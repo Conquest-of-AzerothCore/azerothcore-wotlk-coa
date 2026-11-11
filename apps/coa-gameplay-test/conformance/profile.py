@@ -14,9 +14,13 @@ SPELL_POWER_SCHOOLS = range(1, 7)
 STATS = range(5)
 CASTER = 'caster'
 EQUIPMENT_SLOT_MAIN_HAND = 15
+EQUIPMENT_SLOT_OFF_HAND = 16
 WEAPON_ITEM_CLASS = 2
 INVTYPE_WEAPON = 13
+INVTYPE_WEAPON_MAIN_HAND = 21
 ONE_HAND_SLOT_TYPES = (1 << 21) | (1 << 22)
+ONE_HAND_MAIN = {'EquippedItemClass': WEAPON_ITEM_CLASS, 'EquippedItemSubClassMask': 0,
+                 'EquippedItemInventoryTypeMask': 1 << INVTYPE_WEAPON | ONE_HAND_SLOT_TYPES}
 EQUIP_FIELDS = ('EquippedItemClass', 'EquippedItemSubClassMask', 'EquippedItemInventoryTypeMask')
 
 
@@ -170,6 +174,25 @@ def armed(class_file: dict, requirement: Mapping[str, int]) -> dict:
         lines.append(weapon['skill_line'])
         stats[skill_label(weapon['skill_line'])] = skill_target(class_file)
     return {**class_file, 'weapon': weapon, 'skill_lines': lines, 'reference_stats': stats}
+
+
+def one_hand_main(class_file: dict) -> dict | None:
+    one_handed = armed(class_file, ONE_HAND_MAIN)
+    if one_handed.get('weapon', {}).get('inventory_type') not in (INVTYPE_WEAPON, INVTYPE_WEAPON_MAIN_HAND):
+        return None
+    return one_handed
+
+
+def off_hand_weapon(class_file: dict, item: int) -> dict:
+    weapon = next((weapon for weapon in class_file.get('off_hand_weapons', []) if weapon['item'] == item), None)
+    if weapon is None:
+        raise ValueError(f'off-hand item {item} is not in the class file off_hand_weapons')
+    return weapon
+
+
+def off_hand_steps(item: int) -> list[dict]:
+    return [{'action': 'add_item', 'actor': CASTER, 'item': item},
+            {'action': 'equip', 'actor': CASTER, 'item': item, 'slot': EQUIPMENT_SLOT_OFF_HAND}]
 
 
 def weapon_subclass(class_file: dict) -> int | None:

@@ -6,7 +6,8 @@ import re
 from hits import (DRAIN_MS, MAIN_HAND, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, aura_modifiers, cast_steps,
                   creature_fixture, timed)
 from procs import cast_interval, swing_interval
-from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
+from profile import (CASTER, DBC_DIR, base_steps, measurement, off_hand_steps, off_hand_weapon, one_hand_main,
+                     player_fixture)
 from tooltip import COLOR_CODE, Records
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
                     GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
@@ -1729,6 +1730,9 @@ class CastAppliesAuraSpec:
     target: str = CASTER
     cast_spell: int | None = None
     cast_target: str | None = None
+    control_ms: float | None = None
+    control_clear: tuple[int, ...] = ()
+    label_suffix: str = ''
 
 
 def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tuple[list[dict], list[dict]]:
@@ -1768,7 +1772,7 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
         'steps': steps}
     if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
-    label = f'{spec.spell} behaviour_cast_applies_aura'
+    label = f'{spec.spell} behaviour_cast_applies_aura' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'cast_applies_aura', 'before_label': before_label, 'after_label': after_label,
              'expected_ms': spec.expected_ms, 'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_CAST_APPLIES_AURA, spec.spell, spec.applied_aura, None,
@@ -1777,9 +1781,15 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
 
 
 def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
+    control = entry.get('control')
+    if control is not None and entry.get('cast_spell') is None:
+        raise ValueError(f'{entry["spell"]} cast_applies_aura sets a control arm without a cast_spell to cast '
+                         f'before {entry["spell"]} is learned')
     return CastAppliesAuraSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'],
                                entry['applied_aura'], entry.get('target', CASTER), entry.get('cast_spell'),
-                               entry.get('cast_target'))
+                               entry.get('cast_target'), control['expected_ms'] if control else None,
+                               tuple(control.get('clear_auras', ())) if control else (),
+                               entry.get('label_suffix', ''))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -4045,10 +4055,16 @@ class HitRatioSpec:
     target: str = TARGET
     fixture: tuple[tuple[str, int], ...] = ()
     warmup: tuple[int, ...] = ()
+    off_hand_item: int | None = None
+    swing_hand: int | None = None
 
 
-HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
-HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal'}
+HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
+                     'melee_damage_total': 'melee_damage_count'}
+HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal', 'melee_damage_total': 'melee damage'}
+SWING_METRIC = 'melee_damage_total'
+SWING_HANDS = frozenset({MAIN_HAND, 1})
+SWING_SETTLE_MS = 100
 HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power'})
 
 
@@ -4092,8 +4108,9 @@ def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: st
     return steps
 
 
-def hit_ratio_steps(records: Records, spec: HitRatioSpec) -> list[dict]:
-    fields = {'spell': spec.observe_spell, 'target': spec.target}
+def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> list[dict]:
+    fields = ({'hand': spec.swing_hand, 'glancing': False} if spec.swing_hand is not None
+              else {'spell': spec.observe_spell, 'target': spec.target})
     if spec.critical is not None:
         fields['critical'] = spec.critical
     total_metric, count_metric = spec.metric, HIT_RATIO_METRICS[spec.metric]
@@ -4111,6 +4128,18 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec) -> list[dict]:
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = hit_ratio_reads(spec, name)
+        if spec.swing_hand is not None:
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                      for spell, stacks in arm.auras]
+            steps += reads(marks[0])
+            for trial in range(1, spec.trials + 1):
+                steps += [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                          {'action': 'wait', 'label': f'{name} swing {trial}', 'ms': swing_ms},
+                          {'action': 'stop_attack', 'actor': CASTER},
+                          {'action': 'wait', 'label': f'{name} swing {trial} settle', 'ms': SWING_SETTLE_MS}]
+                steps += reads(marks[trial])
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+            continue
         if spec.warmup:
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
@@ -4134,10 +4163,10 @@ def waited_ms(steps: list[dict]) -> int:
     return sum(step.get('ms', 0) for step in steps if step['action'] == 'wait')
 
 
-def hit_ratio_trial_limit(class_file: dict, spec: HitRatioSpec) -> int:
+def hit_ratio_trial_limit(class_file: dict, spec: HitRatioSpec, swing_ms: int = 0) -> int:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
-    one = waited_ms(hit_ratio_steps(records, replace(spec, trials=1)))
-    two = waited_ms(hit_ratio_steps(records, replace(spec, trials=2)))
+    one = waited_ms(hit_ratio_steps(records, replace(spec, trials=1), swing_ms))
+    two = waited_ms(hit_ratio_steps(records, replace(spec, trials=2), swing_ms))
     per_trial = two - one
     return max(1, (MAX_SCENARIO_MS - TIMEOUT_MARGIN_MS - (one - per_trial)) // per_trial)
 
@@ -4151,19 +4180,42 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         raise ValueError(f'{spec.spell} force_crit {spec.force_crit!r} is not one of {sorted(FORCE_CRIT_RATINGS)}')
     if spec.metric not in HIT_RATIO_METRICS:
         raise ValueError(f'{spec.spell} hit_ratio metric {spec.metric!r} is not one of {sorted(HIT_RATIO_METRICS)}')
+    swinging = spec.swing_hand is not None
+    if swinging != (spec.metric == SWING_METRIC) or (swinging and spec.swing_hand not in SWING_HANDS):
+        raise ValueError(f'{spec.spell} hit_ratio reads {SWING_METRIC} exactly when it sets a swing_hand of '
+                         f'{sorted(SWING_HANDS)}, here metric {spec.metric!r} and swing_hand {spec.swing_hand!r}')
+    if swinging and (spec.caster != CASTER or spec.target != TARGET or spec.warmup or spec.target_health_pct
+                     or spec.control.casts or spec.treatment.casts):
+        raise ValueError(f'{spec.spell} hit_ratio swings at the dummy from the caster, with no casts, warmup or '
+                         f'target health')
+    if swinging and spec.swing_hand and spec.off_hand_item is None:
+        raise ValueError(f'{spec.spell} hit_ratio reads off-hand swings without an off_hand_item')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'hit_ratio', spec.quote, spec.expected)
-    class_file = armed_for(class_file, records, spec.observe_spell)
+    if spec.off_hand_item is not None:
+        off_hand = off_hand_weapon(class_file, spec.off_hand_item)
+        one_handed = one_hand_main(class_file)
+        if one_handed is None:
+            raise NotModelled(f'{spec.spell} hit_ratio dual wields, which needs a one-handed main-hand weapon in '
+                              f'the class file')
+        class_file = one_handed
+        equip = off_hand_steps(spec.off_hand_item)
+    else:
+        off_hand, equip = None, []
+        if not swinging:
+            class_file = armed_for(class_file, records, spec.observe_spell)
+    swing_ms = (off_hand['speed_ms'] if spec.swing_hand else swing_interval(class_file)) if swinging else 0
     learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts, *spec.warmup)
-    steps = ([{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}] +
+    observed = [] if swinging else [{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}]
+    steps = (equip + observed +
              [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
-              if spell != spec.observe_spell or spec.caster != CASTER] +
-             hit_ratio_steps(records, spec))
+              if swinging or spell != spec.observe_spell or spec.caster != CASTER] +
+             hit_ratio_steps(records, spec, swing_ms))
     waited = waited_ms(steps)
     if waited + TIMEOUT_MARGIN_MS > MAX_SCENARIO_MS:
         raise NotModelled(f'{spec.spell} hit_ratio waits {waited} ms over {spec.trials} trials, beyond one '
-                          f'scenario\'s {MAX_SCENARIO_MS} ms; at most {hit_ratio_trial_limit(class_file, spec)} '
-                          f'trials fit')
+                          f'scenario\'s {MAX_SCENARIO_MS} ms; at most '
+                          f'{hit_ratio_trial_limit(class_file, spec, swing_ms)} trials fit')
     player = {**player_fixture(class_file), **dict(spec.fixture)}
     if spec.force_crit is not None:
         player[FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
@@ -4171,10 +4223,14 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
     ally = {**player_fixture(class_file), 'id': ALLY, **(dict(spec.fixture) if spec.caster == ALLY else {})}
     players = [player] + ([ally] if ALLY in (spec.caster, spec.target) else [])
+    observed_text = (f'{spec.trials} {"off-hand" if spec.swing_hand else "main-hand"} swing intervals of '
+                     f'{swing_ms} ms at {spec.target}' if swinging
+                     else f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target}')
+    wielded = f', off-hand item {spec.off_hand_item} equipped' if spec.off_hand_item is not None else ''
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour hit ratio{suffix}',
-        'contract': f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target} per arm, '
+        'contract': f'{observed_text} per arm{wielded}, '
                     f'control first, with the '
                     f'arm\'s auras {list(spec.control.auras)} / {list(spec.treatment.auras)} set and its casts '
                     f'{list(spec.control.casts)} / {list(spec.treatment.casts)} made before every observed cast, '
@@ -4188,7 +4244,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     model = {'kind': 'hit_ratio', 'reads': {name: hit_ratio_reads(spec, name) for name in HIT_RATIO_ARMS},
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
-             'trial_limit': hit_ratio_trial_limit(class_file, spec),
+             'trial_limit': hit_ratio_trial_limit(class_file, spec, swing_ms),
              'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)),
              'metric': spec.metric,
              'quote': entry.quote}
@@ -4199,13 +4255,15 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
 
 
 def hit_ratio_spec(entry: dict) -> HitRatioSpec:
-    return HitRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['observe_spell'],
+    observe = entry.get('observe_spell', 0) if entry.get('swing_hand') is not None else entry['observe_spell']
+    return HitRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], observe,
                         hit_arm(entry.get('control', {})), hit_arm(entry.get('treatment', {})),
                         tuple(entry.get('learn', ())), entry.get('trials', HIT_RATIO_TRIALS), entry.get('critical'),
                         entry.get('force_crit'), entry.get('target_health_pct'), entry.get('label_suffix', ''),
                         entry.get('metric', 'spell_damage_total'), entry.get('caster', CASTER),
                         entry.get('target', TARGET), hit_ratio_fixture(entry.get('fixture', {})),
-                        tuple(int(spell) for spell in entry.get('warmup', ())))
+                        tuple(int(spell) for spell in entry.get('warmup', ())), entry.get('off_hand_item'),
+                        entry.get('swing_hand'))
 
 
 def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:

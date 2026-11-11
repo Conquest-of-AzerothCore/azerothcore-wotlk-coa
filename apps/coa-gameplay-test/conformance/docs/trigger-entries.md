@@ -98,12 +98,15 @@ passive whose own `Spell.dbc` `AttributesEx5` carries `SPELL_ATTR5_EXTRA_INITIAL
 periodic tick on apply"): each part is a separate scenario that re-learns the passive from scratch, so each part
 gets its own extra tick at apply, on top of the regular amplitude cadence.
 
-`dual_wield` (`attack` triggers only) is `{"spell": <id>, "off_hand_item": <id>, "source": <citation>}`: the class
-file's one-handed alternate weapon replaces the reference main hand, and before the baseline the caster learns
-`spell` and equips `off_hand_item` in the off hand (slot 16). With `trial_metric_fields: {"hand": 1}` the trials
-are damaging off-hand swings, and the rule names the off hand. The fixture creates the condition a tooltip names;
-it says nothing about how the class acquires an off hand. Zealotry 92108 ("Your off-hand auto attacks now trigger
-Zealotry") uses Dual Wield 674 and Cudgel 2492.
+`dual_wield` (`attack` triggers only) is `{"spell": <id>, "off_hand_item": <id>, "source": <citation>}` or
+`{"known_spell": <id>, "off_hand_item": <id>, "source": <citation>}`: the class file's one-handed alternate weapon
+replaces the reference main hand, and before the baseline the caster either learns `spell` or, with `known_spell`,
+is only read (`knows_spell`, label `<aura> dual_wield knows <id>`) and keeps the dual wield it was created with;
+it then equips `off_hand_item` in the off hand (slot 16). The harness `equip` step fails the scenario when the server
+refuses the item, so an off-hand equip without a grant shows that the character can dual wield. With
+`trial_metric_fields: {"hand": 1}` the trials are damaging off-hand swings, and the rule names the off hand.
+Zealotry 92108 ("Your off-hand auto attacks now trigger Zealotry") reads Dual Wield 674, which every Templar learns
+at login (`AscensionLiveBaselineData.h:128`), and equips Cudgel 2492 (ADR 0142).
 
 ### Taken-hit trigger entries
 

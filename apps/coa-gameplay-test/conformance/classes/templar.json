@@ -12,6 +12,10 @@
     {"item": 2259, "slot": 15, "subclass": 4, "min_damage": 3.45, "max_damage": 5.75, "speed_ms": 2000,
      "inventory_type": 21, "normalized_speed": 2.4, "skill_line": 54}
   ],
+  "off_hand_weapons": [
+    {"item": 30754, "slot": 16, "subclass": 4, "min_damage": 51.63, "max_damage": 82.65, "speed_ms": 1800,
+     "inventory_type": 13, "normalized_speed": 2.4, "skill_line": 54}
+  ],
   "skill_lines": [70, 71, 72, 136],
   "ratings": {"spell_hit_rating": 10000, "melee_hit_rating": 10000, "expertise_rating": 10000},
   "reference_stats": {"attack_power": 313, "ranged_attack_power": 182,
@@ -1377,7 +1381,7 @@
       "trigger": {"action": "attack", "spell": 0},
       "trial_metric": "melee_damage_count",
       "trial_metric_fields": {"hand": 1},
-      "dual_wield": {"spell": 674, "off_hand_item": 2492, "source": "Dual Wield 674 (Effect[0] 40 SPELL_EFFECT_DUAL_WIELD, Spell::EffectDualWield) gives the caster an off hand; Cudgel 2492 is a one-hand mace (Item.dbc InventoryType 13, subclass 4). The fixture creates the condition the tooltip names. Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons, so this fixture result counts. Every Templar already learns Dual Wield 674 at login: AscensionLiveBaselineData.h:128 {19, 0, 674}, learned by AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017, called from OnPlayerLogin at 1612; lean/templar-offhand-reading.md). The fixture's own grant of 674 is removed in the gap batch, where the clause is re-proven on a fresh character"},
+      "dual_wield": {"known_spell": 674, "off_hand_item": 2492, "source": "Dual Wield 674 (Effect[0] 40 SPELL_EFFECT_DUAL_WIELD, Spell::EffectDualWield) gives the caster an off hand; it is not granted here, only read with knows_spell before the off-hand equip, which PlayerStorage.cpp:2047-2058 refuses without CanDualWield (the harness equip step then fails the scenario). Cudgel 2492 is a one-hand mace (Item.dbc InventoryType 13, subclass 4). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons, so this fixture result counts. Every Templar already learns Dual Wield 674 at login: AscensionLiveBaselineData.h:128 {19, 0, 674}, learned by AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017, called from OnPlayerLogin at 1612; lean/templar-offhand-reading.md). The gap batch removed the fixture's own grant of 674, so the clause is proven on the character as created"},
       "handler": "AscensionTemplarEvents.cpp:55-57 (aura_ascension_templar_event::Check, case 92108): damage && PROC_FLAG_DONE_MELEE_AUTO_ATTACK && AttackType OFF_ATTACK; Proc (AscensionTemplarEvents.cpp:123-125) calls Zealotry(player, target), which casts 801450 once (AscensionTemplar.cpp:217-226; its repeat needs Blade Sermon 572548 or 572554, not learned here). Main-hand swings fail the OFF_ATTACK test, so the trials count damaging off-hand swings only (melee_damage_count hand 1), and the baseline swings before the learn are the control arm",
       "observe_spell": 801450,
       "observe_source": "EffectTriggerSpell[1] of 92108",
@@ -2768,6 +2772,311 @@
       "trials": 40,
       "fixture": {"attack_power": 20000, "spell_power": 20000},
       "expected_source": "Without-talent control of the Tranquil Circle claim: the same arms as the tranquil_circle entry (dummy at 50% health, Tranquil Circle 801205 cast in the treatment arm) with Pious Sweep 520034 not learned. 801205 Effect[2] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER has EffectBasePoints[2] -1 with EffectDieSides[2] 1, so without 520034's SPELLMOD_EFFECT3 +25 (Effect[1], EffectMiscValue[1] 23) the circle adds nothing: ratio 1.0. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, EffectMiscValue[1] 3, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 704175,
+      "name": "Condemnation (Oath: Condemn crit chance)",
+      "kind": "metric_delta",
+      "variant": "oath",
+      "label_suffix": "oath",
+      "quote": "Increases the critical strike chance gained through Condemn by $s1%",
+      "expected": 6,
+      "before_expected": 3,
+      "trigger_spell": 804906,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 804922,
+        "effect": 0
+      },
+      "wait_ms": 500,
+      "expire_ms": 22000,
+      "observe_source": "A Condemn 804906 cast grants Oath: Condemn 804922 (AscensionTemplarAbilities.cpp:172 picks 804922 for Named(info, 804906); AscensionTemplar::GrantOath, AscensionTemplar.cpp:168-181, casts it on the caster). 804922 Effect[0] aura 290, EffectBasePoints[0] 2 + EffectDieSides[0] 1 = 3 ('Increases your critical strike chance by $s1%'). Condemnation 704175 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 3 (SPELLMOD_EFFECT1), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3, EffectSpellClassMask[0] word 0 536870912 matching 804922 SpellFamilyFlags[0] 536870912. Control: before the learn the Oath reads 3; with the talent 6. expire_ms 22000 lets the Oath (15000 ms from GrantOath) and the Condemn aura on the dummy (DurationIndex 86, 21000 ms) end before the second cast, so the second Oath is a fresh aura of one stack."
+    },
+    {
+      "spell": 704175,
+      "name": "Condemnation (periodic crit)",
+      "kind": "metric_delta",
+      "variant": "periodic_crit",
+      "label_suffix": "periodic_crit",
+      "quote": "allows its periodic damage to critically strike",
+      "expected": 3,
+      "before_expected": 0,
+      "trigger_spell": 804906,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 804906,
+        "target": "dummy",
+        "critical": true
+      },
+      "wait_ms": 10500,
+      "expire_ms": 22000,
+      "force_crit": "melee",
+      "observe_source": "Condemnation 704175 Effect[2] aura 286 SPELL_AURA_ABILITY_PERIODIC_CRIT, EffectSpellClassMask[2] word 0 4194304 matching Condemn 804906 SpellFamilyFlags[0] 4194304. AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1180-1209) gives a periodic effect a crit chance only through such an aura (or Rupture), when the aura is applied (SpellAuraEffects.cpp:675). Condemn 804906 Effect[0] aura 3, EffectAmplitude[0] 3000, DurationIndex 86 (21000 ms). Condemn is DmgClass 2 (melee), so Unit::SpellDoneCritChance reads its periodic crit chance from the melee crit percentage (Unit.cpp:10272-10281, PLAYER_CRIT_PERCENTAGE); the caster's melee crit rating is forced, so with the talent every tick crits; the reading 10500 ms after the cast covers the ticks at 3000, 6000 and 9000 ms. Control: before the learn the same forced rating gives 0 critical ticks. The count is cumulative critical periodic damage of 804906 on the dummy (CoAGameplayTest.cpp:1147-1161, 4654-4683). expire_ms 22000 ends the first Condemn before the second cast, so the second aura is applied with the talent known."
+    },
+    {
+      "spell": 705263,
+      "name": "Deep Secrets (Libram)",
+      "kind": "cast_applies_aura",
+      "variant": "libram",
+      "label_suffix": "libram",
+      "quote": "Increases the duration of your Librams and Testaments by $/1000;s1 sec.",
+      "expected_ms": 30000,
+      "applied_aura": 801466,
+      "target": "caster",
+      "cast_spell": 801466,
+      "control": {
+        "expected_ms": 20000
+      },
+      "observe_source": "Libram of Zeal 801466: DurationIndex 18 (20000 ms), EffectImplicitTargetA[0..1] 1 (caster), SpellFamilyFlags[2] 2048, RecoveryTime 180000. Deep Secrets 705263 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 1 (SPELLMOD_DURATION), EffectBasePoints[0] 9999 + EffectDieSides[0] 1 = +10000 ms, EffectSpellClassMask[0] (160, 0, 1075841024) whose word 2 holds 2048. Control arm: cast before the learn, ending at 20000 ms; with arm: cast again after the learn and a cooldown reset, ending at 30000 ms."
+    },
+    {
+      "spell": 705263,
+      "name": "Deep Secrets (Testament)",
+      "kind": "cast_applies_aura",
+      "variant": "testament",
+      "label_suffix": "testament",
+      "quote": "Increases the duration of your Librams and Testaments by $/1000;s1 sec.",
+      "expected_ms": 20000,
+      "applied_aura": 804228,
+      "target": "caster",
+      "cast_spell": 804228,
+      "control": {
+        "expected_ms": 10000,
+        "clear_auras": [
+          102208
+        ]
+      },
+      "observe_source": "Testament of Resolve 804228: DurationIndex 1 (10000 ms), Effect[0] aura 147 on EffectImplicitTargetA[0] 21 TARGET_UNIT_TARGET_ALLY (the caster, as in the class file's 804228 cast_applies_aura entry), SpellFamilyFlags[2] 1073741824, ManaCost 50 Energy, RecoveryTime 60000. Deep Secrets 705263 Effect[0] SPELLMOD_DURATION +10000 ms, EffectSpellClassMask[0] word 2 1075841024 holding 1073741824. 804228 Effect[1] also triggers Sacred Restraint 102208 ('Cannot be targeted by Testaments', DurationIndex 3, 60000 ms) on its target, so the control arm's 102208 is removed before the second cast. Control 10000 ms, with 20000 ms."
+    },
+    {
+      "spell": 705283,
+      "name": "Oath Flow",
+      "kind": "cast_applies_aura",
+      "quote": "Increases the duration of Oath Chain by $s1%.",
+      "expected_ms": 18000,
+      "applied_aura": 704576,
+      "target": "caster",
+      "cast_spell": 804906,
+      "cast_target": "dummy",
+      "control": {
+        "expected_ms": 15000
+      },
+      "observe_source": "A Condemn 804906 cast grants an Oath through AscensionTemplar::GrantOath (AscensionTemplarAbilities.cpp:172; AscensionTemplar.cpp:168-181), which casts Oath Chain 704576 on the caster and sets its duration to GetMaxDuration(). 704576 DurationIndex 8 (15000 ms; AscensionTemplarContracts.cpp:100-101 keeps index 8). Oath Flow 705283 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 1 (SPELLMOD_DURATION), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20%, EffectSpellClassMask[0] word 0 64 matching 704576 SpellFamilyFlags[0] 64: 15000 x 1.2 = 18000 ms. Control arm: Condemn cast before the learn, the chain ending at 15000 ms; with arm: Condemn cast again after the learn and a cooldown reset, ending at 18000 ms."
+    },
+    {
+      "spell": 705272,
+      "name": "Chivalric",
+      "kind": "hit_ratio",
+      "variant": "spell",
+      "label_suffix": "spell",
+      "quote": "Increases your critical damage with Holy spells and abilities by $s1%.",
+      "expected": 1.15,
+      "observe_spell": 572741,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            705272,
+            1
+          ]
+        ]
+      },
+      "critical": true,
+      "force_crit": "spell",
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 15 (705272 EffectBasePoints[0] 14, EffectDieSides[0] 1): Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectMiscValue[0] 2 (Holy). Reckoning 572741 is a Holy spell (SchoolMask 2, DmgClass 1 magic), ${$m1+0+$AP*0.175+$STA*0.5}; the attack power fixture makes its AP part dominate the 49-point die. Forced spell crits, only critical hits compared. Expected 1.15: the whole critical hit x (1 + 15%), the reading the passive check measured (705272 e0 spell_critical_damage 572741: 1500 before and 1725 after the learn, templar/run2/verdicts.json). Control: no talent. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 705272,
+      "name": "Chivalric",
+      "kind": "hit_ratio",
+      "variant": "ability",
+      "label_suffix": "ability",
+      "quote": "Increases your critical damage with Holy spells and abilities by $s1%.",
+      "expected": 1.15,
+      "observe_spell": 806521,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            705272,
+            1
+          ]
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "target_health_pct": 10,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000,
+        "spell_power": 20000
+      },
+      "expected_source": "$s1 = 15 (705272 Effect[0] aura 163, EffectMiscValue[0] 2 Holy). Titanstrike 806521 is a Holy ability (SchoolMask 2, DmgClass 2 melee), ${$m1+0+$AP*0.2+$sph*1}, only usable below 35% health, so the dummy is held at 10%; the fixtures make the stat part dominate the 129-point die. Forced melee crits, only critical hits compared. Expected 1.15 as for the spell variant: Unit.cpp:1728-1752 doubles a melee-class crit and raises the bonus by the aura's percent, 2 x 1.15 / 2. Control: no talent. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 572548,
+      "name": "Blade Sermon",
+      "kind": "hit_ratio",
+      "variant": "off_hand",
+      "label_suffix": "off_hand",
+      "quote": "Increases the Weapon Damage dealt by Zealotry by $s1%",
+      "expected": 1.125,
+      "observe_spell": 801450,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            572548,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 10 (572548 EffectBasePoints[0] 9, EffectDieSides[0] 1): aura 107 on Zealotry 801450's weapon percent, read by the passive check as Effect[1] 80 before and 90 after the learn (572548 e0 spell_effect_value 801450, templar/run2/verdicts.json). Spell::EffectWeaponDmg (SpellEffects.cpp:4665-4749) multiplies the off-hand normalized weapon damage plus the 1-point flat part by that percent, so the hit grows by 90 / 80 = 1.125. Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800, item_template), equipped with no Dual Wield grant (every Templar learns Dual Wield 674 at login, AscensionLiveBaselineData.h:128). Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON (AttributesEx3 16777216; AscensionTemplarContracts.cpp:279-280), so Spell::Spell reads the off hand (m_attackType OFF_ATTACK); the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 572554,
+      "name": "Blade Sermon (Rank 2)",
+      "kind": "hit_ratio",
+      "variant": "off_hand",
+      "label_suffix": "off_hand",
+      "quote": "Increases the Weapon Damage dealt by Zealotry by $s1%",
+      "expected": 1.25,
+      "observe_spell": 801450,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            572554,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 20 (572554 EffectBasePoints[0] 19, EffectDieSides[0] 1): Zealotry 801450's weapon percent 80 before and 100 after the learn (572554 e0 spell_effect_value 801450, templar/run2/verdicts.json), so the hit grows by 100 / 80 = 1.25. Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800, item_template), equipped with no Dual Wield grant (every Templar learns Dual Wield 674 at login, AscensionLiveBaselineData.h:128). Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON (AttributesEx3 16777216; AscensionTemplarContracts.cpp:279-280), so Spell::Spell reads the off hand (m_attackType OFF_ATTACK); the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 705276,
+      "name": "Bursting Impact (Zealotry)",
+      "kind": "hit_ratio",
+      "variant": "zealotry",
+      "label_suffix": "zealotry",
+      "quote": "Increases your off-hand weapon damage by $s1%.",
+      "expected": 1.25,
+      "observe_spell": 801450,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            705276,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 80,
+      "expected_source": "$s1 = 25 (705276 EffectBasePoints[0] 24, EffectDieSides[0] 1), Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT. Zealotry 801450 'Deals $s2% off-hand Weapon Damage as Holy Damage', so a 25% larger off-hand weapon damage gives a 25% larger Zealotry hit if the talent reaches the weapon damage Zealotry reads. No stat fixture: at the reference attack power the weapon roll dominates the hit, so the control arm also gives Zealotry's share of off-hand weapon damage and the hand it reads. Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800, item_template), equipped with no Dual Wield grant (every Templar learns Dual Wield 674 at login, AscensionLiveBaselineData.h:128). Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON (AttributesEx3 16777216; AscensionTemplarContracts.cpp:279-280), so Spell::Spell reads the off hand (m_attackType OFF_ATTACK); the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 705276,
+      "name": "Bursting Impact (off-hand swing)",
+      "kind": "hit_ratio",
+      "variant": "swing",
+      "label_suffix": "swing",
+      "quote": "Increases your off-hand weapon damage by $s1%.",
+      "expected": 1.25,
+      "swing_hand": 1,
+      "metric": "melee_damage_total",
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            705276,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "off_hand_item": 30754,
+      "trials": 30,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 25 (705276 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints[0] 24 + 1): AuraEffect::HandleModOffhandDamagePercent (SpellAuraEffects.cpp:5326-5334) calls Unit::UpdateDamagePctDoneMods(OFF_ATTACK), which multiplies the off-hand 0.5 factor by the aura 122 multiplier into UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT (Unit.cpp:13521-13546), so a plain off-hand white swing grows by 1.25. Both arms auto attack the dummy; each trial is one off-hand swing interval (1800 ms), reading plain (not critical, not glancing) off-hand hits. Off-hand Ancient Bone Mace 30754 beside the main-hand Frostmane Club 2259, no Dual Wield grant. The attack power fixture makes the AP part dominate the weapon roll. Control: no talent."
     }
   ],
   "player_observations": [

@@ -208,22 +208,43 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
     behaviour_entry(records, spec.spell, spec.name, 'cast_applies_aura', spec.quote, spec.expected_ms)
     prefix = f'{spec.spell} {spec.applied_aura}'
     absent = f'{prefix} before cast'
-    arm = expiry_arm(prefix, 'cast', spec.expected_ms, requires=((absent, 0.0),))
     actor = spec.target
     learned, cast = cast_applies_aura_steps(records, spec)
-    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
-             + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)] + cast[:-1]
-             + [acted(cast[-1], arm), applied_step(arm, actor, spec.applied_aura)]
-             + pair_steps(arm, actor, spec.applied_aura))
+    learn = [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    if spec.control_ms is None:
+        arms = [expiry_arm(prefix, 'cast', spec.expected_ms, requires=((absent, 0.0),))]
+        steps = (base_steps(class_file) + learn + learned
+                 + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
+                 + cast_arm(cast, arms[0], actor, spec.applied_aura))
+        contract = (f'{spec.applied_aura} is absent before {spec.spell} is cast, present {arms[0].before_margin_ms} '
+                    f'ms before its stated {spec.expected_ms:g} ms end and absent {arms[0].after_margin_ms} ms after '
+                    f'it, timed from the cast.')
+    else:
+        arms = [expiry_arm(prefix, WITHOUT, spec.control_ms, requires=((absent, 0.0),)),
+                expiry_arm(prefix, WITH, spec.expected_ms, requires=((absent, 0.0),))]
+        cleared = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0,
+                    **({'target': actor} if actor != CASTER else {})} for spell in spec.control_clear]
+        steps = (base_steps(class_file) + learned
+                 + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
+                 + cast_arm(cast, arms[0], actor, spec.applied_aura) + cleared
+                 + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell}] + learn
+                 + cast_arm(cast, arms[1], actor, spec.applied_aura))
+        contract = (f'{spec.applied_aura} is absent before {spec.cast_spell} is first cast; cast without '
+                    f'{spec.spell}, it is present {arms[0].before_margin_ms} ms before {spec.control_ms:g} ms and '
+                    f'absent {arms[0].after_margin_ms} ms after it; cast again with {spec.spell} learned, it is '
+                    f'present {arms[1].before_margin_ms} ms before the stated {spec.expected_ms:g} ms end and absent '
+                    f'{arms[1].after_margin_ms} ms after it, each timed from its cast.')
     scenario = expiry_scenario_shell(
-        class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour expiry',
-        f'{spec.applied_aura} is absent before {spec.spell} is cast, present {arm.before_margin_ms} ms before its '
-        f'stated {spec.expected_ms:g} ms end and absent {arm.after_margin_ms} ms after it, timed from the cast.',
-        steps)
+        class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour expiry', contract, steps)
     if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
-    return finished(scenario), [expiry_expectation(expiry_label(spec.spell), spec.spell, spec.applied_aura,
-                                                   str(spec.expected_ms), prose_rule(spec.quote, spec.spell), [arm])]
+    label = expiry_label(spec.spell) + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    return finished(scenario), [expiry_expectation(label, spec.spell, spec.applied_aura, str(spec.expected_ms),
+                                                   prose_rule(spec.quote, spec.spell), arms)]
+
+
+def cast_arm(cast: list[dict], arm: ExpiryArm, actor: str, aura: int) -> list[dict]:
+    return cast[:-1] + [acted(cast[-1], arm), applied_step(arm, actor, aura)] + pair_steps(arm, actor, aura)
 
 
 def duration_refresh_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

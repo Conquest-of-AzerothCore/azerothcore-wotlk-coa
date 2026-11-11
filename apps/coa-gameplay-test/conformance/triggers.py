@@ -7,7 +7,7 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   magic_schools, records_of, scenario_shell, target_steps, timed)
 from mitigation import PHYSICAL_SCHOOL_MASK
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
-from profile import CASTER, INVTYPE_WEAPON, ONE_HAND_SLOT_TYPES, SETTLE_MS, armed, measurement, player_fixture
+from profile import CASTER, SETTLE_MS, measurement, off_hand_steps, one_hand_main, player_fixture
 from values import (ALLY, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts,
                     armed_for, closes_distance, facts_of, fixture_health_step)
 
@@ -38,12 +38,8 @@ TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
 OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
 MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
-EQUIPMENT_SLOT_OFF_HAND = 16
-WEAPON_ITEM_CLASS = 2
-INVTYPE_WEAPON_MAIN_HAND = 21
-ONE_HAND_MAIN = {'EquippedItemClass': WEAPON_ITEM_CLASS, 'EquippedItemSubClassMask': 0,
-                 'EquippedItemInventoryTypeMask': 1 << INVTYPE_WEAPON | ONE_HAND_SLOT_TYPES}
-DUAL_WIELD_FIELDS = frozenset({'spell', 'off_hand_item', 'source'})
+DUAL_WIELD_FIELDS = (frozenset({'spell', 'off_hand_item', 'source'}),
+                     frozenset({'known_spell', 'off_hand_item', 'source'}))
 PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
 TAKEN_HIT_TRIAL_METRICS = frozenset({'spell_damage_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
@@ -261,9 +257,10 @@ def checked_entry(entry: dict) -> dict:
     if dual_wield is not None:
         if trigger['action'] != ATTACK:
             raise ValueError(f'Trigger {aura} sets dual_wield without an attack action')
-        if set(dual_wield) != DUAL_WIELD_FIELDS or not all(
-                isinstance(dual_wield[field], int) for field in ('spell', 'off_hand_item')):
-            raise ValueError(f'Trigger {aura} dual_wield is {{"spell": int, "off_hand_item": int, "source": text}}')
+        if set(dual_wield) not in DUAL_WIELD_FIELDS or not all(
+                isinstance(dual_wield[field], int) for field in dual_wield if field != 'source'):
+            raise ValueError(f'Trigger {aura} dual_wield is {{"spell" or "known_spell": int, "off_hand_item": int, '
+                             f'"source": text}}')
     factor = entry.get('trial_attempts_factor', 1)
     if factor < 1:
         raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
@@ -394,7 +391,9 @@ def trigger_rule(entry: dict) -> str:
     fixtures += ''.join(f'; {entry["aura"]} also learns {spell}' for spell in entry.get('co_learn', []))
     if entry.get('dual_wield'):
         dual_wield = entry['dual_wield']
-        fixtures += (f'; before the baseline the caster learns {dual_wield["spell"]} and equips off-hand item '
+        granted = (f'learns {dual_wield["spell"]}' if 'spell' in dual_wield
+                   else f'is read knowing {dual_wield["known_spell"]}, not granted,')
+        fixtures += (f'; before the baseline the caster {granted} and equips off-hand item '
                      f'{dual_wield["off_hand_item"]} ({dual_wield["source"]})')
     if entry.get('caster_health_pct') is not None:
         fixtures += f'; before each attempt the caster health set to {entry["caster_health_pct"]}% of max'
@@ -418,8 +417,8 @@ def trigger_rule(entry: dict) -> str:
 
 
 def dual_wielding(class_file: dict) -> dict:
-    one_handed = armed(class_file, ONE_HAND_MAIN)
-    if one_handed.get('weapon', {}).get('inventory_type') not in (INVTYPE_WEAPON, INVTYPE_WEAPON_MAIN_HAND):
+    one_handed = one_hand_main(class_file)
+    if one_handed is None:
         raise Unmodelled('dual wielding needs a one-handed main-hand weapon in the class file')
     return one_handed
 
@@ -429,9 +428,15 @@ def dual_wield_steps(entry: dict) -> list[dict]:
     if dual_wield is None:
         return []
     item = dual_wield['off_hand_item']
-    return [{'action': 'learn', 'actor': CASTER, 'spell': dual_wield['spell']},
-            {'action': 'add_item', 'actor': CASTER, 'item': item},
-            {'action': 'equip', 'actor': CASTER, 'item': item, 'slot': EQUIPMENT_SLOT_OFF_HAND}]
+    if 'spell' in dual_wield:
+        known = [{'action': 'learn', 'actor': CASTER, 'spell': dual_wield['spell']}]
+    else:
+        known = [measurement(dual_wield_known_label(entry), CASTER, 'knows_spell', spell=dual_wield['known_spell'])]
+    return known + off_hand_steps(item)
+
+
+def dual_wield_known_label(entry: dict) -> str:
+    return f'{entry["aura"]} dual_wield knows {entry["dual_wield"]["known_spell"]}'
 
 
 def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:

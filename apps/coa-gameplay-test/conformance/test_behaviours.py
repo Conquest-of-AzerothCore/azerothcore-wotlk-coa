@@ -732,7 +732,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 115)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 126)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6112,6 +6112,54 @@ class PeriodicDispelScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, {**class_entry(TESTAMENT_OF_FORTITUDE, 'periodic_dispel'),
                                             'debuffs': [55095]})
+
+
+BURSTING_IMPACT = 705276
+BLADE_SERMON = 572548
+FROSTMANE_CLUB = 2259
+ANCIENT_BONE_MACE = 30754
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class OffHandHitRatioTests(unittest.TestCase):
+    def test_an_off_hand_hit_ratio_wields_the_off_hand_beside_a_one_hand_main_before_its_casts(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))
+        steps = run.validate(scenario)['steps']
+        main = next(index for index, step in enumerate(steps) if step['action'] == 'equip' and step['slot'] == 15)
+        off = next(index for index, step in enumerate(steps) if step['action'] == 'equip' and step['slot'] == 16)
+        first_cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
+        self.assertEqual((steps[main]['item'], steps[off]['item']), (FROSTMANE_CLUB, ANCIENT_BONE_MACE))
+        self.assertLess(main, off)
+        self.assertLess(off, first_cast)
+        self.assertEqual(expectation.label, f'{BLADE_SERMON} behaviour_hit_ratio off_hand')
+        self.assertIn(f'off-hand item {ANCIENT_BONE_MACE} equipped', scenario['contract'])
+
+    def test_a_swing_hit_ratio_reads_plain_off_hand_hits_of_one_stopped_swing_interval_per_trial(self):
+        entry = variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        reads = [step for step in steps if step.get('metric') in ('melee_damage_total', 'melee_damage_count')]
+        self.assertEqual(len(reads), 2 * 2 * (entry['trials'] + 1))
+        self.assertTrue(all((step['hand'], step['critical'], step['glancing']) == (1, False, False) for step in reads))
+        first = steps.index(next(step for step in steps if step['action'] == 'attack'))
+        self.assertEqual([step['action'] for step in steps[first:first + 4]], ['attack', 'wait', 'stop_attack', 'wait'])
+        self.assertEqual(steps[first + 1]['ms'], 1800)
+        self.assertTrue(steps[first + 4]['label'].endswith('control 1 total'))
+        self.assertEqual([step['action'] for step in steps].count('attack'), 2 * entry['trials'])
+        self.assertFalse(any(step['action'] in ('cast', 'learn') for step in steps))
+        self.assertEqual(expectation.rank_id, 0)
+
+    def test_swing_hit_ratios_are_refused_without_their_metric_hand_or_off_hand_item(self):
+        swing = variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing')
+        broken = ({**swing, 'metric': 'spell_damage_total'},
+                  {**swing, 'swing_hand': 2},
+                  {key: value for key, value in swing.items() if key != 'off_hand_item'},
+                  {**swing, 'off_hand_item': 2492},
+                  {**variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'), 'metric': 'melee_damage_total'})
+        for entry in broken:
+            with self.subTest(entry={key: entry.get(key) for key in ('metric', 'swing_hand', 'off_hand_item')}):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(CLASS_FILE, entry)
 
 
 if __name__ == '__main__':

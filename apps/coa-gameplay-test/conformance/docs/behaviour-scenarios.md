@@ -815,6 +815,15 @@ level-based magic resistance (`Unit::GetEffectiveResistChance`, `UsesLinearMonst
 hits by partial resists (Chastise: 269 to 408 per non-critical hit), which no trial count within one scenario
 overcomes.
 
+`off_hand_item` (an item of the class file's `off_hand_weapons`) wields that off hand beside the class file's
+one-handed main hand: the main hand replaces the reference weapon and the off hand is equipped after the base steps,
+with no Dual Wield grant. A spell carrying `SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON` then reads the off hand. With
+`swing_hand` (0 main hand, 1 off hand) and `metric: "melee_damage_total"` the arms observe auto attacks instead of a
+cast: each trial attacks the dummy for one swing interval of that hand's weapon, stops, settles 100 ms and reads the
+plain (not critical unless `critical` says so, not glancing) hits of that hand. Stopping before the reads keeps a
+swing from landing between the total and the count. An off-hand `swing_hand` needs `off_hand_item`; a swing entry
+takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
+
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 
 "Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`
@@ -830,6 +839,14 @@ A `cast_applies_aura` entry may name `cast_spell` (and `cast_target`) when the a
 than the entry's own, for example a talent whose aura a class ability grants: the talent is learned, `cast_spell` is
 learned, its power and caster aura are set, and it is cast at `cast_target` (default `target`). The expiry pair is
 timed from that cast.
+
+A passive that lengthens another spell's aura states its control arm as `control: {"expected_ms": <ms>,
+"clear_auras": [<id>, ...]}` (ADR 0142). The expiry scenario then has two arms: `without`, the `cast_spell` cast
+before the entry's spell is learned and ending at `control.expected_ms`, and `with`, cast again after the
+`clear_auras` are removed (a lockout such as Sacred Restraint 102208), a cooldown reset and the learn, ending at
+`expected_ms`. Both arms need the aura absent before the first cast. A `control` without a `cast_spell` is refused.
+`label_suffix` names the labels `<spell> behaviour_cast_applies_aura <suffix>` and `<spell> behaviour_expiry
+<suffix>`, so one passive can carry an entry per affected spell (Deep Secrets 705263: `libram` and `testament`).
 
 ### Periodic-dispel scenarios (`behaviour_cast_condition`, `kind: "periodic_dispel"`)
 
@@ -975,6 +992,13 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Spiritual Ascension 500688 | cast_combat | "Usable while in combat." | `combat` reads 1 (real fight), `cast_failure` reads 0 at a dead ally while fighting | round10 `cast-conditions-cooldowns` investigation (2026-11): 500688's own `Attributes` DBC field carries `NOT_SHAPESHIFTED`/`AURA_IS_DEBUFF`/`ALLOW_WHILE_SITTING`/`NO_AURA_CANCEL` only, no `SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL` - unlike a stock combat-blocked resurrection spell such as Redemption 7328, whose own `Attributes` carries exactly that one flag. The stock `CheckCasterAuras` path that would otherwise refuse the cast with `SPELL_FAILED_AFFECTING_COMBAT` therefore never triggers for 500688; no CoA-specific code is involved, no server defect |
 | Beckon 804914 | aggro_redirect | "Taunt an enemy to attack you" | the gated dummy's `victim` switches from `ALLY` to `CASTER` | round10 `cast-conditions-cooldowns` investigation (2026-11), ADR 0056: `EffectImplicitTargetA` all `TARGET_UNIT_TARGET_ENEMY` (single explicit target); `Effect[0]` 114 `SPELL_EFFECT_ATTACK_ME` (`Spell::EffectTaunt`) + `Effect[1]` 11 `SPELL_AURA_MOD_TAUNT`. Stock engine path, no CoA-specific code, no server defect |
 | Absolution 800424 | aggro_redirect | "Taunt all enemies within 8 yds" | dummies at 3.0/6.0 yd switch `victim` to `CASTER`; one at 20.0 yd does not | round10 `cast-conditions-cooldowns` investigation (2026-11), ADR 0056: `EffectImplicitTargetA[0]` 22 `TARGET_SRC_CASTER` + `EffectImplicitTargetB[0]` 15 `TARGET_UNIT_SRC_AREA_ENEMY`, `EffectRadiusIndex[0]` 14 (`SpellRadius.dbc` `RadiusMax` 8.0) — a self-centred area taunt (`Effect[0]` 6 `SPELL_EFFECT_APPLY_AURA`, `EffectApplyAuraName[0]` 11 `SPELL_AURA_MOD_TAUNT`) matching the tooltip's own figure. A dummy at 10.0 yd (just past the nominal radius) measured redirected too, read as area-search hitbox padding around the boundary rather than a defect in the 8-yard figure (ADR 0056); the "outside" target was moved to 20.0 yd to prove the clause unambiguously instead. Stock engine path, no CoA-specific code, no server defect |
+| Condemnation 704175 (`variant: "oath"`) | metric_delta | "Increases the critical strike chance gained through Condemn by $s1%" | 3 before, 6 after | `Effect[0]` aura 107 `SPELLMOD_EFFECT1` +3 on Oath: Condemn 804922 (`aura_amount` of its `Effect[0]` aura 290), granted by a Condemn 804906 cast through `GrantOath` |
+| Condemnation 704175 (`variant: "periodic_crit"`) | metric_delta | "allows its periodic damage to critically strike" | 0 before, 3 after | `Effect[2]` aura 286 on Condemn 804906; Condemn is a melee-class DoT, so its tick crit chance is the melee crit percentage, forced on the caster; critical ticks 10500 ms after the cast |
+| Deep Secrets 705263 (`variant: "libram"`/`"testament"`) | cast_applies_aura with control | "Increases the duration of your Librams and Testaments by $/1000;s1 sec." | Libram of Zeal 801466 20000 then 30000 ms; Testament of Resolve 804228 10000 then 20000 ms | `Effect[0]` aura 107 `SPELLMOD_DURATION` +10000; the testament arm removes Sacred Restraint 102208 before its second cast |
+| Oath Flow 705283 | cast_applies_aura with control | "Increases the duration of Oath Chain by $s1%." | Oath Chain 704576 15000 then 18000 ms | `Effect[0]` aura 108 `SPELLMOD_DURATION` +20%; `GrantOath` sets the chain to `GetMaxDuration()` after a Condemn 804906 cast |
+| Chivalric 705272 (`variant: "spell"`/`"ability"`) | hit_ratio | "Increases your critical damage with Holy spells and abilities by $s1%." | 1.15 | `Effect[0]` aura 163 Holy; forced crits of Reckoning 572741 (magic) and Titanstrike 806521 (melee), critical hits only |
+| Blade Sermon 572548 / 572554 (`variant: "off_hand"`) | hit_ratio | "Increases the Weapon Damage dealt by Zealotry by $s1%" | 1.125 / 1.25 | Zealotry 801450 cast with the off hand wielded; its weapon percent 80 becomes 90 / 100 |
+| Bursting Impact 705276 (`variant: "swing"`/`"zealotry"`) | hit_ratio | "Increases your off-hand weapon damage by $s1%." | 1.25 | `Effect[0]` aura 122 on the off-hand `TOTAL_PCT`; `swing` reads plain off-hand auto attacks, `zealotry` reads Zealotry 801450, whose Holy hit skips `TOTAL_PCT` (`addTotalPct` false) |
 
 The 10-yard and 8-yard fixture radii above are both read from server source, never guessed, per each entry's own
 `radius_reason`.

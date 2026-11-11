@@ -121,8 +121,9 @@ Example of the shape (one attempt, so `pending`; a second entry in `attempts` by
 ```
 
 No Templar ledger entry declares a `tool_gap`. Zealotry 92108 "Your off-hand auto attacks now trigger Zealotry."
-is proven with a dual-wield fixture; its entry carries a `reason` citing the owner ruling that makes the fixture
-count (a claim entry may carry `reason` for the ruling its proof relies on). Two clauses wait for tool work, without
+is proven on the Templar as created, which already dual wields: the trigger equips an off hand without granting Dual
+Wield 674; its entry carries a `reason` citing the evidence and the owner ruling (a claim entry may carry `reason`
+for the ruling or evidence its proof relies on). Two clauses wait for tool work, without
 a declaration: Pulverizing 524620's damage claim needs a hit model for a proc spell, and Parry Dance 804912 "your
 chance to parry is now increased by $560651s1%" needs a parried-attacks-taken metric.
 
@@ -140,7 +141,8 @@ carries the declaration and its `no_behaviour_route_state`. `clause_coverage` re
 reason, no attempt, an attempt without agent or report, a non-claim entry, a clause that also declares a
 `tool_gap`).
 
-No Templar ledger entry declares it.
+One Templar entry declares it, with one attempt (`pending`): Beckon 804914 "for $d", whose 3000 ms end is too short
+for an expiry pair at 25 ms per step.
 
 ### Two proof statuses
 

@@ -104,6 +104,7 @@ OATH_OF_RETRIBUTION = 804924
 SCHEDULED = 273
 KEEPING_THE_OATH = 92109
 ZEALOTRY = 92108
+DUAL_WIELD = 674
 LIBRAM_OF_ZEAL = 801466
 RIGHTEOUS_UPHEAVAL_501562 = 501562
 WHIRLING_TEMPEST = 300504
@@ -2068,12 +2069,15 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         scenario, [expectation] = trigger_scenario(CLASS_FILE, entry, 0)
         steps = scenario['steps']
         main = first_index(steps, action='equip', slot=15)
-        learned = first_index(steps, action='learn', spell=entry['dual_wield']['spell'])
+        known = first_index(steps, metric='knows_spell', spell=entry['dual_wield']['known_spell'])
         off_hand = first_index(steps, action='equip', item=entry['dual_wield']['off_hand_item'], slot=16)
         baseline = first_index(steps, action='attack')
         passive = first_index(steps, action='learn', spell=ZEALOTRY)
-        self.assertLess(main, learned)
-        self.assertLess(learned, off_hand)
+        self.assertNotIn(DUAL_WIELD, [step.get('spell') for step in steps if step['action'] == 'learn'])
+        self.assertEqual(steps[known]['label'], f'{ZEALOTRY} dual_wield knows {DUAL_WIELD}')
+        self.assertIn(f'is read knowing {DUAL_WIELD}, not granted,', expectation.rule)
+        self.assertLess(main, known)
+        self.assertLess(known, off_hand)
         self.assertLess(off_hand, baseline)
         self.assertLess(baseline, passive)
         self.assertNotEqual(steps[main]['item'], CLASS_FILE['weapon']['item'])
@@ -2086,12 +2090,24 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
 
     def test_dual_wield_needs_an_attack_trigger_and_its_three_fields(self):
         entry = copy.deepcopy(templar_trigger(ZEALOTRY))
+        source = entry['dual_wield']['source']
         for broken in ({**entry, 'trigger': {'action': 'cast', 'spell': 573324, 'target': 'dummy'},
                         'trial_metric': 'spell_cast_count', 'trial_metric_fields': {}},
                        {**entry, 'dual_wield': {'spell': 674, 'off_hand_item': 2492}},
-                       {**entry, 'dual_wield': {**entry['dual_wield'], 'spell': '674'}}):
+                       {**entry, 'dual_wield': {'known_spell': '674', 'off_hand_item': 2492, 'source': source}},
+                       {**entry, 'dual_wield': {**entry['dual_wield'], 'spell': 674}}):
             with self.subTest(broken=broken['dual_wield']), self.assertRaises(ValueError):
                 checked_entry(broken)
+
+    def test_a_granted_dual_wield_learns_its_spell_before_the_off_hand_equip(self):
+        entry = copy.deepcopy(templar_trigger(ZEALOTRY))
+        entry['dual_wield'] = {'spell': DUAL_WIELD, 'off_hand_item': 2492, 'source': entry['dual_wield']['source']}
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, checked_entry(entry), 0)
+        steps = scenario['steps']
+        learned = first_index(steps, action='learn', spell=DUAL_WIELD)
+        self.assertLess(learned, first_index(steps, action='equip', item=2492, slot=16))
+        self.assertFalse(any(step.get('metric') == 'knows_spell' for step in steps))
+        self.assertIn(f'the caster learns {DUAL_WIELD} and equips', expectation.rule)
 
     def test_periodic_trigger_interval_is_its_own_amplitude(self):
         for aura, amplitude in ((LIGHTS_WARD, 2000), (LIGHTS_CHOSEN, 5000)):

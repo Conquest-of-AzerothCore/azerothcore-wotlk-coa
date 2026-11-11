@@ -20,7 +20,7 @@
       "92108 trigger_count"
     ],
     "kind": "claim",
-    "reason": "Proven with a dual-wield fixture (Dual Wield 674, off-hand Cudgel 2492; classes/templar.json triggers, Zealotry dual_wield). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons, so the fixture result counts. Every Templar already learns Dual Wield 674 at login through AscensionLiveBaselineData.h:128 and AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017; lean/templar-offhand-reading.md); the fixture's grant is removed in the gap batch, where the clause is re-proven on a fresh character."
+    "reason": "Proven on the Templar as created: the trigger reads Dual Wield 674 (knows_spell) without granting it and equips the off-hand Cudgel 2492, which the server accepts only with CanDualWield (PlayerStorage.cpp:2047-2058); classes/templar.json triggers, Zealotry dual_wield known_spell. Every Templar learns 674 at login through AscensionLiveBaselineData.h:128 and AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017; lean/templar-offhand-reading.md). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons."
   },
   {
     "spell": 92109,
@@ -610,7 +610,8 @@
       "500678 periodic_dispel after_1",
       "500678 periodic_dispel after_2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Commit 566d9dc79c's message calls this check a failure; the chunk 2 segment 4 triage supersedes it: an incorrect test (the periodic_dispel arm set Energy to the 15 cost and the channel ended at its first tick), fixed in 7e4c575ced; the removal already works (lean/batch1-c2-progress.md, segment 4)."
   },
   {
     "spell": 500678,
@@ -1190,10 +1191,7 @@
     "spell": 560649,
     "clause": "Testament of Hope now summons an additional copy of yourself.",
     "labels": [
-      "560649 effect_value #0",
-      "560649 e0",
-      "560649 e1",
-      "560649 e2"
+      "560649 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -1383,9 +1381,7 @@
     "spell": 572548,
     "clause": "Increases the Weapon Damage dealt by Zealotry by $s1%",
     "labels": [
-      "572548 effect_value e0 #0",
-      "572548 e0 spell_modifier 801450",
-      "572548 e0 spell_effect_value 801450"
+      "572548 behaviour_hit_ratio off_hand"
     ],
     "kind": "claim"
   },
@@ -1403,9 +1399,7 @@
     "spell": 572554,
     "clause": "Increases the Weapon Damage dealt by Zealotry by $s1%",
     "labels": [
-      "572554 effect_value e0 #0",
-      "572554 e0 spell_modifier 801450",
-      "572554 e0 spell_effect_value 801450"
+      "572554 behaviour_hit_ratio off_hand"
     ],
     "kind": "claim"
   },
@@ -1645,9 +1639,7 @@
     "spell": 704175,
     "clause": "Increases the critical strike chance gained through Condemn by $s1%",
     "labels": [
-      "704175 effect_value e0 #0",
-      "704175 e0",
-      "704175 e1"
+      "704175 behaviour_metric_delta oath"
     ],
     "kind": "claim"
   },
@@ -1655,7 +1647,7 @@
     "spell": 704175,
     "clause": "allows its periodic damage to critically strike",
     "labels": [
-      "704175 e2"
+      "704175 behaviour_metric_delta periodic_crit"
     ],
     "kind": "claim"
   },
@@ -1796,8 +1788,8 @@
     "spell": 705263,
     "clause": "Increases the duration of your Librams and Testaments by $/1000;s1 sec.",
     "labels": [
-      "705263 effect_value e0 #0",
-      "705263 e0 spell_modifier (multiple targets)"
+      "705263 behaviour_expiry libram",
+      "705263 behaviour_expiry testament"
     ],
     "kind": "claim"
   },
@@ -1851,8 +1843,8 @@
     "spell": 705272,
     "clause": "Increases your critical damage with Holy spells and abilities by $s1%.",
     "labels": [
-      "705272 effect_value e0 #0",
-      "705272 e0 spell_critical_damage 572741"
+      "705272 behaviour_hit_ratio spell",
+      "705272 behaviour_hit_ratio ability"
     ],
     "kind": "claim"
   },
@@ -1878,10 +1870,11 @@
     "spell": 705276,
     "clause": "Increases your off-hand weapon damage by $s1%.",
     "labels": [
-      "705276 effect_value e0 #0",
-      "705276 e0"
+      "705276 behaviour_hit_ratio swing",
+      "705276 behaviour_hit_ratio zealotry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Two readings of 'your off-hand weapon damage': plain off-hand auto attacks (swing) and the off-hand Weapon Damage that Zealotry 801450 deals as Holy damage (zealotry). The clause stays open until the owner says whether Zealotry's hit is part of it (lean/gap-batch-report.md)."
   },
   {
     "spell": 705278,
@@ -1934,9 +1927,7 @@
     "spell": 705283,
     "clause": "Increases the duration of Oath Chain by $s1%.",
     "labels": [
-      "conformance-templar-value-705283",
-      "conformance-templar-passive-705283 (704576/706426/707896 ok)",
-      "705283 e0 spell_modifier 560389 (passive_delta) -- measured 0.0 expected 200.0"
+      "705283 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -3740,7 +3731,16 @@
     "labels": [
       "804914 aura_duration_ms #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "An expiry pair cannot judge a 3000 ms end: the shift it must exclude is max(5% of 3000, 50) = 150 ms, and with no step between the act and the readings the reading after the end would have to come 150 - 7 x 25 - 1 = -26 ms after it at 25 ms per step (expiry.margins_of raises NotModelled below about 4.5 s). The aura_duration_ms readback is the only check.",
+      "attempts": [
+        {
+          "agent": "gap-author",
+          "report": "lean/gap-batch-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804927,

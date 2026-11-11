@@ -24,6 +24,9 @@ COURAGE_RANK_1 = 707754
 SACRED_OATH = 712346
 HOLY_COMBATANT = 500011
 RIGHTEOUS_CUSTODIAN = 572808
+OATH_FLOW = 705283
+DEEP_SECRETS = 705263
+SACRED_RESTRAINT = 102208
 EXPIRY_ENTRIES = (TESTAMENT_OF_STRENGTH, BLESSING_OF_AGGRAMAR, 705271, FINESSE_RANK_2, COURAGE_RANK_1, 712466,
                   SACRED_OATH)
 
@@ -131,6 +134,46 @@ class TemplarExpiryScenarioTest(unittest.TestCase):
         self.assertEqual(stated_ends(BLESSING_OF_AGGRAMAR), {'without': 30000.0, 'with': 30000.0})
         self.assertEqual(stated_ends(SACRED_OATH), {'without': 8000.0, 'with': 7000.0})
         self.assertEqual(stated_ends(HOLY_COMBATANT), {'without': 6000.0, 'with': 7000.0})
+
+    def test_a_control_arm_casts_before_the_passive_is_learned_and_ends_at_the_unmodified_duration(self):
+        scenario, expectation = built(OATH_FLOW)
+        self.assertEqual(stated_ends(OATH_FLOW), {'without': 15000.0, 'with': 18000.0})
+        steps = run.validate(scenario)['steps']
+        labels = [step.get('label') for step in steps]
+        without, with_arm = expectation.model['arms']
+        learned = next(index for index, step in enumerate(steps)
+                       if step['action'] == 'learn' and step['spell'] == OATH_FLOW)
+        reset = next(index for index, step in enumerate(steps) if step['action'] == 'reset_cooldown')
+        self.assertLess(labels.index(without['after_label']), reset)
+        self.assertLess(reset, learned)
+        self.assertLess(learned, labels.index(with_arm['act_label']))
+        self.assertEqual(without['requires'], with_arm['requires'])
+
+    def test_a_control_arm_clears_the_auras_it_names_before_the_second_cast(self):
+        entry = next(entry for entry in behaviour_entries(CLASS_FILE, [DEEP_SECRETS])
+                     if entry.get('label_suffix') == 'testament')
+        scenario, (expectation,) = behaviour_expiry(CLASS_FILE, entry)
+        steps = scenario['steps']
+        cleared = next(index for index, step in enumerate(steps)
+                       if step['action'] == 'set_aura' and step['spell'] == SACRED_RESTRAINT)
+        labels = [step.get('label') for step in steps]
+        without, with_arm = expectation.model['arms']
+        self.assertEqual(steps[cleared]['stacks'], 0)
+        self.assertLess(labels.index(without['after_label']), cleared)
+        self.assertLess(cleared, labels.index(with_arm['act_label']))
+        self.assertEqual(expectation.label, f'{DEEP_SECRETS} {BEHAVIOUR_EXPIRY} testament')
+
+    def test_seeded_passive_that_leaves_the_duration_unchanged_alerts(self):
+        self.assertEqual(judged(OATH_FLOW).status, 'ok')
+        self.assertEqual(judged(OATH_FLOW, {'with': 15000.0}).status, 'alert')
+        self.assertEqual(judged(DEEP_SECRETS).status, 'ok')
+        self.assertEqual(judged(DEEP_SECRETS, {'with': 20000.0}).status, 'alert')
+        self.assertEqual(judged(DEEP_SECRETS, {'without': 30000.0}).status, 'alert')
+
+    def test_a_control_arm_needs_a_separate_cast_spell(self):
+        entry = {key: value for key, value in behaviour(OATH_FLOW).items() if key not in ('cast_spell', 'cast_target')}
+        with self.assertRaises(ValueError):
+            behaviour_expiry(CLASS_FILE, entry)
 
     def test_the_refresh_arm_times_its_end_from_the_breaker_cast(self):
         scenario, expectation = built(BLESSING_OF_AGGRAMAR)
