@@ -1724,6 +1724,56 @@
   ],
   "behaviours": [
     {
+      "spell": 560096, "name": "Devotion of Khaz'goroth group stack cap", "kind": "group_stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "value_spell": 567572, "effect": 0, "partner": 300876, "partner_effect": 0,
+      "metric": "event_interval_median_ms", "fields": {"stream": "melee_hit", "hand": 0, "since_spell": 801461},
+      "marker_spell": 801461, "swing_ms": 30000, "wait_ms": 2000, "tolerance": 50,
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql spell_group 2000182, stack_rule 3 (SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT), lists 567572 and Elune's Blessing 300876; both are Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, EffectBasePoints[0] 9 (+10%). 567572 is cast by templar_player::OnPlayerUpdate while 560096 is known (AscensionTemplar.cpp:299-302). The caster swings at the dummy for 30 s in each phase, after a Libram of Tenacity 801461 cast that marks the phase start; the median main-hand swing interval since that cast reads 2500 ms (reference staff 2495) with neither, 2500 / 1.10 with 560096, and stays 2500 / 1.10 with 300876 learned too, not 2500 / 1.21 = 2066 ms (summed). Libram of Tenacity changes no attack speed; 300876 is learned onto the Templar fixture as setup only."
+    },
+    {
+      "spell": 803893, "name": "Libram of Consecration (nearby enemies)", "kind": "fixed_count",
+      "quote": "and 4 nearby enemies", "expected": 4,
+      "radius": 5.0, "cast_spell": 503141, "target_rank": 804148, "learn": [803893],
+      "auras": [[803893, 1]],
+      "radius_reason": "AscensionTemplarEvents.cpp:193-198 casts 804148 at the target of a damaging ability while Libram of Consecration 803893 is held; 804148 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY, EffectChainTarget[0] 1, EffectRadiusIndex[0] 8 (5 yd); AscensionTemplarContracts.cpp sets 803893 Effect[1] (aura 107 SPELLMOD_JUMP_TARGETS, EffectMiscValue 17) to id - 803890 = 3, CalcValue 4, so 804148 strikes the target and 4 nearby enemies. 803893 is set on the caster before each Chastise 503141 at the primary dummy; five candidates stand within 5 yd of it and one 5 yd beyond."
+    },
+    {
+      "spell": 300513, "name": "Crusader's Brand (movement speed)", "kind": "metric_delta", "variant": "speed_cap", "label_suffix": "speed_cap",
+      "quote": "or increasing their movement speed above normal movement speed", "expected": 1.0,
+      "trigger_spell": 300513, "target": "dummy", "measure_actor": "dummy", "cast_in_before": false,
+      "phase_auras": [[707754, 1, "dummy", "caster"]],
+      "metric": "run_speed_rate", "fields": {},
+      "before_expected": 1.2571428571, "wait_ms": 500, "expire_ms": 500,
+      "observe_source": "Courage Rank 1 707754 (Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED +10%) is set on the dummy in both phases. The dummy (creature 36) runs at its template rate 8/7 = 1.142857, so 1.257143 with Courage (diagnostic 20261111-225359). A Crusader's Brand cast on the dummy calls UpdateSpeed(MOVE_RUN) on apply (AscensionTemplarAuras.cpp:107-112), and Unit::UpdateSpeed caps MOVE_RUN at 1.0 while 300513 is held (Unit.cpp:12581-12582): 1.0 after the cast, below the dummy's own unbuffed 1.142857 (owner question in lean/owner-questions.md)."
+    },
+    {
+      "spell": 300513, "name": "Crusader's Brand (movement speed, player)", "kind": "metric_delta", "variant": "speed_cap_player", "label_suffix": "speed_cap_player",
+      "quote": "or increasing their movement speed above normal movement speed", "expected": 1.0,
+      "trigger_spell": 801461, "target": "caster", "measure_actor": "caster", "cast_in_before": false,
+      "phase_auras": [[707754, 1, "caster", "caster"]], "after_auras": [[300513, 1, "caster", "caster"]],
+      "metric": "run_speed_rate", "fields": {},
+      "before_expected": 1.1, "wait_ms": 500, "expire_ms": 500,
+      "observe_source": "The player half: Courage 707754 (+10%) on the caster in both phases, 1.10; the brand 300513 set on the caster in the second phase (by the caster, so its AscensionTemplarAuras.cpp:107-112 apply hook runs UpdateSpeed; set by the dummy it read 1.10, diagnostic 20261111-225829), then a Libram of Tenacity 801461 cast (no speed effect) as the phase's act: Unit::UpdateSpeed caps MOVE_RUN at 1.0 while 300513 is held (Unit.cpp:12581-12582), the normal player rate."
+    },
+    {
+      "spell": 300513, "name": "Crusader's Brand (fleeing)", "kind": "metric_delta", "variant": "flee", "label_suffix": "flee",
+      "quote": "fleeing", "expected": 0,
+      "trigger_spell": 801461, "target": "caster", "measure_actor": "caster",
+      "phase_auras": [[12096, 1, "caster", "dummy"]],
+      "after_auras": [[12096, 0, "caster", "dummy"], [300513, 1, "caster", "dummy"]],
+      "metric": "moving", "fields": {},
+      "before_expected": 1, "wait_ms": 1000, "expire_ms": 500,
+      "observe_source": "AscensionTemplarContracts.cpp:98-99 sets 300513 Effect[2] to SPELL_AURA_PREVENTS_FLEEING. The caster holds Fear 12096 (aura 7 SPELL_AURA_MOD_FEAR, applied by the dummy) in both phases, so it flees (moving); in the second phase the fear is removed, the brand is set on the caster by the dummy, and the fear is set again. Each phase then casts Libram of Tenacity 801461 (no movement effect) and reads 1000 ms later; without that wait the first read came right after the fear and read 0 or 1 (diagnostic 20261111-225359, counted 20261111-230015). The tooltip reading 'preventing them from fleeing' expects no movement under the brand."
+    },
+    {
+      "spell": 1397742, "name": "Testament of Hope (two copies)", "kind": "taken_hit", "variant": "copies", "label_suffix": "copies",
+      "judge": "damage_ratio", "expected": 0.81, "quote": "each copy reduces all damage you take by", "strike_spell": 41394,
+      "caster_health_pct": 100, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "opening_casts": [[1397742, "caster"]]}],
+      "observe_source": "A real Testament of Hope 1397742 cast opens the treatment arm, 1500 ms before its first strike: two copies 50250 (the 1397742 copies entry) each add 704409 to themselves (AscensionTemplarSummons.cpp, me->AddAura(704409, me)), whose Effect[1] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 87, -10% (EffectBasePoints[1] -11, EffectDieSides[1] 1), reaches the owner from each copy. Two auras of different casters multiply (GetTotalAuraMultiplier): 0.9 x 0.9 = 0.81; an additive 0.80 lies in the same band. The ten treatment trials (about 8 s) end inside the copies' 20 s. The striker (entry 36, level 60) casts Light of the Naaru 41394 (Holy, fixed 1100) at the caster, held at 100000 health; the control arm comes first, without copies. Non-critical hits."
+    },
+    {
       "spell": 503141, "name": "Chastise", "kind": "hit_ratio", "variant": "oaths", "label_suffix": "oaths",
       "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.7745,
       "observe_spell": 503141, "learn": [503141],
@@ -2935,8 +2985,8 @@
     {
       "spell": 524739, "name": "Norgannon's Wrath", "kind": "absorb_pierce_ratio",
       "quote": "Damage dealt pierces all immunities, resistances, and damage absorption effects.",
-      "expected_ratio": 1.0, "damage_spell": 524740, "shield_aura": 706583,
-      "observe_source": "AscensionTemplarContracts.cpp (around line 265): 'if (id == 524740 && info->Effects[1].TriggerSpell == 520842 && info->Effects[0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY) { info->AscensionIgnoreAbsorbAndResistance = true; ... }', setting a custom SpellInfo flag on 524740, the Holy damage spell 524739's own effects trigger (round5 investigation, templar.json:204-205). Unit::CalcAbsorbResist (Unit.cpp, around line 2662) starts with 'if (spellInfo && spellInfo->AscensionIgnoreAbsorbAndResistance) return;', before either the magic partial-resist roll or the SPELL_AURA_SCHOOL_ABSORB consumption loop later in that same function, so both are skipped entirely for 524740's hits; coa-dbc-viewer confirms AscensionIgnoreAbsorbAndResistance has no DBC-field counterpart, it is this fork's own SpellInfo member (SpellInfo.h:362). Immunity-piercing is separate and DBC-native: coa-dbc-viewer Spell 524740 Attributes=536870912 (SPELL_ATTR0_NO_IMMUNITIES) and AttributesEx2=67108864 (SPELL_ATTR2_NO_SCHOOL_IMMUNITIES). The scenario measures 524740's own cumulative spell_damage_total against the dummy once with no shield present and once more after 706583 (Staffguard, the Templar's own Holy-school SPELL_AURA_SCHOOL_ABSORB aura, reused from this same class file's shield_break_trigger entries) is set directly on the dummy, expecting an unchanged damage ratio (1.0) and an untouched shield aura_amount; a server that let the shield absorb part of the hit despite AscensionIgnoreAbsorbAndResistance would show up as both a reduced ratio and a drained shield."
+      "expected_ratio": 1.0, "damage_spell": 524740, "shield_aura": 706583, "target_auras": [[33143, 1]],
+      "observe_source": "Blessed Resilience 33143 (Effect[0] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, EffectBasePoints[0] -1001) is set on the dummy before each cast, so neither cast can crit: a crit of one cast (2182 = 1.5 x 1455, counted runs 20261111-223346 and -223442) read 1.5 against 1 without it. AscensionTemplarContracts.cpp (around line 265): 'if (id == 524740 && info->Effects[1].TriggerSpell == 520842 && info->Effects[0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY) { info->AscensionIgnoreAbsorbAndResistance = true; ... }', setting a custom SpellInfo flag on 524740, the Holy damage spell 524739's own effects trigger (round5 investigation, templar.json:204-205). Unit::CalcAbsorbResist (Unit.cpp, around line 2662) starts with 'if (spellInfo && spellInfo->AscensionIgnoreAbsorbAndResistance) return;', before either the magic partial-resist roll or the SPELL_AURA_SCHOOL_ABSORB consumption loop later in that same function, so both are skipped entirely for 524740's hits; coa-dbc-viewer confirms AscensionIgnoreAbsorbAndResistance has no DBC-field counterpart, it is this fork's own SpellInfo member (SpellInfo.h:362). Immunity-piercing is separate and DBC-native: coa-dbc-viewer Spell 524740 Attributes=536870912 (SPELL_ATTR0_NO_IMMUNITIES) and AttributesEx2=67108864 (SPELL_ATTR2_NO_SCHOOL_IMMUNITIES). The scenario measures 524740's own cumulative spell_damage_total against the dummy once with no shield present and once more after 706583 (Staffguard, the Templar's own Holy-school SPELL_AURA_SCHOOL_ABSORB aura, reused from this same class file's shield_break_trigger entries) is set directly on the dummy, expecting an unchanged damage ratio (1.0) and an untouched shield aura_amount; a server that let the shield absorb part of the hit despite AscensionIgnoreAbsorbAndResistance would show up as both a reduced ratio and a drained shield."
     },
     {
       "spell": 520034,

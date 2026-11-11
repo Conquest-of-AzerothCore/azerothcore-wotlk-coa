@@ -182,14 +182,21 @@
   {
     "spell": 300513,
     "clause": "fleeing,",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300513 behaviour_metric_delta flee"
+    ],
+    "kind": "claim",
+    "reason": "awaiting owner (lean/owner-questions.md): a feared caster still flees with the brand held (moving 1 and 1, counted 20261111-230219 / -230306). AscensionTemplarContracts.cpp:98-99 makes Effect[2] SPELL_AURA_PREVENTS_FLEEING, which since 3.0.2 ignores fear and players (SpellAuraEffects.cpp:3854-3866) and only stops a creature fleeing at low health"
   },
   {
     "spell": 300513,
     "clause": "or increasing their movement speed above normal movement speed",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300513 behaviour_metric_delta speed_cap",
+      "300513 behaviour_metric_delta speed_cap_player"
+    ],
+    "kind": "claim",
+    "reason": "run speed with Courage 707754 (+10%): the dummy 1.257 before a brand cast and 1.0 after it; the caster 1.10 and 1.0 with the brand held (Unit.cpp:12581-12582 caps MOVE_RUN at 1.0). A creature whose template speed exceeds 1 (the dummy, 1.143) is also held at 1.0, below its own unbuffed speed: information item in lean/owner-questions.md"
   },
   {
     "spell": 300513,
@@ -1020,7 +1027,8 @@
       "524739 hit_mean",
       "524739 behaviour_absorb_pierce_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "absorb_pierce_ratio with Blessed Resilience 33143 on the dummy before both casts (no crit): 1455 unshielded, 1455 shielded, shield 305 untouched; the earlier pair read 1.5 when one cast crit (ADR 0170)"
   },
   {
     "spell": 524739,
@@ -1186,8 +1194,11 @@
   {
     "spell": 560096,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560096 behaviour_group_stack_cap"
+    ],
+    "kind": "claim",
+    "reason": "main-hand swing interval of the caster: 2509 ms with neither, 2278 / 2292.5 ms with 560096 (2500/1.10 = 2281, within 50 ms) and the same with Elune's Blessing 300876 (spell_group 2000182, same aura 192) learned too, not 2066 summed; event read (ADR 0170)"
   },
   {
     "spell": 560096,
@@ -3104,8 +3115,11 @@
   {
     "spell": 803893,
     "clause": "and 4 nearby enemies",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "803893 behaviour_fixed_count"
+    ],
+    "kind": "claim",
+    "reason": "with Libram of Consecration 803893 held, each Chastise 503141 makes 804148 strike the primary and exactly 4 of 5 candidates within 5 yd, never the dummy 5 yd beyond (ADR 0170)"
   },
   {
     "spell": 803893,
@@ -4423,7 +4437,8 @@
     "labels": [
       "807805 spell_duration 32747 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "route pending: 807805 SPELL_ATTR7_CAN_CAUSE_INTERRUPT casts SPELL_INTERRUPT_NONPLAYER 32747 on a non-player target (Spell.cpp:3027-3029, :4173-4178; 4 casts of 32747 per Divine Force in diagnostic 20261111-224641); the 3 s lockout acts only on a creature casting at the hit, and the 6 s stun of the same cast hides it, so it needs a stun-immune casting creature and a school-lockout read"
   },
   {
     "spell": 806273,
@@ -4566,11 +4581,23 @@
   {
     "spell": 1397742,
     "clause": "While within $704409a1 yds of you, each copy reduces all damage you take by $704409s2%.",
-    "labels": [
-      "1397742 effect_radius #2 (unmeasurable)",
-      "1397742 effect_value 704409e1 #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "While within $704409a1 yds of you",
+        "labels": [
+          "1397742 effect_radius #2 (unmeasurable)"
+        ]
+      },
+      {
+        "claim": "each copy reduces all damage you take by $704409s2%",
+        "labels": [
+          "1397742 effect_value 704409e1 #3",
+          "1397742 behaviour_hit_ratio copies"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "two copies summoned by a real cast: Light of the Naaru hits 1100 without, 890 with both (0.9 x 0.9, truncated); route pending for the radius: the copies stay 2.5-3.5 yd from the owner (AscensionTemplarSummons.cpp HopeSpot, repositioned every 500 ms), so a copy beyond 15 yd needs the copies held in place"
   },
   {
     "spell": 1397742,
@@ -4597,6 +4624,6 @@
     "clause": "Target an enemy and leap into the air.",
     "labels": [],
     "kind": "claim",
-    "reason": "Effect[0] 138 SPELL_EFFECT_LEAP_BACK (EffectBasePoints 200, EffectMiscValueB 200); added unproven by the custom-mechanics review (M3), no check measures the leap yet."
+    "reason": "not observable on the server (status 4): Effect[0] 138 SPELL_EFFECT_LEAP_BACK on a player is Unit::JumpTo, which only sends SMSG_MOVE_KNOCK_BACK (Unit.cpp:17079-17098); the server relocates the player only on the client's CMSG_MOVE_KNOCK_BACK_ACK (MovementHandler.cpp:818-849). Diagnostic 20261111-224427: one knock-back packet (vertical speed 20.1, horizontal 0, the order to leap straight up) and position x and z, moving, spline and in_flight unchanged for 3 s while the cast completed (524738 on the caster, 520842 on the dummy). A client-side check needs the lab client to cast 524739 and read the player position during and after the leap"
   }
 ]
