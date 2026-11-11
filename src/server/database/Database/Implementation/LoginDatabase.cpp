@@ -147,9 +147,9 @@ void LoginDatabaseConnection::DoPrepareStatements()
         "SET recruit.recruiter = ? WHERE recruit.id = ? AND recruit.recruiter = 0 AND ancestry.blocked = 0 "
         "AND (? IS NULL OR shared.used < ?)",
         CONNECTION_ASYNC);
-    PrepareStatement(LOGIN_UPD_RAF_SHARED_ADDRESS,
-        "UPDATE raf_accounts r JOIN account a ON a.id = r.account_id SET r.shared_address = ? "
-        "WHERE r.account_id = ? AND a.recruiter = ?", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_INS_RAF_LINKED_ACCOUNT,
+        "INSERT IGNORE INTO raf_accounts (account_id, started_at, shared_address) "
+        "SELECT id, UNIX_TIMESTAMP(), ? FROM account WHERE id = ? AND recruiter = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS,
         "SELECT COUNT(*) FROM raf_accounts r JOIN account a ON a.id = r.account_id "
         "WHERE a.recruiter <> 0 AND r.shared_address = ?", CONNECTION_SYNCH);

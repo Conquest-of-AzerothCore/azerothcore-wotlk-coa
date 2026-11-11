@@ -178,9 +178,10 @@ def main():
           'A full shared IP address is refused before prompting the recipient')
     check(accept.index('LinkRecruitmentAddresses') < accept.index('LOGIN_UPD_RAF_RECRUITER'),
           'Address policy is rechecked before persisting the link')
-    check(accept.index('LOGIN_INS_RAF_ACCOUNT') < accept.index('LOGIN_UPD_RAF_SHARED_ADDRESS') <
-          accept.index('AsyncCommitTransaction'),
-          'The shared address is recorded in the transaction that creates the link')
+    check(accept.index('LOGIN_UPD_RAF_RECRUITER') < accept.index('LOGIN_INS_RAF_LINKED_ACCOUNT') <
+          accept.index('AsyncCommitTransaction') and 'LOGIN_INS_RAF_ACCOUNT' not in accept and
+          'UPDATE raf_accounts' not in sql['LOGIN_INS_RAF_LINKED_ACCOUNT'],
+          'The shared address is written only with the registration row the link transaction creates')
     links = sql['LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS']
     check(links.split('SELECT COUNT(*)', 1)[1] in sql['LOGIN_UPD_RAF_RECRUITER'] and
           'AND (? IS NULL OR shared.used < ?)' in sql['LOGIN_UPD_RAF_RECRUITER'],
@@ -198,6 +199,21 @@ def main():
           'Each shared IP address has its own link count')
     check(run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', (None,)).fetchone()[0] == 0,
           'Links between different IP addresses never count')
+
+    def shared_address(account):
+        row = db.execute('SELECT shared_address FROM raf_accounts WHERE account_id=?', (account,)).fetchone()
+        return row[0] if row else 'missing'
+
+    run('LOGIN_INS_RAF_LINKED_ACCOUNT', (None, 2, 1))
+    check(shared_address(2) == '::ffff:198.51.100.7' and
+          run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', ('::ffff:198.51.100.7',)).fetchone()[0] == 2,
+          'A stale different-address acceptance keeps the existing link counted against its shared address')
+    run('LOGIN_INS_RAF_LINKED_ACCOUNT', ('::ffff:203.0.113.9', 4, 2))
+    check(shared_address(4) == '::ffff:203.0.113.9' and
+          run('LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS', ('::ffff:203.0.113.9',)).fetchone()[0] == 2,
+          'A new shared-address link registers its address')
+    run('LOGIN_INS_RAF_LINKED_ACCOUNT', ('::ffff:198.51.100.7', 8, 1))
+    check(shared_address(8) == 'missing', 'No registration is written for an account linked to another recruiter')
     update = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::UpdateRecruitAFriendRewards(')
     check('bool const linked = recruiterId || isRecruiter;' in update and
           '(!force || !linked) && now < _rafRewardsNextUpdate' in update and

@@ -351,14 +351,11 @@ bool WorldSession::HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 acti
     trans->Append(LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_LINK_LOCK));
     trans->Append(LoginDatabase.GetPreparedStatement(LOGIN_UPD_RAF_LINK_LOCK));
     trans->Append(stmt);
-    auto* registration = LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_ACCOUNT);
-    registration->SetData(0, GetAccountId());
+    auto* registration = LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_LINKED_ACCOUNT);
+    SetSharedAddress(registration, 0, addresses.shared);
+    registration->SetData(1, GetAccountId());
+    registration->SetData(2, inviterAccount);
     trans->Append(registration);
-    auto* sharedAddress = LoginDatabase.GetPreparedStatement(LOGIN_UPD_RAF_SHARED_ADDRESS);
-    SetSharedAddress(sharedAddress, 0, addresses.shared);
-    sharedAddress->SetData(1, GetAccountId());
-    sharedAddress->SetData(2, inviterAccount);
-    trans->Append(sharedAddress);
     bool const sharesAddress = addresses.shared.has_value();
     AddTransactionCallback(LoginDatabase.AsyncCommitTransaction(trans)).AfterComplete(
         [this, inviterAccount, sharesAddress](bool success)
