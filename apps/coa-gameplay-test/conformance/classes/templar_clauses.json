@@ -1967,8 +1967,8 @@
     "clause": "Condemn now stacks $s1 additional time.",
     "labels": [
       "conformance-templar-value-705285",
-      "705285 e0 spell_modifier 567539 ok",
-      "705285 e0 spell_max_stacks 567539 ok"
+      "705285 e0 spell_modifier 567539",
+      "705285 e0 spell_max_stacks 567539"
     ],
     "kind": "claim"
   },
@@ -2266,7 +2266,7 @@
     "spell": 705306,
     "clause": "for $s1% of the damage dealt as Holy damage",
     "labels": [
-      "conformance-templar-value-705306 (effect_value e0 #0, 15%)"
+      "705306 effect_value e0 #0"
     ],
     "kind": "claim"
   },
@@ -2400,8 +2400,8 @@
     "spell": 706357,
     "clause": "Increases your Stamina by $s1",
     "labels": [
-      "conformance-templar-value-706357 (effect_value e0 #0)",
-      "706357 e0 stat 2 ok"
+      "706357 effect_value e0 #0",
+      "706357 e0 stat 2"
     ],
     "kind": "claim"
   },
@@ -2409,8 +2409,8 @@
     "spell": 706357,
     "clause": "plus an additional amount equal to $s1% of your Agility",
     "labels": [
-      "conformance-templar-value-706357 (effect_value e0 #1)",
-      "706357 e1 stat 2 ok"
+      "706357 effect_value e0 #1",
+      "706357 e1 stat 2"
     ],
     "kind": "claim"
   },
@@ -2429,7 +2429,7 @@
     "clause": "Your Condemn now heals you for $s1% of the damage dealt.",
     "labels": [
       "conformance-templar-value-706385",
-      "706385 trigger_count ok (594/594)",
+      "706385 trigger_count",
       "706385 trigger_magnitude_ratio"
     ],
     "kind": "claim"
@@ -2558,7 +2558,7 @@
     "spell": 707391,
     "clause": "Melee damage dealt now has a $h% chance to strike 2 additional times",
     "labels": [
-      "707391 proc_rate ok (0.187 vs 0.2 expected)"
+      "707391 proc_rate"
     ],
     "kind": "claim"
   },
@@ -2572,7 +2572,7 @@
     "spell": 707391,
     "clause": "for $s1% of the damage dealt as Holy Damage",
     "labels": [
-      "conformance-templar-value-707391 (effect_value e0 #1)"
+      "707391 effect_value e0 #1"
     ],
     "kind": "claim"
   },
@@ -2590,7 +2590,7 @@
     "spell": 707606,
     "clause": "grants you Oath: Retribution",
     "labels": [
-      "conformance-templar-value-707606 (effect_value 804924e0, 5)"
+      "707606 effect_value 804924e0 #0"
     ],
     "kind": "claim"
   },
@@ -2690,7 +2690,7 @@
     "spell": 712346,
     "clause": "Critical strikes now remove 1 sec from the duration of Oathkeeper when used.",
     "labels": [
-      "712346 behaviour_duration (status ok, behaviour-scenarios.md)",
+      "712346 behaviour_duration",
       "712346 behaviour_expiry"
     ],
     "kind": "claim"
@@ -2699,7 +2699,7 @@
     "spell": 712437,
     "clause": "Your Interdict now strikes 1 additional nearby target.",
     "labels": [
-      "712437 behaviour_count (status ok, behaviour-scenarios.md)"
+      "712437 behaviour_count"
     ],
     "kind": "claim"
   },
