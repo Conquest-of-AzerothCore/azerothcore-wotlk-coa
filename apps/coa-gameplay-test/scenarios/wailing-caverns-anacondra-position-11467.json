@@ -22,6 +22,9 @@
       "metric": "nearest_creature_distance", "entry": 3671, "min": 7, "max": 11 },
     { "action": "teleport", "actor": "player", "map": 43, "x": -53.5451, "y": 274.873, "z": -92.8442, "o": 0.0 },
     { "action": "assert", "label": "Standing on her new spot, the player finds her right there", "actor": "player",
-      "metric": "nearest_creature_distance", "entry": 3671, "max": 1, "within_ms": 2000 }
+      "metric": "nearest_creature_distance", "entry": 3671, "min": 0, "max": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: her spawn 27366 is loaded at the circle spot, height included",
+      "actor": "player", "metric": "spawn_distance", "guid": 27366, "spawn_type": "creature",
+      "x": -53.5451, "y": 274.873, "z": -92.8442, "max": 0.5 }
   ]
 }
