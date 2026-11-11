@@ -140,8 +140,9 @@ UPDATE `creature_template_model` SET `CreatureDisplayID` = 5430, `DisplayScale` 
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
 
--- The blue dome over a shielded Soul Vessel: a creature whose model is the mage's Prismatic Barrier state (display
--- 127809), as an aura could not be made to show.
+-- The blue dome over a shielded Soul Vessel: a creature whose model is the blue bubble spell model (display 132358),
+-- as an aura could not be made to show; and an invisible stalker (display 11686) the beam to Atal'zul leaves from,
+-- at the middle of the crystal.
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
   `VerifiedBuild`) VALUES
@@ -151,10 +152,23 @@ ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 67537;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
   `VerifiedBuild`) VALUES
-(67537, 0, 127809, 1.5, 1, 12340);
+(67537, 0, 132358, 3.8, 1, 12340);
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 67537;
 INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
 (67537, 1, 0, 0, 1);
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+  `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+  `VerifiedBuild`) VALUES
+(67538, 'Soul Vessel Anchor', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 10, 0, '', '', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`),
+  `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 67538;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+  `VerifiedBuild`) VALUES
+(67538, 0, 11686, 1, 1, 12340);
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 67538;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(67538, 1, 0, 0, 1);
 
 -- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 holds;
 -- 978059 keeps its loot for the chests players still hold.

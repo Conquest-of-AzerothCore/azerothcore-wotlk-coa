@@ -91,6 +91,7 @@
 #include "ScriptedGossip.h"
 #include "LootMgr.h"
 #include "Map.h"
+#include "MoveSpline.h"
 #include "MapMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -1029,6 +1030,7 @@ namespace
         NPC_RESTLESS_SPIRIT     = 67535,
         NPC_SOUL_VESSEL         = 67536,
         NPC_VESSEL_BARRIER      = 67537,
+        NPC_VESSEL_ANCHOR       = 67538,
     };
 
     enum AtalzulEvents { EA_BOLT = 1, EA_VOLLEY, EA_LAND };
@@ -1039,7 +1041,9 @@ namespace
     constexpr uint32 ACTION_VESSEL_LINKED = 2;
     constexpr uint32 ACTION_AWAKEN = 3;
     constexpr uint32 ZUROGG_JUMP = 1;
-    Position const ZuroggLanding = { 3439.56f, -4982.28f, 195.727f, 0.0f };
+    Position const ZuroggLanding = { 3368.63f, -4908.01f, 159.4f, 0.0f };
+    constexpr float BARRIER_RISE = 1.0f;
+    constexpr float ANCHOR_RISE = -0.4f;
 
     void Beam(Unit* from, Unit* to)
     {
@@ -1074,7 +1078,12 @@ namespace
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void IsSummonedBy(WorldObject* /*summoner*/) override { _wait = 1500ms; }
+        void IsSummonedBy(WorldObject* summoner) override
+        {
+            _goal = summoner->GetPosition();
+            me->SetWalk(false);
+            me->GetMotionMaster()->MovePoint(1, _goal);
+        }
 
         void OnSpellCast(SpellInfo const* spell) override
         {
@@ -1090,6 +1099,19 @@ namespace
         {
             if (me->HasUnitState(UNIT_STATE_CASTING))
                 return;
+            if (me->GetExactDist2d(&_goal) > 4.0f)
+            {
+                if (me->movespline->Finalized())
+                    me->GetMotionMaster()->MovePoint(1, _goal);
+                return;
+            }
+            if (!_arrived)
+            {
+                _arrived = true;
+                me->StopMoving();
+                me->GetMotionMaster()->Clear();
+                _wait = 0ms;
+            }
             _wait -= Milliseconds(diff);
             if (_wait > 0ms)
                 return;
@@ -1098,7 +1120,9 @@ namespace
         }
 
     private:
-        Milliseconds _wait = 1500ms;
+        Position _goal;
+        bool _arrived = false;
+        Milliseconds _wait = 0ms;
     };
 
     struct npc_soul_vessel_coa : public ScriptedAI
@@ -1120,9 +1144,6 @@ namespace
             _state = state;
             _spirits.DespawnAll();
             me->InterruptNonMeleeSpells(false);
-            if (Creature* barrier = ObjectAccessor::GetCreature(*me, _barrier))
-                barrier->DespawnOrUnsummon();
-            _barrier.Clear();
             me->SetVisible(state != VESSEL_BROKEN);
             if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
@@ -1132,14 +1153,36 @@ namespace
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
-            if (state == VESSEL_SHIELDED)
-                if (TempSummon* barrier = me->SummonCreature(NPC_VESSEL_BARRIER, me->GetPositionX(),
-                    me->GetPositionY(), me->GetPositionZ() - 0.6f, 0, TEMPSUMMON_MANUAL_DESPAWN))
-                {
-                    barrier->SetReactState(REACT_PASSIVE);
-                    _barrier = barrier->GetGUID();
-                }
+            Keep(_barrier, state == VESSEL_SHIELDED, NPC_VESSEL_BARRIER, BARRIER_RISE);
+            Keep(_anchor, state == VESSEL_LINKED || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
             _spawn = 3s;
+        }
+
+        void Keep(ObjectGuid& guid, bool wanted, uint32 entry, float rise)
+        {
+            Creature* held = ObjectAccessor::GetCreature(*me, guid);
+            if (held && wanted)
+                return;
+            if (held)
+                held->DespawnOrUnsummon();
+            guid.Clear();
+            if (!wanted)
+                return;
+            if (TempSummon* made = me->SummonCreature(entry, me->GetPositionX(), me->GetPositionY(),
+                me->GetPositionZ() + rise, 0, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                made->SetReactState(REACT_PASSIVE);
+                guid = made->GetGUID();
+            }
+        }
+
+        void Link()
+        {
+            Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f);
+            if (!atal)
+                return;
+            Creature* anchor = ObjectAccessor::GetCreature(*me, _anchor);
+            Beam(anchor ? static_cast<Unit*>(anchor) : static_cast<Unit*>(me), atal);
         }
 
         void Click()
@@ -1177,26 +1220,24 @@ namespace
         {
             if (_state == VESSEL_LINKED)
             {
-                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
-                    Beam(me, atal);
+                Link();
                 return;
             }
             if (_state != VESSEL_OPEN)
                 return;
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
-                Beam(me, atal);
+            Link();
             _spawn -= Milliseconds(diff);
             if (_spawn > 0ms)
                 return;
-            _spawn = 6s;
-            float const angle = frand(0.0f, 2.0f * float(M_PI));
-            me->SummonCreature(NPC_RESTLESS_SPIRIT, me->GetPositionX() + 4.0f * std::cos(angle),
-                me->GetPositionY() + 4.0f * std::sin(angle), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+            _spawn = 4s;
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                me->SummonCreature(NPC_RESTLESS_SPIRIT, atal->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 60000);
         }
 
     private:
         SummonList _spirits;
         ObjectGuid _barrier;
+        ObjectGuid _anchor;
         VesselState _state = VESSEL_IDLE;
         Milliseconds _spawn = 3s;
     };
