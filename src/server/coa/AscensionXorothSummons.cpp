@@ -135,9 +135,8 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
         if (me->GetEntry() == 50268 && summoner && player->IsAlive() && !player->IsInCombat() &&
             player->IsWithinDistInMap(me, 5) && (player == summoner || summoner->IsInRaidWith(player)))
         {
-            uint16 const riding = player->GetBaseSkillValue(SKILL_RIDING);
-            int32 const speed = riding >= RIDING_SKILL_JOURNEYMAN ? 100 : riding >= RIDING_SKILL_NOVICE ? 60 : 0;
-            player->CastCustomSpell(23161, SPELLVALUE_BASE_POINT1, speed, player, true);
+            player->CastCustomSpell(23161, SPELLVALUE_BASE_POINT1,
+                GetRidingGroundMountSpeed(player->GetBaseSkillValue(SKILL_RIDING)), player, true);
         }
     }
     void JustDied(Unit*) override

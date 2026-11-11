@@ -8,21 +8,75 @@
   ],
   "timeout_ms": 60000,
   "players": [
-    {"id": "v", "race": 1, "class": 29, "level": 60}
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
   ],
-  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
   "steps": [
-    {"action": "wait", "label": "Let login hooks settle", "ms": 2000},
-    {"action": "learn", "label": "The Mycelial Ring talent, which teaches the ring", "actor": "v", "spell": 805238},
-    {"action": "wait", "ms": 500},
-    {"action": "learn", "actor": "v", "spell": 681056},
-    {"action": "cast", "actor": "v", "spell": 681056},
-    {"action": "assert", "label": "Mycelial Ring is cast", "actor": "v", "metric": "cast_failure", "spell": 681056,
-     "equals": 0, "within_ms": 1000},
-    {"action": "wait", "label": "Let the ring's triggered spells land", "ms": 1500},
-    {"action": "assert", "label": "Mycelial Ring is on cooldown", "actor": "v", "metric": "cooldown_ms",
-     "spell": 681056, "min": 30000},
-    {"action": "assert", "label": "and the cooldown is the tooltip's 45 sec, not 2 min", "actor": "v",
-     "metric": "cooldown_ms", "spell": 681056, "max": 45000}
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "label": "The Mycelial Ring talent, which teaches the ring",
+      "actor": "v",
+      "spell": 805238
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 681056
+    },
+    {
+      "action": "cast",
+      "actor": "v",
+      "spell": 681056
+    },
+    {
+      "action": "assert",
+      "label": "Mycelial Ring is cast",
+      "actor": "v",
+      "metric": "cast_failure",
+      "spell": 681056,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ring's triggered spells land",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Mycelial Ring is on cooldown",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 681056,
+      "min": 42000
+    },
+    {
+      "action": "assert",
+      "label": "and the cooldown is the tooltip's 45 sec, not 2 min",
+      "actor": "v",
+      "metric": "cooldown_ms",
+      "spell": 681056,
+      "max": 45000
+    }
   ]
 }
