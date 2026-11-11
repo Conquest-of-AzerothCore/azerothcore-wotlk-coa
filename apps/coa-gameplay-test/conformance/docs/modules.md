@@ -57,6 +57,10 @@
   into `consumed`/`not_consumed` rows (`literal_modifier_sites` refuses a spell whose modifier channel CoA code feeds
   with its own amount) and `merge_consumption(path, rows)` writes `classes/<class>_consumption.json` (see
   [Server mutants and K3 consumption](generate-and-compare.md#server-mutants-and-k3-consumption)).
+- `sample.py`: `sample_document(clauses, seed, total, buckets, minimums, first_size)` draws a batch sample of whole
+  spells from a bucket file (`spell_order` by sha256 of `<seed>|<spell id>`, `bucket_quotas` proportional with
+  floors) and splits it into two chunks (`chunk_split`) (see
+  [Drawing a batch sample](generate-and-compare.md#drawing-a-batch-sample)).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)

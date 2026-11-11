@@ -349,6 +349,24 @@ reads the file beside the ledger: on the verdicts' build, a `consumed` row turns
 behaviour evidence; a `not_consumed` row keeps it data and lists it. K3 is the only consumption route: the K1
 static join needs the value dump, which is not adopted, and no K1+K2 rows are written.
 
+### Drawing a batch sample
+
+```sh
+python3 -B conformance.py sample --buckets BUCKETS.json --seed SEED --total 40 --bucket U --bucket D --bucket A \
+  --minimum A=4 --first-chunk 10 --out SAMPLE.json
+```
+
+`sample` draws the clauses a cost-measuring batch works on, with no judgement: the unit is the spell. The bucket file
+is a JSON array (or `{"clauses": [...]}`) of clauses, each with an integer `spell` and a `bucket`; clauses of a bucket
+not named by `--bucket` are never drawn. Quotas are proportional to the bucket sizes (largest remainder, summing to
+`--total`); a `--minimum` raises a bucket to its floor (or to its size when smaller) and the other buckets share the
+rest. Inside each bucket the spells are ordered by sha256 of `<seed>|<spell id>`, ascending, and each drawn spell
+brings every clause it has in that bucket, until the bucket holds its quota (whole spells, so a bucket may exceed
+it). Chunk 1 takes whole spells, interleaved across the buckets in `--bucket` order, until it holds at least
+`--first-chunk` clauses; a spell drawn in two buckets goes to one chunk with all its clauses. The output keeps the
+seed, sizes, quotas, the clauses held per bucket, both chunks and the draws in draw order (`order`, `bucket`,
+`spell`, `sha256`, `chunk`, `clauses`); the same inputs write the same file.
+
 ### Verdicts
 
 | Status | Given to |

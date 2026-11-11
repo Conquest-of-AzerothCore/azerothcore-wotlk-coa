@@ -24,6 +24,7 @@ from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entri
 from profile import (DBC_DIR, DbcSetMismatch, ledger_consumption_path, load_class_file, server_dbc_dir,
                      spell_dbc_sha256)
 from questions import QUESTIONS_FILE
+from sample import SampleError, load_buckets, parse_minimums, sample_document
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
@@ -536,6 +537,21 @@ def prove_command(args) -> int:
     return code
 
 
+def sample_command(args) -> int:
+    try:
+        document = sample_document(load_buckets(args.buckets), args.seed, args.total, args.bucket,
+                                   parse_minimums(args.minimum), args.first_chunk)
+    except SampleError as error:
+        print(error, file=sys.stderr)
+        return 2
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
+    print(f'{args.out}: {sum(document["drawn_clauses"].values())} clauses in {len(document["draws"])} draws '
+          f'(quotas {document["quotas"]}), chunk 1 {document["chunks"]["1"]["clauses"]} clauses, chunk 2 '
+          f'{document["chunks"]["2"]["clauses"]}')
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='Generate class conformance scenarios and compare their results.')
     commands = parser.add_subparsers(dest='command', required=True)
@@ -636,10 +652,22 @@ def main(argv=None) -> int:
     probing.add_argument('--out', type=Path, required=True, help='the K3 result file to write')
     probing.add_argument('--consumption', type=Path,
                          help='merge the written rows into this consumption file (classes/<class>_consumption.json)')
+    sampling = commands.add_parser('sample', help='draw a batch sample of whole spells from a bucket file, in draw '
+                                                  'order, and split it into two chunks')
+    sampling.add_argument('--buckets', type=Path, required=True,
+                          help='a JSON file of clauses {spell, bucket, ...} (or {"clauses": [...]})')
+    sampling.add_argument('--seed', required=True, help='spells are ordered by sha256 of "<seed>|<spell id>"')
+    sampling.add_argument('--total', type=int, required=True, help='clauses to draw over all buckets')
+    sampling.add_argument('--bucket', action='append', required=True,
+                          help='a bucket to draw from, in draw and interleaving order; repeatable')
+    sampling.add_argument('--minimum', action='append', default=[], help='BUCKET=COUNT, a quota floor; repeatable')
+    sampling.add_argument('--first-chunk', dest='first_chunk', type=int, required=True,
+                          help='clauses chunk 1 holds at least, taken as whole spells interleaved across buckets')
+    sampling.add_argument('--out', type=Path, required=True, help='the sample file to write')
     args = parser.parse_args(argv)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command,
-                'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command}
+                'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command, 'sample': sample_command}
     return handlers[args.command](args)
 
 
