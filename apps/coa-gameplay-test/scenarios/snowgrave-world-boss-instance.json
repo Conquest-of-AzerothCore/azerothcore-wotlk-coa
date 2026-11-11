@@ -10,9 +10,9 @@
   "timeout_ms": 180000,
   "location": {
     "map": 1,
-    "x": 5191.0,
-    "y": -4905.0,
-    "z": 752.5
+    "x": 4744.0,
+    "y": -4932.0,
+    "z": 886.0
   },
   "players": [
     {
@@ -84,7 +84,13 @@
       "ms": 500
     },
     {
-      "action": "use_nearby_gameobject",
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 978095,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
       "actor": "raider",
       "entry": 978095
     },
@@ -141,7 +147,7 @@
       "ms": 500
     },
     {
-      "action": "use_nearby_gameobject",
+      "action": "use_gameobject",
       "actor": "raider",
       "entry": 978095
     },
@@ -159,7 +165,13 @@
       "within_ms": 8000
     },
     {
-      "action": "use_nearby_gameobject",
+      "action": "summon_gameobject",
+      "actor": "mate1",
+      "entry": 978095,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
       "actor": "mate1",
       "entry": 978095
     },
