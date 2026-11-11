@@ -2780,19 +2780,16 @@
       "variant": "oath",
       "label_suffix": "oath",
       "quote": "Increases the critical strike chance gained through Condemn by $s1%",
-      "expected": 6,
-      "before_expected": 3,
+      "expected": 13.146,
+      "before_expected": 10.146,
       "trigger_spell": 804906,
       "target": "dummy",
       "measure_actor": "caster",
-      "metric": "aura_amount",
-      "fields": {
-        "spell": 804922,
-        "effect": 0
-      },
+      "metric": "melee_crit_chance",
+      "fields": {},
       "wait_ms": 500,
       "expire_ms": 22000,
-      "observe_source": "A Condemn 804906 cast grants Oath: Condemn 804922 (AscensionTemplarAbilities.cpp:172 picks 804922 for Named(info, 804906); AscensionTemplar::GrantOath, AscensionTemplar.cpp:168-181, casts it on the caster). 804922 Effect[0] aura 290, EffectBasePoints[0] 2 + EffectDieSides[0] 1 = 3 ('Increases your critical strike chance by $s1%'). Condemnation 704175 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 3 (SPELLMOD_EFFECT1), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3, EffectSpellClassMask[0] word 0 536870912 matching 804922 SpellFamilyFlags[0] 536870912. Control: before the learn the Oath reads 3; with the talent 6. expire_ms 22000 lets the Oath (15000 ms from GrantOath) and the Condemn aura on the dummy (DurationIndex 86, 21000 ms) end before the second cast, so the second Oath is a fresh aura of one stack."
+      "observe_source": "A Condemn 804906 cast grants Oath: Condemn 804922 (AscensionTemplarAbilities.cpp:172 picks 804922 for Named(info, 804906); AscensionTemplar::GrantOath, AscensionTemplar.cpp:168-181, casts it on the caster). 804922 Effect[0] aura 290, EffectBasePoints[0] 2 + EffectDieSides[0] 1 = 3 ('Increases your critical strike chance by $s1%'). Condemnation 704175 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 3 (SPELLMOD_EFFECT1), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3, EffectSpellClassMask[0] word 0 536870912 matching 804922 SpellFamilyFlags[0] 536870912. The metric is the caster's melee crit percentage (PLAYER_CRIT_PERCENTAGE): aura 290 adds to every crit chance, and Condemn is DmgClass 2 (melee). The reference character's melee crit chance without the Oath is 7.146 (melee_crit_chance_refreshed before any cast, diagnostic .cache/verify-all/20261111-124435), so the control arm (Oath, no talent) expects 7.146 + 3 = 10.146 and the talent arm 7.146 + 3 + 3 = 13.146. expire_ms 22000 lets the Oath (15000 ms from GrantOath) and the Condemn aura on the dummy (DurationIndex 86, 21000 ms) end before the second cast, so the second Oath is a fresh aura of one stack."
     },
     {
       "spell": 704175,
