@@ -508,7 +508,7 @@
       "tooltip": "Triggering |cffffffffZealotry|r now has an $h% chance to grant you an additional auto attack on your next strike.@s:801450:0@",
       "chance_token": "$h",
       "trigger": {"action": "cast", "spell": 801450},
-      "trigger_text": "Triggering Zealotry",
+      "trigger_text": "Triggering",
       "event_metric": "melee_attack_count",
       "proc_spell": 505206,
       "proc_spell_source": "EffectTriggerSpell[0] of 504808: 505206, Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS; the events are the main-hand auto attacks it makes, the caster attacking nothing else",
