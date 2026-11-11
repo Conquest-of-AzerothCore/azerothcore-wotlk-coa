@@ -366,6 +366,8 @@
       "proc_spell": 525028,
       "proc_spell_source": "EffectTriggerSpell[0..2] of 707391: 525028 Retribution, SchoolMask 2 (Holy)",
       "events_per_proc": 2,
+      "most_procs_per_trigger": 1,
+      "most_procs_per_trigger_source": "tooltip 'strike 2 additional times': one proc per landed swing, two strikes each. The aura's OnProc runs once per proc (AscensionTemplarEvents.cpp:223) and casts 525028 twice (:144-146); the event flag set in Proc (:112-113) refuses the strikes' own hits (:37), so a strike never procs again.",
       "dbc": {
         "707391": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0},
         "525028": {"ProcChance": 0, "ProcFlags": 0, "ProcCharges": 0}

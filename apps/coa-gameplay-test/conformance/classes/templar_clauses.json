@@ -2735,7 +2735,9 @@
   {
     "spell": 707391,
     "clause": "strike 2 additional times",
-    "labels": [],
+    "labels": [
+      "707391 proc_rate"
+    ],
     "kind": "claim"
   },
   {
