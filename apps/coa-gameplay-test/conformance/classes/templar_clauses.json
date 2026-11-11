@@ -710,9 +710,12 @@
       "504107 effect_value 500689e0",
       "504107 effect_value 572051e0",
       "504107 spell_duration 572051",
-      "504107 max_stacks 572051"
+      "504107 max_stacks 572051",
+      "504107 behaviour_metric_delta tenth",
+      "504107 behaviour_metric_delta ninth"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the four readbacks measure the transformed spell, not the transform; the two metric_delta entries cast Zealotry 801450 ten and nine times with 504107 known: the transform aura 563269 (AscensionTemplarAuras.cpp:144-150, Replacement 801446 to 500689) is present after the tenth hit and absent after the ninth, and absent without 504107"
   },
   {
     "spell": 504561,

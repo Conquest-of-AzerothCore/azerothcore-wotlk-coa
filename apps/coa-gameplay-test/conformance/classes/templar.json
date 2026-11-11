@@ -1708,6 +1708,24 @@
   ],
   "behaviours": [
     {
+      "spell": 504107, "variant": "tenth", "label_suffix": "tenth",
+      "name": "Divine Fury", "kind": "metric_delta",
+      "quote": "10 times now transforms your Vindication into", "expected": 1,
+      "trigger_spell": 801450, "target": "dummy", "setup_casts": [801450, 801450, 801450, 801450, 801450, 801450, 801450, 801450, 801450], "setup_wait_ms": 300,
+      "metric": "aura", "fields": {"spell": 563269},
+      "before_expected": 0, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarAbilities.cpp:295-296 casts the stacking marker 563270 (StackAmount 10) on every landed Zealotry 801450 hit while 504107 is known and 563269 is absent; AscensionTemplarAuras.cpp:144-150 removes it at 10 stacks and casts 563269, whose apply calls Replacement(player, 801446, 500689): Vindication becomes Divine Fury 500689. Zealotry is cast directly at the dummy, 300 ms apart (801450 has no global cooldown); the before phase, without 504107, reads no 563269. Ten Zealotry hits: 563269 present."
+    },
+    {
+      "spell": 504107, "variant": "ninth", "label_suffix": "ninth",
+      "name": "Divine Fury", "kind": "metric_delta",
+      "quote": "10 times now transforms your Vindication into", "expected": 0,
+      "trigger_spell": 801450, "target": "dummy", "setup_casts": [801450, 801450, 801450, 801450, 801450, 801450, 801450, 801450], "setup_wait_ms": 300,
+      "metric": "aura", "fields": {"spell": 563269},
+      "before_expected": 0, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarAbilities.cpp:295-296 casts the stacking marker 563270 (StackAmount 10) on every landed Zealotry 801450 hit while 504107 is known and 563269 is absent; AscensionTemplarAuras.cpp:144-150 removes it at 10 stacks and casts 563269, whose apply calls Replacement(player, 801446, 500689): Vindication becomes Divine Fury 500689. Zealotry is cast directly at the dummy, 300 ms apart (801450 has no global cooldown); the before phase, without 504107, reads no 563269. Nine Zealotry hits: 563269 still absent, so the tenth is the one."
+    },
+    {
       "spell": 524765, "name": "Light's Guidance", "kind": "hit_ratio", "label_suffix": "next_benediction",
       "quote": "now causes your next Benediction to heal for", "expected": 1.25,
       "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
