@@ -672,7 +672,17 @@
       "500694 behaviour_hit_ratio spell_power"
     ],
     "kind": "claim",
-    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc. Amount proven on the triggered spell 803153 cast directly: +63% with +980 attack power and +14.2% with +220 holy spell damage, the 0.25 coefficients over the mean hit 389.25 of $803153m1 + $803153ppl1 at the reference. The periodic path through 500694 (aura 23, a triggered cast) reads the same coefficient row: AscensionTemplarContracts.cpp:335-342 keys on the spell id (AscensionTemplarData.h:78), whoever casts it, so the coefficient cannot differ; a modifier gated on an untriggered cast could, and none is known in the scenario. The periodic path itself is not exercised for the amount; its Zealotry casts are clause 62"
+    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc. Amount proven on the triggered spell 803153 cast directly: +63% with +980 attack power and +14.2% with +220 holy spell damage, the 0.25 coefficients over the mean hit 389.25 of $803153m1 + $803153ppl1 at the reference. The periodic path through 500694 (aura 23, a triggered cast) reads the same coefficient row: AscensionTemplarContracts.cpp:335-342 keys on the spell id (AscensionTemplarData.h:78), whoever casts it, so the coefficient cannot differ; a modifier gated on an untriggered cast could, and none is known in the scenario. The periodic path itself is not exercised for the amount; its Zealotry casts are clause 62",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 500694,
+      "dbc_differs": "ToolTip only"
+    }
   },
   {
     "spell": 500694,
@@ -686,7 +696,17 @@
       "500694 behaviour_metric_delta after_duration"
     ],
     "kind": "claim",
-    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc. Conformant by owner ruling 2026-11-11 (method-study/owner-rulings-2026-11-10.md, Force of Golganneth clause 62): one Zealotry 801450 at the cast, then 5 periodic, 6 in all. The regression reads 1 at 500 ms, 3 at 2500 ms, 6 at 5500 ms and 6 at 7500 ms after one cast, so 5 or 7 alert"
+    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc. Conformant by owner ruling 2026-11-11 (method-study/owner-rulings-2026-11-10.md, Force of Golganneth clause 62): one Zealotry 801450 at the cast, then 5 periodic, 6 in all. The regression reads 1 at 500 ms, 3 at 2500 ms, 6 at 5500 ms and 6 at 7500 ms after one cast, so 5 or 7 alert",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 500694,
+      "dbc_differs": "ToolTip only"
+    }
   },
   {
     "spell": 500694,
@@ -700,7 +720,17 @@
       "500694 cost_gate 803792 with aura",
       "500694 cost_gate 803792 beyond aura"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 500694,
+      "dbc_differs": "ToolTip only"
+    }
   },
   {
     "spell": 572027,
@@ -1589,7 +1619,17 @@
     "labels": [
       "680397 trigger_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 680397,
+      "file": "rev_20261024_46_templar_disciplined_blows_tooltip.sql",
+      "commit": "a5fe7aaa16",
+      "pr": "#8988",
+      "basis": "text_correction",
+      "ruling": null,
+      "dbc_differs": "Description: \"Cnly occur\" spelled \"Only occurs\", line breaks; no value changes"
+    }
   },
   {
     "spell": 680397,
@@ -1598,7 +1638,17 @@
       "680397 effect_value 680398e0 #0",
       "680397 script_hit 680398"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 680397,
+      "file": "rev_20261024_46_templar_disciplined_blows_tooltip.sql",
+      "commit": "a5fe7aaa16",
+      "pr": "#8988",
+      "basis": "text_correction",
+      "ruling": null,
+      "dbc_differs": "Description: \"Cnly occur\" spelled \"Only occurs\", line breaks; no value changes"
+    }
   },
   {
     "spell": 680397,
@@ -1606,16 +1656,38 @@
     "labels": [
       "680397 behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 680397,
+      "file": "rev_20261024_46_templar_disciplined_blows_tooltip.sql",
+      "commit": "a5fe7aaa16",
+      "pr": "#8988",
+      "basis": "text_correction",
+      "ruling": null,
+      "dbc_differs": "Description: \"Cnly occur\" spelled \"Only occurs\", line breaks; no value changes"
+    }
   },
   {
     "spell": 680397,
-    "clause": "Can only occur once every 0.5 sec.",
+    "clause": "Only occurs once every 0.5 sec.",
     "labels": [
       "680397 behaviour_internal_cooldown_gate",
       "680397 behaviour_internal_cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 680397,
+      "file": "rev_20261024_46_templar_disciplined_blows_tooltip.sql",
+      "commit": "a5fe7aaa16",
+      "pr": "#8988",
+      "basis": "text_correction",
+      "ruling": null,
+      "dbc_differs": "Description: \"Cnly occur\" spelled \"Only occurs\", line breaks; no value changes"
+    },
+    "dbc_clause": "Cnly occur once every 0.5 sec.",
+    "reason": "Judged against the streamed client text (rev_20261024_46_templar_disciplined_blows_tooltip.sql, #8988, ADR 0192), which corrects the DBC's \"Cnly occur\" (dbc_clause); the 0.5 sec the claim states is the same in both texts."
   },
   {
     "spell": 680399,
@@ -2336,17 +2408,38 @@
       "705298 trigger_count"
     ],
     "kind": "claim",
-    "reason": "The label \"705298 trigger_count ok\" was a placeholder for the stored trigger verdict \"705298 trigger_count\" (same spell, the trigger entry's own label); re-pointed by trial-o."
+    "reason": "The label \"705298 trigger_count ok\" was a placeholder for the stored trigger verdict \"705298 trigger_count\" (same spell, the trigger entry's own label); re-pointed by trial-o.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 705298,
+      "file": "rev_20261029_240_templar_untainted_tooltip.sql",
+      "commit": "53feaa3c63",
+      "pr": "#10006 (issue #9895)",
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-11, Untainted: 10 plus 10% of Stamina",
+      "dbc_differs": "Description: ${$705299m1+$STA*0.1} reads ${-$705299m1+$STA*0.1} (and 705299 ToolTip)"
+    }
   },
   {
     "spell": 705298,
-    "clause": "by ${$705299m1+$STA*0.1}",
+    "clause": "by ${-$705299m1+$STA*0.1}",
     "labels": [
       "705298 behaviour_metric_delta damage_taken",
       "705298 behaviour_taken_hit reduction"
     ],
     "kind": "claim",
-    "reason": "Judged against the streamed client text (coa_client_spell_description, rev_20261029_240_templar_untainted_tooltip.sql): 705298 \"reduces your Physical damage taken by ${-$705299m1+$STA*0.1}\" and 705299 \"Physical damage taken reduced by ${-$m1+$STA*0.1}\", 10 + 0.1 x Stamina; the DBC text above reads ${$705299m1+$STA*0.1}. The override rests on the owner ruling of 2026-11-11 (owner-rulings Untainted entry: the intended amount is 10 plus 10% of Stamina; the DBC sign is wrong), so it is independent. The server sets int32(-10 - .1f * Stamina) in the class script (AscensionTemplarAuras.cpp:66-67), 17 at Stamina 79; that truncation is the script's own, outside the int32 rule of SpellInfo.cpp:592, and the check compares exactly against it. The metric_delta label reads melee_damage_taken, a readback (trial question 4); the taken_hit reduction label strikes the caster with Night Slaughter 23583 (67 Physical) without and with 705299 and compares each treatment strike with the control strike scaled from 67 to 67 - 17 (ADR 0191), an applied hit."
+    "reason": "Judged against the streamed client text (coa_client_spell_description, rev_20261029_240_templar_untainted_tooltip.sql, ADR 0192): 705298 \"reduces your Physical damage taken by ${-$705299m1+$STA*0.1}\" and 705299 \"Physical damage taken reduced by ${-$m1+$STA*0.1}\", 10 + 0.1 x Stamina; dbc_clause keeps the DBC text. The override rests on the owner ruling of 2026-11-11 (owner-rulings Untainted entry: the intended amount is 10 plus 10% of Stamina; the DBC sign is wrong), so it is independent. The server sets int32(-10 - .1f * Stamina) in the class script (AscensionTemplarAuras.cpp:66-67), 17 at Stamina 79; that truncation is the script's own, outside the int32 rule of SpellInfo.cpp:592, and the check compares exactly against it. The metric_delta label reads melee_damage_taken, a readback (trial question 4); the taken_hit reduction label strikes the caster with Night Slaughter 23583 (67 Physical) without and with 705299 and compares each treatment strike with the control strike scaled from 67 to 67 - 17 (ADR 0191), an applied hit.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 705298,
+      "file": "rev_20261029_240_templar_untainted_tooltip.sql",
+      "commit": "53feaa3c63",
+      "pr": "#10006 (issue #9895)",
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-11, Untainted: 10 plus 10% of Stamina",
+      "dbc_differs": "Description: ${$705299m1+$STA*0.1} reads ${-$705299m1+$STA*0.1} (and 705299 ToolTip)"
+    },
+    "dbc_clause": "by ${$705299m1+$STA*0.1}"
   },
   {
     "spell": 705298,
@@ -2355,7 +2448,17 @@
       "705298 spell_duration 705299 #1",
       "705298 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 705298,
+      "file": "rev_20261029_240_templar_untainted_tooltip.sql",
+      "commit": "53feaa3c63",
+      "pr": "#10006 (issue #9895)",
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-11, Untainted: 10 plus 10% of Stamina",
+      "dbc_differs": "Description: ${$705299m1+$STA*0.1} reads ${-$705299m1+$STA*0.1} (and 705299 ToolTip)"
+    }
   },
   {
     "spell": 705298,
@@ -2363,7 +2466,17 @@
     "labels": [
       "705298 behaviour_internal_cooldown_gate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "spell": 705298,
+      "file": "rev_20261029_240_templar_untainted_tooltip.sql",
+      "commit": "53feaa3c63",
+      "pr": "#10006 (issue #9895)",
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-11, Untainted: 10 plus 10% of Stamina",
+      "dbc_differs": "Description: ${$705299m1+$STA*0.1} reads ${-$705299m1+$STA*0.1} (and 705299 ToolTip)"
+    }
   },
   {
     "spell": 705300,
@@ -4199,7 +4312,17 @@
       "807274 effect_value 570205e0 #1",
       "807274 hit_mean"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 805409,
+      "dbc_differs": "ToolTip only (and ranks 807269-807274)"
+    }
   },
   {
     "spell": 805409,
@@ -4208,7 +4331,17 @@
       "807274 effect_value 570205e0 #1",
       "805409 behaviour_hit_ratio spell_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 805409,
+      "dbc_differs": "ToolTip only (and ranks 807269-807274)"
+    }
   },
   {
     "spell": 805409,
@@ -4218,7 +4351,17 @@
       "805409 behaviour_metric_delta tick_950",
       "805409 behaviour_metric_delta tick_1050"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 805409,
+      "dbc_differs": "ToolTip only (and ranks 807269-807274)"
+    }
   },
   {
     "spell": 805409,
@@ -4230,7 +4373,17 @@
       "805409 behaviour_metric_delta requires_argent_knight",
       "807274 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 805409,
+      "dbc_differs": "ToolTip only (and ranks 807269-807274)"
+    }
   },
   {
     "spell": 805409,
@@ -4241,14 +4394,35 @@
       "805409 behaviour_hit_ratio oath_lunge",
       "805409 behaviour_hit_ratio oath_condemn"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 805409,
+      "dbc_differs": "ToolTip only (and ranks 807269-807274)"
+    }
   },
   {
     "spell": 805410,
-    "clause": "Deals Weapon Damage plus ${$m1+0+$SP*.15}.",
+    "clause": "Deals Weapon Damage plus ${$m1+0+$SP*0.3}.",
     "labels": [],
     "kind": "no_claim",
-    "reason": "Owner ruling 2026-11-10 (ADR 0104 D1): the tick spell's Description is not the governing text; Righteous Tempest's spellbook $SP*0.3 is judged on its own clause (805409, 807274 hit_mean); this $SP*.15 is a client-only text kept in the owner's register."
+    "reason": "Owner ruling 2026-11-10 (ADR 0104 D1): the tick spell's Description is not the governing text; Righteous Tempest's spellbook $SP*0.3 is judged on its own clause (805409, 807274 hit_mean); this $SP*.15 is a client-only text kept in the owner's register. The streamed text (rev_20261110_02, ADR 0105, ADR 0192) restates the tick as $SP*0.3, the spellbook's value; the entry stays no_claim, the spellbook clause carries it.",
+    "dbc_clause": "Deals Weapon Damage plus ${$m1+0+$SP*.15}.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261110_02_templar_client_texts.sql",
+      "commit": "615f478756",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner rulings 2026-11-10, ADR 0104 and ADR 0105",
+      "spell": 805410,
+      "dbc_differs": "Description: $SP*.15 reads $SP*0.3 (and ticks 570200-570205)"
+    }
   },
   {
     "spell": 805415,

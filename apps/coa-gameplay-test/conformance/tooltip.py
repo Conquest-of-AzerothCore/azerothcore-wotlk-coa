@@ -8,6 +8,7 @@ from weakref import WeakKeyDictionary
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'coa-dbc'))
 from inspect_dbc import DataSet
+from streamed import streamed_field
 
 SPELL_POWER_SCHOOLS = {'sph': 1, 'spfi': 2, 'spn': 3, 'spfr': 4, 'sps': 5, 'spa': 6}
 EFFECTIVE_STATS = {'STR': 0, 'AGI': 1, 'STA': 2, 'INT': 3, 'SPI': 4}
@@ -154,6 +155,11 @@ class Records:
         self._derived['weapon_skills'] = value
 
     def field(self, table_name: str, identity: int, name: str):
+        value = self.dbc_field(table_name, identity, name)
+        streamed = streamed_field(identity, name) if table_name == 'Spell' else None
+        return value if streamed is None else streamed
+
+    def dbc_field(self, table_name: str, identity: int, name: str):
         table, schema, index, _ = self.dbc.load(table_name)
         if table_name not in self.columns:
             self.columns[table_name] = {column.name: column for column in schema.columns}

@@ -7,7 +7,10 @@
   `ClassSpell(spell_id, name, ranks, max_rank, required_level, passive)`; `class_skill_lines(dbc_dir, spells,
   weapon_subclass)` lists the `SkillLineAbility` lines of their ranks and of the weapon's skill spell.
 - `tooltip.py`: `read_tooltip(dbc, spell_id, caster)` evaluates a spell's `Description[enUS]` with the caster's
-  measured `CasterStats` and returns `Readout(values, unreadable)`.
+  measured `CasterStats` and returns `Readout(values, unreadable)`; its `Records.field` prefers a streamed text.
+- `streamed.py`: `streamed_texts()` replays the `coa_client_spell_description` rows of the world SQL updates and
+  `streamed_field(spell, name)` gives the `Description[enUS]` or non-empty `ToolTip[enUS]` the server streams
+  (ADR 0192).
 - `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
   with; `spell_dbc_sha256(dbc_dir)` hashes a set's `Spell.dbc` and `server_dbc_dir(dbc_dir)` /
   `require_server_sha(sha, source)` raise `DbcSetMismatch` for a set other than the server's (`load_class_file`

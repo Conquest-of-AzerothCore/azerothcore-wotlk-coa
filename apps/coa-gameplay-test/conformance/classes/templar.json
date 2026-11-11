@@ -1160,7 +1160,7 @@
     {
       "aura": 705298,
       "name": "Untainted",
-      "tooltip": "Effectively healing yourself now reduces your Physical damage taken by ${$705299m1+$STA*0.1} for $705299d.\r\n\r\nCan only occur every 15 sec.",
+      "tooltip": "Effectively healing yourself now reduces your Physical damage taken by ${-$705299m1+$STA*0.1} for $705299d.\r\n\r\nCan only occur every 15 sec.",
       "trigger": {"action": "cast", "spell": 803792, "target": "ally"},
       "trigger_text": "Effectively healing yourself",
       "trigger_spell_text": "Temple Guardian",
@@ -1242,7 +1242,7 @@
     {
       "aura": 680397,
       "name": "Disciplined Blows",
-      "tooltip": "Your healing done triggers a holy pulse around healed targets, dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage to nearby enemies.\r\n\r\nCnly occur once every 0.5 sec.",
+      "tooltip": "Your healing done triggers a holy pulse around healed targets, dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage to nearby enemies.\n\nOnly occurs once every 0.5 sec.",
       "trigger": {"action": "cast", "spell": 578276, "target": "self"},
       "trigger_text": "Your healing done",
       "trigger_spell_text": "Benediction",
@@ -2752,7 +2752,7 @@
     },
     {
       "spell": 680397, "name": "Disciplined Blows", "kind": "internal_cooldown_gate",
-      "quote": "Cnly occur once every 0.5 sec.",
+      "quote": "Only occurs once every 0.5 sec.",
       "trigger_spell": 578276, "observe_spell": 680398, "internal_cooldown_ms": 500,
       "target": "self", "caster_health_pct": 50,
       "source": "AscensionTemplarEvents.cpp:74-76 (aura_ascension_templar_event::Check, case 680397): fires only when !State(player).cooldowns.HasTimeUntilEvent(680397). Proc() (line 157-159) unconditionally schedules State(player).cooldowns.ScheduleEvent(680397, 500ms) on every fire, a per-player world-tick timer distinct from the engine's own spell_proc.Cooldown column (the spell_proc row this aura carries, rev_20260909_04_templar_completion.sql line 10-11, has no Cooldown value, confirming the gate is this scripted timer, not Aura::IsProcOnCooldown). Casting 578276 (Benediction) at self three times, spaced 250 ms then 750 ms apart (total 1000 ms, 500 ms past the window), must show no new 680398 cast between the first two and exactly one between the last two."
@@ -2944,14 +2944,14 @@
     },
     {
       "spell": 680397, "name": "Disciplined Blows", "kind": "internal_cooldown",
-      "quote": "Cnly occur once every 0.5 sec.", "window_ms": 500,
+      "quote": "Only occurs once every 0.5 sec.", "window_ms": 500,
       "trigger_spell": 578276,
       "observe_spell": 680398,
       "item": 118,
       "item_spell": 439,
       "allowed_wait_ms": 1600,
       "caster_health_pct": 50,
-      "observe_source": "quote is sic: verbatim DBC/tooltip typo ('Cnly' for 'Can only'), also present in this entry's own 'tooltip' field (quote must be a substring of tooltip, enforced by behaviour_entry); claims-merged.json keys this clause under the corrected spelling 'Can only occur once every 0.5 sec.'. AscensionTemplarEvents.cpp aura_ascension_templar_event::Check, case 680397: returns heal && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) && !State(player).cooldowns.HasTimeUntilEvent(id); its own Proc, case 680397, unconditionally runs State(player).cooldowns.ScheduleEvent(id, 500ms) before casting 680398, the literal 0.5 sec window the tooltip names (confirmed by source read, not inferred from the tooltip). 578276 (Benediction) itself has StartRecoveryCategory 133 and StartRecoveryTime 1250 (the standard shared global cooldown, confirmed via Spell.dbc), so two of its own casts can never land under 500 ms apart through the harness's real CMSG_CAST_SPELL path (confirmed empirically: the existing 680397 trigger_count scenario already spaces repeated 578276 casts 1750 ms apart for exactly this reason). Item 118 (Minor Healing Potion, data/sql/base/db_world/item_template.sql spellid_1 column) casts spell 439, whose own StartRecoveryCategory is 0; GlobalCooldownMgr::HasGlobalCooldown (CharmInfo.cpp:397-401) keys its lookup by StartRecoveryCategory, so drinking it right after casting 578276 is never blocked by 578276's own active global cooldown (confirmed by source read of both call sites). The scenario casts 578276 once (heal #1, triggers the pulse, starts the 500 ms window), immediately drinks item 118 (heal #2, no global cooldown, landing well inside the 500 ms window: the pair is exactly the tooltip's own 'two heals within 0.5 sec of each other'), and checks 680398 spell_cast_count is unchanged; after waiting past both the window and 578276's own global cooldown, it casts 578276 again (heal #3) and checks the count then increases by exactly one."
+      "observe_source": "quote from the streamed client text (rev_20261024_46_templar_disciplined_blows_tooltip.sql, ADR 0192), which corrects the DBC's 'Cnly occur once every 0.5 sec.'. AscensionTemplarEvents.cpp aura_ascension_templar_event::Check, case 680397: returns heal && (event.GetTypeMask() & DONE_HIT_PROC_FLAG_MASK) && !State(player).cooldowns.HasTimeUntilEvent(id); its own Proc, case 680397, unconditionally runs State(player).cooldowns.ScheduleEvent(id, 500ms) before casting 680398, the literal 0.5 sec window the tooltip names (confirmed by source read, not inferred from the tooltip). 578276 (Benediction) itself has StartRecoveryCategory 133 and StartRecoveryTime 1250 (the standard shared global cooldown, confirmed via Spell.dbc), so two of its own casts can never land under 500 ms apart through the harness's real CMSG_CAST_SPELL path (confirmed empirically: the existing 680397 trigger_count scenario already spaces repeated 578276 casts 1750 ms apart for exactly this reason). Item 118 (Minor Healing Potion, data/sql/base/db_world/item_template.sql spellid_1 column) casts spell 439, whose own StartRecoveryCategory is 0; GlobalCooldownMgr::HasGlobalCooldown (CharmInfo.cpp:397-401) keys its lookup by StartRecoveryCategory, so drinking it right after casting 578276 is never blocked by 578276's own active global cooldown (confirmed by source read of both call sites). The scenario casts 578276 once (heal #1, triggers the pulse, starts the 500 ms window), immediately drinks item 118 (heal #2, no global cooldown, landing well inside the 500 ms window: the pair is exactly the tooltip's own 'two heals within 0.5 sec of each other'), and checks 680398 spell_cast_count is unchanged; after waiting past both the window and 578276's own global cooldown, it casts 578276 again (heal #3) and checks the count then increases by exactly one."
     },
     {
       "spell": 500688, "name": "Spiritual Ascension", "kind": "cast_combat",
@@ -4467,7 +4467,7 @@
     },
     {
       "spell": 705298, "name": "Untainted", "kind": "taken_hit", "variant": "reduction", "label_suffix": "reduction",
-      "judge": "absorb", "quote": "reduces your Physical damage taken by ${$705299m1+$STA*0.1}",
+      "judge": "absorb", "quote": "reduces your Physical damage taken by ${-$705299m1+$STA*0.1}",
       "strike_spell": 23583, "trials": 8, "absorb_constant": 10,
       "caster_health_pct": 100, "caster_max_health": 20000,
       "absorb_terms": [{"coefficient": 0.1, "reads": [{"metric": "stat", "stat": 2}]}],

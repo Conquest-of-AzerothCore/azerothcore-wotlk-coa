@@ -30,6 +30,11 @@ A JSON array. Each entry is one clause:
 - `tool_gap` (optional, a `"claim"` entry only): a clause an agent could not prove because the tool lacks a metric,
   step or setup, `{"reason": "<what the tool lacks>", "attempts": [{"agent": "<who tried>", "report": "<where>"}],
   "owner_acceptance": {"ruling": "<file#section>"}}` (`owner_acceptance` optional). See [Tool gaps](#tool-gaps).
+- `text_source` (optional): the `coa_client_spell_description` row the spell's text is read from (ADR 0192):
+  `spell`, `file`, `commit`, `pr`, `basis` (`owner_ruling`, `live_source`, `text_correction` or `align_to_server`),
+  `ruling` and `dbc_differs`. A claim judged against a row whose basis is `align_to_server` and whose text differs
+  from the DBC has no independent expectation and is listed for the mentor. `dbc_clause` keeps the client DBC's words
+  of a clause the streamed text changed.
 - `no_behaviour_route` (optional, a `"claim"` entry only, never beside `tool_gap`): a data conformant clause no
   behaviour check can reach, `{"reason": "<why no route exists>", "attempts": [{"agent": "<who tried>", "report":
   "<where>"}]}`. See [No behaviour route](#no-behaviour-route).

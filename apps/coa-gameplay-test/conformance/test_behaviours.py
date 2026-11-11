@@ -4591,7 +4591,7 @@ SACRED_DEFENSE_STRIKE = 707720
 
 class IcdGateScenarioTests(unittest.TestCase):
     def spec(self):
-        return IcdGateSpec(DISCIPLINED_BLOWS, 'Disciplined Blows', 'Cnly occur once every 0.5 sec.', BENEDICTION,
+        return IcdGateSpec(DISCIPLINED_BLOWS, 'Disciplined Blows', 'Only occurs once every 0.5 sec.', BENEDICTION,
                            DISCIPLINED_BLOWS_TICK, 500, target='self', caster_health_pct=50)
 
     def test_a_non_positive_internal_cooldown_is_not_modelled(self):
@@ -4659,9 +4659,9 @@ class JudgeIcdGateTests(unittest.TestCase):
     def expectation(self):
         model = {'kind': 'internal_cooldown_gate', 'after1_label': 'after1', 'after2_label': 'after2',
                  'after3_label': 'after3', 'internal_cooldown_ms': 500, 'short_gap_ms': 250,
-                 'reopen_gap_ms': 750, 'quote': 'Cnly occur once every 0.5 sec.'}
+                 'reopen_gap_ms': 750, 'quote': 'Only occurs once every 0.5 sec.'}
         return Expectation('label', BEHAVIOUR_INTERNAL_COOLDOWN_GATE, DISCIPLINED_BLOWS, BENEDICTION, None, '1',
-                           'prose: "Cnly occur once every 0.5 sec." (680397)', model)
+                           'prose: "Only occurs once every 0.5 sec." (680397)', model)
 
     def test_blocked_then_reopened_is_ok(self):
         expectation = self.expectation()
@@ -5487,9 +5487,9 @@ class JudgeInternalCooldownTests(unittest.TestCase):
         model = {'kind': 'internal_cooldown', 'first_label': '680397 internal_cooldown first',
                  'blocked_label': '680397 internal_cooldown blocked',
                  'allowed_label': '680397 internal_cooldown allowed', 'window_ms': 500,
-                 'quote': 'Cnly occur once every 0.5 sec.'}
+                 'quote': 'Only occurs once every 0.5 sec.'}
         return Expectation('680397 behaviour_internal_cooldown', BEHAVIOUR_INTERNAL_COOLDOWN, DISCIPLINED_BLOWS,
-                           578276, None, '500', 'prose: "Cnly occur once every 0.5 sec." (680397)', model)
+                           578276, None, '500', 'prose: "Only occurs once every 0.5 sec." (680397)', model)
 
     def test_a_blocked_second_heal_and_a_later_third_heal_firing_is_ok(self):
         expectation = self.expectation()

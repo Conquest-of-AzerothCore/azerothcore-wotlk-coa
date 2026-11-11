@@ -153,11 +153,13 @@ The formula text itself already names 801832 first (`$801832m1`), so `Expression
 recently named spell within the expression and resolves `$<name>` against *that* spell's formulas instead,
 falling back to the described spell when none has been named yet (see the token table above).
 
-Known divergence: the reader reads the client DBC, which is what players' tooltips show unless the client is
-patched. The server can override a description: `rev_20261029_240_templar_untainted_tooltip.sql` gives Untainted
-705298 `${-$705299m1+$STA*0.1}` through `coa_client_spell_description`, while the client DBC reads
-`${$705299m1+$STA*0.1}`; the comparison follows the client DBC
-([ADR 0014](../../../docs/adr/0014-level-scaled-tooltip-values-use-the-skill-rank.md)). A class script can
+Streamed texts: the server streams a spell's `Description`, and its `ToolTip` when non-empty, from
+`coa_client_spell_description` in place of the client DBC's (`AscensionCompat.cpp`, `BuildSpellPatchRows`), so the
+player reads the streamed text. `streamed.py` replays the table's `DELETE` and `INSERT` statements from
+`data/sql/updates/db_world` and `pending_db_world` in file order, and `Records.field` returns the streamed
+`Description[enUS]` (an empty one blanks the text) or non-empty `ToolTip[enUS]` of a spell with a row; `dbc_field`
+keeps the DBC value. Untainted 705298 thus reads `${-$705299m1+$STA*0.1}`, the DBC `${$705299m1+$STA*0.1}`
+([ADR 0192](../../../../docs/adr/0192-the-tooltip-reader-prefers-the-streamed-client-text.md)). A class script can
 similarly correct a live `SpellInfo` effect without changing `Spell.dbc` at all: Upheave! 520442 effect 0 is
 `EffectMiscValue[0]` 7 in the client DBC, but `AscensionTemplarContracts.cpp:130` rewrites it to 15 at load time;
 the class file's `effect_overrides` entry (see "Effect overrides" below) makes the reader classify the effective

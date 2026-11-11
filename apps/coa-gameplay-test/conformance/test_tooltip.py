@@ -7,6 +7,7 @@ import unittest
 from tooltip import (MAX_EXPANSION_DEPTH, PER_TICK, CasterStats, DataSet, Displayed, ForcedPoints, Records, Tooltip,
                      client_spell_level, period_reading, read_tooltip, weapon_skill_spells)
 import schemas
+from streamed import streamed_field, streamed_texts
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 
@@ -256,8 +257,8 @@ class ClientDbcTooltipTest(unittest.TestCase):
         staffguard = displayed(self.read(STAFFGUARD, SKILLED_TEMPLAR), f'${{${STAFFGUARD_HEALTH}m1+$STA*.3}}')
         self.assertEqual(staffguard.value, STAFFGUARD_HEALTH_BASE_POINTS + 1 + 0.3 * stamina)
         self.assertEqual(staffguard.spell_id, STAFFGUARD_HEALTH)
-        untainted = displayed(self.read(UNTAINTED, SKILLED_TEMPLAR), f'${{${UNTAINTED_EFFECT}m1+$STA*0.1}}')
-        self.assertEqual(untainted.value, UNTAINTED_EFFECT_BASE_POINTS + 1 + 0.1 * stamina)
+        untainted = displayed(self.read(UNTAINTED, SKILLED_TEMPLAR), f'${{-${UNTAINTED_EFFECT}m1+$STA*0.1}}')
+        self.assertEqual(untainted.value, -(UNTAINTED_EFFECT_BASE_POINTS + 1) + 0.1 * stamina)
 
     def test_no_ability_row_means_rank_zero(self):
         readout = self.read(CHAKRA_OF_LIGHT, SKILLED_TEMPLAR)
@@ -327,7 +328,10 @@ class ClientDbcTooltipTest(unittest.TestCase):
         self.assertEqual(readout.unreadable, [])
 
     def test_until_cancelled_duration_is_unreadable(self):
-        readout = self.read(SCOURGEBANE_STRIKE)
+        records = Records(self.dbc)
+        description = records.dbc_field('Spell', SCOURGEBANE_STRIKE, 'Description[enUS]')
+        self.assertIn('over $d', description)
+        readout = Tooltip(records, SCOURGEBANE_STRIKE, LEVEL_60_TEMPLAR).read(description)
         self.assertEqual(readout.unreadable, ['$d'])
         self.assertEqual(displayed(readout, '$i'), Displayed('$i', 0, None, 'count'))
 
@@ -583,6 +587,47 @@ class FixtureTooltipTest(unittest.TestCase):
         readout = read_tooltip(self.dbc, 60, FIXTURE_CASTER)
         self.assertEqual(readout.values, [Displayed('${$61m1*$<scalingbp>}', 6.0, None, 'flat', 61)])
         self.assertEqual(readout.unreadable, [])
+
+
+class StreamedTextTests(unittest.TestCase):
+    def updates(self, files: dict[str, str]) -> Path:
+        root = Path(tempfile.mkdtemp())
+        for name, text in files.items():
+            path = root / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding='utf-8')
+        return root
+
+    def test_rows_replay_their_deletes_and_inserts_in_file_order(self):
+        root = self.updates({
+            'db_world/a.sql': "INSERT INTO `coa_client_spell_description` (`ID`, `Description`, `ToolTip`) VALUES "
+                              "(1, 'old', 'tip'), (2, CONCAT('Deals ', 'it''s\\r\\nfine'), NULL);",
+            'pending_db_world/b.sql': "-- note\nDELETE FROM `coa_client_spell_description` WHERE `ID` IN (1, 3);\n"
+                                      "INSERT INTO `coa_client_spell_description` (`ID`,`Description`) VALUES "
+                                      "(3,'new; kept');",
+            'pending_db_world/c.sql': "DELETE FROM `coa_client_spell_description` WHERE `ID` = 9;"})
+        texts = streamed_texts(root)
+        self.assertEqual(sorted(texts), [2, 3])
+        self.assertEqual((texts[2].description, texts[2].tooltip, texts[2].file), ("Deals it's\r\nfine", None, 'a.sql'))
+        self.assertEqual((texts[3].description, texts[3].tooltip), ('new; kept', None))
+
+    def test_an_empty_description_blanks_the_text_and_an_empty_tooltip_keeps_the_client_one(self):
+        root = self.updates({'pending_db_world/a.sql': "INSERT INTO `coa_client_spell_description` "
+                                                       "(`ID`, `Description`, `ToolTip`) VALUES (5, '', '');"})
+        self.assertEqual(streamed_field(5, 'Description[enUS]', root), '')
+        self.assertIsNone(streamed_field(5, 'ToolTip[enUS]', root))
+        self.assertIsNone(streamed_field(6, 'Description[enUS]', root))
+        self.assertIsNone(streamed_field(5, 'SpellName[enUS]', root))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+    def test_the_reader_prefers_the_streamed_text_and_keeps_the_client_one(self):
+        records = Records(DataSet(DBC_DIR))
+        self.assertIn('${-$705299m1+$STA*0.1}', records.field('Spell', UNTAINTED, 'Description[enUS]'))
+        self.assertIn('${$705299m1+$STA*0.1}', records.dbc_field('Spell', UNTAINTED, 'Description[enUS]'))
+        self.assertEqual(records.field('Spell', UNTAINTED_EFFECT, 'ToolTip[enUS]'),
+                         'Physical damage taken reduced by ${-$m1+$STA*0.1}.')
+        self.assertEqual(records.field('Spell', UNTAINTED, 'ToolTip[enUS]'),
+                         records.dbc_field('Spell', UNTAINTED, 'ToolTip[enUS]'))
 
 
 if __name__ == '__main__':
