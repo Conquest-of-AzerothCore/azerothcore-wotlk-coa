@@ -3845,6 +3845,9 @@ def proc_reset_scenario(class_file: dict, spec: ProcResetSpec) -> tuple[dict, li
         raise NotModelled(f'{spec.reset_spell} recovers in {facts.recast_ms} ms, within the {interval} ms between '
                           f'its trials')
     reduced = next_cast_cost(records, spec.marker_spell, facts.mana_cost)
+    if reduced is None:
+        raise NotModelled(f'{spec.marker_spell} carries no single SPELLMOD_COST percent modifier, so the cost of the '
+                          f'cast after a proc has no stated value')
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.reset_spell}]
     phases = {}
     for phase, trials in (('without', spec.baseline_trials), ('with', spec.trials)):

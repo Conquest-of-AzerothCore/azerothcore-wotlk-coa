@@ -6533,6 +6533,10 @@ class ProcResetScenarioTests(unittest.TestCase):
         verdict = self.judged(self.readings(baseline, self.conformant({3, 10, 40, 70})))
         self.assertEqual(verdict.status, 'alert')
 
+    def test_a_marker_without_a_cost_modifier_is_not_modelled(self):
+        with self.assertRaises(NotModelled):
+            behaviour_scenario(CLASS_FILE, {**self.entry, 'marker_spell': 561167})
+
     def test_too_few_procs_are_not_judged(self):
         verdict = self.judged(self.readings(self.baseline(), self.conformant({3, 10})))
         self.assertEqual(verdict.status, 'insufficient_trials')

@@ -697,7 +697,8 @@ and a quiet one the cooldown still running, and the cast right after a fired tri
 (`marker_spell`'s one `SPELLMOD_COST` percent modifier applied to the cost) and every other cast the full cost; a
 fired trial without the passive is a fault too, so the 20 baseline casts are the control arm. Any fault is an
 `alert`; fewer than `min_events` (3) fired, quiet or discounted trials is `insufficient_trials`. The reset spell's
-cooldown must outlast the interval between trials, or the scenario is `NotModelled`. The cooldown read depends on
+cooldown must outlast the interval between trials, or the scenario is `NotModelled`. So is a `marker_spell`
+without exactly one `SPELLMOD_COST` percent modifier: the cost half of the claim would go unjudged. The cooldown read depends on
 the engine sending the cooldown before the hits (`Spell::_cast`, Spell.cpp:4029 and :4134), so a proc on the cast's
 own hit resets the cooldown that cast started.
 
