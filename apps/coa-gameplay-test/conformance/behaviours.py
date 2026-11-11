@@ -4830,7 +4830,7 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
     if waited + TIMEOUT_MARGIN_MS > MAX_SCENARIO_MS:
         raise NotModelled(f'{spec.spell} taken_hit waits {waited} ms, beyond one scenario\'s {MAX_SCENARIO_MS} ms')
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
-               'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1}
+               'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True}
     targets = {target for arm in spec.arms for _, target in (*arm.casts, *arm.after_casts)}
     creatures = [striker] + ([creature_fixture(class_file)] if TARGET in targets else [])
     health = (f', the caster held at {spec.caster_health_pct}% of {spec.caster_max_health or FIXTURE_MAX_HEALTH} '
@@ -4839,7 +4839,8 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour taken hit'
                 + (f' {spec.label_suffix}' if spec.label_suffix else ''),
-        'contract': f'A striker (creature entry {spec.striker_entry}, level {class_file["level"]}) casts '
+        'contract': f'A passive, stationary striker (creature entry {spec.striker_entry}, level '
+                    f'{class_file["level"]}) casts '
                     f'{spec.strike_spell} at the caster {spec.strikes} time(s) per trial, {spec.trials} trials per '
                     f'arm {[arm.name for arm in spec.arms]}{health}; each arm sets its auras and makes its casts '
                     f'before every strike and its after-casts after it; the damage and the absorbed amount of '

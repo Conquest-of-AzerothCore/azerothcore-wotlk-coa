@@ -1015,8 +1015,9 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 
 ### Taken-hit scenarios (`behaviour_taken_hit`, `kind: "taken_hit"`)
 
-A clause about damage the caster takes is read from a hit actually applied (ADR 0153). A striker (creature
-`striker_entry`, default 36, at the class level) casts `strike_spell` at the caster `strikes` times per trial
+A clause about damage the caster takes is read from a hit actually applied (ADR 0153). A passive, stationary
+striker (creature `striker_entry`, default 36, at the class level; with the defensive reaction, one run read three
+Staffguard trials 18 to 20 below the shield, so nothing but the strikes may reach the caster) casts `strike_spell` at the caster `strikes` times per trial
 (an arm may set its own `strikes`), `trials` trials per arm. `arms` lists named arms, the first the control; each
 sets its `auras` on the caster, makes its `casts` (`[spell, target]`) before the strikes and its `after_casts`
 after them, every trial. `caster_health_pct` with `caster_max_health` sets the caster's health, and maximum, at
