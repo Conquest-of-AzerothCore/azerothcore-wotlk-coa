@@ -7,7 +7,7 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
                   magic_schools, records_of, scenario_shell, target_steps, timed)
 from mitigation import PHYSICAL_SCHOOL_MASK
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
-from profile import CASTER, SETTLE_MS, measurement, player_fixture
+from profile import CASTER, INVTYPE_WEAPON, ONE_HAND_SLOT_TYPES, SETTLE_MS, armed, measurement, player_fixture
 from values import (ALLY, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts,
                     armed_for, closes_distance, facts_of, fixture_health_step)
 
@@ -38,6 +38,12 @@ TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
 OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
 MELEE_COUNTS = frozenset({'melee_attack_count', 'melee_damage_count'})
+EQUIPMENT_SLOT_OFF_HAND = 16
+WEAPON_ITEM_CLASS = 2
+INVTYPE_WEAPON_MAIN_HAND = 21
+ONE_HAND_MAIN = {'EquippedItemClass': WEAPON_ITEM_CLASS, 'EquippedItemSubClassMask': 0,
+                 'EquippedItemInventoryTypeMask': 1 << INVTYPE_WEAPON | ONE_HAND_SLOT_TYPES}
+DUAL_WIELD_FIELDS = frozenset({'spell', 'off_hand_item', 'source'})
 PERIODIC_TRIAL_METRICS = frozenset({'spell_cast_count'})
 TAKEN_HIT_TRIAL_METRICS = frozenset({'spell_damage_count'})
 TRIAL_METRICS = {CAST: frozenset({'spell_cast_count', 'spell_damage_count'}), ATTACK: MELEE_COUNTS,
@@ -251,6 +257,13 @@ def checked_entry(entry: dict) -> dict:
             raise ValueError(f'Trigger {aura} sets trial_spell without trial_metric spell_damage_count')
         if not isinstance(entry['trial_spell'], int):
             raise ValueError(f'Trigger {aura} has a non-integer trial_spell')
+    dual_wield = entry.get('dual_wield')
+    if dual_wield is not None:
+        if trigger['action'] != ATTACK:
+            raise ValueError(f'Trigger {aura} sets dual_wield without an attack action')
+        if set(dual_wield) != DUAL_WIELD_FIELDS or not all(
+                isinstance(dual_wield[field], int) for field in ('spell', 'off_hand_item')):
+            raise ValueError(f'Trigger {aura} dual_wield is {{"spell": int, "off_hand_item": int, "source": text}}')
     factor = entry.get('trial_attempts_factor', 1)
     if factor < 1:
         raise ValueError(f'Trigger {aura} has a trial attempts factor below 1')
@@ -374,10 +387,15 @@ def trigger_rule(entry: dict) -> str:
     if trigger['action'] == PERIODIC:
         trials = f'periodic ticks every {trigger["amplitude_ms"]} ms'
     else:
-        trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else ' main hand')
+        hand = ' off hand' if entry.get('trial_metric_fields', {}).get('hand', MAIN_HAND) != MAIN_HAND else ' main hand'
+        trials = entry['trial_metric'] + (f' of {trial_spell(entry)}' if trial_spell(entry) else hand)
     fixtures = ''.join(f'; before each attempt aura {aura["spell"]} set to {aura["stacks"]} stacks ({aura["source"]})'
                        for aura in entry.get('attempt_auras', []))
     fixtures += ''.join(f'; {entry["aura"]} also learns {spell}' for spell in entry.get('co_learn', []))
+    if entry.get('dual_wield'):
+        dual_wield = entry['dual_wield']
+        fixtures += (f'; before the baseline the caster learns {dual_wield["spell"]} and equips off-hand item '
+                     f'{dual_wield["off_hand_item"]} ({dual_wield["source"]})')
     if entry.get('caster_health_pct') is not None:
         fixtures += f'; before each attempt the caster health set to {entry["caster_health_pct"]}% of max'
     if entry.get('ally_health_pct') is not None:
@@ -399,9 +417,28 @@ def trigger_rule(entry: dict) -> str:
             f'("{entry["per_trigger_text"]}"){fixtures}{scaled}')
 
 
+def dual_wielding(class_file: dict) -> dict:
+    one_handed = armed(class_file, ONE_HAND_MAIN)
+    if one_handed.get('weapon', {}).get('inventory_type') not in (INVTYPE_WEAPON, INVTYPE_WEAPON_MAIN_HAND):
+        raise Unmodelled('dual wielding needs a one-handed main-hand weapon in the class file')
+    return one_handed
+
+
+def dual_wield_steps(entry: dict) -> list[dict]:
+    dual_wield = entry.get('dual_wield')
+    if dual_wield is None:
+        return []
+    item = dual_wield['off_hand_item']
+    return [{'action': 'learn', 'actor': CASTER, 'spell': dual_wield['spell']},
+            {'action': 'add_item', 'actor': CASTER, 'item': item},
+            {'action': 'equip', 'actor': CASTER, 'item': item, 'slot': EQUIPMENT_SLOT_OFF_HAND}]
+
+
 def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
     if entry['trigger']['action'] == CAST:
         class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    if entry.get('dual_wield'):
+        class_file = dual_wielding(class_file)
     plan = trigger_plan(class_file, entry)
     if not 0 <= part < len(plan.part_attempts):
         raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
@@ -410,6 +447,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     attempts = plan.part_attempts[part]
     baseline = BASELINE_ATTEMPTS if part == 0 else 0
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']}] if trigger['action'] == CAST else []
+    steps += dual_wield_steps(entry)
     if trigger.get('target') == ALLY:
         steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
     if baseline:
@@ -448,6 +486,8 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
              'internal_cooldown_ms': entry.get('internal_cooldown_ms', 0),
              'trial_attempts_factor': entry.get('trial_attempts_factor', 1),
              'periodic_initial_tick': entry.get('periodic_initial_tick', False), 'measurements': labels}
+    if entry.get('dual_wield'):
+        model['dual_wield'] = dict(entry['dual_wield'])
     label = trigger_label(aura, trigger.get('spell', trigger['action'])) if shares_trigger_aura(class_file, entry) \
         else trigger_label(aura)
     expectation = Expectation(label, TRIGGER_CHECK, aura, aura, None, entry['trigger_text'],

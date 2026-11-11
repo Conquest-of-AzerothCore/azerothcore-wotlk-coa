@@ -66,7 +66,7 @@ class ManifestWriter:
             raise ValueError(f'Duplicate scenario key {key}')
         file, sha = None, None
         if scenario is not None:
-            text = json.dumps(run.validate(scenario), indent=2) + '\n'
+            text = json.dumps(run.validate(scenario, run.SIMULATED_CLOCK), indent=2) + '\n'
             file = f'{SCENARIO_DIR}/{key}.json'
             (self.out / file).write_text(text, encoding='utf-8')
             sha = hashlib.sha256(text.encode('utf-8')).hexdigest()

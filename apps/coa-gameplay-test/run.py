@@ -459,6 +459,13 @@ def validate_event_time_step(step, where, actor_ids, player_ids):
 
 MAX_PLAYERS = {1: 8, 2: 25}
 MAX_TIMEOUT_MS = {1: 600000, 2: 1200000}
+MAX_SIMULATED_TIMEOUT_MS = {1: 3600000, 2: 3600000}
+REAL_CLOCK = 'real'
+SIMULATED_CLOCK = 'simulated'
+
+
+def timeout_cap(schema, clock):
+    return (MAX_SIMULATED_TIMEOUT_MS if clock == SIMULATED_CLOCK else MAX_TIMEOUT_MS)[schema]
 
 
 def placement_tolerance(value, where):
@@ -534,7 +541,7 @@ def validate_raid_role(player):
     require(len(set(rotation)) == len(rotation), 'rotation must not repeat a spell')
 
 
-def validate(scenario):
+def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'vanity_ownership', 'two_side', 'quest_log_size'},
@@ -542,7 +549,7 @@ def validate(scenario):
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
-    number(scenario.get('timeout_ms', 90000), 'timeout_ms', 1, MAX_TIMEOUT_MS[schema], True)
+    number(scenario.get('timeout_ms', 90000), 'timeout_ms', 1, timeout_cap(schema, clock), True)
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')

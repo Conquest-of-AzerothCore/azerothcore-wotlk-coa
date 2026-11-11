@@ -5,7 +5,7 @@ from pathlib import Path
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
                         STRIKER_HEALTH, NotModelled, behaviour_entry, cast_applies_aura_spec, cast_applies_aura_steps,
                         duration_refresh_spec, duration_spec, mechanic_duration_spec, prose_rule)
-from hits import MAIN_HAND, UNMODELLED, creature_fixture, records_of, timed
+from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fixture, records_of, timed
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -198,7 +198,8 @@ def expiry_scenario_shell(class_file: dict, name: str, contract: str, steps: lis
 
 
 def finished(scenario: dict) -> dict:
-    return timed(scenario, held_ms(scenario['steps']) + len(scenario['steps']) * CLOCK_STEP_MS)
+    return timed(scenario, held_ms(scenario['steps']) + len(scenario['steps']) * CLOCK_STEP_MS,
+                 MAX_ACCELERATED_SCENARIO_MS)
 
 
 def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

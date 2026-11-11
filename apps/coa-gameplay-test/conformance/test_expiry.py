@@ -10,6 +10,7 @@ from compare import Run, Verdict, evaluate, judge_behaviour
 from coverage import BEHAVIOUR, EVIDENCE
 from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, behaviour_expiry, expiry_arm, margins_of,
                     pair_steps, shift_of, trigger_expiry)
+from hits import MAX_ACCELERATED_SCENARIO_MS
 from profile import DBC_DIR, load_class_file
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -22,6 +23,7 @@ FINESSE_RANK_2 = 707851
 COURAGE_RANK_1 = 707754
 SACRED_OATH = 712346
 HOLY_COMBATANT = 500011
+RIGHTEOUS_CUSTODIAN = 572808
 EXPIRY_ENTRIES = (TESTAMENT_OF_STRENGTH, BLESSING_OF_AGGRAMAR, 705271, FINESSE_RANK_2, COURAGE_RANK_1, 712466,
                   SACRED_OATH)
 
@@ -109,6 +111,18 @@ class TemplarExpiryScenarioTest(unittest.TestCase):
                 run.validate(scenario)
                 self.assertEqual(expectation.check, BEHAVIOUR_EXPIRY)
                 self.assertEqual(EVIDENCE[expectation.check], BEHAVIOUR)
+
+    def test_a_half_hour_end_fits_only_an_accelerated_scenario(self):
+        self.assertEqual(MAX_ACCELERATED_SCENARIO_MS, run.MAX_SIMULATED_TIMEOUT_MS[1])
+        scenario, expectation = built(RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(stated_ends(RIGHTEOUS_CUSTODIAN), {'cast': 1800000.0})
+        self.assertGreater(scenario['timeout_ms'], run.MAX_TIMEOUT_MS[1])
+        self.assertIs(run.validate(scenario, run.SIMULATED_CLOCK), scenario)
+        with self.assertRaisesRegex(ValueError, 'too large'):
+            run.validate(scenario)
+        arm = expectation.model['arms'][0]
+        self.assertEqual((arm['before_margin_ms'], arm['after_margin_ms'], arm['requires']),
+                         (45000, 45000, [['572808 572808 before cast', 0.0]]))
 
     def test_stated_ends_come_from_the_dbc_and_the_tooltip(self):
         self.assertEqual(stated_ends(TESTAMENT_OF_STRENGTH), {'cast': 60000.0})

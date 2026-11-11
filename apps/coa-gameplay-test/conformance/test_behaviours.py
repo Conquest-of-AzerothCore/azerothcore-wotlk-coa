@@ -6047,5 +6047,40 @@ class SitePurchaseScenarioTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+PARRY_DANCE = 804912
+
+
+class AttackMetricDeltaTest(unittest.TestCase):
+    def setUp(self):
+        self.entry = next(entry for entry in CLASS_FILE['behaviours']
+                          if entry['spell'] == PARRY_DANCE and entry['kind'] == 'metric_delta')
+
+    def test_the_stack_cap_is_read_after_the_same_crit_swings_without_and_with_the_passive(self):
+        scenario, [expectation] = metric_delta_scenario(CLASS_FILE, metric_delta_spec(self.entry))
+        steps = run.validate(scenario)['steps']
+        attacks = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+        learned = first_index(steps, action='learn', spell=PARRY_DANCE)
+        before = first_index(steps, label=metric_delta_label(metric_delta_spec(self.entry), BEFORE))
+        after = first_index(steps, label=metric_delta_label(metric_delta_spec(self.entry), AFTER))
+        self.assertEqual(len(attacks), 2)
+        self.assertLess(attacks[0], before)
+        self.assertLess(before, learned)
+        self.assertLess(learned, attacks[1])
+        self.assertLess(attacks[1], after)
+        self.assertEqual({steps[index + 1]['ms'] for index in attacks}, {10 * CLASS_FILE['weapon']['speed_ms']})
+        self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+        self.assertEqual(scenario['timeout_ms'],
+                         sum(step['ms'] for step in steps if step['action'] == 'wait') + 60000)
+        self.assertEqual((expectation.check, expectation.model['contrast'], expectation.model['metric']),
+                         (BEHAVIOUR_METRIC_DELTA, 'learned', 'aura_stacks'))
+        self.assertNotIn(PARRY_DANCE, [step.get('spell') for step in steps if step['action'] == 'cast'])
+
+    def test_an_attack_trigger_refuses_setup_casts_or_another_gate_timing(self):
+        for change in ({'gate_timing': 'start'}, {'setup_casts': [572027]}, {'target': 'caster'},
+                       {'force_crit': 'ranged'}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(CLASS_FILE, metric_delta_spec({**self.entry, **change}))
+
+
 if __name__ == '__main__':
     unittest.main()

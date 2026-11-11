@@ -204,6 +204,15 @@ would already include the effect under test, leaving no ungated baseline; `cast_
 `reset_cooldown`/mana-fixture/`cast`/`wait` steps for that one phase while still applying `setup_actor_aura`
 (so a caster-state precondition like being mounted is still set up), and the "after" phase casts normally.
 
+`attack_swings` (default 0, omitting it reproduces every existing entry's generated scenario byte-for-byte) replaces
+the cast with auto attacks at the dummy, for a passive whose trigger is a swing: each phase attacks for
+`attack_swings` reference swing intervals and stops before its reading, the gate is learned between the phases, and
+`trigger_spell` names the observed spell without being cast. It requires `target: "dummy"` and the default
+`gate_timing`, and refuses `setup_casts`, `setup_actor_aura` and `trigger_only_after`. `force_crit` (`melee` or
+`spell`) sets the forced crit rating on the caster, as the trigger entries do. The scenario's `timeout_ms` is its
+summed waits plus the 60 s margin. Parry Dance 804912 uses it to read the `aura_stacks` of 560651 after ten
+forced-crit swings: 0 without the passive, the cap of 5 with it.
+
 ### Health-threshold ratio scenarios (`behaviour_ratio`, `kind: "health_ratio"`)
 
 Some passives state a ratio that only applies while the caster's own health sits above or below a threshold
@@ -874,6 +883,11 @@ after it, `k` counting the steps between the act and the readings (a wait counts
 too short for both conditions at 25 ms per step is `unmodelled` (about 4.5 s with no step between act and readings).
 A clause whose ledger entry lists the `behaviour_expiry` label is behaviour-proven by it; an `unmeasured` or `alert`
 pair leaves the clause unproven.
+
+An expiry scenario may wait up to one hour of game time (`hits.MAX_ACCELERATED_SCENARIO_MS`, ADR 0139), and
+`generate` validates every scenario for the accelerated clock. An end past the real-pace cap, such as Righteous
+Custodian's 30 minutes, therefore runs only through the default accelerated gameplay stage; its pair (1755 s and
+1845 s after the cast) took about 9 s of real time.
 
 ### Templar entries
 

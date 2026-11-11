@@ -363,6 +363,12 @@ the `batch.py` defaults (`--step-ms`, `--active-wait-cap-ms`, `--poll-cap-ms`), 
 change. `wait`, `within_ms` and step `elapsed_ms` use game time on both clocks; on the real clock it follows the
 wall clock at world-tick resolution. `timeout_ms` covers the real setup time until every actor is ready plus the
 game time after that, and the server fails a case that runs three times `timeout_ms` of real time from admission.
+An accelerated case may set `timeout_ms` up to one hour of game time under either schema; at real pace (the real
+clock, single mode and a `pace: real` diagnostic) the cap stays 10 minutes under schema 1 and 20 minutes under
+schema 2 ([ADR 0139](../adr/0139-accelerated-scenarios-may-run-an-hour-of-game-time.md)). Catalog definitions keep
+the real-pace cap so that they run on both clocks; only a `--scenario` file outside the catalog can use the longer
+one, and `verify_all.py --gameplay-clock real` rejects such a file before any stage. The hang rule below scales
+with the case's own `timeout_ms`, so only a case that asks for more time waits longer before it counts as hung.
 The runner treats a case as hung `3 * timeout_ms / 1000 + 60` seconds after a lane could first have admitted it, not
 after it wrote the file ahead: the count starts once the case is among the first `lanes` unfinished case files and
 no exclusive case keeps it waiting (an exclusive case counts only once it is the first).

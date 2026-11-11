@@ -45,6 +45,7 @@ MAGIC_SCHOOLS = range(1, 7)
 NO_MITIGATION = MitigationModel(mean=1.0, variance=0.0)
 DRAIN_MS = 3000
 MAX_SCENARIO_MS = 600000
+MAX_ACCELERATED_SCENARIO_MS = 3600000
 TIMEOUT_MARGIN_MS = 60000
 PART_BUDGET_MS = MAX_SCENARIO_MS - TIMEOUT_MARGIN_MS - SETTLE_MS - DRAIN_MS
 MAIN_HAND = 0
@@ -618,8 +619,8 @@ def model_record(model: HitModel, school_mask: int, weapon: WeaponProfile | None
             'measurements': labels}
 
 
-def timed(scenario: dict, waited_ms: int) -> dict:
-    if waited_ms + TIMEOUT_MARGIN_MS > MAX_SCENARIO_MS:
+def timed(scenario: dict, waited_ms: int, limit_ms: int = MAX_SCENARIO_MS) -> dict:
+    if waited_ms + TIMEOUT_MARGIN_MS > limit_ms:
         raise ValueError(f'{scenario["name"]} waits {waited_ms} ms; split its casts over several scenarios')
     scenario['timeout_ms'] = waited_ms + TIMEOUT_MARGIN_MS
     return scenario

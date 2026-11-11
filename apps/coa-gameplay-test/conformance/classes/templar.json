@@ -1373,14 +1373,17 @@
       "aura": 92108,
       "name": "Zealotry",
       "tooltip": "|cFF66DDFFLevel 10 Passive|r\r\nYour off-hand auto attacks now trigger |cFFFFFFFFZealotry|r.@s:801450:0@",
-      "trigger_text": "",
-      "status": "unmodelled",
-      "reason": "unmodelled: harness cannot produce an off-hand swing for a non-dual-wielding class. DBC: Effect[1]=6 (APPLY_AURA), EffectApplyAuraName[1]=42 (PROC_TRIGGER_SPELL), EffectTriggerSpell[1]=801450, ProcFlags=0, ProcChance=100. rev_20260909_04_templar_completion.sql gives 92108 an explicit spell_proc row and registers spell_script_names 92108 -> aura_ascension_templar_event, bypassing the DBC's zeroed ProcFlags; that script's Check (AscensionTemplarEvents.cpp:55-57) fires only on a damaging off-hand auto-attack hit (PROC_FLAG_DONE_MELEE_AUTO_ATTACK, AttackType OFF_ATTACK), unconditional (no roll), then Proc (AscensionTemplarEvents.cpp:120-122) unconditionally casts 801450 (Zealotry()). The effect is reachable and deterministic in principle, but this package's reference Templar carries only a main-hand weapon (classes/templar.json weapon slot 15, no slot 16 entry): grep of src/server/coa/ for SetCanDualWield/CanDualWield shows every call site scoped to CLASS_SON_OF_ARUGAL only (AscensionCompat.cpp:1104-1109, 9583-9594), with no path granting CanDualWield to Templar (ClassId 19); Player::CanEquipItem rejects an off-hand weapon item without CanDualWield (Player.cpp:13412). So the harness's generic equip/attack actions cannot make this class file's reference character land an off-hand swing at all, and no scenario here can observe the proc. Same category of gap as 92109 (a creature-attacker/off-hand-swing driver would be a shared harness capability, better scoped as its own item, not duplicated per-class here).",
+      "trigger_text": "Your off-hand auto attacks",
+      "trigger": {"action": "attack", "spell": 0},
+      "trial_metric": "melee_damage_count",
+      "trial_metric_fields": {"hand": 1},
+      "dual_wield": {"spell": 674, "off_hand_item": 2492, "source": "Dual Wield 674 (Effect[0] 40 SPELL_EFFECT_DUAL_WIELD, Spell::EffectDualWield) gives the caster an off hand; Cudgel 2492 is a one-hand mace (Item.dbc InventoryType 13, subclass 4). The fixture creates the condition the tooltip names; it does not claim how a Templar acquires an off hand"},
+      "handler": "AscensionTemplarEvents.cpp:55-57 (aura_ascension_templar_event::Check, case 92108): damage && PROC_FLAG_DONE_MELEE_AUTO_ATTACK && AttackType OFF_ATTACK; Proc (AscensionTemplarEvents.cpp:123-125) calls Zealotry(player, target), which casts 801450 once (AscensionTemplar.cpp:217-226; its repeat needs Blade Sermon 572548 or 572554, not learned here). Main-hand swings fail the OFF_ATTACK test, so the trials count damaging off-hand swings only (melee_damage_count hand 1), and the baseline swings before the learn are the control arm",
       "observe_spell": 801450,
       "observe_source": "EffectTriggerSpell[1] of 92108",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
-      "per_trigger_text": ""
+      "per_trigger_text": "now trigger"
     },
     {
       "aura": 301310,
@@ -2696,6 +2699,32 @@
       "cast_spell": 572769,
       "cast_target": "dummy",
       "observe_source": "AscensionTemplarAbilities.cpp:239-243: a Sacred Swing cast (Named 705293) with 705295 known casts Staffguard 706583 on the caster; 706583 DurationIndex 31 (8000 ms, $706583d). Sacred Swing 572769 is cast at the dummy with its CasterAuraSpell 681170 set and its Energy cost filled."
+    },
+    {
+      "spell": 572808,
+      "name": "Righteous Custodian",
+      "kind": "cast_applies_aura",
+      "quote": "sec for",
+      "expected_ms": 1800000,
+      "applied_aura": 572808,
+      "target": "caster",
+      "observe_source": "572808 DurationIndex 30 (1800000 ms, $d), no power cost, cooldown or caster aura; effect 0 APPLY_AURA 227 at TARGET_UNIT_TARGET_RAID (57), and the caster is a raid member of itself. The expiry pair reads the blessing on the caster before and after its stated 30-minute end, timed from the cast; it runs only on the accelerated clock, whose timeout cap admits it (ADR 0139)."
+    },
+    {
+      "spell": 804912,
+      "name": "Parry Dance",
+      "kind": "metric_delta",
+      "quote": "stacking",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 560651,
+      "metric": "aura_stacks",
+      "fields": {"spell": 560651},
+      "target": "dummy",
+      "attack_swings": 10,
+      "force_crit": "melee",
+      "expire_ms": 6000,
+      "observe_source": "AscensionTemplarEvents.cpp:41-43 and 183-185 (aura_ascension_templar_event, case 804912): an outgoing damaging critical auto attack casts 560651 on the caster. 560651 StackAmount 5 ($560651u), DurationIndex 28 (5000 ms), so ten forced-crit swings at the 2500 ms reference swing refresh it and apply it ten times. Without 804912 learned the same swings leave 0 stacks (control arm); with it learned the stack count reads the cap of 5, not 10."
     },
     {
       "spell": 500694,

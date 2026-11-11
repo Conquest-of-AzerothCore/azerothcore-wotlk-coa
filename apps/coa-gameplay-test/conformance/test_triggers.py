@@ -130,6 +130,10 @@ def templar_trigger(aura):
     return next(entry for entry in CLASS_FILE['triggers'] if entry['aura'] == aura)
 
 
+def first_index(steps: list[dict], **match) -> int:
+    return next(index for index, step in enumerate(steps) if all(step.get(k) == v for k, v in match.items()))
+
+
 def templar_gate_trigger(aura):
     return next(entry for entry in CLASS_FILE['triggers']
                if entry['aura'] == aura and entry.get('kind') == GATE_ABSENCE_KIND)
@@ -2046,14 +2050,12 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             trigger_plan(CLASS_FILE, entry)
 
-    def test_keeping_the_oath_and_zealotry_stay_unmodelled(self):
-        for aura in (KEEPING_THE_OATH, ZEALOTRY):
-            with self.subTest(aura=aura):
-                entry = templar_trigger(aura)
-                self.assertEqual(entry['status'], 'unmodelled')
-                self.assertNotIn('trigger', entry)
-                with self.assertRaises(ValueError):
-                    trigger_plan(CLASS_FILE, entry)
+    def test_keeping_the_oath_stays_unmodelled(self):
+        entry = templar_trigger(KEEPING_THE_OATH)
+        self.assertEqual(entry['status'], 'unmodelled')
+        self.assertNotIn('trigger', entry)
+        with self.assertRaises(ValueError):
+            trigger_plan(CLASS_FILE, entry)
 
     def test_keeping_the_oath_is_reachable_through_its_own_spell_proc_row(self):
         entry = templar_trigger(KEEPING_THE_OATH)
@@ -2061,12 +2063,35 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertIn('PROC_HIT_DODGE|PROC_HIT_PARRY', entry['reason'])
         self.assertIn('no action in run.py', entry['reason'])
 
-    def test_zealotry_is_reachable_but_the_harness_cannot_produce_an_off_hand_swing(self):
+    def test_zealotry_dual_wields_a_one_hand_pair_before_the_baseline_and_counts_off_hand_swings(self):
         entry = templar_trigger(ZEALOTRY)
-        self.assertIn('rev_20260909_04_templar_completion.sql', entry['reason'])
-        self.assertIn('OFF_ATTACK', entry['reason'])
-        self.assertIn('CanDualWield', entry['reason'])
-        self.assertIn('no path granting CanDualWield to Templar', entry['reason'])
+        scenario, [expectation] = trigger_scenario(CLASS_FILE, entry, 0)
+        steps = scenario['steps']
+        main = first_index(steps, action='equip', slot=15)
+        learned = first_index(steps, action='learn', spell=entry['dual_wield']['spell'])
+        off_hand = first_index(steps, action='equip', item=entry['dual_wield']['off_hand_item'], slot=16)
+        baseline = first_index(steps, action='attack')
+        passive = first_index(steps, action='learn', spell=ZEALOTRY)
+        self.assertLess(main, learned)
+        self.assertLess(learned, off_hand)
+        self.assertLess(off_hand, baseline)
+        self.assertLess(baseline, passive)
+        self.assertNotEqual(steps[main]['item'], CLASS_FILE['weapon']['item'])
+        trials = [step for step in steps if step.get('metric') == 'melee_damage_count']
+        self.assertEqual({step['hand'] for step in trials}, {1})
+        self.assertIn('trials: melee_damage_count off hand', expectation.rule)
+        self.assertEqual(expectation.model['dual_wield'], entry['dual_wield'])
+        run.validate(scenario)
+        self.assertNotIn('dual_wield', trigger_scenario(CLASS_FILE, templar_trigger(PARRY_DANCE), 0)[1][0].model)
+
+    def test_dual_wield_needs_an_attack_trigger_and_its_three_fields(self):
+        entry = copy.deepcopy(templar_trigger(ZEALOTRY))
+        for broken in ({**entry, 'trigger': {'action': 'cast', 'spell': 573324, 'target': 'dummy'},
+                        'trial_metric': 'spell_cast_count', 'trial_metric_fields': {}},
+                       {**entry, 'dual_wield': {'spell': 674, 'off_hand_item': 2492}},
+                       {**entry, 'dual_wield': {**entry['dual_wield'], 'spell': '674'}}):
+            with self.subTest(broken=broken['dual_wield']), self.assertRaises(ValueError):
+                checked_entry(broken)
 
     def test_periodic_trigger_interval_is_its_own_amplitude(self):
         for aura, amplitude in ((LIGHTS_WARD, 2000), (LIGHTS_CHOSEN, 5000)):

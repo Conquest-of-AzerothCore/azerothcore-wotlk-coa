@@ -370,7 +370,8 @@ Start from [scenarios/frostbolt.json](scenarios/frostbolt.json). Schema version 
 eight creatures and 10,000 sequential steps. Schema version 2 raises the limits for raid encounters to 25 players
 and a 20-minute `timeout_ms` maximum, with the same eight creatures and 10,000 steps. Optional `timeout_ms` bounds
 setup plus execution (default 90s, maximum 10 minutes under schema 1); execution counts in game time, which the
-simulated clock advances past waits. Optional
+simulated clock advances past waits. An accelerated run admits up to one hour under either schema for a scenario file
+outside the catalog ([ADR 0139](../../docs/adr/0139-accelerated-scenarios-may-run-an-hour-of-game-time.md)). Optional
 `contract` records the independently established expected behavior. Optional `hour` (0-23) starts the case in that
 realm-local hour, for mechanics that read the time of day: the simulated clock, which otherwise starts at 10:00,
 jumps ahead to it, and the real clock runs the case in single mode with a fixed `TZ` offset

@@ -19,16 +19,7 @@
     "labels": [
       "92108 trigger_count"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "The harness cannot produce an off-hand auto attack for this class (the Zealotry trigger entry, triggers[48] of classes/templar.json: AscensionTemplarEvents.cpp:55-57 fires only on a damaging off-hand auto-attack hit, PROC_FLAG_DONE_MELEE_AUTO_ATTACK with OFF_ATTACK), so 92108 trigger_count stays unmodelled.",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 92109,
@@ -928,16 +919,7 @@
         ]
       }
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The chance claim is behaviour proven (524620 proc_rate). The damage claim states an absolute amount of the proc spell 524619, which has no hit model: the tool's hit scenarios cover the class's own active spells, and a hit_ratio compares two arms, not an absolute amount. The amount stays read from the token (524620 effect_value 524619e0 #1).",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 524620,
@@ -1483,18 +1465,11 @@
     "spell": 572808,
     "clause": "for $d",
     "labels": [
-      "572808 aura_duration_ms #2"
+      "572808 aura_duration_ms #2",
+      "572808 behaviour_cast_applies_aura",
+      "572808 behaviour_expiry"
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The stated duration is 1800000 ms (30 min). A behaviour reading needs the blessing present shortly before 30 min and absent after it, inside one scenario; a scenario's timeout_ms is at most 10 minutes under schema 1 and 20 minutes under schema 2 (apps/coa-gameplay-test/README.md, scenario limits), so no expiry pair fits. The duration stays read from the aura (572808 aura_duration_ms #2).",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 572808,
@@ -3705,16 +3680,7 @@
     "labels": [
       "804912 effect_value 560651e0 #0"
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The magnitude is a parry chance. A parry_chance reading after the proc is a state read, and coverage counts a state read as behaviour only in a learned contrast (coverage.promised_state); the proc aura 560651 is not learned. A parry-rate reading needs a creature attacking the caster, and the trigger entry triggers[57] notes that the incoming-attack leg has no harness metric or action yet. The value stays read from the token (804912 effect_value 560651e0 #0).",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 804912,
@@ -3729,18 +3695,10 @@
     "spell": 804912,
     "clause": "stacking $560651u times",
     "labels": [
-      "804912 max_stacks 560651 #2"
+      "804912 max_stacks 560651 #2",
+      "804912 behaviour_metric_delta"
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The cap needs six or more procs of 560651 from forced auto-attack crits followed by an aura_stacks reading; no behaviour kind reads a stack count after a trigger sequence (the trigger entries count casts). The cap stays read from the DBC (804912 max_stacks 560651 #2).",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 804912,

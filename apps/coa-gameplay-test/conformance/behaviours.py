@@ -1066,6 +1066,8 @@ class MetricDeltaSpec:
     trigger_only_after: bool = False
     expiry_wait_ms: int | None = None
     after_expiry_expected: float | None = None
+    attack_swings: int = 0
+    force_crit: str | None = None
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -1079,6 +1081,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         raise ValueError(f'{spec.spell} must set expiry_wait_ms and after_expiry_expected together')
     if spec.expiry_wait_ms is not None and spec.gate_timing != 'start':
         raise ValueError(f'{spec.spell} sets expiry_wait_ms but gate_timing is not "start"')
+    if spec.attack_swings and (spec.gate_timing != 'between' or spec.setup_casts or spec.target != TARGET
+                               or spec.setup_actor_aura is not None or spec.trigger_only_after):
+        raise ValueError(f'{spec.spell} attacks the dummy as its trigger, so it learns the gate between the two '
+                         f'attack phases and takes no setup casts, setup aura or after-only trigger')
+    if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
+        raise ValueError(f'{spec.spell} has an unknown force_crit {spec.force_crit!r}')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
@@ -1163,6 +1171,17 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps = steps + [{'action': 'wait', 'label': 'let the triggering aura actually expire',
                               'ms': spec.expiry_wait_ms},
                              measurement(expired_label, spec.measure_actor, spec.metric, **spec.fields)]
+    elif spec.attack_swings:
+        swings = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                  {'action': 'wait', 'label': 'swings', 'ms': spec.attack_swings * swing_interval(class_file)},
+                  {'action': 'stop_attack', 'actor': CASTER}]
+        contract = (f'With/without check: {spec.metric} {spec.fields} after {spec.attack_swings} auto-attack swing '
+                    f'intervals at the dummy, measured before and after {gate_spell} is learned, waiting '
+                    f'{spec.expire_ms} ms between phases for the first phase\'s effect to fully expire.')
+        steps = (base_steps(class_file) + swings
+                 + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step]
+                 + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]
+                 + swings + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     else:
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
@@ -1183,6 +1202,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         'players': [{**player_fixture(class_file), 'allow_regeneration': False}] if spec.disable_regeneration
                    else [player_fixture(class_file)],
         'steps': steps}
+    if spec.force_crit:
+        scenario['players'][0][FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
+    if spec.attack_swings:
+        scenario['timeout_ms'] = sum(step['ms'] for step in steps if step['action'] == 'wait') + TIMEOUT_MARGIN_MS
     if spec.target == TARGET or spec.measure_actor == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
@@ -1210,7 +1233,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('measure_actor', CASTER), entry.get('tolerance'),
                            entry.get('cast_in_before', True),
                            entry.get('gate_timing', 'between'), entry.get('trigger_only_after', False),
-                           entry.get('expiry_wait_ms'), entry.get('after_expiry_expected'))
+                           entry.get('expiry_wait_ms'), entry.get('after_expiry_expected'),
+                           entry.get('attack_swings', 0), entry.get('force_crit'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

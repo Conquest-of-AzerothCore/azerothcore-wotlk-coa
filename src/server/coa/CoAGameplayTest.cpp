@@ -148,8 +148,10 @@ uint32 MaximumPlayers(uint32 schema)
     return schema == 2 ? 25 : 8;
 }
 
-uint32 MaximumTimeoutMs(uint32 schema)
+uint32 MaximumTimeoutMs(uint32 schema, bool accelerated)
 {
+    if (accelerated)
+        return 3600000;
     return schema == 2 ? 1200000 : 600000;
 }
 
@@ -1932,13 +1934,13 @@ public:
         _measured = true;
     }
 
-    void Load(std::string const& scenarioFile)
+    void Load(std::string const& scenarioFile, bool accelerated = false)
     {
         boost::property_tree::read_json(scenarioFile, _scenario);
         _schema = _scenario.get<uint32>("schema");
         Require(_schema == 1 || _schema == 2, "Unsupported scenario schema");
         _timeout = _scenario.get<uint32>("timeout_ms", 90000);
-        Require(_timeout > 0 && _timeout <= MaximumTimeoutMs(_schema), "Invalid scenario timeout");
+        Require(_timeout > 0 && _timeout <= MaximumTimeoutMs(_schema, accelerated), "Invalid scenario timeout");
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
         if (_scenario.get<bool>("ptr_character_copy", false))
@@ -8732,7 +8734,7 @@ private:
         std::string failure;
         try
         {
-            lane.gameplayCase->Load(next.scenarioFile);
+            lane.gameplayCase->Load(next.scenarioFile, _simulated && !next.realPace);
             if (next.hour)
                 RequireRealmLocalHour(*next.hour);
             return;

@@ -89,6 +89,20 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'too large'):
             run.validate(legacy)
 
+    def test_simulated_clock_allows_an_hour_of_game_time_and_the_real_clock_keeps_its_cap(self):
+        for schema, real_cap in ((1, 600000), (2, 1200000)):
+            scenario = self.with_players(schema, 1)
+            scenario['timeout_ms'] = 3600000
+            self.assertIs(run.validate(scenario, 'simulated'), scenario)
+            for clock in ((), ('real',)):
+                with self.assertRaisesRegex(ValueError, 'too large'):
+                    run.validate(scenario, *clock)
+            scenario['timeout_ms'] = real_cap
+            self.assertIs(run.validate(scenario, 'real'), scenario)
+            scenario['timeout_ms'] = 3600001
+            with self.assertRaisesRegex(ValueError, 'too large'):
+                run.validate(scenario, 'simulated')
+
     def test_unknown_schema_rejected(self):
         with self.assertRaisesRegex(ValueError, 'Unsupported scenario schema'):
             run.validate(self.with_players(3, 1))
