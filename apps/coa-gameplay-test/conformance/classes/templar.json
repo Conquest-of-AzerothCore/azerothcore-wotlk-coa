@@ -1849,16 +1849,18 @@
       "name": "Might of Aggramar", "kind": "metric_delta",
       "quote": "increase the tick rate of your Blade of Faith and Condemn by", "expected": 2700,
       "trigger_spell": 804906, "target": "dummy", "setup_casts": [803164], "setup_only_after": true,
+      "gate_spell": 804906,
       "metric": "event_interval_median_ms",
       "fields": {"stream": "spell_damage", "spell": 804906, "target": "dummy", "since_spell": 804906},
       "before_expected": 3000, "wait_ms": 20000, "expire_ms": 22000, "tolerance": 150,
-      "observe_source": "$803164s1 = 10: 803164 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 19 (SPELLMOD_ACTIVATION_TIME), EffectBasePoints[0] -11 (-10%), EffectSpellClassMask[0] 4194304 matching Condemn 804906's SpellFamilyFlags[0]; AuraEffect::CalculatePeriodic applies it to the amplitude (SpellAuraEffects.cpp, SPELLMOD_ACTIVATION_TIME). Condemn ticks every 3000 ms (EffectAmplitude[0]); one stack of 803164, cast on the caster before the second Condemn only, gives 2700 ms between ticks. The median interval since the Condemn cast is read 20000 ms after it, over six or seven intervals, so one late world update does not move it (diagnostic 20261111-180552 read 2400 over two intervals; 20261111-180640 read 2700, min and max 2700); the first Condemn (21000 ms) ends before the second phase. Tolerance 150 ms for the world update step, half the 300 ms the stack moves."
+      "observe_source": "$803164s1 = 10: 803164 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 19 (SPELLMOD_ACTIVATION_TIME), EffectBasePoints[0] -11 (-10%), EffectSpellClassMask[0] 4194304 matching Condemn 804906's SpellFamilyFlags[0]; AuraEffect::CalculatePeriodic applies it to the amplitude (SpellAuraEffects.cpp, SPELLMOD_ACTIVATION_TIME). Condemn ticks every 3000 ms (EffectAmplitude[0]); one stack of 803164, cast on the caster before the second Condemn only, gives 2700 ms between ticks. 803163 itself is not learned (gate_spell is the Condemn rank): its own 25% roll on a Condemn cast left a 60000 ms stack from the first phase in the second, 2400 ms (counted runs 20261111-183543 and -183732, diagnostic 20261111-183937: 2 and 3 casts of 803164). The median interval since the Condemn cast is read 20000 ms after it, over six or seven intervals, so one late world update does not move it (diagnostic 20261111-180552 read 2400 over two intervals; 20261111-180640 read 2700, min and max 2700); the first Condemn (21000 ms) ends before the second phase. Tolerance 150 ms for the world update step, half the 300 ms the stack moves."
     },
     {
       "spell": 803163, "variant": "tick_rate_blade", "label_suffix": "tick_rate_blade",
       "name": "Might of Aggramar", "kind": "metric_delta",
       "quote": "increase the tick rate of your Blade of Faith and Condemn by", "expected": 2700,
       "trigger_spell": 803880, "target": "dummy", "setup_casts": [803164], "setup_only_after": true,
+      "gate_spell": 803880,
       "metric": "event_interval_median_ms",
       "fields": {"stream": "spell_damage", "spell": 803880, "target": "dummy", "since_spell": 803880},
       "before_expected": 3000, "wait_ms": 20000, "expire_ms": 31000, "tolerance": 150,
