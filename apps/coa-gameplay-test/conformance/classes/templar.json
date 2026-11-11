@@ -4687,6 +4687,27 @@
       "setup_casts": [807035, 801832, 801832], "setup_wait_ms": 1100, "setup_actor_aura": 600002,
       "wait_ms": 1000, "expire_ms": 6000,
       "observe_source": "AscensionTemplarAbilities.cpp:266-267 (OnSpellCast): an Argent Blade (Named 804929) or Scarlet Hammer 807035 cast with 806522 known casts 806523 on the caster, whose lifecycle Calculate gives it 2 charges (AscensionTemplarAuras.cpp:116-119); a Scourgebane strike 801832 cast while it is up takes its sequence (:95-97), is forced to crit (:136) and drops one charge (ConsumeSelected, :53-60). ARoy buff 3 600002 (aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -101, aura 52 -201, aura 137 -100% stats, permanent) is set on the caster before every cast, so no strike crits by chance. The before phase casts the same sequence without 806522 (control: 0 crits); the after phase, with it: Scarlet Hammer 807035, then three strikes 801832 at the dummy, of which the first two crit and the third does not."
+    },
+    {
+      "spell": 705300, "name": "Eternal Blessing", "kind": "hit_ratio", "variant": "holy_damage", "label_suffix": "holy_damage",
+      "quote": "Increases your Holy damage and healing done by", "expected": 1.15,
+      "observe_spell": 572741, "learn": [572741],
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [705300, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 15 (705300 EffectBasePoints[0] 14 + 1): Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 2 (Holy). Reckoning 572741 (Holy, the level 60 rank) is cast at the dummy with an attack power fixture of 20000 so the AP part dominates the die; control: no Eternal Blessing; treatment: 705300 set before every cast. The extra Holy hit Eternal Blessing adds to an Oath Breaker is 707111 (AscensionTemplarAbilities.cpp:196-197), a separate spell the ratio does not read. beeg spellpen 823764 in both arms; only non-critical hits."
+    },
+    {
+      "spell": 705300, "name": "Eternal Blessing", "kind": "hit_ratio", "variant": "healing_done", "label_suffix": "healing_done",
+      "quote": "Increases your Holy damage and healing done by", "expected": 1.15,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[705300, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "$s1 = 15: Effect[2] aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 2, EffectBasePoints 14 + 1. The caster heals the ally with Benediction 578276 (rank 8) at spell power 20000; control: no Eternal Blessing; treatment: 705300 set on the caster before every heal. The tooltip says healing done, so the heal the caster gives is read. Only non-critical heals."
+    },
+    {
+      "spell": 705300, "name": "Eternal Blessing", "kind": "cast_applies_aura", "quote": "for $d",
+      "expected_ms": 30000, "applied_aura": 705300, "target": "caster", "cast_spell": 705300, "cast_target": "caster",
+      "source": "705300 DurationIndex 9 (SpellDuration.dbc 30000 ms, $d); its instant cast applies the aura on the caster, read absent before it."
     }
   ],
   "player_observations": [

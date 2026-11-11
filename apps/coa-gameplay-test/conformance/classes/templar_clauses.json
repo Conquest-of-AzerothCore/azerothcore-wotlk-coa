@@ -2354,8 +2354,11 @@
     "spell": 705300,
     "clause": "Increases your Holy damage and healing done by $s1% for $d.",
     "labels": [
-      "conformance-templar-value-705300 (effect_value e0 #0, aura_amount e0 #0)",
-      "conformance-templar-value-705300 (aura_duration_ms #1)"
+      "705300 aura_amount e0 #0",
+      "705300 aura_duration_ms #1",
+      "705300 behaviour_hit_ratio holy_damage",
+      "705300 behaviour_hit_ratio healing_done",
+      "705300 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2371,7 +2374,6 @@
     "spell": 705300,
     "clause": "$?s573452[Dealing damage this way reduces the cooldown of your Librams by $/1000;806106s1 sec.][]",
     "labels": [
-      "conformance-templar-value-705300 (effect_value 806106e0 #3, -4000 ok)",
       "573452 trigger_cooldown_delta"
     ],
     "kind": "claim"
