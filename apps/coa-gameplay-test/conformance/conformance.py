@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import subprocess
 import sys
 from typing import Sequence
 
@@ -457,6 +458,34 @@ def coverage_command(args) -> int:
     return 0
 
 
+def mounted_roots(worktree: Path) -> list[Path]:
+    common = subprocess.run(['git', '-C', str(worktree), 'rev-parse', '--git-common-dir'], capture_output=True,
+                            text=True, check=True).stdout.strip()
+    common_dir = Path(common) if Path(common).is_absolute() else Path(worktree) / common
+    return [Path(worktree), common_dir.resolve().parent]
+
+
+def prove_command(args) -> int:
+    from prove import SUMMARY_FILE, ProveSpec, is_under, prove
+    from prove_ledger import ledger_hooks
+    if not (args.behaviour or args.proc or args.trigger):
+        raise ValueError('prove needs at least one --behaviour, --proc or --trigger entry of the class file')
+    roots = mounted_roots(args.worktree)
+    if not is_under(args.out, roots):
+        raise ValueError(f'--out {args.out} lies outside {[str(root) for root in roots]}, the directories coa-verify '
+                         f'mounts; the scenario files would not be visible to the run')
+
+    def make(out: Path) -> Path:
+        return generate(args.class_id, out, procs=args.proc, triggers=args.trigger, behaviours=args.behaviour)
+
+    out = Path(args.out).resolve()
+    spec = ProveSpec(out, args.worktree, args.runs, args.build, args.timeout_ms)
+    rows, enrich, annotate = ledger_hooks(args.clauses) if args.clauses else (None, None, None)
+    code = prove(spec, make, rows, enrich, annotate)
+    print(f'{out / SUMMARY_FILE}: exit {code}')
+    return code
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='Generate class conformance scenarios and compare their results.')
     commands = parser.add_subparsers(dest='command', required=True)
@@ -488,6 +517,26 @@ def main(argv=None) -> int:
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')
     generating.add_argument('--passes', type=int, default=PASSES, help=f'passes per stack configuration ({PASSES})')
+    proving = commands.add_parser('prove', help='generate exactly the given class-file entries, run them at least '
+                                                'twice through coa-verify, compare each run, report flips and '
+                                                'unjudged verdicts and write a ledger fragment')
+    proving.add_argument('--class', dest='class_id', type=int, required=True)
+    proving.add_argument('--behaviour', type=int, action='append',
+                         help='the spell of a behaviour entry of the class file; repeatable')
+    proving.add_argument('--proc', type=int, action='append',
+                         help='the aura of a proc entry of the class file; repeatable')
+    proving.add_argument('--trigger', type=int, action='append',
+                         help='the aura of a trigger entry of the class file; repeatable')
+    proving.add_argument('--runs', type=int, default=2, help='gameplay runs, at least 2 (2)')
+    proving.add_argument('--out', type=Path, required=True,
+                         help='a new directory under the worktree or its main checkout')
+    proving.add_argument('--worktree', type=Path, required=True, help='the worktree coa-verify runs against')
+    proving.add_argument('--build', action='store_true', help='include the build stage in run 1 only')
+    proving.add_argument('--timeout-ms', dest='timeout_ms', type=int, default=600000,
+                         help='limit of one coa-verify run in milliseconds (600000)')
+    proving.add_argument('--clauses', type=Path,
+                         help='a clause ledger: the fragment lists its claims whose labels all run here, and the '
+                              'summary reports its coverage on each run')
     sheeting = commands.add_parser('sheets', help='write one JSON+text behaviour sheet per spell into --out, '
                                                    'with no class-file entries or verdicts (a blind-reader input)')
     sheeting.add_argument('--class', dest='class_id', type=int, required=True)
@@ -523,7 +572,8 @@ def main(argv=None) -> int:
                                'evidence and the Spell.dbc sha256 of the verdicts')
     args = parser.parse_args(argv)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
-                'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command}
+                'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command,
+                'prove': prove_command}
     return handlers[args.command](args)
 
 

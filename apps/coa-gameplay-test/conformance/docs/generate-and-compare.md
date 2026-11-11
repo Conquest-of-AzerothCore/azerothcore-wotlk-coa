@@ -248,6 +248,51 @@ and reports the rest as `only_a`/`only_b` (one side only) or a same-key disagree
 `.agents/plans/class-conformance-3/scale-out-sheets.md` part 3, scored against Templar's own hand-written entries
 as ground truth.
 
+### Prove runner
+
+```sh
+python3 -B conformance.py prove --class 19 [--behaviour SPELL ...] [--proc AURA ...] [--trigger AURA ...] \
+    --out DIR --worktree W [--runs 2] [--build] [--timeout-ms 600000] [--clauses LEDGER]
+```
+
+`prove` runs the gameplay passes of chosen class-file entries deterministically (ADR 0121). Run it from
+`apps/coa-gameplay-test/conformance`, in the foreground; `--timeout-ms` (default 600000) limits one `coa-verify` run.
+It starts nothing but the `coa-verify` command below.
+
+1. Generates exactly the given entries into `DIR/scenarios` with `DIR/manifest.json`: the behaviour entries of the
+   `--behaviour` spells, the proc entries of the `--proc` auras and the trigger entries of the `--trigger` auras. At
+   least one is required; `DIR` must be new or empty and lie under the worktree or its main checkout, the two
+   directories `coa-verify` mounts.
+2. For each run (at least 2), executes in the foreground `coa-verify --worktree W --ram --stages gameplay --scenario
+   <every scenario file>` (`build,gameplay` on run 1 only with `--build`), with the timeout; never `--jobs`. A timeout
+   stops the process group (SIGTERM, then SIGKILL after 30 s) and the run fails. The run directory comes from the
+   `VERIFY ALL: <status> <report.json>` line of `DIR/run<n>/verify.log`; `INCOMPLETE` is the normal status of
+   exploratory scenario files. A failed build stage, scenario drift, results of several builds, or a run with no
+   result for any scenario fails the proof; so do runs judged on different builds.
+3. Compares each run into `DIR/run<n>/` (`alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`, a copy of
+   `verify-report.json`) and diffs run 1 against each later run into `DIR/flips/` (`impact.md`).
+4. With `--clauses`, writes `DIR/fragment.json`: the ledger claims whose labels all run here (an ordinal-free label
+   resolved to every `#<n>` occurrence), kept when every label is `ok`, `tolerated` or `closed` in every run, each
+   with `evidence` (`behaviour` only when [clause coverage](clause-ledger.md#two-proof-statuses) gives it in every
+   run, else `data`) and the server `Spell.dbc` sha256. Without `--clauses` the fragment is empty.
+5. Writes `DIR/summary.json`: `sizing` (null: no pilot provider exists, see below); per run the `coa-verify`
+   command, status, stage seconds (`gameplay_seconds`), scenarios with and without a result, the worldserver `build`,
+   the `server_commit` and the verdict counts per status; `flips`, `not_judged`, `flip_reports`, the `fragment` row
+   count and the excluded rows, `coverage` per run when `--clauses` is given (proven, behaviour, data, total,
+   not_measured), `failure` and `exit`.
+
+A flip is two judged verdicts of one (label, check, scenario) whose status classes differ: conformant (`ok`,
+`tolerated`, `closed`) against another status, or one non-conformant status against another, or a label present in
+one run only. `ok` against `tolerated` is not a flip. `insufficient_trials` is not judged: it never flips and never
+sets exit 1 by itself; `not_judged` lists each such verdict with its per-run statuses and the largest
+`trials_needed`, the count to rerun with. Exit status: 0 no flip, 1 a flip, 2 scenario drift, 4 a failed run.
+
+`prove.py` holds the runner; `prove_ledger.py` supplies the ledger rows, their evidence and the coverage per run.
+`prove.prove` also takes a `Pilot` (three callables: generate a pilot manifest or none, size labels from the pilot
+verdicts, generate the sized manifest): the pilot runs once into `DIR/pilot/` before the judged runs, is never
+judged, and the judged runs must be on its build. The command passes none: no kind of the current method takes a
+pilot-sized trial count yet.
+
 ### Verdicts
 
 | Status | Given to |

@@ -41,6 +41,10 @@
   returns the `Comparison` with the judged `Build` and the runs refused as `other_build` (`BuildMismatch` when the
   results hold several builds and none is named); `write_outputs` writes `alerts.tsv`, `report.md`, `verdicts.json`
   and `questions.md`.
+- `prove.py`: `prove(spec, generate, rows, enrich, annotate, runner, compare, pilot)` runs the gameplay passes of a
+  generated selection at least twice through `coa-verify`, compares each run, reports flips and unjudged verdicts,
+  and writes `fragment.json` and `summary.json` (see [Prove runner](generate-and-compare.md#prove-runner));
+  `prove_ledger.py` supplies the ledger rows, their per-run evidence and the coverage per run.
 - `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
   spells, kind, question, readings, measured, labels, conditions, observations)` per tooltip and kind, and
   `write_questions(items, out_dir)`
