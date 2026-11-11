@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Karsh keeps stacking Superheated Quicksilver Armor while he fights (#11648, #11512)",
+  "contract": [
+    "Every second Karsh Steelbender 39698 spends in the lava fall, Superheated Quicksilver Armor 5011102 gains a",
+    "stack and lasts 17 s again. It used to drop again on the next update while he was meleeing, so he never got",
+    "past two stacks and his Quicksilver Armor 5011100 came back seconds after he left the lava. Now the stacks keep",
+    "growing while he fights in the lava, and the armor lasts outside it."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 645,
+    "x": 237.3,
+    "y": 784.8,
+    "z": 96.0,
+    "o": 0,
+    "ignore_access": true
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 39698,
+      "as": "karsh",
+      "distance": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "karsh"
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "label": "DISCRIMINATING: after five seconds in the lava fall while meleeing he has at least four stacks",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_stacks",
+      "spell": 5011102,
+      "min": 4
+    },
+    {
+      "label": "CONTROL: his Quicksilver Armor is gone",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_stacks",
+      "spell": 5011100,
+      "equals": 0
+    },
+    {
+      "action": "relocate",
+      "actor": "tank",
+      "dx": 6
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "tank",
+      "dx": 6
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "tank",
+      "dx": 6
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "tank",
+      "dx": 6
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "label": "CONTROL: Karsh followed the tank out of the lava fall",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "position_x",
+      "min": 245
+    },
+    {
+      "label": "Outside the lava he still has the armor",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_stacks",
+      "spell": 5011102,
+      "min": 4
+    },
+    {
+      "label": "and no Quicksilver Armor",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_stacks",
+      "spell": 5011100,
+      "equals": 0
+    },
+    {
+      "label": "The armor still has most of its 17 s",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_duration_ms",
+      "spell": 5011102,
+      "min": 9000
+    },
+    {
+      "action": "wait",
+      "ms": 17000
+    },
+    {
+      "label": "Away from the lava the armor runs out after 17 s",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_stacks",
+      "spell": 5011102,
+      "equals": 0
+    },
+    {
+      "label": "and the Quicksilver Armor comes back",
+      "action": "assert",
+      "actor": "karsh",
+      "metric": "aura_stacks",
+      "spell": 5011100,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

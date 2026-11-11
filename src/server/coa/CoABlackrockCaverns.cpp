@@ -177,6 +177,7 @@ enum BrcData : uint32
     ACTION_OBSIDIUS_FREE = 2,
     ACTION_ZEALOT_EVOLVE = 3,
     ACTION_BEAM_START = 4,
+    ACTION_LAVA_SPOUT = 5,
 
     DISPLAY_MOLTEN_QUICKSILVER = 33011,
     POINT_RAZ_OBSIDIUS_JUMP = 100,
@@ -255,6 +256,9 @@ Damage2 const BerserkerChargeDamage = { 400, 650 };
 Damage2 const FlamebreakDamage = { 350, 560 };
 Damage2 const DarkCommandDamage = { 800, 1280 };
 Damage2 const TwilightCorruptionTick = { 240, 400 };
+Damage2 const BurningMetalPerStack = { 60, 96 };
+Damage2 const LavaSpoutDamage = { 900, 1450 };
+constexpr float LavaGrateRadius = 10.0f;
 constexpr float ShadowSpeedRate = 0.3f;
 constexpr float FireZoneRadius = 4.0f;
 constexpr uint32 FireZoneEveryMs = 2000;
@@ -1270,6 +1274,44 @@ struct boss_coa_brc_karsh : public BossAI
         Talk(SAY_KARSH_DEATH);
     }
 
+    void DoAction(int32 action) override
+    {
+        if (action != ACTION_LAVA_SPOUT || !me->IsInCombat())
+            return;
+        for (Player* player : PlayersNear(me, 100.0f))
+            if (player->GetExactDist2d(LavaFountainPos.GetPositionX(), LavaFountainPos.GetPositionY()) <= LavaGrateRadius)
+                DealDamage(me, player, SPELL_SUPERHEATED_ARMOR,
+                    uint32(Rolled(me, player, float(LavaSpoutDamage.normal60), float(LavaSpoutDamage.mythic),
+                        sSpellMgr->GetSpellInfo(SPELL_SUPERHEATED_ARMOR))),
+                    SPELL_SCHOOL_MASK_FIRE);
+        for (uint8 i = 0; i < 8; ++i)
+        {
+            float const angle = float(i) * float(M_PI) / 4.0f;
+            Position spout = LavaFountainPos;
+            spout.RelocateOffset({ std::cos(angle) * 6.0f, std::sin(angle) * 6.0f, 0.0f });
+            if (Creature* fill = me->SummonCreature(NPC_FIRE_ZONE_FILL, spout, TEMPSUMMON_TIMED_DESPAWN, 2000))
+                if (Aura* aura = fill->AddAura(SPELL_FIRE_ZONE_FILL, fill))
+                {
+                    aura->SetMaxDuration(2000);
+                    aura->SetDuration(2000);
+                }
+        }
+    }
+
+    void DamageDealt(Unit* victim, uint32& damage, DamageEffectType type, SpellSchoolMask ) override
+    {
+        if (type != DIRECT_DAMAGE || !damage || !victim || !victim->IsPlayer())
+            return;
+        Aura const* armor = me->GetAura(SPELL_SUPERHEATED_ARMOR);
+        if (!armor)
+            return;
+        SpellInfo const* info = armor->GetSpellInfo();
+        float const stacks = float(armor->GetStackAmount());
+        DealDamage(me, victim, SPELL_SUPERHEATED_ARMOR,
+            uint32(Rolled(me, victim, BurningMetalPerStack.normal60 * stacks, BurningMetalPerStack.mythic * stacks, info)),
+            SPELL_SCHOOL_MASK_FIRE);
+    }
+
     void UpdateAI(uint32 diff) override
     {
         if (!UpdateVictim())
@@ -1311,9 +1353,13 @@ private:
     {
         if (me->GetExactDist2d(LavaFountainPos.GetPositionX(), LavaFountainPos.GetPositionY()) < 5.0f)
         {
-            bool const first = !me->HasAura(SPELL_SUPERHEATED_ARMOR);
+            Aura* armor = me->GetAura(SPELL_SUPERHEATED_ARMOR);
+            bool const first = !armor;
             me->RemoveAurasDueToSpell(SPELL_QUICKSILVER_ARMOR);
-            me->CastSpell(me, SPELL_SUPERHEATED_ARMOR, true);
+            if (armor)
+                armor->ModStackAmount(1);
+            else
+                me->CastSpell(me, SPELL_SUPERHEATED_ARMOR, true);
             if (first)
             {
                 Talk(SAY_KARSH_SUPERHEATED);
@@ -2351,10 +2397,20 @@ class spell_coa_brc_superheated : public AuraScript
     {
         PreventDefaultAction();
         GetTarget()->RestoreDisplayId();
+        if (GetTargetApplication()->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            if (Creature* karsh = GetTarget()->ToCreature())
+                if (karsh->AI())
+                    karsh->AI()->DoAction(ACTION_LAVA_SPOUT);
+    }
+
+    bool CheckProc(ProcEventInfo& )
+    {
+        return false;
     }
 
     void Register() override
     {
+        DoCheckProc += AuraCheckProcFn(spell_coa_brc_superheated::CheckProc);
         OnEffectApply += AuraEffectApplyFn(
             spell_coa_brc_superheated::HandleApply, EFFECT_2, SPELL_AURA_TRANSFORM, AURA_EFFECT_HANDLE_REAL);
         OnEffectRemove += AuraEffectRemoveFn(
