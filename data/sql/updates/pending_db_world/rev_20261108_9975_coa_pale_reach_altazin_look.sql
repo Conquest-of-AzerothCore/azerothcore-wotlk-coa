@@ -2,7 +2,7 @@
 -- VHJ6iQApHwc 00:11:19, HIbr82QgX6w 01:48:33) he is a blue troll in Zul'Aman plate (skull-cluster shoulders, shin
 -- clasps over bare feet) riding Zelezak, the Drakkari sabre (display 141870), with a pale axe, a narrow dark
 -- serrated cloak, and the Bloodhunter Visage mask the contributor recalls. The wraps, gauntlets, axe and the colours
--- of the clasps and cloak are near picks. The axe is the Zul'Gurub one-hander (60822), picked by the
+-- of the clasps and cloak are near picks. He holds a Zul'Gurub one-handed axe (60822) in each hand, picked by the
 -- contributor from renders of every plain axe against the swing at HIbr82QgX6w 01:48:38.
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 164071;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
@@ -14,7 +14,7 @@ INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, 
 
 DELETE FROM `creature_equip_template` WHERE `CreatureID` = 164071 AND `ID` = 1;
 INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, `VerifiedBuild`) VALUES
-(164071, 1, 60822, 0, 0, 0);
+(164071, 1, 60822, 60822, 0, 0);
 UPDATE `creature` SET `equipment_id` = 1 WHERE `guid` = 9961395 AND `id` = 164071;
 
 DELETE FROM `creature_addon` WHERE `guid` = 9961395;
