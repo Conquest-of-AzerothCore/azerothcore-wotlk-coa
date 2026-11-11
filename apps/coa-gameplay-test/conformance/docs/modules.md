@@ -53,7 +53,12 @@
   `ratio_interval` and `student_t_quantile` give the 99% intervals of the passes.
 - `coverage.py`: `coverage(header, verdicts)` counts the verdicts per status and the class spells, passives and actives
   that a compare output judges (`Coverage`), and `write_coverage` writes `coverage.md` for two outputs (see
-  [Coverage comparison](generate-and-compare.md#coverage-comparison)).
+  [Coverage comparison](generate-and-compare.md#coverage-comparison)); `clause_coverage(clauses, verdicts, build)`
+  returns the `ClauseCoverage` of a clause ledger with the behaviour-proven and data-conformant counts from the
+  closed `EVIDENCE` and `METRIC_EVIDENCE` tables and the `not_measured` labels; `require_build` refuses verdicts of
+  another build than the one judged; `fragment_entries`, `write_fragment` and `read_fragment` write and check ledger
+  fragments that carry the computed evidence and the `Spell.dbc` sha256 (see
+  [Two proof statuses](clause-ledger.md#two-proof-statuses)).
 - `observations.py`: `player_observations(class_file)` reads and validates a class file's `player_observations`
   array (see [Player observations](player-observations.md#player-observations)) and `observations_by_spell` groups them by spell id.
 - `conformance.py`: the command line, `generate`, `compare`, `diff` and `coverage`.

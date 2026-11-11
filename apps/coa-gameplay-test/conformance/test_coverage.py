@@ -1,3 +1,5 @@
+import ast
+from dataclasses import replace
 import json
 from pathlib import Path
 import shutil
@@ -5,14 +7,22 @@ import tempfile
 import unittest
 from unittest import mock
 
-from compare import Verdict, evaluate, write_verdicts
+from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_CAST_APPLIES_AURA,
+                        BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
+                        BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK,
+                        BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
+                        BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_PARTY_STAT_RATIO, CONDITION_CONTRAST, LEARNED_CONTRAST)
+from compare import NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
-from coverage import COVERAGE_FILE, clause_coverage, coverage, write_coverage
+from coverage import (BEHAVIOUR, BY_METRIC, COVERAGE_FILE, DATA, EVENT, EVIDENCE, METRIC_EVIDENCE, READBACK, STATE,
+                      STATE_PROMISES, UNPROVEN, EvidenceError, clause_coverage, clause_coverage_lines, coverage,
+                      fragment_entries, read_fragment, write_coverage, write_fragment)
+from profile import DBC_DIR, DbcSetMismatch, class_file_paths, load_class_file, server_dbc_dir, spell_dbc_sha256
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
-from profile import DbcSetMismatch, load_class_file, server_dbc_dir, spell_dbc_sha256
 from triggers import TRIGGER_CHECK
+from values import GAP_CLOSER_DISTANCE, Expectation
 
 CLASS = {'class_id': 19, 'class_name': 'Templar', 'level': 60}
 CLASS_AURA = 887007
@@ -20,13 +30,12 @@ ARGENT_BLADE = 807268
 SACRED_SWING = 572769
 SERENDIPITY = 300929
 FERVENT_CASTIGATION = 707606
-SERVER_SHA = 'a' * 64
-CLIENT_SHA = 'b' * 64
 
 
 def verdict(label, status, spell, scenario, check, explanation=''):
     measured = None if status in ('unmodelled', 'unreadable') else 1.0
-    return Verdict(label, status, measured, measured, measured, measured, explanation, scenario, spell, spell, check)
+    return Verdict(label, status, measured, measured, measured, measured, explanation, scenario, spell, spell, check,
+                   build=BUILD)
 
 
 def value(spell, status='ok', check='effect_value'):
@@ -179,40 +188,40 @@ class ClauseCoverageTest(unittest.TestCase):
     def test_a_claim_with_every_label_conformant_is_proven(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
                    'labels': [f'{ARGENT_BLADE} effect_value #0']}]
-        proven, total, unproven = clause_coverage(clauses, [value(ARGENT_BLADE)])
-        self.assertEqual((proven, total, unproven), (1, 1, []))
+        result = clause_coverage(clauses, [value(ARGENT_BLADE)], BUILD)
+        self.assertEqual((result.proven, result.total, result.unproven), (1, 1, []))
 
     def test_a_tolerated_verdict_counts_as_proven(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
                    'labels': [f'{ARGENT_BLADE} effect_value #0']}]
-        proven, _, unproven = clause_coverage(clauses, [value(ARGENT_BLADE, 'tolerated')])
-        self.assertEqual((proven, unproven), (1, []))
+        result = clause_coverage(clauses, [value(ARGENT_BLADE, 'tolerated')], BUILD)
+        self.assertEqual((result.proven, result.unproven), (1, []))
 
     def test_an_alerting_label_leaves_the_claim_unproven(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
                    'labels': [f'{ARGENT_BLADE} effect_value #0']}]
-        proven, total, unproven = clause_coverage(clauses, [value(ARGENT_BLADE, 'alert')])
-        self.assertEqual((proven, total), (0, 1))
-        self.assertEqual(unproven[0]['clause'], 'deals extra damage')
+        result = clause_coverage(clauses, [value(ARGENT_BLADE, 'alert')], BUILD)
+        self.assertEqual((result.proven, result.total), (0, 1))
+        self.assertEqual(result.unproven[0]['clause'], 'deals extra damage')
 
     def test_a_claim_with_no_labels_is_unproven(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim', 'labels': []}]
-        proven, total, unproven = clause_coverage(clauses, [value(ARGENT_BLADE)])
-        self.assertEqual((proven, total, len(unproven)), (0, 1, 1))
+        result = clause_coverage(clauses, [value(ARGENT_BLADE)], BUILD)
+        self.assertEqual((result.proven, result.total, len(result.unproven)), (0, 1, 1))
 
     def test_no_claim_entries_are_excluded_from_the_total(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'Level 10 Passive', 'kind': 'no_claim',
                    'reason': 'a level-gate label', 'labels': []}]
-        proven, total, unproven = clause_coverage(clauses, [])
-        self.assertEqual((proven, total, unproven), (0, 0, []))
+        result = clause_coverage(clauses, [], BUILD)
+        self.assertEqual((result.proven, result.total, result.unproven), (0, 0, []))
 
     def test_an_ordinal_free_label_matches_the_real_ordinal_suffixed_verdict(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
                    'labels': [f'{ARGENT_BLADE} effect_value 801832e1']}]
         verdicts = [verdict(f'{ARGENT_BLADE} effect_value 801832e1 #1', 'ok', ARGENT_BLADE,
                            f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
-        proven, total, unproven = clause_coverage(clauses, verdicts)
-        self.assertEqual((proven, total, unproven), (1, 1, []))
+        result = clause_coverage(clauses, verdicts, BUILD)
+        self.assertEqual((result.proven, result.total, result.unproven), (1, 1, []))
 
     def test_an_ordinal_free_label_needs_every_matching_occurrence_conformant(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage twice', 'kind': 'claim',
@@ -221,22 +230,245 @@ class ClauseCoverageTest(unittest.TestCase):
                            f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value'),
                    verdict(f'{ARGENT_BLADE} effect_value 801832e1 #2', 'alert', ARGENT_BLADE,
                            f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
-        proven, total, unproven = clause_coverage(clauses, verdicts)
-        self.assertEqual((proven, total), (0, 1))
+        result = clause_coverage(clauses, verdicts, BUILD)
+        self.assertEqual((result.proven, result.total), (0, 1))
 
     def test_an_ordinal_free_label_with_no_matching_verdict_is_unproven(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
                    'labels': [f'{ARGENT_BLADE} effect_value 801832e1']}]
-        proven, total, unproven = clause_coverage(clauses, [])
-        self.assertEqual((proven, total), (0, 1))
+        result = clause_coverage(clauses, [], BUILD)
+        self.assertEqual((result.proven, result.total), (0, 1))
 
     def test_a_label_already_carrying_an_ordinal_is_not_expanded(self):
         clauses = [{'spell': ARGENT_BLADE, 'clause': 'deals extra damage', 'kind': 'claim',
                    'labels': [f'{ARGENT_BLADE} effect_value 801832e1 #1']}]
         verdicts = [verdict(f'{ARGENT_BLADE} effect_value 801832e1 #10', 'ok', ARGENT_BLADE,
                            f'conformance-templar-value-{ARGENT_BLADE}', 'effect_value')]
-        proven, total, unproven = clause_coverage(clauses, verdicts)
-        self.assertEqual((proven, total), (0, 1))
+        result = clause_coverage(clauses, verdicts, BUILD)
+        self.assertEqual((result.proven, result.total), (0, 1))
+
+
+SERVER_SHA = 'a' * 64
+CLIENT_SHA = 'b' * 64
+BUILD = 'c' * 64
+OTHER_BUILD = 'd' * 64
+CODE_MODULES = ('values.py', 'hits.py', 'passives.py', 'procs.py', 'triggers.py', 'behaviours.py', 'stack.py')
+
+
+def claim(text, *labels, spell=ARGENT_BLADE):
+    return {'spell': spell, 'clause': text, 'kind': 'claim', 'labels': list(labels)}
+
+
+def judged(label, check, metric=None, status='ok', **detail):
+    stamp = {**({'metric': metric} if metric else {}), **detail}
+    return replace(verdict(label, status, ARGENT_BLADE, f'conformance-templar-value-{ARGENT_BLADE}', check),
+                   detail=stamp or None)
+
+
+def evidence_of(clauses, verdicts, build=BUILD):
+    result = clause_coverage(clauses, verdicts, build)
+    return [status for _, status in result.evidence], result
+
+
+class EvidenceStatusTest(unittest.TestCase):
+    def test_a_readback_proves_data_only(self):
+        statuses, result = evidence_of([claim('deals extra damage', f'{ARGENT_BLADE} effect_value #0')],
+                                       [value(ARGENT_BLADE)])
+        self.assertEqual(statuses, [DATA])
+        self.assertEqual((result.proven, result.behaviour, result.data), (1, 0, 1))
+
+    def test_an_observed_hit_proves_behaviour(self):
+        statuses, result = evidence_of([claim('deals damage', f'{ARGENT_BLADE} hit_mean')], [hit(ARGENT_BLADE)])
+        self.assertEqual(statuses, [BEHAVIOUR])
+        self.assertEqual((result.proven, result.behaviour, result.data), (1, 1, 0))
+
+    def test_one_behaviour_label_among_readbacks_makes_the_clause_behaviour(self):
+        clauses = [claim('deals extra damage', f'{ARGENT_BLADE} effect_value #0', f'{ARGENT_BLADE} hit_mean')]
+        self.assertEqual(evidence_of(clauses, [value(ARGENT_BLADE), hit(ARGENT_BLADE)])[0], [BEHAVIOUR])
+
+    def test_an_alerting_behaviour_label_leaves_the_clause_unproven(self):
+        clauses = [claim('deals extra damage', f'{ARGENT_BLADE} effect_value #0', f'{ARGENT_BLADE} hit_mean')]
+        statuses, result = evidence_of(clauses, [value(ARGENT_BLADE), hit(ARGENT_BLADE, 'alert')])
+        self.assertEqual((statuses, result.proven, result.behaviour), ([UNPROVEN], 0, 0))
+
+    def test_a_promised_stat_in_a_learned_contrast_is_behaviour(self):
+        verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor')]
+        self.assertEqual(evidence_of([claim('Increases your Armor by $s1%.', '1 e0 armor')], verdicts)[0],
+                         [BEHAVIOUR])
+
+    def test_a_stat_read_as_a_proxy_stays_data(self):
+        verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor')]
+        self.assertEqual(evidence_of([claim('Reduces Physical damage taken by $s1%.', '1 e0 armor')], verdicts)[0],
+                         [DATA])
+
+    def test_a_stat_read_without_a_learned_contrast_stays_data(self):
+        verdicts = [judged('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 'armor',
+                           contrast=CONDITION_CONTRAST)]
+        clauses = [claim('increases your Armor by 10%', '1 behaviour_metric_delta')]
+        self.assertEqual(evidence_of(clauses, verdicts)[0], [DATA])
+        learned = [replace(verdicts[0], detail={'metric': 'armor', 'contrast': LEARNED_CONTRAST})]
+        self.assertEqual(evidence_of(clauses, learned)[0], [BEHAVIOUR])
+
+    def test_a_modifier_readback_in_a_learned_contrast_stays_data(self):
+        verdicts = [judged('1 e0 spell_modifier 2', PASSIVE_DELTA, 'spell_modifier')]
+        clauses = [claim('Increases the damage of Reckoning by $s1%.', '1 e0 spell_modifier 2')]
+        self.assertEqual(evidence_of(clauses, verdicts)[0], [DATA])
+
+    def test_an_event_metric_of_a_metric_check_is_behaviour(self):
+        verdicts = [judged('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 'owned_creature_count',
+                           contrast=LEARNED_CONTRAST)]
+        self.assertEqual(evidence_of([claim('summons a copy', '1 behaviour_metric_delta')], verdicts)[0],
+                         [BEHAVIOUR])
+
+    def test_an_outcome_check_of_round_ten_is_behaviour(self):
+        clauses = [claim('acts on the target', '1 outcome')]
+        for check in (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_CAST_APPLIES_AURA,
+                      BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
+                      BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK,
+                      BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
+                      GAP_CLOSER_DISTANCE):
+            with self.subTest(check=check):
+                self.assertEqual(evidence_of(clauses, [judged('1 outcome', check)])[0], [BEHAVIOUR])
+
+    def test_a_party_stat_ratio_proves_behaviour_only_for_the_promised_stat(self):
+        clauses = [claim('Increases the attack power of all party and raid members $s1%.', '1 party')]
+        promised = judged('1 party', BEHAVIOUR_PARTY_STAT_RATIO, 'attack_power')
+        probe = judged('1 party', BEHAVIOUR_PARTY_STAT_RATIO, 'spell_damage_done')
+        proxy = judged('1 party', BEHAVIOUR_PARTY_STAT_RATIO, 'armor')
+        self.assertEqual(evidence_of(clauses, [promised])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of(clauses, [probe])[0], [DATA])
+        self.assertEqual(evidence_of(clauses, [proxy])[0], [DATA])
+
+    def test_a_party_stat_ratio_without_its_metric_fails_the_run(self):
+        with self.assertRaises(EvidenceError):
+            evidence_of([claim('Increases attack power.', '1 party')], [judged('1 party', BEHAVIOUR_PARTY_STAT_RATIO)])
+
+    def test_a_water_walk_read_after_the_cast_is_behaviour(self):
+        verdicts = [judged('1 behaviour_aura_presence', BEHAVIOUR_METRIC_DELTA, 'water_walk')]
+        clauses = [claim('and granting the ability to walk on water.', '1 behaviour_aura_presence')]
+        self.assertEqual(evidence_of(clauses, verdicts)[0], [BEHAVIOUR])
+
+    def test_seeded_wrong_class_of_a_round_ten_check_is_caught(self):
+        clauses = [claim('Holds 2 charges.', '1 behaviour_charge_recharge')]
+        verdicts = [judged('1 behaviour_charge_recharge', BEHAVIOUR_CHARGE_RECHARGE)]
+        with mock.patch.dict(EVIDENCE, {BEHAVIOUR_CHARGE_RECHARGE: DATA}):
+            self.assertEqual(evidence_of(clauses, verdicts)[0], [DATA])
+        self.assertEqual(evidence_of(clauses, verdicts)[0], [BEHAVIOUR])
+
+    def test_event_time_reads_of_a_metric_check_are_behaviour(self):
+        label = '1 behaviour_metric_delta'
+        clauses = [claim('Deals Holy damage every 3 sec.', label)]
+        for metric in ('event_first_ms', 'event_interval_min_ms', 'event_interval_max_ms',
+                       'event_interval_median_ms'):
+            with self.subTest(metric=metric):
+                self.assertEqual(METRIC_EVIDENCE[metric], EVENT)
+                read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+                self.assertEqual(evidence_of(clauses, [read])[0], [BEHAVIOUR])
+                with mock.patch.dict(METRIC_EVIDENCE, {metric: READBACK}):
+                    self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
+
+    def test_a_threat_read_counts_only_where_the_clause_promises_threat(self):
+        label = '1 behaviour_metric_delta'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'threat', contrast=LEARNED_CONTRAST)
+        self.assertEqual(METRIC_EVIDENCE['threat'], STATE)
+        self.assertEqual(evidence_of([claim('dealing High Threat Holy damage', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('dealing Holy damage', label)], [read])[0], [DATA])
+
+    def test_a_linked_label_takes_the_evidence_of_what_checks_it(self):
+        linked = verdict('1 e0 passive', 'closed', 1, 'conformance-templar-passive-1', 'unmodelled',
+                         f'checked by "{ARGENT_BLADE} hit_mean" (status ok)')
+        clauses = [claim('deals damage', '1 e0 passive')]
+        self.assertEqual(evidence_of(clauses, [linked, hit(ARGENT_BLADE)])[0], [BEHAVIOUR])
+        readback = replace(linked, explanation=f'checked by "{ARGENT_BLADE} effect_value #0" (status ok)')
+        self.assertEqual(evidence_of(clauses, [readback, value(ARGENT_BLADE)])[0], [DATA])
+
+    def test_a_check_closed_by_rule_is_data(self):
+        closed = verdict(f'{ARGENT_BLADE} hit_mean', 'closed', ARGENT_BLADE, 'conformance-templar-hit-1', 'hit_mean',
+                         'closed: cosmetic')
+        self.assertEqual(evidence_of([claim('deals damage', f'{ARGENT_BLADE} hit_mean')], [closed])[0], [DATA])
+
+    def test_an_unknown_check_fails_the_run(self):
+        with self.assertRaisesRegex(EvidenceError, 'behaviour_not_in_the_table'):
+            clause_coverage([], [judged('1 behaviour_not_in_the_table', 'behaviour_not_in_the_table')], BUILD)
+
+    def test_a_metric_check_without_its_metric_fails(self):
+        with self.assertRaisesRegex(EvidenceError, 'no observed metric'):
+            clause_coverage([claim('x', '1 e0 armor')], [judged('1 e0 armor', PASSIVE_DELTA)], BUILD)
+
+    def test_an_unknown_metric_fails(self):
+        with self.assertRaisesRegex(EvidenceError, 'quest_status'):
+            clause_coverage([claim('x', '1 e0 q')], [judged('1 e0 q', PASSIVE_DELTA, 'quest_status')], BUILD)
+
+    def test_seeded_wrong_evidence_class_is_caught(self):
+        with mock.patch.dict(EVIDENCE, {'effect_value': BEHAVIOUR}):
+            statuses, _ = evidence_of([claim('x', f'{ARGENT_BLADE} effect_value #0')], [value(ARGENT_BLADE)])
+        self.assertNotEqual(statuses, [DATA])
+        self.assertEqual(evidence_of([claim('x', f'{ARGENT_BLADE} effect_value #0')], [value(ARGENT_BLADE)])[0],
+                         [DATA])
+
+
+class EvidenceTablesTest(unittest.TestCase):
+    def defined_checks(self) -> set[str]:
+        found = set()
+        for name in CODE_MODULES:
+            tree = ast.parse((Path(__file__).parent / name).read_text(encoding='utf-8'))
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Assign) and len(node.targets) == 1 and isinstance(node.targets[0], ast.Name):
+                    target = node.targets[0].id
+                    if target.endswith('_CHECK') or (target.startswith('BEHAVIOUR_') and target != 'BEHAVIOUR_CHECKS'):
+                        if isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+                            found.add(node.value.value)
+        return found
+
+    def test_every_check_the_package_defines_has_an_evidence_class(self):
+        from hits import HIT_CHECKS
+        from stack import STACK_CHECKS
+        from values import CHECKS
+        checks = self.defined_checks() | set(HIT_CHECKS) | set(STACK_CHECKS) | set(CHECKS)
+        self.assertGreater(len(checks), 40)
+        self.assertEqual(sorted(checks - EVIDENCE.keys()), [])
+
+    def test_every_metric_of_the_class_checks_has_an_evidence_class(self):
+        for path in class_file_paths():
+            class_file = load_class_file(json.loads(path.read_text(encoding='utf-8'))['class_id'])
+            metrics = {entry.get('metric') or entry.get('observe', {}).get('metric')
+                       for entry in class_file.get('behaviours', [])} - {None}
+            metrics |= {entry['observe_metric'] for entry in class_file.get('triggers', [])
+                        if 'observe_metric' in entry}
+            self.assertEqual(sorted(metrics - METRIC_EVIDENCE.keys()), [], path.name)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+    def test_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):
+        from behaviours import behaviour_scenario
+        for path in class_file_paths():
+            class_file = load_class_file(json.loads(path.read_text(encoding='utf-8'))['class_id'])
+            unstamped = [expectation.label for entry in class_file.get('behaviours', [])
+                         for expectations in (behaviour_scenario(class_file, entry)[1],)
+                         for expectation in expectations
+                         if EVIDENCE[expectation.check] == BY_METRIC
+                         and observed(expectation).get('metric') not in METRIC_EVIDENCE]
+            self.assertEqual(unstamped, [], path.name)
+
+    def test_every_state_metric_names_its_promise(self):
+        states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
+        self.assertEqual(states, set(STATE_PROMISES))
+        self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
+
+
+class StampTest(unittest.TestCase):
+    def test_observed_reads_the_model(self):
+        expectation = Expectation('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 1, 1, None, '1', 'r',
+                                         {'metric': 'aura', 'contrast': LEARNED_CONTRAST})
+        self.assertEqual(observed(expectation), {'metric': 'aura', 'contrast': LEARNED_CONTRAST})
+        trigger = replace(expectation, model={'observe_metric': 'spell_damage_count'})
+        self.assertEqual(observed(trigger), {'metric': 'spell_damage_count'})
+
+    def test_judge_behaviour_stamps_even_an_unmeasured_verdict(self):
+        expectation = Expectation('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 1, 1, None, '1', 'r',
+                                         {'metric': 'aura', 'contrast': LEARNED_CONTRAST})
+        base = Verdict('1 behaviour_metric_delta', 'alert', None, None, None, None, '', 's', 1, 1,
+                       BEHAVIOUR_METRIC_DELTA)
+        self.assertEqual(judge_behaviour(base, None, expectation).detail, {'metric': 'aura', 'contrast': 'learned'})
 
 
 class SpellDbcGuardTest(unittest.TestCase):
@@ -283,12 +515,131 @@ class SpellDbcGuardTest(unittest.TestCase):
             with self.assertRaises(DbcSetMismatch):
                 evaluate(manifest, self.root)
 
-    def test_verdicts_record_the_set_of_their_manifest(self):
+    def test_verdicts_record_the_set_and_the_build_of_their_verdicts(self):
         out = self.root / 'out'
         out.mkdir()
+        stamped = [replace(value(ARGENT_BLADE), server_commit='801527e9aaa4', runs=['r1'])]
         path = write_verdicts({**CLASS, 'spell_dbc_sha256': SERVER_SHA}, out / 'manifest.json', self.root / 'results',
-                              [value(ARGENT_BLADE)], out)
-        self.assertEqual(json.loads(path.read_text(encoding='utf-8'))['spell_dbc_sha256'], SERVER_SHA)
+                              stamped, out)
+        document = json.loads(path.read_text(encoding='utf-8'))
+        self.assertEqual((document['spell_dbc_sha256'], document['build'], document['server_commit']),
+                         (SERVER_SHA, BUILD, '801527e9aaa4'))
+        mixed = stamped + [replace(value(SACRED_SWING), build=OTHER_BUILD)]
+        document = json.loads(write_verdicts(CLASS, out / 'manifest.json', self.root / 'results', mixed,
+                                             out).read_text(encoding='utf-8'))
+        self.assertIsNone(document['build'])
+
+
+class BuildRefusalTest(unittest.TestCase):
+    CLAUSES = [claim('deals extra damage', f'{ARGENT_BLADE} effect_value #0')]
+
+    def test_a_proof_from_another_build_is_refused(self):
+        with self.assertRaisesRegex(EvidenceError, 'another build'):
+            clause_coverage(self.CLAUSES, [value(ARGENT_BLADE)], OTHER_BUILD)
+
+    def test_an_alert_from_another_build_is_refused_too(self):
+        verdicts = [value(ARGENT_BLADE), replace(value(SACRED_SWING, 'alert'), build=OTHER_BUILD)]
+        with self.assertRaisesRegex(EvidenceError, f'1 verdicts come from another build than {BUILD}.*{SACRED_SWING}'):
+            clause_coverage(self.CLAUSES, verdicts, BUILD)
+
+    def test_a_verdict_without_a_build_is_refused(self):
+        with self.assertRaisesRegex(EvidenceError, 'another build'):
+            clause_coverage(self.CLAUSES, [replace(value(ARGENT_BLADE), build=None)], BUILD)
+        with self.assertRaisesRegex(EvidenceError, 'no single build'):
+            clause_coverage(self.CLAUSES, [value(ARGENT_BLADE)], None)
+
+    def test_the_same_build_is_judged(self):
+        result = clause_coverage(self.CLAUSES, [value(ARGENT_BLADE)], BUILD)
+        self.assertEqual((result.proven, result.not_measured), (1, []))
+
+    def test_a_not_measured_read_is_unproven_and_listed(self):
+        result = clause_coverage(self.CLAUSES, [value(ARGENT_BLADE, NOT_MEASURED)], BUILD)
+        self.assertEqual((result.proven, result.not_measured), (0, [f'{ARGENT_BLADE} effect_value #0']))
+        self.assertEqual([status for _, status in result.evidence], [UNPROVEN])
+        self.assertIn(f'  {ARGENT_BLADE} effect_value #0', clause_coverage_lines(result))
+
+    def test_spell_coverage_refuses_a_set_holding_another_build(self):
+        root = Path(tempfile.mkdtemp(prefix='conformance-build-'))
+        self.addCleanup(shutil.rmtree, root)
+        before, after = root / 'before', root / 'after'
+        for directory in (before, after):
+            directory.mkdir()
+            write_verdicts(CLASS, directory / 'manifest.json', root / 'stamp', [value(ARGENT_BLADE)], directory)
+        self.assertTrue(write_coverage(before, after, root / 'out').is_file())
+        header, verdicts = read_verdicts(after)
+        document = json.loads((after / 'verdicts.json').read_text(encoding='utf-8'))
+        document['verdicts'][0]['build'] = OTHER_BUILD
+        (after / 'verdicts.json').write_text(json.dumps(document), encoding='utf-8')
+        with self.assertRaisesRegex(EvidenceError, 'another build'):
+            write_coverage(before, after, root / 'out')
+        self.assertEqual(main(['coverage', '--before', str(before), '--after', str(after)]), DIFF_EXIT)
+
+
+class FragmentTest(unittest.TestCase):
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp(prefix='conformance-fragment-'))
+        self.result = clause_coverage([claim('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                                       claim('extra', f'{ARGENT_BLADE} effect_value #0'), claim('open')],
+                                      [hit(ARGENT_BLADE), value(ARGENT_BLADE)], BUILD)
+
+    def tearDown(self):
+        shutil.rmtree(self.root)
+
+    def test_entries_carry_the_computed_evidence_and_the_set(self):
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            entries = fragment_entries(self.result, {'spell_dbc_sha256': SERVER_SHA, 'results': 'r'})
+            path = write_fragment(self.root / 'fragment.json', entries)
+            self.assertEqual([entry['evidence'] for entry in read_fragment(path)], [BEHAVIOUR, DATA, UNPROVEN])
+        self.assertEqual({entry['spell_dbc_sha256'] for entry in entries}, {SERVER_SHA})
+        with self.assertRaises(FileExistsError):
+            write_fragment(path, entries)
+
+    def test_verdicts_of_another_set_give_no_fragment(self):
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            for sha in (CLIENT_SHA, None):
+                with self.assertRaises(DbcSetMismatch):
+                    fragment_entries(self.result, {'spell_dbc_sha256': sha, 'results': 'r'})
+
+    def test_a_fragment_of_another_set_is_refused(self):
+        path = self.root / 'fragment.json'
+        path.write_text(json.dumps([{**claim('x'), 'evidence': DATA, 'spell_dbc_sha256': CLIENT_SHA}]),
+                        encoding='utf-8')
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            with self.assertRaisesRegex(EvidenceError, CLIENT_SHA):
+                read_fragment(path)
+
+    def test_coverage_command_prints_both_counts_and_writes_the_fragment(self):
+        before = self.root / 'before'
+        after = self.root / 'after'
+        for directory in (before, after):
+            directory.mkdir()
+            write_verdicts({**CLASS, 'spell_dbc_sha256': SERVER_SHA}, directory / 'manifest.json', self.root / 'r',
+                           [hit(ARGENT_BLADE), value(ARGENT_BLADE)], directory)
+        ledger = self.root / 'ledger.json'
+        ledger.write_text(json.dumps([claim('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                                      claim('extra', f'{ARGENT_BLADE} effect_value #0')]), encoding='utf-8')
+        fragment = self.root / 'fragment.json'
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA), \
+                mock.patch('sys.stdout') as stdout:
+            code = main(['coverage', '--before', str(before), '--after', str(after), '--clauses', str(ledger),
+                         '--fragment', str(fragment)])
+        printed = ''.join(call.args[0] for call in stdout.write.call_args_list)
+        self.assertEqual(code, 0)
+        self.assertIn('behaviour proven: 1 of 2 (50.0%)', printed)
+        self.assertIn('data conformant: 1 of 2 (50.0%)', printed)
+        self.assertEqual([entry['evidence'] for entry in json.loads(fragment.read_text(encoding='utf-8'))],
+                         [BEHAVIOUR, DATA])
+
+    def test_coverage_command_refuses_unknown_checks(self):
+        after = self.root / 'after'
+        after.mkdir()
+        write_verdicts(CLASS, after / 'manifest.json', self.root / 'r', [judged('1 gap', 'behaviour_not_in_the_table')],
+                       after)
+        ledger = self.root / 'ledger.json'
+        ledger.write_text('[]', encoding='utf-8')
+        with mock.patch('sys.stderr'):
+            self.assertEqual(main(['coverage', '--before', str(after), '--after', str(after), '--clauses',
+                                   str(ledger)]), DIFF_EXIT)
 
 
 if __name__ == '__main__':

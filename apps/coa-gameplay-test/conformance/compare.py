@@ -100,6 +100,7 @@ CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
+CONTRAST = 'contrast'
 PARRY_CHANCE = 'parry_chance'
 NO_PARRY_BEFORE = ('parry_chance 0 before the learn: the reference character cannot parry (Player::CanParry false) '
                    'and a parry aura enables parry when applied (AuraEffect::HandleAuraModParryPercent), so the delta '
@@ -2872,7 +2873,19 @@ def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) ->
                                f'or materially short right after it, is always an alert')
 
 
+def observed(expectation: Expectation) -> dict:
+    model = expectation.model or {}
+    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST)}
+    return {key: value for key, value in found.items() if value is not None}
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
+    verdict = judged_behaviour(base, run, expectation)
+    stamp = observed(expectation)
+    return replace(verdict, detail={**(verdict.detail or {}), **stamp}) if stamp else verdict
+
+
+def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
     model = expectation.model

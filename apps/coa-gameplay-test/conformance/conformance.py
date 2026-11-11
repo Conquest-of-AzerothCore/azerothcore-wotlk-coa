@@ -11,14 +11,15 @@ from behaviours import behaviour_entries, behaviour_scenario
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, BuildMismatch, ScenarioDrift,
                      evaluate, literal_values, write_levers, write_outputs)
-from coverage import COVERAGE_FILE, clause_coverage, clause_coverage_lines, load_clauses, write_coverage
+from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_coverage_lines, fragment_entries,
+                      load_clauses, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
-from profile import DBC_DIR, load_class_file, server_dbc_dir, spell_dbc_sha256
+from profile import DBC_DIR, DbcSetMismatch, load_class_file, server_dbc_dir, spell_dbc_sha256
 from questions import QUESTIONS_FILE
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
@@ -443,9 +444,16 @@ def coverage_command(args) -> int:
     print(path)
     if args.clauses:
         from compare import read_verdicts
-        _, verdicts = read_verdicts(args.after)
-        proven, total, unproven = clause_coverage(load_clauses(args.clauses), verdicts)
-        print('\n'.join(clause_coverage_lines(proven, total, unproven)))
+        header, verdicts = read_verdicts(args.after)
+        try:
+            result = clause_coverage(load_clauses(args.clauses), verdicts, header.get('build'))
+            entries = fragment_entries(result, header) if args.fragment else []
+        except (EvidenceError, DbcSetMismatch) as error:
+            print(f'No clause coverage: {error}', file=sys.stderr)
+            return DIFF_EXIT
+        print('\n'.join(clause_coverage_lines(result)))
+        if args.fragment:
+            print(write_fragment(args.fragment, entries))
     return 0
 
 
@@ -510,6 +518,9 @@ def main(argv=None) -> int:
     covering.add_argument('--clauses', type=Path,
                           help='a classes/<name>_clauses.json clause ledger; prints proven/total clause coverage '
                                'against --after and lists every unproven clause')
+    covering.add_argument('--fragment', type=Path,
+                          help='with --clauses, write a new ledger fragment: every claim with its computed '
+                               'evidence and the Spell.dbc sha256 of the verdicts')
     args = parser.parse_args(argv)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command}

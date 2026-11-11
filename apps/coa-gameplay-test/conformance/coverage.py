@@ -3,12 +3,27 @@ import json
 from pathlib import Path
 import re
 
+from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
+                        BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT,
+                        BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT,
+                        BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
+                        BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
+                        BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK,
+                        BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
+                        BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
+                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
+                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, LEARNED_CONTRAST)
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
-from compare import CONFORMANT, STATUSES, Verdict, read_verdicts
+from compare import (CONFORMANT, CONTRAST, LINKED_VERDICT_REFERENCE, NOT_MEASURED, PASSIVE_METRIC, STATUSES, Verdict,
+                     read_verdicts)
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
-from procs import PROC_CHECK
-from triggers import TRIGGER_CHECK
+from procs import DELTA_CHECK, PROC_CHECK
+from profile import DbcSetMismatch, require_server_sha
+from stack import STACK_DPS, STACK_SOURCE, TALENT_DELTA
+from triggers import (COOLDOWN_CHECK, DURATION_CHECK, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK, SELF_TRIGGER_CHECK,
+                      TRIGGER_CHECK)
+from values import CHECKS as VALUE_CHECKS, GAP_CLOSER_DISTANCE
 
 COVERAGE_FILE = 'coverage.md'
 JUDGED = frozenset({'ok', 'tolerated', 'alert'})
@@ -159,21 +174,214 @@ def clause_proven(labels: list[str], statuses: dict[str, str]) -> bool:
     return True
 
 
-def clause_coverage(clauses: list[dict], verdicts: list[Verdict]) -> tuple[int, int, list[dict]]:
+DATA = 'data'
+BEHAVIOUR = 'behaviour'
+UNPROVEN = 'unproven'
+BY_METRIC = 'metric'
+LINKED = 'linked'
+EVENT = 'event'
+READBACK = 'readback'
+STATE = 'state'
+EVIDENCE = {
+    **{check: DATA for check in VALUE_CHECKS},
+    'hit_mean': BEHAVIOUR, 'melee_mean': BEHAVIOUR, 'periodic_total': BEHAVIOUR, 'unmodelled': LINKED,
+    PASSIVE_DELTA: BY_METRIC, PROC_CHECK: BEHAVIOUR, DELTA_CHECK: BEHAVIOUR,
+    TRIGGER_CHECK: BEHAVIOUR, COOLDOWN_CHECK: DATA, DURATION_CHECK: DATA, MAGNITUDE_CHECK: BEHAVIOUR,
+    SELF_TRIGGER_CHECK: BEHAVIOUR, GATE_ABSENCE_CHECK: BEHAVIOUR,
+    STACK_DPS: BEHAVIOUR, STACK_SOURCE: BEHAVIOUR, TALENT_DELTA: BEHAVIOUR,
+    BEHAVIOUR_COUNT: BEHAVIOUR, BEHAVIOUR_RATIO: BY_METRIC, BEHAVIOUR_DURATION: DATA, BEHAVIOUR_DURATION_RATIO: DATA,
+    BEHAVIOUR_TRIGGER: BEHAVIOUR, BEHAVIOUR_METRIC_DELTA: BY_METRIC, BEHAVIOUR_DURATION_REFRESH: DATA,
+    BEHAVIOUR_AMOUNT_DELTA: DATA, BEHAVIOUR_CRIT_GUARANTEE: BEHAVIOUR, BEHAVIOUR_AURA_GRANT: BEHAVIOUR,
+    BEHAVIOUR_OATH_CONSUMPTION: BY_METRIC, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL: BEHAVIOUR,
+    BEHAVIOUR_INTERNAL_COOLDOWN_GATE: BEHAVIOUR, BEHAVIOUR_EXCLUSIVITY: BEHAVIOUR,
+    BEHAVIOUR_GROUP_STACK_CAP: BY_METRIC, BEHAVIOUR_SINGLE_TARGET: BEHAVIOUR, BEHAVIOUR_CRIT_MAGNITUDE: BY_METRIC,
+    BEHAVIOUR_CHARGE_RECHARGE: BEHAVIOUR, BEHAVIOUR_FIXED_COUNT: BEHAVIOUR, BEHAVIOUR_PARTY_STAT_RATIO: BY_METRIC,
+    BEHAVIOUR_CAST_GATE: BEHAVIOUR, BEHAVIOUR_CAST_CONDITION: BEHAVIOUR, BEHAVIOUR_MOUNT_GRANT: BEHAVIOUR,
+    BEHAVIOUR_INTERNAL_COOLDOWN: BEHAVIOUR, BEHAVIOUR_CAST_COMBAT: BEHAVIOUR, BEHAVIOUR_AGGRO_REDIRECT: BEHAVIOUR,
+    BEHAVIOUR_HEAL_BLOCK: BEHAVIOUR, BEHAVIOUR_CAST_APPLIES_AURA: BEHAVIOUR, BEHAVIOUR_METRIC_RATIO_DELTA: BEHAVIOUR,
+    BEHAVIOUR_ABSORB_PIERCE_RATIO: BEHAVIOUR, GAP_CLOSER_DISTANCE: BEHAVIOUR,
+}
+METRIC_EVIDENCE = {
+    **dict.fromkeys(('aura', 'aura_stacks', 'aura_apply_count', 'spell_cast_count', 'spell_damage_count',
+                     'spell_damage_total', 'spell_damage_taken', 'spell_heal_count', 'spell_heal_total',
+                     'spell_effective_heal_total', 'spell_energize_count', 'spell_energize_total', 'spell_proc_count',
+                     'melee_attack_count', 'melee_damage_count', 'melee_damage_total', 'melee_damage_taken',
+                     'melee_attacks_taken', 'owned_creature_count', 'owned_creature_damage_count',
+                     'owned_creature_damage_total', 'owned_creature_heal_count', 'owned_creature_heal_total',
+                     'cast_failure', 'timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms',
+                     'timeline_interval_max_ms', 'timeline_interval_median_ms', 'event_first_ms',
+                     'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk'),
+                    EVENT),
+    **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks',
+                     'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
+                     'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms', 'aura_charges', 'cooldown_ms',
+                     'spell_cooldown_packet_ms',
+                     'spell_damage_done', 'spell_healing_done', 'spell_healing_taken', 'spell_critical_damage',
+                     'spell_done_crit_chance', 'melee_damage_done', 'aoe_damage_taken', 'script_spell_damage_taken',
+                     'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune'),
+                    READBACK),
+    **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
+                     'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',
+                     'power', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
+                     'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance', 'weapon_damage_min',
+                     'resistance', 'mana_regen', 'moving', 'threat'), STATE),
+}
+CRIT_WORDS = r'critical strike chance|chance to critically'
+STATE_PROMISES = {
+    'stat': r'strength|agility|stamina|intellect|spirit', 'stat_exact': r'strength|agility|stamina|intellect|spirit',
+    'armor': r'armou?r', 'combat_rating': r'rating', 'melee_hit_chance': r'hit chance|chance to hit',
+    'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise', 'spell_power': r'spell power',
+    'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
+    'max_health': r'maximum health', 'max_power': r'maximum (?:mana|energy|rage|focus)',
+    'power': r'mana|energy|rage|focus', 'run_speed_rate': r'movement speed|run speed',
+    'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
+    'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
+    'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
+    'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
+}
+CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
+LISTED_OTHER_BUILD = 5
+
+
+class EvidenceError(ValueError):
+    pass
+
+
+@dataclass(frozen=True)
+class ClauseCoverage:
+    proven: int
+    behaviour: int
+    total: int
+    unproven: list[dict]
+    evidence: list[tuple[dict, str]]
+    not_measured: list[str]
+
+    @property
+    def data(self) -> int:
+        return self.proven - self.behaviour
+
+
+def require_build(verdicts: list[Verdict], build: str | None, where: str):
+    if not verdicts:
+        return
+    if build is None:
+        raise EvidenceError(f'{where}: no single build is named for these verdicts (runs of several builds, or a '
+                            f'compare that predates per-verdict builds); compare the runs of one build again')
+    other = sorted(verdict.label for verdict in verdicts if verdict.build != build)
+    if other:
+        shown = ', '.join(other[:LISTED_OTHER_BUILD]) + (', ...' if len(other) > LISTED_OTHER_BUILD else '')
+        raise EvidenceError(f'{where}: {len(other)} verdicts come from another build than {build}, alerts and proofs '
+                            f'alike, and are refused: {shown}')
+
+
+def require_known_checks(verdicts: list[Verdict]):
+    unknown = sorted({verdict.check for verdict in verdicts if verdict.check not in EVIDENCE})
+    if unknown:
+        raise EvidenceError(f'checks {unknown} have no evidence class in coverage.EVIDENCE')
+
+
+def metric_class(verdict: Verdict) -> str:
+    metric = (verdict.detail or {}).get(PASSIVE_METRIC)
+    if metric is None:
+        raise EvidenceError(f'{verdict.label}: check {verdict.check} carries no observed metric in its detail')
+    if metric not in METRIC_EVIDENCE:
+        raise EvidenceError(f'{verdict.label}: metric {metric!r} has no evidence class in coverage.METRIC_EVIDENCE')
+    return METRIC_EVIDENCE[metric]
+
+
+def promised_state(verdict: Verdict, clause: str) -> bool:
+    detail = verdict.detail or {}
+    if verdict.check not in CONTRAST_CHECKS:
+        return False
+    if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) != LEARNED_CONTRAST:
+        return False
+    words = STATE_PROMISES.get(detail[PASSIVE_METRIC])
+    return words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is not None
+
+
+def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
+                     seen: frozenset[str] = frozenset()) -> str:
+    if verdict.status not in CONFORMANT:
+        return UNPROVEN
+    kind = EVIDENCE[verdict.check]
+    if kind == LINKED:
+        referenced = [by_label[label] for label in LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
+                      if label in by_label and label not in seen]
+        found = {verdict_evidence(other, clause, by_label, seen | {verdict.label}) for other in referenced}
+        return BEHAVIOUR if BEHAVIOUR in found else DATA
+    if verdict.status == 'closed' or kind == DATA:
+        return DATA
+    if kind == BEHAVIOUR:
+        return BEHAVIOUR
+    observed = metric_class(verdict)
+    if observed == EVENT or (observed == STATE and promised_state(verdict, clause)):
+        return BEHAVIOUR
+    return DATA
+
+
+def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str]) -> str:
+    labels = clause.get('labels') or []
+    if not clause_proven(labels, statuses):
+        return UNPROVEN
+    matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
+    found = {verdict_evidence(verdict, clause.get('clause', ''), by_label) for verdict in matched}
+    return BEHAVIOUR if BEHAVIOUR in found else DATA
+
+
+def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | None = None) -> ClauseCoverage:
+    require_build(verdicts, build, 'clause coverage')
+    require_known_checks(verdicts)
+    by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
-    unproven = [clause for clause in claims if not clause_proven(clause.get('labels') or [], statuses)]
-    return len(claims) - len(unproven), len(claims), unproven
+    evidence = [(clause, clause_evidence(clause, by_label, statuses)) for clause in claims]
+    unproven = [clause for clause, status in evidence if status == UNPROVEN]
+    behaviour = sum(status == BEHAVIOUR for _, status in evidence)
+    not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
+    return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured)
 
 
-def clause_coverage_lines(proven: int, total: int, unproven: list[dict]) -> list[str]:
-    lines = [f'clauses proven: {share(proven, total)}', '']
-    if unproven:
+def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
+    lines = [f'clauses proven: {share(result.proven, result.total)}',
+             f'behaviour proven: {share(result.behaviour, result.total)}',
+             f'data conformant: {share(result.data, result.total)}',
+             f'not measured (CalcValue read of an effect whose amount a CalcAmount hook sets, counted unproven): '
+             f'{len(result.not_measured)}', '']
+    if result.not_measured:
+        lines.append('Not measured labels:')
+        lines += [f'  {label}' for label in result.not_measured]
+    if result.unproven:
         lines.append('Unproven clauses:')
-        for clause in unproven:
+        for clause in result.unproven:
             lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')} "
                         f"(labels {clause.get('labels') or []})")
     return lines
+
+
+def fragment_entries(result: ClauseCoverage, header: dict) -> list[dict]:
+    sha = require_server_sha(header.get('spell_dbc_sha256'), f'verdicts of {header.get("results")}')
+    return [{'spell': clause['spell'], 'clause': clause['clause'], 'labels': list(clause.get('labels') or []),
+             'kind': 'claim', 'evidence': status, 'spell_dbc_sha256': sha} for clause, status in result.evidence]
+
+
+def write_fragment(path: Path, entries: list[dict]) -> Path:
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('x', encoding='utf-8') as stream:
+        stream.write(json.dumps(entries, indent=2) + '\n')
+    return path
+
+
+def read_fragment(path: Path) -> list[dict]:
+    entries = json.loads(Path(path).read_text(encoding='utf-8'))
+    if not isinstance(entries, list):
+        raise EvidenceError(f'{path} holds {type(entries).__name__}, not a JSON array of ledger entries')
+    for index, entry in enumerate(entries):
+        try:
+            require_server_sha(entry.get('spell_dbc_sha256'), f'{path}[{index}]')
+        except DbcSetMismatch as error:
+            raise EvidenceError(str(error)) from error
+    return entries
 
 
 def write_coverage(before_dir: Path, after_dir: Path, out_dir: Path) -> Path:
@@ -181,6 +389,8 @@ def write_coverage(before_dir: Path, after_dir: Path, out_dir: Path) -> Path:
     after_header, after = read_verdicts(after_dir)
     if before_header['class_id'] != after_header['class_id']:
         raise ValueError(f'class {before_header["class_id"]} before, class {after_header["class_id"]} after')
+    require_build(before, before_header.get('build'), f'coverage of {before_dir}')
+    require_build(after, after_header.get('build'), f'coverage of {after_dir}')
     headers = (before_header, after_header)
     results = (coverage(before_header, before), coverage(after_header, after))
     sets = (spell_sets(before_header, before), spell_sets(after_header, after))

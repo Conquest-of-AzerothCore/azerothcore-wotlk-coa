@@ -63,6 +63,9 @@ CRIT_GUARANTEE_CONTROL_MAX_RATIO = 0.9
 PROSE = 'prose: '
 BEFORE = 'before'
 AFTER = 'after'
+LEARNED_CONTRAST = 'learned'
+CONDITION_CONTRAST = 'condition'
+HEALING_RATIO_METRICS = {'effect_value': 'spell_effect_value', 'taken': 'spell_healing_taken'}
 LINE_BREAKS = re.compile(r'\s+')
 
 
@@ -556,7 +559,8 @@ def healing_ratio_scenario(class_file: dict, spec: HealingRatioSpec) -> tuple[di
     expectations = []
     for target in spec.targets:
         model = {'kind': 'ratio', 'before_label': label(target, BEFORE), 'after_label': label(target, AFTER),
-                 'expected': spec.expected, 'quote': entry.quote, 'target_name': target.name}
+                 'expected': spec.expected, 'quote': entry.quote, 'target_name': target.name,
+                 'metric': HEALING_RATIO_METRICS.get(target.method, 'spell_healing_done')}
         expectations.append(Expectation(f'{spec.spell} {target.spell} behaviour_ratio', BEHAVIOUR_RATIO, spec.spell,
                                         target.spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                                         model))
@@ -644,14 +648,14 @@ def leech_ratio_scenario(class_file: dict, spec: LeechRatioSpec) -> tuple[dict, 
                    {'kind': 'leech_ratio', 'damage_label': leech_ratio_label(spec, LEECH_RATIO_DAMAGE, BEFORE),
                     'heal_label': leech_ratio_label(spec, LEECH_RATIO_HEAL, BEFORE), 'heal_baseline_label': None,
                     'expected': spec.expected_before * heal_factor, 'quote': 'healing you equal to the damage dealt',
-                    'target_name': f'{spec.name} (before learning it)'}),
+                    'target_name': f'{spec.name} (before learning it)', 'metric': 'spell_heal_total'}),
         Expectation(f'{spec.spell} {spec.target_rank} leech_ratio after', BEHAVIOUR_RATIO, spec.spell,
                    spec.target_rank, None, str(spec.expected_after * heal_factor), prose_rule(entry.quote, spec.spell),
                    {'kind': 'leech_ratio', 'damage_label': leech_ratio_label(spec, LEECH_RATIO_DAMAGE, AFTER),
                     'heal_label': leech_ratio_label(spec, LEECH_RATIO_HEAL, AFTER),
                     'heal_baseline_label': leech_ratio_label(spec, LEECH_RATIO_HEAL, BEFORE),
                     'expected': spec.expected_after * heal_factor, 'quote': entry.quote,
-                    'target_name': f'{spec.name} (after learning it)'}),
+                    'target_name': f'{spec.name} (after learning it)', 'metric': 'spell_heal_total'}),
     ]
     return scenario, expectations
 
@@ -704,7 +708,7 @@ def cast_leech_ratio_scenario(class_file: dict, spec: CastLeechRatioSpec) -> tup
                               prose_rule(entry.quote, spec.spell),
                               {'kind': 'leech_ratio', 'damage_label': damage_label, 'heal_label': heal_label,
                                'heal_baseline_label': None, 'expected': spec.expected * heal_factor,
-                               'quote': entry.quote, 'target_name': spec.name})
+                               'quote': entry.quote, 'target_name': spec.name, 'metric': 'spell_heal_total'})
     return scenario, [expectation]
 
 
@@ -750,7 +754,7 @@ def cast_stat_ratio_scenario(class_file: dict, spec: CastStatRatioSpec) -> tuple
     label = f'{spec.spell} behaviour_ratio'
     model = {'kind': 'stat_ratio', 'stat_label': stat_label, 'amount_label': amount_label,
              'expected': spec.expected, 'quote': entry.quote, 'target_name': spec.name,
-             'stat_metric': spec.stat_metric}
+             'stat_metric': spec.stat_metric, 'metric': 'aura_amount'}
     expectation = Expectation(label, BEHAVIOUR_RATIO, spec.spell, spec.spell, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -800,7 +804,7 @@ def health_threshold_ratio_scenario(class_file: dict, spec: HealthRatioSpec) -> 
     for health_pct, expected_ratio in spec.levels:
         model = {'kind': 'ratio', 'before_label': health_ratio_label(spec, health_pct, BEFORE),
                  'after_label': health_ratio_label(spec, health_pct, AFTER), 'expected': expected_ratio,
-                 'quote': entry.quote, 'target_name': f'{health_pct}% health'}
+                 'quote': entry.quote, 'target_name': f'{health_pct}% health', 'metric': 'script_spell_damage_taken'}
         expectations.append(Expectation(f'{spec.spell} {health_pct} behaviour_ratio', BEHAVIOUR_RATIO, spec.spell,
                                         health_pct, None, str(expected_ratio), prose_rule(entry.quote, spec.spell),
                                         model))
@@ -1144,7 +1148,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
-             'quote': entry.quote}
+             'contrast': CONDITION_CONTRAST if spec.setup_only_after else LEARNED_CONTRAST, 'quote': entry.quote}
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
     if spec.expiry_wait_ms is not None:
@@ -2447,7 +2451,7 @@ def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple
     label = f'{spec.spell} behaviour_group_stack_cap'
     model = {'kind': 'group_stack_cap', 'baseline_label': baseline_label, 'own_label': own_label,
              'combined_label': combined_label, 'own_pct': own_pct, 'partner_pct': partner_pct,
-             'mechanism': spec.mechanism,
+             'mechanism': spec.mechanism, 'metric': spec.metric,
              'personal_pct': personal_pct, 'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_GROUP_STACK_CAP, spec.spell, spec.partner, None,
                               str(max(own_pct, partner_pct)), prose_rule(entry.quote, spec.spell), model)
