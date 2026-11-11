@@ -189,6 +189,19 @@ class RunnerTests(unittest.TestCase):
         for field in ('entry', 'spell'):
             self.assert_step_rejected({key: value for key, value in step.items() if key != field})
 
+    def test_spell_mod_mutant_action_fields(self):
+        step = {'action': 'spell_mod_mutant', 'actor': 'caster', 'spell': 116, 'op': 12, 'percent': 100}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'percent': -100})
+        for change in ({'percent': 0}, {'percent': -101}, {'percent': 1001}, {'percent': 99.5}, {'op': 32},
+                       {'op': -1}, {'spell': 0}, {'actor': 'target'}, {'factor': 2.0}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'percent'})
+
+    def test_spell_mod_mutants_metric_reads_a_player(self):
+        self.assert_step_validates({'action': 'assert', 'actor': 'caster', 'metric': 'spell_mod_mutants',
+                                    'equals': 1})
+
     def assert_step_validates(self, step):
         scenario = copy.deepcopy(self.scenario)
         scenario['steps'].append(step)

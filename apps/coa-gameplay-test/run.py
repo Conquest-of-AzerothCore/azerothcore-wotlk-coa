@@ -54,6 +54,9 @@ SPAWN_TYPES = {'creature', 'gameobject'}
 MAX_PLACEMENT_TOLERANCE = 10
 PLACEMENT_AUDIT_METRICS = {'placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'}
 MAX_GAMEOBJECT_TYPE = 35
+MAX_SPELL_MOD_OP = 31
+MIN_MUTANT_PERCENT = -100
+MAX_MUTANT_PERCENT = 1000
 METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
@@ -79,7 +82,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
-    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'level_scaling_choice',
+    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'level_scaling_choice', 'spell_mod_mutants',
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
@@ -267,6 +270,7 @@ ACTIONS = {
     'set_action_button': ({'actor', 'button'}, {'actor', 'spell', 'button', 'wildcard_slot'}),
     'grant_resource': ({'actor', 'spell'}, {'actor', 'spell', 'amount'}),
     'unlearn': ({'actor', 'spell'}, {'actor', 'spell', 'all_specs'}),
+    'spell_mod_mutant': ({'actor', 'spell', 'op', 'percent'}, {'actor', 'spell', 'op', 'percent'}),
     'money': ({'actor', 'copper'}, {'actor', 'copper'}),
     'set_aura': ({'actor', 'spell', 'stacks'}, {'actor', 'spell', 'stacks', 'pet', 'owned_entry', 'caster', 'target',
                                               'effect', 'amount'}),
@@ -499,6 +503,14 @@ def validate_placement_audit(step, where):
             number(value, f'{where}.gameobject_types[{index}]', 0, MAX_GAMEOBJECT_TYPE, True)
 
 
+def validate_spell_mod_mutant(step, where, player_ids):
+    require(step['actor'] in player_ids, f'{where}: a spell modifier mutant needs a player')
+    number(step['spell'], f'{where}.spell', 1, 2**31 - 1, True)
+    number(step['op'], f'{where}.op', 0, MAX_SPELL_MOD_OP, True)
+    number(step['percent'], f'{where}.percent', MIN_MUTANT_PERCENT, MAX_MUTANT_PERCENT, True)
+    require(step['percent'] != 0, f'{where}: a mutant percent of 0 changes nothing')
+
+
 def validate_raid_role(player):
     if 'role' not in player:
         require(not RAID_ROLE_FIELDS & player.keys(), f'{sorted(RAID_ROLE_FIELDS)} need a player role')
@@ -719,6 +731,8 @@ def validate(scenario):
             require(step['actor'] in player_ids, f'{where}: pet fixture needs a player')
         if action == 'pet_autocast':
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
+        if action == 'spell_mod_mutant':
+            validate_spell_mod_mutant(step, where, player_ids)
         if action == 'set_aura':
             require(sum(bool(step.get(key)) for key in ('target', 'pet', 'owned_entry')) <= 1,
                     f'{where}: aura fixture selects one recipient')

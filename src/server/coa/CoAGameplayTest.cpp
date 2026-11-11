@@ -711,6 +711,40 @@ private:
 bool AuraApplyCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> AuraApplyCounter::_counts;
 
+constexpr uint32 SpellModMutantOwnerAura = 100523;
+
+class SpellModMutants
+{
+public:
+    static void Own(Aura const* owner, std::unique_ptr<SpellModifier> modifier)
+    {
+        _owned[owner].push_back(std::move(modifier));
+    }
+
+    static void Release(Unit* unit, Aura const* owner)
+    {
+        auto const found = _owned.find(owner);
+        Player* player = unit ? unit->ToPlayer() : nullptr;
+        if (found == _owned.end() || !player)
+            return;
+        for (auto const& modifier : found->second)
+            player->AddSpellMod(modifier.get(), false);
+        _owned.erase(found);
+    }
+
+    static uint32 Count(Unit const* unit)
+    {
+        Aura const* owner = unit ? unit->GetAura(SpellModMutantOwnerAura) : nullptr;
+        auto const found = owner ? _owned.find(owner) : _owned.end();
+        return found == _owned.end() ? 0 : uint32(found->second.size());
+    }
+
+private:
+    static std::map<Aura const*, std::vector<std::unique_ptr<SpellModifier>>> _owned;
+};
+
+std::map<Aura const*, std::vector<std::unique_ptr<SpellModifier>>> SpellModMutants::_owned;
+
 constexpr float DefaultEncounterRadius = 100.0f;
 constexpr float MaximumEncounterRadius = 200.0f;
 
@@ -2291,6 +2325,7 @@ public:
         for (auto& [id, actor] : _actors)
             if (Player* player = actor.session ? actor.session->GetPlayer() : nullptr)
             {
+                player->RemoveAurasDueToSpell(SpellModMutantOwnerAura);
                 if (leaveGroups)
                     ungrouped = LeaveGroups(player) && ungrouped;
                 actor.session->LogoutPlayer(false);
@@ -3808,6 +3843,8 @@ private:
         }
         Player* player = unit->ToPlayer();
         Require(player != nullptr, "Metric requires a player: " + metric);
+        if (metric == "spell_mod_mutants")
+            return SpellModMutants::Count(player);
         if (metric == "knows_spell" || metric == "cooldown_ms" || metric == "spell_charges" ||
             metric == "spell_active" || metric == "global_cooldown_ms" || metric == "has_talent" ||
             metric == "spellbook_offers_spell" || metric == "spellbook_covers_spell" ||
@@ -6681,6 +6718,43 @@ private:
             uint32(anomalies.size()), eventLinked};
     }
 
+    static bool SetsAuraAmount(uint32 op)
+    {
+        return op == SPELLMOD_EFFECT1 || op == SPELLMOD_EFFECT2 || op == SPELLMOD_EFFECT3 || op == SPELLMOD_ALL_EFFECTS;
+    }
+
+    void AddSpellModMutant(Player* player, Tree const& step, Tree& record)
+    {
+        uint32 const spell = step.get<uint32>("spell");
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+        Require(info != nullptr, "Unknown spell for the spell modifier mutant: " + std::to_string(spell));
+        uint32 const op = step.get<uint32>("op");
+        Require(op < MAX_SPELLMOD, "Invalid spell modifier operation for the mutant");
+        int32 const percent = step.get<int32>("percent");
+        Require(percent != 0 && percent >= -100, "The mutant percent must be non-zero and at least -100");
+        Require(!SetsAuraAmount(op) || !player->HasAura(spell),
+            "The mutant must be set before the aura of spell " + std::to_string(spell) + " is applied");
+        Aura* owner = player->GetAura(SpellModMutantOwnerAura);
+        if (!owner)
+            owner = player->AddAura(SpellModMutantOwnerAura, player);
+        Require(owner != nullptr && !owner->IsUsingCharges(), "Could not apply the spell modifier mutant's owner aura");
+        auto modifier = std::make_unique<SpellModifier>(owner);
+        modifier->op = SpellModOp(op);
+        modifier->type = SPELLMOD_PCT;
+        modifier->value = percent;
+        modifier->spellId = spell;
+        modifier->targetSpellId = spell;
+        Require(player->IsAffectedBySpellmod(info, modifier.get()),
+            "The spell modifier mutant does not reach spell " + std::to_string(spell));
+        player->AddSpellMod(modifier.get(), true);
+        SpellModMutants::Own(owner, std::move(modifier));
+        record.put("mutant_spell", spell);
+        record.put("mutant_op", op);
+        record.put("mutant_percent", percent);
+        record.put("mutant_owner_aura", SpellModMutantOwnerAura);
+        record.put("mutants_active", SpellModMutants::Count(player));
+    }
+
     void Act(Tree const& step, Tree& record)
     {
         std::string action = step.get<std::string>("action");
@@ -7568,6 +7642,8 @@ private:
         else if (action == "unlearn")
             player->removeSpell(spell, step.get<bool>("all_specs", false) ? SPEC_MASK_ALL :
                 player->GetActiveSpecMask(), false);
+        else if (action == "spell_mod_mutant")
+            AddSpellModMutant(player, step, record);
         else if (action == "pet_autocast")
         {
             Pet* pet = player->GetPet();
@@ -8937,6 +9013,8 @@ public:
 
     void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode mode) override
     {
+        if (unit && application)
+            SpellModMutants::Release(unit, application->GetBase());
         if (!TimelineRecorder::Active() || !unit || !application)
             return;
         Aura const* aura = application->GetBase();
