@@ -1284,6 +1284,13 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFTED;
     });
 
+    // Mycelial Ring (#11933): its triggered ring spells share spell category 38 with the 45 sec Mycelial Ring 681056
+    // and carry a 2 min category cooldown, which they put on Mycelial Ring itself.
+    ApplySpellFix({ 681291, 681552, 681553, 681554, 681555, 681556 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->CategoryRecoveryTime = 0;
+    });
+
     // Damage Shield
     ApplySpellFix({ 59653 }, [](SpellInfo* spellInfo)
     {
