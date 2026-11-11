@@ -619,12 +619,14 @@ class PerLevelLoss:
 
 
 def per_level_loss(tooltips: TooltipSource, spell_id: int, effect: int, caster_level: int) -> PerLevelLoss | None:
-    rate = float32(float(tooltips.spell_field(spell_id, f'EffectRealPointsPerLevel[{effect}]') or 0))
-    if not rate:
+    try:
+        rate = float32(float(tooltips.spell_field(spell_id, f'EffectRealPointsPerLevel[{effect}]') or 0))
+        if not rate:
+            return None
+        base_level, spell_level, max_level = (int(tooltips.spell_field(spell_id, name) or 0)
+                                              for name in ('BaseLevel', 'SpellLevel', 'MaxLevel'))
+    except Unreadable:
         return None
-    base_level = int(tooltips.spell_field(spell_id, 'BaseLevel') or 0)
-    spell_level = int(tooltips.spell_field(spell_id, 'SpellLevel') or 0)
-    max_level = int(tooltips.spell_field(spell_id, 'MaxLevel') or 0)
     level = caster_level
     if max_level > 0 and level > max_level:
         level = max_level
