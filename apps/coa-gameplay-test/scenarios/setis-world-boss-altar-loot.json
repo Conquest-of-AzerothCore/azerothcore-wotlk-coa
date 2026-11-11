@@ -3,8 +3,9 @@
   "name": "Setis: the shrine takes the raid to his map, he pays every player and leaves a portal back",
   "contract": [
     "rev_20261104_10_coa_setis_world_boss spawns the Shrine of Setis (64600) by the Scarab Wall. On a",
-    "heroic raid difficulty it refuses; on a Normal one its gossip 'Challenge Setis the Gate Warden'",
-    "takes the player to Setis' map (880). Setis (64600) has 470000 health per player, counted from 10 to",
+    "heroic raid difficulty it refuses. His map (880) opens with Zul'Gurub: at release stage 2 the shrine",
+    "leaves the player in Silithus, and at stage 3 its gossip 'Challenge Setis the Gate Warden' on a Normal",
+    "difficulty takes the player to Setis' map (880). Setis (64600) has 470000 health per player, counted from 10 to",
     "40, so 4700000 for one player. For a single player he drops one epic item of item level 68 (one for",
     "every four players, never none), and every player gets 250 Runes of Ascension (375250), 100 to 150",
     "Bazaar Tokens (975001) and a Treasures of Azeroth chest (978059). The Portal to the Scarab Wall",
@@ -92,6 +93,37 @@
     {
       "action": "wait",
       "ms": 500
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm is at the Mythic Dungeons release stage, before Zul'Gurub",
+      "command": "raidphase set 2"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 380138
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: before the Zul'Gurub stage his map stays closed",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm reaches the Zul'Gurub release stage",
+      "command": "raidphase set 3"
     },
     {
       "action": "use_gameobject",
@@ -240,6 +272,11 @@
       "metric": "map_id",
       "equals": 1,
       "within_ms": 8000
+    },
+    {
+      "action": "console",
+      "label": "CLEANUP: the release stage returns to the configured one",
+      "command": "raidphase clear"
     }
   ]
 }
