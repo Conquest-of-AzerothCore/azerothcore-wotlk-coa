@@ -69,6 +69,15 @@
       "save_as": "absorbed_1"
     },
     {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_1"
+    },
+    {
       "action": "cast",
       "actor": "striker",
       "spell": 41394,
@@ -78,6 +87,18 @@
       "action": "wait",
       "label": "strike 1 lands",
       "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_1",
+      "min": 1,
+      "max": 1
     },
     {
       "action": "assert",
@@ -193,6 +214,15 @@
       "save_as": "absorbed_2"
     },
     {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_2"
+    },
+    {
       "action": "cast",
       "actor": "striker",
       "spell": 41394,
@@ -202,6 +232,18 @@
       "action": "wait",
       "label": "strike 2 lands",
       "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_2",
+      "min": 1,
+      "max": 1
     },
     {
       "action": "assert",
@@ -317,6 +359,15 @@
       "save_as": "absorbed_3"
     },
     {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_3"
+    },
+    {
       "action": "cast",
       "actor": "striker",
       "spell": 41394,
@@ -326,6 +377,18 @@
       "action": "wait",
       "label": "strike 3 lands",
       "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_3",
+      "min": 1,
+      "max": 1
     },
     {
       "action": "assert",
@@ -441,6 +504,15 @@
       "save_as": "absorbed_4"
     },
     {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_4"
+    },
+    {
       "action": "cast",
       "actor": "striker",
       "spell": 41394,
@@ -450,6 +522,18 @@
       "action": "wait",
       "label": "strike 4 lands",
       "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_4",
+      "min": 1,
+      "max": 1
     },
     {
       "action": "assert",

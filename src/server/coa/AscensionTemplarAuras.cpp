@@ -165,9 +165,11 @@ class aura_ascension_templar_lifecycle : public AuraScript
         {
             PreventDefaultAction();
             uint32 remaining = std::max(0, effect->GetAmount());
+            if (!remaining)
+                return;
             int32 later = GetAura()->GetDuration() - effect->GetPeriodicTimer();
             uint32 ticks = later < 0 ? 1 : 2 + later / std::max(1, effect->GetAmplitude());
-            uint32 amount = (remaining + ticks - 1) / ticks;
+            uint32 amount = remaining - (ticks - 1) * (remaining / ticks);
             const_cast<AuraEffect*>(effect)->ChangeAmount(remaining - amount);
             uint32 applied =
                 Unit::DealDamage(player, player, amount, nullptr, DOT, SPELL_SCHOOL_MASK_NORMAL, GetSpellInfo(), false);

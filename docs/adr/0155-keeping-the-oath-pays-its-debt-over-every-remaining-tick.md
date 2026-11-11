@@ -51,8 +51,10 @@ longer depends on the update step. Templar code only.
   exactly the delayed amount, in every trial whatever the clock step.
 - A second hit: unchanged behaviour. The ticks still stop at 8 counted from the first hit, the debt still outlives its
   last payment and the remainder is still lost; only the shares change (for 440 + 440 at 3.5 s: 3 x 55, then 90, 90,
-  90, 89, 89, 613 paid). For a second hit that lands less than the overshoot after a tick, the old count was also
-  one short; the new one is not.
+  90, 89, 89, 613 paid). The lost amount moves with the shares: with a non-zero overshoot the old count paid 63, 63,
+  63, then 87, 87, 87, 86, 86, 622 paid and 258 lost (code reading, not measured), against 267 lost now. For a
+  second hit that lands less than the overshoot after a tick, the old count was also one short; the new one is not.
+  ADR 0157 later repays a second hit in full.
 - `ReduceDebt`'s one-tick branch shortens the duration by 1000 ms; the new count follows it, as the old did.
 - Regression: catalog scenarios `templar-keeping-the-oath-debt-spread` (per trial 7 payments and 385 at 7.5 s with
   the debt present, 8 and 440 at 8.5 s with the debt gone, payments 1000 ms apart) and
