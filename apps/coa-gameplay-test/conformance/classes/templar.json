@@ -4476,6 +4476,22 @@
       "spell": 804228, "name": "Testament of Resolve", "kind": "charm_immunity",
       "quote": "granting immunity to fear, charm, and horrify effects", "charm_spell": 37122,
       "observe_source": "Domination 37122: one effect, aura 6 SPELL_AURA_MOD_CHARM, Mechanic 1 (charm), 10 s, instant, cast by the dummy at the caster through the harness cast action (Unit::CastSpell from the creature). Spell.dbc 804228 names no charm immunity (Effect[0] aura 147 MiscValue 512: SPELL_AURA_MOD_FEAR aura-type immunity, SpellInfo.cpp:2738-2739; Effect[2] aura 77 MECHANIC_HORROR); readback 20261111-213317 read IsImmunedToSpell 0 for 37122 with 804228 up. Mentor approval 2026-11-11: own scenario, read inside the charm, charm removed after each read, cleanup asserted."
+    },
+    {
+      "spell": 805421, "name": "Reckoning", "kind": "hit_ratio", "variant": "oaths", "label_suffix": "oaths",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.7745,
+      "observe_spell": 572741, "learn": [572741],
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [804904, 1], [804922, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "Oath: Righteous Lunge 804904 Effect[0] and Effect[2] (aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 SPELLMOD_DAMAGE, EffectBasePoints 4 and 29: +5% and +30%) and Oath: Condemn 804922 Effect[2] (aura 108, MiscValue 0, EffectBasePoints 29: +30%) carry EffectSpellClassMask word 2 bit 128, the Oath Breaker mask (AscensionTemplar Breaker, SpellFamilyFlags[2] 128). Player::ApplySpellMod multiplies the percent mods, as the 572027 readback ground truth shows (804904 alone 1.364, 804922 alone 1.30, both 1419 from 800): 1.05 x 1.30 x 1.30 = 1.7745 with both Oaths held, against 1 with none. Both Oaths are set before every treatment cast and the cast removes them (ClearOaths, AscensionTemplarAbilities.cpp:189-191), which the spell's oath_consumption entry reads as 0 stacks after a cast. Reckoning is cast at its level 60 rank 572741 (BaseLevel 56, SpellFamilyFlags[2] 128); its Holy hit ${$m1+0+$AP*0.175+$STA*0.5} gets its AP term in the effect base value (TemplarCoefficients, AscensionTemplarContracts.cpp:335-342), before SpellDamageBonusDone applies the mods, so the attack power fixture of 20000 makes the scaled part dominate the 8-point die. beeg spellpen 823764 in both arms removes the dummy's partial resists. Only non-critical hits are compared."
+    },
+    {
+      "spell": 578276, "name": "Benediction", "kind": "hit_ratio", "variant": "oaths", "label_suffix": "oaths",
+      "quote": "Consumes your Oaths, dealing additional healing for each consumed.", "expected": 1.7745,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[804904, 1], [804922, 1]]},
+      "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
+      "expected_source": "Oath: Righteous Lunge 804904 Effect[0] and Effect[2] (aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 SPELLMOD_DAMAGE, EffectBasePoints 4 and 29: +5% and +30%) and Oath: Condemn 804922 Effect[2] (aura 108, MiscValue 0, EffectBasePoints 29: +30%) carry EffectSpellClassMask word 2 bit 128, the Oath Breaker mask (AscensionTemplar Breaker, SpellFamilyFlags[2] 128). Player::ApplySpellMod multiplies the percent mods, as the 572027 readback ground truth shows (804904 alone 1.364, 804922 alone 1.30, both 1419 from 800): 1.05 x 1.30 x 1.30 = 1.7745 with both Oaths held, against 1 with none. Both Oaths are set before every treatment cast and the cast removes them (ClearOaths, AscensionTemplarAbilities.cpp:189-191), which the spell's oath_consumption entry reads as 0 stacks after a cast. Benediction 578276 (rank 8, the level 60 rank, SpellFamilyFlags[2] 128) heals the ally with Effect[1] SPELL_EFFECT_HEAL ${$m2+0+$STA*0.25+$SP*0.3}; Unit::SpellHealingBonusDone applies the same SPELLMOD_DAMAGE list to a direct heal. 804922's flat Effect[1] mod (MiscValue 12) is keyed to word 1 bit 2048, which Benediction does not carry. A spell power fixture of 20000 makes the $SP*0.3 part dominate the die, as in Disciplined Mind's Benediction ratio. Only non-critical heals are compared. The ratio of two arms of the same rank does not depend on the rank's per-level term."
     }
   ],
   "player_observations": [

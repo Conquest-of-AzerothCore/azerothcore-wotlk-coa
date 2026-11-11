@@ -2593,7 +2593,6 @@
     "spell": 706385,
     "clause": "Your Condemn now heals you for $s1% of the damage dealt.",
     "labels": [
-      "conformance-templar-value-706385",
       "706385 trigger_count",
       "706385 trigger_magnitude_ratio"
     ],
@@ -3267,7 +3266,8 @@
     "spell": 578276,
     "clause": "Consumes your Oaths, dealing additional healing for each consumed.",
     "labels": [
-      "578276 behaviour_oath_consumption"
+      "578276 behaviour_oath_consumption",
+      "578276 behaviour_hit_ratio oaths"
     ],
     "kind": "claim"
   },
@@ -4298,7 +4298,8 @@
     "spell": 805421,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
     "labels": [
-      "805421 behaviour_oath_consumption"
+      "805421 behaviour_oath_consumption",
+      "805421 behaviour_hit_ratio oaths"
     ],
     "kind": "claim"
   },
