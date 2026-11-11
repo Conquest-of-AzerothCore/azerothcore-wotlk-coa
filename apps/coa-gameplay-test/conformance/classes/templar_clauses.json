@@ -2056,10 +2056,35 @@
   {
     "spell": 705290,
     "clause": "Using Libram spells now increases your damage dealt and healing done by $520537s1% for $520537d",
-    "labels": [
-      "705290 trigger_count ok"
+    "claims": [
+      {
+        "claim": "Using Libram spells now increases",
+        "labels": [
+          "705290 trigger_count 801461"
+        ]
+      },
+      {
+        "claim": "your damage dealt ... by $520537s1%",
+        "labels": [
+          "705290 behaviour_hit_ratio damage"
+        ]
+      },
+      {
+        "claim": "and healing done by $520537s1%",
+        "labels": [
+          "705290 behaviour_hit_ratio healing"
+        ]
+      },
+      {
+        "claim": "for $520537d",
+        "labels": [
+          "705290 spell_duration 520537 #1",
+          "705290 behaviour_expiry"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label 705290 trigger_count ok named no verdict; the Libram trigger is the stored 705290 trigger_count 801461 (Libram of Tenacity), the amounts the two hit ratios with and without 520537 (Vindication 573324 damage, Benediction 578276 healing), the duration the expiry pair of 520537 after a Libram of Tenacity cast"
   },
   {
     "spell": 705290,
@@ -2072,18 +2097,33 @@
   {
     "spell": 705290,
     "clause": "increases your damage dealt and healing done by $520537s1%",
-    "labels": [
-      "conformance-templar-value-705290"
+    "claims": [
+      {
+        "claim": "increases your damage dealt ... by $520537s1%",
+        "labels": [
+          "705290 effect_value 520537e0 #0",
+          "705290 behaviour_hit_ratio damage"
+        ]
+      },
+      {
+        "claim": "and healing done by $520537s1%",
+        "labels": [
+          "705290 behaviour_hit_ratio healing"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label conformance-templar-value-705290 was a scenario name, not a verdict; damage and healing are measured by hit ratios with and without 520537"
   },
   {
     "spell": 705290,
     "clause": "for $520537d",
     "labels": [
-      "705290 spell_duration 520537 #1 ok"
+      "705290 spell_duration 520537 #1",
+      "705290 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label 705290 spell_duration 520537 #1 ok named no verdict; the readback and the expiry pair of 520537 after a Libram of Tenacity 801461 cast (present 14625-14700 ms, absent 15375-15500 ms)"
   },
   {
     "spell": 705291,

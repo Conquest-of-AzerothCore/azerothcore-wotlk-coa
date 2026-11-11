@@ -1708,6 +1708,28 @@
   ],
   "behaviours": [
     {
+      "spell": 705290, "name": "Blessing of Eonar", "kind": "hit_ratio", "variant": "damage", "label_suffix": "damage",
+      "quote": "now increases your damage dealt and healing done by", "expected": 1.1,
+      "observe_spell": 573324, "learn": [573324],
+      "control": {}, "treatment": {"auras": [[520537, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$520537s1 = 10 (520537 EffectBasePoints[0] 9, EffectDieSides[0] 1): Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue[0] 127 (every school, Physical included), on the caster. Vindication 573324 (Physical) hits the dummy; an attack power fixture of 20000 makes its 0.285 x AP part dominate the 59-point die. The treatment sets 520537, which 705290 casts on a Libram use (705290 trigger_count 801461, AscensionTemplarTemporaryLibramProcs.cpp:79-95). Only non-critical hits are compared."
+    },
+    {
+      "spell": 705290, "name": "Blessing of Eonar", "kind": "hit_ratio", "variant": "healing", "label_suffix": "healing",
+      "quote": "now increases your damage dealt and healing done by", "expected": 1.1,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[520537, 1]]},
+      "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
+      "expected_source": "$520537s1 = 10 (520537 EffectBasePoints[1] 9, EffectDieSides[1] 1): Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT on the caster. Benediction 578276 (top rank at 60) heals the ally; a spell power fixture of 20000 makes its 0.30 spell power part (AscensionTemplarData.h:63) dominate the 56-point die. Only non-critical heals are compared."
+    },
+    {
+      "spell": 705290, "name": "Blessing of Eonar", "kind": "cast_applies_aura",
+      "quote": "now increases your damage dealt and healing done by", "expected_ms": 15000,
+      "applied_aura": 520537, "target": "caster", "cast_spell": 801461, "cast_target": "caster",
+      "observe_source": "520537 DurationIndex 8 (15000 ms); 705290 Effect[0] aura 42 casts it when a Libram is used (AscensionTemplarTemporaryLibramProcs.cpp:79-95); Libram of Tenacity 801461 is cast on the caster (EffectImplicitTargetA 1)"
+    },
+    {
       "spell": 504107, "variant": "tenth", "label_suffix": "tenth",
       "name": "Divine Fury", "kind": "metric_delta",
       "quote": "10 times now transforms your Vindication into", "expected": 1,
