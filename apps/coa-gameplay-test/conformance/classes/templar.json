@@ -2112,7 +2112,7 @@
       "quote": "and your spell penetration by", "expected": 1.075,
       "observe_spell": 801450, "off_hand_item": 30754,
       "control": {"auras": [[60234, 1]]}, "treatment": {"auras": [[60234, 1], [301310, 1], [301369, 1]]},
-      "critical": false, "trials": 160, "fixture": {"attack_power": 20000},
+      "critical": false, "trials": 160, "parts": 12, "fixture": {"attack_power": 20000},
       "expected_source": "$s3 = 10 (301310 EffectBasePoints[2] 9, EffectDieSides[2] 1). Light's Chosen's effect 2 triggers 301369 (Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectMiscValue[0] 126), whose amount AscensionTemplarAuras.cpp:68-70 sets to 10% of the caster's Intellect. Greatness 60234 (+300 Intellect) is set in both arms: Intellect 332 (clause 46), so the penetration is int32(33.2) = 33. The dummy is a level 60 creature: CoA.MonsterResistance (coa.conf.dist, PerLevel 1.0, PerPercent 5.0) gives it 60 holy resistance, an average resist of 60 / 5 / 100 = 12% (Unit::GetEffectiveResistChance, Unit.cpp:2582-2626), drawn in tenths by Unit::CalcAbsorbResist. With 33 penetration the dummy keeps 27, 5.4%: (1 - 0.054) / (1 - 0.12) = 1.075 for Zealotry 801450, a Holy hit with no spell-power term. A penetration that raised the resistance by 33 instead (93, 18.6%) reads 0.925. Zealotry needs an off-hand weapon (SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON): Ancient Bone Mace 30754 beside the one-hand main hand. The attack power fixture makes the weapon roll negligible beside the resist draw. Light's Chosen's spell power (effect 0) does not reach a weapon-damage hit and its crit rating (effect 1) is filtered out: only non-critical hits are compared."
     },
     {

@@ -166,6 +166,13 @@ def add_behaviour(writer: ManifestWriter, entry: dict):
     scenario, expectations = behaviour_scenario(class_file, entry)
     key = scenario_key(class_file['name'], 'behaviour', entry['spell'], entry.get('kind', ''),
                         entry.get('variant', ''))
+    parts = int(entry.get('parts', 1))
+    if parts > 1:
+        for part in range(1, parts + 1):
+            writer.add(scenario_key(key.removeprefix('conformance-'), 'part', part), 'behaviour', None,
+                       entry['spell'], expectations, {**scenario, 'name': f'{scenario["name"]} part {part}'},
+                       name=entry['name'])
+        return
     writer.add(key, 'behaviour', None, entry['spell'], expectations, scenario, name=entry['name'])
     expiry = behaviour_expiry(class_file, entry)
     if expiry:

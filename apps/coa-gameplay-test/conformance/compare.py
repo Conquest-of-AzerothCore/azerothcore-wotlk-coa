@@ -3525,19 +3525,27 @@ def hit_ratio_series(run: Run, reads: list[list[str]]) -> tuple[list[float], lis
     return [later[0] - earlier[0] for earlier, later in pairs], [later[1] - earlier[1] for earlier, later in pairs]
 
 
-def behaviour_hit_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
+    runs = run if isinstance(run, list) else [run]
+    run = runs[0]
+    scale = 100.0 if model.get('rate') else 1.0
     series = {}
     for arm in ('control', 'treatment'):
-        found = hit_ratio_series(run, model['reads'][arm])
-        if isinstance(found, str):
-            return replace(base, explanation=found)
-        series[arm] = found
-    minimum = int(model['minimum_hits'])
+        totals, counts = [], []
+        for part in runs:
+            found = hit_ratio_series(part, model['reads'][arm])
+            if isinstance(found, str):
+                return replace(base, explanation=found)
+            totals += [total * scale for total in found[0]]
+            counts += found[1]
+        series[arm] = (totals, counts)
+    minimum = int(model['minimum_hits']) * len(runs)
     hits = {arm: sum(counts) for arm, (_, counts) in series.items()}
     if min(hits.values()) < minimum:
         return replace(base, status='unmeasured',
                        explanation=f'{hits["control"]:g} control and {hits["treatment"]:g} treatment hits counted; '
-                                   f'each arm needs at least {minimum} of its {model["trials"]} casts to land')
+                                   f'each arm needs at least {minimum} of its {model["trials"] * len(runs)} casts to '
+                                   f'land')
     control, treatment = (per_event_sample(*series[arm]) for arm in ('control', 'treatment'))
     flat = model.get('expected_delta')
     scaled = ''
@@ -3562,10 +3570,14 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict
     status, reason, needed = bonus_status(bonus)
     sized = sized_trials(bonus)
     detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,
-              'trial_limit': model.get('trial_limit')}
-    limit = model.get('trial_limit')
+              'trial_limit': model.get('trial_limit'), **({'parts': len(runs)} if len(runs) > 1 else {})}
+    limit = model.get('trial_limit') and model['trial_limit'] * len(runs)
     beyond = (f'; {needed} trials per arm exceed the {limit} one scenario holds' if needed and limit and needed > limit
               else '')
+    if len(runs) > 1:
+        beyond += f'; {len(runs)} parts pooled'
+    if model.get('rate'):
+        beyond += f'; the {model["rate"]} rate is in percent of the counted events'
     return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
                    low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
                    explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
@@ -4358,9 +4370,13 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     hit_parts: dict[str, list[ProcPart]] = {}
     hit_slots: dict[str, int] = {}
     label_runs: dict[str, list[Run]] = {}
+    pooled: dict[str, list[ProcPart]] = {}
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
+            for data in entry['expectations']:
+                if (data.get('model') or {}).get('parts', 1) > 1 and data['check'] == BEHAVIOUR_HIT_RATIO:
+                    pooled.setdefault(data['label'], []).append((entry, None, Expectation(**data)))
             continue
         tokens = read_tokens(manifest['class_file'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
         for data in entry['expectations']:
@@ -4376,6 +4392,11 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK,
                                        SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
+            elif expectation.check == BEHAVIOUR_HIT_RATIO and (expectation.model or {}).get('parts', 1) > 1:
+                if expectation.label not in hit_slots:
+                    hit_slots[expectation.label] = len(verdicts)
+                    verdicts.append(None)
+                pooled.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in HIT_CHECKS and expectation.model and run is not None:
                 if expectation.label not in hit_slots:
                     hit_slots[expectation.label] = len(verdicts)
@@ -4383,6 +4404,22 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                 hit_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             else:
                 verdicts.append(judge(manifest, entry, run, expectation, tokens, tooltips, hit_model))
+    for label in pooled:
+        if label not in hit_slots:
+            hit_slots[label] = len(verdicts)
+            verdicts.append(None)
+    for label, parts in pooled.items():
+        first_entry, _, expectation = parts[0]
+        base = Verdict(label, 'alert', None, None, None, None, '',
+                       ' + '.join(entry['key'] for entry, _, _ in parts), expectation.spell_id, expectation.rank_id,
+                       expectation.check)
+        present = [run for _, run, _ in parts if run is not None]
+        verdict = (behaviour_hit_ratio_verdict(base, present, expectation.model)
+                   if len(present) == expectation.model['parts']
+                   else replace(base, status='unmeasured', explanation=f'{len(present)} of '
+                                f'{expectation.model["parts"]} pooled parts ran'))
+        verdict = with_excluded_band(verdict, expectation.check)
+        verdicts[hit_slots[label]] = replace(verdict, detail={**(verdict.detail or {}), **observed(expectation)})
     for label, parts in hit_parts.items():
         first_entry, _, expectation = parts[0]
         base = Verdict(label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,

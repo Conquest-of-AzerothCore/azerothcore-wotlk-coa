@@ -970,6 +970,11 @@ and `aura_presence` entries take `caster_auras`. `aura_presence` also takes `tar
 relocated that far) and `present: false` (the ally stays without the aura while a second expectation requires it on
 the caster).
 
+A `hit_ratio` entry may pool `parts` identical scenarios under one label (ADR 0195): the judge concatenates the
+trials of every part and needs all of them to have run. `rate: "critical"` (critical over all hits of the observed
+spell) or `rate: "proc"` (hits of `rate_spell` over them) with `expected_points` judges the arms' difference of rates in
+percent points inside the larger of 5% of it and 2 points.
+
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 
 "Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`

@@ -74,6 +74,7 @@ from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
+import compare as compare_module
 
 CLASS_FILE = load_class_file(19)
 RECORDS = Records(dataset(DBC_DIR))
@@ -6466,6 +6467,66 @@ class LevelFlatHitRatioTests(unittest.TestCase):
         for broken in ({**entry, 'level': 61}, {**entry, 'swing_hand': None, 'observe_spell': 706323},
                        {**entry, 'expected_token': ''}):
             with self.subTest(broken=broken.get('level')), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, broken)
+
+
+class PooledRateHitRatioTests(unittest.TestCase):
+    def entry(self, **changes):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['spell'] == 301310 and entry.get('label_suffix') == 'spell_penetration')
+        return {**entry, **changes}
+
+    def run_of(self, model: dict, control: float, treatment: float, events: tuple[float, float] = (1.0, 1.0)):
+        found = {}
+        for arm, marks in model['reads'].items():
+            per_trial = control if arm == 'control' else treatment
+            for index, (total, count) in enumerate(marks):
+                found[total] = index * per_trial * (events[0] if model.get('rate') else 1.0)
+                found[count] = index * (events[1] if model.get('rate') else 1.0)
+        return FakeRun(found)
+
+    def test_a_pooled_entry_judges_the_trials_of_every_part_together(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        self.assertEqual(expectation.model['parts'], 12)
+        base = base_verdict(expectation)
+        one = compare_module.behaviour_hit_ratio_verdict(base, self.run_of(expectation.model, 2000.0, 2150.0),
+                                                         expectation.model)
+        pooled = compare_module.behaviour_hit_ratio_verdict(
+            base, [self.run_of(expectation.model, 2000.0 + wobble, 2150.0 - wobble) for wobble in (-40.0, 40.0)],
+            expectation.model)
+        self.assertEqual((one.status, pooled.status), ('ok', 'ok'))
+        self.assertEqual(pooled.detail['parts'], 2)
+        flat = compare_module.behaviour_hit_ratio_verdict(
+            base, [self.run_of(expectation.model, 2000.0, 2000.0)] * 2, expectation.model)
+        self.assertEqual(flat.status, 'alert')
+
+    def test_a_crit_rate_counts_critical_hits_over_all_hits_in_points(self):
+        entry = self.entry(rate='critical', expected_points=50, critical=None, parts=1, label_suffix='crit_rate')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        totals = [step for step in steps if step.get('label', '').endswith(' total')]
+        counts = [step for step in steps if step.get('label', '').endswith(' count')]
+        self.assertTrue(all(step['metric'] == 'spell_damage_count' and step['critical'] for step in totals))
+        self.assertTrue(all(step['metric'] == 'spell_damage_count' and 'critical' not in step for step in counts))
+        model = expectation.model
+        for treatment, status in ((0.6, 'ok'), (0.4, 'alert')):
+            values = {}
+            for arm, marks in model['reads'].items():
+                rate, crits = (0.1 if arm == 'control' else treatment), 0.0
+                for index, (total, count) in enumerate(marks):
+                    crits += 0.0 if index == 0 else rate + (0.01 if index % 2 else -0.01)
+                    values[total], values[count] = crits, float(index)
+            with self.subTest(treatment=treatment):
+                verdict = compare_module.behaviour_hit_ratio_verdict(base_verdict(expectation), FakeRun(values), model)
+                self.assertEqual(verdict.status, status)
+
+    def test_a_rate_without_its_points_or_its_proc_spell_is_refused(self):
+        for broken in (self.entry(rate='critical', critical=None, parts=1),
+                       self.entry(rate='proc', expected_points=20, critical=None, parts=1),
+                       self.entry(rate='dodge', expected_points=20, critical=None, parts=1),
+                       self.entry(parts=0)):
+            with self.subTest(broken={key: broken.get(key) for key in ('rate', 'parts')}), \
+                    self.assertRaises(ValueError):
                 behaviour_scenario(CLASS_FILE, broken)
 
 

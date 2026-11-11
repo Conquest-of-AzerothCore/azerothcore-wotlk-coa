@@ -4788,6 +4788,10 @@ class HitRatioSpec:
     refresh: bool = False
     expected_token: str = ''
     scale_auras: tuple[tuple[int, int], ...] = ()
+    parts: int = 1
+    rate: str = ''
+    rate_spell: int | None = None
+    expected_points: float | None = None
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
@@ -4797,6 +4801,7 @@ SWING_METRIC = 'melee_damage_total'
 SWING_HANDS = frozenset({MAIN_HAND, 1})
 SWING_SETTLE_MS = 100
 HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power'})
+HIT_RATIO_RATES = ('critical', 'proc')
 
 
 def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
@@ -4852,9 +4857,15 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
     if spec.critical is not None:
         fields['critical'] = spec.critical
     total_metric, count_metric = spec.metric, HIT_RATIO_METRICS[spec.metric]
+    event_fields = fields
+    if spec.rate:
+        total_metric = count_metric
+        fields = {key: value for key, value in fields.items() if key != 'critical'}
+        event_fields = ({**fields, 'critical': True} if spec.rate == 'critical'
+                        else {**fields, 'spell': spec.rate_spell})
 
     def reads(labels: tuple[str, str]) -> list[dict]:
-        return [measurement(labels[0], spec.caster, total_metric, **fields),
+        return [measurement(labels[0], spec.caster, total_metric, **event_fields),
                 measurement(labels[1], spec.caster, count_metric, **fields)]
 
     steps = []
@@ -4944,6 +4955,12 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
             raise ValueError(f'{spec.spell} hit_ratio level {spec.level} lies above the class level '
                              f'{class_file["level"]} or below 1')
         class_file = {**class_file, 'level': spec.level}
+    if spec.parts < 1:
+        raise ValueError(f'{spec.spell} hit_ratio needs at least one part')
+    if spec.rate and (spec.rate not in HIT_RATIO_RATES or spec.expected_points is None or spec.expected_token
+                      or (spec.rate == 'proc') != (spec.rate_spell is not None) or spec.critical is not None):
+        raise ValueError(f'{spec.spell} hit_ratio rate {spec.rate!r} is one of {HIT_RATIO_RATES}, states '
+                         f'expected_points, no expected_token or critical filter, and a rate_spell exactly for proc')
     if (spec.expected_token or spec.scale_auras) and spec.swing_hand is None:
         raise ValueError(f'{spec.spell} hit_ratio judges a flat expected_token on swings only')
     if spec.scale_auras and not spec.expected_token:
@@ -5039,6 +5056,13 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
              'quote': entry.quote}
     if spec.expected_token:
         model['expected_delta'] = delta
+    if spec.rate:
+        model.update({'expected_delta': float(spec.expected_points), 'rate': spec.rate})
+        scenario['contract'] += (f'; the arms\' {spec.rate} rate in percent per {HIT_RATIO_WORDS[spec.metric]} '
+                                 f'event must differ by the stated {spec.expected_points:g} points')
+    if spec.parts > 1:
+        model['parts'] = spec.parts
+        scenario['contract'] += f'; one of {spec.parts} identical parts whose trials are pooled'
     if spec.scale_auras:
         model['scale_reads'] = {name: [hit_ratio_scale_label(spec, name, spell, effect)
                                        for spell, effect in spec.scale_auras] for name in HIT_RATIO_ARMS}
@@ -5060,7 +5084,9 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('swing_hand'), entry.get('cast_spell'), int(entry.get('cast_wait_ms', 0)),
                         entry.get('cast_power'), entry.get('level'), entry.get('target_entry'),
                         bool(entry.get('refresh', False)), entry.get('expected_token', ''),
-                        tuple((int(spell), int(effect)) for spell, effect in entry.get('scale_auras', ())))
+                        tuple((int(spell), int(effect)) for spell, effect in entry.get('scale_auras', ())),
+                        int(entry.get('parts', 1)), entry.get('rate', ''), entry.get('rate_spell'),
+                        entry.get('expected_points'))
 
 
 CRIT_RATE_TRIALS = 300
