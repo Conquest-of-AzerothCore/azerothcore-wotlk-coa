@@ -920,6 +920,11 @@ plain (not critical unless `critical` says so, not glancing) hits of that hand. 
 swing from landing between the total and the count. An off-hand `swing_hand` needs `off_hand_item`; a swing entry
 takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
 
+`cast_spell` casts that spell in each trial in place of `observe_spell`, and `cast_wait_ms` waits after it before
+the reads, for an ability whose hits are another spell's (ADR 0183): Righteous Tempest 807274's aura hits with
+570205 at the cast and every second for 5 s. Its Oaths read +59.4% and +59.6% with two (1 + (30 + 30) / 100, additive)
+and +29.5% to +29.8% with one, at 30 trials per arm.
+
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 
 "Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`

@@ -6228,6 +6228,34 @@ class HitRatioFixtureTests(unittest.TestCase):
         self.assertLess(control, talent)
         self.assertLess(talent, treatment)
 
+    def cast_spell_entry(self):
+        return {'spell': 805409, 'name': 'Righteous Tempest', 'kind': 'hit_ratio', 'label_suffix': 'cast_spell',
+                'quote': 'Consumes your Oaths, dealing additional damage for each consumed.', 'expected': 1.6,
+                'cast_spell': 807274, 'observe_spell': 570205, 'cast_wait_ms': 5500, 'learn': [807274],
+                'control': {}, 'treatment': {'auras': [[804904, 1]]}, 'critical': False, 'trials': 3}
+
+    def test_a_cast_spell_is_cast_and_another_spells_hits_are_read_after_its_wait(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, self.cast_spell_entry())
+        steps = run.validate(scenario)['steps']
+        self.assertFalse([step for step in steps if step['action'] == 'cast' and step['spell'] == 570205])
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 807274]
+        self.assertEqual(len(casts), 6)
+        waits = [step for step in steps if step['action'] == 'wait' and step.get('ms') == 5500]
+        self.assertEqual(len(waits), 6)
+        read = first_index(steps, label='805409 behaviour_hit_ratio cast_spell control 1 total')
+        self.assertEqual(steps[read]['spell'], 570205)
+        self.assertLess(casts[0], read)
+        self.assertEqual(sum(1 for step in steps if step['action'] == 'learn' and step['spell'] == 807274), 1)
+
+    def test_a_cast_spell_needs_another_observed_spell_and_a_wait_needs_a_cast_spell(self):
+        entry = self.cast_spell_entry()
+        without_cast = {key: value for key, value in entry.items() if key != 'cast_spell'}
+        for bad in ({**entry, 'cast_spell': 570205}, {**without_cast, 'observe_spell': 807274},
+                    {**entry, 'cast_wait_ms': -1}):
+            with self.subTest(bad={key: bad.get(key) for key in ('cast_spell', 'cast_wait_ms')}):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(CLASS_FILE, bad)
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CastAppliesAuraCastSpellTests(unittest.TestCase):

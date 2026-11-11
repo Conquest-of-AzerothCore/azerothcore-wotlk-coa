@@ -4472,6 +4472,8 @@ class HitRatioSpec:
     warmup: tuple[int, ...] = ()
     off_hand_item: int | None = None
     swing_hand: int | None = None
+    cast_spell: int | None = None
+    cast_wait_ms: int = 0
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
@@ -4570,7 +4572,9 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
-            steps += healed + hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
+            steps += healed + hit_ratio_cast(records, spec.cast_spell or spec.observe_spell, spec.caster, spec.target)
+            if spec.cast_wait_ms:
+                steps.append({'action': 'wait', 'label': f'{name} trial {trial} hits', 'ms': spec.cast_wait_ms})
             if trial == spec.trials:
                 steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
             steps += reads(marks[trial])
@@ -4609,6 +4613,10 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                          f'target health')
     if swinging and spec.swing_hand and spec.off_hand_item is None:
         raise ValueError(f'{spec.spell} hit_ratio reads off-hand swings without an off_hand_item')
+    if (spec.cast_spell is None and spec.cast_wait_ms) or (spec.cast_spell is not None and swinging) or \
+            spec.cast_spell == spec.observe_spell or spec.cast_wait_ms < 0:
+        raise ValueError(f'{spec.spell} hit_ratio casts {spec.cast_spell} to read the hits of another spell, with a '
+                         f'non-negative cast_wait_ms and no swings')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'hit_ratio', spec.quote, spec.expected)
     if spec.off_hand_item is not None:
@@ -4622,13 +4630,14 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     else:
         off_hand, equip = None, []
         if not swinging:
-            class_file = armed_for(class_file, records, spec.observe_spell)
+            class_file = armed_for(class_file, records, spec.cast_spell or spec.observe_spell)
     swing_ms = (off_hand['speed_ms'] if spec.swing_hand else swing_interval(class_file)) if swinging else 0
     learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts, *spec.warmup)
-    observed = [] if swinging else [{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}]
+    observed = [] if swinging else [{'action': 'learn', 'actor': spec.caster,
+                                     'spell': spec.cast_spell or spec.observe_spell}]
     steps = (equip + observed +
              [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
-              if swinging or spell != spec.observe_spell or spec.caster != CASTER] +
+              if swinging or spell != (spec.cast_spell or spec.observe_spell) or spec.caster != CASTER] +
              hit_ratio_steps(records, spec, swing_ms))
     waited = waited_ms(steps)
     if waited + TIMEOUT_MARGIN_MS > MAX_SCENARIO_MS:
@@ -4644,6 +4653,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     players = [player] + ([ally] if ALLY in (spec.caster, spec.target) else [])
     observed_text = (f'{spec.trials} {"off-hand" if spec.swing_hand else "main-hand"} swing intervals of '
                      f'{swing_ms} ms at {spec.target}' if swinging
+                     else f'{spec.trials} casts of {spec.cast_spell}, each followed by {spec.cast_wait_ms} ms for the '
+                          f'hits of {spec.observe_spell}, by {spec.caster} at {spec.target}' if spec.cast_spell
                      else f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target}')
     wielded = f', off-hand item {spec.off_hand_item} equipped' if spec.off_hand_item is not None else ''
     scenario = {
@@ -4682,7 +4693,7 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('metric', 'spell_damage_total'), entry.get('caster', CASTER),
                         entry.get('target', TARGET), hit_ratio_fixture(entry.get('fixture', {})),
                         tuple(int(spell) for spell in entry.get('warmup', ())), entry.get('off_hand_item'),
-                        entry.get('swing_hand'))
+                        entry.get('swing_hand'), entry.get('cast_spell'), int(entry.get('cast_wait_ms', 0)))
 
 
 TAKEN_HIT_TRIALS = 10
