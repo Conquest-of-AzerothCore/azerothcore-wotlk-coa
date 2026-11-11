@@ -1020,8 +1020,10 @@ namespace
         SPELL_GHOST             = 22650,
         SPELL_SOUL_BIND         = 2119845,
         SPELL_SOUL_FLAY_BEAM    = 2146711,
+        SPELL_SOUL_LINK         = 2119847,
         SPELL_BLUE_SHIELD       = 34648,
-        SPELL_MANA_SHIELD_GLOW  = 31635,
+        SPELL_BARRIER_BLUE      = 12000000,
+        SPELL_BIRTH             = 26047,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
@@ -1037,6 +1039,7 @@ namespace
     constexpr uint32 ACTION_VESSEL_BROKEN = 1;
     constexpr uint32 ACTION_VESSEL_LINKED = 2;
     constexpr uint32 ACTION_AWAKEN = 3;
+    constexpr uint32 ZUROGG_JUMP = 1;
     Position const ZuroggLanding = { 3439.56f, -4982.28f, 195.727f, 0.0f };
 
     void Beam(Unit* from, Unit* to)
@@ -1119,7 +1122,7 @@ namespace
             _spirits.DespawnAll();
             me->InterruptNonMeleeSpells(false);
             me->RemoveAurasDueToSpell(SPELL_BLUE_SHIELD);
-            me->RemoveAurasDueToSpell(SPELL_MANA_SHIELD_GLOW);
+            me->RemoveAurasDueToSpell(SPELL_BARRIER_BLUE);
             me->SetVisible(state != VESSEL_BROKEN);
             if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
@@ -1131,8 +1134,8 @@ namespace
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             if (state == VESSEL_SHIELDED)
             {
-                me->AddAura(SPELL_BLUE_SHIELD, me);
-                me->AddAura(SPELL_MANA_SHIELD_GLOW, me);
+                DoCastSelf(SPELL_BLUE_SHIELD, true);
+                DoCastSelf(SPELL_BARRIER_BLUE, true);
             }
             _spawn = 3s;
         }
@@ -1245,6 +1248,8 @@ namespace
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
             ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_IDLE); });
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
+                rogg->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
             Dormant(me, true);
         }
 
@@ -1262,9 +1267,15 @@ namespace
             _summons.Summon(summon);
             if (summon->GetEntry() != NPC_DAMNED_WIGHT)
                 return;
-            summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+            summon->SetStandState(UNIT_STAND_STATE_SUBMERGED);
             summon->SetControlled(true, UNIT_STATE_STUNNED);
             summon->CastSpell(me, SPELL_SOUL_FLAY_BEAM, true);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->SetStandState(UNIT_STAND_STATE_STAND);
+                summon->CastSpell(summon, SPELL_BIRTH, true);
+                summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+            }, 500ms);
             summon->m_Events.AddEventAtOffset([summon]()
             {
                 summon->InterruptNonMeleeSpells(false);
@@ -1280,6 +1291,7 @@ namespace
             ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_BROKEN); });
             if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
             {
+                rogg->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
                 rogg->KillSelf();
                 rogg->DespawnOrUnsummon(3s);
             }
@@ -1379,7 +1391,10 @@ namespace
             ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_SHIELDED); });
             Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f);
             if (rogg)
+            {
                 rogg->AI()->DoAction(ACTION_AWAKEN);
+                me->CastSpell(rogg, SPELL_SOUL_LINK, true);
+            }
             Player* first = nullptr;
             for (Player* p : Players(me, [](Player*) { return true; }))
                 if (!first || (p->HasTankSpec() && !first->HasTankSpec()) ||
@@ -1401,8 +1416,6 @@ namespace
                 return;
             }
             Dormant(me, true);
-            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
-                Beam(me, rogg);
         }
 
     private:
@@ -1429,6 +1442,7 @@ namespace
                 me->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(),
                     home.GetOrientation());
             _dormant = true;
+            _jumping = false;
             Dormant(me, true);
         }
 
@@ -1436,8 +1450,36 @@ namespace
         {
             if (_dormant)
                 Dormant(me, true);
+            else if (_jumping)
+            {
+                _jump -= Milliseconds(diff);
+                if (_jump <= 0ms)
+                    Land();
+            }
             else
                 custom_world_boss_coa::UpdateAI(diff);
+        }
+
+        void AttackStart(Unit* who) override
+        {
+            if (_jumping)
+                _target = who->GetGUID();
+            else
+                custom_world_boss_coa::AttackStart(who);
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (_jumping && type == EFFECT_MOTION_TYPE && id == ZUROGG_JUMP)
+                Land();
+        }
+
+        void Land()
+        {
+            _jumping = false;
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (Unit* t = ObjectAccessor::GetUnit(*me, _target))
+                AttackStart(t);
         }
 
         void DoAction(int32 action) override
@@ -1446,9 +1488,11 @@ namespace
                 return;
             _dormant = false;
             Dormant(me, false);
+            me->SetReactState(REACT_PASSIVE);
             me->InterruptNonMeleeSpells(false);
-            if (me->GetExactDist(&ZuroggLanding) > 2.0f)
-                me->GetMotionMaster()->MoveJump(ZuroggLanding, 30.0f, 20.0f);
+            _jumping = true;
+            _jump = 4s;
+            me->GetMotionMaster()->MoveJump(ZuroggLanding, 25.0f, 15.0f, ZUROGG_JUMP);
         }
 
         void JustEngagedWith(Unit* who) override
@@ -1510,6 +1554,9 @@ namespace
 
     private:
         bool _dormant = true;
+        bool _jumping = false;
+        Milliseconds _jump = 0ms;
+        ObjectGuid _target;
     };
 
     // ------------------------------------------------------------ Trut-K'hahn

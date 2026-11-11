@@ -128,9 +128,9 @@ DELETE FROM `creature_template_addon` WHERE `entry` IN (67532, 67533);
 INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650'), (67533, '22650');
 
 -- Their models (DevModels gallery): Atal'zul the troll lich (79329), also for his hologram; Zul'rogg the dire troll
--- (79411).
+-- (79411), scaled to stand as tall as Atal'zul (2.5 on display scale 2 is 14 yards; his 1.5 display needs 2.95).
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411 WHERE `CreatureID` = 67533;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411, `DisplayScale` = 2.95 WHERE `CreatureID` = 67533;
 
 -- The Damned Wights are skeletal warriors (display 734) and the Soul Vessel crystal is the
 -- floating purple crystal (47751); his holograms are half as big again.

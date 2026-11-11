@@ -15,6 +15,7 @@
  * spell catalogues print it).
  */
 
+#include "DBCStores.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "Log.h"
@@ -88,7 +89,12 @@ namespace
             if (info->Id == 2119819)
                 info->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
             else if (info->Id == 2119845 || info->Id == 2146711)
+            {
                 info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+                info->DurationEntry = sSpellDurationStore.LookupEntry(21);
+            }
+            else if (info->Id == 2119810)
+                info->Effects[1].Effect = SPELL_EFFECT_NONE;
         }
     };
 }
