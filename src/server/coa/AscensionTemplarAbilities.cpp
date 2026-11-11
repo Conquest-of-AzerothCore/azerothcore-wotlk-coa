@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionTemplar.h"
+#include "DBCStores.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -15,6 +16,19 @@
 namespace
 {
 using namespace AscensionTemplar;
+constexpr uint32 SPELL_DISCIPLINED_MIND_DISPEL = 525052;
+uint32 DispelCasts(uint32 rank)
+{
+    SpellEntry const* entry = sSpellStore.LookupEntry(rank);
+    if (!entry)
+        return 0;
+    uint32 casts = 0;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (entry->EffectApplyAuraName[i] == SPELL_AURA_PROC_TRIGGER_SPELL &&
+            entry->EffectTriggerSpell[i] == SPELL_DISCIPLINED_MIND_DISPEL)
+            ++casts;
+    return casts;
+}
 bool Selected(SpellInfo const* info, uint32 aura)
 {
     switch (aura)
@@ -230,8 +244,14 @@ class templar_casts : public AllSpellScript
         if (Named(info, 801448))
         {
             talent(707364, 712378);
-            if (target && (player->HasAura(680399) || player->HasAura(681483)))
-                Cast(player, target, 525052);
+            if (target)
+                for (uint32 rank : {681483u, 680399u})
+                    if (player->HasAura(rank))
+                    {
+                        for (uint32 cast = DispelCasts(rank); cast; --cast)
+                            Cast(player, target, SPELL_DISCIPLINED_MIND_DISPEL);
+                        break;
+                    }
         }
         if (Named(info, 801165))
         {

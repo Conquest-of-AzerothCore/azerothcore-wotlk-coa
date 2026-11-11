@@ -100,8 +100,9 @@ BEHAVIOUR_LABELS = {
                                 + ('behaviour_hit_ratio' if entry['judge'] == 'damage_ratio' else 'behaviour_taken_hit')
                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'threat_redirect': lambda entry: [f"{entry['spell']} behaviour_threat_redirect"],
-    'dispel_count': lambda entry: [f"{entry['spell']} behaviour_dispel_count {arm['name']} "
-                                   f"{DISPEL_TYPE_NAMES[int(kind)]}"
+    'dispel_count': lambda entry: [f"{entry['spell']} behaviour_dispel_count"
+                                   + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')
+                                   + f" {arm['name']} {DISPEL_TYPE_NAMES[int(kind)]}"
                                    for arm in entry['arms'] for kind, _ in arm['expected']],
     'fixed_count': lambda entry: [f"{entry['spell']} behaviour_fixed_count"],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"

@@ -5139,14 +5139,19 @@ class DispelCountSpec:
     arms: tuple[DispelCountArm, ...]
     trials: int = DISPEL_COUNT_TRIALS
     wait_ms: int = DISPEL_COUNT_WAIT_MS
+    label_suffix: str = ''
+
+
+def dispel_count_check(spec: DispelCountSpec) -> str:
+    return f'{spec.spell} {BEHAVIOUR_DISPEL_COUNT}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
 
 
 def dispel_count_read_label(spec: DispelCountSpec, arm: str, trial: int, debuff: int, moment: str) -> str:
-    return f'{spec.spell} {BEHAVIOUR_DISPEL_COUNT} {arm} {trial} {debuff} {moment}'
+    return f'{dispel_count_check(spec)} {arm} {trial} {debuff} {moment}'
 
 
 def dispel_count_label(spec: DispelCountSpec, arm: str, dispel_type: int) -> str:
-    return f'{spec.spell} {BEHAVIOUR_DISPEL_COUNT} {arm} {DISPEL_TYPE_NAMES[dispel_type]}'
+    return f'{dispel_count_check(spec)} {arm} {DISPEL_TYPE_NAMES[dispel_type]}'
 
 
 def dispel_count_validate(records: Records, spec: DispelCountSpec):
@@ -5195,7 +5200,8 @@ def dispel_count_scenario(class_file: dict, spec: DispelCountSpec) -> tuple[dict
     waited = waited_ms(steps)
     scenario = {
         'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel count',
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel count'
+                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
         'contract': f'The ally carries {[list(group) for _, group in spec.debuffs]} (dispel types '
                     f'{[dispel_type for dispel_type, _ in spec.debuffs]}); the caster casts {spec.cast_spell} on it '
                     f'{spec.trials} times per arm {[arm.name for arm in spec.arms]}, each arm setting its auras first; '
@@ -5225,7 +5231,8 @@ def dispel_count_spec(entry: dict) -> DispelCountSpec:
                  for arm in entry['arms'])
     debuffs = tuple((int(kind), tuple(int(debuff) for debuff in group)) for kind, group in entry['debuffs'])
     return DispelCountSpec(entry['spell'], entry['name'], entry['quote'], entry['cast_spell'], debuffs, arms,
-                           entry.get('trials', DISPEL_COUNT_TRIALS), entry.get('wait_ms', DISPEL_COUNT_WAIT_MS))
+                           entry.get('trials', DISPEL_COUNT_TRIALS), entry.get('wait_ms', DISPEL_COUNT_WAIT_MS),
+                           entry.get('label_suffix', ''))
 
 
 def behaviour_entries(class_file: dict, spell_ids: list[int] | None) -> list[dict]:

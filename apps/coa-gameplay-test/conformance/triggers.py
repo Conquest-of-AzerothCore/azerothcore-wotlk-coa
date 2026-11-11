@@ -235,7 +235,7 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Unknown observe metric {entry["observe_metric"]!r} of trigger {aura}')
     if entry.get('observe_actor', CASTER) not in OBSERVE_ACTORS:
         raise ValueError(f'Unknown observe actor {entry.get("observe_actor")!r} of trigger {aura}')
-    if not 0 < entry['per_trigger'] <= 1:
+    if not (0 < entry['per_trigger'] <= 1 or (isinstance(entry['per_trigger'], int) and entry['per_trigger'] > 1)):
         raise ValueError(f'Trigger {aura} has {entry["per_trigger"]} events per trigger')
     if entry.get('attempt_auras') and trigger['action'] != CAST:
         raise ValueError(f'Trigger {aura} sets attempt auras without a cast before which to set them')
