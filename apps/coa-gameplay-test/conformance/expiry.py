@@ -3,8 +3,9 @@ import math
 from pathlib import Path
 
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
-                        STRIKER_HEALTH, NotModelled, behaviour_entry, cast_applies_aura_spec, cast_applies_aura_steps,
-                        duration_refresh_spec, duration_spec, mechanic_duration_spec, prose_rule)
+                        STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, behaviour_entry, cast_applies_aura_spec,
+                        cast_applies_aura_steps, duration_refresh_spec, duration_spec, mechanic_duration_spec,
+                        prose_rule)
 from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fixture, records_of, timed
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
@@ -20,6 +21,8 @@ SHIFT_FLOOR_MS = 2 * CLOCK_STEP_MS
 MARGIN_SHARE = 0.025
 BEFORE_SLACK_STEPS = 4
 AFTER_SLACK_STEPS = 7
+ACT_BEFORE_STEPS = 2
+ACT_AFTER_STEPS = 4
 APPLY_WITHIN_MS = 2000
 WITHOUT, WITH = 'without', 'with'
 BEHAVIOUR_KINDS = frozenset({'cast_applies_aura', 'duration_refresh', 'duration_ratio', 'duration'})
@@ -56,6 +59,26 @@ def margins_of(expected_ms: float, tail: list[dict]) -> tuple[int, int]:
         raise NotModelled(f'an end stated at {expected_ms:g} ms with {len(tail)} steps after the act leaves no '
                           f'reading pair that a server {shift:g} ms off would fail at {CLOCK_STEP_MS} ms per step')
     return before, after
+
+
+def act_margins_of(expected_ms: float) -> tuple[int, int]:
+    shift = shift_of(expected_ms)
+    before = math.floor(shift) - CLOCK_STEP_MS - 1
+    after = CLOCK_STEP_MS + 1
+    if before <= ACT_BEFORE_STEPS * CLOCK_STEP_MS or after >= shift - ACT_AFTER_STEPS * CLOCK_STEP_MS:
+        raise NotModelled(f'an end stated at {expected_ms:g} ms leaves no reading pair timed from the act itself '
+                          f'that a server {shift:g} ms off would fail at {CLOCK_STEP_MS} ms per step')
+    return before, after
+
+
+def act_anchored_arm(prefix: str, name: str, expected_ms: float,
+                     requires: tuple[tuple[str, float], ...] = ()) -> ExpiryArm:
+    return ExpiryArm(name, float(expected_ms), f'{prefix} {name} expiry act', None, f'{prefix} {name} before_expiry',
+                     f'{prefix} {name} after_expiry', *act_margins_of(expected_ms), 0, requires)
+
+
+def lands_within_its_cast_step(records: Records, spell: int, aura: int) -> bool:
+    return aura == spell and facts_of(records, spell).cast_time_ms == 0 and records.field('Spell', spell, 'Speed') == 0
 
 
 def expiry_arm(prefix: str, name: str, expected_ms: float, tail: list[dict] = (), applied: bool = True,
@@ -212,7 +235,7 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
     learned, cast = cast_applies_aura_steps(records, spec)
     learn = [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
     if spec.control_ms is None:
-        arms = [expiry_arm(prefix, 'cast', spec.expected_ms, requires=((absent, 0.0),))]
+        arms = [single_cast_arm(records, spec, prefix, ((absent, 0.0),))]
         steps = (base_steps(class_file) + learn + learned
                  + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
                  + cast_arm(cast, arms[0], actor, spec.applied_aura))
@@ -243,8 +266,19 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
                                                    prose_rule(spec.quote, spec.spell), arms)]
 
 
+def single_cast_arm(records: Records, spec: CastAppliesAuraSpec, prefix: str,
+                    requires: tuple[tuple[str, float], ...]) -> ExpiryArm:
+    try:
+        return expiry_arm(prefix, 'cast', spec.expected_ms, requires=requires)
+    except NotModelled:
+        if not lands_within_its_cast_step(records, spec.cast_spell or spec.spell, spec.applied_aura):
+            raise
+        return act_anchored_arm(prefix, 'cast', spec.expected_ms, requires)
+
+
 def cast_arm(cast: list[dict], arm: ExpiryArm, actor: str, aura: int) -> list[dict]:
-    return cast[:-1] + [acted(cast[-1], arm), applied_step(arm, actor, aura)] + pair_steps(arm, actor, aura)
+    applied = [applied_step(arm, actor, aura)] if arm.applied_label else []
+    return cast[:-1] + [acted(cast[-1], arm)] + applied + pair_steps(arm, actor, aura)
 
 
 def duration_refresh_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

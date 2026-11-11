@@ -2865,6 +2865,16 @@
       "observe_source": "A Condemn 804906 cast grants an Oath through AscensionTemplar::GrantOath (AscensionTemplarAbilities.cpp:172; AscensionTemplar.cpp:168-181), which casts Oath Chain 704576 on the caster and sets its duration to GetMaxDuration(). 704576 DurationIndex 8 (15000 ms; AscensionTemplarContracts.cpp:100-101 keeps index 8). Oath Flow 705283 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 1 (SPELLMOD_DURATION), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20%, EffectSpellClassMask[0] word 0 64 matching 704576 SpellFamilyFlags[0] 64: 15000 x 1.2 = 18000 ms. Control arm: Condemn cast before the learn, the chain ending at 15000 ms; with arm: Condemn cast again after the learn and a cooldown reset, ending at 18000 ms."
     },
     {
+      "spell": 804914,
+      "name": "Beckon",
+      "kind": "cast_applies_aura",
+      "quote": "Taunt an enemy to attack you for",
+      "expected_ms": 3000,
+      "applied_aura": 804914,
+      "target": "dummy",
+      "observe_source": "804914 DurationIndex 27 (SpellDuration.dbc 3000 ms, $d), CastingTimeIndex 1 (instant), Speed 0, StartRecoveryTime 0, no power cost; Effect[1] APPLY_AURA 11 SPELL_AURA_MOD_TAUNT at EffectImplicitTargetA[1] 6 TARGET_UNIT_TARGET_ENEMY. An instant cast with no travel time applies its aura inside the cast step (Spell::prepare calls cast(true) when m_casttime is 0, Spell.cpp:3778-3779; Spell::cast delays only a spell with Speed > 0, Spell.cpp:4106), so the expiry pair is timed from the cast itself (expiry.act_anchored_arm): a 3000 ms end leaves no pair after an applied assert at 25 ms per step. The taunt aura is read on the dummy, absent before the cast."
+    },
+    {
       "spell": 705272,
       "name": "Chivalric",
       "kind": "hit_ratio",

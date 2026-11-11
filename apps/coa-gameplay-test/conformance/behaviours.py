@@ -1756,13 +1756,13 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     after_label = cast_applies_aura_label(spec, AFTER)
     learned, cast = cast_applies_aura_steps(records, spec)
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
-             + [measurement(before_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura)] + cast
-             + [measurement(after_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura)])
+             + [measurement(before_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)] + cast
+             + [measurement(after_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)])
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast applies aura',
-        'contract': f'{spec.applied_aura}\'s remaining aura_duration_ms on the caster is read once right after '
-                    f'{spec.spell} is learned, before it is ever cast (expected absent, 0 ms, since nothing else '
+        'contract': f'{spec.applied_aura}\'s remaining aura_duration_ms on the {spec.target} is read once right '
+                    f'after {spec.spell} is learned, before it is ever cast (expected absent, 0 ms, since nothing else '
                     f'in this scenario could have applied {spec.applied_aura}), and once right after casting '
                     f'{spec.spell} (expected within {CAST_MARGIN_MS:g} ms below its own SpellDuration.dbc value '
                     f'of {spec.expected_ms:g} ms, the same instant-cast tick loss every aura_duration_ms check in '

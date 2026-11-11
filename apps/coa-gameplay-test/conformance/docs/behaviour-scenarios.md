@@ -910,7 +910,12 @@ otherwise). With `E` the stated end and `shift = max(5% of E, 50 ms)`:
 The readings are placed from the stated end at generation (`expiry.margins_of`): the before reading
 `max(2.5% of E, (k + 4) x 25 ms + 1)` before `E` and the after reading `min(that, shift - (k + 7) x 25 ms - 1)`
 after it, `k` counting the steps between the act and the readings (a wait counts twice, for its own overshoot). An end
-too short for both conditions at 25 ms per step is `unmodelled` (about 4.5 s with no step between act and readings).
+too short for both conditions at 25 ms per step is `unmodelled` (about 4.5 s with no step between act and readings),
+except for a single-arm `cast_applies_aura` whose cast spell applies its own aura within its cast step (cast time 0,
+Speed 0, `expiry.lands_within_its_cast_step`; ADR 0143). That arm has no applied assert and is timed from the cast
+itself (`expiry.act_anchored_arm`): the before reading `floor(shift) - 26` ms before `E`, the after reading 26 ms after
+it (`expiry.act_margins_of`), which leaves a judgeable pair down to about 2.54 s. Beckon 804914's 3000 ms taunt is
+read on the dummy 2876 ms and 3026 ms after the cast.
 A clause whose ledger entry lists the `behaviour_expiry` label is behaviour-proven by it; an `unmeasured` or `alert`
 pair leaves the clause unproven.
 
@@ -957,6 +962,7 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Pious Sweep 520034 (`variant: "above_75"`/`"below_75"`) | hit_ratio | "Increases the damage of Chastise by" / "on enemies above 75% health or affected by Tranquil Circle." | 1.25 at full health, 1.0 at 50% | aura 303 on `AURA_STATE_HEALTH_ABOVE_75_PERCENT`, Chastise mask (`AscensionTemplarContracts.cpp:152-156`) |
 | Force of Golganneth 500694 | cost_gate (`talent_aura`) | "While active, your Temple Guardian spell has its Energy cost reduced by" | 8 Energy while the aura is up | aura 108 `SPELLMOD_COST` -50% |
 | Testament of Fortitude 500678 | cast_applies_aura | "Meditate for" | 15000 ms | `DurationIndex` 8 |
+| Beckon 804914 | cast_applies_aura | "Taunt an enemy to attack you for" | 3000 ms on the dummy | `DurationIndex` 27, `Effect[1]` aura 11 `SPELL_AURA_MOD_TAUNT` at `TARGET_UNIT_TARGET_ENEMY`; instant, Speed 0, so the pair is timed from the cast (ADR 0143) |
 | Testament of Fortitude 500678 | periodic_dispel | "Each second you will also remove 1 disease effect from yourself." | 2 without the spell, 2 at 800 ms, 1 at 1200 ms, 0 at 2200 ms | Frost Fever 55095 and Blood Plague 55078 (15000 ms each); 500690 `Effect[2]` `SPELL_EFFECT_DISPEL` disease, every 1000 ms |
 | Pious Sweep 520034 (`variant: "circle_without_talent"`) | hit_ratio | "on enemies above 75% health or affected by Tranquil Circle." | 1.0 | the Tranquil Circle arm without Pious Sweep learned: the without-talent control of the circle claim |
 | Staffguard 705295 | cast_applies_aura (`cast_spell` 572769) | "for" | 8000 ms | `AscensionTemplarAbilities.cpp:239-243`, 706583 `DurationIndex` 31 |

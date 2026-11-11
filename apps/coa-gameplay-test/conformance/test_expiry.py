@@ -8,10 +8,12 @@ import unittest
 from behaviours import NotModelled, behaviour_entries
 from compare import Run, Verdict, evaluate, judge_behaviour
 from coverage import BEHAVIOUR, EVIDENCE
-from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, behaviour_expiry, expiry_arm, margins_of,
-                    pair_steps, shift_of, trigger_expiry)
+from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, act_margins_of, behaviour_expiry,
+                    expiry_arm, lands_within_its_cast_step, margins_of, pair_steps, shift_of, trigger_expiry)
 from hits import MAX_ACCELERATED_SCENARIO_MS
 from profile import DBC_DIR, load_class_file
+from tooltip import Records
+from values import dataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import run
@@ -27,8 +29,10 @@ RIGHTEOUS_CUSTODIAN = 572808
 OATH_FLOW = 705283
 DEEP_SECRETS = 705263
 SACRED_RESTRAINT = 102208
+BECKON = 804914
+FROSTBOLT = 116
 EXPIRY_ENTRIES = (TESTAMENT_OF_STRENGTH, BLESSING_OF_AGGRAMAR, 705271, FINESSE_RANK_2, COURAGE_RANK_1, 712466,
-                  SACRED_OATH)
+                  SACRED_OATH, BECKON)
 
 
 def behaviour(spell: int) -> dict:
@@ -96,6 +100,14 @@ class MarginTest(unittest.TestCase):
         with self.assertRaises(NotModelled):
             margins_of(3000, [])
 
+    def test_a_short_end_timed_from_the_act_itself_has_a_pair(self):
+        self.assertEqual(act_margins_of(3000), (124, 26))
+        before, after = act_margins_of(2600)
+        self.assertGreater(before, 2 * CLOCK_STEP_MS)
+        self.assertLess(after, shift_of(2600) - 4 * CLOCK_STEP_MS)
+        with self.assertRaises(NotModelled):
+            act_margins_of(2500)
+
     def test_pair_reads_before_and_after_the_stated_end(self):
         arm = expiry_arm('1 2', 'with', 5100)
         steps = pair_steps(arm, 'caster', 2)
@@ -134,6 +146,26 @@ class TemplarExpiryScenarioTest(unittest.TestCase):
         self.assertEqual(stated_ends(BLESSING_OF_AGGRAMAR), {'without': 30000.0, 'with': 30000.0})
         self.assertEqual(stated_ends(SACRED_OATH), {'without': 8000.0, 'with': 7000.0})
         self.assertEqual(stated_ends(HOLY_COMBATANT), {'without': 6000.0, 'with': 7000.0})
+
+    def test_a_three_second_taunt_is_timed_from_its_cast_and_read_on_the_dummy(self):
+        scenario, expectation = built(BECKON)
+        self.assertEqual(stated_ends(BECKON), {'cast': 3000.0})
+        arm = expectation.model['arms'][0]
+        self.assertIsNone(arm['applied_label'])
+        self.assertEqual((arm['before_margin_ms'], arm['after_margin_ms'], arm['requires']),
+                         (124, 26, [[f'{BECKON} {BECKON} before cast', 0.0]]))
+        act = next(index for index, step in enumerate(scenario['steps']) if step.get('label') == arm['act_label'])
+        tail = scenario['steps'][act + 1:]
+        self.assertEqual([step['action'] for step in tail], ['wait', 'assert', 'wait', 'assert'])
+        self.assertEqual([tail[0]['ms'], tail[2]['ms']], [3000 - 124, 124 + 26])
+        self.assertEqual({tail[1]['actor'], tail[3]['actor']}, {'dummy'})
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], ['dummy'])
+
+    def test_only_an_instant_spell_without_travel_lands_its_own_aura_within_its_cast_step(self):
+        records = Records(dataset(DBC_DIR))
+        self.assertTrue(lands_within_its_cast_step(records, BECKON, BECKON))
+        self.assertFalse(lands_within_its_cast_step(records, BECKON, SACRED_RESTRAINT))
+        self.assertFalse(lands_within_its_cast_step(records, FROSTBOLT, FROSTBOLT))
 
     def test_a_control_arm_casts_before_the_passive_is_learned_and_ends_at_the_unmodified_duration(self):
         scenario, expectation = built(OATH_FLOW)
