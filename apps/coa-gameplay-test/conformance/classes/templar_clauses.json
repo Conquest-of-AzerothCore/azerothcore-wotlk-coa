@@ -20,7 +20,7 @@
       "92108 trigger_count"
     ],
     "kind": "claim",
-    "reason": "Proven with a dual-wield fixture (Dual Wield 674, off-hand Cudgel 2492; classes/templar.json triggers, Zealotry dual_wield). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons, so the fixture result counts. Dependency: a Templar on this server has no dual-wield grant today, a missing implementation handled in its own step."
+    "reason": "Proven with a dual-wield fixture (Dual Wield 674, off-hand Cudgel 2492; classes/templar.json triggers, Zealotry dual_wield). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons, so the fixture result counts. Every Templar already learns Dual Wield 674 at login through AscensionLiveBaselineData.h:128 and AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017; lean/templar-offhand-reading.md); the fixture's grant is removed in the gap batch, where the clause is re-proven on a fresh character."
   },
   {
     "spell": 92109,

@@ -2965,6 +2965,7 @@ class PeriodicDispelSpec:
     debuffs: tuple[int, ...]
     period_ms: int
     margin_ms: int = PERIODIC_DISPEL_MARGIN_MS
+    power: int | None = None
 
 
 def periodic_dispel_label(spell: int, moment: str, debuff: int | None = None) -> str:
@@ -2993,7 +2994,10 @@ def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tupl
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + place()
              + [{'action': 'wait', 'label': 'control without the spell wait', 'ms': control_wait}] + read('control')
              + [{'action': 'set_aura', 'actor': CASTER, 'spell': debuff, 'stacks': 0} for debuff in spec.debuffs]
-             + place() + cast_gate_power_step(facts) + required_aura_steps(facts)
+             + place()
+             + ([{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': spec.power}]
+                if spec.power is not None else cast_gate_power_step(facts))
+             + required_aura_steps(facts)
              + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell},
                 {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER}])
     elapsed = 0
@@ -3021,7 +3025,8 @@ def periodic_dispel_scenario(class_file: dict, spec: PeriodicDispelSpec) -> tupl
 
 def periodic_dispel_spec(entry: dict) -> PeriodicDispelSpec:
     return PeriodicDispelSpec(entry['spell'], entry['name'], entry['quote'], tuple(int(d) for d in entry['debuffs']),
-                              int(entry['period_ms']), entry.get('margin_ms', PERIODIC_DISPEL_MARGIN_MS))
+                              int(entry['period_ms']), entry.get('margin_ms', PERIODIC_DISPEL_MARGIN_MS),
+                              entry.get('power'))
 
 
 SPELL_FAILED_TARGET_AURASTATE = 111

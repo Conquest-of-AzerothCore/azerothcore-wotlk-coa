@@ -839,7 +839,9 @@ and reads them after the whole window with no cast (`<spell> periodic_dispel con
 control), removes and sets them again, casts `spell`, and reads them `margin_ms` (200) before the first `period_ms`
 (`before_first`: all present) and `margin_ms` after each period (`after_<n>`: one fewer each time). The removal order
 is not fixed, so each reading is the sum of the fixtures' `aura` values (`sum_labels`), judged exactly by
-`compare.behaviour_cast_gate_verdict`. The fixtures must outlast the window.
+`compare.behaviour_cast_gate_verdict`. The fixtures must outlast the window. `power` sets the caster's power before the cast in place of the plain
+cost, for a channel that also drains power per second (Testament of Fortitude: `ManaPerSecond` 15 on top of
+`ManaCost` 15; at exactly the cost the channel ended at its first tick).
 
 ### Threat-tick periods
 
