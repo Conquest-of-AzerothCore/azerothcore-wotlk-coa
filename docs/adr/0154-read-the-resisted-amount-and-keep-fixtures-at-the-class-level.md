@@ -41,8 +41,11 @@ cap, 60. `item_template` is SQL data, outside the DBC set the generator reads.
 
 - `templar-high-general-chastise-damage` runs at level 60 against level 60 dummies, with 823764 on both players,
   and asserts a resisted amount of 0 on every Chastise log of both arms.
-- Blessed Padding equips Void Slayer's Tunic 30298 (mail chest, `RequiredLevel` 60, armor 704 in the test
-  database) at level 60.
+- Blessed Padding equips Void Slayer's Tunic 30298 (mail chest, `RequiredLevel` 60, template armor 704 in the test
+  database) at level 60. A Templar wears the ItemAddon.dbc reborn armor instead (`LocalLevelScaling::WornArmorFor`),
+  574 for 30298; with 27 from the starter mail, the mail armor the passive scales reads 601.
+- `templar-chastise-partial-resist-read` is the positive control: without 823764, twelve Chastise hits on a level 60
+  dummy must show a positive resisted total.
 - Tests: `test_runner.test_spell_log_metrics_need_a_spell_and_take_the_caster_filters`,
   `test_runner.test_spell_resist_chance_needs_a_magic_school_and_a_target`,
   `test_passives.PassiveScenarioTest.test_item_armor_subclass_item_must_be_wearable_at_the_class_level` and
