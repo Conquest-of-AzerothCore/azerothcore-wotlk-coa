@@ -208,7 +208,8 @@ def libram_of_grace_entry() -> dict:
 
 
 def chakra_of_light_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CHAKRA_OF_LIGHT)
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == CHAKRA_OF_LIGHT and entry['kind'] == 'ally_heal_breadth')
 
 
 def justice_entry() -> dict:
