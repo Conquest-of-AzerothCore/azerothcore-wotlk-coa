@@ -1579,7 +1579,8 @@
     "clause": "Increases the healing of Benediction by $s1%",
     "labels": [
       "680399 effect_value e0 #0",
-      "680399 e0 spell_modifier 578276"
+      "680399 e0 spell_modifier 578276",
+      "680399 behaviour_hit_ratio benediction"
     ],
     "kind": "claim"
   },
@@ -2264,7 +2265,7 @@
     "spell": 705298,
     "clause": "Effectively healing yourself now reduces your Physical damage taken",
     "labels": [
-      "705298 trigger_count ok"
+      "705298 trigger_count"
     ],
     "kind": "claim"
   },
@@ -2272,7 +2273,7 @@
     "spell": 705298,
     "clause": "by ${$705299m1+$STA*0.1}",
     "labels": [
-      "705298 effect_value #0 -- unmeasurable: effect 0 of spell 705299 is disabled by a server correction"
+      "705298 behaviour_metric_delta damage_taken"
     ],
     "kind": "claim"
   },
@@ -2280,7 +2281,8 @@
     "spell": 705298,
     "clause": "for $705299d",
     "labels": [
-      "conformance-templar-value-705298 (spell_duration 705299 #1)"
+      "705298 spell_duration 705299 #1",
+      "705298 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2862,8 +2864,9 @@
     "clause": "Increases the duration of Interdict by $/1000;s1 sec",
     "labels": [
       "712678 effect_value e0 #0",
-      "712678 e0 (unmodelled)",
-      "712678 behaviour_metric_delta duration"
+      "712678 e0",
+      "712678 behaviour_metric_delta duration",
+      "712678 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2872,8 +2875,12 @@
     "clause": "and its cooldown by $/1000;s2 sec",
     "labels": [
       "712678 effect_value e1 #1",
-      "712678 e1 (unmodelled)",
-      "712678 behaviour_metric_delta cooldown"
+      "712678 e1",
+      "712678 behaviour_metric_delta cooldown",
+      "712678 cost_gate 560116 without",
+      "712678 cost_gate 560116 base",
+      "712678 cost_gate 560116 with",
+      "712678 cost_gate 560116 beyond"
     ],
     "kind": "claim"
   },

@@ -3814,6 +3814,82 @@
       "after_casts": [[572027, "dummy"]],
       "after_wait_ms": 2000,
       "observe_source": "$/1000;806106s1 = 4 sec (806106 EffectBasePoints[0] -4001, EffectDieSides[0] 1, -4000 ms). AscensionTemplarAbilities.cpp:182-200: an Oath Breaker cast (Breaker, Righteous Upheaval 572027) with the Eternal Blessing 705300 buff up casts 707111 on the caster; :305-308: a hit of 707111 with 573452 known calls ReduceLibrams(player, 4000) once per spell (AscensionTemplar.cpp:129-133, Libram of Tenacity 801461 among the five Librams). Gated spell Libram of Tenacity 801461, RecoveryTime 180000 ms. Each arm casts Eternal Blessing and a first Righteous Upheaval before the priming cast (no Libram cooldown runs yet), primes the Libram, then, in the arms with 573452, casts Righteous Upheaval at the dummy 2000 ms later. Attempts timed from the priming cast: 176500 ms without 573452 (refused, SPELL_FAILED_NOT_READY 67), 176500 ms with it (goes through), 175500 ms with it (refused: no more than 4 sec). The scenario waits 549400 ms of game time and runs on the accelerated clock only (ADR 0152)."
+    },
+    {
+      "spell": 680399,
+      "name": "Disciplined Mind",
+      "kind": "hit_ratio",
+      "variant": "benediction",
+      "label_suffix": "benediction",
+      "quote": "Increases the healing of Benediction by",
+      "expected": 1.15,
+      "metric": "spell_heal_total",
+      "observe_spell": 578276,
+      "caster": "caster",
+      "target": "ally",
+      "control": {},
+      "treatment": {"auras": [[680399, 1]]},
+      "critical": false,
+      "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "$s1 = 15 (680399 EffectBasePoints[0] 14, EffectDieSides[0] 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE, which also scales heals), EffectSpellClassMask[0] 1073741824 matching Benediction 578276 SpellFamilyFlags[0] 1073741824. The caster heals the ally with Benediction 578276 (rank 8, the level 60 rank); control: no talent; treatment: Disciplined Mind rank 1 set before every heal. A spell power fixture of 20000 makes the $SP*0.3 part dominate the 56-point die, as for rank 2 681483. Only non-critical heals are compared. The ratio does not depend on the rank's per-level term, so the ADR 0148 removal does not move it. Players and the dummy are at level 60."
+    },
+    {
+      "spell": 705298,
+      "name": "Untainted",
+      "kind": "metric_delta",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "quote": "now reduces your Physical damage taken",
+      "expected": 983,
+      "before_expected": 1000,
+      "trigger_spell": 705299,
+      "cast_in_before": false,
+      "metric": "melee_damage_taken",
+      "fields": {"target": "dummy"},
+      "measure_actor": "caster",
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "705299 Effect[0] aura 14 SPELL_AURA_MOD_DAMAGE_TAKEN, EffectMiscValue 1 (Physical). AscensionTemplarAuras.cpp:66-67 (CalcAmount) sets the amount to int32(-10 - .1f * Stamina): the reference character's Stamina 79 (class file reference_stats stat 2) gives int32(-17.9) = -17. MeleeDamageBonusTaken adds it as TakenFlatBenefit (Unit.cpp:11617), so 1000 Physical from the dummy reads 983 with 705299 on the caster and 1000 before any cast (control). 705299 is cast on the caster directly; the heal trigger that grants it is proven by the 705298 trigger entry. The tooltip's own formula ${$705299m1+$STA*0.1} with $705299m1 = -10 reads -2.1, not -17.9: the sign reading is an owner question (lean/trial-o-progress.md). Players and the dummy are at level 60."
+    },
+    {
+      "spell": 705298,
+      "name": "Untainted",
+      "kind": "cast_applies_aura",
+      "quote": "for $705299d",
+      "expected_ms": 8000,
+      "applied_aura": 705299,
+      "target": "caster",
+      "cast_spell": 705299,
+      "cast_target": "caster",
+      "observe_source": "705299 DurationIndex 31 (8000 ms, $705299d), applied on the caster (EffectImplicitTargetA 1). AscensionTemplarEvents.cpp:160-163 casts 705299 on the player when a heal of the player procs 705298; the expiry pair reads 705299 before and after its stated end, timed from a direct cast of 705299."
+    },
+    {
+      "spell": 712678,
+      "name": "Patience",
+      "kind": "cast_applies_aura",
+      "quote": "Increases the duration of Interdict by $/1000;s1 sec",
+      "expected_ms": 8000,
+      "applied_aura": 560116,
+      "target": "dummy",
+      "cast_spell": 560116,
+      "cast_target": "dummy",
+      "control": {
+        "expected_ms": 6000
+      },
+      "observe_source": "AscensionTemplarAbilities.cpp:70-75 (templar_casts::OnCalcMaxDuration): if (player && aura->GetId() == 560116 && player->HasAura(712678)) duration += 2000. Interdict 560116 SpellDuration 32 (6000 ms), TARGET_UNIT_TARGET_ENEMY, so the silence lands on the dummy. Control arm: Interdict cast before the learn, ending at 6000 ms; with arm: cast again after the learn, ending at 8000 ms. Players and the dummy are at level 60."
+    },
+    {
+      "spell": 712678,
+      "name": "Patience",
+      "kind": "cost_gate",
+      "quote": "and its cooldown by $/1000;s2 sec",
+      "gated_spell": 560116,
+      "resource": "cooldown",
+      "reduction": -5000,
+      "target": "dummy",
+      "observe_source": "Owner ruling 2026-11-10: the clause lengthens Interdict's cooldown by 5 sec. AscensionTemplarContracts.cpp:169-170 sets 712678 EffectBasePoints[1] to 4999 (+5000 ms) and AscensionTemplarAbilities.cpp:223-224 (OnSpellCast) calls ModifySpellCooldown(560116, Amount(712678, EFFECT_1)) when 712678 is known; Player.cpp:11950-11956 moves the stored end. Interdict 560116 RecoveryTime 120000 ms, cast at the dummy. Arms timed from a priming cast: 120500 ms without Patience (through), 120500 ms with it (refused, SPELL_FAILED_NOT_READY 67), 125500 ms with it (through), 124500 ms with it (refused). Players and the dummy are at level 60."
     }
   ],
   "player_observations": [
