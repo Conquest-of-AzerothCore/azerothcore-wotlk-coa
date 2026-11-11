@@ -38,7 +38,10 @@ weapon percent (`SpellEffects.cpp:4722`), so the two multiply.
 
 - Zealotry with Bursting Impact is 100% of off-hand weapon damage (80% x 1.25); with Blade Sermon rank 2 125%.
   Without the talent it stays at 80%, and the stock rule is unchanged for every other spell.
-- `SetScriptWeaponDamageMultiplier` stores a value: a later Templar caller on 801450 would overwrite this one. The
-  combined Bursting Impact and Blade Sermon arm (1.5625) shows such an overwrite.
+- `SetScriptWeaponDamageMultiplier` stores a value: a later Templar caller on 801450 would overwrite this one. Blade
+  Sermon raises the weapon percent through a spell modifier and does not call the setter, so the combined arm
+  (1.5625) catches only an overwrite by a caller active under Bursting Impact and Blade Sermon together.
 - Regression: catalog scenario `templar-bursting-impact-zealotry` (1.22-1.28 between two forced-crit hits) and the
-  conformance arms `705276` `zealotry`, `blade_sermon`, `empty_off_hand` and `swing`.
+  conformance arms `705276` `zealotry`, `share` (at the reference attack power, off-hand Cudgel 2492),
+  `blade_sermon`, `empty_off_hand` and `swing`. Without the talent Zealotry's percent is read from the judged
+  Blade Sermon rank 2 ratio, (p + 20) / p.

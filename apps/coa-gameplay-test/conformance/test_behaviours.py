@@ -6155,7 +6155,7 @@ class OffHandHitRatioTests(unittest.TestCase):
         broken = ({**swing, 'metric': 'spell_damage_total'},
                   {**swing, 'swing_hand': 2},
                   {key: value for key, value in swing.items() if key != 'off_hand_item'},
-                  {**swing, 'off_hand_item': 2492},
+                  {**swing, 'off_hand_item': FROSTMANE_CLUB},
                   {**variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'), 'metric': 'melee_damage_total'})
         for entry in broken:
             with self.subTest(entry={key: entry.get(key) for key in ('metric', 'swing_hand', 'off_hand_item')}):

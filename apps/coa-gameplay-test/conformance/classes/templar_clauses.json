@@ -1877,10 +1877,11 @@
       "705276 behaviour_hit_ratio swing",
       "705276 behaviour_hit_ratio zealotry",
       "705276 behaviour_hit_ratio blade_sermon",
-      "705276 behaviour_hit_ratio empty_off_hand"
+      "705276 behaviour_hit_ratio empty_off_hand",
+      "705276 behaviour_hit_ratio share"
     ],
     "kind": "claim",
-    "reason": "Owner ruling 'Bursting Impact on Zealotry' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the talent raises the off-hand weapon's damage, so plain off-hand auto attacks (swing) and Zealotry 801450, a share of that damage (zealotry), both rise by $s1%; it multiplies with Blade Sermon (blade_sermon, the mentor's stacking decision) and does nothing to Zealotry without an off-hand weapon (empty_off_hand). Fixed in AscensionTemplarAbilities.cpp, ADR 0146 (lean/bursting-impact-fix.md)."
+    "reason": "Owner ruling 'Bursting Impact on Zealotry' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the talent raises the off-hand weapon's damage, so plain off-hand auto attacks (swing) and Zealotry 801450, a share of that damage (zealotry), both rise by $s1%; it multiplies with Blade Sermon (blade_sermon, the mentor's stacking decision) and does nothing to Zealotry without an off-hand weapon (empty_off_hand). Fixed in AscensionTemplarAbilities.cpp, ADR 0146 (lean/bursting-impact-fix.md). Zealotry without the talent stays at its 80% weapon percent: the clause 143 ratio (Blade Sermon rank 2, (p + 20) / p, judged on the same runs) gives p = 20 / (ratio - 1), whatever multiplier both arms share."
   },
   {
     "spell": 705278,
