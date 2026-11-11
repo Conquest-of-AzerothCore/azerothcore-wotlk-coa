@@ -106,8 +106,6 @@
 
 #include <algorithm>
 #include <unordered_set>
-#include <mutex>
-#include <atomic>
 #include <array>
 #include <cmath>
 #include <map>
@@ -277,8 +275,6 @@ namespace
     constexpr uint32 SETIS_TOKENS_MAX = 150;
     constexpr uint8 SETIS_NORMAL_GROUP = 1;
     constexpr uint8 SETIS_HEROIC_GROUP = 2;
-    constexpr uint16 SMSG_COA_CHECKPOINTS_ENABLED = 0x767;
-    constexpr uint16 CMSG_COA_RESPAWN_AT_CHECKPOINT = 0x774;
     Position const SetisEntrance = { -8093.0f, 1663.6f, 12.9f, 0.0f };
     Position const SetisShrine = { -7864.724f, 1326.674f, -7.357f, 5.4786f };
     constexpr float SETIS_SHRINE_ARRIVAL = 20.0f;
@@ -522,62 +518,6 @@ namespace
             }
             player->TeleportTo(1, x, y, z + 0.5f, Position::NormalizeOrientation(away + float(M_PI)));
             return true;
-        }
-    };
-
-    // Ascension's death dialog offers "Last Checkpoint" in a raid whose checkpoints are on (SMSG 0x767, u8);
-    // the button sends CMSG 0x774 (u8 1). In Setis' map it carries the body back to the entrance.
-    std::mutex g_checkpointLock;
-    std::unordered_set<uint32> g_checkpointRequests;
-    std::atomic<uint32> g_checkpointCount{0};
-
-    class setis_checkpoint_packets : public ServerScript
-    {
-    public:
-        setis_checkpoint_packets()
-            : ServerScript("setis_checkpoint_packets", {SERVERHOOK_CAN_PACKET_RECEIVE_EARLY}) { }
-
-        [[nodiscard]] bool CanPacketReceiveEarly(WorldSession* session, WorldPacket const& packet) override
-        {
-            if (packet.GetOpcode() != CMSG_COA_RESPAWN_AT_CHECKPOINT)
-                return true;
-            if (session)
-            {
-                std::lock_guard lock(g_checkpointLock);
-                if (g_checkpointRequests.insert(session->GetAccountId()).second)
-                    ++g_checkpointCount;
-            }
-            return false;
-        }
-    };
-
-    class setis_checkpoint_players : public PlayerScript
-    {
-    public:
-        setis_checkpoint_players()
-            : PlayerScript("setis_checkpoint_players", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_MAP_CHANGED}) { }
-
-        void OnPlayerMapChanged(Player* player) override
-        {
-            WorldPacket packet(SMSG_COA_CHECKPOINTS_ENABLED, 1);
-            packet << uint8(player->GetMapId() == SETIS_MAP ? 1 : 0);
-            player->SendDirectMessage(&packet);
-        }
-
-        void OnPlayerUpdate(Player* player, uint32 /*diff*/) override
-        {
-            if (!g_checkpointCount.load(std::memory_order_relaxed))
-                return;
-            {
-                std::lock_guard lock(g_checkpointLock);
-                if (!g_checkpointRequests.erase(player->GetSession()->GetAccountId()))
-                    return;
-                --g_checkpointCount;
-            }
-            if (player->GetMapId() != SETIS_MAP || player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
-                return;
-            player->NearTeleportTo(SetisEntrance.GetPositionX(), SetisEntrance.GetPositionY(),
-                SetisEntrance.GetPositionZ(), SetisEntrance.GetOrientation());
         }
     };
 
@@ -1719,8 +1659,6 @@ void AddCoaCustomWorldBossScripts()
     new go_setis_altar_coa();
     new go_setis_exit_coa("go_setis_exit_coa");
     new go_setis_exit_coa("go_setis_leave_coa");
-    new setis_checkpoint_packets();
-    new setis_checkpoint_players();
     new custom_script<boss_snowgrave_coa>("boss_snowgrave_coa");
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
