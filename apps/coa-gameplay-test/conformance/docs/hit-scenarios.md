@@ -203,18 +203,22 @@ average multiplier over stacks `0, 1, ..., performed - 1`, since the buff is gra
 scenario part starts a fresh character (no stacks carry in). This is additive and class-agnostic: a class file that
 omits `self_stack_bonus` gets multiplier 1.0 (today's unstacked behaviour) for every rank.
 
-## Target-debuff-gated ranks (`target_aura_gates`, ADR 0055)
+## Target-debuff-gated ranks (`target_aura_gates`, ADRs 0078 and 0133)
 
 A clause conditioned on the *target* carrying a specific debuff of the caster's ("on enemies affected by your
 X"), where the gating aura's own bonus is itself a live, target-side `SPELL_AURA_MOD_DAMAGE_FROM_CASTER`-style
 effect (not a caster-side spellmod a static `spell_effect_value`/`spell_modifier` check can read), needs its own
 scenario shape: `hit_parts`'s optional `gate: (gate_spell, percent, enabling_spell)` parameter learns
-`enabling_spell` (the passive owning the modifier) and recasts `gate_spell` on the dummy target before every
-trial (via the same per-cast `cast_fixtures` mechanism the ally-relocate fixture already uses), scaling the
-expected mean by `1 + percent/100`; `measured_hit_model` reads that same scaling back from the Expectation's own
-`gate_multiplier` field at compare time. A class file names one entry per gated rank in `target_aura_gates`
-(`{"spell", "name", "quote", "rank", "gate_spell", "percent", "label_suffix"}`), generated via `conformance.py
-generate --target-gate <passive id>` (`add_target_gate`, which reuses the multi-part writer `add_hit` already
-has, since the trial count this check's tolerance needs routinely exceeds one scenario's budget). Templar's
-Might (705291) is the first entry; see ADR 0055 for why its own check currently judges `alert` rather than `ok`.
+`enabling_spell` (the passive owning the modifier) and, before every trial (via the same per-cast `cast_fixtures`
+mechanism the ally-relocate fixture already uses), removes and re-applies the caster's `gate_spell` aura on the
+dummy target at its `StackAmount` (`set_aura` with `caster`), then asserts that stack count as a `SETUP` step, so a
+gate that fails to land fails the scenario instead of measuring the ungated mean. The gate spell is never cast: a
+cast needs the spell in the caster's spellbook (`HandleCastSpellOpcode` drops it otherwise) and would also run the
+cast's own side effects on the caster. The expected mean is scaled by `1 + percent/100`; `measured_hit_model`
+reads that same scaling back from the Expectation's own `gate_multiplier` field at compare time. A class file
+names one entry per gated rank in `target_aura_gates` (`{"spell", "name", "quote", "rank", "gate_spell",
+"percent", "label_suffix"}`), with `percent` the bonus at the stack cap, generated via `conformance.py generate
+--target-gate <passive id>` (`add_target_gate`, which reuses the multi-part writer `add_hit` already has, since
+the trial count this check's tolerance needs routinely exceeds one scenario's budget). Templar's Might (705291) is
+the first entry.
 

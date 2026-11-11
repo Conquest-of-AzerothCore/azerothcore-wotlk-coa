@@ -12,7 +12,7 @@ from profile import (CASTER, DBC_DIR, SETTLE_MS, base_steps, caster_stats_from, 
 from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readout, Records, Tooltip, Unreadable,
                      mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
-                    EFFECTS, GAP_CLOSER_DISTANCE, GCD_WAIT_MS, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE,
+                    EFFECTS, GAP_CLOSER_DISTANCE, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE,
                     Z_99, Expectation, RankFacts, Unmodelled, armed_for, closes_distance, dataset, equip_requirement,
                     facts_of, gap_closer_expectation, gap_closer_target, is_hostile, required_aura_steps,
                     required_target_health_steps, targets_ally)
@@ -705,23 +705,22 @@ def self_stack_multiplier(class_file: dict, rank_id: int, performed: int) -> flo
     return 1.0 + entry['percent_per_stack'] / 100.0 * (performed - 1) / 2.0
 
 
-GATE_FIXTURE_STEP_COUNT = 5
+GATE_FIXTURE_STEP_COUNT = 3
 
 
-def gate_fixture_steps(target_gate_facts: RankFacts, gate_spell: int, restore_facts: RankFacts) -> list[dict]:
-    steps = [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': gate_spell}]
-    if target_gate_facts.mana_cost > 0 and not target_gate_facts.mana_cost_percentage \
-            and not target_gate_facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': target_gate_facts.power_type,
-                      'value': target_gate_facts.mana_cost})
-    steps += required_aura_steps(target_gate_facts)
-    steps.append({'action': 'cast', 'actor': CASTER, 'spell': gate_spell, 'target': TARGET})
-    steps.append({'action': 'wait', 'ms': GCD_WAIT_MS})
-    if restore_facts.mana_cost > 0 and not restore_facts.mana_cost_percentage \
-            and not restore_facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': restore_facts.power_type,
-                      'value': restore_facts.mana_cost})
-    return steps
+def gate_stacks(records: Records, gate_spell: int) -> int:
+    return max(1, int(records.field('Spell', gate_spell, 'StackAmount')))
+
+
+def gate_setup_label(label: str, gate_spell: int) -> str:
+    return f'{label} SETUP: the caster\'s {gate_spell} holds its stack cap on the target'
+
+
+def gate_fixture_steps(gate_spell: int, stacks: int, label: str) -> list[dict]:
+    fixture = {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER, 'spell': gate_spell}
+    return [{**fixture, 'stacks': 0}, {**fixture, 'stacks': stacks},
+            {'action': 'assert', 'label': gate_setup_label(label, gate_spell), 'actor': TARGET,
+             'metric': 'aura_stacks', 'spell': gate_spell, 'caster': CASTER, 'min': stacks, 'max': stacks}]
 
 
 def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | None = None,
@@ -745,9 +744,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                        armed_file.get('known_auras', []))
         if gate is not None and hit.model.kind in HEAL_KINDS:
             raise ValueError(f'{rank_id} target_aura_gate needs a hostile hit model, got {hit.model.kind!r}')
-        gate_facts = facts_of(records, gate[0]) if gate is not None else None
-        gate_extra_ms = (GCD_WAIT_MS + gate_facts.cast_time_ms + CAST_MARGIN_MS + GATE_FIXTURE_STEP_COUNT
-                         * READ_STEP_MS) if gate_facts else 0
+        stacks = gate_stacks(records, gate[0]) if gate is not None else 0
+        gate_extra_ms = GATE_FIXTURE_STEP_COUNT * READ_STEP_MS if gate is not None else 0
         start_recovery = records.field('Spell', rank_id, 'StartRecoveryTime')
         interval = max(start_recovery, hit.facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS
         budget_interval = interval + gate_extra_ms
@@ -783,7 +781,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     weapon = weapon_profile(armed_file) if model.kind in WEAPON_KINDS else None
     order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind in WEAPON_KINDS else ''
     source = f' of triggered spell {hit.hit_spell} per tick' if hit.hit_spell != rank_id else ''
-    gate_note = f'; {gate[0]} re-cast on the target every trial, {gate[1]:g}% expected mean bonus' if gate else ''
+    gate_note = (f'; the caster\'s {gate[0]} set on the target at {stacks} stacks every trial, {gate[1]:g}% '
+                 f'expected mean bonus') if gate else ''
     rule = (f'{model.kind} hit{source}{order}, integer steps modelled'
             f'{weapon_note(class_file, armed_file, records, rank_id)}{gate_note}')
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', check, spell.spell_id, rank_id, None, entry,
@@ -792,7 +791,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     cast_fixtures = [{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}] \
         if (ally and closes_distance(hit.facts)) or (gap_closing and cast_target) else []
     if gate is not None:
-        cast_fixtures = cast_fixtures + gate_fixture_steps(gate_facts, gate[0], hit.facts)
+        cast_fixtures = cast_fixtures + gate_fixture_steps(gate[0], stacks, label)
     dual = dual_target_entry(class_file, rank_id) if not hostile else None
     if dual and model.kind != 'heal':
         raise ValueError(f'{rank_id} dual_target_effects needs a heal-kind model, got {model.kind!r}')
