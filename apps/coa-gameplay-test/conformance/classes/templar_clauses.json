@@ -4168,7 +4168,9 @@
     "spell": 805409,
     "clause": "every $t1 sec",
     "labels": [
-      "807274 aura_amplitude_ms #2"
+      "807274 aura_amplitude_ms #2",
+      "805409 behaviour_metric_delta tick_950",
+      "805409 behaviour_metric_delta tick_1050"
     ],
     "kind": "claim"
   },
@@ -4177,7 +4179,10 @@
     "clause": "$?s300512[ and reducing damage taken by $300512s2%][] for $d",
     "labels": [
       "807274 effect_value 300512e1 #3",
-      "807274 aura_duration_ms #4"
+      "807274 aura_duration_ms #4",
+      "805409 behaviour_hit_ratio argent_knight",
+      "805409 behaviour_metric_delta requires_argent_knight",
+      "807274 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -4186,7 +4191,9 @@
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
     "labels": [
       "805409 behaviour_oath_consumption_removal",
-      "805409 behaviour_oath_consumption"
+      "805409 behaviour_hit_ratio oaths",
+      "805409 behaviour_hit_ratio oath_lunge",
+      "805409 behaviour_hit_ratio oath_condemn"
     ],
     "kind": "claim"
   },

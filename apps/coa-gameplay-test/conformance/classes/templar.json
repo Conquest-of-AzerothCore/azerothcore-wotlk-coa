@@ -4564,6 +4564,56 @@
       "expected_ms": 20000, "applied_aura": 805416, "target": "caster", "cast_spell": 807268, "cast_target": "dummy",
       "force_crit": "melee",
       "source": "805416 DurationIndex 18 (SpellDuration.dbc 20000 ms, $805416d). AscensionTemplarEvents.cpp:90-91 (Check, case 805415): a damaging critical hit, once per 1 s (State(player).cooldowns); :177-181 (Proc) casts 805416 on the caster and, when GetAuraCount(805416) >= 5 (Unit.cpp:6760-6776 sums the stacks) and High General 524617 is absent, casts 524617. Argent Blade 807268 is cast at the dummy with the forced melee crit rating, as the internal_cooldown_gate entry does; the class fixture's hit and expertise ratings remove misses, dodges and parries, so every cast is one crit. Each setup cast waits 5100 ms, past Argent Blade's 5000 ms RecoveryTime and the 1 s gate, so the trigger cast lands too (a first run at 1100 ms left it on cooldown, one crit short). The before phase casts the same sequence without 805415 (control arm). One forced-crit Argent Blade applies 805416; its expiry pair is timed from that cast (ADR 0182)."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "hit_ratio", "variant": "oaths", "label_suffix": "oaths",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.6,
+      "cast_spell": 807274, "observe_spell": 570205, "cast_wait_ms": 5500, "learn": [807274],
+      "control": {}, "treatment": {"auras": [[804904, 1], [804922, 1]]},
+      "critical": false, "trials": 30,
+      "expected_source": "Righteous Tempest 807274 (the level 60 rank, 5000 ms, a hit of 570205 at the cast and every 1000 ms) is cast at the dummy and the non-critical hits of 570205 are read for 5500 ms after each cast (ADR 0183). AscensionTemplarAuras.cpp's lifecycle Calculate (805409, effect 0) sums max(0, EFFECT_2 amount) of the held Oaths {804904, 804922, 804924, 805332} into the aura's script value, and OnSpellCalculatedTarget multiplies every RighteousTempest() hit by 1 + value/100 (AscensionTemplarAbilities.cpp:128-134). Each Oath's EFFECT_2 is EffectBasePoints 29 + 1 = 30. The Oaths are set before every treatment cast and cleared when the aura ends (the oath_consumption_removal entry). The Oaths' SPELLMOD_DAMAGE effects do not reach 570205: 804904 alone reads 1.297, not 1.30 x 1.30. Two Oaths: 1 + (30 + 30) / 100 = 1.60, additive; a product would read 1.69."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "hit_ratio", "variant": "oath_lunge", "label_suffix": "oath_lunge",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.3,
+      "cast_spell": 807274, "observe_spell": 570205, "cast_wait_ms": 5500, "learn": [807274],
+      "control": {}, "treatment": {"auras": [[804904, 1]]},
+      "critical": false, "trials": 30,
+      "expected_source": "Righteous Tempest 807274 (the level 60 rank, 5000 ms, a hit of 570205 at the cast and every 1000 ms) is cast at the dummy and the non-critical hits of 570205 are read for 5500 ms after each cast (ADR 0183). AscensionTemplarAuras.cpp's lifecycle Calculate (805409, effect 0) sums max(0, EFFECT_2 amount) of the held Oaths {804904, 804922, 804924, 805332} into the aura's script value, and OnSpellCalculatedTarget multiplies every RighteousTempest() hit by 1 + value/100 (AscensionTemplarAbilities.cpp:128-134). Each Oath's EFFECT_2 is EffectBasePoints 29 + 1 = 30. The Oaths are set before every treatment cast and cleared when the aura ends (the oath_consumption_removal entry). The Oaths' SPELLMOD_DAMAGE effects do not reach 570205: 804904 alone reads 1.297, not 1.30 x 1.30. Oath: Righteous Lunge 804904 alone: 1.30."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "hit_ratio", "variant": "oath_condemn", "label_suffix": "oath_condemn",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.3,
+      "cast_spell": 807274, "observe_spell": 570205, "cast_wait_ms": 5500, "learn": [807274],
+      "control": {}, "treatment": {"auras": [[804922, 1]]},
+      "critical": false, "trials": 30,
+      "expected_source": "Righteous Tempest 807274 (the level 60 rank, 5000 ms, a hit of 570205 at the cast and every 1000 ms) is cast at the dummy and the non-critical hits of 570205 are read for 5500 ms after each cast (ADR 0183). AscensionTemplarAuras.cpp's lifecycle Calculate (805409, effect 0) sums max(0, EFFECT_2 amount) of the held Oaths {804904, 804922, 804924, 805332} into the aura's script value, and OnSpellCalculatedTarget multiplies every RighteousTempest() hit by 1 + value/100 (AscensionTemplarAbilities.cpp:128-134). Each Oath's EFFECT_2 is EffectBasePoints 29 + 1 = 30. The Oaths are set before every treatment cast and cleared when the aura ends (the oath_consumption_removal entry). The Oaths' SPELLMOD_DAMAGE effects do not reach 570205: 804904 alone reads 1.297, not 1.30 x 1.30. Oath: Condemn 804922 alone: 1.30."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "taken_hit", "variant": "argent_knight",
+      "label_suffix": "argent_knight", "judge": "damage_ratio", "expected": 0.8, "quote": "reducing damage taken by",
+      "strike_spell": 41394, "trials": 10, "learn": [300512, 807274], "caster_health_pct": 90, "caster_max_health": 100000,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[807274, 0]], "casts": [[807274, "caster"]]}],
+      "observe_source": "Righteous Tempest 807274 is the level 60 rank (BaseLevel 60, DurationIndex 28: 5000 ms, Effect[0] aura 23 every 1000 ms triggering 570205). 300512 (Argent Knight) makes the aura's Effect[1] (aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127) read -20 (the requires_argent_knight metric_delta). 300512 is learned for the whole scenario (it is a talent, not a settable aura); the control arm takes the strikes with no Tempest, the treatment arm casts 807274 on the caster before every strike, within its 5000 ms. The caster is held at 90% of 100000 health before every trial, so the strikes cannot kill it (a first run without it died at the third control strike). The treatment arm removes the previous Tempest (807274 set to 0 stacks) before each cast: a first run without it read every third strike unreduced (946 mean, 7 of 10 at 880), the pattern of a recast that does not take while the previous aura is up, so the aura lapsed before every third strike. Without 300512 the same aura effect reads 0 (requires_argent_knight). A level 60 striker (entry 36) casts Light of the Naaru 41394 (Holy, a flat 1100) at the caster; non-critical hits compared from the damage logs the caster receives (ADR 0153)."
+    },
+    {
+      "spell": 807274, "name": "Righteous Tempest", "kind": "cast_applies_aura", "quote": "for $d",
+      "expected_ms": 5000, "applied_aura": 807274, "target": "caster", "cast_spell": 807274, "cast_target": "caster",
+      "source": "Righteous Tempest 807274 is the level 60 rank (BaseLevel 60, DurationIndex 28: 5000 ms, Effect[0] aura 23 every 1000 ms triggering 570205); the aura is applied by its own instant cast and read absent before it."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "metric_delta", "variant": "tick_950",
+      "label_suffix": "tick_950", "quote": "every $t1 sec", "expected": 7, "before_expected": 1,
+      "trigger_spell": 807274, "target": "dummy", "metric": "spell_damage_count", "fields": {"spell": 570205, "target": "dummy"},
+      "wait_ms": 950, "expire_ms": 6000,
+      "observe_source": "Righteous Tempest 807274 is the level 60 rank (BaseLevel 60, DurationIndex 28: 5000 ms, Effect[0] aura 23 every 1000 ms triggering 570205). 807274 hits at its cast and then every EffectAmplitude 1000 ms (ADR 0150 noted the hit at the cast). The before phase casts 807274 and reads 570205's hits on the dummy 950 ms later; the after phase, after the first aura has ended (six hits, at 0 to 5000 ms), casts again and reads the cumulative count: six plus the second cast's hits so far. Read 950 ms after the cast: 1 hit(s) per cast, so the period is above 950 ms; with the other entry, (950, 1050] ms."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "metric_delta", "variant": "tick_1050",
+      "label_suffix": "tick_1050", "quote": "every $t1 sec", "expected": 8, "before_expected": 2,
+      "trigger_spell": 807274, "target": "dummy", "metric": "spell_damage_count", "fields": {"spell": 570205, "target": "dummy"},
+      "wait_ms": 1050, "expire_ms": 6000,
+      "observe_source": "Righteous Tempest 807274 is the level 60 rank (BaseLevel 60, DurationIndex 28: 5000 ms, Effect[0] aura 23 every 1000 ms triggering 570205). 807274 hits at its cast and then every EffectAmplitude 1000 ms (ADR 0150 noted the hit at the cast). The before phase casts 807274 and reads 570205's hits on the dummy 1050 ms later; the after phase, after the first aura has ended (six hits, at 0 to 5000 ms), casts again and reads the cumulative count: six plus the second cast's hits so far. Read 1050 ms after the cast: 2 hit(s) per cast, so the period is at most 1050 ms; with the other entry, (950, 1050] ms."
     }
   ],
   "player_observations": [
