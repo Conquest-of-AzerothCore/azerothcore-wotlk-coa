@@ -992,7 +992,8 @@ class PassiveDeltaTest(unittest.TestCase):
         token = [Displayed('$s1', 6.0, 0, 'percent')]
         within = self.single(entry, '2.8592', '8.8592', token)
         self.assertEqual(within.status, 'ok')
-        self.assertAlmostEqual(within.high - within.expected, 0.03)
+        self.assertAlmostEqual(within.high - within.expected, 0.01)
+        self.assertEqual(self.single(entry, '2.8592', '8.8792', token).status, 'alert')
         self.assertEqual(self.single(entry, '2.8592', '7.8592', token).status, 'alert')
 
     def test_crit_chance_consumer_has_no_one_point_floor(self):

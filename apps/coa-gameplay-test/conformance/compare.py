@@ -2878,8 +2878,8 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     cap_pct = strongest_percent(own_pct, partner_pct)
     own_expected = baseline * (1 + own_pct / 100) * (1 + personal_pct / 100)
     combined_expected = baseline * (1 + cap_pct / 100) * (1 + personal_pct / 100)
-    own_margin = delta_margin(model['metric'], own_expected)
-    combined_margin = delta_margin(model['metric'], combined_expected)
+    own_margin = delta_margin(model.get('metric', ''), own_expected)
+    combined_margin = delta_margin(model.get('metric', ''), combined_expected)
     own_ok = abs(own - own_expected) <= own_margin
     combined_ok = abs(combined - combined_expected) <= combined_margin
     status = 'ok' if own_ok and combined_ok else 'alert'
