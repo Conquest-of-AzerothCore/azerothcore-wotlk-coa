@@ -84,7 +84,7 @@
       "ms": 500
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "actor": "raider",
       "entry": 978095
     },
@@ -141,7 +141,7 @@
       "ms": 500
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "actor": "raider",
       "entry": 978095
     },
@@ -159,7 +159,7 @@
       "within_ms": 8000
     },
     {
-      "action": "use_gameobject",
+      "action": "use_nearby_gameobject",
       "actor": "mate1",
       "entry": 978095
     },
