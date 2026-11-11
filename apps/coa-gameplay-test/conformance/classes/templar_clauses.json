@@ -31,8 +31,17 @@
   {
     "spell": 92109,
     "clause": "You now delay 40% of direct damage taken, instead taking it over $803237d.",
-    "labels": [
-      "92109 spell_duration 803237"
+    "claims": [
+      {
+        "claim": "You now delay 40% of direct damage taken",
+        "labels": []
+      },
+      {
+        "claim": "instead taking it over $803237d",
+        "labels": [
+          "92109 spell_duration 803237"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -107,8 +116,19 @@
   {
     "spell": 300504,
     "clause": "While Righteous Tempest is active you gain 20% increased movement speed.",
-    "labels": [
-      "300504 trigger_count"
+    "claims": [
+      {
+        "claim": "While Righteous Tempest is active you gain ... movement speed",
+        "labels": [
+          "300504 trigger_count"
+        ]
+      },
+      {
+        "claim": "20% increased movement speed",
+        "labels": [
+          "300504 behaviour_metric_delta"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -867,9 +887,23 @@
   {
     "spell": 524739,
     "clause": "and reduces their damage and healing done by $520842s1% for $520842d.",
-    "labels": [
-      "524739 effect_value 520842e0 #3",
-      "524739 spell_duration 520842 #4"
+    "claims": [
+      {
+        "claim": "and reduces their damage done by $520842s1%",
+        "labels": [
+          "524739 effect_value 520842e0 #3"
+        ]
+      },
+      {
+        "claim": "and healing done by $520842s1%",
+        "labels": []
+      },
+      {
+        "claim": "for $520842d",
+        "labels": [
+          "524739 spell_duration 520842 #4"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1161,10 +1195,31 @@
   {
     "spell": 560835,
     "clause": "Periodic damage dealt by Condemn also has a $h% chance to burst, dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage to up to $561277i1 enemies within $561277a1 yds of the target.",
-    "labels": [
-      "560835 effect_value 561277e0 #5",
-      "560835 effect_radius 561277e0 #7",
-      "560835 proc_rate 561277"
+    "claims": [
+      {
+        "claim": "also has a $h% chance to burst",
+        "labels": [
+          "560835 proc_rate 561277"
+        ]
+      },
+      {
+        "claim": "dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage",
+        "labels": [
+          "560835 effect_value 561277e0 #5"
+        ]
+      },
+      {
+        "claim": "to up to $561277i1 enemies",
+        "labels": [
+          "560835 effect_value #6"
+        ]
+      },
+      {
+        "claim": "within $561277a1 yds of the target",
+        "labels": [
+          "560835 effect_radius 561277e0 #7"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1409,9 +1464,18 @@
   {
     "spell": 680399,
     "clause": "causes it to dispel $525052s2 poison and disease effect",
-    "labels": [
-      "680399 effect_value 525052e1 #1",
-      "680399 trigger_count"
+    "claims": [
+      {
+        "claim": "causes it to dispel $525052s2 effect",
+        "labels": [
+          "680399 effect_value 525052e1 #1",
+          "680399 trigger_count"
+        ]
+      },
+      {
+        "claim": "poison and disease",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -1461,8 +1525,17 @@
   {
     "spell": 681483,
     "clause": "causes it to dispel 2 poison and disease effects",
-    "labels": [
-      "681483 trigger_count"
+    "claims": [
+      {
+        "claim": "causes it to dispel",
+        "labels": [
+          "681483 trigger_count"
+        ]
+      },
+      {
+        "claim": "2 poison and disease effects",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -1809,8 +1882,17 @@
   {
     "spell": 705286,
     "clause": "increases your damage dealt and movement speed by $560834s1%",
-    "labels": [
-      "705286 effect_value 560834e0 #0 ok"
+    "claims": [
+      {
+        "claim": "increases your damage dealt by $560834s1%",
+        "labels": [
+          "705286 effect_value 560834e0 #0 ok"
+        ]
+      },
+      {
+        "claim": "and movement speed by $560834s1%",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -2054,8 +2136,19 @@
   {
     "spell": 705306,
     "clause": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage.",
-    "labels": [
-      "705306 behaviour_internal_cooldown_gate"
+    "claims": [
+      {
+        "claim": "When you take Physical damage you now strike back at enemies",
+        "labels": [
+          "705306 behaviour_internal_cooldown_gate"
+        ]
+      },
+      {
+        "claim": "for $s1% of the damage dealt as Holy damage",
+        "labels": [
+          "705306 effect_value e0 #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2546,10 +2639,19 @@
   {
     "spell": 800424,
     "clause": "Taunt all enemies within 8 yds",
-    "labels": [
-      "800424 aggro_redirect primary after",
-      "800424 aggro_redirect extra1 after",
-      "800424 aggro_redirect extra2 after"
+    "claims": [
+      {
+        "claim": "Taunt all enemies",
+        "labels": [
+          "800424 aggro_redirect primary after",
+          "800424 aggro_redirect extra1 after",
+          "800424 aggro_redirect extra2 after"
+        ]
+      },
+      {
+        "claim": "within 8 yds",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -3841,8 +3943,17 @@
   {
     "spell": 806522,
     "clause": "Casting Argent Blade or Scarlet Hammer now guarantees your next 2 instances of damage dealt by Scourgebane to critically strike.",
-    "labels": [
-      "806522 trigger_count"
+    "claims": [
+      {
+        "claim": "Casting Argent Blade or Scarlet Hammer now",
+        "labels": [
+          "806522 trigger_count"
+        ]
+      },
+      {
+        "claim": "guarantees your next 2 instances of damage dealt by Scourgebane to critically strike",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -3880,8 +3991,17 @@
   {
     "spell": 807814,
     "clause": "restoring $o1 Energy over $d",
-    "labels": [
-      "807814 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "restoring $o1 Energy",
+        "labels": []
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "807814 aura_duration_ms #1"
+        ]
+      }
     ],
     "kind": "claim"
   },

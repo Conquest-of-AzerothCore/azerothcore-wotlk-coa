@@ -9,8 +9,8 @@ from unittest import mock
 
 from compare import BuildMismatch, ScenarioDrift, Verdict, write_verdicts
 import prove
-from prove import (DRIFT_EXIT, FAILURE_EXIT, FLIP_EXIT, MISSING_EXIT, OK_EXIT, Pilot, ProveSpec, RunTimeout, find_flips, is_under,
-                   run_command, verify_command, verify_report)
+from prove import (DRIFT_EXIT, FAILURE_EXIT, FLIP_EXIT, MISSING_EXIT, OK_EXIT, Pilot, ProveSpec, RunTimeout, find_flips,
+                   is_under, run_command, verify_command, verify_report)
 from prove_ledger import ledger_coverage, ledger_evidence, ledger_rows
 
 CLASS_FILE = {'class_id': 19, 'class_name': 'Templar', 'level': 60}
@@ -497,6 +497,73 @@ class LedgerHookTests(unittest.TestCase):
         self.space.statuses = [{'a': 'ok'}, {'a': 'ok'}]
         with self.assertRaisesRegex(ValueError, 'no single build'):
             self.space.prove(annotate=ledger_coverage([claim(1, 'a')]))
+
+
+def declared(spell, *claims):
+    return {'spell': spell, 'clause': f'clause of {spell}', 'kind': 'claim',
+            'claims': [{'claim': words, 'labels': list(labels)} for words, *labels in claims]}
+
+
+class DeclaredClaimRowTests(unittest.TestCase):
+    def setUp(self):
+        self.space = Workspace(self)
+        self.space.builds = [LEDGER_BUILD, LEDGER_BUILD]
+        patcher = mock.patch('profile.server_spell_dbc_sha256', return_value=LEDGER_SHA)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_a_declared_clause_whose_claims_all_run_is_one_row(self):
+        ledger = [declared(1, ('damage dealt', '1 effect_value e0'), ('movement speed', '1 e1 run_speed_rate'))]
+        rows = ledger_rows(ledger)(manifest_with('1 effect_value e0 #0', '1 e1 run_speed_rate'))
+        self.assertEqual(len(rows), 1)
+        self.assertEqual([claim['labels'] for claim in rows[0]['claims']],
+                         [['1 effect_value e0 #0'], ['1 e1 run_speed_rate']])
+
+    def test_seeded_claim_without_a_running_label_gives_per_claim_rows_only(self):
+        ledger = [declared(1, ('damage dealt', '1 effect_value e0'), ('movement speed', '1 e1 run_speed_rate'))]
+        rows = ledger_rows(ledger)(manifest_with('1 effect_value e0 #0'))
+        self.assertEqual([(row['claim'], row['labels']) for row in rows], [('damage dealt', ['1 effect_value e0 #0'])])
+        self.assertNotIn('claims', rows[0])
+
+    def test_a_declared_claim_without_labels_gives_no_row_of_its_own(self):
+        ledger = [declared(1, ('damage dealt', '1 effect_value e0'), ('movement speed',))]
+        rows = ledger_rows(ledger)(manifest_with('1 effect_value e0 #0'))
+        self.assertEqual([row['claim'] for row in rows], ['damage dealt'])
+
+    def test_a_ledger_with_malformed_claims_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'at least 2'):
+            ledger_rows([declared(1, ('damage dealt', 'a'))])
+
+    def test_a_proven_declared_clause_is_one_fragment_row_with_its_claims(self):
+        self.space.statuses = [{'a': 'ok', 'b': 'ok'}, {'a': 'ok', 'b': 'ok'}]
+        rows = lambda manifest: [declared(1, ('first', 'a'), ('second', 'b'))]
+        self.assertEqual(self.space.prove(rows, enrich=ledger_evidence), OK_EXIT)
+        fragment = self.space.fragment()
+        self.assertEqual(len(fragment), 1)
+        self.assertEqual([claim['evidence'] for claim in fragment[0]['claims']], ['behaviour', 'behaviour'])
+        self.assertEqual(fragment[0]['evidence'], 'behaviour')
+
+    def test_seeded_alert_on_one_claim_keeps_the_declared_clause_out_of_the_fragment(self):
+        self.space.statuses = [{'a': 'ok', 'b': 'alert'}, {'a': 'ok', 'b': 'alert'}]
+        rows = lambda manifest: [declared(1, ('first', 'a'), ('second', 'b'))]
+        self.space.prove(rows, enrich=ledger_evidence)
+        self.assertEqual(self.space.fragment(), [])
+        self.assertEqual(self.space.summary()['fragment']['excluded'][0]['labels'], ['a', 'b'])
+
+    def test_a_per_claim_row_keeps_its_claim_words_in_the_fragment(self):
+        self.space.statuses = [{'a': 'ok'}, {'a': 'ok'}]
+        ledger = [declared(1, ('first', 'a'), ('second', 'b'))]
+        rows = lambda manifest: ledger_rows(ledger)(manifest_with('a'))
+        self.assertEqual(self.space.prove(rows, enrich=ledger_evidence), OK_EXIT)
+        self.assertEqual([(row['claim'], row['labels'], row['evidence']) for row in self.space.fragment()],
+                         [('first', ['a'], 'behaviour')])
+
+    def test_seeded_partial_proof_leaves_the_declared_clause_unproven_in_the_coverage(self):
+        self.space.statuses = [{'a': 'ok'}, {'a': 'ok'}]
+        ledger = [declared(1, ('first', 'a'), ('second', 'b')), claim(2, 'a')]
+        self.assertEqual(self.space.prove(annotate=ledger_coverage(ledger)), OK_EXIT)
+        self.assertEqual([(figure['proven'], figure['total']) for figure in self.space.summary()['coverage']],
+                         [(1, 2), (1, 2)])
 
 
 if __name__ == '__main__':

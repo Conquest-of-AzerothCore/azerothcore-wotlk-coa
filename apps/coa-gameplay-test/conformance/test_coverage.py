@@ -16,7 +16,7 @@ from compare import NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, 
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, COVERAGE_FILE, DATA, EVENT, EVIDENCE, METRIC_EVIDENCE, READBACK, STATE,
                       STATE_PROMISES, UNPROVEN, EvidenceError, clause_coverage, clause_coverage_lines, coverage,
-                      fragment_entries, read_fragment, write_coverage, write_fragment)
+                      fragment_entries, load_clauses, read_fragment, require_claims, write_coverage, write_fragment)
 from profile import DBC_DIR, DbcSetMismatch, class_file_paths, load_class_file, server_dbc_dir, spell_dbc_sha256
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
@@ -575,6 +575,68 @@ class BuildRefusalTest(unittest.TestCase):
         self.assertEqual(main(['coverage', '--before', str(before), '--after', str(after)]), DIFF_EXIT)
 
 
+def declared(text, *claims, spell=ARGENT_BLADE):
+    return {'spell': spell, 'clause': text, 'kind': 'claim',
+            'claims': [{'claim': words, 'labels': list(labels)} for words, *labels in claims]}
+
+
+DUTY_CALLS_TEXT = 'increases your damage dealt and movement speed by $560834s1%'
+
+
+class DeclaredClaimsTest(unittest.TestCase):
+    def test_seeded_clause_proven_by_one_of_its_two_claims_is_unproven(self):
+        verdicts = [value(ARGENT_BLADE)]
+        partial = [declared(DUTY_CALLS_TEXT, ('damage dealt', f'{ARGENT_BLADE} effect_value #0'), ('movement speed',))]
+        statuses, result = evidence_of(partial, verdicts)
+        self.assertEqual((statuses, result.proven, result.total), ([UNPROVEN], 0, 1))
+        self.assertEqual(result.claim_evidence, [[DATA, UNPROVEN]])
+        self.assertEqual(evidence_of([claim(DUTY_CALLS_TEXT, f'{ARGENT_BLADE} effect_value #0')], verdicts)[0], [DATA])
+
+    def test_every_claim_proven_closes_the_clause(self):
+        clauses = [declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                            ('for $d', f'{ARGENT_BLADE} effect_value #0'))]
+        statuses, result = evidence_of(clauses, [hit(ARGENT_BLADE), value(ARGENT_BLADE)])
+        self.assertEqual((statuses, result.proven, result.behaviour), ([BEHAVIOUR], 1, 1))
+        self.assertEqual(result.claim_evidence, [[BEHAVIOUR, DATA]])
+
+    def test_seeded_alert_on_one_claim_leaves_the_clause_unproven(self):
+        clauses = [declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                            ('for $d', f'{ARGENT_BLADE} effect_value #0'))]
+        statuses, _ = evidence_of(clauses, [hit(ARGENT_BLADE), value(ARGENT_BLADE, 'alert')])
+        self.assertEqual(statuses, [UNPROVEN])
+
+    def test_a_claim_promises_a_stat_by_its_own_words(self):
+        verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor'), judged('1 e1 armor', PASSIVE_DELTA, 'armor')]
+        clauses = [declared('increases your armor and damage dealt', ('armor', '1 e0 armor'),
+                            ('damage dealt', '1 e1 armor'))]
+        self.assertEqual(evidence_of(clauses, verdicts)[1].claim_evidence, [[BEHAVIOUR, DATA]])
+
+    def test_undeclared_entries_keep_one_claim_of_their_labels(self):
+        _, result = evidence_of([claim('deals damage', f'{ARGENT_BLADE} hit_mean')], [hit(ARGENT_BLADE)])
+        self.assertEqual(result.claim_evidence, [[BEHAVIOUR]])
+
+    def test_malformed_declarations_are_refused(self):
+        cases = {'clause labels': {**declared('x', ('a', 'l1'), ('b', 'l2')), 'labels': ['l1']},
+                 'at least 2': declared('x', ('a', 'l1')),
+                 'not a claim entry': {**declared('x', ('a', 'l1'), ('b', 'l2')), 'kind': 'no_claim'},
+                 'a claim is': {**declared('x', ('a', 'l1')), 'claims': [{'claim': 'a', 'labels': []}, 'b']}}
+        for message, clause in cases.items():
+            with self.subTest(message=message), self.assertRaisesRegex(EvidenceError, message):
+                clause_coverage([clause], [], BUILD)
+
+    def test_an_unproven_declared_clause_lists_each_claim_status(self):
+        result = clause_coverage([declared(DUTY_CALLS_TEXT, ('damage dealt', f'{ARGENT_BLADE} effect_value #0'),
+                                           ('movement speed',))], [value(ARGENT_BLADE)], BUILD)
+        lines = clause_coverage_lines(result)
+        self.assertIn("    claim 'damage dealt': data (labels ['807268 effect_value #0'])", lines)
+        self.assertIn("    claim 'movement speed': unproven (labels [])", lines)
+
+    def test_every_declared_clause_of_the_class_ledgers_is_well_formed(self):
+        for path in sorted(Path(__file__).parent.joinpath('classes').glob('*_clauses.json')):
+            with self.subTest(ledger=path.name):
+                require_claims(load_clauses(path))
+
+
 class FragmentTest(unittest.TestCase):
     def setUp(self):
         self.root = Path(tempfile.mkdtemp(prefix='conformance-fragment-'))
@@ -593,6 +655,26 @@ class FragmentTest(unittest.TestCase):
         self.assertEqual({entry['spell_dbc_sha256'] for entry in entries}, {SERVER_SHA})
         with self.assertRaises(FileExistsError):
             write_fragment(path, entries)
+
+    def test_an_unproven_declared_clause_gives_one_row_per_claim(self):
+        result = clause_coverage([declared(DUTY_CALLS_TEXT, ('damage dealt', f'{ARGENT_BLADE} effect_value #0'),
+                                           ('movement speed',))], [value(ARGENT_BLADE)], BUILD)
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            entries = fragment_entries(result, {'spell_dbc_sha256': SERVER_SHA, 'results': 'r'})
+        self.assertEqual([(entry['claim'], entry['labels'], entry['evidence']) for entry in entries],
+                         [('damage dealt', [f'{ARGENT_BLADE} effect_value #0'], DATA),
+                          ('movement speed', [], UNPROVEN)])
+        self.assertEqual({entry['clause'] for entry in entries}, {DUTY_CALLS_TEXT})
+        self.assertFalse(any('claims' in entry for entry in entries))
+
+    def test_a_proven_declared_clause_gives_one_row_with_its_claims(self):
+        result = clause_coverage([declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                                           ('for $d', f'{ARGENT_BLADE} effect_value #0'))],
+                                 [hit(ARGENT_BLADE), value(ARGENT_BLADE)], BUILD)
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            entries = fragment_entries(result, {'spell_dbc_sha256': SERVER_SHA, 'results': 'r'})
+        self.assertEqual([entry['evidence'] for entry in entries], [BEHAVIOUR])
+        self.assertEqual([claim['evidence'] for claim in entries[0]['claims']], [BEHAVIOUR, DATA])
 
     def test_verdicts_of_another_set_give_no_fragment(self):
         with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):

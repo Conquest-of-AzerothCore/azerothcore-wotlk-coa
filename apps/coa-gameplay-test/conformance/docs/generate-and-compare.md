@@ -273,7 +273,10 @@ It starts nothing but the `coa-verify` command below.
 3. Compares each run into `DIR/run<n>/` (`alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`, a copy of
    `verify-report.json`) and diffs run 1 against each later run into `DIR/flips/` (`impact.md`).
 4. With `--clauses`, writes `DIR/fragment.json`: the ledger claims whose labels all run here (an ordinal-free label
-   resolved to every `#<n>` occurrence), kept when every label is `ok`, `tolerated` or `closed` in every run, each
+   resolved to every `#<n>` occurrence; an entry with declared `claims` gives one row when every claim's labels run,
+   otherwise one row per claim whose labels run, which never closes the clause, see
+   [Stated claims](clause-ledger.md#stated-claims)), kept when every label is `ok`, `tolerated` or `closed` in every
+   run, each
    with `evidence` (`behaviour` only when [clause coverage](clause-ledger.md#two-proof-statuses) gives it in every
    run, else `data`) and the server `Spell.dbc` sha256. Without `--clauses` the fragment is empty.
 5. Writes `DIR/summary.json`: `sizing` (null: no pilot provider exists, see below); per run the `coa-verify`

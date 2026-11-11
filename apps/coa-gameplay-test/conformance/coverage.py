@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import json
 from pathlib import Path
 import re
@@ -164,6 +164,42 @@ def resolved_labels(label: str, statuses: dict[str, str]) -> list[str]:
                  if candidate.startswith(prefix) and candidate[len(prefix):].isdigit())
 
 
+DECLARED_CLAIMS = 'claims'
+CLAIM_WORDS = 'claim'
+MIN_DECLARED_CLAIMS = 2
+
+
+def clause_claims(clause: dict) -> list[dict]:
+    if DECLARED_CLAIMS in clause:
+        return [{CLAIM_WORDS: claim[CLAIM_WORDS], 'labels': list(claim.get('labels') or [])}
+                for claim in clause[DECLARED_CLAIMS]]
+    words = clause.get(CLAIM_WORDS, clause.get('clause', ''))
+    return [{CLAIM_WORDS: words, 'labels': list(clause.get('labels') or [])}]
+
+
+def clause_labels(clause: dict) -> list[str]:
+    return [label for claim in clause_claims(clause) for label in claim['labels']]
+
+
+def require_claims(clauses: list[dict]):
+    for clause in clauses:
+        if DECLARED_CLAIMS not in clause:
+            continue
+        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+        claims = clause[DECLARED_CLAIMS]
+        if clause.get('kind') != 'claim':
+            raise EvidenceError(f'{where} declares claims but is not a claim entry')
+        if clause.get('labels'):
+            raise EvidenceError(f'{where} declares claims and also clause labels; the labels belong to its claims')
+        if not isinstance(claims, list) or len(claims) < MIN_DECLARED_CLAIMS:
+            raise EvidenceError(f'{where} declares {claims!r}; declared claims are a list of at least '
+                                f'{MIN_DECLARED_CLAIMS}, otherwise the clause labels are its one claim')
+        for claim in claims:
+            if not isinstance(claim, dict) or not isinstance(claim.get(CLAIM_WORDS), str) \
+                    or not isinstance(claim.get('labels'), list):
+                raise EvidenceError(f'{where} declares {claim!r}; a claim is {{"claim": <words>, "labels": [...]}}')
+
+
 def clause_proven(labels: list[str], statuses: dict[str, str]) -> bool:
     if not labels:
         return False
@@ -255,6 +291,7 @@ class ClauseCoverage:
     unproven: list[dict]
     evidence: list[tuple[dict, str]]
     not_measured: list[str]
+    claim_evidence: list[list[str]] = field(default_factory=list)
 
     @property
     def data(self) -> int:
@@ -319,26 +356,39 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     return DATA
 
 
-def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str]) -> str:
-    labels = clause.get('labels') or []
+def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str]) -> str:
+    labels = claim['labels']
     if not clause_proven(labels, statuses):
         return UNPROVEN
     matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
-    found = {verdict_evidence(verdict, clause.get('clause', ''), by_label) for verdict in matched}
+    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label) for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
+
+
+def claims_evidence(found: list[str]) -> str:
+    if UNPROVEN in found:
+        return UNPROVEN
+    return BEHAVIOUR if BEHAVIOUR in found else DATA
+
+
+def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str]) -> str:
+    return claims_evidence([claim_evidence(claim, by_label, statuses) for claim in clause_claims(clause)])
 
 
 def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | None = None) -> ClauseCoverage:
     require_build(verdicts, build, 'clause coverage')
     require_known_checks(verdicts)
+    require_claims(clauses)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
-    evidence = [(clause, clause_evidence(clause, by_label, statuses)) for clause in claims]
+    per_claim = [[claim_evidence(claim, by_label, statuses) for claim in clause_claims(clause)] for clause in claims]
+    evidence = [(clause, claims_evidence(found)) for clause, found in zip(claims, per_claim)]
     unproven = [clause for clause, status in evidence if status == UNPROVEN]
     behaviour = sum(status == BEHAVIOUR for _, status in evidence)
     not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
-    return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured)
+    return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured,
+                          per_claim)
 
 
 def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
@@ -352,16 +402,38 @@ def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
         lines += [f'  {label}' for label in result.not_measured]
     if result.unproven:
         lines.append('Unproven clauses:')
+        found = {id(clause): statuses for (clause, _), statuses in zip(result.evidence, result.claim_evidence)}
         for clause in result.unproven:
-            lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')} "
-                        f"(labels {clause.get('labels') or []})")
+            if DECLARED_CLAIMS not in clause:
+                lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')} "
+                            f"(labels {clause.get('labels') or []})")
+                continue
+            lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')}")
+            for claim, status in zip(clause_claims(clause), found.get(id(clause), [])):
+                lines.append(f"    claim {claim[CLAIM_WORDS]!r}: {status} (labels {claim['labels']})")
     return lines
+
+
+def claim_rows(clause: dict, statuses: list[str], sha: str) -> list[dict]:
+    claims = clause_claims(clause)
+    status = claims_evidence(statuses)
+    if DECLARED_CLAIMS not in clause:
+        return [{'spell': clause['spell'], 'clause': clause['clause'], **(
+            {CLAIM_WORDS: clause[CLAIM_WORDS]} if CLAIM_WORDS in clause else {}), 'labels': claims[0]['labels'],
+            'kind': 'claim', 'evidence': status, 'spell_dbc_sha256': sha}]
+    if status != UNPROVEN:
+        return [{'spell': clause['spell'], 'clause': clause['clause'],
+                 DECLARED_CLAIMS: [{**claim, 'evidence': found} for claim, found in zip(claims, statuses)],
+                 'kind': 'claim', 'evidence': status, 'spell_dbc_sha256': sha}]
+    return [{'spell': clause['spell'], 'clause': clause['clause'], CLAIM_WORDS: claim[CLAIM_WORDS],
+             'labels': claim['labels'], 'kind': 'claim', 'evidence': found, 'spell_dbc_sha256': sha}
+            for claim, found in zip(claims, statuses)]
 
 
 def fragment_entries(result: ClauseCoverage, header: dict) -> list[dict]:
     sha = require_server_sha(header.get('spell_dbc_sha256'), f'verdicts of {header.get("results")}')
-    return [{'spell': clause['spell'], 'clause': clause['clause'], 'labels': list(clause.get('labels') or []),
-             'kind': 'claim', 'evidence': status, 'spell_dbc_sha256': sha} for clause, status in result.evidence]
+    return [row for (clause, _), statuses in zip(result.evidence, result.claim_evidence)
+            for row in claim_rows(clause, statuses, sha)]
 
 
 def write_fragment(path: Path, entries: list[dict]) -> Path:

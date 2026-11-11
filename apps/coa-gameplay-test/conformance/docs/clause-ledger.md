@@ -24,6 +24,30 @@ A JSON array. Each entry is one clause:
 - `kind`: `"claim"` for a clause with a gameplay meaning to prove, or `"no_claim"` for a line that carries no
   mechanic (a level-gate label, an empty tooltip, flavour/acquisition text). A `"no_claim"` entry also carries
   `"reason"`, the audit's note explaining why.
+- `claims` (optional, a `"claim"` entry only): the stated claims of a clause whose labels would otherwise prove only
+  part of it, each `{"claim": "<the tooltip words of that claim>", "labels": [...]}`, at least two, in place of the
+  entry's `labels` (an entry carrying both is refused). Without `claims` the entry's `labels` are its one claim.
+
+### Stated claims
+
+A clause states one claim per value it gives (a magnitude, a duration, a stack count, a radius, a period, a chance,
+a target count, a literal number such as "40%" or "8 yds") and per quantity one value moves through a separate
+effect ("damage dealt and movement speed by $560834s1%": Duty Calls 560834 holds them in e0, aura 79, and e1, aura
+31). A clause is closed only when every stated claim is proven (ADR 0123). An entry declares `claims` when its labels
+measure only some of them; an entry whose labels already cover every stated claim, or whose other claims have their
+own entries, needs none. Example:
+
+```json
+{"spell": 524739, "clause": "and reduces their damage and healing done by $520842s1% for $520842d.",
+ "claims": [{"claim": "and reduces their damage done by $520842s1%", "labels": ["524739 effect_value 520842e0 #3"]},
+            {"claim": "and healing done by $520842s1%", "labels": []},
+            {"claim": "for $520842d", "labels": ["524739 spell_duration 520842 #4"]}],
+ "kind": "claim"}
+```
+
+Templar: 11 entries declare claims (92109, 300504, 524739, 560835 burst, 680399, 681483, 705286, 705306, 800424,
+806522, 807814), from the audit of the clauses counted proven on round 10 (`templar-run2`); 8 of them have a claim
+no label measures and are unproven.
 
 ## How a workstream contributes
 
@@ -37,7 +61,8 @@ directly. It writes its own fragment, an array of:
 
 The integrator merges these fragments into the ledger by matching on `(spell, clause)` and replacing that
 entry's `labels` (a `kind: "no_claim"` entry is never produced by a fragment; only the ledger's initial
-generation from the clause audit sets it).
+generation from the clause audit sets it). A row carrying `claim` (one claim of a clause with declared `claims`)
+matches on `(spell, clause, claim)` and replaces only that claim's `labels`: it never closes the clause.
 
 An owner ruling is the one other source of `no_claim`: when the owner rules that a tooltip text does not govern
 (it loses to another text the player sees), the commit applying the ruling sets that clause's `kind` to
@@ -53,7 +78,9 @@ but leaves it without a proving test empties its `labels`, so the clause counts 
 - A claim is **proven** when it has at least one label and every one of its labels' live verdict status (from
   the `verdicts` list passed in — always the same compare run being reported on) is `ok`, `tolerated` or
   `closed` (`compare.CONFORMANT`). A claim with no labels yet, or any label whose live status is anything else
-  (including a label that is simply absent from this run's verdicts), is unproven.
+  (including a label that is simply absent from this run's verdicts), is unproven. An entry with declared
+  `claims` is proven only when every one of its claims is; `ClauseCoverage.claim_evidence` holds the status of each
+  claim, in the order of `evidence`.
 - A label may omit the trailing `" #<ordinal>"` that `values.py` appends when a spell has several tokens of
   the same effect/spell/kind (`92111 effect_value 801832e1`, not `92111 effect_value 801832e1 #1`) — the audit
   (`claims-merged.json`) writes labels this way since it cannot predict the ordinal a future generate run will
@@ -67,8 +94,9 @@ but leaves it without a proving test empties its `labels`, so the clause counts 
 
 `ClauseCoverage` holds `proven`, `behaviour`, `data` (`proven - behaviour`), `total`, `unproven`, the per-claim
 `evidence` and the `not_measured` labels. A proven claim is **behaviour proven** when at least one of its matched
-verdicts is behaviour evidence, otherwise **data conformant**. The figure reported to the owner is `behaviour`;
-`data` is reported beside it.
+verdicts is behaviour evidence, otherwise **data conformant**; a state read is judged against the claim's own
+words. A proven entry with declared claims is behaviour proven when one of its claims is. The figure reported to
+the owner is `behaviour`; `data` is reported beside it.
 
 `build` is the build being judged, the verdict set's header `build` (a worldserver sha256). Every verdict carries its
 own `build`, `server_commit` and `runs` ([Verdicts](generate-and-compare.md#verdicts)); a set holding a verdict of
@@ -113,7 +141,9 @@ not in the table fails the whole run (`EvidenceError`, no default):
 - A `closed` verdict closed by its rule, without a measurement, is data whatever its check.
 
 A ledger fragment (`coverage --fragment`, `fragment_entries`) lists every claim with its computed `evidence` and the
-`Spell.dbc` sha256 of the verdicts; `fragment_entries` and `read_fragment` refuse another or a missing sha (ADR 0117).
+`Spell.dbc` sha256 of the verdicts. An entry with declared claims gives one row with its `claims` (each with its
+`evidence`) when every claim is proven, otherwise one row per claim (`claim`, `labels`, `evidence`), which never
+closes the clause; `fragment_entries` and `read_fragment` refuse another or a missing sha (ADR 0117).
 The status is computed from these tables, never typed (ADR 0120).
 
 Run it from the command line together with the ordinary before/after coverage report:

@@ -166,8 +166,8 @@ def execute_run(spec: ProveSpec, number: int, manifest_path: Path, files: Sequen
     except BuildMismatch as mismatch:
         raise ProveFailure(f'run {number}: {mismatch}') from mismatch
     header, verdicts = read_verdicts(directory)
-    record = {'run': number, 'directory': str(directory), 'command': command, 'returncode': returncode, 'verify_status': status,
-              'report': str(report_path), 'results': str(results), 'stages': stages,
+    record = {'run': number, 'directory': str(directory), 'command': command, 'returncode': returncode,
+              'verify_status': status, 'report': str(report_path), 'results': str(results), 'stages': stages,
               'gameplay_seconds': stages.get(GAMEPLAY_STAGE, {}).get('seconds'),
               'scenarios_with_result': with_result, 'scenarios_without_result': len(without_result),
               'missing_results': sorted(without_result),
@@ -268,8 +268,12 @@ def write_flip_reports(spec: ProveSpec, runs: Sequence[RunOutcome]) -> list[str]
     return paths
 
 
+def row_labels(row: dict) -> list[str]:
+    return list(row.get('labels') or []) + [label for claim in row.get('claims') or [] for label in claim['labels']]
+
+
 def conformant_in_every_run(row: dict, runs: Sequence[RunOutcome]) -> bool:
-    labels = row.get('labels') or []
+    labels = row_labels(row)
     if not labels:
         return False
     for run in runs:
@@ -327,7 +331,8 @@ def prove(spec: ProveSpec, generate: Generate, rows: Rows | None = None, enrich:
         summary['flip_reports'] = write_flip_reports(spec, outcomes)
         candidates = rows(manifest) if rows else []
         kept = [row for row in candidates if conformant_in_every_run(row, outcomes)]
-        excluded = [{'spell': row['spell'], 'clause': row['clause'], 'labels': row.get('labels')}
+        excluded = [{'spell': row['spell'], 'clause': row['clause'],
+                     **({'claim': row['claim']} if 'claim' in row else {}), 'labels': row_labels(row)}
                     for row in candidates if row not in kept]
         if enrich:
             kept = enrich(kept, outcomes)

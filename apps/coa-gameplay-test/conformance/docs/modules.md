@@ -60,9 +60,11 @@
   [Coverage comparison](generate-and-compare.md#coverage-comparison)); `clause_coverage(clauses, verdicts, build)`
   returns the `ClauseCoverage` of a clause ledger with the behaviour-proven and data-conformant counts from the
   closed `EVIDENCE` and `METRIC_EVIDENCE` tables and the `not_measured` labels; `require_build` refuses verdicts of
-  another build than the one judged; `fragment_entries`, `write_fragment` and `read_fragment` write and check ledger
-  fragments that carry the computed evidence and the `Spell.dbc` sha256 (see
-  [Two proof statuses](clause-ledger.md#two-proof-statuses)).
+  another build than the one judged; `clause_claims` and `require_claims` read and check an entry's declared claims
+  (a clause is closed only when every one is proven, `ClauseCoverage.claim_evidence`); `fragment_entries`,
+  `write_fragment` and `read_fragment` write and check ledger fragments that carry the computed evidence and the
+  `Spell.dbc` sha256, one row per claim for a clause not fully proven (see
+  [Two proof statuses](clause-ledger.md#two-proof-statuses) and [Stated claims](clause-ledger.md#stated-claims)).
 - `observations.py`: `player_observations(class_file)` reads and validates a class file's `player_observations`
   array (see [Player observations](player-observations.md#player-observations)) and `observations_by_spell` groups them by spell id.
 - `conformance.py`: the command line, `generate`, `compare`, `diff` and `coverage`.
