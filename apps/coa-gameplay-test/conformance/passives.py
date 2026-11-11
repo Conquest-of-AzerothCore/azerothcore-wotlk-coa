@@ -660,7 +660,7 @@ def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> list[tup
             candidates.append(('behaviours', entry))
     if not candidates:
         return None
-    exact = [(key, entry) for key, entry in candidates if entry.get('effect') == effect]
+    exact = [(key, entry) for key, entry in candidates if entry.get('effect') == effect and 'value_spell' not in entry]
     if exact:
         return exact
     unscoped = [(key, entry) for key, entry in candidates if entry.get('effect') is None]
