@@ -4162,6 +4162,39 @@
       "measure_actor": "dummy", "before_expected": 0, "expected": 1, "setup_casts": [805422],
       "setup_only_after": true, "wait_ms": 1000, "expire_ms": 45000,
       "observe_source": "Tome of Light: Tranquil Circle 807004, \"Your next Tranquil Circle within $d triggers instantly.\" Tranquil Circle 801205 Effect[1] (aura 23, EffectAmplitude 2000) triggers Tranquil State 850010 on the enemies in its area; with 807004 on the caster its periodic timer is set to 0 when the aura applies (AscensionTemplarAuras.cpp:73-74, 90-91), so the first trigger comes at once instead of after 2000 ms. Read 1000 ms after the cast at the dummy: without Tome of Light 850010 is absent (0), with Tome of Light cast first it is present (1). 850010 lasts 40000 ms on a creature, so the phases are 45000 ms apart. Players and the dummy are at level 60."
+    },
+    {
+      "spell": 680397, "name": "Disciplined Blows", "kind": "script_hit",
+      "quote": "dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage", "hit_spell": 680398,
+      "casts": [[578276, "caster"]], "caster_health_pct": 50, "trials": 150, "minimum_hits": 100,
+      "observe_source": "AscensionTemplarEvents.cpp:156-158 casts the pulse 680398 at the healed target's position on a heal done by the caster; Benediction 578276 heals the caster, held at 50% health before every trial, and the dummy stands 3 yd away inside the pulse's 5 yd radius (SpellRadius 192)"
+    },
+    {
+      "spell": 524620, "name": "Pulverizing", "kind": "script_hit",
+      "quote": "dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage", "hit_spell": 524619,
+      "casts": [[804906, "dummy"]], "settle_ms": 21500, "trials": 40, "minimum_hits": 20,
+      "observe_source": "AscensionTemplarEvents.cpp:88 and 174-175: damage dealt by Condemn 804906 rolls the 15% chance and casts 524619 at the caster's position; every trial waits out Condemn's 21000 ms periodic damage (EffectAmplitude 3000), and the dummy stands 3 yd away inside 524619's 5 yd radius (SpellRadius 8)"
+    },
+    {
+      "spell": 804930, "name": "Armor of Faith", "kind": "script_hit",
+      "quote": "inflict ${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5} High Threat Holy damage to nearby enemies.",
+      "hit_spell": 801546, "caster_auras": [[706583, 1]], "strike_spell": 41394, "receiver": "striker",
+      "caster_health_pct": 100, "trials": 100, "minimum_hits": 60,
+      "observe_source": "AscensionTemplarAuras.cpp:213 casts 801546 when Staffguard's absorb 706583 is removed by breaking; the striker's Light of the Naaru 41394 (1100 Holy) exceeds the shield, and the striker stands 3 yd away inside 801546's 8 yd radius (SpellRadius 14)"
+    },
+    {
+      "spell": 804927, "name": "Lorescribe", "kind": "cost_gate",
+      "quote": "Casting Oath Breaker abilities now reduce the cooldown of Librams by", "gated_spell": 801461,
+      "resource": "cooldown", "reduction": 4000, "target": "caster", "after_casts": [[572027, "dummy"]],
+      "after_wait_ms": 2000,
+      "observe_source": "$/1000;806106s1 = 4 sec (806106 EffectBasePoints[0] -4001, EffectDieSides[0] 1). AscensionTemplarAbilities.cpp:181-182: an Oath Breaker cast (Breaker(info)) with 804927 known calls ReduceLibrams with Amount(806106). Righteous Upheaval 572027 is the Oath Breaker, cast 2000 ms after the priming cast in the talent arms only. Libram of Tenacity 801461 recovers in 180000 ms (RecoveryTime)."
+    },
+    {
+      "spell": 804912, "name": "Parry Dance", "kind": "taken_outcome",
+      "quote": "your chance to parry is now increased by $560651s1%", "victim_state": 3, "aura": 560651,
+      "stacks": 5, "expected_points": 15, "arm_ms": 1400000, "attacker_auras": [62531, 2116852],
+      "learn": [705303], "state_metric": "parry_chance",
+      "observe_source": "560651 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, $560651s1 = 3 (EffectBasePoints[0] 2, EffectDieSides[0] 1), StackAmount 5: 15 points at 5 stacks. 804912 is not learned in either arm, so its own parry rating from Agility (Effect[0] aura 220) and its parry-triggered stacks stay out of the contrast; Graceful Fighter 705303 is known in both arms, since a Templar parries only once AscensionTemplar.cpp:297-298 (705303) or a parry-percent aura (SpellAuraEffects.cpp HandleAuraModParryPercent) sets CanParry, and a first diagnostic run without it read 0 parries in 219 control swings; the aura is set at 5 stacks every 4000 ms inside its 5000 ms duration. VICTIMSTATE_PARRY 3 (Unit.h:89) is read from SMSG_ATTACKERSTATEUPDATE. The attackers carry Molten 62531 (aura 138, +100%) and Enrage 2116852 (aura 192, +100%) so that they swing four times as often."
     }
   ],
   "player_observations": [

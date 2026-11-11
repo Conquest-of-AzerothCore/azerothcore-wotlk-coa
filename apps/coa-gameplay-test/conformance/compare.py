@@ -25,7 +25,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                        BEHAVIOUR_DISPEL_COUNT, DISPEL_TYPE_NAMES, strongest_percent)
+                        BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, DISPEL_TYPE_NAMES, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
@@ -721,7 +721,7 @@ def judge_fixed_per_level(base: Verdict, expectation: Expectation, run: Run, mea
 
 
 def per_level_unmodelled(verdict: Verdict, tooltips: TooltipSource, rank_id: int, caster_level: int) -> Verdict:
-    if verdict.status != 'alert':
+    if verdict.status != 'alert' or PER_LEVEL_ROUNDING in (verdict.detail or {}):
         return verdict
     losses = {effect: found for effect in EFFECTS
               if (found := per_level_loss(tooltips, rank_id, effect, caster_level)) and found.loss}
@@ -853,6 +853,16 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
     if count < minimum:
         return replace(base, status='insufficient_trials', measured=mean,
                        explanation=f'{count:g} usable hits, fewer than the {minimum} the mean needs{notes}{failures}')
+    control = model.get('control_label')
+    if control is not None:
+        controls = [run.values.get(control) for run, _, _ in judged]
+        if None in controls:
+            return replace(base, measured=mean, explanation=f'measurement {control!r} is missing')
+        if sum(controls) > 0:
+            return replace(base, status='alert', measured=mean,
+                           explanation=f'the control arm counts {sum(controls):g} hits of {model.get("hit_spell")} '
+                                       f'without the spell known; the hits are not told apart from it{notes}')
+        notes += f'; control arm without the spell known: 0 hits ({control})'
     models = []
     for run, part, part_count in judged:
         try:
@@ -872,6 +882,25 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
     half = Z_99 * math.sqrt(variance / count)
     low, high = expected_mean - half, expected_mean + half
     status = banded_status(mean, low, high, expected_mean)
+    detail = None
+    if status != 'ok' and all(expected.engine is not None for expected, _ in models):
+        engine_mean = sum(part_count * expected.engine.mean for expected, part_count in models) / count
+        engine_variance = sum(part_count * expected.engine.sigma ** 2 for expected, part_count in models) / count
+        engine_half = Z_99 * math.sqrt(engine_variance / count)
+        engine_status = banded_status(mean, engine_mean - engine_half, engine_mean + engine_half, engine_mean)
+        rule = models[0][0].engine_rule
+        detail = {PER_LEVEL_ROUNDING: {'tooltip_mean': expected_mean, 'engine_mean': engine_mean,
+                                       'engine_low': engine_mean - engine_half,
+                                       'engine_high': engine_mean + engine_half, 'rule': rule}}
+        if engine_status == 'ok':
+            return replace(base, status='ok', measured=mean, expected=engine_mean, low=engine_mean - engine_half,
+                           high=engine_mean + engine_half, detail=detail,
+                           explanation=f'{count:g} usable hits; outside the tooltip model mean {expected_mean:.3f} '
+                                       f'[{low:.3f}, {high:.3f}], inside the engine model mean {engine_mean:.3f} '
+                                       f'sigma {math.sqrt(engine_variance):.3f}, 99% interval of the mean: {rule}'
+                                       f'{notes}{failures}')
+        notes += (f'; the engine model mean {engine_mean:.3f} [{engine_mean - engine_half:.3f}, '
+                  f'{engine_mean + engine_half:.3f}] does not explain it either ({rule})')
     first = models[0][0]
     modifiers = ' or '.join(dict.fromkeys(describe_modifiers(expected.modifiers) for expected, _ in models))
     kind_term = 'mean'
@@ -880,7 +909,7 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
         mean, expected_mean, half = mean * ticks, expected_mean * ticks, half * ticks
         low, high = expected_mean - half, expected_mean + half
         kind_term = f'total over {ticks} ticks'
-    return replace(base, status=status, measured=mean, expected=expected_mean, low=low, high=high,
+    return replace(base, status=status, measured=mean, expected=expected_mean, low=low, high=high, detail=detail,
                    explanation=f'{count:g} usable hits; {first.kind} model {kind_term} {expected_mean:.3f} sigma '
                                f'{math.sqrt(variance):.3f} from the measured stats and target, 99% interval of the '
                                f'mean; tooltip mean {first.tooltip_mean:.2f} (display only); modifiers '
@@ -3602,6 +3631,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_threat_redirect_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_DISPEL_COUNT:
         return behaviour_dispel_count_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_TAKEN_OUTCOME:
+        return behaviour_taken_outcome_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
@@ -3631,6 +3662,48 @@ def behaviour_dispel_count_verdict(base: Verdict, run: Run, model: dict) -> Verd
                        f'{model["arm"]}: {kind} debuffs removed per cast {removed} of {carried[0]} carried, against '
                        f'{expected}; ' + ('; '.join(faults) if faults else 'every cast matches')
                        + '; each count is compared exactly'))
+
+
+TAKEN_OUTCOME_MINIMUM_SWINGS = 100
+
+
+def behaviour_taken_outcome_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    rates = {}
+    for arm, reads in model['reads'].items():
+        values = {key: run.values.get(label) for key, label in reads.items()}
+        missing = next((reads[key] for key, value in values.items() if value is None), None)
+        if missing:
+            return replace(base, explanation=missing_measurement(run, missing))
+        swings = values['end swings'] - values['start swings']
+        outcomes = values['end outcomes'] - values['start outcomes']
+        if swings < TAKEN_OUTCOME_MINIMUM_SWINGS or not 0 <= outcomes <= swings:
+            return replace(base, status='unmeasured',
+                           explanation=f'{arm} arm: {outcomes:g} outcomes over {swings:g} swings taken; each arm '
+                                       f'needs at least {TAKEN_OUTCOME_MINIMUM_SWINGS} swings')
+        rates[arm] = (outcomes / swings, swings, outcomes)
+    (control, control_swings, control_hits), (treated, treated_swings, treated_hits) = \
+        rates['control'], rates['treatment']
+    spread = control * (1 - control) / control_swings + treated * (1 - treated) / treated_swings
+    bonus = Bonus((treated - control) * 100, Z_99 * math.sqrt(spread) * 100, float(model['expected_points']),
+                  int(min(control_swings, treated_swings)))
+    status, reason, needed = bonus_status(bonus)
+    states = {arm: run.values.get(label) for arm, label in (model.get('states') or {}).items()}
+    detail = {'bonus': bonus_detail(bonus), 'swings_needed': needed, 'states': states}
+    return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
+                   low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
+                   explanation=f'victim state {model["victim_state"]}: {control_hits:g} of {control_swings:g} swings '
+                               f'taken in the control arm ({control:.2%}), {treated_hits:g} of {treated_swings:g} '
+                               f'with {model["stacks"]} stacks ({treated:.2%}); difference in points, 99% normal '
+                               f'interval: {taken_outcome_text(bonus)}; {reason}'
+                               + (f'; state read per arm {states} (not judged)' if states else ''))
+
+
+def taken_outcome_text(bonus: Bonus) -> str:
+    low, high = bonus.excluded
+    return (f'difference {bonus.measured:+.4g} points (99% interval {bonus.low:+.4g} to {bonus.high:+.4g}, '
+            f'{bonus.trials} swings in the smaller arm) against the stated {bonus.expected:+.4g} points, which '
+            f'passes inside +-{bonus.band:.3g} points (the larger of 5% of it and 2 points); excludes a difference '
+            f'below {low:+.4g} or above {high:+.4g} points')
 
 
 def taken_hit_formula(constant: float, coefficients: list[float], sums: list[float]) -> int:

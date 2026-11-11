@@ -83,6 +83,8 @@ class HitModel:
     hits_per_cast: int = 1
     modifiers: tuple[Modifier, ...] = ()
     displayed: tuple[str, ...] = ()
+    engine: 'HitModel | None' = None
+    engine_rule: str = ''
 
 
 @dataclass(frozen=True)
@@ -313,7 +315,8 @@ def effect_hit(readout: Readout, indexes: list[int], rolls: Mapping[int, Sequenc
 
 
 def rolled_values(records: Records, rank_id: int, caster: CasterStats, readout: Readout,
-                  indexes: Sequence[int]) -> dict[int, tuple[float, ...]]:
+                  indexes: Sequence[int], tooltip_spell: int | None = None) -> dict[int, tuple[float, ...]]:
+    described = rank_id if tooltip_spell is None else tooltip_spell
     rolls = {}
     for effect in indexes:
         sides = records.field('Spell', rank_id, f'EffectDieSides[{effect}]')
@@ -324,7 +327,7 @@ def rolled_values(records: Records, rank_id: int, caster: CasterStats, readout: 
         values = []
         for roll in range(1, sides + 1):
             forced = ForcedPoints(records.dbc, rank_id, effect, base + roll)
-            reread = Tooltip(forced, rank_id, caster).read(records.field('Spell', rank_id, 'Description[enUS]'))
+            reread = Tooltip(forced, described, caster).read(records.field('Spell', described, 'Description[enUS]'))
             same = [value for value in reread.values if value.text == shown[0].text]
             if len(same) != 1:
                 raise Unmodelled(f'{shown[0].text} is unreadable with roll {roll} of effect {effect}')
@@ -573,6 +576,67 @@ def magic_schools(school_mask: int) -> list[int]:
     return [school for school in MAGIC_SCHOOLS if school_mask & (1 << school)]
 
 
+SCRIPT_HIT_KINDS = frozenset({'school', 'heal'})
+PER_LEVEL_ENGINE_RULE = 'known engine rounding, per-level term truncated before the sum (SpellInfo.cpp:497)'
+
+
+def per_level_fraction(records: Records, spell_id: int, effect: int, level: int) -> float:
+    rate = float32(float(records.field('Spell', spell_id, f'EffectRealPointsPerLevel[{effect}]') or 0))
+    if not rate:
+        return 0.0
+    base_level, spell_level, max_level = (int(records.field('Spell', spell_id, name) or 0)
+                                          for name in ('BaseLevel', 'SpellLevel', 'MaxLevel'))
+    if max_level > 0 and level > max_level:
+        level = max_level
+    elif level < base_level:
+        level = base_level
+    term = float32((level - max(base_level, spell_level)) * rate)
+    return term - math.trunc(term)
+
+
+def engine_rolls(readout: Readout, indexes: Sequence[int], rolls: Mapping[int, Sequence[float]],
+                 losses: Mapping[int, float]) -> dict[int, tuple[float, ...]]:
+    engine = {}
+    for index in indexes:
+        values = rolls.get(index)
+        if values is None:
+            low, high, _ = value_range(readout, index)
+            values = tuple(low + step for step in range(int(high - low) + 1))
+        engine[index] = tuple(float32(value - losses.get(index, 0.0)) for value in values)
+    return engine
+
+
+def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caster: CasterStats,
+                     target: TargetProfile, auras: Sequence[int]) -> HitModel:
+    records = records_of(class_file)
+    facts = facts_of(records, hit_spell)
+    readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), hit_spell)
+    kind, indexes = hit_kind(facts.effects, facts.aura_names, None, readout)
+    if kind not in SCRIPT_HIT_KINDS:
+        raise Unmodelled(f'script-cast spell {hit_spell} is a {kind} hit, not one direct damage or heal effect')
+    school_mask = records.field('Spell', hit_spell, 'SchoolMask')
+    mitigation = NO_MITIGATION if kind in HEAL_KINDS else mitigation_for(school_mask, target, caster.level)
+    modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
+    rolls = rolled_values(records, hit_spell, caster, readout, indexes, tooltip_spell=tooltip_spell)
+    model = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
+                         modifiers=modifiers, rolls=rolls, records=records, rank_id=hit_spell)
+    losses = {index: loss for index in indexes
+              if (loss := per_level_fraction(records, hit_spell, index, caster.level))}
+    if not losses:
+        return model
+    engine = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
+                          modifiers=modifiers, rolls=engine_rolls(readout, indexes, rolls, losses), records=records,
+                          rank_id=hit_spell)
+    terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())
+    return replace(model, engine=replace(engine, displayed=model.displayed),
+                   engine_rule=f'{PER_LEVEL_ENGINE_RULE}: {terms}')
+
+
+def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int) -> HitModel:
+    return script_hit_model(class_file, tooltip_spell, hit_spell, reference_caster(class_file), REFERENCE_TARGET,
+                            class_file.get('known_auras', []))
+
+
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
     labels = expectation.model['measurements']
     if expectation.model['kind'] != 'melee':
@@ -587,6 +651,9 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
     auras = [aura for aura in class_file.get('known_auras', []) if measured[known_aura_label(aura)] > 0]
     if expectation.model['kind'] == 'melee':
         return melee_model(class_file, caster, target, auras)
+    if 'tooltip_spell' in expectation.model:
+        return script_hit_model(class_file, expectation.model['tooltip_spell'], expectation.model['hit_spell'],
+                                caster, target, auras)
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \

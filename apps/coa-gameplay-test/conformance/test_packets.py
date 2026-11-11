@@ -68,7 +68,7 @@ class PacketTests(unittest.TestCase):
             return item['entry'].get('aura', item['entry'].get('spell'))
 
         self.assertEqual([(item['section'], spell_of(item)) for item in self.data['class_entries']],
-                         [('triggers', PARRY_DANCE), ('behaviours', PARRY_DANCE)])
+                         [('triggers', PARRY_DANCE), ('behaviours', PARRY_DANCE), ('behaviours', PARRY_DANCE_BUFF)])
         nearest = self.data['nearest_entries']
         self.assertEqual([(item['section'], item['kind']) for item in nearest],
                          [('behaviours', 'metric_delta'), ('triggers', None)])

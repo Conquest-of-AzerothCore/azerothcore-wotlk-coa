@@ -958,7 +958,8 @@
       {
         "claim": "dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage",
         "labels": [
-          "524620 effect_value 524619e0 #1"
+          "524620 effect_value 524619e0 #1",
+          "524620 script_hit 524619"
         ]
       }
     ],
@@ -1558,7 +1559,8 @@
     "spell": 680397,
     "clause": "dealing ${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2} Holy damage",
     "labels": [
-      "680397 effect_value 680398e0 #0"
+      "680397 effect_value 680398e0 #0",
+      "680397 script_hit 680398"
     ],
     "kind": "claim"
   },
@@ -3921,7 +3923,8 @@
     "spell": 804912,
     "clause": "your chance to parry is now increased by $560651s1%",
     "labels": [
-      "804912 effect_value 560651e0 #0"
+      "804912 effect_value 560651e0 #0",
+      "804912 behaviour_taken_outcome 560651"
     ],
     "kind": "claim"
   },
@@ -3981,7 +3984,10 @@
     "clause": "Casting Oath Breaker abilities now reduce the cooldown of Librams by $/1000;806106s1 sec.",
     "labels": [
       "804927 effect_value 806106e0 #0",
-      "804927 trigger_cooldown_delta"
+      "804927 trigger_cooldown_delta",
+      "804927 cost_gate 801461 without",
+      "804927 cost_gate 801461 with",
+      "804927 cost_gate 801461 beyond"
     ],
     "kind": "claim"
   },
@@ -4042,7 +4048,8 @@
     "spell": 804930,
     "clause": "Whenever the absorption shield from Staffguard breaks, inflict ${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5} High Threat Holy damage to nearby enemies.",
     "labels": [
-      "804930 effect_value 801546e0 #0"
+      "804930 effect_value 801546e0 #0",
+      "804930 script_hit 801546"
     ],
     "kind": "claim"
   },

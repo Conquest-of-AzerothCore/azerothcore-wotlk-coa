@@ -6,7 +6,8 @@ import sys
 import unittest
 
 from classes import ClassSpell, class_spells
-from compare import Run, Verdict, judge_hit
+from behaviours import STRIKER, behaviour_scenario
+from compare import PER_LEVEL_ROUNDING, Run, Verdict, judge_hit
 from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
                   casts_needed, dual_target_entry, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario,
@@ -989,6 +990,89 @@ class HitScenarioTest(unittest.TestCase):
         self.assertTrue(checks.get('hit_mean'))
         self.assertTrue(checks.get('unmodelled'))
         self.assertTrue(checks.get(GAP_CLOSER_DISTANCE))
+
+
+DISCIPLINED_BLOWS = 680397
+DISCIPLINED_BLOWS_PULSE = 680398
+ARMOR_OF_FAITH = 804930
+ARMOR_OF_FAITH_HIT = 801546
+
+
+def script_hit_entry(class_file, spell):
+    return next(entry for entry in class_file['behaviours']
+                if entry['spell'] == spell and entry['kind'] == 'script_hit')
+
+
+class ScriptHitTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.templar = load_class_file(TEMPLAR_CLASS_ID)
+
+    def scripted(self, spell):
+        scenario, expectations = behaviour_scenario(self.templar, script_hit_entry(self.templar, spell))
+        return run.validate(scenario, run.SIMULATED_CLOCK), expectations[0]
+
+    def judged(self, spell, mean, count, control=0.0, engine=False):
+        scenario, hit = self.scripted(spell)
+        measured = measured_reference(self.templar, hit)
+        model = measured_hit_model(self.templar, hit, measured)
+        labels = hit.model['measurements']
+        expected = model.engine.mean if engine else model.mean
+        values = {**measured, labels['total']: (expected + mean) * count, labels['count']: count,
+                  hit.model['control_label']: control}
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+        found = Run(key='script', status='ok', message='', values=values, steps=[], max_step_ms=None)
+        return judge_hit(base, self.templar, [(scenario, found, hit)], measured_hit_model)
+
+    def test_the_hit_is_read_from_the_tooltip_of_the_spell_that_states_it(self):
+        _, hit = self.scripted(DISCIPLINED_BLOWS)
+        self.assertEqual((hit.check, hit.spell_id, hit.rank_id), ('hit_mean', DISCIPLINED_BLOWS,
+                                                                  DISCIPLINED_BLOWS_PULSE))
+        self.assertEqual(hit.model['tooltip_spell'], DISCIPLINED_BLOWS)
+        self.assertEqual(hit.displayed, '${$680398m1*$<scalingbp>+$AP*0.05+$AGI*0.2}')
+
+    def test_the_control_arm_runs_every_trial_before_the_spell_is_learned(self):
+        scenario, hit = self.scripted(DISCIPLINED_BLOWS)
+        steps = scenario['steps']
+        learned = next(index for index, step in enumerate(steps)
+                       if step['action'] == 'learn' and step['spell'] == DISCIPLINED_BLOWS)
+        control = next(index for index, step in enumerate(steps) if step.get('label') == hit.model['control_label'])
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 578276]
+        trials = script_hit_entry(self.templar, DISCIPLINED_BLOWS)['trials']
+        self.assertEqual(len([index for index in casts if index < control]), trials)
+        self.assertEqual(len([index for index in casts if index > learned]), trials)
+        self.assertLess(control, learned)
+
+    def test_a_hit_received_by_the_striker_is_read_on_the_striker(self):
+        scenario, hit = self.scripted(ARMOR_OF_FAITH)
+        reads = [step for step in scenario['steps'] if step.get('spell') == ARMOR_OF_FAITH_HIT]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['target'] == STRIKER for step in reads))
+        armor = next(step for step in scenario['steps'] if step.get('label') == hit.model['measurements']['armor'])
+        self.assertEqual(armor['actor'], STRIKER)
+
+    def test_seeded_mean_passes_and_a_tenth_low_alerts(self):
+        self.assertEqual(self.judged(DISCIPLINED_BLOWS, 0.0, 150).status, 'ok')
+        _, hit = self.scripted(DISCIPLINED_BLOWS)
+        low = -0.1 * hit.model['reference']['mean']
+        self.assertEqual(self.judged(DISCIPLINED_BLOWS, low, 150).status, 'alert')
+
+    def test_seeded_hits_without_the_spell_alert(self):
+        verdict = self.judged(DISCIPLINED_BLOWS, 0.0, 150, control=3.0)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('control arm', verdict.explanation)
+
+    def test_a_truncated_per_level_term_is_ok_only_where_the_engine_model_reproduces_it(self):
+        engine = self.judged(ARMOR_OF_FAITH, 0.0, 40000, engine=True)
+        self.assertEqual(engine.status, 'ok')
+        self.assertIn('known engine rounding', engine.explanation)
+        self.assertIn(PER_LEVEL_ROUNDING, engine.detail)
+        self.assertEqual(self.judged(ARMOR_OF_FAITH, 0.0, 40000).status, 'ok')
+        _, hit = self.scripted(ARMOR_OF_FAITH)
+        mutant = self.judged(ARMOR_OF_FAITH, -0.06 * hit.model['reference']['mean'], 40000, engine=True)
+        self.assertEqual(mutant.status, 'alert')
+        self.assertIn('does not explain it either', mutant.explanation)
 
 
 if __name__ == '__main__':

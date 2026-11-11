@@ -3,8 +3,9 @@ import math
 from pathlib import Path
 import re
 
-from hits import (DRAIN_MS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS,
-                  aura_modifiers, cast_steps, creature_fixture, timed)
+from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS,
+                  TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
+                  magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
@@ -52,6 +53,7 @@ BEHAVIOUR_PROC_RESET = 'behaviour_proc_reset'
 BEHAVIOUR_TAKEN_HIT = 'behaviour_taken_hit'
 BEHAVIOUR_THREAT_REDIRECT = 'behaviour_threat_redirect'
 BEHAVIOUR_DISPEL_COUNT = 'behaviour_dispel_count'
+BEHAVIOUR_TAKEN_OUTCOME = 'behaviour_taken_outcome'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -63,7 +65,7 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
                     BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                    BEHAVIOUR_DISPEL_COUNT)
+                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -71,7 +73,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
-        'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count')
+        'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
+        'script_hit', 'taken_outcome')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -5002,6 +5005,267 @@ def threat_redirect_spec(entry: dict) -> ThreatRedirectSpec:
                               entry.get('settle_ms', THREAT_REDIRECT_SETTLE_MS))
 
 
+SCRIPT_HIT_SETTLE_MS = 500
+SCRIPT_HIT_RECEIVERS = (TARGET, STRIKER)
+
+
+@dataclass(frozen=True)
+class ScriptHitSpec:
+    spell: int
+    name: str
+    quote: str
+    hit_spell: int
+    trials: int
+    minimum_hits: int
+    casts: tuple[tuple[int, str], ...] = ()
+    strike_spell: int = 0
+    striker_entry: int = TAKEN_HIT_STRIKER_ENTRY
+    caster_auras: tuple[tuple[int, int], ...] = ()
+    caster_health_pct: int | None = None
+    settle_ms: int = SCRIPT_HIT_SETTLE_MS
+    learn: tuple[int, ...] = ()
+    receiver: str = TARGET
+
+
+def script_hit_label(spec: ScriptHitSpec) -> str:
+    return f'{spec.spell} script_hit {spec.hit_spell}'
+
+
+def script_hit_validate(spec: ScriptHitSpec):
+    if spec.hit_spell == spec.spell:
+        raise ValueError(f'{spec.spell} script_hit measures another spell than the one whose tooltip states it')
+    if spec.trials < 1 or not 1 <= spec.minimum_hits:
+        raise ValueError(f'{spec.spell} script_hit needs at least one trial and one hit')
+    if not spec.casts and not spec.strike_spell:
+        raise ValueError(f'{spec.spell} script_hit needs a cast or a strike to set off the script')
+    if spec.receiver not in SCRIPT_HIT_RECEIVERS:
+        raise ValueError(f'{spec.spell} script_hit receiver {spec.receiver!r} is not one of {SCRIPT_HIT_RECEIVERS}')
+    if spec.receiver == STRIKER and not spec.strike_spell:
+        raise ValueError(f'{spec.spell} script_hit is received by a striker that never strikes')
+    if spec.caster_health_pct is not None and not 0 < spec.caster_health_pct <= 100:
+        raise ValueError(f'{spec.spell} script_hit caster health {spec.caster_health_pct} is not a percent')
+
+
+def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
+    steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+             for spell, stacks in spec.caster_auras]
+    if spec.caster_health_pct is not None:
+        steps.append({'action': 'set_health', 'actor': CASTER,
+                      'value': spec.caster_health_pct * FIXTURE_MAX_HEALTH // 100, 'maximum': FIXTURE_MAX_HEALTH})
+    for spell, target in spec.casts:
+        steps += hit_ratio_cast(records, spell, CASTER, target)
+    if spec.strike_spell:
+        steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
+                  {'action': 'wait', 'label': f'{arm} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
+    return steps + [{'action': 'wait', 'label': f'{arm} settle {trial}', 'ms': spec.settle_ms}]
+
+
+def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, list[Expectation]]:
+    script_hit_validate(spec)
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'script_hit', spec.quote, 1)
+    try:
+        model = reference_script_hit_model(class_file, spec.spell, spec.hit_spell)
+    except Unmodelled as error:
+        raise NotModelled(f'{spec.spell} script_hit {spec.hit_spell}: {error.reason}') from error
+    label = script_hit_label(spec)
+    school_mask = records.field('Spell', spec.hit_spell, 'SchoolMask')
+    heal = model.kind in HEAL_KINDS
+    family = 'spell_heal' if heal else 'spell_damage'
+    unblocked = {} if heal else {'blocked': False}
+    receiver = {'target': spec.receiver}
+    labels = {'total': f'{label} total', 'count': f'{label} count'}
+    reads = []
+    if not heal:
+        reads = [measurement(ARMOR_LABEL, spec.receiver, 'armor'),
+                 measurement(VIEW_LEVEL_LABEL, CASTER, 'view_level', target=spec.receiver)]
+        labels.update({'armor': ARMOR_LABEL, 'view_level': VIEW_LEVEL_LABEL})
+        for school in magic_schools(school_mask):
+            reads.append(measurement(resistance_label(school), spec.receiver, 'resistance', school=school))
+            labels[f'resistance {school}'] = resistance_label(school)
+    control_label = f'{label} control count'
+    learned = dict.fromkeys((*spec.learn, *(spell for spell, _ in spec.casts)))
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned] + reads
+    for trial in range(1, spec.trials + 1):
+        steps += script_hit_trial(records, spec, 'control', trial)
+    steps += [{'action': 'wait', 'label': 'control drain', 'ms': DRAIN_MS},
+              measurement(control_label, CASTER, f'{family}_count', spell=spec.hit_spell, **receiver),
+              {'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    for trial in range(1, spec.trials + 1):
+        steps += script_hit_trial(records, spec, 'treatment', trial)
+    steps.append({'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS})
+    for part in ('total', 'count'):
+        steps.append(measurement(labels[part], CASTER, f'{family}_{part}', spell=spec.hit_spell, **receiver,
+                                 critical=False, **unblocked))
+    steps.append(measurement(f'{label} critical_hits', CASTER, f'{family}_count', spell=spec.hit_spell, **receiver,
+                             critical=True))
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in spec.caster_auras]
+    waited = waited_ms(steps)
+    if waited + TIMEOUT_MARGIN_MS > MAX_ACCELERATED_SCENARIO_MS:
+        raise NotModelled(f'{spec.spell} script_hit waits {waited} ms, beyond the accelerated cap '
+                          f'{MAX_ACCELERATED_SCENARIO_MS} ms')
+    creatures = ([creature_fixture(class_file)] if spec.receiver == TARGET
+                 or any(target == TARGET for _, target in spec.casts) else [])
+    if spec.strike_spell:
+        creatures.append({'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
+                          'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True})
+    setup = ([f'casts {[spell for spell, _ in spec.casts]}'] if spec.casts else []) + \
+        ([f'a passive, stationary striker (creature entry {spec.striker_entry}) casts {spec.strike_spell} at the '
+          f'caster'] if spec.strike_spell else [])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour script hit {spec.hit_spell}',
+        'contract': f'Each trial the caster {" and ".join(setup)}, {spec.trials} trials without {spec.spell} known '
+                    f'(the control, which must count no {spec.hit_spell} hit) and {spec.trials} with it; the mean '
+                    f'non-critical {spec.hit_spell} hit on {spec.receiver} is judged against the {spec.spell} '
+                    f'tooltip read with the measured stats, its known modifiers and mitigation.',
+        'players': [player_fixture(class_file)],
+        'creatures': creatures,
+        'steps': base_steps(class_file) + steps,
+        'timeout_ms': waited + TIMEOUT_MARGIN_MS}
+    rule = f'{model.kind} hit of script-cast spell {spec.hit_spell} read from the {spec.spell} tooltip, ' \
+           f'integer steps modelled; control arm without {spec.spell}; {prose_rule(entry.quote, spec.spell)}'
+    record = {**model_record(model, school_mask, None, labels, spec.minimum_hits), 'hit_spell': spec.hit_spell,
+              'tooltip_spell': spec.spell, 'control_label': control_label, 'gate_multiplier': 1.0, 'part': 0,
+              'parts': 1, 'part_casts': spec.trials}
+    return scenario, [Expectation(label, 'hit_mean', spec.spell, spec.hit_spell, 0, ' | '.join(model.displayed), rule,
+                                  record)]
+
+
+def script_hit_spec(entry: dict) -> ScriptHitSpec:
+    return ScriptHitSpec(entry['spell'], entry['name'], entry['quote'], entry['hit_spell'], entry['trials'],
+                         entry['minimum_hits'],
+                         tuple((int(spell), str(target)) for spell, target in entry.get('casts', ())),
+                         entry.get('strike_spell', 0), entry.get('striker_entry', TAKEN_HIT_STRIKER_ENTRY),
+                         tuple((int(spell), int(stacks)) for spell, stacks in entry.get('caster_auras', ())),
+                         entry.get('caster_health_pct'), entry.get('settle_ms', SCRIPT_HIT_SETTLE_MS),
+                         tuple(entry.get('learn', ())), entry.get('receiver', TARGET))
+
+
+TAKEN_OUTCOME_ATTACKERS = 8
+TAKEN_OUTCOME_REFRESH_MS = 4000
+TAKEN_OUTCOME_ENGAGE_MS = 3000
+TAKEN_OUTCOME_HEALTH = 1_000_000
+TAKEN_OUTCOME_ARMS = ('control', 'treatment')
+TAKEN_OUTCOME_MAX_STATE = 8
+TAKEN_OUTCOME_SWING_MARGIN_MS = 300
+
+
+@dataclass(frozen=True)
+class TakenOutcomeSpec:
+    spell: int
+    name: str
+    quote: str
+    victim_state: int
+    aura: int
+    stacks: int
+    expected_points: float
+    arm_ms: int
+    attackers: int = TAKEN_OUTCOME_ATTACKERS
+    attacker_entry: int = DUMMY_ENTRY
+    attacker_auras: tuple[int, ...] = ()
+    refresh_ms: int = TAKEN_OUTCOME_REFRESH_MS
+    learn: tuple[int, ...] = ()
+    state_metric: str = ''
+
+
+def taken_outcome_label(spec: TakenOutcomeSpec) -> str:
+    return f'{spec.spell} {BEHAVIOUR_TAKEN_OUTCOME} {spec.aura}'
+
+
+def taken_outcome_attacker(index: int) -> str:
+    return f'attacker{index + 1}'
+
+
+def taken_outcome_reads(spec: TakenOutcomeSpec, arm: str, moment: str) -> list[dict]:
+    label = taken_outcome_label(spec)
+    return [measurement(f'{label} {arm} {moment} swings', CASTER, 'melee_attacks_taken'),
+            measurement(f'{label} {arm} {moment} outcomes', CASTER, 'melee_attacks_taken',
+                        victim_state=spec.victim_state)]
+
+
+def taken_outcome_validate(spec: TakenOutcomeSpec):
+    if not 0 <= spec.victim_state <= TAKEN_OUTCOME_MAX_STATE:
+        raise ValueError(f'{spec.spell} taken_outcome victim_state {spec.victim_state} is not a VictimState')
+    if not 1 <= spec.attackers <= TAKEN_OUTCOME_ATTACKERS:
+        raise ValueError(f'{spec.spell} taken_outcome needs 1 to {TAKEN_OUTCOME_ATTACKERS} attackers')
+    if spec.stacks < 1 or spec.arm_ms < spec.refresh_ms or spec.refresh_ms <= 0:
+        raise ValueError(f'{spec.spell} taken_outcome needs a stacked aura and arms of whole refresh cycles')
+
+
+def taken_outcome_scenario(class_file: dict, spec: TakenOutcomeSpec) -> tuple[dict, list[Expectation]]:
+    taken_outcome_validate(spec)
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'taken_outcome', spec.quote, spec.expected_points)
+    attackers = [taken_outcome_attacker(index) for index in range(spec.attackers)]
+    health = {'action': 'set_health', 'actor': CASTER, 'value': TAKEN_OUTCOME_HEALTH, 'maximum': TAKEN_OUTCOME_HEALTH}
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn] + [health]
+    swing_ms = swing_interval(class_file) + TAKEN_OUTCOME_SWING_MARGIN_MS
+    for attacker in attackers:
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'target': attacker, 'caster': attacker, 'spell': aura,
+                   'stacks': 1} for aura in spec.attacker_auras]
+        steps += [{'action': 'attack', 'actor': CASTER, 'target': attacker},
+                  {'action': 'wait', 'label': f'engage {attacker}', 'ms': swing_ms}, health]
+    steps += [{'action': 'stop_attack', 'actor': CASTER},
+              {'action': 'wait', 'label': 'engage', 'ms': TAKEN_OUTCOME_ENGAGE_MS}]
+    cycles = spec.arm_ms // spec.refresh_ms
+    for arm in TAKEN_OUTCOME_ARMS:
+        steps += taken_outcome_reads(spec, arm, 'start')
+        aura = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': 0},
+                 {'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': spec.stacks}]
+                if arm == 'treatment' else [])
+        for cycle in range(cycles):
+            steps += aura + [health, {'action': 'wait', 'label': f'{arm} swings {cycle + 1}', 'ms': spec.refresh_ms}]
+            if spec.state_metric and cycle == 0:
+                steps.append(measurement(f'{taken_outcome_label(spec)} {arm} {spec.state_metric}', CASTER,
+                                         spec.state_metric))
+        steps += taken_outcome_reads(spec, arm, 'end')
+    steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': 0})
+    waited = waited_ms(steps)
+    if waited + TIMEOUT_MARGIN_MS > MAX_ACCELERATED_SCENARIO_MS:
+        raise NotModelled(f'{spec.spell} taken_outcome waits {waited} ms, beyond the accelerated cap '
+                          f'{MAX_ACCELERATED_SCENARIO_MS} ms')
+    creatures = [{'id': attacker, 'owner': CASTER, 'entry': spec.attacker_entry, 'level': class_file['level'],
+                  'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 2, 'stationary': True}
+                 for attacker in attackers]
+    hasted = f' each carrying {list(spec.attacker_auras)}' if spec.attacker_auras else ''
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour taken outcome {spec.aura}',
+        'contract': f'{spec.attackers} aggressive, stationary attackers (creature entry {spec.attacker_entry}, level '
+                    f'{class_file["level"]}){hasted} melee the caster in front of it; the melee packets the caster '
+                    f'receives are counted with and without victim state {spec.victim_state}, {spec.arm_ms} ms '
+                    f'without {spec.aura} (the control) and {spec.arm_ms} ms with {spec.aura} removed and set again '
+                    f'at {spec.stacks} stacks every {spec.refresh_ms} ms (set_aura keeps the duration of an aura it '
+                    f'finds); the outcome rates are compared. The caster engages each '
+                    f'attacker with one swing interval of auto attack, then stops'
+                    + (f'; it knows {list(spec.learn)} in both arms' if spec.learn else '') + '.',
+        'players': [player_fixture(class_file)],
+        'creatures': creatures,
+        'steps': base_steps(class_file) + steps,
+        'timeout_ms': waited + TIMEOUT_MARGIN_MS}
+    label = taken_outcome_label(spec)
+    reads = {arm: {f'{moment} {key}': f'{label} {arm} {moment} {key}' for moment in ('start', 'end')
+                   for key in ('swings', 'outcomes')} for arm in TAKEN_OUTCOME_ARMS}
+    if spec.state_metric:
+        model_states = {arm: f'{label} {arm} {spec.state_metric}' for arm in TAKEN_OUTCOME_ARMS}
+    else:
+        model_states = {}
+    model = {'kind': 'taken_outcome', 'reads': reads, 'states': model_states, 'expected_points': spec.expected_points,
+             'victim_state': spec.victim_state, 'stacks': spec.stacks, 'quote': entry.quote}
+    return scenario, [Expectation(label, BEHAVIOUR_TAKEN_OUTCOME, spec.spell, spec.aura, None,
+                                  str(spec.expected_points), prose_rule(entry.quote, spec.spell), model)]
+
+
+def taken_outcome_spec(entry: dict) -> TakenOutcomeSpec:
+    return TakenOutcomeSpec(entry['spell'], entry['name'], entry['quote'], entry['victim_state'], entry['aura'],
+                            entry['stacks'], float(entry['expected_points']), entry['arm_ms'],
+                            entry.get('attackers', TAKEN_OUTCOME_ATTACKERS),
+                            entry.get('attacker_entry', DUMMY_ENTRY), tuple(entry.get('attacker_auras', ())),
+                            entry.get('refresh_ms', TAKEN_OUTCOME_REFRESH_MS), tuple(entry.get('learn', ())),
+                            entry.get('state_metric', ''))
+
+
 def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
     if not trials or entry.get('kind') != 'hit_ratio':
         return entry
@@ -5114,6 +5378,10 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return threat_redirect_scenario(class_file, threat_redirect_spec(entry))
     if entry['kind'] == 'dispel_count':
         return dispel_count_scenario(class_file, dispel_count_spec(entry))
+    if entry['kind'] == 'script_hit':
+        return script_hit_scenario(class_file, script_hit_spec(entry))
+    if entry['kind'] == 'taken_outcome':
+        return taken_outcome_scenario(class_file, taken_outcome_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
-                        BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT,
+                        BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
                         BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
                         BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
@@ -735,7 +735,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 219)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 224)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6796,6 +6796,62 @@ class UncappedAreaAndControlledLeechTests(unittest.TestCase):
         wrong = {**right, model['heal_baseline_label']: 235.0, model['heal_label']: 471.0}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
+
+
+PARRY_DANCE_BUFF = 560651
+
+
+def taken_outcome_entry() -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'taken_outcome')
+
+
+def taken_outcome_values(model: dict, control: tuple[float, float], treatment: tuple[float, float]) -> dict:
+    values = {}
+    for arm, (swings, outcomes) in (('control', control), ('treatment', treatment)):
+        reads = model['reads'][arm]
+        values.update({reads['start swings']: 0.0, reads['start outcomes']: 0.0,
+                       reads['end swings']: swings, reads['end outcomes']: outcomes})
+    return values
+
+
+class TakenOutcomeTests(unittest.TestCase):
+    def test_the_aura_is_set_only_in_the_treatment_arm_and_parries_are_read_by_victim_state(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, taken_outcome_entry())
+        validated = run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertEqual(len(validated['creatures']), 8)
+        self.assertTrue(all(creature['reaction'] == 2 and creature['stationary']
+                            for creature in validated['creatures']))
+        steps = validated['steps']
+        control_end = next(index for index, step in enumerate(steps)
+                           if step.get('label', '').endswith('control end outcomes'))
+        auras = [index for index, step in enumerate(steps) if step['action'] == 'set_aura'
+                 and step.get('spell') == PARRY_DANCE_BUFF and step.get('stacks') == 5]
+        self.assertTrue(auras)
+        self.assertGreater(min(auras), control_end)
+        outcomes = [step for step in steps if step.get('label', '').endswith('outcomes')]
+        self.assertEqual(len(outcomes), 4)
+        self.assertTrue(all(step['victim_state'] == 3 for step in outcomes))
+        self.assertEqual(expectations[0].check, BEHAVIOUR_TAKEN_OUTCOME)
+        self.assertNotIn({'action': 'learn', 'actor': CASTER, 'spell': taken_outcome_entry()['spell']}, steps)
+
+    def test_seeded_fifteen_points_pass_and_twelve_alert(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, taken_outcome_entry())
+        expectation = expectations[0]
+        right = taken_outcome_values(expectation.model, (40000.0, 2000.0), (40000.0, 8000.0))
+        wrong = taken_outcome_values(expectation.model, (40000.0, 2000.0), (40000.0, 6800.0))
+        none = taken_outcome_values(expectation.model, (40000.0, 2000.0), (40000.0, 2000.0))
+        for values, status in ((right, 'ok'), (wrong, 'alert'), (none, 'alert')):
+            with self.subTest(status=status, treated=values):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+                self.assertEqual(verdict.status, status)
+
+    def test_too_few_swings_are_not_judged(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, taken_outcome_entry())
+        expectation = expectations[0]
+        few = taken_outcome_values(expectation.model, (2000.0, 100.0), (2000.0, 400.0))
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(few), expectation)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIsNotNone(verdict.detail['swings_needed'])
 
 
 if __name__ == '__main__':
