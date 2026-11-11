@@ -1467,6 +1467,17 @@ class CheckedGateAbsenceEntryTest(unittest.TestCase):
         entry = self.entry()
         self.assertIs(checked_entry(entry), entry)
 
+    def test_rejects_an_away_step_beyond_one_relocation(self):
+        entry = {**self.entry(), 'away_yd': 25.0}
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
+    def test_rejects_an_away_step_without_a_dummy_target(self):
+        entry = {**self.entry(), 'away_yd': 15.0}
+        entry['trigger'] = {**entry['trigger'], 'target': 'ally'}
+        with self.assertRaises(ValueError):
+            checked_gate_absence_entry(entry)
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GateAbsenceScenarioShapeTest(unittest.TestCase):
@@ -1492,6 +1503,17 @@ class GateAbsenceScenarioShapeTest(unittest.TestCase):
     def test_gate_absence_rule_names_the_withheld_condition(self):
         entry = templar_gate_trigger(FAITH_GUARD)
         self.assertIn('While a Libram is active', gate_absence_rule(entry))
+
+    def test_an_away_step_casts_in_place_and_waits_away(self):
+        entry = {**templar_gate_trigger(FAITH_GUARD), 'away_yd': 15.0}
+        scenario, _ = gate_absence_scenario(CLASS_FILE, entry, part=0)
+        steps = run.validate(scenario)['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        moves = [step['dx'] for step in steps if step['action'] == 'relocate']
+        self.assertEqual(moves, [-15.0] + [15.0, -15.0] * len(casts))
+        for index in casts:
+            self.assertEqual(steps[index + 1], {'action': 'relocate', 'actor': 'caster', 'dx': -15.0})
+            self.assertEqual(steps[index - 1]['dx'], 15.0)
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

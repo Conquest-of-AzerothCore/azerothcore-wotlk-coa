@@ -174,6 +174,9 @@ def checked_self_trigger_entry(entry: dict) -> dict:
     return entry
 
 
+RELOCATE_LIMIT_YD = 20.0
+
+
 def checked_gate_absence_entry(entry: dict) -> dict:
     aura = entry['aura']
     trigger = entry['trigger']
@@ -193,6 +196,10 @@ def checked_gate_absence_entry(entry: dict) -> dict:
         raise ValueError(f'Gate-absence trigger {aura} must not set any attempt_auras: it tests their absence')
     if not entry.get('gate_text'):
         raise ValueError(f'Gate-absence trigger {aura} needs gate_text naming the withheld condition')
+    away = entry.get('away_yd')
+    if away is not None and (trigger.get('target') != TARGET or not 0 < away <= RELOCATE_LIMIT_YD):
+        raise ValueError(f'Gate-absence trigger {aura} steps {away!r} yd away; it needs a dummy target and at most '
+                         f'{RELOCATE_LIMIT_YD:g} yd')
     return entry
 
 
@@ -359,9 +366,18 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
         cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
-        steps = cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts,
-                           attempt_fixtures(entry, facts))
+        away = entry.get('away_yd')
+        fixtures = attempt_fixtures(entry, facts) + ([relocated(away)] if away else [])
+        steps = cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts, fixtures)
+        if away:
+            steps = [relocated(-away)] + [moved for step in steps
+                                          for moved in ([step, relocated(-away)] if step['action'] == 'cast'
+                                                        else [step])]
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
+
+
+def relocated(dx: float) -> dict:
+    return {'action': 'relocate', 'actor': CASTER, 'dx': dx}
 
 
 def counts(entry: dict, trials_label: str, events_label: str) -> list[dict]:

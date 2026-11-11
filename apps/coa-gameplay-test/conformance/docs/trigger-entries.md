@@ -560,6 +560,12 @@ from, the same choice `judge_self_trigger` already made). The judged label is `<
 `add_trigger` (`conformance.py`) keys its scenario `(<aura>, "gate")` so it never collides with the plain
 `trigger_count` entry sharing the same `aura`.
 
+`away_yd` (a dummy target only, at most 20 yd) withholds a range condition: the caster steps `away_yd` back once
+before the attempts, steps forward before each cast and back again right after it, so the trigger's later damage,
+such as a periodic tick, lands while the caster is out of range. Condemnation 706325 ("if you are within melee
+range of your target") casts Condemn 804906 and waits its ticks 18 yd from the dummy: 0 Zealotry 801450 casts in
+594 ticks (diagnostic 20261111-173551); its in-range rate is the `706325 proc_rate 801450 804906` entry.
+
 Faith Guard 705259 (round10 `proc-chains`): "While a Libram is active, your Chastise will now unleash a line of
 holy power..." The reference Templar carries no Libram by default (the sibling `trigger_count` entry needs its
 own `attempt_auras` to set one), so this entry withholds the condition for free, with no extra fixture. Two
