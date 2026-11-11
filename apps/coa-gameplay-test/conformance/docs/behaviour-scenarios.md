@@ -506,6 +506,17 @@ expected delta from `relation`/`expected` (`before * (expected - 1.0)` for `"rat
 `tolerated` within 5%, `alert` otherwise. A nonzero `aura_stacks` reading after the cast always downgrades an
 otherwise-passing verdict to `alert` — the Oath must be consumed, not just read.
 
+The `oath_consumption` reads are computed formula calls with no hit applied, so they are readbacks (the internal
+damage read ruling of 2026-11-11). "Dealing additional damage/healing for each consumed" is proven by a `hit_ratio`
+entry, `variant` and `label_suffix` `oaths`: the Breaker's level 60 rank is cast at the dummy (or Benediction at the
+ally, `metric: "spell_heal_total"`), with no Oath in the control arm and two distinct Oaths set before every
+treatment cast, 804904 (Righteous Lunge, +5% and +30%) and 804922 (Condemn, +30%), whose `SPELLMOD_DAMAGE` effects
+carry the Breaker mask (`EffectSpellClassMask` word 2 bit 128). The percent mods multiply, so the stated ratio is
+1.05 x 1.30 x 1.30 = 1.7745; one Oath's 1.365 or an additive 1.65 lies outside the band. A Holy Breaker sets 823764
+in both arms, a stat fixture makes the scaled term dominate the die, and only non-critical hits count. The ledger
+row keeps the `oath_consumption` label beside the hit ratio, because its stacks read after a real cast proves the
+removal. Reckoning 805421 (572741) and Benediction 578276 read +77.3% and +77.45% (`20261111-221450`).
+
 ### Oath-consumption-on-removal scenarios (`behaviour_oath_consumption_removal`, `kind: "oath_consumption_removal"`)
 
 Righteous Tempest 805409's own "Consumes your Oaths, dealing additional damage for each consumed." clause does
