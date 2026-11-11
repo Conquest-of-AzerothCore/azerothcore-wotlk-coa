@@ -6835,7 +6835,7 @@ public:
       return;
 
     uint8 itemCategoryId = AppearanceCategoryForEquipmentSlot(slot);
-    if (itemCategoryId && state->CanSeeItemAppearances)
+    if (itemCategoryId)
     {
       uint32 appearanceId = state->ActiveAppearances[itemCategoryId];
       auto appearanceItr = _appearances.find(appearanceId);
@@ -6862,6 +6862,58 @@ public:
         PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + slot * 2, 0,
         static_cast<uint16>(effectItr->second.EnchantId));
   }
+
+    static bool IsVisibleItemEntryField(uint16 index)
+    {
+        return index >= PLAYER_VISIBLE_ITEM_1_ENTRYID &&
+            index < PLAYER_VISIBLE_ITEM_1_ENTRYID + EQUIPMENT_SLOT_END * 2 &&
+            (index - PLAYER_VISIBLE_ITEM_1_ENTRYID) % 2 == 0;
+    }
+
+    void ShowEquippedItemsToViewer(Player const* wearer, ByteBuffer& data, BuildValuesCachePosPointers const& pos,
+        Player* viewer)
+    {
+        std::shared_ptr<PlayerCollectionState> viewerState;
+        std::shared_ptr<PlayerCollectionState> wearerState;
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            uint16 const index = PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2;
+            auto const field = pos.other.find(index);
+            if (field == pos.other.end())
+                continue;
+            if (!viewerState && !(viewerState = GetState(viewer)))
+                return;
+            if (viewerState->CanSeeItemAppearances)
+                return;
+            if (!wearerState && !(wearerState = GetState(wearer)))
+                return;
+
+            uint8 const category = AppearanceCategoryForEquipmentSlot(slot);
+            Item const* item = wearer->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!category || !item)
+                continue;
+            auto const appearance = _appearances.find(wearerState->ActiveAppearances[category]);
+            if (appearance != _appearances.end() && appearance->second.SourceItem &&
+                appearance->second.SourceItem == wearer->GetUInt32Value(index))
+                data.put<uint32>(field->second, item->GetEntry());
+        }
+    }
+
+    void ResendVisibleItemsTo(Player* viewer)
+    {
+        auto const resend = [](Player* wearer)
+        {
+            for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+                if (wearer->GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2))
+                    wearer->ForceValuesUpdateAtIndex(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2);
+        };
+        resend(viewer);
+        viewer->GetMap()->DoForAllPlayers([viewer, &resend](Player* wearer)
+        {
+            if (wearer != viewer && viewer->HaveAtClient(wearer))
+                resend(wearer);
+        });
+    }
 
     uint32 GetAmmunitionDisplay(Player* player)
     {
@@ -8132,6 +8184,7 @@ private:
                               canSeeItem ? 1 : 0, canSeeSpell ? 1 : 0);
 
     RefreshVisibleItems(player);
+    ResendVisibleItemsTo(player);
     RefreshIncarnations(player);
     SendAppearanceVisibility(player, *state);
   }
@@ -10210,7 +10263,21 @@ public:
             {UNITHOOK_ON_BLOCK,
              UNITHOOK_ON_PERIODIC_DAMAGE_RESULT,
              UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE,
-             UNITHOOK_ON_SEND_AURA_UPDATE, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM}) {}
+             UNITHOOK_ON_SEND_AURA_UPDATE, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM,
+             UNITHOOK_SHOULD_TRACK_VALUES_UPDATE_POS_BY_INDEX, UNITHOOK_ON_PATCH_VALUES_UPDATE}) {}
+
+    bool ShouldTrackValuesUpdatePosByIndex(Unit const* unit, uint8, uint16 index) override
+    {
+        return unit->IsPlayer() && AscensionCollectionService::IsVisibleItemEntryField(index);
+    }
+
+    void OnPatchValuesUpdate(Unit const* unit, ByteBuffer& data, BuildValuesCachePosPointers& pos,
+        Player* target) override
+    {
+        if (target && !pos.other.empty() && unit->IsPlayer() &&
+            ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+            AscensionCollectionService::Instance().ShowEquippedItemsToViewer(unit->ToPlayer(), data, pos, target);
+    }
 
     void OnUnitSetShapeshiftForm(Unit* unit, uint8) override
     {
