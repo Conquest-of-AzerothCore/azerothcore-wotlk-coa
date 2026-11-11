@@ -3947,6 +3947,19 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? uint32(object->GetGoState()) : 99;
         }
+        if (metric == "nearby_gameobject_flags")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object ? double(object->GetUInt32Value(GAMEOBJECT_FLAGS)) : -1.0;
+        }
+        if (metric == "nearby_gameobject_quest")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            if (!object)
+                return -1.0;
+            GameObjectTemplate const* info = object->GetGOInfo();
+            return info->type == GAMEOBJECT_TYPE_GOOBER ? double(info->goober.questId) : 0.0;
+        }
         if (metric == "nearby_gameobject_scale")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);

@@ -132,6 +132,7 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
+    'nearby_gameobject_flags', 'nearby_gameobject_quest',
     'nearby_gameobject_display', 'nearby_gameobject_ground_offset', 'nearby_gameobject_orientation',
     'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'map_creature_count',
     'map_creatures_below_floor',

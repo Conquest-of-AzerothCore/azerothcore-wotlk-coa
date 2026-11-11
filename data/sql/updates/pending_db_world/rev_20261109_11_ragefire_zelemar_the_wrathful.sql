@@ -8,7 +8,7 @@ UPDATE `gameobject_template_addon` SET `flags` = `flags` & ~4 WHERE `entry` = 18
 UPDATE `smart_scripts` SET `action_param4` = 0
 WHERE `entryorguid` = 182024 AND `source_type` = 1 AND `id` = 0 AND `action_type` = 12;
 
-DELETE FROM `creature_text` WHERE `CreatureID` = 17830 AND `GroupID` IN (0, 1);
+DELETE FROM `creature_text` WHERE `CreatureID` = 17830 AND `GroupID` IN (0, 1) AND `ID` = 0;
 INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`,
     `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
 (17830, 0, 0, 'Who dare summon me!', 14, 0, 100, 0, 0, 0, 0, 0, 'Zelemar the Wrathful - On Summoned'),

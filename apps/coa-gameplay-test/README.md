@@ -1119,6 +1119,9 @@ whose grid is not loaded is not counted.
 below the floor under them, or over no floor at all. The floor is searched downward from the higher of the
 creature's current Z and its spawn Z, so a creature that sank through the ground counts while one that walked
 down a ramp does not. Each one counted is logged with its spawn id, position and floor.
+`nearby_gameobject_flags` takes `entry` and returns the `GameObjectFlags` the client gets for the nearest such
+gameobject within 20 yards (4 is `GO_FLAG_INTERACT_COND`, which keeps the client from using it), and
+`nearby_gameobject_quest` the quest a goober requires (0 for none); both return -1 when there is no such gameobject.
 `nearby_gameobject_state` takes `entry` and returns the state of the nearest such gameobject within 20 yards
 (0 open, 1 closed, 99 none).
 `nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within
