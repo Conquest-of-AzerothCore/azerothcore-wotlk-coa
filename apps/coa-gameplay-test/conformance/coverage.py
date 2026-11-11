@@ -322,9 +322,9 @@ EVIDENCE = {
 }
 METRIC_EVIDENCE = {
     **dict.fromkeys(('aura', 'aura_stacks', 'aura_apply_count', 'spell_cast_count', 'spell_damage_count',
-                     'spell_damage_total', 'spell_damage_taken', 'spell_heal_count', 'spell_heal_total',
+                     'spell_damage_total', 'spell_heal_count', 'spell_heal_total',
                      'spell_effective_heal_total', 'spell_energize_count', 'spell_energize_total', 'spell_proc_count',
-                     'melee_attack_count', 'melee_damage_count', 'melee_damage_total', 'melee_damage_taken',
+                     'melee_attack_count', 'melee_damage_count', 'melee_damage_total',
                      'melee_attacks_taken', 'owned_creature_count', 'owned_creature_damage_count',
                      'owned_creature_damage_total', 'owned_creature_heal_count', 'owned_creature_heal_total',
                      'cast_failure', 'timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms',
@@ -338,6 +338,7 @@ METRIC_EVIDENCE = {
                      'spell_cooldown_packet_ms',
                      'spell_damage_done', 'spell_healing_done', 'spell_healing_taken', 'spell_critical_damage',
                      'spell_done_crit_chance', 'melee_damage_done', 'aoe_damage_taken', 'script_spell_damage_taken',
+                     'spell_damage_taken', 'melee_damage_taken',
                      'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune'),
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',

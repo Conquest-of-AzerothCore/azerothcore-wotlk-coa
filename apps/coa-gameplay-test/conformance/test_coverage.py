@@ -405,6 +405,16 @@ class EvidenceStatusTest(unittest.TestCase):
                 with mock.patch.dict(METRIC_EVIDENCE, {metric: READBACK}):
                     self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
 
+    def test_a_damage_taken_probe_without_a_hit_is_a_readback(self):
+        label = '1 behaviour_metric_delta damage_taken'
+        clauses = [claim('reduces damage taken by an additional 5% per copy', label)]
+        for metric in ('melee_damage_taken', 'spell_damage_taken'):
+            with self.subTest(metric=metric):
+                self.assertEqual(METRIC_EVIDENCE[metric], READBACK)
+                read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)
+                self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
+        self.assertEqual(METRIC_EVIDENCE['spell_absorb_total'], EVENT)
+
     def test_a_threat_read_counts_only_where_the_clause_promises_threat(self):
         label = '1 behaviour_metric_delta'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'threat', contrast=LEARNED_CONTRAST)

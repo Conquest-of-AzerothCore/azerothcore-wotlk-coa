@@ -3018,11 +3018,15 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                    {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                    measurement(label, CASTER, 'cast_failure', spell=spec.gated_spell)])
 
+    def after_casts(arm: CostGateArm) -> tuple[tuple[int, str], ...]:
+        return spec.after_casts if arm.with_talent else tuple(
+            (spell, target) for spell, target in spec.after_casts if spell != spec.spell)
+
     def after(arm: CostGateArm) -> list[dict]:
-        if not (arm.with_talent and spec.after_casts):
+        if not after_casts(arm):
             return []
         steps = [{'action': 'wait', 'label': f'{arm.name} wait before the after casts', 'ms': spec.after_wait_ms}]
-        for spell, target in spec.after_casts:
+        for spell, target in after_casts(arm):
             after_facts = facts_of(records, spell)
             steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}]
                       + cast_gate_power_step(after_facts) + required_aura_steps(after_facts)
@@ -3030,11 +3034,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         return steps
 
     def cooldown_wait(arm: CostGateArm) -> int:
-        return int(arm.level) - (spec.after_wait_ms if arm.with_talent and spec.after_casts else 0)
+        return int(arm.level) - (spec.after_wait_ms if after_casts(arm) else 0)
 
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gated_spell}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
-        spell for spell, _ in spec.setup_casts + spec.after_casts)]
+        spell for spell, _ in spec.setup_casts + spec.after_casts if spell != spec.spell)]
     expectations = []
     rule = prose_rule(entry.quote, spec.spell)
     model = {'kind': 'cost_gate', 'resource': spec.resource, 'base': base, 'reduction': spec.reduction,
@@ -3090,8 +3094,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                     + (f' The talent resets the running cooldown: both arms attempt {spec.gated_spell} '
                        f'{spec.margin_ms} ms after the after casts, refused without {spec.spell}, through with it.'
                        if spec.resets else '')
-                    + (f' In the arms with {spec.spell}, {[spell for spell, _ in spec.after_casts]} are cast '
-                       f'{spec.after_wait_ms} ms after the priming cast.' if spec.after_casts else ''),
+                    + (f' {[spell for spell, _ in spec.after_casts]} are cast {spec.after_wait_ms} ms after the '
+                       f'priming cast, in every arm except {spec.spell} itself, which only the arms with it cast and '
+                       f'learn.' if spec.after_casts else ''),
         'players': players,
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -4737,6 +4742,8 @@ def taken_hit_reads(spec: TakenHitSpec, arm: str, mark, debt: bool) -> list[dict
 
 def taken_hit_debt_reads(spec: TakenHitSpec, arm: str, trial: int, moment: str) -> list[dict]:
     return [measurement(taken_hit_mark(spec, arm, trial, f'paid {moment}'), CASTER, 'spell_damage_total',
+                        spell=spec.debt_spell, target=CASTER),
+            measurement(taken_hit_mark(spec, arm, trial, f'payments {moment}'), CASTER, 'spell_damage_count',
                         spell=spec.debt_spell, target=CASTER),
             measurement(taken_hit_mark(spec, arm, trial, f'debt {moment}'), CASTER, 'aura', spell=spec.debt_spell)]
 

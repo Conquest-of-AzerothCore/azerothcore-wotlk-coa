@@ -193,7 +193,12 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `event` (hits, heals, energizes, casts, procs, auras on a unit including `water_walk`, which reads
   `HasAuraType(SPELL_AURA_WATER_WALK)`, owned creatures, timeline events, the event times of ADR 0119) is behaviour;
   `readback` (spell definitions, live aura values, cooldowns and the in-process damage, healing and crit probes such
-  as `spell_damage_done` or `aoe_damage_taken`) is data; `state` (stat fields: `stat`, `armor`, ratings, hit, crit,
+  as `spell_damage_done`, `aoe_damage_taken`, `spell_damage_taken` or `melee_damage_taken`) is data. An internal
+  damage read is behaviour only when its value comes from a damage event applied in the run (the amount a unit lost,
+  or the log the server emitted for that hit, such as the `taken_hit` reads); it is a readback when the harness calls
+  a calculation function or reads a stored modifier with no hit applied (trial question 4, 2026-11-11): the two
+  `*_damage_taken` metrics return `SpellDamageBonusTaken` and `MeleeDamageBonusTaken` of a fixed 1000
+  (`CoAGameplayTest.cpp`, the `spell_damage_taken || melee_damage_taken` branch); `state` (stat fields: `stat`, `armor`, ratings, hit, crit,
   dodge and parry chances, power, speed, attack time) is data, except that a state read counts as behaviour when it
   is the stat the clause promises, read in a learned/unlearned contrast: the check is `passive_delta`,
   `behaviour_party_stat_ratio` (an ally's stat before and after the caster learns the spell), or

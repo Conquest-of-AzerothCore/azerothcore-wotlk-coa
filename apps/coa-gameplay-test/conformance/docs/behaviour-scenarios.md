@@ -187,7 +187,8 @@ is wrong (an implementation that gets the delta right from a wrong baseline is s
 is off by as little as one unit, since the shared margin's floor of 1 absolute unit would otherwise mask the
 exact failure this check exists to catch (a modifier of +1 silently not applying). Exact equality is sound here
 specifically because both metrics are deterministic integer reads taken with no combat in flight, unlike the
-live combat-roll pipeline behind `melee_damage_taken`/`spell_damage_taken`, which does need a tolerance band.
+damage logs of real hits, which do need a tolerance band. (`melee_damage_taken`/`spell_damage_taken` are not such
+logs: they return the damage-taken calculation of a fixed 1000 with no hit, so they are readbacks, ADR 0153.)
 "Exact" means within `compare.METRIC_DELTA_FLOAT_TOLERANCE` (1e-5), not `compare.FLOAT_EPSILON` (1e-9): every
 `metric_delta` entry before round4's Whirling Tempest checks had an integer-valued `expected`/`before_expected`
 (creature counts, aura amounts, power), for which the two tolerances behave identically. **Maintenance follow-up
@@ -842,9 +843,12 @@ player, and the caster steps back `CHARGE_OFFSET_YD` before each attempt of a sp
 reduction that leaves no level only it separates (`beyond` below 0, the reduced level at or above the base, or a
 cooldown wait under the global cooldown) is `NotModelled`. Judged exactly (`compare.behaviour_cast_gate_verdict`).
 
-`after_casts` (`[spell, target]` pairs, cooldown gates only) are cast `after_wait_ms` after the priming cast, in the
-arms with the talent only, each after a reset of its own cooldown; the cooldown wait is shortened by the same
-`after_wait_ms`, so every arm is still timed from the priming cast. It is for an active that cuts a running cooldown:
+`after_casts` (`[spell, target]` pairs, cooldown gates only) are cast `after_wait_ms` after the priming cast, each
+after a reset of its own cooldown; the cooldown wait is shortened by the same `after_wait_ms`, so every arm is still
+timed from the priming cast. An after cast that is the entry's own `spell` is cast and learned only in the arms with
+it; every other after cast is learned at the start and cast in the `without` arm too, so the control differs from the
+talent arms in the talent alone (Eternally Devoted 573452 casts Righteous Upheaval in all three arms). It is for an
+active that cuts a running cooldown:
 Profound Enlightenment 680953 "reducing the remaining cooldown of Testaments by $s1%" is cast 20000 ms after Testament
 of Faith 801478, when 160000 ms remain, so `reduction` is 80000; a cut of half the full cooldown would let the
 `beyond` attempt through. A power gate, or an `after_wait_ms` not below the `beyond` wait, is refused.
@@ -1016,8 +1020,8 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 ### Taken-hit scenarios (`behaviour_taken_hit`, `kind: "taken_hit"`)
 
 A clause about damage the caster takes is read from a hit actually applied (ADR 0153). A passive, stationary
-striker (creature `striker_entry`, default 36, at the class level; with the defensive reaction, one run read three
-Staffguard trials 18 to 20 below the shield, so nothing but the strikes may reach the caster) casts `strike_spell` at the caster `strikes` times per trial
+striker (creature `striker_entry`, default 36, at the class level, passive so that nothing but the strikes reaches
+the caster) casts `strike_spell` at the caster `strikes` times per trial
 (an arm may set its own `strikes`), `trials` trials per arm. `arms` lists named arms, the first the control; each
 sets its `auras` on the caster, makes its `casts` (`[spell, target]`) before the strikes and its `after_casts`
 after them, every trial. `caster_health_pct` with `caster_max_health` sets the caster's health, and maximum, at
@@ -1036,7 +1040,9 @@ a trial with fewer logs than strikes did not land and is left out; each arm need
 - `debt_spell` with an arm's `debt_removed_pct` also reads that debt's periodic damage paid by the caster and its
   aura 500 ms before and 500 ms after the debt's duration from the strike: by the end the debt is gone and has
   paid the absorbed amount less floor(`debt_removed_pct`% of it). `debt_ends: true` also needs the debt present
-  with less paid just before its end: the damage is taken over the whole duration.
+  with less paid just before its end: the damage is taken over the whole duration. Each debt read also records the
+  count of the debt's damage logs (`payments early`, `payments late`, `spell_damage_count`), which the judge does not
+  use: it shows how many payments the debt was split into.
 
 The control arm is the negative arm: without the talent nothing is absorbed or reduced.
 
