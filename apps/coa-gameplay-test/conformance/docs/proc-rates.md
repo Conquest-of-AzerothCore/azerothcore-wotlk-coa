@@ -50,9 +50,20 @@ different weapon than the class's reference weapon still casts.
 When the text leaves open which events are trials, `trial_readings` lists each reading: the triggering hits plus the
 counts in `adds`, less the events when `minus_events` is true. No reading is chosen: the comparison judges each one,
 gives their common verdict when they agree and `ambiguous_tooltip` with every reading's numbers when they do not, so
-that the owner can rule. "Direct damage dealt" (Scourgebane) reads as every direct damage event, its own strikes
-801832 included (Effect 2 and 31, DmgClass 1); its own strikes do trigger further Scourgebane strikes, settled from
-the Ascension logs below, so the "auto attacks only" reading that would exclude them is no longer listed.
+that the owner can rule. "Direct damage dealt" (Scourgebane) is settled by the owner ruling of 2026-11-11 (ADR 0130):
+the chance applies to weapon hits, 20% per hit, and a Scourgebane strike 801832 never triggers another one, so its
+entry has no `trial_readings` and counts strikes per landed swing instead (below).
+
+An `attack` entry with `most_procs_per_trigger` (a positive whole number, with its citation in
+`most_procs_per_trigger_source`, refused without one, with `trial_readings` or with a `cast` trigger) makes every
+auto attack its own trigger: the part reads the main-hand hits and the event counts once, then for each trigger
+attacks `dummy`, waits one weapon swing, stops and reads them again (`trigger_boundaries` in the model, one reading
+of each count per boundary, 25 ms per step budgeted beside the swing). The comparison keeps the triggers with
+exactly one landed main-hand hit, states how many it left out and gives the histogram of procs per one-hit
+trigger. A trigger with more procs than the limit is an `alert` whatever the rate: under a chain a proc's own event
+rolls again, so some swings give two or more procs (the prototype's chaining server: 77 of 1540 one-hit swings),
+which a summed rate cannot see. Otherwise the rate is the one-hit triggers with a proc over the one-hit triggers,
+judged like any other rate.
 
 `trials_needed(p)` is `ceil(2.576^2 x p (1 - p) / 0.025^2)`, the trials that put the half width of the 99% interval
 of the rate at 2.5 points: 1699 for 20%, 956 for 10%. The scenario performs `ceil(1.5 x trials_needed)` attempts
@@ -144,9 +155,9 @@ cast):
 Light's Echo parts made 287 and 319 player casts. Every extra Argent Blade strike was a cast of 807268; 804929
 was never cast. A Light's Echo part takes 443 to 491 s of game time in 3.2 to 4.3 s of real time. Scourgebane
 92111 was also measured this round with the same two readings (13 parts, 196 or 197 swings each, 525 in 2554
-auto attacks only, 525 in 3079 every direct damage event); round 4's Ascension-log pass (below) found its own
-strikes do trigger further strikes, settling the reading and dropping this table to the single-reading
-measurement further down.
+auto attacks only, 525 in 3079 every direct damage event); round 4's Ascension-log pass (below) read its own
+strikes as triggering further strikes and kept the second reading only; the owner ruling of 2026-11-11 withdrew
+that reading (a strike never triggers another one) and the entry now counts strikes per landed swing.
 
 Measured on 2026-11-06 (stamps `20261106-130841`, 26 Condemnation parts in 36.2 s, and `20261106-130708`, 11
 Transcendent Guardian parts, simulated clock, no failed cast):
@@ -179,7 +190,9 @@ Round 4's owner ruling (2026-11-08) settles an ambiguous tooltip from the Ascens
 `trial_readings` entries and Condemnation's) carried an "each cast" reading alongside "each damage tick"; the
 logs settle all three as "each damage tick" only, and Scourgebane's own two readings settle as "every direct
 damage event, Scourgebane strikes included" only (dropping "auto attacks only"), so `trial_readings` for all
-four now holds a single entry and no `ambiguous_tooltip` verdict remains for any of them:
+four now held a single entry and no `ambiguous_tooltip` verdict remained for any of them. The Scourgebane part of
+this ruling is withdrawn by the owner ruling of 2026-11-11 (ADR 0130); the bullet below records what round 4 and
+round 10 read and why it did not hold:
 
 - **Lightkeeper 560835 (561016, 561277) and Condemnation 706325 — "each cast" is mechanically impossible, not
   just disfavoured.** Lightkeeper's own `ProcFlags` is `262144`, exactly `PROC_FLAG_DONE_PERIODIC`
@@ -191,7 +204,8 @@ four now holds a single entry and no `ambiguous_tooltip` verdict remains for any
   ticks per cast); archive-wide, Zealotry 801450's dominant triggers are periodic Condemn/Blade of Faith damage
   (9712 and 6164 of about 48000 hits), an order of magnitude ahead of any cast-shaped trigger. Citation:
   `2026-11-08, Condemn 567539 periodic-tick/cast ratio ~9:1, Ascension combat log, private archive`.
-- **Scourgebane 92111 — settles as "every direct damage event, Scourgebane strikes included".** `Check()`'s case
+- **Scourgebane 92111 — settled in round 4 as "every direct damage event, Scourgebane strikes included",
+  withdrawn on 2026-11-11.** `Check()`'s case
   `92111`/`520007` (`AscensionTemplarEvents.cpp:58`) excludes only Light's Echo's extra Argent Blade strike
   (804929) from re-triggering Scourgebane; it does not exclude Scourgebane's own strike (801832). Across the 13
   archive logs containing Scourgebane (18476 hits), 982 pairs of consecutive Scourgebane hits from the same
@@ -202,16 +216,20 @@ four now holds a single entry and no `ambiguous_tooltip` verdict remains for any
   verdict from `ambiguous_tooltip` to a reported `alert`, not `ok`: the single surviving reading is the
   tooltip-correct one, and the measured rate undershoots 20% once self-chains are counted — a real finding for
   an implementer to trace (root cause not established by this pass), not a fix proposed here.
-  The re-roll recurses inside the previous strike, so the server caps one chain at 8 strikes
-  (`MaxScourgebaneStrikesPerChain`, `AscensionTemplarEvents.cpp`); a chance modifier near 100% would otherwise
-  recurse until the target died or the stack overflowed. Grouping the archive's Scourgebane damage and miss events
-  by source, target and millisecond gives 16147 chains of 1 to 6 strikes (13929, 1949, 177, 78, 13, 1), so the
-  longest observed chain is 6 and the cap binds only past it (at most 0.3^8 of chains at Pure Focus rank 2's 30%).
-  Catalog scenario `templar-scourgebane-chain-cap` forces 100% and reads exactly 8 strikes per landed swing.
+  Round 10 then added the chain to the server (`822b1f5a74`) so that this reading would pass, and capped it at 8
+  strikes (`59cac10ecd`). The prototype's K4 diagnosis (2026-11-10) showed both were wrong: the same-millisecond
+  grouping does not separate a chain from other same-millisecond strikes, and after 1229 isolated melee swings in
+  the same 13 logs, 263 gave a strike on the swing's target within 200 ms and 1 a second one, where a chain gives
+  about 64; the summed rate of this reading gives 0.20 for a 20% chain and for a 25% server without one alike.
+  Owner ruling 2026-11-11: a Scourgebane strike never triggers another one. The chain and its cap are removed
+  (`AscensionTemplarEvents.cpp` is back to the reentrancy guard and the `Derived()` exclusion that refuse 801832),
+  the entry counts strikes per landed swing (`most_procs_per_trigger` 1), and catalog scenario
+  `templar-scourgebane-strike-never-retriggers` forces the chance to 100% and reads exactly 1 strike per landed
+  swing, where the chaining server read 8.
 
-Measured on 2026-11-09 (gameplay stage, `.cache/verify-all/20261109-093335/report.json`, simulated clock, no
-failed cast, exploratory-only selection, 91 of 91 parts passed natively; `conformance.py compare` against that
-stamp, `.cache/conformance/r4-log-checks/verdicts.json`):
+Measured on 2026-11-09, before the chain was added (gameplay stage, `.cache/verify-all/20261109-093335/report.json`,
+simulated clock, no failed cast, exploratory-only selection, 91 of 91 parts passed natively; `conformance.py compare`
+against that stamp, `.cache/conformance/r4-log-checks/verdicts.json`):
 
 | Aura | Parts | Reading | Procs in trials | Wilson 99% | Verdict |
 |---|---|---|---|---|---|
@@ -225,7 +243,17 @@ Scourgebane's `alert` is a server finding for an implementer, not a player quest
 already settled; no reading disagreement remains to ask about). `report.md` cross-checks the player reports on
 file: the 2026-11-07 report "Zealotry can proc back to back on each damage tick of Blade of Faith" corroborates
 Condemnation's settled reading (`ok`); the 2026-11-07 report "Scourgebane does not proc off itself" is
-contradicted by the settled reading (`alert`) and is set aside per the owner's ruling that the logs decide.
+contradicted by the settled reading (`alert`) and is set aside per the owner's ruling that the logs decide. The
+isolated-swing log count and the owner ruling of 2026-11-11 later agreed with that report; the Scourgebane row's
+`alert` was the round 4 reading's own blindness (523 strikes in 2561 swings is 0.204 per swing).
+
+Measured on 2026-11-11 with one strike per landed swing at most (`most_procs_per_trigger` 1, server without the
+chain, `.cache/verify-all/20261111-033743` and `20261111-033923`, simulated clock, 13 of 13 parts each):
+
+| Aura | Run | Procs per one-hit swing (0 / 1) | Swings with a strike | Wilson 99% | Verdict |
+|---|---|---|---|---|---|
+| Scourgebane 92111 | 1 | 2060 / 488 | 488 in 2548 | 0.1723 to 0.2124 | `ok` |
+| Scourgebane 92111 | 2 | 2029 / 519 | 519 in 2548 | 0.1839 to 0.2250 | `ok` |
 
 Zealotry 801450 itself has three independently-coded trigger paths, found while tracing Condemnation's trigger
 for this pass: the already-modelled 706325 periodic-tick path and 92108 off-hand-swing path, plus an

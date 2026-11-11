@@ -6,8 +6,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, PART_BUDGET_MS, 
                   cast_steps, creature_fixture, records_of, reference_caster, scenario_shell, timed, weapon_profile)
 from profile import CASTER, SETTLE_MS, measurement, player_fixture
 from tooltip import read_tooltip
-from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, TARGET, Expectation, RankFacts, armed_for,
-                    facts_of, is_hostile, targets_ally)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, READ_STEP_MS, TARGET, Expectation, RankFacts,
+                    armed_for, facts_of, is_hostile, targets_ally)
 
 PROC_CHECK = 'proc_rate'
 AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
@@ -24,6 +24,11 @@ PERIODIC_DAMAGE_AURA = 3
 TICKS_PER_ATTEMPT = 2
 TRIGGERING_HITS = 'triggering hits only'
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
+PER_TRIGGER = 'most_procs_per_trigger'
+PER_TRIGGER_SOURCE = 'most_procs_per_trigger_source'
+PER_TRIGGER_RULE = ('each auto attack is its own trigger, read before and after; only triggers with exactly one landed '
+                    'main-hand hit count, and a trigger with more procs than the stated limit is an alert')
+TRIGGER_ACTIONS = 3
 DELTA_CHECK = 'proc_rate_delta'
 DELTA_SANITY_FACTOR = 3
 DELTA_RULE = (f'two-proportion z >= {Z_99:g} (one-sided, 99%) that the with-aura rate exceeds the baseline rate, '
@@ -143,11 +148,33 @@ def cast_interval(class_file: dict, spell: int, cooldown: int = 0) -> int:
     return max(start_recovery, facts.cast_time_ms, cooldown) + CAST_MARGIN_MS
 
 
+def per_trigger_limit(entry: dict) -> int | None:
+    limit = entry.get(PER_TRIGGER)
+    if limit is None:
+        return None
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 1:
+        raise ValueError(f'Proc {entry["aura"]} states {limit!r} procs per trigger, not a positive whole number')
+    if entry['trigger']['action'] != ATTACK:
+        raise ValueError(f'Proc {entry["aura"]} counts procs per trigger, which needs an attack trigger')
+    if entry.get('trial_readings'):
+        raise ValueError(f'Proc {entry["aura"]} counts procs per trigger, whose trials are the triggers alone')
+    if not entry.get(PER_TRIGGER_SOURCE):
+        raise ValueError(f'Proc {entry["aura"]} states {limit} procs per trigger without {PER_TRIGGER_SOURCE}')
+    return limit
+
+
+def boundary_reads(entry: dict) -> int:
+    return 1 + len(event_terms(entry))
+
+
 def attempt_interval(class_file: dict, entry: dict) -> int:
     trigger = entry['trigger']
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
-        return swing_interval(class_file, cooldown)
+        swing = swing_interval(class_file, cooldown)
+        if per_trigger_limit(entry) is None:
+            return swing
+        return swing + (TRIGGER_ACTIONS + boundary_reads(entry)) * READ_STEP_MS
     if trigger['action'] != CAST:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of proc {entry["aura"]}')
     facts = facts_of(records_of(class_file), trigger['spell'])
@@ -164,6 +191,7 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
     if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry):
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
+    per_trigger_limit(entry)
     chance = proc_chance(class_file, entry)
     needed = trials_needed(chance / 100)
     scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN) if attempts is None else attempts
@@ -225,7 +253,36 @@ def charge_pool_steps(entry: dict) -> list[dict]:
             measurement(charge_pool_label(entry['aura']), CASTER, CHARGES, spell=spell)]
 
 
+def trigger_boundary(entry: dict, index: int) -> dict:
+    aura = entry['aura']
+    return {'hits': f'{aura} proc trigger {index} hits',
+            'events': [f'{aura} proc trigger {index} events {term["metric"]} {term["spell"]}'
+                       for _, term in event_terms(entry)]}
+
+
+def trigger_boundaries(entry: dict, triggers: int) -> list[dict]:
+    return [trigger_boundary(entry, index) for index in range(triggers + 1)]
+
+
+def boundary_steps(boundary: dict, entry: dict) -> list[dict]:
+    hits = measurement(boundary['hits'], CASTER, 'melee_damage_count', hand=MAIN_HAND)
+    return [hits] + [spell_count_step(label, term['metric'], term['spell'])
+                     for label, (_, term) in zip(boundary['events'], event_terms(entry))]
+
+
+def per_trigger_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    swing = swing_interval(class_file)
+    boundaries = trigger_boundaries(entry, plan.per_part)
+    steps = boundary_steps(boundaries[0], entry)
+    for boundary in boundaries[1:]:
+        steps += [{'action': 'attack', 'actor': CASTER, 'target': TARGET}, {'action': 'wait', 'ms': swing},
+                  {'action': 'stop_attack', 'actor': CASTER}] + boundary_steps(boundary, entry)
+    return steps
+
+
 def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[str, str]) -> list[dict]:
+    if per_trigger_limit(entry) is not None:
+        return per_trigger_steps(class_file, entry, plan)
     if entry['trigger']['action'] == ATTACK:
         return [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                 {'action': 'wait', 'label': 'swings', 'ms': plan.per_part * plan.attempt_ms},
@@ -313,9 +370,11 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     aura = entry['aura']
     labels = proc_measurements(aura)
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
+    limit = per_trigger_limit(entry)
     steps += attempt_steps(class_file, entry, plan, labels)
-    steps += added_trial_steps(entry)
-    steps += event_steps(entry) + [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
+    if limit is None:
+        steps += added_trial_steps(entry) + event_steps(entry)
+    steps += [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
     name = f'Conformance proc {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {plan.parts}'
     contract = 'Proc rate of an aura over enough triggering hits, summed over its parts, against its tooltip chance.'
     scenario = scenario_shell(class_file, name, contract, steps)
@@ -333,10 +392,15 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                           for reading in trial_readings(entry)]}
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
+    rule = f'{WILSON_RULE}; {trial_rule(entry)}'
+    if limit is not None:
+        model[PER_TRIGGER] = limit
+        model['trigger_boundaries'] = trigger_boundaries(entry, plan.per_part)
+        rule = f'{rule}; {PER_TRIGGER_RULE} ({limit})'
     trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
     label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
-                              f'{WILSON_RULE}; {trial_rule(entry)}{handler_note(entry)}', model)
+                              f'{rule}{handler_note(entry)}', model)
     return timed(scenario, SETTLE_MS + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
 
 

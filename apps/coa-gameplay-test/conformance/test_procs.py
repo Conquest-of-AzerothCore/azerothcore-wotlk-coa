@@ -1,5 +1,5 @@
 import copy
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import hashlib
 import json
 import math
@@ -12,8 +12,9 @@ import unittest
 
 from compare import STATUSES, class_entry
 from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, UNMODELLED, Unmodelled
-from procs import (PART_BUDGET_MS, PROC_CHECK, proc_label, proc_plan, proc_scenario, proc_status_expectation,
-                   shares_aura, shares_proc_spell, trials_needed, trigger_key, wilson_interval)
+from procs import (PART_BUDGET_MS, PER_TRIGGER, PER_TRIGGER_SOURCE, PROC_CHECK, proc_label, proc_plan, proc_scenario,
+                   proc_status_expectation, shares_aura, shares_proc_spell, trials_needed, trigger_boundaries,
+                   trigger_key, wilson_interval)
 from profile import DBC_DIR
 from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
 from tooltip import Displayed, Records
@@ -292,10 +293,12 @@ class ProcCompareTest(unittest.TestCase):
                                 [expectation], steps=steps, spell=aura, rank=aura)
         return self.verdict(chance_reader(chance, entry['chance_token']))
 
-    def test_scourgebane_self_chain_reading_is_the_only_reading_left(self):
+    def test_scourgebane_counts_at_most_one_strike_per_landed_swing(self):
         entry = templar_proc(SCOURGEBANE)
-        self.assertEqual([reading['name'] for reading in entry['trial_readings']],
-                         ['every direct damage event, Scourgebane strikes included'])
+        self.assertNotIn('trial_readings', entry)
+        self.assertEqual(entry[PER_TRIGGER], 1)
+        self.assertIn('owner ruling 2026-11-11', entry[PER_TRIGGER_SOURCE])
+        self.assertIn('Scourgebane does not proc off itself.', entry[PER_TRIGGER_SOURCE])
 
     def test_lightkeeper_and_condemnation_keep_only_the_tick_reading(self):
         for aura, proc_spell in ((LIGHTKEEPER, LIGHTKEEPER_PARRY), (LIGHTKEEPER, LIGHTKEEPER_BURST),
@@ -325,12 +328,6 @@ class ProcCompareTest(unittest.TestCase):
         verdict = self.single_reading_verdict(entry, CONDEMNATION, 622, 4134, 15.0)
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 622 / 4134)
-
-    def test_scourgebane_single_reading_is_an_alert_against_the_tooltip_chance(self):
-        entry = templar_proc(SCOURGEBANE)
-        verdict = self.single_reading_verdict(entry, SCOURGEBANE, 525, 3079, 20.0)
-        self.assertEqual(verdict.status, 'alert')
-        self.assertAlmostEqual(verdict.measured, 525 / 3079)
 
     def test_ambiguous_and_unmodelled_entries_are_never_ok(self):
         for status in ('ambiguous_tooltip', 'unmodelled'):
@@ -387,38 +384,147 @@ class ProcCompareTest(unittest.TestCase):
             self.assertIn(status, STATUSES)
 
 
+def per_trigger_expectation(triggers, minimum=1699):
+    entry = templar_proc(SCOURGEBANE)
+    _, [expectation] = proc_scenario(CLASS_FILE, entry)
+    model = {**expectation.model, 'part': 0, 'parts': 1, 'part_attempts': triggers, 'minimum_trials': minimum,
+             'trigger_boundaries': trigger_boundaries(entry, triggers)}
+    return replace(expectation, model=model)
+
+
+def per_trigger_steps(outcomes, aura=1):
+    boundaries = trigger_boundaries(templar_proc(SCOURGEBANE), len(outcomes))
+    steps, hits, events = [assert_step(LABELS['aura'], str(aura))], 0, 0
+    for index, boundary in enumerate(boundaries):
+        if index:
+            hits, events = hits + outcomes[index - 1][0], events + outcomes[index - 1][1]
+        steps += [assert_step(boundary['hits'], str(hits))] + [assert_step(label, str(events))
+                                                               for label in boundary['events']]
+    return steps
+
+
+def swings(*counts):
+    return [outcome for procs, count in enumerate(counts) for outcome in [(1, procs)] * count]
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class PerTriggerCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, outcomes, reader=None, minimum=1699, steps=None):
+        expectation = per_trigger_expectation(len(outcomes), minimum)
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps or per_trigger_steps(outcomes),
+                                spell=SCOURGEBANE, name='Scourgebane', rank=SCOURGEBANE)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=reader or chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_one_strike_in_a_fifth_of_the_swings_is_ok(self):
+        verdict = self.verdict(swings(1360, 340))
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.2)
+        self.assertIn('no one-hit trigger gave more than 1 proc', verdict.explanation)
+        self.assertIn('340 of 1700 one-hit triggers gave a proc', verdict.explanation)
+
+    def test_a_chaining_server_is_an_alert_even_at_a_fifth_of_the_swings(self):
+        verdict = self.verdict(swings(1225, 238, 66, 9, 2), minimum=1540)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 315 / 1540)
+        self.assertIn('77 of 1540 one-hit triggers gave more than 1 proc (at most 4)', verdict.explanation)
+        self.assertIn('procs per one-hit trigger 0: 1225, 1: 238, 2: 66, 3: 9, 4: 2', verdict.explanation)
+
+    def test_one_extra_strike_is_enough_for_an_alert(self):
+        verdict = self.verdict(swings(1360, 339, 1))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('1 of 1700 one-hit triggers gave more than 1 proc (at most 2)', verdict.explanation)
+
+    def test_a_quarter_of_the_swings_without_a_chain_is_an_alert(self):
+        verdict = self.verdict(swings(1275, 425))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('no one-hit trigger gave more than 1 proc', verdict.explanation)
+
+    def test_a_seeded_tooltip_chance_other_than_the_generated_one_is_an_alert(self):
+        verdict = self.verdict(swings(1360, 340), chance_reader(25.0))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('shows 25%, generated as 20%', verdict.explanation)
+
+    def test_triggers_without_exactly_one_hit_are_left_out(self):
+        verdict = self.verdict(swings(1360, 340) + [(2, 2)] * 30 + [(0, 0)] * 5)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.2)
+        self.assertIn('35 triggers without exactly one landed hit left out', verdict.explanation)
+
+    def test_fewer_one_hit_triggers_than_the_rate_needs_are_insufficient(self):
+        self.assertEqual(self.verdict(swings(1000, 250)).status, 'insufficient_trials')
+
+    def test_a_missing_boundary_reading_leaves_the_part_unmeasured(self):
+        outcomes = swings(1360, 340)
+        steps = [step for step in per_trigger_steps(outcomes) if step['label'] != '92111 proc trigger 7 hits']
+        verdict = self.verdict(outcomes, steps=steps)
+        self.assertNotEqual(verdict.status, 'ok')
+        self.assertIn('no usable trial', verdict.explanation)
+
+    def test_absent_aura_is_never_ok(self):
+        outcomes = swings(1360, 340)
+        verdict = self.verdict(outcomes, steps=per_trigger_steps(outcomes, aura=0))
+        self.assertEqual(verdict.status, 'unmeasured')
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ProcScenarioTest(unittest.TestCase):
-    def test_scourgebane_schedules_the_margin_over_the_trials_in_parts_that_fit_the_timeout(self):
+    def test_scourgebane_reads_every_swing_in_parts_that_fit_the_timeout(self):
         entry = templar_proc(SCOURGEBANE)
         plan = proc_plan(CLASS_FILE, entry)
+        swing = CLASS_FILE['weapon']['speed_ms']
         self.assertEqual(plan.chance_pct, 20.0)
         self.assertEqual(plan.needed, 1699)
         self.assertEqual(plan.scheduled, math.ceil(1699 * EXCLUDED_OUTCOME_MARGIN))
-        self.assertEqual(plan.attempt_ms, CLASS_FILE['weapon']['speed_ms'])
+        self.assertGreater(plan.attempt_ms, swing)
         self.assertGreaterEqual(plan.parts * plan.per_part, plan.scheduled)
         for part in range(plan.parts):
-            scenario, expectations = proc_scenario(CLASS_FILE, entry, part)
+            scenario, [expectation] = proc_scenario(CLASS_FILE, entry, part)
             run.validate(scenario)
             self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
-            actions = [step['action'] for step in scenario['steps']]
-            self.assertIn('attack', actions)
-            self.assertEqual(scenario['steps'][actions.index('attack') + 1]['ms'], plan.per_part * plan.attempt_ms)
-            measured = {step['label']: step for step in scenario['steps'] if step['action'] == 'assert'}
-            self.assertEqual(measured['92111 proc trials']['metric'], 'melee_damage_count')
-            self.assertEqual(measured['92111 proc events']['metric'], 'spell_cast_count')
-            self.assertEqual(measured['92111 proc events']['spell'], SCOURGEBANE_STRIKE)
+            steps = scenario['steps']
+            attacks = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+            self.assertEqual(len(attacks), plan.per_part)
+            for index in attacks:
+                self.assertEqual([step['action'] for step in steps[index:index + 3]], ['attack', 'wait', 'stop_attack'])
+                self.assertEqual(steps[index + 1]['ms'], swing)
+            boundaries = expectation.model['trigger_boundaries']
+            self.assertEqual(len(boundaries), plan.per_part + 1)
+            measured = {step['label']: step for step in steps if step['action'] == 'assert'}
+            for boundary in boundaries:
+                self.assertEqual((measured[boundary['hits']]['metric'], measured[boundary['hits']]['hand']),
+                                 ('melee_damage_count', 0))
+                [events] = boundary['events']
+                self.assertEqual((measured[events]['metric'], measured[events]['spell']),
+                                 ('spell_cast_count', SCOURGEBANE_STRIKE))
+            self.assertNotIn(LABELS['trials'], measured)
+            self.assertNotIn(LABELS['events'], measured)
             self.assertEqual(measured['92111 proc aura']['metric'], 'aura')
-            self.assertEqual((measured[STRIKE_TRIALS]['metric'], measured[STRIKE_TRIALS]['spell'],
-                              measured[STRIKE_TRIALS]['target']), ('spell_damage_count', SCOURGEBANE_STRIKE, 'dummy'))
-            self.assertIn({'action': 'learn', 'actor': 'caster', 'spell': SCOURGEBANE}, scenario['steps'])
-            [expectation] = expectations
+            self.assertIn({'action': 'learn', 'actor': 'caster', 'spell': SCOURGEBANE}, steps)
             self.assertEqual((expectation.label, expectation.check, expectation.displayed),
                              (PROC_LABEL, PROC_CHECK, CHANCE_TOKEN))
             self.assertEqual((expectation.model['part'], expectation.model['parts']), (part, plan.parts))
-            self.assertEqual(expectation.model['minimum_trials'], 1699)
-            self.assertEqual([reading['labels'] for reading in expectation.model['readings']],
-                             [[LABELS['trials'], STRIKE_TRIALS]])
+            self.assertEqual((expectation.model['minimum_trials'], expectation.model[PER_TRIGGER]), (1699, 1))
+
+    def test_per_trigger_limits_need_an_attack_trigger_one_reading_and_a_source(self):
+        entry = templar_proc(SCOURGEBANE)
+        cast = {**entry, 'trigger': {'action': 'cast', 'spell': ARGENT_BLADE_MAX_RANK}}
+        readings = {**entry, 'trial_readings': [{'name': 'every strike', 'adds': []}]}
+        unsourced = {key: value for key, value in entry.items() if key != PER_TRIGGER_SOURCE}
+        for bad in (cast, readings, unsourced, {**entry, PER_TRIGGER: 0}, {**entry, PER_TRIGGER: True},
+                    {**entry, PER_TRIGGER: 1.5}):
+            with self.subTest(entry={key: bad[key] for key in ('trigger', PER_TRIGGER) if key in bad}):
+                with self.assertRaises(ValueError):
+                    proc_scenario(CLASS_FILE, bad)
 
     def test_lights_echo_casts_argent_blade_and_counts_the_strikes_of_its_first_rank(self):
         for aura, chance in zip(LIGHTS_ECHO, (10.0, 20.0)):

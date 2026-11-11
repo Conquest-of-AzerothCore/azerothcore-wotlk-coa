@@ -32,7 +32,8 @@ from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
-from procs import AMBIGUOUS_TOOLTIP, CAST, DELTA_CHECK, DELTA_SANITY_FACTOR, PROC_CHECK, chance_of, wilson_interval
+from procs import (AMBIGUOUS_TOOLTIP, CAST, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK, chance_of,
+                   wilson_interval)
 from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
@@ -732,11 +733,85 @@ def event_text(model: dict, event_labels: list[str], trigger: int) -> str:
     return f'{" + ".join(event_labels)}{minus}'
 
 
+def trigger_trials(run: Run, model: dict) -> list[tuple[float, float]] | None:
+    readings = []
+    for boundary in model['trigger_boundaries']:
+        values = [run.values.get(label) for label in [boundary['hits']] + boundary['events']]
+        if None in values:
+            return None
+        readings.append((values[0], sum(values[1:])))
+    return [(after[0] - before[0], (after[1] - before[1]) / model['events_per_proc'])
+            for before, after in zip(readings, readings[1:])]
+
+
+def stated_chance(manifest: dict, run: Run, expectation: Expectation, tooltips: TooltipSource, base: Verdict,
+                  measured: float | None) -> float | Verdict:
+    try:
+        caster = caster_stats_from(run.values, manifest['class_file'])
+    except KeyError as error:
+        return replace(base, measured=measured, explanation=f'base measurement {error} is missing from {run.key}')
+    chance = chance_of(tooltips.read(expectation.rank_id, caster).values, expectation.displayed)
+    if chance is None:
+        return replace(base, measured=measured, explanation=f'the tooltip of {expectation.rank_id} no longer shows '
+                                                            f'the chance token {expectation.displayed}')
+    if abs(chance - expectation.model['chance_pct']) > FLOAT_EPSILON:
+        return replace(base, measured=measured, expected=chance / 100,
+                       explanation=f'{expectation.displayed} shows {chance:g}%, generated as '
+                                   f'{expectation.model["chance_pct"]:g}%')
+    return chance
+
+
+def judge_proc_per_trigger(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource, base: Verdict) -> Verdict:
+    _, first_run, expectation = parts[0]
+    model = expectation.model
+    limit = model[PER_TRIGGER]
+    single, other_triggers, without_aura, unmeasured = [], 0, [], []
+    for _, run, _ in parts:
+        aura = run.values.get(model['measurements']['aura'])
+        trials = trigger_trials(run, model)
+        if aura is None or trials is None:
+            unmeasured.append(f'{run.key} ({run.status}: {run.message})')
+        elif aura <= 0:
+            without_aura.append(run.key)
+        else:
+            single += [procs for hits, procs in trials if hits == 1]
+            other_triggers += sum(1 for hits, _ in trials if hits != 1)
+    notes = f'{model["parts"] - len(unmeasured) - len(without_aura)} of {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {expectation.spell_id} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no proc measurements in {", ".join(unmeasured)}'
+    notes += f'; {other_triggers} triggers without exactly one landed hit left out'
+    if not single:
+        status = 'alert' if unmeasured and not without_aura else 'unmeasured'
+        return replace(base, status=status, explanation=f'no usable trial: no trigger landed exactly one hit ({notes})')
+    with_proc = float(sum(1 for procs in single if procs >= 1))
+    measured = with_proc / len(single)
+    chance = stated_chance(manifest, first_run, expectation, tooltips, base, measured)
+    if isinstance(chance, Verdict):
+        return chance
+    expected = chance / 100
+    status, low, high, why = rate_judgement(with_proc, len(single), model['minimum_trials'], expected)
+    counts = Counter(procs for procs in single)
+    histogram = ', '.join(f'{procs:g}: {counts[procs]}' for procs in sorted(counts))
+    over = sum(count for procs, count in counts.items() if procs > limit)
+    multiplicity = (f'{over} of {len(single)} one-hit triggers gave more than {limit} proc (at most '
+                    f'{max(counts):g})' if over else f'no one-hit trigger gave more than {limit} proc')
+    if over:
+        status, low, high = 'alert', None, None
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   explanation=f'{multiplicity}; procs per one-hit trigger {histogram}; {with_proc:g} of '
+                               f'{len(single)} one-hit triggers gave a proc, {why}: {status} ({notes}); '
+                               f'{expectation.displayed} shows {chance:g}%; {expectation.rule}')
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
+    if model.get(PER_TRIGGER):
+        return judge_proc_per_trigger(manifest, parts, tooltips, base)
     labels = model['measurements']
     readings = proc_readings(model)
     event_labels = model.get('event_labels') or [labels['events']]
@@ -777,17 +852,9 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         status = 'alert' if unmeasured and not (without_aura or reasons) else 'unmeasured'
         return replace(base, status=status, measured=measured,
                        explanation=f'no usable trial: no triggering hit was measured ({notes})')
-    try:
-        caster = caster_stats_from(first_run.values, manifest['class_file'])
-    except KeyError as error:
-        return replace(base, measured=measured, explanation=f'base measurement {error} is missing from {first_run.key}')
-    chance = chance_of(tooltips.read(expectation.rank_id, caster).values, expectation.displayed)
-    if chance is None:
-        return replace(base, measured=measured, explanation=f'the tooltip of {expectation.rank_id} no longer shows '
-                                                            f'the chance token {expectation.displayed}')
-    if abs(chance - model['chance_pct']) > FLOAT_EPSILON:
-        return replace(base, measured=measured, expected=chance / 100,
-                       explanation=f'{expectation.displayed} shows {chance:g}%, generated as {model["chance_pct"]:g}%')
+    chance = stated_chance(manifest, first_run, expectation, tooltips, base, measured)
+    if isinstance(chance, Verdict):
+        return chance
     expected = chance / 100
     judged = []
     for reading in readings:

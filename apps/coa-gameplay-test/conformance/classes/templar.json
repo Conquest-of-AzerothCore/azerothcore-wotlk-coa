@@ -294,11 +294,8 @@
       "proc_spell": 801832,
       "proc_spell_source": "tooltip tokens $801832s2 and $801832m1",
       "events_per_proc": 1,
-      "trial_readings": [
-        {"name": "every direct damage event, Scourgebane strikes included",
-         "meaning": "every direct damage hit rolls the chance, Scourgebane strikes too, so one Scourgebane can trigger another",
-         "adds": [{"metric": "spell_damage_count", "spell": 801832}]}
-      ],
+      "most_procs_per_trigger": 1,
+      "most_procs_per_trigger_source": "owner ruling 2026-11-11 (owner-rulings-2026-11-10.md, Prototype score (G6) rulings): a Scourgebane strike never triggers another one, 20% per weapon hit, as the isolated Ascension live logs show (prototype k4-report.md section 5: after 1229 isolated melee swings, 263 gave a strike on the swing's target and 1 a second one); player report 2026-11-07 'Scourgebane does not proc off itself.'",
       "dbc": {
         "92111": {"ProcChance": 100, "ProcFlags": 0, "ProcCharges": 0},
         "520007": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}
