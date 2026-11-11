@@ -5921,12 +5921,14 @@ class HitRatioHealTests(unittest.TestCase):
 
     def test_an_unknown_metric_is_refused(self):
         with self.assertRaises(ValueError):
-            behaviour_scenario(CLASS_FILE, {**variant_entry(705278, 'hit_ratio', 'done'), 'metric': 'absorb'})
+            behaviour_scenario(CLASS_FILE, {**variant_entry(705278, 'hit_ratio', 'done'), 'metric': 'aura'})
 
     def test_the_observed_rank_arms_the_caster(self):
-        scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(572547, 'hit_ratio', 'talent'))
-        plain, _ = behaviour_scenario(CLASS_FILE, variant_entry(705278, 'hit_ratio', 'done'))
-        self.assertNotEqual(scenario['players'][0], plain['players'][0])
+        def equipped(entry: dict) -> list[dict]:
+            scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+            return [step for step in scenario['steps'] if step['action'] in ('add_item', 'equip_item', 'equip')]
+        self.assertNotEqual(equipped(variant_entry(572547, 'hit_ratio', 'talent')),
+                            equipped(variant_entry(705278, 'hit_ratio', 'done')))
 
 
 def cost_gate_entry(spell: int, variant: str | None = None) -> dict:

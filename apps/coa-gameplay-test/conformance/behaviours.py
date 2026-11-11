@@ -3849,13 +3849,13 @@ class HitRatioSpec:
     force_crit: str | None = None
     target_health_pct: int | None = None
     label_suffix: str = ''
-    metric: str = 'damage'
+    metric: str = 'spell_damage_total'
     caster: str = CASTER
     target: str = TARGET
 
 
-HIT_RATIO_METRICS = {'damage': ('spell_damage_total', 'spell_damage_count'),
-                     'heal': ('spell_heal_total', 'spell_heal_count')}
+HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
+HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal'}
 
 
 def hit_arm(raw: dict) -> HitArm:
@@ -3895,7 +3895,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec) -> list[dict]:
     fields = {'spell': spec.observe_spell, 'target': spec.target}
     if spec.critical is not None:
         fields['critical'] = spec.critical
-    total_metric, count_metric = HIT_RATIO_METRICS[spec.metric]
+    total_metric, count_metric = spec.metric, HIT_RATIO_METRICS[spec.metric]
 
     def reads(labels: tuple[str, str]) -> list[dict]:
         return [measurement(labels[0], spec.caster, total_metric, **fields),
@@ -3971,7 +3971,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                     f'control first, with the '
                     f'arm\'s auras {list(spec.control.auras)} / {list(spec.treatment.auras)} set and its casts '
                     f'{list(spec.control.casts)} / {list(spec.treatment.casts)} made before every observed cast, '
-                    f'the cumulative {spec.metric} and hit count read after every trial{critical}; the per-hit mean '
+                    f'the cumulative {HIT_RATIO_WORDS[spec.metric]} and hit count read after every trial{critical}; '
+                    f'the per-hit mean '
                     f'of the treatment arm over the control arm must give the stated bonus of '
                     f'{(spec.expected - 1) * 100:+g}%',
         'players': players,
@@ -3982,7 +3983,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
              'trial_limit': hit_ratio_trial_limit(class_file, spec),
              'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)),
-             'metric': HIT_RATIO_METRICS[spec.metric][0],
+             'metric': spec.metric,
              'quote': entry.quote}
     expectation = Expectation(hit_ratio_label(spec.spell, spec.label_suffix), BEHAVIOUR_HIT_RATIO, spec.spell,
                               spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
@@ -3995,7 +3996,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         hit_arm(entry.get('control', {})), hit_arm(entry.get('treatment', {})),
                         tuple(entry.get('learn', ())), entry.get('trials', HIT_RATIO_TRIALS), entry.get('critical'),
                         entry.get('force_crit'), entry.get('target_health_pct'), entry.get('label_suffix', ''),
-                        entry.get('metric', 'damage'), entry.get('caster', CASTER), entry.get('target', TARGET))
+                        entry.get('metric', 'spell_damage_total'), entry.get('caster', CASTER),
+                        entry.get('target', TARGET))
 
 
 def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
