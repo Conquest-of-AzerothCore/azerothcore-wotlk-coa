@@ -94,7 +94,7 @@ namespace
                 info->DurationEntry = sSpellDurationStore.LookupEntry(21);
             }
             else if (info->Id == 2119810)
-                info->Effects[1].Effect = SPELL_EFFECT_NONE;
+                info->Effects[1].Effect = SpellEffects(0);
         }
     };
 }
