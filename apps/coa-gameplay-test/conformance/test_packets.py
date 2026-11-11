@@ -64,11 +64,15 @@ class PacketTests(unittest.TestCase):
                          {str(PARRY_DANCE_BUFF): {'id': ['src/server/coa/Example.cpp:184'], 'family': []}})
 
     def test_the_existing_entry_and_the_nearest_entry_of_its_kind_come_from_the_class_file(self):
-        self.assertEqual([(item['section'], item['entry']['aura']) for item in self.data['class_entries']],
-                         [('triggers', PARRY_DANCE)])
+        def spell_of(item):
+            return item['entry'].get('aura', item['entry'].get('spell'))
+
+        self.assertEqual([(item['section'], spell_of(item)) for item in self.data['class_entries']],
+                         [('triggers', PARRY_DANCE), ('behaviours', PARRY_DANCE)])
         nearest = self.data['nearest_entries']
-        self.assertEqual([(item['section'], item['kind']) for item in nearest], [('triggers', None)])
-        self.assertNotEqual(nearest[0]['entry']['aura'], PARRY_DANCE)
+        self.assertEqual([(item['section'], item['kind']) for item in nearest],
+                         [('behaviours', 'metric_delta'), ('triggers', None)])
+        self.assertNotIn(PARRY_DANCE, [spell_of(item) for item in nearest])
 
     def test_class_map_fields_come_from_the_map_by_id_or_by_name_and_hit(self):
         self.assertEqual(self.data['class_map']['fields']['risk'], 'scripted')
