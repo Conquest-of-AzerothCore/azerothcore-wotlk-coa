@@ -33,6 +33,10 @@
      "target": "runner"},
     {"action": "gossip_select", "actor": "hero", "option": 1, "label": "the fast escort"},
     {"label": "DISCRIMINATING: after the second option he runs (7 x 1.14 = 8 yards per second)", "action": "assert",
-     "actor": "runner", "metric": "spline_speed", "min": 7.8, "max": 8.2, "within_ms": 3000}
+     "actor": "runner", "metric": "spline_speed", "min": 7.8, "max": 8.2, "within_ms": 3000},
+    {"label": "He pauses at his first waypoint", "action": "assert", "actor": "runner", "metric": "spline_speed",
+     "equals": 0, "within_ms": 6000},
+    {"label": "and runs on after the pause", "action": "assert", "actor": "runner", "metric": "spline_speed",
+     "min": 7.8, "max": 8.2, "within_ms": 15000}
   ]
 }
