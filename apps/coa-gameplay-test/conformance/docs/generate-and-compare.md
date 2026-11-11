@@ -457,15 +457,21 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   run without those reads, or a different per-level part leaves a read outside the range an `alert` labelled
   "per-level truncation, engine computation not modelled", never `ok`. Known limit: a CoA
   `ModifySpellEffectBaseValue` hook that multiplies the value (such as `ascension_scaling_base`,
-  AscensionScalingBase.cpp:51) or changes the level is not detected; the tool cannot see it. A `hit_mean`,
+  AscensionScalingBase.cpp:51) or changes the level is not detected; the tool cannot see it. A rank whose tooltip
+  leaves the per-level term out (the cancel list, ADR 0014) fails the per-level part check and never takes this
+  rounding. Inherent limit: where the lost fraction exceeds the per-roll minimum's fraction, a flat 1-below server
+  error gives exactly the engine's integer set and cannot be told apart from it. A fixed (`EffectDieSides` 0 or 1)
+  `effect_value` with a fractional per-level term takes the same rule instead of the `max(1, 0.5%)` band: `ok` only
+  when the read is the int32 truncation of the tooltip value or, under the same model checks, of that value less
+  the lost fraction; otherwise an `alert`, labelled "not modelled" when a model check failed. A `hit_mean`,
   `melee_mean` or `periodic_total` alert on a rank with such a term says
   "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
   needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the
   roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar
   run found six such `ok` verdicts (Reckoning 572741, 748507, 805421; Vindication 501589, 501590, 501592), whose
-  server value adds a per-level part the expected value omits. An `aura_amount` of a rolled effect has one read (one cast) and is
-  therefore `measured` unless one read is enough. The Templar has rolled tokens on Righteous Upheaval, Vindication,
-  Reckoning, Chastise, Benediction, Titanstrike and others (`EffectDieSides` 3 to 224).
+  server value adds a per-level part the expected value omits. An `aura_amount` of a rolled effect has one read (one
+  cast) and is therefore `measured` unless one read is enough. The Templar has rolled tokens on Righteous Upheaval,
+  Vindication, Reckoning, Chastise, Benediction, Titanstrike and others (`EffectDieSides` 3 to 224).
   Every `effect_value` and `aura_amount` verdict whose measured effect rolls (the token's effect, or the first
   active effect for an unreadable value) keeps `roll_spread`, `abs(EffectDieSides) - 1`, in its `detail`: two
   `CalcValue` draws of that effect at the same stats differ by at most that much.

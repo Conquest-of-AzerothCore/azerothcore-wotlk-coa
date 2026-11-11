@@ -573,7 +573,7 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     low = expected - half - (TRUNCATED_READ if expected > 0 else 0)
     high = expected + half + (TRUNCATED_READ if expected < 0 else 0)
     per_level = per_level_loss(tooltips, spell_id, effect, tokens.caster.level)
-    unmodelled = (per_level_model_gap(base.label, run, tooltips, expectation, tokens, index, rolls, per_level)
+    unmodelled = (per_level_model_gap(base.label, run, tooltips, expectation, tokens, index, rolls.start, per_level)
                   if per_level and per_level.loss else None)
     engine = [value - per_level.loss for value in values] if per_level and per_level.loss and not unmodelled else None
     rounded, outside = truncation_reads(values, reads)
@@ -651,7 +651,7 @@ def per_level_loss(tooltips: TooltipSource, spell_id: int, effect: int, caster_l
 
 
 def per_level_model_gap(label: str, run: Run, tooltips: TooltipSource, expectation: Expectation, tokens: Tokens,
-                        index: int, rolls: range, per_level: PerLevelLoss) -> str | None:
+                        index: int, roll: int, per_level: PerLevelLoss) -> str | None:
     spell_id, effect = token_effect(expectation)
     modifiers = [run.values.get(effect_modifier_label(label, op)) for op in ('all', effect)]
     if None in modifiers:
@@ -659,7 +659,7 @@ def per_level_model_gap(label: str, run: Run, tooltips: TooltipSource, expectati
     if any(abs(value - EFFECT_MODIFIER_BASE) > FLOAT_EPSILON for value in modifiers):
         return (f'an effect modifier changes {EFFECT_MODIFIER_BASE:g} to {modifiers[0]:g} (all effects) and '
                 f'{modifiers[1]:g} (effect {effect}), which the engine model does not apply')
-    forced = (spell_id, effect, rolls.start)
+    forced = (spell_id, effect, roll)
     scaled = tooltips.read(expectation.rank_id, tokens.caster, forced).values
     unscaled = tooltips.read(expectation.rank_id, tokens.caster, forced, unscaled=True).values
     if index >= len(scaled) or index >= len(unscaled):
@@ -669,6 +669,54 @@ def per_level_model_gap(label: str, run: Run, tooltips: TooltipSource, expectati
         return (f'the tooltip adds {continuous:g} per level where stock CalcValue adds {per_level.term:g} '
                 f'({per_level.levels} levels after its level clamp)')
     return None
+
+
+def hit_spell_of(expectation: Expectation) -> int:
+    return (expectation.model or {}).get('hit_spell') or expectation.rank_id
+
+
+FIXED_READ_TOLERANCE = 1e-4
+
+
+def truncations_of(value: float) -> set[float]:
+    away = math.copysign(FIXED_READ_TOLERANCE * max(1.0, abs(value)), value)
+    return {engine_truncation(value), engine_truncation(value + away)}
+
+
+def judge_fixed_per_level(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
+                          tooltips: TooltipSource, index: int, expected: float, why: str) -> Verdict | None:
+    found = token_effect(expectation)
+    if expectation.check != 'effect_value' or found is None:
+        return None
+    spell_id, effect = found
+    per_level = per_level_loss(tooltips, spell_id, effect, tokens.caster.level)
+    if not per_level or not per_level.loss:
+        return None
+    base_points, _ = tooltips.effect_points(spell_id, effect)
+    gap = per_level_model_gap(base.label, run, tooltips, expectation, tokens, index, base_points + 1, per_level)
+    final = truncations_of(expected)
+    engine = None if gap else expected - per_level.loss
+    lowered = truncations_of(engine) if engine is not None else set()
+    term = (f'per-level term {per_level.levels} levels x {per_level.rate:g} = {per_level.term:g}, truncated to '
+            f'{per_level.truncated:g} before the sum (SpellInfo.cpp:497)')
+    if measured in final:
+        detail = {ENGINE_ROUNDING: [expected]} if measured != expected else None
+        return replace(base, status='ok', measured=measured, expected=expected, low=min(final), high=max(final),
+                       detail=detail,
+                       explanation=f'{why}; the int32 truncation at SpellEffectInfo::CalcValue (SpellInfo.cpp:592) of '
+                                   f'{expected:g} gives {measured:g}; no flat band applies to an effect with a {term}')
+    if measured in lowered:
+        return replace(base, status='ok', measured=measured, expected=engine, low=min(lowered), high=max(lowered),
+                       detail={PER_LEVEL_ROUNDING: {'per_level': per_level.term, 'truncated_to': per_level.truncated,
+                                                    'loss': per_level.loss, 'engine_value': engine}},
+                       explanation=f'{why}; known engine rounding, {term}: the engine computes {engine:g}, read '
+                                   f'{measured:g} after its int32 truncation (SpellInfo.cpp:592)')
+    reason = f'; {PER_LEVEL_UNMODELLED}: {gap}' if gap else ''
+    return replace(base, status='alert', measured=measured, expected=expected, low=min(final), high=max(final),
+                   detail={PER_LEVEL_ROUNDING: PER_LEVEL_UNMODELLED} if gap else None,
+                   explanation=f'{why}; read {measured:g}, where the int32 truncation of {expected:g} gives '
+                               f'{sorted(final)} and the engine computation with the {term} gives '
+                               f'{sorted(lowered) if lowered else "no modelled value"}{reason}: a deviation')
 
 
 def per_level_unmodelled(verdict: Verdict, tooltips: TooltipSource, rank_id: int, caster_level: int) -> Verdict:
@@ -745,14 +793,18 @@ def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: flo
     plain = PLAIN_TOKEN.fullmatch(token.text)
     if plain:
         points = displayed_points(tooltips, plain, token.spell_id or expectation.rank_id)
-        return deterministic(base, measured, measured, expected * plain_sign(points),
-                             f'{token.text} is shown unsigned; the expected value takes the sign of its Spell.dbc '
-                             f'points {points}')
+        why = (f'{token.text} is shown unsigned; the expected value takes the sign of its Spell.dbc points '
+               f'{points}')
+        signed = expected * plain_sign(points)
+        return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, signed, why)
+                or deterministic(base, measured, measured, signed, why))
     if measured * expected < 0:
         return replace(base, status='ambiguous_tooltip', measured=measured, expected=expected,
                        explanation=f'{token.text} evaluates to {expected:g}, the measured value has the opposite sign',
                        detail={'question': sign_question(base, name, token.text, measured, expected)})
-    return deterministic(base, measured, measured, expected, f'{token.text} read with the measured stats')
+    why = f'{token.text} read with the measured stats'
+    return (judge_fixed_per_level(base, expectation, run, measured, tokens, tooltips, index, expected, why)
+            or deterministic(base, measured, measured, expected, why))
 
 
 def sign_question(base: Verdict, name: str, text: str, measured: float, expected: float) -> dict:
@@ -3702,7 +3754,7 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
         return replace(base, status='unmeasured', measured=measured, explanation=f'cast failed: {failure}')
     if check in HIT_CHECKS:
         return per_level_unmodelled(judge_hit(base, manifest['class_file'], [(entry, run, expectation)], hit_model),
-                                    tooltips, expectation.rank_id, manifest['level'])
+                                    tooltips, hit_spell_of(expectation), manifest['level'])
     if measured is None:
         return replace(base, explanation=f'no measurement {expectation.label!r} in {run.key} '
                                          f'({run.status}: {run.message})')
@@ -3830,7 +3882,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         base = Verdict(label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                        expectation.rank_id, expectation.check)
         verdicts[hit_slots[label]] = per_level_unmodelled(judge_hit(base, manifest['class_file'], parts, hit_model),
-                                                          tooltips, base.rank_id, manifest['level'])
+                                                          tooltips, hit_spell_of(parts[0][2]), manifest['level'])
     verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
                  for parts in proc_parts.values()]
     verdicts += [server_question(manifest, parts[0][2], judge_proc_delta(manifest, parts, tooltips), tooltips)
