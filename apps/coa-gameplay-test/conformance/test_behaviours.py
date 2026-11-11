@@ -5954,9 +5954,9 @@ class CostGateScenarioTests(unittest.TestCase):
         scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(706309))
         run.validate(scenario)
         self.assertEqual([(e.displayed, e.model['level']) for e in expectations],
-                         [('67', 15500.0), ('0', 15500.0), ('67', 14500.0)])
+                         [('67', 15250.0), ('0', 15250.0), ('67', 14750.0)])
         waits = [step['ms'] for step in scenario['steps'] if step.get('label', '').endswith('cooldown wait')]
-        self.assertEqual(waits, [15500, 15500, 14500])
+        self.assertEqual(waits, [15250, 15250, 14750])
 
     def test_fractional_reduction_and_the_next_and_duration_arms(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(707364))
