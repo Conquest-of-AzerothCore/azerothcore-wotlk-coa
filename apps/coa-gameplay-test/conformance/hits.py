@@ -693,12 +693,12 @@ def creature_fixture(class_file: dict) -> dict:
             'health': DUMMY_HEALTH, 'distance': DUMMY_DISTANCE, 'stationary': True}
 
 
-def target_steps(school_mask: int) -> tuple[list[dict], dict[str, str]]:
-    steps = [measurement(ARMOR_LABEL, TARGET, 'armor'),
-             measurement(VIEW_LEVEL_LABEL, CASTER, 'view_level', target=TARGET)]
+def target_steps(school_mask: int, unit: str = TARGET) -> tuple[list[dict], dict[str, str]]:
+    steps = [measurement(ARMOR_LABEL, unit, 'armor'),
+             measurement(VIEW_LEVEL_LABEL, CASTER, 'view_level', target=unit)]
     labels = {'armor': ARMOR_LABEL, 'view_level': VIEW_LEVEL_LABEL}
     for school in magic_schools(school_mask):
-        steps.append(measurement(resistance_label(school), TARGET, 'resistance', school=school))
+        steps.append(measurement(resistance_label(school), unit, 'resistance', school=school))
         labels[f'resistance {school}'] = resistance_label(school)
     return steps, labels
 

@@ -1610,7 +1610,10 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     self.assertEqual(entry['trial_metric'], 'spell_cast_count')
                     continue
                 if trigger['action'] == TAKEN_HIT:
-                    self.assertEqual(entry['trial_metric'], 'spell_damage_count')
+                    metric = entry['trigger_metric'] if entry.get('kind') == MAGNITUDE_RATIO_KIND \
+                        else entry['trial_metric']
+                    self.assertEqual(metric, 'spell_damage_total' if entry.get('kind') == MAGNITUDE_RATIO_KIND
+                                     else 'spell_damage_count')
                     self.assertGreater(trigger['striker_entry'], 0)
                     continue
                 self.assertEqual(trigger['action'], 'cast')
@@ -2269,6 +2272,65 @@ class TakenHitTriggerTests(unittest.TestCase):
         del entry['trigger']['striker_entry']
         with self.assertRaises(ValueError):
             checked_entry(entry)
+
+    def test_every_strike_refills_the_caster_first(self):
+        entry = self.entry()
+        plan = trigger_plan(CLASS_FILE, entry)
+        steps = attempt_steps(CLASS_FILE, entry, plan, 3, '')
+        for index, step in enumerate(steps):
+            if step.get('action') == 'cast':
+                self.assertEqual(steps[index - 1]['action'], 'set_health')
+                self.assertEqual(steps[index - 1]['actor'], 'caster')
+
+    def magnitude_entry(self):
+        return {'aura': SACRED_DEFENSE, 'kind': MAGNITUDE_RATIO_KIND, 'name': 'Sacred Defense',
+                'tooltip': self.entry()['tooltip'],
+                'trigger': {'action': 'taken_hit', 'spell': 32247, 'striker_entry': 36},
+                'trigger_text': 'When you take Physical damage', 'trigger_metric': 'spell_damage_total',
+                'observe_spell': 707720, 'observe_source': 'synthetic fixture',
+                'observe_metric': 'spell_damage_total', 'per_trigger_text': 'for $s1% of the damage dealt',
+                'internal_cooldown_ms': 1000, 'expected_ratio': 0.15}
+
+    def test_a_magnitude_ratio_reads_the_strikers_hits_and_the_strike_back_at_the_striker(self):
+        scenario, [expectation] = magnitude_ratio_scenario(CLASS_FILE, self.magnitude_entry(), 0)
+        run.validate(scenario)
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], ['striker'])
+        labels = expectation.model['measurements']
+        steps = {step.get('label'): step for step in scenario['steps']}
+        for key in ('trigger_total', 'trigger_count'):
+            self.assertEqual((steps[labels[key]]['caster'], steps[labels[key]]['target'], steps[labels[key]]['spell']),
+                             ('striker', 'caster', 32247))
+        self.assertEqual(steps[labels['observe_total']]['spell'], 707720)
+        self.assertEqual(expectation.model['resisted_school_mask'], 2)
+        self.assertEqual(steps[expectation.model['target_measurements']['resistance 1']]['actor'], 'striker')
+        casts = [step for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertTrue(casts and all(step['actor'] == 'striker' for step in casts))
+
+    def test_a_magnitude_ratio_taken_hit_needs_a_striker_and_a_spell(self):
+        for trigger in ({'action': 'taken_hit', 'spell': 32247}, {'action': 'taken_hit', 'striker_entry': 36}):
+            with self.subTest(trigger=trigger), self.assertRaises(ValueError):
+                checked_entry({**self.magnitude_entry(), 'trigger': trigger})
+
+    def gate_entry(self):
+        return {'aura': SACRED_DEFENSE, 'kind': GATE_ABSENCE_KIND, 'name': 'Sacred Defense',
+                'tooltip': self.entry()['tooltip'],
+                'trigger': {'action': 'taken_hit', 'spell': 32247, 'striker_entry': 31146},
+                'trigger_text': 'When you take Physical damage', 'trial_metric': 'spell_damage_count',
+                'observe_spell': 707720, 'observe_source': 'synthetic fixture', 'observe_metric': 'spell_cast_count',
+                'internal_cooldown_ms': 1000, 'gate_text': 'the striker is a boss'}
+
+    def test_a_gate_absence_on_a_taken_hit_strikes_from_the_withheld_striker(self):
+        scenario, [expectation] = gate_absence_scenario(CLASS_FILE, self.gate_entry(), 0)
+        run.validate(scenario)
+        self.assertEqual(scenario['creatures'][0]['entry'], 31146)
+        self.assertFalse(any(step.get('action') == 'learn' and step.get('spell') == 32247
+                             for step in scenario['steps']))
+        self.assertEqual(expectation.check, GATE_ABSENCE_CHECK)
+
+    def test_a_gate_absence_on_a_taken_hit_needs_a_striker(self):
+        entry = self.gate_entry()
+        with self.assertRaises(ValueError):
+            checked_entry({**entry, 'trigger': {'action': 'taken_hit', 'spell': 32247}})
 
     def test_absent_passive_gives_zero_baseline_events(self):
         scenario, [expectation] = trigger_scenario(CLASS_FILE, self.entry(), 0)

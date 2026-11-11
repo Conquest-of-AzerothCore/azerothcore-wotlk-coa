@@ -23,7 +23,8 @@ SELF_TRIGGER_CHECK = 'self_trigger_count'
 GATE_ABSENCE_KIND = 'gate_absence'
 GATE_ABSENCE_CHECK = 'gate_absence_count'
 MAGNITUDE_TRIGGER_METRICS_BY_ACTION = {'cast': frozenset({'spell_damage_total'}),
-                                       'attack': frozenset({'melee_damage_total'})}
+                                       'attack': frozenset({'melee_damage_total'}),
+                                       'taken_hit': frozenset({'spell_damage_total'})}
 MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_damage_total', 'spell_heal_total'})
 MISSED_TRIGGER_RATE = 0.025
 FALSE_OK_RISK = 0.01
@@ -34,6 +35,7 @@ SELF = 'self'
 PERIODIC = 'periodic'
 TAKEN_HIT = 'taken_hit'
 TAKEN_HIT_MIN_INTERVAL_MS = 500
+TAKEN_HIT_HEALTH_PCT = 100
 TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
 OBSERVE_METRICS = frozenset({'spell_cast_count', 'spell_energize_count', 'aura_apply_count'})
 OBSERVE_ACTORS = {CASTER: CASTER, 'target': TARGET}
@@ -115,11 +117,15 @@ def checked_magnitude_entry(entry: dict) -> dict:
     aura = entry['aura']
     trigger = entry['trigger']
     if trigger['action'] not in MAGNITUDE_TRIGGER_METRICS_BY_ACTION:
-        raise ValueError(f'Magnitude-ratio trigger {aura} must cast or attack, not {trigger["action"]!r}')
+        raise ValueError(f'Magnitude-ratio trigger {aura} must cast, attack or take a hit, not {trigger["action"]!r}')
     if trigger['action'] == CAST:
         if trigger.get('target') not in TRIGGER_TARGETS:
             raise ValueError(f'Magnitude-ratio trigger {aura} casts at {trigger.get("target")!r}, not one of '
                              f'{sorted(TRIGGER_TARGETS)}')
+    elif trigger['action'] == TAKEN_HIT:
+        if not trigger.get('spell', 0) > 0 or not trigger.get('striker_entry', 0) > 0:
+            raise ValueError(f'Magnitude-ratio taken_hit trigger {aura} needs a striker spell and a positive '
+                             f'striker_entry')
     elif trigger.get('spell', 0) != 0:
         raise ValueError(f'Magnitude-ratio attack trigger {aura} must not name a spell')
     if entry.get('trigger_metric') not in MAGNITUDE_TRIGGER_METRICS_BY_ACTION[trigger['action']]:
@@ -180,14 +186,16 @@ RELOCATE_LIMIT_YD = 20.0
 def checked_gate_absence_entry(entry: dict) -> dict:
     aura = entry['aura']
     trigger = entry['trigger']
-    if trigger['action'] != CAST:
-        raise ValueError(f'Gate-absence trigger {aura} must cast, not {trigger["action"]!r}')
-    if trigger.get('target') not in TRIGGER_TARGETS:
+    if trigger['action'] not in (CAST, TAKEN_HIT):
+        raise ValueError(f'Gate-absence trigger {aura} must cast or take a hit, not {trigger["action"]!r}')
+    if trigger['action'] == CAST and trigger.get('target') not in TRIGGER_TARGETS:
         raise ValueError(f'Gate-absence trigger {aura} casts at {trigger.get("target")!r}, not one of '
                          f'{sorted(TRIGGER_TARGETS)}')
-    if entry['trial_metric'] not in TRIAL_METRICS[CAST]:
+    if trigger['action'] == TAKEN_HIT and not trigger.get('striker_entry', 0) > 0:
+        raise ValueError(f'Gate-absence trigger {aura} taken_hit action needs a positive striker_entry')
+    if entry['trial_metric'] not in TRIAL_METRICS[trigger['action']]:
         raise ValueError(f'Trial metric {entry["trial_metric"]!r} of gate-absence trigger {aura} does not count '
-                         f'a cast')
+                         f'a {trigger["action"]}')
     if entry['observe_metric'] not in OBSERVE_METRICS:
         raise ValueError(f'Unknown observe metric {entry["observe_metric"]!r} of gate-absence trigger {aura}')
     if entry.get('observe_actor', CASTER) not in OBSERVE_ACTORS:
@@ -359,10 +367,7 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
                  {'action': 'wait', 'label': f'{phase}swings', 'ms': attempts * plan.attempt_ms},
                  {'action': 'stop_attack', 'actor': CASTER}]
     elif trigger['action'] == TAKEN_HIT:
-        steps = []
-        for _ in range(attempts):
-            steps.append({'action': 'cast', 'actor': STRIKER, 'spell': trigger['spell'], 'target': CASTER})
-            steps.append({'action': 'wait', 'ms': plan.attempt_ms})
+        steps = [step for _ in range(attempts) for step in taken_hit_attempt(trigger, plan.attempt_ms)]
     else:
         facts = facts_of(records_of(class_file), trigger['spell'])
         cast_target = trigger['target'] if trigger['target'] in (TARGET, ALLY) else None
@@ -374,6 +379,12 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
                                           for moved in ([step, relocated(-away)] if step['action'] == 'cast'
                                                         else [step])]
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
+
+
+def taken_hit_attempt(trigger: dict, attempt_ms: int) -> list[dict]:
+    return [fixture_health_step(CASTER, TAKEN_HIT_HEALTH_PCT),
+            {'action': 'cast', 'actor': STRIKER, 'spell': trigger['spell'], 'target': CASTER},
+            {'action': 'wait', 'ms': attempt_ms}]
 
 
 def away_control_label(aura: int) -> str:
@@ -455,6 +466,11 @@ def dual_wield_steps(entry: dict) -> list[dict]:
     return known + off_hand_steps(item)
 
 
+def striker_fixture(class_file: dict, trigger: dict) -> dict:
+    return {'id': STRIKER, 'owner': CASTER, 'entry': trigger['striker_entry'], 'level': class_file['level'],
+            'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 0, 'stationary': True}
+
+
 def dual_wield_known_label(entry: dict) -> str:
     return f'{entry["aura"]} dual_wield knows {entry["dual_wield"]["known_spell"]}'
 
@@ -492,9 +508,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     if force_crit:
         scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING
     if trigger['action'] == TAKEN_HIT:
-        scenario['creatures'] = [{'id': STRIKER, 'owner': CASTER, 'entry': trigger['striker_entry'],
-                                  'level': class_file['level'], 'health': STRIKER_HEALTH,
-                                  'distance': STRIKER_DISTANCE, 'reaction': 0, 'stationary': True}]
+        scenario['creatures'] = [striker_fixture(class_file, trigger)]
     elif trigger['action'] == ATTACK or trigger.get('target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if trigger.get('target') == ALLY:
@@ -593,15 +607,17 @@ def gate_absence_rule(entry: dict) -> str:
 
 
 def gate_absence_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
-    class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
+    taken = entry['trigger']['action'] == TAKEN_HIT
+    if not taken:
+        class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
     plan = trigger_plan(class_file, entry)
     if not 0 <= part < len(plan.part_attempts):
         raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
     aura, trigger = entry['aura'], entry['trigger']
     labels = trigger_measurements(aura)
     attempts = plan.part_attempts[part]
-    steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']},
-             {'action': 'learn', 'actor': CASTER, 'spell': aura}]
+    steps = ([] if taken else [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']}]) + \
+        [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
     if trigger.get('target') == ALLY:
         steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
     steps += attempt_steps(class_file, entry, plan, attempts, '')
@@ -618,6 +634,8 @@ def gate_absence_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple
     contract = ('Events of an always-on passive with its required gate withheld: zero expected across its '
                'scheduled attempts, with the passive itself known, against its tooltip condition.')
     scenario = scenario_shell(class_file, name, contract, steps)
+    if taken:
+        scenario['creatures'] = [striker_fixture(class_file, trigger)]
     if trigger.get('target') == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
     if trigger.get('target') == ALLY:
@@ -859,7 +877,7 @@ def magnitude_trigger_rule(entry: dict) -> str:
 
 
 def magnitude_resisted_school(class_file: dict, entry: dict, cast_target: str | None) -> int:
-    if entry['observe_metric'] != 'spell_damage_total' or cast_target != TARGET:
+    if entry['observe_metric'] != 'spell_damage_total' or cast_target not in (TARGET, STRIKER):
         return 0
     school_mask = records_of(class_file).field('Spell', entry['observe_spell'], 'SchoolMask')
     if school_mask & PHYSICAL_SCHOOL_MASK or not magic_schools(school_mask):
@@ -885,6 +903,10 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
         if trigger.get('target') == ALLY:
             steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
         steps += cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts)
+    elif trigger['action'] == TAKEN_HIT:
+        cast_target = STRIKER
+        steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
+        steps += [step for _ in range(attempts) for step in taken_hit_attempt(trigger, plan.attempt_ms)]
     else:
         cast_target = TARGET
         steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura},
@@ -895,6 +917,10 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
     if trigger['action'] == CAST:
         steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], spell=trigger['spell']))
         steps.append(measurement(labels['trigger_count'], CASTER, 'spell_damage_count', spell=trigger['spell']))
+    elif trigger['action'] == TAKEN_HIT:
+        for label, metric in ((labels['trigger_total'], entry['trigger_metric']),
+                              (labels['trigger_count'], 'spell_damage_count')):
+            steps.append(measurement(label, CASTER, metric, spell=trigger['spell'], target=CASTER, caster=STRIKER))
     else:
         steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], hand=MAIN_HAND))
         steps.append(measurement(labels['trigger_count'], CASTER, 'melee_damage_count', hand=MAIN_HAND))
@@ -905,7 +931,7 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
     resisted_school = magnitude_resisted_school(class_file, entry, cast_target)
     target_labels: dict[str, str] = {}
     if resisted_school:
-        resistance_steps, target_labels = target_steps(resisted_school)
+        resistance_steps, target_labels = target_steps(resisted_school, cast_target)
         steps += resistance_steps
     parts = len(plan.part_attempts)
     name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} magnitude part {part + 1} of {parts}'
@@ -914,6 +940,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
     scenario = scenario_shell(class_file, name, contract, steps)
     if cast_target == TARGET:
         scenario['creatures'] = [creature_fixture(class_file)]
+    if cast_target == STRIKER:
+        scenario['creatures'] = [striker_fixture(class_file, trigger)]
     force_crit = entry.get('force_crit')
     if force_crit:
         scenario['players'][0][FORCE_CRIT_RATINGS[force_crit]] = FORCED_CRIT_RATING

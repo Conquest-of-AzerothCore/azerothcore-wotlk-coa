@@ -130,6 +130,15 @@ not by reading `TRIGGERED_FULL_MASK`'s own flag bits, since those did not resolv
 (`SchoolMask` 1, `DmgClass` 2, `Effect[0]` 2 `SCHOOL_DAMAGE`, `CasterAuraState` 0) is the one confirmed working so
 far, reused by the Sacred Defense (705306) entry.
 
+Every taken-hit attempt first sets the caster to its full fixture health (`set_health` 10000 of 10000), so a long
+run of strikes never kills it. A `magnitude_ratio` and a `gate_absence` entry also take a `taken_hit` trigger (ADR
+0181). The magnitude reads the striker's `spell_damage_total` and `spell_damage_count` on the caster as the trigger
+side and the caster's copy as the observed side; a magic copy is judged after the striker's own level-based partial
+resist (`target_steps` reads the striker). The gate absence learns only the aura and strikes from the creature
+whose kind withholds the gate. Sacred Defense strikes with 32247 (a flat 1000 physical, `SPELL_ATTR3_ALWAYS_HIT`):
+Harvest Golem 36 reads 0.1316 against 0.15 x 0.88 with 273 strikes back in 273 hits, and Heroic Training Dummy
+31146, a boss by `type_flags` 4, reads 0 in 273 (diagnostic `20261111-222153`).
+
 ### Cooldown-delta trigger entries
 
 A `kind: "cooldown_delta"` entry is for a trigger whose tooltip states a fixed cooldown reduction on another,
@@ -544,7 +553,7 @@ the clause — that the effect does *not* fire when the named condition is withh
 itself is known. The plain entry's own baseline (no passive learned) cannot stand in for this: it proves "the
 passive is required", not "the named condition is required while the passive is known".
 
-Fields: the same `trigger` (`action: "cast"` only), `trial_metric`, `observe_spell`/`observe_source`/
+Fields: the same `trigger` (`action: "cast"`, or `"taken_hit"` with its striker), `trial_metric`, `observe_spell`/`observe_source`/
 `observe_metric`/`observe_actor`, `trigger_text` as the default shape, plus `gate_text` (the tooltip words
 naming the withheld condition) in place of `per_trigger`/`per_trigger_text`. `checked_gate_absence_entry`
 additionally forbids `attempt_auras`: the entry must run with every optional fixture at its default, absent
