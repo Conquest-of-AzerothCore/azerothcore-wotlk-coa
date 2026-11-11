@@ -2442,6 +2442,7 @@
     "clause": "@ext:Does not work on Bosses.:ext@",
     "labels": [
       "705306 gate_absence_count",
+      "705306 gate_absence_count dungeon_boss",
       "705306 trigger_magnitude_ratio"
     ],
     "kind": "claim"

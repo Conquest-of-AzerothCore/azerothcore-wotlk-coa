@@ -1674,6 +1674,16 @@
       "handler": "The striker is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, so Creature::isWorldBoss), against the non-boss Harvest Golem 36 of the magnitude_ratio entry, whose every hit strikes back. AscensionTemplarEvents.cpp:46-49 (Check, case 705306): a direct damage taken by the player with a physical school mask from an actor that is not a dungeon or world boss; :134-138 (Proc) casts Copy(player, actor, 707720, damage * 15 / 100) once per 1 s (State(player).cooldowns); striker spell 32247 ('Karazhan - Chess NPC Action: Melee Attack: DAMAGE (Footman)', SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 1, EffectBasePoints 999 EffectDieSides 1, SPELL_ATTR3_ALWAYS_HIT), the striker of the internal_cooldown_gate entry, so 15% never truncates to 0"
     },
     {
+      "aura": 705306, "kind": "gate_absence", "name": "Sacred Defense", "label_suffix": "dungeon_boss",
+      "tooltip": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage. Can only occur once per sec. \r\n\r\n@ext:Does not work on Bosses.:ext@",
+      "trigger": {"action": "taken_hit", "spell": 32247, "striker_entry": 643},
+      "trigger_text": "When you take Physical damage", "trial_metric": "spell_damage_count",
+      "observe_spell": 707720, "observe_source": "EffectTriggerSpell[0] of 705306", "observe_metric": "spell_cast_count",
+      "internal_cooldown_ms": 1000,
+      "gate_text": "@ext:Does not work on Bosses.:ext@",
+      "handler": "The striker is Sneed 643, the kill credit of the Deadmines encounter 162 (instance_encounters, a non-raid map), so ObjectMgr::LoadInstanceEncounters sets CREATURE_FLAG_EXTRA_DUNGEON_BOSS on it (ObjectMgr.cpp:6862) and Creature::IsDungeonBoss reads it (Creature.cpp:3620-3627); its type_flags are 0, so Creature::isWorldBoss is false. The tooltip says 'Bosses' and Check refuses both kinds (AscensionTemplarEvents.cpp:46-49); the world-boss arm is the other gate_absence entry. AscensionTemplarEvents.cpp:46-49 (Check, case 705306): a direct damage taken by the player with a physical school mask from an actor that is not a dungeon or world boss; :134-138 (Proc) casts Copy(player, actor, 707720, damage * 15 / 100) once per 1 s (State(player).cooldowns); striker spell 32247 ('Karazhan - Chess NPC Action: Melee Attack: DAMAGE (Footman)', SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 1, EffectBasePoints 999 EffectDieSides 1, SPELL_ATTR3_ALWAYS_HIT), the striker of the internal_cooldown_gate entry, so 15% never truncates to 0"
+    },
+    {
       "aura": 572741, "kind": "self_trigger", "name": "Reckoning",
       "tooltip": "Unleash a powerful |cffffffffOath Breaker|r, dealing ${$m1+0+$AP*0.175+$STA*0.5} Holy damage and restoring $521241s1 Energy for each enemy struck.\r\n\r\nConsumes your |cffffffffOaths|r, dealing additional damage for each consumed.",
       "trigger": {"action": "cast", "spell": 572741, "target": "dummy"},
