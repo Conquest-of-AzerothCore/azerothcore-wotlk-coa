@@ -353,10 +353,12 @@ public:
             Leashes[*entry].points = outline;
         }
         WorldDatabase.Execute("INSERT IGNORE INTO `coa_boss_leash` (`entry`, `radius`) VALUES ({}, 0)", *entry);
-        WorldDatabase.Execute("DELETE FROM `coa_boss_leash_point` WHERE `entry` = {}", *entry);
+        WorldDatabaseTransaction trans = WorldDatabase.BeginTransaction();
+        trans->Append("DELETE FROM `coa_boss_leash_point` WHERE `entry` = {}", *entry);
         for (std::size_t i = 0; i < outline.size(); ++i)
-            WorldDatabase.Execute("INSERT INTO `coa_boss_leash_point` (`entry`, `point`, `x`, `y`, `z`) VALUES ({}, {}, {}, {}, {})",
+            trans->Append("INSERT INTO `coa_boss_leash_point` (`entry`, `point`, `x`, `y`, `z`) VALUES ({}, {}, {}, {}, {})",
                 *entry, i, outline[i].GetPositionX(), outline[i].GetPositionY(), outline[i].GetPositionZ());
+        WorldDatabase.CommitTransaction(trans);
         handler->PSendSysMessage("{} ({}): room leash with {} points around {:.1f} {:.1f}, cut at the exits. "
             "Check it with .leash show and fix single points with .leash undo / .leash point.",
             BossName(*entry), *entry, outline.size(), from.GetPositionX(), from.GetPositionY());
