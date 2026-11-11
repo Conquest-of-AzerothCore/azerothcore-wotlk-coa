@@ -755,7 +755,8 @@ class TemplarProcEntriesTest(unittest.TestCase):
                     continue
                 self.assertIn(entry['trigger']['action'], ('cast', 'attack'))
                 self.assertIn(entry['trigger_text'], entry['tooltip'])
-                self.assertIn(entry['event_metric'], ('spell_cast_count', 'spell_damage_count', 'spell_charges'))
+                self.assertIn(entry['event_metric'], ('spell_cast_count', 'spell_damage_count', 'melee_attack_count',
+                                                      'spell_charges'))
                 self.assertTrue(self.spell(entry['proc_spell'], 'SpellName[enUS]'))
                 self.assertEqual(entry['internal_cooldown_ms'], 0)
 
