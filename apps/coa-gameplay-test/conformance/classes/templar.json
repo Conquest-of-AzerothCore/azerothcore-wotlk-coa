@@ -507,26 +507,41 @@
       "name": "Paladin Training",
       "tooltip": "Triggering |cffffffffZealotry|r now has an $h% chance to grant you an additional auto attack on your next strike.@s:801450:0@",
       "chance_token": "$h",
-      "status": "unmodelled",
-      "reason": "the trigger condition is confirmed (a landed, damaging hit of Zealotry 801450 itself, regardless of what caused 801450 to be cast), but no scenario source for that hit exists yet: 801450 is never a player's own direct, learnable cast, only reached via AscensionTemplar.cpp's Zealotry() helper (called from 92108, 504807, 706325 or a Blade Sermon repeat), and whether it deals nonzero off-hand weapon damage without an off-hand weapon equipped is unverified (Player::_ApplyWeaponDamage zeroes the off-hand damage range and, unlike SPELL_ATTR0_REQUIRES_MAIN_HAND's unarmed fallback, has no such fallback for OFF_ATTACK, Player.cpp:7489-7499, and the hit-result gate at AscensionTemplarAbilities.cpp:275 requires nonzero damage to roll). This is not blocked by Spell::CheckItems's off-hand-weapon-required check: 801450's own EquippedItemClass is -1, and that check (Spell.cpp:7996-8023) only runs when EquippedItemClass>=0, so it never reaches the SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON gate for this spell even on a forced cast",
-      "handler": "AscensionTemplarAbilities.cpp:277-286 rolls it on a damaging hit of the Zealotry strike 801450",
+      "trigger": {"action": "cast", "spell": 801450},
+      "trigger_text": "Triggering Zealotry",
+      "event_metric": "melee_attack_count",
+      "proc_spell": 505206,
+      "proc_spell_source": "EffectTriggerSpell[0] of 504808: 505206, Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS; the events are the main-hand auto attacks it makes, the caster attacking nothing else",
+      "events_per_proc": 1,
+      "handler": "AscensionTemplarAbilities.cpp:297-300 (OnSpellHitResult, 801450 block): on a damaging hit of Zealotry 801450, Chance(player, 504808) rolls its ProcChance 8 (AscensionTemplar.cpp:107-116, no cooldown) and Copy casts 505206 with 1 extra attack; Zealotry is cast directly at the dummy, a hit of 801450 whatever casts it",
       "dbc": {
         "504808": {"ProcChance": 8, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     },
     {
       "aura": 572548,
       "name": "Blade Sermon",
       "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
       "chance_token": "$h",
-      "status": "unmodelled",
-      "reason": "owner ruling 2026-11-09 settles the tooltip: the double-hit chance applies to all three Zealotry sources (periodic tick 706325, off-hand swing 92108, Oath: Vindication 805332 ability cast), all reached through the single shared AscensionTemplar.cpp:212-220 Zealotry() function (repeat=false default), whose unconditional roll_chance_i(info->ProcChance) reroll of this spell's own ProcChance is not duplicated or branched per caller. Round 6 measured this on the periodic-tick source with the same proc_rate_delta scenario shape as 572554's own entry (round7/blade-sermon-report.md, stamp 20261109-162302, 2031 attempts per phase): with 706325 co-learned as the baseline and 572548 added for the main phase, baseline rate 0.1428 (590 in 4131), with-aura rate 0.1561 (645 in 4131), two-proportion z 1.70 (needs >= 2.576), measured chance +0.0932 vs tooltip 0.05 - directionally consistent (positive, same order of magnitude) but short of this check's power threshold at this trial count. The delta-method half-width needed to also require +-2.5 points of precision on a 5% nested chance from this baseline rate would need roughly two orders of magnitude more trials (derived in the fix report), out of this round's budget. The sibling rank 572554 (10%, same function, same lines, only a different ProcChance operand) carries a 572554 proc_rate_delta check that does measure ok, at 12000 attempts per phase for a reliable margin (z's own sampling noise has unit variance regardless of trial count, so 2031 attempts gave an unreliable z between 1.67 and 3.08 across repeated runs; the registered 572554 entry's own run, stamp 20261109-163213, gives z 5.90): that is runtime evidence the shared mechanism is live on the periodic-tick source, which this rank's identical code path inherits without a separate roll. The off-hand-swing (92108) and Oath: Vindication (805332) sources are not independently measurable by this harness today for pre-existing reasons recorded on their own entries (92108: no CanDualWield path for Templar, so the harness cannot produce an off-hand swing at all; 805332/504107: triggers.py/procs.py have no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round introduces.",
-      "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
+      "trigger": {"action": "cast", "spell": 573324},
+      "trigger_text": "trigger twice",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801450,
+      "proc_spell_source": "AscensionTemplar.cpp:217-225 Zealotry(): it casts 801450, then rolls 572548's ProcChance to call itself once more with repeat=true",
+      "events_per_proc": 1,
+      "events_exclude_trigger_casts": true,
+      "attempt_auras": [
+        {"spell": 704576, "stacks": 10, "source": "Oath Chain at its 10-stack cap: GrantOath (AscensionTemplar.cpp:168-171) grants no Oath: Vindication, whose 20% roll would call Zealotry again"},
+        {"spell": 805332, "stacks": 0, "source": "no Oath: Vindication 805332 from an earlier attempt"}
+      ],
+      "handler": "AscensionTemplarAbilities.cpp:321-325 (OnSpellHitResult): a landed Vindication 573324 hit calls Zealotry once, which casts 801450 and rolls 572548's ProcChance 5 for a second 801450 (AscensionTemplar.cpp:217-225); the events are the 801450 casts less the Vindication casts, so each trial is one roll",
       "dbc": {
         "572548": {"ProcChance": 5, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     },
     {
       "aura": 572554,
