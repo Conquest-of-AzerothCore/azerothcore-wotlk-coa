@@ -63,7 +63,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         threat_tick_ratio_spec)
 from bonus import bonus_band
 from compare import Verdict, judge_behaviour
-from hits import aura_modifiers
+from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
@@ -6065,6 +6065,19 @@ class CostGateScenarioTests(unittest.TestCase):
         beyond = next(e for e in expectations if e.model['arm'] == 'beyond')
         verdict = judge_behaviour(base_verdict(beyond), FakeRun({beyond.label: 0.0}), beyond)
         self.assertEqual(verdict.status, 'alert')
+
+    def test_a_cooldown_gate_beyond_the_real_clock_cap_runs_accelerated_only(self):
+        entry = {'spell': 573452, 'name': 'Eternally Devoted', 'kind': 'cost_gate',
+                 'quote': 'Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by',
+                 'gated_spell': 801461, 'resource': 'cooldown', 'reduction': 4000, 'target': 'caster',
+                 'setup_casts': [[705300, 'caster'], [572027, 'dummy']], 'after_casts': [[572027, 'dummy']],
+                 'after_wait_ms': 2000}
+        scenario, expectations = behaviour_scenario(CLASS_FILE, entry)
+        self.assertGreater(scenario['timeout_ms'], MAX_SCENARIO_MS)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+        self.assertEqual([e.model['level'] for e in expectations], [176500.0, 176500.0, 175500.0])
 
     def test_after_casts_need_a_cooldown_gate_and_a_wait_below_the_beyond_attempt(self):
         with self.assertRaises(ValueError):

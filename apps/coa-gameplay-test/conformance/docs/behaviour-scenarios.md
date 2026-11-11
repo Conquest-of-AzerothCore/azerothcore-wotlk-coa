@@ -844,6 +844,10 @@ Profound Enlightenment 680953 "reducing the remaining cooldown of Testaments by 
 of Faith 801478, when 160000 ms remain, so `reduction` is 80000; a cut of half the full cooldown would let the
 `beyond` attempt through. A power gate, or an `after_wait_ms` not below the `beyond` wait, is refused.
 
+A cooldown gate may wait up to the accelerated cap (`hits.MAX_ACCELERATED_SCENARIO_MS`, ADR 0152), as expiry
+scenarios may; a power gate keeps the ten-minute budget. Eternally Devoted 573452 gates Libram of Tenacity 801461's
+180000 ms cooldown and waits 549400 ms, so it runs only on the accelerated clock.
+
 ### Hit-ratio heals and actors
 
 A `hit_ratio` entry may set `metric: "heal"` to read `spell_heal_total` and `spell_heal_count` instead of the damage

@@ -3,8 +3,8 @@ import math
 from pathlib import Path
 import re
 
-from hits import (DRAIN_MS, MAIN_HAND, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, aura_modifiers, cast_steps,
-                  creature_fixture, timed)
+from hits import (DRAIN_MS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS,
+                  aura_modifiers, cast_steps, creature_fixture, timed)
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, base_steps, measurement, off_hand_steps, off_hand_weapon, one_hand_main,
                      player_fixture)
@@ -2996,7 +2996,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         'players': players,
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
-    return timed(scenario, waited_ms(steps)), expectations
+    limit = MAX_ACCELERATED_SCENARIO_MS if spec.resource == 'cooldown' else MAX_SCENARIO_MS
+    return timed(scenario, waited_ms(steps), limit), expectations
 
 
 def cost_gate_spec(entry: dict) -> CostGateSpec:
