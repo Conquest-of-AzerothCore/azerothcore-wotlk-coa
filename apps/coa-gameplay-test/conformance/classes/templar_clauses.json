@@ -649,7 +649,8 @@
     "labels": [
       "500694 effect_value 803153e0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc; no behaviour route yet: no hit model for a periodic trigger of a school-damage spell (803153)"
   },
   {
     "spell": 500694,
@@ -658,7 +659,8 @@
       "500694 aura_amplitude_ms",
       "500694 aura_duration_ms"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc; uncertain expectation (mentor, trial question 1): one cast gives one Zealotry 801450 at the cast, then 5 periodic ones, 6 in all, against every 1 sec for 5 sec (diagnostic 20261111-174753); CoADev2 Zealot videos or the owner settle it"
   },
   {
     "spell": 500694,
@@ -3516,7 +3518,7 @@
       "803159 behaviour_count"
     ],
     "kind": "claim",
-    "reason": "ally_heal_breadth with both allies 17 yd from the caster and 14 yd from the dummy: healed only by a heal centred on the target, as AscensionTemplarAbilities.cpp:208-213 does (Nearby(target, 15.0f)); 0 heals before the learn"
+    "reason": "ally_heal_breadth with both allies 17 yd from the caster and 14 yd from the dummy: healed only by a heal centred on the target, as AscensionTemplarAbilities.cpp:208-213 does (Nearby(target, 15.0f)); 0 heals before the learn; the streamed text of the heal 803160 reads \"within $a1 yards of the target\" (rev_20261110_02_templar_client_texts.sql)"
   },
   {
     "spell": 803163,
