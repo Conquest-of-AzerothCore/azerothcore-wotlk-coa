@@ -2982,6 +2982,7 @@ class CostGateSpec:
     after_wait_ms: int = 0
     resets: bool = False
     talent_aura_each_arm: bool = False
+    restore_charges: bool = False
 
 
 @dataclass(frozen=True)
@@ -3009,7 +3010,7 @@ def cost_gate_base(spec: CostGateSpec, facts) -> float:
     return float(facts.recast_ms)
 
 
-def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float]:
+def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float | None]:
     if spec.resets:
         opened = spec.after_wait_ms + spec.margin_ms
         if spec.resource != 'cooldown' or not spec.after_casts or not GCD_WAIT_MS <= opened < base:
@@ -3019,6 +3020,8 @@ def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float]:
     reduced = base - spec.reduction
     if spec.resource == 'power':
         allowed = math.ceil(reduced)
+        if allowed == reduced == 0 < base:
+            return 0, None
         beyond = allowed - 1 if allowed == reduced else allowed - 2
         if not 0 <= beyond < allowed < base:
             raise NotModelled(f'{spec.gated_spell} cost {base:g} less {spec.reduction:g} leaves no power level that '
@@ -3054,7 +3057,8 @@ def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
     arms = [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
     if spec.next_arm:
         arms.append(CostGateArm('next', True, allowed, refused, setup=False))
-    arms.append(CostGateArm('beyond', True, beyond, refused))
+    if beyond is not None:
+        arms.append(CostGateArm('beyond', True, beyond, refused))
     if spec.aura_duration_ms is not None:
         if spec.resource != 'power' or not spec.setup_casts:
             raise ValueError(f'{spec.spell} aura_duration_ms needs a power gate opened by setup_casts')
@@ -3085,6 +3089,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         steps = []
         for spell, target in spec.setup_casts:
             setup_facts = facts_of(records, spell)
+            steps += ([{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}]
+                      if target == ALLY and closes_distance(setup_facts) else [])
+            steps += ([{'action': 'restore_charges', 'actor': CASTER, 'spell': spell}] if spec.restore_charges else [])
             steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}]
                       + cast_gate_power_step(setup_facts) + required_aura_steps(setup_facts)
                       + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target},
@@ -3157,7 +3164,7 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                                         {**model, 'arm': arm.name, 'level': arm.level, 'held_ms': arm.held_ms}))
     unit = 'power' if spec.resource == 'power' else 'ms after a cast'
     players = [{**player_fixture(class_file), 'allow_regeneration': False}]
-    if spec.target == ALLY:
+    if ALLY in (spec.target, *(target for _, target in (*spec.setup_casts, *spec.after_casts))):
         players.append({**player_fixture(class_file), 'id': ALLY})
     scenario = {
         'schema': 1,
@@ -3192,7 +3199,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS),
                         tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
                         entry.get('after_wait_ms', 0), entry.get('resets', False),
-                        bool(entry.get('talent_aura_each_arm', False)))
+                        bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000

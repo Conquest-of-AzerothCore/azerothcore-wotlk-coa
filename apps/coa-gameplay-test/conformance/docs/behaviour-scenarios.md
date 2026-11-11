@@ -879,6 +879,12 @@ A cooldown gate may wait up to the accelerated cap (`hits.MAX_ACCELERATED_SCENAR
 scenarios may; a power gate keeps the ten-minute budget. Eternally Devoted 573452 gates Libram of Tenacity 801461's
 180000 ms cooldown and waits 549400 ms, so it runs only on the accelerated clock.
 
+A power gate whose reduction leaves the cost at 0 ("free of cost") has no `beyond` arm: no level lies below 0 (ADR
+0185). A setup cast at the `ally` adds the ally player whatever the entry's `target`; a setup cast that closes the
+distance is preceded by the step back, and `restore_charges` restores its charges first. Determined 705256: Holy
+Cleave 573049 at 0 Energy is refused without it, goes through after a Temple Guardian 803792, is refused on the next
+attempt, and goes through 300 ms before and is refused 300 ms after the 5000 ms end.
+
 A negative `reduction` on a cooldown gate states a longer cooldown ("and its cooldown by 5 sec", Patience 712678 on
 Interdict 560116). The arms are then `without` (through `margin_ms` after the base cooldown, the control), `base`
 (with the talent, refused at that same wait), `with` (through `margin_ms` after the lengthened cooldown) and `beyond`

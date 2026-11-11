@@ -6036,6 +6036,33 @@ class TrialToolStepTests(unittest.TestCase):
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CostGateScenarioTests(unittest.TestCase):
+    def free_gate_entry(self):
+        return {'spell': 705256, 'name': 'Determined', 'kind': 'cost_gate', 'label_suffix': 'free',
+                'quote': 'now makes your next ability within $681136d free of cost.', 'gated_spell': 573049,
+                'resource': 'power', 'reduction': 35, 'target': 'dummy', 'setup_casts': [[803792, 'ally']],
+                'next_arm': True, 'aura_duration_ms': 5000, 'restore_charges': True}
+
+    def test_a_cost_reduced_to_zero_has_no_beyond_arm(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, self.free_gate_entry())
+        run.validate(scenario)
+        self.assertEqual([(e.model['arm'], e.displayed, e.model['level']) for e in expectations],
+                         [('without', '85', 0), ('with', '0', 0), ('next', '85', 0), ('held', '0', 0),
+                          ('expired', '85', 0)])
+
+    def test_an_ally_setup_cast_adds_the_ally_and_a_charge_steps_back_with_its_charges_restored(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.free_gate_entry())
+        steps = run.validate(scenario)['steps']
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 803792]
+        self.assertTrue(casts)
+        for index in casts:
+            before = [step['action'] for step in steps[index - 5:index]]
+            self.assertIn('relocate', before)
+            self.assertIn('restore_charges', before)
+        plain = {key: value for key, value in self.free_gate_entry().items() if key != 'restore_charges'}
+        plain_steps = run.validate(behaviour_scenario(CLASS_FILE, plain)[0])['steps']
+        self.assertFalse([step for step in plain_steps if step['action'] == 'restore_charges'])
+
     def test_power_gate_refuses_without_the_talent_and_one_point_beyond(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(301059, 'sacred_swing'))
         validated = run.validate(scenario)
