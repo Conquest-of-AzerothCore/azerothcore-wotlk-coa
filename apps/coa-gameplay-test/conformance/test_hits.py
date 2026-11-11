@@ -7,6 +7,7 @@ import unittest
 
 from classes import ClassSpell, class_spells
 from compare import Run, Verdict, judge_hit
+from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
                   casts_needed, dual_target_entry, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario,
                   measured_hit_model, melee_scenario, records_of, periodic_tick_readout, reference_caster,
@@ -746,7 +747,7 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual({key: value for key, value in entry.items() if key != 'reason'},
                          {'spell': TEMPLARS_MIGHT, 'name': "Templar's Might", 'rank': CHASTISE_MAX_RANK,
                           'gate_spell': CONDEMN_LIVE_RANK, 'percent': 18.0, 'label_suffix': 'condemn_gate',
-                          'quote': 'on enemies affected by your Condemn'})
+                          'stack_arms': [0, 1], 'quote': 'on enemies affected by your Condemn'})
         parts = hit_parts(self.templar, self.chastise_spell(), 3, rank_id=CHASTISE_MAX_RANK, label='gate test',
                           gate=(entry['gate_spell'], entry['percent'], entry['spell']))
         scenario, expectations = parts[0]
@@ -762,6 +763,52 @@ class HitScenarioTest(unittest.TestCase):
         self.assertEqual({(step['min'], step['max']) for step in setup}, {(3, 3)})
         hit = hit_expectation(expectations)
         self.assertEqual(hit.model['gate_multiplier'], 1.18)
+
+    def gate_arm(self, held: int, percent: float):
+        entry = next(entry for entry in self.templar['target_aura_gates'] if entry['spell'] == TEMPLARS_MIGHT)
+        casts = casts_needed(reference_hit_model(self.templar, CHASTISE_MAX_RANK))
+        return hit_parts(self.templar, self.chastise_spell(), casts, rank_id=CHASTISE_MAX_RANK, label='gate arm',
+                         gate=(entry['gate_spell'], percent, entry['spell']), gate_held=held)[0]
+
+    def test_templars_might_gate_arms_are_the_cap_then_zero_and_one_stack_at_six_percent_per_stack(self):
+        entry = next(entry for entry in self.templar['target_aura_gates'] if entry['spell'] == TEMPLARS_MIGHT)
+        self.assertEqual(target_gate_arms(entry, 3), [(3, 18.0, ''), (0, 0.0, 'stacks 0'), (1, 6.0, 'stacks 1')])
+        with self.assertRaises(ValueError):
+            target_gate_arms({**entry, 'stack_arms': [3]}, 3)
+
+    def test_templars_might_zero_stack_arm_holds_the_talent_and_no_condemn_on_the_target(self):
+        scenario, expectations = self.gate_arm(0, 0.0)
+        self.assertTrue(steps_with(scenario, action='learn', spell=TEMPLARS_MIGHT))
+        gate = {'action': 'set_aura', 'target': 'dummy', 'caster': 'caster', 'spell': CONDEMN_LIVE_RANK}
+        rank_casts = steps_with(scenario, action='cast', spell=CHASTISE_MAX_RANK, target='dummy')
+        self.assertEqual(len(steps_with(scenario, **gate, stacks=0)), len(rank_casts))
+        self.assertEqual(len(steps_with(scenario, action='set_aura', spell=CONDEMN_LIVE_RANK)), len(rank_casts))
+        setup = steps_with(scenario, action='assert', metric='aura_stacks', spell=CONDEMN_LIVE_RANK)
+        self.assertEqual({(step['min'], step['max']) for step in setup}, {(0, 0)})
+        self.assertEqual(hit_expectation(expectations).model['gate_multiplier'], 1.0)
+
+    def test_templars_might_one_stack_arm_judges_a_flat_cap_bonus_as_alert(self):
+        scenario, expectations = self.gate_arm(1, 6.0)
+        setup = steps_with(scenario, action='assert', metric='aura_stacks', spell=CONDEMN_LIVE_RANK)
+        self.assertEqual({(step['min'], step['max']) for step in setup}, {(1, 1)})
+        hit = hit_expectation(expectations)
+        self.assertEqual(hit.model['gate_multiplier'], 1.06)
+        measured = measured_reference(self.templar, hit)
+        labels = hit.model['measurements']
+        minimum = hit.model['minimum_hits']
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+
+        def run_at(multiplier: float) -> Run:
+            model = measured_hit_model(self.templar, replace(hit, model={**hit.model, 'gate_multiplier': multiplier}),
+                                       measured)
+            return Run(key=f'x{multiplier}', status='ok', message='',
+                       values={**measured, labels['total']: model.mean * minimum, labels['count']: minimum},
+                       steps=[], max_step_ms=None)
+        self.assertEqual(judge_hit(base, self.templar, [(scenario, run_at(1.06), hit)], measured_hit_model).status,
+                         'ok')
+        self.assertEqual(judge_hit(base, self.templar, [(scenario, run_at(1.18), hit)], measured_hit_model).status,
+                         'alert')
 
     def test_templars_might_gate_never_casts_condemn_the_caster_has_not_learned(self):
         entry = next(entry for entry in self.templar['target_aura_gates'] if entry['spell'] == TEMPLARS_MIGHT)

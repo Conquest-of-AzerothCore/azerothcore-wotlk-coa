@@ -203,7 +203,7 @@ average multiplier over stacks `0, 1, ..., performed - 1`, since the buff is gra
 scenario part starts a fresh character (no stacks carry in). This is additive and class-agnostic: a class file that
 omits `self_stack_bonus` gets multiplier 1.0 (today's unstacked behaviour) for every rank.
 
-## Target-debuff-gated ranks (`target_aura_gates`, ADRs 0078 and 0133)
+## Target-debuff-gated ranks (`target_aura_gates`, ADRs 0078, 0133 and 0134)
 
 A clause conditioned on the *target* carrying a specific debuff of the caster's ("on enemies affected by your
 X"), where the gating aura's own bonus is itself a live, target-side `SPELL_AURA_MOD_DAMAGE_FROM_CASTER`-style
@@ -217,8 +217,12 @@ cast needs the spell in the caster's spellbook (`HandleCastSpellOpcode` drops it
 cast's own side effects on the caster. The expected mean is scaled by `1 + percent/100`; `measured_hit_model`
 reads that same scaling back from the Expectation's own `gate_multiplier` field at compare time. A class file
 names one entry per gated rank in `target_aura_gates` (`{"spell", "name", "quote", "rank", "gate_spell",
-"percent", "label_suffix"}`), with `percent` the bonus at the stack cap, generated via `conformance.py generate
---target-gate <passive id>` (`add_target_gate`, which reuses the multi-part writer `add_hit` already has, since
-the trial count this check's tolerance needs routinely exceeds one scenario's budget). Templar's Might (705291) is
-the first entry.
+"percent", "label_suffix", "stack_arms"}`), with `percent` the bonus at the stack cap, generated via
+`conformance.py generate --target-gate <passive id>` (`add_target_gate`, which reuses the multi-part writer
+`add_hit` already has, since the trial count this check's tolerance needs routinely exceeds one scenario's budget).
+`stack_arms` (optional, each below the cap) adds one arm per stack count, labelled `<label> stacks <n>` and judged
+at `percent * n / cap` (`conformance.target_gate_arms`; `hit_parts(gate_held=n)`): every arm learns
+`enabling_spell`, so arm 0 is the gate held off with the talent known (the condition "on enemies affected by your
+X" names), and a lower arm with the cap separates a per-stack bonus from a flat one. Templar's Might (705291) is
+the first entry, with arms 0 and 1 (+0% and +6% against +18% at 3 stacks).
 

@@ -2818,7 +2818,6 @@ def cast_combat_spec(entry: dict) -> CastCombatSpec:
     return CastCombatSpec(entry['spell'], entry['name'], entry['quote'])
 
 
-SPELL_FAILED_FLEEING = 34
 STATE_PRESENT = 1
 STATE_ABSENT = 0
 
@@ -2907,6 +2906,12 @@ def immunity_label(spec: ImmunitySpec, subject: int, moment: str) -> str:
     return f'{spec.spell} immunity {subject} {moment}'
 
 
+def dummy_casts_at_caster(spell: int) -> list[dict]:
+    return [step for _ in range(IMMUNITY_CASTS)
+            for step in ({'action': 'cast', 'actor': TARGET, 'spell': spell, 'target': CASTER},
+                         {'action': 'wait', 'ms': IMMUNITY_CAST_WAIT_MS})]
+
+
 def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'immunity', spec.quote, STATE_ABSENT)
@@ -2922,17 +2927,27 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
     steps += self_cast_attempt(spec.spell, facts_of(records, spec.spell), immunity_label(spec, spec.spell, 'cast'))
     steps.append(measurement(applied_label, CASTER, 'aura', spell=spec.spell))
     for effect in spec.effects:
-        for _ in range(IMMUNITY_CASTS):
-            steps += [{'action': 'cast', 'actor': TARGET, 'spell': effect.spell, 'target': CASTER},
-                      {'action': 'wait', 'ms': IMMUNITY_CAST_WAIT_MS}]
+        steps += dummy_casts_at_caster(effect.spell)
         steps.append(measurement(immunity_label(spec, effect.spell, 'with'), CASTER, 'aura', spell=effect.spell))
+    duration_ms = int(records.duration_ms(spec.spell))
+    if duration_ms <= 0:
+        raise ValueError(f'{spec.spell} immunity needs a finite aura duration for its control, not {duration_ms}')
+    with_arm_ms = len(spec.effects) * IMMUNITY_CASTS * IMMUNITY_CAST_WAIT_MS
+    expired_label = immunity_label(spec, spec.spell, 'expired')
+    steps += [{'action': 'wait', 'ms': max(CAST_MARGIN_MS, duration_ms + CAST_MARGIN_MS - with_arm_ms)},
+              measurement(expired_label, CASTER, 'aura', spell=spec.spell)]
+    for effect in spec.effects:
+        steps += dummy_casts_at_caster(effect.spell)
+        steps += [measurement(immunity_label(spec, effect.spell, 'control'), CASTER, 'aura', spell=effect.spell),
+                  {'action': 'set_aura', 'actor': CASTER, 'caster': TARGET, 'spell': effect.spell, 'stacks': 0}]
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour immunity',
         'contract': f'Each named effect ({", ".join(f"{e.words} {e.spell}" for e in spec.effects)}) is applied to '
                     f'the caster by the dummy and must be present; {spec.spell} is then cast on the caster, and the '
-                    f'dummy casts each effect at the caster {IMMUNITY_CASTS} times: none may be present, proving '
-                    f'the "{spec.quote}" clause.',
+                    f'dummy casts each effect at the caster {IMMUNITY_CASTS} times: none may be present. Once '
+                    f'{spec.spell} has expired ({duration_ms} ms), the same casts from the same dummy must land, '
+                    f'the control that the cast route lands at all, proving the "{spec.quote}" clause.',
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -2947,7 +2962,11 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
             Expectation(immunity_label(spec, effect.spell, 'without'), BEHAVIOUR_IMMUNITY, spec.spell, effect.spell,
                         None, str(STATE_PRESENT), rule, dict(model)),
             Expectation(immunity_label(spec, effect.spell, 'with'), BEHAVIOUR_IMMUNITY, spec.spell, effect.spell,
-                        None, str(STATE_ABSENT), rule, dict(model))]
+                        None, str(STATE_ABSENT), rule, dict(model)),
+            Expectation(immunity_label(spec, effect.spell, 'control'), BEHAVIOUR_IMMUNITY, spec.spell, effect.spell,
+                        None, str(STATE_PRESENT), rule, dict(model))]
+    expectations.append(Expectation(expired_label, BEHAVIOUR_IMMUNITY, spec.spell, spec.spell, None,
+                                    str(STATE_ABSENT), rule, {'kind': 'immunity', 'quote': entry.quote}))
     return scenario, expectations
 
 

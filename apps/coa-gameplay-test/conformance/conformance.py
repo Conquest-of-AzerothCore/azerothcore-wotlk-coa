@@ -17,8 +17,8 @@ from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_cove
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from passives import passive_scenario
-from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
-                  reference_hit_model, reference_melee_model)
+from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, gate_stacks, hit_parts, melee_scenario,
+                  records_of, reference_hit_model, reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
 from profile import (DBC_DIR, DbcSetMismatch, ledger_consumption_path, load_class_file, server_dbc_dir,
@@ -183,11 +183,26 @@ def target_gate_entries(class_file: dict, spell_ids: list[int] | None) -> list[d
     return chosen
 
 
+def target_gate_arms(entry: dict, cap: int) -> list[tuple[int, float, str]]:
+    arms = [(cap, entry['percent'], '')]
+    for held in entry.get('stack_arms', []):
+        if not 0 <= held < cap:
+            raise ValueError(f'{entry["spell"]} stack_arms {held} is outside 0..{cap - 1} below the stack cap {cap}')
+        arms.append((held, entry['percent'] * held / cap, f'stacks {held}'))
+    return arms
+
+
 def add_target_gate(writer: ManifestWriter, entry: dict):
+    records = records_of(writer.class_file)
+    for held, percent, arm in target_gate_arms(entry, gate_stacks(records, entry['gate_spell'])):
+        add_target_gate_arm(writer, entry, held, percent, arm)
+
+
+def add_target_gate_arm(writer: ManifestWriter, entry: dict, held: int, percent: float, arm: str):
     class_file = writer.class_file
     records = records_of(class_file)
     rank_id = entry['rank']
-    suffix = entry.get('label_suffix', '')
+    suffix = ' '.join(part for part in (entry.get('label_suffix', ''), arm) if part)
     name = records.field('Spell', rank_id, 'SpellName[enUS]')
     test_spell = ClassSpell(rank_id, name, (rank_id,), rank_id, 0, False)
     label = f'{rank_id} hit_mean {suffix}' if suffix else f'{rank_id} hit_mean'
@@ -199,7 +214,7 @@ def add_target_gate(writer: ManifestWriter, entry: dict):
         return
     try:
         parts = hit_parts(class_file, test_spell, casts, rank_id=rank_id, label=label,
-                          gate=(entry['gate_spell'], entry['percent'], entry['spell']))
+                          gate=(entry['gate_spell'], percent, entry['spell']), gate_held=held)
     except ValueError as error:
         writer.add(key, 'target_gate', test_spell, rank_id, unmodelled(label, test_spell, str(error)))
         return

@@ -712,20 +712,22 @@ def gate_stacks(records: Records, gate_spell: int) -> int:
     return max(1, int(records.field('Spell', gate_spell, 'StackAmount')))
 
 
-def gate_setup_label(label: str, gate_spell: int) -> str:
-    return f'{label} SETUP: the caster\'s {gate_spell} holds its stack cap on the target'
+def gate_setup_label(label: str, gate_spell: int, stacks: int) -> str:
+    return f'{label} SETUP: the caster\'s {gate_spell} holds {stacks} stacks on the target'
 
 
 def gate_fixture_steps(gate_spell: int, stacks: int, label: str) -> list[dict]:
     fixture = {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER, 'spell': gate_spell}
-    return [{**fixture, 'stacks': 0}, {**fixture, 'stacks': stacks},
-            {'action': 'assert', 'label': gate_setup_label(label, gate_spell), 'actor': TARGET,
-             'metric': 'aura_stacks', 'spell': gate_spell, 'caster': CASTER, 'min': stacks, 'max': stacks}]
+    held = [{**fixture, 'stacks': stacks}] if stacks else []
+    return [{**fixture, 'stacks': 0}] + held + [
+        {'action': 'assert', 'label': gate_setup_label(label, gate_spell, stacks), 'actor': TARGET,
+         'metric': 'aura_stacks', 'spell': gate_spell, 'caster': CASTER, 'min': stacks, 'max': stacks}]
 
 
 def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | None = None,
              label: str | None = None, check: str = 'hit_mean',
-             gate: tuple[int, float, int] | None = None) -> list[tuple[dict, list[Expectation]]]:
+             gate: tuple[int, float, int] | None = None,
+             gate_held: int | None = None) -> list[tuple[dict, list[Expectation]]]:
     if casts < 1:
         raise ValueError(f'{spell.name} needs at least one cast, not {casts}')
     rank_id = spell.max_rank if rank_id is None else rank_id
@@ -744,7 +746,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                        armed_file.get('known_auras', []))
         if gate is not None and hit.model.kind in HEAL_KINDS:
             raise ValueError(f'{rank_id} target_aura_gate needs a hostile hit model, got {hit.model.kind!r}')
-        stacks = gate_stacks(records, gate[0]) if gate is not None else 0
+        stacks = (gate_stacks(records, gate[0]) if gate_held is None else gate_held) if gate is not None else 0
         gate_extra_ms = GATE_FIXTURE_STEP_COUNT * READ_STEP_MS if gate is not None else 0
         start_recovery = records.field('Spell', rank_id, 'StartRecoveryTime')
         interval = max(start_recovery, hit.facts.cast_time_ms, hit.duration_ms) + CAST_MARGIN_MS

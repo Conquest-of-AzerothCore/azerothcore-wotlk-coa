@@ -5756,16 +5756,37 @@ class ImmunityScenarioTests(unittest.TestCase):
         for effect in (CREATURE_FEAR, PSYCHIC_HORROR):
             self.assertEqual(self.by_label[f'804228 immunity {effect} without'].displayed, '1')
             self.assertEqual(self.by_label[f'804228 immunity {effect} with'].displayed, '0')
+            self.assertEqual(self.by_label[f'804228 immunity {effect} control'].displayed, '1')
         self.assertEqual(self.by_label['804228 immunity 804228 applied'].displayed, '1')
+        self.assertEqual(self.by_label['804228 immunity 804228 expired'].displayed, '0')
+
+    def dummy_casts(self, effect):
+        return [index for index, step in enumerate(self.steps)
+                if step.get('action') == 'cast' and step.get('actor') == 'dummy' and step.get('spell') == effect]
 
     def test_the_dummy_casts_each_effect_after_the_spell_lands(self):
         landed = first_index(self.steps, label='804228 immunity 804228 applied')
         for effect in (CREATURE_FEAR, PSYCHIC_HORROR):
-            casts = [index for index, step in enumerate(self.steps)
-                     if step.get('action') == 'cast' and step.get('actor') == 'dummy' and step.get('spell') == effect]
-            self.assertEqual(len(casts), IMMUNITY_CASTS)
+            casts = self.dummy_casts(effect)[:IMMUNITY_CASTS]
             self.assertLess(landed, casts[0])
             self.assertLess(casts[-1], first_index(self.steps, label=f'804228 immunity {effect} with'))
+
+    def test_the_same_dummy_casts_land_once_the_spell_has_expired(self):
+        landed = first_index(self.steps, label='804228 immunity 804228 applied')
+        expired = first_index(self.steps, label='804228 immunity 804228 expired')
+        waited = sum(step['ms'] for step in self.steps[landed:expired] if step.get('action') == 'wait')
+        self.assertGreater(waited, 10000)
+        for effect in (CREATURE_FEAR, PSYCHIC_HORROR):
+            casts = self.dummy_casts(effect)
+            self.assertEqual(len(casts), 2 * IMMUNITY_CASTS)
+            control = casts[IMMUNITY_CASTS:]
+            self.assertLess(expired, control[0])
+            self.assertLess(control[-1], first_index(self.steps, label=f'804228 immunity {effect} control'))
+
+    def test_a_control_effect_that_does_not_land_is_alert(self):
+        expectation = self.by_label[f'804228 immunity {CREATURE_FEAR} control']
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: 0.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
 
     def test_an_effect_present_under_the_immunity_is_alert(self):
         expectation = self.by_label[f'804228 immunity {CREATURE_FEAR} with']
