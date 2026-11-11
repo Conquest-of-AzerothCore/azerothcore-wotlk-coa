@@ -493,7 +493,7 @@ def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str
 def claims_evidence(found: list[str]) -> str:
     if UNPROVEN in found:
         return UNPROVEN
-    return BEHAVIOUR if BEHAVIOUR in found else DATA
+    return BEHAVIOUR if all(status == BEHAVIOUR for status in found) else DATA
 
 
 def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str],

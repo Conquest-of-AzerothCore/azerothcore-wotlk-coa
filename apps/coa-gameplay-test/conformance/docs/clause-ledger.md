@@ -124,8 +124,9 @@ No Templar ledger entry declares a `tool_gap` yet.
 `ClauseCoverage` holds `proven`, `behaviour`, `data` (`proven - behaviour`), `total`, `unproven`, the per-claim
 `evidence` and the `not_measured` labels. A proven claim is **behaviour proven** when at least one of its matched
 verdicts is behaviour evidence, otherwise **data conformant**; a state read is judged against the claim's own
-words. A proven entry with declared claims is behaviour proven when one of its claims is. The figure reported to
-the owner is `behaviour`; `data` is reported beside it.
+words. A proven entry with declared claims is behaviour proven only when every one of its claims is, otherwise
+data conformant (owner ruling 2026-11-11, ADR 0131). The figure reported to the owner is `behaviour`; `data` is
+reported beside it.
 
 `build` is the build being judged, the verdict set's header `build` (a worldserver sha256). Every verdict carries its
 own `build`, `server_commit` and `runs` ([Verdicts](generate-and-compare.md#verdicts)); a set holding a verdict of

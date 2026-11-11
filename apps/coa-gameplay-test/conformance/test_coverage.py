@@ -667,8 +667,22 @@ class DeclaredClaimsTest(unittest.TestCase):
         clauses = [declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
                             ('for $d', f'{ARGENT_BLADE} effect_value #0'))]
         statuses, result = evidence_of(clauses, [hit(ARGENT_BLADE), value(ARGENT_BLADE)])
-        self.assertEqual((statuses, result.proven, result.behaviour), ([BEHAVIOUR], 1, 1))
+        self.assertEqual((statuses, result.proven, result.behaviour, result.data), ([DATA], 1, 0, 1))
         self.assertEqual(result.claim_evidence, [[BEHAVIOUR, DATA]])
+
+    def test_seeded_mixed_proof_is_data_and_every_claim_in_game_is_behaviour(self):
+        mixed = declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                         ('for $d', f'{ARGENT_BLADE} effect_value #0'))
+        in_game = declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
+                           ('for $d', f'{ARGENT_BLADE} behaviour_expiry'))
+        verdicts = [hit(ARGENT_BLADE), value(ARGENT_BLADE),
+                    judged(f'{ARGENT_BLADE} behaviour_expiry', BEHAVIOUR_EXPIRY, 'aura')]
+        statuses, result = evidence_of([mixed, in_game], verdicts)
+        self.assertEqual(statuses, [DATA, BEHAVIOUR])
+        self.assertEqual((result.behaviour, result.data), (1, 1))
+        with mock.patch('coverage.claims_evidence',
+                        lambda found: UNPROVEN if UNPROVEN in found else BEHAVIOUR if BEHAVIOUR in found else DATA):
+            self.assertEqual(evidence_of([mixed, in_game], verdicts)[0], [BEHAVIOUR, BEHAVIOUR])
 
     def test_seeded_alert_on_one_claim_leaves_the_clause_unproven(self):
         clauses = [declared('deals damage for $d', ('deals damage', f'{ARGENT_BLADE} hit_mean'),
@@ -807,7 +821,7 @@ class FragmentTest(unittest.TestCase):
                                  [hit(ARGENT_BLADE), value(ARGENT_BLADE)], BUILD)
         with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
             entries = fragment_entries(result, {'spell_dbc_sha256': SERVER_SHA, 'results': 'r'})
-        self.assertEqual([entry['evidence'] for entry in entries], [BEHAVIOUR])
+        self.assertEqual([entry['evidence'] for entry in entries], [DATA])
         self.assertEqual([claim['evidence'] for claim in entries[0]['claims']], [BEHAVIOUR, DATA])
 
     def test_verdicts_of_another_set_give_no_fragment(self):
