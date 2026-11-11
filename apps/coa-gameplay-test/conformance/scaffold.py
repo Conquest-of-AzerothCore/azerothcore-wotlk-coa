@@ -26,7 +26,7 @@ REFERENCE_QUALITY = 1
 STAT_SLOTS = range(1, 11)
 SPELL_SLOTS = range(1, 6)
 REFERENCE_RATINGS = {'spell_hit_rating': 10000, 'melee_hit_rating': 10000, 'expertise_rating': 10000}
-EMPTY_LIST_FIELDS = ('alternate_weapons', 'known_auras', 'probe_auras', 'extra_spells',
+EMPTY_LIST_FIELDS = ('alternate_weapons', 'off_hand_weapons', 'known_auras', 'probe_auras', 'extra_spells',
                      'disabled_foreign_effects', 'foreign_aura_grants', 'effect_overrides',
                      'item_armor_subclass_effects', 'unmodelled_effects', 'literal_tokens',
                      'effect_notes', 'passive_targets', 'procs', 'triggers', 'talent_modifiers', 'rotation',

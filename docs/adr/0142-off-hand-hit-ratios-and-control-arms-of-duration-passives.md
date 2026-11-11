@@ -30,6 +30,8 @@ class map finds no code for, and an off-hand measurement of Zealotry 801450 and 
 - A trigger `dual_wield` may name `known_spell` instead of `spell`: the spell is read with `knows_spell`, not learned,
   before the off-hand equip, which the harness fails when the server refuses it.
 - `one_hand_main`, `off_hand_weapon` and `off_hand_steps` move to `profile.py`, shared by triggers and behaviours.
+- A passive's P5 `checked by` link names `hit_ratio` entries and suffixed `cast_applies_aura` entries by their
+  own labels; the scaffold writes an empty `off_hand_weapons` list.
 
 ## Consequences
 

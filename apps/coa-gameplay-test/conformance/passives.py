@@ -77,7 +77,10 @@ BEHAVIOUR_LABELS = {
     'threat_tick_ratio': lambda entry: [f"{entry['spell']} behaviour_metric_ratio_delta"
                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'absorb_pierce_ratio': lambda entry: [f"{entry['spell']} behaviour_absorb_pierce_ratio"],
-    'cast_applies_aura': lambda entry: [f"{entry['spell']} behaviour_cast_applies_aura"],
+    'cast_applies_aura': lambda entry: [f"{entry['spell']} behaviour_cast_applies_aura"
+                                        + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
+    'hit_ratio': lambda entry: [f"{entry['spell']} behaviour_hit_ratio"
+                                + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'cast_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_ratio"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
