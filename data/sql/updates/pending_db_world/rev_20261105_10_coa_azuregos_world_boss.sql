@@ -118,13 +118,3 @@ INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Quest
 (1615011, 978060, 978060, 5, 0, 1, 0, 1, 1, 'Treasures of Azeroth - 5% a world boss item'),
 (1615011, 400750, 0, 100, 0, 1, 0, 15, 15, 'Treasures of Azeroth - 15 Raider''s Commendations'),
 (1615011, 978061, 978061, 100, 0, 1, 0, 4, 4, 'Treasures of Azeroth - 1000 Runes of Descension (250 x 4)');
-
--- A player still in his map when it closes (a server restart or a reset, dead or alive) logs back in at its
--- entrance instead of at their hearthstone: the map's entrance trigger, at a spot no one can reach, points there.
-DELETE FROM `areatrigger` WHERE `entry` IN (978881);
-INSERT INTO `areatrigger` (`entry`, `map`, `x`, `y`, `z`, `radius`, `length`, `width`, `height`, `orientation`) VALUES
-(978881, 881, 0, 0, -10000, 0, 0, 0, 0, 0);
-DELETE FROM `areatrigger_teleport` WHERE `ID` IN (978881);
-INSERT INTO `areatrigger_teleport` (`ID`, `Name`, `target_map`, `target_position_x`, `target_position_y`,
-  `target_position_z`, `target_orientation`) VALUES
-(978881, 'Azuregos - boss map entrance', 881, 2948.83, -4882.32, 241.06, 0.0);
