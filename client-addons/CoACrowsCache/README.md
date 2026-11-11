@@ -16,7 +16,8 @@ The shipped default is disabled. Coordinate, interval and random-location settin
 Copy this entire `CoACrowsCache` directory into the CoA client's `Interface/AddOns` directory.
 Fully reopen the client after first installation; use `/reload` for later addon updates.
 The marker uses the client's dungeon portal atlas, is 55 pixels wide and has the hover text
-"High-Risk 60 PvP Event". An addon is required on each client that should display the marker.
+"High-Risk 60 PvP Event". The server also sends the location as a native client map pin
+(`SMSG_COA_AREA_POI_PAYLOAD`, atlas `hr-event-gear-active`), so clients without this addon still see it.
 
 ## Event behavior
 

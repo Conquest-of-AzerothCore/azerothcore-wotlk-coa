@@ -1200,11 +1200,12 @@ def run_batch(args, directory=catalog.DIRECTORY):
     if args.clock == SIMULATED_CLOCK:
         exclusive = clock_policy(directory)
         for case in cases:
-            world_phase = any(step['action'] == 'set_phase' and step['value'] & 1
+            world_phase = any(step['action'] == 'set_phase' and step.get('value', 0) & 1
                               for step in case.scenario['steps'])
             process_global = any(step['action'] in {'game_event', 'encounter_start'}
                                  for step in case.scenario['steps'])
             case.exclusive = (world_phase or process_global or case.scenario.get('creature_scaling', False)
+                              or case.scenario.get('ptr_character_copy', False)
                               or 'vanity_ownership' in case.scenario or 'two_side' in case.scenario
                               or 'quest_log_size' in case.scenario
                               or (not case.exploratory and case.key in exclusive) or case.hour is not None)

@@ -1,0 +1,152 @@
+{
+  "schema": 1,
+  "name": "Spark of Infernus procs on landed direct magic damage (#11660)",
+  "contract": "Spark of Infernus (equip dummies 201007 on the base item and 312227/316227/320227 on the worldforged tiers) is an aura 42 (proc trigger spell) on the Fire damage over time 201008/312228/316228/320228. Every record carries Spell.dbc ProcFlags 0 and the world had no spell_proc row, so Aura::GetProcEffectMask found no proc entry and the tooltip's 'Direct damage spells have a chance to sear the target' never rolled (#11660). The records' own ProcChance is 8 on the base dummy and 12 on the tiers, and no tooltip names an internal cooldown. The repair grants PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG at the hit phase over every school and spell family, defers Chance to the record and leaves Cooldown 0. spell_proc_chance reads the loaded entries' 8 and 12, and aura_proc_rate replays the aura's native proc decision (including the roll) 40000 times per sample on a synthetic landed magic-class direct hit naming Frostbolt 116; melee-class and periodic events proc it zero times. Before the repair the chance lookups fail with 'Spell has no proc entry' and every rate reads 0, so both discriminating assertions fail rather than flake.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 13,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Base item proc dummy",
+      "actor": "caster",
+      "spell": 201007,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Top worldforged tier proc dummy",
+      "actor": "caster",
+      "spell": 320227,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: base proc dummy aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 201007,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: top tier proc dummy aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320227,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 201007 loads the record's 8% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 201007,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 312227 loads the record's 12% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312227,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 316227 loads the record's 12% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316227,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dummy 320227 loads the record's 12% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320227,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: landed direct magic damage procs 201007 at about 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201007,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 7,
+      "max": 9
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: landed direct magic damage procs 320227 at about 12%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320227,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 11,
+      "max": 13
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a melee-class hit is not magic damage",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201007,
+      "target": "dummy",
+      "trigger_spell": 34027,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic tick is not a landed direct hit",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201007,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

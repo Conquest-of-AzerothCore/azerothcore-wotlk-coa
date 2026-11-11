@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Lady Sathrah is up at one of her two spawns (#8955)",
+  "contract": "Tears of the Moon 2518 asks for Silvery Spinnerets 8344, which Lady Sathrah 7319 drops at 100% for players on the quest. Sathrah has two northern Teldrassil spawns, 12596 (10979.6, 1366.13) and 12605 (10993.6, 1686.8), in pool 1107 with max_limit 1, so exactly one of them is up at a time. The spawns lie in different map grids, and a creature in an unloaded grid is not counted, so one player stands at each spawn. Expected: exactly one Lady Sathrah is loaded on the map, near one of the two players.",
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": 10979.6, "y": 1366.13, "z": 1328.87, "o": 0 },
+  "players": [
+    { "id": "south", "race": 4, "class": 1, "level": 60 },
+    { "id": "north", "race": 4, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    {
+      "action": "teleport", "label": "Stand at the northern spawn 12605", "actor": "north", "map": 1,
+      "x": 10993.6, "y": 1686.8, "z": 1291.2
+    },
+    { "action": "wait", "label": "Let both grids load", "ms": 5000 },
+    { "action": "prepare_quest", "label": "Take Tears of the Moon", "actor": "south", "quest": 2518, "complete": false },
+    {
+      "action": "destroy_item", "label": "Drop the fixture spinnerets so the quest needs them again", "actor": "south",
+      "item": 8344
+    },
+    {
+      "action": "assert", "label": "SETUP: the quest still needs the spinnerets", "actor": "south",
+      "metric": "quest_status", "quest": 2518, "equals": 3, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: exactly one Lady Sathrah is up across both spawns",
+      "actor": "south", "metric": "map_creature_count", "entry": 7319, "equals": 1, "within_ms": 10000
+    }
+  ]
+}

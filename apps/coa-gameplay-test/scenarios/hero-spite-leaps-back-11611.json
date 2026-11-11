@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "A Hero's Spite flings the caster away from the target instead of forward (#11611)",
+  "contract": [
+    "Spite 281250 promises to fling yourself back a great distance (Spell.dbc description).",
+    "Effect 0 is LEAP_BACK with horizontal MiscValue 250 and vertical BasePoints 74 + DieSides 1 (7.5).",
+    "A caster facing east (o 0) is sent west: the knock-back direction cosine is -1 and sine 0.",
+    "Native SMSG_MOVE_KNOCK_BACK carries direction, horizontal speed and negated vertical speed.",
+    "This observes the trajectory instruction; client landing and input remain unverified."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 10,
+      "level": 28,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "p",
+      "entry": 36,
+      "level": 3,
+      "health": 1000000,
+      "distance": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 281250
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 281250,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 281250,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the caster is sent back, away from the target it faces",
+      "actor": "p",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 3,
+      "min": -1.01,
+      "max": -0.99,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "the direction has no sideways component",
+      "actor": "p",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 2,
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "assert",
+      "label": "the great distance keeps the authored horizontal speed",
+      "actor": "p",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 1,
+      "min": 24.95,
+      "max": 25.05
+    },
+    {
+      "action": "assert",
+      "label": "the leap keeps the authored vertical speed",
+      "actor": "p",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 0,
+      "min": -7.55,
+      "max": -7.45
+    }
+  ]
+}

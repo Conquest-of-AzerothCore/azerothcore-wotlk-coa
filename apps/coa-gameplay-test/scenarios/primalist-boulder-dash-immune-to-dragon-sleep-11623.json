@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Primalist Boulder Dash is immune to the Emerald Dragons' Sleep (#11623)",
+  "contract": "Boulder Dash (500692) makes the Primalist immune to crowd control effects for its duration. The Sleep of Taerar (2119519) and of the other Emerald Dragons is a sleep, so every effect of it must be immune while the dash lasts and no immunity may remain afterwards.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 1,
+      "class": 31,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "enemy",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "pvp",
+      "actor": "primalist",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "enemy",
+      "enabled": true
+    },
+    {
+      "action": "teleport",
+      "actor": "enemy",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159265
+    },
+    {
+      "action": "specialization",
+      "actor": "primalist",
+      "id": 59
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 196
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "learn",
+      "actor": "primalist",
+      "spell": 78
+    },
+    {
+      "action": "add_item",
+      "actor": "primalist",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "primalist",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Taerar's Sleep affects the Primalist before Boulder Dash",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 2119519,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "primalist",
+      "spell": 500692
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is active",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500692,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash grants immunity to Taerar's Sleep",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 2119519,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is immune to effect 0 of Taerar's Sleep",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 2119519,
+      "effect": 0,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is immune to effect 1 of Taerar's Sleep",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 2119519,
+      "effect": 1,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is immune to effect 2 of Taerar's Sleep",
+      "actor": "primalist",
+      "metric": "spell_effect_immune",
+      "spell": 2119519,
+      "effect": 2,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is immune to the dragon Sleep 2119419",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 2119419,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is immune to the dragon Sleep 2119619",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 2119619,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash is immune to the dragon Sleep 2119719",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 2119719,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Boulder Dash ends",
+      "actor": "primalist",
+      "metric": "aura",
+      "spell": 500692,
+      "equals": 0,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The immunity ends with Boulder Dash",
+      "actor": "primalist",
+      "metric": "spell_immune",
+      "spell": 2119519,
+      "target": "enemy",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "name": "Drowned Diver's worldforged pickups lie on the floor of the cave under Splithoof Crag (#11234, #11264)",
+  "contract": "Issues #11234 and #11264. Ascension client caches place the Drowned Diver's Signet, Drowned Diver's Helmet and Scuba Slayer's Blade together in the cave under Splithoof Crag. Their cached height (about z -80) is a sealed hollow under our client's cave floor, and the floor straight above it is broken rock, so the pickups stand on the flat cave floor 3 yd south-west at z -64.55. Before, they sat on the cliff slope of the crag top, the ring 50 yd down the drop, where players slid off. Each item now has one pickup resting on the cave floor with open space around and above it.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -4949.5,
+    "y": -2293.5,
+    "z": -65.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Ring (6970038) rests on the cave floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6970038,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Ring (6970038) is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6970038,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Ring (6970038) is not walled in",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6970038,
+      "spawn_type": "gameobject",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Ring (6970038) has a cave roof clear above it",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6970038,
+      "spawn_type": "gameobject",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Ring (6970038) is in the cave under the crag",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6970038,
+      "spawn_type": "gameobject",
+      "x": -4953.4,
+      "y": -2295.7,
+      "z": -64.55,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Scuba Slayer's Blade (6970042) rests on the cave floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6970042,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Scuba Slayer's Blade (6970042) is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6970042,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Scuba Slayer's Blade (6970042) is not walled in",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6970042,
+      "spawn_type": "gameobject",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Scuba Slayer's Blade (6970042) has a cave roof clear above it",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6970042,
+      "spawn_type": "gameobject",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Scuba Slayer's Blade (6970042) is in the cave under the crag",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6970042,
+      "spawn_type": "gameobject",
+      "x": -4954.3,
+      "y": -2296.4,
+      "z": -64.55,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Helm (6970037) rests on the cave floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6970037,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Helm (6970037) is grounded",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "guid": 6970037,
+      "spawn_type": "gameobject",
+      "tolerance": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Helm (6970037) is not walled in",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "guid": 6970037,
+      "spawn_type": "gameobject",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Helm (6970037) has a cave roof clear above it",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6970037,
+      "spawn_type": "gameobject",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "Drowned Diver's Helm (6970037) is in the cave under the crag",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6970037,
+      "spawn_type": "gameobject",
+      "x": -4953.3,
+      "y": -2297.0,
+      "z": -64.55,
+      "max": 1
+    }
+  ]
+}

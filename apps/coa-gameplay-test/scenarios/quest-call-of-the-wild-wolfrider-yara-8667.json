@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Call of the Wild: Wolfrider Yara stands at the Valley of Trials turn-in spot and takes the quest (#8667)",
+  "contract": [
+    "Report #8667: a level 7 Ranger at (-593.06, -4212.63, 38.99) in the Valley of Trials found no NPC to turn in Call of the Wild 52009.",
+    "52009 (Ranger only, class mask 1048576) ends at Wolfrider Yara 502810. Her spawn 9003508 at (-591.5, -4209.8, 39.0) is 3.2 yd from the report point and belongs to the CoA class trainer event 195, which AscensionFreepick starts on a ConquestOfAzeroth realm.",
+    "Expected: with event 195 running, exactly one living Wolfrider Yara stands within reach of the report point, and a Ranger holding 52009 with the Tribal Guide 54009 turns it in to her through the questgiver packet handlers."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 1, "x": -593.06, "y": -4212.63, "z": 38.99, "o": 1.9 },
+  "players": [
+    { "id": "p", "race": 2, "class": 21, "level": 7 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "SETUP: join world phase 1, the phase the Valley of Trials spawns live in", "actor": "p", "value": 1 },
+    { "action": "game_event", "label": "SETUP: the CoA class trainer event 195 is running, as on a CoA realm", "event": 195, "active": true },
+    { "action": "teleport", "label": "Stand on the report point", "actor": "p", "map": 1, "x": -593.06, "y": -4212.63, "z": 38.99, "o": 1.9 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: exactly one living Wolfrider Yara is at the turn-in spot", "actor": "p", "metric": "nearby_creature_count", "entry": 502810, "equals": 1, "within_ms": 10000 },
+    { "action": "prepare_quest", "label": "SETUP: Cutting Teeth, the prerequisite, is ready to turn in", "actor": "p", "quest": 788 },
+    { "action": "reward_quest", "label": "SETUP: Cutting Teeth is rewarded", "actor": "p", "quest": 788 },
+    { "action": "prepare_quest", "label": "SETUP: Call of the Wild is ready to turn in with the Tribal Guide", "actor": "p", "quest": 52009 },
+    { "action": "quest_turn_in", "label": "Hand Call of the Wild in at Wolfrider Yara", "actor": "p", "quest": 52009, "entry": 502810, "reward": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Call of the Wild is rewarded at Yara", "actor": "p", "metric": "quest_rewarded", "quest": 52009, "equals": 1, "within_ms": 4000 }
+  ]
+}

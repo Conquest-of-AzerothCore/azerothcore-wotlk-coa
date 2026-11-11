@@ -2930,6 +2930,19 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS); // 5yd
     });
 
+    // Summon Robot (quest 9433 A Dip in the Moonwell): the 50 yd random spot can be up the hill behind the control panel
+    ApplySpellFix({ 30009 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_0].RadiusEntry = sSpellRadiusStore.LookupEntry(EFFECT_RADIUS_5_YARDS);
+    });
+
+    // Woodworking upgrade kits ship without the interrupt flags every other recipe has, so moving does not stop a Create All queue
+    ApplySpellFix({ 1015015, 1015016, 1015017, 1015018, 1015019 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->InterruptFlags = SPELL_INTERRUPT_FLAG_MOVEMENT | SPELL_INTERRUPT_FLAG_PUSH_BACK
+            | SPELL_INTERRUPT_FLAG_UNK3 | SPELL_INTERRUPT_FLAG_INTERRUPT;
+    });
+
     // Impaled (Lord Marrowgar)
     ApplySpellFix({ 69065 }, [](SpellInfo* spellInfo)
     {

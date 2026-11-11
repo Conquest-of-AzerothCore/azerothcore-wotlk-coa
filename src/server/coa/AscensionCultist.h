@@ -54,6 +54,7 @@ std::list<Unit*> Allies(Player* player, Unit* center, float radius, uint32 count
 uint32 Highest(Player* player, uint32 root);
 void Reduce(Player* player, uint32 root, int32 milliseconds);
 void RestoreBlade(Player* player);
+void MarkVoidTouched(Player* player, Unit* healed);
 void SetHelper(Player* player, uint32 id, bool enabled);
 void SetAmount(Player* player, uint32 id, uint8 slot, int32 amount);
 void Accumulate(Player* player, Unit* target, uint32 id, uint32 total);

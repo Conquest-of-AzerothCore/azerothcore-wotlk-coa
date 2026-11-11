@@ -1,8 +1,11 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionBloodforged.h"
+#include "AscensionBazaarTokenCap.h"
 #include "AscensionCrowsCachePolicy.h"
 #include "Chat.h"
 #include "Config.h"
+#include "Containers.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "Errors.h"
@@ -26,9 +29,12 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <algorithm>
+#include <array>
 #include <map>
 #include <memory>
 #include <mutex>
+#include <sstream>
+#include <string>
 #include <vector>
 
 namespace CrowsCache
@@ -56,13 +62,15 @@ struct Reward
 
 std::recursive_mutex mutex;
 std::map<uint32, Event> events;
-std::vector<Reward> gear;
 std::vector<Reward> materials;
 bool enabled = false;
 bool randomLocation = true;
 uint32 nextId = 1;
 uint32 interval = 10800;
 uint32 warning = 1800;
+std::array<uint32, 2> silverMarks = {SilverMarksMin, SilverMarksMax};
+std::array<uint32, 2> goldenMarks = {GoldenMarks, GoldenMarks};
+uint32 bazaarTokens = DefaultBazaarTokens;
 uint64 nextStart = 0;
 Position location(-7831.0f, -3465.0f, 56.87f, 0.0f);
 Position silithus(-7203.1616f, 372.38562f, 25.355282f, 4.4326873f);
@@ -131,20 +139,59 @@ std::string Marker(Event const& event)
         event.position.GetPositionX(), event.position.GetPositionY());
 }
 
-void BroadcastMarker(std::string const& message)
+template <typename Send>
+void ForEachPlayerInWorld(Send send)
 {
     std::shared_lock lock(*HashMapHolder<Player>::GetLock());
     for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
         if (player->IsInWorld())
-            SendMarker(player, message);
+            send(player);
+}
+
+void BroadcastMarker(std::string const& message)
+{
+    ForEachPlayerInWorld([&message](Player* player) { SendMarker(player, message); });
 }
 
 void BroadcastAnnouncement(std::string const& message)
 {
-    std::shared_lock lock(*HashMapHolder<Player>::GetLock());
-    for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
-        if (player->IsInWorld())
-            ChatHandler(player->GetSession()).SendSysMessage(message.c_str());
+    ForEachPlayerInWorld([&message](Player* player)
+    {
+        ChatHandler(player->GetSession()).SendSysMessage(message.c_str());
+    });
+}
+
+unsigned EventZone(Event const& event)
+{
+    return sMapMgr->GetZoneId(PHASEMASK_NORMAL, WorldLocation(event.map, event.position));
+}
+
+std::string PinPayload(Event const& event, bool visible)
+{
+    if (!visible)
+        return Acore::StringFormat("{{\"Apply\":false,\"ID\":\"crows-cache-{}\"}}", event.id);
+    return Acore::StringFormat(
+        "{{\"Apply\":true,\"ZoneId\":{},\"ID\":\"crows-cache-{}\",\"Name\":\"Crow's Cache\","
+        "\"Description\":\"{}\",\"X\":{:.4f},\"Y\":{:.4f},\"Z\":{:.4f},"
+        "\"TextureId\":\"hr-event-gear-active\",\"Scale\":0.50,\"POIFlags\":{}}}",
+        EventZone(event), event.id,
+        event.phase == Phase::Warning ? "High-Risk 60 PvP Event: materializing soon."
+            : "High-Risk 60 PvP Event: High-Risk level-60 players can claim it.",
+        event.position.GetPositionX(), event.position.GetPositionY(), event.position.GetPositionZ(), PinFlags);
+}
+
+void SendPin(Player* player, Event const& event, bool visible)
+{
+    std::string const payload = PinPayload(event, visible);
+    WorldPacket packet(SMSG_COA_AREA_POI_PAYLOAD, 4 + payload.size() + 1);
+    packet << uint32(PinCacheBase + event.id);
+    packet << payload;
+    player->SendDirectMessage(&packet);
+}
+
+void BroadcastPin(Event const& event, bool visible)
+{
+    ForEachPlayerInWorld([&event, visible](Player* player) { SendPin(player, event, visible); });
 }
 
 void SendMarkers(Player* player)
@@ -157,9 +204,12 @@ void SendMarkers(Player* player)
     SendMarker(player, "E");
 }
 
-unsigned EventZone(Event const& event)
+void SendPins(Player* player)
 {
-    return sMapMgr->GetZoneId(PHASEMASK_NORMAL, WorldLocation(event.map, event.position));
+    if (enabled)
+        for (auto const& [id, event] : events)
+            if (VisibleMarker(event))
+                SendPin(player, event, true);
 }
 
 char const* LocationName(Event const& event)
@@ -321,6 +371,7 @@ bool Claim(Player* player, GameObject* object, bool completedCast)
         event->deadline = Now() + 86400;
     cache->SetUInt32Value(ITEM_FIELD_DURATION, uint32(event->deadline > Now() ? event->deadline - Now() : 1));
     BroadcastMarker(Acore::StringFormat("D;{}", event->id));
+    BroadcastPin(*event, false);
     event->phase = Phase::Carried;
     event->carrier = player->GetGUID().GetCounter();
     event->item = cache->GetGUID().GetCounter();
@@ -368,17 +419,36 @@ bool Open(Player* player, Item* cache)
             "You must be level 60, in High-Risk mode and out of combat in Gadgetzan, Cenarion Hold or Ratchet to open a claimed Crow's Cache.");
         return false;
     }
-    if (gear.size() < RewardCount || materials.empty())
+    std::vector<uint32> const newest = Bloodforged::NewestReleasedHeroicGear();
+    std::vector<Reward> pool;
+    for (uint32 entry : Bloodforged::ReleasedHeroicGear())
+        pool.push_back({entry, 1});
+    if (materials.empty())
         return false;
     std::vector<Reward> rewards;
-    auto pool = gear;
-    for (unsigned i = 0; i < RewardCount; ++i)
+    if (!newest.empty())
+    {
+        uint32 const first = Acore::Containers::SelectRandomContainerElement(newest);
+        rewards.push_back({first, 1});
+        std::erase_if(pool, [first](Reward const& reward) { return reward.item == first; });
+    }
+    while (rewards.size() < RewardCount && !pool.empty())
     {
         unsigned index = urand(0, uint32(pool.size() - 1));
         rewards.push_back(pool[index]);
         pool.erase(pool.begin() + index);
     }
+    if (rewards.size() < RewardCount)
+    {
+        ChatHandler(player->GetSession()).SendSysMessage(
+            "This Crow's Cache cannot be opened yet: no Heroic Bloodforged rewards are released.");
+        return false;
+    }
     rewards.insert(rewards.end(), materials.begin(), materials.end());
+    if (uint32 count = urand(goldenMarks[0], goldenMarks[1]))
+        rewards.push_back({GoldenMarkOfWar, count});
+    if (uint32 count = urand(silverMarks[0], silverMarks[1]))
+        rewards.push_back({SilverMarkOfWar, count});
     std::vector<std::unique_ptr<Item>> pending;
     std::vector<Item*> pointers;
     for (Reward const& reward : rewards)
@@ -424,13 +494,42 @@ bool Open(Player* player, Item* cache)
     Save(found->second, player, true);
     events.erase(found);
     UpdateCarrier(player);
+    AscensionBazaarTokenCap::Give(player, bazaarTokens);
     ChatHandler(player->GetSession()).SendSysMessage(
-        "Crow's Cache opened: five top-tier Heroic Bloodforged raid items and High-Risk materials.");
+        "Crow's Cache opened: three Heroic Bloodforged items, one of them from the newest released tier, High-Risk materials, Marks of War and Bazaar Tokens.");
     return true;
 }
 
-void Begin(uint32 seconds, Position const& point)
+void RemoveUnclaimed()
 {
+    for (auto it = events.begin(); it != events.end();)
+    {
+        Event& event = it->second;
+        if (!VisibleMarker(event))
+        {
+            ++it;
+            continue;
+        }
+        if (Map* map = sMapMgr->FindBaseNonInstanceMap(event.map))
+            RemoveObjects(map, event);
+        Save(event, nullptr, true);
+        BroadcastMarker(Acore::StringFormat("D;{}", event.id));
+        BroadcastPin(event, false);
+        it = events.erase(it);
+    }
+}
+
+bool GearReleased()
+{
+    return RewardsReleased(Bloodforged::HighRiskStage(), Bloodforged::NewestReleasedHeroicGear().size(),
+        Bloodforged::ReleasedHeroicGear().size());
+}
+
+bool Begin(uint32 seconds, Position const& point)
+{
+    if (!GearReleased())
+        return false;
+    RemoveUnclaimed();
     Event event;
     event.id = nextId++;
     event.position = point;
@@ -440,10 +539,12 @@ void Begin(uint32 seconds, Position const& point)
     auto [found, inserted] = events.emplace(event.id, event);
     Announce(found->second, Now());
     BroadcastMarker(Marker(found->second));
+    BroadcastPin(found->second, true);
     if (std::none_of(std::begin(WarningSeconds), std::end(WarningSeconds), [seconds](unsigned value)
         { return value == seconds; }))
         BroadcastAnnouncement(Acore::StringFormat(
             "Crow's Cache is materializing in {} in {} seconds!", LocationName(found->second), seconds).c_str());
+    return true;
 }
 
 void UpdateEvents()
@@ -461,7 +562,8 @@ void UpdateEvents()
     if (now + warning >= nextStart)
     {
         Position const* locations[] = {&location, &silithus, &needles, &barrens};
-        Begin(uint32(nextStart - now), *locations[randomLocation ? urand(0, 3) : 0]);
+        if (!Begin(uint32(nextStart - now), *locations[randomLocation ? urand(0, 3) : 0]))
+            RemoveUnclaimed();
         nextStart += interval;
         SaveSchedule();
     }
@@ -481,6 +583,7 @@ void UpdateEvents()
                     if (Player* player = reference.GetSource())
                         if (player->IsAlive() && player->GetExactDist(&event.position) < 30)
                             player->KnockbackFrom(event.position.GetPositionX(), event.position.GetPositionY(), 15, 6);
+            BroadcastPin(event, true);
             BroadcastAnnouncement(Acore::StringFormat(
                 "Crow's Cache has appeared in {}! High-Risk level-60 players can claim it.", LocationName(event)));
         }
@@ -496,6 +599,20 @@ void UpdateEvents()
             Announce(event, now);
         ++it;
     }
+}
+
+bool ReadMarkRange(std::string const& key, std::array<uint32, 2>& range)
+{
+    std::string const value = sConfigMgr->GetOption<std::string>(key, "");
+    if (value.empty())
+        return true;
+    std::istringstream input(value);
+    std::array<uint32, 2> parsed;
+    std::string extra;
+    if (!(input >> parsed[0] >> parsed[1]) || input >> extra || !ValidMarkRange(parsed[0], parsed[1]))
+        return false;
+    range = parsed;
+    return true;
 }
 
 class Configuration final : public WorldScript
@@ -528,6 +645,14 @@ public:
             sConfigMgr->GetOption<float>("CrowsCache.Z", 56.87f), 0.0f);
         if (!enabled)
             return;
+        bazaarTokens = sConfigMgr->GetOption<uint32>("CrowsCache.BazaarTokens", DefaultBazaarTokens);
+        if (!ReadMarkRange("CrowsCache.SilverMarksOfWar", silverMarks)
+            || !ReadMarkRange("CrowsCache.GoldenMarksOfWar", goldenMarks))
+        {
+            enabled = false;
+            LOG_ERROR("coa", "Crow's Cache disabled: invalid CrowsCache.SilverMarksOfWar or CrowsCache.GoldenMarksOfWar");
+            return;
+        }
         auto* rewardStatement = WorldDatabase.GetPreparedStatement(WORLD_SEL_CROWS_CACHE_REWARDS);
         if (PreparedQueryResult result = WorldDatabase.Query(rewardStatement))
             do
@@ -536,9 +661,10 @@ public:
                 uint32 entry = f[1].Get<uint32>();
                 if (!sObjectMgr->GetItemTemplate(entry))
                     continue;
-                (f[0].Get<uint8>() == 0 ? gear : materials).push_back({entry, f[2].Get<uint32>()});
+                if (f[0].Get<uint8>() == 1)
+                    materials.push_back({entry, f[2].Get<uint32>()});
             } while (result->NextRow());
-        if (gear.size() < RewardCount || materials.empty())
+        if (materials.empty())
         {
             enabled = false;
             LOG_ERROR("coa", "Crow's Cache disabled: reward pool is incomplete");
@@ -571,8 +697,8 @@ public:
             nextStart = Now() + interval;
             SaveSchedule();
         }
-        LOG_INFO("coa", "Crow's Cache enabled: {} raid rewards, {} material rewards, {} restored events",
-            gear.size(), materials.size(), events.size());
+        LOG_INFO("coa", "Crow's Cache enabled: {} material rewards, {} restored events",
+            materials.size(), events.size());
     }
 };
 
@@ -605,6 +731,7 @@ public:
         std::lock_guard lock(mutex);
         UpdateCarrier(player);
         SendMarkers(player);
+        SendPins(player);
         for (uint32 entry : {ChestEntry, DropEntry})
         {
             WorldPacket query(CMSG_GAMEOBJECT_QUERY, 12);
@@ -794,7 +921,11 @@ public:
             handler->SendSysMessage("Crow's Cache is disabled or has no valid reward pool.");
             return false;
         }
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), location);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), location))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -803,7 +934,11 @@ public:
         std::lock_guard lock(mutex);
         if (!enabled)
             return false;
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), silithus);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), silithus))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Silithus Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -812,7 +947,11 @@ public:
         std::lock_guard lock(mutex);
         if (!enabled)
             return false;
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), needles);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), needles))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -821,7 +960,11 @@ public:
         std::lock_guard lock(mutex);
         if (!enabled)
             return false;
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), barrens);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), barrens))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started. Use .crows visit to reach it.");
         return true;
     }
@@ -833,7 +976,11 @@ public:
                 && player->GetZoneId() != ThousandNeedles && player->GetZoneId() != Barrens) || !enabled)
             return false;
         std::lock_guard lock(mutex);
-        Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), *player);
+        if (!Begin(std::clamp<uint32>(seconds.value_or(warning), 1, 3600), *player))
+        {
+            handler->SendSysMessage("Crow's Cache needs Mythic Dungeons (stage 2) and at least three released Heroic Bloodforged rewards.");
+            return false;
+        }
         handler->SendSysMessage("Crow's Cache warning started at your current position.");
         return true;
     }
@@ -862,28 +1009,16 @@ public:
     static bool Cancel(ChatHandler* handler)
     {
         std::lock_guard lock(mutex);
-        for (auto it = events.begin(); it != events.end();)
-        {
-            Event& event = it->second;
-            if (!VisibleMarker(event))
-            {
-                ++it;
-                continue;
-            }
-            if (Map* map = sMapMgr->FindBaseNonInstanceMap(event.map))
-                RemoveObjects(map, event);
-            Save(event, nullptr, true);
-            BroadcastMarker(Acore::StringFormat("D;{}", event.id));
-            it = events.erase(it);
-        }
+        RemoveUnclaimed();
         handler->SendSysMessage("Unclaimed Crow's Cache test events cancelled. Carried and dropped caches are preserved.");
         return true;
     }
     static bool Status(ChatHandler* handler)
     {
         std::lock_guard lock(mutex);
-        handler->PSendSysMessage("Crow's Cache: enabled={}, raid pool={}, active events={}, next automatic chest in {} seconds.",
-            enabled, gear.size(), events.size(), nextStart > Now() ? nextStart - Now() : 0);
+        handler->PSendSysMessage("Crow's Cache: enabled={}, newest tier pool={}, released pool={}, active events={}, next automatic chest in {} seconds.",
+            enabled, Bloodforged::NewestReleasedHeroicGear().size(), Bloodforged::ReleasedHeroicGear().size(), events.size(),
+            nextStart > Now() ? nextStart - Now() : 0);
         for (auto const& [id, event] : events)
             handler->PSendSysMessage("Event {}: phase={}, carrier={}, map={}, position=({}, {}, {}).",
                 id, unsigned(event.phase), event.carrier, event.map, event.position.GetPositionX(),

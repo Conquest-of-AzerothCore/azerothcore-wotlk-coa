@@ -227,6 +227,8 @@ void ApplyContracts(SpellInfo* info)
         for (auto& effect : info->Effects)
             if (effect.Effect == 168)
                 effect.Effect = SPELL_EFFECT_DUMMY;
+    if (id == 804751)
+        info->AttributesEx2 &= ~SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
     if (id == 707768)
     {
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);

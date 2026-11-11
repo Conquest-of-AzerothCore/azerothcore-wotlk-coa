@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Blade of Yogg-Saron rank 2 is in the Heretic tab, not General",
+  "contract": "Issue #11676. Blade of Yogg-Saron rank 1 (524887) is in SkillLine 90 (Heretic) through SkillLineAbility row 24171, while rank 2 (525078) had no row and the client filed it under General. SkillLineAbility row 842, a duplicate of row 12782 for spell 13809 that differs only in MinSkillLineRank, is repurposed for 525078 at SkillLine 90, the line of rank 1, and the client patch streams that row after the spell is learned.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 60 }
+  ],
+  "steps": [
+    { "action": "assert", "actor": "cultist", "metric": "skill_line_for_spell", "spell": 524887, "equals": 90, "label": "CONTROL: rank 1 is in the Heretic line" },
+    { "action": "assert", "actor": "cultist", "metric": "skill_line_for_spell", "spell": 13809, "equals": 50, "label": "CONTROL: the repurposed row's old spell keeps its line through the twin row" },
+    { "action": "assert", "actor": "cultist", "metric": "skill_line_for_spell", "spell": 525078, "equals": 90, "label": "rank 2 carries the Heretic line of rank 1" },
+    { "action": "learn", "actor": "cultist", "spell": 525078, "label": "learn Blade of Yogg-Saron rank 2" },
+    { "action": "assert", "actor": "cultist", "metric": "skill_line_after_learned", "spell": 525078, "equals": 1, "within_ms": 5000, "label": "the row follows the learn announcement" },
+    { "action": "assert", "actor": "cultist", "metric": "skill_line_ability", "spell": 525078, "equals": 90, "within_ms": 5000, "label": "the client patch carries SkillLine 90 for rank 2" }
+  ]
+}

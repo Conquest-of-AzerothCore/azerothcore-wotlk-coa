@@ -7,9 +7,13 @@
 #     CoA.ClientBooleanConfigs = "CONFIG_LEGACY_CHARACTER_ADVANCEMENT_ENABLED=0"
 #     CoA.ClassModel = "hero"
 #     CoA.MapClass10ToWarrior = 0
-#     CoA.RealmType = "live seasonal"
+#     CoA.RealmType = "league"
 #     PlayerStart.CustomSpells = 1
 #     AlwaysMaxSkillForLevel = 1
+#
+# "league" is the realm type whose Character Advancement rows the Wildcard pool draws from: the
+# Wildcard-only entries are flagged league (and PTR/development) only, so on a live or seasonal realm
+# the client hides entries the server still rolls, and Rapid Rolling cannot list them.
 #
 
 [worldserver]

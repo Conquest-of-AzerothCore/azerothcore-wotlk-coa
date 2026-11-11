@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Dolanaar has Sylindra Starweave training riding and Maelira Rider selling frostsaber reins",
+  "contract": [
+    "On Ascension, Sylindra Starweave 449169 <Traveling Riding Trainer>, Maelira Rider 449168 <Traveling Mount",
+    "Merchant> and a Riding Striped Frostsaber 12358 stood by the Dolanaar stable; the server had none of them.",
+    "Maelira sold Reins of the Ancient Frostsaber 12302 and Reins of the Nightsaber 12303 at 100g (db.exil.es).",
+    "Expected: both NPCs spawn in Dolanaar; Sylindra offers riding training with Novice Riding 33379 available to",
+    "an Alliance player of any race; Maelira's shop holds exactly the two reins at 100g each. They stay all year,",
+    "including while Pilgrim's Bounty (game event 26) runs."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": 9895.5, "y": 950.5, "z": 1311.9, "o": 0.9},
+  "players": [{"id": "human", "race": 1, "class": 1, "level": 20}],
+  "creatures": [
+    {"id": "sylindra", "owner": "human", "entry": 449169, "faction": 35, "distance": 2},
+    {"id": "maelira", "owner": "human", "entry": 449168, "faction": 35, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: Sylindra Starweave stands in Dolanaar", "actor": "human",
+     "metric": "map_creature_count", "entry": 449169, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "DISCRIMINATING: Maelira Rider stands in Dolanaar", "actor": "human",
+     "metric": "map_creature_count", "entry": 449168, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "label": "A Riding Striped Frostsaber stands on show beside them", "actor": "human",
+     "metric": "map_creature_count", "entry": 12358, "min": 1, "within_ms": 5000},
+    {"action": "gossip_hello", "label": "Talk to Sylindra Starweave", "actor": "human", "target": "sylindra"},
+    {"action": "assert", "label": "She offers riding training", "actor": "human", "metric": "gossip_option_text",
+     "index": 0, "text": "I seek training to ride a steed.", "equals": 1, "within_ms": 3000},
+    {"action": "gossip_select", "label": "Choose riding training", "actor": "human", "option": 0},
+    {"action": "assert", "label": "Novice Riding is available to a Human", "actor": "human",
+     "metric": "trainer_window_state", "spell": 33379, "equals": 0, "within_ms": 3000},
+    {"action": "client_packet", "label": "Ask Maelira Rider for her wares", "actor": "human", "opcode": 414,
+     "fields": [{"actor_guid": "maelira"}], "consumed": false},
+    {"action": "assert", "label": "Her shop opens", "actor": "human", "metric": "vendor_list_packets", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "She sells two mounts", "actor": "human", "metric": "vendor_items", "equals": 2},
+    {"action": "assert", "label": "Reins of the Ancient Frostsaber cost 100g", "actor": "human",
+     "metric": "vendor_price", "item": 12302, "equals": 1000000},
+    {"action": "assert", "label": "Reins of the Nightsaber cost 100g", "actor": "human", "metric": "vendor_price",
+     "item": 12303, "equals": 1000000},
+    {"action": "game_event", "label": "Pilgrim's Bounty begins", "event": 26, "active": true},
+    {"action": "wait", "label": "Let the event's spawns update", "ms": 3000},
+    {"action": "assert", "label": "Sylindra Starweave stays through Pilgrim's Bounty", "actor": "human",
+     "metric": "map_creature_count", "entry": 449169, "equals": 1},
+    {"action": "assert", "label": "Maelira Rider stays through Pilgrim's Bounty", "actor": "human",
+     "metric": "map_creature_count", "entry": 449168, "equals": 1}
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Cultist: Crystalline Reflection reflects damage absorbed by self-cast and ally Void Shields (#10688)",
+  "contract": [
+    "Crystalline Reflection 525060: 'Increases the chance for Void Shield to resist dispel effects on allies by 50%",
+    "and it now also reflects 50% of the damage absorbed.' The dispel clause names allies; the reflection clause",
+    "applies to every Void Shield 500715, including one the Cultist casts on himself, as solo footage of the talent",
+    "shows (#4983). When a Cultist's Void Shield absorbs damage, Crystalline Reflection 525062 strikes the",
+    "attacker. A hostile caster's Frostbolt into a self-cast shield and into a shield on a party member must each",
+    "be reflected."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0},
+  "players": [
+    {"id": "cultist", "race": 1, "class": 25, "level": 30},
+    {"id": "ally", "race": 1, "class": 1, "level": 30}
+  ],
+  "creatures": [
+    { "id": "caster", "owner": "cultist", "entry": 36, "level": 30, "health": 1000000, "faction": 14,
+      "distance": 10 }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "learn", "actor": "cultist", "spell": 500715},
+    {"action": "learn", "actor": "cultist", "spell": 525060},
+    {"action": "group", "actor": "cultist", "target": "ally"},
+    { "action": "assert", "label": "CONTROL: the Crystalline Reflection passive is active", "actor": "cultist",
+      "metric": "aura", "spell": 525060, "equals": 1, "within_ms": 2000 },
+    { "action": "cast", "label": "Void Shield on the Cultist himself", "actor": "cultist", "spell": 500715,
+      "target": "cultist" },
+    { "action": "assert", "label": "CONTROL: the Cultist carries his own Void Shield", "actor": "cultist",
+      "metric": "aura", "spell": 500715, "caster": "cultist", "equals": 1, "within_ms": 3000 },
+    {"action": "cast", "label": "A hostile Frostbolt into the self-cast shield", "actor": "caster", "spell": 116,
+      "target": "cultist"},
+    {"action": "wait", "ms": 2500},
+    {"action": "cast", "label": "A second Frostbolt in case the first missed", "actor": "caster", "spell": 116,
+      "target": "cultist"},
+    { "action": "assert", "label": "A self-cast Void Shield reflects absorbed damage to the attacker",
+      "actor": "cultist", "metric": "spell_damage_count", "spell": 525062, "target": "caster", "min": 1,
+      "within_ms": 5000 },
+    { "action": "snapshot", "actor": "cultist", "metric": "spell_damage_count", "spell": 525062, "target": "caster",
+      "save_as": "reflects_before_ally" },
+    {"action": "wait", "label": "Let the global cooldown end", "ms": 1500},
+    { "action": "cast", "label": "Void Shield on the party member", "actor": "cultist", "spell": 500715,
+      "target": "ally" },
+    { "action": "assert", "label": "CONTROL: the ally carries the Cultist's Void Shield", "actor": "ally",
+      "metric": "aura", "spell": 500715, "caster": "cultist", "equals": 1, "within_ms": 3000 },
+    {"action": "cast", "label": "A hostile Frostbolt into the ally's shield", "actor": "caster", "spell": 116,
+      "target": "ally"},
+    {"action": "wait", "ms": 2500},
+    {"action": "cast", "label": "A second Frostbolt in case the first missed", "actor": "caster", "spell": 116,
+      "target": "ally"},
+    { "action": "assert", "label": "A Void Shield on an ally still reflects absorbed damage to the attacker",
+      "actor": "cultist", "metric": "spell_damage_count", "spell": 525062, "target": "caster",
+      "relative_to": "reflects_before_ally", "min": 1, "within_ms": 5000 }
+  ]
+}

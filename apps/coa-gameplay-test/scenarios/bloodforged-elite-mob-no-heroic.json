@@ -1,0 +1,96 @@
+{
+  "schema": 1,
+  "name": "Bloodforged elite mob drops a rare and a non-Heroic epic",
+  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.Rates55 = \"0.00 99.99 0.00\", Bloodforged.EliteEpicPercent = 100, Bloodforged.HighRiskEliteEntries = \"1834\", Bloodforged.EliteHeroicUpgradePercent = 0, Bloodforged.DropRate.Rare and .Epic = 1, Bloodforged.ExtraBluePercent = 0 and the catalogue SQL with its Heroic Bloodforged entries. A level 60 High-Risk character kills a natural Scarlet Paladin (elite, level 55-56, listed as a High-Risk elite) in Western Plaguelands and finds exactly two Bloodforged items: the guaranteed rare roll and the elite epic, which is a normal (not Heroic) epic copy.",
+  "players": [
+    {
+      "id": "h",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 2830.0,
+    "y": -1400.0,
+    "z": 147.0,
+    "o": 0
+  },
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "h",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "h",
+      "maximum": 2000000,
+      "value": 2000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "h",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "nearby_creature_count",
+      "entry": 1834,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "h",
+      "entry": 1834,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "h",
+      "entry": 1834
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "heroic": false,
+      "quality": 4,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "heroic": true,
+      "equals": 0
+    }
+  ]
+}

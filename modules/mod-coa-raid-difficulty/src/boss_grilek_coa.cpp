@@ -143,7 +143,7 @@ namespace
                         events.ScheduleEvent(EVENT_PURSUIT, 20s);
                         break;
                     case EVENT_GROUND_SLAM:
-                        DoCastSelf(SPELL_GROUND_SLAM);
+                        DoCastVictim(SPELL_GROUND_SLAM);
                         events.ScheduleEvent(EVENT_GROUND_SLAM, 25s);
                         break;
                     default:

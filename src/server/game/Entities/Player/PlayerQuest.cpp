@@ -722,12 +722,17 @@ void Player::IncompleteQuest(uint32 quest_id)
 // quest asks for or hands out the same item, as the next quest of a chain may need it.
 static bool IsDiscardableQuestItem(ItemTemplate const* proto, uint32 questId)
 {
+    bool const doesSomething = proto->StartQuest || proto->HasFlag(ITEM_FLAG_HAS_LOOT) ||
+        std::any_of(std::begin(proto->Spells), std::end(proto->Spells),
+            [](_Spell const& spell) { return spell.SpellId != 0; });
+
+    if (proto->Class == ITEM_CLASS_QUEST && doesSomething)
+        return false;
+
     if (proto->Bonding == BIND_QUEST_ITEM)
         return true;
 
-    if (proto->Class != ITEM_CLASS_QUEST || proto->StartQuest || proto->HasFlag(ITEM_FLAG_HAS_LOOT) ||
-        std::any_of(std::begin(proto->Spells), std::end(proto->Spells),
-            [](_Spell const& spell) { return spell.SpellId != 0; }))
+    if (proto->Class != ITEM_CLASS_QUEST)
         return false;
 
     for (auto const& [otherId, other] : sObjectMgr->GetQuestTemplates())

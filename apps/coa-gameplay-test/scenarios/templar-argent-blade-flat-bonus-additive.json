@@ -1,0 +1,666 @@
+{
+  "schema": 1,
+  "name": "Argent Blade adds its flat bonus after the 215% weapon damage",
+  "contract": "Argent Blade 807268 reads 'dealing 215% Weapon Damage plus AP*0.4725+SP*1.35+421': the flat value 421 + 0.4725 AP is added after the weapon percent. A level 60 Templar with a Walking Stick and 250-400 attack power, no spell power, hits a level 60 target for about 2.15 x (normalized weapon damage 10.5 + AP/14*3.3) + 421 + 0.4725 AP, times the target's mitigation (measured at 0.71 on this target for the holy Scourgebane hit, 262 on average), which gives 420-700 against 1019 when the flat part was multiplied by 2.15.",
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "t",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "add_item",
+      "actor": "t",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "t",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Attack power stays in the contract's range",
+      "actor": "t",
+      "metric": "attack_power",
+      "min": 250,
+      "max": 400
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "t",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "t",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 807268,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the hit land",
+      "ms": 1600
+    },
+    {
+      "action": "wait",
+      "label": "Let Scourgebane land",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 807268,
+      "target": "dummy",
+      "critical": false,
+      "save_as": "argent_hits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy",
+      "critical": false,
+      "save_as": "scourgebane_hits"
+    },
+    {
+      "action": "assert",
+      "label": "Argent Blade lands non-critical hits",
+      "actor": "t",
+      "metric": "spell_damage_count",
+      "spell": 807268,
+      "target": "dummy",
+      "critical": false,
+      "min": 10
+    },
+    {
+      "action": "assert",
+      "label": "A non-critical Argent Blade averages 215% weapon damage plus the flat bonus, not 215% of both",
+      "actor": "t",
+      "metric": "spell_damage_total",
+      "spell": 807268,
+      "target": "dummy",
+      "critical": false,
+      "ratio_to": "argent_hits",
+      "min": 420,
+      "max": 700
+    },
+    {
+      "action": "assert",
+      "label": "A non-critical Scourgebane keeps its tooltip damage",
+      "actor": "t",
+      "metric": "spell_damage_total",
+      "spell": 801832,
+      "target": "dummy",
+      "critical": false,
+      "ratio_to": "scourgebane_hits",
+      "min": 200,
+      "max": 340
+    }
+  ]
+}

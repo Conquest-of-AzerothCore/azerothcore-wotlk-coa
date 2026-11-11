@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Roll Back stacks its mana cost increase on the caster",
+  "contract": "Each hand-cast Roll Back leaves one stack of Roll Back 807771 on the caster for 5 seconds. Each stack adds 50 percent to the next Roll Back mana cost, so the second cast costs 1.5 times the first and the third 2 times the first. The stacks expire after 5 seconds and the cost returns to its base.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 22,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "caster", "spell": 804490 },
+    { "action": "assert", "label": "No cost stack before the first cast", "actor": "caster", "metric": "aura_stacks", "spell": 807771, "equals": 0 },
+    { "action": "snapshot", "actor": "caster", "metric": "spell_power_cost", "spell": 804490, "save_as": "base_cost" },
+    { "action": "set_aura", "actor": "ally", "spell": 116, "stacks": 1 },
+    { "action": "cast", "actor": "caster", "spell": 804490, "target": "ally" },
+    { "action": "assert", "label": "First cast leaves one stack", "actor": "caster", "metric": "aura_stacks", "spell": 807771, "equals": 1 },
+    { "action": "assert", "label": "Second cast costs 1.5 times the first", "actor": "caster", "metric": "spell_power_cost", "spell": 804490, "ratio_to": "base_cost", "min": 1.49, "max": 1.51 },
+    { "action": "wait", "ms": 1600 },
+    { "action": "set_aura", "actor": "ally", "spell": 116, "stacks": 1 },
+    { "action": "cast", "actor": "caster", "spell": 804490, "target": "ally" },
+    { "action": "assert", "label": "Second cast leaves two stacks", "actor": "caster", "metric": "aura_stacks", "spell": 807771, "equals": 2 },
+    { "action": "assert", "label": "Third cast costs 2 times the first", "actor": "caster", "metric": "spell_power_cost", "spell": 804490, "ratio_to": "base_cost", "min": 1.99, "max": 2.01 },
+    { "action": "wait", "ms": 5500 },
+    { "action": "assert", "label": "Stacks expire", "actor": "caster", "metric": "aura_stacks", "spell": 807771, "equals": 0 },
+    { "action": "assert", "label": "Cost returns to base", "actor": "caster", "metric": "spell_power_cost", "spell": 804490, "ratio_to": "base_cost", "min": 0.99, "max": 1.01 }
+  ]
+}

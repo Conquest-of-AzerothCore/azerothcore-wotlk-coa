@@ -487,6 +487,7 @@ class spell_ascension_felsworn_chaos_rush : public SpellScript
         Player* player = GetCaster() ? GetCaster()->ToPlayer() : nullptr;
         if (!player)
             return;
+        player->RemoveAurasWithMechanic(1ULL << MECHANIC_ROOT);
         float forward = player->HasUnitMovementFlag(MOVEMENTFLAG_BACKWARD) ? -1.0f
                         : player->HasUnitMovementFlag(MOVEMENTFLAG_FORWARD) ? 1.0f : 0.0f;
         float strafe = player->HasUnitMovementFlag(MOVEMENTFLAG_STRAFE_LEFT) ? 1.0f

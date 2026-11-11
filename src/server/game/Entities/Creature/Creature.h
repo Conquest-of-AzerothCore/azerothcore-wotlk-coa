@@ -275,6 +275,7 @@ public:
     [[nodiscard]] Group* GetLootRecipientGroup() const;
     [[nodiscard]] bool hasLootRecipient() const { return m_lootRecipient || m_lootRecipientGroup; }
     bool IsSharedQuestTarget() const;
+    [[nodiscard]] uint32 GetQuestTargetRespawnCap() const;
     void RegisterSharedQuestContributor(Unit* attacker);
     void FinalizeSharedQuestParticipants();
     void RewardSharedQuestParticipants(ObjectGuid rewardedPlayer, ObjectGuid rewardedGroup);

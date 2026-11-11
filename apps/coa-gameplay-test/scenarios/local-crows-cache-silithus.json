@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Silithus Crows Cache location and Cenarion Hold delivery",
-  "contract": "Crow's Cache spawns at the user's exact Southwind Village coordinates in Silithus, announces that location, allows a ten-second High-Risk claim. Marker transport and removal are covered by local-crows-cache; exact Silithus projection and tooltip are covered by crows_cache_map. The carry aura clears and the cache opens with five raid items plus materials in Cenarion Hold. Requires CrowsCache.Enable=1. Automatic selection normally picks one of Tanaris or Silithus at random; isolated scenarios disable random selection for deterministic automatic-timer coverage. The fixture clears the four local hostile ghosts before the uninterrupted claim test; NPC damage otherwise correctly interrupts opening.",
+  "contract": "Crow's Cache spawns at the user's exact Southwind Village coordinates in Silithus, announces that location, allows a ten-second High-Risk claim. Marker transport and removal are covered by local-crows-cache; exact Silithus projection and tooltip are covered by crows_cache_map. The carry aura clears and the cache opens with three Heroic Bloodforged raid items, materials, 10 Golden and 5-10 Silver Marks of War and 400 Bazaar Tokens in Cenarion Hold. Requires CrowsCache.Enable=1. Automatic selection normally picks one of Tanaris or Silithus at random; isolated scenarios disable random selection for deterministic automatic-timer coverage. The fixture clears the four local hostile ghosts before the uninterrupted claim test; NPC damage otherwise correctly interrupts opening.",
   "players": [
     {
       "id": "owner",
@@ -230,9 +230,32 @@
       "action": "assert",
       "actor": "owner",
       "metric": "carried_item_count",
-      "equals": 64,
       "within_ms": 1500,
-      "relative_to": "before_rewards"
+      "relative_to": "before_rewards",
+      "min": 477,
+      "max": 482
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1201003,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1201002,
+      "min": 5,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 400
     }
   ]
 }

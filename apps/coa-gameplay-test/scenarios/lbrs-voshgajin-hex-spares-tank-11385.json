@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire: Shadow Hunter Vosh'gajin's Hex spares her current target",
+  "contract": [
+    "Vosh'gajin (9236) casts Hex 16097 (10-yard area around her) 8 s into combat and then every 15 s. It hexes every",
+    "enemy in range except her current victim, so the tank keeps hold of her. The tank attacks her and holds her",
+    "attention; a second player joins them once she is engaged and stands beside them without attacking. Over two casts, the bystander is hexed and the",
+    "tank never is."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "tank", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "bystander", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "group", "actor": "tank", "target": "bystander" },
+    { "action": "teleport", "actor": "tank", "map": 229, "x": 78.5083, "y": -225.044, "z": 49.839, "o": 5.1 },
+    { "action": "assert", "label": "CONTROL: tank is in Lower Blackrock Spire", "actor": "tank", "metric": "map_id",
+      "equals": 229, "within_ms": 10000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_health", "actor": "tank", "value": 100000000, "maximum": 100000000 },
+    { "action": "set_health", "actor": "bystander", "value": 100000000, "maximum": 100000000 },
+    { "action": "summon", "actor": "tank", "as": "voshgajin", "entry": 9236, "distance": 4 },
+    { "action": "encounter_start", "actor": "tank", "boss_entry": 9236, "radius": 30 },
+    { "action": "attack", "actor": "tank", "target": "voshgajin" },
+    { "action": "assert", "label": "CONTROL: Vosh'gajin is in combat", "actor": "voshgajin", "metric": "combat",
+      "equals": 1, "within_ms": 10000 },
+    { "action": "wait", "label": "The tank builds a threat lead before the bystander arrives", "ms": 3000 },
+    { "action": "teleport", "actor": "bystander", "map": 229, "x": 78.5083, "y": -225.044, "z": 49.839, "o": 5.1 },
+    { "action": "assert", "label": "CONTROL: bystander is in Lower Blackrock Spire", "actor": "bystander",
+      "metric": "map_id", "equals": 229, "within_ms": 10000 },
+    { "action": "assert", "label": "CONTROL: the tank holds her attention", "actor": "voshgajin", "metric": "victim",
+      "target": "tank", "equals": 1, "within_ms": 5000 },
+    { "action": "wait", "label": "Run through the first Hex and one repeat", "ms": 26000 },
+    { "action": "assert", "label": "CONTROL: Vosh'gajin casts Hex", "actor": "tank", "metric": "timeline_count",
+      "event": "cast", "spell": 16097, "source_entry": 9236, "min": 1 },
+    { "action": "assert", "label": "Hex lands on the bystander", "actor": "tank", "metric": "timeline_count",
+      "event": "aura_applied", "spell": 16097, "source_entry": 9236, "target_actors": ["bystander"], "min": 1 },
+    { "action": "assert", "label": "Hex never lands on the tank", "actor": "tank", "metric": "timeline_count",
+      "event": "aura_applied", "spell": 16097, "source_entry": 9236, "target_actors": ["tank"], "equals": 0 }
+  ]
+}

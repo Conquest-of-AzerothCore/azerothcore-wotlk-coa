@@ -6,7 +6,9 @@
     "they hatch about 10 s later. Each egg (179985) hatches one Spawn of Mar'li (15041). Two heroes stand",
     "back to back and each places one egg 3 yards in front of them; the world's eggs share phase 1 and the",
     "lane has its own phase, so Mar'li sees only these two. When she casts Hatch Eggs 17 s into the fight no",
-    "spider appears at once or 7 s later, and two spiders appear by 13 s: one per egg, not ten on the nearest."
+    "spider appears at once or 7 s later, and two spiders appear by 13 s: one per egg, not ten on the nearest.",
+    "The tester of 2026-11-08: a Spawn of Mar'li had 36,342 health with 11 players on live; coa_boss_flex gives it",
+    "3,304 per player, so with the raid count's floor of 10 a spider has 33,040 health on Normal."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -188,6 +190,16 @@
       "metric": "nearby_creature_count",
       "entry": 15041,
       "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a spider has its live health per player",
+      "actor": "tank",
+      "metric": "nearby_creature_max_health",
+      "entry": 15041,
+      "min": 33039,
+      "max": 33041,
+      "within_ms": 2000
     }
   ]
 }
