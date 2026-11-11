@@ -87,7 +87,8 @@ SUITES = {
                      [CONFORMANCE + 'test_sheets.py'], [CONFORMANCE + 'test_records.py'],
                      [CONFORMANCE + 'test_score.py'], [CONFORMANCE + 'test_prove.py'],
                      [CONFORMANCE + 'test_expiry.py'], [CONFORMANCE + 'test_mutants.py'],
-                     [CONFORMANCE + 'test_k3.py'], [CONFORMANCE + 'test_sample.py']],
+                     [CONFORMANCE + 'test_k3.py'], [CONFORMANCE + 'test_sample.py'],
+                     [CONFORMANCE + 'test_packets.py']],
     },
     'world-content': {
         'paths': [CONTENT + '*.py'],

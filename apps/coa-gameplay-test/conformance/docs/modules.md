@@ -61,6 +61,9 @@
   spells from a bucket file (`spell_order` by sha256 of `<seed>|<spell id>`, `bucket_quotas` proportional with
   floors) and splits it into two chunks (`chunk_split`) (see
   [Drawing a batch sample](generate-and-compare.md#drawing-a-batch-sample)).
+- `packets.py`: `write_packets(dbc_dir, class_file, sample, chunk, bucket_rows, out_dir, class_map)` writes one
+  Markdown packet per spell of a sample chunk (`packet`, `render_packet`) (see
+  [Per-spell packets](generate-and-compare.md#per-spell-packets)).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)

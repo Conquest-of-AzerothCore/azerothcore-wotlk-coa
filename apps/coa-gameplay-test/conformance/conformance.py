@@ -6,6 +6,7 @@ from pathlib import Path
 import re
 import subprocess
 import sys
+import time
 from typing import Sequence
 
 from behaviours import behaviour_entries, behaviour_scenario, sized_behaviour
@@ -16,6 +17,7 @@ from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_cove
                       load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
+from packets import PacketError, write_packets
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, gate_stacks, hit_parts, melee_scenario,
                   records_of, reference_hit_model, reference_melee_model)
@@ -567,6 +569,21 @@ def sample_command(args) -> int:
     return 0
 
 
+def packets_command(args) -> int:
+    started = time.monotonic()
+    class_file = load_class_file(args.class_id)
+    try:
+        sample = json.loads(args.sample.read_text(encoding='utf-8'))
+        class_map = json.loads(args.class_map.read_text(encoding='utf-8')) if args.class_map else None
+        written = write_packets(server_dbc_dir(class_file.get('dbc_dir', DBC_DIR)), class_file, sample, args.chunk,
+                                load_buckets(args.buckets), args.out, class_map)
+    except (PacketError, SampleError) as error:
+        print(error, file=sys.stderr)
+        return 2
+    print(f'{args.out}: {len(written)} packets for chunk {args.chunk} in {time.monotonic() - started:.2f} s')
+    return 0
+
+
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='Generate class conformance scenarios and compare their results.')
     commands = parser.add_subparsers(dest='command', required=True)
@@ -679,10 +696,23 @@ def main(argv=None) -> int:
     sampling.add_argument('--first-chunk', dest='first_chunk', type=int, required=True,
                           help='clauses chunk 1 holds at least, taken as whole spells interleaved across buckets')
     sampling.add_argument('--out', type=Path, required=True, help='the sample file to write')
+    packeting = commands.add_parser('packets', help='write one Markdown packet per spell of a sample chunk: '
+                                                    'tooltip, Spell.dbc effects, script hits, ledger rows, class-file '
+                                                    'entries, the nearest entry of each check kind, fixtures and the '
+                                                    'class map fields')
+    packeting.add_argument('--class', dest='class_id', type=int, required=True)
+    packeting.add_argument('--sample', type=Path, required=True, help='the sample file of conformance.py sample')
+    packeting.add_argument('--chunk', required=True, help='the chunk of the sample whose spells get a packet')
+    packeting.add_argument('--buckets', type=Path, required=True,
+                           help='the bucket file the sample was drawn from, with every clause row of the class')
+    packeting.add_argument('--class-map', dest='class_map', type=Path,
+                           help='a class map JSON ({"classes": {"<class id>": {"spells": [...]}}}), read only')
+    packeting.add_argument('--out', type=Path, required=True, help='the directory that receives <spell id>.md')
     args = parser.parse_args(argv)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command,
-                'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command, 'sample': sample_command}
+                'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command, 'sample': sample_command,
+                'packets': packets_command}
     return handlers[args.command](args)
 
 

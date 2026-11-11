@@ -367,6 +367,31 @@ it). Chunk 1 takes whole spells, interleaved across the buckets in `--bucket` or
 seed, sizes, quotas, the clauses held per bucket, both chunks and the draws in draw order (`order`, `bucket`,
 `spell`, `sha256`, `chunk`, `clauses`); the same inputs write the same file.
 
+### Per-spell packets
+
+```sh
+python3 -B conformance.py packets --class 19 --sample SAMPLE.json --chunk 2 --buckets BUCKETS.json \
+  --class-map CLASS-MAP.json --out PACKETS/
+```
+
+`packets` writes `<spell id>.md` for every spell of one chunk of a `sample` file, built with no judgement from the
+server DBC set, the class file, the bucket file and an optional class map, which it only reads:
+
+- the tooltip, with each token followed by the value read with the class file's reference stats (`$s1[=3]`), and the
+  tokens it cannot read;
+- the `Spell.dbc` fields of the spell, of the spells its tokens name and of its triggered spells, with the DBC labels;
+- the `script_touch_hits` of the spell's bucket rows (file and line);
+- every bucket row of the spell (bucket, evidence, `token_kind`, labels and their statuses), marked by chunk;
+- the class-file entries of a check section (`behaviours`, `procs`, `triggers`, `talent_modifiers`,
+  `target_aura_gates`, the player observations and tooltip readings) that name the spell or a spell its tokens name;
+- for each check kind those entries or the rows' labels name, the nearest other entry of that section and kind: the
+  most shared `(Effect, EffectApplyAuraName)` pairs, then the smallest spell id distance;
+- the fixtures: the other class-file sections naming those spells, and the behaviour kinds the generator builds;
+- the class map fields `risk`, `gap`, `custom_mechanics`, `log_casts`, `log_other_events` and `log_linked_events`,
+  matched by spell id, else by a map spell of the same name whose hits name the id.
+
+The command prints its runtime. The same inputs write the same files.
+
 ### Verdicts
 
 | Status | Given to |
