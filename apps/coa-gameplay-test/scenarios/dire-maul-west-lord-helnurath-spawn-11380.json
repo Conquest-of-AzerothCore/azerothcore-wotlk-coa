@@ -21,6 +21,9 @@
     { "action": "assert", "label": "He stands at the Ascension spot", "actor": "player", "metric": "nearest_creature_distance",
       "entry": 14506, "min": 0, "max": 7 },
     { "action": "assert", "label": "No Dread Guard stands with him", "actor": "player", "metric": "nearby_creature_count",
-      "entry": 14483, "equals": 0 }
+      "entry": 14483, "equals": 0 },
+    { "action": "teleport", "actor": "player", "map": 429, "x": -2.9, "y": 700.0, "z": -24.4, "o": 0.0 },
+    { "action": "assert", "label": "No Dread Guard stands at the old spot from #11411 either", "actor": "player",
+      "metric": "nearby_creature_count", "entry": 14483, "equals": 0, "within_ms": 2000 }
   ]
 }
