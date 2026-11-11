@@ -1021,8 +1021,6 @@ namespace
         SPELL_SOUL_BIND         = 2119845,
         SPELL_SOUL_FLAY_BEAM    = 2146711,
         SPELL_SOUL_LINK         = 2119847,
-        SPELL_BLUE_SHIELD       = 34648,
-        SPELL_BARRIER_BLUE      = 12000000,
         SPELL_BIRTH             = 26047,
 
         NPC_ATALZUL             = 67532,
@@ -1030,6 +1028,7 @@ namespace
         NPC_DAMNED_WIGHT        = 67534,
         NPC_RESTLESS_SPIRIT     = 67535,
         NPC_SOUL_VESSEL         = 67536,
+        NPC_VESSEL_BARRIER      = 67537,
     };
 
     enum AtalzulEvents { EA_BOLT = 1, EA_VOLLEY, EA_LAND };
@@ -1121,8 +1120,9 @@ namespace
             _state = state;
             _spirits.DespawnAll();
             me->InterruptNonMeleeSpells(false);
-            me->RemoveAurasDueToSpell(SPELL_BLUE_SHIELD);
-            me->RemoveAurasDueToSpell(SPELL_BARRIER_BLUE);
+            if (Creature* barrier = ObjectAccessor::GetCreature(*me, _barrier))
+                barrier->DespawnOrUnsummon();
+            _barrier.Clear();
             me->SetVisible(state != VESSEL_BROKEN);
             if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
@@ -1133,10 +1133,12 @@ namespace
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             if (state == VESSEL_SHIELDED)
-            {
-                DoCastSelf(SPELL_BLUE_SHIELD, true);
-                DoCastSelf(SPELL_BARRIER_BLUE, true);
-            }
+                if (TempSummon* barrier = me->SummonCreature(NPC_VESSEL_BARRIER, me->GetPositionX(),
+                    me->GetPositionY(), me->GetPositionZ() - 0.6f, 0, TEMPSUMMON_MANUAL_DESPAWN))
+                {
+                    barrier->SetReactState(REACT_PASSIVE);
+                    _barrier = barrier->GetGUID();
+                }
             _spawn = 3s;
         }
 
@@ -1149,7 +1151,11 @@ namespace
                 atal->AI()->DoAction(ACTION_VESSEL_LINKED);
         }
 
-        void JustSummoned(Creature* summon) override { _spirits.Summon(summon); }
+        void JustSummoned(Creature* summon) override
+        {
+            if (summon->GetEntry() == NPC_RESTLESS_SPIRIT)
+                _spirits.Summon(summon);
+        }
 
         void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/,
             SpellSchoolMask /*school*/) override
@@ -1188,6 +1194,7 @@ namespace
 
     private:
         SummonList _spirits;
+        ObjectGuid _barrier;
         VesselState _state = VESSEL_IDLE;
         Milliseconds _spawn = 3s;
     };

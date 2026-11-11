@@ -100,18 +100,18 @@ UPDATE `creature` SET `position_x` = 3363.6626, `position_y` = -4904.645, `posit
   `orientation` = 1.9564 WHERE `guid` = 9780104 AND `id` = 67532;
 UPDATE `creature` SET `position_x` = 3461.96, `position_y` = -4971.2, `position_z` = 197.948,
   `orientation` = 3.6 WHERE `guid` = 9780105 AND `id` = 67533;
-UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 160.5792
+UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 160.7792
 WHERE `guid` = 9780106;
-UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 160.5839
+UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 160.7839
 WHERE `guid` = 9780107;
-UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 160.4575
+UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 160.6575
 WHERE `guid` = 9780108;
-UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 160.4516
+UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 160.6516
 WHERE `guid` = 9780109;
 
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(978093, 10, 7355, 'Altar of the Soul Vessel', '', '', '', 1, '', 'go_atalzul_vessel_coa', 12340)
+(978093, 10, 652, 'Altar of the Soul Vessel', '', '', '', 1.5, '', 'go_atalzul_vessel_coa', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `gameobject` WHERE `guid` BETWEEN 9780941 AND 9780944;
@@ -132,11 +132,29 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650')
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411, `DisplayScale` = 2.95 WHERE `CreatureID` = 67533;
 
--- The Damned Wights are skeletal warriors (display 734) and the Soul Vessel crystal is the
--- floating purple crystal (47751); his holograms are half as big again.
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 734, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
+-- Models, all checked in the client's own DBC and MPQs: the Damned Wights are Maldraxxus skeletons (96060), the
+-- Restless Spirits the Reaper's Ghost Form ghost (5430, from creature 841213), the Soul Vessel crystal the floating
+-- purple crystal (47751) and his holograms are half as big again.
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 96060, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 5430, `DisplayScale` = 1.5 WHERE `CreatureID` = 67535;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
+
+-- The blue dome over a shielded Soul Vessel: a creature whose model is the mage's Prismatic Barrier state (display
+-- 127809), as an aura could not be made to show.
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+  `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+  `VerifiedBuild`) VALUES
+(67537, 'Soul Vessel Barrier', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 10, 0, '', '', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`),
+  `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 67537;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+  `VerifiedBuild`) VALUES
+(67537, 0, 127809, 1.5, 1, 12340);
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 67537;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(67537, 1, 0, 0, 1);
 
 -- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 holds;
 -- 978059 keeps its loot for the chests players still hold.
