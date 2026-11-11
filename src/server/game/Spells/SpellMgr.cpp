@@ -1345,7 +1345,12 @@ std::vector<std::vector<uint32>> SpellMgr::LoadClientSpellRankChains() const
     std::vector<std::vector<uint32>> chains;
     ClientDBC ranks;
     if (!ranks.Load(GetClientDBCPath("SpellRank.dbc"), SPELL_RANK_RANK + 1))
-        return chains;
+    {
+        // the world database expects these chains (rows naming a later rank were dropped for them), so a
+        // realm without them would lose scripts, procs and spell groups instead of falling back cleanly
+        LOG_ERROR("server.loading", "Required SpellRank.dbc not found or not compatible in {}", GetClientDBCPath(""));
+        exit(1);
+    }
 
     std::map<uint32, std::map<uint32, uint32>> byChain;
     for (uint32 row = 0; row < ranks.GetRecordCount(); ++row)
