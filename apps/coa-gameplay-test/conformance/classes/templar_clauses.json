@@ -605,7 +605,10 @@
     "labels": [
       "500678 effect_value e0",
       "500678 aura_amount e0",
-      "500678 aura_amplitude_ms"
+      "500678 aura_amplitude_ms",
+      "500678 behaviour_hit_ratio max_health",
+      "500678 behaviour_metric_delta tick_950",
+      "500678 behaviour_metric_delta tick_1050"
     ],
     "kind": "claim"
   },
@@ -614,7 +617,8 @@
     "clause": "and reducing damage taken by $s2%.",
     "labels": [
       "500678 effect_value e1",
-      "500678 aura_amount e1"
+      "500678 aura_amount e1",
+      "500678 behaviour_hit_ratio damage_taken"
     ],
     "kind": "claim"
   },
@@ -3441,20 +3445,25 @@
     "spell": 801465,
     "clause": "you deal ${$m1+$ppl1+$AP*2} Holy damage",
     "labels": [
-      "801465 effect_value e0 #0"
+      "801465 effect_value e0 #0",
+      "801465 behaviour_hit_ratio attack_power"
     ],
     "kind": "claim"
   },
   {
     "spell": 801465,
     "clause": "to all nearby enemies",
-    "labels": [],
+    "labels": [
+      "801465 behaviour_fixed_count"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801465,
     "clause": "and heal nearby allies for the same amount",
-    "labels": [],
+    "labels": [
+      "801465 behaviour_hit_ratio ally_heal"
+    ],
     "kind": "claim"
   },
   {

@@ -4728,6 +4728,59 @@
       "quote": "@ext:Enemies pulled cannot be pulled this way again within 15 seconds.:ext@",
       "trigger_spell": 807274, "observe_spell": 520695, "internal_cooldown_ms": 15000, "target": "dummy",
       "source": "AscensionTemplarAbilities.cpp:352-362: a hit of Righteous Tempest (805410 or family word 0 bit 2, here 570205 of 807274) with 520534 known casts 520544 once per spell and, for every valid enemy of Nearby(player, 15.0f) not carrying the caster's 520694, casts 520695 (Templar Rituals Pull, Effect[0] 124 SPELL_EFFECT_PULL_TOWARDS) and 520694 (a 15000 ms marker, aura 4) on it. Three Righteous Tempest casts at the dummy, 7500 ms then 8000 ms apart (each past the 5000 ms aura): the pull 520695 is cast on the dummy by the first, not by the second while its 520694 marker holds, and once more by the third. The first gap outlasts the Tempest, whose recast is refused while its aura is up."
+    },
+    {
+      "spell": 500678, "name": "Testament of Fortitude", "kind": "hit_ratio", "variant": "max_health",
+      "label_suffix": "max_health", "quote": "restoring $s1% of your maximum health", "expected": 2.0,
+      "metric": "spell_heal_total", "cast_spell": 500678, "observe_spell": 500690, "target": "caster", "cast_power": 100,
+      "control": {"auras": [[500678, 0], [102208, 0]]},
+      "treatment": {"auras": [[500678, 0], [102208, 0], [43833, 1]]}, "critical": false, "trials": 30,
+      "expected_source": "Testament of Fortitude 500678: Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE every EffectAmplitude 1000 ms, EffectBasePoints 4 + 1 = 5, triggering Ascetic Abdication 500690 (Effect[0] 136 SPELL_EFFECT_HEAL_PCT on the caster); DurationIndex 8 (15000 ms); Effect[2] applies Sacred Restraint 102208 (60000 ms). Each trial removes the previous Testament and its Sacred Restraint, casts 500678 on the caster and reads 500690's heals 1600 ms later: the one tick at 1000 ms. Treatment: Increase Health 43833 (aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +100%, permanent) doubles the maximum health, so a heal of a share of the maximum reads 2.0; a flat or a current-health heal would not double. Each cast sets 100 Energy (cast_power, ADR 0187), so the channel's drain does not end it before its tick."
+    },
+    {
+      "spell": 500678, "name": "Testament of Fortitude", "kind": "metric_delta", "variant": "tick_950",
+      "label_suffix": "tick_950", "quote": "every $T1 sec", "expected": 0, "before_expected": 0,
+      "trigger_spell": 500678, "target": "caster", "metric": "spell_heal_count", "fields": {"spell": 500690, "target": "caster"},
+      "wait_ms": 950, "expire_ms": 1000, "cast_in_before": false, "cast_power": 100,
+      "observe_source": "Testament of Fortitude 500678: Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE every EffectAmplitude 1000 ms, EffectBasePoints 4 + 1 = 5, triggering Ascetic Abdication 500690 (Effect[0] 136 SPELL_EFFECT_HEAL_PCT on the caster); DurationIndex 8 (15000 ms); Effect[2] applies Sacred Restraint 102208 (60000 ms). The before phase reads 500690's heals with no cast (0); the after phase casts 500678 and reads them 950 ms later (0). With the other entry the period is in (950, 1050] ms, the first tick a period after the cast. The cast sets 100 Energy (cast_power, ADR 0187): the channel also drains 15 Energy a second, and at exactly its 15 cost it ends at its first tick, with no heal."
+    },
+    {
+      "spell": 500678, "name": "Testament of Fortitude", "kind": "metric_delta", "variant": "tick_1050",
+      "label_suffix": "tick_1050", "quote": "every $T1 sec", "expected": 1, "before_expected": 0,
+      "trigger_spell": 500678, "target": "caster", "metric": "spell_heal_count", "fields": {"spell": 500690, "target": "caster"},
+      "wait_ms": 1050, "expire_ms": 1000, "cast_in_before": false, "cast_power": 100,
+      "observe_source": "Testament of Fortitude 500678: Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE every EffectAmplitude 1000 ms, EffectBasePoints 4 + 1 = 5, triggering Ascetic Abdication 500690 (Effect[0] 136 SPELL_EFFECT_HEAL_PCT on the caster); DurationIndex 8 (15000 ms); Effect[2] applies Sacred Restraint 102208 (60000 ms). The before phase reads 500690's heals with no cast (0); the after phase casts 500678 and reads them 1050 ms later (1). With the other entry the period is in (950, 1050] ms, the first tick a period after the cast. The cast sets 100 Energy (cast_power, ADR 0187): the channel also drains 15 Energy a second, and at exactly its 15 cost it ends at its first tick, with no heal."
+    },
+    {
+      "spell": 500678, "name": "Testament of Fortitude", "kind": "taken_hit", "variant": "damage_taken",
+      "label_suffix": "damage_taken", "judge": "damage_ratio", "expected": 0.5, "quote": "and reducing damage taken by",
+      "strike_spell": 41394, "trials": 10, "learn": [500678], "caster_health_pct": 90, "caster_max_health": 100000, "cast_power": 100,
+      "arms": [{"name": "control", "auras": [[500678, 0], [102208, 0]]},
+               {"name": "treatment", "auras": [[500678, 0], [102208, 0]], "casts": [[500678, "caster"]]}],
+      "observe_source": "Testament of Fortitude 500678: Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE every EffectAmplitude 1000 ms, EffectBasePoints 4 + 1 = 5, triggering Ascetic Abdication 500690 (Effect[0] 136 SPELL_EFFECT_HEAL_PCT on the caster); DurationIndex 8 (15000 ms); Effect[2] applies Sacred Restraint 102208 (60000 ms). Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, EffectBasePoints -51 + 1 = -50%. A level 60 striker (entry 36) casts Light of the Naaru 41394 (Holy, a flat 1100) at the caster, held at 90% of 100000 health; the control takes it with no Testament, the treatment casts 500678 before every strike, after removing the previous one and its Sacred Restraint, at 100 Energy (cast_power, ADR 0187: at exactly the 15 cost the channel ends at its first drain). Non-critical hits from the damage logs (ADR 0153)."
+    },
+    {
+      "spell": 801465, "name": "Silverhand Incantation", "kind": "hit_ratio", "variant": "attack_power",
+      "label_suffix": "attack_power", "quote": "Upon reaching your target you deal", "expected": 3.1166,
+      "cast_spell": 801465, "observe_spell": 801501, "cast_wait_ms": 1000, "learn": [801465],
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [35785, 1]]},
+      "critical": false, "trials": 30,
+      "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). At the reference AP 313: 300 + 626 = 926 (the tooltip's resolved value). Treatment: Attack Power 980 35785 (aura 99, EffectBasePoints 979) gives 300 + 2 x 1293 = 2886: 2886 / 926 = 3.1166. A coefficient of 1.5 reads 2.587 and of 2.5 3.646. beeg spellpen 823764 in both arms removes the dummy's partial resists; the class aura 887007 scales both arms. Only non-critical hits."
+    },
+    {
+      "spell": 801465, "name": "Silverhand Incantation", "kind": "fixed_count", "variant": "enemies",
+      "quote": "Holy damage to all nearby enemies", "expected": 2, "uncapped": true,
+      "cast_spell": 801465, "target_rank": 801501, "metric": "spell_damage_count", "cast_target": "dummy", "repeats": 2,
+      "radius": 8.0,
+      "radius_reason": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the primary dummy at 3 yd; the two extra dummies within 8 yd of it are hit, the one 5 yd beyond the radius is not."
+    },
+    {
+      "spell": 801465, "name": "Silverhand Incantation", "kind": "hit_ratio", "variant": "ally_heal",
+      "label_suffix": "ally_heal", "quote": "and heal nearby allies for the same amount", "expected": 3.1166,
+      "metric": "spell_heal_total", "cast_spell": 801465, "observe_spell": 801501, "cast_wait_ms": 1000,
+      "caster": "caster", "target": "ally", "learn": [801465],
+      "control": {}, "treatment": {"auras": [[35785, 1]]}, "critical": false, "trials": 30,
+      "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the grouped ally; the heal 801501 lands on it with the same Effect[0] value as the damage: 926 at AP 313, 2886 with Attack Power 980 35785, so the heal ratio is the damage ratio, 3.1166 (the attack_power entry). Only non-critical heals."
     }
   ],
   "player_observations": [
