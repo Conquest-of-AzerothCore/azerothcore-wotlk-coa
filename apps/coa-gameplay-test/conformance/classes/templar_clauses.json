@@ -3729,18 +3729,11 @@
     "spell": 804914,
     "clause": "for $d",
     "labels": [
-      "804914 aura_duration_ms #0"
+      "804914 aura_duration_ms #0",
+      "804914 behaviour_cast_applies_aura",
+      "804914 behaviour_expiry"
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "An expiry pair cannot judge a 3000 ms end: the shift it must exclude is max(5% of 3000, 50) = 150 ms, and with no step between the act and the readings the reading after the end would have to come 150 - 7 x 25 - 1 = -26 ms after it at 25 ms per step (expiry.margins_of raises NotModelled below about 4.5 s). The aura_duration_ms readback is the only check.",
-      "attempts": [
-        {
-          "agent": "gap-author",
-          "report": "lean/gap-batch-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 804927,
