@@ -1051,7 +1051,9 @@ It tests dispatch and deferral, not a real socket, packet delivery, or every pos
 `view_level` takes a player `actor` and unit `target` and queries the target-relative combat level.
 `sent_level`, `sent_max_health` and `sent_faction` (the faction template) use the same fields and observe
 values-only object updates emitted to the socketless session. They return zero until the corresponding field has been observed; they do not
-force updates or inspect client rendering. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
+force updates or inspect client rendering. `sent_visible_item` takes a `slot` like `visible_item` and returns the
+item entry the `actor` was last sent for the `target` player's visible item in that slot, or -1 before one is
+observed. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
 `lfg_lock_status` takes a player `actor` and an LFGDungeons.dbc `dungeon` id and returns the lock status the
 server lists for that dungeon in the player's Dungeon Finder info (0 when it is not locked, otherwise the

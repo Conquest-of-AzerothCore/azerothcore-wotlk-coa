@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Disable Transmog hides transmogs from the player who disabled it (#9030)",
+  "contract": [
+    "CMSG 1699 carries the wardrobe's item and spell transmog switches (u8 item, u8 spell). The item switch",
+    "decides what its sender sees: with it off, other players' visible items are sent to that viewer as the",
+    "items they actually wear, while every other viewer and the wearer keep the transmog. The wearer equips",
+    "Apprentice's Robe 56 and applies Appearances.dbc row 6720 (chest, SourceItem Neophyte's Robe 6098),",
+    "collected through CoA.UnlockLocalAppearanceCatalog. sent_visible_item reads the PLAYER_VISIBLE_ITEM",
+    "entry each session last received in a values update; rendering itself is not observed."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "wearer", "race": 1, "class": 1, "level": 20 },
+    { "id": "viewer", "race": 1, "class": 1, "level": 20 },
+    { "id": "bystander", "race": 1, "class": 1, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login scripts settle", "ms": 3000 },
+    {
+      "action": "client_packet", "label": "The viewer turns item transmogs off", "actor": "viewer",
+      "opcode": 1699, "fields": [ { "u8": 0 }, { "u8": 1 } ]
+    },
+    { "action": "add_item", "actor": "wearer", "item": 56 },
+    { "action": "equip", "actor": "wearer", "item": 56, "slot": 4 },
+    {
+      "action": "assert", "label": "SETUP: the wearer wears Apprentice's Robe", "actor": "wearer",
+      "metric": "equipped_item", "slot": 4, "equals": 56
+    },
+    { "action": "apply_appearances", "actor": "wearer", "selection": { "4": 6720 } },
+    {
+      "action": "assert", "label": "SETUP: the chest transmog is accepted", "actor": "wearer",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the wearer's visible chest is Neophyte's Robe", "actor": "wearer",
+      "metric": "visible_item", "slot": 4, "equals": 6098
+    },
+    {
+      "action": "assert", "label": "CONTROL: the wearer is sent the transmog", "actor": "wearer",
+      "target": "wearer", "metric": "sent_visible_item", "slot": 4, "equals": 6098, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "CONTROL: a bystander with transmogs on is sent the transmog",
+      "actor": "bystander", "target": "wearer", "metric": "sent_visible_item", "slot": 4, "equals": 6098,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The viewer with transmogs off is sent the worn Apprentice's Robe",
+      "actor": "viewer", "target": "wearer", "metric": "sent_visible_item", "slot": 4, "equals": 56,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet", "label": "The viewer turns item transmogs back on", "actor": "viewer",
+      "opcode": 1699, "fields": [ { "u8": 1 }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "Turning transmogs back on resends the transmog without a relog",
+      "actor": "viewer", "target": "wearer", "metric": "sent_visible_item", "slot": 4, "equals": 6098,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet", "label": "The wearer turns item transmogs off", "actor": "wearer",
+      "opcode": 1699, "fields": [ { "u8": 0 }, { "u8": 1 } ]
+    },
+    {
+      "action": "assert", "label": "The wearer then sees their own worn Apprentice's Robe", "actor": "wearer",
+      "target": "wearer", "metric": "sent_visible_item", "slot": 4, "equals": 56, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "The wearer's own switch keeps the transmog for everyone else", "actor": "wearer",
+      "metric": "visible_item", "slot": 4, "equals": 6098
+    },
+    {
+      "action": "assert", "label": "The viewer is still sent the wearer's transmog", "actor": "viewer",
+      "target": "wearer", "metric": "sent_visible_item", "slot": 4, "equals": 6098, "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Ctrl+Alt+Click collects an item appearance (#11001)",
+  "contract": [
+    "Ctrl+Alt+Click on a bag item with an uncollected appearance opens CONFIRM_COLLECT_APPEARANCE; accepting it calls",
+    "C_AppearanceCollection.CollectItemAppearance, which sends CMSG_COLLECT_ITEM_APPEARANCE (0x06EA, opcode 1770) with",
+    "the item's u64 GUID and waits for SMSG_COLLECT_ITEM_APPEARANCE_RESULT (0x06EB, opcode 1771). The server never",
+    "queued or handled 0x06EA, so the request was dropped and nothing was collected (#11001, #11085, #11275, #11329,",
+    "#11331). Expected: a carried Sentinel's Blade 450934 (ItemAppearances 450934 -> 24009) is answered with",
+    "COLLECT_ITEM_APPEARANCE_OK, and a carried Linen Cloth 2589, which has no appearance, with",
+    "COLLECT_ITEM_APPEARANCE_FAILED. Collecting leaves a Bind-on-Equip Old Amani Waraxe 467 (ItemAppearances",
+    "467 -> 11962) unbound. CoA.UnlockLocalAppearanceCatalog collects every appearance locally, so the added",
+    "appearance itself is not observed here."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "collector", "race": 1, "class": 1, "level": 60 },
+    { "id": "boe_collector", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "add_item", "actor": "collector", "item": 450934 },
+    { "action": "add_item", "actor": "collector", "item": 2589 },
+    {
+      "action": "client_packet", "label": "Collect the Sentinel's Blade appearance", "actor": "collector",
+      "opcode": 1770, "fields": [ { "item_guid": 450934 } ]
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the collect request is accepted", "actor": "collector",
+      "metric": "server_packet_contains", "opcode": 1771, "text": "COLLECT_ITEM_APPEARANCE_OK", "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Collecting leaves the blade in the bags", "actor": "collector",
+      "metric": "item_count", "item": 450934, "equals": 1
+    },
+    { "action": "add_item", "actor": "boe_collector", "item": 467 },
+    {
+      "action": "assert", "label": "SETUP: the Bind-on-Equip Old Amani Waraxe is unbound", "actor": "boe_collector",
+      "metric": "item_soulbound", "item": 467, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Collect the Old Amani Waraxe appearance", "actor": "boe_collector",
+      "opcode": 1770, "fields": [ { "item_guid": 467 } ]
+    },
+    {
+      "action": "assert", "label": "SETUP: the Old Amani Waraxe collect request is accepted",
+      "actor": "boe_collector", "metric": "server_packet_contains", "opcode": 1771,
+      "text": "COLLECT_ITEM_APPEARANCE_OK", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Collecting does not bind a Bind-on-Equip item", "actor": "boe_collector",
+      "metric": "item_soulbound", "item": 467, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Collect from an item without an appearance", "actor": "collector",
+      "opcode": 1770, "fields": [ { "item_guid": 2589 } ]
+    },
+    {
+      "action": "assert", "label": "An item without an appearance is refused", "actor": "collector",
+      "metric": "server_packet_contains", "opcode": 1771, "text": "COLLECT_ITEM_APPEARANCE_FAILED", "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

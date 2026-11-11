@@ -3333,6 +3333,17 @@ private:
                 return 0;
             return itr->second.at(field);
         }
+        if (metric == "sent_visible_item")
+        {
+            uint32 slot = step.get<uint32>("slot");
+            Require(slot < EQUIPMENT_SLOT_END, "Equipment observation needs a slot from 0 through 18");
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.unitValues.find(GetUnit(step.get<std::string>("target"))->GetGUID().GetRawValue());
+            uint16 const field = PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2;
+            if (itr == actor.unitValues.end() || !itr->second.count(field))
+                return -1;
+            return itr->second.at(field);
+        }
         if (metric == "quest_query_scaled")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));

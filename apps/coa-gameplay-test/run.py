@@ -76,7 +76,7 @@ METRICS = TIMELINE_METRICS | {
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
-    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'level_scaling_choice',
+    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item', 'level_scaling_choice',
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
@@ -954,9 +954,11 @@ def validate(scenario):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
-            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
+            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
+            if metric == 'sent_visible_item':
+                number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'creature_query_rank', 'creature_query_quest_item'}:
                 require(step['actor'] in player_ids, f'{where}: creature query metric needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)

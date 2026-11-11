@@ -187,6 +187,8 @@ constexpr std::size_t MAX_APPEARANCE_OUTFIT_NAME_BYTES = 64;
 constexpr std::size_t MAX_APPEARANCE_OUTFITS = 100;
 constexpr uint16 SMSG_CAN_SEE_APPEARANCES_INFO = 0x06A2;
 constexpr uint16 CMSG_SET_CAN_SEE_APPEARANCES = 0x06A3;
+constexpr uint16 CMSG_COLLECT_ITEM_APPEARANCE = 0x06EA;
+constexpr uint16 SMSG_COLLECT_ITEM_APPEARANCE_RESULT = 0x06EB;
 constexpr uint16 SMSG_VANITY_COLLECTION_INFO = 0x06F7;
 constexpr uint16 SMSG_VANITY_COLLECTION_ADDED = 0x06F8;
 
@@ -254,11 +256,12 @@ constexpr uint32 VANITY_FLAG_NOT_OFFERED = 0x8;
 constexpr uint8 REALM_TYPE_COUNT = 5;
 constexpr std::string_view VANITY_ITEM_LEARNED_EVENT = "ASCENSION_STORE_COLLECTION_ITEM_LEARNED";
 
-constexpr std::array<uint16, 9> QUEUED_EXTENSION_OPCODES = {
+constexpr std::array<uint16, 10> QUEUED_EXTENSION_OPCODES = {
     CMSG_APPLY_APPEARANCES, CMSG_SET_CAN_SEE_APPEARANCES,
     CMSG_EXTENSION_INITIALIZED, CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST,
     CMSG_SAVE_APPEARANCE_OUTFIT, CMSG_DELETE_APPEARANCE_OUTFIT,
-    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID};
+    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID,
+    CMSG_COLLECT_ITEM_APPEARANCE};
 
 constexpr uint16 CMSG_QUERY_VENDORED_ITEM_RECOVERY = 0x05DE;
 constexpr uint16 CMSG_RECOVER_VENDORED_ITEM = 0x05E0;
@@ -4560,6 +4563,7 @@ private:
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
+  static constexpr uint32 X53_TOURING_ROCKET_SUMMON = 75973;
   static constexpr std::size_t SWAP_ENTRY_ID_POOL = 4096;
   static constexpr uint8 CLIENT_AUTOPLACE_MAX_LEVEL = 10;
   static constexpr std::size_t SPELL_WIRE_RANK = 2;
@@ -5665,6 +5669,8 @@ private:
       row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
       row.Values[SPELL_ATTRIBUTES_FIELD + 5] = info->AttributesEx5;
     }
+    if (info->Id == X53_TOURING_ROCKET_SUMMON)
+      row.Values[SPELL_ATTRIBUTES_FIELD + 4] = info->AttributesEx4;
     if (info->Id == 805027 ||
         (info->Id >= 807938 && info->Id <= 807941))
     {
@@ -5760,7 +5766,7 @@ private:
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     Ascension::ClientSpellPatches::Instance().Register(TinkerReplenishmentFieldAura);
     for (uint32 const spellId : {801292u, 501836u, 501837u, 501838u, 501839u, 501840u, 574346u, 567543u, 567544u,
-        805027u, 807938u, 807939u, 807940u, 807941u})
+        805027u, 807938u, 807939u, 807940u, 807941u, X53_TOURING_ROCKET_SUMMON})
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     Ascension::ClientSpellPatches::Instance().Register(VAULT_CLIENT_SPELL);
     std::unordered_set<uint32> requested = Ascension::ClientSpellPatches::Instance().GetIds(true);
@@ -6829,7 +6835,7 @@ public:
       return;
 
     uint8 itemCategoryId = AppearanceCategoryForEquipmentSlot(slot);
-    if (itemCategoryId && state->CanSeeItemAppearances)
+    if (itemCategoryId)
     {
       uint32 appearanceId = state->ActiveAppearances[itemCategoryId];
       auto appearanceItr = _appearances.find(appearanceId);
@@ -6856,6 +6862,58 @@ public:
         PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + slot * 2, 0,
         static_cast<uint16>(effectItr->second.EnchantId));
   }
+
+    static bool IsVisibleItemEntryField(uint16 index)
+    {
+        return index >= PLAYER_VISIBLE_ITEM_1_ENTRYID &&
+            index < PLAYER_VISIBLE_ITEM_1_ENTRYID + EQUIPMENT_SLOT_END * 2 &&
+            (index - PLAYER_VISIBLE_ITEM_1_ENTRYID) % 2 == 0;
+    }
+
+    void ShowEquippedItemsToViewer(Player const* wearer, ByteBuffer& data, BuildValuesCachePosPointers const& pos,
+        Player* viewer)
+    {
+        std::shared_ptr<PlayerCollectionState> viewerState;
+        std::shared_ptr<PlayerCollectionState> wearerState;
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+        {
+            uint16 const index = PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2;
+            auto const field = pos.other.find(index);
+            if (field == pos.other.end())
+                continue;
+            if (!viewerState && !(viewerState = GetState(viewer)))
+                return;
+            if (viewerState->CanSeeItemAppearances)
+                return;
+            if (!wearerState && !(wearerState = GetState(wearer)))
+                return;
+
+            uint8 const category = AppearanceCategoryForEquipmentSlot(slot);
+            Item const* item = wearer->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!category || !item)
+                continue;
+            auto const appearance = _appearances.find(wearerState->ActiveAppearances[category]);
+            if (appearance != _appearances.end() && appearance->second.SourceItem &&
+                appearance->second.SourceItem == wearer->GetUInt32Value(index))
+                data.put<uint32>(field->second, item->GetEntry());
+        }
+    }
+
+    void ResendVisibleItemsTo(Player* viewer)
+    {
+        auto const resend = [](Player* wearer)
+        {
+            for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+                if (wearer->GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2))
+                    wearer->ForceValuesUpdateAtIndex(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2);
+        };
+        resend(viewer);
+        viewer->GetMap()->DoForAllPlayers([viewer, &resend](Player* wearer)
+        {
+            if (wearer != viewer && viewer->HaveAtClient(wearer))
+                resend(wearer);
+        });
+    }
 
     uint32 GetAmmunitionDisplay(Player* player)
     {
@@ -7871,6 +7929,26 @@ private:
     }
   }
 
+    bool HasItemAppearance(uint32 itemId) const
+    {
+        return _itemAppearances.contains(itemId) || _itemAppearances.contains(ItemScaling::BaseEntry(itemId));
+    }
+
+    void HandleCollectItemAppearance(Player* player, WorldPacket& packet)
+    {
+        ObjectGuid const itemGuid(packet.read<uint64>());
+        Item* item = player->GetItemByGuid(itemGuid);
+        std::shared_ptr<PlayerCollectionState> state = GetState(player);
+        if (!state || !item || !HasItemAppearance(item->GetEntry()))
+        {
+            SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_FAILED");
+            return;
+        }
+
+        CollectItem(player, *state, item->GetEntry(), true, item->IsSoulBound());
+        SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_OK");
+    }
+
   void HandleClientPacket(Player *player, WorldPacket &packet) {
     packet.rpos(0);
     try {
@@ -7886,6 +7964,9 @@ private:
         break;
       case CMSG_DELETE_APPEARANCE_OUTFIT:
         HandleDeleteOutfit(player, packet);
+        break;
+      case CMSG_COLLECT_ITEM_APPEARANCE:
+        HandleCollectItemAppearance(player, packet);
         break;
       case CMSG_INSPECT_CHARACTER_ADVANCEMENT:
         AscensionClassService::Instance().SendInspectResult(player, ObjectGuid(packet.read<uint64>()));
@@ -8103,6 +8184,7 @@ private:
                               canSeeItem ? 1 : 0, canSeeSpell ? 1 : 0);
 
     RefreshVisibleItems(player);
+    ResendVisibleItemsTo(player);
     RefreshIncarnations(player);
     SendAppearanceVisibility(player, *state);
   }
@@ -10181,7 +10263,21 @@ public:
             {UNITHOOK_ON_BLOCK,
              UNITHOOK_ON_PERIODIC_DAMAGE_RESULT,
              UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE,
-             UNITHOOK_ON_SEND_AURA_UPDATE, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM}) {}
+             UNITHOOK_ON_SEND_AURA_UPDATE, UNITHOOK_ON_UNIT_SET_SHAPESHIFT_FORM,
+             UNITHOOK_SHOULD_TRACK_VALUES_UPDATE_POS_BY_INDEX, UNITHOOK_ON_PATCH_VALUES_UPDATE}) {}
+
+    bool ShouldTrackValuesUpdatePosByIndex(Unit const* unit, uint8, uint16 index) override
+    {
+        return unit->IsPlayer() && AscensionCollectionService::IsVisibleItemEntryField(index);
+    }
+
+    void OnPatchValuesUpdate(Unit const* unit, ByteBuffer& data, BuildValuesCachePosPointers& pos,
+        Player* target) override
+    {
+        if (target && !pos.other.empty() && unit->IsPlayer() &&
+            ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+            AscensionCollectionService::Instance().ShowEquippedItemsToViewer(unit->ToPlayer(), data, pos, target);
+    }
 
     void OnUnitSetShapeshiftForm(Unit* unit, uint8) override
     {
