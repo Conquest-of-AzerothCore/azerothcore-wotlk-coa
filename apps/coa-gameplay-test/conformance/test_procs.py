@@ -28,6 +28,8 @@ Z_99 = 2.576
 HALF_WIDTH = 0.025
 SCOURGEBANE = 92111
 WARRIOR_OF_DAWN = 560648
+OATH_OF_VINDICATION = 805332
+VINDICATION = 573324
 RETRIBUTION = 707391
 ARGENT_BLADE_MAX_RANK = 807268
 SCOURGEBANE_STRIKE = 801832
@@ -42,7 +44,7 @@ READINGS = [{'name': 'auto attacks only', 'labels': [LABELS['trials']]},
             {'name': 'every direct damage event', 'labels': [LABELS['trials'], STRIKE_TRIALS]}]
 LIGHTS_ECHO = (520017, 520883)
 ARGENT_BLADE_FIRST_RANK = 804929
-SCRIPTED_IN_CODE = {504808, 520017, 520883, 572548, 572554, 706325, 804571}
+SCRIPTED_IN_CODE = {504808, 520017, 520883, 572548, 572554, 706325, 804571, 805332}
 CONDEMNATION = 706325
 BLADE_OF_FAITH = 803880
 BLADE_OF_FAITH_TICK_MS = 3000
@@ -146,6 +148,10 @@ class TrialsTest(unittest.TestCase):
         low, high = wilson_interval(250, 1699)
         self.assertLess(high, 0.20)
         self.assertGreater(low, 0.0)
+
+
+def first_step(steps, action):
+    return next(index for index, step in enumerate(steps) if step['action'] == action)
 
 
 class ProcCompareTest(unittest.TestCase):
@@ -660,6 +666,15 @@ class ProcScenarioTest(unittest.TestCase):
         entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN, 'source': 'seeded'}}
         with self.assertRaises(ValueError):
             proc_plan(CLASS_FILE, entry)
+
+    def test_the_oath_of_vindication_is_set_and_its_chance_read_from_vindication(self):
+        entry = templar_proc(OATH_OF_VINDICATION)
+        scenario, [expectation] = proc_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        self.assertFalse([step for step in steps if step['action'] == 'learn' and step['spell'] == OATH_OF_VINDICATION])
+        self.assertEqual(steps[first_step(steps, 'set_aura')]['spell'], OATH_OF_VINDICATION)
+        self.assertEqual(proc_plan(CLASS_FILE, entry).chance_pct, 20.0)
+        self.assertEqual((expectation.model['chance_spell'], expectation.model['chance_kind']), (VINDICATION, 'percent'))
 
     def test_an_applied_by_without_its_source_is_refused(self):
         entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN}}

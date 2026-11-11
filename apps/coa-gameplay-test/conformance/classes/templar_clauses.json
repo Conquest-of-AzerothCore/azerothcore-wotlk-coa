@@ -3023,11 +3023,13 @@
       {
         "claim": "+$SP*0.75}",
         "labels": [
-          "573324 effect_value e0 #0"
+          "573324 effect_value e0 #0",
+          "573324 behaviour_hit_ratio spell_power"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the SP*0.75 claim is measured by 573324 behaviour_hit_ratio spell_power: +220 spell damage (Power of the Ashtongue 1140480) against none, expected ratio 802/637 from the formula at the reference attack power"
   },
   {
     "spell": 573324,
@@ -3049,9 +3051,10 @@
     "spell": 805332,
     "clause": "Oath: Your damaging abilities have a $805332s1% chance to trigger Zealotry.",
     "labels": [
-      "573324 effect_value 805332e0 #1"
+      "805332 proc_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "573324 effect_value 805332e0 #1 (not_measured) is replaced by the rate: Oath: Vindication 805332 set (applied_by 573324, ADR 0151), Zealotry 801450 casts per Argent Blade 807268 hit, Wilson 99% interval against 20%; roll at AscensionTemplarAbilities.cpp:326-329"
   },
   {
     "spell": 578276,

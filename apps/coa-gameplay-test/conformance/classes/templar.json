@@ -290,6 +290,25 @@
   ],
   "procs": [
     {
+      "aura": 805332,
+      "name": "Oath: Vindication",
+      "tooltip": "Strike an enemy with zeal, dealing ${$m1+0+$AP*0.285+$SP*0.75} Physical damage, triggering |cffffffffZealotry|r, and granting an |cffffffffOath|r.\r\n\r\n|cffffffffOath:|r Your damaging abilities have a $805332s1% chance to trigger |cffffffffZealotry|r.\r\n@s:801450:0@",
+      "applied_by": {"spell": 573324, "source": "Vindication 573324 grants the Oath on its cast (AscensionTemplarAbilities.cpp:174-176, GrantOath); 805332 has no Description of its own, so the chance is read from Vindication's tooltip"},
+      "chance_token": "$805332s1",
+      "trigger": {"action": "cast", "spell": 807268},
+      "trigger_text": "Your damaging abilities",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801450,
+      "proc_spell_source": "tooltip reference @s:801450:0@: Zealotry 801450",
+      "events_per_proc": 1,
+      "handler": "AscensionTemplarAbilities.cpp:326-329 (OnSpellHitResult): a damaging, untriggered hit of an Ability (AscensionTemplar.cpp:68-73) rolls the Oath's effect 0 amount and calls Zealotry, which casts 801450; Argent Blade 807268 triggers no Zealotry of its own and its Scourgebane 801832 returns earlier (:283-288)",
+      "dbc": {
+        "805332": {"ProcChance": 101, "ProcFlags": 0, "ProcCharges": 0}
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
       "aura": 92111,
       "name": "Scourgebane",
       "tooltip": "|cFF66DDFFLevel 10 Passive|r\r\nDirect damage dealt now has a $520007h% chance to strike an enemy with |cffffffffScourgebane|r, dealing an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage.\r\n\r\nThis is guaranteed to critically strike against Undead enemies.",
@@ -1673,6 +1692,14 @@
     {"name": "c7_scarlet", "talents": [301065, 520812, 806525]}
   ],
   "behaviours": [
+    {
+      "spell": 573324, "name": "Vindication", "kind": "hit_ratio", "label_suffix": "spell_power",
+      "quote": "Physical damage", "expected": 1.259,
+      "observe_spell": 573324, "learn": [573324],
+      "control": {}, "treatment": {"auras": [[1140480, 1]]},
+      "critical": false, "trials": 160,
+      "expected_source": "${$m1+0+$AP*0.285+$SP*0.75}: $m1 519 (EffectBasePoints[0] 518, EffectDieSides[0] 59, so a hit rolls 519 to 577, mean 548), AP 313 (class file reference_stats, read by the base steps), SP 0 at the reference; AscensionTemplarContracts.cpp:335-342 adds 0.285 x AP + 0.75 x SpellBaseDamageBonusDone(127) (AscensionTemplarData.h:62) to the effect base value, truncated to int32. Treatment: Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, EffectMiscValue[0] 126, EffectBasePoints[0] 219: +220 spell damage) adds 0.75 x 220 = 165, so the mean hit goes from 548 + 89 = 637 to 548 + 254 = 802: ratio 802 / 637 = 1.259. A coefficient of 0.5 reads 1.173, of 1.0 1.345, both outside the band. Only non-critical hits are compared; armor scales both arms alike."
+    },
     {
       "spell": 560648, "name": "Warrior of Dawn", "kind": "proc_reset",
       "quote": "chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by",
