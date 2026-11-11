@@ -132,20 +132,30 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650')
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411, `DisplayScale` = 2.95 WHERE `CreatureID` = 67533;
 
--- Models, all checked in the client's own DBC and MPQs: the Damned Wights are the armored bone-yellow skeleton in its
--- HD remodel (3507), the Restless Spirits the Reaper's Ghost Form ghost (5430, from creature 841213), the Soul Vessel
+-- Models, all checked in the client's own DBC and MPQs: the Damned Wights are the armored Risen Alliance Soldier
+-- skeleton (27550), the Restless Spirits the Reaper's Ghost Form ghost (5430, from creature 841213), the Soul Vessel
 -- crystal the floating purple crystal (47751) and his holograms are half as big again.
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 3507, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 27550, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 5430, `DisplayScale` = 1.5 WHERE `CreatureID` = 67535;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
 
--- The shielded Soul Vessel wears Force Field Visual (34648) itself; the dome creature tried before is gone. An
--- invisible
--- stalker (display 11686) the beam to Atal'zul leaves from, at the middle of the crystal.
+-- The shielded Soul Vessel carries a creature whose model is the mage's Prismatic Barrier state (display 127809, shown
+-- big around the crystal), as auras never showed; and an invisible stalker (display 11686) the beam to Atal'zul
+-- leaves from, at the middle of the crystal.
+INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
+  `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
+  `VerifiedBuild`) VALUES
+(67537, 'Soul Vessel Barrier', '', 63, 63, 35, 0, 1, 1, 1, 33554434, 10, 0, '', '', 12340)
+ON DUPLICATE KEY UPDATE `name` = VALUES(`name`), `faction` = VALUES(`faction`), `unit_flags` = VALUES(`unit_flags`),
+  `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 67537;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
+  `VerifiedBuild`) VALUES
+(67537, 0, 127809, 3, 1, 12340);
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 67537;
-DELETE FROM `creature_template` WHERE `entry` = 67537;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(67537, 1, 0, 0, 1);
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
   `VerifiedBuild`) VALUES
@@ -173,3 +183,57 @@ INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Quest
 -- The adds and the crystals are ordinary level 61 and 63 creatures; only the two bosses are skull level.
 UPDATE `creature_template` SET `minlevel` = 61, `maxlevel` = 61, `rank` = 0 WHERE `entry` IN (67534, 67535);
 UPDATE `creature_template` SET `minlevel` = 63, `maxlevel` = 63, `rank` = 0 WHERE `entry` IN (67536, 67538);
+
+-- The core binds every player permanently to the instance the moment a creature with CREATURE_FLAG_EXTRA_INSTANCE_BIND
+-- (flags_extra 1) dies, before the kill rewards run, so every player looked already locked. The rewards bind the
+-- players themselves, so Atal'zul no longer carries the flag.
+UPDATE `creature_template` SET `flags_extra` = `flags_extra` & ~1 WHERE `entry` = 67532;
+
+-- The world boss maps (880 to 890) reset weekly, as map 891 does: the lockout of their rewards follows it.
+DELETE FROM `mapdifficulty_dbc` WHERE `MapID` BETWEEN 880 AND 890;
+INSERT INTO `mapdifficulty_dbc` (`ID`, `MapID`, `Difficulty`, `Message_Lang_Mask`, `RaidDuration`, `MaxPlayers`,
+  `Difficultystring`) VALUES
+(691, 880, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(692, 880, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(693, 880, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(694, 880, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(695, 881, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(696, 881, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(697, 881, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(698, 881, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(699, 882, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(700, 882, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(701, 882, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(702, 882, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(703, 883, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(704, 883, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(705, 883, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(706, 883, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(707, 884, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(708, 884, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(709, 884, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(710, 884, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(711, 885, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(712, 885, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(713, 885, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(714, 885, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(715, 886, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(716, 886, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(717, 886, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(718, 886, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(719, 887, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(720, 887, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(721, 887, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(722, 887, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(723, 888, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(724, 888, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(725, 888, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(726, 888, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(734, 889, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(735, 889, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(736, 889, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(737, 889, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC'),
+(741, 890, 0, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(742, 890, 1, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER'),
+(743, 890, 2, 16712188, 604800, 40, 'RAID_DIFFICULTY_10PLAYER_HEROIC'),
+(744, 890, 3, 16712188, 604800, 40, 'RAID_DIFFICULTY_25PLAYER_HEROIC');

@@ -6,6 +6,7 @@
 #include "GameObject.h"
 #include "GameObjectScript.h"
 #include "InstanceSaveMgr.h"
+#include "Log.h"
 #include "Item.h"
 #include "LootMgr.h"
 #include "Mail.h"
@@ -150,6 +151,8 @@ namespace coa_world_boss_instance
         void OnUnitDeath(Unit* unit, Unit* /*killer*/) override
         {
             Creature* boss = unit->ToCreature();
+            LOG_INFO("module", "[wbi] death hook: entry {} map {} creature {}", unit->GetEntry(), unit->GetMapId(),
+                boss != nullptr);
             if (!boss || boss->GetEntry() != _config.bossEntry || boss->GetMapId() != _config.bossMap)
                 return;
             uint32 const raid = boss->GetMap()->GetPlayersCountExceptGMs();
@@ -162,12 +165,16 @@ namespace coa_world_boss_instance
             std::string const sender = _config.boss;
             InstanceMap* instance = boss->GetMap()->ToInstanceMap();
             InstanceSave* save = instance ? sInstanceSaveMgr->GetInstanceSave(instance->GetInstanceId()) : nullptr;
+            LOG_INFO("module", "[wbi] {} died: {} players, instance map {}, save {}", _config.boss, raid,
+                instance != nullptr, save != nullptr);
             boss->GetMap()->DoForAllPlayers([&sender, save](Player* player)
             {
                 if (save)
                 {
                     InstancePlayerBind* bind = sInstanceSaveMgr->PlayerGetBoundInstance(player->GetGUID(),
                         save->GetMapId(), save->GetDifficulty());
+                    LOG_INFO("module", "[wbi] {}: bound {} perm {}", player->GetName(), bind != nullptr,
+                        bind && bind->perm);
                     if (bind && bind->perm)
                         return;
                     WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);

@@ -1022,13 +1022,14 @@ namespace
         SPELL_SOUL_BIND         = 2119845,
         SPELL_SOUL_FLAY_BEAM    = 2146711,
         SPELL_SOUL_LINK         = 2119847,
-        SPELL_BLUE_SHIELD       = 34648,
+        SPELL_BIRTH             = 26047,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
         NPC_DAMNED_WIGHT        = 67534,
         NPC_RESTLESS_SPIRIT     = 67535,
         NPC_SOUL_VESSEL         = 67536,
+        NPC_VESSEL_BARRIER      = 67537,
         NPC_VESSEL_ANCHOR       = 67538,
     };
 
@@ -1041,7 +1042,7 @@ namespace
     constexpr uint32 ACTION_AWAKEN = 3;
     constexpr uint32 ZUROGG_JUMP = 1;
     Position const ZuroggLanding = { 3368.63f, -4908.01f, 159.4f, 0.0f };
-    constexpr float WIGHT_RISE = 2.0f;
+    constexpr float BARRIER_RISE = 1.0f;
     constexpr float ANCHOR_RISE = -0.4f;
 
     void Beam(Unit* from, Unit* to)
@@ -1153,9 +1154,7 @@ namespace
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             _assaulted = false;
-            me->RemoveAurasDueToSpell(SPELL_BLUE_SHIELD);
-            if (state == VESSEL_SHIELDED)
-                DoCastSelf(SPELL_BLUE_SHIELD, true);
+            Keep(_barrier, state == VESSEL_SHIELDED, NPC_VESSEL_BARRIER, BARRIER_RISE);
             Keep(_anchor, state == VESSEL_LINKED || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
             _spawn = 3s;
         }
@@ -1228,12 +1227,6 @@ namespace
                 Link();
                 return;
             }
-            if (_state == VESSEL_SHIELDED)
-            {
-                if (!me->HasAura(SPELL_BLUE_SHIELD))
-                    DoCastSelf(SPELL_BLUE_SHIELD, true);
-                return;
-            }
             if (_state != VESSEL_OPEN)
                 return;
             Link();
@@ -1249,6 +1242,7 @@ namespace
 
     private:
         SummonList _spirits;
+        ObjectGuid _barrier;
         bool _assaulted = false;
         ObjectGuid _anchor;
         VesselState _state = VESSEL_IDLE;
@@ -1332,9 +1326,7 @@ namespace
                 return;
             summon->SetReactState(REACT_PASSIVE);
             summon->CastSpell(me, SPELL_SOUL_FLAY_BEAM, true);
-            summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-            summon->GetMotionMaster()->MovePoint(1, summon->GetPositionX(), summon->GetPositionY(),
-                summon->GetPositionZ() + WIGHT_RISE, FORCED_MOVEMENT_NONE, 1.5f, 0.0f, false, true);
+            summon->CastSpell(summon, SPELL_BIRTH, true);
             summon->m_Events.AddEventAtOffset([summon]()
             {
                 summon->InterruptNonMeleeSpells(false);
@@ -1388,9 +1380,8 @@ namespace
                 Unit* t = RandomPlayer(false);
                 if (!t)
                     return;
-                Position pos = me->GetNearPosition(8.0f + 3.0f * float(_raise % 3), 2.4f * float(_raise));
-                pos.m_positionZ -= WIGHT_RISE;
-                me->SummonCreature(NPC_DAMNED_WIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                me->SummonCreature(NPC_DAMNED_WIGHT, me->GetNearPosition(8.0f + 3.0f * float(_raise % 3),
+                    2.4f * float(_raise)), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                 if (_raise++ % 2 == 0)
                     CastAt(t->GetPosition(), SPELL_CHOKING_CLOUD);
             }
