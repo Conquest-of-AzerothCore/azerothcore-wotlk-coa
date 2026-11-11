@@ -2863,25 +2863,25 @@
     "clause": "Increases the duration of Interdict by $/1000;s1 sec",
     "labels": [
       "712678 effect_value e0 #0",
-      "712678 e0",
       "712678 behaviour_metric_delta duration",
       "712678 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the placeholder 712678 e0 (unmodelled) is dropped (trial-o, 2026-11-11): unmodelled_effects records that AscensionTemplarContracts.cpp dummies effect 0 at load and a scripted hook adds the 2000 ms; its verdict stays unmodelled and measures nothing, the clause is measured by the duration delta and the expiry pair"
   },
   {
     "spell": 712678,
     "clause": "and its cooldown by $/1000;s2 sec",
     "labels": [
       "712678 effect_value e1 #1",
-      "712678 e1",
       "712678 behaviour_metric_delta cooldown",
       "712678 cost_gate 560116 without",
       "712678 cost_gate 560116 base",
       "712678 cost_gate 560116 with",
       "712678 cost_gate 560116 beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the placeholder 712678 e1 (unmodelled) is dropped (trial-o, 2026-11-11): unmodelled_effects records that effect 1 is dummied at load and the +5000 ms is a scripted cast hook; its verdict stays unmodelled and measures nothing, the clause is measured by the cooldown delta and the lengthened-cooldown gate"
   },
   {
     "spell": 800424,
