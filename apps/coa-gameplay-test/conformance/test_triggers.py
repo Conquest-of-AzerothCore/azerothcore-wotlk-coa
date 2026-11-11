@@ -2334,6 +2334,12 @@ class TakenHitTriggerTests(unittest.TestCase):
                              for step in scenario['steps']))
         self.assertEqual(expectation.check, GATE_ABSENCE_CHECK)
 
+    def test_a_gate_absence_suffix_names_its_label(self):
+        _, [plain] = gate_absence_scenario(CLASS_FILE, self.gate_entry(), 0)
+        _, [named] = gate_absence_scenario(CLASS_FILE, {**self.gate_entry(), 'label_suffix': 'dungeon_boss'}, 0)
+        self.assertEqual(plain.label, f'{SACRED_DEFENSE} gate_absence_count')
+        self.assertEqual(named.label, f'{SACRED_DEFENSE} gate_absence_count dungeon_boss')
+
     def test_a_gate_absence_on_a_taken_hit_needs_a_striker(self):
         entry = self.gate_entry()
         with self.assertRaises(ValueError):

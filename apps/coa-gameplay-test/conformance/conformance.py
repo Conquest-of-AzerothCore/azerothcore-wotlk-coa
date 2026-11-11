@@ -310,7 +310,7 @@ def add_trigger(writer: ManifestWriter, entry: dict):
     elif entry.get('kind') is None and not entry.get('status') and shares_trigger_aura(class_file, entry):
         key_parts = (aura, entry['trigger'].get('spell', entry['trigger']['action']))
     elif entry.get('kind') == GATE_ABSENCE_KIND:
-        key_parts = (aura, 'gate')
+        key_parts = (aura, 'gate', *([entry['label_suffix']] if entry.get('label_suffix') else []))
     else:
         key_parts = (aura,)
     key = scenario_key(class_file['name'], 'trigger', *key_parts)

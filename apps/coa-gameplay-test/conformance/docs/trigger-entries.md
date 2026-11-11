@@ -137,7 +137,9 @@ side and the caster's copy as the observed side; a magic copy is judged after th
 resist (`target_steps` reads the striker). The gate absence learns only the aura and strikes from the creature
 whose kind withholds the gate. Sacred Defense strikes with 32247 (a flat 1000 physical, `SPELL_ATTR3_ALWAYS_HIT`):
 Harvest Golem 36 reads 0.1316 against 0.15 x 0.88 with 273 strikes back in 273 hits, and Heroic Training Dummy
-31146, a boss by `type_flags` 4, reads 0 in 273 (diagnostic `20261111-222153`).
+31146, a boss by `type_flags` 4, reads 0 in 273 (diagnostic `20261111-222153`). A `gate_absence` entry may set `label_suffix`
+(label `<aura> gate_absence_count <suffix>`, scenario key `(<aura>, "gate", <suffix>)`), so one aura can withhold
+several gates (ADR 0184): Sacred Defense's second arm strikes from Sneed 643, a dungeon boss by its instance encounter.
 
 ### Cooldown-delta trigger entries
 
