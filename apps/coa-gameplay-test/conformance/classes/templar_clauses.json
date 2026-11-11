@@ -3321,9 +3321,11 @@
     "clause": "increasing your melee haste by $s2%",
     "labels": [
       "801466 effect_value e1 #0",
-      "801466 aura_amount e1 #0"
+      "801466 aura_amount e1 #0",
+      "801466 behaviour_metric_delta haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the swing time reads 2500 ms before the Libram cast and 2083.33 ms (2500 / 1.20) after it, a learned contrast on the stat the clause names"
   },
   {
     "spell": 801466,
@@ -3338,9 +3340,11 @@
     "spell": 801466,
     "clause": "for $d",
     "labels": [
-      "801466 aura_duration_ms #2"
+      "801466 aura_duration_ms #2",
+      "801466 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 801466 after its cast on the caster: present 19500-19575 ms, absent 20500-20625 ms"
   },
   {
     "spell": 801466,

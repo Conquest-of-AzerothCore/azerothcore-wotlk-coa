@@ -1723,6 +1723,21 @@
   ],
   "behaviours": [
     {
+      "spell": 801466, "variant": "haste", "label_suffix": "haste",
+      "name": "Libram of Zeal", "kind": "metric_delta",
+      "quote": "increasing your melee haste by", "expected": 2083.333,
+      "trigger_spell": 801466, "target": "caster", "cast_in_before": false,
+      "metric": "attack_time_ms", "fields": {"hand": 0},
+      "before_expected": 2500, "wait_ms": 500, "tolerance": 0.01,
+      "observe_source": "$s2 = 20 (801466 EffectBasePoints[1] 19, EffectDieSides[1] 1): Effect[1] aura 138 SPELL_AURA_MOD_MELEE_HASTE. attack_time_ms reads UNIT_FIELD_BASEATTACKTIME, the hasted swing time: the reference staff 2495 swings in 2500 ms (class file weapon speed_ms), 2500 / 1.20 = 2083.333 ms with the Libram cast on the caster; before the cast, 2500."
+    },
+    {
+      "spell": 801466, "name": "Libram of Zeal", "kind": "cast_applies_aura",
+      "quote": "for", "expected_ms": 20000,
+      "applied_aura": 801466, "target": "caster",
+      "observe_source": "801466 DurationIndex 18 (20000 ms), cast on the caster (EffectImplicitTargetA 1); its expiry pair times the stated duration"
+    },
+    {
       "spell": 572027, "name": "Righteous Upheaval", "kind": "hit_ratio", "variant": "zealotry_stacks", "label_suffix": "zealotry_stacks",
       "quote": "for each time you triggered Zealotry during your Oath Chain", "expected": 1.5,
       "observe_spell": 572027, "learn": [572027],
