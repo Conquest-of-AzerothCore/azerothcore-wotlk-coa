@@ -267,7 +267,7 @@ namespace
     constexpr uint32 SETIS_MAX_FLEX = 40;
     constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
     constexpr uint32 ITEM_BAZAAR_TOKEN = 975001;
-    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 978059;
+    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 1615011;
     constexpr uint32 SETIS_RUNES = 250;
     constexpr uint32 SETIS_TOKENS_MIN = 100;
     constexpr uint32 SETIS_TOKENS_MAX = 150;
@@ -1114,6 +1114,7 @@ namespace
         void Reset() override
         {
             custom_world_boss_coa::Reset();
+            me->SetLootMode(me->GetMap()->IsHeroic() ? LOOT_MODE_HARD_MODE_1 : LOOT_MODE_DEFAULT);
             ApplyFlex();
             _summons.DespawnAll();
             _nextVeil = 80;
