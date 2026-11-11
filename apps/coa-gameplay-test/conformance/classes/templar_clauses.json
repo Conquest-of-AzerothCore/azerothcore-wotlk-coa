@@ -2490,7 +2490,7 @@
       "706325 proc_rate 801450 804906"
     ],
     "kind": "claim",
-    "reason": "out of melee range: 0 Zealotry in the Condemn ticks with the caster 18 yd from the dummy (gate_absence away_yd 15); in range: the Condemn rate at 15%. Check at AscensionTemplarEvents.cpp:83-85 (IsWithinMeleeRange)"
+    "reason": "out of melee range: 0 Zealotry in 594 Condemn ticks with the caster 6.5 yd from the dummy, outside the 5 yd melee range (IsWithinMeleeRange, Unit.cpp:911-931) and inside Zealotry 801450 own 7.775 yd range, where the closing cast of 801450 goes through; in range: the Condemn rate at 15%. Check at AscensionTemplarEvents.cpp:83-85. The first version stood 18 yd away, where Zealotry own range hid the gate (review I1)"
   },
   {
     "spell": 706357,

@@ -694,7 +694,8 @@
       "trigger_spell_text": "Condemn",
       "trial_metric": "spell_damage_count",
       "gate_text": "if you are within melee range of your target",
-      "away_yd": 15.0,
+      "away_yd": 3.5,
+      "away_reason": "6.5 yd from the dummy: outside melee range, max(1.5 + 1.275 + 4/3, 5) = 5 yd (Unit::GetMeleeRange, Unit.cpp:927-931, IsWithinMeleeRange :911-925; combat reaches 1.5 and 1.275 read in diagnostic 20261111-194014), and inside Zealotry 801450's own range, 5 + 1.5 + 1.275 = 7.775 yd (SpellRange 192, IsWithinCombatRange :895-908: cast at 7.5 yd went through, at 8 yd refused). At 18 yd the strike's own range hid the gate. The scenario ends with a cast of 801450 at that position, which must go through.",
       "observe_spell": 801450,
       "observe_source": "EffectTriggerSpell[0] of 706325",
       "observe_metric": "spell_cast_count"
