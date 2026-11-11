@@ -1331,9 +1331,12 @@ namespace
             summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);
             summon->m_Events.AddEventAtOffset([summon]()
             {
-                summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
                 summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
             }, 1500ms);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+            }, 2900ms);
             ObjectGuid bossGuid = me->GetGUID();
             summon->m_Events.AddEventAtOffset([summon, bossGuid]()
             {
