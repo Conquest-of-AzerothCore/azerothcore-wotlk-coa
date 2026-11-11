@@ -677,6 +677,22 @@ class ProcScenarioTest(unittest.TestCase):
         model = expectation.model
         self.assertEqual((model['chance_spell'], model['chance_kind']), (VINDICATION, 'percent'))
 
+    def test_attempt_auras_are_set_before_every_cast(self):
+        entry = {**templar_proc(OATH_OF_VINDICATION),
+                 'attempt_auras': [{'spell': OATH_OF_VINDICATION, 'stacks': 0, 'source': 'seeded'}]}
+        steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        for earlier, cast in zip([0] + casts, casts):
+            fixtures = [step for step in steps[earlier:cast]
+                        if step['action'] == 'set_aura' and step['stacks'] == 0]
+            self.assertEqual(len(fixtures), 1)
+
+    def test_an_attempt_aura_without_its_source_is_refused(self):
+        entry = {**templar_proc(OATH_OF_VINDICATION),
+                 'attempt_auras': [{'spell': OATH_OF_VINDICATION, 'stacks': 0}]}
+        with self.assertRaises(ValueError):
+            proc_scenario(CLASS_FILE, entry)
+
     def test_an_applied_by_without_its_source_is_refused(self):
         entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN}}
         with self.assertRaises(ValueError):

@@ -254,9 +254,21 @@ def trials_step(entry: dict, label: str) -> dict:
     return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET)
 
 
+def attempt_auras(entry: dict) -> list[dict]:
+    auras = entry.get('attempt_auras', [])
+    if auras and entry['trigger']['action'] != CAST:
+        raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
+    for aura in auras:
+        if set(aura) != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) or aura['stacks'] < 0:
+            raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} must name its spell, stacks and source')
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+            for aura in auras]
+
+
 def attempt_fixtures(entry: dict) -> list[dict]:
     spell = trigger_spell(entry)
     fixtures = [{'action': 'restore_charges', 'actor': CASTER, 'spell': spell}] if counts_charges(entry) else []
+    fixtures += attempt_auras(entry)
     if trigger_target(entry) == ALLY:
         fixtures.append({'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD})
     return fixtures
