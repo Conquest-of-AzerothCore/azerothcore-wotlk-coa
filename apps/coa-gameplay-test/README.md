@@ -585,7 +585,7 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `target_owned_entry` in place of `target` sends it at the player's living creature of that entry.
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
-`level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `has_talent`, `talent_points`, `active_talent_spec`,
+`level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `spell_rank` (the spell's rank in its chain, 1 when unranked), `first_rank_spell` (the first rank of its chain, itself when unranked), `has_talent`, `talent_points`, `active_talent_spec`,
 `cooldown_ms`, `spell_cooldown_packet_ms`, `item_loot_releases`, `item_count`, `carried_item_count`, `bank_bag_slots`, `guild_bank_tabs`, `aura`, `aura_stacks`, `aura_charges`,
 `aura_duration_ms`, `aura_amount`, `pet_entry`, `pet_aura_stacks`, `owned_creature_count`, `owned_creature_spacing`,
 `charm_entry`, `charm_distance`, `charm_aura_stacks`, `owned_creature_sent_faction`, `controls_self`, `private_instance`, `dynamic_object`,

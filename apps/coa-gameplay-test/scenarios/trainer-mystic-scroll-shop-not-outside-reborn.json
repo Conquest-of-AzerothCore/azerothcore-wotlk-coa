@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Class trainers offer no Mystic Scroll shop outside Warcraft Reborn",
+  "contract": [
+    "The trainer Mystic Scroll shops belong to Warcraft Reborn. On any other realm a paladin at a paladin trainer sees",
+    "the trainer's own menu only."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8573.0, "y": 878.0, "z": 106.5, "o": 0 },
+  "players": [
+    { "id": "pal", "name": "Shopnoreborn", "race": 1, "class": 2, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "sammuel", "owner": "pal", "entry": 925, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "gossip_hello", "actor": "pal", "target": "sammuel" },
+    { "action": "assert", "label": "CONTROL: the trainer offers training", "actor": "pal", "metric": "gossip_option_text",
+      "index": 0, "text": "Please teach me.", "equals": 1 },
+    { "action": "assert", "label": "THE FIX: no Mystic Scrolls option", "actor": "pal", "metric": "gossip_option_text",
+      "index": 1, "text": "|TInterface/ICONS/Ability_ThunderBolt:30:30:-18:0|t|rMystic Scrolls", "equals": 0 }
+  ]
+}
