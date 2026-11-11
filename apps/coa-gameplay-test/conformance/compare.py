@@ -35,8 +35,8 @@ from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
-from procs import (AMBIGUOUS_TOOLTIP, CAST, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK, chance_of,
-                   wilson_interval)
+from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK,
+                   chance_of, wilson_interval)
 from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
@@ -944,9 +944,11 @@ def stated_chance(manifest: dict, run: Run, expectation: Expectation, tooltips: 
         caster = caster_stats_from(run.values, manifest['class_file'])
     except KeyError as error:
         return replace(base, measured=measured, explanation=f'base measurement {error} is missing from {run.key}')
-    chance = chance_of(tooltips.read(expectation.rank_id, caster).values, expectation.displayed)
+    shown = expectation.model.get('chance_spell', expectation.rank_id)
+    chance = chance_of(tooltips.read(shown, caster).values, expectation.displayed,
+                       expectation.model.get('chance_kind', CHANCE_KIND))
     if chance is None:
-        return replace(base, measured=measured, explanation=f'the tooltip of {expectation.rank_id} no longer shows '
+        return replace(base, measured=measured, explanation=f'the tooltip of {shown} no longer shows '
                                                             f'the chance token {expectation.displayed}')
     if abs(chance - expectation.model['chance_pct']) > FLOAT_EPSILON:
         return replace(base, measured=measured, expected=chance / 100,

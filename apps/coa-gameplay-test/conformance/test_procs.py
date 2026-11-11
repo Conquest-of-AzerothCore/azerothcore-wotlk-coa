@@ -656,6 +656,16 @@ class ProcScenarioTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             proc_scenario(CLASS_FILE, entry)
 
+    def test_an_applied_aura_must_show_its_chance_as_its_own_percent(self):
+        entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN, 'source': 'seeded'}}
+        with self.assertRaises(ValueError):
+            proc_plan(CLASS_FILE, entry)
+
+    def test_an_applied_by_without_its_source_is_refused(self):
+        entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN}}
+        with self.assertRaises(ValueError):
+            proc_plan(CLASS_FILE, entry)
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TemplarProcEntriesTest(unittest.TestCase):
@@ -680,7 +690,8 @@ class TemplarProcEntriesTest(unittest.TestCase):
     def test_every_entry_cites_its_dbc_tooltip_and_proc_fields(self):
         for entry in CLASS_FILE['procs']:
             with self.subTest(aura=entry['aura']):
-                self.assertEqual(entry['tooltip'], self.spell(entry['aura'], 'Description[enUS]'))
+                shown = entry.get('applied_by', {}).get('spell', entry['aura'])
+                self.assertEqual(entry['tooltip'], self.spell(shown, 'Description[enUS]'))
                 self.assertEqual(entry['name'], self.spell(entry['aura'], 'SpellName[enUS]'))
                 self.assertIn(str(entry['aura']), entry['dbc'])
                 for spell_id, fields in entry['dbc'].items():

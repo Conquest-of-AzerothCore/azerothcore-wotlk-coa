@@ -14,6 +14,7 @@ AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
 ENTRY_STATUSES = {'ambiguous_tooltip': AMBIGUOUS_TOOLTIP, 'unmodelled': UNMODELLED}
 RATE_HALF_WIDTH = 0.025
 CHANCE_KIND = 'chance_pct'
+PERCENT_KIND = 'percent'
 ATTACK = 'attack'
 CAST = 'cast'
 CAST_COUNT = 'spell_cast_count'
@@ -87,16 +88,48 @@ def trigger_key(entry: dict) -> int | str:
     return trigger['spell'] if trigger['action'] == CAST else trigger['action']
 
 
-def chance_of(values: Sequence, token: str) -> float | None:
-    return next((value.value for value in values if value.kind == CHANCE_KIND and value.text == token), None)
+def chance_of(values: Sequence, token: str, kind: str = CHANCE_KIND) -> float | None:
+    return next((value.value for value in values if value.kind == kind and value.text == token), None)
+
+
+def applied_by(entry: dict) -> int | None:
+    applied = entry.get('applied_by')
+    if applied is None:
+        return None
+    if not isinstance(applied, dict) or set(applied) != {'spell', 'source'} or not isinstance(applied['spell'], int):
+        raise ValueError(f'Proc {entry["aura"]} applied_by must name the spell whose cast grants it and the source')
+    return applied['spell']
+
+
+def chance_source(entry: dict) -> tuple[int, str]:
+    granted = applied_by(entry)
+    if granted is None:
+        return entry['aura'], CHANCE_KIND
+    if entry['chance_token'] != f'${entry["aura"]}s1':
+        raise ValueError(f'Proc {entry["aura"]} applied by {granted} must show its chance as ${entry["aura"]}s1')
+    return granted, PERCENT_KIND
 
 
 def proc_chance(class_file: dict, entry: dict) -> float:
-    readout = read_tooltip(records_of(class_file).dbc, entry['aura'], reference_caster(class_file))
-    chance = chance_of(readout.values, entry['chance_token'])
+    shown, kind = chance_source(entry)
+    readout = read_tooltip(records_of(class_file).dbc, shown, reference_caster(class_file))
+    chance = chance_of(readout.values, entry['chance_token'], kind)
     if chance is None:
-        raise ValueError(f'The tooltip of {entry["aura"]} shows no chance token {entry["chance_token"]}')
+        raise ValueError(f'The tooltip of {shown} shows no chance token {entry["chance_token"]}')
     return chance
+
+
+def chance_model(entry: dict) -> dict:
+    if applied_by(entry) is None:
+        return {}
+    shown, kind = chance_source(entry)
+    return {'chance_spell': shown, 'chance_kind': kind}
+
+
+def aura_steps(entry: dict) -> list[dict]:
+    if applied_by(entry) is None:
+        return [{'action': 'learn', 'actor': CASTER, 'spell': entry['aura']}]
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': entry['aura'], 'stacks': 1}]
 
 
 def trigger_spell(entry: dict) -> int:
@@ -369,7 +402,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         raise ValueError(f'Proc {entry["aura"]} has parts 0 to {plan.parts - 1}, not {part}')
     aura = entry['aura']
     labels = proc_measurements(aura)
-    steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
+    steps = aura_steps(entry)
     limit = per_trigger_limit(entry)
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
@@ -385,6 +418,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
              'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms,
              'trigger': dict(entry['trigger']), 'proc_spell': entry['proc_spell'],
+             **chance_model(entry),
              'event_metric': entry['event_metric'], 'events_per_proc': entry.get('events_per_proc', 1),
              'measurements': labels, 'event_labels': event_labels(entry, plan),
              'exclude_trigger_casts': excludes_trigger_casts(entry),
