@@ -3,7 +3,7 @@
 -- (gameplay footage). Entries, names, subnames and Maelira's two reins at 100g come from the db.exil.es mirror;
 -- positions from in-game .gps matched to the footage. Level, flags and modifiers follow Garion Hunter and Pol Hunter
 -- in Goldshire, with the Darnassus faction. Ascension's displays 449168/449169 do not resolve in the client, so
--- Sylindra uses 1727 (closest match) and Maelira 4483 (placeholder). Sylindra trains from Jartsam's riding list
+-- Sylindra uses 1727 (closest match) and Maelira 9270 (placeholder). Sylindra trains from Jartsam's riding list
 -- (trainer 40) and his riding gossip (menu 4019), which teaches every Alliance race.
 INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`,
     `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`,
@@ -47,7 +47,7 @@ DELETE FROM `creature_template_model` WHERE `CreatureID` IN (449168, 449169);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`,
     `VerifiedBuild`) VALUES
 (449169, 0, 1727, 1, 1, 0),
-(449168, 0, 4483, 1, 1, 0);
+(449168, 0, 9270, 1, 1, 0);
 
 DELETE FROM `creature_default_trainer` WHERE `CreatureId` = 449169;
 INSERT INTO `creature_default_trainer` (`CreatureId`, `TrainerId`) VALUES
