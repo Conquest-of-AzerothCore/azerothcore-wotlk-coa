@@ -1,0 +1,11 @@
+[
+  {
+    "build": "84dc5c4c0a7867c1e69e35a0ccce03f73f936d080c2981edc8f70447919dd807",
+    "effect": 0,
+    "evidence": ".agents/plans/class-conformance-3/lean/x1-out/k3.json",
+    "label": "300514 spell_duration 102208 #3",
+    "result": "consumed",
+    "route": "K3",
+    "spell": 102208
+  }
+]
