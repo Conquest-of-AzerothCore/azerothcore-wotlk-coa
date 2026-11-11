@@ -92,7 +92,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9780932, 978090, 0, 0, 0, 1, 1, 3322.411, -4846.606, 172.1479, 5.1839, 300, 0, 0),
 (9780938, 978090, 890, 10281, 10281, 15, 1, 3313, -4844.6, 173.2892, 0, 300, 0, 0);
 
--- In his map Atal'zul stands where the diagonals between the four altars cross, Zul'rogg starts on top of the pyramid and jumps down when the
+-- In his map Atal'zul stands where the diagonals between the four altars cross, Zul'rogg starts on top of the
+-- pyramid and jumps down when the
 -- Soul Vessels wake him. Each Soul Vessel is a crystal (the creature) on an altar (978093, a goober players use to
 -- click the vessel); breaking it hides the crystal and leaves the altar.
 UPDATE `creature` SET `position_x` = 3363.6626, `position_y` = -4904.645, `position_z` = 159.2667,
