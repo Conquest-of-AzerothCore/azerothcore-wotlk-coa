@@ -129,3 +129,12 @@ REPLACE INTO `creaturemodeldata_dbc` (`ID`, `Flags`, `ModelName`, `SizeClass`, `
   `GeoBoxMinX`, `GeoBoxMinY`, `GeoBoxMinZ`, `GeoBoxMaxX`, `GeoBoxMaxY`, `GeoBoxMaxZ`, `WorldEffectScale`,
   `AttachedEffectScale`, `MissileCollisionRadius`, `MissileCollisionPush`, `MissileCollisionRaise`) VALUES
 (113990, 0, 'Creature\\korrim\\korrim.m2', 3, 1.0, 3, 1, 18.0, 12.0, 1.0, 0, 2, 11, 193, 4.0, 2.083, 0.0, -2.2947, -4.1475, -0.0213, 2.4742, 4.0076, 7.679, 1.0, 0.75, 0.0, 0.0, 0.0);
+
+-- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 held.
+DELETE FROM `item_loot_template` WHERE `Entry` IN (978059, 1615011);
+INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
+  `MinCount`, `MaxCount`, `Comment`) VALUES
+(1615011, 978059, 978059, 100, 0, 1, 0, 1, 1, 'Treasures of Azeroth - a Heroic Dungeon epic'),
+(1615011, 978060, 978060, 5, 0, 1, 0, 1, 1, 'Treasures of Azeroth - 5% a world boss item'),
+(1615011, 400750, 0, 100, 0, 1, 0, 15, 15, 'Treasures of Azeroth - 15 Raider''s Commendations'),
+(1615011, 978061, 978061, 100, 0, 1, 0, 4, 4, 'Treasures of Azeroth - 1000 Runes of Descension (250 x 4)');
