@@ -23,6 +23,7 @@ from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
 from tooltip import CasterStats, Displayed, Readout, read_tooltip
 from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RANGE_YD, Expectation,
+                    effect_modifier_label,
                     calc_amount_hooks_label, mean_samples, sample_labels, structure_stats, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -153,16 +154,18 @@ class Workspace:
 
 
 class FakeTooltips:
-    def __init__(self, tokens, points=None, fields=None):
+    def __init__(self, tokens, points=None, fields=None, unscaled=None):
         self.tokens = tokens
         self.points = points or {}
         self.fields = fields or {}
+        self.unscaled = unscaled
 
     def spell_field(self, spell_id, name):
         return self.fields.get((spell_id, name), 0)
 
-    def read(self, rank_id, caster, forced=None):
-        values = self.tokens(caster, forced) if callable(self.tokens) else list(self.tokens)
+    def read(self, rank_id, caster, forced=None, unscaled=False):
+        tokens = self.unscaled if unscaled and self.unscaled else self.tokens
+        values = tokens(caster, forced) if callable(tokens) else list(tokens)
         return Readout(values, [])
 
     def effect_points(self, spell_id, effect):
@@ -339,20 +342,28 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'ok')
         self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
 
-    def per_level_verdict(self, reads, rate=1.085):
+    def per_level_verdict(self, reads, rate=1.085, modifiers=(1000, 1000), tooltip_per_level=8.68):
         text = '${$m2+0+$AP*0.805+$sph*0.85}'
         label = '1001 effect_value e0 #0'
 
         def tokens(caster, forced):
             roll = forced[2] if forced else 105
-            return [Displayed(text, roll + 8.68 + 251.965, 0, 'flat')]
+            return [Displayed(text, roll + tooltip_per_level + 251.965, 0, 'flat')]
+
+        def unscaled(caster, forced):
+            roll = forced[2] if forced else 105
+            return [Displayed(text, roll + 251.965, 0, 'flat')]
 
         fields = {(RANK, 'EffectRealPointsPerLevel[0]'): rate, (RANK, 'BaseLevel'): 22, (RANK, 'SpellLevel'): 22,
                   (RANK, 'MaxLevel'): 30}
         item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
         labels = sample_labels(label, len(reads))
         steps = [assert_step(name, str(read)) for name, read in zip(labels, reads)]
-        return self.value_run([item], [text], steps, FakeTooltips(tokens, {(RANK, 0): (101, 7)}, fields))[label]
+        if modifiers is not None:
+            steps += [assert_step(effect_modifier_label(label, op), str(value))
+                      for op, value in zip(('all', 0), modifiers)]
+        reader = FakeTooltips(tokens, {(RANK, 0): (101, 7)}, fields, unscaled)
+        return self.value_run([item], [text], steps, reader)[label]
 
     def test_reads_the_per_level_truncation_reproduces_are_known_engine_rounding(self):
         reads = [361, 362, 363, 365, 366, 367, 362, 366, 364, 363, 361, 367, 365, 366, 362, 364, 363, 366, 365, 364]
@@ -361,6 +372,21 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['engine_range'], [361.0, 367.0])
         self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['truncated_to'], 8.0)
         self.assertIn('per-level term truncated before the sum (SpellInfo.cpp:497)', verdict.explanation)
+
+    def test_an_effect_modifier_leaves_a_low_read_an_unmodelled_alert(self):
+        reads = [361, 362, 363, 365, 366, 367, 362, 366, 364, 363, 361, 367, 365, 366, 362, 364, 363, 366, 365, 364]
+        for modifiers in ((1100, 1000), (1000, 1050), None):
+            verdict = self.per_level_verdict(reads, modifiers=modifiers)
+            self.assertEqual(verdict.status, 'alert')
+            self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING], PER_LEVEL_UNMODELLED)
+            self.assertIn(PER_LEVEL_UNMODELLED, verdict.explanation)
+            self.fresh()
+
+    def test_a_level_clamp_unlike_stock_leaves_a_low_read_an_unmodelled_alert(self):
+        reads = [361, 362, 363, 365, 366, 367, 362, 366, 364, 363, 361, 367, 365, 366, 362, 364, 363, 366, 365, 364]
+        verdict = self.per_level_verdict(reads, rate=0.6)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('where stock CalcValue adds 4.8', verdict.explanation)
 
     def test_a_low_read_both_truncations_reproduce_is_named_by_the_per_level_term(self):
         verdict = self.per_level_verdict([362, 365, 367])

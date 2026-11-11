@@ -449,7 +449,16 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   per-roll value less that lost fraction, and the fraction changes the integer set the rolls give, the verdict is
   "known engine rounding, per-level term truncated before the sum", judged around the engine mean, and
   `detail['per_level_rounding']` holds the term, its truncation, the loss and the engine's integer range. The model
-  has no effect-modifier factor. A `hit_mean`, `melee_mean` or `periodic_total` alert on a rank with such a term says
+  has no effect-modifier factor and follows stock's level clamp, so it is used only when the run shows both hold:
+  every value scenario reads, for an effect with a per-level term, `spell_modifier` on base 1000 for
+  `SPELLMOD_ALL_EFFECTS` and the effect's own `SPELLMOD_EFFECTn` (`<label> effect_modifier all` and `e<n>`, the
+  modifiers `Unit::ApplyEffectModifiers` applies), and the tooltip's own per-level part (the token read with and
+  without the effect's `EffectRealPointsPerLevel`) must equal stock's `levels x rate`. A modifier other than 1000, a
+  run without those reads, or a different per-level part leaves a read outside the range an `alert` labelled
+  "per-level truncation, engine computation not modelled", never `ok`. Known limit: a CoA
+  `ModifySpellEffectBaseValue` hook that multiplies the value (such as `ascension_scaling_base`,
+  AscensionScalingBase.cpp:51) or changes the level is not detected; the tool cannot see it. A `hit_mean`,
+  `melee_mean` or `periodic_total` alert on a rank with such a term says
   "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
   needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the
   roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar

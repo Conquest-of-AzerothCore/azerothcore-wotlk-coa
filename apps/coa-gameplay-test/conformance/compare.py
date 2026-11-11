@@ -42,12 +42,13 @@ from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUE
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE,
                    TALENT_DELTA, levers, mean_interval, ratio_interval)
-from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
+from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
+                     Unreadable)
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
                       PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
-from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GAP_CLOSER_DISTANCE,
-                    GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation, calc_amount_hooks_label,
-                    dataset, mean_samples, roll_range, sample_labels)
+from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFECTS, FIXED_DIE_SIDES,
+                    GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation,
+                    calc_amount_hooks_label, dataset, effect_modifier_label, mean_samples, roll_range, sample_labels)
 
 NOT_MEASURED = 'not_measured'
 STATUSES = ('ok', 'tolerated', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials',
@@ -114,6 +115,7 @@ PERCENT_PATH_RELATIONS = frozenset({'scale'})
 ENGINE_ROUNDING = 'engine_rounding'
 PER_LEVEL_ROUNDING = 'per_level_rounding'
 PER_LEVEL_UNMODELLED = 'per-level truncation, engine computation not modelled'
+PER_LEVEL_TERM_TOLERANCE = 1e-3
 CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
@@ -203,7 +205,8 @@ class BuildMismatch(ValueError):
 
 
 class TooltipSource(Protocol):
-    def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None) -> Readout: ...
+    def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None,
+             unscaled: bool = False) -> Readout: ...
 
     def effect_points(self, spell_id: int, effect: int) -> tuple[int, int]: ...
 
@@ -224,8 +227,10 @@ class DbcTooltips:
         self.records = Records(self.dbc)
         self.class_file = class_file or {}
 
-    def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None) -> Readout:
-        records = self.records if forced is None else ForcedPoints(self.dbc, *forced)
+    def read(self, rank_id: int, caster: CasterStats, forced: tuple[int, int, int] | None = None,
+             unscaled: bool = False) -> Readout:
+        points = UnscaledForcedPoints if unscaled else ForcedPoints
+        records = self.records if forced is None else points(self.dbc, *forced)
         description = records.field('Spell', rank_id, 'Description[enUS]')
         readout = Tooltip(records, rank_id, caster).read(description)
         literal = literal_values(self.class_file, rank_id, description)
@@ -568,7 +573,9 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     low = expected - half - (TRUNCATED_READ if expected > 0 else 0)
     high = expected + half + (TRUNCATED_READ if expected < 0 else 0)
     per_level = per_level_loss(tooltips, spell_id, effect, tokens.caster.level)
-    engine = [value - per_level.loss for value in values] if per_level and per_level.loss else None
+    unmodelled = (per_level_model_gap(base.label, run, tooltips, expectation, tokens, index, rolls, per_level)
+                  if per_level and per_level.loss else None)
+    engine = [value - per_level.loss for value in values] if per_level and per_level.loss and not unmodelled else None
     rounded, outside = truncation_reads(values, reads)
     lowered = {read: value for read, value in zip(map(engine_truncation, engine), engine)} if engine else {}
     if engine and set(lowered) == {engine_truncation(value) for value in values}:
@@ -593,6 +600,9 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
         cause = (f'; per-level term {per_level.term:g} truncated to {per_level.truncated:g} (SpellInfo.cpp:497) '
                  f'reproduces reads {sorted(lowered)} but not {[read for read in reads if read not in lowered]}'
                  if engine else '')
+        if unmodelled:
+            cause = f'; {PER_LEVEL_UNMODELLED}: {unmodelled}'
+            detail = {**detail, PER_LEVEL_ROUNDING: PER_LEVEL_UNMODELLED}
         return replace(base, status='alert', measured=mean, expected=expected, low=low, high=high, detail=detail,
                        explanation=f'{roll}; reads {outside} lie outside the formula range {min(values):g} to '
                                    f'{max(values):g} and are not its int32 truncation at SpellEffectInfo::CalcValue '
@@ -638,6 +648,27 @@ def per_level_loss(tooltips: TooltipSource, spell_id: int, effect: int, caster_l
     term = float32(levels * rate)
     truncated = float(math.trunc(term))
     return PerLevelLoss(levels, rate, term, truncated, term - truncated)
+
+
+def per_level_model_gap(label: str, run: Run, tooltips: TooltipSource, expectation: Expectation, tokens: Tokens,
+                        index: int, rolls: range, per_level: PerLevelLoss) -> str | None:
+    spell_id, effect = token_effect(expectation)
+    modifiers = [run.values.get(effect_modifier_label(label, op)) for op in ('all', effect)]
+    if None in modifiers:
+        return 'the run reads no effect modifier of this effect'
+    if any(abs(value - EFFECT_MODIFIER_BASE) > FLOAT_EPSILON for value in modifiers):
+        return (f'an effect modifier changes {EFFECT_MODIFIER_BASE:g} to {modifiers[0]:g} (all effects) and '
+                f'{modifiers[1]:g} (effect {effect}), which the engine model does not apply')
+    forced = (spell_id, effect, rolls.start)
+    scaled = tooltips.read(expectation.rank_id, tokens.caster, forced).values
+    unscaled = tooltips.read(expectation.rank_id, tokens.caster, forced, unscaled=True).values
+    if index >= len(scaled) or index >= len(unscaled):
+        return 'the tooltip term cannot be read without its per-level part'
+    continuous = undivided(scaled[index]) - undivided(unscaled[index])
+    if abs(continuous - per_level.term) > PER_LEVEL_TERM_TOLERANCE:
+        return (f'the tooltip adds {continuous:g} per level where stock CalcValue adds {per_level.term:g} '
+                f'({per_level.levels} levels after its level clamp)')
+    return None
 
 
 def per_level_unmodelled(verdict: Verdict, tooltips: TooltipSource, rank_id: int, caster_level: int) -> Verdict:

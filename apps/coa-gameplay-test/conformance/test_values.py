@@ -14,7 +14,7 @@ from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, writ
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
 from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH,
                     GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
-                    calc_amount_hooks_label, conditional_extra_values,
+                    calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
                     foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
 
@@ -389,7 +389,17 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         item = next(item for item in expectations if item.label == VINDICATION_ROLLED_LABEL)
         self.assertEqual(item.model['samples'], 1)
         self.assertEqual([step['label'] for step in scenario['steps'] if step.get('label', '').startswith(item.label)],
-                         [item.label, calc_amount_hooks_label(item.label)])
+                         [item.label, calc_amount_hooks_label(item.label), effect_modifier_label(item.label, 'all'),
+                          effect_modifier_label(item.label, 0)])
+
+    def test_an_effect_value_with_a_per_level_term_reads_its_effect_modifiers(self):
+        scenario, expectations = self.build(VINDICATION, VINDICATION_RANK_2)
+        item = next(item for item in expectations if item.label == VINDICATION_ROLLED_LABEL)
+        labels = (effect_modifier_label(item.label, 'all'), effect_modifier_label(item.label, 0))
+        reads = [step for step in scenario['steps'] if step.get('label') in labels]
+        self.assertEqual([(step['metric'], step['op'], step['base'], step['spell']) for step in reads],
+                         [('spell_modifier', 8, 1000, VINDICATION_RANK_2),
+                          ('spell_modifier', 3, 1000, VINDICATION_RANK_2)])
 
     def test_spell_without_a_required_caster_aura_sets_no_aura(self):
         scenario, _ = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)

@@ -357,6 +357,11 @@ class ForcedPoints(Records):
         return float(self.value + per_level * self.levels_above_base(spell_id, level))
 
 
+class UnscaledForcedPoints(ForcedPoints):
+    def per_level(self, spell_id: int, effect: int) -> float:
+        return 0.0 if (spell_id, effect) == self.forced else super().per_level(spell_id, effect)
+
+
 class ScaledPeriod(Records):
     def __init__(self, dbc, spell_id: int, effect: int, duration_factor: int, amplitude_factor: int):
         super().__init__(dbc)

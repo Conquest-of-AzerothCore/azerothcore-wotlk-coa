@@ -363,6 +363,21 @@ def calc_amount_hooks_label(label: str) -> str:
     return label + CALC_AMOUNT_HOOKS_SUFFIX
 
 
+EFFECT_MODIFIER_OPS = {'all': 8, 0: 3, 1: 12, 2: 23}
+EFFECT_MODIFIER_BASE = 1000
+
+
+def effect_modifier_label(label: str, op: str | int) -> str:
+    return f'{label} effect_modifier {op if op == "all" else f"e{op}"}'
+
+
+def effect_modifier_measurements(records: Records, label: str, spell_id: int, effect: int) -> list[dict]:
+    if not records.per_level(spell_id, effect):
+        return []
+    return [measurement(effect_modifier_label(label, op), CASTER, 'spell_modifier', spell=spell_id,
+                        op=EFFECT_MODIFIER_OPS[op], base=EFFECT_MODIFIER_BASE) for op in ('all', effect)]
+
+
 def calc_amount_hooks_measurement(label: str, spell_id: int, effect: int) -> dict:
     return measurement(calc_amount_hooks_label(label), CASTER, CALC_AMOUNT_HOOKS_METRIC, spell=spell_id,
                        effect=effect)
@@ -424,8 +439,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         return measurement(label, CASTER, 'spell_effect_value', spell=rank_id, effect=effect)
 
     def effect_measurements(label: str, spell_id: int, effect: int) -> list[dict]:
-        return [measurement(label, CASTER, 'spell_effect_value', spell=spell_id, effect=effect),
-                calc_amount_hooks_measurement(label, spell_id, effect)]
+        return ([measurement(label, CASTER, 'spell_effect_value', spell=spell_id, effect=effect),
+                 calc_amount_hooks_measurement(label, spell_id, effect)]
+                + effect_modifier_measurements(records, label, spell_id, effect))
 
     def aura_measurement(label: str, metric: str, carrier_effect: int, **fields) -> dict:
         return measurement(label, metric=metric, spell=rank_id, **aura_carrier(facts, carrier_effect), **fields)
