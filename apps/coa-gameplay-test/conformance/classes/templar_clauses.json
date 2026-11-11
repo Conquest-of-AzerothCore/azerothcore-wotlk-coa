@@ -3417,8 +3417,11 @@
   {
     "spell": 803159,
     "clause": "heal allies around the target",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "803159 behaviour_count"
+    ],
+    "kind": "claim",
+    "reason": "ally_heal_breadth with both allies 17 yd from the caster and 14 yd from the dummy: healed only by a heal centred on the target, as AscensionTemplarAbilities.cpp:208-213 does (Nearby(target, 15.0f)); 0 heals before the learn"
   },
   {
     "spell": 803163,

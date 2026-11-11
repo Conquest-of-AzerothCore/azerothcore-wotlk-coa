@@ -2243,8 +2243,8 @@
     {
       "spell": 803159, "name": "Chakra of Light", "kind": "ally_heal_breadth",
       "quote": "heal allies around the target", "expected": 2,
-      "heal_spell": 803160, "trigger_spell": 572027,
-      "radius_reason": "803159's own scripted Oath Breaker hook (AscensionTemplarAbilities.cpp:192-198, per docs/trigger-entries.md's 'Chakra of Light 803844, 803159' row) casts 803160 once per Oath Breaker cast (modelled here with the same 572027 'a dominating Oath Breaker' fixture that row already uses); 803160 is SPELL_EFFECT_HEAL with EffectImplicitTargetA[0]=22 TARGET_SRC_CASTER / EffectImplicitTargetB[0]=30 TARGET_UNIT_SRC_AREA_ALLY, EffectRadiusIndex[0]=18 -> SpellRadius.dbc 15.0 yd (coa-dbc-viewer Spell 803159 and SpellRadius 18 read this session), so the heal lands on every grouped ally within 15 yd of the caster; before/after the passive is learned isolates the breadth, since 572027 alone casts nothing that heals."
+      "heal_spell": 803160, "trigger_spell": 572027, "near_distance": 17.0,
+      "radius_reason": "AscensionTemplarAbilities.cpp:208-213: on an Oath Breaker cast with 803159 known, every unit of Nearby(target, 15.0f) that is the player or in its raid is healed by 803160, which AscensionTemplarContracts.cpp:220-223 retargets to TARGET_UNIT_TARGET_ALLY. The allies stand 17 yd from the caster and 14 yd from the dummy at 3 yd: inside 15 yd of the target, outside 15 yd (plus their size) of the caster, so a heal centred on the caster (803160's own TARGET_SRC_CASTER, radius index 18, 15 yd) would miss them. 572027 alone casts nothing that heals."
     },
     {
       "spell": 806521, "name": "Titanstrike", "kind": "cast_gate",
