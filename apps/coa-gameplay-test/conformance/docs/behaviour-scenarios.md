@@ -1109,7 +1109,9 @@ judge takes the outcome rate of each arm, needs 100 swings in each, and compares
 and the reading must lie inside it (ADR 0161). Parry Dance 804912 sets 560651 at 5 stacks (15 points) without
 learning 804912, so that its own parry rating from Agility stays out of the contrast; Graceful Fighter 705303 is
 known in both arms, since the caster parries only once it or a parry-percent aura sets `CanParry`; its attackers
-carry Molten 62531 and Enrage 2116852 to swing four times as often. `state_metric` (here `parry_chance`) is read
+carry Self Root Forever (No Visual) 42716, because `stationary` did not keep them in front (a diagnostic read three
+of eight behind the caster, where no swing is parried), and Molten 62531 and Enrage 2116852 to swing four times as
+often. `state_metric` (here `parry_chance`) is read
 once per arm, after the first refresh, and reported, not judged.
 
 ### Uncapped areas and controlled leech ratios

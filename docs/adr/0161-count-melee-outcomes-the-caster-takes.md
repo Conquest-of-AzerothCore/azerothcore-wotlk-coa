@@ -36,5 +36,8 @@ victim state that says whether the swing was parried.
   377 to 379.
 - Without the attackers' haste fixtures, eight attackers at 2.0 s swing about 14,000 times an hour, short of the
   half-width the band needs; Molten 62531 and Enrage 2116852 make them swing four times as often.
+- `stationary` does not keep engaged attackers in place: they spread around the caster, and a swing from behind is
+  never parried, so the parried share fell by a third in some runs. A root aura (42716) holds them in front.
+- `set_aura` keeps the remaining duration of an aura it finds, so the kind removes the aura before setting it again.
 - Any outcome rate of incoming melee (dodge, block, miss, parry) can use the kind.
 - Tests: `test_runner.test_melee_attacks_taken_keeps_one_victim_state`, `test_behaviours.TakenOutcomeTests`.
