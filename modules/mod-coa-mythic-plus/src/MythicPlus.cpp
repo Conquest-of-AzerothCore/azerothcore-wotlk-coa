@@ -196,8 +196,14 @@ namespace
     };
 
     std::recursive_mutex g_lock;
-    std::unordered_map<ObjectGuid, uint32> g_pendingDepletion;
-    std::atomic<bool> g_anyPendingDepletion { false };
+    std::unordered_map<ObjectGuid, uint32> g_pendingKeystones;
+    std::atomic<bool> g_anyPendingKeystone { false };
+
+    void QueueKeystone(ObjectGuid owner, uint32 item)
+    {
+        g_pendingKeystones[owner] = item;
+        g_anyPendingKeystone = true;
+    }
     std::unordered_map<uint32, Run> g_runs;             // by instance id
     std::unordered_map<uint32, uint32> g_forces;        // creature entry -> enemy forces
     std::vector<Reward> g_rewards;
@@ -1049,6 +1055,9 @@ namespace
         ClearRunSpawns(map);
         RefuseToFight(map);
 
+        uint32 const nextKey = RandomKeystone(newLevel);
+        bool ownerHere = false;
+
         ForEachPlayer(map, [&](Player* player)
         {
             RemovePlayerAffixes(player, run);
@@ -1069,16 +1078,24 @@ namespace
 
             if (player->GetGUID() == run.owner)
             {
-                if (uint32 next = RandomKeystone(newLevel))
-                    ReplaceKeystone(player, run.keystoneItem, next);
-                if (timed)
+                ownerHere = true;
+                if (!nextKey)
                     ChatHandler(player->GetSession()).PSendSysMessage(
-                        "Mythic+: keystone upgraded +{}, now level {}.", upgrade, newLevel);
+                        "Mythic+: no dungeon has a level {} keystone, your keystone stays as it is.", newLevel);
                 else
-                    ChatHandler(player->GetSession()).PSendSysMessage(
-                        "Mythic+: out of time, keystone drops to level {}.", newLevel);
+                {
+                    ReplaceKeystone(player, run.keystoneItem, nextKey);
+                    if (timed)
+                        ChatHandler(player->GetSession()).PSendSysMessage(
+                            "Mythic+: keystone upgraded +{}, now level {}.", upgrade, newLevel);
+                    else
+                        ChatHandler(player->GetSession()).PSendSysMessage(
+                            "Mythic+: out of time, keystone drops to level {}.", newLevel);
+                }
             }
         });
+        if (!ownerHere && nextKey)
+            QueueKeystone(run.owner, nextKey);
     }
 
     void CheckComplete(Map* map, Run& run)
@@ -1096,25 +1113,22 @@ namespace
 
     void Deplete(Run const& run)
     {
-        uint32 const item = Data::Instance().GetKeystoneItem(run.lfgId, std::max<uint32>(1, run.level - 1));
-        if (!item)
-            return;
-        g_pendingDepletion[run.owner] = item;
-        g_anyPendingDepletion = true;
+        if (uint32 const item = Data::Instance().GetKeystoneItem(run.lfgId, std::max<uint32>(1, run.level - 1)))
+            QueueKeystone(run.owner, item);
     }
 
     void ApplyDepletion(Player* player)
     {
-        if (!g_anyPendingDepletion)
+        if (!g_anyPendingKeystone)
             return;
         std::lock_guard<std::recursive_mutex> guard(g_lock);
-        auto itr = g_pendingDepletion.find(player->GetGUID());
-        if (itr == g_pendingDepletion.end())
+        auto itr = g_pendingKeystones.find(player->GetGUID());
+        if (itr == g_pendingKeystones.end())
             return;
         uint32 const item = itr->second;
-        g_pendingDepletion.erase(itr);
-        g_anyPendingDepletion = !g_pendingDepletion.empty();
-        if (HasAnyKeystone(player))
+        g_pendingKeystones.erase(itr);
+        g_anyPendingKeystone = !g_pendingKeystones.empty();
+        if (!CarriedKeystones(player).empty())
             ReplaceKeystone(player, 0, item);
     }
 
