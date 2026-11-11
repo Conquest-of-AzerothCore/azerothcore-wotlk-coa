@@ -14,11 +14,12 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
-                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_IMMUNITY, BEHAVIOUR_INTERNAL_COOLDOWN,
+                        BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
-                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
-                        MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
+                        BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
+                        BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, IMMUNITY_CASTS, MECHANIC_LAND_ATTEMPTS,
+                        NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
                         SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
                         BEHAVIOUR_HIT_RATIO, NotModelled, sized_behaviour,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
@@ -730,7 +731,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 85)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 89)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -5688,6 +5689,124 @@ class JudgeHealBlockTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertEqual(verdict.measured, 1.0)
+
+
+
+def class_entry(spell: int, kind: str) -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind)
+
+
+def first_index(steps: list[dict], **match) -> int:
+    return next(index for index, step in enumerate(steps) if all(step.get(k) == v for k, v in match.items()))
+
+
+TESTAMENT_OF_RESOLVE = 804228
+TESTAMENT_OF_STRENGTH = 300514
+CREATURE_FEAR = 12096
+PSYCHIC_HORROR = 64044
+FAITH_GUARD = 705259
+FAITH = 706466
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CastStateScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE,
+                                                              class_entry(TESTAMENT_OF_RESOLVE, 'cast_state'))
+        self.steps = self.scenario['steps']
+
+    def test_scenario_validates_and_expects_control_refused_state_held_spell_allowed(self):
+        run.validate(self.scenario)
+        self.assertEqual([(e.label, e.check, e.displayed) for e in self.expectations],
+                         [('804228 cast_state control', BEHAVIOUR_CAST_CONDITION, '34'),
+                          ('804228 cast_state state', BEHAVIOUR_CAST_CONDITION, '1'),
+                          ('804228 cast_state allowed', BEHAVIOUR_CAST_CONDITION, str(NO_CAST_FAILURE))])
+
+    def test_the_dummy_applies_the_state_before_the_control_and_the_spell_come_last(self):
+        state = first_index(self.steps, action='set_aura', spell=CREATURE_FEAR)
+        self.assertEqual(self.steps[state]['caster'], 'dummy')
+        control = first_index(self.steps, action='cast', spell=TESTAMENT_OF_STRENGTH)
+        held = first_index(self.steps, label='804228 cast_state state')
+        allowed = first_index(self.steps, action='cast', spell=TESTAMENT_OF_RESOLVE)
+        self.assertLess(state, control)
+        self.assertLess(control, held)
+        self.assertLess(held, allowed)
+
+    def test_an_allowed_control_or_a_refused_spell_is_alert(self):
+        control, _, allowed = self.expectations
+        for expectation, value in ((control, NO_CAST_FAILURE), (allowed, 34)):
+            verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: float(value)}),
+                                      expectation)
+            self.assertEqual(verdict.status, 'alert')
+        verdict = judge_behaviour(base_verdict(allowed), FakeRun({allowed.label: 0.0}), allowed)
+        self.assertEqual(verdict.status, 'ok')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ImmunityScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE,
+                                                              class_entry(TESTAMENT_OF_RESOLVE, 'immunity'))
+        self.steps = self.scenario['steps']
+        self.by_label = {expectation.label: expectation for expectation in self.expectations}
+
+    def test_scenario_validates_and_expects_each_effect_present_then_absent(self):
+        run.validate(self.scenario)
+        self.assertTrue(all(e.check == BEHAVIOUR_IMMUNITY for e in self.expectations))
+        for effect in (CREATURE_FEAR, PSYCHIC_HORROR):
+            self.assertEqual(self.by_label[f'804228 immunity {effect} without'].displayed, '1')
+            self.assertEqual(self.by_label[f'804228 immunity {effect} with'].displayed, '0')
+        self.assertEqual(self.by_label['804228 immunity 804228 applied'].displayed, '1')
+
+    def test_the_dummy_casts_each_effect_after_the_spell_lands(self):
+        landed = first_index(self.steps, label='804228 immunity 804228 applied')
+        for effect in (CREATURE_FEAR, PSYCHIC_HORROR):
+            casts = [index for index, step in enumerate(self.steps)
+                     if step.get('action') == 'cast' and step.get('actor') == 'dummy' and step.get('spell') == effect]
+            self.assertEqual(len(casts), IMMUNITY_CASTS)
+            self.assertLess(landed, casts[0])
+            self.assertLess(casts[-1], first_index(self.steps, label=f'804228 immunity {effect} with'))
+
+    def test_an_effect_present_under_the_immunity_is_alert(self):
+        expectation = self.by_label[f'804228 immunity {CREATURE_FEAR} with']
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: 1.0}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_an_effect_word_missing_from_the_quote_is_refused(self):
+        entry = dict(class_entry(TESTAMENT_OF_RESOLVE, 'immunity'))
+        entry['effects'] = [{'spell': CREATURE_FEAR, 'words': 'stun'}]
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ThreatSlopeScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.scenario, (self.expectation,) = behaviour_scenario(CLASS_FILE, class_entry(FAITH_GUARD, 'threat_slope'))
+        self.model = self.expectation.model
+
+    def readings(self, threat: float, lost: float, cast: float = NO_CAST_FAILURE) -> FakeRun:
+        return FakeRun({self.model['cast_label']: cast, self.model['health_before_label']: 10000.0,
+                        self.model['health_after_label']: 10000.0 - lost, self.model['threat_label']: threat})
+
+    def judged(self, run_values: FakeRun) -> Verdict:
+        return judge_behaviour(base_verdict(self.expectation), run_values, self.expectation)
+
+    def test_scenario_validates_and_takes_the_flat_threat_from_the_dbc(self):
+        run.validate(self.scenario)
+        self.assertEqual(self.expectation.check, BEHAVIOUR_THREAT_SLOPE)
+        self.assertEqual(self.model['flat'], 100.0)
+        self.assertEqual(self.model['expected'], 2.0)
+
+    def test_twice_the_damage_plus_the_flat_threat_is_ok(self):
+        self.assertEqual(self.judged(self.readings(400.0, 150.0)).status, 'ok')
+
+    def test_unscaled_damage_threat_is_alert(self):
+        self.assertEqual(self.judged(self.readings(250.0, 150.0)).status, 'alert')
+
+    def test_a_hit_that_did_not_land_is_unmeasured(self):
+        self.assertEqual(self.judged(self.readings(100.0, 0.0)).status, 'unmeasured')
+        self.assertEqual(self.judged(self.readings(400.0, 150.0, cast=34.0)).status, 'unmeasured')
 
 
 if __name__ == '__main__':

@@ -1716,7 +1716,9 @@
   {
     "spell": 705259,
     "clause": "High Threat Holy damage",
-    "labels": [],
+    "labels": [
+      "705259 behaviour_threat_slope 706466"
+    ],
     "kind": "claim"
   },
   {
@@ -1967,22 +1969,26 @@
     "spell": 705291,
     "clause": "increased by $s1%",
     "labels": [
-      "conformance-templar-value-705291",
-      "705291 e0 spell_modifier 567539 ok",
-      "705291 e0 spell_effect_value 567539 ok"
+      "705291 effect_value e0 #0",
+      "503141 hit_mean condemn_gate"
     ],
     "kind": "claim"
   },
   {
     "spell": 705291,
     "clause": "per stack",
-    "labels": [],
+    "labels": [
+      "503141 hit_mean condemn_gate"
+    ],
     "kind": "claim"
   },
   {
     "spell": 705291,
     "clause": "on enemies affected by your Condemn",
-    "labels": [],
+    "labels": [
+      "503141 hit_mean condemn_gate",
+      "503141 hit_mean"
+    ],
     "kind": "claim"
   },
   {
@@ -3401,15 +3407,46 @@
   {
     "spell": 804228,
     "clause": "granting immunity to fear, charm, and horrify effects for $d",
-    "labels": [
-      "804228 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "granting immunity to fear",
+        "labels": [
+          "804228 immunity 804228 cast",
+          "804228 immunity 804228 applied",
+          "804228 immunity 12096 without",
+          "804228 immunity 12096 with"
+        ]
+      },
+      {
+        "claim": "charm",
+        "labels": []
+      },
+      {
+        "claim": "and horrify effects",
+        "labels": [
+          "804228 immunity 804228 cast",
+          "804228 immunity 804228 applied",
+          "804228 immunity 64044 without",
+          "804228 immunity 64044 with"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804228 aura_duration_ms #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 804228,
     "clause": "Usable while feared.",
-    "labels": [],
+    "labels": [
+      "804228 cast_state control",
+      "804228 cast_state state",
+      "804228 cast_state allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -3418,7 +3455,8 @@
     "labels": [
       "804228 spell_duration 102208 #1",
       "804228 aura_duration_ms #0",
-      "804228 aura_duration_ms 102208 #1"
+      "804228 aura_duration_ms 102208 #1",
+      "804228 behaviour_expiry"
     ],
     "kind": "claim"
   },

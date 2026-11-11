@@ -9,9 +9,10 @@ from unittest import mock
 
 from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_CAST_APPLIES_AURA,
                         BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
-                        BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK,
+                        BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_IMMUNITY,
                         BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
-                        BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_PARTY_STAT_RATIO, CONDITION_CONTRAST, LEARNED_CONTRAST)
+                        BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_THREAT_SLOPE, CONDITION_CONTRAST,
+                        LEARNED_CONTRAST)
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EVENT, EVIDENCE, K3, METRIC_EVIDENCE,
@@ -299,6 +300,17 @@ class EvidenceStatusTest(unittest.TestCase):
         verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor')]
         self.assertEqual(evidence_of([claim('Increases your Armor by $s1%.', '1 e0 armor')], verdicts)[0],
                          [BEHAVIOUR])
+
+    def test_spell_damage_promises_the_spell_power_stat(self):
+        verdicts = [judged('1 e2 spell_power 1', PASSIVE_DELTA, 'spell_power')]
+        promised = claim('Increases your Holy spell damage by $s3% of your Agility.', '1 e2 spell_power 1')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your Holy damage by $s3%.', '1 e2 spell_power 1')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_immunity_and_threat_slope_checks_are_behaviour(self):
+        self.assertEqual(EVIDENCE[BEHAVIOUR_IMMUNITY], BEHAVIOUR)
+        self.assertEqual(EVIDENCE[BEHAVIOUR_THREAT_SLOPE], BEHAVIOUR)
 
     def test_a_promised_stat_the_floor_alone_accepted_is_data(self):
         verdicts = [replace(judged('1 e0 stat 1', PASSIVE_DELTA, 'stat'),

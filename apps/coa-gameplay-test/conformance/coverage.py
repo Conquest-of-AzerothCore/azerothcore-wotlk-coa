@@ -9,10 +9,11 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION,
                         BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY,
                         BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_HIT_RATIO,
-                        BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA,
-                        BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
-                        BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, LEARNED_CONTRAST)
+                        BEHAVIOUR_IMMUNITY, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
+                        BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
+                        BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO,
+                        BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER,
+                        LEARNED_CONTRAST)
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
 from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, NOT_MEASURED, PASSIVE_METRIC,
                      STATUSES, Verdict, read_verdicts)
@@ -280,7 +281,7 @@ EVIDENCE = {
     BEHAVIOUR_INTERNAL_COOLDOWN: BEHAVIOUR, BEHAVIOUR_CAST_COMBAT: BEHAVIOUR, BEHAVIOUR_AGGRO_REDIRECT: BEHAVIOUR,
     BEHAVIOUR_HEAL_BLOCK: BEHAVIOUR, BEHAVIOUR_CAST_APPLIES_AURA: DATA, BEHAVIOUR_METRIC_RATIO_DELTA: BEHAVIOUR,
     BEHAVIOUR_ABSORB_PIERCE_RATIO: BEHAVIOUR, GAP_CLOSER_DISTANCE: BEHAVIOUR, BEHAVIOUR_HIT_RATIO: BY_METRIC,
-    BEHAVIOUR_EXPIRY: BEHAVIOUR,
+    BEHAVIOUR_EXPIRY: BEHAVIOUR, BEHAVIOUR_IMMUNITY: BEHAVIOUR, BEHAVIOUR_THREAT_SLOPE: BEHAVIOUR,
 }
 METRIC_EVIDENCE = {
     **dict.fromkeys(('aura', 'aura_stacks', 'aura_apply_count', 'spell_cast_count', 'spell_damage_count',
@@ -311,7 +312,8 @@ CRIT_WORDS = r'critical strike chance|chance to critically'
 STATE_PROMISES = {
     'stat': r'strength|agility|stamina|intellect|spirit', 'stat_exact': r'strength|agility|stamina|intellect|spirit',
     'armor': r'armou?r', 'combat_rating': r'rating', 'melee_hit_chance': r'hit chance|chance to hit',
-    'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise', 'spell_power': r'spell power',
+    'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise',
+    'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
     'max_health': r'maximum health', 'max_power': r'maximum (?:mana|energy|rage|focus)',
     'power': r'mana|energy|rage|focus', 'run_speed_rate': r'movement speed|run speed',

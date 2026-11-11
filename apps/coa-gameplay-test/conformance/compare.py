@@ -16,13 +16,13 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_HIT_RATIO,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY,
                         BEHAVIOUR_INTERNAL_COOLDOWN,
                         BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
                         BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, strongest_percent)
+                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
@@ -2938,6 +2938,38 @@ def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectatio
                 'cast_failure SpellCastResult reason compared exactly to the expected code')
 
 
+def behaviour_immunity_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:
+    measured = run.values.get(expectation.label)
+    if measured is None:
+        return replace(base, explanation=missing_measurement(run, expectation.label))
+    return exact(base, float(measured), float(expectation.displayed),
+                 'cast_failure reason or aura presence on the caster compared exactly to the expected value')
+
+
+THREAT_SLOPE_TOLERANCE = 1e-3
+
+
+def behaviour_threat_slope_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = (model['cast_label'], model['health_before_label'], model['health_after_label'], model['threat_label'])
+    missing = next((label for label in labels if run.values.get(label) is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    cast, before, after, threat = (float(run.values[label]) for label in labels)
+    expected = float(model['expected'])
+    damage = before - after
+    if cast != NO_CAST_FAILURE or damage <= 0:
+        return replace(base, status='unmeasured', expected=expected,
+                       explanation=f'cast_failure {cast:g}, health lost {damage:g}: no landed hit to divide by')
+    slope = (threat - float(model['flat'])) / damage
+    status = 'ok' if abs(slope - expected) <= THREAT_SLOPE_TOLERANCE else 'alert'
+    return replace(base, status=status, measured=slope, expected=expected, low=expected - THREAT_SLOPE_TOLERANCE,
+                   high=expected + THREAT_SLOPE_TOLERANCE,
+                   explanation=f'threat {threat:g} less flat {model["flat"]:g} over health lost {damage:g} = '
+                               f'{slope:.6g}, judged against {expected:g} within {THREAT_SLOPE_TOLERANCE:g}; '
+                               f'every slope outside [{expected - THREAT_SLOPE_TOLERANCE:g}, '
+                               f'{expected + THREAT_SLOPE_TOLERANCE:g}] is excluded')
+
+
 def behaviour_mount_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     caster_value = run.values.get(model['caster_label'])
     ally_value = run.values.get(model['ally_label'])
@@ -3085,6 +3117,10 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_cast_gate_verdict(base, run, expectation)
     if expectation.check == BEHAVIOUR_CAST_COMBAT:
         return behaviour_cast_gate_verdict(base, run, expectation)
+    if expectation.check == BEHAVIOUR_IMMUNITY:
+        return behaviour_immunity_verdict(base, run, expectation)
+    if expectation.check == BEHAVIOUR_THREAT_SLOPE:
+        return behaviour_threat_slope_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_COUNT:
         return behaviour_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_FIXED_COUNT:

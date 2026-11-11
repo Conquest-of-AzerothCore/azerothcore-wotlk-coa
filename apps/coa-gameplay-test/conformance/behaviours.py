@@ -42,6 +42,8 @@ BEHAVIOUR_CAST_APPLIES_AURA = 'behaviour_cast_applies_aura'
 BEHAVIOUR_METRIC_RATIO_DELTA = 'behaviour_metric_ratio_delta'
 BEHAVIOUR_ABSORB_PIERCE_RATIO = 'behaviour_absorb_pierce_ratio'
 BEHAVIOUR_HIT_RATIO = 'behaviour_hit_ratio'
+BEHAVIOUR_IMMUNITY = 'behaviour_immunity'
+BEHAVIOUR_THREAT_SLOPE = 'behaviour_threat_slope'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -51,14 +53,14 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
-                    BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO)
+                    BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
-        'hit_ratio')
+        'hit_ratio', 'cast_state', 'immunity', 'threat_slope')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2816,6 +2818,209 @@ def cast_combat_spec(entry: dict) -> CastCombatSpec:
     return CastCombatSpec(entry['spell'], entry['name'], entry['quote'])
 
 
+SPELL_FAILED_FLEEING = 34
+STATE_PRESENT = 1
+STATE_ABSENT = 0
+
+
+@dataclass(frozen=True)
+class CastStateSpec:
+    spell: int
+    name: str
+    quote: str
+    state_aura: int
+    control_spell: int
+    blocked_result: int
+
+
+def cast_state_label(spell: int, moment: str) -> str:
+    return f'{spell} cast_state {moment}'
+
+
+def self_cast_attempt(spell: int, facts, label: str) -> list[dict]:
+    return ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}] + cast_gate_power_step(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': CASTER},
+               {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+               measurement(label, CASTER, 'cast_failure', spell=spell)])
+
+
+def cast_state_scenario(class_file: dict, spec: CastStateSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'cast_state', spec.quote, NO_CAST_FAILURE)
+    control_label = cast_state_label(spec.spell, 'control')
+    state_label = cast_state_label(spec.spell, 'state')
+    allowed_label = cast_state_label(spec.spell, 'allowed')
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                {'action': 'learn', 'actor': CASTER, 'spell': spec.control_spell},
+                {'action': 'set_aura', 'actor': CASTER, 'caster': TARGET, 'spell': spec.state_aura, 'stacks': 1}]
+             + self_cast_attempt(spec.control_spell, facts_of(records, spec.control_spell), control_label)
+             + [measurement(state_label, CASTER, 'aura', spell=spec.state_aura)]
+             + self_cast_attempt(spec.spell, facts_of(records, spec.spell), allowed_label))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast state',
+        'contract': f'The dummy applies {spec.state_aura} to the caster; the control spell {spec.control_spell} is '
+                    f'attempted on the caster and must be refused with code {spec.blocked_result}, '
+                    f'{spec.state_aura} must still be present, then {spec.spell} is attempted on the caster and '
+                    f'must go through ({NO_CAST_FAILURE}), proving the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'cast_state', 'quote': entry.quote}
+    rule = prose_rule(entry.quote, spec.spell)
+    expectations = [
+        Expectation(control_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.control_spell, None,
+                    str(spec.blocked_result), rule, dict(model)),
+        Expectation(state_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.state_aura, None, str(STATE_PRESENT),
+                    rule, dict(model)),
+        Expectation(allowed_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
+                    rule, dict(model)),
+    ]
+    return scenario, expectations
+
+
+def cast_state_spec(entry: dict) -> CastStateSpec:
+    return CastStateSpec(entry['spell'], entry['name'], entry['quote'], entry['state_aura'], entry['control_spell'],
+                         entry['blocked_result'])
+
+
+IMMUNITY_CASTS = 3
+IMMUNITY_CAST_WAIT_MS = CAST_MARGIN_MS
+
+
+@dataclass(frozen=True)
+class ImmunityEffect:
+    spell: int
+    words: str
+
+
+@dataclass(frozen=True)
+class ImmunitySpec:
+    spell: int
+    name: str
+    quote: str
+    effects: tuple[ImmunityEffect, ...]
+
+
+def immunity_label(spec: ImmunitySpec, subject: int, moment: str) -> str:
+    return f'{spec.spell} immunity {subject} {moment}'
+
+
+def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'immunity', spec.quote, STATE_ABSENT)
+    for effect in spec.effects:
+        if effect.words not in entry.quote:
+            raise ValueError(f'{spec.spell} immunity quote {entry.quote!r} does not name {effect.words!r}')
+    applied_label = immunity_label(spec, spec.spell, 'applied')
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    for effect in spec.effects:
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'caster': TARGET, 'spell': effect.spell, 'stacks': 1},
+                  measurement(immunity_label(spec, effect.spell, 'without'), CASTER, 'aura', spell=effect.spell),
+                  {'action': 'set_aura', 'actor': CASTER, 'caster': TARGET, 'spell': effect.spell, 'stacks': 0}]
+    steps += self_cast_attempt(spec.spell, facts_of(records, spec.spell), immunity_label(spec, spec.spell, 'cast'))
+    steps.append(measurement(applied_label, CASTER, 'aura', spell=spec.spell))
+    for effect in spec.effects:
+        for _ in range(IMMUNITY_CASTS):
+            steps += [{'action': 'cast', 'actor': TARGET, 'spell': effect.spell, 'target': CASTER},
+                      {'action': 'wait', 'ms': IMMUNITY_CAST_WAIT_MS}]
+        steps.append(measurement(immunity_label(spec, effect.spell, 'with'), CASTER, 'aura', spell=effect.spell))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour immunity',
+        'contract': f'Each named effect ({", ".join(f"{e.words} {e.spell}" for e in spec.effects)}) is applied to '
+                    f'the caster by the dummy and must be present; {spec.spell} is then cast on the caster, and the '
+                    f'dummy casts each effect at the caster {IMMUNITY_CASTS} times: none may be present, proving '
+                    f'the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    rule = prose_rule(entry.quote, spec.spell)
+    expectations = [Expectation(immunity_label(spec, spec.spell, 'cast'), BEHAVIOUR_IMMUNITY, spec.spell, spec.spell,
+                                None, str(NO_CAST_FAILURE), rule, {'kind': 'immunity', 'quote': entry.quote}),
+                    Expectation(applied_label, BEHAVIOUR_IMMUNITY, spec.spell, spec.spell, None, str(STATE_PRESENT),
+                                rule, {'kind': 'immunity', 'quote': entry.quote})]
+    for effect in spec.effects:
+        model = {'kind': 'immunity', 'quote': entry.quote, 'words': effect.words}
+        expectations += [
+            Expectation(immunity_label(spec, effect.spell, 'without'), BEHAVIOUR_IMMUNITY, spec.spell, effect.spell,
+                        None, str(STATE_PRESENT), rule, dict(model)),
+            Expectation(immunity_label(spec, effect.spell, 'with'), BEHAVIOUR_IMMUNITY, spec.spell, effect.spell,
+                        None, str(STATE_ABSENT), rule, dict(model))]
+    return scenario, expectations
+
+
+def immunity_spec(entry: dict) -> ImmunitySpec:
+    return ImmunitySpec(entry['spell'], entry['name'], entry['quote'],
+                        tuple(ImmunityEffect(effect['spell'], effect['words']) for effect in entry['effects']))
+
+
+SPELL_EFFECT_THREAT = 63
+THREAT_SLOPE_WAIT_MS = CAST_MARGIN_MS
+
+
+@dataclass(frozen=True)
+class ThreatSlopeSpec:
+    spell: int
+    name: str
+    quote: str
+    hit_spell: int
+    expected_slope: float
+
+
+def threat_slope_label(spec: ThreatSlopeSpec, metric: str, moment: str) -> str:
+    return f'{spec.spell} threat_slope {spec.hit_spell} {metric} {moment}'
+
+
+def flat_threat(records: Records, spell_id: int) -> float:
+    flat = 0.0
+    for effect in range(3):
+        if records.field('Spell', spell_id, f'Effect[{effect}]') == SPELL_EFFECT_THREAT:
+            flat += records.single_value(spell_id, effect)
+    return flat
+
+
+def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'threat_slope', spec.quote, spec.expected_slope)
+    facts = facts_of(records, spec.hit_spell)
+    labels = {key: threat_slope_label(spec, *key.split(' ')) for key in
+              ('health before', 'health after', 'threat after', 'cast_failure after')}
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.hit_spell},
+                measurement(labels['health before'], TARGET, 'health'),
+                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.hit_spell}]
+             + cast_gate_power_step(facts)
+             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.hit_spell, 'target': TARGET},
+                {'action': 'wait', 'ms': facts.cast_time_ms + THREAT_SLOPE_WAIT_MS},
+                measurement(labels['cast_failure after'], CASTER, 'cast_failure', spell=spec.hit_spell),
+                measurement(labels['health after'], TARGET, 'health'),
+                measurement(labels['threat after'], TARGET, 'threat', target=CASTER)])
+    flat = flat_threat(records, spec.hit_spell)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat slope',
+        'contract': f'{spec.hit_spell} is cast once at a fresh dummy; the dummy\'s threat on the caster less the flat '
+                    f'{flat:g} of its SPELL_EFFECT_THREAT effects, divided by the health it lost, must equal '
+                    f'{spec.expected_slope:g}, proving the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'threat_slope', 'quote': entry.quote, 'flat': flat, 'expected': spec.expected_slope,
+             'health_before_label': labels['health before'], 'health_after_label': labels['health after'],
+             'threat_label': labels['threat after'], 'cast_label': labels['cast_failure after']}
+    expectation = Expectation(f'{spec.spell} behaviour_threat_slope {spec.hit_spell}', BEHAVIOUR_THREAT_SLOPE,
+                              spec.spell, spec.hit_spell, None, f'{spec.expected_slope:g}',
+                              prose_rule(entry.quote, spec.spell), model)
+    return scenario, [expectation]
+
+
+def threat_slope_spec(entry: dict) -> ThreatSlopeSpec:
+    return ThreatSlopeSpec(entry['spell'], entry['name'], entry['quote'], entry['hit_spell'],
+                           float(entry['expected_slope']))
+
+
 AGGRO_SETTLE_MS = 300
 AGGRO_REDIRECT_REACTION = 1
 
@@ -3574,6 +3779,12 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return internal_cooldown_scenario(class_file, internal_cooldown_spec(entry))
     if entry['kind'] == 'cast_combat':
         return cast_combat_scenario(class_file, cast_combat_spec(entry))
+    if entry['kind'] == 'cast_state':
+        return cast_state_scenario(class_file, cast_state_spec(entry))
+    if entry['kind'] == 'immunity':
+        return immunity_scenario(class_file, immunity_spec(entry))
+    if entry['kind'] == 'threat_slope':
+        return threat_slope_scenario(class_file, threat_slope_spec(entry))
     if entry['kind'] == 'aggro_redirect':
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':

@@ -28,6 +28,9 @@ produce the same status vocabulary (`ok`, `alert`, `unmodelled`, `measured`, `am
 | `behaviour_oath_consumption_removal` (`kind: "oath_consumption_removal"`) | "Consumes your Oaths, dealing additional damage for each consumed"-shaped claims whose own ability bakes the bonus into its own aura's script value at cast time and consumes the Oaths only when that aura is later removed: one or more Oath auras are fixtured, each one's own `aura_amount` is read, the trigger spell is cast once, its own aura's `aura_script_value` is read shortly after (must equal the summed `aura_amount` readings) while every Oath's `aura_stacks` must still read 1, then after the aura expires naturally every Oath's `aura_stacks` must read 0 |
 | `behaviour_charge_recharge` | a native spell-charge count ("N Charges") and its recharge interval ("T sec recharge"), proven by spending every charge one cast at a time, confirming an over-cast attempt is refused, and bracketing the recharge window at a tolerance |
 | `behaviour_cast_gate` | a cast-attempt gate on the target's own `TargetAuraState`, and an optional bypass of that gate by a second, named spell's own ability-ignore-aurastate effect |
+| `behaviour_cast_condition` (`kind: "cast_state"`) | "Usable while feared."-shaped claims: a spell allowed in a caster state that refuses a control spell |
+| `behaviour_immunity` (`kind: "immunity"`) | "granting immunity to fear ... effects": each named effect lands before the cast and none lands after it |
+| `behaviour_threat_slope` (`kind: "threat_slope"`) | "High Threat" damage: threat per point of damage of one landed hit, the flat `SPELL_EFFECT_THREAT` amount taken out |
 | `behaviour_metric_delta` (`kind: "dispel_removal"`) | a dispel/cleanse active that removes a named debuff aura from a target (self or a grouped ally) the moment it is cast, read as the generic `aura` metric going from present to absent |
 | `behaviour_metric_delta` (`kind: "aura_presence"`) | an active that grants an arbitrary metric's "present" state (an aura, a water-walk flag, ...) on a target (self or a grouped ally) the moment it is cast, read going from absent to present |
 
@@ -608,6 +611,36 @@ measured value to the `Expectation.displayed` float, regardless of which metric 
 each measured value matches exactly, `alert` otherwise, including a fixture that never reached real combat or a
 cast still refused while in it.
 
+### Cast-state scenarios (`behaviour_cast_condition`, `kind: "cast_state"`)
+
+"Usable while feared." states that a spell goes through in a caster state that refuses other spells.
+`cast_state_scenario` has the dummy apply `state_aura` to the caster (`set_aura` with `caster: dummy`, so the
+aura is applied by `AddAura` from a hostile unit), attempts `control_spell` on the caster (a spell of the class
+without the allowing attribute: must be refused with `blocked_result`), reads `aura` of `state_aura` (must still be
+1, so the state held at the attempt), then attempts `spell` on the caster (must read `NO_CAST_FAILURE`). The control
+comes first because the spell under test may remove the state it is allowed in. The three readings are judged by
+`compare.behaviour_cast_gate_verdict` (exact).
+
+### Immunity scenarios (`behaviour_immunity`, `kind: "immunity"`)
+
+"granting immunity to fear, charm, and horrify effects" states that named effects no longer land. `effects` lists
+one fixture spell per named word (`words` must appear in `quote`), each with a single aura effect, so an immune
+effect leaves no aura behind. `immunity_scenario` applies each fixture from the dummy with `set_aura` and reads its
+`aura` (must be 1: the caster is not immune by itself), removes it, casts `spell` on the caster (cast reads
+`NO_CAST_FAILURE`, `aura` of `spell` reads 1), then has the dummy cast each fixture at the caster `IMMUNITY_CASTS`
+(3) times, a real creature cast with `TRIGGERED_FULL_MASK`, and reads its `aura` (must be 0). Three casts keep a
+spell miss from passing for an immunity (a 4% miss chance gives 0.04^3 = 6.4e-5). A named word without a fixture
+stays an unproven claim of the ledger entry. Judged exactly (`compare.behaviour_immunity_verdict`).
+
+### Threat-slope scenarios (`behaviour_threat_slope`, `kind: "threat_slope"`)
+
+"High Threat" damage carries no number in the tooltip; the owner set the expectation (2026-11-10: threat x2 on
+damage, the flat +100 of `SPELL_EFFECT_THREAT` kept). `threat_slope_scenario` casts `hit_spell` once at a fresh
+dummy and reads the dummy's `health` before and after and its `threat` on the caster. The judge
+(`compare.behaviour_threat_slope_verdict`) takes the sum of the `SPELL_EFFECT_THREAT` (63) points of `hit_spell`
+from the DBC as the flat part and computes `(threat - flat) / health lost`: `ok` within 0.001 of `expected_slope`,
+`alert` outside, `unmeasured` when the cast failed or no health was lost. The verdict states the excluded slopes.
+
 ### Aggro-redirect scenarios (`behaviour_aggro_redirect`, `kind: "aggro_redirect"`)
 
 Some tooltips state that casting the spell makes one or more hostile creatures switch their current attack
@@ -773,6 +806,10 @@ pair leaves the clause unproven.
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
 | Interdict 560116 (`variant: "undead"`/`"demon"`/`"control"`) | heal_block | "If they are an Undead or Demon they are unable to be healed for the duration." | 561309 present on Undead/Demon, absent on the control | round10 `cc-dispel-movement` — **confirmed defect, fixed this round**: 561309 "Atone for your Sins!" (the `EffectTriggerSpell[1]` the silence effect triggers) applied its `SPELL_AURA_MOD_HEALING_PCT -101` heal-block unconditionally, to every Interdict target regardless of creature type; `Spell::EffectTriggerSpell` (`SpellEffects.cpp`) has no generic creature-type gate, and no CoA script referenced either spell id before this fix. Fixed in `AscensionTemplarAbilities.cpp`'s `templar_casts::OnSpellCalculatedTarget`: `hit.missCondition = SPELL_MISS_IMMUNE` for the 561309 cast when the target's `GetCreatureType()` is neither `CREATURE_TYPE_UNDEAD` nor `CREATURE_TYPE_DEMON`. Creature entry 201 (Brittlebones Skeleton, type 6 Undead) and 416 (Imp, type 3 Demon) prove the block holds (561309 measured present); entry 36 (Harvest Golem, type 9 Mechanical, `DUMMY_ENTRY` elsewhere in this tool) is the positive control proving 561309 stays absent when neither type matches — pre-fix, this control entry alerted (561309 present when it should not be) |
 | Final Prayer 705268 | ratio | "Doubles the healing done to you" | 2.0 | two named targets: Testament of Faith 501606 (a direct heal, `SPELL_AURA_MOD_HEALING_RECEIVED` taken-side, method `"taken"`, measured with `spell_healing_taken`; round8/round9 found method `"cast"`/`spell_healing_done` structurally blind to this aura — `Unit::SpellHealingBonusDone` is the healer's own caster-side multiplier and never reads a taken-side aura of the healed unit, so it measured the same 800 before and after regardless of whether the server doubles the heal) and Testament of Fortitude 500678 (a `SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE` self-heal whose doubling is a `SPELLMOD_EFFECT1` percent modifier read inside its own effect-0 `CalcValue`, needing no cast at all, method `"effect_value"`, measured with `spell_effect_value {spell: 500678, effect: 0}`) |
+| Testament of Resolve 804228 | cast_state | "Usable while feared." | control 34, state 1, spell 0 | 804228 `AttributesEx5` `SPELL_ATTR5_ALLOW_WHILE_FLEEING`; `Spell::CheckCasterAuras` (Spell.cpp:7143-7144) refuses a fleeing caster with `SPELL_FAILED_FLEEING` (34) otherwise; state Fear 12096 from the dummy, control Testament of Strength 300514 |
+| Testament of Resolve 804228 | immunity | "granting immunity to fear, charm, and horrify effects" | fear and horrify fixtures absent after the cast | `Effect[0]` aura 147 misc 512 (bit 9, `SPELL_AURA_MOD_FEAR` aura-type immunity, SpellInfo.cpp:2738-2739), `Effect[2]` aura 77 misc 24 (`MECHANIC_HORROR`); fixtures Fear 12096 and Psychic Horror 64044. Charm has no fixture and no 804228 effect names it |
+| Faith Guard 705259 | threat_slope | "High Threat Holy damage" | 2 | Faith 706466 cast at a fresh dummy, flat 100 from its `Effect[1]` 63; spell_threat pctMod 2 (rev_20261103_01_templar_faith_threat.sql); owner ruling 2026-11-10 |
+| Testament of Resolve 804228 | cast_applies_aura | "Applies Sacred Restraint for" | 60000 ms | `Effect[1]` 64 `SPELL_EFFECT_TRIGGER_SPELL` 102208 on the ally target (the caster here); no CoA code casts 102208 for 804228; proven by its expiry pair |
 | Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` open conformance check (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |

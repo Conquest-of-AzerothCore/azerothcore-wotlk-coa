@@ -89,6 +89,13 @@ BEHAVIOUR_LABELS = {
     'internal_cooldown_gate': lambda entry: [f"{entry['spell']} behaviour_internal_cooldown_gate"],
     'crit_magnitude': lambda entry: [f"{entry['spell']} behaviour_crit_magnitude"],
     'internal_cooldown': lambda entry: [f"{entry['spell']} behaviour_internal_cooldown"],
+    'threat_slope': lambda entry: [f"{entry['spell']} behaviour_threat_slope {entry['hit_spell']}"],
+    'cast_state': lambda entry: [f"{entry['spell']} cast_state {moment}" for moment in ('control', 'state', 'allowed')],
+    'immunity': lambda entry: [f"{entry['spell']} immunity {subject} {moment}"
+                               for subject, moments in ((entry['spell'], ('cast', 'applied')),
+                                                        *((effect['spell'], ('without', 'with'))
+                                                          for effect in entry['effects']))
+                               for moment in moments],
 }
 FAMILY_REASONS = {
     'P5': 'proc or trigger effect without a trigger entry',
