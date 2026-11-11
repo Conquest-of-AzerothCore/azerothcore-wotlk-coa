@@ -4,10 +4,10 @@
 #include "AllMapScript.h"
 #include "AllSpellScript.h"
 #include "Creature.h"
-#include "Group.h"
 #include "Log.h"
 #include "LootMgr.h"
 #include "Map.h"
+#include "MiscScript.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -15,7 +15,6 @@
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "UnitScript.h"
-#include "World.h"
 
 #include <algorithm>
 #include <cmath>
@@ -914,13 +913,101 @@ namespace
         }
     };
 
+    bool IsMagmusStageFlameKeeper(
+        Creature* creature)
+    {
+        if (!creature ||
+            creature->GetEntry() !=
+                NPC_SHADOWFORGE_FLAME_KEEPER ||
+            creature->GetMapId() !=
+                MAP_BLACKROCK_DEPTHS)
+        {
+            return false;
+        }
+
+        ManastormRun* run =
+            GetRunForStageCreature(
+                creature);
+
+        return run &&
+            (run->GetSegment().SegmentId ==
+                SEGMENT_MAGMUS_NORMAL ||
+             run->GetSegment().SegmentId ==
+                SEGMENT_MAGMUS_ENDGAME);
+    }
+
+    bool HoldsShadowforgeTorch(
+        Loot const& loot)
+    {
+        return std::any_of(
+            loot.items.begin(),
+            loot.items.end(),
+            [](LootItem const& item)
+            {
+                return item.itemid ==
+                    ITEM_SHADOWFORGE_TORCH;
+            });
+    }
+
     class manastorm_magmus_flame_keeper_torch :
-        public UnitScript
+        public MiscScript
     {
     public:
         manastorm_magmus_flame_keeper_torch()
-            : UnitScript(
+            : MiscScript(
                 "manastorm_magmus_flame_keeper_torch",
+                {MISCHOOK_ON_AFTER_LOOT_TEMPLATE_PROCESS})
+        {
+        }
+
+        void OnAfterLootTemplateProcess(
+            Loot* loot,
+            LootTemplate const* /*tab*/,
+            LootStore const& store,
+            Player* owner,
+            bool /*personal*/,
+            bool /*noEmptyError*/,
+            uint16 /*lootMode*/) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !loot ||
+                !owner ||
+                &store != &LootTemplates_Creature)
+            {
+                return;
+            }
+
+            Creature* creature =
+                ObjectAccessor::GetCreature(
+                    *owner,
+                    loot->sourceWorldObjectGUID);
+
+            if (!IsMagmusStageFlameKeeper(creature) ||
+                HoldsShadowforgeTorch(*loot))
+            {
+                return;
+            }
+
+            loot->AddItem(
+                LootStoreItem(
+                    ITEM_SHADOWFORGE_TORCH,
+                    0,
+                    100.0f,
+                    false,
+                    LOOT_MODE_DEFAULT,
+                    0,
+                    1,
+                    1));
+        }
+    };
+
+    class manastorm_magmus_flame_keeper_lootable :
+        public UnitScript
+    {
+    public:
+        manastorm_magmus_flame_keeper_lootable()
+            : UnitScript(
+                "manastorm_magmus_flame_keeper_lootable",
                 true,
                 {UNITHOOK_ON_UNIT_DEATH})
         {
@@ -939,92 +1026,16 @@ namespace
             Creature* creature =
                 unit->ToCreature();
 
-            if (!creature ||
-                creature->GetEntry() !=
-                    NPC_SHADOWFORGE_FLAME_KEEPER ||
-                creature->GetMapId() !=
-                    MAP_BLACKROCK_DEPTHS)
+            if (!IsMagmusStageFlameKeeper(creature) ||
+                creature->loot.isLooted() ||
+                !HoldsShadowforgeTorch(
+                    creature->loot))
             {
                 return;
             }
 
-            ManastormRun* run =
-                GetRunForStageCreature(
-                    creature);
-
-            if (!run ||
-                (run->GetSegment().SegmentId !=
-                    SEGMENT_MAGMUS_NORMAL &&
-                 run->GetSegment().SegmentId !=
-                    SEGMENT_MAGMUS_ENDGAME))
-            {
-                return;
-            }
-
-            Player* looter =
-                creature->GetLootRecipient();
-
-            if (!looter ||
-                creature->loot.lootOwnerGUID !=
-                    looter->GetGUID())
-            {
-                return;
-            }
-
-            Group* group =
-                looter->GetGroup();
-
-            if (!group &&
-                sWorld->getBoolConfig(
-                    CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) &&
-                !creature->WasAttackedDirectlyBy(
-                    looter->GetGUID()))
-            {
-                return;
-            }
-
-            ItemTemplate const* torch =
-                sObjectMgr->GetItemTemplate(
-                    ITEM_SHADOWFORGE_TORCH);
-
-            if (!torch ||
-                std::any_of(
-                    creature->loot.items.begin(),
-                    creature->loot.items.end(),
-                    [](LootItem const& item)
-                    {
-                        return item.itemid ==
-                            ITEM_SHADOWFORGE_TORCH;
-                    }))
-            {
-                return;
-            }
-
-            creature->loot.AddItem(
-                LootStoreItem(
-                    ITEM_SHADOWFORGE_TORCH,
-                    0,
-                    100.0f,
-                    false,
-                    LOOT_MODE_DEFAULT,
-                    0,
-                    1,
-                    1));
-
-            if (group &&
-                !creature->loot.items.empty() &&
-                torch->Quality <
-                    uint32(group->GetLootThreshold()))
-            {
-                creature->loot.items.back().is_underthreshold =
-                    true;
-            }
-
-            if (!creature->loot.isLooted())
-            {
-                creature->SetDynamicFlag(
-                    UNIT_DYNFLAG_LOOTABLE);
-            }
+            creature->SetDynamicFlag(
+                UNIT_DYNFLAG_LOOTABLE);
         }
     };
 }
@@ -1036,4 +1047,5 @@ void AddSC_manastorm_runtime_compat()
     new manastorm_blasted_lands_invincibility_bypass();
     new manastorm_forced_track_restore();
     new manastorm_magmus_flame_keeper_torch();
+    new manastorm_magmus_flame_keeper_lootable();
 }

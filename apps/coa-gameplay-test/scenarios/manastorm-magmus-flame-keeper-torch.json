@@ -10,7 +10,8 @@
     "one. Pool 1550 spawns two of its four keepers at random and three of them patrol, so the case summons a",
     "keeper without an owner in the Lyceum: Manastorm sets loot mode 0 on it as on the pooled keepers.",
     "Manastorm scales the keeper's health below half of its native health, so the scaling also resizes the player",
-    "damage requirement; otherwise no kill was credited to the player and the corpse got no loot owner."
+    "damage requirement; otherwise no kill was credited to the player and the corpse got no loot owner. The torch",
+    "is a free-for-all item, so it joins the loot while the core fills it: added after the kill, no looter saw it."
   ],
   "timeout_ms": 90000,
   "players": [

@@ -82,6 +82,7 @@ class MagmusTorchTests(unittest.TestCase):
     def setUp(self):
         self.source = (SOURCE / 'ManastormRuntimeCompat.cpp').read_text(encoding='utf-8')
         self.script = function(self.source, 'class manastorm_magmus_flame_keeper_torch')
+        self.lootable = function(self.source, 'class manastorm_magmus_flame_keeper_lootable')
 
     def test_constants(self):
         for constant in ('MAP_BLACKROCK_DEPTHS = 230', 'NPC_SHADOWFORGE_FLAME_KEEPER = 9956',
@@ -90,25 +91,34 @@ class MagmusTorchTests(unittest.TestCase):
             self.assertIn(constant, self.source)
 
     def test_scoped_to_magmus_stage_flame_keepers(self):
-        for guard in ('ManastormModuleConfig::Enabled()', 'NPC_SHADOWFORGE_FLAME_KEEPER', 'MAP_BLACKROCK_DEPTHS',
-                      'GetRunForStageCreature(', 'SEGMENT_MAGMUS_NORMAL', 'SEGMENT_MAGMUS_ENDGAME'):
-            self.assertIn(guard, self.script)
+        keeper = function(self.source, 'bool IsMagmusStageFlameKeeper(')
+        for guard in ('NPC_SHADOWFORGE_FLAME_KEEPER', 'MAP_BLACKROCK_DEPTHS', 'GetRunForStageCreature(',
+                      'SEGMENT_MAGMUS_NORMAL', 'SEGMENT_MAGMUS_ENDGAME'):
+            self.assertIn(guard, keeper)
+        for script in (self.script, self.lootable):
+            self.assertIn('ManastormModuleConfig::Enabled()', script)
+            self.assertIn('IsMagmusStageFlameKeeper(creature)', script)
 
-    def test_follows_core_loot_eligibility(self):
-        eligibility = self.script.index('creature->loot.lootOwnerGUID')
-        solo = self.script.index('CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT')
-        self.assertLess(eligibility, self.script.index('loot.AddItem('))
-        self.assertLess(solo, self.script.index('loot.AddItem('))
-        self.assertIn('WasAttackedDirectlyBy(', self.script)
+    def test_torch_joins_creature_loot_before_core_assigns_looters(self):
+        self.assertIn('MISCHOOK_ON_AFTER_LOOT_TEMPLATE_PROCESS', self.script)
+        self.assertIn('&store != &LootTemplates_Creature', self.script)
+        self.assertIn('loot->sourceWorldObjectGUID', self.script)
+        loot = (ROOT / 'src/server/game/Loot/LootMgr.cpp').read_text(encoding='utf-8')
+        fill = function(loot, 'bool Loot::FillLoot(')
+        self.assertLess(fill.index('sScriptMgr->OnAfterLootTemplateProcess('), fill.index('FillNotNormalLootFor('))
+        self.assertLess(fill.index('lootOwnerGUID = lootOwner->GetGUID()'),
+                        fill.index('sScriptMgr->OnAfterLootTemplateProcess('))
 
-    def test_adds_one_torch_and_makes_corpse_lootable(self):
+    def test_adds_one_torch(self):
         self.assertRegex(self.script, r'LootStoreItem\(\s*ITEM_SHADOWFORGE_TORCH,\s*0,\s*100\.0f,\s*false,\s*'
                                       r'LOOT_MODE_DEFAULT,\s*0,\s*1,\s*1\)')
-        duplicate = self.script.index('item.itemid ==\n                            ITEM_SHADOWFORGE_TORCH')
-        self.assertLess(duplicate, self.script.index('loot.AddItem('))
-        self.assertIn('GetLootThreshold()', self.script)
-        self.assertIn('is_underthreshold', self.script)
-        self.assertIn('SetDynamicFlag(\n                    UNIT_DYNFLAG_LOOTABLE)', self.script)
+        self.assertLess(self.script.index('HoldsShadowforgeTorch(*loot)'), self.script.index('loot->AddItem('))
+
+    def test_corpse_with_torch_is_lootable(self):
+        self.assertIn('UNITHOOK_ON_UNIT_DEATH', self.lootable)
+        self.assertIn('creature->loot.isLooted()', self.lootable)
+        self.assertIn('HoldsShadowforgeTorch(\n                    creature->loot)', self.lootable)
+        self.assertIn('SetDynamicFlag(\n                UNIT_DYNFLAG_LOOTABLE)', self.lootable)
 
     def test_health_scaling_resizes_player_damage_requirement(self):
         source = (SOURCE / 'ManastormMgr.cpp').read_text(encoding='utf-8')
@@ -120,7 +130,7 @@ class MagmusTorchTests(unittest.TestCase):
     def test_registered(self):
         registration = function(self.source, 'void AddSC_manastorm_runtime_compat()')
         self.assertIn('new manastorm_magmus_flame_keeper_torch();', registration)
-
+        self.assertIn('new manastorm_magmus_flame_keeper_lootable();', registration)
 
 if __name__ == '__main__':
     unittest.main()
