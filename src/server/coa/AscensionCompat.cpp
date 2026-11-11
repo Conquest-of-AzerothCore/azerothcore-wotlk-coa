@@ -187,6 +187,8 @@ constexpr std::size_t MAX_APPEARANCE_OUTFIT_NAME_BYTES = 64;
 constexpr std::size_t MAX_APPEARANCE_OUTFITS = 100;
 constexpr uint16 SMSG_CAN_SEE_APPEARANCES_INFO = 0x06A2;
 constexpr uint16 CMSG_SET_CAN_SEE_APPEARANCES = 0x06A3;
+constexpr uint16 CMSG_COLLECT_ITEM_APPEARANCE = 0x06EA;
+constexpr uint16 SMSG_COLLECT_ITEM_APPEARANCE_RESULT = 0x06EB;
 constexpr uint16 SMSG_VANITY_COLLECTION_INFO = 0x06F7;
 constexpr uint16 SMSG_VANITY_COLLECTION_ADDED = 0x06F8;
 
@@ -254,11 +256,12 @@ constexpr uint32 VANITY_FLAG_NOT_OFFERED = 0x8;
 constexpr uint8 REALM_TYPE_COUNT = 5;
 constexpr std::string_view VANITY_ITEM_LEARNED_EVENT = "ASCENSION_STORE_COLLECTION_ITEM_LEARNED";
 
-constexpr std::array<uint16, 9> QUEUED_EXTENSION_OPCODES = {
+constexpr std::array<uint16, 10> QUEUED_EXTENSION_OPCODES = {
     CMSG_APPLY_APPEARANCES, CMSG_SET_CAN_SEE_APPEARANCES,
     CMSG_EXTENSION_INITIALIZED, CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST,
     CMSG_SAVE_APPEARANCE_OUTFIT, CMSG_DELETE_APPEARANCE_OUTFIT,
-    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID};
+    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID,
+    CMSG_COLLECT_ITEM_APPEARANCE};
 
 constexpr uint16 CMSG_QUERY_VENDORED_ITEM_RECOVERY = 0x05DE;
 constexpr uint16 CMSG_RECOVER_VENDORED_ITEM = 0x05E0;
@@ -7874,6 +7877,26 @@ private:
     }
   }
 
+  bool HasItemAppearance(uint32 itemId) const
+  {
+    return _itemAppearances.contains(itemId) || _itemAppearances.contains(ItemScaling::BaseEntry(itemId));
+  }
+
+  void HandleCollectItemAppearance(Player* player, WorldPacket& packet)
+  {
+    ObjectGuid const itemGuid(packet.read<uint64>());
+    Item* item = player->GetItemByGuid(itemGuid);
+    std::shared_ptr<PlayerCollectionState> state = GetState(player);
+    if (!state || !item || !HasItemAppearance(item->GetEntry()))
+    {
+      SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_FAILED");
+      return;
+    }
+
+    CollectItem(player, *state, item->GetEntry(), true, item->IsSoulBound());
+    SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_OK");
+  }
+
   void HandleClientPacket(Player *player, WorldPacket &packet) {
     packet.rpos(0);
     try {
@@ -7889,6 +7912,9 @@ private:
         break;
       case CMSG_DELETE_APPEARANCE_OUTFIT:
         HandleDeleteOutfit(player, packet);
+        break;
+      case CMSG_COLLECT_ITEM_APPEARANCE:
+        HandleCollectItemAppearance(player, packet);
         break;
       case CMSG_INSPECT_CHARACTER_ADVANCEMENT:
         AscensionClassService::Instance().SendInspectResult(player, ObjectGuid(packet.read<uint64>()));
