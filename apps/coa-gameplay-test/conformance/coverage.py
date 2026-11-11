@@ -13,7 +13,8 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
                         BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO,
                         BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER,
-                        BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, LEARNED_CONTRAST)
+                        BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT,
+                        BEHAVIOUR_THREAT_REDIRECT, LEARNED_CONTRAST)
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
 from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, NOT_MEASURED, PASSIVE_METRIC,
                      STATUSES, Verdict, read_verdicts)
@@ -317,7 +318,7 @@ EVIDENCE = {
     BEHAVIOUR_ABSORB_PIERCE_RATIO: BEHAVIOUR, GAP_CLOSER_DISTANCE: BEHAVIOUR, BEHAVIOUR_HIT_RATIO: BY_METRIC,
     BEHAVIOUR_EXPIRY: BEHAVIOUR, BEHAVIOUR_IMMUNITY: BEHAVIOUR, BEHAVIOUR_THREAT_SLOPE: BEHAVIOUR,
     BEHAVIOUR_EVENT_DELAY: BEHAVIOUR,
-    BEHAVIOUR_PROC_RESET: BEHAVIOUR,
+    BEHAVIOUR_PROC_RESET: BEHAVIOUR, BEHAVIOUR_TAKEN_HIT: BEHAVIOUR, BEHAVIOUR_THREAT_REDIRECT: BEHAVIOUR,
 }
 METRIC_EVIDENCE = {
     **dict.fromkeys(('aura', 'aura_stacks', 'aura_apply_count', 'spell_cast_count', 'spell_damage_count',
@@ -328,7 +329,8 @@ METRIC_EVIDENCE = {
                      'owned_creature_damage_total', 'owned_creature_heal_count', 'owned_creature_heal_total',
                      'cast_failure', 'timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms',
                      'timeline_interval_max_ms', 'timeline_interval_median_ms', 'event_first_ms',
-                     'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk'),
+                     'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk',
+                     'spell_absorb_total', 'spell_log_count'),
                     EVENT),
     **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',

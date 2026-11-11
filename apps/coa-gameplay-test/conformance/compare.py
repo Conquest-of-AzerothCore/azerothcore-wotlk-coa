@@ -24,7 +24,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
-                        BEHAVIOUR_PROC_RESET,
+                        BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
@@ -2633,10 +2633,24 @@ def behaviour_leech_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdi
     heal = run.values.get(model['heal_label'])
     baseline_label = model.get('heal_baseline_label')
     baseline = run.values.get(baseline_label) if baseline_label else 0.0
+    damage_baseline_label = model.get('damage_baseline_label')
+    damage_baseline = run.values.get(damage_baseline_label) if damage_baseline_label else 0.0
     missing = next((label for label, value in ((model['damage_label'], damage), (model['heal_label'], heal),
-                                               (baseline_label, baseline)) if label and value is None), None)
+                                               (baseline_label, baseline),
+                                               (damage_baseline_label, damage_baseline)) if label and value is None),
+                   None)
     if missing:
         return replace(base, explanation=missing_measurement(run, missing))
+    if damage_baseline_label:
+        if damage_baseline <= 0:
+            return replace(base, status='unmeasured', measured=baseline,
+                           explanation=f'{damage_baseline_label} measured {damage_baseline:g}; the control cast must '
+                                       f'land to show that it heals nothing')
+        if abs(baseline) > FLOAT_EPSILON:
+            return replace(base, status='alert', measured=baseline, expected=0.0, low=0.0, high=0.0,
+                           explanation=f'the control cast without the auras healed {baseline:g} '
+                                       f'({model["control_heal_label"]}), where nothing is stated')
+        damage -= damage_baseline
     if damage <= 0:
         return replace(base, status='unmeasured', measured=heal,
                        explanation=f'{model["damage_label"]} measured {damage:g}; a ratio needs a positive damage '
@@ -3575,7 +3589,116 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_hit_ratio_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_EXPIRY:
         return behaviour_expiry_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_TAKEN_HIT:
+        return behaviour_taken_hit_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_THREAT_REDIRECT:
+        return behaviour_threat_redirect_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
+
+
+def taken_hit_formula(constant: float, coefficients: list[float], sums: list[float]) -> int:
+    total = float32(constant)
+    for coefficient, value in zip(coefficients, sums):
+        total = float32(total + float32(float32(coefficient) * float32(value)))
+    return math.trunc(total)
+
+
+def taken_hit_trial_fault(arm: dict, trial: dict, expected_absorb: int | None, debt_ends: bool) -> str | None:
+    absorbed, damage = trial['absorb'], trial['damage']
+    if arm['absorb'] == 'none' and absorbed:
+        return f'absorbed {absorbed:g} with no absorb stated'
+    if arm['absorb'] == 'formula' and absorbed != expected_absorb:
+        return f'absorbed {absorbed:g} against {expected_absorb}'
+    if arm['absorb'] == 'share':
+        share = math.floor((absorbed + damage) * arm['share_pct'] / 100)
+        if absorbed != share:
+            return f'absorbed {absorbed:g} of {absorbed + damage:g} against {share} ({arm["share_pct"]}%)'
+    if arm['debt_removed_pct'] is None:
+        return None
+    due = absorbed - math.floor(absorbed * arm['debt_removed_pct'] / 100)
+    if debt_ends and (not trial['debt early'] or trial['paid early'] >= due):
+        return (f'debt present {trial["debt early"]:g} with {trial["paid early"]:g} of {due:g} paid before its end '
+                f'(must be present with less paid)')
+    if trial['debt late'] or trial['paid late'] != due:
+        return (f'debt present {trial["debt late"]:g} with {trial["paid late"]:g} of {due:g} paid after its end '
+                f'(must be gone with all paid)')
+    return None
+
+
+def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    faults, summaries, short = [], [], []
+    judged = 0
+    for arm in model['arms']:
+        values = {}
+        for mark, labels in arm['marks'].items():
+            for key, label in labels.items():
+                value = run.values.get(label)
+                if value is None:
+                    return replace(base, explanation=missing_measurement(run, label))
+                values[(mark, key)] = value
+        expected_absorb = None
+        if arm['absorb'] == 'formula':
+            sums = []
+            for labels in arm['terms']:
+                read = [run.values.get(label) for label in labels]
+                if any(value is None for value in read):
+                    return replace(base, explanation=missing_measurement(run, labels[read.index(None)]))
+                sums.append(sum(read))
+            expected_absorb = taken_hit_formula(model['absorb_constant'], model['absorb_coefficients'], sums)
+        landed = 0
+        absorbs = []
+        previous = 'start'
+        for trial in range(1, model['trials'] + 1):
+            mark = str(trial)
+            delta = {key: values[(mark, key)] - values[(previous, key)]
+                     for key in ('damage', 'absorb', 'logs')}
+            if arm['debt_removed_pct'] is not None:
+                for moment in ('early', 'late'):
+                    delta[f'paid {moment}'] = values[(mark, f'paid {moment}')] - values[(previous, 'paid')]
+                    delta[f'debt {moment}'] = values[(mark, f'debt {moment}')]
+            previous = mark
+            if delta['logs'] < arm['strikes']:
+                continue
+            landed += 1
+            absorbs.append(delta['absorb'])
+            fault = taken_hit_trial_fault(arm, delta, expected_absorb, model.get('debt_ends', False))
+            if fault:
+                faults.append(f'{arm["name"]} trial {trial}: {fault}')
+        if landed < model['minimum_trials']:
+            short.append(f'{arm["name"]} landed {landed} of {model["trials"]} trials')
+        judged += landed
+        stated = {'none': 'no absorb', 'formula': f'{expected_absorb} absorbed',
+                  'share': f'{arm["share_pct"]}% absorbed'}[arm['absorb']]
+        debt = ('' if arm['debt_removed_pct'] is None else
+                f', debt paid by its end less {arm["debt_removed_pct"]}% removed'
+                + (', part of it still unpaid just before its end' if model.get('debt_ends') else ''))
+        summaries.append(f'{arm["name"]}: {landed} landed trials, absorbed {sorted(set(absorbs))} ({stated}{debt})')
+    status = 'alert' if faults else 'unmeasured' if short else 'ok'
+    reason = '; '.join(faults[:6]) if faults else '; '.join(short) if short else 'every landed trial matches'
+    return replace(base, status=status, measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{"; ".join(summaries)}; {reason}; each absorbed amount is compared exactly')
+
+
+def behaviour_threat_redirect_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    gained = {}
+    for phase, moments in model['reads'].items():
+        for holder in moments['before']:
+            before = run.values.get(moments['before'][holder])
+            after = run.values.get(moments['after'][holder])
+            if before is None or after is None:
+                return replace(base, explanation=missing_measurement(
+                    run, moments['before'][holder] if before is None else moments['after'][holder]))
+            gained[(phase, holder)] = after - before
+    ally, caster = (holder for holder in model['reads']['control']['before'])
+    control_ok = gained[('control', ally)] > 0 and abs(gained[('control', caster)]) <= FLOAT_EPSILON
+    treatment_ok = abs(gained[('treatment', ally)]) <= FLOAT_EPSILON and gained[('treatment', caster)] > 0
+    status = 'ok' if control_ok and treatment_ok else 'alert'
+    return replace(base, status=status, measured=gained[('treatment', caster)],
+                   expected=gained[('control', ally)], low=0.0, high=None,
+                   explanation=f'threat gained on the dummy without the spell: {ally} '
+                               f'{gained[("control", ally)]:g}, {caster} {gained[("control", caster)]:g} (must be '
+                               f'positive and 0); with it: {ally} {gained[("treatment", ally)]:g}, {caster} '
+                               f'{gained[("treatment", caster)]:g} (must be 0 and positive)')
 
 
 def behaviour_expiry_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

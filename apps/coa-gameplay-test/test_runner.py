@@ -1255,6 +1255,18 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(metric=metric, change=change), self.assertRaises(ValueError):
                 run.validate(invalid)
 
+    def test_spell_log_metrics_need_a_spell_and_take_the_caster_filters(self):
+        for metric in ('spell_log_count', 'spell_absorb_total'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                      'caster': 'target', 'target': 'caster', 'critical': False, 'min': 0})
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            invalid = copy.deepcopy(scenario)
+            del invalid['steps'][-1]['spell']
+            with self.subTest(metric=metric, spell=None), self.assertRaises(ValueError):
+                run.validate(invalid)
+
     def test_owned_creature_metrics_need_an_entry(self):
         for metric in ('owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
                        'owned_creature_heal_count', 'owned_creature_heal_total',

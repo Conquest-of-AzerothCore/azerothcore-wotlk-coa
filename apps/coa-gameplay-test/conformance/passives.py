@@ -96,6 +96,11 @@ BEHAVIOUR_LABELS = {
     'threat_slope': lambda entry: [f"{entry['spell']} behaviour_threat_slope {entry['hit_spell']}"],
     'event_delay': lambda entry: [f"{entry['spell']} behaviour_event_delay"],
     'proc_reset': lambda entry: [f"{entry['spell']} behaviour_proc_reset"],
+    'taken_hit': lambda entry: [f"{entry['spell']} "
+                                + ('behaviour_hit_ratio' if entry['judge'] == 'damage_ratio' else 'behaviour_taken_hit')
+                                + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
+    'threat_redirect': lambda entry: [f"{entry['spell']} behaviour_threat_redirect"],
+    'fixed_count': lambda entry: [f"{entry['spell']} behaviour_fixed_count"],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
                                    for arm in ('outsider', 'party', *(('raid',) if entry.get('raid', True) else ()))
                                    for metric in ('cast', 'aura')],

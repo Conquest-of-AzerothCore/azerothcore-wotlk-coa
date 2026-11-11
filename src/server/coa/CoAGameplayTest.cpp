@@ -910,6 +910,16 @@ struct SpellDamageEvent
     uint64 atMs = 0;
 };
 
+struct SpellLogEvent
+{
+    ObjectGuid caster;
+    ObjectGuid target;
+    uint32 spell = 0;
+    uint32 damage = 0;
+    uint32 absorb = 0;
+    bool critical = false;
+};
+
 struct SpellHealEvent
 {
     ObjectGuid caster;
@@ -1020,6 +1030,7 @@ struct Actor
     uint64 castPushbackMs = 0;
     std::vector<SpellCastEvent> spellCasts;
     std::vector<SpellDamageEvent> spellDamage;
+    std::vector<SpellLogEvent> spellLogs;
     std::vector<SpellHealEvent> spellHeals;
     std::vector<SpellEnergizeEvent> spellEnergizes;
     Tree castFailures;
@@ -1134,7 +1145,8 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         response >> event.damage;
         response.read_skip<uint32>();
         response.read_skip<uint8>();
-        response.read_skip<uint32>();
+        uint32 absorb;
+        response >> absorb;
         response.read_skip<uint32>();
         response.read_skip<uint8>();
         response.read_skip<uint8>();
@@ -1143,6 +1155,7 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         response >> blocked >> hitInfo;
         event.critical = (hitInfo & SPELL_HIT_TYPE_CRIT) != 0;
         event.blocked = blocked != 0;
+        actor.spellLogs.push_back({event.caster, event.target, event.spell, event.damage, absorb, event.critical});
     }
     else
     {
@@ -4678,6 +4691,23 @@ private:
                     (!target || event.target == target) && (!critical || event.critical == *critical) &&
                     (!blocked || event.blocked == *blocked))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
+            return double(value);
+        }
+        if (metric == "spell_log_count" || metric == "spell_absorb_total")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
+            ObjectGuid caster = player->GetGUID();
+            if (auto id = step.get_optional<std::string>("caster"))
+                caster = GetUnit(*id)->GetGUID();
+            ObjectGuid target;
+            if (auto id = step.get_optional<std::string>("target"))
+                target = GetUnit(*id)->GetGUID();
+            auto critical = step.get_optional<bool>("critical");
+            uint64 value = 0;
+            for (SpellLogEvent const& event : _actors.at(step.get<std::string>("actor")).spellLogs)
+                if (event.caster == caster && event.spell == spell && (!target || event.target == target) &&
+                    (!critical || event.critical == *critical))
+                    value += metric == "spell_log_count" ? 1 : event.absorb;
             return double(value);
         }
         if (metric == "owned_creature_damage_total" || metric == "owned_creature_damage_count" ||

@@ -751,6 +751,9 @@ as a creature fixture, and `critical` filters critical or noncritical hits. `blo
 whose log reports (true) or lacks (false) a blocked amount; periodic damage is never blocked. Values accumulate
 throughout the scenario; use snapshots and `relative_to` around a cast.
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
+`spell_log_count` and `spell_absorb_total` read the same native direct spell damage logs, including a hit that an
+absorb took whole: they count the logs of `spell`, or sum the absorbed amount each log reports. They take the
+`caster`, `target` and `critical` filters; periodic logs are not read.
 `spell_heal_count`, `spell_heal_total` and `spell_effective_heal_total` similarly observe native direct and
 periodic healing logs, counting positive heals, summing healing including overhealing, or summing effective
 healing. They accept the same caster/critical filters; `target_pet: true` selects the current pet of a player
