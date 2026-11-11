@@ -390,7 +390,8 @@ def righteous_custodian_single_target_entry() -> dict:
 
 
 def sanctify_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SANCTIFY)
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == SANCTIFY and entry['kind'] == 'metric_delta')
 
 
 def chakra_of_power_entry() -> dict:
@@ -413,7 +414,8 @@ def chastise_weapon_damage_gate_entry() -> dict:
 
 
 def libram_of_tenacity_heal_gate_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == LIBRAM_OF_TENACITY)
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == LIBRAM_OF_TENACITY and entry.get('label_suffix') == 'heal_gate')
 
 
 def temple_guardian_charge_recharge_entry() -> dict:
@@ -457,7 +459,8 @@ def righteous_custodian_entry() -> dict:
 
 
 def norgannons_wrath_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == NORGANNONS_WRATH)
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == NORGANNONS_WRATH and entry['kind'] == 'absorb_pierce_ratio')
 
 
 class BehaviourEntryTests(unittest.TestCase):
@@ -735,7 +738,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 249)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 250)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
