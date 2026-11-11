@@ -11,7 +11,8 @@ A `procs` entry of the class file describes one proc aura:
 | | `dummy`, with `"target": "ally"` for a cast at a second player |
 | `trigger_text` | the words of the tooltip that name the trigger |
 | `proc_spell`, `proc_spell_source` | the spell each proc casts, and where that id comes from |
-| `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell`; `spell_charges` when a proc |
+| `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell`; `melee_attack_count` (a `cast` |
+| | trigger only) for the main-hand auto attacks of an extra-attack proc (Paladin Training 504808); `spell_charges` when a proc |
 | | refreshes a charge of the trigger rank (`proc_spell`) instead of casting a spell |
 | `extra_event_terms` | further `{"metric", "spell"}` counts added to the events |
 | `events_exclude_trigger_casts` | the events count the trigger's own casts, so the completed player casts are removed |

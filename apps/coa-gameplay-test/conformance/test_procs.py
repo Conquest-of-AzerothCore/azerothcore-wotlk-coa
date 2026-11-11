@@ -11,7 +11,7 @@ import tempfile
 import unittest
 
 from compare import STATUSES, class_entry
-from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, UNMODELLED, Unmodelled
+from hits import EXCLUDED_OUTCOME_MARGIN, MAX_SCENARIO_MS, Unmodelled
 from procs import (PART_BUDGET_MS, PER_TRIGGER, PER_TRIGGER_SOURCE, PROC_CHECK, proc_label, proc_plan, proc_scenario,
                    proc_status_expectation, shares_aura, shares_proc_spell, trials_needed, trigger_boundaries,
                    trigger_key, wilson_interval)
@@ -658,7 +658,7 @@ class ProcScenarioTest(unittest.TestCase):
             proc_plan(CLASS_FILE, entry)
 
     def test_status_entry_has_no_scenario(self):
-        entry = next(entry for entry in CLASS_FILE['procs'] if entry.get('status'))
+        entry = {**templar_proc(SCOURGEBANE), 'status': 'unmodelled', 'reason': 'seeded'}
         with self.assertRaises(ValueError):
             proc_scenario(CLASS_FILE, entry)
 
@@ -678,8 +678,8 @@ class ProcScenarioTest(unittest.TestCase):
         self.assertEqual((model['chance_spell'], model['chance_kind']), (VINDICATION, 'percent'))
 
     def test_attempt_auras_are_set_before_every_cast(self):
-        entry = {**templar_proc(OATH_OF_VINDICATION),
-                 'attempt_auras': [{'spell': OATH_OF_VINDICATION, 'stacks': 0, 'source': 'seeded'}]}
+        entry = {**templar_proc(CONDEMNATION),
+                 'attempt_auras': [{'spell': 704576, 'stacks': 0, 'source': 'seeded'}]}
         steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
         for earlier, cast in zip([0] + casts, casts):
@@ -687,9 +687,21 @@ class ProcScenarioTest(unittest.TestCase):
                         if step['action'] == 'set_aura' and step['stacks'] == 0]
             self.assertEqual(len(fixtures), 1)
 
+    def test_auto_attacks_count_as_events_only_for_a_cast_trigger(self):
+        entry = {**templar_proc(SCOURGEBANE), 'event_metric': 'melee_attack_count'}
+        with self.assertRaises(ValueError):
+            proc_plan(CLASS_FILE, entry)
+
+    def test_auto_attack_events_are_read_on_the_main_hand(self):
+        entry = {**templar_proc(CONDEMNATION), 'event_metric': 'melee_attack_count'}
+        steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
+        reads = [step for step in steps if step.get('metric') == 'melee_attack_count']
+        self.assertTrue(reads)
+        self.assertTrue(all(step['hand'] == 0 and 'spell' not in step for step in reads))
+
     def test_an_attempt_aura_without_its_source_is_refused(self):
-        entry = {**templar_proc(OATH_OF_VINDICATION),
-                 'attempt_auras': [{'spell': OATH_OF_VINDICATION, 'stacks': 0}]}
+        entry = {**templar_proc(CONDEMNATION),
+                 'attempt_auras': [{'spell': 704576, 'stacks': 0}]}
         with self.assertRaises(ValueError):
             proc_scenario(CLASS_FILE, entry)
 
@@ -894,11 +906,11 @@ class TemplarProcEntriesTest(unittest.TestCase):
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateProcTest(unittest.TestCase):
-    def test_generate_writes_every_part_and_the_status_entries(self):
+    def test_generate_writes_every_part(self):
         from conformance import generate
         out = Path(tempfile.mkdtemp(prefix='conformance-procs-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[SCOURGEBANE, 572548])
+            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[SCOURGEBANE])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             self.assertEqual({entry['kind'] for entry in manifest['scenarios']}, {'proc'})
             parts = [entry for entry in manifest['scenarios'] if entry['file']]
@@ -910,8 +922,7 @@ class GenerateProcTest(unittest.TestCase):
                 self.assertEqual(entry['sha256'], hashlib.sha256(text.encode('utf-8')).hexdigest())
                 self.assertEqual(batch.exploratory_key(path, set()), entry['key'])
                 self.assertEqual((entry['spell_id'], entry['spell_name']), (SCOURGEBANE, 'Scourgebane'))
-            [status_entry] = [entry for entry in manifest['scenarios'] if not entry['file']]
-            self.assertTrue(status_entry['expectations'][0]['rule'].startswith(UNMODELLED))
+            self.assertFalse([entry for entry in manifest['scenarios'] if not entry['file']])
         finally:
             shutil.rmtree(out)
 

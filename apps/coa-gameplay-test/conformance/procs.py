@@ -18,7 +18,8 @@ PERCENT_KIND = 'percent'
 ATTACK = 'attack'
 CAST = 'cast'
 CAST_COUNT = 'spell_cast_count'
-EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count'})
+MELEE_EVENTS = 'melee_attack_count'
+EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS})
 CHARGES = 'spell_charges'
 TRIGGER_TARGETS = frozenset({TARGET, ALLY})
 PERIODIC_DAMAGE_AURA = 3
@@ -224,6 +225,8 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
     if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry):
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
+    if entry['event_metric'] == MELEE_EVENTS and entry['trigger']['action'] != CAST:
+        raise ValueError(f'Proc {entry["aura"]} counts auto attacks as events, which needs a cast trigger')
     per_trigger_limit(entry)
     chance = proc_chance(class_file, entry)
     needed = trials_needed(chance / 100)
@@ -345,6 +348,8 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
 def spell_count_step(label: str, metric: str, spell: int) -> dict:
     if metric not in EVENT_METRICS:
         raise ValueError(f'Unknown count metric {metric!r}')
+    if metric == MELEE_EVENTS:
+        return measurement(label, CASTER, metric, hand=MAIN_HAND)
     fields = {'target': TARGET} if metric == 'spell_damage_count' else {}
     return measurement(label, CASTER, metric, spell=spell, **fields)
 
