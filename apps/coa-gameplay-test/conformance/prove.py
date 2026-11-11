@@ -29,16 +29,18 @@ VERIFY_LINE = re.compile(r'^VERIFY ALL: (PASSED|FAILED|INCOMPLETE) (.+)$', re.MU
 OK_EXIT = 0
 FLIP_EXIT = 1
 DRIFT_EXIT = 2
+MISSING_EXIT = 3
 FAILURE_EXIT = 4
 BUILD_STAGE = 'build'
 GAMEPLAY_STAGE = 'gameplay'
 
 
 class ProveFailure(Exception):
-    def __init__(self, reason: str, exit_code: int = FAILURE_EXIT):
+    def __init__(self, reason: str, exit_code: int = FAILURE_EXIT, record: dict | None = None):
         super().__init__(reason)
         self.reason = reason
         self.exit_code = exit_code
+        self.record = record
 
 
 class RunTimeout(Exception):
@@ -70,7 +72,7 @@ Generate = Callable[[Path], Path]
 Rows = Callable[[dict], list[dict]]
 Enrich = Callable[[list[dict], Sequence[RunOutcome]], list[dict]]
 Annotate = Callable[[Sequence[RunOutcome]], Mapping]
-Compare = Callable[[Path, Path, Path], tuple[int, int]]
+Compare = Callable[[Path, Path, Path], tuple[int, list[str]]]
 
 
 @dataclass(frozen=True)
@@ -132,10 +134,10 @@ def count_statuses(verdicts: Sequence[Verdict]) -> dict[str, int]:
     return {status: sum(verdict.status == status for verdict in verdicts) for status in STATUSES}
 
 
-def compare_run(manifest_path: Path, results: Path, directory: Path) -> tuple[int, int]:
+def compare_run(manifest_path: Path, results: Path, directory: Path) -> tuple[int, list[str]]:
     comparison = evaluate(manifest_path, results)
     write_outputs(manifest_path, results, comparison.verdicts, directory)
-    return len(comparison.runs), len(comparison.missing)
+    return len(comparison.runs), list(comparison.missing)
 
 
 def execute_run(spec: ProveSpec, number: int, manifest_path: Path, files: Sequence[Path], runner: Runner,
@@ -163,15 +165,18 @@ def execute_run(spec: ProveSpec, number: int, manifest_path: Path, files: Sequen
         raise ProveFailure(f'run {number}: scenario drift, no verdict:\n{drift}', DRIFT_EXIT) from drift
     except BuildMismatch as mismatch:
         raise ProveFailure(f'run {number}: {mismatch}') from mismatch
-    if not with_result:
-        raise ProveFailure(f'run {number}: none of the {len(files)} scenarios produced a result in {results}')
     header, verdicts = read_verdicts(directory)
-    record = {'run': number, 'command': command, 'returncode': returncode, 'verify_status': status,
+    record = {'run': number, 'directory': str(directory), 'command': command, 'returncode': returncode, 'verify_status': status,
               'report': str(report_path), 'results': str(results), 'stages': stages,
               'gameplay_seconds': stages.get(GAMEPLAY_STAGE, {}).get('seconds'),
-              'scenarios_with_result': with_result, 'scenarios_without_result': without_result,
+              'scenarios_with_result': with_result, 'scenarios_without_result': len(without_result),
+              'missing_results': sorted(without_result),
               'build': header.get('build'), 'server_commit': header.get('server_commit'),
               'counts': count_statuses(verdicts)}
+    if without_result:
+        shown = ', '.join(sorted(without_result))
+        raise ProveFailure(f'run {number}: {len(without_result)} of {with_result + len(without_result)} scenarios '
+                           f'produced no result in {results}: {shown}', MISSING_EXIT, record)
     return RunOutcome(number, directory, results, header, verdicts, record)
 
 
@@ -295,7 +300,8 @@ def prove(spec: ProveSpec, generate: Generate, rows: Rows | None = None, enrich:
     spec = ProveSpec(out.resolve(), Path(spec.worktree), spec.runs, spec.build, spec.timeout_ms, spec.verify)
     summary = {'schema': SUMMARY_SCHEMA, 'class_id': None, 'manifest': None, 'spell_dbc_sha256': None,
                'scenarios': 0, 'worktree': str(spec.worktree), 'sizing': None, 'runs': [], 'flips': [],
-               'not_judged': [], 'flip_reports': [], 'fragment': None, 'failure': None, 'exit': OK_EXIT}
+               'not_judged': [], 'flip_reports': [], 'fragment': None, 'missing_results': [], 'failed_run': None,
+               'failure': None, 'exit': OK_EXIT}
     outcomes: list[RunOutcome] = []
     try:
         piloted, trials = None, {}
@@ -333,8 +339,13 @@ def prove(spec: ProveSpec, generate: Generate, rows: Rows | None = None, enrich:
     except ProveFailure as failure:
         summary['failure'] = failure.reason
         summary['exit'] = failure.exit_code
+        if failure.record is not None:
+            summary['failed_run'] = failure.record
+            summary['missing_results'] = [{'directory': failure.record['directory'],
+                                           'scenarios': failure.record['missing_results']}]
     summary['exit_meaning'] = {OK_EXIT: 'no flip', FLIP_EXIT: 'two judged verdicts differ between runs',
-                               DRIFT_EXIT: 'scenario drift', FAILURE_EXIT: 'a run failed'}[summary['exit']]
+                               DRIFT_EXIT: 'scenario drift', MISSING_EXIT: 'a scenario produced no result',
+                               FAILURE_EXIT: 'a run failed'}[summary['exit']]
     write_json(spec.out / SUMMARY_FILE, summary)
     return summary['exit']
 

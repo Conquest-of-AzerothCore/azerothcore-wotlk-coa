@@ -267,8 +267,9 @@ It starts nothing but the `coa-verify` command below.
    <every scenario file>` (`build,gameplay` on run 1 only with `--build`), with the timeout; never `--jobs`. A timeout
    stops the process group (SIGTERM, then SIGKILL after 30 s) and the run fails. The run directory comes from the
    `VERIFY ALL: <status> <report.json>` line of `DIR/run<n>/verify.log`; `INCOMPLETE` is the normal status of
-   exploratory scenario files. A failed build stage, scenario drift, results of several builds, or a run with no
-   result for any scenario fails the proof; so do runs judged on different builds.
+   exploratory scenario files. A failed build stage, scenario drift, results of several builds, or a run (pilot
+   included) in which any scenario of the manifest has no result fails the proof; so do runs judged on different
+   builds. A missing result stops the proof at that run, writes no fragment and lists the scenarios (ADR 0122).
 3. Compares each run into `DIR/run<n>/` (`alerts.tsv`, `report.md`, `verdicts.json`, `questions.md`, a copy of
    `verify-report.json`) and diffs run 1 against each later run into `DIR/flips/` (`impact.md`).
 4. With `--clauses`, writes `DIR/fragment.json`: the ledger claims whose labels all run here (an ordinal-free label
@@ -276,16 +277,19 @@ It starts nothing but the `coa-verify` command below.
    with `evidence` (`behaviour` only when [clause coverage](clause-ledger.md#two-proof-statuses) gives it in every
    run, else `data`) and the server `Spell.dbc` sha256. Without `--clauses` the fragment is empty.
 5. Writes `DIR/summary.json`: `sizing` (null: no pilot provider exists, see below); per run the `coa-verify`
-   command, status, stage seconds (`gameplay_seconds`), scenarios with and without a result, the worldserver `build`,
+   command, status, stage seconds (`gameplay_seconds`), scenarios with and without a result (`missing_results`
+   names the latter), the worldserver `build`,
    the `server_commit` and the verdict counts per status; `flips`, `not_judged`, `flip_reports`, the `fragment` row
    count and the excluded rows, `coverage` per run when `--clauses` is given (proven, behaviour, data, total,
-   not_measured), `failure` and `exit`.
+   not_measured), `missing_results` (the run directory and scenario keys of the run that lacked results),
+   `failed_run` (that run's record), `failure` and `exit`.
 
 A flip is two judged verdicts of one (label, check, scenario) whose status classes differ: conformant (`ok`,
 `tolerated`, `closed`) against another status, or one non-conformant status against another, or a label present in
 one run only. `ok` against `tolerated` is not a flip. `insufficient_trials` is not judged: it never flips and never
 sets exit 1 by itself; `not_judged` lists each such verdict with its per-run statuses and the largest
-`trials_needed`, the count to rerun with. Exit status: 0 no flip, 1 a flip, 2 scenario drift, 4 a failed run.
+`trials_needed`, the count to rerun with. Exit status: 0 no flip, 1 a flip, 2 scenario drift, 3 a scenario without
+result, 4 a failed run. Exit 0 needs a result for every scenario of the manifest in every run.
 
 `prove.py` holds the runner; `prove_ledger.py` supplies the ledger rows, their evidence and the coverage per run.
 `prove.prove` also takes a `Pilot` (three callables: generate a pilot manifest or none, size labels from the pilot

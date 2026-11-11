@@ -9,7 +9,7 @@ from unittest import mock
 
 from compare import BuildMismatch, ScenarioDrift, Verdict, write_verdicts
 import prove
-from prove import (DRIFT_EXIT, FAILURE_EXIT, FLIP_EXIT, OK_EXIT, Pilot, ProveSpec, RunTimeout, find_flips, is_under,
+from prove import (DRIFT_EXIT, FAILURE_EXIT, FLIP_EXIT, MISSING_EXIT, OK_EXIT, Pilot, ProveSpec, RunTimeout, find_flips, is_under,
                    run_command, verify_command, verify_report)
 from prove_ledger import ledger_coverage, ledger_evidence, ledger_rows
 
@@ -39,7 +39,7 @@ class Workspace:
         self.write_log = True
         self.write_report = True
         self.drift = False
-        self.results_missing = False
+        self.missing: list[list[str]] = []
         self.builds: list[str | None] = []
         self.mixed_builds = False
         self.details: dict[str, dict] = {}
@@ -89,7 +89,8 @@ class Workspace:
                     for label, status in statuses.items()]
         directory.mkdir(parents=True, exist_ok=True)
         write_verdicts(manifest, manifest_path, results, verdicts, directory)
-        return (0, 2) if self.results_missing else (2, 0)
+        missing = self.missing[number - 1] if len(self.missing) >= number else []
+        return len(KEYS) - len(missing), list(missing)
 
     def prove(self, rows=None, runs=2, build=False, enrich=None, annotate=None, out_name='proof',
               pilot=None) -> int:
@@ -256,9 +257,43 @@ class ProveRunTests(unittest.TestCase):
 
     def test_no_scenario_result_fails_the_run(self):
         self.space.statuses = [{}, {}]
-        self.space.results_missing = True
-        self.assertEqual(self.space.prove(), FAILURE_EXIT)
-        self.assertIn('none of the 2 scenarios', self.space.summary()['failure'])
+        self.space.missing = [list(KEYS)]
+        self.assertEqual(self.space.prove(), MISSING_EXIT)
+        self.assertIn('2 of 2 scenarios produced no result', self.space.summary()['failure'])
+
+    def test_seeded_one_missing_result_of_two_fails_and_names_the_scenario(self):
+        self.space.statuses = [{'a': 'ok'}, {'a': 'ok'}]
+        self.space.missing = [['scenario-b']]
+        rows = lambda manifest: [row('a')]
+        self.assertEqual(self.space.prove(rows), MISSING_EXIT)
+        summary = self.space.summary()
+        self.assertIn('1 of 2 scenarios produced no result', summary['failure'])
+        self.assertEqual([entry['scenarios'] for entry in summary['missing_results']], [['scenario-b']])
+        self.assertEqual(summary['failed_run']['missing_results'], ['scenario-b'])
+        self.assertEqual(summary['fragment'], None)
+        self.assertFalse((self.space.root / 'proof' / 'fragment.json').exists())
+        self.assertEqual(len(self.space.commands), 1)
+
+    def test_seeded_missing_result_in_the_second_run_only_fails(self):
+        self.space.statuses = [{'a': 'ok'}, {'a': 'ok'}]
+        self.space.missing = [[], ['scenario-a']]
+        self.assertEqual(self.space.prove(lambda manifest: [row('a')]), MISSING_EXIT)
+        summary = self.space.summary()
+        self.assertEqual(summary['missing_results'][0]['scenarios'], ['scenario-a'])
+        self.assertTrue(summary['missing_results'][0]['directory'].endswith('run2'))
+        self.assertEqual([run['scenarios_without_result'] for run in summary['runs']], [0])
+
+    def test_every_result_present_records_no_missing_scenario(self):
+        self.space.statuses = [{'a': 'ok'}, {'a': 'ok'}]
+        self.assertEqual(self.space.prove(), OK_EXIT)
+        summary = self.space.summary()
+        self.assertEqual(summary['missing_results'], [])
+        self.assertEqual([run['missing_results'] for run in summary['runs']], [[], []])
+
+    def test_compare_run_names_the_scenarios_without_a_result(self):
+        comparison = mock.Mock(runs={'scenario-a': object()}, missing=['scenario-b'], verdicts=[])
+        with mock.patch('prove.evaluate', return_value=comparison), mock.patch('prove.write_outputs'):
+            self.assertEqual(prove.compare_run(Path('m.json'), Path('r'), Path('d')), (1, ['scenario-b']))
 
     def test_summary_records_gameplay_seconds_counts_and_statuses_per_run(self):
         self.space.statuses = [{'a': 'ok', 'b': 'alert'}, {'a': 'ok', 'b': 'alert'}]
@@ -379,6 +414,15 @@ class PilotRunTests(unittest.TestCase):
         self.assertEqual(len(self.space.commands), 2)
         self.assertIsNone(self.space.summary()['sizing'])
         self.assertEqual(self.space.sized_with, [])
+
+    def test_seeded_missing_pilot_result_fails_before_any_judged_run(self):
+        self.space.statuses = [{'a': 'ok'}] * 3
+        self.space.missing = [['scenario-a']]
+        self.assertEqual(self.space.prove(pilot=self.space.pilot({'a': 40})), MISSING_EXIT)
+        summary = self.space.summary()
+        self.assertTrue(summary['missing_results'][0]['directory'].endswith('pilot/run1'))
+        self.assertEqual(summary['runs'], [])
+        self.assertEqual(len(self.space.commands), 1)
 
     def test_judged_runs_of_another_build_than_the_pilot_fail(self):
         self.space.statuses = [{'a': 'ok'}] * 3
