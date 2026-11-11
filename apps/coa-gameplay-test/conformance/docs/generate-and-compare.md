@@ -452,9 +452,9 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   has no effect-modifier factor. A `hit_mean`, `melee_mean` or `periodic_total` alert on a rank with such a term says
   "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
   needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the
-  roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar run found six such `ok`
-  verdicts (Reckoning 572741, 748507, 805421; Vindication 501589, 501590, 501592), whose server value adds a
-  per-level part the expected value omits. An `aura_amount` of a rolled effect has one read (one cast) and is
+  roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar
+  run found six such `ok` verdicts (Reckoning 572741, 748507, 805421; Vindication 501589, 501590, 501592), whose
+  server value adds a per-level part the expected value omits. An `aura_amount` of a rolled effect has one read (one cast) and is
   therefore `measured` unless one read is enough. The Templar has rolled tokens on Righteous Upheaval, Vindication,
   Reckoning, Chastise, Benediction, Titanstrike and others (`EffectDieSides` 3 to 224).
   Every `effect_value` and `aura_amount` verdict whose measured effect rolls (the token's effect, or the first
