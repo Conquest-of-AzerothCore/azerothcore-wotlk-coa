@@ -120,7 +120,8 @@ Example of the shape (one attempt, so `pending`; a second entry in `attempts` by
  "attempts": [{"agent": "round10/proc-chains", "report": "round10/workstreams/proc-chains.md"}]}}
 ```
 
-No Templar ledger entry declares a `tool_gap` yet.
+Templar: Zealotry 92108 "Your off-hand auto attacks now trigger Zealotry." declares one with one attempt
+(`pending`): the harness cannot produce an off-hand auto attack for this class.
 
 ### No behaviour route
 
@@ -136,9 +137,10 @@ carries the declaration and its `no_behaviour_route_state`. `clause_coverage` re
 reason, no attempt, an attempt without agent or report, a non-claim entry, a clause that also declares a
 `tool_gap`).
 
-Templar: three clauses declare it with one attempt (`pending`): Righteous Custodian 572808 "for $d" (30 min, beyond
-the longest scenario timeout) and Pious Sweep 520034 "Increases the damage of Chastise by $s1%" and "on enemies above
-75% health or affected by Tranquil Circle." (Chastise's per-hit spread needs about 2000 trials per arm).
+Templar: four clauses declare it with one attempt (`pending`): Righteous Custodian 572808 "for $d" (30 min, beyond
+the longest scenario timeout), the damage claim of Pulverizing 524620 (an absolute amount of a proc spell without a
+hit model) and Parry Dance 804912 "your chance to parry is now increased by $560651s1%" and "stacking $560651u times"
+(no learned contrast for a proc aura, no stack reading after a trigger sequence).
 
 ### Two proof statuses
 

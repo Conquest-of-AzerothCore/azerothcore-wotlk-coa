@@ -731,7 +731,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 100)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 112)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -3235,7 +3235,7 @@ class HitRatioScenarioTests(unittest.TestCase):
         self.assertIn('trials fit', str(raised.exception))
 
     def test_identical_arms_are_refused(self):
-        entry = {**pious_sweep_hit_ratio_entry(), 'treatment': {}}
+        entry = {**pious_sweep_hit_ratio_entry(), 'treatment': pious_sweep_hit_ratio_entry()['control']}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
@@ -5982,6 +5982,69 @@ class CostGateScenarioTests(unittest.TestCase):
     def test_a_reduction_that_leaves_no_separating_level_is_not_modelled(self):
         with self.assertRaises(NotModelled):
             behaviour_scenario(CLASS_FILE, {**cost_gate_entry(301059, 'sacred_swing'), 'reduction': 20})
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioFixtureTests(unittest.TestCase):
+    def test_fixture_stats_reach_the_caster_only(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(705284, 'hit_ratio', 'oath_breakers'))
+        run.validate(scenario)
+        self.assertEqual((scenario['players'][0]['attack_power'], scenario['players'][0]['spell_power']),
+                         (20000, 20000))
+
+    def test_an_unknown_fixture_stat_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**variant_entry(705284, 'hit_ratio', 'oath_breakers'),
+                                            'fixture': {'strength': 100}})
+
+    def test_warmup_casts_open_each_arm_before_its_start_reading(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, variant_entry(705284, 'hit_ratio', 'condemn'))
+        steps = run.validate(scenario)['steps']
+        for arm in ('control', 'treatment'):
+            start = first_index(steps, label=f'705284 behaviour_hit_ratio condemn {arm} start total')
+            casts = [index for index, step in enumerate(steps[:start]) if step['action'] == 'cast']
+            self.assertGreaterEqual(len(casts), 3)
+        treatment = first_index(steps, label='705284 behaviour_hit_ratio condemn treatment start total')
+        control = first_index(steps, label='705284 behaviour_hit_ratio condemn control start total')
+        talent = first_index(steps, action='set_aura', spell=705284)
+        self.assertLess(control, talent)
+        self.assertLess(talent, treatment)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CastAppliesAuraCastSpellTests(unittest.TestCase):
+    def test_a_named_cast_spell_is_learned_powered_and_cast_at_its_own_target(self):
+        entry = class_entry(705295, 'cast_applies_aura')
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        cast = first_index(steps, action='cast', spell=572769)
+        self.assertEqual(steps[cast]['target'], 'dummy')
+        self.assertLess(first_index(steps, action='learn', spell=572769), cast)
+        self.assertLess(first_index(steps, action='set_aura', spell=681170), cast)
+        self.assertEqual(expectation.model['expected_ms'], 8000)
+        self.assertIn('creatures', scenario)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class SitePurchaseScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, class_entry(804781, 'site_purchase'))
+        self.steps = run.validate(self.scenario)['steps']
+
+    def test_arms_check_the_site_and_the_price(self):
+        self.assertEqual([(e.label, e.displayed) for e in self.expectations],
+                         [('804781 site_purchase outside', '0'), ('804781 site_purchase paid', '1'),
+                          ('804781 site_purchase spent', '0'), ('804781 site_purchase topped_up', '1')])
+        purses = [step['copper'] for step in self.steps if step['action'] == 'money']
+        self.assertEqual(purses, [100, 99, 1])
+        teleports = [step['x'] for step in self.steps if step['action'] == 'teleport']
+        self.assertEqual(teleports, [-14297.2, 2279.65, 659.762])
+
+    def test_seeded_reward_learned_away_from_a_site_is_alert(self):
+        outside = self.expectations[0]
+        verdict = judge_behaviour(base_verdict(outside), FakeRun({outside.label: 1.0}), outside)
+        self.assertEqual(verdict.status, 'alert')
 
 
 if __name__ == '__main__':

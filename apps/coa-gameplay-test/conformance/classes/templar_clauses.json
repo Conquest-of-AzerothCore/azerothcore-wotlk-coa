@@ -19,7 +19,16 @@
     "labels": [
       "92108 trigger_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The harness cannot produce an off-hand auto attack for this class (the Zealotry trigger entry, triggers[48] of classes/templar.json: AscensionTemplarEvents.cpp:55-57 fires only on a damaging off-hand auto-attack hit, PROC_FLAG_DONE_MELEE_AUTO_ATTACK with OFF_ATTACK), so 92108 trigger_count stays unmodelled.",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 92109,
@@ -275,8 +284,26 @@
   {
     "spell": 300520,
     "clause": "Increases the damage of Scourgebane, Scarlet Hammer, and Titanstrike by $s1%",
-    "labels": [
-      "300520 effect_value e0"
+    "claims": [
+      {
+        "claim": "Increases the damage of Scourgebane ... by $s1%",
+        "labels": [
+          "300520 effect_value e0",
+          "300520 behaviour_hit_ratio scourgebane"
+        ]
+      },
+      {
+        "claim": "Scarlet Hammer",
+        "labels": [
+          "300520 behaviour_hit_ratio scarlet_hammer"
+        ]
+      },
+      {
+        "claim": "and Titanstrike",
+        "labels": [
+          "300520 behaviour_hit_ratio titanstrike"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -557,7 +584,9 @@
     "spell": 500678,
     "clause": "Meditate for $d,",
     "labels": [
-      "500678 aura_duration_ms"
+      "500678 aura_duration_ms",
+      "500678 behaviour_cast_applies_aura",
+      "500678 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -636,7 +665,10 @@
     "clause": "While active, your Temple Guardian spell has its Energy cost reduced by $s1%.",
     "labels": [
       "500694 effect_value e0",
-      "500694 aura_amount e0"
+      "500694 aura_amount e0",
+      "500694 cost_gate 803792 without",
+      "500694 cost_gate 803792 with",
+      "500694 cost_gate 803792 beyond"
     ],
     "kind": "claim"
   },
@@ -770,37 +802,33 @@
       "520034 effect_value e0 #0",
       "520034 e0 spell_damage_done 503141",
       "520034 e1 spell_modifier 801205",
-      "520034 e1 spell_effect_value 801205"
+      "520034 e1 spell_effect_value 801205",
+      "520034 behaviour_hit_ratio above_75"
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "The behaviour route is a Chastise hit ratio with and without Pious Sweep on a dummy above 75% health. Chastise's non-critical hits spread from 269 to 408 within one arm (stamp 20261111-062655, the Tranquil Circle arm), about 9% per hit, so the 99% half-width at 100 trials per arm is about 4 points against the 1-point power limit of the +25% band (2 points); the judge asks for about 2000 trials per arm and one scenario holds 166 (behaviour_hit_ratio tranquil_circle, insufficient_trials in both runs of this chunk). No lower-variance observation of Chastise's damage exists in the tool.",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 520034,
     "clause": "on enemies above 75% health or affected by Tranquil Circle.",
-    "labels": [
-      "520034 effect_value e0 #0",
-      "520034 e0 spell_damage_done 503141",
-      "520034 e1 spell_modifier 801205"
+    "claims": [
+      {
+        "claim": "on enemies above 75% health",
+        "labels": [
+          "520034 effect_value e0 #0",
+          "520034 e0 spell_damage_done 503141",
+          "520034 behaviour_hit_ratio above_75",
+          "520034 behaviour_hit_ratio below_75"
+        ]
+      },
+      {
+        "claim": "or affected by Tranquil Circle.",
+        "labels": [
+          "520034 e1 spell_modifier 801205",
+          "520034 behaviour_hit_ratio tranquil_circle"
+        ]
+      }
     ],
-    "kind": "claim",
-    "no_behaviour_route": {
-      "reason": "Same route and limit as 'Increases the damage of Chastise by $s1%': the Tranquil Circle hit ratio reads +26.5% and +24.9% (insufficient_trials, half-width about 4 points, power limit 1) and the above-75% arm has the same Chastise spread; one scenario holds 166 trials per arm against about 2000 needed.",
-      "attempts": [
-        {
-          "agent": "c2-author",
-          "report": "lean/batch1-c2-author.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 520442,
@@ -886,12 +914,30 @@
   {
     "spell": 524620,
     "clause": "Damage dealt by Condemn now has a $h% chance to consecrate the earth around you with holy fervor, dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage",
-    "labels": [
-      "524620 effect_value #0",
-      "524620 effect_value 524619e0 #1",
-      "524620 proc_rate"
+    "claims": [
+      {
+        "claim": "Damage dealt by Condemn now has a $h% chance",
+        "labels": [
+          "524620 proc_rate"
+        ]
+      },
+      {
+        "claim": "dealing ${$524619m1*$<scalingbp>+$sph*0.225+$AP*.1} Holy damage",
+        "labels": [
+          "524620 effect_value 524619e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "The chance claim is behaviour proven (524620 proc_rate). The damage claim states an absolute amount of the proc spell 524619, which has no hit model: the tool's hit scenarios cover the class's own active spells, and a hit_ratio compares two arms, not an absolute amount. The amount stays read from the token (524620 effect_value 524619e0 #1).",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 524620,
@@ -1915,9 +1961,26 @@
   {
     "spell": 705284,
     "clause": "Increases the the damage of Oath Breakers, Condemn, and Titanstrike by $s1%.",
-    "labels": [
-      "conformance-templar-value-705284",
-      "conformance-templar-passive-705284 (806835 ok, e1 567539 ok, plus matching measured entries for 578276/803880/704573/503141/501567/501568/501569/801477/572741/572027)"
+    "claims": [
+      {
+        "claim": "Increases the the damage of Oath Breakers ... by $s1%",
+        "labels": [
+          "705284 effect_value e0 #0",
+          "705284 behaviour_hit_ratio oath_breakers"
+        ]
+      },
+      {
+        "claim": "Condemn",
+        "labels": [
+          "705284 behaviour_hit_ratio condemn"
+        ]
+      },
+      {
+        "claim": "and Titanstrike",
+        "labels": [
+          "705284 behaviour_hit_ratio titanstrike"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2097,7 +2160,7 @@
     "spell": 705295,
     "clause": "Casting Sacred Swing now grants you Staffguard",
     "labels": [
-      "705295 trigger_count ok"
+      "705295 trigger_count"
     ],
     "kind": "claim"
   },
@@ -2113,7 +2176,9 @@
     "spell": 705295,
     "clause": "for $706583d",
     "labels": [
-      "conformance-templar-value-705295 (spell_duration 706583 #1)"
+      "705295 spell_duration 706583 #1",
+      "705295 behaviour_cast_applies_aura",
+      "705295 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2964,7 +3029,8 @@
     "clause": "dealing ${$m1+0+$AP*0.285+$SP*0.75} Physical damage",
     "labels": [
       "801446 effect_value e0 #0",
-      "573324 effect_value e0 #0"
+      "573324 effect_value e0 #0",
+      "573324 hit_mean"
     ],
     "kind": "claim"
   },
@@ -3549,13 +3615,31 @@
   {
     "spell": 804781,
     "clause": "Pay a tithe of 1 silver",
-    "labels": [],
+    "labels": [
+      "804781 site_purchase outside",
+      "804781 site_purchase paid",
+      "804781 site_purchase spent",
+      "804781 site_purchase topped_up"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804781,
     "clause": "to learn a special new ability to empower your entire party",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "to learn a special new ability",
+        "labels": [
+          "804781 site_purchase outside",
+          "804781 site_purchase paid",
+          "804781 site_purchase topped_up"
+        ]
+      },
+      {
+        "claim": "to empower your entire party",
+        "labels": []
+      }
+    ],
     "kind": "claim"
   },
   {
@@ -3621,7 +3705,16 @@
     "labels": [
       "804912 effect_value 560651e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "The magnitude is a parry chance. A parry_chance reading after the proc is a state read, and coverage counts a state read as behaviour only in a learned contrast (coverage.promised_state); the proc aura 560651 is not learned. A parry-rate reading needs a creature attacking the caster, and the trigger entry triggers[57] notes that the incoming-attack leg has no harness metric or action yet. The value stays read from the token (804912 effect_value 560651e0 #0).",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804912,
@@ -3638,7 +3731,16 @@
     "labels": [
       "804912 max_stacks 560651 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "The cap needs six or more procs of 560651 from forced auto-attack crits followed by an aura_stacks reading; no behaviour kind reads a stack count after a trigger sequence (the trigger entries count casts). The cap stays read from the DBC (804912 max_stacks 560651 #2).",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804912,

@@ -796,6 +796,31 @@ player. The arms' `auras` are still set on the caster, so a talent set in the tr
 the caster heals and healing received when the ally heals the caster. The caster is armed for the observed rank
 (`values.armed_for`), so a rank that needs a weapon class can be observed.
 
+A `hit_ratio` entry may also set `fixture` (`attack_power`, `ranged_attack_power`, `spell_power`: flat fixture bonuses
+of the caster player, `README.md` player fixture fields) so the stat part of a formula dominates its die, and
+`warmup` (spells cast at the start of each arm, after the arm's auras and before its start reading) so a stacking
+damage over time is read at full stacks in both arms. A magic-school observation against the dummy sets the aura
+823764 ("beeg spellpen", `SPELL_AURA_MOD_TARGET_RESISTANCE` -9999 on the magic schools) in both arms: the dummy's
+level-based magic resistance (`Unit::GetEffectiveResistChance`, `UsesLinearMonsterResistance`) otherwise spreads the
+hits by partial resists (Chastise: 269 to 408 per non-critical hit), which no trial count within one scenario
+overcomes.
+
+### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
+
+"Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`
+teleports the caster to `outside` (away from every site), adds `price` copper and casts `spell` (`<spell>
+site_purchase outside`: the first site's reward not known), teleports to the first site and casts (`paid`: known),
+teleports to the second site, adds `price - 1` copper and casts (`spent`: the second reward not known, so the first
+payment was taken), adds 1 copper and casts again (`topped_up`: known). Each reading is `knows_spell` of the reward,
+judged exactly.
+
+### Cast-applies-aura casts
+
+A `cast_applies_aura` entry may name `cast_spell` (and `cast_target`) when the aura comes from casting another spell
+than the entry's own, for example a talent whose aura a class ability grants: the talent is learned, `cast_spell` is
+learned, its power and caster aura are set, and it is cast at `cast_target` (default `target`). The expiry pair is
+timed from that cast.
+
 ### Threat-tick periods
 
 A `threat_tick_ratio` entry may set `ticks` (default 1) and `label_suffix`: the wait then lets that many periodic ticks
@@ -883,6 +908,13 @@ pair leaves the clause unproven.
 | Grace of Aman'thul 301059 (`variant: "righteous_lunge"`/`"sacred_swing"`) | cost_gate (power) | "Reduces the Energy cost of Righteous Lunge by" / "and Sacred Swing by" | 35 and 10 Energy | aura 107 `SPELLMOD_COST` -5 on 570233 (40), -10 on 572769 (20) |
 | Battle Hardened 706309 | cost_gate (cooldown) | "Reduces the cooldown of Righteous Upheaval by" | 15000 ms | aura 107 `SPELLMOD_COOLDOWN` -5000 on 572027 (`CategoryRecoveryTime` 20000) |
 | Guardian of the Light 707364 | cost_gate (power, next, duration) | "Casting Benediction now reduces the cost of your next Temple Guardian by" | 8 Energy for 6000 ms, next cast only | 712378 aura 108 `SPELLMOD_COST` -50% for 6000 ms, one charge (`AscensionTemplarAuras.cpp:116-121`, `AscensionTemplarAbilities.cpp:227-229`) |
+| One-Punch Man 705284 (`variant: "oath_breakers"`/`"condemn"`/`"titanstrike"`) | hit_ratio | "Increases the the damage of Oath Breakers, Condemn, and Titanstrike by" | 1.2 each | `Effect[0]` aura 108 `SPELLMOD_DAMAGE` (masks 16/64/128), `Effect[1]` `SPELLMOD_DOT` on Condemn; fixture power, resistance fixture for Holy |
+| Judgement 300520 (`variant: "titanstrike"`/`"scourgebane"`/`"scarlet_hammer"`) | hit_ratio | "Increases the damage of Scourgebane, Scarlet Hammer, and Titanstrike by" | 1.25 each at 10% health | `AscensionTemplarAbilities.cpp:140-142` (launch damage) and `AscensionTemplarContracts.cpp` `ModifySpellDamageTaken` (Titanstrike's leech damage) |
+| Pious Sweep 520034 (`variant: "above_75"`/`"below_75"`) | hit_ratio | "Increases the damage of Chastise by" / "on enemies above 75% health or affected by Tranquil Circle." | 1.25 at full health, 1.0 at 50% | aura 303 on `AURA_STATE_HEALTH_ABOVE_75_PERCENT`, Chastise mask (`AscensionTemplarContracts.cpp:152-156`) |
+| Force of Golganneth 500694 | cost_gate (`talent_aura`) | "While active, your Temple Guardian spell has its Energy cost reduced by" | 8 Energy while the aura is up | aura 108 `SPELLMOD_COST` -50% |
+| Testament of Fortitude 500678 | cast_applies_aura | "Meditate for" | 15000 ms | `DurationIndex` 8 |
+| Staffguard 705295 | cast_applies_aura (`cast_spell` 572769) | "for" | 8000 ms | `AscensionTemplarAbilities.cpp:239-243`, 706583 `DurationIndex` 31 |
+| Tithe 804781 | site_purchase | "Pay a tithe of 1 silver to learn a special new ability" | 100 copper, Light's Hope Chapel then Strahnbrad | `AscensionTemplarTithe.cpp` (`TITHE_COST`, site table) |
 | Warrior of Tyr 301253 | metric_delta | "Periodic damage dealt now generates" | 10 (Energy, power type 3) | `AscensionCustomResourceData.h:475` `NativePowerGainRules` (`ClassId 19, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253`), consumed by `AscensionCompat.cpp:3632-3680` `OnPeriodicDamageTick`; Condemn 567541 (periodic damage, 3000 ms ticks) is cast as a real tick source, with the scenario's own mana-cost fixture resetting Energy to a known baseline immediately before each cast; matches the already-written issue scenario `templar-5163-warrior-of-tyr-energy-generation.json` (#5163, #4432). No code or SQL fix needed — the prior `triggers` entry for 301253 (removed) searched only the `ProcFlags`/`spell_proc` path and missed this separate native-resource-rule path |
 | Sacred Resistance 301309 | metric_delta | "now increases your Armor by" | 1 (aura present) | round4 `scripted-script-aura` investigation (2026-11): `talent(301309, 680870)` inside `OnSpellCast`'s generic `talent` helper (`AscensionTemplarAbilities.cpp:152-153`), `if (Named(info, 805421)) talent(301309, 680870)` i.e. `if (player->HasAura(301309)) Cast(player, player, 680870)` whenever the player casts a Reckoning rank (805421, family 25, `SpellFamilyFlags[2]` bit 128 set); `680870`'s own armor-percent and duration tokens are already `ok` (`301309 effect_value 680870e0 #0`, `301309 spell_duration 680870 #1`). 301309's own effect 0 (`BasePoints`/`MiscValue` both 0) is a pure flag, read nowhere by value: the metric is `aura {spell: 680870}` before and after learning 301309, around a cast of Reckoning's max rank 572741 (`EffectImplicitTargetA[0]` 6, TARGET_UNIT_TARGET_ENEMY, so `target: "dummy"`) |
 | Keeping the Oath 92109, effect 1 | metric_delta | "you no longer consume your Oaths with Oath Breakers" | 1 (aura present) | round4 `scripted-script-aura` investigation (2026-11): `AscensionTemplarAbilities.cpp:174`, `if (!player->HasAura(92109) && !player->HasAura(803149) && !Named(info, 805409)) ClearOaths(player);` inside the `Breaker(info)` block, run on every cast satisfying `Breaker` (`SpellFamilyFlags[2]` bit 128, or `Named(info, 805409)`, Righteous Tempest); `ClearOaths` removes Oath Chain 704576 among others. Reckoning 572741 (max rank) satisfies `Breaker` through the `SpellFamilyFlags[2]` bit, not through `Named(info, 805409)`, so it exercises the 92109 gate specifically rather than the separate, always-exempt Righteous Tempest case; the scenario measures `aura {spell: 704576}` before and after learning 92109, around a Reckoning cast whose own `required_aura_steps` fixture re-grants Oath Chain fresh immediately before each cast (shared with the Sacred Resistance entry above, same `trigger_spell`) |

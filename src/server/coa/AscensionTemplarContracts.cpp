@@ -366,6 +366,10 @@ class templar_scaling : public UnitScript
         if (Player* player = Owner(target))
             if (info && !info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
                 damage = int32(damage * Mitigation(player, attacker, info->SchoolMask));
+        if (Player* striker = Owner(attacker))
+            if (info && Named(info, 806521) && info->HasEffect(SPELL_EFFECT_HEALTH_LEECH) &&
+                striker->HasAura(300520) && target->HealthBelowPct(20))
+                damage = int32(damage * 1.25f);
     }
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {

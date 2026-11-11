@@ -61,7 +61,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
-        'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate')
+        'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1702,6 +1702,18 @@ class CastAppliesAuraSpec:
     expected_ms: float
     applied_aura: int
     target: str = CASTER
+    cast_spell: int | None = None
+    cast_target: str | None = None
+
+
+def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tuple[list[dict], list[dict]]:
+    if spec.cast_spell is None:
+        return [], [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target}]
+    facts = facts_of(records, spec.cast_spell)
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}],
+            cast_gate_power_step(facts) + required_aura_steps(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell,
+                'target': spec.cast_target or spec.target}])
 
 
 def cast_applies_aura_label(spec: CastAppliesAuraSpec, moment: str) -> str:
@@ -1713,12 +1725,10 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     entry = behaviour_entry(records, spec.spell, spec.name, 'cast_applies_aura', spec.quote, spec.expected_ms)
     before_label = cast_applies_aura_label(spec, BEFORE)
     after_label = cast_applies_aura_label(spec, AFTER)
-    cast_target = spec.target
-    steps = base_steps(class_file) + [
-        {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
-        measurement(before_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura),
-        {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': cast_target},
-        measurement(after_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura)]
+    learned, cast = cast_applies_aura_steps(records, spec)
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
+             + [measurement(before_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura)] + cast
+             + [measurement(after_label, CASTER, 'aura_duration_ms', spell=spec.applied_aura)])
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast applies aura',
@@ -1731,7 +1741,7 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
                     f'its $d token matching when read without a cast.',
         'players': [player_fixture(class_file)],
         'steps': steps}
-    if spec.target == TARGET:
+    if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_cast_applies_aura'
     model = {'kind': 'cast_applies_aura', 'before_label': before_label, 'after_label': after_label,
@@ -1743,7 +1753,8 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
 
 def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
     return CastAppliesAuraSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'],
-                               entry['applied_aura'], entry.get('target', CASTER))
+                               entry['applied_aura'], entry.get('target', CASTER), entry.get('cast_spell'),
+                               entry.get('cast_target'))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -2838,6 +2849,81 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS))
 
 
+SITE_PURCHASE_SETTLE_MS = 3000
+
+
+@dataclass(frozen=True)
+class PurchaseSite:
+    map: int
+    x: float
+    y: float
+    z: float
+    reward: int
+
+
+@dataclass(frozen=True)
+class SitePurchaseSpec:
+    spell: int
+    name: str
+    quote: str
+    price: int
+    sites: tuple[PurchaseSite, PurchaseSite]
+    outside: PurchaseSite
+    settle_ms: int = SITE_PURCHASE_SETTLE_MS
+
+
+def site_purchase_label(spell: int, arm: str) -> str:
+    return f'{spell} site_purchase {arm}'
+
+
+def site_purchase_scenario(class_file: dict, spec: SitePurchaseSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'site_purchase', spec.quote, spec.price)
+    first, second = spec.sites
+
+    def go(site: PurchaseSite) -> list[dict]:
+        return [{'action': 'teleport', 'actor': CASTER, 'map': site.map, 'x': site.x, 'y': site.y, 'z': site.z},
+                {'action': 'wait', 'label': 'teleport settle', 'ms': spec.settle_ms}]
+
+    def pay(arm: str, reward: int, copper: int = 0) -> list[dict]:
+        purse = [{'action': 'money', 'actor': CASTER, 'copper': copper}] if copper else []
+        return purse + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell},
+                        {'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER},
+                        {'action': 'wait', 'ms': SINGLE_TARGET_GCD_WAIT_MS},
+                        measurement(site_purchase_label(spec.spell, arm), CASTER, 'knows_spell', spell=reward)]
+
+    arms = [('outside', first.reward, NO_CAST_FAILURE), ('paid', first.reward, STATE_PRESENT),
+            ('spent', second.reward, NO_CAST_FAILURE), ('topped_up', second.reward, STATE_PRESENT)]
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+             + go(spec.outside) + pay('outside', first.reward, spec.price) + go(first) + pay('paid', first.reward)
+             + go(second) + pay('spent', second.reward, spec.price - 1) + pay('topped_up', second.reward, 1))
+    rule = prose_rule(entry.quote, spec.spell)
+    model = {'kind': 'site_purchase', 'price': spec.price, 'quote': entry.quote}
+    expectations = [Expectation(site_purchase_label(spec.spell, arm), BEHAVIOUR_CAST_CONDITION, spec.spell, reward,
+                                None, str(known), rule, {**model, 'arm': arm}) for arm, reward, known in arms]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour site purchase',
+        'contract': f'{spec.spell} is cast with {spec.price} copper away from any site (reward {first.reward} not '
+                    f'learned), at the first site (learned), then at the second site with {spec.price - 1} copper '
+                    f'added (reward {second.reward} not learned: the first payment was spent) and once more after 1 '
+                    f'copper more (learned), proving the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    return timed(scenario, waited_ms(steps)), expectations
+
+
+def site_purchase_spec(entry: dict) -> SitePurchaseSpec:
+    def site(raw: dict, reward: int) -> PurchaseSite:
+        return PurchaseSite(int(raw['map']), float(raw['x']), float(raw['y']), float(raw['z']), reward)
+
+    sites = tuple(site(raw, int(raw['reward'])) for raw in entry['sites'])
+    if len(sites) != 2:
+        raise ValueError(f'{entry["spell"]} site_purchase needs exactly two sites')
+    return SitePurchaseSpec(entry['spell'], entry['name'], entry['quote'], int(entry['price']), sites,
+                            site(entry['outside'], 0), entry.get('settle_ms', SITE_PURCHASE_SETTLE_MS))
+
+
 SPELL_FAILED_TARGET_AURASTATE = 111
 NO_CAST_FAILURE = 0
 CAST_GATE_WAIT_MS = CAST_MARGIN_MS
@@ -3852,10 +3938,20 @@ class HitRatioSpec:
     metric: str = 'spell_damage_total'
     caster: str = CASTER
     target: str = TARGET
+    fixture: tuple[tuple[str, int], ...] = ()
+    warmup: tuple[int, ...] = ()
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
 HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal'}
+HIT_RATIO_FIXTURE_STATS = frozenset({'attack_power', 'ranged_attack_power', 'spell_power'})
+
+
+def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
+    unknown = set(raw) - HIT_RATIO_FIXTURE_STATS
+    if unknown:
+        raise ValueError(f'hit_ratio fixture fields {sorted(unknown)} are not {sorted(HIT_RATIO_FIXTURE_STATS)}')
+    return tuple(sorted((name, int(value)) for name, value in raw.items()))
 
 
 def hit_arm(raw: dict) -> HitArm:
@@ -3910,6 +4006,11 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec) -> list[dict]:
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = hit_ratio_reads(spec, name)
+        if spec.warmup:
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                      for spell, stacks in arm.auras]
+            for spell in spec.warmup:
+                steps += hit_ratio_cast(records, spell, spec.caster, spec.target)
         steps += reads(marks[0])
         for trial in range(1, spec.trials + 1):
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
@@ -3948,7 +4049,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'hit_ratio', spec.quote, spec.expected)
     class_file = armed_for(class_file, records, spec.observe_spell)
-    learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts)
+    learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts, *spec.warmup)
     steps = ([{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}] +
              [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
               if spell != spec.observe_spell or spec.caster != CASTER] +
@@ -3958,12 +4059,13 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         raise NotModelled(f'{spec.spell} hit_ratio waits {waited} ms over {spec.trials} trials, beyond one '
                           f'scenario\'s {MAX_SCENARIO_MS} ms; at most {hit_ratio_trial_limit(class_file, spec)} '
                           f'trials fit')
-    player = player_fixture(class_file)
+    player = {**player_fixture(class_file), **dict(spec.fixture)}
     if spec.force_crit is not None:
         player[FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
     critical = '' if spec.critical is None else f', counting only hits with critical={spec.critical}'
     suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
-    players = [player] + ([{**player_fixture(class_file), 'id': ALLY}] if ALLY in (spec.caster, spec.target) else [])
+    ally = {**player_fixture(class_file), 'id': ALLY, **(dict(spec.fixture) if spec.caster == ALLY else {})}
+    players = [player] + ([ally] if ALLY in (spec.caster, spec.target) else [])
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour hit ratio{suffix}',
@@ -3997,7 +4099,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         tuple(entry.get('learn', ())), entry.get('trials', HIT_RATIO_TRIALS), entry.get('critical'),
                         entry.get('force_crit'), entry.get('target_health_pct'), entry.get('label_suffix', ''),
                         entry.get('metric', 'spell_damage_total'), entry.get('caster', CASTER),
-                        entry.get('target', TARGET))
+                        entry.get('target', TARGET), hit_ratio_fixture(entry.get('fixture', {})),
+                        tuple(int(spell) for spell in entry.get('warmup', ())))
 
 
 def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
@@ -4094,6 +4197,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return group_target_scenario(class_file, group_target_spec(entry))
     if entry['kind'] == 'cost_gate':
         return cost_gate_scenario(class_file, cost_gate_spec(entry))
+    if entry['kind'] == 'site_purchase':
+        return site_purchase_scenario(class_file, site_purchase_spec(entry))
     if entry['kind'] == 'absorb_pierce_ratio':
         return absorb_pierce_ratio_scenario(class_file, absorb_pierce_ratio_spec(entry))
     if entry['kind'] == 'hit_ratio':

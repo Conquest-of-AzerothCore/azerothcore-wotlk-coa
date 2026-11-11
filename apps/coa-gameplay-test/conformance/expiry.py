@@ -3,8 +3,8 @@ import math
 from pathlib import Path
 
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
-                        STRIKER_HEALTH, NotModelled, behaviour_entry, cast_applies_aura_spec, duration_refresh_spec,
-                        duration_spec, mechanic_duration_spec, prose_rule)
+                        STRIKER_HEALTH, NotModelled, behaviour_entry, cast_applies_aura_spec, cast_applies_aura_steps,
+                        duration_refresh_spec, duration_spec, mechanic_duration_spec, prose_rule)
 from hits import MAIN_HAND, UNMODELLED, creature_fixture, records_of, timed
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
@@ -209,17 +209,17 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
     absent = f'{prefix} before cast'
     arm = expiry_arm(prefix, 'cast', spec.expected_ms, requires=((absent, 0.0),))
     actor = spec.target
-    steps = base_steps(class_file) + [
-        {'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
-        measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura),
-        acted({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target}, arm),
-        applied_step(arm, actor, spec.applied_aura)] + pair_steps(arm, actor, spec.applied_aura)
+    learned, cast = cast_applies_aura_steps(records, spec)
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
+             + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)] + cast[:-1]
+             + [acted(cast[-1], arm), applied_step(arm, actor, spec.applied_aura)]
+             + pair_steps(arm, actor, spec.applied_aura))
     scenario = expiry_scenario_shell(
         class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour expiry',
         f'{spec.applied_aura} is absent before {spec.spell} is cast, present {arm.before_margin_ms} ms before its '
         f'stated {spec.expected_ms:g} ms end and absent {arm.after_margin_ms} ms after it, timed from the cast.',
         steps)
-    if spec.target == TARGET:
+    if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
     return finished(scenario), [expiry_expectation(expiry_label(spec.spell), spec.spell, spec.applied_aura,
                                                    str(spec.expected_ms), prose_rule(spec.quote, spec.spell), [arm])]

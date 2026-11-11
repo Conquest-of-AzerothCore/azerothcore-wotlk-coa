@@ -99,6 +99,8 @@ BEHAVIOUR_LABELS = {
                                 for arm in ('without', 'with', *(('next',) if entry.get('next_arm') else ()),
                                             'beyond',
                                             *(('held', 'expired') if entry.get('aura_duration_ms') else ()))],
+    'site_purchase': lambda entry: [f"{entry['spell']} site_purchase {arm}"
+                                    for arm in ('outside', 'paid', 'spent', 'topped_up')],
     'cast_state': lambda entry: [f"{entry['spell']} cast_state {moment}" for moment in ('control', 'state', 'allowed')],
     'immunity': lambda entry: [f"{entry['spell']} immunity {subject} {moment}"
                                for subject, moments in ((entry['spell'], ('cast', 'applied')),
