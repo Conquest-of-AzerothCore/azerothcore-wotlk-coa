@@ -3890,6 +3890,42 @@
       "reduction": -5000,
       "target": "dummy",
       "observe_source": "Owner ruling 2026-11-10: the clause lengthens Interdict's cooldown by 5 sec. AscensionTemplarContracts.cpp:169-170 sets 712678 EffectBasePoints[1] to 4999 (+5000 ms) and AscensionTemplarAbilities.cpp:223-224 (OnSpellCast) calls ModifySpellCooldown(560116, Amount(712678, EFFECT_1)) when 712678 is known; Player.cpp:11950-11956 moves the stored end. Interdict 560116 RecoveryTime 120000 ms, cast at the dummy. Arms timed from a priming cast: 120500 ms without Patience (through), 120500 ms with it (refused, SPELL_FAILED_NOT_READY 67), 125500 ms with it (through), 124500 ms with it (refused). Players and the dummy are at level 60."
+    },
+    {
+      "spell": 805422,
+      "name": "Tome of Light",
+      "kind": "cast_applies_aura",
+      "variant": "shield",
+      "label_suffix": "shield",
+      "quote": "for $d",
+      "expected_ms": 30000,
+      "applied_aura": 805422,
+      "target": "caster",
+      "observe_source": "805422 DurationIndex 9 (30000 ms, $d); Effect[1] aura 69 SPELL_AURA_SCHOOL_ABSORB on the caster, its amount set to the maximum health in CalcAmount (AscensionTemplarAuras.cpp:56-57). The expiry pair reads 805422 on the caster before and after its stated end, timed from the cast."
+    },
+    {
+      "spell": 805422,
+      "name": "Tome of Light",
+      "kind": "cast_applies_aura",
+      "variant": "barrier",
+      "label_suffix": "barrier",
+      "quote": "and grants an additional effect for each.",
+      "expected_ms": 30000,
+      "applied_aura": 806354,
+      "target": "caster",
+      "observe_source": "AscensionTemplarAuras.cpp:122-128: when Tome of Light 805422 applies to the caster it resets Barrier of Light 805417 and Tranquil Circle 801205 and casts Tome of Light: Barrier of Light 806354 and Tome of Light: Tranquil Circle 807004 on the caster. 806354 DurationIndex 9 (30000 ms, its embedded $d). The expiry pair reads 806354 absent before the Tome cast, present before its stated end and absent after it."
+    },
+    {
+      "spell": 805422,
+      "name": "Tome of Light",
+      "kind": "cast_applies_aura",
+      "variant": "circle",
+      "label_suffix": "circle",
+      "quote": "and grants an additional effect for each.",
+      "expected_ms": 30000,
+      "applied_aura": 807004,
+      "target": "caster",
+      "observe_source": "AscensionTemplarAuras.cpp:122-128: when Tome of Light 805422 applies to the caster it resets Barrier of Light 805417 and Tranquil Circle 801205 and casts Tome of Light: Barrier of Light 806354 and Tome of Light: Tranquil Circle 807004 on the caster. 807004 DurationIndex 9 (30000 ms, its embedded $d). The expiry pair reads 807004 absent before the Tome cast, present before its stated end and absent after it."
     }
   ],
   "player_observations": [

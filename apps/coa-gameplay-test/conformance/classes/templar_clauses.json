@@ -50,11 +50,10 @@
     "spell": 92109,
     "clause": "In addition, you no longer consume your Oaths with Oath Breakers.",
     "labels": [
-      "92109 trigger_count",
-      "92109 e2",
       "92109 behaviour_metric_delta"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "92109 trigger_count and 92109 e2 removed from this clause (trial-o, 2026-11-11): they are the unmodelled effect 2 (SPELL_AURA_PROC_TRIGGER_SPELL to SPELL_RECENTLY_PARRIED_OR_DODGED 681170), which the 92109 triggers entry states is not named in the tooltip; the clause is measured by 92109 behaviour_metric_delta (Oath Chain 704576 kept after Reckoning 572741 only with 92109 known)"
   },
   {
     "spell": 92111,
@@ -4196,7 +4195,8 @@
     "spell": 805422,
     "clause": "for $d",
     "labels": [
-      "805422 aura_duration_ms #0"
+      "805422 aura_duration_ms #0",
+      "805422 behaviour_expiry shield"
     ],
     "kind": "claim"
   },
@@ -4209,12 +4209,39 @@
   {
     "spell": 805422,
     "clause": "and grants an additional effect for each.@s:806354:0@@s:807004:0@",
-    "labels": [
-      "805422 spell_duration 806354 #1",
-      "805422 spell_duration 807004 #2",
-      "805422 aura_duration_ms #0",
-      "805422 aura_duration_ms 806354 #1",
-      "805422 aura_duration_ms 807004 #2"
+    "claims": [
+      {
+        "claim": "and grants an additional effect for each.",
+        "labels": [
+          "805422 aura_duration_ms #0",
+          "805422 behaviour_expiry barrier",
+          "805422 behaviour_expiry circle"
+        ]
+      },
+      {
+        "claim": "Tome of Light: Barrier of Light: within $d",
+        "labels": [
+          "805422 spell_duration 806354 #1",
+          "805422 aura_duration_ms 806354 #1",
+          "805422 behaviour_expiry barrier"
+        ]
+      },
+      {
+        "claim": "Tome of Light: Barrier of Light: Your next Barrier of Light removes the Oathkeeper stagger debuff.",
+        "labels": []
+      },
+      {
+        "claim": "Tome of Light: Tranquil Circle: within $d",
+        "labels": [
+          "805422 spell_duration 807004 #2",
+          "805422 aura_duration_ms 807004 #2",
+          "805422 behaviour_expiry circle"
+        ]
+      },
+      {
+        "claim": "Tome of Light: Tranquil Circle: Your next Tranquil Circle triggers instantly.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
