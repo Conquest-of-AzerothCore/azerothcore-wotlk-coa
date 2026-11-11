@@ -515,9 +515,11 @@
     "spell": 301310,
     "clause": "and your spell penetration by $s3% of your Intellect.",
     "labels": [
-      "301310 effect_value e2"
+      "301310 effect_value e2",
+      "301310 behaviour_hit_ratio spell_penetration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "measured deviation (route Z): Zealotry 801450 at the level 60 dummy (60 holy resistance, 12% average resist) reads -7.75% with Light's Chosen and 301369 set against the +7.5% that 33 penetration (10% of Intellect 332) gives; resist-free arms read 12.7% resisted without and 18.8% with it, the 18.6% of 60 + 33: 301369's amount (AscensionTemplarAuras.cpp:68-70, +10% of Intellect) is added to the target's resistance (Unit.cpp:2615); server-fix note to the mentor, no change made"
   },
   {
     "spell": 301311,
@@ -647,10 +649,12 @@
     "spell": 500694,
     "clause": "Explode with holy power, dealing ${$803153m1+$803153ppl1+$AP*0.25+$sph*.25} Holy damage",
     "labels": [
-      "500694 effect_value 803153e0"
+      "500694 effect_value 803153e0",
+      "500694 behaviour_hit_ratio attack_power",
+      "500694 behaviour_hit_ratio spell_power"
     ],
     "kind": "claim",
-    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc; no behaviour route yet: no hit model for a periodic trigger of a school-damage spell (803153)"
+    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc; behaviour: hits of 803153 cast directly read +63% with +980 attack power and +14.2% with +220 holy spell damage, the 0.25 coefficients over the mean hit 389.25 of $803153m1 + $803153ppl1 at the reference"
   },
   {
     "spell": 500694,
@@ -3507,9 +3511,11 @@
     "spell": 803159,
     "clause": "and Oath Breakers now heal allies around the target for ${$m1+$SP*0.35}",
     "labels": [
-      "803159 effect_value e0 #1"
+      "803159 effect_value e0 #1",
+      "803159 behaviour_hit_ratio spell_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "heals of 803160 at the ally read 56 and 140 per heal without and with +300 healing power: ratio 2.5 against 176.15 / 71.15 = 2.4758, $m1 being 71.15 at level 60 with its per-level part (EffectRealPointsPerLevel[0] 1.65); an earlier design that took $m1 as 20 was an incorrect test"
   },
   {
     "spell": 803159,

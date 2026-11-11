@@ -1723,6 +1723,32 @@
   ],
   "behaviours": [
     {
+      "spell": 500694, "name": "Force of Golganneth", "kind": "hit_ratio", "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "Explode with holy power, dealing", "expected": 1.6294,
+      "observe_spell": 803153,
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [35785, 1]]},
+      "critical": false, "trials": 40,
+      "expected_source": "${$803153m1+$803153ppl1+$AP*0.25+$sph*.25}: 803153 EffectBasePoints[0] 53, EffectDieSides[0] 3 (a hit rolls 54 to 56, mean 55), EffectRealPointsPerLevel[0] 8.0 over 32 levels above BaseLevel 28 (256), AP 313 (class file reference_stats, read by the base steps), holy spell power 0 at the reference; AscensionTemplarContracts.cpp:335-342 adds 0.25 x AP + 0.25 x SpellBaseDamageBonusDone(2) (AscensionTemplarData.h, 803153 row) to the effect base value, truncated to int32. Mean hit 55 + 256 + 78.25 = 389.25. Treatment: Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] 979) adds 0.25 x 980 = 245: 634.25 / 389.25 = 1.6294. A coefficient of 0.20 reads 1.525, of 0.30 1.725, both outside the band. 803153 is the spell 500694's periodic effect 2 triggers (EffectTriggerSpell[2]); it is cast directly here, so the hits read are the explosion's own. beeg spellpen 823764 in both arms removes the dummy's level resistance (partial resists); the class aura 887007 scales both arms. Only non-critical hits are compared."
+    },
+    {
+      "spell": 500694, "name": "Force of Golganneth", "kind": "hit_ratio", "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Explode with holy power, dealing", "expected": 1.1413,
+      "observe_spell": 803153,
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [1140480, 1]]},
+      "critical": false, "trials": 40,
+      "expected_source": "${$803153m1+$803153ppl1+$AP*0.25+$sph*.25}: mean hit 389.25 at the reference, as the attack_power variant states. Treatment: Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, EffectMiscValue[0] 126 with the holy bit, EffectBasePoints[0] 219: +220 spell damage) adds 0.25 x 220 = 55 through SpellBaseDamageBonusDone(2): 444.25 / 389.25 = 1.1413. A coefficient of 0.20 reads 1.113, of 0.30 1.170, both outside the band; a stock spell-power bonus on top of the scripted term would read above it. beeg spellpen 823764 in both arms; only non-critical hits are compared."
+    },
+    {
+      "spell": 301310, "name": "Light's Chosen", "kind": "hit_ratio", "label_suffix": "spell_penetration",
+      "quote": "and your spell penetration by", "expected": 1.075,
+      "observe_spell": 801450, "off_hand_item": 30754,
+      "control": {"auras": [[60234, 1]]}, "treatment": {"auras": [[60234, 1], [301310, 1], [301369, 1]]},
+      "critical": false, "trials": 160, "fixture": {"attack_power": 20000},
+      "expected_source": "$s3 = 10 (301310 EffectBasePoints[2] 9, EffectDieSides[2] 1). Light's Chosen's effect 2 triggers 301369 (Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectMiscValue[0] 126), whose amount AscensionTemplarAuras.cpp:68-70 sets to 10% of the caster's Intellect. Greatness 60234 (+300 Intellect) is set in both arms: Intellect 332 (clause 46), so the penetration is int32(33.2) = 33. The dummy is a level 60 creature: CoA.MonsterResistance (coa.conf.dist, PerLevel 1.0, PerPercent 5.0) gives it 60 holy resistance, an average resist of 60 / 5 / 100 = 12% (Unit::GetEffectiveResistChance, Unit.cpp:2582-2626), drawn in tenths by Unit::CalcAbsorbResist. With 33 penetration the dummy keeps 27, 5.4%: (1 - 0.054) / (1 - 0.12) = 1.075 for Zealotry 801450, a Holy hit with no spell-power term. A penetration that raised the resistance by 33 instead (93, 18.6%) reads 0.925. Zealotry needs an off-hand weapon (SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON): Ancient Bone Mace 30754 beside the one-hand main hand. The attack power fixture makes the weapon roll negligible beside the resist draw. Light's Chosen's spell power (effect 0) does not reach a weapon-damage hit and its crit rating (effect 1) is filtered out: only non-critical hits are compared."
+    },
+    {
       "spell": 804932, "variant": "divine_fury", "label_suffix": "divine_fury",
       "name": "Unbroken Creed", "kind": "metric_delta",
       "quote": "auto attack your target an amount of times equal to your stack count", "expected": 3,
@@ -2511,6 +2537,14 @@
       "quote": "heal allies around the target", "expected": 2,
       "heal_spell": 803160, "trigger_spell": 572027, "near_distance": 17.0,
       "radius_reason": "AscensionTemplarAbilities.cpp:208-213: on an Oath Breaker cast with 803159 known, every unit of Nearby(target, 15.0f) that is the player or in its raid is healed by 803160, which AscensionTemplarContracts.cpp:220-223 retargets to TARGET_UNIT_TARGET_ALLY. The allies stand 17 yd from the caster and 14 yd from the dummy at 3 yd: inside 15 yd of the target, outside 15 yd (plus their size) of the caster, so a heal centred on the caster (803160's own TARGET_SRC_CASTER, radius index 18, 15 yd) would miss them. 572027 alone casts nothing that heals."
+    },
+    {
+      "spell": 803159, "name": "Chakra of Light", "kind": "hit_ratio", "label_suffix": "spell_power",
+      "quote": "now heal allies around the target for", "expected": 2.4758,
+      "metric": "spell_heal_total", "observe_spell": 803160, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[966472, 1]]},
+      "critical": false, "trials": 40,
+      "expected_source": "${$m1+$SP*0.35}: $m1 is 71.15 at level 60: 803159 EffectBasePoints[0] 19 with EffectDieSides[0] 1 (20) plus EffectRealPointsPerLevel[0] 1.65 over 31 levels above BaseLevel 29 (51.15). AscensionTemplarContracts.cpp:333-334 sets 803160 e0 to Amount(803159, 0), SpellEffectInfo::CalcValue at the caster's level, and :335-342 add 0.35 x SpellBaseHealingBonusDone(127) (AscensionTemplarData.h, 803160 heal row), truncated to int32. Healing power is 0 at the reference: SpellBaseHealingBonusDone (Unit.cpp:11026-11069) sums healing-done auras, the base spell power (every school reads 0 in reference_stats) and item healing (the reference staff 2495 has none). Treatment: Test Healing Power + 300 966472 (Effect[0] aura 135 SPELL_AURA_MOD_HEALING_DONE, EffectMiscValue[0] 127, EffectBasePoints[0] 299): 71.15 + 105 = 176.15 against 71.15, ratio 2.4758. A coefficient of 0.30 reads 2.265, of 0.40 2.687, and $m1 without its per-level part (20) 6.25, all outside the band. 803160 is cast at the ally directly (AscensionTemplarContracts.cpp:220-224 retargets it to TARGET_UNIT_TARGET_ALLY); its cast by an Oath Breaker is 803159 trigger_count and the ally_heal_breadth entry. The class aura 887007 (-20% healing done) scales both arms. Only non-critical heals are compared."
     },
     {
       "spell": 806521, "name": "Titanstrike", "kind": "cast_gate",
