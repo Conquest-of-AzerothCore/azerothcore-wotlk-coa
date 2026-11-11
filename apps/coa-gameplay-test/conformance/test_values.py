@@ -12,8 +12,9 @@ from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_pa
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
-from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC,
-                    TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled, conditional_extra_values,
+from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH,
+                    GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
+                    calc_amount_hooks_label, conditional_extra_values,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
                     foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
 
@@ -284,6 +285,17 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
             self.assertEqual((steps[0]['metric'], steps[0]['spell'], steps[0]['effect'], steps[0]['actor']),
                              ('spell_effect_value', ARGENT_BLADE_RANK_2, effect, 'caster'))
 
+    def test_every_judged_effect_value_read_carries_a_calc_amount_hook_count_of_the_same_effect(self):
+        scenario, expectations = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)
+        judged = [item for item in expectations if item.check == 'effect_value' and item.rule.startswith('read ')]
+        self.assertTrue(judged)
+        for item in judged:
+            read, = self.steps_of(scenario, item.label)
+            hooks, = self.steps_of(scenario, calc_amount_hooks_label(item.label))
+            self.assertEqual((hooks['metric'], hooks['spell'], hooks['effect'], hooks['actor']),
+                             (CALC_AMOUNT_HOOKS_METRIC, read['spell'], read['effect'], read['actor']))
+        run.validate(scenario)
+
     def test_scalingbp_token_reads_as_a_foreign_effect_value_and_gets_a_measurement(self):
         scenario, expectations = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)
         unreadable = [item for item in expectations if item.rule.startswith(UNREADABLE)]
@@ -377,7 +389,7 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         item = next(item for item in expectations if item.label == VINDICATION_ROLLED_LABEL)
         self.assertEqual(item.model['samples'], 1)
         self.assertEqual([step['label'] for step in scenario['steps'] if step.get('label', '').startswith(item.label)],
-                         [item.label])
+                         [item.label, calc_amount_hooks_label(item.label)])
 
     def test_spell_without_a_required_caster_aura_sets_no_aura(self):
         scenario, _ = self.build(ARGENT_BLADE, ARGENT_BLADE_RANK_2)

@@ -801,7 +801,10 @@ the actor with `incoming`. `trigger_spell` names the event's spell; `hit_mask` (
 a window around the expected chance; 40000 trials put six standard deviations inside 1.5 points.
 Spell queries require `spell` and submit nothing: `spell_modifier` applies the player's native spell modifiers for
 `op` (`SpellModOp`) to the number `base`; `spell_effect_value` (optional `effect`) returns the effect's value as the
-player would cast it, including module base-value hooks; `spell_cast_time_ms`, `spell_max_range` and
+player would cast it, including module base-value hooks, but before aura script `DoEffectCalcAmount` hooks;
+`spell_calc_amount_hooks` (optional `effect`) counts the `DoEffectCalcAmount` handlers of the aura scripts bound to
+the spell (`spell_script_names`) that apply to that effect, so a nonzero count means the applied aura amount is set
+after the `spell_effect_value` read; `spell_cast_time_ms`, `spell_max_range` and
 `spell_max_stacks` return the modified native values; `spell_duration_ms` returns `Unit::CalcSpellDuration` after
 the player's `SPELLMOD_DURATION` modifiers, a permanent -1 unmodified: the base duration before script hooks.
 `ScriptMgr::OnCalcMaxDuration` hooks and the target-side `Unit::ModSpellDuration` are not applied, so it can

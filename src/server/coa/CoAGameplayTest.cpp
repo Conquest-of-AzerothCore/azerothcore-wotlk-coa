@@ -73,6 +73,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "SpellScript.h"
 #include "StringFormat.h"
 #include "TemporarySummon.h"
 #include "Timer.h"
@@ -4792,10 +4793,27 @@ private:
         if (metric == "spell_modifier" || metric == "spell_cast_time_ms" || metric == "spell_max_range"
             || metric == "spell_max_stacks" || metric == "spell_duration_ms" || metric == "spell_healing_done"
             || metric == "spell_effect_value" || metric == "spell_effect_radius"
-            || metric == "spell_family_flags")
+            || metric == "spell_family_flags" || metric == "spell_calc_amount_hooks")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
             Require(info != nullptr, "Unknown spell in metric");
+            if (metric == "spell_calc_amount_hooks")
+            {
+                uint32 effect = step.get<uint32>("effect", EFFECT_0);
+                Require(effect < MAX_SPELL_EFFECTS && info->Effects[effect].IsEffect(), "Spell effect does not exist");
+                std::list<AuraScript*> scripts;
+                sScriptMgr->CreateAuraScripts(spell, scripts);
+                uint32 hooks = 0;
+                for (AuraScript* script : scripts)
+                {
+                    script->_Register();
+                    for (auto& hook : script->DoEffectCalcAmount)
+                        if (hook.IsEffectAffected(info, uint8(effect)))
+                            ++hooks;
+                    delete script;
+                }
+                return hooks;
+            }
             if (metric == "spell_family_flags")
             {
                 uint32 const index = step.get<uint32>("index", 0);

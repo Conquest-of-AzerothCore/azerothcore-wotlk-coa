@@ -39,12 +39,13 @@ from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tool
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
                       PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECTS, FIXED_DIE_SIDES, GAP_CLOSER_DISTANCE,
-                    GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation, dataset, mean_samples,
-                    roll_range, sample_labels)
+                    GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation, calc_amount_hooks_label,
+                    dataset, mean_samples, roll_range, sample_labels)
 
+NOT_MEASURED = 'not_measured'
 STATUSES = ('ok', 'tolerated', 'alert', 'unreadable', 'unmodelled', 'ambiguous_tooltip', 'insufficient_trials',
-            'unmeasured', MEASURED, 'closed')
-NOT_ALERTS = frozenset({'ok', MEASURED, 'closed'})
+            'unmeasured', MEASURED, 'closed', NOT_MEASURED)
+NOT_ALERTS = frozenset({'ok', MEASURED, 'closed', NOT_MEASURED})
 CONFORMANT = frozenset({'ok', 'tolerated', 'closed'})
 CAST_DEPENDENT_CHECKS = frozenset({'cooldown_ms', 'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms',
                                    GAP_CLOSER_DISTANCE})
@@ -75,7 +76,11 @@ TRUNCATED_READ = 1.0
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
-                 'deviation', 'explanation')
+                 'deviation', 'explanation', 'server_commit', 'build', 'runs')
+SERVER_REVISION = re.compile(r'\brev\. (?P<commit>[0-9a-f]{7,40}\+?)(?![0-9a-f])')
+BINARY_SHA256 = re.compile(r'[0-9a-f]{64}')
+COMMIT_PREFIX = re.compile(r'[0-9a-f]{7,40}\+?')
+DIRTY = '+'
 ALERTS_FILE = 'alerts.tsv'
 REPORT_FILE = 'report.md'
 LEVERS_FILE = 'levers.md'
@@ -84,6 +89,8 @@ VERDICTS_SCHEMA = 1
 SPELL_DURATION_SCOPE = ('base duration after the player\'s SPELLMOD_DURATION modifiers, before script hooks: a '
                         'ScriptMgr::OnCalcMaxDuration change is not covered')
 EFFECT_VALUE_SCOPE = 'CalcValue before aura scripts (CalcAmount hooks not covered)'
+CALC_AMOUNT_HOOKS = 'calc_amount_hooks'
+CALC_VALUE_STATUS = 'calc_value_status'
 PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance',
                                    'melee_hit_chance', 'spell_hit_chance', 'parry_chance', 'dodge_chance',
                                    'spell_done_crit_chance'})
@@ -140,6 +147,9 @@ class Verdict:
     rank_id: int = 0
     check: str = ''
     detail: dict | None = field(default=None, hash=False)
+    server_commit: str | None = None
+    build: str | None = None
+    runs: list[str] | None = field(default=None, hash=False)
 
 
 @dataclass(frozen=True)
@@ -152,6 +162,22 @@ class Run:
     max_step_ms: float | None
     cast_failures: dict[int, list[int]] = field(default_factory=dict)
     clock: str | None = None
+    server_commit: str | None = None
+    build: str | None = None
+    run_id: str | None = None
+
+
+@dataclass(frozen=True)
+class Build:
+    server_commit: str | None
+    binary_sha256: str | None
+
+    def text(self) -> str:
+        return f'commit {self.server_commit or "unknown"}, worldserver sha256 {self.binary_sha256 or "unknown"}'
+
+
+class BuildMismatch(ValueError):
+    pass
 
 
 class TooltipSource(Protocol):
@@ -210,6 +236,8 @@ class Comparison:
     runs: dict[str, Run]
     missing: list[str]
     verdicts: list[Verdict]
+    build: Build = Build(None, None)
+    other_build: dict[str, Build] = field(default_factory=dict)
 
 
 def number(text, label: str) -> float:
@@ -249,6 +277,53 @@ def recorded_clock(directory: Path) -> str | None:
     return GAMEPLAY_CLOCK_SIMULATED if isinstance(data.get('simulation'), dict) else GAMEPLAY_CLOCK_REAL
 
 
+def recorded_build(directory: Path) -> str | None:
+    summary = directory / 'summary.json'
+    if not summary.is_file():
+        return None
+    try:
+        return json.loads(summary.read_text(encoding='utf-8')).get('binary_sha256')
+    except ValueError:
+        return None
+
+
+def server_commit(version: str | None) -> str | None:
+    found = SERVER_REVISION.search(version or '')
+    return found.group('commit') if found else None
+
+
+def run_build(run: Run) -> Build:
+    return Build(run.server_commit, run.build)
+
+
+def build_matches(build: Build, wanted: str) -> bool:
+    if BINARY_SHA256.fullmatch(wanted):
+        return build.binary_sha256 == wanted
+    commit = build.server_commit or ''
+    if not commit or commit.endswith(DIRTY) != wanted.endswith(DIRTY):
+        return False
+    commit, wanted = commit.rstrip(DIRTY), wanted.rstrip(DIRTY)
+    return commit.startswith(wanted) or wanted.startswith(commit)
+
+
+def judged_build(runs: Mapping[str, Run], wanted: str | None) -> tuple[Build, dict[str, Build]]:
+    if wanted is not None and not (BINARY_SHA256.fullmatch(wanted) or COMMIT_PREFIX.fullmatch(wanted)):
+        raise BuildMismatch(f'--build {wanted!r} is neither a worldserver sha256 nor a commit hash of 7-40 hex digits '
+                            f'(with {DIRTY} for a build of a modified tree)')
+    builds = {key: run_build(run) for key, run in runs.items()}
+    refused = {key: build for key, build in builds.items() if wanted is not None and not build_matches(build, wanted)}
+    kept = {build for key, build in builds.items() if key not in refused}
+    if len(kept) > 1:
+        listed = '; '.join(sorted(build.text() for build in kept))
+        raise BuildMismatch(f'the results hold runs of {len(kept)} builds ({listed}); name the build being judged '
+                            f'with --build <worldserver sha256 or commit>')
+    if kept:
+        return kept.pop(), refused
+    if wanted is None:
+        return Build(None, None), refused
+    return (Build(None, wanted) if BINARY_SHA256.fullmatch(wanted) else Build(wanted, None)), refused
+
+
 def runs_by_hash(results_dir: Path) -> dict[str, Path]:
     found = {}
     for directory in sorted(results_dir.joinpath(*EXPLORATORY).glob('*/')):
@@ -273,7 +348,8 @@ def load_run(results_dir: Path, entry: dict, by_hash: Mapping[str, Path]) -> Run
     max_step = result.get('max_step_ms')
     return Run(entry['key'], result.get('status', ''), result.get('message') or '', measured_values(result),
                result.get('steps', []), None if max_step is None else number(max_step, 'max_step_ms'),
-               cast_failures(result), recorded_clock(directory))
+               cast_failures(result), recorded_clock(directory), server_commit(result.get('server_version')),
+               recorded_build(directory), result.get('run_id'))
 
 
 def cast_failures(result: dict) -> dict[int, list[int]]:
@@ -3104,9 +3180,40 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
         verdict = judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'])
         if check == 'effect_value':
-            return replace(verdict, detail={**(verdict.detail or {}), 'scope': EFFECT_VALUE_SCOPE})
+            return calc_amount_verdict(replace(verdict, detail={**(verdict.detail or {}), 'scope': EFFECT_VALUE_SCOPE}),
+                                       run, expectation)
         return verdict
     return replace(base, measured=measured, explanation=f'no comparison for check {check!r} with rule {rule!r}')
+
+
+def read_effect(expectation: Expectation) -> tuple[int, int | None]:
+    model = expectation.model or {}
+    if 'effect_spell' in model:
+        return model['effect_spell'], model['effect']
+    return expectation.rank_id, expectation.effect_index
+
+
+def calc_amount_verdict(verdict: Verdict, run: Run, expectation: Expectation) -> Verdict:
+    spell_id, effect = read_effect(expectation)
+    label = calc_amount_hooks_label(expectation.label)
+    hooks = run.values.get(label)
+    if hooks is None:
+        return replace(verdict, status='unmeasured',
+                       explanation=f'no {label!r} reading in {run.key}: the CalcValue read of spell {spell_id} effect '
+                                   f'{effect} cannot be told apart from an aura script CalcAmount hook that sets the '
+                                   f'applied amount later; regenerate the scenario (the read alone would be '
+                                   f'{verdict.status}: {verdict.explanation})',
+                       detail={**(verdict.detail or {}), CALC_VALUE_STATUS: verdict.status})
+    if hooks <= 0:
+        return replace(verdict, detail={**(verdict.detail or {}), CALC_AMOUNT_HOOKS: 0})
+    reading = 'nothing' if verdict.measured is None else f'{verdict.measured:g}'
+    return replace(verdict, status=NOT_MEASURED,
+                   explanation=f'CalcValue of spell {spell_id} effect {effect} read {reading}, but '
+                               f'{hooks:g} DoEffectCalcAmount hook(s) of the aura scripts bound to spell {spell_id} '
+                               f'set that effect\'s amount after CalcValue, so this read does not measure the amount '
+                               f'the aura applies; an aura_amount read of a present aura does (the read alone would '
+                               f'be {verdict.status}: {verdict.explanation})',
+                   detail={**(verdict.detail or {}), CALC_AMOUNT_HOOKS: int(hooks), CALC_VALUE_STATUS: verdict.status})
 
 
 LINKED_VERDICT_REFERENCE = re.compile(r'"([^"]+)" \(status \w+\)')
@@ -3133,11 +3240,13 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
 
 
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
-             hit_model: HitModelSource | None = None) -> Comparison:
+             hit_model: HitModelSource | None = None, build: str | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
     if 'spell_dbc_sha256' in manifest:
         require_server_sha(manifest['spell_dbc_sha256'], str(manifest_path))
     runs, missing = load_runs(manifest, Path(results_dir))
+    judged, other_build = judged_build(runs, build)
+    runs = {key: run for key, run in runs.items() if key not in other_build}
     tooltips = tooltips or DbcTooltips(manifest.get('dbc_dir', DBC_DIR), manifest.get('class_file'))
     hit_model = hit_model or measured_hit_model
     verdicts = []
@@ -3147,6 +3256,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     trigger_parts: dict[str, list[ProcPart]] = {}
     hit_parts: dict[str, list[ProcPart]] = {}
     hit_slots: dict[str, int] = {}
+    label_runs: dict[str, list[Run]] = {}
     for entry in manifest['scenarios']:
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
@@ -3154,6 +3264,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         tokens = read_tokens(manifest['class_file'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
         for data in entry['expectations']:
             expectation = Expectation(**data)
+            if run is not None:
+                label_runs.setdefault(expectation.label, []).append(run)
             if expectation.check == PROC_CHECK and run is not None:
                 proc_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check == DELTA_CHECK and run is not None:
@@ -3185,12 +3297,28 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
-    return Comparison(manifest, runs, missing, resolve_linked_statuses(verdicts))
+    stamped = [with_provenance(verdict, judged, label_runs.get(verdict.label) or scenario_runs(runs, verdict))
+               for verdict in resolve_linked_statuses(verdicts)]
+    return Comparison(manifest, runs, missing, stamped, judged, other_build)
+
+
+def scenario_runs(runs: Mapping[str, Run], verdict: Verdict) -> list[Run]:
+    return [runs[key] for key in verdict.scenario.split(' + ') if key in runs]
+
+
+def with_provenance(verdict: Verdict, build: Build, runs: list[Run]) -> Verdict:
+    run_ids = sorted({run.run_id or run.key for run in runs})
+    return replace(verdict, server_commit=build.server_commit, build=build.binary_sha256, runs=run_ids)
+
+
+def verdicts_build(verdicts: list[Verdict]) -> Build | None:
+    builds = {(verdict.server_commit, verdict.build) for verdict in verdicts}
+    return Build(*builds.pop()) if len(builds) == 1 else None
 
 
 def compare(manifest: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
-            hit_model: HitModelSource | None = None) -> list[Verdict]:
-    return evaluate(manifest, results_dir, tooltips=tooltips, hit_model=hit_model).verdicts
+            hit_model: HitModelSource | None = None, build: str | None = None) -> list[Verdict]:
+    return evaluate(manifest, results_dir, tooltips=tooltips, hit_model=hit_model, build=build).verdicts
 
 
 def cell(value) -> str:
@@ -3211,7 +3339,8 @@ def alert_rows(verdicts: list[Verdict]) -> list[str]:
                      if verdict.measured is not None and verdict.expected is not None else None)
         rows.append('\t'.join(cell(value) for value in (
             verdict.scenario, verdict.spell_id, verdict.rank_id, verdict.label, verdict.check, verdict.status,
-            verdict.measured, verdict.expected, verdict.low, verdict.high, deviation, verdict.explanation)))
+            verdict.measured, verdict.expected, verdict.low, verdict.high, deviation, verdict.explanation,
+            verdict.server_commit, verdict.build, ' '.join(verdict.runs or ()))))
     return rows
 
 
@@ -3292,12 +3421,16 @@ def tooltip_reading_lines(manifest: dict, verdicts: list[Verdict], tooltips: Too
 
 
 def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: dict[str, Run], missing: list[str],
-                 verdicts: list[Verdict], tooltips: TooltipSource | None = None) -> list[str]:
+                 verdicts: list[Verdict], tooltips: TooltipSource | None = None,
+                 other_build: Mapping[str, Build] | None = None) -> list[str]:
     statuses = Counter(verdict.status for verdict in verdicts)
     failed = sorted((key, run) for key, run in runs.items() if run.status != 'passed')
+    judged = verdicts_build(verdicts)
     lines = [f'# Class conformance: {manifest["class_name"]} (class {manifest["class_id"]})', '',
              f'- Manifest: `{manifest_path}`', f'- Results: `{results_dir}`',
-             f'- Scenarios: {len(runs)} with a result, {len(missing)} without a result, {len(failed)} not passed',
+             f'- Build judged: {judged.text() if judged else "several builds among the verdicts"}',
+             f'- Scenarios: {len(runs)} with a result, {len(missing)} without a result, {len(failed)} not passed, '
+             f'{len(other_build or {})} refused as another build',
              '', '## Verdicts by status', '', '| status | count |', '|---|---|']
     lines += [f'| {status} | {statuses.get(status, 0)} |' for status in STATUSES]
     lines += ['', '## Known modifiers', '',
@@ -3331,6 +3464,13 @@ def report_lines(manifest: dict, manifest_path: Path, results_dir: Path, runs: d
     lines += passive_lines(manifest, verdicts)
     lines += observation_lines(manifest['class_file'], verdicts)
     lines += tooltip_reading_lines(manifest, verdicts, tooltips)
+    not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
+    if not_measured:
+        lines += ['', '## Not measured: CalcValue reads of effects whose amount a CalcAmount hook sets', '']
+        lines += [f'- `{label}`' for label in not_measured]
+    if other_build:
+        lines += ['', '## Runs refused: another build than the one judged', '']
+        lines += [f'- `{key}`: {build.text()}' for key, build in sorted(other_build.items())]
     if missing:
         lines += ['', '## Scenarios without a result', ''] + [f'- `{key}`' for key in missing]
     if failed:
@@ -3343,6 +3483,9 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
                   tooltips: TooltipSource | None = None) -> tuple[Path, Path]:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
     runs, missing = load_runs(manifest, Path(results_dir))
+    judged = verdicts_build(verdicts)
+    other_build = {key: run_build(run) for key, run in runs.items() if judged is not None and run_build(run) != judged}
+    runs = {key: run for key, run in runs.items() if key not in other_build}
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     alerts, report = out_dir / ALERTS_FILE, out_dir / REPORT_FILE
@@ -3353,17 +3496,18 @@ def write_outputs(manifest_path: Path, results_dir: Path, verdicts: list[Verdict
     source = tooltips or (DbcTooltips(manifest.get('dbc_dir', DBC_DIR), manifest.get('class_file'))
                          if asked_verdicts or has_readings else None)
     report.write_text('\n'.join(report_lines(manifest, Path(manifest_path), Path(results_dir), runs, missing,
-                                             verdicts, source)), encoding='utf-8')
+                                             verdicts, source, other_build)), encoding='utf-8')
     write_questions(questions(asked_verdicts, source) if asked_verdicts else [], out_dir, source)
     return alerts, report
 
 
 def write_verdicts(manifest: dict, manifest_path: Path, results_dir: Path, verdicts: list[Verdict],
                    out_dir: Path) -> Path:
+    build = verdicts_build(verdicts) or Build(None, None)
     document = {'schema': VERDICTS_SCHEMA, 'class_id': manifest['class_id'], 'class_name': manifest['class_name'],
                 'level': manifest['level'], 'manifest': str(manifest_path), 'results': str(results_dir),
-                'spell_dbc_sha256': manifest.get('spell_dbc_sha256'),
-                'verdicts': [asdict(verdict) for verdict in verdicts]}
+                'spell_dbc_sha256': manifest.get('spell_dbc_sha256'), 'build': build.binary_sha256,
+                'server_commit': build.server_commit, 'verdicts': [asdict(verdict) for verdict in verdicts]}
     path = Path(out_dir) / VERDICTS_FILE
     path.write_text(json.dumps(document, indent=2) + '\n', encoding='utf-8')
     return path

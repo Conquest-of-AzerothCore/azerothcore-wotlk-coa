@@ -88,9 +88,16 @@ test player reached by its own reset-cooldown-and-recast sequence, chosen by whe
 `TARGET_UNIT_TARGET_ALLY` (`targets_ally`). Only the listed pairs get this extra check, so an uninvestigated
 `foreign_duration` match elsewhere in the class is unaffected (ADR 0051).
 `spell_effect_value` is `SpellEffectInfo::CalcValue`, before aura scripts: every `effect_value` verdict carries
-`detail['scope']` "CalcValue before aura scripts (CalcAmount hooks not covered)". Known limit: an amount that an
-AuraScript `CalcAmount` hook sets is not covered, so a passing value can still differ from the applied aura, and a
-failing one can be an artifact of the metric. An `aura_amount` check on a present aura is the remedy. Staffguard
-706583: `AscensionTemplarAuras.cpp:60-63` sets the applied amount to 125 + 0.3 × Stamina + 0.25 × (dodge + parry
-rating), the 125 base the client shows, while CalcValue gives 305.
+`detail['scope']` "CalcValue before aura scripts (CalcAmount hooks not covered)". Each judged `effect_value` read
+(`read <kind>` rule, own or foreign effect) is followed by `<label> calc_amount_hooks`, the harness metric
+`spell_calc_amount_hooks` of the same spell and effect: the number of `DoEffectCalcAmount` handlers of the aura scripts
+bound to that spell that apply to that effect. Above 0, the verdict is `not_measured` whatever CalcValue reads
+(`detail` `calc_amount_hooks` and `calc_value_status`, the status the read alone would have had); 0 judges the read as
+before; a scenario without the reading gives `unmeasured` (regenerate it). An `aura_amount` check on a present aura
+is the remedy. Staffguard 706583 and Untainted 705299: `AscensionTemplarAuras.cpp:60-67`
+(`aura_ascension_templar_lifecycle::Calculate`) sets the applied amounts to 125 + 0.3 × Stamina + 0.25 × (dodge +
+parry rating) and -10 - 0.1 × Stamina, while CalcValue gives 305 and -41 at level 60. The Templar class file still
+lists both as `disabled_foreign_effects`, so their reads are not generated; without those rows they would read
+`not_measured` (ADR 0118). The count covers aura scripts bound through `spell_script_names`, not global
+`OnAfterAuraEffectCalculateAmount` hooks.
 

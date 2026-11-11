@@ -9,7 +9,8 @@ import sys
 import tempfile
 import unittest
 
-from compare import (ALERT_COLUMNS, EFFECT_VALUE_SCOPE, PERCENT_POINT_METRICS, DbcTooltips, ScenarioDrift, Verdict,
+from compare import (ALERT_COLUMNS, CONFORMANT, EFFECT_VALUE_SCOPE, NOT_MEASURED, PERCENT_POINT_METRICS,
+                     BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
                      write_outputs)
@@ -18,8 +19,8 @@ from hits import HitModel, Modifier
 from profile import CLASSES_DIR, DBC_DIR
 from classes import class_spells
 from tooltip import CasterStats, Displayed, Readout, read_tooltip
-from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RANGE_YD, Expectation, mean_samples,
-                    sample_labels, structure_stats, value_scenario)
+from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RANGE_YD, Expectation,
+                    calc_amount_hooks_label, mean_samples, sample_labels, structure_stats, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
@@ -50,6 +51,8 @@ BASE_ACTUALS = {'attack_power': '313', 'ranged_attack_power': '182', 'spell_powe
                 'skill 70': '300', 'skill 71': '300', 'skill 72': '300', 'skill 136': '300'}
 STAFFGUARD, STAFFGUARD_TOKEN = 705295, '${$706583m1+$STA*.3}'
 STAFFGUARD_HEALTH_AT_RANK_ZERO, STAFFGUARD_HEALTH_AT_LEVEL_60 = 125, 305
+WORKSPACE_COMMIT = '801527e9aaa4'
+WORKSPACE_BUILD = 'e' * 64
 
 
 def expectation(label, check, displayed, rule, effect=None, model=None):
@@ -78,18 +81,28 @@ def periodic_total_model_record(minimum_hits=4, hits_per_cast=10):
             'minimum_hits': minimum_hits, 'scheduled_casts': 6, 'measurements': PERIODIC_TOTAL_LABELS}
 
 
+def calc_amount_hook_steps(expectations, steps, hooks):
+    if hooks is None:
+        return []
+    present = {step.get('label') for step in steps}
+    return [assert_step(calc_amount_hooks_label(entry.label), hooks) for entry in expectations
+            if entry.check == 'effect_value' and entry.rule.startswith('read ')
+            and calc_amount_hooks_label(entry.label) not in present]
+
+
 class Workspace:
     def __init__(self):
         self.root = Path(tempfile.mkdtemp(prefix='conformance-compare-'))
         self.scenarios = []
         self.runs = {}
         self.cast_failures = {}
+        self.builds = {}
 
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
 
     def scenario(self, key, kind, expectations, tokens=(), steps=(), recorded_hash=None, spell=SPELL,
-                 name='Test Strike', rank=RANK, clock='real'):
+                 name='Test Strike', rank=RANK, clock='real', hooks='0', build=None):
         path = self.root / 'out' / 'scenarios' / f'{key}.json'
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({'name': key}, indent=2) + '\n', encoding='utf-8')
@@ -98,11 +111,16 @@ class Workspace:
                                'spell_id': spell, 'spell_name': name, 'rank_id': rank,
                                'tokens': list(tokens), 'expectations': [asdict(entry) for entry in expectations]})
         if steps is not None:
-            self.runs[key] = (list(steps), recorded_hash or sha, clock)
+            self.runs[key] = (list(steps) + calc_amount_hook_steps(expectations, steps, hooks), recorded_hash or sha,
+                              clock)
+        if build is not None:
+            self.builds[key] = build
 
     def rename_run(self, key, folder):
         steps, recorded_hash, clock = self.runs.pop(key)
         self.runs[folder] = (steps, recorded_hash, clock)
+        if key in self.builds:
+            self.builds[folder] = self.builds.pop(key)
 
     def manifest(self, known_modifiers=None, **base_overrides):
         manifest = {'schema': 1, 'class_id': CLASS_FILE['class_id'], 'class_name': CLASS_FILE['name'],
@@ -117,12 +135,14 @@ class Workspace:
             directory.mkdir(parents=True)
             base = [assert_step(label, actual) for label, actual in {**BASE_ACTUALS, **base_overrides}.items()]
             every = [{'index': str(index), **step} for index, step in enumerate(base + steps)]
-            result = {'schema': '1', 'scenario': key, 'status': 'passed', 'message': 'All assertions passed',
-                      'max_step_ms': '25', 'steps': every}
+            commit, binary = self.builds.get(key, (WORKSPACE_COMMIT, WORKSPACE_BUILD))
+            result = {'schema': '1', 'run_id': f'run-{key}', 'scenario': key, 'status': 'passed',
+                      'message': 'All assertions passed', 'max_step_ms': '25', 'steps': every,
+                      'server_version': f'AzerothCore rev. {commit} 2026-11-10 11:09:47 +0100 (test branch)'}
             if key in self.cast_failures:
                 result['cast_failures'] = self.cast_failures[key]
             (directory / 'result.json').write_text(json.dumps(result), encoding='utf-8')
-            summary = {'scenario_sha256': recorded_hash}
+            summary = {'scenario_sha256': recorded_hash, 'binary_sha256': binary}
             if clock == 'simulated':
                 summary['simulation'] = {'pace': 'accelerated'}
             (directory / 'summary.json').write_text(json.dumps(summary), encoding='utf-8')
@@ -295,7 +315,8 @@ class CompareTest(unittest.TestCase):
 
     def test_rolled_effect_value_carries_the_spread_of_its_roll(self):
         self.assertEqual(self.rolled_verdict([248]).detail,
-                         {'reads': 1, 'reads_needed': 10, 'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE})
+                         {'reads': 1, 'reads_needed': 10, 'roll_spread': 9, 'scope': EFFECT_VALUE_SCOPE,
+                          'calc_amount_hooks': 0})
 
     def test_unreadable_value_of_a_rolled_first_effect_carries_the_spread_of_its_roll(self):
         label = '1001 effect_value #1'
@@ -304,7 +325,7 @@ class CompareTest(unittest.TestCase):
         self.assertEqual((verdicts[label].status, verdicts[label].detail), ('unreadable', {'roll_spread': 9}))
 
     def test_fixed_effect_value_has_no_roll_spread(self):
-        self.assertEqual(self.effect_verdict('568').detail, {'scope': EFFECT_VALUE_SCOPE})
+        self.assertEqual(self.effect_verdict('568').detail, {'scope': EFFECT_VALUE_SCOPE, 'calc_amount_hooks': 0})
 
     def test_rolled_effect_in_a_non_monotone_expression_is_unmodelled(self):
         verdict = self.rolled_verdict([248], lambda roll: (roll - 104) ** 2)
@@ -334,7 +355,7 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([item], [text], uniform, reader)
         self.assertEqual((verdicts[label].status, verdicts[label].detail),
                          ('ok', {'reads': needed, 'reads_needed': needed, 'roll_spread': 9,
-                                 'scope': EFFECT_VALUE_SCOPE}))
+                                 'scope': EFFECT_VALUE_SCOPE, 'calc_amount_hooks': 0}))
         self.assertEqual(forced_spells, {2002})
         self.fresh()
         shifted = [assert_step(name, '125') for name in sample_labels(label, needed)]
@@ -785,6 +806,115 @@ BLESSED_PADDING = 301311
 FURY_OF_AGGRAMAR, LIBRAM_OF_CONSECRATION, LIBRAM_OF_FERVOR = 801480, 803893, 805423
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
+
+
+class CalcAmountAndBuildTest(unittest.TestCase):
+    LABEL = '1001 effect_value e0 #0'
+    TOKEN = Displayed('${$m1*1.1}', 568.9, 0, 'flat')
+
+    def setUp(self):
+        self.workspace = Workspace()
+        self.paths = None
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def fresh(self):
+        self.workspace.close()
+        self.workspace = Workspace()
+        self.paths = None
+
+    def value(self, actual, hooks='0', key=VALUE_KEY, build=None, label=LABEL):
+        self.workspace.scenario(key, 'value', [expectation(label, 'effect_value', self.TOKEN.text, 'read flat', 0)],
+                                [self.TOKEN.text], [assert_step(label, actual)], hooks=hooks, build=build)
+
+    def evaluated(self, build=None):
+        self.paths = self.paths or self.workspace.manifest()
+        manifest, results = self.paths
+        return evaluate(manifest, results, tooltips=constant_reader(self.TOKEN), hit_model=reference_hit, build=build)
+
+    def verdict(self, build=None, label=LABEL):
+        return next(verdict for verdict in self.evaluated(build).verdicts if verdict.label == label)
+
+    def test_a_hooked_effect_read_is_not_measured_whatever_calc_value_reads(self):
+        for actual, calc_value_status in (('305', 'alert'), ('568', 'ok')):
+            self.fresh()
+            self.value(actual, hooks='1')
+            verdict = self.verdict()
+            self.assertEqual((verdict.status, verdict.detail['calc_value_status']), (NOT_MEASURED, calc_value_status))
+            self.assertNotIn(NOT_MEASURED, CONFORMANT)
+
+    def test_an_unhooked_wrong_read_still_alerts(self):
+        self.value('305')
+        verdict = self.verdict()
+        self.assertEqual((verdict.status, verdict.detail['calc_amount_hooks']), ('alert', 0))
+
+    def test_a_read_without_a_hook_reading_is_unmeasured_not_judged(self):
+        self.value('305', hooks=None)
+        verdict = self.verdict()
+        self.assertEqual((verdict.status, verdict.detail['calc_value_status']), ('unmeasured', 'alert'))
+
+    def test_not_measured_stays_out_of_the_alerts_and_is_listed_in_the_report(self):
+        self.value('305', hooks='1')
+        manifest, results = self.workspace.manifest()
+        comparison = evaluate(manifest, results, tooltips=constant_reader(self.TOKEN), hit_model=reference_hit)
+        out = self.workspace.root / 'report'
+        write_outputs(manifest, results, comparison.verdicts, out, tooltips=constant_reader(self.TOKEN))
+        self.assertEqual(alert_rows(comparison.verdicts), ['\t'.join(ALERT_COLUMNS)])
+        report = (out / 'report.md').read_text(encoding='utf-8')
+        self.assertIn(f'## Not measured: CalcValue reads of effects whose amount a CalcAmount hook sets\n\n'
+                      f'- `{self.LABEL}`', report)
+        self.assertIn(f'- Build judged: commit {WORKSPACE_COMMIT}, worldserver sha256 {WORKSPACE_BUILD}', report)
+
+    def test_every_verdict_carries_the_build_and_the_run_that_produced_it(self):
+        self.value('305')
+        self.workspace.scenario('conformance-templar-value-1002', 'value',
+                                [expectation('1002 effect_value #0', 'effect_value', '', 'closed: no value')], [], None)
+        self.workspace.scenarios[-1]['file'] = None
+        manifest, results = self.workspace.manifest()
+        comparison = evaluate(manifest, results, tooltips=constant_reader(self.TOKEN), hit_model=reference_hit)
+        by_label = {verdict.label: verdict for verdict in comparison.verdicts}
+        measured = by_label[self.LABEL]
+        self.assertEqual((measured.status, measured.server_commit, measured.build, measured.runs),
+                         ('alert', WORKSPACE_COMMIT, WORKSPACE_BUILD, [f'run-{VALUE_KEY}']))
+        static = by_label['1002 effect_value #0']
+        self.assertEqual((static.server_commit, static.build, static.runs), (WORKSPACE_COMMIT, WORKSPACE_BUILD, []))
+        out = self.workspace.root / 'out'
+        write_outputs(manifest, results, comparison.verdicts, out, tooltips=constant_reader(self.TOKEN))
+        header, stored = read_verdicts(out)
+        self.assertEqual((header['build'], header['server_commit']), (WORKSPACE_BUILD, WORKSPACE_COMMIT))
+        self.assertEqual(stored, comparison.verdicts)
+        row = (out / 'alerts.tsv').read_text(encoding='utf-8').splitlines()[1].split('\t')
+        self.assertEqual(row[-3:], [WORKSPACE_COMMIT, WORKSPACE_BUILD, f'run-{VALUE_KEY}'])
+
+    def test_runs_of_two_builds_are_refused_unless_the_judged_build_is_named(self):
+        other = ('0123456789ab', 'f' * 64)
+        self.value('568')
+        self.value('305', key='conformance-templar-value-1003', build=other, label='1003 effect_value e0 #0')
+        with self.assertRaises(BuildMismatch):
+            self.evaluated()
+        for wanted in (WORKSPACE_BUILD, WORKSPACE_COMMIT[:7]):
+            comparison = self.evaluated(wanted)
+            labels = {verdict.label for verdict in comparison.verdicts}
+            self.assertIn(self.LABEL, labels)
+            self.assertNotIn('1003 effect_value e0 #0', labels)
+            self.assertEqual(list(comparison.other_build), ['conformance-templar-value-1003'])
+            self.assertEqual(comparison.build.binary_sha256, WORKSPACE_BUILD)
+        comparison = self.evaluated(other[1])
+        self.assertEqual([verdict.status for verdict in comparison.verdicts if verdict.label.startswith('1003')],
+                         ['alert'])
+        self.assertEqual({verdict.build for verdict in comparison.verdicts}, {other[1]})
+
+    def test_a_modified_tree_keeps_its_marker_and_matches_only_a_marked_commit(self):
+        self.value('568', build=('90d75d6925a2+', WORKSPACE_BUILD))
+        self.assertEqual(self.evaluated().build.server_commit, '90d75d6925a2+')
+        self.assertEqual(self.evaluated('90d75d6+').other_build, {})
+        self.assertEqual(list(self.evaluated('90d75d6').other_build), [VALUE_KEY])
+
+    def test_a_named_build_must_be_a_sha256_or_a_commit(self):
+        self.value('568')
+        with self.assertRaises(BuildMismatch):
+            self.evaluated('not-a-build')
 
 
 class GameplayClockGateTest(unittest.TestCase):
@@ -1323,7 +1453,7 @@ class GeneratedTokenTest(unittest.TestCase):
     def tearDown(self):
         self.workspace.close()
 
-    def judged(self, spell_id, displayed, actual):
+    def judged(self, spell_id, displayed, actual, hooks='0'):
         self.workspace.close()
         self.workspace = Workspace()
         spell = self.spells[spell_id]
@@ -1331,7 +1461,8 @@ class GeneratedTokenTest(unittest.TestCase):
         item = next(item for item in expectations if item.displayed == displayed)
         tokens = [value.text for value in read_tooltip(self.tooltips.dbc, spell_id, structure_stats(CLASS_FILE)).values]
         self.workspace.scenario(f'conformance-templar-value-{spell_id}', 'value', expectations, tokens,
-                                [assert_step(item.label, actual)], spell=spell_id, name=spell.name, rank=spell_id)
+                                [assert_step(item.label, actual)], spell=spell_id, name=spell.name, rank=spell_id,
+                                hooks=hooks)
         manifest, results = self.workspace.manifest()
         verdicts = compare(manifest, results, tooltips=self.tooltips, hit_model=reference_hit)
         return next(verdict for verdict in verdicts if verdict.label == item.label)

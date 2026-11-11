@@ -36,9 +36,11 @@
 - `triggers.py`: `trigger_scenario(class_file, entry, part)` returns one part of the scenario of a `triggers` entry and
   its `Expectation`; `trigger_plan` sizes the parts and `trigger_entries(class_file, auras)` selects the entries (see
   [Trigger entries](trigger-entries.md#trigger-entries)).
-- `compare.py`: `compare(manifest, results_dir)` judges a run against the manifest and returns `Verdict(label, status,
-  measured, expected, low, high, explanation)`; `write_outputs` writes `alerts.tsv`, `report.md`, `verdicts.json` and
-  `questions.md`.
+- `compare.py`: `compare(manifest, results_dir, build=None)` judges a run against the manifest and returns
+  `Verdict(label, status, measured, expected, low, high, explanation, ..., server_commit, build, runs)`; `evaluate`
+  returns the `Comparison` with the judged `Build` and the runs refused as `other_build` (`BuildMismatch` when the
+  results hold several builds and none is named); `write_outputs` writes `alerts.tsv`, `report.md`, `verdicts.json`
+  and `questions.md`.
 - `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
   spells, kind, question, readings, measured, labels, conditions, observations)` per tooltip and kind, and
   `write_questions(items, out_dir)`

@@ -9,8 +9,8 @@ from typing import Sequence
 
 from behaviours import behaviour_entries, behaviour_scenario
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
-from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, ScenarioDrift, evaluate,
-                     literal_values, write_levers, write_outputs)
+from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, BuildMismatch, ScenarioDrift,
+                     evaluate, literal_values, write_levers, write_outputs)
 from coverage import COVERAGE_FILE, clause_coverage, clause_coverage_lines, load_clauses, write_coverage
 from diff import IMPACT_FILE, diff_directories, write_impact
 from passives import passive_scenario
@@ -39,6 +39,7 @@ MANIFEST_FILE = 'manifest.json'
 KEY_SEPARATORS = re.compile(r'[^a-z0-9]+')
 DRIFT_EXIT = 2
 DIFF_EXIT = 3
+BUILD_EXIT = 5
 
 
 def scenario_key(*parts) -> str:
@@ -387,15 +388,19 @@ def generate_command(args) -> int:
 
 def compare_command(args) -> int:
     try:
-        comparison = evaluate(args.manifest, args.results)
+        comparison = evaluate(args.manifest, args.results, build=args.build)
     except ScenarioDrift as error:
         print(f'Scenario drift, no verdict:\n{error}', file=sys.stderr)
         return DRIFT_EXIT
+    except BuildMismatch as error:
+        print(f'Build mismatch, no verdict: {error}', file=sys.stderr)
+        return BUILD_EXIT
     out = args.out or args.manifest.parent
     alerts, report = write_outputs(args.manifest, args.results, comparison.verdicts, out)
     counts = {status: sum(verdict.status == status for verdict in comparison.verdicts) for status in STATUSES}
     print(' '.join(f'{status}={count}' for status, count in counts.items()))
-    print(f'{len(comparison.runs)} scenarios with a result, {len(comparison.missing)} without')
+    print(f'{len(comparison.runs)} scenarios with a result, {len(comparison.missing)} without, '
+          f'{len(comparison.other_build)} refused as another build; judged {comparison.build.text()}')
     print(f'{alerts}\n{report}\n{out / VERDICTS_FILE}\n{out / QUESTIONS_FILE}')
     if any(verdict.check in STACK_CHECKS for verdict in comparison.verdicts):
         print(write_levers(args.manifest, args.results, comparison.verdicts, out))
@@ -489,6 +494,8 @@ def main(argv=None) -> int:
     comparing.add_argument('--manifest', type=Path, required=True)
     comparing.add_argument('--results', type=Path, required=True, help='a .cache/verify-all/<STAMP> directory')
     comparing.add_argument('--out', type=Path, help='output directory, the manifest directory by default')
+    comparing.add_argument('--build', help='the build being judged: a worldserver sha256 or a server commit; runs of '
+                                           'another build are refused, and without it the results must hold one build')
     diffing = commands.add_parser('diff', help=f'write {IMPACT_FILE}: what moved between two compare outputs')
     diffing.add_argument('--before', type=Path, required=True, help=f'a compare output directory ({VERDICTS_FILE})')
     diffing.add_argument('--after', type=Path, required=True, help='a compare output directory')

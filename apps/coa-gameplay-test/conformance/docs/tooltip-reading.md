@@ -54,7 +54,9 @@ alone cannot tell it apart from a live one; `foreign_radius` treats a listed pai
 `unmeasurable: effect <n> of spell <id> is disabled by a server correction` instead of generating a step that
 would fail against the live server. Templar: Testament of Hope 1397742's `$704409a1` names effect 0 of 704409,
 which `AscensionTemplarContracts.cpp:211` disables (effect 1, the one still applying the aura, carries the
-identical `EffectRadiusIndex`).
+identical `EffectRadiusIndex`). An effect that exists but whose amount an aura script's CalcAmount hook sets later is
+not listed here: its read is generated and `compare` reports it `not_measured` from the harness hook count
+([value scenarios](value-scenarios.md), ADR 0118).
 Color codes `|c........` and `|r` are removed, in either case.
 A trailing digit on `$h`, `$d`, `$u`, `$i` (`$h1`, `$d1`, `$u1`, `$i1`) is accepted and ignored: in
 `QuestTextParser.cpp`'s token switch, `case 'H'/'h'` (`:804-805`), `case 'D'/'d'` (`:743-744`), `case 'U'/'u'`

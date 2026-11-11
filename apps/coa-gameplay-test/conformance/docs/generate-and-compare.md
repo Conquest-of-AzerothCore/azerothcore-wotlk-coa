@@ -32,12 +32,23 @@ server set's.
 manifest hash when no folder has the key. The recorded hash is `scenario_sha256` of the folder's `summary.json`
 (or the hash of its `scenario.json`). A result whose hash differs from the manifest stops the comparison with an
 error and no verdict. A scenario without a result has no verdict and is listed in the report. The harness writes
-every `actual` as a string; it is converted to a number, and a value that is not one is an error. `alerts.tsv`
-(default: the manifest directory) has one row per verdict that is neither `ok` nor `measured`; `report.md` counts the
+every `actual` as a string; it is converted to a number, and a value that is not one is an error.
+
+Each run carries its build: the server commit parsed from `server_version` of `result.json` (`AzerothCore rev.
+<commit>`, a trailing `+` for a modified tree kept), the worldserver `binary_sha256` of `summary.json`, and the
+`run_id`. `compare --build <sha256 or commit>` names the build being judged and refuses the runs of any other build
+(no verdict, listed in `report.md` under "Runs refused"); without `--build` the results must hold one build,
+otherwise `compare` stops with exit 5 and no verdict. Every verdict, alerts included, then carries `server_commit`,
+`build` (the worldserver sha256) and `runs` (the run ids it was judged from, empty for a verdict decided by rule), in
+`verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118).
+
+`alerts.tsv`
+(default: the manifest directory) has one row per verdict that is neither `ok`, `measured`, `closed` nor
+`not_measured`; `report.md` counts the
 verdicts per status, per spell and, for passive scenarios, per measurement family ("Passives"), and lists the known
 modifiers, the probe auras, the scenarios without a result and the runs that did not pass. `verdicts.json` keeps every
-verdict with its interval, detail and explanation (schema 1) for `diff`, with the manifest's `Spell.dbc` sha256 in
-its header. `questions.md` lists the checks a reviewer must
+verdict with its interval, detail and explanation (schema 1) for `diff`, with the manifest's `Spell.dbc` sha256 and
+the judged `build` and `server_commit` (shared by every verdict, `null` otherwise) in its header. `questions.md` lists the checks a reviewer must
 settle from the reference logs (see [Open conformance checks](#open-conformance-checks)). When the run holds stack
 verdicts, `compare` also
 writes `levers.md`.
@@ -248,6 +259,7 @@ as ground truth.
 | `ambiguous_tooltip` | a sign opposite to the measured value, a proc of unstated trigger, disagreeing talent or passive readings, a named spell outside the class mask while a mask spell moves |
 | `insufficient_trials` | a hit mean below `minimum_hits`, a proc rate below `trials_needed` (R9), a missing pass |
 | `unmeasured` | a check after a failed single cast; a hit mean, proc rate or talent delta without usable hit (R11); a passive whose aura is absent after `learn`; damage against an aura state the scenario does not establish; a passive delta that cannot move (a multiplying relation on a before value of 0, a `stat` change below 1, `parry_chance` on a character that cannot parry) |
+| `not_measured` | an `effect_value` read by `spell_effect_value` (`SpellEffectInfo::CalcValue`) of an effect that an aura script's `DoEffectCalcAmount` hook sets later (`<label> calc_amount_hooks` above 0): the read does not measure the applied amount, whatever it reads; not an alert, never conformant, listed in `report.md` (ADR 0118) |
 | `measured` | a stack DPS or source damage that no tooltip value judges, a passive plan with `judged` false, a mask spell the tooltip does not name, a namesake of a named spell that moves, two effects on one quantity whose relations do not combine, rolled reads fewer than the mean needs; never an alert |
 
 The tooltip of each rank is read again with the `CasterStats` measured by the run's base steps. If its tokens differ

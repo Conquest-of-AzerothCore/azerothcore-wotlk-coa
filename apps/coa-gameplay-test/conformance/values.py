@@ -34,6 +34,8 @@ GCD_WAIT_MS = 1600
 CAST_WAIT_LABEL = 'cast time'
 UNREADABLE = 'unreadable: '
 UNMEASURABLE = 'unmeasurable: '
+CALC_AMOUNT_HOOKS_METRIC = 'spell_calc_amount_hooks'
+CALC_AMOUNT_HOOKS_SUFFIX = ' calc_amount_hooks'
 GENERIC = 'generic: '
 EXT_NOTE = re.compile(r'@ext:.*:ext@', re.DOTALL)
 OWN_DURATION = re.compile(r'\$(\d*)[dD]')
@@ -357,6 +359,15 @@ def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankF
     return Expectation(label, 'power_cost', spell_id, rank_id, None, displayed, rule)
 
 
+def calc_amount_hooks_label(label: str) -> str:
+    return label + CALC_AMOUNT_HOOKS_SUFFIX
+
+
+def calc_amount_hooks_measurement(label: str, spell_id: int, effect: int) -> dict:
+    return measurement(calc_amount_hooks_label(label), CASTER, CALC_AMOUNT_HOOKS_METRIC, spell=spell_id,
+                       effect=effect)
+
+
 def sampled_reads(measured: list[dict], rolled: dict[str, int], budget: int) -> tuple[list[dict], dict[str, int]]:
     steps, samples = [], {}
     for step in measured:
@@ -412,6 +423,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     def effect_measurement(label: str, effect: int) -> dict:
         return measurement(label, CASTER, 'spell_effect_value', spell=rank_id, effect=effect)
 
+    def effect_measurements(label: str, spell_id: int, effect: int) -> list[dict]:
+        return [measurement(label, CASTER, 'spell_effect_value', spell=spell_id, effect=effect),
+                calc_amount_hooks_measurement(label, spell_id, effect)]
+
     def aura_measurement(label: str, metric: str, carrier_effect: int, **fields) -> dict:
         return measurement(label, metric=metric, spell=rank_id, **aura_carrier(facts, carrier_effect), **fields)
 
@@ -435,7 +450,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             return
         if shown.kind in EFFECT_KINDS and effect is not None and facts.effects[effect]:
             label = f'{rank_id} effect_value e{effect} #{ordinal}'
-            measured.append(effect_measurement(label, effect))
+            measured.extend(effect_measurements(label, rank_id, effect))
             expect(label, 'effect_value', effect, shown.text, note_rule(f'read {shown.kind}', note))
             sample_rolled(label, ordinal, shown.text, rank_id, effect)
             if facts.aura_names[effect] and not facts.passive:
@@ -520,8 +535,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         foreign, unmeasurable = foreign_effect(records, rank_id, shown, disabled_effects)
         if foreign:
             label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
-            measured.append(measurement(label, CASTER, 'spell_effect_value', spell=foreign['effect_spell'],
-                                        effect=foreign['effect']))
+            measured.extend(effect_measurements(label, foreign['effect_spell'], foreign['effect']))
             expect(label, 'effect_value', None, shown.text, note_rule(f'read {shown.kind}', note), foreign)
             sample_rolled(label, ordinal, shown.text, foreign['effect_spell'], foreign['effect'])
             return
