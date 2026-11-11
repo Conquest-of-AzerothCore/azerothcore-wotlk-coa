@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Bursting Impact raises Zealotry's off-hand weapon damage by 25%",
+  "contract": "Bursting Impact 705276 reads 'Increases your off-hand weapon damage by 25%.' and Zealotry 801450 'Deals 80% off-hand Weapon Damage as Holy Damage'; the owner ruled on 2026-11-11 that Zealotry rises with the talent. Two level 60 Templars dual wield Frostmane Club 2259 and Ancient Bone Mace 30754 with no Dual Wield grant, 20000 bonus attack power and forced critical strikes, and cast Zealotry once at their own dummy, magic resistance removed by 823764. The talented hit compares 1.25 to the untalented one (1.22-1.28: the off-hand roll moves a hit by under 1% at this attack power); a talent that misses Zealotry's Holy weapon damage gives 1.0.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "attack_power": 20000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "impact",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000,
+      "attack_power": 20000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "impact_dummy",
+      "owner": "impact",
+      "entry": 36,
+      "level": 60,
+      "health": 100000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2259
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2259,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 54,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 30754
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 30754,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801450
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "impact",
+      "item": 2259
+    },
+    {
+      "action": "equip",
+      "actor": "impact",
+      "item": 2259,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "impact",
+      "skill": 54,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "add_item",
+      "actor": "impact",
+      "item": 30754
+    },
+    {
+      "action": "equip",
+      "actor": "impact",
+      "item": 30754,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "impact",
+      "spell": 801450
+    },
+    {
+      "action": "set_aura",
+      "actor": "impact",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "impact",
+      "spell": 705276
+    },
+    {
+      "action": "assert",
+      "label": "Bursting Impact is applied",
+      "actor": "impact",
+      "metric": "aura",
+      "spell": 705276,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801450,
+      "target": "control_dummy"
+    },
+    {
+      "action": "cast",
+      "actor": "impact",
+      "spell": 801450,
+      "target": "impact_dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let both Zealotry hits land",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The untalented Zealotry hits its dummy once, critically",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "control_dummy",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The talented Zealotry hits its dummy once, critically",
+      "actor": "impact",
+      "metric": "spell_damage_count",
+      "spell": 801450,
+      "target": "impact_dummy",
+      "critical": true,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 801450,
+      "target": "control_dummy",
+      "save_as": "control_zealotry"
+    },
+    {
+      "action": "assert",
+      "label": "Bursting Impact raises the off-hand Zealotry hit by 25%",
+      "actor": "impact",
+      "metric": "spell_damage_total",
+      "spell": 801450,
+      "target": "impact_dummy",
+      "ratio_to": "control_zealotry",
+      "min": 1.22,
+      "max": 1.28
+    }
+  ]
+}

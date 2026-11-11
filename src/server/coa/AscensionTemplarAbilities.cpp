@@ -88,6 +88,9 @@ class templar_casts : public AllSpellScript
         Player* player = Owner(caster);
         if (!player || info->SpellFamilyName != 25)
             return;
+        if (info->Id == 801450 && player->GetWeaponForAttack(OFF_ATTACK, true))
+            if (AuraEffect const* impact = player->GetAuraEffect(705276, EFFECT_0))
+                spell->SetScriptWeaponDamageMultiplier(1.0f + float(impact->GetAmount()) / 100.0f);
         for (uint32 sid : selected)
             if ((!spell->IsTriggered() || info->Id == 801832) && Selected(info, sid))
                 if (Aura* aura = player->GetAura(sid))

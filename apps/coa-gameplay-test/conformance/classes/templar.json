@@ -3048,11 +3048,12 @@
       "spell": 705276,
       "name": "Bursting Impact (Zealotry)",
       "kind": "hit_ratio",
+      "quote": "Increases your off-hand weapon damage by $s1%.",
+      "observe_spell": 801450,
+      "critical": false,
       "variant": "zealotry",
       "label_suffix": "zealotry",
-      "quote": "Increases your off-hand weapon damage by $s1%.",
       "expected": 1.25,
-      "observe_spell": 801450,
       "control": {
         "auras": [
           [
@@ -3073,10 +3074,12 @@
           ]
         ]
       },
-      "critical": false,
       "off_hand_item": 30754,
-      "trials": 80,
-      "expected_source": "$s1 = 25 (705276 EffectBasePoints[0] 24, EffectDieSides[0] 1), Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT. Zealotry 801450 'Deals $s2% off-hand Weapon Damage as Holy Damage', so a 25% larger off-hand weapon damage gives a 25% larger Zealotry hit if the talent reaches the weapon damage Zealotry reads. No stat fixture: at the reference attack power 313 the normalized AP term (313 / 14 x 2.4 = 53.7) is about 44% of the damage before the weapon percent (off-hand average 67.1, plus 53.7, plus the 1-point flat part), so the off-hand roll still spreads the hit: the control arm shows the hand Zealotry reads (off hand 0.64 x (51.63..82.65 + 54.7) = 68.0..87.9, main hand 37.2..38.7, with the 80% weapon percent and the -20% Templar tuning aura 887007, a known aura of every scenario), and its share of off-hand weapon damage is the control mean / (0.8 x (67.1 + 53.7 + 1)). Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800, item_template), equipped with no Dual Wield grant (every Templar learns Dual Wield 674 at login, AscensionLiveBaselineData.h:128). Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON (AttributesEx3 16777216; AscensionTemplarContracts.cpp:279-280), so Spell::Spell reads the off hand (m_attackType OFF_ATTACK); the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "$s1 = 25 (705276 EffectBasePoints[0] 24, EffectDieSides[0] 1), Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT. Zealotry 801450 'Deals $s2% off-hand Weapon Damage as Holy Damage': a 25% larger off-hand weapon damage gives a 25% larger Zealotry hit, 1.25. Owner ruling 'Bursting Impact on Zealotry' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the talent raises the off-hand weapon's damage by 25%, so Zealotry, a share of that damage, rises with it; the mentor's stacking decision makes it multiply with Blade Sermon. Stock Spell::EffectWeaponDmg asks a Holy hit for weapon damage without the off-hand TOTAL_PCT (SpellEffects.cpp:4719, StatSystem.cpp:732), so templar_casts::OnSpellBeforeEffects (AscensionTemplarAbilities.cpp) sets the spell's script weapon damage multiplier to 1 + the 705276 effect 0 amount / 100 for 801450 when a usable off-hand weapon is equipped (ADR 0146). The attack power fixture makes the hit's spread small enough to judge the ratio. Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800), equipped with no Dual Wield grant. Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, so Spell::Spell reads the off hand; the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen', SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, family 33) to remove the dummy's level-based magic resistance."
     },
     {
       "spell": 705276,
@@ -3104,6 +3107,117 @@
         "attack_power": 20000
       },
       "expected_source": "$s1 = 25 (705276 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints[0] 24 + 1): AuraEffect::HandleModOffhandDamagePercent (SpellAuraEffects.cpp:5326-5334) calls Unit::UpdateDamagePctDoneMods(OFF_ATTACK), which multiplies the off-hand 0.5 factor by the aura 122 multiplier into UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT (Unit.cpp:13521-13546), so a plain off-hand white swing grows by 1.25. Both arms auto attack the dummy; each trial is one off-hand swing interval (1800 ms), reading plain (not critical, not glancing) off-hand hits. Off-hand Ancient Bone Mace 30754 beside the main-hand Frostmane Club 2259, no Dual Wield grant. The attack power fixture makes the AP part dominate the weapon roll. Control: no talent."
+    },
+    {
+      "spell": 705276,
+      "name": "Bursting Impact (Zealotry share)",
+      "kind": "hit_ratio",
+      "quote": "Increases your off-hand weapon damage by $s1%.",
+      "observe_spell": 801450,
+      "critical": false,
+      "variant": "share",
+      "label_suffix": "share",
+      "expected": 1.25,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            705276,
+            1
+          ]
+        ]
+      },
+      "off_hand_item": 30754,
+      "trials": 80,
+      "expected_source": "Share and hand reading, not cited by the ledger: at the reference attack power 313 one trial's spread is too wide for the +-2-point band (the zealotry variant judges the ratio). The normalized AP term (313 / 14 x 2.4 = 53.7) is about 44% of the damage before the weapon percent (off-hand average 67.1, plus 53.7, plus the 1-point flat part), so the off-hand roll still spreads the hit: the control arm shows the hand Zealotry reads (off hand 0.64 x (51.63..82.65 + 54.7) = 68.0..87.9, main hand 37.2..38.7, with the 80% weapon percent and the -20% Templar tuning aura 887007) and its share of off-hand weapon damage, the control mean / (0.8 x (67.1 + 53.7 + 1)). Owner ruling 'Bursting Impact on Zealotry' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the talent raises the off-hand weapon's damage by 25%, so Zealotry, a share of that damage, rises with it; the mentor's stacking decision makes it multiply with Blade Sermon. Stock Spell::EffectWeaponDmg asks a Holy hit for weapon damage without the off-hand TOTAL_PCT (SpellEffects.cpp:4719, StatSystem.cpp:732), so templar_casts::OnSpellBeforeEffects (AscensionTemplarAbilities.cpp) sets the spell's script weapon damage multiplier to 1 + the 705276 effect 0 amount / 100 for 801450 when a usable off-hand weapon is equipped (ADR 0146). Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800), equipped with no Dual Wield grant. Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, so Spell::Spell reads the off hand; the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen', SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, family 33) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 705276,
+      "name": "Bursting Impact with Blade Sermon (Zealotry)",
+      "kind": "hit_ratio",
+      "quote": "Increases your off-hand weapon damage by $s1%.",
+      "observe_spell": 801450,
+      "critical": false,
+      "variant": "blade_sermon",
+      "label_suffix": "blade_sermon",
+      "expected": 1.5625,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            572554,
+            1
+          ],
+          [
+            705276,
+            1
+          ]
+        ]
+      },
+      "off_hand_item": 30754,
+      "trials": 40,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "Both talents in one arm, so that a later overwrite of either factor shows. Blade Sermon 572554 adds $s1 = 20 points to Zealotry's 80% weapon percent (x1.25, clause 143); Bursting Impact multiplies the off-hand weapon damage by 1.25 (mentor's stacking decision, multiplicative, method-study/owner-rulings-2026-11-10.md): 1.25 x 1.25 = 1.5625 (the additive alternative, 1.5, lies outside the band). Owner ruling 'Bursting Impact on Zealotry' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the talent raises the off-hand weapon's damage by 25%, so Zealotry, a share of that damage, rises with it; the mentor's stacking decision makes it multiply with Blade Sermon. Stock Spell::EffectWeaponDmg asks a Holy hit for weapon damage without the off-hand TOTAL_PCT (SpellEffects.cpp:4719, StatSystem.cpp:732), so templar_casts::OnSpellBeforeEffects (AscensionTemplarAbilities.cpp) sets the spell's script weapon damage multiplier to 1 + the 705276 effect 0 amount / 100 for 801450 when a usable off-hand weapon is equipped (ADR 0146). Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800), equipped with no Dual Wield grant. Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, so Spell::Spell reads the off hand; the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen', SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, family 33) to remove the dummy's level-based magic resistance."
+    },
+    {
+      "spell": 705276,
+      "name": "Bursting Impact (Zealotry, empty off hand)",
+      "kind": "hit_ratio",
+      "quote": "Increases your off-hand weapon damage by $s1%.",
+      "observe_spell": 801450,
+      "critical": false,
+      "variant": "empty_off_hand",
+      "label_suffix": "empty_off_hand",
+      "expected": 1.0,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            705276,
+            1
+          ]
+        ]
+      },
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "expected_source": "Mentor condition: with no off-hand weapon the talent must not change Zealotry. 801450's EquippedItemClass is -1, so Spell::CheckItems skips its off-hand weapon check (Spell.cpp:7995-8024) and Zealotry can still be cast; the reference staff 2495 (two-hand) leaves the off hand empty. The fix sets its multiplier only when Player::GetWeaponForAttack(OFF_ATTACK, true) finds a usable weapon, so both arms read the same hit: 1.0. Hits counted in both arms show that Zealotry fires with an empty off hand. Owner ruling 'Bursting Impact on Zealotry' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the talent raises the off-hand weapon's damage by 25%, so Zealotry, a share of that damage, rises with it; the mentor's stacking decision makes it multiply with Blade Sermon. Stock Spell::EffectWeaponDmg asks a Holy hit for weapon damage without the off-hand TOTAL_PCT (SpellEffects.cpp:4719, StatSystem.cpp:732), so templar_casts::OnSpellBeforeEffects (AscensionTemplarAbilities.cpp) sets the spell's script weapon damage multiplier to 1 + the 705276 effect 0 amount / 100 for 801450 when a usable off-hand weapon is equipped (ADR 0146). Both arms set 823764."
     },
     {
       "spell": 524739,
