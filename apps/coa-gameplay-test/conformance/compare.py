@@ -3090,7 +3090,7 @@ def behaviour_event_delay_verdict(base: Verdict, run: Run, model: dict) -> Verdi
         return replace(base, status='alert', expected=expected, low=low, high=high,
                        explanation=f'first hit of {observed} after each cast {since_cast} ms, after its own cast '
                                    f'packet {since_hit_cast} ms, cumulative hits {hits}: a cast was not followed by a '
-                                   f'stamped hit of {observed}, stated after {expected:g} ms')
+                                   f'stamped hit of {observed}, expected after the Spell.dbc delay of {expected:g} ms')
     delays = [cast - hit_cast for cast, hit_cast in zip(since_cast, since_hit_cast)]
     status = 'ok' if all(low - FLOAT_EPSILON <= delay <= high + FLOAT_EPSILON for delay in delays) else 'alert'
     return replace(base, status=status, measured=max(delays, key=lambda delay: abs(delay - expected)),
@@ -3098,9 +3098,11 @@ def behaviour_event_delay_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                    detail={EXCLUDED: [low, high], 'delays_ms': delays, 'cast_to_hit_ms': since_hit_cast},
                    explanation=f'first hit of {observed} after each cast at {since_cast} ms, less its own '
                                f'cast-to-hit time {since_hit_cast} ms = {delays} ms from the cast to the cast of '
-                               f'{observed}, stated {expected:g} ms within max({EVENT_DELAY_SHARE:g} x {expected:g}, '
-                               f'{EVENT_DELAY_FLOOR_MS:g}) = {tolerance:g} ms; a delay below {low:g} or above '
+                               f'{observed}, Spell.dbc {expected:g} ms within '
+                               f'max({EVENT_DELAY_SHARE:g} x {expected:g}, {EVENT_DELAY_FLOOR_MS:g}) = {tolerance:g} '
+                               f'ms; a delay below {low:g} or above '
                                f'{high:g} ms is excluded; cumulative hits {hits}')
+
 
 def behaviour_mount_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     caster_value = run.values.get(model['caster_label'])

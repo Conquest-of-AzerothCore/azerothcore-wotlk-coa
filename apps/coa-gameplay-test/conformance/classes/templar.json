@@ -3129,10 +3129,10 @@
         "extra_cast": {
           "spell": 806521,
           "target": "dummy",
-          "after_ms": 3000
+          "after_ms": 5000
         }
       },
-      "observe_source": "Titanstrike 806521 Effect[1] SPELL_EFFECT_TRIGGER_SPELL casts Oath Chain 707896, whose Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, EffectMiscValue[0] 704576, EffectBasePoints[0] 2999 + EffectDieSides[0] 1 = 3000, EffectImplicitTargetA[0] 1 (TARGET_UNIT_CASTER); Spell::EffectAscensionModifyAuraDuration (SpellEffects.cpp:899-920) adds the 3000 ms to the caster's own 704576. A Condemn 804906 cast grants the chain at its 15000 ms maximum (AscensionTemplar.cpp:168-181; DurationIndex 8 kept by AscensionTemplarContracts.cpp:100-101). Without arm: the chain ends 15000 ms after Condemn. With arm: Titanstrike cast at the dummy 3000 ms after Condemn (dummy held at 30% health for TargetAuraState 13), so the chain ends 18000 ms after Condemn. 707896 appears in no file of src/server/coa; the Titanstrike cast hook only syncs the Oath durations to the chain before the hit (AscensionTemplarAbilities.cpp:177-178). A handler that does nothing ends the with arm at 15000 ms (alert)."
+      "observe_source": "Titanstrike 806521 Effect[1] SPELL_EFFECT_TRIGGER_SPELL casts Oath Chain 707896, whose Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, EffectMiscValue[0] 704576, EffectBasePoints[0] 2999 + EffectDieSides[0] 1 = 3000, EffectImplicitTargetA[0] 1 (TARGET_UNIT_CASTER); Spell::EffectAscensionModifyAuraDuration (SpellEffects.cpp:899-920) adds the 3000 ms to the caster's own 704576. A Condemn 804906 cast grants the chain at its 15000 ms maximum (AscensionTemplar.cpp:168-181; DurationIndex 8 kept by AscensionTemplarContracts.cpp:100-101). Without arm: the chain ends 15000 ms after Condemn. With arm: Titanstrike cast at the dummy 5000 ms after Condemn (dummy held at 30% health for TargetAuraState 13). Predicted ends, timed from Condemn: 18000 ms for the tooltip's extension (5000 + 10000 remaining + 3000); 20000 ms for a refresh of the chain to its 15000 ms maximum at the Titanstrike cast (5000 + 15000), the reset GrantOath does (AscensionTemplar.cpp:168-181), which the with arm's reading after 18000 ms excludes. 707896 appears in no file of src/server/coa; the Titanstrike cast hook only syncs the Oath durations to the chain before the hit (AscensionTemplarAbilities.cpp:177-178). A handler that does nothing ends the with arm at 15000 ms (alert)."
     },
     {
       "spell": 705285,

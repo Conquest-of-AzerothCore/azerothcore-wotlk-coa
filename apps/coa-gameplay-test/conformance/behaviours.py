@@ -1758,11 +1758,11 @@ def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tupl
                 'target': spec.cast_target or spec.target}])
 
 
-def extra_cast_setup(records: Records, extra: ExtraCast | None) -> list[dict]:
+def extra_cast_setup(records: Records, extra: ExtraCast | None, known: int) -> list[dict]:
     if extra is None:
         return []
-    return ([{'action': 'learn', 'actor': CASTER, 'spell': extra.spell}]
-            + required_target_health_steps(facts_of(records, extra.spell), extra.target))
+    learn = [] if extra.spell == known else [{'action': 'learn', 'actor': CASTER, 'spell': extra.spell}]
+    return learn + required_target_health_steps(facts_of(records, extra.spell), extra.target)
 
 
 def extra_cast_steps(records: Records, extra: ExtraCast) -> list[dict]:
@@ -1786,7 +1786,7 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     extra = extra_cast_steps(records, spec.extra_cast) if spec.extra_cast else []
     expected_ms = spec.expected_ms - (spec.extra_cast.after_ms if spec.extra_cast else 0)
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
-             + extra_cast_setup(records, spec.extra_cast)
+             + extra_cast_setup(records, spec.extra_cast, spec.spell)
              + [measurement(before_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)] + cast + extra
              + [measurement(after_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)])
     scenario = {
@@ -3606,6 +3606,7 @@ def event_delay_spec(entry: dict) -> EventDelaySpec:
     return EventDelaySpec(entry['spell'], entry['name'], entry['quote'], float(entry['expected_ms']),
                           entry['observe_spell'], entry.get('trials', EVENT_DELAY_TRIALS),
                           entry.get('wait_ms', EVENT_DELAY_WAIT_MS))
+
 
 AGGRO_SETTLE_MS = 300
 AGGRO_REDIRECT_REACTION = 1

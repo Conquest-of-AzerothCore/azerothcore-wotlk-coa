@@ -248,8 +248,10 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
                 expiry_arm(prefix, WITH, spec.expected_ms, extra, requires=((absent, 0.0),))]
         cleared = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0,
                     **({'target': actor} if actor != CASTER else {})} for spell in spec.control_clear]
-        first, second = (learn + learned + extra_cast_setup(records, spec.extra_cast), []) if spec.extra_cast \
-            else (learned, learn)
+        if spec.extra_cast:
+            first, second = learn + learned + extra_cast_setup(records, spec.extra_cast, spec.spell), []
+        else:
+            first, second = learned, learn
         steps = (base_steps(class_file) + first
                  + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
                  + cast_arm(cast, arms[0], actor, spec.applied_aura) + cleared

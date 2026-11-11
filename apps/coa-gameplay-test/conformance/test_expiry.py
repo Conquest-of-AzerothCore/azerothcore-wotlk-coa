@@ -224,6 +224,14 @@ class TemplarExpiryScenarioTest(unittest.TestCase):
         self.assertEqual(judged(TITANSTRIKE).status, 'ok')
         self.assertEqual(judged(TITANSTRIKE, {'with': 15000.0}).status, 'alert')
 
+    def test_seeded_extra_cast_that_refreshes_the_aura_to_its_maximum_alerts(self):
+        extra = behaviour(TITANSTRIKE)['control']['extra_cast']
+        self.assertNotEqual(extra['after_ms'], 3000)
+        self.assertEqual(judged(TITANSTRIKE, {'with': extra['after_ms'] + 15000.0}).status, 'alert')
+        learns = [step for step in built(TITANSTRIKE)[0]['steps']
+                  if step['action'] == 'learn' and step['spell'] == TITANSTRIKE]
+        self.assertEqual(len(learns), 1)
+
     def test_an_extra_cast_names_its_spell_target_and_delay(self):
         entry = behaviour(TITANSTRIKE)
         broken = {**entry, 'control': {**entry['control'], 'extra_cast': {'spell': TITANSTRIKE}}}

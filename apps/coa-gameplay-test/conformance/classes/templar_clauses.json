@@ -4144,7 +4144,7 @@
       "806521 behaviour_expiry"
     ],
     "kind": "claim",
-    "reason": "Our Spell.dbc (707896 EffectBasePoints 2999) and tooltip say 3 sec, measured: the chain ends at 18000 ms with a Titanstrike and at 15000 ms without. The coabuildhub text says 5 sec, an older patch state (lean/mech-batch-author.md)."
+    "reason": "Our Spell.dbc (707896 EffectBasePoints 2999) and tooltip say 3 sec, measured: with a Titanstrike 5000 ms after Condemn the chain ends at 18000 ms (a refresh to the maximum would end it at 20000 ms), at 15000 ms without. coabuildhub (skills_templar.json, spells_master_index.json) says 'by 5 sec'; the same snapshot carries Oath Flow 'by 2 sec' and Zealotry 'Deals 40%', both ruled older patch states (owner rulings 2026-11-11, gap batch decisions), so its 5 sec is cited as an older state. Video: judged-2.tsv:118 records dzhum7IIw9g 17:24 T 'Oath Chain by 3 sec', but observations/templar/dzhum7IIw9g.csv cuts that tooltip at 'healing you equal to ...'; the frame is unverified and no video number is an expected value (lean/mech-batch-author.md)."
   },
   {
     "spell": 806521,
@@ -4261,5 +4261,12 @@
     ],
     "kind": "claim",
     "reason": "Tooltip sentence with no ledger clause before the custom-mechanics batch. The tooltip states no number; Spell.dbc 524739 Effect[1] 183 gives 1500 ms (EffectBasePoints 1499, DieSides 1). The sentence opening the tooltip, \"Target an enemy and leap into the air.\", stays without a clause."
+  },
+  {
+    "spell": 524739,
+    "clause": "Target an enemy and leap into the air.",
+    "labels": [],
+    "kind": "claim",
+    "reason": "Effect[0] 138 SPELL_EFFECT_LEAP_BACK (EffectBasePoints 200, EffectMiscValueB 200); added unproven by the custom-mechanics review (M3), no check measures the leap yet."
   }
 ]

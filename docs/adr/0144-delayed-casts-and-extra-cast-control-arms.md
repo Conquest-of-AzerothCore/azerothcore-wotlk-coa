@@ -29,6 +29,8 @@ not fit an existing check:
 - `cast_applies_aura` `control` takes `extra_cast: {"spell", "target", "after_ms"}`. Both arms learn the entry's
   spell first; the `with` arm casts the extra spell `after_ms` after the `cast_spell` cast, inside the arm, so the
   expiry margins count its steps. The readback scenario makes the same cast and expects `expected_ms - after_ms`.
+  `after_ms` must differ from the extension, so that a refresh of the aura to its maximum gives another end
+  (Titanstrike: 5000 ms, 18000 ms against 20000 ms for a refresh; review of the batch, I1).
 - `metric_delta` takes `setup_wait_ms` (default 0, no step): a wait after each setup cast.
 
 ## Consequences

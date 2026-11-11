@@ -870,7 +870,9 @@ and the extra cast's target health is set for its `TargetAuraState`. The `with` 
 `extra_cast.target` `after_ms` after the `cast_spell` cast, inside the arm, so the margins take its steps into
 account; the arms differ by that cast only. The readback scenario makes the same extra cast before its second read,
 which then expects `expected_ms` less `after_ms`. Titanstrike 806521: Condemn 804906 grants Oath Chain 704576
-(15000 ms), and a Titanstrike 3000 ms later ends it at 18000 ms. An `extra_cast` that does not name exactly `spell`,
+(15000 ms), and a Titanstrike 5000 ms later ends it at 18000 ms. `after_ms` must differ from the extension: with
+5000 ms a refresh of the chain to its maximum would end it at 20000 ms, which the `with` arm excludes, while a
+Titanstrike at 3000 ms would give 18000 ms either way. An `extra_cast` that does not name exactly `spell`,
 `target` and `after_ms` is refused.
 
 ### Periodic-dispel scenarios (`behaviour_cast_condition`, `kind: "periodic_dispel"`)
@@ -1028,7 +1030,7 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Condemnation 704175 (`variant: "periodic_crit"`) | metric_delta | "allows its periodic damage to critically strike" | 0 before, 3 after | `Effect[2]` aura 286 on Condemn 804906; Condemn is a melee-class DoT, so its tick crit chance is the melee crit percentage, forced on the caster; critical ticks 10500 ms after the cast |
 | Deep Secrets 705263 (`variant: "libram"`/`"testament"`) | cast_applies_aura with control | "Increases the duration of your Librams and Testaments by $/1000;s1 sec." | Libram of Zeal 801466 20000 then 30000 ms; Testament of Resolve 804228 10000 then 20000 ms | `Effect[0]` aura 107 `SPELLMOD_DURATION` +10000; the testament arm removes Sacred Restraint 102208 before its second cast |
 | Norgannon's Wrath 524739 | event_delay | "After a short delay, you blast them with immense holy force" | 1500 ms from the cast to the cast of 524740 | `Effect[1]` 183 `SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED`, points 1500, `EffectTriggerSpell[1]` 524740 (`Speed` 30, its flight read from its own cast packet); no CoA code names 524739 |
-| Titanstrike 806521 | cast_applies_aura with an extra-cast control | "extending the duration of your Oath Chain by $/1000;707896s1 sec." | Oath Chain 704576 15000 ms without, 18000 ms with a Titanstrike 3000 ms after Condemn 804906 | `Effect[1]` triggers 707896, whose `Effect[0]` 177 `SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION` adds 3000 ms to the caster's own 704576 |
+| Titanstrike 806521 | cast_applies_aura with an extra-cast control | "extending the duration of your Oath Chain by $/1000;707896s1 sec." | Oath Chain 704576 15000 ms without, 18000 ms with a Titanstrike 5000 ms after Condemn 804906 (a refresh to the maximum would give 20000 ms) | `Effect[1]` triggers 707896, whose `Effect[0]` 177 `SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION` adds 3000 ms to the caster's own 704576 |
 | Tyr's Blessing 705285 | metric_delta (`setup_wait_ms`) | "Condemn now stacks $s1 additional time." | Condemn 804906 `aura_stacks` on the dummy 3 before, 4 after five casts | `Effect[0]` aura 107, `EffectMiscValue[0]` 31 `SPELLMOD_MAX_AURA_STACKS`, read by `SpellInfo::CalcMaxAuraStacks` on every stack increase |
 | Barrier of Light 805417 (`variant: "received"`) | hit_ratio | "increasing the healing received by nearby party and raid members by $s3% for $d" | 1.40 | `Effect[2]` area aura 319 `SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT`, read by `Unit::SpellHealingBonusTaken` (Unit.cpp:10898); the ally's Chakra of Light 803845 heals the caster, who casts Barrier before every treatment heal |
 | Oath Flow 705283 | cast_applies_aura with control | "Increases the duration of Oath Chain by $s1%." | Oath Chain 704576 15000 then 18000 ms | `Effect[0]` aura 108 `SPELLMOD_DURATION` +20%; `GrantOath` sets the chain to `GetMaxDuration()` after a Condemn 804906 cast |
