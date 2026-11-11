@@ -1,13 +1,14 @@
 {
   "schema": 1,
-  "name": "A level-60 leader with open world scaling off does not stop the party's dungeon from scaling",
+  "name": "A level-60 leader with open world scaling off does not stop a Dungeon Finder group's dungeon from scaling",
   "contract": [
-    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds.",
-    "While grouped, the leader's Destiny Weaver switch is every member's open world scaling switch. A scaled",
-    "five-player dungeon does not consult it: Ascension scales classic dungeons to each character inside them, so a",
-    "level-60 leader with the switch off must not hold a level-26 member to Maraudon's authored level-45 creatures.",
-    "Maraudon (map 349) holds its band from LFGDungeons.dbc TargetLevelMin 20; the member, whose own switch is on but",
-    "who follows the leader's off switch while grouped, still sees a level-45 Black Riding Wolf 5194 at 26."
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default",
+    "DestinyWeaver.Scaling.DungeonIds. While grouped, the leader's Destiny Weaver switch is every member's open world",
+    "scaling switch. A scaled five-player dungeon does not consult it for a Dungeon Finder group: Ascension scales a",
+    "finder run to each character in it, so a level-60 leader with the switch off must not hold a level-26 member to",
+    "Maraudon's authored level-45 creatures. Maraudon is finder entry 26; walking in keeps the authored creatures",
+    "(#11184). Maraudon (map 349) holds its band from LFGDungeons.dbc TargetLevelMin 20; the member, whose own switch",
+    "is on but who follows the leader's off switch while grouped, still sees a level-45 Black Riding Wolf 5194 at 26."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -30,6 +31,8 @@
     { "action": "level_scaling_packet", "actor": "leader", "value": 0 },
     { "action": "level_scaling_packet", "actor": "member", "value": 1 },
     { "action": "group", "actor": "leader", "target": "member" },
+    { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Maraudon", "actor": "leader",
+      "dungeon": 26 },
     { "action": "wait", "label": "Let the group's switch reach the member", "ms": 1000 },
     {
       "action": "assert",

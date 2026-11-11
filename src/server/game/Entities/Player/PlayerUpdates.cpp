@@ -832,6 +832,8 @@ void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uin
         case SKILL_TAILORING: profession = RATE_XP_PROFESSION_TAILORING; break;
         case SKILL_LOCKPICKING: profession = RATE_XP_PROFESSION_LOCKPICKING; break;
         case SKILL_INSCRIPTION: profession = RATE_XP_PROFESSION_INSCRIPTION; break;
+        case SKILL_WOODCUTTING: profession = RATE_XP_PROFESSION_WOODCUTTING; break;
+        case SKILL_WOODWORKING: profession = RATE_XP_PROFESSION_WOODWORKING; break;
         case SKILL_ENCHANTING:
             profession = disenchanting ? RATE_XP_PROFESSION_DISENCHANTING : RATE_XP_PROFESSION_ENCHANTING;
             break;

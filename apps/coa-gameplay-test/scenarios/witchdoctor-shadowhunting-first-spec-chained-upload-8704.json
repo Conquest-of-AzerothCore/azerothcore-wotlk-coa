@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Choosing Shadowhunting with its chained automatic entries is accepted (#8704)",
+  "contract": "A level 10 Witch Doctor choosing Shadowhunting (specialization 4) uploads the identity and signature with the zero-cost automatic entries 4505 Reclamation 806288 and 12086 Malefic Arrow 707854, which require identity 4006 and signature 29747. #8704 (core 75317f96d7) reported that after choosing Shadowhunting at level 10 the character could not progress: #8642 (c0b330a020) refused automatic entries whose requirements were not yet in the stored known set, so every Shadowhunting save carrying them was refused until #8750 (1221b742cd) validated them against the proposed set. The save must activate Shadowhunting and grant Shadowhunter 92086, Reclamation 806288 and Malefic Arrow 707854, and the grants must survive levelling to the report's level 18. The control adds Fleshwarden entry 12166 to the same save, which must be refused, so the listed entries demonstrably reach the server.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "doctor", "race": 1, "class": 13, "level": 10}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks and class synchronisation settle", "ms": 5000},
+    {"action": "assert", "label": "Reclamation is not known before the save", "actor": "doctor", "metric": "knows_spell", "spell": 806288, "equals": 0},
+    {"action": "assert", "label": "Malefic Arrow passive is not known before the save", "actor": "doctor", "metric": "knows_spell", "spell": 707854, "equals": 0},
+    {"action": "specialization", "label": "Control: a Fleshwarden entry in the same save reaches the server and is refused", "actor": "doctor", "id": 4, "entries": [4505, 12086, 12166], "refused": true},
+    {"action": "specialization", "label": "Shadowhunting save carries Reclamation and Malefic Arrow", "actor": "doctor", "id": 4, "entries": [4505, 12086]},
+    {"action": "assert", "label": "Shadowhunting grants its identity Shadowhunter", "actor": "doctor", "metric": "knows_spell", "spell": 92086, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Reclamation is granted with Shadowhunting", "actor": "doctor", "metric": "knows_spell", "spell": 806288, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "Malefic Arrow passive is granted with Shadowhunting", "actor": "doctor", "metric": "knows_spell", "spell": 707854, "equals": 1, "within_ms": 3000},
+    {"action": "set_level", "label": "Level to the report's level 18", "actor": "doctor", "value": 18},
+    {"action": "wait", "label": "Let the level-change synchronisation run", "ms": 3000},
+    {"action": "assert", "label": "Reclamation stays known at level 18", "actor": "doctor", "metric": "knows_spell", "spell": 806288, "equals": 1},
+    {"action": "assert", "label": "Malefic Arrow passive stays known at level 18", "actor": "doctor", "metric": "knows_spell", "spell": 707854, "equals": 1}
+  ]
+}

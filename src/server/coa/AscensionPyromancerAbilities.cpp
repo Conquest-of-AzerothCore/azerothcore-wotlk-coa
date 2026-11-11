@@ -287,7 +287,7 @@ class pyromancer_spells : public AllSpellScript
                 if (tender)
                     for (Unit* ally : Allies(player, target, 10, sSpellMgr->GetSpellInfo(704274)->MaxAffectedTargets))
                         Copy(player, ally, 704274, CalculatePct(healing, Amount(tender->GetId())));
-                if (player->HasAura(806747) && target->ToCreature() && AnyPet(target))
+                if (player->GetOwnedAura(806747, player->GetGUID()) && target->ToCreature() && AnyPet(target))
                 {
                     SpellInfo const* fuel = sSpellMgr->GetSpellInfo(806749);
                     for (Unit* ally :

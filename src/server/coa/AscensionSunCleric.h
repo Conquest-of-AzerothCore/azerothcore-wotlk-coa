@@ -49,7 +49,7 @@ int32 Amount(uint32 id, uint8 slot = 0, Unit* caster = nullptr);
 float Radius(uint32 id, uint8 slot = 0);
 void Cast(Unit* caster, Unit* target, uint32 id);
 void Copy(Unit* caster, Unit* target, uint32 id, uint32 amount);
-void Mana(Player* player, uint32 amount);
+void Mana(Player* player, uint32 amount, uint32 source = 504877);
 bool Resource(Player* player, uint32 id, int32 delta);
 void Refresh(Player* player);
 bool Chance(Player* player, uint32 id, uint32 cooldown = 0);

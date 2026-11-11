@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk Ravages the tank, Claw Storm bleeds on 8% of its hits and she vanishes 44 s after Ravage",
+  "contract": [
+    "The tester of 2026-11-08 (live): Arlokk's (14515) Ravage (2118330, hits 2118331) goes to the tank, her Claw Storm",
+    "(2118336, hits 2118337) applies the Razor Claws bleed (2118326), and she vanishes (2118312) later than 26 s after",
+    "Ravage. The CoA logs show 7 of 7 Ravages on the tank, Vanish 44 s after each Ravage, and the bleed after 54 of 55",
+    "landed swings but only 34 of 452 Claw Storm hits (BB 65 of 816), so a Claw Storm hit bleeds with an 8% chance",
+    "(decided 2026-11-08). Her Razor Claws aura replays 40,000 synthetic hits per rate. In panther form she Ravages",
+    "11 s after the change and Claw Storms 18 s after the Ravage. The tank wounds her below half health and holds by",
+    "far the most threat; two raiders who never swing at her stand on the same spot and wound her for 1 % each."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "raider1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "raider2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider1",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider2",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "The heroes share one Zul'Gurub instance",
+      "actor": "hero",
+      "target": "raider1"
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "raider2"
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider1",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "raider2",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heroes are in Zul'Gurub",
+      "actor": "raider2",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk before she walks back to her temple",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "The tank wounds Arlokk below half health",
+      "actor": "hero",
+      "entry": 14515,
+      "pct": 45
+    },
+    {
+      "action": "set_health_pct",
+      "label": "The first raider wounds her for 1 %",
+      "actor": "raider1",
+      "entry": 14515,
+      "pct": 44
+    },
+    {
+      "action": "set_health_pct",
+      "label": "and the second for 1 %",
+      "actor": "raider2",
+      "entry": 14515,
+      "pct": 43
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she takes panther form",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1,
+      "within_ms": 3000
+    },    {
+      "action": "assert",
+      "label": "CONTROL: Razor Claws bleeds on every landed swing",
+      "actor": "arlokk",
+      "metric": "aura_proc_rate",
+      "spell": 2118325,
+      "target": "hero",
+      "type_mask": 4,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: but only on about 8% of Claw Storm hits",
+      "actor": "arlokk",
+      "metric": "aura_proc_rate",
+      "spell": 2118325,
+      "target": "raider1",
+      "trigger_spell": 2118337,
+      "type_mask": 16,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ravage lands 11 s after the change",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "arlokk",
+      "spell": 2118331,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: on the tank",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "caster": "arlokk",
+      "spell": 2118331,
+      "target": "hero",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let a Ravage bleed tick",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ravage did not go to the first raider",
+      "actor": "raider1",
+      "metric": "spell_damage_count",
+      "caster": "arlokk",
+      "spell": 2118331,
+      "target": "raider1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nor to the second",
+      "actor": "raider2",
+      "metric": "spell_damage_count",
+      "caster": "arlokk",
+      "spell": 2118331,
+      "target": "raider2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first raider does not bleed before Claw Storm",
+      "actor": "raider1",
+      "metric": "spell_damage_count",
+      "caster": "arlokk",
+      "spell": 2118326,
+      "target": "raider1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Claw Storm cuts the first raider 18 s after Ravage",
+      "actor": "raider1",
+      "metric": "spell_damage_count",
+      "caster": "arlokk",
+      "spell": 2118337,
+      "target": "raider1",
+      "min": 1,
+      "within_ms": 20000
+    },
+
+    {
+      "action": "wait",
+      "label": "Past 30 s after Ravage, inside the old 26-36 s Vanish",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Vanish 26 s after Ravage",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she vanishes 44 s after Ravage",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and is still fighting",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

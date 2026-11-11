@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FORMATS = ROOT / "src/server/shared/DataStores/DBCfmt.h"
 STORES = ROOT / "src/server/game/DataStores/DBCStores.cpp"
 MANIFEST = "client-dbc.manifest.json"
+CLIENT_LOADS = (("SpellRank.dbc", "niii", "spell_ranks"),)
 HEADER = struct.Struct("<4s4I")
 PREFIX = "dbfilesclient\\"
 BASE_ARCHIVES = ("common", "common-2", "expansion", "lichking")
@@ -69,7 +70,7 @@ def core_stores(root=ROOT):
     loads = re.findall(r'^\s*LOAD_DBC\((\w+),\s*"([^"]+)",\s*"([^"]+)"\);', source, re.M)
     if not loads:
         raise ValueError("No LOAD_DBC entries found in " + str(STORES))
-    return [(file, formats[storages[store]], table) for store, file, table in loads]
+    return [(file, formats[storages[store]], table) for store, file, table in loads] + list(CLIENT_LOADS)
 
 
 def file_format(table, fmt):

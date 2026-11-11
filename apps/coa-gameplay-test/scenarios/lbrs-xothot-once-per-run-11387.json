@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire has one Xot'hot the Burning per run",
+  "contract": [
+    "Xot'hot the Burning (10263) stands in a Mythic Lower Blackrock Spire. Every further",
+    "Xot'hot that appears in the same instance, such as one called by a Scarshield Portal, vanishes at once."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "player", "value": 2 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "actor": "player", "value": 1 },
+    { "action": "teleport", "actor": "player", "map": 229, "x": -40.0, "y": -381.7, "z": 31.62, "o": 0.0 },
+    { "action": "assert", "label": "CONTROL: player is in a Mythic Lower Blackrock Spire", "actor": "player",
+      "metric": "map_difficulty", "equals": 2, "within_ms": 15000 },
+    { "action": "assert", "label": "Xot'hot stands in the instance", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 10263, "equals": 1, "within_ms": 10000 },
+    { "action": "summon", "actor": "player", "as": "second", "entry": 10263, "distance": 5 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "A second Xot'hot vanishes", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 10263, "equals": 1 }
+  ]
+}

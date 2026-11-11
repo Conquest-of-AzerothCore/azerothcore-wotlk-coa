@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Scalding Mornbrew Delivery has no quest timer (#8969)",
+  "contract": "Scalding Mornbrew Delivery 3364 starts at Nori Pridedrift 12738 with Durnan's Scalding Mornbrew 10439 and ends at Durnan Furcutter 836. The 3.3.5 quest has TimeAllowed 0 (stock quest_template, coa_world) and its text says the cup stays hot 'for a few more minutes'; only the vanilla text named a five-minute limit. A timed quest fails when its timer runs out, whatever its objectives. Expected: with the mornbrew carried, the quest stays complete after more than five minutes and the mornbrew stays in the bags.",
+  "timeout_ms": 420000,
+  "location": { "map": 0, "x": -6371.13, "y": 571.816, "z": 385.827, "o": 0 },
+  "players": [
+    { "id": "courier", "race": 3, "class": 1, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    {
+      "action": "prepare_quest", "label": "Take Scalding Mornbrew Delivery with the mornbrew", "actor": "courier",
+      "quest": 3364
+    },
+    {
+      "action": "assert", "label": "The delivery is ready to hand in", "actor": "courier", "metric": "quest_status",
+      "quest": 3364, "equals": 1
+    },
+    { "action": "wait", "label": "Let more than five minutes pass", "ms": 330000 },
+    {
+      "action": "assert", "label": "The delivery has not failed", "actor": "courier", "metric": "quest_status",
+      "quest": 3364, "equals": 1
+    },
+    {
+      "action": "assert", "label": "The mornbrew is still carried", "actor": "courier", "metric": "item_count",
+      "item": 10439, "equals": 1
+    }
+  ]
+}

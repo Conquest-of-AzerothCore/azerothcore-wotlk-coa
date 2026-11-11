@@ -55,8 +55,8 @@ struct StagedCache
 std::array<StagedCache, 9> const CallboardTiers = {{
     { RaidRelease::StageHeroicDungeons, 1615001 },
     { RaidRelease::StageMythicDungeons, 1615002 },
-    { RaidRelease::StageMoltenCore, 1615004 },
     { RaidRelease::StageZulGurub, 1615003 },
+    { RaidRelease::StageMoltenCore, 1615004 },
     { RaidRelease::StageOnyxiasLair, 1615005 },
     { RaidRelease::StageBlackwingLair, 1615006 },
     { RaidRelease::StageAhnQiraj, 1615007 },

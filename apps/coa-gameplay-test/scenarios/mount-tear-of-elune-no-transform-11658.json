@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Tear of Elune mount keeps the rider's own model (#11658)",
+  "contract": [
+    "Tear of Elune 979870 casts the ground variants 979871 and 979872. Their effects are MOUNTED with creature 100226,",
+    "a mounted speed aura and SPELL_AURA_TRANSFORM into creature 100225, which has no creature_template; core falls back",
+    "to the pig display 16358. No other mount wrapper transforms the rider. Mounting must set the mount display 48527",
+    "from creature_template_model 100226 and leave the rider's display id unchanged."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -9377.45, "y": -1295.63, "z": 56.7373, "o": 0 },
+  "players": [
+    { "id": "rider", "race": 1, "class": 25, "level": 20 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 4000 },
+    { "action": "set_skill", "actor": "rider", "skill": 762, "value": 75, "maximum": 75 },
+    { "action": "snapshot", "actor": "rider", "metric": "display_id", "save_as": "native" },
+    { "action": "learn", "actor": "rider", "spell": 979870 },
+    { "action": "cast", "actor": "rider", "spell": 979870 },
+    {
+      "action": "assert", "label": "The rider sits on the Tear of Elune mount model",
+      "actor": "rider", "metric": "mount_display_id", "equals": 48527, "within_ms": 4000
+    },
+    {
+      "action": "assert", "label": "The rider keeps their own display instead of the pig fallback",
+      "actor": "rider", "metric": "display_id", "relative_to": "native", "equals": 0
+    }
+  ]
+}

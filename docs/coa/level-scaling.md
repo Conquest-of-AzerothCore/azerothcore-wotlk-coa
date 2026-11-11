@@ -53,11 +53,13 @@ authored level. The band is the `TargetLevelMin`-`MaxLevel` of the dungeon's `LF
 merged per map; entries with placeholder levels (100/100 for Wailing Caverns, Gnomeregan and Uldaman)
 use 15-59.
 
-A scaled dungeon does not consult the Destiny Weaver's switch, which is open-world scaling, as its menu
-row and its messages say. Every character inside sees their own version, whatever their own choice or
-their leader's: a level-60 leader with the switch off would otherwise hold a level-20 party to Maraudon's
-level-45 creatures. Only a challenge rule (`ScalingBlocksFor`) keeps a character on the authored
-dungeon.
+A scaled dungeon scales only for a Dungeon Finder group inside the dungeon it was assigned, as on
+Ascension (#11184). Every member of that group sees their own version, whatever their own choice or their
+leader's: a level-60 leader with the switch off would otherwise hold a level-20 finder party to
+Maraudon's level-45 creatures. A character who walked in, alone or in an ordinary group, keeps the
+authored creatures and loot whatever the Destiny Weaver's switch says; the switch is open-world scaling,
+as its menu row and its messages say. A challenge rule (`ScalingBlocksFor`) keeps even a finder group's
+character on the authored dungeon.
 
 #### Where a creature scales
 
@@ -276,10 +278,11 @@ exception: it is dispatched to every registered unit script.
 Not scaled, deliberately, and matching the reference implementation: the creature's **resistance values**
 (template-based and level-independent there too; only the level terms above follow the view) and **loot
 tables**, which are one corpse shared by everyone who tagged it. Scaling gear on that corpse takes the level
-of whoever loots it or wins the roll, a master looter's pick the receiver's. Inside a scaled dungeon loot
-scales for everyone, whatever their own or their leader's switch, up or down: the item takes the
+of whoever loots it or wins the roll, a master looter's pick the receiver's. Inside a Dungeon Finder group's
+scaled dungeon loot scales for every member, whatever their own or their leader's switch, up or down: the item takes the
 looter's level, with that ladder row's stats, armor and required level, as the corpse and roll frame
-preview it. Elsewhere, scaling gear from loot or a quest reward scales only for a
+preview it. In a scaled dungeon entered on foot loot keeps its authored stats like the creatures. Elsewhere,
+scaling gear from loot or a quest reward scales only for a
 character whose scaling is on, by the same answer the creature view asks (their choice, or their leader's
 in a group, and no challenge or open-world ruleset holding them to the authored world); everyone else
 receives the authored item, and their corpse and roll frame preview none.

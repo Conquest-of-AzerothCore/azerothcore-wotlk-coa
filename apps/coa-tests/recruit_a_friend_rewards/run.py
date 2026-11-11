@@ -1,3 +1,4 @@
+import ipaddress
 from pathlib import Path
 import re
 import sqlite3
@@ -143,7 +144,47 @@ def main():
     check(db.execute(cycle_sql, (3, 6)).fetchone()[0] == 0, 'Unrelated root may join an existing chain')
     db.execute('UPDATE account SET recruiter=3 WHERE id=1')
     check(db.execute(cycle_sql, (3, 1)).fetchone()[0] == 1, 'Preexisting cycles terminate safely via UNION DISTINCT')
-    recovery = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::RecoverRecruitAFriendRewards(')
+    migration = (ROOT / 'data/sql/updates/pending_db_auth/zz_rev_20261106_01_raf_unlink_same_ip.sql').read_text()
+    selector = 'SELECT `recruit`.' + migration.split('SELECT `recruit`.', 1)[1].split(';', 1)[0]
+
+    def inet6_aton(value):
+        try:
+            return ipaddress.ip_address(value).packed
+        except ValueError:
+            return None
+
+    db.create_function('INET6_ATON', 1, inet6_aton)
+    db.create_function('CONCAT', 2, lambda left, right: left + right)
+    db.executescript("""
+        ALTER TABLE account ADD COLUMN last_ip TEXT;
+        ALTER TABLE account ADD COLUMN last_login INTEGER;
+        UPDATE account SET last_login=1, last_ip='192.0.2.1' WHERE id=1;
+        UPDATE account SET last_login=1, last_ip='::ffff:192.0.2.1' WHERE id=2;
+        UPDATE account SET last_login=1, last_ip='192.0.2.2' WHERE id=3;
+        UPDATE account SET last_ip='192.0.2.1' WHERE id=5;
+        INSERT INTO account VALUES
+            (7,'G',0,'0.0.0.0',1),(8,'H',7,'::ffff:0.0.0.0',1),
+            (9,'I',0,'2001:db8::1',1),(10,'J',9,'2001:0db8:0:0::1',1);
+    """)
+    blocked = sorted(db.execute(selector).fetchall())
+    check(blocked == [(2,), (10,)], 'Only authenticated links with matching concrete IPv4 or IPv6 addresses are selected')
+    check('DELETE `progress` FROM' in migration and 'DELETE `registration` FROM' in migration and
+          'SET `recruit`.`recruiter` = 0' in migration and '`raf_claims`' not in migration,
+          'Cleanup drops qualification and unlinks the recruit while preserving award receipts')
+    invite = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'bool WorldSession::InviteRecruitAFriend(')
+    accept = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'bool WorldSession::HandleRecruitAFriendInviteResponse(')
+    check(invite.index('CanLinkRecruitmentAddresses') < invite.index('SendDynamicGossipMenu'),
+          'Same-IP invitation is blocked before prompting the recipient')
+    check(accept.index('CanLinkRecruitmentAddresses') < accept.index('LOGIN_UPD_RAF_RECRUITER'),
+          'Address policy is rechecked before persisting the link')
+    update = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::UpdateRecruitAFriendRewards(')
+    check('bool const linked = recruiterId || isRecruiter;' in update and
+          '(!force || !linked) && now < _rafRewardsNextUpdate' in update and
+          '(linked ? LinkedRewardInterval : UnlinkedRecoveryInterval)' in update,
+          'Unlinked account saves respect recovery backoff while linked accounts can checkpoint progress')
+    check(update.rstrip().endswith('RecoverRecruitAFriendRewards();\n    RecoverRecruitAFriendRewards(true);\n}'),
+          'Both reward classes still get recovery after the last link is removed')
+    recovery = method('src/server/game/Handlers/ReferAFriendHandler.cpp', 'void WorldSession::DeliverRecruitAFriendRewards(')
     mail_rows = method('src/server/game/Mails/Mail.cpp', 'StagedMail MailDraft::AppendMailRows(')
     new_item = method('src/server/game/Entities/Item/Item.cpp', 'void Item::SaveToDB(')
     check('CharacterDatabase.DirectCommitTransaction(trans)' in recovery and 'StageMailTo(trans' in recovery,

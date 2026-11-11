@@ -183,6 +183,13 @@ struct CreatureModel
 };
 
 // from `creature_template` table
+enum class QuestTargetRespawn : uint8
+{
+    None,
+    General,
+    Named
+};
+
 struct CreatureTemplate
 {
     uint32  Entry;

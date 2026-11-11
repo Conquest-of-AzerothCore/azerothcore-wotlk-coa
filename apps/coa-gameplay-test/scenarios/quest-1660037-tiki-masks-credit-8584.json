@@ -1,0 +1,427 @@
+{
+  "schema": 1,
+  "name": "Unease Makes Tongues Wag: smashing a tiki mask summons the hostile mask, and killing it credits the objective (#8584, #8781, #8945)",
+  "contract": [
+    "Unease Makes Tongues Wag 1660037 asks for one Enchanted, one Chattering and one Possessed Tiki Mask destroyed (creatures 161854, 161855, 161856). The masks are goobers 2300535, 2300536 and 2300537 (spawns 7917000-7917002 at Zeb'Goro).",
+    "Using a mask casts Destroying 256719 on it through go_coa_tiki_mask. On live the smash wakes the mask: a hostile level 3 Tiki Mask enemy appears (Bronzebeard Questie: 134/100/134 health; Descension's live capture shows the Chattering and Possessed masks casting Hellfire 256753), and killing it is the objective. Players reported the missing enemy in #7279, #8189, #8584, #8781, #8945, #9730 and #11056.",
+    "Expected: each smash summons its own hostile mask enemy with the live health and gives no credit by itself; killing the enemy credits the matching objective; the mask object despawns and returns after 15 s. With the quest complete, a respawned mask cannot be smashed and summons nothing."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": -346.0,
+    "y": -4103.9,
+    "z": 50.9,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 8,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "label": "SETUP: join the world phase the Zeb'Goro masks live in",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 1660037,
+      "complete": false
+    },
+    {
+      "action": "teleport",
+      "label": "Stand beside the Enchanted Tiki Mask (7917000)",
+      "actor": "p",
+      "map": 1,
+      "x": -346.0,
+      "y": -4103.9,
+      "z": 50.9,
+      "o": 0.0
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Divine Shield keeps nearby mobs and Hellfire off p",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: exactly one Enchanted Tiki Mask is in range",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300535,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Enchanted Tiki Mask enemy stands here before the smash",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161854,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Smash the Enchanted Tiki Mask",
+      "actor": "p",
+      "entry": 2300535
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: smashing the Enchanted mask summons the Enchanted Tiki Mask enemy",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161854,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "the Enchanted mask object is gone after the cast",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300535,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the Enchanted Tiki Mask enemy is hostile",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 161854,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Enchanted Tiki Mask enemy has its live 134 health",
+      "actor": "p",
+      "metric": "nearby_creature_max_health",
+      "entry": 161854,
+      "equals": 134
+    },
+    {
+      "action": "assert",
+      "label": "the smash alone gives no credit",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 1660037,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the Enchanted Tiki Mask enemy",
+      "actor": "p",
+      "entry": 161854,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: killing the Enchanted Tiki Mask enemy credits objective 1",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 1660037,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the Enchanted Tiki Mask enemy is dead",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161854,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "label": "Stand beside the Chattering Tiki Mask (7917001)",
+      "actor": "p",
+      "map": 1,
+      "x": -403.5,
+      "y": -4060.6,
+      "z": 51.6,
+      "o": 0.0
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Divine Shield keeps nearby mobs and Hellfire off p",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: exactly one Chattering Tiki Mask is in range",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300536,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Chattering Tiki Mask enemy stands here before the smash",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161855,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Smash the Chattering Tiki Mask",
+      "actor": "p",
+      "entry": 2300536
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: smashing the Chattering mask summons the Chattering Tiki Mask enemy",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161855,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "the Chattering mask object is gone after the cast",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300536,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the Chattering Tiki Mask enemy is hostile",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 161855,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Chattering Tiki Mask enemy has its live 100 health",
+      "actor": "p",
+      "metric": "nearby_creature_max_health",
+      "entry": 161855,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "the smash alone gives no credit",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 1660037,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the Chattering Tiki Mask enemy",
+      "actor": "p",
+      "entry": 161855,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: killing the Chattering Tiki Mask enemy credits objective 2",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 1660037,
+      "index": 1,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the Chattering Tiki Mask enemy is dead",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161855,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "label": "Stand beside the Possessed Tiki Mask (7917002)",
+      "actor": "p",
+      "map": 1,
+      "x": -375.3,
+      "y": -4142.7,
+      "z": 52.1,
+      "o": 0.0
+    },
+    {
+      "action": "set_aura",
+      "label": "SETUP: Divine Shield keeps nearby mobs and Hellfire off p",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: exactly one Possessed Tiki Mask is in range",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 2300537,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Possessed Tiki Mask enemy stands here before the smash",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161856,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Smash the Possessed Tiki Mask",
+      "actor": "p",
+      "entry": 2300537
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: smashing the Possessed mask summons the Possessed Tiki Mask enemy",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161856,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "the Possessed mask object is gone after the cast",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300537,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "the Possessed Tiki Mask enemy is hostile",
+      "actor": "p",
+      "metric": "nearby_creature_can_attack",
+      "entry": 161856,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the Possessed Tiki Mask enemy has its live 134 health",
+      "actor": "p",
+      "metric": "nearby_creature_max_health",
+      "entry": 161856,
+      "equals": 134
+    },
+    {
+      "action": "assert",
+      "label": "the smash alone gives no credit",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 1660037,
+      "index": 2,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill the Possessed Tiki Mask enemy",
+      "actor": "p",
+      "entry": 161856,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: killing the Possessed Tiki Mask enemy credits objective 3",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 1660037,
+      "index": 2,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the Possessed Tiki Mask enemy is dead",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161856,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "the three masks complete Unease Makes Tongues Wag",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1660037,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the Possessed mask respawns after 15 s",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300537,
+      "equals": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Try the respawned mask again with the quest complete",
+      "actor": "p",
+      "entry": 2300537
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "a done mask summons no further enemy",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 161856,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "a done mask is not smashed again",
+      "actor": "p",
+      "metric": "nearby_gameobject_at_client",
+      "entry": 2300537,
+      "equals": 1
+    }
+  ]
+}

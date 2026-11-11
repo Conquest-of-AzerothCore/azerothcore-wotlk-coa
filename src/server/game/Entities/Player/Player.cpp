@@ -7540,6 +7540,28 @@ void Player::CastAllObtainSpells()
 
 void Player::ApplyItemObtainSpells(Item* item, bool apply)
 {
+    auto carriedElsewhere = [this, item](int32 spellId)
+    {
+        auto grants = [item, spellId](Item const* other)
+        {
+            if (!other || other == item)
+                return false;
+            for (auto const& spell : other->GetTemplate()->Spells)
+                if (spell.SpellTrigger == ITEM_SPELLTRIGGER_ON_NO_DELAY_USE && spell.SpellId == spellId)
+                    return true;
+            return false;
+        };
+        for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
+            if (grants(GetItemByPos(INVENTORY_SLOT_BAG_0, slot)))
+                return true;
+        for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+            if (Bag* bag = GetBagByPos(i))
+                for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot)
+                    if (grants(bag->GetItemByPos(slot)))
+                        return true;
+        return false;
+    };
+
     ItemTemplate const* itemTemplate = item->GetTemplate();
     for (uint8 i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
     {
@@ -7555,7 +7577,7 @@ void Player::ApplyItemObtainSpells(Item* item, bool apply)
             if (!HasAura(spellId))
                 CastSpell(this, spellId, true, item);
         }
-        else
+        else if (!carriedElsewhere(spellId))
             RemoveAurasDueToSpell(spellId);
     }
 }

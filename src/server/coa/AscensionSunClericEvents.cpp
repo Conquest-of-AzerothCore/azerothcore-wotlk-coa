@@ -41,6 +41,21 @@ class aura_ascension_sun_cleric_event : public AuraScript
         uint32 damage = event.GetDamageInfo() ? event.GetDamageInfo()->GetDamage() : 0;
         uint32 healing = event.GetHealInfo() ? event.GetHealInfo()->GetEffectiveHeal() : 0;
         bool periodic = event.GetTypeMask() & (PROC_FLAG_DONE_PERIODIC | PROC_FLAG_TAKEN_PERIODIC);
+        if (!periodic)
+        {
+            Spell const* proc = event.GetProcSpell();
+            SpellInfo const* trigger = proc ? proc->GetTriggeredByAuraSpellInfo() : nullptr;
+            if (trigger && trigger->Id != 805629 && trigger->Id != 807970 && trigger->Id != 807971 &&
+                trigger->Id != 807972 && trigger->Id != 807973 && trigger->Id != 807974)
+                for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+                    if ((trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL ||
+                         trigger->Effects[i].ApplyAuraName == SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE) &&
+                        trigger->Effects[i].TriggerSpell == proc->GetSpellInfo()->Id)
+                    {
+                        periodic = true;
+                        break;
+                    }
+        }
         bool critical = event.GetHitMask() & PROC_HIT_CRITICAL;
         bool automatic = event.GetTypeMask() & (PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK);
         bool direct = info && !periodic && !automatic;
