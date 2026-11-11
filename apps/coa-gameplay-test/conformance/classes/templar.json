@@ -3667,6 +3667,19 @@
       "critical": false,
       "trials": 40,
       "expected_source": "$s3 = 40 (805417 EffectBasePoints[2] 39, EffectDieSides[2] 1): Effect[2] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT (handler HandleNoImmediateEffect, SpellAuraEffects.cpp:389), read by Unit::SpellHealingBonusTaken as TakenTotalMod *= GetTotalAuraMultiplier (Unit.cpp:10898). The ally heals the caster with Chakra of Light 803845 (SPELL_EFFECT_HEAL, EffectBasePoints[0] 49, EffectDieSides[0] 1, no CoA script), which goes through SpellHealingBonusTaken. Treatment arm: the caster casts Barrier of Light before every heal (the cooldown is reset each time, so the 15 s aura is fresh for every trial). Control arm: no Barrier of Light. Only non-critical heals are compared. Barrier's Effect[0] aura 87 has value 0 and Effect[1] periodically force-casts the threat redirect 807694; neither touches healing. A handler that does nothing reads a ratio of 1.0 (alert)."
+    },
+    {
+      "spell": 680953,
+      "name": "Profound Enlightenment",
+      "kind": "cost_gate",
+      "quote": "reducing the remaining cooldown of Testaments by $s1%",
+      "gated_spell": 801478,
+      "resource": "cooldown",
+      "reduction": 80000,
+      "target": "caster",
+      "after_casts": [[680953, "caster"]],
+      "after_wait_ms": 20000,
+      "observe_source": "$s1 = 50 (680953 EffectBasePoints[0..2] 49, EffectDieSides 1). Effect[0..2] 192 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN_PCT, EffectMiscValue 500678, 801478, 1397742 (Testament of Fortitude, Faith, Hope). The class script replaces the effect: AscensionTemplarAbilities.cpp:377-388 (Enlighten, bound at :424-425 for 680953) walks the known spells, and for each one in a Testament's chain (Named, AscensionTemplar.cpp:39-42) with a running cooldown calls ModifySpellCooldown(-CalculatePct(remaining, 50)) (Player.cpp:11950-11956 moves the stored end). Gated spell Testament of Faith 801478, RecoveryTime 180000 ms. Arms timed from a priming cast on the caster: without Profound Enlightenment, refused 100500 ms later (SPELL_FAILED_NOT_READY 67); with it, Profound Enlightenment is cast 20000 ms after the priming cast, when 160000 ms remain, so 80000 ms are left and the Testament goes through 100500 ms after the priming cast and is refused 99500 ms after it. Half of the full cooldown (90000 ms) instead of the remaining one would let the 99500 ms attempt through. One of the three Testaments is tested; the other two go through the same loop."
     }
   ],
   "player_observations": [

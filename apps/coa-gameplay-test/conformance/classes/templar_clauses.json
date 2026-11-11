@@ -1610,7 +1610,10 @@
     "spell": 680953,
     "clause": "reducing the remaining cooldown of Testaments by $s1%",
     "labels": [
-      "680953 effect_value e0 #0"
+      "680953 effect_value e0 #0",
+      "680953 cost_gate 801478 without",
+      "680953 cost_gate 801478 with",
+      "680953 cost_gate 801478 beyond"
     ],
     "kind": "claim"
   },
