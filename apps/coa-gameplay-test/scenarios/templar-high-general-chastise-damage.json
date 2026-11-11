@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "name": "High General doubles the direct damage of the Chastise that consumes Scarlet Champion",
-  "contract": "High General 524617 reads 'Your next Chastise consumes all stacks of Scarlet Champion to deal $s1% increased direct damage, and be guaranteed to critically strike.' The server DBC gives e0 BasePoints 99, DieSides 1, so $s1 = 100 and the consuming Chastise 803157 deals x2.0. Two level 80 Templars with forced critical strikes each cast Chastise eight times with one Oath Chain 704576 stack, which Chastise requires, and 5 stacks of Scarlet Champion 805416; only one also holds High General before each cast. Both totals hold the stacks' Holy damage bonus, which applies at launch before the stacks are consumed, so the critical-strike totals compare 2.0 (1.9-2.1); the former x1.5 gives 1.5.",
+  "contract": "High General 524617 reads 'Your next Chastise consumes all stacks of Scarlet Champion to deal $s1% increased direct damage, and be guaranteed to critically strike.' The server DBC gives e0 BasePoints 99, DieSides 1, so $s1 = 100 and the consuming Chastise 803157 deals x2.0. Two level 60 Templars with forced critical strikes each cast Chastise eight times at their own level 60 dummy with one Oath Chain 704576 stack, which Chastise requires, and 5 stacks of Scarlet Champion 805416; only one also holds High General before each cast. Both hold beeg spellpen 823764 (e0 aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, permanent), so Unit::GetEffectiveResistChance clamps the dummy's Holy resistance to 0 and no hit is partially resisted: the resisted amount of every Chastise log is 0 in both arms. Both totals hold the stacks' Holy damage bonus, which applies at launch before the stacks are consumed, so the critical-strike totals compare 2.0 (1.9-2.1); the former x1.5 gives 1.5.",
   "timeout_ms": 240000,
   "players": [
     {
       "id": "control",
       "race": 1,
       "class": 19,
-      "level": 80,
+      "level": 60,
       "melee_hit_rating": 10000,
       "spell_hit_rating": 10000,
       "expertise_rating": 10000,
@@ -20,7 +20,7 @@
       "id": "general",
       "race": 1,
       "class": 19,
-      "level": 80,
+      "level": 60,
       "melee_hit_rating": 10000,
       "spell_hit_rating": 10000,
       "expertise_rating": 10000,
@@ -34,7 +34,7 @@
       "id": "dummy_control",
       "owner": "control",
       "entry": 36,
-      "level": 80,
+      "level": 60,
       "health": 50000000,
       "distance": 3
     },
@@ -42,7 +42,7 @@
       "id": "dummy_general",
       "owner": "general",
       "entry": 36,
-      "level": 80,
+      "level": 60,
       "health": 50000000,
       "distance": 3
     }
@@ -70,6 +70,12 @@
       "slot": 15
     },
     {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
       "action": "learn",
       "actor": "general",
       "spell": 803157
@@ -84,6 +90,12 @@
       "actor": "general",
       "item": 2495,
       "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "general",
+      "spell": 823764,
+      "stacks": 1
     },
     {
       "action": "set_aura",
@@ -699,6 +711,42 @@
       "spell": 803157,
       "target": "dummy_general",
       "critical": false,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every control Chastise leaves a damage log",
+      "actor": "control",
+      "metric": "spell_log_count",
+      "spell": 803157,
+      "target": "dummy_control",
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No control Chastise is partially resisted",
+      "actor": "control",
+      "metric": "spell_resist_total",
+      "spell": 803157,
+      "target": "dummy_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Every general Chastise leaves a damage log",
+      "actor": "general",
+      "metric": "spell_log_count",
+      "spell": 803157,
+      "target": "dummy_general",
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "No general Chastise is partially resisted",
+      "actor": "general",
+      "metric": "spell_resist_total",
+      "spell": 803157,
+      "target": "dummy_general",
       "equals": 0
     },
     {
