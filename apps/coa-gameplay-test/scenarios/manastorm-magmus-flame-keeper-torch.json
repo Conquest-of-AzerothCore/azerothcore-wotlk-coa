@@ -11,7 +11,8 @@
     "keeper without an owner in the Lyceum: Manastorm sets loot mode 0 on it as on the pooled keepers.",
     "Manastorm scales the keeper's health below half of its native health, so the scaling also resizes the player",
     "damage requirement; otherwise no kill was credited to the player and the corpse got no loot owner. The torch",
-    "is a free-for-all item, so it joins the loot while the core fills it: added after the kill, no looter saw it."
+    "is a free-for-all item, so it joins the loot while the core fills it: added after the kill, no looter saw it.",
+    "The player takes the torch from their own free-for-all view and must then carry it."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -62,6 +63,14 @@
       "equals": 0
     },
     {
+      "action": "assert",
+      "label": "CONTROL: the player starts without a Shadowforge Torch",
+      "actor": "n",
+      "metric": "item_count",
+      "item": 11885,
+      "equals": 0
+    },
+    {
       "action": "summon",
       "label": "Add a keeper that, like a pooled one, is not player-created",
       "actor": "n",
@@ -98,6 +107,20 @@
       "label": "The keeper's corpse holds one Shadowforge Torch",
       "actor": "n",
       "metric": "loot_count",
+      "item": 11885,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "label": "Take the torch from this player's own view of the free-for-all loot",
+      "actor": "n",
+      "item": 11885
+    },
+    {
+      "action": "assert",
+      "label": "The player now carries the Shadowforge Torch",
+      "actor": "n",
+      "metric": "item_count",
       "item": 11885,
       "equals": 1
     },
