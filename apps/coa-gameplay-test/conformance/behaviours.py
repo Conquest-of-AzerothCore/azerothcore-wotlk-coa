@@ -1795,6 +1795,7 @@ class CastAppliesAuraSpec:
     control_clear: tuple[int, ...] = ()
     label_suffix: str = ''
     extra_cast: 'ExtraCast | None' = None
+    cast_target_health_pct: int | None = None
 
 
 @dataclass(frozen=True)
@@ -1808,10 +1809,11 @@ def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tupl
     if spec.cast_spell is None:
         return [], [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target}]
     facts = facts_of(records, spec.cast_spell)
+    target = spec.cast_target or spec.target
+    health = [] if spec.cast_target_health_pct is None else [fixture_health_step(target, spec.cast_target_health_pct)]
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}],
-            cast_gate_power_step(facts) + required_aura_steps(facts)
-            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell,
-                'target': spec.cast_target or spec.target}])
+            cast_gate_power_step(facts) + required_aura_steps(facts) + health
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': target}])
 
 
 def extra_cast_setup(records: Records, extra: ExtraCast | None, known: int) -> list[dict]:
@@ -1886,7 +1888,7 @@ def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
                                entry['applied_aura'], entry.get('target', CASTER), entry.get('cast_spell'),
                                entry.get('cast_target'), control['expected_ms'] if control else None,
                                tuple(control.get('clear_auras', ())) if control else (),
-                               entry.get('label_suffix', ''), extra)
+                               entry.get('label_suffix', ''), extra, entry.get('cast_target_health_pct'))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -4431,11 +4433,15 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                 measurement(labels[1], spec.caster, count_metric, **fields)]
 
     steps = []
+    healed = []
     if spec.target_health_pct is not None:
         if not 0 < spec.target_health_pct < 100:
             raise ValueError(f'target health percent {spec.target_health_pct} must lie between 0 and 100')
-        steps += [{'action': 'set_health_pct', 'actor': CASTER, 'target': TARGET, 'pct': spec.target_health_pct},
-                  {'action': 'wait', 'ms': HIT_RATIO_HEALTH_SETTLE_MS}]
+        if spec.target == TARGET:
+            steps += [{'action': 'set_health_pct', 'actor': CASTER, 'target': TARGET, 'pct': spec.target_health_pct},
+                      {'action': 'wait', 'ms': HIT_RATIO_HEALTH_SETTLE_MS}]
+        else:
+            healed = [fixture_health_step(spec.target, spec.target_health_pct)]
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = hit_ratio_reads(spec, name)
@@ -4455,14 +4461,14 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
             for spell in spec.warmup:
-                steps += hit_ratio_cast(records, spell, spec.caster, spec.target)
+                steps += healed + hit_ratio_cast(records, spell, spec.caster, spec.target)
         steps += reads(marks[0])
         for trial in range(1, spec.trials + 1):
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
-            steps += hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
+            steps += healed + hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
             if trial == spec.trials:
                 steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
             steps += reads(marks[trial])

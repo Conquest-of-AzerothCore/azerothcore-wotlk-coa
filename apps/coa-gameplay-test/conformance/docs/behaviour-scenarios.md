@@ -862,6 +862,9 @@ harness reads a player's own heals), and `target` (default the dummy). An `ally`
 player. The arms' `auras` are still set on the caster, so a talent set in the treatment arm reaches healing done when
 the caster heals and healing received when the ally heals the caster. The caster is armed for the observed rank
 (`values.armed_for`), so a rank that needs a weapon class can be observed.
+With a player `target`, `target_health_pct` sets that player to the percent of the fixture maximum before every
+observed and warm-up heal instead of holding the dummy once, for a heal whose script only reacts to a healed amount
+(Light's Guidance 524765 casts nothing after a Benediction on a target at full health).
 
 A `hit_ratio` entry may also set `fixture` (`attack_power`, `ranged_attack_power`, `spell_power`: flat fixture bonuses
 of the caster player, `README.md` player fixture fields) so the stat part of a formula dominates its die, and
@@ -896,6 +899,9 @@ A `cast_applies_aura` entry may name `cast_spell` (and `cast_target`) when the a
 than the entry's own, for example a talent whose aura a class ability grants: the talent is learned, `cast_spell` is
 learned, its power and caster aura are set, and it is cast at `cast_target` (default `target`). The expiry pair is
 timed from that cast.
+
+`cast_target_health_pct` sets the `cast_spell` target to that percent of the fixture maximum right before each cast,
+for an aura a heal grants only when it heals (Light's Guidance 524766 after Benediction 578276).
 
 A passive that lengthens another spell's aura states its control arm as `control: {"expected_ms": <ms>,
 "clear_auras": [<id>, ...]}` (ADR 0142). The expiry scenario then has two arms: `without`, the `cast_spell` cast
@@ -1005,6 +1011,8 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Testament of Resolve 804228 | immunity | "granting immunity to fear, charm, and horrify effects" | fear and horrify fixtures absent after the cast, present again once 804228 has expired | `Effect[0]` aura 147 misc 512 (bit 9, `SPELL_AURA_MOD_FEAR` aura-type immunity, SpellInfo.cpp:2738-2739), `Effect[2]` aura 77 misc 24 (`MECHANIC_HORROR`); fixtures Fear 12096 and Psychic Horror 64044. Charm has no fixture and no 804228 effect names it |
 | Faith Guard 705259 | threat_slope | "High Threat Holy damage" | 2 | Faith 706466 cast at a fresh dummy, flat 100 from its `Effect[1]` 63; spell_threat pctMod 2 (rev_20261103_01_templar_faith_threat.sql); owner ruling 2026-11-10 |
 | Testament of Resolve 804228 | cast_applies_aura | "Applies Sacred Restraint for" | 60000 ms | `Effect[1]` 64 `SPELL_EFFECT_TRIGGER_SPELL` 102208 on the ally target (the caster here); no CoA code casts 102208 for 804228; proven by its expiry pair |
+| Light's Guidance 524765 (`label_suffix: "next_benediction"`) | hit_ratio (heal) | "now causes your next Benediction to heal for" | 1.25 | 524765 set in the treatment arm, ally at 50% before each Benediction 578276, a warm-up Benediction per arm; `AscensionTemplarAbilities.cpp:279-280` casts 524766 (aura 108 `SPELLMOD_DAMAGE` +25%, one charge) after a healing hit |
+| Light's Guidance 524765 | cast_applies_aura (`cast_spell` 578276 at the caster, `cast_target_health_pct` 50) | "to heal for" | 30000 ms | 524766 `DurationIndex` 9 |
 | Warrior of Dawn 560648 | proc_reset | "chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by" | cooldown 0 after a proc, the next Argent Blade 807268 at 25 Energy instead of 50 | `AscensionTemplarEvents.cpp:71-72` (melee damage, not periodic) and `:152-154` (`Reduce(player, 804929, INT32_MAX)`, `Cast(player, player, 561156)`); 561156 `Effect[0]` aura 108 `SPELLMOD_COST` -50%, one charge (`AscensionTemplarAuras.cpp:116-120`), dropped by the next Argent Blade (`AscensionTemplarAbilities.cpp:26-27`). 561167's effect 195 is not on the path |
 | Holy Tempest 301339 | spread (`first_tick`) | "spreads Condemn on affected enemies to a nearby enemy" | 1 of 2 after the first tick | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` open conformance check (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |

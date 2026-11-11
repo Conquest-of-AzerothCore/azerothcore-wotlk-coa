@@ -5976,6 +5976,16 @@ class HitRatioHealTests(unittest.TestCase):
         self.assertTrue(talent)
         self.assertTrue(all(index > treatment for index in talent))
 
+    def test_a_healed_target_is_set_to_its_health_before_each_heal(self):
+        entry = {**variant_entry(705278, 'hit_ratio', 'done'), 'target_health_pct': 50}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        for earlier, cast in zip([0] + casts, casts):
+            healths = [step for step in steps[earlier:cast] if step['action'] == 'set_health']
+            self.assertEqual([step['actor'] for step in healths], ['ally'])
+        self.assertFalse([step for step in steps if step['action'] == 'set_health_pct'])
+
     def test_an_unknown_metric_is_refused(self):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, {**variant_entry(705278, 'hit_ratio', 'done'), 'metric': 'aura'})
@@ -6152,6 +6162,15 @@ class CastAppliesAuraCastSpellTests(unittest.TestCase):
         self.assertLess(first_index(steps, action='set_aura', spell=681170), cast)
         self.assertEqual(expectation.model['expected_ms'], 8000)
         self.assertIn('creatures', scenario)
+
+    def test_a_cast_target_health_is_set_right_before_the_cast(self):
+        entry = {**class_entry(705295, 'cast_applies_aura'), 'cast_target': 'caster', 'cast_target_health_pct': 50}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        cast = first_index(steps, action='cast', spell=572769)
+        health = first_index(steps, action='set_health', actor='caster')
+        self.assertLess(health, cast)
+        self.assertFalse([step for step in steps[health + 1:cast] if step['action'] == 'wait'])
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
