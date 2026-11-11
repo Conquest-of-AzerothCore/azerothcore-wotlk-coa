@@ -2353,7 +2353,7 @@
       "705303 e1 combat_rating 2"
     ],
     "kind": "claim",
-    "reason": "data conformant, final by the Lean package follow-up ruling 'Stat passives' (2026-11-11, method-study/owner-rulings-2026-11-10.md): a deterministic stat reading is judged to the rounding, and where the rounding cannot separate the stated value the clause stays data conformant; with the 'Sturdy, no server change' amendment (Batch 1 chunk 1 rulings) and ADR 0141 (percent-path stats judged to the engine truncation). 705303 e1 combat_rating 2 (dodge rating): 0 before and 6 after the learn against an expected delta of +6.4 (20% of Intellect 32), ok to the engine truncation and data_only: a 1-point floor on a 6.4 share cannot tell 20% from a percent close to it. Label re-pointed from free text to that verdict: same spell 705303, effect 1, quantity dodge rating"
+    "reason": "data conformant, final by the Lean package follow-up ruling 'Stat passives' (2026-11-11, method-study/owner-rulings-2026-11-10.md): a deterministic stat reading is judged to the rounding, and where the rounding cannot separate the stated value the clause stays data conformant; applied by ADR 0135 (deterministic stat readings judged to their rounding; combat_rating is a deterministic stat metric, not an ADR 0141 percent-path one). 705303 e1 combat_rating 2 (dodge rating): 0 before and 6 after the learn against +6.4 (20% of Intellect 32), ok as an exact reading within its 1-point rounding and data_only: the 1-point floor is wider than the 5% band (0.32), so it cannot tell 20% from a percent close to it. Label re-pointed from free text to that verdict: same spell 705303, effect 1, quantity dodge rating"
   },
   {
     "spell": 705306,
