@@ -873,6 +873,25 @@ class PassiveScenarioTest(unittest.TestCase):
     def scenario(self, spell_id: int):
         return passive_scenario(self.class_file, templar_passive(spell_id))
 
+    def test_blessed_padding_equips_its_mail_chest_at_the_class_level(self):
+        for spell_id in (301311, 301360):
+            scenario, _ = self.scenario(spell_id)
+            self.assertEqual([player['level'] for player in scenario['players']], [self.class_file['level']])
+            self.assertIn({'action': 'equip', 'actor': 'caster', 'item': 30298, 'slot': 4}, scenario['steps'])
+
+    def test_item_armor_subclass_item_must_be_wearable_at_the_class_level(self):
+        seeded = {'spell': BLESSED_PADDING, 'effect': 0, 'subclass': 3, 'item': 1065932, 'slot': 4}
+        for entry, message in (({**seeded, 'required_level': self.class_file['level'] + 20}, 'requires level 80'),
+                               ({**seeded, 'required_level': 60, 'level': 80}, 'cannot set its own level'),
+                               (seeded, 'needs the RequiredLevel')):
+            class_file = {**self.class_file, 'item_armor_subclass_effects': [entry]}
+            with self.subTest(entry=entry), self.assertRaisesRegex(ValueError, message):
+                passive_scenario(class_file, templar_passive(BLESSED_PADDING))
+        class_file = {**self.class_file, 'item_armor_subclass_effects': [{**seeded, 'required_level': 60}]}
+        scenario, _ = passive_scenario(class_file, templar_passive(BLESSED_PADDING))
+        self.assertEqual(scenario['players'][0]['level'], 60)
+        self.assertIn({'action': 'add_item', 'actor': 'caster', 'item': 1065932}, scenario['steps'])
+
     def test_passive_scenario_measures_before_and_after_learn(self):
         scenario, expectations = self.scenario(PIOUS)
         steps = scenario['steps']

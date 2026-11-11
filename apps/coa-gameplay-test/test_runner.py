@@ -1256,7 +1256,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(invalid)
 
     def test_spell_log_metrics_need_a_spell_and_take_the_caster_filters(self):
-        for metric in ('spell_log_count', 'spell_absorb_total'):
+        for metric in ('spell_log_count', 'spell_absorb_total', 'spell_resist_total'):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
                                       'caster': 'target', 'target': 'caster', 'critical': False, 'min': 0})
@@ -1265,6 +1265,21 @@ class RunnerTests(unittest.TestCase):
             invalid = copy.deepcopy(scenario)
             del invalid['steps'][-1]['spell']
             with self.subTest(metric=metric, spell=None), self.assertRaises(ValueError):
+                run.validate(invalid)
+
+    def test_spell_resist_chance_needs_a_magic_school_and_a_target(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_resist_chance',
+                                  'school': 1, 'target': 'target', 'min': 0})
+        self.assertIs(run.validate(scenario), scenario)
+        for change in ({'school': 0}, {'school': 7}, {'school': None}, {'target': None}):
+            invalid = copy.deepcopy(scenario)
+            for key, value in change.items():
+                if value is None:
+                    del invalid['steps'][-1][key]
+                else:
+                    invalid['steps'][-1][key] = value
+            with self.subTest(change=change), self.assertRaises(ValueError):
                 run.validate(invalid)
 
     def test_owned_creature_metrics_need_an_entry(self):

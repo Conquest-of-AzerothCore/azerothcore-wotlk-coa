@@ -125,7 +125,7 @@ each cast; the entry `{"spell": 712678, "effect": 1, "base_points": 4999}` makes
 ### Item-armor-subclass overrides
 
 A class file's `item_armor_subclass_effects` list (`[{"spell": <id>, "effect": <n>, "subclass": <n>,
-"item": <entry>, "slot": <n>, "level": <n, optional>, "citation": "..."}]`) models aura 142 (`SPELL_AURA_MOD_BASE_RESISTANCE_PCT`) for
+"item": <entry>, "slot": <n>, "required_level": <n>, "citation": "..."}]`) models aura 142 (`SPELL_AURA_MOD_BASE_RESISTANCE_PCT`) for
 an effect whose `EffectMiscValueB` names an item-armor subclass (`ITEM_SUBCLASS_ARMOR_*`,
 `ItemTemplate.h:390-400`) that `SpellInfo::GetItemArmorSubclassMask()` (`SpellInfo.cpp`) recognises for the
 live `SpellInfo`, the same `{spell_id or rank_id, effect}` lookup as `effect_overrides`, checked before `aura
@@ -144,13 +144,13 @@ holds under `source` by the tooltip's percent, with no change needed there. Temp
 (50%) and 301360 (100%) both carry `EffectMiscValueB[0]` 8 (`1 << ITEM_SUBCLASS_ARMOR_MAIL`) for a `SpellInfo`
 whose `GetItemArmorSubclassMask()` previously whitelisted only `SpellFamilyName` 24, missing their own family
 25 — a server defect masking the whole effect regardless of equipped gear (fixed alongside this override,
-`SpellInfo.cpp`); both now equip the mail chest item 1065932 at slot 4 (chest), the same fixture
-`apps/coa-gameplay-test/scenarios/templar-blessed-padding.json` already named for this clause without the tool
-ever running it through the generated/compared pipeline; that fixture item's `RequiredLevel` (80) is above
-Templar's class-file reference level (60), so both entries carry `"level": 80`, which `passive_scenario` applies
-only to that one generated scenario's player, never the class file's own reference level. A spell using aura 142
-with no matching override entry
-still raises `Closed(OUT_OF_SCOPE[142])` exactly as before.
+`SpellInfo.cpp`); both equip Void Slayer's Tunic 30298 (mail chest, `RequiredLevel` 60) at slot 4. The player
+stays at the class file level: `required_level` is the `RequiredLevel` of the item's `item_template` row (SQL data
+outside the DBC set, so the class file states it and cites where it was read), and `passive_scenario` refuses an
+entry without it, one above the class file level, or one that sets a `level` of its own. The earlier fixture, chest
+1065932 of `apps/coa-gameplay-test/scenarios/templar-blessed-padding.json`, requires level 80 and raised the
+generated player to 80. A spell using aura 142 with no matching override entry still raises
+`Closed(OUT_OF_SCOPE[142])` exactly as before.
 
 ### Conditional tooltips
 

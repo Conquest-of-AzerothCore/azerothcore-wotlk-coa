@@ -917,6 +917,7 @@ struct SpellLogEvent
     uint32 spell = 0;
     uint32 damage = 0;
     uint32 absorb = 0;
+    uint32 resist = 0;
     bool critical = false;
 };
 
@@ -1146,8 +1147,8 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         response.read_skip<uint32>();
         response.read_skip<uint8>();
         uint32 absorb;
-        response >> absorb;
-        response.read_skip<uint32>();
+        uint32 resist;
+        response >> absorb >> resist;
         response.read_skip<uint8>();
         response.read_skip<uint8>();
         uint32 blocked;
@@ -1155,7 +1156,8 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         response >> blocked >> hitInfo;
         event.critical = (hitInfo & SPELL_HIT_TYPE_CRIT) != 0;
         event.blocked = blocked != 0;
-        actor.spellLogs.push_back({event.caster, event.target, event.spell, event.damage, absorb, event.critical});
+        actor.spellLogs.push_back(
+            {event.caster, event.target, event.spell, event.damage, absorb, resist, event.critical});
     }
     else
     {
@@ -4560,6 +4562,13 @@ private:
             Require(school < MAX_SPELL_SCHOOL, "Invalid spell school");
             return player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school);
         }
+        if (metric == "spell_resist_chance")
+        {
+            uint32 school = step.get<uint32>("school");
+            Require(school > SPELL_SCHOOL_NORMAL && school < MAX_SPELL_SCHOOL, "Invalid resistance school");
+            return 100.0 * Unit::GetEffectiveResistChance(player, SpellSchoolMask(1 << school),
+                GetUnit(step.get<std::string>("target")));
+        }
         if (metric == "melee_crit_chance")
             return player->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
         if (metric == "melee_crit_chance_refreshed")
@@ -4693,7 +4702,7 @@ private:
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
         }
-        if (metric == "spell_log_count" || metric == "spell_absorb_total")
+        if (metric == "spell_log_count" || metric == "spell_absorb_total" || metric == "spell_resist_total")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
             ObjectGuid caster = player->GetGUID();
@@ -4707,7 +4716,8 @@ private:
             for (SpellLogEvent const& event : _actors.at(step.get<std::string>("actor")).spellLogs)
                 if (event.caster == caster && event.spell == spell && (!target || event.target == target) &&
                     (!critical || event.critical == *critical))
-                    value += metric == "spell_log_count" ? 1 : event.absorb;
+                    value += metric == "spell_log_count" ? 1 :
+                        (metric == "spell_absorb_total" ? event.absorb : event.resist);
             return double(value);
         }
         if (metric == "owned_creature_damage_total" || metric == "owned_creature_damage_count" ||

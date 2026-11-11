@@ -601,6 +601,21 @@ def item_armor_subclass_override(class_file: dict, spell_ids: set[int], effect: 
                  if entry['spell'] in spell_ids and entry['effect'] == effect), None)
 
 
+def item_armor_subclass_priming(class_file: dict, entry: dict) -> list[dict]:
+    if 'level' in entry:
+        raise ValueError(f'{entry["spell"]} item {entry["item"]}: the player stays at the class file level '
+                         f'{class_file["level"]}, so an item entry cannot set its own level')
+    required = entry.get('required_level')
+    if not isinstance(required, int) or isinstance(required, bool):
+        raise ValueError(f'{entry["spell"]} item {entry["item"]} needs the RequiredLevel of its item_template row '
+                         f'as required_level')
+    if required > class_file['level']:
+        raise ValueError(f'{entry["spell"]} item {entry["item"]} requires level {required}, above the class file '
+                         f'level {class_file["level"]}')
+    return [{'action': 'add_item', 'actor': CASTER, 'item': entry['item']},
+            {'action': 'equip', 'actor': CASTER, 'item': entry['item'], 'slot': entry['slot']}]
+
+
 def item_armor_subclass_plans(spell_id: int, effect: int, entry: dict) -> tuple[MetricPlan, ...]:
     reference = MetricPlan('item_armor_by_subclass', {'subclass': entry['subclass']}, 'add', judged=False)
     reference_label = probe_label(spell_id, effect, reference.metric, [entry['subclass']])
@@ -906,13 +921,9 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
         return steps
 
     priming = []
-    item_level_override = None
     for entry in class_file.get('item_armor_subclass_effects', []):
         if entry['spell'] == rank_id:
-            priming += [{'action': 'add_item', 'actor': CASTER, 'item': entry['item']},
-                       {'action': 'equip', 'actor': CASTER, 'item': entry['item'], 'slot': entry['slot']}]
-            if entry.get('level'):
-                item_level_override = entry['level']
+            priming += item_armor_subclass_priming(class_file, entry)
     if any(probe.metric == PARRY_CHANCE for probe in probes):
         priming = priming + [{'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 1},
                              {'action': 'set_aura', 'actor': CASTER, 'spell': rank_id, 'stacks': 0}]
@@ -921,8 +932,6 @@ def passive_scenario(class_file: dict, spell: ClassSpell) -> tuple[dict | None, 
     learning = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id},
                 measurement(aura_label, CASTER, 'aura', spell=rank_id)]
     caster = player_fixture(class_file)
-    if item_level_override is not None:
-        caster = {**caster, 'level': item_level_override}
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id} passive',
