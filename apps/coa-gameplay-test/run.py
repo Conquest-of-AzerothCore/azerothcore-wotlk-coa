@@ -305,7 +305,7 @@ ACTIONS = {
     'select': ({'actor', 'target'}, {'actor', 'target'}),
     'select_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'radius'}),
     'minion_kill': ({'actor', 'minion', 'target'}, {'actor', 'minion', 'target'}),
-    'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance', 'ai_action'}),
+    'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance', 'ai_action', 'unowned'}),
     'loot_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'loot_creature': ({'actor', 'target'}, {'actor', 'target'}),
     'loot_slot': ({'actor'}, {'actor', 'slot', 'item'}),

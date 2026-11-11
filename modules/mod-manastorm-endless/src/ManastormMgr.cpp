@@ -32,6 +32,7 @@
 #include "ManastormAffixEngine.h"
 #include "ManastormGreedyDemon.h"
 #include "ManastormVoiceOfMillhouse.h"
+#include "ManastormSubstitutedObjectives.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -3157,6 +3158,83 @@ namespace
 
         return !objectiveGuid.IsEmpty() &&
             creature->GetGUID() == objectiveGuid;
+    }
+
+    ManastormSubstitutedObjectives::NativeTemplate const*
+    FindSubstitutedObjectiveTemplate(
+        Creature const* creature,
+        ManastormRun const& run)
+    {
+        ManastormSegment const& segment =
+            run.GetSegment();
+
+        if (!IsObjectiveBoss(
+                creature,
+                run) ||
+            creature->GetEntry() !=
+                segment.ObjectiveCreatureEntry ||
+            !creature->GetCreatureTemplate())
+        {
+            return nullptr;
+        }
+
+        return ManastormSubstitutedObjectives::Find(
+            segment.NativeObjectiveCreatureEntry,
+            segment.ObjectiveCreatureEntry);
+    }
+
+    void ApplySubstitutedObjectiveMana(
+        Creature* creature,
+        double manaRatio)
+    {
+        uint32 const createMana =
+            creature->GetCreateMana();
+
+        if (!createMana ||
+            manaRatio == 1.0)
+        {
+            return;
+        }
+
+        uint32 const oldMaxMana =
+            creature->GetMaxPower(
+                POWER_MANA);
+
+        double const manaPct =
+            oldMaxMana
+            ? double(creature->GetPower(POWER_MANA)) /
+                double(oldMaxMana)
+            : 1.0;
+
+        uint32 const nativeMana =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    createMana,
+                    manaRatio));
+
+        creature->SetCreateMana(
+            nativeMana);
+
+        creature->SetStatFlatModifier(
+            UNIT_MOD_MANA,
+            BASE_VALUE,
+            float(nativeMana));
+
+        creature->UpdateMaxPower(
+            POWER_MANA);
+
+        uint32 const newMaxMana =
+            creature->GetMaxPower(
+                POWER_MANA);
+
+        creature->SetPower(
+            POWER_MANA,
+            std::min<uint32>(
+                newMaxMana,
+                uint32(std::llround(
+                    double(newMaxMana) *
+                    std::clamp(manaPct, 0.0, 1.0)))));
     }
 
     double GetChaoticLinkHealthMultiplier(
@@ -6761,11 +6839,35 @@ void ManastormMgr::ApplyCreatureHealthScaling(
     if (!creature)
         return;
 
-    uint32 const normalizedMaxHealth =
+    uint32 normalizedMaxHealth =
         creature->GetMaxHealth();
 
     if (!normalizedMaxHealth)
         return;
+
+    if (ManastormSubstitutedObjectives::NativeTemplate const* nativeTemplate =
+        FindSubstitutedObjectiveTemplate(
+            creature,
+            run))
+    {
+        CreatureTemplate const* runtimeTemplate =
+            creature->GetCreatureTemplate();
+
+        normalizedMaxHealth =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    normalizedMaxHealth,
+                    ManastormSubstitutedObjectives::Ratio(
+                        nativeTemplate->HealthModifier,
+                        runtimeTemplate->ModHealth)));
+
+        ApplySubstitutedObjectiveMana(
+            creature,
+            ManastormSubstitutedObjectives::Ratio(
+                nativeTemplate->ManaModifier,
+                runtimeTemplate->ModMana));
+    }
 
     double endlessMultiplier =
         double(
@@ -6841,6 +6943,16 @@ void ManastormMgr::ApplyCreatureHealthScaling(
 
     creature->SetHealth(
         finalHealth);
+
+    //
+    // The player damage requirement was sized from the native health. A
+    // creature scaled below half of it could never be credited to a player,
+    // so its corpse got no loot owner.
+    //
+    if (!creature->IsInCombat())
+    {
+        creature->ResetPlayerDamageReq();
+    }
 }
 
 void ManastormMgr::ApplyChaoticLinkBossHealth(
