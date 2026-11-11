@@ -733,7 +733,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 128)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 132)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6164,9 +6164,9 @@ class OffHandHitRatioTests(unittest.TestCase):
 
 
 TYRS_BLESSING = 705285
-CONDEMN = 804906
+CONDEMN_BASE_RANK = 804906
 BARRIER_OF_LIGHT = 805417
-CHAKRA_OF_LIGHT = 803845
+CHAKRA_OF_LIGHT_HEAL = 803845
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -6220,12 +6220,13 @@ class StackCapScenarioTests(unittest.TestCase):
         steps = run.validate(scenario)['steps']
         learned = first_index(steps, action='learn', spell=TYRS_BLESSING)
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
-        self.assertEqual(len([index for index in casts if index < learned]), 5)
-        self.assertEqual(len([index for index in casts if index > learned]), 5)
-        for index in casts:
-            following = steps[index + 1]
-            self.assertEqual(following['action'], 'wait')
-            self.assertGreater(following['ms'], RECORDS.field('Spell', CONDEMN, 'StartRecoveryTime') - 1)
+        phases = ([index for index in casts if index < learned], [index for index in casts if index > learned])
+        self.assertEqual([len(phase) for phase in phases], [5, 5])
+        for phase in phases:
+            for index in phase[:-1]:
+                following = steps[index + 1]
+                self.assertEqual(following['action'], 'wait')
+                self.assertGreater(following['ms'], RECORDS.field('Spell', CONDEMN_BASE_RANK, 'StartRecoveryTime'))
 
     def test_seeded_cap_that_ignores_the_modifier_alerts(self):
         _, (expectation,) = behaviour_scenario(CLASS_FILE, class_entry(TYRS_BLESSING, 'metric_delta'))
@@ -6254,7 +6255,7 @@ class HealingReceivedAuraScenarioTests(unittest.TestCase):
                      if entry['spell'] == BARRIER_OF_LIGHT and entry['kind'] == 'hit_ratio')
         scenario, (expectation,) = behaviour_scenario(CLASS_FILE, entry)
         steps = run.validate(scenario)['steps']
-        heals = [step for step in steps if step['action'] == 'cast' and step['spell'] == CHAKRA_OF_LIGHT]
+        heals = [step for step in steps if step['action'] == 'cast' and step['spell'] == CHAKRA_OF_LIGHT_HEAL]
         barriers = [step for step in steps if step['action'] == 'cast' and step['spell'] == BARRIER_OF_LIGHT]
         self.assertTrue(all(step['actor'] == 'ally' and step['target'] == 'caster' for step in heals))
         self.assertEqual(len(barriers), entry['trials'])
