@@ -292,10 +292,9 @@ class CompareTest(unittest.TestCase):
         self.assertAlmostEqual(verdict.low, fmean(values) - half - 1)
         self.assertAlmostEqual(verdict.high, fmean(values) + half)
 
-    def test_an_offset_of_half_the_roll_spread_is_outside_the_interval_but_tolerated(self):
+    def test_reads_at_the_low_end_of_the_roll_are_outside_the_interval_but_tolerated(self):
         values, needed = rolled_reads_needed()
-        offset = (max(values) - min(values)) / 2
-        reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
+        reads = [math.trunc(min(values)) + 1] * needed
         verdict = self.rolled_verdict(reads)
         self.assertEqual(verdict.status, 'tolerated')
         self.assertIn('tolerated', verdict.explanation)
@@ -305,6 +304,39 @@ class CompareTest(unittest.TestCase):
         offset = fmean(values) * 0.5
         reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
         self.assertEqual(self.rolled_verdict(reads).status, 'alert')
+
+    def narrow_roll_verdict(self, read, fraction):
+        text = '${$803153m1+$803153ppl1+$AP*0.25+$sph*.25}'
+        label = '1001 effect_value e0 #0'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 55
+            return [Displayed(text, 334.0 + fraction + roll, 0, 'flat')]
+
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': 1})
+        return self.value_run([item], [text], [assert_step(label, str(read))],
+                              FakeTooltips(tokens, {(RANK, 0): (53, 3)}))[label]
+
+    def test_a_read_one_below_the_range_that_truncation_reproduces_is_known_engine_rounding(self):
+        verdict = self.narrow_roll_verdict(388, 0.25)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail[ENGINE_ROUNDING], [388.25])
+        self.assertIn('known engine rounding, int32 truncation: 388.25 truncates to 388', verdict.explanation)
+
+    def test_seeded_read_one_below_that_truncation_does_not_reproduce_is_a_deviation(self):
+        verdict = self.narrow_roll_verdict(387, 0.0)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
+
+    def test_seeded_read_one_above_the_range_is_a_deviation(self):
+        verdict = self.narrow_roll_verdict(391, 0.25)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('outside the formula range', verdict.explanation)
+
+    def test_a_read_inside_the_range_names_no_rounding(self):
+        verdict = self.narrow_roll_verdict(389, 0.25)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
 
     def test_one_read_of_a_rolled_effect_inside_its_roll_range_is_measured(self):
         verdict = self.rolled_verdict([248])

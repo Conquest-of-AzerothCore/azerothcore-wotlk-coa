@@ -438,7 +438,12 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   the rolls are equally likely, so the expected mean and sigma are the mean and population sigma of the per-roll
   values, re-read with the measured stats; with n reads (`detail['reads']`) the mean of the reads must lie in
   expected mean ± 2.576 x sigma / sqrt(n), widened by 1 toward zero because `CalcValue` returns `int32(value)`
-  (`SpellInfo.cpp:587`, a truncation). Fewer reads than the count the mean needs at the measured stats
+  (`SpellInfo.cpp:592`, a truncation). Each read must also lie in the range of the per-roll values (ADR 0145, owner
+  ruling of 2026-11-11 on integer truncation): a read at most 1 below it, toward zero, is "known engine rounding,
+  int32 truncation" only when it is the truncation of a per-roll value (`float32`, then toward zero), and
+  `detail['engine_rounding']` lists those formula values (Force of Golganneth 500694: 388.25 read as 388); any other
+  read outside the range, above it, further below, or one below that no value truncates to, is an `alert`. Fewer
+  reads than the count the mean needs at the measured stats
   (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the roll range proves nothing
   about a constant offset smaller than the range: the fix round of the phase-2 Templar run found six such `ok`
   verdicts (Reckoning 572741, 748507, 805421; Vindication 501589, 501590, 501592), whose server value adds a

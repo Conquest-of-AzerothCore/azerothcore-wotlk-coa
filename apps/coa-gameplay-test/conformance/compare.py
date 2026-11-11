@@ -565,12 +565,44 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     half = Z_99 * sigma / math.sqrt(len(reads))
     low = expected - half - (TRUNCATED_READ if expected > 0 else 0)
     high = expected + half + (TRUNCATED_READ if expected < 0 else 0)
+    rounded, outside = truncation_reads(values, reads)
+    if outside:
+        return replace(base, status='alert', measured=mean, expected=expected, low=low, high=high, detail=detail,
+                       explanation=f'{roll}; reads {outside} lie outside the formula range {min(values):g} to '
+                                   f'{max(values):g} and are not its int32 truncation at SpellEffectInfo::CalcValue '
+                                   f'(at most {TRUNCATED_READ:g} toward zero, reproduced from a formula value): '
+                                   f'a deviation')
+    if rounded:
+        detail = {**detail, ENGINE_ROUNDING: sorted(set(rounded.values()))}
     status = banded_status(mean, low, high, expected)
     tolerated_note = '; outside the 99% interval but within 5% of expected: tolerated' if status == 'tolerated' else ''
+    rounding_note = ('; known engine rounding, int32 truncation: ' + ', '.join(
+        f'{value:g} truncates to {read:g}' for read, value in sorted(rounded.items()))
+        + ' at SpellEffectInfo::CalcValue (SpellInfo.cpp:592)') if rounded else ''
     return replace(base, status=status, measured=mean, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'{roll}; 99% interval of the mean, expected mean +- Z x sigma / sqrt(reads) '
                                f'{half:.3f}, widened by {TRUNCATED_READ:g} toward zero for the int32 truncation of '
-                               f'CalcValue{tolerated_note}')
+                               f'CalcValue{rounding_note}{tolerated_note}')
+
+
+def engine_truncation(value: float) -> float:
+    return float(math.trunc(float32(value)))
+
+
+def truncation_reads(values: list[float], reads: list[float]) -> tuple[dict[float, float], list[float]]:
+    low, high = min(values), max(values)
+    truncations = {engine_truncation(value): value for value in values}
+    toward_low = fmean(values) > 0
+    rounded, outside = {}, []
+    for read in reads:
+        if low - FLOAT_EPSILON <= read <= high + FLOAT_EPSILON:
+            continue
+        gap = low - read if toward_low else read - high
+        if gap <= TRUNCATED_READ + FLOAT_EPSILON and read in truncations:
+            rounded[read] = truncations[read]
+        else:
+            outside.append(read)
+    return rounded, outside
 
 
 def token_drift(expectation: Expectation, tokens: Tokens | None) -> str | None:
