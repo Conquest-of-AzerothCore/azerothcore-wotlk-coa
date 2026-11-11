@@ -6066,6 +6066,31 @@ class CostGateScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(beyond), FakeRun({beyond.label: 0.0}), beyond)
         self.assertEqual(verdict.status, 'alert')
 
+    def lengthening_entry(self) -> dict:
+        return {'spell': 712678, 'name': 'Patience', 'kind': 'cost_gate',
+                'quote': 'and its cooldown by $/1000;s2 sec', 'gated_spell': 560116, 'resource': 'cooldown',
+                'reduction': -5000, 'target': 'dummy'}
+
+    def test_a_negative_cooldown_reduction_is_judged_from_both_ends(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, self.lengthening_entry())
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        self.assertEqual([(e.model['arm'], e.displayed, e.model['level']) for e in expectations],
+                         [('without', '0', 120500.0), ('base', '67', 120500.0), ('with', '0', 125500.0),
+                          ('beyond', '67', 124500.0)])
+        learn = first_index(steps, action='learn', spell=712678)
+        self.assertLess(first_index(steps, label='712678 cost_gate 560116 without'), learn)
+        self.assertLess(learn, first_index(steps, label='712678 cost_gate 560116 base'))
+
+    def test_seeded_cooldown_that_is_not_lengthened_alerts_on_the_base_arm(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, self.lengthening_entry())
+        base = next(e for e in expectations if e.model['arm'] == 'base')
+        verdict = judge_behaviour(base_verdict(base), FakeRun({base.label: 0.0}), base)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_lengthening_refused_with_an_increase_inside_two_margins(self):
+        with self.assertRaises(NotModelled):
+            behaviour_scenario(CLASS_FILE, {**self.lengthening_entry(), 'reduction': -900})
+
     def test_a_cooldown_gate_beyond_the_real_clock_cap_runs_accelerated_only(self):
         entry = {'spell': 573452, 'name': 'Eternally Devoted', 'kind': 'cost_gate',
                  'quote': 'Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by',

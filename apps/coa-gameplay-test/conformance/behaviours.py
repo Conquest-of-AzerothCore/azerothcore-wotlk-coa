@@ -2873,15 +2873,30 @@ def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float]:
                               f'only the reduction separates')
         return allowed, beyond
     allowed, beyond = reduced + spec.margin_ms, reduced - spec.margin_ms
+    if lengthens(spec):
+        if not base + spec.margin_ms < beyond:
+            raise NotModelled(f'{spec.gated_spell} cooldown {base:g} ms plus {-spec.reduction:g} ms leaves no wait '
+                              f'that only the increase separates at {spec.margin_ms} ms')
+        return allowed, beyond
     if not GCD_WAIT_MS <= beyond < allowed < base:
         raise NotModelled(f'{spec.gated_spell} cooldown {base:g} ms less {spec.reduction:g} ms leaves no wait that '
                           f'only the reduction separates at {spec.margin_ms} ms')
     return allowed, beyond
 
 
+def lengthens(spec: CostGateSpec) -> bool:
+    return spec.resource == 'cooldown' and spec.reduction < 0
+
+
 def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
     refused = COST_GATE_RESOURCES[spec.resource]
     allowed, beyond = cost_gate_levels(spec, base)
+    if lengthens(spec):
+        if spec.next_arm or spec.aura_duration_ms is not None or spec.after_casts:
+            raise ValueError(f'{spec.spell} lengthens a cooldown, which takes no next, duration or after-cast arms')
+        opened = base + spec.margin_ms
+        return [CostGateArm('without', False, opened, NO_CAST_FAILURE), CostGateArm('base', True, opened, refused),
+                CostGateArm('with', True, allowed, NO_CAST_FAILURE), CostGateArm('beyond', True, beyond, refused)]
     arms = [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
     if spec.next_arm:
         arms.append(CostGateArm('next', True, allowed, refused, setup=False))
@@ -2991,6 +3006,10 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         'contract': f'{spec.gated_spell} is attempted at {base:g} less {spec.reduction:g} {unit}: without '
                     f'{spec.spell} it must be refused, with it it must go through, and one step beyond the stated '
                     f'reduction it must be refused again, proving the "{spec.quote}" clause.'
+                    + (f' The reduction is negative, a longer cooldown: without {spec.spell} the cast goes through '
+                       f'{spec.margin_ms} ms after the base cooldown, with it it is refused there, goes through '
+                       f'{spec.margin_ms} ms after the lengthened cooldown and is refused {spec.margin_ms} ms before '
+                       f'it.' if lengthens(spec) else '')
                     + (f' In the arms with {spec.spell}, {[spell for spell, _ in spec.after_casts]} are cast '
                        f'{spec.after_wait_ms} ms after the priming cast.' if spec.after_casts else ''),
         'players': players,

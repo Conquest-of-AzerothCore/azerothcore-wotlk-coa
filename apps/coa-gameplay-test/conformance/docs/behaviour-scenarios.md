@@ -848,6 +848,12 @@ A cooldown gate may wait up to the accelerated cap (`hits.MAX_ACCELERATED_SCENAR
 scenarios may; a power gate keeps the ten-minute budget. Eternally Devoted 573452 gates Libram of Tenacity 801461's
 180000 ms cooldown and waits 549400 ms, so it runs only on the accelerated clock.
 
+A negative `reduction` on a cooldown gate states a longer cooldown ("and its cooldown by 5 sec", Patience 712678 on
+Interdict 560116). The arms are then `without` (through `margin_ms` after the base cooldown, the control), `base`
+(with the talent, refused at that same wait), `with` (through `margin_ms` after the lengthened cooldown) and `beyond`
+(refused `margin_ms` before it). An increase not above twice `margin_ms` is `NotModelled`; next, duration and
+after-cast arms are refused.
+
 ### Hit-ratio heals and actors
 
 A `hit_ratio` entry may set `metric: "heal"` to read `spell_heal_total` and `spell_heal_count` instead of the damage
