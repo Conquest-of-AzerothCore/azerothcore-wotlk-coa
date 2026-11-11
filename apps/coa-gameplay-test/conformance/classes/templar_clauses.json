@@ -844,9 +844,11 @@
       "520442 e0 spell_modifier 501561",
       "520442 e0 spell_modifier 572027",
       "520442 e0 spell_critical_damage 501561",
-      "520442 e0 spell_critical_damage 572027"
+      "520442 e0 spell_critical_damage 572027",
+      "520442 behaviour_hit_ratio critical"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the spell_critical_damage reads are computed values; the hit ratio compares forced critical hits of Righteous Upheaval 572027 with and without 520442: +9.8% against 2.2 / 2.0"
   },
   {
     "spell": 520534,

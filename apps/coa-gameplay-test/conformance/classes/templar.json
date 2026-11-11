@@ -1708,6 +1708,14 @@
   ],
   "behaviours": [
     {
+      "spell": 520442, "name": "Upheave!", "kind": "hit_ratio", "label_suffix": "critical",
+      "quote": "Increases the critical damage of Righteous Upheaval by", "expected": 1.1,
+      "observe_spell": 572027, "learn": [572027],
+      "control": {}, "treatment": {"auras": [[520442, 1]]},
+      "critical": true, "force_crit": "melee", "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 20 (520442 EffectBasePoints[0] 19, EffectDieSides[0] 1) on Righteous Upheaval 572027 (EffectSpellClassMask[1] 128). A melee-class critical hit deals 200% (the passive check reads spell_critical_damage 2000 to 2200 per 1000, 520442 e0 spell_critical_damage 572027): the bonus above the hit grows from 100% to 120%, so a critical hit grows by 2.2 / 2.0 = 1.1. Melee crits are forced (DmgClass 2) and only critical hits are compared; an attack power fixture of 20000 makes the AP part dominate the 224-point die."
+    },
+    {
       "spell": 804932, "variant": "three_stacks", "label_suffix": "three_stacks",
       "name": "Unbroken Creed", "kind": "metric_delta",
       "quote": "auto attack your target an amount of times equal to your stack count", "expected": 3,
