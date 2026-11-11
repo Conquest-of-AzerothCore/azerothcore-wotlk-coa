@@ -390,7 +390,7 @@ class CompareTest(unittest.TestCase):
         self.assertIn('the tooltip adds 0 per level where stock CalcValue adds 7.8', verdict.explanation)
 
     def test_a_loss_that_leaves_the_integer_set_unchanged_names_no_per_level_rounding(self):
-        verdict = self.per_level_verdict([362, 363, 364, 365, 366, 367, 368] * 3, rate=1.0025, tooltip_per_level=8.02)
+        verdict = self.per_level_verdict([362, 363, 364, 365, 366, 367] * 3, rate=1.0025, tooltip_per_level=8.02)
         self.assertEqual(verdict.status, 'ok')
         self.assertNotIn(PER_LEVEL_ROUNDING, verdict.detail)
 
