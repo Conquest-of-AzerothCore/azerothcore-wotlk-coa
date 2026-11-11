@@ -2400,8 +2400,7 @@
     "spell": 705303,
     "clause": "Increases your parry rating by $s1% of Agility",
     "labels": [
-      "conformance-templar-value-705303 (effect_value e0)",
-      "705303 e0 combat_rating 3 ok (26 vs 26.4 expected)"
+      "705303 e0 combat_rating 3"
     ],
     "kind": "claim"
   },
