@@ -1304,8 +1304,12 @@ namespace
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
             me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
             ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_IDLE); });
-            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f, false))
+            {
+                if (!rogg->IsAlive())
+                    rogg->Respawn(true);
                 rogg->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
+            }
             Dormant(me, true);
         }
 
@@ -1329,20 +1333,20 @@ namespace
             {
                 summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
                 summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
-            }, 400ms);
+            }, 1500ms);
             ObjectGuid bossGuid = me->GetGUID();
             summon->m_Events.AddEventAtOffset([summon, bossGuid]()
             {
                 if (Creature* boss = ObjectAccessor::GetCreature(*summon, bossGuid))
                     summon->CastSpell(boss, SPELL_SOUL_FLAY_BEAM, true);
-            }, 1800ms);
+            }, 3s);
             summon->m_Events.AddEventAtOffset([summon]()
             {
                 summon->InterruptNonMeleeSpells(false);
                 summon->SetReactState(REACT_AGGRESSIVE);
                 if (Player* target = summon->SelectNearestPlayer(150.0f))
                     summon->AI()->AttackStart(target);
-            }, 3s);
+            }, 4s);
         }
 
         void JustDied(Unit* /*killer*/) override
