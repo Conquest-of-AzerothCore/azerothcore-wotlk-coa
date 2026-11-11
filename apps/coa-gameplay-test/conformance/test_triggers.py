@@ -1640,6 +1640,8 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
                     expected = 0.5
                 elif entry['per_trigger_text'].startswith('10 times'):
                     expected = 0.1
+                elif entry['aura'] == DISCIPLINED_MIND_681483:
+                    expected = 2
                 else:
                     expected = 1
                 self.assertEqual(entry['per_trigger'], expected)
@@ -2013,11 +2015,19 @@ class TemplarTriggerEntriesTest(unittest.TestCase):
         self.assertNotIn({'action': 'learn', 'actor': 'caster', 'spell': RIGHTEOUSNESS}, scenario['steps'])
         self.assertNotIn('also learns', expectations[0].rule)
 
+    def test_a_trigger_may_cast_a_whole_number_of_events_but_not_a_fraction_above_one(self):
+        entry = copy.deepcopy(templar_trigger(DISCIPLINED_MIND_681483))
+        self.assertEqual(trigger_scenario(CLASS_FILE, entry)[1][0].model['per_trigger'], 2)
+        entry['per_trigger'] = 1.5
+        with self.assertRaisesRegex(ValueError, 'events per trigger'):
+            trigger_scenario(CLASS_FILE, entry)
+
     def test_disciplined_mind_681483_entry_casts_at_an_ally(self):
         entry = templar_trigger(DISCIPLINED_MIND_681483)
         self.assertEqual(entry['trigger'], {'action': 'cast', 'spell': BENEDICTION_RANK_60, 'target': 'ally'})
         self.assertEqual(entry['observe_spell'], DISPEL_FOR_BENEDICTION)
         self.assertEqual(entry['observe_metric'], 'spell_cast_count')
+        self.assertEqual((entry['per_trigger'], templar_trigger(680399)['per_trigger']), (2, 1))
         scenario, [expectation] = trigger_scenario(CLASS_FILE, entry)
         steps = scenario['steps']
         self.assertIn({'action': 'group', 'actor': 'caster', 'target': ALLY}, steps)

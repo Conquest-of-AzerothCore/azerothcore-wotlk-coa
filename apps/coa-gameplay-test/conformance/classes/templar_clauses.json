@@ -1676,12 +1676,16 @@
           "681483 behaviour_dispel_count rank_2 disease",
           "681483 behaviour_dispel_count rank_2 poison",
           "681483 behaviour_dispel_count control disease",
-          "681483 behaviour_dispel_count control poison"
+          "681483 behaviour_dispel_count control poison",
+          "681483 behaviour_dispel_count uneven rank_2 disease",
+          "681483 behaviour_dispel_count uneven rank_2 poison",
+          "681483 behaviour_dispel_count uneven control disease",
+          "681483 behaviour_dispel_count uneven control poison"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "confirmed defect by the owner ruling 'Disciplined Mind' (2026-11-11, method-study/owner-rulings-2026-11-10.md): rank 2 must dispel 2 poison and 2 disease effects per Benediction. Measured (ADR 0158, runs 20261111-213735 and -213819): rank 2 removes 1 disease and 1 poison of 2 each per cast, as rank 1 does (1 and 1, ok). Fix pending a fix note to the mentor"
+    "reason": "fixed (ADR 0159) after the owner ruling 'Disciplined Mind' (2026-11-11, method-study/owner-rulings-2026-11-10.md): rank 2 dispels 2 poison and 2 disease effects per Benediction. Before the fix rank 2 removed 1 + 1 (runs 20261111-213735, -213819). After it, on two runs (20261111-214755, -214852): 2 + 2 of 2 each, 1 disease and 2 poisons of 1 and 3, 525052 cast twice per Benediction; rank 1 stays 1 + 1"
   },
   {
     "spell": 681537,

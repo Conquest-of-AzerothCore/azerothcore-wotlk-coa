@@ -1193,9 +1193,9 @@
       "trial_metric": "spell_cast_count",
       "observe_spell": 525052,
       "observe_source": "EffectTriggerSpell[1] of 681483",
-      "observe_note": "the DBC also repeats EffectTriggerSpell 525052 on effect 2; AscensionTemplarAbilities.cpp:213-218 is a scripted OnSpellCast hook that casts it once per qualifying Benediction cast, not twice, so the entry observes one event per trigger, matching the live mechanism rather than the DBC's two decorative slots",
+      "observe_note": "the DBC repeats EffectTriggerSpell 525052 on effects 1 and 2; since ADR 0159 the scripted Benediction hook (AscensionTemplarAbilities.cpp, DispelCasts) casts 525052 once per such effect of the held rank, so rank 2 casts it twice per Benediction (owner ruling 'Disciplined Mind', 2026-11-11)",
       "observe_metric": "spell_cast_count",
-      "per_trigger": 1,
+      "per_trigger": 2,
       "per_trigger_text": "causes it to dispel"
     },
     {
@@ -3830,6 +3830,14 @@
       "arms": [{"name": "control", "expected": [[3, 0], [4, 0]]},
                {"name": "rank_2", "auras": [[681483, 1]], "expected": [[3, 2], [4, 2]]}],
       "expected_source": "The owner ruling 'Disciplined Mind' (2026-11-11): rank 2 dispels 2 poison and 2 disease effects per Benediction; 681483 repeats EffectTriggerSpell 525052 on effects 1 and 2 in the DBC. Disciplined Mind ranks cast 525052 from Benediction's OnSpellCast hook (AscensionTemplarAbilities.cpp:231-235); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
+    },
+    {
+      "spell": 681483, "name": "Disciplined Mind", "kind": "dispel_count", "variant": "uneven", "label_suffix": "uneven",
+      "quote": "causes it to dispel 2 poison and disease effects", "cast_spell": 578276,
+      "debuffs": [[3, [55095]], [4, [2818, 25810, 3409]]],
+      "arms": [{"name": "control", "expected": [[3, 0], [4, 0]]},
+               {"name": "rank_2", "auras": [[681483, 1]], "expected": [[3, 1], [4, 2]]}],
+      "expected_source": "Mentor condition (2026-11-11): under rank 2 an ally with 3 poisons and 1 disease loses 2 poisons and 1 disease, with no error. Each 525052 cast removes at most 1 disease and 1 poison; the second cast finds no disease left. Fixtures: Frost Fever 55095 (Dispel 3); Deadly Poison 2818, Mind-numbing Poison 25810 and Crippling Poison 3409 (Dispel 4)."
     },
     {
       "spell": 680399,

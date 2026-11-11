@@ -735,7 +735,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 218)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 219)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6717,9 +6717,10 @@ class ThreatRedirectScenarioTests(unittest.TestCase):
                          'alert')
 
 
-def dispel_count_entry(spell: int) -> dict:
+def dispel_count_entry(spell: int, suffix: str = '') -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
-                if entry['spell'] == spell and entry['kind'] == 'dispel_count')
+                if entry['spell'] == spell and entry['kind'] == 'dispel_count'
+                and entry.get('label_suffix', '') == suffix)
 
 
 class DispelCountScenarioTests(unittest.TestCase):
@@ -6752,6 +6753,15 @@ class DispelCountScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(2)), expectation).status, 'ok')
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values(1)), expectation)
         self.assertEqual((verdict.status, verdict.measured), ('alert', 1.0))
+
+    def test_rank_two_on_one_disease_and_three_poisons_expects_one_and_two(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, dispel_count_entry(681483, 'uneven'))
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertTrue(scenario['name'].endswith(' uneven'))
+        self.assertEqual([(expectation.label, expectation.model['expected']) for expectation in expectations
+                          if expectation.model['arm'] == 'rank_2'],
+                         [('681483 behaviour_dispel_count uneven rank_2 disease', 1),
+                          ('681483 behaviour_dispel_count uneven rank_2 poison', 2)])
 
     def test_a_debuff_missing_before_the_cast_is_not_counted(self):
         _, expectations = behaviour_scenario(CLASS_FILE, dispel_count_entry(680399))
