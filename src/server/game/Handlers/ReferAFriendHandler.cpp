@@ -53,27 +53,6 @@ namespace
     constexpr time_t UnlinkedRecoveryInterval = 15 * 60;
     constexpr uint32 RewardSpread = 17;
 
-    bool CanLinkRecruitmentAddresses(WorldSession& inviter, WorldSession& recipient)
-    {
-        auto parse = [](WorldSession& session) -> std::optional<boost::asio::ip::address_v6::bytes_type>
-        {
-            boost::system::error_code error;
-            auto const address = Acore::Net::make_address(session.GetRemoteAddress(), error);
-            if (error || address.is_unspecified())
-                return std::nullopt;
-            auto const normalized = address.is_v4()
-                ? boost::asio::ip::make_address_v6(boost::asio::ip::v4_mapped, address.to_v4())
-                : address.to_v6();
-            if (normalized.is_v4_mapped() &&
-                boost::asio::ip::make_address_v4(boost::asio::ip::v4_mapped, normalized).is_unspecified())
-                return std::nullopt;
-            return normalized.to_bytes();
-        };
-        auto const inviterAddress = parse(inviter);
-        auto const recipientAddress = parse(recipient);
-        return inviterAddress && recipientAddress && *inviterAddress != *recipientAddress;
-    }
-
     uint8 GrantLevelError(Player* donor, Player* target)
     {
         if (!target || target == donor)
@@ -201,6 +180,65 @@ void WorldSession::RefreshRecruitAFriendFlags()
     _player->GetSocial()->SendSocialList(_player, SOCIAL_FLAG_FRIEND);
 }
 
+namespace
+{
+    std::optional<std::string> RecruitmentAddress(WorldSession& session)
+    {
+        boost::system::error_code error;
+        auto const address = Acore::Net::make_address(session.GetRemoteAddress(), error);
+        if (error || address.is_unspecified())
+            return std::nullopt;
+        auto const normalized = address.is_v4()
+            ? boost::asio::ip::make_address_v6(boost::asio::ip::v4_mapped, address.to_v4())
+            : address.to_v6();
+        if (normalized.is_v4_mapped() &&
+            boost::asio::ip::make_address_v4(boost::asio::ip::v4_mapped, normalized).is_unspecified())
+            return std::nullopt;
+        return normalized.to_string();
+    }
+
+    struct RecruitmentAddresses
+    {
+        bool valid = false;
+        std::optional<std::string> shared;
+    };
+
+    RecruitmentAddresses LinkRecruitmentAddresses(WorldSession& inviter, WorldSession& recipient)
+    {
+        auto const inviterAddress = RecruitmentAddress(inviter);
+        auto const recipientAddress = RecruitmentAddress(recipient);
+        if (!inviterAddress || !recipientAddress)
+            return {};
+        if (*inviterAddress == *recipientAddress)
+            return { true, inviterAddress };
+        return { true, std::nullopt };
+    }
+
+    uint32 SharedAddressLinkLimit()
+    {
+        return sWorld->getIntConfig(CONFIG_RECRUIT_A_FRIEND_SHARED_ADDRESS_LINKS);
+    }
+
+    bool SharedAddressHasFreeLink(std::string const& address)
+    {
+        auto* links = LoginDatabase.GetPreparedStatement(LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS);
+        links->SetData(0, address);
+        PreparedQueryResult const result = LoginDatabase.Query(links);
+        return result && result->Fetch()[0].Get<uint64>() < SharedAddressLinkLimit();
+    }
+
+    void SetSharedAddress(LoginDatabasePreparedStatement* stmt, uint8 index, std::optional<std::string> const& address)
+    {
+        if (address)
+            stmt->SetData(index, *address);
+        else
+            stmt->SetData(index, nullptr);
+    }
+
+    constexpr char const* InvalidAddressRefusal = "Recruit-A-Friend requires two valid IP addresses.";
+    constexpr char const* SharedAddressRefusal = "Recruit-A-Friend requires two different IP addresses.";
+}
+
 bool WorldSession::InviteRecruitAFriend(Player* target)
 {
     ChatHandler chat(this);
@@ -218,8 +256,11 @@ bool WorldSession::InviteRecruitAFriend(Player* target)
         return reject("You cannot recruit yourself or another character on your own account.");
 
     WorldSession* recipient = target->GetSession();
-    if (!CanLinkRecruitmentAddresses(*this, *recipient))
-        return reject("Recruit-A-Friend requires two different, valid IP addresses.");
+    RecruitmentAddresses const addresses = LinkRecruitmentAddresses(*this, *recipient);
+    if (!addresses.valid)
+        return reject(InvalidAddressRefusal);
+    if (addresses.shared && !SharedAddressLinkLimit())
+        return reject(SharedAddressRefusal);
     if (recipient->recruiterId == GetAccountId())
         return reject("That account is already recruited by you. The link is permanent; use .raf status to view your recruits.");
     if (recipient->recruiterId)
@@ -245,6 +286,12 @@ bool WorldSession::InviteRecruitAFriend(Player* target)
         return false;
     }
     _rafInviteCooldown = now + 10;
+    if (addresses.shared && !SharedAddressHasFreeLink(*addresses.shared))
+    {
+        chat.PSendSysMessage("Only {} Recruit-A-Friend links may join accounts that share an IP address, "
+            "and this IP address has reached that limit.", SharedAddressLinkLimit());
+        return false;
+    }
     recipient->_rafInviter = _player->GetGUID();
     recipient->_rafInviteExpiry = now + ProposalLifetime;
     target->PlayerTalkClass->ClearMenus();
@@ -284,9 +331,10 @@ bool WorldSession::HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 acti
         _player->IsInCombat() || inviter->IsInCombat())
         return true;
 
-    if (!CanLinkRecruitmentAddresses(*inviter->GetSession(), *this))
+    RecruitmentAddresses const addresses = LinkRecruitmentAddresses(*inviter->GetSession(), *this);
+    if (!addresses.valid || (addresses.shared && !SharedAddressLinkLimit()))
     {
-        ChatHandler(this).SendSysMessage("Recruit-A-Friend requires two different, valid IP addresses.");
+        ChatHandler(this).SendSysMessage(addresses.valid ? SharedAddressRefusal : InvalidAddressRefusal);
         return true;
     }
 
@@ -294,16 +342,23 @@ bool WorldSession::HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 acti
     auto* stmt = LoginDatabase.GetPreparedStatement(LOGIN_UPD_RAF_RECRUITER);
     stmt->SetData(0, inviterAccount);
     stmt->SetData(1, GetAccountId());
-    stmt->SetData(2, inviterAccount);
-    stmt->SetData(3, GetAccountId());
+    SetSharedAddress(stmt, 2, addresses.shared);
+    stmt->SetData(3, inviterAccount);
+    stmt->SetData(4, GetAccountId());
+    SetSharedAddress(stmt, 5, addresses.shared);
+    stmt->SetData(6, SharedAddressLinkLimit());
     LoginDatabaseTransaction trans = LoginDatabase.BeginTransaction();
     trans->Append(LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_LINK_LOCK));
     trans->Append(LoginDatabase.GetPreparedStatement(LOGIN_UPD_RAF_LINK_LOCK));
     trans->Append(stmt);
-    auto* registration = LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_ACCOUNT);
-    registration->SetData(0, GetAccountId());
+    auto* registration = LoginDatabase.GetPreparedStatement(LOGIN_INS_RAF_LINKED_ACCOUNT);
+    SetSharedAddress(registration, 0, addresses.shared);
+    registration->SetData(1, GetAccountId());
+    registration->SetData(2, inviterAccount);
     trans->Append(registration);
-    AddTransactionCallback(LoginDatabase.AsyncCommitTransaction(trans)).AfterComplete([this, inviterAccount](bool success)
+    bool const sharesAddress = addresses.shared.has_value();
+    AddTransactionCallback(LoginDatabase.AsyncCommitTransaction(trans)).AfterComplete(
+        [this, inviterAccount, sharesAddress](bool success)
     {
         if (!success)
         {
@@ -315,13 +370,18 @@ bool WorldSession::HandleRecruitAFriendInviteResponse(uint32 menuId, uint32 acti
         auto* status = LoginDatabase.GetPreparedStatement(LOGIN_SEL_RAF_STATUS);
         status->SetData(0, GetAccountId());
         GetQueryProcessor().AddCallback(LoginDatabase.AsyncQuery(status).WithPreparedCallback(
-            [this, inviterAccount](PreparedQueryResult result)
+            [this, inviterAccount, sharesAddress](PreparedQueryResult result)
             {
                 if (!result || result->Fetch()[0].Get<uint32>() != inviterAccount)
                 {
-                    ChatHandler(this).SendSysMessage("Recruitment was not accepted because an account is already linked or would create a recruitment cycle.");
+                    char const* refusal = sharesAddress
+                        ? "Recruitment was not accepted because an account is already linked, it would create a "
+                          "recruitment cycle, or your shared IP address has reached its Recruit-A-Friend link limit."
+                        : "Recruitment was not accepted because an account is already linked or would create a "
+                          "recruitment cycle.";
+                    ChatHandler(this).SendSysMessage(refusal);
                     if (WorldSession* recruiter = sWorldSessionMgr->FindSession(inviterAccount))
-                        ChatHandler(recruiter).SendSysMessage("Recruitment was not accepted because an account is already linked or would create a recruitment cycle.");
+                        ChatHandler(recruiter).SendSysMessage(refusal);
                     return;
                 }
                 recruiterId = inviterAccount;

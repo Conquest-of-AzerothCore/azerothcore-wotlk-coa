@@ -344,6 +344,9 @@ void WorldConfig::BuildConfigCache()
         LOG_INFO("server.loading", "RecruitAFriend.MaxDifference: upgrading legacy value 4 to 30.");
         OverwriteConfigValue<uint32>(CONFIG_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL_DIFFERENCE, 30);
     }
+
+    SetConfigValue<uint32>(CONFIG_RECRUIT_A_FRIEND_SHARED_ADDRESS_LINKS, "RecruitAFriend.SharedAddressLinks", 2);
+
     SetConfigValue<bool>(CONFIG_ALL_TAXI_PATHS, "AllFlightPaths", false);
     SetConfigValue<uint32>(CONFIG_INSTANT_TAXI, "InstantFlightPaths", 0);
 

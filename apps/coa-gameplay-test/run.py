@@ -6,6 +6,7 @@ import configparser
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 import json
 import math
 import os
@@ -362,6 +363,14 @@ def keys(value, required, allowed, where):
     require(value.keys() <= allowed, f'{where}: unknown fields {sorted(value.keys() - allowed)}')
 
 
+def valid_address(text):
+    try:
+        ipaddress.ip_address(text)
+    except ValueError:
+        return False
+    return True
+
+
 def number(value, where, minimum=None, maximum=None, integer=False):
     require(type(value) in (int, float) and math.isfinite(value), f'{where}: expected a finite number')
     require(not integer or type(value) is int, f'{where}: expected an integer')
@@ -526,7 +535,7 @@ def validate(scenario):
              {'id', 'race', 'class', 'gender', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'attack_power', 'ranged_attack_power', 'spell_power',
-              'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
+              'allow_regeneration', 'name', 'expansion', 'ascension_client', 'address', 'account_of',
               'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist', 'security'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
@@ -546,6 +555,9 @@ def validate(scenario):
         number(player.get('expansion', 2), 'expansion', 0, 2, True)
         require(type(player.get('bot', False)) is bool, 'bot must be boolean')
         require(type(player.get('ascension_client', False)) is bool, 'ascension_client must be boolean')
+        if 'address' in player:
+            require(isinstance(player['address'], str) and valid_address(player['address']),
+                    'address must be an IPv4 or IPv6 address')
         number(player.get('spell_hit_rating', 0), 'spell_hit_rating', 0, 100000, True)
         number(player.get('spell_crit_rating', 0), 'spell_crit_rating', 0, 100000, True)
         number(player.get('melee_crit_rating', 0), 'melee_crit_rating', 0, 100000, True)
