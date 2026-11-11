@@ -92,11 +92,11 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9780932, 978090, 0, 0, 0, 1, 1, 3322.411, -4846.606, 172.1479, 5.1839, 300, 0, 0),
 (9780938, 978090, 890, 10281, 10281, 15, 1, 3313, -4844.6, 173.2892, 0, 300, 0, 0);
 
--- In his map Atal'zul stands at the centre of his room, Zul'rogg starts on top of the pyramid and jumps down when the
--- Soul Vessels wake him. Each Soul Vessel is a crystal (the creature) on an altar (978093); breaking it hides the
--- crystal and leaves the altar.
-UPDATE `creature` SET `position_x` = 3386.9883, `position_y` = -4926.9863, `position_z` = 160.7894,
-  `orientation` = 2.3036 WHERE `guid` = 9780104 AND `id` = 67532;
+-- In his map Atal'zul stands where the diagonals between the four altars cross, Zul'rogg starts on top of the pyramid and jumps down when the
+-- Soul Vessels wake him. Each Soul Vessel is a crystal (the creature) on an altar (978093, a goober players use to
+-- click the vessel); breaking it hides the crystal and leaves the altar.
+UPDATE `creature` SET `position_x` = 3363.6626, `position_y` = -4904.645, `position_z` = 159.2667,
+  `orientation` = 1.9564 WHERE `guid` = 9780104 AND `id` = 67532;
 UPDATE `creature` SET `position_x` = 3439.5637, `position_y` = -4982.276, `position_z` = 195.7287,
   `orientation` = 2.3572 WHERE `guid` = 9780105 AND `id` = 67533;
 UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 160.5792
@@ -110,7 +110,7 @@ WHERE `guid` = 9780109;
 
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(978093, 5, 7355, 'Altar of the Soul Vessel', '', '', '', 1, '', '', 12340)
+(978093, 10, 7355, 'Altar of the Soul Vessel', '', '', '', 1, '', 'go_atalzul_vessel_coa', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `gameobject` WHERE `guid` BETWEEN 9780941 AND 9780944;
@@ -132,9 +132,10 @@ UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `Creature
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411 WHERE `CreatureID` = 67533;
 
 -- The Damned Wights are skeletal warriors (display 200, as Skeletal Warrior 48) and the Soul Vessel crystal is the
--- Scourge Crystal (16135).
+-- floating purple crystal (47751); his holograms are half as big again.
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 200, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 16135, `DisplayScale` = 1.5 WHERE `CreatureID` = 67536;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
+UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
 
 -- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 holds;
 -- 978059 keeps its loot for the chests players still hold.
@@ -145,3 +146,13 @@ INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Quest
 (1615011, 978060, 978060, 5, 0, 1, 0, 1, 1, 'Treasures of Azeroth - 5% a world boss item'),
 (1615011, 400750, 0, 100, 0, 1, 0, 15, 15, 'Treasures of Azeroth - 15 Raider''s Commendations'),
 (1615011, 978061, 978061, 100, 0, 1, 0, 4, 4, 'Treasures of Azeroth - 1000 Runes of Descension (250 x 4)');
+
+-- A player still in his map when it closes (a server restart or a reset, dead or alive) logs back in at its
+-- entrance instead of at their hearthstone: the map's entrance trigger, at a spot no one can reach, points there.
+DELETE FROM `areatrigger` WHERE `entry` IN (978890);
+INSERT INTO `areatrigger` (`entry`, `map`, `x`, `y`, `z`, `radius`, `length`, `width`, `height`, `orientation`) VALUES
+(978890, 890, 0, 0, -10000, 0, 0, 0, 0, 0);
+DELETE FROM `areatrigger_teleport` WHERE `ID` IN (978890);
+INSERT INTO `areatrigger_teleport` (`ID`, `Name`, `target_map`, `target_position_x`, `target_position_y`,
+  `target_position_z`, `target_orientation`) VALUES
+(978890, 'Atal''zul - boss map entrance', 890, 3307.54, -4849.5786, 167.9613, 3.297);

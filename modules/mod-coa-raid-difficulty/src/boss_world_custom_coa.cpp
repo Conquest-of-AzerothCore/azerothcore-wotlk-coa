@@ -1019,7 +1019,7 @@ namespace
         SPELL_VEIL_POWER        = 2119857,
         SPELL_GHOST             = 22650,
         SPELL_BLUE_BEAM         = 30945,
-        SPELL_BLUE_SHIELD       = 31635,
+        SPELL_BLUE_SHIELD       = 34648,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
@@ -1032,7 +1032,6 @@ namespace
 
     enum VesselState { VESSEL_IDLE, VESSEL_LINKED, VESSEL_SHIELDED, VESSEL_OPEN, VESSEL_BROKEN };
 
-    constexpr uint32 FACTION_FRIENDLY = 35;
     constexpr uint32 ACTION_VESSEL_BROKEN = 1;
     constexpr uint32 ACTION_VESSEL_LINKED = 2;
     constexpr uint32 ACTION_AWAKEN = 3;
@@ -1045,7 +1044,7 @@ namespace
             creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             creature->SetReactState(REACT_PASSIVE);
             if (!creature->HasAura(SPELL_GHOST))
-                creature->CastSpell(creature, SPELL_GHOST, true);
+                creature->AddAura(SPELL_GHOST, creature);
         }
         else
         {
@@ -1113,16 +1112,11 @@ namespace
             me->InterruptNonMeleeSpells(false);
             me->RemoveAurasDueToSpell(SPELL_BLUE_SHIELD);
             me->SetVisible(state != VESSEL_BROKEN);
-            me->SetFaction(state == VESSEL_IDLE ? FACTION_FRIENDLY : me->GetCreatureTemplate()->faction);
-            if (state == VESSEL_IDLE)
-                me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
-            else
-                me->RemoveNpcFlag(UNIT_NPC_FLAG_GOSSIP);
             if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
-            if (state == VESSEL_IDLE || state == VESSEL_OPEN)
+            if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
@@ -1180,17 +1174,16 @@ namespace
         Milliseconds _spawn = 3s;
     };
 
-    class npc_soul_vessel_script : public CreatureScript
+    class go_soul_vessel_altar : public GameObjectScript
     {
     public:
-        npc_soul_vessel_script() : CreatureScript("npc_soul_vessel_coa") { }
-        CreatureAI* GetAI(Creature* creature) const override { return new npc_soul_vessel_coa(creature); }
+        go_soul_vessel_altar() : GameObjectScript("go_atalzul_vessel_coa") { }
 
-        bool OnGossipHello(Player* player, Creature* creature) override
+        bool OnGossipHello(Player* /*player*/, GameObject* go) override
         {
-            if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(creature->AI()))
-                ai->Click();
-            CloseGossipMenuFor(player);
+            if (Creature* vessel = go->FindNearestCreature(NPC_SOUL_VESSEL, 5.0f))
+                if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(vessel->AI()))
+                    ai->Click();
             return true;
         }
     };
@@ -1378,6 +1371,7 @@ namespace
                 custom_world_boss_coa::UpdateAI(diff);
                 return;
             }
+            Dormant(me, true);
             _beam -= Milliseconds(diff);
             if (_beam > 0ms || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
@@ -1410,13 +1404,23 @@ namespace
             if (me->GetExactDist(&home) > 2.0f)
                 me->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(),
                     home.GetOrientation());
+            _dormant = true;
             Dormant(me, true);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_dormant)
+                Dormant(me, true);
+            else
+                custom_world_boss_coa::UpdateAI(diff);
         }
 
         void DoAction(int32 action) override
         {
             if (action != ACTION_AWAKEN)
                 return;
+            _dormant = false;
             Dormant(me, false);
             me->InterruptNonMeleeSpells(false);
             if (me->GetExactDist(&ZuroggLanding) > 2.0f)
@@ -1479,6 +1483,9 @@ namespace
                     if (atal->IsAlive())
                         damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
         }
+
+    private:
+        bool _dormant = true;
     };
 
     // ------------------------------------------------------------ Trut-K'hahn
@@ -1697,7 +1704,8 @@ void AddCoaCustomWorldBossScripts()
     void AddCoaAtalzulInstanceScripts();
     AddCoaAtalzulInstanceScripts();
     new custom_script<boss_zulrogg_coa>("boss_zulrogg_coa");
-    new npc_soul_vessel_script();
+    new custom_script<npc_soul_vessel_coa>("npc_soul_vessel_coa");
+    new go_soul_vessel_altar();
     new custom_script<npc_restless_spirit_coa>("npc_restless_spirit_coa");
     new custom_script<npc_custom_add_coa>("npc_custom_add_coa");
     new custom_script<boss_trut_khahn_coa>("boss_trut_khahn_coa");
