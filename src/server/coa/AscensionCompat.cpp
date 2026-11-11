@@ -4560,6 +4560,7 @@ private:
   };
 
   static constexpr uint32 SPELL_ATTRIBUTES_FIELD = 4;
+  static constexpr uint32 X53_TOURING_ROCKET_SUMMON = 75973;
   static constexpr std::size_t SWAP_ENTRY_ID_POOL = 4096;
   static constexpr uint8 CLIENT_AUTOPLACE_MAX_LEVEL = 10;
   static constexpr std::size_t SPELL_WIRE_RANK = 2;
@@ -5665,6 +5666,8 @@ private:
       row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
       row.Values[SPELL_ATTRIBUTES_FIELD + 5] = info->AttributesEx5;
     }
+    if (info->Id == X53_TOURING_ROCKET_SUMMON)
+      row.Values[SPELL_ATTRIBUTES_FIELD + 4] = info->AttributesEx4;
     if (info->Id == 805027 ||
         (info->Id >= 807938 && info->Id <= 807941))
     {
@@ -5760,7 +5763,7 @@ private:
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     Ascension::ClientSpellPatches::Instance().Register(TinkerReplenishmentFieldAura);
     for (uint32 const spellId : {801292u, 501836u, 501837u, 501838u, 501839u, 501840u, 574346u, 567543u, 567544u,
-        805027u, 807938u, 807939u, 807940u, 807941u})
+        805027u, 807938u, 807939u, 807940u, 807941u, X53_TOURING_ROCKET_SUMMON})
       Ascension::ClientSpellPatches::Instance().Register(spellId);
     Ascension::ClientSpellPatches::Instance().Register(VAULT_CLIENT_SPELL);
     std::unordered_set<uint32> requested = Ascension::ClientSpellPatches::Instance().GetIds(true);
