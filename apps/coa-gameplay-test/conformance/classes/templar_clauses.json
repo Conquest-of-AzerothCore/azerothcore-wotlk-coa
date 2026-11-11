@@ -687,17 +687,23 @@
     "spell": 572027,
     "clause": "increased by $807764s1% for each time you triggered Zealotry during your Oath Chain.",
     "labels": [
-      "572027 effect_value 807764e0"
+      "572027 effect_value 807764e0",
+      "572027 behaviour_hit_ratio zealotry_stacks",
+      "572027 behaviour_metric_delta oath_chain",
+      "572027 behaviour_metric_delta no_oath_chain"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "five 807764 stacks raise Righteous Upheaval hits by 50% (10% each); each Zealotry during Oath Chain adds a stack (3 casts, 3 stacks) and none outside it"
   },
   {
     "spell": 572027,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
     "labels": [
-      "572027 behaviour_oath_consumption"
+      "572027 behaviour_oath_consumption",
+      "572027 behaviour_hit_ratio oath"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "572027 behaviour_oath_consumption reads a computed spell_damage_done with no hit (a readback under the internal damage read rule); the hit ratio of Righteous Upheaval with one Oath: Righteous Lunge 804904 against none reads 1.365"
   },
   {
     "spell": 504107,

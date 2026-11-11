@@ -1723,6 +1723,42 @@
   ],
   "behaviours": [
     {
+      "spell": 572027, "name": "Righteous Upheaval", "kind": "hit_ratio", "variant": "zealotry_stacks", "label_suffix": "zealotry_stacks",
+      "quote": "for each time you triggered Zealotry during your Oath Chain", "expected": 1.5,
+      "observe_spell": 572027, "learn": [572027],
+      "control": {}, "treatment": {"auras": [[807764, 5]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$807764s1 = 10 (807764 EffectBasePoints[0] 9, EffectDieSides[0] 1): Effect[0] aura 108 SPELLMOD_DAMAGE per stack on Righteous Upheaval (StackAmount 30); five stacks give +50%, so the hit grows by 1.5 (the Holy Upheaval entries read 4.0 at 30 stacks without the talent). An attack power fixture of 20000 makes the AP part dominate the 224-point die. Only non-critical hits are compared."
+    },
+    {
+      "spell": 572027, "variant": "oath_chain", "label_suffix": "oath_chain",
+      "name": "Righteous Upheaval", "kind": "metric_delta",
+      "quote": "for each time you triggered Zealotry during your Oath Chain", "expected": 3,
+      "trigger_spell": 801450, "target": "dummy", "setup_casts": [801450, 801450], "setup_wait_ms": 300,
+      "setup_actor_aura": 704576, "cast_in_before": false,
+      "metric": "aura_stacks", "fields": {"spell": 807764},
+      "before_expected": 0, "wait_ms": 500,
+      "observe_source": "AscensionTemplarAbilities.cpp:154-155 (OnSpellCast): each cast of Zealotry 801450 while Oath Chain 704576 is up casts 807764 on the caster. Oath Chain is set and Zealotry cast three times at the dummy: 3 stacks."
+    },
+    {
+      "spell": 572027, "variant": "no_oath_chain", "label_suffix": "no_oath_chain",
+      "name": "Righteous Upheaval", "kind": "metric_delta",
+      "quote": "for each time you triggered Zealotry during your Oath Chain", "expected": 0,
+      "trigger_spell": 801450, "target": "dummy", "setup_casts": [801450, 801450], "setup_wait_ms": 300,
+      "cast_in_before": false,
+      "metric": "aura_stacks", "fields": {"spell": 807764},
+      "before_expected": 0, "wait_ms": 500,
+      "observe_source": "The control of the oath_chain entry: the same three Zealotry casts with no Oath Chain give no 807764 (AscensionTemplarAbilities.cpp:154)."
+    },
+    {
+      "spell": 572027, "name": "Righteous Upheaval", "kind": "hit_ratio", "variant": "oath", "label_suffix": "oath",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.365,
+      "observe_spell": 572027, "learn": [572027],
+      "control": {}, "treatment": {"auras": [[804904, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "Oath: Righteous Lunge 804904 Effect[0] and Effect[2] aura 108 SPELLMOD_DAMAGE (EffectBasePoints 4 and 29: +5% and +30%) on the Oath Breaker mask (EffectSpellClassMask[8] 128): 1.05 x 1.30 = 1.365, the factor the spell_modifier read 1000 to 1365 gives (572027 behaviour_oath_consumption, a computed read with no hit). One Oath is set before each Righteous Upheaval; the Upheaval removes it (ClearOaths, AscensionTemplarAbilities.cpp:190-191). An attack power fixture of 20000 makes the AP part dominate the die. Only non-critical hits are compared."
+    },
+    {
       "spell": 520442, "name": "Upheave!", "kind": "hit_ratio", "label_suffix": "critical",
       "quote": "Increases the critical damage of Righteous Upheaval by", "expected": 1.1,
       "observe_spell": 572027, "learn": [572027],
