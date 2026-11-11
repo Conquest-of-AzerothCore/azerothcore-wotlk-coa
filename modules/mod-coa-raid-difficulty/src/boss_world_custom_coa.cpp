@@ -1022,7 +1022,6 @@ namespace
         SPELL_SOUL_BIND         = 2119845,
         SPELL_SOUL_FLAY_BEAM    = 2146711,
         SPELL_SOUL_LINK         = 2119847,
-        SPELL_BIRTH             = 26047,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
@@ -1325,9 +1324,11 @@ namespace
             if (summon->GetEntry() != NPC_DAMNED_WIGHT)
                 return;
             summon->SetReactState(REACT_PASSIVE);
+            summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);
             summon->m_Events.AddEventAtOffset([summon]()
             {
-                summon->CastSpell(summon, SPELL_BIRTH, true);
+                summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+                summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
             }, 400ms);
             ObjectGuid bossGuid = me->GetGUID();
             summon->m_Events.AddEventAtOffset([summon, bossGuid]()
@@ -1388,8 +1389,9 @@ namespace
                 Unit* t = RandomPlayer(false);
                 if (!t)
                     return;
-                me->SummonCreature(NPC_DAMNED_WIGHT, me->GetNearPosition(8.0f + 3.0f * float(_raise % 3),
-                    2.4f * float(_raise)), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                Position pos = me->GetNearPosition(8.0f + 3.0f * float(_raise % 3), 2.4f * float(_raise));
+                me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+                me->SummonCreature(NPC_DAMNED_WIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                 if (_raise++ % 2 == 0)
                     CastAt(t->GetPosition(), SPELL_CHOKING_CLOUD);
             }
