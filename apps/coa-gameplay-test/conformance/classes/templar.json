@@ -4652,6 +4652,41 @@
       "control": {"auras": [[807274, 0]]}, "treatment": {"auras": [[807274, 0], [1140480, 0], [1140480, 1]]},
       "critical": false, "trials": 70,
       "expected_source": "Expected from the hit model (hits.rank_hit, the model of the stored '807274 hit_mean', ok at 172.4 against 172.5): Righteous Tempest 807274's hit 570205 at the reference stats (AP 313, spell power 0) is 100% normalized weapon damage of 2495 plus Effect[0] 154 plus 0.3 x SpellBaseDamageBonusDone(127) (TemplarCoefficients, AscensionTemplarData.h:55, added to the base value at AscensionTemplarContracts.cpp:335-342), tooltip mean 236.53, then 887007's -20% and the dummy's armor: 172.40. The same model with spell power +220 (Power of the Ashtongue 1140480, aura 13, MiscValue 126, EffectBasePoints 219) reads tooltip mean 302.53 and 220.20: 1.2773. A diagnostic readback (20261111-230228) reads 570205's Effect[0] value 154 without the aura and 220 with it. 1140480 lasts 5000 ms (DurationIndex 28), so each trial removes the previous Tempest (807274 to 0 stacks), removes and sets the aura again (a set on a present aura does not restart it; a run without the removal read 1.206), casts 807274 at the dummy and reads 570205's hits 3600 ms later (the hits at 0 to 3000 ms), inside the aura; a first design read 5.5 s and lost the boost on the late hits (1.254). Only non-critical hits."
+    },
+    {
+      "spell": 806522, "name": "Legacy of the Silver Hand", "kind": "hit_ratio", "variant": "critical_damage",
+      "label_suffix": "critical_damage", "quote": "Increases the critical damage of", "expected": 1.0833,
+      "observe_spell": 801832, "learn": [801832], "force_crit": "spell",
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [806522, 1]]},
+      "critical": true, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$s2 = 25 (806522 EffectBasePoints[1] 24 + 1): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 15 SPELLMOD_CRIT_DAMAGE_BONUS, which the engine applies to the critical bonus, not to the whole hit. Scourgebane's strike 801832 (Holy, DmgClass 1 magic) is cast at the dummy with the forced spell crit rating; a magic critical hit is 150%, so 25% more bonus gives 162.5 / 150 = 1.0833; the other reading of the tooltip, 25% more on the whole critical hit, gives 1.25. This entry measures which one the server does; the tooltip does not decide it (the talent_modifiers entry's ambiguous_tooltip question). beeg spellpen 823764 in both arms; an attack power fixture of 20000 makes the weapon and AP parts dominate the die; only critical hits are compared."
+    },
+    {
+      "spell": 806522, "name": "Legacy of the Silver Hand", "kind": "metric_delta", "variant": "next_two_argent_blade",
+      "label_suffix": "next_two_argent_blade", "quote": "now guarantees your next 2 instances of damage dealt by Scourgebane to critically strike.",
+      "expected": 2, "before_expected": 0, "trigger_spell": 801832, "target": "dummy",
+      "metric": "spell_damage_count", "fields": {"spell": 801832, "target": "dummy", "critical": true},
+      "setup_casts": [807268, 801832, 801832], "setup_wait_ms": 1100, "setup_actor_aura": 600002,
+      "wait_ms": 1000, "expire_ms": 6000,
+      "observe_source": "AscensionTemplarAbilities.cpp:266-267 (OnSpellCast): an Argent Blade (Named 804929) or Scarlet Hammer 807035 cast with 806522 known casts 806523 on the caster, whose lifecycle Calculate gives it 2 charges (AscensionTemplarAuras.cpp:116-119); a Scourgebane strike 801832 cast while it is up takes its sequence (:95-97), is forced to crit (:136) and drops one charge (ConsumeSelected, :53-60). ARoy buff 3 600002 (aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -101, aura 52 -201, aura 137 -100% stats, permanent) is set on the caster before every cast, so no strike crits by chance. The before phase casts the same sequence without 806522 (control: 0 crits); the after phase, with it: Argent Blade 807268, then three strikes 801832 at the dummy, of which the first two crit and the third does not."
+    },
+    {
+      "spell": 806522, "name": "Legacy of the Silver Hand", "kind": "metric_delta", "variant": "next_two_strikes",
+      "label_suffix": "next_two_strikes", "quote": "now guarantees your next 2 instances of damage dealt by Scourgebane to critically strike.",
+      "expected": 8, "before_expected": 4, "trigger_spell": 801832, "target": "dummy",
+      "metric": "spell_damage_count", "fields": {"spell": 801832, "target": "dummy"},
+      "setup_casts": [807268, 801832, 801832], "setup_wait_ms": 1100, "setup_actor_aura": 600002,
+      "wait_ms": 1000, "expire_ms": 6000,
+      "observe_source": "AscensionTemplarAbilities.cpp:266-267 (OnSpellCast): an Argent Blade (Named 804929) or Scarlet Hammer 807035 cast with 806522 known casts 806523 on the caster, whose lifecycle Calculate gives it 2 charges (AscensionTemplarAuras.cpp:116-119); a Scourgebane strike 801832 cast while it is up takes its sequence (:95-97), is forced to crit (:136) and drops one charge (ConsumeSelected, :53-60). ARoy buff 3 600002 (aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -101, aura 52 -201, aura 137 -100% stats, permanent) is set on the caster before every cast, so no strike crits by chance. The before phase casts the same sequence without 806522 (control: 0 crits); the after phase, with it: Argent Blade 807268, then three strikes 801832 at the dummy, of which the first two crit and the third does not. This entry counts every strike, critical or not: 4 per phase (cumulative 4, then 8), the three cast strikes and the one Argent Blade deals itself (AscensionTemplarAbilities.cpp:126-127 sets its 801832 script value; a first reading expected 3 and read 4), so the next_two entries read 2 crits out of 4 landed strikes. Scourgebane 92111 is not known (probe_aura 0), so no other strike comes."
+    },
+    {
+      "spell": 806522, "name": "Legacy of the Silver Hand", "kind": "metric_delta", "variant": "next_two_scarlet_hammer",
+      "label_suffix": "next_two_scarlet_hammer", "quote": "now guarantees your next 2 instances of damage dealt by Scourgebane to critically strike.",
+      "expected": 2, "before_expected": 0, "trigger_spell": 801832, "target": "dummy",
+      "metric": "spell_damage_count", "fields": {"spell": 801832, "target": "dummy", "critical": true},
+      "setup_casts": [807035, 801832, 801832], "setup_wait_ms": 1100, "setup_actor_aura": 600002,
+      "wait_ms": 1000, "expire_ms": 6000,
+      "observe_source": "AscensionTemplarAbilities.cpp:266-267 (OnSpellCast): an Argent Blade (Named 804929) or Scarlet Hammer 807035 cast with 806522 known casts 806523 on the caster, whose lifecycle Calculate gives it 2 charges (AscensionTemplarAuras.cpp:116-119); a Scourgebane strike 801832 cast while it is up takes its sequence (:95-97), is forced to crit (:136) and drops one charge (ConsumeSelected, :53-60). ARoy buff 3 600002 (aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -101, aura 52 -201, aura 137 -100% stats, permanent) is set on the caster before every cast, so no strike crits by chance. The before phase casts the same sequence without 806522 (control: 0 crits); the after phase, with it: Scarlet Hammer 807035, then three strikes 801832 at the dummy, of which the first two crit and the third does not."
     }
   ],
   "player_observations": [

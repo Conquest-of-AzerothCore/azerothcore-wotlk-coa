@@ -4541,7 +4541,13 @@
         "labels": []
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "labels": [
+      "806522 trigger_count",
+      "806522 behaviour_metric_delta next_two_argent_blade",
+      "806522 behaviour_metric_delta next_two_scarlet_hammer",
+      "806522 behaviour_metric_delta next_two_strikes"
+    ]
   },
   {
     "spell": 806522,
