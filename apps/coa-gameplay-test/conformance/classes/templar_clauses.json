@@ -504,9 +504,12 @@
     "labels": [
       "301310 effect_value e1",
       "301310 e1 combat_rating 8",
-      "301310 e1 combat_rating 10"
+      "301310 e1 combat_rating 10",
+      "301310 behaviour_metric_delta rating_8",
+      "301310 behaviour_metric_delta rating_10"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the passive check reads +4 against +4.8 at the reference Intellect 32, which its 1-point floor cannot tell (data_only); with Greatness 60234 (+300 Intellect) both crit ratings read 0 before and 49 = int32(332 x 0.15) after the learn (PlayerUpdates.cpp:662-670)"
   },
   {
     "spell": 301310,

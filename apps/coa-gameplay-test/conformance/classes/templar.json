@@ -1708,6 +1708,24 @@
   ],
   "behaviours": [
     {
+      "spell": 301310, "variant": "rating_8", "label_suffix": "rating_8",
+      "name": "Light's Chosen", "kind": "metric_delta",
+      "quote": "your critical strike rating by", "expected": 49,
+      "trigger_spell": 60234, "target": "caster",
+      "metric": "combat_rating", "fields": {"rating": 8},
+      "before_expected": 0, "wait_ms": 500,
+      "observe_source": "301310 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, EffectMiscValue[1] 1280 (CR_CRIT_MELEE 8 and CR_CRIT_SPELL 10), EffectMiscValueB[1] 3 (Intellect), $s2 = 15 (EffectBasePoints[1] 14). PlayerUpdates.cpp:662-670 adds int32(CalculatePct(GetStat(intellect), 15)) to the rating. Greatness 60234 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, EffectMiscValue[0] 3, EffectBasePoints[0] 299: +300 Intellect, 15000 ms) is cast on the caster in both phases, so Intellect reads 32 + 300 = 332 (class file reference_stats stat 3): int32(332 x 0.15) = int32(49.8) = 49 after the learn, 0 before. The reference Intellect alone gives 4.8, which the 1-point floor of the passive check cannot tell (301310 e1 combat_rating data_only)."
+    },
+    {
+      "spell": 301310, "variant": "rating_10", "label_suffix": "rating_10",
+      "name": "Light's Chosen", "kind": "metric_delta",
+      "quote": "your critical strike rating by", "expected": 49,
+      "trigger_spell": 60234, "target": "caster",
+      "metric": "combat_rating", "fields": {"rating": 10},
+      "before_expected": 0, "wait_ms": 500,
+      "observe_source": "301310 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, EffectMiscValue[1] 1280 (CR_CRIT_MELEE 8 and CR_CRIT_SPELL 10), EffectMiscValueB[1] 3 (Intellect), $s2 = 15 (EffectBasePoints[1] 14). PlayerUpdates.cpp:662-670 adds int32(CalculatePct(GetStat(intellect), 15)) to the rating. Greatness 60234 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, EffectMiscValue[0] 3, EffectBasePoints[0] 299: +300 Intellect, 15000 ms) is cast on the caster in both phases, so Intellect reads 32 + 300 = 332 (class file reference_stats stat 3): int32(332 x 0.15) = int32(49.8) = 49 after the learn, 0 before. The reference Intellect alone gives 4.8, which the 1-point floor of the passive check cannot tell (301310 e1 combat_rating data_only)."
+    },
+    {
       "spell": 705290, "name": "Blessing of Eonar", "kind": "hit_ratio", "variant": "damage", "label_suffix": "damage",
       "quote": "now increases your damage dealt and healing done by", "expected": 1.1,
       "observe_spell": 573324, "learn": [573324],
