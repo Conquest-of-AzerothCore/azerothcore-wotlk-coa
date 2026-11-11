@@ -6101,6 +6101,34 @@ class CostGateScenarioTests(unittest.TestCase):
         with self.assertRaises(NotModelled):
             behaviour_scenario(CLASS_FILE, {**self.lengthening_entry(), 'reduction': -900})
 
+    def reset_entry(self) -> dict:
+        return {'spell': 805422, 'name': 'Tome of Light', 'kind': 'cost_gate',
+                'quote': 'resets the cooldown of Barrier of Light and Tranquil Circle', 'gated_spell': 805417,
+                'resource': 'cooldown', 'reduction': 90000, 'target': 'caster',
+                'after_casts': [[805422, 'caster']], 'after_wait_ms': 2000, 'resets': True}
+
+    def test_a_reset_is_attempted_once_just_after_the_after_casts_in_both_arms(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, self.reset_entry())
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        self.assertEqual([(e.model['arm'], e.displayed, e.model['level']) for e in expectations],
+                         [('without', '67', 2500.0), ('with', '0', 2500.0)])
+        tomes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 805422]
+        self.assertEqual(len(tomes), 1)
+        self.assertLess(first_index(steps, label='805422 cost_gate 805417 without'), tomes[0])
+        waits = [step['ms'] for step in steps if step.get('label', '').endswith('cooldown wait')]
+        self.assertEqual(waits, [2500, 500])
+
+    def test_seeded_reset_that_does_not_happen_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, self.reset_entry())
+        allowed = next(e for e in expectations if e.model['arm'] == 'with')
+        verdict = judge_behaviour(base_verdict(allowed), FakeRun({allowed.label: 67.0}), allowed)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_a_reset_needs_after_casts_on_a_cooldown_gate(self):
+        entry = {**self.reset_entry(), 'after_casts': []}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
     def test_a_cooldown_gate_beyond_the_real_clock_cap_runs_accelerated_only(self):
         entry = {'spell': 573452, 'name': 'Eternally Devoted', 'kind': 'cost_gate',
                  'quote': 'Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by',

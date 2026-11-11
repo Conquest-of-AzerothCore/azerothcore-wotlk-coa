@@ -854,6 +854,11 @@ Interdict 560116). The arms are then `without` (through `margin_ms` after the ba
 (refused `margin_ms` before it). An increase not above twice `margin_ms` is `NotModelled`; next, duration and
 after-cast arms are refused.
 
+`resets: true` (cooldown gates with `after_casts` only) states a reset of the running cooldown: the two arms attempt
+the gated spell `margin_ms` after the after casts, `without` refused (the control) and `with` through; there is no
+`beyond` arm, since any later attempt goes through. Tome of Light 805422 resets Barrier of Light 805417
+(`AscensionTemplarAuras.cpp:122-128`): Barrier is primed, Tome is cast 2000 ms later, Barrier is attempted at 2500 ms.
+
 ### Hit-ratio heals and actors
 
 A `hit_ratio` entry may set `metric: "heal"` to read `spell_heal_total` and `spell_heal_count` instead of the damage

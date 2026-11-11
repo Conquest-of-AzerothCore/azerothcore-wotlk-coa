@@ -2838,6 +2838,7 @@ class CostGateSpec:
     duration_margin_ms: int = COST_GATE_DURATION_MARGIN_MS
     after_casts: tuple[tuple[int, str], ...] = ()
     after_wait_ms: int = 0
+    resets: bool = False
 
 
 @dataclass(frozen=True)
@@ -2866,6 +2867,12 @@ def cost_gate_base(spec: CostGateSpec, facts) -> float:
 
 
 def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float]:
+    if spec.resets:
+        opened = spec.after_wait_ms + spec.margin_ms
+        if spec.resource != 'cooldown' or not spec.after_casts or not GCD_WAIT_MS <= opened < base:
+            raise ValueError(f'{spec.spell} resets a running cooldown through after_casts, with the attempt '
+                             f'{opened} ms after the priming cast below the {base:g} ms cooldown')
+        return opened, opened
     reduced = base - spec.reduction
     if spec.resource == 'power':
         allowed = math.ceil(reduced)
@@ -2893,6 +2900,8 @@ def lengthens(spec: CostGateSpec) -> bool:
 def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
     refused = COST_GATE_RESOURCES[spec.resource]
     allowed, beyond = cost_gate_levels(spec, base)
+    if spec.resets:
+        return [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
     if lengthens(spec):
         if spec.next_arm or spec.aura_duration_ms is not None or spec.after_casts:
             raise ValueError(f'{spec.spell} lengthens a cooldown, which takes no next, duration or after-cast arms')
@@ -2922,8 +2931,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     entry = behaviour_entry(records, spec.spell, spec.name, 'cost_gate', spec.quote, spec.reduction)
     facts = facts_of(records, spec.gated_spell)
     base = cost_gate_base(spec, facts)
-    if spec.after_casts and (spec.resource != 'cooldown'
-                             or not 0 <= spec.after_wait_ms < cost_gate_levels(spec, base)[1]):
+    if spec.after_casts and not spec.resets and (spec.resource != 'cooldown'
+                                                 or not 0 <= spec.after_wait_ms < cost_gate_levels(spec, base)[1]):
         raise ValueError(f'{spec.spell} after_casts needs a cooldown gate and an after_wait_ms below the beyond wait')
     full_power = cast_gate_power_step(facts)
     approach = ([{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}]
@@ -3012,6 +3021,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                        f'{spec.margin_ms} ms after the base cooldown, with it it is refused there, goes through '
                        f'{spec.margin_ms} ms after the lengthened cooldown and is refused {spec.margin_ms} ms before '
                        f'it.' if lengthens(spec) else '')
+                    + (f' The talent resets the running cooldown: both arms attempt {spec.gated_spell} '
+                       f'{spec.margin_ms} ms after the after casts, refused without {spec.spell}, through with it.'
+                       if spec.resets else '')
                     + (f' In the arms with {spec.spell}, {[spell for spell, _ in spec.after_casts]} are cast '
                        f'{spec.after_wait_ms} ms after the priming cast.' if spec.after_casts else ''),
         'players': players,
@@ -3029,7 +3041,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         entry.get('next_arm', False), entry.get('aura_duration_ms'),
                         entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS),
                         tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
-                        entry.get('after_wait_ms', 0))
+                        entry.get('after_wait_ms', 0), entry.get('resets', False))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
