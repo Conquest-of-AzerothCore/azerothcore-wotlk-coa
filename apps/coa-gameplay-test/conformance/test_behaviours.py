@@ -6165,7 +6165,8 @@ class CostGateScenarioTests(unittest.TestCase):
         scenario, _ = behaviour_scenario(CLASS_FILE, self.trigger_after_cast_entry())
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
         without = first_index(steps, label='573452 cost_gate 801461 without')
-        before_control = [step for step in steps[:without] if step.get('label') == 'without wait before the after casts']
+        before_control = [step for step in steps[:without]
+                          if step.get('label') == 'without wait before the after casts']
         self.assertEqual(len(before_control), 1)
         waits = [step['ms'] for step in steps if step.get('label', '').endswith('cooldown wait')]
         self.assertEqual(waits, [174500, 174500, 173500])

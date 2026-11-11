@@ -198,10 +198,10 @@ not in the table fails the whole run (`EvidenceError`, no default):
   or the log the server emitted for that hit, such as the `taken_hit` reads); it is a readback when the harness calls
   a calculation function or reads a stored modifier with no hit applied (trial question 4, 2026-11-11): the two
   `*_damage_taken` metrics return `SpellDamageBonusTaken` and `MeleeDamageBonusTaken` of a fixed 1000
-  (`CoAGameplayTest.cpp`, the `spell_damage_taken || melee_damage_taken` branch); `state` (stat fields: `stat`, `armor`, ratings, hit, crit,
-  dodge and parry chances, power, speed, attack time) is data, except that a state read counts as behaviour when it
-  is the stat the clause promises, read in a learned/unlearned contrast: the check is `passive_delta`,
-  `behaviour_party_stat_ratio` (an ally's stat before and after the caster learns the spell), or
+  (`CoAGameplayTest.cpp`, the `spell_damage_taken || melee_damage_taken` branch); `state` (stat fields: `stat`,
+  `armor`, ratings, hit, crit, dodge and parry chances, power, speed, attack time) is data, except that a state read
+  counts as behaviour when it is the stat the clause promises, read in a learned/unlearned contrast: the check is
+  `passive_delta`, `behaviour_party_stat_ratio` (an ally's stat before and after the caster learns the spell), or
   `behaviour_metric_delta` with `detail.contrast` `learned` (not the `setup_only_after` condition contrast), and the
   clause text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell
   power" or "spell damage"). A stat read as a proxy for another effect stays data. A conformant verdict with
