@@ -50,6 +50,13 @@
   and writes `fragment.json` and `summary.json` (see [Prove runner](generate-and-compare.md#prove-runner));
   `prove_ledger.py` supplies the ledger rows, their per-run evidence and the coverage per run; `pilot.py`
   (`hit_ratio_pilot`) runs the hit-ratio entries at 20 trials first and sizes the judged runs from their verdicts.
+- `mutants.py`: `load_mutants(path)` reads `{label, spell, op, factor}` server mutants (factor 2 or 0), `mutate(manifest,
+  mutants)` adds the `spell_mod_mutant` step after the `settle` wait and an active-mutant assert at the end of every
+  scenario carrying a mutant label, and `contamination(baseline, mutant, mutated)` lists the unmutated verdicts whose
+  status class changed; `k3.py`: `k3_rows(probes, mutants, baseline, mutant, evidence)` judges K3 consumption probes
+  into `consumed`/`not_consumed` rows (`literal_modifier_sites` refuses a spell whose modifier channel CoA code feeds
+  with its own amount) and `merge_consumption(path, rows)` writes `classes/<class>_consumption.json` (see
+  [Server mutants and K3 consumption](generate-and-compare.md#server-mutants-and-k3-consumption)).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)
@@ -66,9 +73,10 @@
   `ratio_interval` and `student_t_quantile` give the 99% intervals of the passes.
 - `coverage.py`: `coverage(header, verdicts)` counts the verdicts per status and the class spells, passives and actives
   that a compare output judges (`Coverage`), and `write_coverage` writes `coverage.md` for two outputs (see
-  [Coverage comparison](generate-and-compare.md#coverage-comparison)); `clause_coverage(clauses, verdicts, build)`
-  returns the `ClauseCoverage` of a clause ledger with the behaviour-proven and data-conformant counts from the
-  closed `EVIDENCE` and `METRIC_EVIDENCE` tables and the `not_measured` labels; `require_build` refuses verdicts of
+  [Coverage comparison](generate-and-compare.md#coverage-comparison)); `clause_coverage(clauses, verdicts, build,
+  consumption)` returns the `ClauseCoverage` of a clause ledger with the behaviour-proven and data-conformant counts
+  from the closed `EVIDENCE` and `METRIC_EVIDENCE` tables, the `not_measured` labels and the readbacks a K3
+  consumption row of that build promotes or shows not consumed (`load_consumption`, `acting`); `require_build` refuses verdicts of
   another build than the one judged; `clause_claims` and `require_claims` read and check an entry's declared claims
   (a clause is closed only when every one is proven, `ClauseCoverage.claim_evidence`); `fragment_entries`,
   `write_fragment` and `read_fragment` write and check ledger fragments that carry the computed evidence and the

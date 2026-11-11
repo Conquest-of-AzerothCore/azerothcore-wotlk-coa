@@ -133,6 +133,13 @@ another build, or a verdict without one, is refused with `EvidenceError`, alerts
 is a non-empty set for which no single build is named. `not_measured` verdicts are not conformant, so a claim citing
 one is unproven; `ClauseCoverage.not_measured` lists their labels and the coverage output prints them.
 
+A K3 consumption row (`classes/<class>_consumption.json`, written by `conformance.py k3`, see
+[Server mutants and K3 consumption](generate-and-compare.md#server-mutants-and-k3-consumption)) of the judged build
+turns a conformant readback label into behaviour evidence when its result is `consumed`: a server mutant of the
+value moved an acting observation in every run. A `not_consumed` row keeps the label data;
+`ClauseCoverage.promoted` and `ClauseCoverage.not_consumed` list them and the coverage output prints both. Rows of
+another build count for nothing (ADR 0129).
+
 Each verdict's evidence comes from its `check` through the closed table `coverage.EVIDENCE`; a verdict whose check is
 not in the table fails the whole run (`EvidenceError`, no default):
 

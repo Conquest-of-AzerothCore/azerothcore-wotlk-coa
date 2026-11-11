@@ -14,12 +14,13 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_PARTY_STAT_RATIO, CONDITION_CONTRAST, LEARNED_CONTRAST)
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
-from coverage import (BEHAVIOUR, BY_METRIC, COVERAGE_FILE, DATA, EVENT, EVIDENCE, METRIC_EVIDENCE, READBACK, STATE,
-                      STATE_PROMISES, UNPROVEN, EvidenceError, clause_coverage, clause_coverage_lines, coverage,
-                      TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING, fragment_entries, load_clauses, read_fragment,
-                      require_claims, write_coverage, write_fragment)
+from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EVENT, EVIDENCE, K3, METRIC_EVIDENCE,
+                      NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption, EvidenceError, acting,
+                      clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
+                      fragment_entries, load_clauses, read_fragment, require_claims, write_coverage, write_fragment)
 from expiry import BEHAVIOUR_EXPIRY
-from profile import DBC_DIR, DbcSetMismatch, class_file_paths, load_class_file, server_dbc_dir, spell_dbc_sha256
+from profile import (CLASSES_DIR, DBC_DIR, DbcSetMismatch, class_file_paths, ledger_consumption_path, load_class_file,
+                     server_dbc_dir, spell_dbc_sha256)
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
 from procs import PROC_CHECK
@@ -429,6 +430,52 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertNotEqual(statuses, [DATA])
         self.assertEqual(evidence_of([claim('x', f'{ARGENT_BLADE} effect_value #0')], [value(ARGENT_BLADE)])[0],
                          [DATA])
+
+
+def consumed(label, result=CONSUMED, build=BUILD):
+    return Consumption(label, K3, ARGENT_BLADE, 0, build, 'k3.json', result)
+
+
+class ConsumptionTest(unittest.TestCase):
+    READBACK = f'{ARGENT_BLADE} effect_value #0'
+
+    def coverage(self, rows, status='ok'):
+        return clause_coverage([claim('deals extra damage', self.READBACK)], [value(ARGENT_BLADE, status)], BUILD,
+                               rows)
+
+    def test_a_consumed_k3_row_of_the_same_build_promotes_a_readback_to_behaviour(self):
+        result = self.coverage([consumed(self.READBACK)])
+        self.assertEqual(([status for _, status in result.evidence], result.behaviour), ([BEHAVIOUR], 1))
+        self.assertEqual(result.promoted, {self.READBACK})
+        self.assertIn('readbacks promoted by a K3 consumption row (the acting reading moved under a server '
+                      'mutant): 1', clause_coverage_lines(result))
+
+    def test_seeded_row_of_another_build_promotes_nothing(self):
+        result = self.coverage([consumed(self.READBACK, build=OTHER_BUILD)])
+        self.assertEqual([status for _, status in result.evidence], [DATA])
+
+    def test_a_not_consumed_row_keeps_the_readback_data_and_is_listed(self):
+        result = self.coverage([consumed(self.READBACK, NOT_CONSUMED)])
+        self.assertEqual(([status for _, status in result.evidence], result.not_consumed), ([DATA], {self.READBACK}))
+
+    def test_one_not_consumed_row_outweighs_a_consumed_row_of_the_same_label(self):
+        result = self.coverage([consumed(self.READBACK), consumed(self.READBACK, NOT_CONSUMED)])
+        self.assertEqual([status for _, status in result.evidence], [DATA])
+
+    def test_a_consumed_row_never_proves_an_alerting_readback(self):
+        result = self.coverage([consumed(self.READBACK)], 'alert')
+        self.assertEqual([status for _, status in result.evidence], [UNPROVEN])
+
+    def test_acting_observations_exclude_readbacks_and_data_only_reads(self):
+        self.assertTrue(acting(hit(ARGENT_BLADE)))
+        self.assertFalse(acting(value(ARGENT_BLADE)))
+        self.assertFalse(acting(judged('1 e0 armor', PASSIVE_DELTA, 'armor', **{DATA_ONLY: 'floor'})))
+        self.assertFalse(acting(hit(ARGENT_BLADE, 'alert')))
+
+    def test_consumption_files_are_not_class_files(self):
+        self.assertEqual(ledger_consumption_path(CLASSES_DIR / 'templar_clauses.json'),
+                         CLASSES_DIR / 'templar_consumption.json')
+        self.assertNotIn(CLASSES_DIR / 'templar_consumption.json', class_file_paths())
 
 
 class EvidenceTablesTest(unittest.TestCase):

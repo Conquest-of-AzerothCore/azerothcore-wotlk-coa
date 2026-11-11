@@ -305,6 +305,50 @@ verdict's `detail.sized_trials` (the trials whose 99% half-width would be 0.8 of
 sizes the judged runs, never below the pilot's 20 and capped at what one scenario holds (`detail.trial_limit`;
 `capped` in the record); a label without a pilot verdict or interval keeps its class-file trials.
 
+### Server mutants and K3 consumption
+
+```sh
+python3 -B conformance.py mutate --manifest DIR/manifest.json --mutants MUTANTS
+python3 -B conformance.py k3 --probes PROBES --mutants MUTANTS --manifest DIR/manifest.json \
+    --baseline BASE --mutant MUT --out K3.json [--consumption classes/<class>_consumption.json]
+```
+
+A server mutant asks whether the value a readback reads is the value the acting path uses (ADR 0129). `mutate`
+rewrites a generated manifest in place: every scenario carrying a mutant's `label` gets, right after its `settle`
+wait, the harness step `spell_mod_mutant` (a player-scoped percent spell modifier of one native operation on one
+spell, owned by a harness dummy aura, see the gameplay-test README) and, as its last step, an assert that every
+mutant of the scenario is still active (`spell_mod_mutants`), so a mutant lost mid-case fails the scenario instead
+of reading as unconsumed. The manifest records the mutants and their scenarios; the scenario sha256 entries are
+rewritten. A mutants file is a JSON array of `{label, spell, op, factor}`: `op` by name (`duration`, `effect1`,
+`effect2`, `effect3`, `all_effects`, `radius`, `cooldown`, `jump_targets`, `chance_of_success`,
+`value_multiplier`), `factor` 2 or 0 only (x0 where the mechanic allows a zero, such as a chance or an amount; x2
+for a duration or a target count, whose zero can mean unlimited). A probe only asks whether the value is read, so
+the change lies far outside every tolerance. Mutants that change an aura amount must come before the aura exists:
+the step fails when the player already has an aura of the spell.
+
+Run the unmutated and the mutated manifests of one build at least twice each through `coa-verify`, compare each run
+into `BASE/run<n>` and `MUT/run<n>`, then run `k3`. A probe file is a JSON array of `{label, spell, effect,
+observation[, mutant, predicted]}`: `label` is the readback the row is about, `observation` the verdict label read in
+the baseline runs, `mutant` (default `observation`) the verdict label read in the mutant runs, `predicted` the
+reading the observation would give if the value were consumed. `k3` writes `K3.json`
+(`build`, `contaminated`, per probe `result` and `reason`, `rows`) and exits 3 when an unmutated verdict changed
+status class between the baseline and the mutant runs or went missing (shared-process contamination). Per probe:
+
+- the observation must be conformant in every baseline run and observe an acting outcome (an event, a count, a
+  rate, an expiry: coverage `acting`), never a readback or a `data_only` read;
+- `consumed` when the mutant reading alerts in every mutant run with a measured value;
+- `not_consumed` when it stays conformant in every mutant run and `predicted` lies outside the tolerance of the
+  baseline expected value; without such a prediction no row is written;
+- no row when CoA code passes its own amount through the mutated spell's modifier channel
+  (`ApplySpellMod(<spell>` in `src/server/coa`, outside the harness): a spell modifier mutant then moves the
+  reading whether or not the DBC value is read (Scourgebane's literal 20% chance, `AscensionTemplarEvents.cpp`).
+
+Rows `{label, route: K3, spell, effect, build, evidence, result}` merge into `--consumption`
+(`classes/<class>_consumption.json`, a rerun of the same label and build replaces its row). `coverage --clauses`
+reads the file beside the ledger: on the verdicts' build, a `consumed` row turns a conformant readback label into
+behaviour evidence; a `not_consumed` row keeps it data and lists it. K3 is the only consumption route: the K1
+static join needs the value dump, which is not adopted, and no K1+K2 rows are written.
+
 ### Verdicts
 
 | Status | Given to |

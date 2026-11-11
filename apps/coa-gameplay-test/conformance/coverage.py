@@ -328,6 +328,68 @@ class EvidenceError(ValueError):
     pass
 
 
+K3 = 'K3'
+CONSUMED = 'consumed'
+NOT_CONSUMED = 'not_consumed'
+CONSUMPTION_FIELDS = frozenset({'label', 'route', 'spell', 'effect', 'build', 'evidence', 'result'})
+SHA256 = re.compile(r'[0-9a-f]{64}')
+
+
+@dataclass(frozen=True)
+class Consumption:
+    label: str
+    route: str
+    spell: int
+    effect: int
+    build: str
+    evidence: str
+    result: str
+
+
+def consumption_row(row, where: str) -> Consumption:
+    if not isinstance(row, dict) or set(row) != CONSUMPTION_FIELDS:
+        raise EvidenceError(f'{where}: a consumption row has exactly the fields {sorted(CONSUMPTION_FIELDS)}')
+    if row['route'] != K3:
+        raise EvidenceError(f'{where}: route {row["route"]!r} is not {K3}, the only consumption route (ADR 0129)')
+    if row['result'] not in (CONSUMED, NOT_CONSUMED):
+        raise EvidenceError(f'{where}: result {row["result"]!r} is not {CONSUMED} or {NOT_CONSUMED}')
+    if not isinstance(row['build'], str) or not SHA256.fullmatch(row['build']):
+        raise EvidenceError(f'{where}: build {row["build"]!r} is not a worldserver binary sha256')
+    if not all(isinstance(row[name], str) and row[name] for name in ('label', 'evidence')):
+        raise EvidenceError(f'{where}: label and evidence are non-empty strings')
+    if not all(isinstance(row[name], int) and not isinstance(row[name], bool) and row[name] >= 0
+               for name in ('spell', 'effect')):
+        raise EvidenceError(f'{where}: spell and effect are non-negative integers')
+    return Consumption(row['label'], row['route'], row['spell'], row['effect'], row['build'], row['evidence'],
+                       row['result'])
+
+
+def load_consumption(path: Path) -> list[Consumption]:
+    path = Path(path)
+    if not path.is_file():
+        return []
+    rows = json.loads(path.read_text(encoding='utf-8'))
+    if not isinstance(rows, list):
+        raise EvidenceError(f'{path} holds {type(rows).__name__}, not a JSON array of consumption rows')
+    return [consumption_row(row, f'{path}[{index}]') for index, row in enumerate(rows)]
+
+
+def consumption_results(rows, build: str | None) -> dict[str, str]:
+    results = {}
+    for row in rows:
+        if build is None or row.build != build:
+            continue
+        results[row.label] = NOT_CONSUMED if NOT_CONSUMED in (row.result, results.get(row.label)) else CONSUMED
+    return results
+
+
+def acting(verdict: Verdict) -> bool:
+    if verdict.status not in CONFORMANT or verdict.status == 'closed' or (verdict.detail or {}).get(DATA_ONLY):
+        return False
+    kind = EVIDENCE.get(verdict.check)
+    return kind == BEHAVIOUR or (kind == BY_METRIC and metric_class(verdict) == EVENT)
+
+
 @dataclass(frozen=True)
 class ClauseCoverage:
     proven: int
@@ -338,6 +400,8 @@ class ClauseCoverage:
     not_measured: list[str]
     claim_evidence: list[list[str]] = field(default_factory=list)
     tool_gaps: list[tuple[dict, str]] = field(default_factory=list)
+    promoted: frozenset[str] = frozenset()
+    not_consumed: frozenset[str] = frozenset()
 
     @property
     def data(self) -> int:
@@ -395,15 +459,17 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
 
 
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
-                     seen: frozenset[str] = frozenset()) -> str:
+                     seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset()) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = EVIDENCE[verdict.check]
     if kind == LINKED:
         referenced = [by_label[label] for label in LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
                       if label in by_label and label not in seen]
-        found = {verdict_evidence(other, clause, by_label, seen | {verdict.label}) for other in referenced}
+        found = {verdict_evidence(other, clause, by_label, seen | {verdict.label}, promoted) for other in referenced}
         return BEHAVIOUR if BEHAVIOUR in found else DATA
+    if verdict.status != 'closed' and verdict.label in promoted:
+        return BEHAVIOUR
     if verdict.status == 'closed' or kind == DATA or (verdict.detail or {}).get(DATA_ONLY):
         return DATA
     if kind == BEHAVIOUR:
@@ -414,12 +480,13 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     return DATA
 
 
-def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str]) -> str:
+def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
+                   promoted: frozenset[str] = frozenset()) -> str:
     labels = claim['labels']
     if not clause_proven(labels, statuses):
         return UNPROVEN
     matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
-    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label) for verdict in matched}
+    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted) for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
 
@@ -429,26 +496,32 @@ def claims_evidence(found: list[str]) -> str:
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
 
-def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str]) -> str:
-    return claims_evidence([claim_evidence(claim, by_label, statuses) for claim in clause_claims(clause)])
+def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
+                    promoted: frozenset[str] = frozenset()) -> str:
+    return claims_evidence([claim_evidence(claim, by_label, statuses, promoted) for claim in clause_claims(clause)])
 
 
-def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | None = None) -> ClauseCoverage:
+def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | None = None,
+                    consumption=()) -> ClauseCoverage:
     require_build(verdicts, build, 'clause coverage')
     require_known_checks(verdicts)
     require_claims(clauses)
     require_tool_gaps(clauses)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
+    results = consumption_results(consumption, build)
+    promoted = frozenset(label for label, result in results.items() if result == CONSUMED)
+    not_consumed = frozenset(label for label, result in results.items() if result == NOT_CONSUMED)
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
-    per_claim = [[claim_evidence(claim, by_label, statuses) for claim in clause_claims(clause)] for clause in claims]
+    per_claim = [[claim_evidence(claim, by_label, statuses, promoted) for claim in clause_claims(clause)]
+                 for clause in claims]
     evidence = [(clause, claims_evidence(found)) for clause, found in zip(claims, per_claim)]
     unproven = [clause for clause, status in evidence if status == UNPROVEN]
     behaviour = sum(status == BEHAVIOUR for _, status in evidence)
     not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
     tool_gaps = [(clause, tool_gap_state(clause)) for clause in unproven if TOOL_GAP in clause]
     return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured,
-                          per_claim, tool_gaps)
+                          per_claim, tool_gaps, promoted & by_label.keys(), not_consumed & by_label.keys())
 
 
 def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
@@ -460,7 +533,15 @@ def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
              f'tool gaps pending (one agent\'s attempt only, counted unresolved): {result.pending_tool_gaps}',
              f'clauses resolved (proven or accepted tool gap): {share(result.resolved, result.total)}',
              f'not measured (CalcValue read of an effect whose amount a CalcAmount hook sets, counted unproven): '
-             f'{len(result.not_measured)}', '']
+             f'{len(result.not_measured)}',
+             f'readbacks promoted by a K3 consumption row (the acting reading moved under a server mutant): '
+             f'{len(result.promoted)}',
+             f'readbacks shown not consumed by a K3 row (the acting reading did not move, kept as data): '
+             f'{len(result.not_consumed)}', '']
+    for title, labels in (('K3 promoted labels:', result.promoted), ('K3 not consumed labels:', result.not_consumed)):
+        if labels:
+            lines.append(title)
+            lines += [f'  {label}' for label in sorted(labels)]
     if result.not_measured:
         lines.append('Not measured labels:')
         lines += [f'  {label}' for label in result.not_measured]

@@ -13,7 +13,7 @@ from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spell
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, BuildMismatch, ScenarioDrift,
                      evaluate, literal_values, write_levers, write_outputs)
 from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_coverage_lines, fragment_entries,
-                      load_clauses, write_coverage, write_fragment)
+                      load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from passives import passive_scenario
@@ -21,7 +21,8 @@ from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_part
                   reference_hit_model, reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
-from profile import DBC_DIR, DbcSetMismatch, load_class_file, server_dbc_dir, spell_dbc_sha256
+from profile import (DBC_DIR, DbcSetMismatch, ledger_consumption_path, load_class_file, server_dbc_dir,
+                     spell_dbc_sha256)
 from questions import QUESTIONS_FILE
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
@@ -457,7 +458,8 @@ def coverage_command(args) -> int:
         from compare import read_verdicts
         header, verdicts = read_verdicts(args.after)
         try:
-            result = clause_coverage(load_clauses(args.clauses), verdicts, header.get('build'))
+            result = clause_coverage(load_clauses(args.clauses), verdicts, header.get('build'),
+                                     load_consumption(ledger_consumption_path(args.clauses)))
             entries = fragment_entries(result, header) if args.fragment else []
         except (EvidenceError, DbcSetMismatch) as error:
             print(f'No clause coverage: {error}', file=sys.stderr)
@@ -466,6 +468,35 @@ def coverage_command(args) -> int:
         if args.fragment:
             print(write_fragment(args.fragment, entries))
     return 0
+
+
+def mutate_command(args) -> int:
+    from mutants import MANIFEST_KEY, load_mutants, mutate
+    path = mutate(args.manifest, load_mutants(args.mutants))
+    applied = json.loads(path.read_text(encoding='utf-8'))[MANIFEST_KEY]
+    for mutant in applied:
+        print(f"{mutant['label']}: {mutant['op']} of {mutant['spell']} x{mutant['factor']:g} in "
+              f"{len(mutant['scenarios'])} scenarios")
+    print(path)
+    return 0
+
+
+def k3_command(args) -> int:
+    from k3 import compare_runs, k3_rows, load_probes, merge_consumption
+    from mutants import contamination, load_mutants, mutated_scenarios
+    baseline, mutant = compare_runs(args.baseline), compare_runs(args.mutant)
+    mutants = load_mutants(args.mutants)
+    manifest = json.loads(args.manifest.read_text(encoding='utf-8'))
+    changed = contamination([verdicts for _, verdicts in baseline], [verdicts for _, verdicts in mutant],
+                            mutated_scenarios(manifest))
+    rows, outcomes = k3_rows(load_probes(args.probes), mutants, baseline, mutant, str(args.out))
+    document = {'build': baseline[0][0].get('build'), 'contaminated': changed, 'probes': outcomes, 'rows': rows}
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    args.out.write_text(json.dumps(document, indent=2) + '\n', encoding='utf-8')
+    if args.consumption and rows:
+        print(merge_consumption(args.consumption, rows))
+    print(f'{len(rows)} K3 rows, {len(changed)} contaminated unmutated verdicts; {args.out}')
+    return 0 if not changed else DIFF_EXIT
 
 
 def mounted_roots(worktree: Path) -> list[Path]:
@@ -589,10 +620,26 @@ def main(argv=None) -> int:
     covering.add_argument('--fragment', type=Path,
                           help='with --clauses, write a new ledger fragment: every claim with its computed '
                                'evidence and the Spell.dbc sha256 of the verdicts')
+    mutating = commands.add_parser('mutate', help='add a player-scoped server mutant to every generated scenario '
+                                                  'that carries a mutant label, in place')
+    mutating.add_argument('--manifest', type=Path, required=True, help='a generated manifest, mutated in place')
+    mutating.add_argument('--mutants', type=Path, required=True,
+                          help='a JSON array of server mutants {label, spell, op, factor}, factor 2 or 0')
+    probing = commands.add_parser('k3', help='judge K3 consumption probes from compare outputs of baseline and '
+                                             'mutant runs of one build, and report contamination')
+    probing.add_argument('--probes', type=Path, required=True,
+                         help='a JSON array of K3 probes {label, spell, effect, observation[, mutant, predicted]}')
+    probing.add_argument('--mutants', type=Path, required=True, help='the mutants file the mutant runs used')
+    probing.add_argument('--manifest', type=Path, required=True, help='the mutated manifest')
+    probing.add_argument('--baseline', type=Path, required=True, help='compare outputs run1, run2, ... unmutated')
+    probing.add_argument('--mutant', type=Path, required=True, help='compare outputs run1, run2, ... mutated')
+    probing.add_argument('--out', type=Path, required=True, help='the K3 result file to write')
+    probing.add_argument('--consumption', type=Path,
+                         help='merge the written rows into this consumption file (classes/<class>_consumption.json)')
     args = parser.parse_args(argv)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command,
-                'prove': prove_command}
+                'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command}
     return handlers[args.command](args)
 
 

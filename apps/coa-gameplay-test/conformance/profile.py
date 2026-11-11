@@ -46,6 +46,7 @@ def probe_aura_label(spell_id: int) -> str:
 
 
 CLAUSE_LEDGER_SUFFIX = '_clauses'
+CONSUMPTION_SUFFIX = '_consumption'
 SPELL_DBC = 'Spell.dbc'
 
 
@@ -86,7 +87,14 @@ def server_dbc_dir(dbc_dir: Path) -> Path:
 
 
 def class_file_paths() -> list[Path]:
-    return sorted(path for path in CLASSES_DIR.glob('*.json') if not path.stem.endswith(CLAUSE_LEDGER_SUFFIX))
+    return sorted(path for path in CLASSES_DIR.glob('*.json')
+                  if not path.stem.endswith((CLAUSE_LEDGER_SUFFIX, CONSUMPTION_SUFFIX)))
+
+
+def ledger_consumption_path(ledger: Path) -> Path:
+    ledger = Path(ledger)
+    stem = ledger.stem.removesuffix(CLAUSE_LEDGER_SUFFIX)
+    return ledger.with_name(f'{stem}{CONSUMPTION_SUFFIX}.json')
 
 
 def load_class_file(class_id: int) -> dict:
