@@ -3680,6 +3680,12 @@ private:
             return unit->HasUnitState(UNIT_STATE_ROOT);
         if (metric == "stunned")
             return unit->HasUnitState(UNIT_STATE_STUNNED);
+        if (metric == "school_prohibited")
+        {
+            Creature const* creature = unit->ToCreature();
+            Require(creature != nullptr, "School lockout observation needs a creature");
+            return creature->IsSpellProhibited(SpellSchoolMask(step.get<uint32>("school_mask")));
+        }
         if (metric == "stealth_detection")
             return unit->m_stealthDetect.GetValue(STEALTH_GENERAL);
         if (metric == "can_detect")

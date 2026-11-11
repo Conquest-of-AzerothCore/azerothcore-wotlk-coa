@@ -8,8 +8,9 @@ import unittest
 from behaviours import NotModelled, behaviour_entries
 from compare import Run, Verdict, evaluate, judge_behaviour
 from coverage import BEHAVIOUR, EVIDENCE
-from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, act_margins_of, behaviour_expiry,
-                    expiry_arm, lands_within_its_cast_step, margins_of, pair_steps, shift_of, trigger_expiry)
+from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, LOCKOUT_METRIC, SCHOOL_LOCKOUT,
+                    act_margins_of, behaviour_expiry, expiry_arm, lands_within_its_cast_step, margins_of, pair_steps,
+                    school_lockout_scenario, shift_of, trigger_expiry)
 from hits import MAX_ACCELERATED_SCENARIO_MS
 from profile import DBC_DIR, load_class_file
 from tooltip import Records
@@ -33,6 +34,8 @@ BECKON = 804914
 FROSTBOLT = 116
 TITANSTRIKE = 806521
 CONDEMN = 804906
+DIVINE_FORCE = 806153
+EVOCATION = 12051
 EXPIRY_ENTRIES = (TESTAMENT_OF_STRENGTH, BLESSING_OF_AGGRAMAR, 705271, FINESSE_RANK_2, COURAGE_RANK_1, 712466,
                   SACRED_OATH, BECKON)
 
@@ -311,6 +314,67 @@ class TemplarExpiryScenarioTest(unittest.TestCase):
                        expectation.rank_id, expectation.check)
         missing = Run(found.key, found.status, found.message, values, found.steps, found.max_step_ms)
         self.assertEqual(judge_behaviour(base, missing, expectation).status, 'alert')
+
+
+def lockout_entry() -> dict:
+    return next(entry for entry in behaviour_entries(CLASS_FILE, [DIVINE_FORCE]) if entry['kind'] == SCHOOL_LOCKOUT)
+
+
+def lockout_judged(ends: dict[str, float] | None = None, **options) -> Verdict:
+    scenario, expectations = school_lockout_scenario(CLASS_FILE, lockout_entry())
+    expectation = expectations[0]
+    stated = {arm['name']: arm['expected_ms'] for arm in expectation.model['arms']}
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'expiry-run', expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    return judge_behaviour(base, simulated(scenario, expectation, stated | (ends or {}), **options), expectation)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class SchoolLockoutTest(unittest.TestCase):
+    def test_the_lockout_is_read_on_a_channelling_dummy_and_timed_from_the_interrupting_cast(self):
+        scenario, expectations = school_lockout_scenario(CLASS_FILE, lockout_entry())
+        run.validate(scenario)
+        expectation = expectations[0]
+        self.assertEqual((expectation.label, expectation.check, expectation.model['observe_metric']),
+                         (f'{DIVINE_FORCE} {BEHAVIOUR_EXPIRY} lockout', BEHAVIOUR_EXPIRY, LOCKOUT_METRIC))
+        arm = expectation.model['arms'][0]
+        self.assertEqual((arm['expected_ms'], arm['applied_label'], arm['before_margin_ms'], arm['after_margin_ms']),
+                         (3000.0, None, 124, 26))
+        self.assertEqual([label.split()[-3:] for label, _ in arm['requires']],
+                         [['lockout', 'before', 'cast'], ['channel', 'before', 'cast']])
+        steps = scenario['steps']
+        channel = next(index for index, step in enumerate(steps) if step.get('spell') == EVOCATION)
+        act = next(index for index, step in enumerate(steps) if step.get('label') == arm['act_label'])
+        self.assertLess(channel, act)
+        self.assertEqual((steps[channel]['actor'], steps[act]['spell'], steps[act]['target']),
+                         ('dummy', 807805, 'dummy'))
+        reads = [step for step in steps[act + 1:] if step['action'] == 'assert']
+        self.assertEqual({(step['actor'], step['metric'], step['school_mask']) for step in reads},
+                         {('dummy', LOCKOUT_METRIC, 64)})
+        self.assertEqual([step['ms'] for step in steps[act + 1:] if step['action'] == 'wait'], [2876, 150])
+
+    def test_a_conformant_lockout_is_ok(self):
+        for gap in (0.0, CLOCK_STEP_MS):
+            with self.subTest(gap=gap):
+                self.assertEqual(lockout_judged(gap_ms=gap).status, 'ok')
+
+    def test_seeded_lockout_held_by_the_stun_or_shortened_alerts(self):
+        self.assertEqual(lockout_judged({'cast': 6000.0}).status, 'alert')
+        self.assertEqual(lockout_judged({'cast': 3000.0 - shift_of(3000.0)}).status, 'alert')
+        self.assertEqual(lockout_judged({'cast': 0.0}).status, 'alert')
+
+    def test_a_dummy_that_was_not_channelling_is_unmeasured(self):
+        scenario, expectations = school_lockout_scenario(CLASS_FILE, lockout_entry())
+        expectation = expectations[0]
+        channel = expectation.model['arms'][0]['requires'][1][0]
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'expiry-run', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        found = simulated(scenario, expectation, {'cast': 3000.0}, values={channel: 0.0})
+        self.assertEqual(judge_behaviour(base, found, expectation).status, 'unmeasured')
+
+    def test_a_spell_an_interrupt_cannot_stop_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'not a channel an interrupt stops'):
+            school_lockout_scenario(CLASS_FILE, {**lockout_entry(), 'channel_spell': FROSTBOLT})
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')

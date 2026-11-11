@@ -1392,6 +1392,9 @@ with a base amount of 1000 and requires `spell`; `periodic: true` selects the na
 `stealth_detection` reads native general stealth detection. `can_detect` requires `target` and invokes
 the observer's native `CanSeeOrDetect` check; neither metric covers client rendering.
 
+`school_prohibited` reads a creature's native school lockout (`Creature::IsSpellProhibited`) for `school_mask`
+(1-127): 1 while an interrupt keeps that school locked, 0 otherwise.
+
 `ascension_dungeon_difficulty_packet` sends the one-byte Ascension portrait-menu request through the
 real early receive hook and session queue; follow it with a wait before teleporting. The native
 `dungeon_difficulty_packet` remains available for Normal and Heroic. `nearby_creature_max_health`

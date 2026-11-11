@@ -146,7 +146,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'carried_money',
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
-    'spell_hit_bonus_taken', 'rooted', 'stunned', 'spell_cast_count', 'spell_go_count', 'cast_failure',
+    'spell_hit_bonus_taken', 'rooted', 'stunned', 'school_prohibited', 'spell_cast_count', 'spell_go_count',
+    'cast_failure',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
     'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
@@ -243,7 +244,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries',
-                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'victim_state'} \
+                  'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'victim_state', 'school_mask'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -1187,6 +1188,8 @@ def validate(scenario, clock=REAL_CLOCK):
                           'distance_2d', 'can_detect'} \
                     or metric.startswith('script_'):
                 require('target' in step, f'{where}: damage metric needs target')
+            if metric == 'school_prohibited':
+                number(step.get('school_mask'), f'{where}.school_mask', 1, 127, True)
             if metric == 'aura_proc_rate':
                 require('target' in step, f'{where}: {metric} metric needs target')
                 number(step.get('type_mask'), f'{where}.type_mask', 1, 2**32 - 1, True)

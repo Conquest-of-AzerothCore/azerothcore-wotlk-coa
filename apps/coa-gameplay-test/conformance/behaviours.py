@@ -74,7 +74,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
-        'script_hit', 'taken_outcome', 'charm_immunity')
+        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -4777,6 +4777,9 @@ class TakenArm:
     debt_removed_pct: int | None = None
     strikes: int | None = None
     opening_casts: tuple[tuple[int, str], ...] = ()
+    select: str | None = None
+    select_settle_ms: int = 0
+    checks: tuple[tuple[tuple[str, object], ...], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -4805,6 +4808,7 @@ class TakenHitSpec:
     learn: tuple[int, ...] = ()
     label_suffix: str = ''
     debt_ends: bool = False
+    targets: tuple[tuple[str, float], ...] = ()
 
 
 def taken_hit_label(spec: TakenHitSpec) -> str:
@@ -4854,6 +4858,12 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
         steps += hit_ratio_cast(records, spell, CASTER, target)
     if arm.opening_casts:
         steps.append({'action': 'wait', 'label': f'{arm.name} opening settle', 'ms': TAKEN_HIT_OPENING_SETTLE_MS})
+    if arm.select:
+        steps += [{'action': 'select', 'actor': CASTER, 'target': arm.select},
+                  {'action': 'wait', 'label': f'{arm.name} select settle', 'ms': arm.select_settle_ms}]
+    for index, check in enumerate(arm.checks):
+        steps.append({'action': 'assert', 'label': taken_hit_mark(spec, arm.name, 'check', str(index)),
+                      'actor': CASTER, **dict(check)})
     if arm.absorb == 'formula':
         for term_index, term in enumerate(spec.absorb_terms):
             for read_index, (metric, fields) in enumerate(term.reads):
@@ -4896,7 +4906,8 @@ def taken_hit_validate(spec: TakenHitSpec):
     names = [arm.name for arm in spec.arms]
     if len(set(names)) != len(names) or len(names) < 2:
         raise ValueError(f'{spec.spell} taken_hit needs at least two distinct arms, here {names}')
-    if len({(arm.auras, arm.opening_casts, arm.casts, arm.after_casts) for arm in spec.arms}) != len(spec.arms):
+    if len({(arm.auras, arm.opening_casts, arm.casts, arm.after_casts, arm.select)
+            for arm in spec.arms}) != len(spec.arms):
         raise ValueError(f'{spec.spell} taken_hit arms are identical; the contrast would measure nothing')
     if spec.judge == 'damage_ratio' and names != list(HIT_RATIO_ARMS):
         raise ValueError(f'{spec.spell} taken_hit damage_ratio compares exactly the arms {HIT_RATIO_ARMS}')
@@ -4916,6 +4927,18 @@ def taken_hit_validate(spec: TakenHitSpec):
         raise ValueError(f'{spec.spell} taken_hit judges when a debt ends without an arm that reads one')
     if spec.caster_health_pct is not None and not 0 < spec.caster_health_pct <= 100:
         raise ValueError(f'{spec.spell} taken_hit caster health {spec.caster_health_pct} is not a percent')
+    fixtures = [name for name, _ in spec.targets]
+    if len(set(fixtures)) != len(fixtures) or {STRIKER, TARGET, CASTER} & set(fixtures):
+        raise ValueError(f'{spec.spell} taken_hit targets {fixtures} must be distinct new fixture ids')
+    for arm in spec.arms:
+        if arm.select is not None and arm.select not in fixtures:
+            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} selects {arm.select!r}, not one of its targets')
+        if arm.select is None and arm.select_settle_ms:
+            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} settles after a selection it does not make')
+        for check in arm.checks:
+            named = dict(check)
+            if 'metric' not in named or not {'equals', 'min', 'max'} & set(named):
+                raise ValueError(f'{spec.spell} taken_hit arm {arm.name} check {named} needs a metric and a bound')
 
 
 def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list[Expectation]]:
@@ -4934,6 +4957,7 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
                'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True}
     targets = {target for arm in spec.arms for _, target in (*arm.opening_casts, *arm.casts, *arm.after_casts)}
     creatures = [striker] + ([creature_fixture(class_file)] if TARGET in targets else [])
+    creatures += [{**creature_fixture(class_file), 'id': name, 'distance': distance} for name, distance in spec.targets]
     health = (f', the caster held at {spec.caster_health_pct}% of {spec.caster_max_health or FIXTURE_MAX_HEALTH} '
               f'health before every trial' if spec.caster_health_pct is not None else '')
     scenario = {
@@ -4990,7 +5014,7 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
 
 def taken_arm(raw: dict) -> TakenArm:
     unknown = set(raw) - {'name', 'auras', 'casts', 'after_casts', 'absorb', 'share_pct', 'debt_removed_pct',
-                          'strikes', 'opening_casts'}
+                          'strikes', 'opening_casts', 'select', 'select_settle_ms', 'checks'}
     if unknown:
         raise ValueError(f'taken_hit arm fields {sorted(unknown)} are not known')
     return TakenArm(raw['name'], tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ())),
@@ -4998,7 +5022,9 @@ def taken_arm(raw: dict) -> TakenArm:
                     tuple((int(spell), str(target)) for spell, target in raw.get('after_casts', ())),
                     raw.get('absorb', 'none'), int(raw.get('share_pct', 0)), raw.get('debt_removed_pct'),
                     raw.get('strikes'),
-                    tuple((int(spell), str(target)) for spell, target in raw.get('opening_casts', ())))
+                    tuple((int(spell), str(target)) for spell, target in raw.get('opening_casts', ())),
+                    raw.get('select'), int(raw.get('select_settle_ms', 0)),
+                    tuple(tuple(sorted(check.items())) for check in raw.get('checks', ())))
 
 
 def absorb_term(raw: dict) -> AbsorbTerm:
@@ -5015,7 +5041,8 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         entry.get('caster_max_health'), float(entry.get('absorb_constant', 0.0)),
                         tuple(absorb_term(term) for term in entry.get('absorb_terms', ())),
                         entry.get('debt_spell', 0), tuple(entry.get('learn', ())), entry.get('label_suffix', ''),
-                        entry.get('debt_ends', False))
+                        entry.get('debt_ends', False),
+                        tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())))
 
 
 THREAT_REDIRECT_SWINGS = 3

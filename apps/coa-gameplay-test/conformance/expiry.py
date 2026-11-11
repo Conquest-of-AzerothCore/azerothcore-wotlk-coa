@@ -4,14 +4,14 @@ from pathlib import Path
 
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
                         STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, behaviour_entry, cast_applies_aura_player,
-                        cast_applies_aura_spec,
+                        cast_applies_aura_spec, cast_gate_power_step,
                         cast_applies_aura_steps, duration_refresh_spec, duration_spec, extra_cast_setup,
                         extra_cast_steps, mechanic_duration_spec, prose_rule)
 from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fixture, records_of, timed
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import FORCED_CRIT_RATING, TARGET, Expectation, armed_for, dataset, facts_of
+from values import FORCED_CRIT_RATING, TARGET, Expectation, armed_for, dataset, facts_of, required_aura_steps
 
 BEHAVIOUR_EXPIRY = 'behaviour_expiry'
 EXPIRY_KIND = 'expiry'
@@ -27,6 +27,11 @@ ACT_AFTER_STEPS = 4
 APPLY_WITHIN_MS = 2000
 WITHOUT, WITH = 'without', 'with'
 BEHAVIOUR_KINDS = frozenset({'cast_applies_aura', 'duration_refresh', 'duration_ratio', 'duration'})
+SCHOOL_LOCKOUT = 'school_lockout'
+LOCKOUT_METRIC = 'school_prohibited'
+SILENCE_PREVENTION = 1
+CHANNEL_INTERRUPT = 0x8
+CHANNEL_SETTLE_MS = 300
 TRIGGER_KINDS = frozenset({'duration_delta'})
 
 
@@ -107,17 +112,18 @@ def held_ms(steps: list[dict]) -> int:
     return sum(int(step.get('ms', 0)) for step in steps if step['action'] == 'wait')
 
 
-def pair_steps(arm: ExpiryArm, actor: str, spell: int, caster: str | None = None) -> list[dict]:
+def pair_steps(arm: ExpiryArm, actor: str, spell: int, caster: str | None = None, metric: str = PRESENCE_METRIC,
+               fields: dict | None = None) -> list[dict]:
     lead = round(arm.expected_ms) - arm.before_margin_ms - arm.held_ms
     if lead < 0:
         raise NotModelled(f'{arm.before_label}: the steps after the act already wait {arm.held_ms} ms, past the '
                           f'reading {arm.before_margin_ms} ms before the stated end of {arm.expected_ms:g} ms')
-    fields = reading_fields(spell, caster)
+    fields = reading_fields(spell, caster) if fields is None else fields
     waits = [{'action': 'wait', 'label': f'{arm.before_label} wait', 'ms': lead}] if lead else []
-    return waits + [measurement(arm.before_label, actor, PRESENCE_METRIC, **fields),
+    return waits + [measurement(arm.before_label, actor, metric, **fields),
                     {'action': 'wait', 'label': f'{arm.after_label} wait',
                      'ms': arm.before_margin_ms + arm.after_margin_ms},
-                    measurement(arm.after_label, actor, PRESENCE_METRIC, **fields)]
+                    measurement(arm.after_label, actor, metric, **fields)]
 
 
 def arm_model(arm: ExpiryArm) -> dict:
@@ -129,8 +135,8 @@ def arm_model(arm: ExpiryArm) -> dict:
 
 
 def expiry_expectation(label: str, spell: int, rank_id: int, displayed: str, rule: str,
-                       arms: list[ExpiryArm]) -> Expectation:
-    model = {'kind': EXPIRY_KIND, 'observe_metric': PRESENCE_METRIC, 'arms': [arm_model(arm) for arm in arms]}
+                       arms: list[ExpiryArm], observe_metric: str = PRESENCE_METRIC) -> Expectation:
+    model = {'kind': EXPIRY_KIND, 'observe_metric': observe_metric, 'arms': [arm_model(arm) for arm in arms]}
     return Expectation(label, BEHAVIOUR_EXPIRY, spell, rank_id, None, displayed, rule, model)
 
 
@@ -161,7 +167,8 @@ class ArmReading:
     detail: dict
 
 
-def arm_reading(values: dict, steps: list[dict], max_step: float | None, run_key: str, arm: dict) -> ArmReading:
+def arm_reading(values: dict, steps: list[dict], max_step: float | None, run_key: str, arm: dict,
+                metric: str = PRESENCE_METRIC) -> ArmReading:
     name, expected = arm['name'], arm['expected_ms']
     before, after = values.get(arm['before_label']), values.get(arm['after_label'])
     if before is None or after is None:
@@ -187,7 +194,7 @@ def arm_reading(values: dict, steps: list[dict], max_step: float | None, run_key
     shift = arm['shift_ms']
     detail = {'name': name, 'expected_ms': expected, 'before': before, 'after': after,
               'before_ms': [before_low, before_high], 'after_ms': [after_low, after_high], 'shift_ms': shift}
-    placed = (f'{name}: {PRESENCE_METRIC} read {before:g} between {before_low:g} and {before_high:g} ms after the '
+    placed = (f'{name}: {metric} read {before:g} between {before_low:g} and {before_high:g} ms after the '
               f'effect began and {after:g} between {after_low:g} and {after_high:g} ms after it')
     if before_high >= expected or after_low < expected + max_step:
         return ArmReading('unmeasured', f'{placed}; the readings do not bracket the stated end of {expected:g} ms '
@@ -206,7 +213,8 @@ def arm_reading(values: dict, steps: list[dict], max_step: float | None, run_key
 
 def expiry_readings(values: dict, steps: list[dict], max_step: float | None, run_key: str,
                     model: dict) -> list[ArmReading]:
-    return [arm_reading(values, steps, max_step, run_key, arm) for arm in model['arms']]
+    return [arm_reading(values, steps, max_step, run_key, arm, model.get('observe_metric', PRESENCE_METRIC))
+            for arm in model['arms']]
 
 
 def combined_status(readings: list[ArmReading]) -> str:
@@ -459,6 +467,68 @@ def trigger_duration_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
                                                    f'{entry["trigger_text"]} ({aura})', [without, with_arm])]
 
 
+@dataclass(frozen=True)
+class SchoolLockoutSpec:
+    spell: int
+    name: str
+    quote: str
+    interrupt_spell: int
+    cast_spell: int
+    channel_spell: int
+    label_suffix: str = ''
+
+
+def school_lockout_spec(entry: dict) -> SchoolLockoutSpec:
+    return SchoolLockoutSpec(entry['spell'], entry['name'], entry['quote'], entry['interrupt_spell'],
+                             entry['cast_spell'], entry['channel_spell'], entry.get('label_suffix', ''))
+
+
+def interruptible_channel_school(records: Records, spell: int) -> int:
+    prevention = records.field('Spell', spell, 'PreventionType')
+    flags = records.field('Spell', spell, 'ChannelInterruptFlags')
+    if prevention != SILENCE_PREVENTION or not flags & CHANNEL_INTERRUPT:
+        raise ValueError(f'{spell} is not a channel an interrupt stops (PreventionType {prevention}, '
+                         f'ChannelInterruptFlags {flags})')
+    return int(records.field('Spell', spell, 'SchoolMask'))
+
+
+def school_lockout_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    spec = school_lockout_spec(entry)
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    expected_ms = records.duration_ms(spec.interrupt_spell)
+    behaviour_entry(records, spec.spell, spec.name, SCHOOL_LOCKOUT, spec.quote, expected_ms)
+    school = interruptible_channel_school(records, spec.channel_spell)
+    facts = facts_of(records, spec.cast_spell)
+    if facts.cast_time_ms:
+        raise NotModelled(f'{spec.cast_spell} has a cast time; the lockout would not begin within its cast step')
+    prefix = f'{spec.spell} {spec.interrupt_spell}'
+    arm = act_anchored_arm(prefix, 'cast', expected_ms, ((f'{prefix} lockout before cast', 0.0),
+                                                         (f'{prefix} channel before cast', 1.0)))
+    fields = {'school_mask': school}
+    cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
+                 (spec.spell, spec.cast_spell))]
+             + [{'action': 'cast', 'actor': TARGET, 'spell': spec.channel_spell},
+                {'action': 'wait', 'label': f'{prefix} channel settle', 'ms': CHANNEL_SETTLE_MS},
+                measurement(f'{prefix} channel before cast', TARGET, 'casting'),
+                measurement(f'{prefix} lockout before cast', TARGET, LOCKOUT_METRIC, **fields)]
+             + cast_gate_power_step(facts) + required_aura_steps(facts) + [acted(cast, arm)]
+             + pair_steps(arm, TARGET, spec.interrupt_spell, metric=LOCKOUT_METRIC, fields=fields))
+    contract = (f'The {TARGET} channels {spec.channel_spell} (school mask {school}); {spec.cast_spell} cast at it '
+                f'interrupts the channel through {spec.interrupt_spell}, whose duration locks that school: locked '
+                f'{arm.before_margin_ms} ms before the stated {expected_ms:g} ms end and free {arm.after_margin_ms} '
+                f'ms after it, timed from the cast; not locked while the channel runs before the cast.')
+    scenario = expiry_scenario_shell(
+        class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour school lockout', contract,
+        steps)
+    scenario['creatures'] = [creature_fixture(class_file)]
+    label = expiry_label(spec.spell) + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    return finished(scenario), [expiry_expectation(label, spec.spell, spec.interrupt_spell, str(expected_ms),
+                                                   prose_rule(spec.quote, spec.spell), [arm], LOCKOUT_METRIC)]
+
+
+BEHAVIOUR_PAIRS = {SCHOOL_LOCKOUT: school_lockout_scenario}
 BEHAVIOUR_EXPIRIES = {'cast_applies_aura': cast_applies_aura_expiry, 'duration_refresh': duration_refresh_expiry,
                       'duration_ratio': duration_ratio_expiry, 'duration': duration_delta_expiry}
 TRIGGER_EXPIRIES = {'duration_delta': trigger_duration_expiry}

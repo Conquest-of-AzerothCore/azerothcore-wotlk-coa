@@ -740,7 +740,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 256)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 258)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -7081,6 +7081,61 @@ class TakenHitOpeningCastTests(unittest.TestCase):
     def test_arms_that_differ_only_by_an_opening_cast_are_distinct(self):
         spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'copies'))
         self.assertNotEqual(spec.arms[0], spec.arms[1])
+        taken_hit_scenario(CLASS_FILE, spec)
+
+
+
+class TakenHitSelectionTests(unittest.TestCase):
+    def test_copies_are_placed_by_selecting_a_dummy_at_each_arm_distance(self):
+        spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'radius'))
+        scenario, _ = taken_hit_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual({creature['id']: creature['distance'] for creature in scenario['creatures']
+                          if creature['id'] in ('near', 'far')}, {'near': 16.0, 'far': 24.0})
+        steps = scenario['steps']
+        selections = [index for index, step in enumerate(steps) if step['action'] == 'select']
+        self.assertEqual([steps[index]['target'] for index in selections], ['near', 'far'])
+        self.assertLess(cast_indices(steps, 1397742)[0], selections[0])
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(len([index for index in strikes if selections[0] < index < selections[1]]), spec.trials)
+        checks = [step for step in steps if ' check ' in step.get('label', '')]
+        self.assertTrue(all(step['actor'] == CASTER and 'equals' in step for step in checks))
+        self.assertTrue(all(selections[0] < steps.index(step) for step in checks))
+
+    def test_seeded_reduction_beyond_the_radius_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(1397742, 'taken_hit', 'radius'))
+        expectation = expectations[0]
+        reads = expectation.model['reads']
+
+        def values(far_hit: float) -> dict:
+            found = {}
+            for arm, marks in reads.items():
+                for index, (total, count) in enumerate(marks):
+                    found[total] = index * (890.0 if arm == 'control' else far_hit)
+                    found[count] = float(index)
+            return found
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(1100.0)), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(890.0)), expectation).status,
+                         'alert')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(990.0)), expectation).status,
+                         'alert')
+
+    def test_a_selection_outside_the_targets_or_a_check_without_a_bound_is_refused(self):
+        entry = r1a_entry(1397742, 'taken_hit', 'radius')
+        unknown = {**entry, 'arms': [entry['arms'][0], {**entry['arms'][1], 'select': 'dummy'}]}
+        with self.assertRaisesRegex(ValueError, 'not one of its targets'):
+            taken_hit_scenario(CLASS_FILE, taken_hit_spec(unknown))
+        unbounded = {**entry, 'arms': [entry['arms'][0], {**entry['arms'][1],
+                                                          'checks': [{'metric': 'owned_creature_count'}]}]}
+        with self.assertRaisesRegex(ValueError, 'needs a metric and a bound'):
+            taken_hit_scenario(CLASS_FILE, taken_hit_spec(unbounded))
+
+    def test_arms_that_differ_only_by_their_selection_are_distinct(self):
+        entry = r1a_entry(1397742, 'taken_hit', 'radius')
+        same = {**entry, 'arms': [entry['arms'][0], {**entry['arms'][1], 'name': 'treatment', 'checks': []}]}
+        spec = taken_hit_spec(same)
+        self.assertNotEqual(spec.arms[0].select, spec.arms[1].select)
         taken_hit_scenario(CLASS_FILE, spec)
 
 

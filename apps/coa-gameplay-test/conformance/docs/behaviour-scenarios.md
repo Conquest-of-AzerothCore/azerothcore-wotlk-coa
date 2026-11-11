@@ -1304,3 +1304,20 @@ Four kinds can set auras around their casts. Without the fields every scenario i
   baseline interval by each haste factor (`relation: inverse`) within `tolerance` ms.
 - `taken_hit` arm `opening_casts`: `[spell, target]` cast once before the arm's first read, followed by a 1500 ms
   settle. Testament of Hope 1397742 summons its two copies once, before the treatment arm's strikes.
+
+### School lockouts and positioned taken hits (ADR 0171)
+
+- `school_lockout` (`expiry.school_lockout_scenario`): an interrupt's school lockout on a creature, judged as an
+  expiry pair. The dummy channels `channel_spell` on itself (refused unless its PreventionType is silence and its
+  ChannelInterruptFlags hold the interrupt flag); the caster then casts `cast_spell`, an instant spell, at it. The
+  stated end is the DBC duration of `interrupt_spell`, timed from the cast (an act-anchored arm), and read with the
+  harness metric `school_prohibited` (`Creature::IsSpellProhibited`) for the channel's school mask. The pair needs
+  the dummy channelling and its school free just before the cast. Divine Force 806153: 807805 casts
+  SPELL_INTERRUPT_NONPLAYER 32747 at a creature target; Evocation 12051's Arcane school is locked 2876 ms after the
+  cast and free 3026 ms after it, against 3000 ms. The 6 s stun of the same cast does not change that read.
+- `taken_hit` `targets` (`[[id, distance], ...]`, extra stationary dummies at that distance) and arm fields
+  `select` (one of those ids, selected by the caster after the opening casts), `select_settle_ms` (wait after the
+  selection) and `checks` (harness asserts after it, each a metric with a bound; a failed check fails the
+  scenario). Testament of Hope 1397742's copies attack the owner's selected enemy, so selecting a dummy places them:
+  within 16.5 yd with `near` (16 yd) selected, beyond 20 yd with `far` (24 yd); the strike hits 890 near and 1100
+  far, judged as 1 / 0.81.

@@ -16,7 +16,7 @@ from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_F
 from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_coverage_lines, fragment_entries,
                       load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
-from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
+from expiry import BEHAVIOUR_PAIRS, EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, gate_stacks, hit_parts, melee_scenario,
@@ -163,7 +163,8 @@ def add_passive(writer: ManifestWriter, spell: ClassSpell):
 
 def add_behaviour(writer: ManifestWriter, entry: dict):
     class_file = writer.class_file
-    scenario, expectations = behaviour_scenario(class_file, entry)
+    build = BEHAVIOUR_PAIRS.get(entry.get('kind'), behaviour_scenario)
+    scenario, expectations = build(class_file, entry)
     key = scenario_key(class_file['name'], 'behaviour', entry['spell'], entry.get('kind', ''),
                         entry.get('variant', ''))
     writer.add(key, 'behaviour', None, entry['spell'], expectations, scenario, name=entry['name'])
