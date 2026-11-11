@@ -4512,6 +4512,40 @@
       "control": {}, "treatment": {"auras": [[804904, 1], [804922, 1]]},
       "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
       "expected_source": "Oath: Righteous Lunge 804904 Effect[0] and Effect[2] (aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 SPELLMOD_DAMAGE, EffectBasePoints 4 and 29: +5% and +30%) and Oath: Condemn 804922 Effect[2] (aura 108, MiscValue 0, EffectBasePoints 29: +30%) carry EffectSpellClassMask word 2 bit 128, the Oath Breaker mask (AscensionTemplar Breaker, SpellFamilyFlags[2] 128). Player::ApplySpellMod multiplies the percent mods, as the 572027 readback ground truth shows (804904 alone 1.364, 804922 alone 1.30, both 1419 from 800): 1.05 x 1.30 x 1.30 = 1.7745 with both Oaths held, against 1 with none. Both Oaths are set before every treatment cast and the cast removes them (ClearOaths, AscensionTemplarAbilities.cpp:189-191), which the spell's oath_consumption entry reads as 0 stacks after a cast. Benediction 578276 (rank 8, the level 60 rank, SpellFamilyFlags[2] 128) heals the ally with Effect[1] SPELL_EFFECT_HEAL ${$m2+0+$STA*0.25+$SP*0.3}; Unit::SpellHealingBonusDone applies the same SPELLMOD_DAMAGE list to a direct heal. 804922's flat Effect[1] mod (MiscValue 12) is keyed to word 1 bit 2048, which Benediction does not carry. A spell power fixture of 20000 makes the $SP*0.3 part dominate the die, as in Disciplined Mind's Benediction ratio. Only non-critical heals are compared. The ratio of two arms of the same rank does not depend on the rank's per-level term."
+    },
+    {
+      "spell": 805415, "name": "Scarlet Champion", "kind": "metric_delta", "variant": "stack_cap",
+      "label_suffix": "stack_cap", "quote": "stacking $805416u times", "expected": 5, "before_expected": 0,
+      "trigger_spell": 807268, "target": "dummy", "metric": "aura_stacks", "fields": {"spell": 805416},
+      "force_crit": "melee", "setup_casts": [807268, 807268, 807268, 807268, 807268], "setup_wait_ms": 5100, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarEvents.cpp:90-91 (Check, case 805415): a damaging critical hit, once per 1 s (State(player).cooldowns); :177-181 (Proc) casts 805416 on the caster and, when GetAuraCount(805416) >= 5 (Unit.cpp:6760-6776 sums the stacks) and High General 524617 is absent, casts 524617. Argent Blade 807268 is cast at the dummy with the forced melee crit rating, as the internal_cooldown_gate entry does; the class fixture's hit and expertise ratings remove misses, dodges and parries, so every cast is one crit. Each setup cast waits 5100 ms, past Argent Blade's 5000 ms RecoveryTime and the 1 s gate, so the trigger cast lands too (a first run at 1100 ms left it on cooldown, one crit short). The before phase casts the same sequence without 805415 (control arm). Six crits read the cap of 5 stacks ($805416u, 805416 StackAmount 5), not 6."
+    },
+    {
+      "spell": 805415, "name": "Scarlet Champion", "kind": "metric_delta", "variant": "high_general",
+      "label_suffix": "high_general", "quote": "At 5 stacks, you are granted High General.", "expected": 1, "before_expected": 0,
+      "trigger_spell": 807268, "target": "dummy", "metric": "aura", "fields": {"spell": 524617},
+      "force_crit": "melee", "setup_casts": [807268, 807268, 807268, 807268], "setup_wait_ms": 5100, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarEvents.cpp:90-91 (Check, case 805415): a damaging critical hit, once per 1 s (State(player).cooldowns); :177-181 (Proc) casts 805416 on the caster and, when GetAuraCount(805416) >= 5 (Unit.cpp:6760-6776 sums the stacks) and High General 524617 is absent, casts 524617. Argent Blade 807268 is cast at the dummy with the forced melee crit rating, as the internal_cooldown_gate entry does; the class fixture's hit and expertise ratings remove misses, dodges and parries, so every cast is one crit. Each setup cast waits 5100 ms, past Argent Blade's 5000 ms RecoveryTime and the 1 s gate, so the trigger cast lands too (a first run at 1100 ms left it on cooldown, one crit short). The before phase casts the same sequence without 805415 (control arm). Five crits reach 5 stacks and grant High General 524617."
+    },
+    {
+      "spell": 805415, "name": "Scarlet Champion", "kind": "metric_delta", "variant": "high_general_four",
+      "label_suffix": "high_general_four", "quote": "At 5 stacks, you are granted High General.", "expected": 0, "before_expected": 0,
+      "trigger_spell": 807268, "target": "dummy", "metric": "aura", "fields": {"spell": 524617},
+      "force_crit": "melee", "setup_casts": [807268, 807268, 807268], "setup_wait_ms": 5100, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarEvents.cpp:90-91 (Check, case 805415): a damaging critical hit, once per 1 s (State(player).cooldowns); :177-181 (Proc) casts 805416 on the caster and, when GetAuraCount(805416) >= 5 (Unit.cpp:6760-6776 sums the stacks) and High General 524617 is absent, casts 524617. Argent Blade 807268 is cast at the dummy with the forced melee crit rating, as the internal_cooldown_gate entry does; the class fixture's hit and expertise ratings remove misses, dodges and parries, so every cast is one crit. Each setup cast waits 5100 ms, past Argent Blade's 5000 ms RecoveryTime and the 1 s gate, so the trigger cast lands too (a first run at 1100 ms left it on cooldown, one crit short). The before phase casts the same sequence without 805415 (control arm). Four crits leave 4 stacks (the four_stacks entry) and no High General: the grant waits for the fifth."
+    },
+    {
+      "spell": 805415, "name": "Scarlet Champion", "kind": "metric_delta", "variant": "four_stacks",
+      "label_suffix": "four_stacks", "quote": "At 5 stacks, you are granted High General.", "expected": 4, "before_expected": 0,
+      "trigger_spell": 807268, "target": "dummy", "metric": "aura_stacks", "fields": {"spell": 805416},
+      "force_crit": "melee", "setup_casts": [807268, 807268, 807268], "setup_wait_ms": 5100, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarEvents.cpp:90-91 (Check, case 805415): a damaging critical hit, once per 1 s (State(player).cooldowns); :177-181 (Proc) casts 805416 on the caster and, when GetAuraCount(805416) >= 5 (Unit.cpp:6760-6776 sums the stacks) and High General 524617 is absent, casts 524617. Argent Blade 807268 is cast at the dummy with the forced melee crit rating, as the internal_cooldown_gate entry does; the class fixture's hit and expertise ratings remove misses, dodges and parries, so every cast is one crit. Each setup cast waits 5100 ms, past Argent Blade's 5000 ms RecoveryTime and the 1 s gate, so the trigger cast lands too (a first run at 1100 ms left it on cooldown, one crit short). The before phase casts the same sequence without 805415 (control arm). Four crits read 4 stacks, the state in which the high_general_four entry reads no High General."
+    },
+    {
+      "spell": 805415, "name": "Scarlet Champion", "kind": "cast_applies_aura", "quote": "for $805416d",
+      "expected_ms": 20000, "applied_aura": 805416, "target": "caster", "cast_spell": 807268, "cast_target": "dummy",
+      "force_crit": "melee",
+      "source": "805416 DurationIndex 18 (SpellDuration.dbc 20000 ms, $805416d). AscensionTemplarEvents.cpp:90-91 (Check, case 805415): a damaging critical hit, once per 1 s (State(player).cooldowns); :177-181 (Proc) casts 805416 on the caster and, when GetAuraCount(805416) >= 5 (Unit.cpp:6760-6776 sums the stacks) and High General 524617 is absent, casts 524617. Argent Blade 807268 is cast at the dummy with the forced melee crit rating, as the internal_cooldown_gate entry does; the class fixture's hit and expertise ratings remove misses, dodges and parries, so every cast is one crit. Each setup cast waits 5100 ms, past Argent Blade's 5000 ms RecoveryTime and the 1 s gate, so the trigger cast lands too (a first run at 1100 ms left it on cooldown, one crit short). The before phase casts the same sequence without 805415 (control arm). One forced-crit Argent Blade applies 805416; its expiry pair is timed from that cast (ADR 0182)."
     }
   ],
   "player_observations": [

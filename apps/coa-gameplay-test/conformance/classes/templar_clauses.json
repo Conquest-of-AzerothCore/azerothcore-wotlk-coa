@@ -4210,7 +4210,8 @@
     "spell": 805415,
     "clause": "stacking $805416u times",
     "labels": [
-      "805415 max_stacks 805416 #2"
+      "805415 max_stacks 805416 #2",
+      "805415 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -4218,7 +4219,8 @@
     "spell": 805415,
     "clause": "for $805416d",
     "labels": [
-      "805415 spell_duration 805416 #1"
+      "805415 spell_duration 805416 #1",
+      "805415 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -4234,7 +4236,9 @@
     "spell": 805415,
     "clause": "At 5 stacks, you are granted High General.@s:524617:0@",
     "labels": [
-      "805415 effect_value 524617e0 #3"
+      "805415 behaviour_metric_delta high_general",
+      "805415 behaviour_metric_delta high_general_four",
+      "805415 behaviour_metric_delta four_stacks"
     ],
     "kind": "claim"
   },
