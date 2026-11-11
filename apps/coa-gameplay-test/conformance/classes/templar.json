@@ -3926,6 +3926,38 @@
       "applied_aura": 807004,
       "target": "caster",
       "observe_source": "AscensionTemplarAuras.cpp:122-128: when Tome of Light 805422 applies to the caster it resets Barrier of Light 805417 and Tranquil Circle 801205 and casts Tome of Light: Barrier of Light 806354 and Tome of Light: Tranquil Circle 807004 on the caster. 807004 DurationIndex 9 (30000 ms, its embedded $d). The expiry pair reads 807004 absent before the Tome cast, present before its stated end and absent after it."
+    },
+    {
+      "spell": 805422,
+      "name": "Tome of Light",
+      "kind": "cost_gate",
+      "variant": "barrier",
+      "label_suffix": "barrier",
+      "quote": "resets the cooldown of Barrier of Light and Tranquil Circle",
+      "gated_spell": 805417,
+      "resource": "cooldown",
+      "reduction": 90000,
+      "target": "caster",
+      "after_casts": [[805422, "caster"]],
+      "after_wait_ms": 2000,
+      "resets": true,
+      "observe_source": "AscensionTemplarAuras.cpp:122-126: when Tome of Light 805422 applies to the caster, Reduce(player, 805417, INT32_MAX) clears Barrier of Light's running cooldown (AscensionTemplar.cpp:115-122, every known rank of the chain). Barrier of Light 805417 RecoveryTime 90000 ms, no global cooldown on either spell (StartRecoveryTime 0). Arms timed from a Barrier priming cast: 2500 ms later without Tome of Light, refused (SPELL_FAILED_NOT_READY 67); with Tome of Light cast 2000 ms after the priming cast, Barrier goes through 500 ms later."
+    },
+    {
+      "spell": 805422,
+      "name": "Tome of Light",
+      "kind": "cost_gate",
+      "variant": "circle",
+      "label_suffix": "circle",
+      "quote": "resets the cooldown of Barrier of Light and Tranquil Circle",
+      "gated_spell": 801205,
+      "resource": "cooldown",
+      "reduction": 120000,
+      "target": "dummy",
+      "after_casts": [[805422, "caster"]],
+      "after_wait_ms": 2000,
+      "resets": true,
+      "observe_source": "AscensionTemplarAuras.cpp:122-126: Tome of Light 805422 also calls Reduce(player, 801205, INT32_MAX) on Tranquil Circle. Tranquil Circle 801205 RecoveryTime 120000 ms, ManaCost 30 Energy, cast at the dummy. Arms as for Barrier: 2500 ms after the priming cast, refused without Tome of Light, through with Tome cast at 2000 ms."
     }
   ],
   "player_observations": [

@@ -4203,7 +4203,12 @@
   {
     "spell": 805422,
     "clause": "resets the cooldown of Barrier of Light and Tranquil Circle",
-    "labels": [],
+    "labels": [
+      "805422 cost_gate 805417 barrier without",
+      "805422 cost_gate 805417 barrier with",
+      "805422 cost_gate 801205 circle without",
+      "805422 cost_gate 801205 circle with"
+    ],
     "kind": "claim"
   },
   {
