@@ -1325,15 +1325,23 @@ namespace
             if (summon->GetEntry() != NPC_DAMNED_WIGHT)
                 return;
             summon->SetReactState(REACT_PASSIVE);
-            summon->CastSpell(me, SPELL_SOUL_FLAY_BEAM, true);
-            summon->CastSpell(summon, SPELL_BIRTH, true);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->CastSpell(summon, SPELL_BIRTH, true);
+            }, 400ms);
+            ObjectGuid bossGuid = me->GetGUID();
+            summon->m_Events.AddEventAtOffset([summon, bossGuid]()
+            {
+                if (Creature* boss = ObjectAccessor::GetCreature(*summon, bossGuid))
+                    summon->CastSpell(boss, SPELL_SOUL_FLAY_BEAM, true);
+            }, 1800ms);
             summon->m_Events.AddEventAtOffset([summon]()
             {
                 summon->InterruptNonMeleeSpells(false);
                 summon->SetReactState(REACT_AGGRESSIVE);
                 if (Player* target = summon->SelectNearestPlayer(150.0f))
                     summon->AI()->AttackStart(target);
-            }, 2s);
+            }, 3s);
         }
 
         void JustDied(Unit* /*killer*/) override
