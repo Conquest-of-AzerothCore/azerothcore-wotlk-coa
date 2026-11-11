@@ -4166,7 +4166,8 @@
     "spell": 805409,
     "clause": "scaling with spell power",
     "labels": [
-      "807274 effect_value 570205e0 #1"
+      "807274 effect_value 570205e0 #1",
+      "805409 behaviour_hit_ratio spell_power"
     ],
     "kind": "claim"
   },

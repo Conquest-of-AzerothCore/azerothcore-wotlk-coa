@@ -4644,6 +4644,14 @@
       "spell": 801463, "name": "Libram of Grace", "kind": "cast_applies_aura", "quote": "for $d",
       "expected_ms": 20000, "applied_aura": 801463, "target": "caster", "cast_spell": 801463, "cast_target": "caster",
       "source": "801463 DurationIndex 18 (SpellDuration.dbc 20000 ms, $d); the Libram applies its own aura on the caster with its instant cast, read absent before it."
+    },
+    {
+      "spell": 805409, "name": "Righteous Tempest", "kind": "hit_ratio", "variant": "spell_power",
+      "label_suffix": "spell_power", "quote": "scaling with spell power", "expected": 1.2773,
+      "cast_spell": 807274, "observe_spell": 570205, "cast_wait_ms": 2000, "learn": [807274],
+      "control": {"auras": [[807274, 0]]}, "treatment": {"auras": [[807274, 0], [1140480, 0], [1140480, 1]]},
+      "critical": false, "trials": 70,
+      "expected_source": "Expected from the hit model (hits.rank_hit, the model of the stored '807274 hit_mean', ok at 172.4 against 172.5): Righteous Tempest 807274's hit 570205 at the reference stats (AP 313, spell power 0) is 100% normalized weapon damage of 2495 plus Effect[0] 154 plus 0.3 x SpellBaseDamageBonusDone(127) (TemplarCoefficients, AscensionTemplarData.h:55, added to the base value at AscensionTemplarContracts.cpp:335-342), tooltip mean 236.53, then 887007's -20% and the dummy's armor: 172.40. The same model with spell power +220 (Power of the Ashtongue 1140480, aura 13, MiscValue 126, EffectBasePoints 219) reads tooltip mean 302.53 and 220.20: 1.2773. A diagnostic readback (20261111-230228) reads 570205's Effect[0] value 154 without the aura and 220 with it. 1140480 lasts 5000 ms (DurationIndex 28), so each trial removes the previous Tempest (807274 to 0 stacks), removes and sets the aura again (a set on a present aura does not restart it; a run without the removal read 1.206), casts 807274 at the dummy and reads 570205's hits 3600 ms later (the hits at 0 to 3000 ms), inside the aura; a first design read 5.5 s and lost the boost on the late hits (1.254). Only non-critical hits."
     }
   ],
   "player_observations": [
