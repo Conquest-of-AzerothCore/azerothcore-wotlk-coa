@@ -23,7 +23,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, IMMUNITY_CASTS,
                         MECHANIC_LAND_ATTEMPTS,
                         NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
-                        SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
+                        SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER, TAKEN_HIT_PVP_LOCATION,
                         BEHAVIOUR_HIT_RATIO, NotModelled, sized_behaviour,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
@@ -741,7 +741,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 297)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 304)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6661,7 +6661,8 @@ def taken_hit_values(model: dict, trial_values) -> dict:
             values.update(dict.fromkeys(labels, 79.0 if term == 0 else 0.0))
         for trial in range(1, model['trials'] + 1):
             delta = trial_values(arm['name'], trial)
-            for key in ('damage', 'count', 'absorb', 'logs', 'paid'):
+            for key in ('damage', 'count', 'absorb', 'logs', 'paid', 'returned', 'returned count', 'returned logs',
+                        'returned absorb', 'returned resist'):
                 if key in totals:
                     totals[key] += delta.get(key, 0.0)
             for key, label in arm['marks'][str(trial)].items():
@@ -6769,6 +6770,96 @@ class TakenHitScenarioTests(unittest.TestCase):
         entry = {**route_entry(92109, 'delay'), 'strikes': 2}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
+
+    def ratio_values(self, model: dict, control: float, treatment: float) -> dict:
+        found = {}
+        for arm, marks in model['reads'].items():
+            for index, (total, count) in enumerate(marks):
+                found[total] = index * (control if arm == 'control' else treatment)
+                found[count] = float(index)
+        return found
+
+    def test_a_player_striker_is_hostile_flagged_and_strikes_beside_the_caster(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(801461, 'players'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        striker = next(player for player in scenario['players'] if player['id'] == STRIKER)
+        self.assertEqual((striker['race'], striker['class']), (2, CLASS_FILE['class_id']))
+        self.assertNotIn(STRIKER, [creature['id'] for creature in scenario['creatures']])
+        self.assertEqual(scenario['location'], TAKEN_HIT_PVP_LOCATION)
+        self.assertEqual(sorted(step['actor'] for step in steps if step['action'] == 'pvp'), [CASTER, STRIKER])
+        self.assertIn({'action': 'learn', 'actor': STRIKER, 'spell': 92559},
+                      [{key: step[key] for key in ('action', 'actor', 'spell') if key in step} for step in steps])
+        strikes = [step for step in steps if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(len(strikes), 2 * 10)
+        _, creature = behaviour_scenario(CLASS_FILE, route_entry(801461, 'physical'))
+        expectation = expectations[0]
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(self.ratio_values(
+            expectation.model, 332.0, 282.0)), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(creature[0]), FakeRun(self.ratio_values(
+            creature[0].model, 949.0, 806.0)), creature[0]).status, 'alert')
+
+    def test_seeded_area_and_periodic_reductions_alert_off_their_amount(self):
+        for variant, spell, control, right, wrong in (('area', 301311, 2000.0, 1800.0, 1600.0),
+                                                     ('area', 301360, 2000.0, 1600.0, 1800.0),
+                                                     ('periodic', 300529, 1735.0, 1474.0, 1735.0)):
+            _, expectations = behaviour_scenario(CLASS_FILE, route_entry(spell, variant))
+            expectation = expectations[0]
+            for per_hit, status in ((right, 'ok'), (wrong, 'alert')):
+                with self.subTest(spell=spell, per_hit=per_hit):
+                    verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.ratio_values(
+                        expectation.model, control, per_hit)), expectation)
+                    self.assertEqual(verdict.status, status)
+
+    def test_a_refreshed_arm_removes_its_auras_before_each_trial_and_waits_its_settle(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, route_entry(300529, 'periodic'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        removed = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 301283
+                   and step['stacks'] == 0]
+        self.assertEqual(len(removed), 10 + 1)
+        settles = [step['ms'] for step in steps if step['action'] == 'wait' and ' settle ' in step.get('label', '')]
+        self.assertEqual(settles, [2200] * 20)
+
+    def test_seeded_strike_back_judges_the_returned_share_with_its_resisted_part(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705306, 'strike_back'))
+        expectation = expectations[0]
+
+        def trial(returned: float, resist: float = 0.0, control_returned: float = 0.0):
+            def values(arm: str, _):
+                back = control_returned if arm == 'control' else returned
+                return {'damage': 949.0, 'count': 1.0, 'absorb': 0.0, 'logs': 1.0, 'returned': back,
+                        'returned count': float(bool(back)), 'returned logs': float(bool(back)),
+                        'returned absorb': 0.0, 'returned resist': 0.0 if arm == 'control' else resist}
+            return taken_hit_values(expectation.model, values)
+
+        for values, status in ((trial(142.0), 'ok'), (trial(128.0, 14.0), 'ok'), (trial(128.0), 'alert'),
+                               (trial(142.0, control_returned=142.0), 'alert'), (trial(0.0), 'unmeasured')):
+            with self.subTest(status=status):
+                self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
+                                 status)
+
+    def test_seeded_reduction_reads_the_formula_off_the_mitigated_control_strike(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705298, 'reduction'))
+        expectation = expectations[0]
+        self.assertEqual(expectation.model['strike_base'], 67)
+
+        def run_of(treatment: float):
+            return FakeRun(taken_hit_values(expectation.model, lambda arm, _: {
+                'damage': 64.0 if arm == 'control' else treatment, 'count': 1.0, 'absorb': 0.0, 'logs': 1.0}))
+
+        for treatment, status in ((48.0, 'ok'), (47.0, 'ok'), (49.0, 'alert'), (57.0, 'alert'), (64.0, 'alert')):
+            with self.subTest(treatment=treatment):
+                self.assertEqual(judge_behaviour(base_verdict(expectation), run_of(treatment), expectation).status,
+                                 status)
+
+    def test_a_reduction_or_returned_share_refuses_an_entry_that_cannot_judge_it(self):
+        reduction = route_entry(705298, 'reduction')
+        strike_back = route_entry(705306, 'strike_back')
+        for entry in ({**reduction, 'arms': [{**arm, 'name': f'{arm["name"]}_arm'} for arm in reduction['arms']]},
+                      {**reduction, 'absorb_terms': []}, {**reduction, 'strike_spell': 42395},
+                      {**strike_back, 'returned_spell': 0},
+                      {**strike_back, 'arms': [{**arm, 'returned_pct': 0} for arm in strike_back['arms']]}):
+            with self.subTest(entry=entry['arms']), self.assertRaises((ValueError, NotModelled)):
+                behaviour_scenario(CLASS_FILE, entry)
 
 
 class ThreatRedirectScenarioTests(unittest.TestCase):

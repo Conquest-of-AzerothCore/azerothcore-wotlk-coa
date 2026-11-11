@@ -4415,6 +4415,66 @@
       "observe_source": "AscensionTemplarAbilities.cpp:225-226 (OnSpellCast): a Libram cast with Holy Books 706468 known calls ReduceDebt(player, 70), which removes uint64(debt) * 70 / 100 of Oathkeeper 803237 (AscensionTemplar.cpp:199-211). Both arms carry Keeping the Oath 92109, take one Light of the Naaru 41394 strike (1100 Holy) from a level 60 striker (entry 36) at 20000 health, and cast Libram of Consecration 801441 300 ms later, before the debt's first tick; the treatment arm also carries 706468. The debt paid from the 803237 damage logs must be the whole absorbed amount without Holy Books and the absorbed amount less floor(70%%) with it, all paid by the debt's end."
     },
     {
+      "spell": 801461, "name": "Libram of Tenacity", "kind": "taken_hit", "variant": "physical",
+      "label_suffix": "physical", "judge": "damage_ratio", "expected": 0.7,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "quote": "reducing your Physical Damage taken by $s2%", "strike_spell": 92559, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801461, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:196 dummies 801461's Effect[1] and Effect[2] (aura 87), and Mitigation (AscensionTemplarContracts.cpp:288-294, applied in ModifySpellDamageTaken, ModifyMeleeDamage and ModifyPeriodicDamageAurasTick) multiplies a physical hit taken by 1 + Amount(801461, EFFECT_2 against a unit whose charmer, owner or self is a player, else EFFECT_1)/100: -30 against a creature. A level 60 striker (entry 36, no owner: TempSummon::InitStats sets no owner GUID for a summon without properties) casts Void Zone 92559 (SPELL_EFFECT_SCHOOL_DAMAGE, Physical, EffectBasePoints 999, EffectDieSides 1, DmgClass none: no miss, no crit, no level scaling) at the caster; control without 801461, treatment with it set before every strike; the caster's armor is the same in both arms, so the damage ratio is the mitigation's."
+    },
+    {
+      "spell": 801461, "name": "Libram of Tenacity", "kind": "taken_hit", "variant": "players",
+      "label_suffix": "players", "judge": "damage_ratio", "expected": 0.85, "quote": "($s3% against players)",
+      "strike_spell": 92559, "striker_race": 2, "trials": 10,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801461, 1]]}],
+      "observe_source": "As the physical entry, with a player striker: Mitigation takes Amount(801461, EFFECT_2) = -15 when the attacker's charmer, owner or self is a player (AscensionTemplarContracts.cpp:291-293). A level 60 orc (race 2) Templar striker, PvP-flagged like the human caster, learns and casts Void Zone 92559 (1000 Physical, DmgClass none, no cooldown, no cost) at the caster; control without 801461, treatment with it set before every strike."
+    },
+    {
+      "spell": 301311, "name": "Blessed Padding", "kind": "taken_hit", "variant": "area", "label_suffix": "area",
+      "judge": "damage_ratio", "expected": 0.9,
+      "quote": "reduces damage taken from area of effect attacks by $s2%", "strike_spell": 101350, "trials": 10,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[301311, 1]]}],
+      "observe_source": "301311 Effect[1] is SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE (229), EffectBasePoints -11 (-10), MiscValue 127; Spell.cpp:8621-8623 applies Unit::CalculateAOEDamageReduction (Unit.cpp:17922-17927) to a hit whose effect targets an area. A level 60 striker (entry 36) casts Holy Nova 101350 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1999, EffectDieSides 1, TARGET_SRC_CASTER with TARGET_UNIT_SRC_AREA_ENEMY, 15 yd) beside the caster; control without 301311, treatment with it set before every strike. Holy, not Physical, so 301311's Effect[0] mail armor plays no part; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 301360, "name": "Blessed Padding", "kind": "taken_hit", "variant": "area", "label_suffix": "area",
+      "judge": "damage_ratio", "expected": 0.8,
+      "quote": "reduces damage taken from area of effect attacks by $s2%", "strike_spell": 101350, "trials": 10,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[301360, 1]]}],
+      "observe_source": "As the 301311 area entry, rank 2: 301360 Effect[1] aura 229, EffectBasePoints -21 (-20), MiscValue 127."
+    },
+    {
+      "spell": 300529, "name": "Light's Ward", "kind": "taken_hit", "variant": "periodic", "label_suffix": "periodic",
+      "judge": "damage_ratio", "expected": 0.85,
+      "quote": "reduces your damage taken from periodic effects by $301283s2%", "strike_spell": 42395,
+      "settle_ms": 2200, "trials": 10,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[301283, 1]], "refresh": true}],
+      "observe_source": "AscensionTemplarContracts.cpp:368-372 (ModifyPeriodicDamageAurasTick) multiplies a periodic damage tick taken by 1 + Light's Ward 301283 Effect[1] amount/100 (-15, EffectBasePoints -16) when its MiscValue (127) holds the tick's school and the spell carries SPELL_AURA_PERIODIC_DAMAGE, _PERCENT or PERIODIC_LEECH; the stock aura 214 term of SpellDamageBonusTaken needs MiscValueB 1, which 301283 does not carry. 300529 grants 301283 through its Effect[0] (aura 23); the arm sets 301283 itself. A level 60 striker (entry 36) casts Lacerating Slash 42395 (SPELL_AURA_PERIODIC_DAMAGE, Physical, EffectBasePoints 1734, EffectDieSides 1, every 2 s for 18 s, no stacks) at the caster, then waits 2200 ms; the periodic damage logs the caster receives give the mean tick, control without 301283, treatment with it removed and set again before every strike (its 11 s duration would otherwise run out mid-arm)."
+    },
+    {
+      "spell": 705306, "name": "Sacred Defense", "kind": "taken_hit", "variant": "strike_back",
+      "label_suffix": "strike_back", "judge": "absorb",
+      "quote": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage.",
+      "strike_spell": 92559, "returned_spell": 707720, "settle_ms": 1200, "trials": 8,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "arms": [{"name": "control", "returned_pct": 0},
+               {"name": "sacred_defense", "auras": [[705306, 1]], "returned_pct": 15}],
+      "observe_source": "AscensionTemplarEvents.cpp:46-50: 705306 procs on a non-periodic hit taken from another unit with a physical school, not from a dungeon or world boss; :134-139 casts Sacred Defense 707720 at the attacker with uint64(damage) * 15 / 100 as its base points, at most once per second (spell_proc 705306: every proc flag, rev_20260909_04_templar_completion.sql:21). 707720 is a TemplarCopies spell (AscensionTemplarData.h:213-220): it cannot crit and ignores caster and taken modifiers and armor. A level 60 striker (entry 36) casts Void Zone 92559 (1000 Physical, DmgClass none) at the caster, then 1200 ms pass; each landed strike must return exactly floor(15% of its logged damage) as one 707720 hit on the striker, read from the damage logs the caster receives. A 707720 the striker avoids leaves that trial out. Control: no 705306, nothing returned."
+    },
+    {
+      "spell": 705298, "name": "Untainted", "kind": "taken_hit", "variant": "reduction", "label_suffix": "reduction",
+      "judge": "absorb", "quote": "reduces your Physical damage taken by ${$705299m1+$STA*0.1}",
+      "strike_spell": 23583, "trials": 8, "absorb_constant": 10,
+      "caster_health_pct": 100, "caster_max_health": 20000,
+      "absorb_terms": [{"coefficient": 0.1, "reads": [{"metric": "stat", "stat": 2}]}],
+      "arms": [{"name": "control"}, {"name": "untainted", "auras": [[705299, 1]], "reduction": "formula", "refresh": true}],
+      "observe_source": "AscensionTemplarAuras.cpp:66-67 sets Untainted 705299's Effect[0] (SPELL_AURA_MOD_DAMAGE_TAKEN, MiscValue 1, Physical) to int32(-10 - .1f * Stamina); the owner ruled 10 plus 10% of Stamina (2026-11-11), the streamed text. A level 60 striker (entry 36) casts Night Slaughter 23583 (SPELL_EFFECT_SCHOOL_DAMAGE, Physical, EffectBasePoints 66, EffectDieSides 1) at the caster; control without 705299, treatment with it set before every strike. Each landed treatment strike must read the control strike less the truncated 10 + 0.1 x Stamina, the caster's Stamina read before the arm."
+    },
+    {
       "spell": 801481, "name": "Glory", "kind": "cast_leech_ratio", "variant": "downfall_heal",
       "label_suffix": "downfall_heal", "quote": "After the duration, you gain", "heal_spell": 803331,
       "expected": 0.5, "cast_spell": 572769, "auras": [[801482, 1]],

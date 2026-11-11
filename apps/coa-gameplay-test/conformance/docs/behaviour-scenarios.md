@@ -1116,6 +1116,31 @@ a trial with fewer logs than strikes did not land and is left out; each arm need
   count of the debt's damage logs (`payments early`, `payments late`, `spell_damage_count`), which the judge does not
   use: it shows how many payments the debt was split into.
 
+- `settle_ms` (default 500) is the wait after each trial's strikes, longer for a periodic strike's ticks or an
+  internal cooldown. An arm's `refresh: true` removes its `auras` before setting them every trial, so an aura
+  shorter than the arm does not run out mid-arm (`set_aura` keeps the remaining duration of an aura it finds).
+- `striker_race` (default 0, a creature striker) makes the striker a player of that race and the caster's class,
+  both PvP-flagged at the scenario `location` of `TAKEN_HIT_PVP_LOCATION` (Elwynn Forest, the location of the
+  catalog PvP scenarios); the striker learns `strike_spell` and casts it through the client cast opcode, so the
+  strike needs no cost, cooldown or global cooldown in its trials. Libram of Tenacity 801461 "($s3% against
+  players)" uses an orc striker.
+- An arm's `reduction: "formula"` (absorb judge, a `control` arm and `absorb_terms` required) judges a flat
+  damage-taken reduction applied before the strike's mitigation: the control strikes must read one damage `C`, and
+  each landed strike of the arm must lie between floor((B - R) x C / B) and ceil((B - R) x (C + 1) / B) - 1, with
+  `B` the strike's fixed base (`strike_base`, its one SPELL_EFFECT_SCHOOL_DAMAGE effect's base points plus die
+  sides of at most 1) and `R` the formula. The control's mitigation is thereby carried over without modelling armor.
+- `returned_spell`, with every arm's `returned_pct`, reads that spell's damage, absorbed and resisted amounts and its
+  logs from the caster onto the striker after each trial: an arm at 0 must return nothing; otherwise each landed
+  strike answered by one non-critical hit must have returned exactly floor(`returned_pct`% of the strike's logged
+  damage) as damage plus absorbed plus resisted; a strike the striker avoided is left out, and half the trials must
+  be judged.
+
+Strikes the class file uses: Light of the Naaru 41394 (1100 Holy, DmgClass melee), Void Zone 92559 (1000
+Physical, DmgClass none: it neither misses nor crits), Holy Nova 101350 (2000 Holy around the striker, 15 yd, an
+area strike), Lacerating Slash 42395 (1735 Physical every 2 s for 18 s, a periodic strike) and Night Slaughter 23583
+(67 Physical). A strike heavier than the caster's health kills it: hold `caster_health_pct` and
+`caster_max_health`.
+
 The control arm is the negative arm: without the talent nothing is absorbed or reduced.
 
 ### Threat-redirect scenarios (`behaviour_threat_redirect`, `kind: "threat_redirect"`)

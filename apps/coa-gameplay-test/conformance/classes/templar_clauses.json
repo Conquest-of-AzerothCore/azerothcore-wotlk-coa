@@ -359,9 +359,10 @@
     "spell": 300529,
     "clause": "and reduces your damage taken from periodic effects by $301283s2%.",
     "labels": [
-      "300529 effect_value 301283e1"
+      "300529 behaviour_hit_ratio periodic"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The effect_value read of 301283e1 is not_measured: an aura script's DoEffectCalcAmount hook of 301283 sets the amount after CalcValue, so CalcValue does not give the amount the aura applies. The taken_hit periodic ratio (ADR 0191) measures that amount on applied Lacerating Slash 42395 ticks, without and with 301283."
   },
   {
     "spell": 300530,
@@ -547,7 +548,8 @@
       "301311 effect_value e1",
       "301311 e1 aoe_damage_taken 0",
       "301311 e1 aoe_damage_taken 1",
-      "301311 e1 aoe_damage_taken 2"
+      "301311 e1 aoe_damage_taken 2",
+      "301311 behaviour_hit_ratio area"
     ],
     "kind": "claim"
   },
@@ -575,7 +577,8 @@
       "301360 effect_value e1",
       "301360 e1 aoe_damage_taken 0",
       "301360 e1 aoe_damage_taken 1",
-      "301360 e1 aoe_damage_taken 2"
+      "301360 e1 aoe_damage_taken 2",
+      "301360 behaviour_hit_ratio area"
     ],
     "kind": "claim"
   },
@@ -2339,10 +2342,11 @@
     "spell": 705298,
     "clause": "by ${$705299m1+$STA*0.1}",
     "labels": [
-      "705298 behaviour_metric_delta damage_taken"
+      "705298 behaviour_metric_delta damage_taken",
+      "705298 behaviour_taken_hit reduction"
     ],
     "kind": "claim",
-    "reason": "Judged against the streamed client text (coa_client_spell_description, rev_20261029_240_templar_untainted_tooltip.sql): 705298 \"reduces your Physical damage taken by ${-$705299m1+$STA*0.1}\" and 705299 \"Physical damage taken reduced by ${-$m1+$STA*0.1}\", 10 + 0.1 x Stamina; the DBC text above reads ${$705299m1+$STA*0.1}. The override rests on the owner ruling of 2026-11-11 (owner-rulings Untainted entry: the intended amount is 10 plus 10% of Stamina; the DBC sign is wrong), so it is independent. The server sets int32(-10 - .1f * Stamina) in the class script (AscensionTemplarAuras.cpp:66-67), 17 at Stamina 79; that truncation is the script's own, outside the int32 rule of SpellInfo.cpp:592, and the check compares exactly against it. The only label reads melee_damage_taken, a readback (trial question 4), so the clause is data conformant."
+    "reason": "Judged against the streamed client text (coa_client_spell_description, rev_20261029_240_templar_untainted_tooltip.sql): 705298 \"reduces your Physical damage taken by ${-$705299m1+$STA*0.1}\" and 705299 \"Physical damage taken reduced by ${-$m1+$STA*0.1}\", 10 + 0.1 x Stamina; the DBC text above reads ${$705299m1+$STA*0.1}. The override rests on the owner ruling of 2026-11-11 (owner-rulings Untainted entry: the intended amount is 10 plus 10% of Stamina; the DBC sign is wrong), so it is independent. The server sets int32(-10 - .1f * Stamina) in the class script (AscensionTemplarAuras.cpp:66-67), 17 at Stamina 79; that truncation is the script's own, outside the int32 rule of SpellInfo.cpp:592, and the check compares exactly against it. The metric_delta label reads melee_damage_taken, a readback (trial question 4); the taken_hit reduction label strikes the caster with Night Slaughter 23583 (67 Physical) without and with 705299 and compares each treatment strike with the control strike scaled from 67 to 67 - 17 (ADR 0191), an applied hit."
   },
   {
     "spell": 705298,
@@ -2423,13 +2427,15 @@
       {
         "claim": "When you take Physical damage you now strike back at enemies",
         "labels": [
-          "705306 behaviour_internal_cooldown_gate"
+          "705306 behaviour_internal_cooldown_gate",
+          "705306 behaviour_taken_hit strike_back"
         ]
       },
       {
         "claim": "for $s1% of the damage dealt as Holy damage",
         "labels": [
-          "705306 effect_value e0 #0"
+          "705306 effect_value e0 #0",
+          "705306 behaviour_taken_hit strike_back"
         ]
       }
     ],
@@ -3344,7 +3350,8 @@
     "clause": "reducing your Physical Damage taken by $s2%",
     "labels": [
       "801461 effect_value e1 #0",
-      "801461 aura_amount e1 #0"
+      "801461 aura_amount e1 #0",
+      "801461 behaviour_hit_ratio physical"
     ],
     "kind": "claim"
   },
@@ -3353,7 +3360,8 @@
     "clause": "($s3% against players)",
     "labels": [
       "801461 effect_value e2 #1",
-      "801461 aura_amount e2 #1"
+      "801461 aura_amount e2 #1",
+      "801461 behaviour_hit_ratio players"
     ],
     "kind": "claim"
   },

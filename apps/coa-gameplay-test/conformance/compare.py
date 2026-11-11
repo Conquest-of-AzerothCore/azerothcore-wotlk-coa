@@ -1,5 +1,6 @@
 from collections import Counter
 from dataclasses import asdict, dataclass, field, replace
+from fractions import Fraction
 from functools import lru_cache
 import hashlib
 import json
@@ -26,8 +27,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
-                        DISPEL_TYPE_NAMES,
-                        strongest_percent)
+                        DISPEL_TYPE_NAMES, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
@@ -3851,9 +3851,51 @@ def taken_hit_trial_fault(arm: dict, trial: dict, expected_absorb: int | None, d
     return None
 
 
+def taken_hit_returned_fault(arm: dict, trial: dict) -> tuple[str | None, bool]:
+    if 'returned_pct' not in arm:
+        return None, False
+    logs, count = trial['returned logs'], trial['returned count']
+    if not arm['returned_pct']:
+        return (f'{logs:g} returned hits with none stated' if logs else None), False
+    if not logs or not count:
+        return None, False
+    due = math.floor(trial['damage'] * arm['returned_pct'] / 100)
+    dealt = trial['returned'] + trial['returned absorb'] + trial['returned resist']
+    if count != 1 or dealt != due:
+        return (f'returned {dealt:g} (damage, absorbed and resisted) in {count:g} hits of a {trial["damage"]:g} '
+                f'strike against {due} ({arm["returned_pct"]}%)'), True
+    return None, True
+
+
+def taken_hit_reduction_faults(model: dict, landed: dict[str, list[float]], reductions: dict[str, int]) -> list[str]:
+    reference = sorted(set(landed.get(TAKEN_HIT_CONTROL_ARM, [])))
+    faults = []
+    for arm in model['arms']:
+        if arm.get('reduction') != 'formula':
+            continue
+        if len(reference) != 1:
+            faults.append(f'{arm["name"]}: the {TAKEN_HIT_CONTROL_ARM} strikes read {reference}, not one damage')
+            continue
+        low, high = taken_hit_reduced_range(model['strike_base'], reductions[arm['name']], reference[0])
+        wrong = sorted({damage for damage in landed[arm['name']] if not low <= damage <= high})
+        if wrong:
+            faults.append(f'{arm["name"]}: strikes read {wrong} against {low}-{high}, the {TAKEN_HIT_CONTROL_ARM} '
+                          f'strike {reference[0]:g} scaled from {model["strike_base"]} to '
+                          f'{model["strike_base"]} - {reductions[arm["name"]]}')
+    return faults
+
+
+def taken_hit_reduced_range(base: int, reduction: int, control: float) -> tuple[int, int]:
+    reduced = max(0, base - reduction)
+    low = Fraction(reduced * int(control), base)
+    high = Fraction(reduced * (int(control) + 1), base)
+    return math.floor(low), max(math.floor(low), math.ceil(high) - 1)
+
+
 def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     faults, summaries, short = [], [], []
     judged = 0
+    landed_damage, reductions = {}, {}
     for arm in model['arms']:
         values = {}
         for mark, labels in arm['marks'].items():
@@ -3863,21 +3905,27 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                     return replace(base, explanation=missing_measurement(run, label))
                 values[(mark, key)] = value
         expected_absorb = None
-        if arm['absorb'] == 'formula':
+        if arm['terms']:
             sums = []
             for labels in arm['terms']:
                 read = [run.values.get(label) for label in labels]
                 if any(value is None for value in read):
                     return replace(base, explanation=missing_measurement(run, labels[read.index(None)]))
                 sums.append(sum(read))
-            expected_absorb = taken_hit_formula(model['absorb_constant'], model['absorb_coefficients'], sums)
+            formula = taken_hit_formula(model['absorb_constant'], model['absorb_coefficients'], sums)
+            if arm.get('reduction') == 'formula':
+                reductions[arm['name']] = formula
+            else:
+                expected_absorb = formula
         landed = 0
-        absorbs = []
+        absorbs, damages = [], []
+        returned = 0
         previous = 'start'
         for trial in range(1, model['trials'] + 1):
             mark = str(trial)
             delta = {key: values[(mark, key)] - values[(previous, key)]
-                     for key in ('damage', 'absorb', 'logs')}
+                     for key in ('damage', 'absorb', 'logs', *(TAKEN_HIT_RETURNED_KEYS if 'returned_pct' in arm
+                                                               else ()))}
             if arm['debt_removed_pct'] is not None:
                 for moment in ('early', 'late'):
                     delta[f'paid {moment}'] = values[(mark, f'paid {moment}')] - values[(previous, 'paid')]
@@ -3887,22 +3935,38 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                 continue
             landed += 1
             absorbs.append(delta['absorb'])
+            damages.append(delta['damage'])
             fault = taken_hit_trial_fault(arm, delta, expected_absorb, model.get('debt_ends', False))
-            if fault:
-                faults.append(f'{arm["name"]} trial {trial}: {fault}')
+            returned_fault, judged_return = taken_hit_returned_fault(arm, delta)
+            returned += judged_return
+            for found in (fault, returned_fault):
+                if found:
+                    faults.append(f'{arm["name"]} trial {trial}: {found}')
+        landed_damage[arm['name']] = damages
         if landed < model['minimum_trials']:
             short.append(f'{arm["name"]} landed {landed} of {model["trials"]} trials')
+        if arm.get('returned_pct') and returned < model['minimum_trials']:
+            short.append(f'{arm["name"]} returned a non-critical hit in {returned} of {model["trials"]} trials')
         judged += landed
         stated = {'none': 'no absorb', 'formula': f'{expected_absorb} absorbed',
                   'share': f'{arm["share_pct"]}% absorbed'}[arm['absorb']]
         debt = ('' if arm['debt_removed_pct'] is None else
                 f', debt paid by its end less {arm["debt_removed_pct"]}% removed'
                 + (', part of it still unpaid just before its end' if model.get('debt_ends') else ''))
-        summaries.append(f'{arm["name"]}: {landed} landed trials, absorbed {sorted(set(absorbs))} ({stated}{debt})')
+        reduced = (f', damage {sorted(set(damages))} ({reductions[arm["name"]]} taken off the '
+                   f'{model.get("strike_base")} strike before the {TAKEN_HIT_CONTROL_ARM} arm\'s mitigation)'
+                   if arm['name'] in reductions else '')
+        back = ('' if 'returned_pct' not in arm else
+                f', {returned} non-critical returned hits judged ({arm["returned_pct"]}% of the strike)')
+        summaries.append(f'{arm["name"]}: {landed} landed trials, absorbed {sorted(set(absorbs))} ({stated}{debt})'
+                         f'{reduced}{back}')
+    faults += taken_hit_reduction_faults(model, landed_damage, reductions)
     status = 'alert' if faults else 'unmeasured' if short else 'ok'
     reason = '; '.join(faults[:6]) if faults else '; '.join(short) if short else 'every landed trial matches'
     return replace(base, status=status, measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
-                   explanation=f'{"; ".join(summaries)}; {reason}; each absorbed amount is compared exactly')
+                   explanation=f'{"; ".join(summaries)}; {reason}; each absorbed amount is compared exactly'
+                               + ('; each reduced or returned amount is compared exactly'
+                                  if reductions or any('returned_pct' in arm for arm in model['arms']) else ''))
 
 
 def behaviour_threat_redirect_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
