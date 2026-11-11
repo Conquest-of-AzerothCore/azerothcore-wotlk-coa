@@ -571,7 +571,7 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     engine = [value - per_level.loss for value in values] if per_level and per_level.loss else None
     rounded, outside = truncation_reads(values, reads)
     lowered = {read: value for read, value in zip(map(engine_truncation, engine), engine)} if engine else {}
-    if outside and engine and all(read in lowered for read in reads):
+    if (outside or rounded) and engine and all(read in lowered for read in reads):
         engine_reads = [engine_truncation(value) for value in engine]
         engine_mean = fmean(engine_reads)
         engine_low, engine_high = engine_mean - half, engine_mean + half

@@ -362,6 +362,11 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['truncated_to'], 8.0)
         self.assertIn('per-level term truncated before the sum (SpellInfo.cpp:497)', verdict.explanation)
 
+    def test_a_low_read_both_truncations_reproduce_is_named_by_the_per_level_term(self):
+        verdict = self.per_level_verdict([362, 365, 367])
+        self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['engine_range'], [361.0, 367.0])
+        self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
+
     def test_seeded_low_read_the_per_level_truncation_does_not_explain_alerts(self):
         reads = [361, 362, 363, 365, 366, 367, 362, 366, 364, 363, 361, 367, 365, 366, 362, 364, 363, 366, 365, 364]
         self.assertEqual(self.per_level_verdict(reads, rate=1.0).status, 'alert')
