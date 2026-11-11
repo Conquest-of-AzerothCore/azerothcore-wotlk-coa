@@ -964,6 +964,12 @@ difference of the per-hit means with that amount inside the larger of 5% of it a
 at Mindless Zombie 1501 at levels 50 and 60 with Brute Force 54678 removing its armor, scaled by the class tuning
 887007.
 
+A cast the server refuses unless the caster is mounted takes a mount first (ADR 0194): the class-file section
+`cast_auras` (`[{"spell", "auras", "reason"}]`) sets its auras before a value scenario's cast, and `cast_applies_aura`
+and `aura_presence` entries take `caster_auras`. `aura_presence` also takes `target_distance` (the grouped ally is
+relocated that far) and `present: false` (the ally stays without the aura while a second expectation requires it on
+the caster).
+
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 
 "Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`

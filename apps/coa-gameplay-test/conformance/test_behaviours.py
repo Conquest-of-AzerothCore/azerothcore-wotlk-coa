@@ -741,7 +741,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 306)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 310)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6467,6 +6467,37 @@ class LevelFlatHitRatioTests(unittest.TestCase):
                        {**entry, 'expected_token': ''}):
             with self.subTest(broken=broken.get('level')), self.assertRaises(ValueError):
                 behaviour_scenario(CLASS_FILE, broken)
+
+
+class MountedCastTests(unittest.TestCase):
+    def test_a_mounted_only_cast_sets_its_mount_aura_first_in_value_and_duration_scenarios(self):
+        from values import cast_aura_steps
+        self.assertEqual(cast_aura_steps(CLASS_FILE, 562302), [{'action': 'set_aura', 'actor': CASTER, 'spell': 458,
+                                                               'stacks': 1}])
+        self.assertEqual(cast_aura_steps(CLASS_FILE, 801461), [])
+        scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'cast_applies_aura', None))
+        steps = run.validate(scenario)['steps']
+        mount = next(index for index, step in enumerate(steps) if step['action'] == 'set_aura' and step['spell'] == 458)
+        cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 562302)
+        self.assertLess(mount, cast)
+
+    def test_an_ally_beyond_the_radius_must_stay_without_the_aura_the_caster_carries(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'aura_presence', 'outside'))
+        steps = run.validate(scenario)['steps']
+        self.assertEqual(sum(step.get('dx', 0) for step in steps if step['action'] == 'relocate'
+                             and step['actor'] == ALLY), 45)
+        self.assertEqual([expectation.model['expected'] for expectation in expectations], [0.0, 1.0])
+        self.assertEqual([step['actor'] for step in steps if step.get('metric') == 'aura' and step['spell'] == 562302],
+                         [ALLY, CASTER, ALLY, CASTER])
+        _, [inside] = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'aura_presence', 'inside'))
+        self.assertEqual(inside.model['expected'], 1.0)
+
+    def test_seeded_aura_reaching_the_outside_ally_alerts(self):
+        _, [outside, caster] = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'aura_presence', 'outside'))
+        for model_of, after, status in ((outside, 1.0, 'alert'), (outside, 0.0, 'ok'), (caster, 0.0, 'alert')):
+            values = {model_of.model['before_label']: 0.0, model_of.model['after_label']: after}
+            with self.subTest(label=model_of.label, after=after):
+                self.assertEqual(judge_behaviour(base_verdict(model_of), FakeRun(values), model_of).status, status)
 
 
 class OffHandHitRatioTests(unittest.TestCase):

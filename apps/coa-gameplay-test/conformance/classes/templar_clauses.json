@@ -1190,9 +1190,10 @@
     "spell": 527023,
     "clause": "increasing their movement speed by $527272s2%",
     "labels": [
-      "527023 effect_value 527272e1 #0"
+      "527023 behaviour_metric_delta steed_speed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The effect_value read of 527272e1 is not_measured in the pooled verdicts; the steed_speed metric_delta reads run_speed_rate 1.0 before and 2.0 after learning and casting 527023 (527272 Effect[1] +100% mounted speed), the stat the clause names, in a learned contrast (ADR 0194)."
   },
   {
     "spell": 527023,
@@ -1432,7 +1433,10 @@
     "spell": 562302,
     "clause": "for all party and raid members within $a1 yds",
     "labels": [
-      "562302 effect_radius e0 #1"
+      "562302 effect_radius e0 #1",
+      "562302 behaviour_aura_presence inside",
+      "562302 behaviour_aura_presence outside",
+      "562302 behaviour_aura_presence outside caster"
     ],
     "kind": "claim"
   },
@@ -1440,7 +1444,9 @@
     "spell": 562302,
     "clause": "for $d",
     "labels": [
-      "562302 aura_duration_ms #2"
+      "562302 aura_duration_ms #2",
+      "562302 behaviour_cast_applies_aura",
+      "562302 behaviour_expiry"
     ],
     "kind": "claim"
   },

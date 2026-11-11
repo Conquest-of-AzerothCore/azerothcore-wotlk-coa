@@ -114,6 +114,10 @@
     {"spell": 805422, "target": 807004,
      "reason": "AscensionTemplarAuras.cpp:122-127 (id == 805422) casts 807004 on the caster when 805422 is cast; a scripted trigger with no DBC effect, so only a live cast proves it"}
   ],
+  "cast_auras": [
+    {"spell": 562302, "auras": [458],
+     "reason": "Crusader's Presence 562302 can only be used while Mounted (the Templar OnSpellCheckCast hook returns SPELL_FAILED_ONLY_MOUNTED, 91); Brown Horse 458's aura 78 mounts the caster before its cast"}
+  ],
   "conditional_spells": [
     {"spell": 705300, "learn": 573452,
      "reason": "$?s573452 true branch names 806106's own effect 0, a static value independent of caster state"},
@@ -2935,6 +2939,14 @@
       "observe_source": "Mounted-only state is set directly via the same fixture aura of 458 (Brown Horse) the round10 mounted cast_condition entry above already proves grants IsMounted(); 458's own EffectApplyAuraName[1] is 32 (SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED), EffectBasePoints[1]=59 (+60%). 562302's own three effects (EffectApplyAuraName 172/211/210, EffectBasePoints 49 -> +50% each) are SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK/MOD_FLIGHT_SPEED_MOUNTED_NOT_STACKING/MOD_FLIGHT_SPEED_NOT_STACKING. Unit::UpdateSpeed's MOVE_RUN-while-mounted branch (Unit.cpp ~12410-12415) reads main_speed_mod from type 32 alone (60, from the mount, unaffected by 562302) and non_stack_bonus from type 172 alone (1 + 50/100 = 1.5 while 562302's own aura is up, 1.0 without it); the final speed is max(non_stack_bonus, stack_bonus) scaled by main_speed_mod (Unit.cpp ~12497-12498: speed = max(non_stack_bonus, stack_bonus); AddPct(speed, main_speed_mod)), so before_expected (mounted only) is max(1.0,1.0)*1.60=1.60 and expected (mounted, 562302 cast) is max(1.5,1.0)*1.60=2.40, matching run_speed_rate exactly since no other type-32/172/129 aura is active in this scenario. cast_in_before=false (new MetricDeltaSpec field, round10) so the before measurement reads the mounted baseline alone, without 562302 having been cast at all; the after phase casts 562302 (reset_cooldown + cast, the existing cast_steps machinery) while the mount aura is reapplied, then measures again. No server defect; stock engine math, unaudited by any existing scenario."
     },
     {
+      "spell": 527023, "variant": "steed_speed", "label_suffix": "steed_speed",
+      "name": "Divine Charge", "kind": "metric_delta",
+      "quote": "increasing their movement speed by $527272s2%", "expected": 2.0,
+      "trigger_spell": 527023, "metric": "run_speed_rate", "fields": {},
+      "before_expected": 1.0, "cast_in_before": false, "wait_ms": 500, "expire_ms": 500,
+      "observe_source": "AscensionTemplarAuras.cpp:94-98 casts the target's own 527272 when 527023's party aura applies; 527272 Effect[0] is SPELL_AURA_MOUNTED (Apply mounts 14584, :103-106) and Effect[1] SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED, EffectBasePoints 99 (+100%). Unit::UpdateSpeed's mounted branch takes the highest SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED, so the unmounted caster's run_speed_rate 1.0 reads 2.0 after learning and casting 527023 outdoors (cast_in_before false: the before phase has no cast)."
+    },
+    {
       "spell": 527023, "variant": "mount_grant", "name": "Divine Charge", "kind": "mount_grant",
       "grant_quote": "You and your party members leap upon a divine steed,",
       "persist_quote": "While active, casting does not dismount you or your allies.",
@@ -4473,6 +4485,23 @@
       "absorb_terms": [{"coefficient": 0.1, "reads": [{"metric": "stat", "stat": 2}]}],
       "arms": [{"name": "control"}, {"name": "untainted", "auras": [[705299, 1]], "reduction": "formula", "refresh": true}],
       "observe_source": "AscensionTemplarAuras.cpp:66-67 sets Untainted 705299's Effect[0] (SPELL_AURA_MOD_DAMAGE_TAKEN, MiscValue 1, Physical) to int32(-10 - .1f * Stamina); the owner ruled 10 plus 10% of Stamina (2026-11-11), the streamed text. A level 60 striker (entry 36) casts Night Slaughter 23583 (SPELL_EFFECT_SCHOOL_DAMAGE, Physical, EffectBasePoints 66, EffectDieSides 1) at the caster; control without 705299, treatment with it set before every strike. Each landed treatment strike must read the control strike less the truncated 10 + 0.1 x Stamina, the caster's Stamina read before the arm."
+    },
+    {
+      "spell": 562302, "name": "Crusader's Presence (mounted speed)", "kind": "cast_applies_aura", "quote": "for $d",
+      "expected_ms": 15000, "applied_aura": 562302, "target": "caster", "caster_auras": [458],
+      "observe_source": "Mounted on Brown Horse 458 (aura 78) first, as the Templar OnSpellCheckCast hook requires (SPELL_FAILED_ONLY_MOUNTED, 91, otherwise; cast_condition entry above). 562302 DurationIndex 8 (15000 ms), Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID on the caster; its expiry pair times the stated duration."
+    },
+    {
+      "spell": 562302, "name": "Crusader's Presence (mounted speed)", "kind": "aura_presence", "variant": "inside", "label_suffix": "inside",
+      "quote": "for all party and raid members within $a1 yds", "metric": "aura", "fields": {"spell": 562302},
+      "target": "ally", "target_distance": 35, "wait_ms": 1500, "caster_auras": [458],
+      "reason": "Mounted on Brown Horse 458 (aura 78) first, as the Templar OnSpellCheckCast hook requires (SPELL_FAILED_ONLY_MOUNTED, 91, otherwise; cast_condition entry above). Effect[0..2] are SPELL_EFFECT_APPLY_AREA_AURA_RAID with EffectRadiusIndex 23 (40 yd); the server's area-aura update applies 562302 to a grouped ally 35 yd away."
+    },
+    {
+      "spell": 562302, "name": "Crusader's Presence (mounted speed)", "kind": "aura_presence", "variant": "outside", "label_suffix": "outside",
+      "quote": "for all party and raid members within $a1 yds", "metric": "aura", "fields": {"spell": 562302},
+      "target": "ally", "target_distance": 45, "wait_ms": 1500, "caster_auras": [458], "present": false,
+      "reason": "As the inside entry, with the grouped ally 45 yd away, beyond the 40 yd radius: the ally stays without 562302 while the caster carries it."
     },
     {
       "spell": 706323, "name": "Holy Constitution", "kind": "hit_ratio", "variant": "level_60",

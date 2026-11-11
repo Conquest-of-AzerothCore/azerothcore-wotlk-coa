@@ -189,6 +189,11 @@ def required_aura_steps(facts: RankFacts) -> list[dict]:
     return [{'action': 'set_aura', 'actor': CASTER, 'spell': facts.caster_aura_spell, 'stacks': 1}]
 
 
+def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1}
+            for entry in class_file.get('cast_auras', []) if entry['spell'] == spell for aura in entry['auras']]
+
+
 def required_target_health_steps(facts: RankFacts, target: str = TARGET) -> list[dict]:
     if not facts.target_aura_state:
         return []
@@ -620,7 +625,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         elif targets_resurrect(facts):
             cast_steps.append({'action': 'die', 'actor': ALLY})
             cast['target'] = ALLY
-        cast_steps += required_aura_steps(facts)
+        cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
         cast_steps.append(cast)
         if facts.cast_time_ms:
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,

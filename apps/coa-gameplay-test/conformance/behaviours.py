@@ -1766,6 +1766,9 @@ class AuraPresenceSpec:
     target: str = CASTER
     wait_ms: int = DEFAULT_AURA_PRESENCE_WAIT_MS
     label_suffix: str = ''
+    caster_auras: tuple[int, ...] = ()
+    target_distance: float = 0.0
+    present: bool = True
 
 
 def aura_presence_label(spec: AuraPresenceSpec, moment: str) -> str:
@@ -1786,15 +1789,24 @@ def aura_presence_scenario(class_file: dict, spec: AuraPresenceSpec) -> tuple[di
                            'value': facts.mana_cost})
     cast_steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell})
     cast_steps += required_aura_steps(facts)
+    cast_steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
     cast_steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': CASTER})
     cast_steps.append({'action': 'wait', 'ms': spec.wait_ms})
 
+    if (spec.target_distance or not spec.present) and spec.target == CASTER:
+        raise ValueError(f'{spec.spell} aura_presence places or excludes the target, so the target is not the caster')
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
     if spec.target != CASTER:
         steps.append({'action': 'group', 'actor': CASTER, 'target': spec.target})
+        steps += relocate_steps(spec.target, spec.target_distance)
+    caster_before, caster_label = aura_presence_label(spec, 'caster before'), aura_presence_label(spec, 'caster')
     steps.append(measurement(before_label, spec.target, spec.metric, **spec.fields))
+    if not spec.present:
+        steps.append(measurement(caster_before, CASTER, spec.metric, **spec.fields))
     steps += cast_steps
     steps.append(measurement(after_label, spec.target, spec.metric, **spec.fields))
+    if not spec.present:
+        steps.append(measurement(caster_label, CASTER, spec.metric, **spec.fields))
 
     scenario = {
         'schema': 1,
@@ -1806,18 +1818,29 @@ def aura_presence_scenario(class_file: dict, spec: AuraPresenceSpec) -> tuple[di
     if spec.target != CASTER:
         scenario['players'].append({**player_fixture(class_file), 'id': spec.target})
 
-    model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label, 'expected': 1.0,
+    if spec.target_distance:
+        scenario['contract'] += f' {spec.target} stands {spec.target_distance:g} yd away.'
+    if not spec.present:
+        scenario['contract'] += f' {spec.target} must stay without it while the caster carries it.'
+    present = 1.0 if spec.present else 0.0
+    model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label, 'expected': present,
              'before_expected': 0.0, 'metric': spec.metric, 'quote': entry.quote}
     label = f'{spec.spell} behaviour_aura_presence' + (f' {spec.label_suffix}' if spec.label_suffix else '')
-    expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None, '1',
-                              prose_rule(entry.quote, spec.spell), model)
-    return scenario, [expectation]
+    expectations = [Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None, f'{present:g}',
+                                prose_rule(entry.quote, spec.spell), model)]
+    if not spec.present:
+        caster_model = {'kind': 'metric_delta', 'before_label': caster_before, 'after_label': caster_label,
+                        'expected': 1.0, 'before_expected': 0.0, 'metric': spec.metric, 'quote': entry.quote}
+        expectations.append(Expectation(f'{label} caster', BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None, '1',
+                                        prose_rule(entry.quote, spec.spell), caster_model))
+    return scenario, expectations
 
 
 def aura_presence_spec(entry: dict) -> AuraPresenceSpec:
     return AuraPresenceSpec(entry['spell'], entry['name'], entry['quote'], entry['metric'], entry.get('fields', {}),
                             entry.get('target', CASTER), entry.get('wait_ms', DEFAULT_AURA_PRESENCE_WAIT_MS),
-                            entry.get('label_suffix', ''))
+                            entry.get('label_suffix', ''), tuple(int(aura) for aura in entry.get('caster_auras', ())),
+                            float(entry.get('target_distance', 0.0)), bool(entry.get('present', True)))
 
 
 DEFAULT_HEAL_BLOCK_WAIT_MS = 1000
@@ -2113,6 +2136,7 @@ class CastAppliesAuraSpec:
     extra_cast: 'ExtraCast | None' = None
     cast_target_health_pct: int | None = None
     force_crit: str | None = None
+    caster_auras: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -2123,13 +2147,14 @@ class ExtraCast:
 
 
 def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tuple[list[dict], list[dict]]:
+    auras = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
     if spec.cast_spell is None:
-        return [], [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target}]
+        return [], auras + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': spec.target}]
     facts = facts_of(records, spec.cast_spell)
     target = spec.cast_target or spec.target
     health = [] if spec.cast_target_health_pct is None else [fixture_health_step(target, spec.cast_target_health_pct)]
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}],
-            cast_gate_power_step(facts) + required_aura_steps(facts) + health
+            cast_gate_power_step(facts) + required_aura_steps(facts) + auras + health
             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': target}])
 
 
@@ -2214,7 +2239,8 @@ def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
                                entry['applied_aura'], entry.get('target', CASTER), entry.get('cast_spell'),
                                entry.get('cast_target'), control['expected_ms'] if control else None,
                                tuple(control.get('clear_auras', ())) if control else (),
-                               entry.get('label_suffix', ''), extra, entry.get('cast_target_health_pct'), force_crit)
+                               entry.get('label_suffix', ''), extra, entry.get('cast_target_health_pct'), force_crit,
+                               tuple(int(aura) for aura in entry.get('caster_auras', ())))
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
