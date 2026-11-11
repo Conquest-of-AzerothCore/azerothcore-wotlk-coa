@@ -9,7 +9,8 @@ import sys
 import tempfile
 import unittest
 
-from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, NOT_MEASURED, PERCENT_POINT_METRICS,
+from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, ENGINE_ROUNDING, NOT_MEASURED,
+                     PERCENT_POINT_METRICS,
                      magnitude_excluded,
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
@@ -804,6 +805,7 @@ BELLS_OF_LIGHT, ZEALOTRY_PASSIVE = 801204, 92108
 LEGACY, SCOURGEBANE_DAMAGE, TEMPLARS_MIGHT, RIGHTEOUS_LUNGE, CONDEMN = 806522, 801832, 705291, 570233, 567539
 UPHEAVE = 520442
 BLESSED_PADDING = 301311
+STURDY = 681009
 FURY_OF_AGGRAMAR, LIBRAM_OF_CONSECRATION, LIBRAM_OF_FERVOR = 801480, 803893, 805423
 SPELL_NAMES = {(RECKONING, 'SpellName[enUS]'): 'Reckoning', (INTERDICT, 'SpellName[enUS]'): 'Interdict',
                (SACRED_RESTRAINT, 'SpellName[enUS]'): 'Sacred Restraint', (RECKONING, 'SchoolMask'): 2}
@@ -1305,8 +1307,8 @@ class PassiveDeltaTest(unittest.TestCase):
         token = [Displayed('$s1', 50.0, 0, 'percent')]
         ok = self.single(entry, '5000', '5802', token, **{source_label: '1604'})
         self.assertEqual((ok.status, ok.expected), ('ok', 802.0))
-        rounded = self.single(entry, '5000', '5803', token, **{source_label: '1604'})
-        self.assertEqual((rounded.status, rounded.high), ('ok', 803.0))
+        one_above = self.single(entry, '5000', '5803', token, **{source_label: '1604'})
+        self.assertEqual((one_above.status, one_above.high), ('alert', 802.0))
         alert = self.single(entry, '5000', '5850', token, **{source_label: '1604'})
         self.assertEqual((alert.status, alert.expected), ('alert', 802.0))
 
@@ -1319,8 +1321,45 @@ class PassiveDeltaTest(unittest.TestCase):
         inside_the_old_tolerated_tier = self.single(entry, '5000', '5834', token, **{source_label: '1604'})
         self.assertEqual(inside_the_old_relative_margin.status, 'alert')
         self.assertEqual(inside_the_old_tolerated_tier.status, 'alert')
-        self.assertIn('the rounding of a deterministic armor reading', inside_the_old_tolerated_tier.explanation)
+        self.assertIn('as the engine truncates the armor reading', inside_the_old_tolerated_tier.explanation)
         self.assertEqual(banded_status(834.0, 802.0 - 4.01, 802.0 + 4.01, 802.0), 'tolerated')
+
+    def sturdy_energy(self, before, after):
+        entry = passive_expectation(STURDY, 1, 'max_power', 'scale', '$s1', 5.0, fields={'power': 3})
+        return self.single(entry, before, after, [Displayed('$s1', 5.0, 1, 'percent')], name='Sturdy')
+
+    def test_seeded_one_below_reproduced_by_the_float_emulation_is_known_engine_rounding(self):
+        verdict = self.sturdy_energy('100', '104')
+        self.assertEqual((verdict.status, verdict.measured, verdict.expected), ('ok', 4.0, 5.0))
+        self.assertEqual(verdict.detail[ENGINE_ROUNDING], 104.99999237060547)
+        self.assertIn('known engine rounding', verdict.explanation)
+        self.assertIn('also follows from +4%', verdict.detail[DATA_ONLY])
+        separated = self.sturdy_energy('120', '125')
+        self.assertEqual((separated.status, separated.detail[ENGINE_ROUNDING]), ('ok', 125.99999237060547))
+        self.assertNotIn(DATA_ONLY, separated.detail)
+
+    def test_seeded_four_percent_mutant_one_below_an_exact_float_result_is_an_alert(self):
+        verdict = self.sturdy_energy('80', '83')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 4.0))
+        self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
+        self.assertEqual(self.sturdy_energy('80', '84').status, 'ok')
+
+    def test_seeded_one_above_or_two_below_a_percent_derived_stat_is_an_alert(self):
+        for after in ('106', '103'):
+            verdict = self.sturdy_energy('100', after)
+            self.assertEqual(verdict.status, 'alert')
+            self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
+        self.assertEqual(self.sturdy_energy('100', '105').status, 'ok')
+
+    def test_seeded_one_below_on_a_metric_outside_the_percent_path_never_takes_the_engine_rounding(self):
+        damage = passive_expectation(SERENDIPITY, 0, 'weapon_damage_min', 'ratio', '$s1', 5.0, fields={'hand': 0})
+        dealt = self.single(damage, '100', '104', [Displayed('$s1', 5.0, 0, 'percent')])
+        self.assertEqual(dealt.status, 'alert')
+        self.assertNotIn(ENGINE_ROUNDING, dealt.detail)
+        power = passive_expectation(CALL_OF_THE_MONASTERY, 0, 'attack_power', 'scale', '$s1', 5.0)
+        attack = self.single(power, '100', '104', [Displayed('$s1', 5.0, 0, 'percent')])
+        self.assertNotIn(ENGINE_ROUNDING, attack.detail)
+        self.assertIn('the rounding of a deterministic attack_power reading', attack.explanation)
 
     def test_shared_token_takes_the_sign_of_the_effect_points(self):
         entry = passive_expectation(PALADIN_TRAINING, 1, 'spell_power_cost', 'scale', '$s1', -20.0, 570233,

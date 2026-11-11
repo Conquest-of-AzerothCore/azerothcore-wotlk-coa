@@ -516,6 +516,19 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   +802 expected: +803 is `ok`, +805 and +834 are alerts. The same holds for the pre-truncation `stat_exact` reading
   (0.01) and for the readings of a `behaviour_group_stack_cap` on such a metric. Where the rounding cannot separate
   the stated value, `data_only` below keeps the clause data conformant.
+  Percent-path stats (ADR 0141, owner ruling "Sturdy, no server change" of 2026-11-11): for a metric of
+  `compare.PERCENT_PATH_METRICS` (`stat`, `armor`, `max_health`, `max_power`, `resistance`), the stats the engine
+  reaches through its percent modifiers and truncates to an integer, the symmetric 1-point floor is replaced by the
+  truncation: the delta must be the expected delta truncated (`compare.truncated`, +108 for +108.65), so one above is
+  an alert (Blessed Padding +803 for +802). One below is `ok`, "known engine rounding", only on a `scale` relation
+  where the float emulation reproduces the reading (`compare.engine_rounding_verdict`): the factor `AddPct` builds
+  in float from 1 (`Util.h:52-60`), the float product with the before value, then the truncation
+  (`Player::UpdateMaxPower`, `SetMaxPower(power, uint32(value))`). The verdict's `detail['engine_rounding']` holds the
+  computed float value: Sturdy 681009 Energy 100 to 104 for +5% carries 104.99999237060547. It keeps `data_only` when
+  a percent one point away emulates to the same reading (+4% also gives 104 from 100); else the reading tells the
+  stated percent (120 to 125 for +5%: +4% gives 124, +6% 127). A one below the emulation does not reproduce (80 to 83
+  for +5%, where the float gives 84), two or more away, a zero delta, combined effects and every other metric
+  (damage, healing, durations, attack power) never take this rule.
   Spell modifier targets (D5, ADR 0017): a mask spell the tooltip does not name, beside named targets of the same
   effect and metric, is `measured`; beside named targets that are all `unmodelled` for that effect and metric (a
   named spell without the consumer's effect: `target <id> has no effect <n>`) it is `unmodelled`, the reason naming

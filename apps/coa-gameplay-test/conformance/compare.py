@@ -7,6 +7,7 @@ import math
 from pathlib import Path
 import re
 from statistics import fmean, pstdev
+import struct
 from typing import Callable, Mapping, Protocol
 
 from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
@@ -107,6 +108,9 @@ DETERMINISTIC_STAT_METRICS = frozenset({'stat', 'stat_exact', 'armor', 'combat_r
                                         'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
                                         'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance',
                                         'weapon_damage_min', 'resistance', 'mana_regen'})
+PERCENT_PATH_METRICS = frozenset({'stat', 'armor', 'max_health', 'max_power', 'resistance'})
+PERCENT_PATH_RELATIONS = frozenset({'scale'})
+ENGINE_ROUNDING = 'engine_rounding'
 CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
@@ -1770,8 +1774,39 @@ def delta_margin(metric: str, expected: float) -> float:
     return max(floor, RELATIVE_TOLERANCE * abs(expected))
 
 
+def truncated(expected: float) -> float:
+    return float(math.floor(expected + METRIC_DELTA_FLOAT_TOLERANCE))
+
+
+def stat_reading_ok(metric: str, measured: float, expected: float) -> bool:
+    if metric in PERCENT_PATH_METRICS:
+        return abs(measured - truncated(expected)) <= FLOAT_EPSILON
+    return abs(measured - expected) <= delta_margin(metric, expected) + FLOAT_EPSILON
+
+
+def float32(value: float) -> float:
+    return struct.unpack('f', struct.pack('f', value))[0]
+
+
+def engine_percent_factor(percent: float) -> float:
+    factor = float32(1.0)
+    return float32(factor + float32(float32(factor * float32(percent)) / float32(100.0)))
+
+
+def engine_percent_value(before: float, percent: float) -> float:
+    return float32(float32(before) * engine_percent_factor(percent))
+
+
+def engine_reading(before: float, percent: float) -> float:
+    return float(math.trunc(engine_percent_value(before, percent)))
+
+
 def delta_margin_rule(metric: str) -> str:
     floor = delta_floor(metric)
+    if metric in PERCENT_PATH_METRICS:
+        return (f'delta = the expected delta truncated to an integer, as the engine truncates the {metric} reading, '
+                f'with no symmetric floor, no relative margin and no tolerated tier; one below only as a known '
+                f'engine rounding that the float emulation reproduces')
     if metric in DETERMINISTIC_STAT_METRICS:
         return (f'|delta - expected| <= {floor:g}, the rounding of a deterministic {metric} reading, with no '
                 f'relative margin and no tolerated tier')
@@ -1783,7 +1818,7 @@ def delta_status(metric: str, measured: float, expected: float) -> str:
         return 'alert'
     margin = delta_margin(metric, expected)
     if metric in DETERMINISTIC_STAT_METRICS:
-        return 'ok' if abs(measured - expected) <= margin + FLOAT_EPSILON else 'alert'
+        return 'ok' if stat_reading_ok(metric, measured, expected) else 'alert'
     return banded_status(measured, expected - margin, expected + margin, expected)
 
 
@@ -2049,10 +2084,36 @@ def interval_verdict(base: Verdict, metric: str, delta: float, judged: list[tupl
                      context: str) -> Verdict:
     reading, status = judged[0]
     margin = delta_margin(metric, reading.delta)
+    low, high = ((truncated(reading.delta),) * 2 if metric in PERCENT_PATH_METRICS
+                 else (reading.delta - margin, reading.delta + margin))
     readings = '; '.join(f'{item.name} ({item.why}): expected delta {item.delta:+.6g}: {item_status}'
                          for item, item_status in judged)
-    return replace(base, status=status, measured=delta, expected=reading.delta, low=reading.delta - margin,
-                   high=reading.delta + margin, explanation=f'{context}; {readings}; {delta_margin_rule(metric)}')
+    return replace(base, status=status, measured=delta, expected=reading.delta, low=low, high=high,
+                   explanation=f'{context}; {readings}; {delta_margin_rule(metric)}')
+
+
+def engine_rounding_verdict(base: Verdict, model: dict, before: float, delta: float, value: float,
+                            reading: DeltaReading, context: str) -> Verdict | None:
+    stated = truncated(reading.delta)
+    if (model['metric'] not in PERCENT_PATH_METRICS or model['relation'] not in PERCENT_PATH_RELATIONS
+            or abs(delta) <= FLOAT_EPSILON or abs(delta - (stated - 1)) > FLOAT_EPSILON):
+        return None
+    computed = engine_percent_value(before, value)
+    if abs(engine_reading(before, value) - (before + delta)) > FLOAT_EPSILON:
+        return None
+    detail = {ENGINE_ROUNDING: computed}
+    neighbours = [percent for percent in (value - 1, value + 1)
+                  if abs(engine_reading(before, percent) - (before + delta)) <= FLOAT_EPSILON]
+    if neighbours:
+        detail[DATA_ONLY] = (f'the engine reading {before + delta:g} also follows from '
+                             f'{" and ".join(f"{percent:+g}%" for percent in neighbours)}, so it does not tell the '
+                             f'stated {value:+g}%')
+    return replace(base, status='ok', measured=delta, expected=reading.delta, low=stated - 1, high=stated,
+                   detail=detail,
+                   explanation=f'{context}; {reading.name} ({reading.why}): expected delta {reading.delta:+.6g}: '
+                               f'known engine rounding: AddPct builds the factor {engine_percent_factor(value)!r} in '
+                               f'float, {before:g} x that factor is {computed!r} in float, truncated to '
+                               f'{before + delta:g}, one below the stated {before + stated:g}')
 
 
 def change(before: float, delta: float) -> str:
@@ -3228,7 +3289,7 @@ def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Exp
     verdict = passive_verdict(manifest, entry, run, expectation, tooltips)
     metric = expectation.model['metric']
     detail = {**(verdict.detail or {}), PASSIVE_METRIC: metric}
-    reason = detail.get(DATA_ONLY) or floor_only_reason(verdict, metric)
+    reason = detail.get(DATA_ONLY) or (None if ENGINE_ROUNDING in detail else floor_only_reason(verdict, metric))
     if reason:
         detail[DATA_ONLY] = reason
     return replace(verdict, detail=detail)
@@ -3339,6 +3400,10 @@ def passive_verdict(manifest: dict, entry: dict, run: Run | None, expectation: E
     if partners and model['named'] is None:
         return judge_combined(base, manifest, run, model, partners, readings, before, delta, context,
                               tooltips.read(rank_id, caster).values, tooltips, rank_id)
+    if len(readings) == 1:
+        rounded = engine_rounding_verdict(base, model, before, delta, value, readings[0], context)
+        if rounded is not None:
+            return rounded
     judged = [(reading, delta_status(model['metric'], delta, reading.delta)) for reading in readings]
     if model['named'] is not None:
         return judge_modifier_target(base, manifest, entry, run, model, value, before, delta, judged, context,
