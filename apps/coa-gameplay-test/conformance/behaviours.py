@@ -5473,6 +5473,9 @@ def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
 
 
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    if entry['kind'] == 'school_lockout':
+        from expiry import school_lockout_scenario
+        return school_lockout_scenario(class_file, entry)
     if entry['kind'] == 'count':
         return target_count_scenario(class_file, target_count_spec(entry))
     if entry['kind'] == 'fixed_count':

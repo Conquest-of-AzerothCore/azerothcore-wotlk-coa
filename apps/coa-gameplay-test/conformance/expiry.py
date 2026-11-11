@@ -528,7 +528,6 @@ def school_lockout_scenario(class_file: dict, entry: dict) -> tuple[dict, list[E
                                                    prose_rule(spec.quote, spec.spell), [arm], LOCKOUT_METRIC)]
 
 
-BEHAVIOUR_PAIRS = {SCHOOL_LOCKOUT: school_lockout_scenario}
 BEHAVIOUR_EXPIRIES = {'cast_applies_aura': cast_applies_aura_expiry, 'duration_refresh': duration_refresh_expiry,
                       'duration_ratio': duration_ratio_expiry, 'duration': duration_delta_expiry}
 TRIGGER_EXPIRIES = {'duration_delta': trigger_duration_expiry}
