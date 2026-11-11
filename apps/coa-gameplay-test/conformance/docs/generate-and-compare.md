@@ -457,7 +457,10 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   run without those reads, or a different per-level part leaves a read outside the range an `alert` labelled
   "per-level truncation, engine computation not modelled", never `ok`. Known limit: a CoA
   `ModifySpellEffectBaseValue` hook that multiplies the value (such as `ascension_scaling_base`,
-  AscensionScalingBase.cpp:51) or changes the level is not detected; the tool cannot see it. A rank whose tooltip
+  AscensionScalingBase.cpp:51) or changes the level is not detected; the tool cannot see it. That hook applies to
+  the 454 `{spell, effect mask}` rows of `AscensionCompatData::ScalingBaseSpells`
+  (`src/server/coa/AscensionScalingBaseData.h`): an ok verdict is exposed to it only when its spell is listed with
+  that effect's bit; no Templar spell judged by this rule is listed. A rank whose tooltip
   leaves the per-level term out (the cancel list, ADR 0014) fails the per-level part check and never takes this
   rounding. Inherent limit: where the lost fraction exceeds the per-roll minimum's fraction, a flat 1-below server
   error gives exactly the engine's integer set and cannot be told apart from it. A fixed (`EffectDieSides` 0 or 1)

@@ -19,6 +19,9 @@ constexpr std::array<uint32, 15> TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS = {
     801446, 501589, 501590, 501591, 501592, 501593, 573324,
     805421, 748505, 748506, 748507, 572739, 572740, 572741, 804150};
 
+constexpr std::array<std::pair<uint32, uint8>, 2> TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS = {{
+    {803844, 0}, {807035, 1}}};
+
 float StockEffectRealPointsPerLevelAmount(Unit const* caster, SpellInfo const* info, uint8 index)
 {
     float perLevel = info->Effects[index].RealPointsPerLevel;
@@ -38,7 +41,9 @@ void CancelStockEffectRealPointsPerLevel(Unit const* caster, SpellInfo const* in
     if (!caster || !info)
         return;
     if (std::find(TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.begin(), TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end(),
-                  info->Id) == TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end())
+                  info->Id) == TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end() &&
+        std::find(TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS.begin(), TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS.end(),
+                  std::make_pair(info->Id, index)) == TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS.end())
         return;
     value -= float(int32(StockEffectRealPointsPerLevelAmount(caster, info, index)));
 }
@@ -323,10 +328,6 @@ class templar_scaling : public UnitScript
         if (!player || !info)
             return;
         CancelStockEffectRealPointsPerLevel(caster, info, index, value);
-        if (info->Id == 803844 && index == 0)
-            value -= 2.65f * float(player->GetLevel());
-        if (info->Id == 807035 && index == 1)
-            value -= 9.76f * float(std::max<int32>(0, int32(player->GetLevel()) - 30));
         if (info->Id == 527269 && index == 0)
             value = float(Amount(527270, 2, player));
         if (info->Id == 803160 && index == 0)
