@@ -8,8 +8,8 @@ from hits import reference_caster
 from tooltip import Readout, Records, Unreadable, read_tooltip
 from values import EFFECTS, dataset
 
-CHECK_SECTIONS = ('behaviours', 'procs', 'triggers', 'talent_modifiers', 'target_aura_gates', 'player_observations',
-                  'player_tooltip_readings')
+CHECK_SECTIONS = ('behaviours', 'procs', 'triggers', 'talent_modifiers', 'target_aura_gates', 'learned_hits',
+                  'player_observations', 'player_tooltip_readings')
 SPELL_FIELDS = ('spell', 'rank', 'talent', 'gate_spell', 'proc_spell', 'aura', 'aura_spell', 'trial_spell',
                 'observe_spell')
 EFFECT_FIELDS = ('Effect', 'EffectBasePoints', 'EffectDieSides', 'EffectApplyAuraName', 'EffectMiscValue',

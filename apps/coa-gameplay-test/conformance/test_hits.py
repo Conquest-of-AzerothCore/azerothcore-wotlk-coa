@@ -11,6 +11,7 @@ from compare import PER_LEVEL_ROUNDING, Run, Verdict, judge_hit
 from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
                   casts_needed, dual_target_entry, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario,
+                  learned_weapon_part,
                   measured_hit_model, melee_scenario, records_of, periodic_tick_readout, reference_caster,
                   reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
                   self_stack_multiplier, weapon_profile)
@@ -100,6 +101,7 @@ TEMPLE_GUARDIAN_LIVE_RANK = 803792
 TITANSTRIKE = 806521
 TITANSTRIKE_MAX_RANK = 806835
 CHASTISE_MAX_RANK = 503141
+MARTIAL_TRAINING = 806525
 TEMPLARS_MIGHT = 705291
 CONDEMN_LIVE_RANK = 567539
 BENEDICTION = 801448
@@ -306,6 +308,27 @@ class ExpectedHitTest(unittest.TestCase):
         readout = Readout(values=[Displayed('${$m1+0+$sph*0.6+$AP*0.45}', 478.85, 0, 'flat')], unreadable=[])
         kind, indexes = hit_kind([SCHOOL_DAMAGE, 0, WEAPON_PERCENT_DAMAGE], (0, 0, 0), readout=readout)
         self.assertEqual((kind, indexes), ('school', [0]))
+
+    def test_a_learned_weapon_part_is_added_to_the_school_hit_after_each_takes_the_modifiers(self):
+        school = Displayed('$s1', 100.0, 0, 'flat')
+        token = Displayed('$806525s1', 150.0, 0, 'percent', MARTIAL_TRAINING)
+        effects = [SCHOOL_DAMAGE, 0, WEAPON_PERCENT_DAMAGE]
+        part = learned_weapon_part(Readout(values=[school, token], unreadable=[]), effects, caster(),
+                                   walking_stick(), MARTIAL_TRAINING)
+        model = expected_hit(Readout(values=[school], unreadable=[]), effects, caster(), walking_stick(),
+                             NO_MITIGATION, modifiers=[tuning()], weapon_part=part)
+        bonus = REFERENCE_ATTACK_POWER / 14 * 2.5
+        rolls = range(math.floor(6.5625 + bonus), math.floor(10.9375 + bonus) + 1)
+        hits = [math.floor(100 * 0.8) + math.floor(math.floor(roll * 1.5) * 0.8) for roll in rolls]
+        self.assertAlmostEqual(model.mean, sum(hits) / len(hits), places=9)
+        self.assertEqual(model.displayed, ('$s1', '$806525s1'))
+
+    def test_a_learned_spell_whose_weapon_percent_is_not_shown_is_unmodelled(self):
+        readout = Readout(values=[Displayed('$s1', 100.0, 0, 'flat')], unreadable=[])
+        with self.assertRaises(Unmodelled) as raised:
+            learned_weapon_part(readout, [SCHOOL_DAMAGE, 0, WEAPON_PERCENT_DAMAGE], caster(), walking_stick(),
+                                MARTIAL_TRAINING)
+        self.assertIn('0 weapon percents', raised.exception.reason)
 
     def test_several_token_bearing_kinds_still_raises(self):
         readout = Readout(values=[Displayed('$s1', 10.0, 0, 'flat'), Displayed('$s3', 50.0, 2, 'percent')],
@@ -668,6 +691,33 @@ class HitScenarioTest(unittest.TestCase):
         alert_verdict = judge_hit(base, self.templar, [(scenario, half_run, hit)], measured_hit_model)
         self.assertEqual(alert_verdict.status, 'alert')
         self.assertIn('usable hits', alert_verdict.explanation)
+
+    def test_chastise_with_martial_training_learns_it_and_alerts_without_its_weapon_part(self):
+        chastise = ClassSpell(CHASTISE_MAX_RANK, 'Chastise', (CHASTISE_MAX_RANK,), CHASTISE_MAX_RANK, 0, False)
+        label = f'{CHASTISE_MAX_RANK} hit_mean weapon_damage'
+        (scenario, expectations), = hit_parts(self.templar, chastise, 1, rank_id=CHASTISE_MAX_RANK, label=label,
+                                              learned=MARTIAL_TRAINING)
+        (_, plain_expectations), = hit_parts(self.templar, chastise, 1, rank_id=CHASTISE_MAX_RANK)
+        hit, plain = hit_expectation(expectations), hit_expectation(plain_expectations)
+        self.assertEqual(steps_with(scenario, action='learn', spell=MARTIAL_TRAINING)[0]['actor'], 'caster')
+        self.assertEqual((hit.model['learned'], hit.model['weapon']['item']), (MARTIAL_TRAINING, 2495))
+        self.assertNotIn('learned', plain.model)
+        measured = measured_reference(self.templar, hit)
+        learned_model = measured_hit_model(self.templar, hit, measured)
+        plain_model = measured_hit_model(self.templar, plain, measured_reference(self.templar, plain))
+        self.assertGreater(learned_model.mean - plain_model.mean, 60)
+        labels = hit.model['measurements']
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+        count = 1000
+        for mean, status in ((learned_model.mean, 'ok'), (plain_model.mean, 'alert'),
+                             (plain_model.mean + 2 / 3 * (learned_model.mean - plain_model.mean), 'alert')):
+            with self.subTest(mean=mean):
+                found = Run(key='learned', status='ok', message='',
+                            values={**measured, labels['total']: mean * count, labels['count']: count},
+                            steps=[], max_step_ms=None)
+                self.assertEqual(judge_hit(base, self.templar, [(scenario, found, hit)], measured_hit_model).status,
+                                 status)
 
     def test_effect_hit_mixes_instead_of_summing_several_indexes(self):
         readout = Readout(values=[Displayed('$m1', 100.0, 0, 'flat'), Displayed('$m2', 200.0, 1, 'flat')],

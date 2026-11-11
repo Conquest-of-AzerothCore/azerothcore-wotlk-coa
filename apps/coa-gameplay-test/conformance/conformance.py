@@ -19,8 +19,8 @@ from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import BEHAVIOUR_PAIRS, EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
-from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, gate_stacks, hit_parts, melee_scenario,
-                  records_of, reference_hit_model, reference_melee_model)
+from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, gate_stacks, hit_parts,
+                  melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model, reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
 from profile import (DBC_DIR, DbcSetMismatch, ledger_consumption_path, load_class_file, server_dbc_dir,
@@ -230,6 +230,39 @@ def add_target_gate_arm(writer: ManifestWriter, entry: dict, held: int, percent:
                    'target_gate', test_spell, rank_id, expectations, scenario)
 
 
+def learned_hit_entries(class_file: dict, spell_ids: list[int] | None) -> list[dict]:
+    entries = class_file.get('learned_hits', [])
+    if spell_ids is None:
+        return entries
+    chosen = [entry for entry in entries if entry['spell'] in spell_ids]
+    unknown = set(spell_ids) - {entry['spell'] for entry in chosen}
+    if unknown:
+        raise ValueError(f'Spells {sorted(unknown)} are not {class_file["name"]} learned_hits entries')
+    return chosen
+
+
+def add_learned_hit(writer: ManifestWriter, entry: dict):
+    class_file = writer.class_file
+    records = records_of(class_file)
+    rank_id, learned = entry['rank'], entry['spell']
+    test_spell = ClassSpell(rank_id, records.field('Spell', rank_id, 'SpellName[enUS]'), (rank_id,), rank_id, 0,
+                            False)
+    label = f'{rank_id} hit_mean {entry["label_suffix"]}'
+    key = scenario_key(class_file['name'], 'learned-hit', learned, entry['label_suffix'])
+    armed_file = armed_for(class_file, records, rank_id)
+    try:
+        casts = casts_needed(rank_hit(armed_file, rank_id, reference_caster(armed_file), REFERENCE_TARGET,
+                                      armed_file.get('known_auras', []), learned).model)
+        parts = hit_parts(class_file, test_spell, casts, rank_id=rank_id, label=label, learned=learned)
+    except (Unmodelled, ValueError) as error:
+        writer.add(key, 'learned_hit', test_spell, rank_id,
+                   unmodelled(label, test_spell, getattr(error, 'reason', str(error))))
+        return
+    for part, (scenario, expectations) in enumerate(parts, start=1):
+        writer.add(key if len(parts) == 1 else f'{key}-part-{part}', 'learned_hit', test_spell, rank_id,
+                   expectations, scenario)
+
+
 def add_melee(writer: ManifestWriter):
     class_file = writer.class_file
     try:
@@ -345,7 +378,8 @@ def selected_passives(class_file: dict, dbc_dir: Path, spell_ids: list[int]) -> 
 def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
              stack: bool = False, passes: int = PASSES, passives: list[int] | None = None,
              triggers: list[int] | None = None, behaviours: list[int] | None = None,
-             target_gates: list[int] | None = None, trials: dict[str, int] | None = None) -> Path:
+             target_gates: list[int] | None = None, trials: dict[str, int] | None = None,
+             learned_hits: list[int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = server_dbc_dir(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -355,13 +389,15 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
     scenario_dir.mkdir(parents=True, exist_ok=True)
     writer = ManifestWriter(class_file, out)
     everything = (spells is None and procs is None and passives is None and triggers is None and behaviours is None
-                 and target_gates is None and not stack)
+                 and target_gates is None and learned_hits is None and not stack)
     chosen_procs = proc_entries(class_file, procs) if everything or procs is not None else []
     chosen_triggers = trigger_entries(class_file, triggers) if everything or triggers is not None else []
     chosen_passives = selected_passives(class_file, dbc_dir, passives) if passives is not None else []
     chosen_behaviours = behaviour_entries(class_file, behaviours) if everything or behaviours is not None else []
     chosen_target_gates = target_gate_entries(class_file, target_gates) \
         if everything or target_gates is not None else []
+    chosen_learned_hits = learned_hit_entries(class_file, learned_hits) \
+        if everything or learned_hits is not None else []
     generated_passives: set[int] = set()
     if everything or spells is not None:
         for spell in selected_spells(class_file, dbc_dir, spells):
@@ -382,6 +418,8 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
         add_behaviour(writer, sized_behaviour(entry, trials))
     for entry in chosen_target_gates:
         add_target_gate(writer, entry)
+    for entry in chosen_learned_hits:
+        add_learned_hit(writer, entry)
     if stack:
         add_stack(writer, passes)
     if everything:
@@ -410,7 +448,7 @@ def scaffold_command(args) -> int:
 
 def generate_command(args) -> int:
     path = generate(args.class_id, args.out, args.spell, args.proc, args.stack, args.passes, args.passive,
-                    args.trigger, args.behaviour, args.target_gate)
+                    args.trigger, args.behaviour, args.target_gate, learned_hits=args.learned_hit)
     manifest = json.loads(path.read_text(encoding='utf-8'))
     written = sum(1 for entry in manifest['scenarios'] if entry['file'])
     print(f'{path}: {written} scenarios in {path.parent / SCENARIO_DIR}, '
@@ -612,6 +650,9 @@ def main(argv=None) -> int:
                             help='the spell of a behaviour entry of the class file; repeat to select several')
     generating.add_argument('--target-gate', dest='target_gate', type=int, action='append',
                             help='the spell of a target_aura_gates entry of the class file; repeat to select '
+                                 'several')
+    generating.add_argument('--learned-hit', dest='learned_hit', type=int, action='append',
+                            help='the learned spell of a learned_hits entry of the class file; repeat to select '
                                  'several')
     generating.add_argument('--stack', action='store_true',
                             help='the passes of every stack configuration of the class file, cumulative talents')

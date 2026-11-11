@@ -383,7 +383,7 @@ server DBC set, the class file, the bucket file and an optional class map, which
 - the `script_touch_hits` of the spell's bucket rows (file and line);
 - every bucket row of the spell (bucket, evidence, `token_kind`, labels and their statuses), marked by chunk;
 - the class-file entries of a check section (`behaviours`, `procs`, `triggers`, `talent_modifiers`,
-  `target_aura_gates`, the player observations and tooltip readings) that name the spell or a spell its tokens name;
+  `target_aura_gates`, `learned_hits`, the player observations and tooltip readings) that name the spell or a spell its tokens name;
 - for each check kind those entries or the rows' labels name, the nearest other entry of that section and kind: the
   most shared `(Effect, EffectApplyAuraName)` pairs, then the smallest spell id distance;
 - the fixtures: the other class-file sections naming those spells, and the behaviour kinds the generator builds;
