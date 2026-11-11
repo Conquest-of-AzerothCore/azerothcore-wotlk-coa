@@ -8,12 +8,14 @@
     "queued or handled 0x06EA, so the request was dropped and nothing was collected (#11001, #11085, #11275, #11329,",
     "#11331). Expected: a carried Sentinel's Blade 450934 (ItemAppearances 450934 -> 24009) is answered with",
     "COLLECT_ITEM_APPEARANCE_OK, and a carried Linen Cloth 2589, which has no appearance, with",
-    "COLLECT_ITEM_APPEARANCE_FAILED. CoA.UnlockLocalAppearanceCatalog collects every appearance locally, so the",
-    "added appearance itself is not observed here."
+    "COLLECT_ITEM_APPEARANCE_FAILED. Collecting leaves a Bind-on-Equip Old Amani Waraxe 467 (ItemAppearances",
+    "467 -> 11962) unbound. CoA.UnlockLocalAppearanceCatalog collects every appearance locally, so the added",
+    "appearance itself is not observed here."
   ],
   "timeout_ms": 60000,
   "players": [
-    { "id": "collector", "race": 1, "class": 1, "level": 60 }
+    { "id": "collector", "race": 1, "class": 1, "level": 60 },
+    { "id": "boe_collector", "race": 1, "class": 1, "level": 60 }
   ],
   "steps": [
     { "action": "wait", "ms": 2000 },
@@ -31,6 +33,24 @@
     {
       "action": "assert", "label": "Collecting leaves the blade in the bags", "actor": "collector",
       "metric": "item_count", "item": 450934, "equals": 1
+    },
+    { "action": "add_item", "actor": "boe_collector", "item": 467 },
+    {
+      "action": "assert", "label": "SETUP: the Bind-on-Equip Old Amani Waraxe is unbound", "actor": "boe_collector",
+      "metric": "item_soulbound", "item": 467, "equals": 0
+    },
+    {
+      "action": "client_packet", "label": "Collect the Old Amani Waraxe appearance", "actor": "boe_collector",
+      "opcode": 1770, "fields": [ { "item_guid": 467 } ]
+    },
+    {
+      "action": "assert", "label": "SETUP: the Old Amani Waraxe collect request is accepted",
+      "actor": "boe_collector", "metric": "server_packet_contains", "opcode": 1771,
+      "text": "COLLECT_ITEM_APPEARANCE_OK", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "Collecting does not bind a Bind-on-Equip item", "actor": "boe_collector",
+      "metric": "item_soulbound", "item": 467, "equals": 0
     },
     {
       "action": "client_packet", "label": "Collect from an item without an appearance", "actor": "collector",

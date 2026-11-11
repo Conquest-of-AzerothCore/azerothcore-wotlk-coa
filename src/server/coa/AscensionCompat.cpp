@@ -7929,25 +7929,25 @@ private:
     }
   }
 
-  bool HasItemAppearance(uint32 itemId) const
-  {
-    return _itemAppearances.contains(itemId) || _itemAppearances.contains(ItemScaling::BaseEntry(itemId));
-  }
-
-  void HandleCollectItemAppearance(Player* player, WorldPacket& packet)
-  {
-    ObjectGuid const itemGuid(packet.read<uint64>());
-    Item* item = player->GetItemByGuid(itemGuid);
-    std::shared_ptr<PlayerCollectionState> state = GetState(player);
-    if (!state || !item || !HasItemAppearance(item->GetEntry()))
+    bool HasItemAppearance(uint32 itemId) const
     {
-      SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_FAILED");
-      return;
+        return _itemAppearances.contains(itemId) || _itemAppearances.contains(ItemScaling::BaseEntry(itemId));
     }
 
-    CollectItem(player, *state, item->GetEntry(), true, item->IsSoulBound());
-    SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_OK");
-  }
+    void HandleCollectItemAppearance(Player* player, WorldPacket& packet)
+    {
+        ObjectGuid const itemGuid(packet.read<uint64>());
+        Item* item = player->GetItemByGuid(itemGuid);
+        std::shared_ptr<PlayerCollectionState> state = GetState(player);
+        if (!state || !item || !HasItemAppearance(item->GetEntry()))
+        {
+            SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_FAILED");
+            return;
+        }
+
+        CollectItem(player, *state, item->GetEntry(), true, item->IsSoulBound());
+        SendOutfitResult(player, SMSG_COLLECT_ITEM_APPEARANCE_RESULT, "COLLECT_ITEM_APPEARANCE_OK");
+    }
 
   void HandleClientPacket(Player *player, WorldPacket &packet) {
     packet.rpos(0);
