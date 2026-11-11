@@ -907,9 +907,11 @@
     "labels": [
       "520608 effect_value e0 #0",
       "520608 e0 spell_modifier 561156",
-      "520608 e0 spell_effect_value 561156"
+      "520608 e0 spell_effect_value 561156",
+      "520608 behaviour_hit_ratio argent_blade"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Argent Blade 807268 with Warrior of Dawn 561156 set: +50.0% with 520608 set first against 561156 alone, forced critical hits in both arms"
   },
   {
     "spell": 520608,
@@ -990,21 +992,26 @@
       {
         "claim": "and reduces their damage done by $520842s1%",
         "labels": [
-          "524739 effect_value 520842e0 #3"
+          "524739 effect_value 520842e0 #3",
+          "524739 behaviour_hit_ratio damage_done"
         ]
       },
       {
         "claim": "and healing done by $520842s1%",
-        "labels": []
+        "labels": [
+          "524739 behaviour_hit_ratio healing_done"
+        ]
       },
       {
         "claim": "for $520842d",
         "labels": [
-          "524739 spell_duration 520842 #4"
+          "524739 spell_duration 520842 #4",
+          "524739 behaviour_expiry"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "520842 set on the caster: Vindication hits -9.9% and Benediction heals -10.0% against the control; expiry pair of 520842 on the dummy after a 524739 cast (present 4875-4950 ms, absent 5074-5199 ms after it landed)"
   },
   {
     "spell": 524739,
@@ -1018,8 +1025,11 @@
   {
     "spell": 524739,
     "clause": "Scales with modifiers to Chastise.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "524739 behaviour_hit_ratio chastise_modifier"
+    ],
+    "kind": "claim",
+    "reason": "524740 cast directly: +2.955% with Argent Knight 805407 (a Chastise-only SPELLMOD_DAMAGE, mask word 1 67108864, the bit AscensionTemplarContracts.cpp:260-265 adds to 524740) against none without"
   },
   {
     "spell": 524747,
@@ -2729,25 +2739,31 @@
     "spell": 707606,
     "clause": "Casting Righteous Upheaval or Blade of Faith now grants you Oath: Retribution (per trigger spell)",
     "labels": [
-      "707606 trigger_count ok (273/273, aggregate)",
       "707606 trigger_count 572027",
       "707606 trigger_count 803880"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the malformed aggregate label was dropped; the two per-trigger counts (572027, 803880) are the proof"
   },
   {
     "spell": 707606,
     "clause": "grants you Oath: Retribution",
     "labels": [
-      "707606 effect_value 804924e0 #0"
+      "707606 effect_value 804924e0 #0",
+      "707606 behaviour_metric_delta oath_aura"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Oath: Retribution 804924 absent after Righteous Upheaval 572027 without 707606, present with it"
   },
   {
     "spell": 707606,
     "clause": "and starts your Oath Chain",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "707606 behaviour_metric_delta oath_chain",
+      "707606 behaviour_metric_delta oath_chain_blade"
+    ],
+    "kind": "claim",
+    "reason": "Oath Chain 704576 at 0 stacks after Righteous Upheaval 572027 or Blade of Faith 803880 without 707606, 1 with it"
   },
   {
     "spell": 707663,
@@ -3131,9 +3147,11 @@
     "spell": 804904,
     "clause": "Oath: Your abilities damage or heal for $804904s2% more.",
     "labels": [
-      "570233 effect_value 804904e1 #2"
+      "804904 behaviour_hit_ratio damage",
+      "804904 behaviour_hit_ratio heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "804904 set: Vindication +5.08% (Effect[0] only); Benediction +36.48% = 1.05 x 1.30 (Effect[0] and the Breaker bonus Effect[2]); the not_measured value label of 570233 was dropped"
   },
   {
     "spell": 573049,
@@ -3165,9 +3183,10 @@
     "spell": 804903,
     "clause": "Oath: Your abilities strike $804903s1 additional nearby target.",
     "labels": [
-      "573049 effect_value 804903e0 #2"
+      "804903 behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Holy Cleave 573049 without the Oath cleared: 2 extra dummies hit by the casts after the first (per cast [1, 2]), the far dummy never; the 573049 fixed_count entry clears the Oath and reads 1; the not_measured value label was dropped"
   },
   {
     "spell": 573324,
@@ -3317,9 +3336,11 @@
     "spell": 801461,
     "clause": "$?s707385[ and instantly healing you for $s1% maximum health][]",
     "labels": [
-      "801461 behaviour_metric_delta heal_gate"
+      "801461 behaviour_metric_delta heal_gate",
+      "801461 behaviour_metric_delta heal_event"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Libram of Tenacity heals the caster for 0 without Tenacious Defender 707385 and 347 with it: int(int(0.20 x 2173) x 0.8), the class aura 887007 -20% healing done included"
   },
   {
     "spell": 801461,
@@ -3915,9 +3936,12 @@
     "spell": 804906,
     "clause": "stacking $u times",
     "labels": [
-      "567539 max_stacks 567539 #2"
+      "567539 max_stacks 567539 #2",
+      "804906 behaviour_metric_delta stack_cap",
+      "804906 behaviour_metric_delta below_stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Condemn 567539 at the dummy: 1 stack after one cast, 2 after two, 3 after four"
   },
   {
     "spell": 804906,
@@ -3931,9 +3955,10 @@
     "spell": 804906,
     "clause": "Oath: Increases your critical strike chance by $804922s1%.",
     "labels": [
-      "567539 effect_value 804922e0 #3"
+      "804906 behaviour_metric_delta oath_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "melee crit chance 7.146 before a Condemn cast and 10.146 after it, with Oath: Condemn 804922; the not_measured value label of the other rank was dropped"
   },
   {
     "spell": 804912,
@@ -4530,9 +4555,11 @@
     "clause": "Summons $s1 copies of yourself that charge at a nearby enemy and aid you in combat for $d.",
     "labels": [
       "1397742 effect_value e0 #0",
-      "1397742 aura_duration_ms #1 (unmeasurable)"
+      "1397742 behaviour_metric_delta copies",
+      "1397742 behaviour_metric_delta copies_end"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "owned copies 50250: 0 before the cast, 2 one second after it, 2 at 19000 ms and 0 at 21000 ms"
   },
   {
     "spell": 1397742,

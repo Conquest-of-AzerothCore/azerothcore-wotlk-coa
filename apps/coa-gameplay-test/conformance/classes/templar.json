@@ -1724,6 +1724,139 @@
   ],
   "behaviours": [
     {
+      "spell": 707606, "name": "Fervent Castigation (Oath: Retribution)", "kind": "metric_delta", "variant": "oath_aura", "label_suffix": "oath_aura",
+      "quote": "now grants you", "expected": 1,
+      "trigger_spell": 572027, "target": "dummy", "metric": "aura", "fields": {"spell": 804924},
+      "before_expected": 0, "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "AscensionTemplarAbilities.cpp:182-195 (OnSpellCast, Breaker block): ClearOaths, then with 707606 known and Named(info, 501562) (Righteous Upheaval, 572027 a rank of it) GrantOath(player, 804924) casts Oath: Retribution on the caster (AscensionTemplar.cpp:168-181). Righteous Upheaval 572027 is cast at the dummy without 707606 (no 804924) and again after 707606 is learned (804924 present 500 ms later)."
+    },
+    {
+      "spell": 707606, "name": "Fervent Castigation (Oath Chain)", "kind": "metric_delta", "variant": "oath_chain", "label_suffix": "oath_chain",
+      "quote": "and starts your", "expected": 1,
+      "trigger_spell": 572027, "target": "dummy", "metric": "aura_stacks", "fields": {"spell": 704576},
+      "before_expected": 0, "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "GrantOath (AscensionTemplar.cpp:168-181) casts Oath Chain 704576 after the Oath; 804924's own delayed 704576 trigger (Effect[1] 183) is removed by AscensionTemplarContracts.cpp:85-86. A Righteous Upheaval 572027 cast is a Breaker (SpellFamilyFlags[2] 128) that clears the Oaths and grants none of its own (no SpellFamilyFlags[2] bit 1): 0 Oath Chain stacks without 707606, 1 with it."
+    },
+    {
+      "spell": 707606, "name": "Fervent Castigation (Oath Chain, Blade of Faith)", "kind": "metric_delta", "variant": "oath_chain_blade", "label_suffix": "oath_chain_blade",
+      "quote": "and starts your", "expected": 1,
+      "trigger_spell": 803880, "target": "dummy", "metric": "aura_stacks", "fields": {"spell": 704576},
+      "before_expected": 0, "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "The Blade of Faith half: 803880 (rank 9 of chain 803872, SpellFamilyFlags[2] 128) satisfies Named(info, 803872) in AscensionTemplarAbilities.cpp:194-195; 0 Oath Chain 704576 stacks without 707606, 1 with it."
+    },
+    {
+      "spell": 804904, "name": "Oath: Righteous Lunge", "kind": "hit_ratio", "variant": "damage", "label_suffix": "damage",
+      "quote": "Your abilities damage or heal for", "expected": 1.05,
+      "observe_spell": 573324, "learn": [573324],
+      "control": {}, "treatment": {"auras": [[804904, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$804904s2 = 5 in the Righteous Lunge tooltip: 804904 Effect[0] aura 108 SPELLMOD_DAMAGE, EffectBasePoints[0] 4 + EffectDieSides[0] 1 = +5%, EffectSpellClassMask[0] [8208, 33554432, 161], which Vindication 573324 (SpellFamilyFlags[2] 1) matches; Effect[2] (+30%, mask word 2 128 after AscensionTemplarContracts.cpp:90-91 clears word 0) does not. Vindication is no Oath Breaker, so the Oath stays. Attack power fixture 20000. Only non-critical hits are compared."
+    },
+    {
+      "spell": 804904, "name": "Oath: Righteous Lunge", "kind": "hit_ratio", "variant": "heal", "label_suffix": "heal",
+      "quote": "Your abilities damage or heal for", "expected": 1.365,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[804904, 1]]},
+      "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
+      "expected_source": "Benediction 578276 (top rank at 60, SpellFamilyFlags [1073741824, 0, 128]) is the only Templar heal 804904 Effect[0] (+5%, mask [8208, 33554432, 161]) matches, and as an Oath Breaker (word 2 128) it also matches Effect[2] (+30%, the Oath's own Breaker bonus). Percent spell modifiers multiply: 1.05 x 1.30 = 1.365; without Effect[0] the heal would read 1.30. Spell power fixture 20000. Only non-critical heals are compared."
+    },
+    {
+      "spell": 801461, "name": "Libram of Tenacity (Tenacious Defender heal)", "kind": "metric_delta", "variant": "heal_event", "label_suffix": "heal_event",
+      "quote": "and instantly healing you for", "expected": 347,
+      "trigger_spell": 801461, "target": "caster", "gate_spell": 707385,
+      "metric": "spell_heal_total", "fields": {"spell": 801461, "target": "caster"},
+      "before_expected": 0, "wait_ms": 500, "expire_ms": 500,
+      "observe_source": "801461 Effect[0] 136 SPELL_EFFECT_HEAL_PCT, EffectBasePoints[0] -1 + EffectDieSides[0] 1 = 0% without Tenacious Defender; 707385 Effect[0] aura 107 SPELLMOD_EFFECT1 +20 (EffectBasePoints[0] 19) on 801461 (mask word 0 65536). spell_heal_total counts the heal events the caster logs for 801461 (raw amount, overheal included): none before 707385 is learned; after, 20% of the reference character's 2173 maximum health (805422 behaviour_ratio reads 2173) is int(434.6) = 434, and the class aura 887007 (-20% healing done, as on every Templar heal in this file) gives int(434 x 0.8) = 347."
+    },
+    {
+      "spell": 1397742, "name": "Testament of Hope (copies)", "kind": "metric_delta", "variant": "copies", "label_suffix": "copies",
+      "quote": "copies of yourself that charge at a nearby enemy", "expected": 2,
+      "trigger_spell": 1397742, "target": "caster", "cast_in_before": false,
+      "metric": "owned_creature_count", "fields": {"entry": 50250},
+      "before_expected": 0, "wait_ms": 1000, "expire_ms": 500,
+      "observe_source": "$s1 = 2: 1397742 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50250, EffectBasePoints[0] 1 + EffectDieSides[0] 1; npc_ascension_templar_hope (AscensionTemplarSummons.cpp) keeps a copy only when UNIT_CREATED_BY_SPELL is 1397742 and sets its owner. No copy before the cast, 2 one second after it."
+    },
+    {
+      "spell": 1397742, "name": "Testament of Hope (copies end)", "kind": "metric_delta", "variant": "copies_end", "label_suffix": "copies_end",
+      "quote": "aid you in combat for", "expected": 2,
+      "trigger_spell": 1397742, "target": "caster", "gate_timing": "start", "trigger_only_after": true,
+      "metric": "owned_creature_count", "fields": {"entry": 50250},
+      "before_expected": 0, "wait_ms": 19000, "expire_ms": 500,
+      "expiry_wait_ms": 2000, "after_expiry_expected": 0,
+      "observe_source": "1397742 DurationIndex 18 (20000 ms), the summons' lifetime: both copies still present 19000 ms after the cast and none 21000 ms after it."
+    },
+    {
+      "spell": 524739, "name": "Norgannon's Wrath", "kind": "hit_ratio", "variant": "damage_done", "label_suffix": "damage_done",
+      "quote": "and reduces their damage and healing done by", "expected": 0.9,
+      "observe_spell": 573324, "learn": [573324],
+      "control": {}, "treatment": {"auras": [[520842, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$520842s1 = 10 (520842 EffectBasePoints[0] -11, EffectDieSides[0] 1): Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue[0] 127, on the unit that holds it. The treatment sets 520842 on the caster, so Vindication 573324 (Physical) at the dummy is the holder's own damage done; an attack power fixture of 20000 makes its 0.285 x AP part dominate the 59-point die. 524740 Effect[1] casts 520842 on the blasted enemies (DBC trigger; AscensionTemplarContracts.cpp:260-265 gives it 524740's area targets); its application is the 524739 expiry pair. Only non-critical hits are compared."
+    },
+    {
+      "spell": 524739, "name": "Norgannon's Wrath", "kind": "hit_ratio", "variant": "healing_done", "label_suffix": "healing_done",
+      "quote": "and reduces their damage and healing done by", "expected": 0.9,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[520842, 1]]},
+      "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
+      "expected_source": "$520842s1 = 10 (520842 EffectBasePoints[1] -11, EffectDieSides[1] 1): Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, EffectMiscValue[1] 127, on the unit that holds it. The treatment sets 520842 on the caster; Benediction 578276 (top rank at 60) heals the ally; a spell power fixture of 20000 makes its 0.30 spell power part (AscensionTemplarData.h:63) dominate the 56-point die. Only non-critical heals are compared."
+    },
+    {
+      "spell": 524739, "name": "Norgannon's Wrath", "kind": "cast_applies_aura",
+      "quote": "and reduces their damage and healing done by", "expected_ms": 5000,
+      "applied_aura": 520842, "target": "dummy", "cast_spell": 524739,
+      "observe_source": "524739 Effect[1] 183 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED casts 524740 at the target 1500 ms after the cast; 524740 Effect[1] 64 SPELL_EFFECT_TRIGGER_SPELL casts 520842 on each enemy hit; 520842 DurationIndex 28 (5000 ms). The expiry arm is timed from the applied assert, after the delay and the missile"
+    },
+    {
+      "spell": 524739, "name": "Norgannon's Wrath", "kind": "hit_ratio", "variant": "chastise_modifier", "label_suffix": "chastise_modifier",
+      "quote": "Scales with modifiers to", "expected": 1.03,
+      "observe_spell": 524740,
+      "control": {}, "treatment": {"auras": [[805407, 1]]},
+      "critical": false, "trials": 20,
+      "expected_source": "AscensionTemplarContracts.cpp:260-265 adds SpellFamilyFlags[1] bit 67108864 to 524740, the Chastise bit (Chastise 503141 SpellFamilyFlags[1] 67108865). Argent Knight 805407 Effect[0] aura 108 SPELLMOD_DAMAGE, EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3%, EffectSpellClassMask[0] words [0, 67108864, 0]: a modifier of Chastise only, which 524740's own flags (word 2 524288) do not match. 524740 is cast directly at the dummy (EffectDieSides[0] 1, AscensionIgnoreAbsorbAndResistance, so no die or resist spread): +3% with 805407 set, none without. Only non-critical hits are compared."
+    },
+    {
+      "spell": 804906, "name": "Condemn", "kind": "metric_delta", "variant": "stack_cap", "label_suffix": "stack_cap",
+      "quote": "stacking", "expected": 3,
+      "trigger_spell": 567539, "target": "dummy", "setup_casts": [567539, 567539, 567539], "setup_only_after": true,
+      "gate_spell": 567539, "setup_wait_ms": 1600,
+      "measure_actor": "dummy", "metric": "aura_stacks", "fields": {"spell": 567539},
+      "before_expected": 1, "wait_ms": 500, "expire_ms": 22000,
+      "observe_source": "$u = 3: Condemn 567539 (top rank at 60, BaseLevel 60) StackAmount 3, DurationIndex 86 (21000 ms). The before phase casts it once at the dummy (1 stack); after it has expired, four casts 1600 ms apart (global cooldown) leave 3 stacks."
+    },
+    {
+      "spell": 804906, "name": "Condemn", "kind": "metric_delta", "variant": "below_stack_cap", "label_suffix": "below_stack_cap",
+      "quote": "stacking", "expected": 2,
+      "trigger_spell": 567539, "target": "dummy", "setup_casts": [567539], "setup_only_after": true,
+      "gate_spell": 567539, "setup_wait_ms": 1600,
+      "measure_actor": "dummy", "metric": "aura_stacks", "fields": {"spell": 567539},
+      "before_expected": 1, "wait_ms": 500, "expire_ms": 22000,
+      "observe_source": "Control of the stack_cap entry: two casts of Condemn 567539 1600 ms apart leave 2 stacks, so the casts stack and the cap is what stops the four-cast arm at 3."
+    },
+    {
+      "spell": 804906, "name": "Condemn (Oath crit chance)", "kind": "metric_delta", "variant": "oath_crit", "label_suffix": "oath_crit",
+      "quote": "Increases your critical strike chance by", "expected": 10.146,
+      "before_expected": 7.146,
+      "trigger_spell": 804906, "target": "dummy", "measure_actor": "caster",
+      "metric": "melee_crit_chance_refreshed", "fields": {},
+      "wait_ms": 500, "expire_ms": 500, "gate_timing": "start", "trigger_only_after": true,
+      "observe_source": "A Condemn 804906 cast grants Oath: Condemn 804922 (AscensionTemplarAbilities.cpp:168-174 picks 804922 for Named(info, 804906); GrantOath casts it on the caster). $804922s1 = 3: 804922 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints[0] 2 + EffectDieSides[0] 1. melee_crit_chance_refreshed recomputes PLAYER_CRIT_PERCENTAGE: 7.146 for the reference character before the cast (704175 talent_without_oath, diagnostic 20261111-124435), 7.146 + 3 after it."
+    },
+    {
+      "spell": 520608, "name": "Scourge-Defense Training", "kind": "hit_ratio", "variant": "argent_blade", "label_suffix": "argent_blade",
+      "quote": "now also increases the damage and critical strike chance of your next", "expected": 1.5,
+      "observe_spell": 807268, "learn": [807268],
+      "control": {"auras": [[561156, 1]]}, "treatment": {"auras": [[520608, 1], [561156, 1]]},
+      "critical": true, "force_crit": "melee", "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 50 (520608 EffectBasePoints[0] 49, EffectDieSides[0] 1): Effect[0] aura 107 SPELLMOD_EFFECT2 (EffectMiscValue 12) on Warrior of Dawn 561156 (mask word 2 16777216), whose Effect[1] aura 108 SPELLMOD_DAMAGE on Argent Blade (mask word 2 32, 807268 SpellFamilyFlags[2] 32) is 0 on its own (EffectBasePoints[1] -1, EffectDieSides[1] 1). Both arms set 561156 before each Argent Blade 807268, which consumes it (AscensionTemplarAbilities.cpp:52, ConsumeSelected); the treatment sets 520608 first, so 561156 is computed with +50. A melee crit rating fixture makes every Argent Blade a critical hit in both arms (the treatment's +50% crit chance would otherwise leave fewer than half its hits non-critical, unmeasured in counted run 20261111-222258), so the critical hits are compared and the crit multiplier cancels. An attack power fixture of 20000 makes the attack power part dominate the weapon roll."
+    },
+    {
+      "spell": 804903, "name": "Oath: Holy Cleave", "kind": "fixed_count",
+      "quote": "additional enemy", "expected": 2,
+      "radius": 10.0, "cast_spell": 573049,
+      "radius_reason": "Holy Cleave 573049 has EffectChainTarget 2 on both weapon-damage effects (1 beyond the primary, the 573049 fixed_count entry with the Oath cleared before each cast). Each cast grants Oath: Holy Cleave 804903 (AscensionTemplarAbilities.cpp:168-174), Effect[0] aura 107 SPELLMOD_JUMP_TARGETS (EffectMiscValue 17), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1, so here the Oath is not cleared and every cast after the first strikes 1 additional nearby target: 2 beyond the primary. Spell::SearchChainTargets uses a 10 yd jump radius for melee chains (Spell.cpp:2200-2213); the far dummy stands 5 yd beyond it."
+    },
+    {
       "spell": 300513, "name": "Crusader's Brand", "kind": "cast_applies_aura",
       "quote": "Brand an enemy for", "expected_ms": 20000,
       "applied_aura": 300513, "target": "dummy", "cast_spell": 300513,
