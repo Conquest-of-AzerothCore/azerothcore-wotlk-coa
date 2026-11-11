@@ -13,9 +13,9 @@ INSERT INTO `skilllineability_dbc` (`ID`, `SkillLine`, `Spell`, `RaceMask`, `Cla
 (843, 90, 525307, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0);
 
 CREATE TABLE IF NOT EXISTS `coa_client_skill_line_ability` (
-  `ID` INT UNSIGNED NOT NULL,
-  `SkillLine` INT UNSIGNED NOT NULL,
-  PRIMARY KEY (`ID`)
+    `ID` INT UNSIGNED NOT NULL,
+    `SkillLine` INT UNSIGNED NOT NULL,
+    PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DELETE FROM `coa_client_skill_line_ability` WHERE `ID` = 843;
