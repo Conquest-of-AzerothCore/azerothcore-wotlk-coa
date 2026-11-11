@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Lord Melenas is up at Fel Rock and comes back after a kill (#8874)",
+  "contract": "Twisted Hatred 932 asks for Melenas' Head 5221, which Lord Melenas 2038 drops at 100% for players on the quest. Melenas has three Fel Rock spawns (49818, 49819, 49850) in pool 387 with max_limit 1, so exactly one of them is up at a time, and each respawns 120 s after a kill at a pool-chosen spot. The player stands at a Fel Rock grell spawn (48025) that is within 50 yards of all three spots. Expected: one Melenas is up, killing and looting him completes the quest, and exactly one Melenas is up again within three minutes, at whichever spot the pool picks.",
+  "timeout_ms": 300000,
+  "location": { "map": 1, "x": 10110.4, "y": 1156.79, "z": 1313.28, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 4, "class": 1, "level": 10, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "set_phase", "label": "SETUP: join the world phase Lord Melenas lives in", "actor": "hero", "value": 1 },
+    { "action": "wait", "label": "Let the Fel Rock grid load", "ms": 3000 },
+    { "action": "set_health", "actor": "hero", "maximum": 100000, "value": 100000 },
+    { "action": "prepare_quest", "label": "Take Twisted Hatred", "actor": "hero", "quest": 932, "complete": false },
+    { "action": "destroy_item", "label": "Drop the fixture head so the quest needs it again", "actor": "hero", "item": 5221 },
+    {
+      "action": "assert", "label": "SETUP: the quest still needs the head", "actor": "hero", "metric": "quest_status",
+      "quest": 932, "equals": 3, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: exactly one Lord Melenas is up at Fel Rock", "actor": "hero",
+      "metric": "nearby_creature_count", "entry": 2038, "equals": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "No other Lord Melenas is loaded on the map", "actor": "hero",
+      "metric": "map_creature_count", "entry": 2038, "equals": 1
+    },
+    { "action": "set_health_pct", "label": "Pull Lord Melenas from his pool spot", "actor": "hero", "entry": 2038, "pct": 50 },
+    {
+      "action": "assert", "label": "Lord Melenas closes to melee range", "actor": "hero", "metric": "nearby_creature_count",
+      "entry": 2038, "equals": 1, "within_ms": 1000
+    },
+    { "action": "wait", "label": "Let him reach the hero", "ms": 6000 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 2038, "kill": true },
+    {
+      "action": "assert", "label": "Lord Melenas is dead", "actor": "hero", "metric": "map_creature_count",
+      "entry": 2038, "equals": 0, "within_ms": 10000
+    },
+    { "action": "wait", "ms": 1500 },
+    { "action": "loot_nearby", "actor": "hero", "entry": 2038 },
+    {
+      "action": "assert", "label": "The corpse offers Melenas' Head", "actor": "hero",
+      "metric": "loot_offered_item_count", "item": 5221, "equals": 1
+    },
+    { "action": "loot_slot", "actor": "hero", "item": 5221 },
+    { "action": "close_loot", "actor": "hero" },
+    {
+      "action": "assert", "label": "The head completes Twisted Hatred", "actor": "hero", "metric": "quest_status",
+      "quest": 932, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "One Lord Melenas is up again at a pool spot after the respawn", "actor": "hero",
+      "metric": "map_creature_count", "entry": 2038, "equals": 1, "within_ms": 180000
+    }
+  ]
+}

@@ -363,6 +363,7 @@ public: /* PlayerScript */
     void OnPlayerCreate(Player* player);
     bool OnPlayerCreateInitialItems(Player* player, bool& handled);
     void OnPlayerSave(Player* player);
+    void OnPlayerSaveInventory(Player* player, CharacterDatabaseTransaction trans);
     void OnPlayerNormalizeActionButtonSpell(Player* player, uint32& action, bool loading);
     void OnPlayerTemporarySpellReplacementNotice(Player* player, uint32 previous, uint32 replacement, bool sent);
     void OnPlayerTemporarySpellLearnNotice(Player* player, uint32 spellId, bool sent);

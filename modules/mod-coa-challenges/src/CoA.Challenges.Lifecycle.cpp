@@ -1,6 +1,7 @@
 // mod-coa-challenges (review split): CoA.Challenges.Lifecycle.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "AscensionRulesets.h"
 #include "InstanceScript.h"
 
 #include <atomic>
@@ -475,7 +476,9 @@ namespace CoAChallenges
         // HIGH_RISK_ONLY (High Roller / Ironman - High-Risk): the character must
         // be in the High Risk ruleset (aura applied by CoA).
         if (CoAParse::ListContains(ChallengeRules(challengeID), "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY")
-            && HighRiskActivationBlocked(player))
+            && HighRiskActivationBlocked(player)
+            && !(IsTrialChallenge(challengeID)
+                && AscensionRulesets::CanApply(player, AscensionRulesets::Ruleset::HighRisk, true)))
         {
             ChatHandler(player->GetSession()).PSendSysMessage(
                 "{} requires you to be in High Risk.", ChallengeName(challengeID));

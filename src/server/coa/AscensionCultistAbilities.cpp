@@ -62,6 +62,19 @@ public:
         if (!player || caster != player || info->SpellFamilyName != 31 || spell->IsTriggered())
             return;
         spell->SetScriptValue(Insanity, Count(player, Insanity));
+        if (Named(info, 500110) || info->Id == 680576)
+            for (Unit* ally : Allies(player, player, 100))
+                if (Aura* marks = ally->GetAura(301982, player->GetGUID()))
+                {
+                    uint32 stacks = marks->GetStackAmount();
+                    float amount = Amount(301983, 0, player) +
+                        .35f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW);
+                    Copy(player, ally, 301983, uint32(std::max(0.0f, amount)));
+                    if (Aura* remaining = ally->GetAura(301982, player->GetGUID());
+                        remaining && remaining->GetStackAmount() == stacks)
+                        remaining->Remove();
+                    MarkVoidTouched(player, ally);
+                }
         for (uint32 id : selected)
             if (Select(id, info))
                 if (Aura* aura = player->GetAura(id))
@@ -119,15 +132,6 @@ public:
                 Reduce(player, 573028, std::abs(Amount(300297)));
                 Reduce(player, 800432, std::abs(Amount(300297, 1)));
             }
-            for (Unit* ally : Allies(player, player, 100))
-                if (Aura* marks = ally->GetAura(301982, player->GetGUID()))
-                {
-                    uint32 stacks = marks->GetStackAmount();
-                    float amount = Amount(301983, 0, player) + .35f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW);
-                    Copy(player, ally, 301983, uint32(std::max(0.0f, amount)));
-                    if (Aura* remaining = ally->GetAura(301982, player->GetGUID()); remaining && remaining->GetStackAmount() == stacks)
-                        remaining->Remove();
-                }
             if (target && player->IsValidAttackTarget(target))
             {
                 Command(player, target);
@@ -546,17 +550,23 @@ class spell_ascension_cultist_gaze_of_cthun_jump : public SpellScript
         TempSummon* summon = creature->ToTempSummon();
         return summon && summon->m_Properties && summon->m_Properties->Type == SUMMON_TYPE_MINIPET;
     }
-    void SkipCompanions(std::list<WorldObject*>& targets)
+    bool IsJumpTarget(Unit* unit)
+    {
+        Unit* caster = GetCaster();
+        return unit && !IsCompanion(unit) && caster &&
+            (caster->IsValidAttackTarget(unit, GetSpellInfo()) || caster->IsValidAssistTarget(unit));
+    }
+    void SkipUnusableTargets(std::list<WorldObject*>& targets)
     {
         Unit* primary = GetExplTargetUnit();
         size_t const jumps = targets.size();
-        targets.remove_if([](WorldObject* target) { return IsCompanion(target); });
+        targets.remove_if([this](WorldObject* target) { return !IsJumpTarget(target ? target->ToUnit() : nullptr); });
         if (!primary || targets.size() == jumps)
             return;
         std::list<Unit*> candidates = Nearby(primary, GazeJumpRadius);
         candidates.remove_if([&](Unit* unit)
         {
-            return unit == primary || IsCompanion(unit) ||
+            return unit == primary || !IsJumpTarget(unit) ||
                 std::find(targets.begin(), targets.end(), unit) != targets.end() ||
                 GetSpellInfo()->CheckTarget(GetCaster(), unit, true) != SPELL_CAST_OK ||
                 !primary->IsWithinLOSInMap(unit, VMAP::ModelIgnoreFlags::M2);
@@ -572,9 +582,9 @@ class spell_ascension_cultist_gaze_of_cthun_jump : public SpellScript
     void Register() override
     {
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
-            spell_ascension_cultist_gaze_of_cthun_jump::SkipCompanions, EFFECT_0, TARGET_UNIT_TARGET_ANY);
+            spell_ascension_cultist_gaze_of_cthun_jump::SkipUnusableTargets, EFFECT_0, TARGET_UNIT_TARGET_ANY);
         OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
-            spell_ascension_cultist_gaze_of_cthun_jump::SkipCompanions, EFFECT_1, TARGET_UNIT_TARGET_ANY);
+            spell_ascension_cultist_gaze_of_cthun_jump::SkipUnusableTargets, EFFECT_1, TARGET_UNIT_TARGET_ANY);
     }
 };
 }

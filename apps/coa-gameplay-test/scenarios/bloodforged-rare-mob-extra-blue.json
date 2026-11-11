@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Rare mob drops an extra blue Bloodforged item",
+  "contract": "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.RareRaidItemPercent = \"0 0\", Bloodforged.ExtraBluePercent = 100, Bloodforged.ExtraBlueRaidItemPercent = 0 and the catalogue SQL with its Heroic Bloodforged entries. A level 60 High-Risk character kills the natural Scarlet Judge (rank 4 rare, level 60) in Western Plaguelands and finds three Bloodforged items: the normal epic, the Heroic copy and one extra blue item, all requiring level 60.",
+  "players": [
+    {
+      "id": "h",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": 2830.0,
+    "y": -1400.0,
+    "z": 147.0,
+    "o": 0
+  },
+  "timeout_ms": 180000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "h",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "h",
+      "maximum": 2000000,
+      "value": 2000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "h",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "nearby_creature_count",
+      "entry": 1837,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "h",
+      "entry": 1837,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "h",
+      "entry": 1837
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "heroic": true,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "heroic": false,
+      "quality": 4,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Extra blue item",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "heroic": false,
+      "quality": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "h",
+      "metric": "loot_bloodforged",
+      "max_required_level": 59,
+      "equals": 0
+    }
+  ]
+}

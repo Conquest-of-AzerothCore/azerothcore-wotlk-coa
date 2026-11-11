@@ -446,18 +446,6 @@ void ApplyContracts(SpellInfo* info)
         hit.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
         hit.TargetB = SpellImplicitTargetInfo();
     }
-    if (id == 707232)
-        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
-    if (id == 801063)
-    {
-        SpellEffectInfo& e = info->Effects[EFFECT_2];
-        e.Effect = SPELL_EFFECT_APPLY_AURA;
-        e.ApplyAuraName = SPELL_AURA_MOD_INCREASE_SPEED;
-        e.BasePoints = 0;
-        e.DieSides = 0;
-        e.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
-        e.TargetB = SpellImplicitTargetInfo();
-    }
     if (id == 704954)
     {
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;

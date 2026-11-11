@@ -17,6 +17,7 @@ namespace
 enum ChronomancerTalentSpells : uint32
 {
     SPELL_ROLL_BACK = 804490,
+    SPELL_ROLL_BACK_COST = 807771,
     SPELL_TIME_SKIP = 804451,
     SPELL_SHIMMERING_SHARD = 806302,
     SPELL_SHIMMER = 806303,
@@ -403,8 +404,14 @@ public:
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
         Player* player = caster ? caster->ToPlayer() : nullptr;
-        if (!player || player->getClass() != CLASS_CHRONOMANCER || info->SpellFamilyName != 28 ||
-            spell->HasTriggeredCastFlag(TRIGGERED_IGNORE_GCD) || !IsAeonActivation(info->Id))
+        if (!player || player->getClass() != CLASS_CHRONOMANCER || info->SpellFamilyName != 28)
+            return;
+        if (info->Id == SPELL_ROLL_BACK && !spell->IsTriggered())
+        {
+            player->CastSpell(player, SPELL_ROLL_BACK_COST, true);
+            return;
+        }
+        if (spell->HasTriggeredCastFlag(TRIGGERED_IGNORE_GCD) || !IsAeonActivation(info->Id))
             return;
         if (player->HasAura(SPELL_SHIMMERING_SHARD))
             player->CastSpell(player, SPELL_SHIMMER, true);

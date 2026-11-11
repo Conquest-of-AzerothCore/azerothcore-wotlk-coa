@@ -264,16 +264,14 @@ public:
         if (Nanobots(player,target) && player->HasAura(560734) &&
             Any(info,{801809,801709,502537,801808,803552}))
             Cast(player,target,560736);
-        if (healing && Named(info,680196))
-        {
-            if (critical && player->HasAura(805306))
-                for (Unit* ally : Allies(player,target,Radius(706255),sSpellMgr->GetSpellInfo(706255)->MaxAffectedTargets))
-                    Copy(player,ally,706255,CalculatePct(healing,15));
-            if (player->HasAura(560787))
-                for (Creature* device : Devices(player))
-                    for (Unit* ally : Allies(player,device,Radius(681513),1))
-                        Cast(device,ally,681513);
-        }
+        if (uint32 shotHealing = spell->GetScriptHealingIncludingOverheal(); shotHealing && critical &&
+            Named(info,680196) && player->HasAura(805306))
+            for (Unit* ally : Allies(player,target,Radius(706255),sSpellMgr->GetSpellInfo(706255)->MaxAffectedTargets))
+                Copy(player,ally,706255,CalculatePct(shotHealing,15));
+        if (healing && Named(info,680196) && player->HasAura(560787))
+            for (Creature* device : Devices(player))
+                for (Unit* ally : Allies(player,device,Radius(681513),1))
+                    Cast(device,ally,681513);
         if (Named(info,801707) && player->HasAura(524834))
             if (Creature* device = target->ToCreature(); device && Owned(player,device))
                 Overcharge(player,device);

@@ -1,0 +1,331 @@
+{
+  "schema": 1,
+  "name": "Penance ranks that only SpellRank.dbc lists channel their own rank's bolts",
+  "contract": [
+    "These ranks exist only in the client's SpellRank.dbc. Under the stock spell_ranks chains they had no first rank, so the first-rank script that turns their dummy effect into the real one never ran and the cast did nothing.",
+    "Penance 47549 and 302000-302003 (ranks 2-6 of 47540) channel the bolts of the same rank: damage 47667 and 302008-302011 on an enemy, healing 47763 on a friend."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "pr",
+      "name": "Rankpriest",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "pr",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Rankpriest"
+    },
+    {
+      "action": "assert",
+      "label": "47549 is rank 2 of 47540",
+      "actor": "pr",
+      "metric": "spell_rank",
+      "spell": 47549,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "47549 belongs to the 47540 chain",
+      "actor": "pr",
+      "metric": "first_rank_spell",
+      "spell": 47549,
+      "equals": 47540
+    },
+    {
+      "action": "assert",
+      "label": "302000 is rank 3 of 47540",
+      "actor": "pr",
+      "metric": "spell_rank",
+      "spell": 302000,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "302000 belongs to the 47540 chain",
+      "actor": "pr",
+      "metric": "first_rank_spell",
+      "spell": 302000,
+      "equals": 47540
+    },
+    {
+      "action": "assert",
+      "label": "302003 is rank 6 of 47540",
+      "actor": "pr",
+      "metric": "spell_rank",
+      "spell": 302003,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "302003 belongs to the 47540 chain",
+      "actor": "pr",
+      "metric": "first_rank_spell",
+      "spell": 302003,
+      "equals": 47540
+    },
+    {
+      "action": "learn",
+      "actor": "pr",
+      "spell": 47549
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pr",
+      "spell": 47549
+    },
+    {
+      "action": "snapshot",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 47667,
+      "target": "enemy",
+      "save_as": "d47549"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Penance 47549 on the enemy",
+      "actor": "pr",
+      "spell": 47549,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Penance 47549 on the enemy produces 47667",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 47667,
+      "target": "enemy",
+      "relative_to": "d47549",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "pr",
+      "spell": 302000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pr",
+      "spell": 302000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302008,
+      "target": "enemy",
+      "save_as": "d302000"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Penance 302000 on the enemy",
+      "actor": "pr",
+      "spell": 302000,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Penance 302000 on the enemy produces 302008",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302008,
+      "target": "enemy",
+      "relative_to": "d302000",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "pr",
+      "spell": 302001
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pr",
+      "spell": 302001
+    },
+    {
+      "action": "snapshot",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302009,
+      "target": "enemy",
+      "save_as": "d302001"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Penance 302001 on the enemy",
+      "actor": "pr",
+      "spell": 302001,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Penance 302001 on the enemy produces 302009",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302009,
+      "target": "enemy",
+      "relative_to": "d302001",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "pr",
+      "spell": 302002
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pr",
+      "spell": 302002
+    },
+    {
+      "action": "snapshot",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302010,
+      "target": "enemy",
+      "save_as": "d302002"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Penance 302002 on the enemy",
+      "actor": "pr",
+      "spell": 302002,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Penance 302002 on the enemy produces 302010",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302010,
+      "target": "enemy",
+      "relative_to": "d302002",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "pr",
+      "spell": 302003
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pr",
+      "spell": 302003
+    },
+    {
+      "action": "snapshot",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302011,
+      "target": "enemy",
+      "save_as": "d302003"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Penance 302003 on the enemy",
+      "actor": "pr",
+      "spell": 302003,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Penance 302003 on the enemy produces 302011",
+      "actor": "pr",
+      "metric": "spell_damage_count",
+      "spell": 302011,
+      "target": "enemy",
+      "relative_to": "d302003",
+      "min": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "pr",
+      "spell": 47549
+    },
+    {
+      "action": "set_health",
+      "actor": "pr",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pr",
+      "metric": "spell_heal_count",
+      "spell": 47763,
+      "target": "pr",
+      "save_as": "h47549"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Penance 47549 on the priest itself",
+      "actor": "pr",
+      "spell": 47549,
+      "target": "pr"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Penance 47549 on the priest itself produces 47763",
+      "actor": "pr",
+      "metric": "spell_heal_count",
+      "spell": 47763,
+      "target": "pr",
+      "relative_to": "h47549",
+      "min": 1
+    }
+  ]
+}

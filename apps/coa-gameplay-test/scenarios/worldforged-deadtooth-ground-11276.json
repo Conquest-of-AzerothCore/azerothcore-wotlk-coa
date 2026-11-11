@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "name": "Worldforged Deadtooth rests on the ground (#11276)",
+  "contract": "The Deadtooth pickup (spawn 6975013) in the Redridge Defias camp stood 1.00 yd under the terrain. Issue #11276.",
+  "timeout_ms": 60000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the pickup rests on the terrain",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6975013, "spawn_type": "gameobject", "min": -0.15, "max": 0.5
+    }
+  ]
+}

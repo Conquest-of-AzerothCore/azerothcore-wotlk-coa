@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "A Humble Task stops scaling at 20 like the other starter-hub quests (#9220)",
+  "contract": "Quest 752 A Humble Task is a level-2 Red Cloud Mesa quest. Its QuestTemplateScaling.dbc row is minimum 2, maximum 20 in both the server DBC and the installed client, like the other 148 starter-hub quests (docs/coa/level-scaling.md: starter hubs cap at 20). A level-41 character with open-world scaling on therefore plays it at 20, not at 37 (41 - 4). Quest::XPValue then applies the stock level difference: 2 * (20 - 41) + 20 is below 1, so the factor is 1/10 and QuestXP.dbc level 20 column (780) pays 78, rounded to 80, times Rate.XP.Quest (1 in the repack config, 1.26 in the Ascension rate set). That is the small reward the report describes, and it is the designed result. The scenario asserts the level, an upper bound that a level-37 scaled reward cannot meet, and that the quest log preview and the award agree. No prestige aura, experience aura or test zone is active. Client rendering is not tested.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "scaled41", "race": 6, "class": 1, "level": 41 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixtures settle", "ms": 2000 },
+    { "action": "command", "actor": "scaled41", "command": ".xp 1" },
+    { "action": "level_scaling_packet", "actor": "scaled41", "value": 1 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "prepare_quest", "actor": "scaled41", "quest": 752 },
+    { "action": "assert", "label": "The starter-hub row caps the quest at 20", "actor": "scaled41", "metric": "quest_level", "quest": 752, "equals": 20 },
+    { "action": "assert", "label": "The quest log offers the grey-quest reward", "actor": "scaled41", "metric": "quest_log_sent_xp", "quest": 752, "min": 1, "max": 150, "within_ms": 1000 },
+    { "action": "snapshot", "actor": "scaled41", "metric": "quest_log_sent_xp", "quest": 752, "save_as": "shown" },
+    { "action": "snapshot", "actor": "scaled41", "metric": "xp", "save_as": "before" },
+    { "action": "reward_quest", "actor": "scaled41", "quest": 752 },
+    { "action": "assert", "actor": "scaled41", "metric": "quest_rewarded", "quest": 752, "equals": 1 },
+    { "action": "assert", "label": "The award matches the offered reward", "actor": "scaled41", "metric": "xp", "relative_to": "before", "ratio_to": "shown", "equals": 1 }
+  ]
+}

@@ -1,30 +1,37 @@
 # .agents
 
-Source of truth for this repo's agent skills and docs:
+Source of truth for this repo's agent rules, skill and docs:
 
-- `skills/<name>/SKILL.md`
+- `rules/` — rules that apply to every task, linked from `AGENTS.md`
+- `skills/coa-development/` — the repository's development skill; `SKILL.md` routes to `references/`
 - `docs/` — task-scoped agent docs; taxonomy and placement policy in `docs/README.md`
-- `plans/` — per-task planning docs, gitignored
+- `plans/` — per-task plans, specs and investigation notes, gitignored
 
-Conventions live in `AGENTS.md` and `docs/`. Agent-specific files point there instead of restating
-them, so there is one copy to keep current.
+Agent-specific files point here instead of restating it, so there is one copy to keep current.
+
+## Required plugin
+
+Development uses the [superpowers](https://github.com/obra/superpowers) process skills (brainstorming for
+features, systematic debugging for issue fixing, verification before completion). `rules/workflow.md` says which
+one applies and where this repository's rules override it.
 
 ## Hooking up your agent
 
-- **Claude Code** — reads `CLAUDE.md`, which imports `AGENTS.md`. Skills are exposed by a relative
-  symlink: `.claude/skills/<name> -> ../../.agents/skills/<name>`.
+- **Claude Code** — reads `CLAUDE.md`, which imports `AGENTS.md`; `AGENTS.md` imports `rules/*.md` with
+  `@` references. Claude Code does not discover `.agents/skills/`, so `.claude/skills/coa-development/SKILL.md` is
+  a real (not symlinked) stub that loads this skill. The checked-in `.claude/settings.json` enables superpowers
+  from the official marketplace; after trusting the folder, install it once with
+  `claude plugin install superpowers@claude-plugins-official --scope project`.
+- **Codex** — reads `AGENTS.md` and discovers `.agents/skills/` natively. Install superpowers for Codex as its
+  README describes.
 - **GitHub Copilot** — reads `AGENTS.md` natively. Code review also reads
   `.github/copilot-instructions.md`; custom agent profiles live in `.github/agents/`.
-- **Any other agent** — point it at `AGENTS.md` through its own entry file (`GEMINI.md`,
-  `.cursorrules`, …), using that agent's include syntax or, where includes are unsupported, a line
-  telling it to read `AGENTS.md` first.
+- **Any other agent** — point it at `AGENTS.md` through its own entry file (`GEMINI.md`, `.cursorrules`, …) and
+  have it read `.agents/rules/` before starting.
 
-To add a skill: create it here, then symlink it from each agent's skills dir. Docs need no
-symlinks — AGENTS.md references them by path.
+To add a rule file: create it in `rules/` and link it from the Rules section of `AGENTS.md` with an `@` reference.
+Prefer extending the existing skill's `references/` over adding another skill; a new skill also needs a stub in
+`.claude/skills/<name>/SKILL.md` with the same name and description.
 
-On Windows, symlinks need `git config core.symlinks true` plus Developer Mode or an elevated shell;
-without them git checks the links out as plain text files.
-
-The skills in this repository often build on those from
-[agent-toolkit](https://github.com/eai-org/agent-toolkit/), invoking them when available.
-Installing the toolkit at user level is therefore recommended.
+The issue-batch scheduling, git safety and guide tooling parts of the skill are adapted from lostmind84's
+[coa-server-guide](https://github.com/lostmind84/coa-server-guide).

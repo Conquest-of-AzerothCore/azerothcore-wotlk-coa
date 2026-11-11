@@ -850,7 +850,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 164 SPELL_EFFECT_REMOVE_AURA
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 167 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 167 SPELL_EFFECT_ASCENSION_PLAY_MOVIE
     {EFFECT_IMPLICIT_TARGET_CASTER,   TARGET_OBJECT_TYPE_UNIT}, // 168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
@@ -881,7 +881,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 196 unknown Ascension effect
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 197 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_COOLDOWN
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 198 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 198 SPELL_EFFECT_ASCENSION_MODIFY_FAMILY_DOT_DURATION
 } };
 
 SpellInfo::SpellInfo(SpellEntry const* spellEntry)
@@ -3248,6 +3248,12 @@ int32 SpellInfo::CalcPowerCost(Unit const* caster, SpellSchoolMask schoolMask, S
             if (AuraEffect const* talent = caster->GetAuraEffect(582307, EFFECT_0))
                 powerCostMultiplier -= insanity * talent->GetAmount() / 100.0f;
     }
+
+    if (uint32(PowerType) < 32)
+        for (AuraEffect const* effect : caster->GetAuraEffectsByType(SPELL_AURA_ASCENSION_MOD_POWER_COST_PCT))
+            if ((uint32(effect->GetMiscValue()) & (uint32(1) << uint32(PowerType))) &&
+                (uint32(effect->GetMiscValueB()) & uint32(schoolMask)))
+                powerCostMultiplier += float(effect->GetAmount()) / 100.0f;
 
     powerCost = int32(powerCost * (1.0f + powerCostMultiplier));
     if (PowerType == POWER_MANA && caster->IsPlayer() && caster->getClass() == CLASS_SUN_CLERIC &&

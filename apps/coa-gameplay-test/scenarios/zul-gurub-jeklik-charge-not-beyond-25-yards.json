@@ -7,7 +7,8 @@
     "Stock Jeklik's Charge reaches 8-25 yards. Her bat form charges 2 s in and every 20 s after that. The far",
     "hero stands about 35 yards away, the only player out of melee, so no charge comes 2 s in. Then the near hero",
     "steps out to about 15 yards and the next charge reaches them. Fear Ward keeps the tank and the near hero in",
-    "place through her Screech."
+    "place through her Screech. The tester of 2026-11-08: on live her Terrifying Screech (2106131) comes the moment",
+    "the charge stuns its target (12 of 12 landed charges, 0-9 ms), not on a timer of its own 2 s after the charge."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -252,6 +253,14 @@
       "max": 25
     },
     {
+      "action": "snapshot",
+      "actor": "near",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106131,
+      "save_as": "screeches_before_charge"
+    },
+    {
       "action": "assert",
       "label": "CONTROL: her next charge comes 20 s after the first",
       "actor": "near",
@@ -269,6 +278,17 @@
       "target": "jeklik",
       "max": 6,
       "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she screeches the moment the charge stuns them",
+      "actor": "near",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106131,
+      "relative_to": "screeches_before_charge",
+      "min": 1,
+      "within_ms": 1000
     },
     {
       "action": "assert",

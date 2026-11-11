@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "A boss leash set with .leash makes the boss evade on Heroic when it leaves its area, not on Normal",
+  "contract": [
+    "#11389: on Heroic and above a dungeon boss may not leave its arena. A game master sets the area in game with",
+    ".leash; here a 15-yard circle around Vosh'gajin's (9236) spawn point. In a Heroic instance she evades as soon as",
+    "she chases her target out of the circle. In a Normal instance the leash does not apply and she keeps chasing."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2, "melee_hit_rating": 10000 },
+    { "id": "normal", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "gm", "value": 1 },
+    { "action": "wait", "ms": 500 },
+    { "action": "teleport", "actor": "gm", "map": 229, "x": 78.5083, "y": -225.044, "z": 49.839, "o": 5.1 },
+    { "action": "teleport", "actor": "normal", "map": 229, "x": 78.5083, "y": -225.044, "z": 49.839, "o": 5.1 },
+    { "action": "assert", "label": "CONTROL: gm is in a Heroic Lower Blackrock Spire", "actor": "gm", "metric": "map_difficulty",
+      "equals": 1, "within_ms": 15000 },
+    { "action": "assert", "label": "CONTROL: normal is in a Normal Lower Blackrock Spire", "actor": "normal",
+      "metric": "map_difficulty", "equals": 0, "within_ms": 15000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_health", "actor": "gm", "value": 100000000, "maximum": 100000000 },
+    { "action": "set_health", "actor": "normal", "value": 100000000, "maximum": 100000000 },
+    { "action": "command", "actor": "gm", "command": ".leash radius 15 9236" },
+    { "action": "summon", "actor": "gm", "as": "heroic_boss", "entry": 9236, "distance": 4 },
+    { "action": "summon", "actor": "normal", "as": "normal_boss", "entry": 9236, "distance": 4 },
+    { "action": "attack", "actor": "gm", "target": "heroic_boss" },
+    { "action": "attack", "actor": "normal", "target": "normal_boss" },
+    { "action": "assert", "label": "CONTROL: the Heroic boss is in combat", "actor": "heroic_boss", "metric": "combat",
+      "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "CONTROL: the Normal boss is in combat", "actor": "normal_boss", "metric": "combat",
+      "equals": 1, "within_ms": 10000 },
+    { "action": "relocate", "actor": "gm", "dx": 3.8, "dy": -18.0, "dz": 5.5 },
+    { "action": "relocate", "actor": "normal", "dx": 3.8, "dy": -18.0, "dz": 5.5 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "relocate", "actor": "gm", "dx": 3.7, "dy": -18.4, "dz": 5.4 },
+    { "action": "relocate", "actor": "normal", "dx": 3.7, "dy": -18.4, "dz": 5.4 },
+    { "action": "assert", "label": "CONTROL: moving away keeps the Normal player in combat", "actor": "normal",
+      "metric": "combat", "equals": 1 },
+    { "action": "assert", "label": "The Heroic boss evades once she leaves the circle", "actor": "heroic_boss",
+      "metric": "combat", "equals": 0, "within_ms": 20000 },
+    { "action": "assert", "label": "The Normal boss chases her target out of the circle", "actor": "normal_boss",
+      "metric": "distance", "target": "normal", "max": 8, "within_ms": 20000 },
+    { "action": "assert", "label": "CONTROL: the Normal boss is still fighting", "actor": "normal_boss", "metric": "combat",
+      "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".leash clear 9236" }
+  ]
+}

@@ -5,7 +5,8 @@
     "The tester saw Jeklik take her bat form without the fear that followed on live. In the live logs of 2025-12",
     "to 2026-08 her Terrifying Screech (2106131) fears part of the raid with 2106137 (\"all nearby enemies\"), and",
     "the script gives that fear the 20 yards of her Mass Fear. Below half health she drains her avatar, then takes",
-    "her bat form, whose first Screech comes 4 s later, so the hero fighting next to her must be feared."
+    "her bat form. With nobody out of melee to charge, her Screech comes in place of the first charge 2 s later,",
+    "so the hero fighting next to her must be feared."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -107,7 +108,7 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: she screeches 4 s into her bat form",
+      "label": "CONTROL: she screeches 2 s into her bat form",
       "actor": "hero",
       "metric": "spell_go_count",
       "entry": 14517,

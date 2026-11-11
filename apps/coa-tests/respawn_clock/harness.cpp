@@ -25,7 +25,14 @@ inline Seconds GetGameTime() { return Seconds(Now); }
 }
 
 enum class DeathState : uint8 { Alive, JustDied, Corpse, Dead, JustRespawned };
-enum ServerConfigs { CONFIG_RESPAWN_TIMER_STARTS_AT_DEATH };
+enum ServerConfigs
+{
+    CONFIG_RESPAWN_TIMER_STARTS_AT_DEATH,
+    CONFIG_RESPAWN_QUEST_TARGET_NAMED,
+    CONFIG_RESPAWN_QUEST_TARGET_GENERAL,
+    CONFIG_RESPAWN_QUEST_TARGET_LONG_RESPAWN
+};
+enum class QuestTargetRespawn : uint8 { None, General, Named };
 enum Rates { RATE_CORPSE_DECAY_LOOTED };
 enum LootType { LOOT_CORPSE = 1, LOOT_SKINNING = 6 };
 enum UnitFlags : uint32 { UNIT_FLAG_SKINNABLE = 0x04000000 };
@@ -38,10 +45,26 @@ struct World
 {
     bool timerFromDeath = true;
     float lootedRate = 0.5f;
+    uint32 namedCap = 150;
+    uint32 generalCap = 0;
+    uint32 longRespawn = 358;
     bool getBoolConfig(ServerConfigs) const { return timerFromDeath; }
+    uint32 getIntConfig(ServerConfigs config) const
+    {
+        return config == CONFIG_RESPAWN_QUEST_TARGET_NAMED ? namedCap
+            : config == CONFIG_RESPAWN_QUEST_TARGET_GENERAL ? generalCap
+            : config == CONFIG_RESPAWN_QUEST_TARGET_LONG_RESPAWN ? longRespawn : 0;
+    }
     float getRate(Rates) const { return lootedRate; }
 } world;
 World* sWorld = &world;
+
+struct ObjectMgr
+{
+    QuestTargetRespawn questTarget = QuestTargetRespawn::None;
+    QuestTargetRespawn GetQuestTargetRespawn(uint32) const { return questTarget; }
+} objectMgr;
+ObjectMgr* sObjectMgr = &objectMgr;
 
 struct Creature;
 struct Map
@@ -52,6 +75,7 @@ struct Map
     int saves = 0;
     uint32 ApplyDynamicModeRespawnScaling(Creature const*, uint32 delay) const { return delay / divisor; }
     bool IsDungeon() const { return dungeon; }
+    bool IsWorldMap() const { return !dungeon; }
     void SaveCreatureRespawnTime(uint32, time_t& respawnTime) { saved = respawnTime; ++saves; }
     void ScheduleCreatureRespawn(uint64, Seconds) { }
 } map;
@@ -92,7 +116,6 @@ struct Creature : Unit
     CreatureTemplate cinfo;
     bool _respawnCompatibilityMode = true;
     bool summon = false;
-    bool namedQuestTarget = false;
     bool worldBoss = false;
     bool IsAIEnabled = true;
     CreatureAI ai;
@@ -106,7 +129,10 @@ struct Creature : Unit
 
     DeathState getDeathState() const { return m_deathState; }
     bool IsAlive() const { return m_deathState == DeathState::Alive; }
-    bool IsSharedQuestTarget() const { return namedQuestTarget && !map.dungeon; }
+    bool IsSharedQuestTarget() const { return objectMgr.questTarget == QuestTargetRespawn::Named && !map.dungeon; }
+    bool IsControlledByPlayer() const { return false; }
+    uint32 GetEntry() const { return 1; }
+    Map const* FindMap() const { return &map; }
     bool IsSummon() const { return summon; }
     bool IsPet() const { return false; }
     bool isWorldBoss() const { return worldBoss; }
@@ -149,11 +175,13 @@ struct Creature : Unit
     void ForcedDespawn(Milliseconds timeMSToDespawn = 0ms, Seconds forcedRespawnTimer = 0s);
     void SaveRespawnTime();
     bool IsRespawnTimerFromDeath() const;
+    uint32 GetQuestTargetRespawnCap() const;
     void Tick(uint32 diff);
 };
 
 void Creature::setDeathState(DeathState state, bool despawn)
 {
+    bool const wasParabolic = false;
     Unit::setDeathState(state, despawn);
     if (state == DeathState::JustDied)
 // NATIVE_JUST_DIED
@@ -190,7 +218,11 @@ int main(int argc, char** argv)
     Creature creature;
     creature._respawnCompatibilityMode = get("compat", 1) != 0;
     creature.m_spawnId = uint32(get("spawn", 1));
-    creature.namedQuestTarget = get("named", 0) != 0;
+    world.namedCap = uint32(get("named_cap", 150));
+    world.generalCap = uint32(get("general_cap", 0));
+    world.longRespawn = uint32(get("long_respawn", 358));
+    objectMgr.questTarget = get("named", 0) ? QuestTargetRespawn::Named
+        : get("general", 0) ? QuestTargetRespawn::General : QuestTargetRespawn::None;
     creature.worldBoss = get("worldboss", 0) != 0;
     creature.summon = get("summon", 0) != 0;
     creature.data.dbData = get("db", 1) != 0;
