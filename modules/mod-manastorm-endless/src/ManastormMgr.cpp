@@ -3042,6 +3042,16 @@ namespace
         }
     }
 
+    void ClearRunUtilityAuras(Player* player)
+    {
+        for (auto const& gadget : Ascension::Manastorm::Gadgets)
+            if (!gadget.passive)
+                player->RemoveAurasDueToSpell(gadget.spell);
+
+        player->RemoveAurasDueToSpell(ManastormBaseline::SpellMagicalEscape);
+        player->RemoveAurasDueToSpell(ManastormBaseline::SpellPotionResourceRegen);
+    }
+
     void DespawnCogsleyCompanion(Player* player)
     {
         if (!player)
@@ -4922,6 +4932,7 @@ void ManastormMgr::RemoveBaselineRunItems(
     {
         _manastormPotionCharges.erase(
             playerGuid);
+        ClearRunUtilityAuras(player);
     }
 }
 
