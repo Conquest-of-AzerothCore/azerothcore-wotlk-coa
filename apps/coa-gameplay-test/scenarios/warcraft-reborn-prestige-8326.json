@@ -4,8 +4,9 @@
   "contract": [
     "Issue 8326: Chromie refused stock classes on Warcraft Reborn (Prestige Mode is only available to Conquest of Azeroth classes).",
     "A Reborn character at the Prestige level activates Prestige like a CoA class: level 1, 0 experience, the Prestige aura, the rewards, the quest reset and the racial start.",
-    "The active talent spec's talents are reset, every Mystic Enchant in the active preset is removed, class spells above level 1 are forgotten and a lower rank becomes usable again.",
-    "The specialization is the talent spec: activating the other talent spec is refused until the Prestige level, then allowed."
+    "The active specialization's talents (its free-pick build) are reset, every Mystic Enchant in the active preset is removed, class spells above level 1 are forgotten and a lower rank becomes usable again.",
+    "The specialization is the specialization slot (swap spells 979993 and on, as for a free-pick Hero): activating another slot is refused until the Prestige level, then allowed.",
+    "The Prestige level is the realm's level cap (MaxPlayerLevel, 80 as shipped), so the character starts at 80 and completes the cycle by reaching 80 again."
   ],
   "timeout_ms": 240000,
   "location": {
@@ -21,7 +22,8 @@
       "name": "Rebornprest",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 80,
+      "security": 2
     }
   ],
   "creatures": [
@@ -40,19 +42,19 @@
       "ms": 3000
     },
     {
-      "action": "talent",
-      "label": "Spend a point in Reborn Improved Heroic Strike",
+      "action": "command",
+      "label": "Learn Reborn Improved Heroic Strike (talent entry 12228) in the active specialization",
       "actor": "w",
-      "talent": 110124,
-      "rank": 0
+      "command": ".ca2 player addentry Rebornprest 12228"
     },
     {
       "action": "assert",
       "label": "SETUP: the talent is learned",
       "actor": "w",
-      "metric": "has_talent",
-      "spell": 1112282,
-      "equals": 1
+      "metric": "knows_spell",
+      "spell": 1112664,
+      "equals": 1,
+      "within_ms": 2000
     },
     {
       "action": "add_item",
@@ -125,9 +127,9 @@
     },
     {
       "action": "learn",
-      "label": "Learn Dual Talent Specialization",
+      "label": "Unlock Specialization II",
       "actor": "w",
-      "spell": 63624
+      "spell": 979994
     },
     {
       "action": "prepare_quest",
@@ -207,10 +209,10 @@
     },
     {
       "action": "assert",
-      "label": "The active spec's talent is reset",
+      "label": "The active specialization's talent is reset",
       "actor": "w",
-      "metric": "has_talent",
-      "spell": 1112282,
+      "metric": "knows_spell",
+      "spell": 1112664,
       "equals": 0
     },
     {
@@ -290,9 +292,9 @@
     },
     {
       "action": "cast",
-      "label": "Try to activate the secondary talent spec",
+      "label": "Try to activate Specialization II",
       "actor": "w",
-      "spell": 63644
+      "spell": 979994
     },
     {
       "action": "assert",
@@ -301,24 +303,26 @@
       "metric": "system_message_contains",
       "text": "prestige locked",
       "equals": 1,
-      "within_ms": 2000
+      "within_ms": 8000
     },
     {
       "action": "assert",
-      "label": "The primary spec stays active",
+      "label": "Specialization I stays active",
       "actor": "w",
-      "metric": "active_talent_spec",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
       "equals": 0,
       "within_ms": 6000
     },
     {
       "action": "set_level",
       "actor": "w",
-      "value": 60
+      "value": 80
     },
     {
       "action": "assert",
-      "label": "Reaching level 60 completes the cycle",
+      "label": "Reaching the level cap (80) again completes the cycle",
       "actor": "w",
       "metric": "aura",
       "spell": 9930831,
@@ -327,15 +331,17 @@
     },
     {
       "action": "cast",
-      "label": "Activate the secondary talent spec",
+      "label": "Activate Specialization II",
       "actor": "w",
-      "spell": 63644
+      "spell": 979994
     },
     {
       "action": "assert",
-      "label": "The spec is unlocked",
+      "label": "The specialization is unlocked",
       "actor": "w",
-      "metric": "active_talent_spec",
+      "metric": "player_setting",
+      "source": "core.ascension_slot.active",
+      "index": 0,
       "equals": 1,
       "within_ms": 8000
     }

@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Mar'li's Web Spray reaches players 35 yards from her",
+  "contract": [
+    "The tester of 2026-11-08 (live): Web Spray (2118133) did not reach everyone in the raid and should reach about",
+    "35 yards. Its own area effects reach 20 yards (radius 9); live logs show it on 11 to 17 players at once. The",
+    "decision of 2026-11-08 widens it to 35 yards. The tank holds her in her spider form, which she takes below half",
+    "health, and an archer stands some 24 to 32 yards away. 15 s into the spider form Web Spray must land on both."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "archer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "archer",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "archer"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "archer",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heroes are in Zul'Gurub on Normal",
+      "actor": "tank",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14510,
+      "as": "marli",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages Mar'li",
+      "actor": "tank",
+      "target": "marli"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights",
+      "actor": "marli",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Mar'li below half health",
+      "actor": "tank",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Mar'li fights in her spider form",
+      "actor": "marli",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "relocate",
+      "label": "The archer steps back about 16 yards",
+      "actor": "archer",
+      "dx": -10.15,
+      "dy": -12.955,
+      "dz": -0.665
+    },
+    {
+      "action": "relocate",
+      "label": "and about 12 more",
+      "actor": "archer",
+      "dx": -7.1,
+      "dy": -9.05,
+      "dz": -0.45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the archer stands beyond the spell's own 20 yards",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "marli",
+      "min": 21,
+      "max": 34
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Web Spray lands on the tank 15 s into the spider form",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 2118133,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the archer still stands beyond 20 yards as it lands",
+      "actor": "archer",
+      "metric": "distance",
+      "target": "marli",
+      "min": 21,
+      "max": 34
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Web Spray lands on the archer too",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118133,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and slows the archer",
+      "actor": "archer",
+      "metric": "aura",
+      "spell": 2118134,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

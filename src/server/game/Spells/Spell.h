@@ -314,10 +314,12 @@ public:
     void EffectAscensionRestoreBaseManaPct(SpellEffIndex effIndex);
     void EffectAscensionHealthPctDamage(SpellEffIndex effIndex);
     void EffectDelayedTriggerSpell(SpellEffIndex effIndex);
+    void EffectAscensionPlayMovie(SpellEffIndex effIndex);
     void EffectAscensionPlaySpellVisualKit(SpellEffIndex effIndex);
     void EffectAscensionSpreadAura(SpellEffIndex effIndex);
     void EffectAscensionSpellFanout(SpellEffIndex effIndex);
     void EffectAscensionRefreshAura(SpellEffIndex effIndex);
+    void EffectAscensionModifyFamilyDotDuration(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacks(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraStacksBySpell(SpellEffIndex effIndex);
     void EffectAscensionModifyAuraDuration(SpellEffIndex effIndex);
@@ -326,6 +328,7 @@ public:
     void EffectAscensionModifyCooldownPct(SpellEffIndex effIndex);
     void EffectAscensionRestoreBaseHealthPct(SpellEffIndex effIndex);
     void EffectAscensionPctDamage(SpellEffIndex effIndex);
+    void EffectAscensionFaceNearestPlayer(SpellEffIndex effIndex);
     void EffectAscensionTriggerSpellDelayed(SpellEffIndex effIndex);
     void EffectAscensionResetCooldown(SpellEffIndex effIndex);
     void EffectAscensionModifyFamilyCooldown(SpellEffIndex effIndex);

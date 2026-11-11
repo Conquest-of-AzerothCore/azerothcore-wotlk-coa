@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Healing Radiator heals the Nanobot holder and each ally once per Nanobot tick (#11613)",
+  "contract": [
+    "Healing Radiator 705846 restores 705847 health to allied players around the affected target.",
+    "Each Nanobot Reconstruction tick heals every selected unit once: 705847 is cast per selected ally.",
+    "A Tinker and one injured ally in its group are both selected, so each receives exactly one Radiator heal per tick.",
+    "Before the fix every cast also healed the area around the Tinker, giving two heals per unit per tick."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "t",
+      "race": 1,
+      "class": 28,
+      "level": 52,
+      "allow_regeneration": false
+    },
+    {
+      "id": "a",
+      "race": 1,
+      "class": 12,
+      "level": 52,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "t",
+      "target": "a"
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "learn",
+      "actor": "t",
+      "spell": 705846
+    },
+    {
+      "action": "set_health",
+      "actor": "t",
+      "value": 40
+    },
+    {
+      "action": "set_health",
+      "actor": "a",
+      "value": 40
+    },
+    {
+      "action": "cast",
+      "actor": "t",
+      "spell": 801809
+    },
+    {
+      "action": "assert",
+      "actor": "t",
+      "metric": "aura",
+      "spell": 801809,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "set_aura",
+      "actor": "t",
+      "spell": 801809,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 801809,
+      "target": "t",
+      "caster": "t",
+      "save_as": "ticks"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Nanobot Reconstruction ticked several times",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 801809,
+      "target": "t",
+      "caster": "t",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Tinker receives one Radiator heal per tick",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 705847,
+      "target": "t",
+      "caster": "t",
+      "ratio_to": "ticks",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ally receives one Radiator heal per tick",
+      "actor": "t",
+      "metric": "spell_heal_count",
+      "spell": 705847,
+      "target": "a",
+      "caster": "t",
+      "ratio_to": "ticks",
+      "min": 0.99,
+      "max": 1.01
+    }
+  ]
+}

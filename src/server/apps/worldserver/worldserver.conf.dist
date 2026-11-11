@@ -3246,6 +3246,38 @@ Rate.Corpse.Decay.Looted = 0.5
 Respawn.TimerStartsAtDeath = 1
 
 #
+#    Respawn.QuestTarget.Named
+#        Description: Longest respawn time, in seconds from death, of a unique named quest target in the
+#                     open world: a creature flagged as a quest boss (type_flags 0x80000000) that has a
+#                     single open-world spawn point, counting each spawn pool as one. These targets also
+#                     share their quest credit and quest loot with every contributor. Longer database
+#                     respawn times are shortened to this value; rares, rare elites and world bosses are
+#                     never shortened.
+#        Default:     150 - (2.5 minutes)
+#                     0   - (Disabled, the database respawn time applies)
+
+Respawn.QuestTarget.Named = 150
+
+#
+#    Respawn.QuestTarget.General
+#        Description: Longest respawn time, in seconds from death, of any other open-world creature a
+#                     quest needs: a kill objective, a kill-credit stand-in, a creature with quest loot,
+#                     or a quest-boss-flagged creature with more than one spawn point. Credit and loot
+#                     stay tapped as usual. Rares, rare elites and world bosses are never shortened.
+#        Default:     0 - (Disabled, the database respawn time applies)
+
+Respawn.QuestTarget.General = 0
+
+#
+#    Respawn.QuestTarget.LongRespawn
+#        Description: Quest targets whose database respawn time, in seconds, is longer than this keep it;
+#                     neither Respawn.QuestTarget.Named nor Respawn.QuestTarget.General shortens them.
+#        Default:     358 - (5 minutes 58 seconds)
+#                     0   - (No limit, every quest target can be shortened)
+
+Respawn.QuestTarget.LongRespawn = 358
+
+#
 #    Rate.Creature.Normal.Damage
 #    Rate.Creature.Elite.Elite.Damage
 #    Rate.Creature.Elite.RARE.Damage

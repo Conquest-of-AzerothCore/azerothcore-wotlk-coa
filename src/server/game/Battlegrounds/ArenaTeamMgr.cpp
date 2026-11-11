@@ -103,6 +103,29 @@ ArenaTeam* ArenaTeamMgr::GetArenaTeamByCaptain(ObjectGuid guid) const
     return nullptr;
 }
 
+bool ArenaTeamMgr::IsCaptainOfTeamWithOtherMembers(ObjectGuid guid) const
+{
+    for (auto const& [id, team] : ArenaTeamStore)
+        if (team->GetCaptain() == guid && team->GetMembersSize() > 1)
+            return true;
+
+    return false;
+}
+
+void ArenaTeamMgr::DisbandSoloTeamsOfCaptain(ObjectGuid guid)
+{
+    std::vector<ArenaTeam*> soloTeams;
+    for (auto const& [id, team] : ArenaTeamStore)
+        if (team->GetCaptain() == guid && team->GetMembersSize() <= 1)
+            soloTeams.push_back(team);
+
+    for (ArenaTeam* team : soloTeams)
+    {
+        team->Disband();
+        delete team;
+    }
+}
+
 ArenaTeam* ArenaTeamMgr::GetArenaTeamByCaptain(ObjectGuid guid, const uint32 type) const
 {
     for (ArenaTeamContainer::const_iterator itr = ArenaTeamStore.begin(); itr != ArenaTeamStore.end(); ++itr)

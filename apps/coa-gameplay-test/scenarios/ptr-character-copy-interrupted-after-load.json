@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "PTR character copy: a load interrupted after the character exists is reported as copied once",
+  "contract": "The target realm claims a request (state Loading) with the GUID the copy will get, then commits the copy in one transaction. If the realm stops after that commit but before it completes the request, the next poll finds the claimed request, sees the copy under the claimed GUID and completes it as copied, so the source realm reports the copy and it is not loaded a second time. ptr_character_copy_interruption after_load stops the first claimed load at that point.",
+  "timeout_ms": 120000,
+  "ptr_character_copy": true,
+  "ptr_character_copy_interruption": "after_load",
+  "players": [
+    { "id": "a", "name": "Harnesslate", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "relog", "actor": "a" },
+    { "action": "assert", "label": "The source account starts with one character", "actor": "a",
+      "metric": "account_character_count", "equals": 1 },
+    { "action": "command", "label": "Copy the online character", "actor": "a", "command": ".ptr copy Harnesslate" },
+    { "action": "assert", "label": "The copy is queued for the target realm", "actor": "a",
+      "metric": "system_message_contains", "text": "Harnesslate is on its way to", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "The interrupted load committed the copy as a second character", "actor": "a",
+      "metric": "account_character_count", "equals": 2, "within_ms": 15000 },
+    { "action": "assert", "label": "DISCRIMINATING: the interrupted request is recovered as copied and reported",
+      "actor": "a", "metric": "system_message_contains", "text": "Harnesslate was copied to", "equals": 1,
+      "within_ms": 25000 },
+    { "action": "assert", "label": "The recovered copy keeps its at-login rename", "actor": "a",
+      "metric": "system_message_contains", "text": "choose a new one at login", "equals": 1 },
+    { "action": "wait", "label": "Let the target realm poll the request table three more times", "ms": 16000 },
+    { "action": "assert", "label": "DISCRIMINATING: the recovered request is not loaded again", "actor": "a",
+      "metric": "account_character_count", "equals": 2 }
+  ]
+}

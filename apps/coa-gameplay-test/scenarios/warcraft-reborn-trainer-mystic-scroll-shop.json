@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn: a class trainer sells its own class the Mystic Scrolls the Guardian of Time does not",
+  "contract": [
+    "On Warcraft Reborn a class trainer's menu adds \"Mystic Scrolls\", with the Guardian's icon for that class, for",
+    "characters of the trainer's class only. It opens the class's shop: every scroll that can be in that class's",
+    "collection on the realm except worldforged ones and those the Guardian already sells, priced like the Guardian",
+    "(Rare 4000, Legendary 7500, Artifact 10000 Runes). Paladin: 62 scrolls, among them Glyph of Divine Plea 554230."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8573.0, "y": 878.0, "z": 106.5, "o": 0 },
+  "players": [
+    { "id": "pal", "name": "Shoppaladin", "race": 1, "class": 2, "level": 60 },
+    { "id": "war", "name": "Shopwarrior", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "sammuel", "owner": "pal", "entry": 925, "distance": 2, "faction": 35 },
+    { "id": "sammuel2", "owner": "war", "entry": 925, "distance": 2, "faction": 35 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "gossip_hello", "actor": "pal", "target": "sammuel" },
+    { "action": "assert", "label": "CONTROL: the trainer still offers training first", "actor": "pal", "metric": "gossip_option_text",
+      "index": 0, "text": "Please teach me.", "equals": 1 },
+    { "action": "assert", "label": "THE FIX: a paladin sees one more option", "actor": "pal", "metric": "gossip_options", "equals": 2 },
+    { "action": "assert", "label": "THE FIX: Mystic Scrolls with the Guardian's paladin icon", "actor": "pal", "metric": "gossip_option_text",
+      "index": 1, "text": "|TInterface/ICONS/Ability_ThunderBolt:30:30:-18:0|t|rMystic Scrolls", "equals": 1 },
+    { "action": "gossip_select", "actor": "pal", "option": 1 },
+    { "action": "assert", "label": "THE FIX: the shop opens", "actor": "pal", "metric": "vendor_list_packets", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "The paladin shop holds 62 scrolls", "actor": "pal", "metric": "vendor_items", "equals": 62 },
+    { "action": "assert", "label": "Glyph of Divine Plea is sold for 4000 Runes (rare)", "actor": "pal", "metric": "vendor_extended_cost",
+      "item": 554230, "equals": 64603 },
+    { "action": "assert", "label": "A legendary scroll costs 7500 Runes", "actor": "pal", "metric": "vendor_extended_cost",
+      "item": 1013894, "equals": 20030 },
+    { "action": "assert", "label": "An artifact scroll costs 10000 Runes", "actor": "pal", "metric": "vendor_extended_cost",
+      "item": 202589, "equals": 20019 },
+    { "action": "assert", "label": "A scroll the Guardian sells is not repeated here", "actor": "pal", "metric": "vendor_extended_cost",
+      "item": 200731, "equals": -1 },
+    { "action": "gossip_hello", "actor": "war", "target": "sammuel2" },
+    { "action": "assert", "label": "THE FIX: a warrior at a paladin trainer sees no Mystic Scrolls option", "actor": "war",
+      "metric": "gossip_option_text", "index": 1, "text": "|TInterface/ICONS/Ability_ThunderBolt:30:30:-18:0|t|rMystic Scrolls", "equals": 0 },
+    { "action": "assert", "label": "and no paladin shop was opened for the warrior", "actor": "war", "metric": "vendor_list_packets", "equals": 0 }
+  ]
+}

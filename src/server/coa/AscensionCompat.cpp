@@ -199,6 +199,10 @@ constexpr uint16 CMSG_CHARACTER_ADVANCEMENT_KNOWN_ENTRIES = 0x0727;
 constexpr uint16 SMSG_CHARACTER_ADVANCEMENT_PURGE_TALENTS_RESULT = 0x072B;
 constexpr uint16 SMSG_CHARACTER_ADVANCEMENT_UPDATE_ENTRIES_RESULT = 0x072C;
 constexpr uint16 SMSG_CHARACTER_ADVANCEMENT_CREDITS = 0x0926;
+constexpr uint16 SMSG_UPDATE_SPECIALIZATION_EQUIPMENT_SET_ID = 0x0738;
+constexpr uint16 CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID = 0x073A;
+constexpr char SPECIALIZATION_EQUIPMENT_SET_SETTING[] = "core.equipment_set.spec";
+constexpr uint32 SPECIALIZATION_LINK_COUNT = 20;
 constexpr uint16 CMSG_INSPECT_CHARACTER_ADVANCEMENT = 0x06E1;
 constexpr uint16 SMSG_INSPECT_CHARACTER_ADVANCEMENT_RESULT = 0x06E2;
 constexpr uint16 CMSG_MISSILE_FIRE_POSITION = 0x09C7;
@@ -250,11 +254,11 @@ constexpr uint32 VANITY_FLAG_NOT_OFFERED = 0x8;
 constexpr uint8 REALM_TYPE_COUNT = 5;
 constexpr std::string_view VANITY_ITEM_LEARNED_EVENT = "ASCENSION_STORE_COLLECTION_ITEM_LEARNED";
 
-constexpr std::array<uint16, 8> QUEUED_EXTENSION_OPCODES = {
+constexpr std::array<uint16, 9> QUEUED_EXTENSION_OPCODES = {
     CMSG_APPLY_APPEARANCES, CMSG_SET_CAN_SEE_APPEARANCES,
     CMSG_EXTENSION_INITIALIZED, CMSG_CUSTOM_ASCENSION_POINT_SPEND_REQUEST,
     CMSG_SAVE_APPEARANCE_OUTFIT, CMSG_DELETE_APPEARANCE_OUTFIT,
-    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY};
+    CMSG_INSPECT_CHARACTER_ADVANCEMENT, CMSG_ITEM_STAT_QUERY, CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID};
 
 constexpr uint16 CMSG_QUERY_VENDORED_ITEM_RECOVERY = 0x05DE;
 constexpr uint16 CMSG_RECOVER_VENDORED_ITEM = 0x05E0;
@@ -284,6 +288,8 @@ constexpr ExtensionOpcodeIdentity EXTENSION_OPCODES[] = {
     {0x05A1, "CMSG_CHALLENGE_QUERY_FAILURE"},
     {CMSG_ITEM_QUERY_BULK, "CMSG_ITEM_QUERY_BULK"},
     {CMSG_ITEM_STAT_QUERY, "CMSG_ITEM_STAT_QUERY"},
+    {SMSG_UPDATE_SPECIALIZATION_EQUIPMENT_SET_ID, "SMSG_UPDATE_SPECIALIZATION_EQUIPMENT_SET_ID"},
+    {CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID, "CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID"},
     {0x0667, "CMSG_SET_LEVEL_SCALING"},
     {SMSG_PATCH_APPEARANCES, "SMSG_PATCH_APPEARANCES"},
     {SMSG_PATCH_ITEM_APPEARANCES, "SMSG_PATCH_ITEM_APPEARANCES"},
@@ -835,6 +841,17 @@ constexpr std::array<FelswornRiftGrant, 3> FelswornHordeCapitalRifts =
     {535600, 36}
 }};
 
+struct SpellTaughtBySpell
+{
+    uint32 SpellId;
+    uint32 TeacherSpellId;
+};
+
+constexpr std::array<SpellTaughtBySpell, 1> SpellsTaughtByKnownSpells =
+{{
+    {801294, 804492}
+}};
+
 bool CanGrantAscensionRacialSpell(Player const* player, uint32 spellId)
 {
     if (!AscensionFelsworn::CanLearnRift(player, spellId))
@@ -937,8 +954,11 @@ public:
             return CanGrantAutomaticEntry(player, entry, activeSpec) &&
                    std::find(entry.SpellIds.begin(), entry.SpellIds.end(), spellId) != entry.SpellIds.end();
           });
+      bool const taughtByKnownSpell = std::any_of(SpellsTaughtByKnownSpells.begin(), SpellsTaughtByKnownSpells.end(),
+          [player, spellId](SpellTaughtBySpell const& taught)
+          { return taught.SpellId == spellId && player->HasSpell(taught.TeacherSpellId); });
       return std::binary_search(racialSpells.begin(), racialSpells.end(), spellId) ||
-          observed || proficiency || unresolved || automatic || selectedTalentOwns(spellId) ||
+          observed || proficiency || unresolved || automatic || taughtByKnownSpell || selectedTalentOwns(spellId) ||
           std::any_of(AscensionCompatData::ClassSpells.begin(),
           AscensionCompatData::ClassSpells.end(), [player, spellId](auto const& entry)
           {
@@ -1138,7 +1158,8 @@ public:
 
             uint32 replacement = 0;
             Aura const* aura = entry.RequiresAura ? player->GetAura(entry.ParentSpellId, player->GetGUID()) : nullptr;
-            bool const parentOwned = entry.RequiresAura ? aura && !aura->IsRemoved() :
+            bool const parentOwned = entry.RequiresAura ?
+                aura && !aura->IsRemoved() && aura->GetStackAmount() >= entry.MinAuraStacks :
                 player->HasSpell(entry.ParentSpellId);
             bool const allowed = (!entry.SpecId || specializationId == entry.SpecId) && parentOwned;
             for (auto const& rank : entry.Ranks)
@@ -1806,7 +1827,7 @@ public:
     WorldPacket packet(SMSG_CHARACTER_ADVANCEMENT_ACTIVE_SPEC, sizeof(uint32) * 2);
     bool const wildcard = AscensionWildcard::IsWildcardHero(player);
     packet << (wildcard ? AscensionWildcard::ActiveSpec(player) : ActiveSlot(player))
-           << uint32(wildcard || IsAscensionCustomClass(player) || AscensionFreepick::IsFreepickHero(player) ?
+           << uint32(wildcard || IsAscensionCustomClass(player) || AscensionFreepick::HasFreepickBuild(player) ?
         AscensionWildcard::SPECIALIZATION_COUNT : 1);
     player->GetSession()->SendPacket(&packet);
 
@@ -4489,9 +4510,10 @@ private:
   static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
   static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
-  static constexpr std::array<uint32, 19> RANGED_PREPARATION_CLIENT_SPELLS = {
+  static constexpr std::array<uint32, 28> RANGED_PREPARATION_CLIENT_SPELLS = {
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
-      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
+      572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870, 804179,
+      680256, 680257, 680258, 680259, 680260, 680261, 680262, 681203};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
@@ -7241,6 +7263,70 @@ private:
             [appearanceId](std::array<uint32, 17> const& row) { return row[0] == appearanceId; });
     }
 
+    static uint64 SpecializationEquipmentSet(Player const* player, uint32 specialization)
+    {
+        PlayerSettingVector const* stored = player->FindPlayerSettings(SPECIALIZATION_EQUIPMENT_SET_SETTING);
+        uint32 const low = 2 * specialization;
+        if (!stored || low + 1 >= stored->size())
+            return 0;
+        return uint64((*stored)[low].value) | (uint64((*stored)[low + 1].value) << 32);
+    }
+
+    static void SendSpecializationEquipmentSet(Player* player, uint32 specialization, uint64 setGuid)
+    {
+        WorldPacket packet(SMSG_UPDATE_SPECIALIZATION_EQUIPMENT_SET_ID, sizeof(uint32) + 1 + sizeof(uint64));
+        packet << specialization << uint8(setGuid ? 1 : 0);
+        if (setGuid)
+            packet << setGuid;
+        player->SendDirectMessage(&packet);
+    }
+
+    static bool OwnsEquipmentSet(Player const* player, uint64 setGuid)
+    {
+        return setGuid && std::any_of(player->GetEquipmentSets().begin(), player->GetEquipmentSets().end(),
+            [setGuid](auto const& set)
+            {
+                return set.second.Guid == setGuid && set.second.state != EQUIPMENT_SET_DELETED;
+            });
+    }
+
+    static void StoreSpecializationEquipmentSet(Player* player, uint32 specialization, uint64 setGuid)
+    {
+        player->UpdatePlayerSetting(SPECIALIZATION_EQUIPMENT_SET_SETTING, 2 * specialization, uint32(setGuid));
+        player->UpdatePlayerSetting(SPECIALIZATION_EQUIPMENT_SET_SETTING, 2 * specialization + 1,
+            uint32(setGuid >> 32));
+    }
+
+    static void SendSpecializationEquipmentSets(Player* player)
+    {
+        for (uint32 specialization = 0; specialization < SPECIALIZATION_LINK_COUNT; ++specialization)
+        {
+            uint64 const setGuid = SpecializationEquipmentSet(player, specialization);
+            if (!setGuid)
+                continue;
+            if (OwnsEquipmentSet(player, setGuid))
+                SendSpecializationEquipmentSet(player, specialization, setGuid);
+            else
+                StoreSpecializationEquipmentSet(player, specialization, 0);
+        }
+    }
+
+    static void HandleSpecializationEquipmentSet(Player* player, WorldPacket& packet)
+    {
+        uint32 const specialization = packet.read<uint32>();
+        bool const linked = packet.read<uint8>() != 0;
+        uint64 const setGuid = linked ? packet.read<uint64>() : 0;
+        if (specialization >= SPECIALIZATION_LINK_COUNT)
+            return;
+        if (linked && !OwnsEquipmentSet(player, setGuid))
+        {
+            SendSpecializationEquipmentSet(player, specialization, SpecializationEquipmentSet(player, specialization));
+            return;
+        }
+        StoreSpecializationEquipmentSet(player, specialization, setGuid);
+        SendSpecializationEquipmentSet(player, specialization, setGuid);
+    }
+
     void SendServerPetAppearances(Player* player)
     {
         for (auto const& row : _serverPetAppearancePatches)
@@ -7810,6 +7896,7 @@ private:
         SendAscensionRunemasterEchoesCooldown(player);
         AscensionDisplayPatchService::Instance().SendPatchStream(player);
         SendServerPetAppearances(player);
+        SendSpecializationEquipmentSets(player);
         RefreshAscensionLfgObjectiveDungeon(player);
         LOG_DEBUG("coa", "Resent spell charge state to {} after client world entry",
                   player->GetName());
@@ -7820,6 +7907,9 @@ private:
         break;
       case CMSG_ITEM_STAT_QUERY:
         ItemScaling::HandleStatQuery(player->GetSession(), packet);
+        break;
+      case CMSG_SET_SPECIALIZATION_EQUIPMENT_SET_ID:
+        HandleSpecializationEquipmentSet(player, packet);
         break;
       case CMSG_CREATURE_QUERY_BULK:
         for (uint32 entry : ReadBulkQueryEntries(packet, MAX_CREATURE_QUERY_BULK_ENTRIES))
@@ -8923,11 +9013,16 @@ public:
             ObjectGuid guid = packet.read<ObjectGuid>(0);
             CreatureDisplayPreset const* preset = nullptr;
             uint32 unitDisplayId = 0;
+            uint32 spawnSeed = guid.GetCounter();
 
             if (guid.IsCreatureOrVehicle())
             {
                 if (Creature const* creature = session->GetPlayer()->GetMap()->GetCreature(guid))
+                {
                     unitDisplayId = creature->GetDisplayId();
+                    if (creature->GetSpawnId())
+                        spawnSeed = creature->GetSpawnId();
+                }
 
                 preset = sAscensionPresets->GetPreset(guid.GetEntry(), unitDisplayId);
             }
@@ -8948,19 +9043,20 @@ public:
 
             if (preset)
             {
+                CreatureDisplayPreset const look = sAscensionPresets->WithSpawnVariety(*preset, spawnSeed);
                 WorldPacket response(SMSG_MIRRORIMAGE_DATA, 68);
                 response << guid;
-                response << uint32(unitDisplayId != 0 ? unitDisplayId : preset->display_id);
-                response << uint8(preset->race);
-                response << uint8(preset->gender);
-                response << uint8(preset->class_id);
-                response << uint8(preset->skin);
-                response << uint8(preset->face);
-                response << uint8(preset->hair);
-                response << uint8(preset->haircolor);
-                response << uint8(preset->facialhair);
-                response << uint32(preset->guild_id);
-                for (uint32 item : preset->items)
+                response << uint32(unitDisplayId != 0 ? unitDisplayId : look.display_id);
+                response << uint8(look.race);
+                response << uint8(look.gender);
+                response << uint8(look.class_id);
+                response << uint8(look.skin);
+                response << uint8(look.face);
+                response << uint8(look.hair);
+                response << uint8(look.haircolor);
+                response << uint8(look.facialhair);
+                response << uint32(look.guild_id);
+                for (uint32 item : look.items)
                     response << uint32(item);
 
                 session->SendPacket(&response);
@@ -10284,6 +10380,16 @@ public:
                     break;
                 case 256779:
                     spellInfo->AttributesEx5 |= SPELL_ATTR5_AI_DOESNT_FACE_TARGET;
+                    break;
+                case 979871:
+                case 979872:
+                    if (spellInfo->Effects[EFFECT_2].Effect == SPELL_EFFECT_APPLY_AURA &&
+                        spellInfo->Effects[EFFECT_2].ApplyAuraName == SPELL_AURA_TRANSFORM)
+                    {
+                        spellInfo->Effects[EFFECT_2].Effect = 0;
+                        spellInfo->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+                        spellInfo->_InitializeExplicitTargetMask();
+                    }
                     break;
                 case 83086:
                 case 9930889:

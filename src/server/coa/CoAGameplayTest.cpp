@@ -26,6 +26,7 @@
 #include "Chat.h"
 #include "ClientDBC.h"
 #include "CoACreatureScaling.h"
+#include "CoAPtrCharacterCopy.h"
 #include "Config.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -53,6 +54,7 @@
 #include "Log.h"
 #include "LocalLevelScaling.h"
 #include "LootMgr.h"
+#include "Mail.h"
 #include "Map.h"
 #include "MapMgr.h"
 #include "MoveSpline.h"
@@ -1195,7 +1197,7 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_CORPSE_RECLAIM_DELAY &&
         packet.GetOpcode() != SMSG_TRADE_STATUS &&
         packet.GetOpcode() != SMSG_TOTEM_CREATED &&
-        packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA)
+        packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA && packet.GetOpcode() != SMSG_TRIGGER_MOVIE)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -1850,6 +1852,15 @@ public:
         Require(_timeout > 0 && _timeout <= MaximumTimeoutMs(_schema), "Invalid scenario timeout");
         if (_scenario.get<bool>("creature_scaling", false))
             _creatureScaling.emplace();
+        if (_scenario.get<bool>("ptr_character_copy", false))
+        {
+            std::string const interruption = _scenario.get<std::string>("ptr_character_copy_interruption", "");
+            Require(interruption.empty() || interruption == "before_load" || interruption == "after_load",
+                "Invalid ptr_character_copy_interruption");
+            _ptrCharacterCopy.emplace(interruption == "before_load" ? PtrCharacterCopy::Interruption::BeforeLoad
+                : interruption == "after_load" ? PtrCharacterCopy::Interruption::AfterLoad
+                : PtrCharacterCopy::Interruption::None);
+        }
         if (auto ownership = _scenario.get_child_optional("vanity_ownership"))
         {
             std::string starterItems;
@@ -3128,6 +3139,53 @@ private:
             return unit->IsAlive();
         if (metric == "map_id")
             return unit->GetMapId();
+        if (metric == "spell_power_cost")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            Require(info != nullptr, "Power cost observation needs a valid spell");
+            return info->CalcPowerCost(unit, info->GetSchoolMask());
+        }
+        if (metric == "spell_effect_kind" || metric == "spell_effect_misc")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            uint32 const effect = step.get<uint32>("effect", 0);
+            Require(info && effect < MAX_SPELL_EFFECTS, "Spell effect observation needs a valid spell and slot");
+            return metric == "spell_effect_kind" ? double(info->Effects[effect].Effect)
+                : double(info->Effects[effect].MiscValue);
+        }
+        if (metric == "movie_exists")
+            return sMovieStore.LookupEntry(step.get<uint32>("id")) != nullptr;
+        if (metric == "position_o")
+            return unit->GetOrientation();
+        if (metric == "avoidance_samples")
+        {
+            Unit* target = GetUnit(step.get<std::string>("target"));
+            uint32 const probe = step.get<uint32>("id") - 1;
+            Require(probe <= 5, "Unknown native avoidance probe");
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(step.get<uint32>("spell", 78));
+            Require(info != nullptr, "Avoidance probe spell missing");
+            uint32 count = 0;
+            for (uint32 sample = 0; sample < 512; ++sample)
+            {
+                if (probe <= 3)
+                {
+                    MeleeHitOutcome const outcome = unit->RollMeleeOutcomeAgainst(target, BASE_ATTACK, 0,
+                        probe == 3 ? 20000 : 0, probe == 0 ? 20000 : 0,
+                        probe == 1 ? 20000 : 0, probe == 2 ? 20000 : 0);
+                    MeleeHitOutcome const expected = probe == 0 ? MELEE_HIT_DODGE
+                        : probe == 1 ? MELEE_HIT_PARRY : probe == 2 ? MELEE_HIT_BLOCK : MELEE_HIT_MISS;
+                    count += outcome == expected;
+                }
+                else if (probe == 4)
+                {
+                    SpellMissInfo const outcome = unit->MeleeSpellHitResult(target, info);
+                    count += outcome == SPELL_MISS_DODGE || outcome == SPELL_MISS_PARRY || outcome == SPELL_MISS_BLOCK;
+                }
+                else
+                    count += unit->isSpellBlocked(target, info);
+            }
+            return count;
+        }
         if (metric == "position_x")
             return unit->GetPositionX();
         if (metric == "position_y")
@@ -3589,7 +3647,7 @@ private:
         }
         Player* player = unit->ToPlayer();
         Require(player != nullptr, "Metric requires a player: " + metric);
-        if (metric == "knows_spell" || metric == "cooldown_ms" || metric == "spell_charges" ||
+        if (metric == "knows_spell" || metric == "spell_rank" || metric == "first_rank_spell" || metric == "cooldown_ms" || metric == "spell_charges" ||
             metric == "spell_active" || metric == "global_cooldown_ms" || metric == "has_talent" ||
             metric == "spellbook_offers_spell" || metric == "spellbook_covers_spell" ||
             metric == "trainer_window_state" || metric == "trainer_window_ability" ||
@@ -3598,6 +3656,10 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
         if (metric == "knows_spell")
             return player->HasSpell(spell);
+        if (metric == "spell_rank")
+            return sSpellMgr->AssertSpellInfo(spell)->GetRank();
+        if (metric == "first_rank_spell")
+            return sSpellMgr->GetFirstSpellInChain(spell);
         if (metric == "level_scaling_choice")
             return LocalLevelScaling::ScalingChoiceEnabled(player) ? 1.0 : 0.0;
         if (metric == "skill_line_after_initial" || metric == "skill_line_after_learned")
@@ -3901,6 +3963,12 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? object->GetObjectScale() : 0.0f;
         }
+        if (metric == "nearby_gameobject_orientation")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            Require(object != nullptr, "Orientation needs an existing nearby gameobject");
+            return object->GetOrientation();
+        }
         if (metric == "nearby_gameobject_display")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
@@ -3927,10 +3995,16 @@ private:
                     window = &creature->loot;
             if (!window)
                 return 0;
+            auto const heroic = step.get_optional<bool>("heroic");
+            auto const quality = step.get_optional<uint32>("quality");
+            uint32 const maxRequiredLevel = step.get<uint32>("max_required_level", STRONG_MAX_LEVEL);
             uint32 count = 0;
             for (LootItem const& item : window->items)
                 if (ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(item.itemid))
-                    if (!item.is_looted && itemTemplate->Name1.rfind("Bloodforged", 0) == 0)
+                    if (!item.is_looted && itemTemplate->Name1.rfind("Bloodforged", 0) == 0
+                        && (!heroic || *heroic == (itemTemplate->Description.find("Heroic Bloodforged") != std::string::npos))
+                        && (!quality || itemTemplate->Quality == *quality)
+                        && itemTemplate->RequiredLevel <= maxRequiredLevel)
                         ++count;
             return count;
         }
@@ -4124,6 +4198,12 @@ private:
                 }
             return nearest;
         }
+        if (metric == "nearby_creature_orientation")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f);
+            Require(creature != nullptr, "Orientation needs an existing nearby creature");
+            return creature->GetOrientation();
+        }
         if (metric == "nearby_creature_count")
         {
             std::list<Creature*> creatures;
@@ -4144,11 +4224,16 @@ private:
         }
         if (metric == "map_creature_count")
         {
-            uint32 const entry = step.get<uint32>("entry", 0);
+            std::set<uint32> entries;
+            if (uint32 const entry = step.get<uint32>("entry", 0))
+                entries.insert(entry);
+            if (auto listed = step.get_child_optional("entries"))
+                for (auto const& [key, entry] : *listed)
+                    entries.insert(entry.get_value<uint32>());
             auto const& spawns = player->GetMap()->GetCreatureBySpawnIdStore();
-            return std::count_if(spawns.begin(), spawns.end(), [entry](auto const& spawn)
+            return std::count_if(spawns.begin(), spawns.end(), [&entries](auto const& spawn)
             {
-                return (!entry || spawn.second->GetEntry() == entry) && spawn.second->IsInWorld()
+                return (entries.empty() || entries.count(spawn.second->GetEntry())) && spawn.second->IsInWorld()
                     && spawn.second->IsAlive();
             });
         }
@@ -5375,6 +5460,50 @@ private:
             Require(title != nullptr, "has_title needs a title from CharTitles.dbc");
             return player->HasTitle(title) ? 1.0 : 0.0;
         }
+        if (metric == "account_character_count")
+        {
+            QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM characters WHERE account = {}",
+                player->GetSession()->GetAccountId());
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_item_count")
+        {
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT CAST(COALESCE(SUM(i.count), 0) AS UNSIGNED) FROM item_instance i "
+                "JOIN characters c ON c.guid = i.owner_guid "
+                "WHERE c.account = {} AND c.guid <> {} AND i.itemEntry = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_bank_item_count")
+        {
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT CAST(COALESCE(SUM(i.count), 0) AS UNSIGNED) FROM mod_ascension_bank_item b "
+                "JOIN item_instance i ON i.guid = b.item_guid "
+                "JOIN characters c ON c.guid = b.owner_id AND b.owner_kind = 0 "
+                "WHERE c.account = {} AND c.guid <> {} AND i.itemEntry = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), step.get<uint32>("item"));
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_at_login_flag")
+        {
+            uint32 const flag = step.get<uint32>("id");
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT COUNT(*) FROM characters WHERE account = {} AND guid <> {} AND at_login & {} = {}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), flag, flag);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
+        if (metric == "account_other_mail_count" || metric == "account_other_foreign_mail_count")
+        {
+            std::string const foreignOnly = metric == "account_other_foreign_mail_count"
+                ? Acore::StringFormat(" AND m.messageType = {} AND m.sender <> m.receiver", uint32(MAIL_NORMAL))
+                : std::string();
+            QueryResult result = CharacterDatabase.Query(
+                "SELECT COUNT(*) FROM mail m JOIN characters c ON c.guid = m.receiver "
+                "WHERE c.account = {} AND c.guid <> {}{}",
+                player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), foreignOnly);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {
             uint32 mails = 0, items = 0;
@@ -5870,6 +5999,16 @@ private:
                             request << value.get_value<std::string>();
                         else if (kind == "buyback_guid")
                             request << BuybackGuid(player, value.get_value<uint32>());
+                        else if (kind == "equipment_set_guid" || kind == "packed_equipment_set_guid")
+                        {
+                            auto const set = player->GetEquipmentSets().find(value.get_value<uint32>());
+                            Require(set != player->GetEquipmentSets().end(),
+                                "Packet equipment set GUID requires a saved equipment set at that index");
+                            if (kind == "equipment_set_guid")
+                                request << set->second.Guid;
+                            else
+                                request.appendPackGUID(set->second.Guid);
+                        }
                         else if (kind == "item_guid")
                         {
                             Item* item = player->GetItemByEntry(value.get_value<uint32>());
@@ -6439,6 +6578,13 @@ private:
                 player->AddUnitMovementFlag(movementFlag);
             else
                 player->RemoveUnitMovementFlag(movementFlag);
+            if (step.get<bool>("unit_state", false))
+            {
+                if (step.get<bool>("enabled"))
+                    player->AddUnitState(UNIT_STATE_MOVING);
+                else
+                    player->ClearUnitState(UNIT_STATE_MOVING);
+            }
         }
         else if (action == "relocate")
         {
@@ -6691,6 +6837,13 @@ private:
             player->SetPhaseMask(step.get<uint32>("value", _phase), true);
         else if (action == "set_money")
             player->SetMoney(step.get<uint32>("value"));
+        else if (action == "add_at_login_flag")
+        {
+            uint32 const flag = step.get<uint32>("id");
+            player->SetAtLoginFlag(AtLoginFlags(flag));
+            CharacterDatabase.DirectExecute("UPDATE characters SET at_login = at_login | {} WHERE guid = {}", flag,
+                player->GetGUID().GetCounter());
+        }
         else if (action == "set_player_setting")
             player->UpdatePlayerSetting(step.get<std::string>("source"), step.get<uint32>("index"),
                 step.get<uint32>("value"));
@@ -6841,6 +6994,14 @@ private:
             if (sScriptMgr->CanPacketReceive(player->GetSession(), packet))
                 player->GetSession()->HandleLootRoll(packet);
         }
+        else if (action == "send_mail")
+        {
+            Player* recipient = GetPlayer(step.get<std::string>("target"));
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            MailDraft("Harness mail", "Sent by the gameplay harness")
+                .SendMailTo(trans, MailReceiver(recipient), MailSender(player));
+            CharacterDatabase.DirectCommitTransaction(trans);
+        }
         else if (action == "master_loot_give")
         {
             Player* recipient = GetPlayer(step.get<std::string>("target"));
@@ -6965,6 +7126,22 @@ private:
             WorldPacket packet(CMSG_BINDER_ACTIVATE, 8);
             packet << innkeeper->GetGUID();
             player->GetSession()->HandleBinderActivateOpcode(packet);
+        }
+        else if (action == "system_mail")
+        {
+            std::string const kind = step.get<std::string>("kind");
+            Require(kind == "postmaster" || kind == "reward" || kind == "server",
+                    "system_mail kind must be postmaster, reward or server");
+            Item* item = Item::CreateItem(step.get<uint32>("item"), 1, player);
+            Require(item != nullptr, "system_mail could not create the item");
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            item->SaveToDB(trans);
+            MailSender const sender = kind == "postmaster" ? MailSender(MAIL_CREATURE, 34337)
+                                                           : MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
+            std::string const subject = kind == "reward" ? RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT : "System mail";
+            MailDraft(subject, "Sent by the gameplay test.").AddItem(item)
+                .SendMailTo(trans, MailReceiver(player, player->GetGUID().GetCounter()), sender);
+            CharacterDatabase.CommitTransaction(trans);
         }
         else if (action == "destroy_item")
         {
@@ -7113,19 +7290,24 @@ private:
                 recipient = player->GetGuardianPet();
             if (auto entry = step.get_optional<uint32>("owned_entry"))
                 recipient = GetOwnedCreature(player, *entry);
+            if (auto target = step.get_optional<std::string>("target"))
+                recipient = GetUnit(*target);
             Require(recipient != nullptr, "Aura fixture requires its selected player, pet or owned creature");
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
             Require(info != nullptr, "Unknown fixture aura");
+            auto const casterId = step.get_optional<std::string>("caster");
+            Unit* auraCaster = casterId ? GetUnit(*casterId) : recipient;
+            ObjectGuid const casterGuid = casterId ? auraCaster->GetGUID() : ObjectGuid::Empty;
             uint32 stacks = step.get<uint32>("stacks");
             Require(stacks <= std::max<uint32>(1, info->CalcMaxAuraStacks(recipient)),
                 "Fixture aura exceeds its stack limit");
             if (!stacks)
-                recipient->RemoveAurasDueToSpell(spell);
+                recipient->RemoveAurasDueToSpell(spell, casterGuid);
             else
             {
-                Aura* aura = recipient->GetAura(spell);
+                Aura* aura = recipient->GetAura(spell, casterGuid);
                 if (!aura)
-                    aura = recipient->AddAura(spell, recipient);
+                    aura = auraCaster->AddAura(spell, recipient);
                 Require(aura != nullptr, "Could not apply fixture aura");
                 aura->SetStackAmount(uint8(stacks));
                 if (aura->GetMaxDuration() == 0)
@@ -7371,6 +7553,8 @@ private:
             uint32 const skill = step.get<uint32>("skill");
             Require(sSkillLineStore.LookupEntry(skill) != nullptr, "Unknown fixture skill");
             player->SetSkill(skill, 1, step.get<uint16>("value"), step.get<uint16>("maximum"));
+            if (step.get<bool>("refresh_stats", false))
+                player->UpdateAllStats();
         }
         else if (action == "gather_skill")
         {
@@ -7750,6 +7934,7 @@ private:
     std::optional<Target> _encounterBoss;
     QueryCallbackProcessor _queries;
     std::optional<CreatureScaling::TestOverride> _creatureScaling;
+    std::optional<PtrCharacterCopy::TestOverride> _ptrCharacterCopy;
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<QuestLogSizeConfig> _questLogSize;

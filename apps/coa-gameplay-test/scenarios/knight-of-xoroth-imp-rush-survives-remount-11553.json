@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "A Greater Imp below level 28 keeps Imp Rush and its autocast choice across a mount (#11553)",
+  "contract": [
+    "#11553 reports a level 12 Fleshwarden gets \"my Greater Imp has learned Imp Rush and the ability has been turned",
+    "off\" on every dismount. Mounting temporarily unsummons the pet and dismounting reloads it. Imp Rush (630931) is",
+    "taught by the Xoroth refresh, so a reload that unlearns it below its level 28 makes the refresh teach it again,",
+    "which sends the client a pet-learned-spell packet (SMSG_PET_LEARNED_SPELL, 0x499) and resets the autocast choice.",
+    "Expected: a level 13 Fleshwarden whose imp has Imp Rush with autocast turned off gets no further pet-learned-spell",
+    "packet over a mount and dismount, the imp still knows Imp Rush, and its autocast is still off."
+  ],
+  "timeout_ms": 180000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 13 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "knight", "spell": 92101 },
+    { "action": "set_aura", "actor": "knight", "spell": 92101, "stacks": 1, "label": "Force the Greater Imp passive aura" },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp passive teaches Summon: Greater Imp",
+      "actor": "knight", "metric": "knows_spell", "spell": 520661, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "actor": "knight", "spell": 520661 },
+    {
+      "action": "assert", "label": "SETUP: the Greater Imp is the knight's pet",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "SETUP: the pet knows Imp Rush",
+      "actor": "knight", "metric": "pet_knows_spell", "spell": 630931, "equals": 1, "within_ms": 10000
+    },
+    { "action": "pet_autocast", "actor": "knight", "spell": 630931, "enabled": false, "label": "Turn Imp Rush autocast off" },
+    {
+      "action": "assert", "label": "SETUP: Imp Rush autocast is off",
+      "actor": "knight", "metric": "pet_autocast_enabled", "spell": 630931, "equals": 0
+    },
+    { "action": "set_skill", "actor": "knight", "skill": 762, "value": 75, "maximum": 75 },
+    { "action": "learn", "actor": "knight", "spell": 458 },
+    { "action": "wait", "label": "Let the pet bar settle", "ms": 2000 },
+    { "action": "snapshot", "actor": "knight", "metric": "server_packets", "opcode": 1177, "save_as": "learned_before_mount" },
+    { "action": "cast", "actor": "knight", "spell": 458, "label": "Mount" },
+    { "action": "wait", "label": "Ride for a moment", "ms": 2000 },
+    { "action": "cancel_mount", "actor": "knight", "label": "Dismount" },
+    {
+      "action": "assert", "label": "The imp is back after the dismount",
+      "actor": "knight", "metric": "pet_entry", "equals": 510100, "within_ms": 10000
+    },
+    { "action": "wait", "label": "Let the Xoroth refresh run", "ms": 2000 },
+    {
+      "action": "assert", "label": "The imp still knows Imp Rush",
+      "actor": "knight", "metric": "pet_knows_spell", "spell": 630931, "equals": 1
+    },
+    {
+      "action": "assert", "label": "Imp Rush autocast is still off",
+      "actor": "knight", "metric": "pet_autocast_enabled", "spell": 630931, "equals": 0
+    },
+    {
+      "action": "assert", "label": "The client was not told the imp learned a spell",
+      "actor": "knight", "metric": "server_packets", "opcode": 1177, "relative_to": "learned_before_mount", "equals": 0
+    }
+  ]
+}

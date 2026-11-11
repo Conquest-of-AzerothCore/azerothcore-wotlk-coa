@@ -5,7 +5,9 @@
     "On live every removal of High Priest Venoxis's (14507) Parasitic Poison (2118041), including its natural",
     "expiry after 12 s, is followed by three Parasitic Serpents (14884) at the poisoned player (live logs, tester",
     "2026-11-04). In snake form he casts Parasitic Poison (2118040, 1.5 s cast) 3 s after the change. Venoxis is",
-    "summoned at the entrance on Normal, away from his avatar, so the snake form comes at once at half health."
+    "summoned at the entrance on Normal, away from his avatar, so the snake form comes at once at half health.",
+    "The live log of 2026-08-02: a serpent had 10,768 health with 11 players; coa_boss_flex gives it 979 per",
+    "player, so with the raid count's floor of 10 a serpent has 9,790 health on Normal."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -132,6 +134,16 @@
       "entry": 14884,
       "equals": 3,
       "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a serpent has its live health per player",
+      "actor": "hero",
+      "metric": "nearby_creature_max_health",
+      "entry": 14884,
+      "min": 9789,
+      "max": 9791,
+      "within_ms": 2000
     },
     {
       "action": "assert",

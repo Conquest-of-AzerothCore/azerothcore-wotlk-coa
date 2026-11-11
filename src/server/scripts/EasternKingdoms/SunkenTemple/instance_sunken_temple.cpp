@@ -127,6 +127,39 @@ public:
 
             if (creature->IsAlive() && creature->GetSpawnId() && creature->GetCreatureType() == CREATURE_TYPE_DRAGONKIN && creature->GetEntry() != NPC_SHADE_OF_ERANIKUS)
                 _dragonkinList.push_back(creature->GetGUID());
+
+            // The creatures the Avatar of Hakkar event summons fixate on the player who started it.
+            switch (creature->GetEntry())
+            {
+                case NPC_HAKKARI_BLOODKEEPER:
+                case NPC_HAKKARI_MINION:
+                case NPC_NIGHTMARE_SUPPRESSOR:
+                    if (!creature->GetSpawnId() && GetData(TYPE_HAKKAR_EVENT) == IN_PROGRESS)
+                    {
+                        // Passive until the next update, so nobody standing at the summon point pulls it first.
+                        creature->SetReactState(REACT_PASSIVE);
+                        creature->m_Events.AddEventAtOffset([this, creature]
+                        {
+                            creature->SetReactState(REACT_AGGRESSIVE);
+                            AttackHakkarActivator(creature);
+                        }, 1ms);
+                    }
+                    break;
+            }
+        }
+
+        void AttackHakkarActivator(Creature* creature)
+        {
+            if (GetData(TYPE_HAKKAR_EVENT) != IN_PROGRESS || !creature->IsAlive() || !creature->AI())
+                return;
+
+            Player* activator = ObjectAccessor::GetPlayer(instance, _hakkarActivatorGUID);
+            if (!activator || !activator->IsAlive() || activator->IsGameMaster() || !creature->IsValidAttackTarget(activator))
+                return;
+
+            creature->EngageWithTarget(activator);
+            creature->GetThreatMgr().FixateTarget(activator);
+            creature->AI()->AttackStart(activator);
         }
 
         void OnUnitDeath(Unit* unit) override
@@ -297,6 +330,15 @@ public:
             }
         }
 
+        void SetGuidData(uint32 type, ObjectGuid guid) override
+        {
+            if (type != DATA_AWAKEN_SOULFLAYER || GetData(TYPE_HAKKAR_EVENT) != NOT_STARTED)
+                return;
+
+            _hakkarActivatorGUID = guid;
+            AwakenSoulflayer();
+        }
+
         void SetData(uint32 type, uint32 data) override
         {
             switch (type)
@@ -411,6 +453,7 @@ public:
         ObjectGuid _worshipAltarGUID;
         GuidVector _eternalFlameGUIDs;
         ObjectGuid _jammalanGUID;
+        ObjectGuid _hakkarActivatorGUID;
         ObjectGuid _shadeOfEranikusGUID;
         GuidVector _sanctumDragonGUIDs;
         GuidList _dragonkinList;
@@ -476,7 +519,7 @@ class spell_temple_of_atal_hakkar_awaken_the_soulflayer : public SpellScript
     {
         PreventHitDefaultEffect(effIndex);
         if (InstanceScript* instanceScript = GetCaster()->GetInstanceScript())
-            instanceScript->SetData(DATA_AWAKEN_SOULFLAYER, 0);
+            instanceScript->SetGuidData(DATA_AWAKEN_SOULFLAYER, GetCaster()->GetGUID());
     }
 
     void Register() override
@@ -490,10 +533,10 @@ class go_hakkar_worship_altar : public GameObjectScript
 public:
     go_hakkar_worship_altar() : GameObjectScript("go_hakkar_worship_altar") { }
 
-    bool OnGossipHello(Player* /*player*/, GameObject* go) override
+    bool OnGossipHello(Player* player, GameObject* go) override
     {
         if (InstanceScript* instanceScript = go->GetInstanceScript())
-            instanceScript->SetData(DATA_AWAKEN_SOULFLAYER, 0);
+            instanceScript->SetGuidData(DATA_AWAKEN_SOULFLAYER, player->GetGUID());
         return false;
     }
 };

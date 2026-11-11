@@ -21,6 +21,8 @@ python apps/coa-world/world_data.py bootstrap --defaults-file /path/to/world-cli
 
 The client option file supplies the connection settings. Use `--mysql /path/to/mysql`
 if the client is not on PATH, and `--database` to select the world schema.
+A client without the `--no-login-paths` option (MySQL 8.0 and 8.1) still reads saved login paths from
+`.mylogin.cnf`, so one of them can affect the connection.
 Set worldserver's `SourceDirectory` to this checkout.
 
 Bootstrap verifies the package and imported content, and requires an empty schema.

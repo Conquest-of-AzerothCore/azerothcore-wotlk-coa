@@ -2,9 +2,11 @@
 
 #include "AscensionWitchDoctorCompletion.h"
 #include "Creature.h"
+#include "DBCStores.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+#include "Opcodes.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -15,6 +17,9 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
+#include "TotemPackets.h"
+#include "WorldPacket.h"
+#include "WorldSession.h"
 #include <algorithm>
 #include <cmath>
 
@@ -128,6 +133,41 @@ void Mirror(Player* player, Unit* target, uint32 spell)
                 mimic->AI()->DoAction(ActionMirror);
             }
 }
+static SummonPropertiesEntry const* TotemProperties(uint32 spell, uint32 entry)
+{
+    SpellEntry const* native = sSpellStore.LookupEntry(spell);
+    if (!native)
+        return nullptr;
+    for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
+        if (native->Effect[i] == SPELL_EFFECT_SUMMON && uint32(native->EffectMiscValue[i]) == entry)
+            if (SummonPropertiesEntry const* properties =
+                    sSummonPropertiesStore.LookupEntry(native->EffectMiscValueB[i]))
+                if (properties->Type == SUMMON_TYPE_TOTEM && properties->Slot >= SUMMON_SLOT_TOTEM_FIRE &&
+                    properties->Slot < MAX_TOTEM_SLOT)
+                    return properties;
+    return nullptr;
+}
+static void ShowOnTotemBar(Player* player, Creature* summon, SummonPropertiesEntry const* totem, uint32 spell,
+                           uint32 duration)
+{
+    WorldPackets::Totem::TotemCreated data;
+    data.Slot = uint8(totem->Slot - SUMMON_SLOT_TOTEM_FIRE);
+    data.Totem = summon->GetGUID();
+    data.Duration = duration;
+    data.SpellID = spell;
+    player->SendDirectMessage(data.Write());
+}
+static Creature* TotemBarSummon(Player* player, uint32 slot)
+{
+    for (ObjectGuid guid : State(player).summons)
+        if (Creature* summon = ObjectAccessor::GetCreature(*player, guid))
+            if (summon->IsAlive() && summon->GetOwnerGUID() == player->GetGUID() && summon->IsAIEnabled)
+                if (SummonPropertiesEntry const* totem =
+                        TotemProperties(summon->AI()->GetData(DataSource), summon->GetEntry());
+                    totem && totem->Slot == slot)
+                    return summon;
+    return nullptr;
+}
 void Summon(Player* player, uint32 spell, Unit* target, Position const& location)
 {
     if (!player || !player->IsAlive() || !player->IsInWorld())
@@ -153,6 +193,7 @@ void Summon(Player* player, uint32 spell, Unit* target, Position const& location
     if (spell == Marionette)
         duration = 8500;
     uint8 slot = Slot(entry);
+    SummonPropertiesEntry const* totem = TotemProperties(spell, entry);
     PruneSummons(player);
     auto previous = State(player).summons;
     for (uint32 i = 0; i < count; ++i)
@@ -170,6 +211,8 @@ void Summon(Player* player, uint32 spell, Unit* target, Position const& location
         summon->AI()->SetData(DataSource, spell);
         if (target)
             summon->AI()->SetGUID(target->GetGUID(), DataTarget);
+        if (totem)
+            ShowOnTotemBar(player, summon, totem, spell, uint32(std::max(1, duration)));
         if (slot != NoSlot)
             for (ObjectGuid guid : previous)
                 if (Creature* old = ObjectAccessor::GetCreature(*player, guid))
@@ -662,6 +705,35 @@ class witch_doctor_magnet : public UnitScript
         return nullptr;
     }
 };
+
+class witch_doctor_totem_bar_dismiss : public ServerScript
+{
+  public:
+    witch_doctor_totem_bar_dismiss() : ServerScript("witch_doctor_totem_bar_dismiss", {SERVERHOOK_CAN_PACKET_RECEIVE})
+    {
+    }
+    bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
+    {
+        if (packet.GetOpcode() != CMSG_TOTEM_DESTROYED || packet.size() < sizeof(uint8) || !session)
+            return true;
+        Player* player = session->GetPlayer();
+        if (!player || !player->IsInWorld() || player->m_mover != player)
+            return true;
+        uint32 slot = SUMMON_SLOT_TOTEM_FIRE + packet.read<uint8>(0);
+        if (slot >= MAX_TOTEM_SLOT)
+            return true;
+        if (Creature* native = player->m_SummonSlot[slot] ? player->GetMap()->GetCreature(player->m_SummonSlot[slot])
+                                                          : nullptr;
+            native && native->IsTotem())
+            return true;
+        Creature* summon = TotemBarSummon(player, slot);
+        if (!summon)
+            return true;
+        summon->DespawnOrUnsummon();
+        PruneSummons(player);
+        return false;
+    }
+};
 }
 void AddAscensionWitchDoctorSummonScripts()
 {
@@ -670,4 +742,5 @@ void AddAscensionWitchDoctorSummonScripts()
     RegisterSpellScript(spell_ascension_witch_doctor_spiritual_recall);
     new witch_doctor_summon_events();
     new witch_doctor_magnet();
+    new witch_doctor_totem_bar_dismiss();
 }

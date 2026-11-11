@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire has a single Razmorg the Decapitator on the bridge to Overlord Wyrmthalak",
+  "contract": [
+    "Razmorg the Decapitator (9218) stands once in a Lower Blackrock Spire run on Normal and on Mythic,",
+    "and with Chop'gog (9219) and Wizz'Magg (9217) at most one of the three is up, as the maintainer decided for #11383.",
+    "A player on the bridge next to the reported position loads the grid of every candidate."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 229,
+      "x": -26.02,
+      "y": -436.86,
+      "z": 31.78,
+      "o": 0.0
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 229,
+      "x": -26.02,
+      "y": -436.86,
+      "z": 31.78,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in a Normal Lower Blackrock Spire",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Lower Blackrock Spire",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Normal: at most one Razmorg is up",
+      "actor": "normal",
+      "metric": "map_creature_count",
+      "entries": [
+        9218
+      ],
+      "max": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mythic: at most one Razmorg is up",
+      "actor": "mythic",
+      "metric": "map_creature_count",
+      "entries": [
+        9218
+      ],
+      "max": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Normal: exactly one of the three rares is up",
+      "actor": "normal",
+      "metric": "map_creature_count",
+      "entries": [
+        9217,
+        9218,
+        9219
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mythic: exactly one of the three rares is up",
+      "actor": "mythic",
+      "metric": "map_creature_count",
+      "entries": [
+        9217,
+        9218,
+        9219
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

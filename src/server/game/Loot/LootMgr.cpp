@@ -17,10 +17,6 @@
 
 #include "LootMgr.h"
 #include "AscensionEquippedGearLoot.h"
-#include "DatabaseEnv.h"
-#include "DungeonLoot.h"
-#include "Field.h"
-#include "Map.h"
 #include "Containers.h"
 #include "Creature.h"
 #include "DisableMgr.h"
@@ -28,62 +24,13 @@
 #include "ItemEnchantmentMgr.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include "Creature.h"
 #include "Player.h"
-#include <algorithm>
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "Util.h"
 #include "World.h"
-
-namespace
-{
-    DungeonLoot::Variants dungeonLootVariants;
-}
-
-void LoadDungeonLootVariants()
-{
-    dungeonLootVariants.clear();
-    auto* statement = WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DUNGEON_LOOT_VARIANT);
-    if (PreparedQueryResult result = WorldDatabase.Query(statement))
-    {
-        do
-        {
-            Field* fields = result->Fetch();
-            uint32 const base = fields[0].Get<uint32>();
-            ItemTemplate const* original = sObjectMgr->GetItemTemplate(base);
-            if (!original || (original->Class != ITEM_CLASS_WEAPON && original->Class != ITEM_CLASS_ARMOR)
-                || original->StartQuest || original->Bonding == BIND_QUEST_ITEM)
-                continue;
-
-            std::array<uint32, 2> variants{};
-            for (uint8 tier = 0; tier < 2; ++tier)
-            {
-                uint32 const entry = fields[tier + 1].Get<uint32>();
-                if (!entry)
-                    continue;
-
-                ItemTemplate const* target = sObjectMgr->GetItemTemplate(entry);
-                if (!target || target->Class != original->Class || target->SubClass != original->SubClass
-                    || target->InventoryType != original->InventoryType || target->StartQuest
-                    || target->Bonding == BIND_QUEST_ITEM)
-                {
-                    LOG_ERROR("sql.sql", "Invalid dungeon loot variant {} -> {} (difficulty {})", base, entry, tier + 1);
-                    continue;
-                }
-
-                variants[tier] = entry;
-            }
-
-            if (variants[0] || variants[1])
-                dungeonLootVariants.emplace(base, variants);
-        } while (result->NextRow());
-    }
-
-    LOG_INFO("server.loading", ">> Loaded {} dungeon loot variant families", dungeonLootVariants.size());
-}
 
 ServerConfigs const qualityToRate[] =
 {
@@ -533,10 +480,8 @@ void LootItem::AddAllowedLooter(Player const* player)
 //
 
 // Inserts the item into the loot (called by LootTemplate processors)
-void Loot::AddItem(LootStoreItem const& original)
+void Loot::AddItem(LootStoreItem const& item)
 {
-    LootStoreItem item(original);
-    item.itemid = DungeonLoot::Resolve(dungeonLootVariants, original.itemid, dungeonDifficulty, original.needs_quest);
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item.itemid);
     if (!proto)
         return;
@@ -609,17 +554,6 @@ void Loot::AddItem(LootStoreItem const& original)
     }
 }
 
-namespace
-{
-    // Gear a Heroic/Mythic boss guarantees: weapons and armor from green up, no quest items.
-    bool IsBossGear(uint32 itemId, bool needsQuest)
-    {
-        ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
-        return proto && !needsQuest && (proto->Class == ITEM_CLASS_WEAPON || proto->Class == ITEM_CLASS_ARMOR)
-            && proto->Quality >= ITEM_QUALITY_UNCOMMON && !proto->StartQuest && proto->Bonding != BIND_QUEST_ITEM;
-    }
-}
-
 void LootTemplate::CollectItems(std::vector<LootStoreItem const*>& out, uint8 depth) const
 {
     if (depth > 4)
@@ -648,58 +582,6 @@ void LootTemplate::CollectItems(std::vector<LootStoreItem const*>& out, uint8 de
         }
 }
 
-// Rolling a boss's table can give no gear or several pieces. Heroic and Mythic bosses of the vanilla
-// dungeons drop exactly one: several rolled -> one of them stays, none rolled -> one is drawn evenly
-// from everything the boss can drop. Quest items, gold and non-gear items are left as rolled.
-void Loot::GuaranteeOneGearDrop(LootTemplate const& tab)
-{
-    std::vector<size_t> rolled;
-    for (size_t i = 0; i < items.size(); ++i)
-        if (IsBossGear(items[i].itemid, items[i].needs_quest))
-            rolled.push_back(i);
-
-    if (rolled.size() == 1)
-        return;
-
-    if (!rolled.empty())
-    {
-        size_t const keep = rolled[urand(0, uint32(rolled.size() - 1))];
-        std::vector<LootItem> kept;
-        kept.reserve(items.size());
-        for (size_t i = 0; i < items.size(); ++i)
-        {
-            if (i != keep && IsBossGear(items[i].itemid, items[i].needs_quest))
-            {
-                ItemTemplate const* proto = sObjectMgr->GetItemTemplate(items[i].itemid);
-                if (items[i].conditions.empty() && !proto->HasFlag(ITEM_FLAG_MULTI_DROP) && unlootedCount)
-                    --unlootedCount;
-                continue;
-            }
-            kept.push_back(items[i]);
-        }
-        items.swap(kept);
-        for (size_t i = 0; i < items.size(); ++i)
-            items[i].itemIndex = uint32(i);
-        return;
-    }
-
-    std::vector<LootStoreItem const*> all;
-    tab.CollectItems(all);
-    std::vector<LootStoreItem const*> pool;
-    for (LootStoreItem const* entry : all)
-        if (entry->conditions.empty() && IsBossGear(entry->itemid, entry->needs_quest)
-            && std::none_of(pool.begin(), pool.end(), [entry](LootStoreItem const* p) { return p->itemid == entry->itemid; }))
-            pool.push_back(entry);
-
-    if (pool.empty())
-        return;
-
-    LootStoreItem chosen(*pool[urand(0, uint32(pool.size() - 1))]);
-    chosen.mincount = 1;
-    chosen.maxcount = 1;
-    AddItem(chosen);                                        // resolves the Heroic/Mythic variant of the item
-}
-
 // Calls processor of corresponding LootTemplate (which handles everything including references)
 bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bool personal, bool noEmptyError, uint16 lootMode /*= LOOT_MODE_DEFAULT*/, WorldObject* lootSource /*= nullptr*/)
 {
@@ -710,10 +592,6 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
     lootOwnerGUID = lootOwner->GetGUID();
     Creature* sharedSource = lootSource ? lootSource->ToCreature() : nullptr;
     sharedQuestLoot = sharedSource && &store == &LootTemplates_Creature && sharedSource->IsSharedQuestTarget();
-    Map const* sourceMap = lootSource ? lootSource->FindMap() : nullptr;
-    bool const worldLoot = &store == &LootTemplates_Creature || &store == &LootTemplates_Gameobject;
-    dungeonDifficulty = sourceMap ? DungeonLoot::Difficulty(sourceMap->GetId(),
-        uint8(sourceMap->GetSpawnMode()), worldLoot) : 0;
 
     LootTemplate const* tab = store.GetLootFor(lootId);
 
@@ -744,11 +622,6 @@ bool Loot::FillLoot(uint32 lootId, LootStore const& store, Player* lootOwner, bo
         static LootTemplate const emptyTemplate;
         tab = &emptyTemplate;
     }
-
-    if (dungeonDifficulty && &store == &LootTemplates_Creature && lootSource && lootSource->IsCreature())
-        if (Creature const* boss = lootSource->ToCreature();
-            boss->IsDungeonBoss() || boss->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS)
-            GuaranteeOneGearDrop(*tab);
 
     sScriptMgr->OnAfterLootTemplateProcess(this, tab, store, lootOwner, personal, noEmptyError, lootMode);
 

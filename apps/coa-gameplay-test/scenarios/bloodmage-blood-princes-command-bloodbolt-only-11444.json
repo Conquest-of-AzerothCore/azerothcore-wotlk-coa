@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Blood Prince's Command's guaranteed crit reaches Bloodbolt only (#11444)",
+  "contract": "Blood Prince's Command 704641 raises effect 1 of Taldaram's Torment 802580 (aura 308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, base value 0) to 100. That effect carries its own class mask (EffectSpellClassMask word 1 = 0x20000, which only Bloodbolt 578304/578305 match through SpellFamilyFlags[1] = 131072), and the talent tooltip reads \"Your Bloodbolt is now guaranteed to critically strike on enemies affected by Taldaram's Torment\". Unit::SpellTakenCritChance and Unit::GetUnitCriticalChance summed every aura 308 effect of the caster without looking at that mask, so every other spell and every weapon hit of the Bloodmage on a Torment-afflicted target crit at 100%. Expected: Bloodbolt 578305 on the afflicted enemy has a taken crit chance of at least 100, Torment 802580 itself (SpellFamilyFlags[1] = 0, not in the mask) and the ranged weapon crit chance on that enemy equal the values measured on an identical enemy that carries no Torment.",
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "caster", "race": 1, "class": 20, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "caster", "entry": 36, "level": 80, "health": 1000000, "distance": 3},
+    {"id": "control", "owner": "caster", "entry": 36, "level": 80, "health": 1000000, "distance": 4}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "caster", "spell": 704641},
+    {"action": "learn", "actor": "caster", "spell": 802580},
+    {"action": "learn", "actor": "caster", "spell": 578305},
+    {
+      "action": "snapshot", "label": "Torment crit chance on the enemy without any Torment",
+      "actor": "caster", "metric": "spell_taken_crit_chance", "spell": 802580, "target": "control", "save_as": "torment_plain"
+    },
+    {
+      "action": "snapshot", "label": "Ranged weapon crit chance on the enemy without any Torment",
+      "actor": "caster", "metric": "ranged_taken_crit_chance", "target": "control", "save_as": "weapon_plain"
+    },
+    {
+      "action": "assert", "label": "The control enemy is not guaranteed to be crit by Bloodbolt",
+      "actor": "caster", "metric": "spell_taken_crit_chance", "spell": 578305, "target": "control", "max": 99
+    },
+    {"action": "cast", "actor": "caster", "spell": 802580, "target": "enemy"},
+    {
+      "action": "assert", "label": "Taldaram's Torment lands on the enemy",
+      "actor": "enemy", "metric": "aura", "spell": 802580, "caster": "caster", "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Bloodbolt is guaranteed to crit the afflicted enemy",
+      "actor": "caster", "metric": "spell_taken_crit_chance", "spell": 578305, "target": "enemy", "min": 100
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Torment itself is outside the class mask and keeps its normal crit chance",
+      "actor": "caster", "metric": "spell_taken_crit_chance", "spell": 802580, "target": "enemy",
+      "relative_to": "torment_plain", "min": -0.001, "max": 0.001
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: weapon hits keep their normal crit chance on the afflicted enemy",
+      "actor": "caster", "metric": "ranged_taken_crit_chance", "target": "enemy",
+      "relative_to": "weapon_plain", "min": -0.001, "max": 0.001
+    }
+  ]
+}

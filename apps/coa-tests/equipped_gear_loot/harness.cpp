@@ -28,7 +28,6 @@ constexpr uint16 WORLDHOOK_ON_STARTUP = 2;
 constexpr uint32 ITEM_SUBCLASS_JEWELCRAFTING_RECIPE = 10;
 constexpr uint32 EXPANSION_THE_BURNING_CRUSADE = 1;
 constexpr uint32 CREATURE_ELITE_WORLDBOSS = 3;
-DungeonLoot::Variants dungeonLootVariants;
 
 #define LOG_INFO(...) ((void)0)
 #define LOG_ERROR(...) ((void)0)
@@ -251,16 +250,12 @@ struct Loot
 {
     std::vector<LootItem> items, quest_items;
     uint32 unlootedCount = 0, maxItemCount = MAX_NR_LOOT_ITEMS;
-    uint8 dungeonDifficulty = 0;
     bool sharedQuestLoot = false, fixedMoneyLoot = false;
     uint64 lootOwnerGUID = 0, sourceWorldObjectGUID = 1, roundRobinPlayer = 0;
     std::vector<uint64> rights;
     std::map<uint64, uint32> PlayerQuestItems;
     void AddItem(LootStoreItem const&);
     bool FillLoot(uint32, LootStore const&, Player*, bool, bool, uint16, WorldObject*);
-    void GuaranteeOneGearDrop(LootTemplate const&)
-    {
-    }
     void FillQuestLoot(Player* player) { PlayerQuestItems.emplace(player->GetGUID(), 1); }
     void FillNotNormalLootFor(Player* player)
     {

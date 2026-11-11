@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Dire Maul East: Ironbark is freed only after Zevrim Thornhoof and Hydrospawn die, and only one Ironbark is visible",
-  "contract": "Before Zevrim Thornhoof (11490) and Hydrospawn (13280) are both dead, Old Ironbark (11491) is visible and Ironbark the Redeemed (14241) is hidden (#11379: Zevrim's death alone used to free him, so the east wing could be skipped). After Zevrim dies Old Ironbark stays; once Hydrospawn dies too, Old Ironbark despawns and Ironbark the Redeemed becomes visible, so a player never sees both. It does not cover the reverse kill order, Ironbark the Redeemed's walk to the door or a reloaded instance.",
+  "contract": "Before Zevrim Thornhoof (11490) and Hydrospawn (13280) are both dead, Old Ironbark (11491) is visible and Ironbark the Redeemed (14241) is hidden (#11379: Zevrim's death alone used to free him, so the east wing could be skipped). After Zevrim dies Old Ironbark stays; once Hydrospawn dies too, Old Ironbark despawns and Ironbark the Redeemed becomes visible, so a player never sees both. dire-maul-east-door-needs-ironbark-11379 covers the reverse kill order and the walk to the door; a reloaded instance is not covered.",
   "timeout_ms": 120000,
   "location": {
     "map": 429,

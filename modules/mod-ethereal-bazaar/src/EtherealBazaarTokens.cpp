@@ -28,15 +28,14 @@
 #include "EtherealBazaar.h"
 
 #include "AscensionBazaarTokenCap.h"
-#include "Chat.h"
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
+#include "DataMap.h"
 #include "Formulas.h"
-#include "GameTime.h"
 #include "KillRewarder.h"
-#include "Log.h"
 #include "Map.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "QuestDef.h"
@@ -44,21 +43,59 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "StringConvert.h"
+#include "StringFormat.h"
+#include "WorldScript.h"
+#include <algorithm>
+#include <atomic>
+#include <limits>
+#include <memory>
+#include <string>
+#include <utility>
 
 namespace
 {
-    bool Enabled()
-    {
-        return sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.Enable", true);
-    }
+    std::string const PendingTokensKey = "ethereal_bazaar_pending_tokens";
+    constexpr uint32 KillPayoutMinimumMs = 1000;
+    constexpr uint32 KillPayoutSpreadMs = 1000;
 
-    uint32 Wuerfeln(char const* was, uint32 minVorgabe, uint32 maxVorgabe)
+    struct RewardRange
     {
-        uint32 const lo = sConfigMgr->GetOption<uint32>(
-            Acore::StringFormat("EtherealBazaar.Tokens.{}.Min", was), minVorgabe);
-        uint32 const hi = sConfigMgr->GetOption<uint32>(
-            Acore::StringFormat("EtherealBazaar.Tokens.{}.Max", was), maxVorgabe);
-        return urand(lo, std::max(lo, hi));
+        uint32 Min;
+        uint32 Max;
+
+        uint32 Roll() const { return urand(Min, Max); }
+    };
+
+    struct TokenSettings
+    {
+        bool Enabled = true;
+        bool Announce = false;
+        RewardRange Quest{0, 6};
+        RewardRange Creature{0, 2};
+        RewardRange DungeonBoss{6, 12};
+        RewardRange RaidBoss{30, 40};
+        uint32 MaxLevel = 60;
+        Optional<uint32> LevelingGap;
+        Optional<uint32> MaxLevelGap = 5;
+        uint32 BonusLevel = 60;
+        uint32 BonusPercent = 100;
+    };
+
+    std::atomic<std::shared_ptr<TokenSettings const>> Settings{std::make_shared<TokenSettings>()};
+
+    struct PendingTokens final : DataMap::Base
+    {
+        uint32 Amount = 0;
+        bool Scheduled = false;
+    };
+
+    RewardRange LoadRange(char const* name, RewardRange defaults)
+    {
+        uint32 const min = sConfigMgr->GetOption<uint32>(
+            Acore::StringFormat("EtherealBazaar.Tokens.{}.Min", name), defaults.Min);
+        uint32 const max = sConfigMgr->GetOption<uint32>(
+            Acore::StringFormat("EtherealBazaar.Tokens.{}.Max", name), defaults.Max);
+        return {min, std::max(min, max)};
     }
 
     // The setting is a number of levels, or "grey" for the XP rule: anything grey
@@ -68,95 +105,148 @@ namespace
     // to them has that level's health and armor, so it pays like one. A scaled
     // dungeon holds its creatures inside the dungeon's band, so a low dungeon
     // stays below a maximum-level character.
-    bool KillPays(Player* player, Creature const* killed)
+    bool KillPays(Player* player, Creature const* killed, TokenSettings const& settings)
     {
         uint32 const level = player->GetLevel();
-        bool const atMaxLevel = level >= sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.MaxLevel", 60);
-        std::string const setting = atMaxLevel
-            ? sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel", "5")
-            : sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling", "grey");
-
+        Optional<uint32> const& levelsAbove = level >= settings.MaxLevel ? settings.MaxLevelGap : settings.LevelingGap;
         uint32 const killedLevel = killed->getLevelForTarget(player);
-        if (Optional<uint32> const levelsAbove = Acore::StringTo<uint32>(setting))
-            return killedLevel + *levelsAbove >= level;
+        if (levelsAbove)
+            return killedLevel >= level || level - killedLevel <= *levelsAbove;
 
         return killedLevel > Acore::XP::GetGrayLevel(level);
     }
 
     // The multiplier is a percentage so the config can hold a whole number.
-    uint32 ApplyLevelBonus(Player* player, uint32 amount)
+    uint32 CalculateReward(Player* player, uint32 amount, TokenSettings const& settings)
     {
         if (!amount)
             return 0;
 
-        uint32 const abLevel = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusLevel", 60);
-        if (player->GetLevel() < abLevel)
-            return amount;
-
-        uint32 const prozent = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusPercent", 100);
-        return std::max<uint32>(1, amount * prozent / 100);
+        if (player->GetLevel() >= settings.BonusLevel)
+            amount = uint32(std::clamp<uint64>(uint64(amount) * settings.BonusPercent / 100,
+                1, std::numeric_limits<uint32>::max()));
+        return TestZoneBonus::Apply(player, TestZoneBonus::Reward::BazaarTokens, amount);
     }
 
-    void Grant(Player* player, uint32 amount, char const* grund)
+    void Deliver(Player* player, uint32 amount, bool announce)
     {
-        if (!player || !amount)
+        if (!amount)
             return;
 
-        amount = TestZoneBonus::Apply(player, TestZoneBonus::Reward::BazaarTokens, ApplyLevelBonus(player, amount));
-
+        ItemTemplate const* token = sObjectMgr->GetItemTemplate(BAZAAR_TOKEN_ITEM);
+        if (!token)
+            return;
         amount = AscensionBazaarTokenCap::Claim(player, amount);
         if (!amount)
             return;
 
-        // A full bag must not swallow the reward. Mail is the only honest
-        // fallback: the player keeps what they earned and notices it.
+        uint32 remaining = amount;
         ItemPosCountVec dest;
-        InventoryResult const check =
-            player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, BAZAAR_TOKEN_ITEM, amount);
-        if (check == EQUIP_ERR_OK)
+        player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, BAZAAR_TOKEN_ITEM, amount);
+        if (!dest.empty())
         {
-            Item* item = player->StoreNewItem(dest, BAZAAR_TOKEN_ITEM, true);
-
-            // Der Einsammel-Hinweis oben rechts kommt aus SendNewItem. Bei
-            // Tokens faellt er bei jedem zweiten Mob an und wird schnell zum
-            // Rauschen; die Tasche aktualisiert sich auch ohne ihn. Wer ihn
-            // will, schaltet ihn an.
-            if (item && sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.Announce", false))
-                player->SendNewItem(item, amount, true, false);
-        }
-        else if (Item* item = Item::CreateItem(BAZAAR_TOKEN_ITEM, amount, player))
-        {
-            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-            item->SaveToDB(trans);
-            MailDraft("Bazaar Tokens",
-                      "Your bags were full, so Tiraxis had these sent on.")
-                .AddItem(item)
-                .SendMailTo(trans, MailReceiver(player), MailSender(MAIL_CREATURE, BAZAAR_NPC_TIRAXIS));
-            CharacterDatabase.CommitTransaction(trans);
+            if (Item* item = player->StoreNewItem(dest, BAZAAR_TOKEN_ITEM, true))
+            {
+                for (ItemPosCount const& position : dest)
+                    remaining -= position.count;
+                if (announce)
+                    player->SendNewItem(item, amount - remaining, true, false);
+            }
         }
 
-        LOG_DEBUG("module.bazaar", "Ethereal Bazaar: {} earned {} token(s) from {}.",
-                  player->GetName(), amount, grund);
+        uint32 const mailLimit = uint32(std::min<uint64>(
+            uint64(token->GetMaxStackSize()) * MAX_MAIL_ITEMS, std::numeric_limits<uint32>::max()));
+        while (remaining)
+        {
+            uint32 const count = std::min(remaining, mailLimit);
+            player->SendItemRetrievalMail(BAZAAR_TOKEN_ITEM, count);
+            remaining -= count;
+        }
+    }
+
+    void FlushPending(Player* player)
+    {
+        if (PendingTokens* pending = player->CustomData.Get<PendingTokens>(PendingTokensKey))
+            Deliver(player, std::exchange(pending->Amount, 0), Settings.load()->Announce);
+    }
+
+    void QueueKillReward(Player* player, uint32 amount)
+    {
+        if (!amount)
+            return;
+
+        PendingTokens* pending = player->CustomData.GetDefault<PendingTokens>(PendingTokensKey);
+        if (amount > std::numeric_limits<uint32>::max() - pending->Amount)
+            FlushPending(player);
+        pending->Amount += amount;
+        if (pending->Scheduled)
+            return;
+
+        pending->Scheduled = true;
+        player->m_Events.AddEventAtOffset([guid = player->GetGUID()]
+        {
+            Player* current = ObjectAccessor::FindConnectedPlayer(guid);
+            if (!current)
+                return;
+            if (PendingTokens* batch = current->CustomData.Get<PendingTokens>(PendingTokensKey))
+            {
+                batch->Scheduled = false;
+                FlushPending(current);
+            }
+        }, Milliseconds(KillPayoutMinimumMs + player->GetGUID().GetRawValue() % KillPayoutSpreadMs));
     }
 }
+
+class ethereal_bazaar_token_config final : public WorldScript
+{
+public:
+    ethereal_bazaar_token_config() : WorldScript("ethereal_bazaar_token_config", {WORLDHOOK_ON_AFTER_CONFIG_LOAD}) { }
+
+    void OnAfterConfigLoad(bool) override
+    {
+        auto settings = std::make_shared<TokenSettings>();
+        settings->Enabled = sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.Enable", true);
+        settings->Announce = sConfigMgr->GetOption<bool>("EtherealBazaar.Tokens.Announce", false);
+        settings->Quest = LoadRange("Quest", settings->Quest);
+        settings->Creature = LoadRange("Creature", settings->Creature);
+        settings->DungeonBoss = LoadRange("DungeonBoss", settings->DungeonBoss);
+        settings->RaidBoss = LoadRange("RaidBoss", settings->RaidBoss);
+        settings->MaxLevel = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.MaxLevel", 60);
+        settings->LevelingGap = Acore::StringTo<uint32>(
+            sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.WhileLeveling", "grey"));
+        settings->MaxLevelGap = Acore::StringTo<uint32>(
+            sConfigMgr->GetOption<std::string>("EtherealBazaar.Tokens.MaxLevelsAboveMob.AtMaxLevel", "5"));
+        settings->BonusLevel = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusLevel", 60);
+        settings->BonusPercent = sConfigMgr->GetOption<uint32>("EtherealBazaar.Tokens.BonusPercent", 100);
+        Settings.store(std::move(settings));
+    }
+};
 
 class ethereal_bazaar_tokens : public PlayerScript
 {
 public:
-    ethereal_bazaar_tokens() : PlayerScript("ethereal_bazaar_tokens") { }
+    ethereal_bazaar_tokens() : PlayerScript("ethereal_bazaar_tokens",
+        {PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_BEFORE_LOGOUT}) { }
+
+    void OnPlayerBeforeLogout(Player* player) override
+    {
+        FlushPending(player);
+    }
 
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
     {
-        if (!Enabled() || !player || !quest)
+        auto const settings = Settings.load();
+        if (!settings->Enabled || !player || !quest)
             return;
 
-        Grant(player, Wuerfeln("Quest", 0, 6), "a quest");
+        FlushPending(player);
+        Deliver(player, CalculateReward(player, settings->Quest.Roll(), *settings), settings->Announce);
     }
 
     void OnPlayerRewardKillRewarder(Player* player, KillRewarder* rewarder, bool, float&) override
     {
         Creature* killed = rewarder && rewarder->GetVictim() ? rewarder->GetVictim()->ToCreature() : nullptr;
-        if (!Enabled() || !player || !killed)
+        if (!player || !killed)
             return;
 
         // Nothing for what a player made themselves, and nothing for the
@@ -164,26 +254,35 @@ public:
         if (killed->IsSummon() || killed->IsCritter() || killed->IsTotem())
             return;
 
-        if (!KillPays(player, killed))
+        auto const settings = Settings.load();
+        if (!settings->Enabled)
             return;
 
         // Bosses are worth a real amount, and a raid boss more than a dungeon
         // one. IsDungeonBoss covers the flagged encounters; the world bosses
         // outside an instance are deliberately left with the ordinary rate.
-        if (killed->IsDungeonBoss())
+        bool const boss = killed->IsDungeonBoss();
+        Map const* map = boss ? killed->GetMap() : nullptr;
+        RewardRange const& range = !boss ? settings->Creature
+            : (map && map->IsRaid() ? settings->RaidBoss : settings->DungeonBoss);
+        uint32 const roll = range.Roll();
+        if (!roll || !KillPays(player, killed, *settings))
+            return;
+
+        uint32 const amount = CalculateReward(player, roll, *settings);
+        if (boss)
         {
-            Map const* map = killed->GetMap();
-            bool const raid = map && map->IsRaid();
-            Grant(player, Wuerfeln(raid ? "RaidBoss" : "DungeonBoss", raid ? 30 : 6, raid ? 40 : 12),
-                  raid ? "a raid boss" : "a dungeon boss");
+            FlushPending(player);
+            Deliver(player, amount, settings->Announce);
             return;
         }
 
-        Grant(player, Wuerfeln("Creature", 0, 2), "a creature");
+        QueueKillReward(player, amount);
     }
 };
 
 void AddEtherealBazaarTokenScripts()
 {
+    new ethereal_bazaar_token_config();
     new ethereal_bazaar_tokens();
 }

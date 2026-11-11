@@ -1,0 +1,173 @@
+{
+  "schema": 1,
+  "name": "Sunken Temple: the summoned Hakkari Bloodkeeper has dungeon health on Heroic and Mythic (#11440)",
+  "contract": [
+    "#11440: the Hakkari Bloodkeeper (8438) the Shade of Hakkar summons at the Avatar of Hakkar event had no coa_dungeon_health row,",
+    "so on Heroic and Mythic it kept its Normal health while the other rank 1 class 2 elites of map 109 (Hakkari Sapper 8336,",
+    "Hakkari Frostwing 5291, Nightmare Suppressor 8497) have 39091 on Heroic and 50818 on Mythic. A Bloodkeeper summoned into a",
+    "Heroic and a Mythic instance must now have the same health as a summoned Sapper: 39091 and 50818."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 109,
+      "x": -515.0,
+      "y": -88.0,
+      "z": -91.0,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: heroic is in a Heroic Sunken Temple",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "as": "heroic_sapper",
+      "entry": 8336,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "as": "heroic_keeper",
+      "entry": 8438,
+      "distance": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the summoned Hakkari Sapper has 39091 health on Heroic",
+      "actor": "heroic_sapper",
+      "metric": "max_health",
+      "equals": 39091
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the summoned Hakkari Bloodkeeper has 39091 health on Heroic",
+      "actor": "heroic_keeper",
+      "metric": "max_health",
+      "equals": 39091
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 109,
+      "x": -515.0,
+      "y": -88.0,
+      "z": -91.0,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Sunken Temple",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "as": "mythic_sapper",
+      "entry": 8336,
+      "distance": 3
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "as": "mythic_keeper",
+      "entry": 8438,
+      "distance": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the summoned Hakkari Sapper has 50818 health on Mythic",
+      "actor": "mythic_sapper",
+      "metric": "max_health",
+      "equals": 50818
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the summoned Hakkari Bloodkeeper has 50818 health on Mythic",
+      "actor": "mythic_keeper",
+      "metric": "max_health",
+      "equals": 50818
+    }
+  ]
+}

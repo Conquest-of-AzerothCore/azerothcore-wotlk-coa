@@ -21,8 +21,10 @@
  *   Bat form, when the avatar dies
  *     Bat-tering Charge  first 2s, every 20s   random player out of melee and within 25
  *                                              yards, knocks back everyone within 10 yards
- *     Terrifying Screech first 4s, every 20s   everyone in the room, and fears
- *                                              everyone within 20 yards
+ *     Terrifying Screech the moment the charge stuns, or in its place when no player
+ *                                              is in reach (live: 12 of 12 landed charges, 0-9 ms):
+ *                                              everyone in the room, and fears everyone
+ *                                              within 20 yards
  *     Vampirism          passive, her hits drain life
  *     Bat Riders         two, from stock, throwing liquid fire
  *
@@ -208,7 +210,6 @@ namespace
 
             events.SetPhase(PHASE_BAT);
             events.ScheduleEvent(EVENT_BATTERING_CHARGE, 2s, 0, PHASE_BAT);
-            events.ScheduleEvent(EVENT_SCREECH, 4s, 0, PHASE_BAT);
             events.ScheduleEvent(EVENT_BAT_RIDER, 10s, 0, PHASE_BAT);
         }
 
@@ -250,8 +251,11 @@ namespace
         // The charge stuns its target; the impact around it is its own spell.
         void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
-            if (spell->Id == SPELL_BATTERING_STUN)
-                me->CastSpell(target, SPELL_BATTERING_IMPACT, true);
+            if (spell->Id != SPELL_BATTERING_STUN)
+                return;
+
+            me->CastSpell(target, SPELL_BATTERING_IMPACT, true);
+            events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
         }
 
         void CallOfHireek()
@@ -327,11 +331,12 @@ namespace
                                 return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinDist(u, BATTERING_CHARGE_MAX_RANGE);
                             }))
                             DoCast(target, SPELL_BATTERING_CHARGE);
+                        else
+                            events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
                         events.ScheduleEvent(EVENT_BATTERING_CHARGE, 20s, 0, PHASE_BAT);
                         break;
                     case EVENT_SCREECH:
                         DoCastSelf(SPELL_SCREECH);
-                        events.ScheduleEvent(EVENT_SCREECH, 20s, 0, PHASE_BAT);
                         break;
                     case EVENT_BAT_RIDER:
                         if (_riders < 2)
