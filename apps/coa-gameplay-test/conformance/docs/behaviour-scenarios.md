@@ -95,6 +95,12 @@ after them, and the verdict is an `alert` unless each dummy inside the radius en
 beyond it moves less than 0.5 yd (ADR 0186). Templar Rituals 520534 pulls the dummies at 3.75, 7.5 and 11.25 yd to
 0, 0 and 1.23 yd, and leaves the one at 20 yd in place, after one Righteous Tempest.
 
+`cast_power` (on `hit_ratio`, `taken_hit` and `metric_delta`) sets the caster's power to that value before each cast
+in place of the plain cost, for a channel that also drains power per second (ADR 0187): at exactly its 15 cost,
+Testament of Fortitude 500678 ends at its first drain and never heals. With 100 Energy its heal reads 5% of the maximum
+health (108 of 2173, 217 under +100% health), its first tick lands between 950 and 1050 ms, and a Holy strike under it
+reads 550 against 1100.
+
 ### Healing-ratio scenarios (`behaviour_ratio`)
 
 Each `targets` entry is either a 2-element `[rank_id, name]` (method `"cast"`, the default) or a 3-element

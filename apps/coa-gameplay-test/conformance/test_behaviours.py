@@ -7020,6 +7020,24 @@ class PhaseAuraTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(uncapped), expectation).status, 'alert')
 
 
+class CastPowerTests(unittest.TestCase):
+    def test_a_cast_power_replaces_the_cost_before_each_cast_of_the_three_kinds(self):
+        entries = [next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 500678
+                        and entry.get('label_suffix') == suffix) for suffix in ('max_health', 'damage_taken', 'tick_1050')]
+        for entry in entries:
+            with self.subTest(kind=entry['kind']):
+                steps = run.validate(behaviour_scenario(CLASS_FILE, entry)[0])['steps']
+                casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 500678]
+                self.assertTrue(casts)
+                for index in casts:
+                    power = max(i for i in range(index) if steps[i]['action'] == 'set_power')
+                    self.assertEqual(steps[power]['value'], 100)
+                plain = {key: value for key, value in entry.items() if key != 'cast_power'}
+                plain_steps = run.validate(behaviour_scenario(CLASS_FILE, plain)[0])['steps']
+                self.assertIn(15, [step['value'] for step in plain_steps if step['action'] == 'set_power'])
+                self.assertNotIn(100, [step['value'] for step in plain_steps if step['action'] == 'set_power'])
+
+
 class FixedCountPullTests(unittest.TestCase):
     def entry(self):
         return {'spell': 520534, 'name': 'Templar Rituals', 'kind': 'fixed_count',

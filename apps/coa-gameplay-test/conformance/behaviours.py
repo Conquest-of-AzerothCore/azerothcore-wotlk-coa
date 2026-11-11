@@ -1225,6 +1225,7 @@ class MetricDeltaSpec:
     after_auras: tuple[tuple[int, int, str, str], ...] = ()
     select_dummy: bool = False
     after_at_least: float | None = None
+    cast_power: int | None = None
 
 
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
@@ -1293,7 +1294,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps += [phase_aura_step(aura) for aura in (*(spec.after_auras if after else ()), *spec.phase_auras)]
         if not include_cast:
             return steps
-        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+        if spec.cast_power is not None:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                         'value': spec.cast_power})
+        elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
@@ -1418,7 +1422,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('attack_swings', 0), entry.get('force_crit'), entry.get('setup_wait_ms', 0),
                            tuple(phase_aura(raw) for raw in entry.get('phase_auras', ())),
                            tuple(phase_aura(raw) for raw in entry.get('after_auras', ())),
-                           entry.get('select_dummy', False), entry.get('after_at_least'))
+                           entry.get('select_dummy', False), entry.get('after_at_least'), entry.get('cast_power'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -4565,6 +4569,7 @@ class HitRatioSpec:
     swing_hand: int | None = None
     cast_spell: int | None = None
     cast_wait_ms: int = 0
+    cast_power: int | None = None
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
@@ -4604,10 +4609,13 @@ def hit_ratio_reads(spec: HitRatioSpec, arm: str) -> list[tuple[str, str]]:
     return [(f'{base} {mark} total', f'{base} {mark} count') for mark in ('start', *range(1, spec.trials + 1))]
 
 
-def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: str = TARGET) -> list[dict]:
+def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: str = TARGET,
+                   power: int | None = None) -> list[dict]:
     facts = facts_of(records, spell)
     steps = []
-    if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+    if power is not None:
+        steps.append({'action': 'set_power', 'actor': actor, 'power': facts.power_type, 'value': power})
+    elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
         steps.append({'action': 'set_power', 'actor': actor, 'power': facts.power_type, 'value': facts.mana_cost})
     steps.append({'action': 'reset_cooldown', 'actor': actor, 'spell': spell})
     steps += [{**step, 'actor': actor} for step in required_aura_steps(facts)]
@@ -4663,7 +4671,8 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
-            steps += healed + hit_ratio_cast(records, spec.cast_spell or spec.observe_spell, spec.caster, spec.target)
+            steps += healed + hit_ratio_cast(records, spec.cast_spell or spec.observe_spell, spec.caster, spec.target,
+                                             spec.cast_power)
             if spec.cast_wait_ms:
                 steps.append({'action': 'wait', 'label': f'{name} trial {trial} hits', 'ms': spec.cast_wait_ms})
             if trial == spec.trials:
@@ -4784,7 +4793,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('metric', 'spell_damage_total'), entry.get('caster', CASTER),
                         entry.get('target', TARGET), hit_ratio_fixture(entry.get('fixture', {})),
                         tuple(int(spell) for spell in entry.get('warmup', ())), entry.get('off_hand_item'),
-                        entry.get('swing_hand'), entry.get('cast_spell'), int(entry.get('cast_wait_ms', 0)))
+                        entry.get('swing_hand'), entry.get('cast_spell'), int(entry.get('cast_wait_ms', 0)),
+                        entry.get('cast_power'))
 
 
 CRIT_RATE_TRIALS = 300
@@ -4905,6 +4915,7 @@ class TakenHitSpec:
     label_suffix: str = ''
     debt_ends: bool = False
     targets: tuple[tuple[str, float], ...] = ()
+    cast_power: int | None = None
 
 
 def taken_hit_label(spec: TakenHitSpec) -> str:
@@ -4969,7 +4980,7 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
     for trial in range(1, spec.trials + 1):
         steps += auras + health
         for spell, target in arm.casts:
-            steps += hit_ratio_cast(records, spell, CASTER, target)
+            steps += hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
         for _ in range(arm.strikes or spec.strikes):
             steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                       {'action': 'wait', 'label': f'{arm.name} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
@@ -5138,7 +5149,8 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         tuple(absorb_term(term) for term in entry.get('absorb_terms', ())),
                         entry.get('debt_spell', 0), tuple(entry.get('learn', ())), entry.get('label_suffix', ''),
                         entry.get('debt_ends', False),
-                        tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())))
+                        tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())),
+                        entry.get('cast_power'))
 
 
 THREAT_REDIRECT_SWINGS = 3
