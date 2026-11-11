@@ -203,9 +203,7 @@ namespace
     {
         if (player->CanUseItem(item) !=
             EQUIP_ERR_OK)
-        {
             return false;
-        }
 
         uint32 const skill =
             item->GetSkill();
