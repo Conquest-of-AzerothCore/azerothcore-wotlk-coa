@@ -4550,21 +4550,21 @@
       {
         "claim": "Casting Argent Blade or Scarlet Hammer now",
         "labels": [
-          "806522 trigger_count"
+          "806522 trigger_count",
+          "806522 behaviour_metric_delta next_two_argent_blade",
+          "806522 behaviour_metric_delta next_two_scarlet_hammer"
         ]
       },
       {
         "claim": "guarantees your next 2 instances of damage dealt by Scourgebane to critically strike",
-        "labels": []
+        "labels": [
+          "806522 behaviour_metric_delta next_two_argent_blade",
+          "806522 behaviour_metric_delta next_two_scarlet_hammer",
+          "806522 behaviour_metric_delta next_two_strikes"
+        ]
       }
     ],
-    "kind": "claim",
-    "labels": [
-      "806522 trigger_count",
-      "806522 behaviour_metric_delta next_two_argent_blade",
-      "806522 behaviour_metric_delta next_two_scarlet_hammer",
-      "806522 behaviour_metric_delta next_two_strikes"
-    ]
+    "kind": "claim"
   },
   {
     "spell": 806522,
