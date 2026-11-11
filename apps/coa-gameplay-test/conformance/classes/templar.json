@@ -1674,6 +1674,12 @@
   ],
   "behaviours": [
     {
+      "spell": 560648, "name": "Warrior of Dawn", "kind": "proc_reset",
+      "quote": "chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by",
+      "reset_spell": 807268, "marker_spell": 561156,
+      "reason": "AscensionTemplarEvents.cpp:71-72 (Check: damage && melee && !periodic, melee = PROC_FLAG_DONE_MELEE_AUTO_ATTACK | PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS) and :152-154 (Proc: Reduce(player, 804929, INT32_MAX), Cast(player, player, 561156)); 561167's effect 195 is not the path. Spell::_cast sends the cooldown (Spell.cpp:4029) before handle_immediate (:4134), so a proc on Argent Blade's own hit resets the cooldown that cast started. 561156 e0 aura 108 SPELLMOD_COST -50%, one charge (AscensionTemplarAuras.cpp:116-120), dropped by the next Argent Blade (AscensionTemplarAbilities.cpp:26-27, ConsumeSelected)."
+    },
+    {
       "spell": 573049, "name": "Holy Cleave", "kind": "fixed_count",
       "quote": "and an additional nearby enemy", "expected": 1,
       "radius": 10.0, "clear_auras": [804903],
@@ -1735,7 +1741,7 @@
       "spell": 301339, "name": "Holy Tempest", "kind": "spread",
       "quote": "spreads Condemn on affected enemies to a nearby enemy", "expected": 1,
       "seed_spell": 567539, "aura_spell": 567539, "target_rank": 807274,
-      "radius": 10.0,
+      "radius": 10.0, "first_tick": true,
       "radius_reason": "AscensionTemplar.cpp:224-257 SpreadCondemn: Nearby(target, 10.0f), a hardcoded radius; 301339's own effect has EffectRadiusIndex[0] 0 and no DBC field defines this distance."
     },
     {

@@ -539,9 +539,10 @@
     "spell": 301339,
     "clause": "Damage dealt by Righteous Tempest now spreads Condemn on affected enemies to a nearby enemy.",
     "labels": [
-      "301339 e0 behaviour_count"
+      "301339 behaviour_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label 301339 e0 behaviour_count named no verdict; the spread entry reads one copy on one of two nearby dummies after the first hit of Righteous Tempest 570205 on the primary (first_tick, ADR 0150), through AscensionTemplarAbilities.cpp:307-308 and SpreadCondemn (AscensionTemplar.cpp:227-264)"
   },
   {
     "spell": 301360,
@@ -1181,11 +1182,11 @@
     "spell": 560648,
     "clause": "Melee damage dealt now has a $h% chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by $561156s1%.",
     "labels": [
-      "560648 effect_value #0",
-      "560648 effect_value 561156e0 #1",
-      "560648 proc_rate"
+      "560648 proc_rate",
+      "560648 behaviour_proc_reset"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "560648 effect_value #0 (unmodelled) and 560648 effect_value 561156e0 #1 (not_measured) are replaced by 560648 behaviour_proc_reset: 100 Argent Blade 807268 casts with the passive, each proc of 561156 reads the cooldown at 0 and the next cast at 25 Energy instead of 50; 20 casts without it read no proc (ADR 0150). The chance stays 560648 proc_rate. Script path AscensionTemplarEvents.cpp:71-72, :152-154."
   },
   {
     "spell": 560649,

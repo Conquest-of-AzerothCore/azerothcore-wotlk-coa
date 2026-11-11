@@ -733,7 +733,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 135)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 136)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -1036,13 +1036,43 @@ class AuraSpreadScenarioTests(unittest.TestCase):
         spec = aura_spread_spec(holy_tempest_entry())
         scenario, expectations = aura_spread_scenario(CLASS_FILE, spec)
         validated = run.validate(scenario)
-        self.assertEqual(len(validated['creatures']), 2)
+        self.assertEqual(len(validated['creatures']), 3)
         self.assertEqual(len(expectations), 1)
         expectation = expectations[0]
         self.assertEqual(expectation.check, BEHAVIOUR_COUNT)
         self.assertTrue(expectation.rule.startswith('prose: "spreads Condemn on affected enemies'))
-        self.assertEqual(len(expectation.model['dummy_labels']), 1)
+        self.assertEqual(len(expectation.model['dummy_labels']), 2)
         self.assertEqual(expectation.model['expected'], 1)
+        self.assertEqual(expectation.model['headroom'], 1)
+
+    def test_first_tick_extras_sit_beyond_the_tick_reach_and_within_the_spread_radius(self):
+        spec = aura_spread_spec(holy_tempest_entry())
+        scenario, _ = aura_spread_scenario(CLASS_FILE, spec)
+        reach = RECORDS.radius(RECORDS.field('Spell', RIGHTEOUS_TEMPEST_RANK, 'EffectTriggerSpell[0]'), 0)
+        primary, *extras = [creature['distance'] for creature in scenario['creatures']]
+        for distance in extras:
+            self.assertGreater(distance, reach + 2.0)
+            self.assertLess(distance - primary, spec.radius)
+
+    def test_first_tick_reads_once_per_phase_before_the_second_tick(self):
+        spec = aura_spread_spec(holy_tempest_entry())
+        scenario, _ = aura_spread_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        amplitude = RECORDS.field('Spell', RIGHTEOUS_TEMPEST_RANK, 'EffectAmplitude[0]')
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_TEMPEST_RANK]
+        self.assertEqual(len(casts), 2)
+        for index in casts:
+            moment = 'before' if index == casts[0] else 'after'
+            self.assertEqual(steps[index - 1]['label'], f'{HOLY_TEMPEST} primary hits {moment} start')
+            self.assertLess(steps[index + 1]['ms'], amplitude)
+            self.assertEqual(steps[index + 2]['spell'], RECORDS.field('Spell', RIGHTEOUS_TEMPEST_RANK,
+                                                                       'EffectTriggerSpell[0]'))
+        learned = first_index(steps, action='learn', spell=HOLY_TEMPEST)
+        settle = steps[learned - 1]
+        self.assertEqual(settle['label'], 'periodic buff end')
+        self.assertGreaterEqual(steps[casts[0] + 1]['ms'] + settle['ms'],
+                                RECORDS.duration_ms(RIGHTEOUS_TEMPEST_RANK))
 
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, holy_tempest_entry())
@@ -1069,9 +1099,9 @@ class AuraSpreadScenarioTests(unittest.TestCase):
         aura_steps = [step for step in scenario['steps']
                      if step.get('metric') == 'aura' and step.get('spell') == CONDEMN_RANK
                      and step.get('actor') != 'primary']
-        self.assertEqual(len(aura_steps), 2)
+        self.assertEqual(len(aura_steps), 4)
+        self.assertEqual([step['actor'] for step in aura_steps], ['extra1', 'extra2'] * 2)
         for step in aura_steps:
-            self.assertEqual(step['actor'], 'extra1')
             self.assertEqual(step['caster'], 'caster')
 
 
@@ -6319,6 +6349,85 @@ class HealingReceivedAuraScenarioTests(unittest.TestCase):
         self.assertEqual(len(barriers), entry['trials'])
         self.assertTrue(all(step['actor'] == 'caster' for step in barriers))
         self.assertEqual(expectation.label, f'{BARRIER_OF_LIGHT} behaviour_hit_ratio received')
+
+
+WARRIOR_OF_DAWN = 560648
+WARRIOR_OF_DAWN_MARKER = 561156
+ARGENT_BLADE_MAX_RANK = 807268
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ProcResetScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.entry = class_entry(WARRIOR_OF_DAWN, 'proc_reset')
+        self.scenario, (self.expectation,) = behaviour_scenario(CLASS_FILE, self.entry)
+        self.model = self.expectation.model
+
+    def readings(self, without, with_):
+        values = {}
+        for phase, trials in (('without', without), ('with', with_)):
+            reads = self.model['phases'][phase]
+            values[reads['start']] = 0.0
+            total = 0.0
+            for read, (events, cooldown, spent) in zip(reads['reads'], trials):
+                total += events
+                values.update({read['procs']: total, read['cooldown']: cooldown,
+                               read['power']: self.model['power_level'] - spent})
+        return FakeRun(values)
+
+    def conformant(self, fired: set[int]):
+        trials, after = [], False
+        for index in range(len(self.model['phases']['with']['reads'])):
+            proc = index in fired
+            trials.append((1.0 if proc else 0.0, 0.0 if proc else 3500.0, 25.0 if after else 50.0))
+            after = proc
+        return trials
+
+    def judged(self, run_values) -> Verdict:
+        return judge_behaviour(base_verdict(self.expectation), run_values, self.expectation)
+
+    def baseline(self):
+        return [(0.0, 3500.0, 50.0)] * len(self.model['phases']['without']['reads'])
+
+    def test_casts_read_the_cooldown_power_and_procs_without_then_with_the_passive(self):
+        steps = run.validate(self.scenario)['steps']
+        learned = first_index(steps, action='learn', spell=WARRIOR_OF_DAWN)
+        casts = [index for index, step in enumerate(steps)
+                 if step['action'] == 'cast' and step['spell'] == ARGENT_BLADE_MAX_RANK]
+        self.assertEqual(len([index for index in casts if index < learned]), 20)
+        self.assertEqual(len([index for index in casts if index > learned]), 100)
+        self.assertEqual((self.model['cost'], self.model['reduced_cost']), (50, 25.0))
+        self.assertGreater(RECORDS.field('Spell', ARGENT_BLADE_MAX_RANK, 'RecoveryTime'),
+                           cast_interval(CLASS_FILE, ARGENT_BLADE_MAX_RANK))
+
+    def test_every_proc_resetting_and_discounting_the_next_cast_is_ok(self):
+        verdict = self.judged(self.readings(self.baseline(), self.conformant({3, 10, 40, 41, 70})))
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_seeded_proc_that_leaves_the_cooldown_alerts(self):
+        trials = self.conformant({3, 10, 40, 70})
+        trials[10] = (1.0, 3500.0, 50.0)
+        self.assertEqual(self.judged(self.readings(self.baseline(), trials)).status, 'alert')
+
+    def test_seeded_proc_without_a_cheaper_next_cast_alerts(self):
+        trials = self.conformant({3, 10, 40, 70})
+        trials[11] = (0.0, 3500.0, 50.0)
+        self.assertEqual(self.judged(self.readings(self.baseline(), trials)).status, 'alert')
+
+    def test_seeded_discount_beyond_the_next_cast_alerts(self):
+        trials = self.conformant({3, 10, 40, 70})
+        trials[12] = (0.0, 3500.0, 25.0)
+        self.assertEqual(self.judged(self.readings(self.baseline(), trials)).status, 'alert')
+
+    def test_seeded_reset_in_the_control_arm_alerts(self):
+        baseline = self.baseline()
+        baseline[5] = (1.0, 0.0, 50.0)
+        verdict = self.judged(self.readings(baseline, self.conformant({3, 10, 40, 70})))
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_too_few_procs_are_not_judged(self):
+        verdict = self.judged(self.readings(self.baseline(), self.conformant({3, 10})))
+        self.assertEqual(verdict.status, 'insufficient_trials')
 
 
 if __name__ == '__main__':
