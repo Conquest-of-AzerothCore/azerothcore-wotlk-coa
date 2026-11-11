@@ -3614,9 +3614,11 @@
     "spell": 503141,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
     "labels": [
-      "503141 behaviour_oath_consumption"
+      "503141 behaviour_oath_consumption",
+      "503141 behaviour_hit_ratio oaths"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Chastise 503141 at the dummy: +77.42% / +77.43% with Oaths 804904 and 804922 set before every cast against none (1.05 x 1.30 x 1.30, the shared shape of r1-b b003254ae8); the oath_consumption label stays for the removal"
   },
   {
     "spell": 803158,

@@ -1724,6 +1724,14 @@
   ],
   "behaviours": [
     {
+      "spell": 503141, "name": "Chastise", "kind": "hit_ratio", "variant": "oaths", "label_suffix": "oaths",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.", "expected": 1.7745,
+      "observe_spell": 503141, "learn": [503141],
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [804904, 1], [804922, 1]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000, "spell_power": 20000},
+      "expected_source": "The shared Oath-consumption shape (docs/behaviour-scenarios.md, r1-b b003254ae8): Oath: Righteous Lunge 804904 Effect[0] and Effect[2] (aura 108 SPELLMOD_DAMAGE, +5% and +30%) and Oath: Condemn 804922 Effect[2] (aura 108 SPELLMOD_DAMAGE, +30%) carry EffectSpellClassMask word 2 bit 128, the Oath Breaker mask, which Chastise 503141 (level 60 rank, SpellFamilyFlags[2] 128) carries; 804922's flat Effect[1] (word 1 bit 2048) does not match Chastise (word 1 67108865). The percent mods multiply: 1.05 x 1.30 x 1.30 = 1.7745 with both Oaths set before every treatment cast, 1 with none; the cast removes them (ClearOaths, AscensionTemplarAbilities.cpp:189-191), as the 503141 oath_consumption entry reads. Chastise's Holy hit ${$m1+0+$sph*0.6+$AP*0.45} is dominated by the attack power and spell power fixtures of 20000 over its 34-point die; beeg spellpen 823764 in both arms removes the dummy's partial resists. Only non-critical hits are compared."
+    },
+    {
       "spell": 707606, "name": "Fervent Castigation (Oath: Retribution)", "kind": "metric_delta", "variant": "oath_aura", "label_suffix": "oath_aura",
       "quote": "now grants you", "expected": 1,
       "trigger_spell": 572027, "target": "dummy", "metric": "aura", "fields": {"spell": 804924},
