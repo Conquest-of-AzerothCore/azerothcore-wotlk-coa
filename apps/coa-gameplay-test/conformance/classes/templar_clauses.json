@@ -3438,22 +3438,65 @@
   {
     "spell": 801481,
     "clause": "increasing your attack speed by $s1% for $d",
-    "labels": [
-      "801481 effect_value e0 #0",
-      "801481 aura_amount e0 #0",
-      "801481 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "increasing your attack speed by $s1%",
+        "labels": [
+          "801481 effect_value e0 #0",
+          "801481 aura_amount e0 #0",
+          "801481 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "801481 aura_duration_ms #1",
+          "801481 behaviour_expiry"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 801481,
     "clause": "After the duration, you gain Downfall.",
-    "labels": [
-      "801481 effect_value 801482e0 #2",
-      "801481 spell_duration 801482 #3",
-      "801481 effect_value 801483e0 #4",
-      "801481 effect_value 801483e2 #5",
-      "801481 spell_duration 801483 #6"
+    "claims": [
+      {
+        "claim": "After the duration, you gain Downfall.",
+        "labels": [
+          "801481 behaviour_metric_delta downfall"
+        ]
+      },
+      {
+        "claim": "Downfall: You heal for $s1% of all damage dealt",
+        "labels": [
+          "801481 effect_value 801482e0 #2"
+        ]
+      },
+      {
+        "claim": "Downfall: for $d",
+        "labels": [
+          "801481 spell_duration 801482 #3"
+        ]
+      },
+      {
+        "claim": "Redemption: Increases attack speed by $s1%",
+        "labels": [
+          "801481 effect_value 801483e0 #4"
+        ]
+      },
+      {
+        "claim": "Redemption: and you heal for $s3% of all damage dealt",
+        "labels": [
+          "801481 effect_value 801483e2 #5"
+        ]
+      },
+      {
+        "claim": "Redemption: for $d",
+        "labels": [
+          "801481 spell_duration 801483 #6"
+        ]
+      }
     ],
     "kind": "claim"
   },

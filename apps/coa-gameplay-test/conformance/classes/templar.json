@@ -3717,6 +3717,53 @@
       "applied_aura": 805417,
       "target": "caster",
       "observe_source": "805417 DurationIndex 8 (15000 ms, $d); its three effects are raid area auras (Effect 65) centred on the caster (EffectImplicitTargetA 1), so the caster holds the aura that carries the healing-received effect (Effect[2] aura 319). The expiry pair reads 805417 on the caster before and after its stated end, timed from the cast."
+    },
+    {
+      "spell": 801481,
+      "name": "Glory",
+      "kind": "metric_delta",
+      "quote": "increasing your attack speed by $s1%",
+      "expected": 1923.076904296875,
+      "before_expected": 2500.0,
+      "trigger_spell": 801481,
+      "cast_in_before": false,
+      "metric": "attack_time_ms",
+      "fields": {"hand": 0},
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "label_suffix": "haste",
+      "variant": "haste",
+      "observe_source": "$s1 = 30 (801481 EffectBasePoints[0] 29, EffectDieSides[0] 1): Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE. Unit::ApplyAttackTimePercentMod (Unit.cpp:14894-14911) multiplies UNIT_FIELD_BASEATTACKTIME by 100.0f / 130.0f in float (ApplyPercentModFloatVar, Unit.cpp:14889-14892): the reference 2500 ms swing reads 1923.076904296875 after a Glory cast. The before phase does not cast Glory (cast_in_before false) and reads 2500 (control). AscensionTemplarContracts.cpp:160-164 clears Glory's ProcFlags and ProcCharges, so its 10 charges are not consumed by the reads."
+    },
+    {
+      "spell": 801481,
+      "name": "Glory",
+      "kind": "cast_applies_aura",
+      "quote": "for $d",
+      "expected_ms": 5000,
+      "applied_aura": 801481,
+      "target": "caster",
+      "observe_source": "801481 DurationIndex 28 (5000 ms, $d), both effects on the caster (EffectImplicitTargetA 1). The expiry pair reads Glory on the caster before and after its stated end, timed from the cast."
+    },
+    {
+      "spell": 801481,
+      "name": "Glory",
+      "kind": "metric_delta",
+      "quote": "After the duration, you gain Downfall.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 801481,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {"spell": 801482},
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 1,
+      "label_suffix": "downfall",
+      "variant": "downfall",
+      "observe_source": "801481 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 5000, EffectTriggerSpell 801482 (Downfall), against Glory's DurationIndex 28 (5000 ms): the one tick lands at the end of Glory. Reads of Downfall 801482 on the caster: 0 before any Glory cast (control), 0 4000 ms after the cast (not during Glory), 1 2000 ms later, 6000 ms after the cast (gained after the duration; Downfall itself lasts 5000 ms, DurationIndex 28)."
     }
   ],
   "player_observations": [
