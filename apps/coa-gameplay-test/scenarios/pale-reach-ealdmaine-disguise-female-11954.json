@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Ealdmaine Caverns: a woman clicking the disguise corpse gets the attire and the Ealdir Disguise credit (#11954, #12021)",
+  "contract": [
+    "Two reports (#11954, #12021): a female character clicking Dead Ealdmaine Ealdir 164225 got the Ealdir attire 365017",
+    "and the red error \"You are in the wrong zone.\", and Ealdir Disguise stayed at 0/1. The existing case uses a man.",
+    "Expected for a woman: the attire 365017 and the reaction 365094 are applied and the objective counts."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -7631.0,
+    "y": 767.2,
+    "z": 144.4,
+    "o": 3.37
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 25,
+      "level": 56,
+      "gender": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the corpse is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the corpse reach the client",
+      "ms": 2500
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 175035
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 175035
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Take Ealdmaine Caverns beside the corpse",
+      "actor": "p",
+      "quest": 175036,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "the client is told the corpse can be clicked",
+      "actor": "p",
+      "metric": "nearby_creature_sent_spellclick",
+      "entry": 164225,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "spell_click_nearby",
+      "label": "Click the corpse",
+      "actor": "p",
+      "entry": 164225
+    },
+    {
+      "action": "assert",
+      "label": "the Ealdmaine Caverns reaction is applied",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 365094,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the female attire is applied",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 365017,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "and the Ealdir Disguise objective counts",
+      "actor": "p",
+      "metric": "quest_objective_count",
+      "quest": 175036,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}
