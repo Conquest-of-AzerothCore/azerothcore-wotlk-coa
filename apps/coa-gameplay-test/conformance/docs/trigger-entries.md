@@ -562,9 +562,13 @@ from, the same choice `judge_self_trigger` already made). The judged label is `<
 
 `away_yd` (a dummy target only, at most 20 yd) withholds a range condition: the caster steps `away_yd` back once
 before the attempts, steps forward before each cast and back again right after it, so the trigger's later damage,
-such as a periodic tick, lands while the caster is out of range. Condemnation 706325 ("if you are within melee
-range of your target") casts Condemn 804906 and waits its ticks 18 yd from the dummy: 0 Zealotry 801450 casts in
-594 ticks (diagnostic 20261111-173551); its in-range rate is the `706325 proc_rate 801450 804906` entry.
+such as a periodic tick, lands while the caster is out of range. The scenario then casts `observe_spell` at the dummy
+from that position and reads its `cast_failure` (`<aura> gate away control cast`): a spell with its own range shorter
+than the away position would read 0 events with or without the gate, so a refused control cast makes the verdict
+`unmeasured`. Condemnation 706325 ("if you are within melee range of your target") waits its Condemn 804906 ticks
+6.5 yd from the dummy, outside the 5 yd melee range and inside Zealotry 801450's 7.775 yd (5 + both combat reaches):
+0 Zealotry casts in 594 ticks, and the control cast goes through (diagnostic 20261111-194228). Its in-range rate is
+the `706325 proc_rate 801450 804906` entry. A first version stood 18 yd away, where Zealotry's own range hid the gate.
 
 Faith Guard 705259 (round10 `proc-chains`): "While a Libram is active, your Chastise will now unleash a line of
 holy power..." The reference Templar carries no Libram by default (the sibling `trigger_count` entry needs its

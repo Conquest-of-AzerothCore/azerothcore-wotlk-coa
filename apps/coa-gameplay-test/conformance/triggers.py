@@ -8,8 +8,8 @@ from hits import (DRAIN_MS, EXCLUDED_OUTCOME_MARGIN, MAIN_HAND, UNMODELLED, Unmo
 from mitigation import PHYSICAL_SCHOOL_MASK
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, off_hand_steps, one_hand_main, player_fixture
-from values import (ALLY, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation, RankFacts,
-                    armed_for, closes_distance, facts_of, fixture_health_step)
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation,
+                    RankFacts, armed_for, closes_distance, facts_of, fixture_health_step)
 
 TRIGGER_CHECK = 'trigger_count'
 COOLDOWN_DELTA_KIND = 'cooldown_delta'
@@ -376,6 +376,10 @@ def attempt_steps(class_file: dict, entry: dict, plan: TriggerPlan, attempts: in
     return steps + [{'action': 'wait', 'label': f'{phase}drain', 'ms': DRAIN_MS}]
 
 
+def away_control_label(aura: int) -> str:
+    return f'{aura} gate away control cast'
+
+
 def relocated(dx: float) -> dict:
     return {'action': 'relocate', 'actor': CASTER, 'dx': dx}
 
@@ -602,6 +606,13 @@ def gate_absence_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple
         steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
     steps += attempt_steps(class_file, entry, plan, attempts, '')
     steps += counts(entry, labels['trials'], labels['events'])
+    control = away_control_label(aura) if entry.get('away_yd') else None
+    if control:
+        steps += [{'action': 'learn', 'actor': CASTER, 'spell': entry['observe_spell']},
+                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': entry['observe_spell']},
+                  {'action': 'cast', 'actor': CASTER, 'spell': entry['observe_spell'], 'target': TARGET},
+                  {'action': 'wait', 'ms': CAST_MARGIN_MS},
+                  measurement(control, CASTER, 'cast_failure', spell=entry['observe_spell'])]
     parts = len(plan.part_attempts)
     name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} gate part {part + 1} of {parts}'
     contract = ('Events of an always-on passive with its required gate withheld: zero expected across its '
@@ -616,6 +627,8 @@ def gate_absence_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple
              'trial_metric': entry['trial_metric'], 'observe_spell': entry['observe_spell'],
              'observe_metric': entry['observe_metric'], 'observe_actor': entry.get('observe_actor', CASTER),
              'gate_text': entry['gate_text'], 'measurements': labels}
+    if control:
+        model['away_control'] = control
     expectation = Expectation(gate_absence_label(aura), GATE_ABSENCE_CHECK, aura, aura, None, entry['trigger_text'],
                               gate_absence_rule(entry), model)
     return timed(scenario, SETTLE_MS + attempts * plan.attempt_ms + DRAIN_MS), [expectation]

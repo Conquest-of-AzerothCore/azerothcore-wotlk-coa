@@ -1,5 +1,5 @@
 import copy
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import hashlib
 import json
 import math
@@ -1405,6 +1405,22 @@ class GateAbsenceCompareTest(unittest.TestCase):
                                 steps=gate_absence_steps(TRIGGER_TRIALS - 1, 0))
         self.assertEqual(self.verdict().status, 'insufficient_trials')
 
+    def away_expectation(self):
+        expectation = gate_absence_expectation()
+        return replace(expectation, model={**expectation.model, 'away_control': 'control'})
+
+    def test_an_absence_away_is_ok_only_when_the_observed_spell_casts_there(self):
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [self.away_expectation()],
+                                steps=gate_absence_steps(SCHEDULED, 0) + [assert_step('control', '0')])
+        self.assertEqual(self.verdict().status, 'ok')
+
+    def test_seeded_absence_out_of_the_observed_spells_range_is_unmeasured(self):
+        self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [self.away_expectation()],
+                                steps=gate_absence_steps(SCHEDULED, 0) + [assert_step('control', '97')])
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('could not be cast at the away position', verdict.explanation)
+
     def test_missing_measurement_is_an_alert(self):
         self.workspace.scenario(GATE_ABSENCE_KEY, 'trigger', [gate_absence_expectation()],
                                 steps=[assert_step(GATE_ABSENCE_LABELS['trials'], str(SCHEDULED))])
@@ -1504,11 +1520,20 @@ class GateAbsenceScenarioShapeTest(unittest.TestCase):
         entry = templar_gate_trigger(FAITH_GUARD)
         self.assertIn('While a Libram is active', gate_absence_rule(entry))
 
+    def test_an_away_step_ends_with_a_cast_of_the_observed_spell_away(self):
+        entry = {**templar_gate_trigger(FAITH_GUARD), 'away_yd': 15.0}
+        scenario, [expectation] = gate_absence_scenario(CLASS_FILE, entry, part=0)
+        steps = run.validate(scenario)['steps']
+        self.assertEqual(steps[-1]['label'], expectation.model['away_control'])
+        self.assertEqual(steps[-1]['metric'], 'cast_failure')
+        last_cast = max(index for index, step in enumerate(steps) if step['action'] == 'cast')
+        self.assertEqual(steps[last_cast]['spell'], 706466)
+
     def test_an_away_step_casts_in_place_and_waits_away(self):
         entry = {**templar_gate_trigger(FAITH_GUARD), 'away_yd': 15.0}
         scenario, _ = gate_absence_scenario(CLASS_FILE, entry, part=0)
         steps = run.validate(scenario)['steps']
-        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == CHASTISE]
         moves = [step['dx'] for step in steps if step['action'] == 'relocate']
         self.assertEqual(moves, [-15.0] + [15.0, -15.0] * len(casts))
         for index in casts:

@@ -1288,7 +1288,7 @@ def judge_self_trigger(parts: list[ProcPart]) -> Verdict:
     labels = model['measurements']
     observed = f'{model["observe_metric"]} of {model["observe_spell"]}'
     trials = events = 0.0
-    counted, unmeasured, reasons = [], [], []
+    counted, unmeasured, reasons, refused = [], [], [], []
     for _, run, part in parts:
         reasons += failure_reasons(run, model['trigger']['spell'])
         total_trials = run.values.get(labels['trials'])
@@ -1296,10 +1296,17 @@ def judge_self_trigger(parts: list[ProcPart]) -> Verdict:
         if total_trials is None or total_events is None:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
             continue
+        control = model.get('away_control')
+        if control is not None and run.values.get(control) != 0:
+            refused.append(f'{run.key} ({run.values.get(control)})')
         counted.append(run.key)
         trials += total_trials
         events += total_events
     notes = f'{len(counted)} of {model["parts"]} parts'
+    if refused:
+        return replace(base, status='unmeasured',
+                       explanation=f'{model["observe_spell"]} could not be cast at the away position, so its absence '
+                                   f'does not show the withheld gate: cast failure in {", ".join(refused)}')
     if unmeasured:
         notes += f'; no trigger measurements in {", ".join(unmeasured)}'
     if reasons:
