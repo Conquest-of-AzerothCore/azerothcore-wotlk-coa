@@ -3,7 +3,8 @@ import math
 from pathlib import Path
 
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
-                        STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, behaviour_entry, cast_applies_aura_spec,
+                        STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, behaviour_entry, cast_applies_aura_player,
+                        cast_applies_aura_spec,
                         cast_applies_aura_steps, duration_refresh_spec, duration_spec, extra_cast_setup,
                         extra_cast_steps, mechanic_duration_spec, prose_rule)
 from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fixture, records_of, timed
@@ -266,6 +267,7 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
                     f'{arms[1].after_margin_ms} ms after it, each timed from its cast.')
     scenario = expiry_scenario_shell(
         class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour expiry', contract, steps)
+    scenario['players'] = [cast_applies_aura_player(class_file, spec)]
     if TARGET in (spec.target, spec.cast_target, spec.extra_cast and spec.extra_cast.target):
         scenario['creatures'] = [creature_fixture(class_file)]
     label = expiry_label(spec.spell) + (f' {spec.label_suffix}' if spec.label_suffix else '')

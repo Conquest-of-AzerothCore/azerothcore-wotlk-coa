@@ -1864,6 +1864,7 @@ class CastAppliesAuraSpec:
     label_suffix: str = ''
     extra_cast: 'ExtraCast | None' = None
     cast_target_health_pct: int | None = None
+    force_crit: str | None = None
 
 
 @dataclass(frozen=True)
@@ -1925,7 +1926,7 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
                     f'of {spec.expected_ms:g} ms, the same instant-cast tick loss every aura_duration_ms check in '
                     f'this tool tolerates), proving the cast itself applies {spec.applied_aura} rather than only '
                     f'its $d token matching when read without a cast.',
-        'players': [player_fixture(class_file)],
+        'players': [cast_applies_aura_player(class_file, spec)],
         'steps': steps}
     if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
@@ -1942,8 +1943,17 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     return scenario, [expectation]
 
 
+def cast_applies_aura_player(class_file: dict, spec: CastAppliesAuraSpec) -> dict:
+    player = player_fixture(class_file)
+    return {**player, FORCE_CRIT_RATINGS[spec.force_crit]: FORCED_CRIT_RATING} if spec.force_crit else player
+
+
 def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
     control = entry.get('control')
+    force_crit = entry.get('force_crit')
+    if force_crit is not None and (force_crit not in FORCE_CRIT_RATINGS or entry.get('cast_spell') is None):
+        raise ValueError(f'{entry["spell"]} cast_applies_aura forces a {force_crit!r} crit, which needs a cast_spell '
+                         f'and one of {sorted(FORCE_CRIT_RATINGS)}')
     if control is not None and entry.get('cast_spell') is None:
         raise ValueError(f'{entry["spell"]} cast_applies_aura sets a control arm without a cast_spell to cast '
                          f'before {entry["spell"]} is learned')
@@ -1956,7 +1966,7 @@ def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
                                entry['applied_aura'], entry.get('target', CASTER), entry.get('cast_spell'),
                                entry.get('cast_target'), control['expected_ms'] if control else None,
                                tuple(control.get('clear_auras', ())) if control else (),
-                               entry.get('label_suffix', ''), extra, entry.get('cast_target_health_pct'))
+                               entry.get('label_suffix', ''), extra, entry.get('cast_target_health_pct'), force_crit)
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000

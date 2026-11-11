@@ -939,6 +939,10 @@ timed from that cast.
 `cast_target_health_pct` sets the `cast_spell` target to that percent of the fixture maximum right before each cast,
 for an aura a heal grants only when it heals (Light's Guidance 524766 after Benediction 578276).
 
+`force_crit` (`melee` or `spell`, with a `cast_spell`) sets the forced crit rating on the caster in the readback and
+in the expiry scenario, for an aura that only a critical hit grants (ADR 0182): Scarlet Champion 805415's 805416
+after one forced-crit Argent Blade 807268, ending after 19500 and by 20625 ms against 20000.
+
 A passive that lengthens another spell's aura states its control arm as `control: {"expected_ms": <ms>,
 "clear_auras": [<id>, ...]}` (ADR 0142). The expiry scenario then has two arms: `without`, the `cast_spell` cast
 before the entry's spell is learned and ending at `control.expected_ms`, and `with`, cast again after the

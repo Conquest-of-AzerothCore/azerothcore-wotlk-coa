@@ -6249,6 +6249,25 @@ class CastAppliesAuraCastSpellTests(unittest.TestCase):
         self.assertFalse([step for step in steps[health + 1:cast] if step['action'] == 'wait'])
 
 
+    def test_a_forced_crit_sets_the_rating_in_the_readback_and_the_expiry_pair(self):
+        from expiry import behaviour_expiry
+        entry = {**class_entry(705295, 'cast_applies_aura'), 'force_crit': 'melee'}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        expiry, _ = behaviour_expiry(CLASS_FILE, entry)
+        for built in (scenario, expiry):
+            run.validate(built)
+            self.assertEqual(built['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
+        plain, _ = behaviour_scenario(CLASS_FILE, class_entry(705295, 'cast_applies_aura'))
+        self.assertNotEqual(plain['players'][0].get('melee_crit_rating'), FORCED_CRIT_RATING)
+
+    def test_a_forced_crit_needs_a_known_rating_and_a_cast_spell(self):
+        entry = class_entry(705295, 'cast_applies_aura')
+        without_cast = {key: value for key, value in entry.items() if key not in ('cast_spell', 'cast_target')}
+        for bad in ({**entry, 'force_crit': 'ranged'}, {**without_cast, 'force_crit': 'melee'}):
+            with self.subTest(force_crit=bad['force_crit']), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, bad)
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class SitePurchaseScenarioTests(unittest.TestCase):
     def setUp(self):
