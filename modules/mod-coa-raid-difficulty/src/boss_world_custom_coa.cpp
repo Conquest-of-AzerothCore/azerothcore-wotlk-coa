@@ -1042,7 +1042,7 @@ namespace
     constexpr uint32 ACTION_AWAKEN = 3;
     constexpr uint32 ZUROGG_JUMP = 1;
     Position const ZuroggLanding = { 3368.63f, -4908.01f, 159.4f, 0.0f };
-    constexpr float BARRIER_RISE = 1.0f;
+    constexpr float BARRIER_RISE = -0.4f;
     constexpr float ANCHOR_RISE = -0.4f;
 
     void Beam(Unit* from, Unit* to)
@@ -1165,17 +1165,13 @@ namespace
             if (held && wanted)
                 return;
             if (held)
-            {
-                LOG_INFO("module", "[wbi] vessel {}: despawn {}", me->GetSpawnId(), entry);
                 held->DespawnOrUnsummon();
-            }
             guid.Clear();
             if (!wanted)
                 return;
             if (TempSummon* made = me->SummonCreature(entry, me->GetPositionX(), me->GetPositionY(),
                 me->GetPositionZ() + rise, 0, TEMPSUMMON_MANUAL_DESPAWN))
             {
-                LOG_INFO("module", "[wbi] vessel {}: summon {}", me->GetSpawnId(), entry);
                 made->SetReactState(REACT_PASSIVE);
                 guid = made->GetGUID();
             }
