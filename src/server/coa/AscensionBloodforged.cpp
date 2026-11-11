@@ -161,11 +161,13 @@ private:
                 });
             }
         for (unsigned level = 15; level <= 60; ++level)
-            if (pools[level][0].empty() || pools[level][1].empty())
-            {
-                LOG_ERROR("server.loading", "Bloodforged disabled: green/blue pool missing at level {}", level);
-                return;
-            }
+            for (unsigned index = 0; index < 2; ++index)
+                if (next->rates[Band(level)][index] && pools[level][index].empty())
+                {
+                    LOG_ERROR("server.loading", "Bloodforged disabled: quality {} pool missing at level {}",
+                        index + 2, level);
+                    return;
+                }
         for (unsigned level = 15; level <= 60; ++level)
         {
             auto entriesForLevel = std::make_unique<LootTemplate>();

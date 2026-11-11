@@ -458,7 +458,7 @@ void Drop(Player* player)
             choose(gear);
     if (roll_chance_f(resourceChance.load()))
         choose(resources);
-    uint32 const insuranceFee = FelCommutation::Shield(player, insurable, losses);
+    uint32 insuranceFee = FelCommutation::Shield(player, insurable, losses);
     uint32 const carried = player->GetMoney() > insuranceFee ? player->GetMoney() - insuranceFee : 0;
     uint32 gold = roll_chance_f(goldChance.load()) ? GoldLoss(carried, urand(1, 5)) : 0;
     if (losses.empty() && !gold && !insuranceFee)
@@ -475,6 +475,7 @@ void Drop(Player* player)
             {
                 case 0:
                     choose(gear);
+                    insuranceFee = FelCommutation::Shield(player, insurable, losses);
                     break;
                 case 1:
                     choose(resources);

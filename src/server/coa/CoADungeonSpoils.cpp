@@ -37,10 +37,10 @@ namespace
 
     std::unordered_set<uint32> MarkBosses;
 
-    bool IsHeroicOrMythicVanillaDungeon(Map const* map)
+    bool IsHeroicVanillaDungeon(Map const* map)
     {
         return map && map->IsNonRaidDungeon() && DungeonHealth::IsVanillaDungeon(map->GetId()) &&
-            (map->GetSpawnMode() == 1 || map->GetSpawnMode() == 2);
+            map->GetSpawnMode() == 1;
     }
 
     bool PlayerCanWear(Player const* player, ItemTemplate const* item)
@@ -290,7 +290,6 @@ private:
             case 0:
                 return DungeonSpoils;
             case 1:
-            case 2:
                 return MarkOfTriumph;
             default:
                 return 0;
@@ -313,7 +312,7 @@ public:
                 MarkBosses.insert(result->Fetch()[0].Get<uint32>());
             } while (result->NextRow());
         }
-        LOG_INFO("server.loading", ">> Loaded {} CoA dungeon bosses that give a Mark of Triumph on Heroic and Mythic", MarkBosses.size());
+        LOG_INFO("server.loading", ">> Loaded {} CoA dungeon bosses that give a Mark of Triumph on Heroic", MarkBosses.size());
     }
 };
 
@@ -325,7 +324,7 @@ public:
     void OnUnitDeath(Unit* unit, Unit*) override
     {
         Creature const* boss = unit ? unit->ToCreature() : nullptr;
-        if (!boss || !MarkBosses.count(boss->GetEntry()) || !IsHeroicOrMythicVanillaDungeon(boss->GetMap()))
+        if (!boss || !MarkBosses.count(boss->GetEntry()) || !IsHeroicVanillaDungeon(boss->GetMap()))
             return;
         boss->GetMap()->DoForAllPlayers([](Player* player)
         {

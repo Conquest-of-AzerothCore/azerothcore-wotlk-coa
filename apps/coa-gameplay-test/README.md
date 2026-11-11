@@ -1099,7 +1099,8 @@ all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM ac
 at least that many yards from their own home positions (2D), and `spell` those carrying that aura. This can
 observe movement and auras of native summons without creating or controlling them.
 `map_creature_count` requires a player and counts living spawned creatures loaded anywhere on the player's map,
-in any phase, of `entry` when given and of every entry otherwise; a spawn whose grid is not loaded is not counted.
+in any phase, of `entry` or of any entry in the list `entries` when given and of every entry otherwise; a spawn
+whose grid is not loaded is not counted.
 `map_creatures_below_floor` requires a player and counts those loaded living spawns that stand more than 3 yards
 below the floor under them, or over no floor at all. The floor is searched downward from the higher of the
 creature's current Z and its spawn Z, so a creature that sank through the ground counts while one that walked

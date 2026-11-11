@@ -21,6 +21,8 @@ constexpr unsigned AbyssalSands = 1939;
 constexpr unsigned RewardCount = 5;
 constexpr unsigned WarningSeconds[] = {1800, 900, 300, 60};
 constexpr unsigned WarningCount = 4;
+constexpr unsigned PinCacheBase = 994311000;
+constexpr unsigned PinFlags = 0x10;
 
 constexpr unsigned PassedWarnings(unsigned remaining)
 {

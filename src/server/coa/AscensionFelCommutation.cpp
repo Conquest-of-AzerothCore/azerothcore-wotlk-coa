@@ -1,4 +1,5 @@
 #include "AscensionFelCommutation.h"
+#include "AscensionAverageItemLevel.h"
 #include "AscensionClientLua.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionFelCommutationPolicy.h"
@@ -17,6 +18,7 @@
 #include "ScriptMgr.h"
 #include "StringConvert.h"
 #include "StringFormat.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldScript.h"
 #include "WorldSession.h"
@@ -73,9 +75,11 @@ void SendAddon(Player* player, std::string const& message)
     player->SendDirectMessage(&packet);
 }
 
-uint64 Fee(Item const* item)
+Settlement DeathCost(Player const* player, std::size_t insuredItems)
 {
-    return ItemFee(item->GetTemplate()->ItemLevel, feeMultiplier);
+    return Settle(AscensionAverageItemLevel::Equipped(player),
+        player->GetLevel() >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL), feeMultiplier, insuredItems,
+        player->GetMoney());
 }
 
 void SendSlots(Player* player)
@@ -86,7 +90,8 @@ void SendSlots(Player* player)
         flags += SlotInsured(mask, key) ? '1' : '0';
     SendAddon(player, "SLOTS " + flags + " " + std::to_string(maxSlots.load()));
 
-    uint64 total = 0;
+    uint64 const fee = DeathCost(player, 0).total;
+    bool anyInsured = false;
     std::vector<std::string> chunks(1);
     for (unsigned key = 1; key <= SlotCount; ++key)
     {
@@ -94,15 +99,13 @@ void SendSlots(Player* player)
         if (!item || !Insurable(key))
             continue;
 
-        uint64 const fee = Fee(item);
-        if (SlotInsured(mask, key))
-            total += fee;
+        anyInsured = anyInsured || SlotInsured(mask, key);
         std::string const entry = std::to_string(item->GetEntry()) + ":" + std::to_string(fee) + ",";
         if (chunks.back().size() + entry.size() > AddonChunkLength)
             chunks.emplace_back();
         chunks.back() += entry;
     }
-    SendAddon(player, "COST " + std::to_string(total));
+    SendAddon(player, "COST " + std::to_string(anyInsured ? fee : 0));
     for (std::string const& chunk : chunks)
         if (!chunk.empty())
             SendAddon(player, "ITEMS " + chunk);
@@ -824,36 +827,30 @@ uint32 Shield(Player* player, std::vector<Item*> const& insurable, std::vector<I
 
     uint32 const mask = InsuredSlots(player);
     std::vector<Item*> hit;
-    std::vector<uint64> fees;
     for (Item* item : losses)
         if (std::find(insurable.begin(), insurable.end(), item) != insurable.end() &&
             SlotInsured(mask, unsigned(item->GetSlot()) + 1))
-        {
             hit.push_back(item);
-            fees.push_back(Fee(item));
-        }
     if (hit.empty())
         return 0;
 
-    uint64 fee = 0;
-    for (uint64 share : fees)
-        fee += share;
-
+    Settlement const cost = DeathCost(player, hit.size());
     ChatHandler chat(player->GetSession());
-    if (fee > player->GetMoney())
+    if (!cost.covered)
     {
         chat.SendSysMessage(Acore::StringFormat(
-            "Fel Commutation could not protect your items: it needs {} and you carry {}.", FormatMoney(fee),
+            "Fel Commutation could not protect your items: it needs {} and you carry {}.", FormatMoney(cost.total),
             FormatMoney(player->GetMoney())));
         return 0;
     }
 
     for (std::size_t i = 0; i < hit.size(); ++i)
     {
-        chat.SendSysMessage(Acore::StringFormat("Item {} kept safe for {}", ItemLink(hit[i]), FormatMoney(fees[i])));
+        chat.SendSysMessage(Acore::StringFormat("Item {} kept safe for {}", ItemLink(hit[i]),
+            FormatMoney(cost.perItem[i])));
         losses.erase(std::remove(losses.begin(), losses.end(), hit[i]), losses.end());
     }
-    return uint32(fee);
+    return uint32(cost.total);
 }
 
 void ReportLoss(Player* player, uint32 insuranceFee, uint32 droppedGold)

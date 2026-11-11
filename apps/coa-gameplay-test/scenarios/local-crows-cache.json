@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Local Crows Cache handoff and rewards",
-  "contract": "Tanaris cache has a crow warning and ten-second damage/movement-interruptible claim for living level-60 High-Risk players. Carrier cannot open outside Gadgetzan; death drops an instant-claim chest. Safe opening gives five distinct ilvl-95 Heroic Bloodforged Naxxramas items and three stacks of twenty High-Risk cloth. Requires CrowsCache.Enable=1. Existing zone PvP rules are retained. Automatic cycles are deferred by the isolated test configuration so the manual countdown is the only event. First announcement is thirty minutes before appearance and broadcasts a map location without a crow; self addon resync restores that location, cancelling removes it, and automatic scheduling creates the next warning. First claim removes the public location for both factions. Warning threshold/cadence boundaries and client hover/map rendering are independently covered by unit and Lua harness checks. All four warning texts and the final-five-minute crow appearance are exercised natively; sixty seconds is the one-minute testing countdown.",
+  "contract": "Tanaris cache has a crow warning and ten-second damage/movement-interruptible claim for living level-60 High-Risk players. Carrier cannot open outside Gadgetzan; death drops an instant-claim chest. Safe opening gives five distinct ilvl-95 Heroic Bloodforged Naxxramas items and three stacks of twenty High-Risk cloth. Requires CrowsCache.Enable=1. Existing zone PvP rules are retained. Automatic cycles are deferred by the isolated test configuration so the manual countdown is the only event. First announcement is thirty minutes before appearance and broadcasts a map location without a crow; self addon resync restores that location, cancelling removes it, and automatic scheduling creates the next warning. The same location is sent as a native client map pin (SMSG 0x77C) to every player and removed by cancel and claim. First claim removes the public location for both factions. Warning threshold/cadence boundaries and client hover/map rendering are independently covered by unit and Lua harness checks. All four warning texts and the final-five-minute crow appearance are exercised natively; sixty seconds is the one-minute testing countdown.",
   "players": [
     {
       "id": "owner",
@@ -122,6 +122,28 @@
       "within_ms": 1500
     },
     {
+      "action": "assert",
+      "label": "The warning sends a native Tanaris map pin",
+      "actor": "owner",
+      "metric": "server_packet_contains",
+      "opcode": 1916,
+      "row": 994311001,
+      "text": "\"Apply\":true,\"ZoneId\":440,\"ID\":\"crows-cache-1\"",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Every player receives the native map pin",
+      "actor": "outsider",
+      "metric": "server_packet_contains",
+      "opcode": 1916,
+      "row": 994311001,
+      "text": "\"Apply\":true,\"ZoneId\":440,\"ID\":\"crows-cache-1\"",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
       "action": "whisper",
       "actor": "owner",
       "to": "Cacheowner",
@@ -147,6 +169,17 @@
       "metric": "whispers_received",
       "from": "owner",
       "text": "COACrows\tD;1",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Cancelling removes the native map pin",
+      "actor": "owner",
+      "metric": "server_packet_contains",
+      "opcode": 1916,
+      "row": 994311001,
+      "text": "\"Apply\":false,\"ID\":\"crows-cache-1\"",
       "equals": 1,
       "within_ms": 1500
     },
@@ -261,6 +294,17 @@
       "metric": "whispers_received",
       "from": "owner",
       "text": "COACrows\tP;5;1;-7831;-3465",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The scheduled warning sends its native map pin",
+      "actor": "owner",
+      "metric": "server_packet_contains",
+      "opcode": 1916,
+      "row": 994311005,
+      "text": "\"Apply\":true,\"ZoneId\":440,\"ID\":\"crows-cache-5\"",
       "equals": 1,
       "within_ms": 1500
     },
@@ -415,6 +459,28 @@
       "metric": "whispers_received",
       "from": "outsider",
       "text": "COACrows\tD;5",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Claiming removes the native map pin",
+      "actor": "owner",
+      "metric": "server_packet_contains",
+      "opcode": 1916,
+      "row": 994311005,
+      "text": "\"Apply\":false,\"ID\":\"crows-cache-5\"",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Claiming removes the native map pin for everyone",
+      "actor": "outsider",
+      "metric": "server_packet_contains",
+      "opcode": 1916,
+      "row": 994311005,
+      "text": "\"Apply\":false,\"ID\":\"crows-cache-5\"",
       "equals": 1,
       "within_ms": 1500
     },

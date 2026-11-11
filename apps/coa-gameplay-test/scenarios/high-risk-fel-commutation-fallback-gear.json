@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "Fel Commutation also protects the High-Risk fallback gear loss",
+  "contract": [
+    "A High-Risk level 60 character with Fel Commutation on and an insured chest slot dies to a player.",
+    "Its unbound starter gear is destroyed, so the chest piece is the only gear it can lose.",
+    "The normal gear roll misses, so the guaranteed fallback picks the equipped chest piece.",
+    "Fel Commutation charges its fee and the chest stays equipped, as for a normal gear roll.",
+    "Requires HighRisk.Losses = 1, HighRisk.GearChance = 0.001, HighRisk.ResourceChance = 0,",
+    "HighRisk.GoldChance = 0, HighRisk.FelCommutation.Enable = 1 and HighRisk.FelCommutation.ToggleAnywhere = 1."
+  ],
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "name": "Felvictim"
+    },
+    {
+      "id": "k",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "timeout_ms": 120000,
+  "steps": [
+    {
+      "action": "teleport",
+      "actor": "k",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 355242,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "v",
+      "item": 355242,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 355242
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 38
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 38,
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 39
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 39,
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 40
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 40,
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "v",
+      "item": 49778
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 49778,
+      "equals": 0
+    },
+    {
+      "action": "set_money",
+
+      "actor": "v",
+      "value": 10000000
+    },
+    {
+      "action": "client_packet",
+      "label": "Turn Fel Commutation on",
+      "actor": "v",
+      "opcode": 1851,
+      "fields": [
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "server_packet_contains",
+      "opcode": 1852,
+      "text": "TOGGLE_FEL_COMMUTATION_OK",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "whisper",
+      "label": "Insure the chest slot",
+      "actor": "v",
+      "to": "Felvictim",
+      "language": 4294967295,
+      "text": "FELCOMM\tINSURE 5"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "pvp",
+      "actor": "v",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "k",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the fallback gear loss goes through Fel Commutation",
+      "actor": "v",
+      "metric": "system_message_contains",
+      "text": "kept safe for",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "equipped_item",
+      "slot": 4,
+      "equals": 355242
+    },
+    {
+      "action": "assert",
+      "label": "The fee was paid",
+      "actor": "v",
+      "metric": "carried_money",
+      "max": 9999999
+    }
+  ]
+}

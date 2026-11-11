@@ -5,10 +5,10 @@
 int main()
 {
     using namespace HonorableCombat;
-    assert(IsHonorableZone(28) && IsHonorableZone(618));
+    assert(IsHonorableZone(28) && IsHonorableZone(618) && IsHonorableZone(490));
     assert(!IsHonorableZone(357) && !IsHonorableZone(139) && !IsHonorableZone(0));
-    assert(Eligible(28, true) && Eligible(618, true));
-    assert(!Eligible(28, false) && !Eligible(357, true));
+    assert(Eligible(28, true) && Eligible(618, true) && Eligible(490, true));
+    assert(!Eligible(28, false) && !Eligible(490, false) && !Eligible(357, true));
     assert(ZonesOpcode == 0x0768 && HonorableAura == 9930870 && CombatAura == 9930871);
 
     for (unsigned criteria : {15691u, 15695u, 21691u, 21695u})
@@ -35,7 +35,7 @@ int main()
     assert(!IsInitiation(false, true));
     assert(!IsInitiation(true, false));
 
-    assert(IsWin(1, 1, 28) && IsWin(1, 1, 618));
+    assert(IsWin(1, 1, 28) && IsWin(1, 1, 618) && IsWin(1, 1, 490));
     assert(!IsWin(3, 1, 28) && !IsWin(1, 1, 357) && !IsWin(0, 0, 28));
 
     assert(RespiteAura == 9930878 && RespiteDurationMs == 30000 && SkullIcon == 7);

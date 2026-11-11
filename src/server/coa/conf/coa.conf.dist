@@ -434,12 +434,26 @@ RatedSoloArena.Title.Rival = 2000
 RatedSoloArena.Title.Duelist = 2300
 RatedSoloArena.Title.Gladiator = 2600
 
+#    Ascension.PvPVendors.ReleaseStage
+#        Description: The newest PvP Season 1 vendor phase the realm has released, 0-2. Each phase's
+#                     vendors stand in Champion's Hall and the Hall of Legends only once it is released,
+#                     and earlier phases stay. Changes apply on .reload config.
+#                     0 - No Season 1 PvP vendors
+#                     1 - Phase 1: Lieutenant Thorne 48051/48052, Quartermaster Hadwin, Captain Korgash
+#                         49050/49051 and Warbringer Krogash (Corporal's, Grunt's, Challenger's,
+#                         Sergeant's and Captain's)
+#                     2 - Phase 2 as well: Lieutenant Thorne 48053, Captain Korgash 49053 and both
+#                         Vik "Angry" Smalls (CoA PvP Gear, Legionnaire's, Centurion's and the Legacy lists)
+#        Default:     1
+
+Ascension.PvPVendors.ReleaseStage = 1
+
 #    HighRisk.FelCommutation.Enable
 #        Description: Fel Commutation. A High-Risk character switches it on and picks the equipment slots to
 #                     insure in the window at the Fel Commutation Portal (object 8000053). While on, items in
 #                     insured slots that a High-Risk death would drop are kept if the character carries
-#                     enough gold for all of their fees, and the fees go into the death chest. If the gold
-#                     is short, the character keeps it and the items drop. The normal gold loss
+#                     enough gold for the fee, and the fee goes into the death chest. If the gold is short,
+#                     the character keeps it and the items drop. The normal gold loss
 #                     (HighRisk.GoldChance) still applies on top, from the gold left after the fees; the
 #                     death message shows the two parts separately.
 #        Default:     0 - (Disabled)
@@ -448,17 +462,18 @@ RatedSoloArena.Title.Gladiator = 2600
 HighRisk.FelCommutation.Enable = 0
 
 #    HighRisk.FelCommutation.FeeMultiplier
-#        Description: Multiplier applied to each item's fee. The base fee of an item is its item level times
-#                     the client's rate band for that level (for example 179 x 2750 copper).
+#        Description: Multiplier applied to the fee. The fee is one amount per death, as the client shows it:
+#                     the whole average equipped item level times the client's rate band for that level, plus
+#                     10 gold at the maximum player level (for example 74 x 1500 copper + 10 gold = 21g 10s).
 #        Default:     1.0
 
 HighRisk.FelCommutation.FeeMultiplier = 1.0
 
 #    HighRisk.FelCommutation.MaxSlots
 #        Description: Equipment slots a character may insure at once. 0 means no limit.
-#        Default:     3
+#        Default:     0
 
-HighRisk.FelCommutation.MaxSlots = 3
+HighRisk.FelCommutation.MaxSlots = 0
 
 #    HighRisk.FelCommutation.AltarRange
 #        Description: Distance in yards within which the portal must stand for the switch to be accepted.
@@ -523,14 +538,15 @@ Bloodforged.Enable = 0
 #    Bloodforged.Rates55
 #        Description: Base percent per eligible corpse for the level band starting at that level, as
 #                     three values: uncommon, rare, epic. One roll per quality, spread evenly across
-#                     that quality's pool, before the Rate.Drop.Item.* multipliers.
-#        Default:     "4.50 0.50 0.00", "4.00 1.00 0.00", "3.80 1.40 0.15", "3.60 1.80 0.25", "3.40 2.20 0.40"
+#                     that quality's pool, before the Rate.Drop.Item.* multipliers. Uncommon 0 drops
+#                     no green Bloodforged items; otherwise each value must exceed the next.
+#        Default:     "0.00 0.50 0.00", "0.00 1.00 0.00", "0.00 1.40 0.15", "0.00 1.80 0.25", "0.00 2.20 0.40"
 
-Bloodforged.Rates15 = "4.50 0.50 0.00"
-Bloodforged.Rates25 = "4.00 1.00 0.00"
-Bloodforged.Rates35 = "3.80 1.40 0.15"
-Bloodforged.Rates45 = "3.60 1.80 0.25"
-Bloodforged.Rates55 = "3.40 2.20 0.40"
+Bloodforged.Rates15 = "0.00 0.50 0.00"
+Bloodforged.Rates25 = "0.00 1.00 0.00"
+Bloodforged.Rates35 = "0.00 1.40 0.15"
+Bloodforged.Rates45 = "0.00 1.80 0.25"
+Bloodforged.Rates55 = "0.00 2.20 0.40"
 
 #
 #    Ascension.PrestigiousCache.ReleaseStage
