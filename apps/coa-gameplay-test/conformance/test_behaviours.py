@@ -5985,6 +5985,39 @@ class CostGateScenarioTests(unittest.TestCase):
         with self.assertRaises(NotModelled):
             behaviour_scenario(CLASS_FILE, {**cost_gate_entry(301059, 'sacred_swing'), 'reduction': 20})
 
+    def after_cast_entry(self) -> dict:
+        return {'spell': 680953, 'name': 'Profound Enlightenment', 'kind': 'cost_gate',
+                'quote': 'reducing the remaining cooldown of Testaments by $s1%', 'gated_spell': 801478,
+                'resource': 'cooldown', 'reduction': 80000, 'target': 'caster',
+                'after_casts': [[680953, 'caster']], 'after_wait_ms': 20000}
+
+    def test_after_casts_cut_the_running_cooldown_in_the_talent_arms_only(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, self.after_cast_entry())
+        steps = run.validate(scenario)['steps']
+        self.assertEqual([(e.model['arm'], e.displayed, e.model['level']) for e in expectations],
+                         [('without', '67', 100500.0), ('with', '0', 100500.0), ('beyond', '67', 99500.0)])
+        after_casts = [index for index, step in enumerate(steps)
+                       if step['action'] == 'cast' and step['spell'] == 680953]
+        self.assertEqual(len(after_casts), 2)
+        self.assertLess(first_index(steps, label='680953 cost_gate 801478 without'), after_casts[0])
+        self.assertEqual(steps[after_casts[0] - 2], {'action': 'wait', 'label': 'with wait before the after casts',
+                                                     'ms': 20000})
+        waits = [step['ms'] for step in steps if step.get('label', '').endswith('cooldown wait')]
+        self.assertEqual(waits, [100500, 80500, 79500])
+
+    def test_seeded_reduction_of_the_full_cooldown_lets_the_beyond_attempt_through_and_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, self.after_cast_entry())
+        beyond = next(e for e in expectations if e.model['arm'] == 'beyond')
+        verdict = judge_behaviour(base_verdict(beyond), FakeRun({beyond.label: 0.0}), beyond)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_after_casts_need_a_cooldown_gate_and_a_wait_below_the_beyond_attempt(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**cost_gate_entry(301059, 'sacred_swing'),
+                                            'after_casts': [[680953, 'caster']]})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**self.after_cast_entry(), 'after_wait_ms': 99500})
+
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

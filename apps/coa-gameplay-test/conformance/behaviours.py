@@ -2778,6 +2778,8 @@ class CostGateSpec:
     next_arm: bool = False
     aura_duration_ms: int | None = None
     duration_margin_ms: int = COST_GATE_DURATION_MARGIN_MS
+    after_casts: tuple[tuple[int, str], ...] = ()
+    after_wait_ms: int = 0
 
 
 @dataclass(frozen=True)
@@ -2847,6 +2849,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     entry = behaviour_entry(records, spec.spell, spec.name, 'cost_gate', spec.quote, spec.reduction)
     facts = facts_of(records, spec.gated_spell)
     base = cost_gate_base(spec, facts)
+    if spec.after_casts and (spec.resource != 'cooldown'
+                             or not 0 <= spec.after_wait_ms < cost_gate_levels(spec, base)[1]):
+        raise ValueError(f'{spec.spell} after_casts needs a cooldown gate and an after_wait_ms below the beyond wait')
     full_power = cast_gate_power_step(facts)
     approach = ([{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}]
                 if spec.target == ALLY and closes_distance(facts) else [])
@@ -2866,6 +2871,20 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                 + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target},
                    {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                    measurement(label, CASTER, 'cast_failure', spell=spec.gated_spell)])
+
+    def after(arm: CostGateArm) -> list[dict]:
+        if not (arm.with_talent and spec.after_casts):
+            return []
+        steps = [{'action': 'wait', 'label': f'{arm.name} wait before the after casts', 'ms': spec.after_wait_ms}]
+        for spell, target in spec.after_casts:
+            after_facts = facts_of(records, spell)
+            steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}]
+                      + cast_gate_power_step(after_facts) + required_aura_steps(after_facts)
+                      + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target}])
+        return steps
+
+    def cooldown_wait(arm: CostGateArm) -> int:
+        return int(arm.level) - (spec.after_wait_ms if arm.with_talent and spec.after_casts else 0)
 
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gated_spell}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
@@ -2898,8 +2917,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                                                 'value': int(arm.level)}])
         else:
             steps += (opening + full_power + required_aura_steps(facts)
-                      + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target},
-                         {'action': 'wait', 'label': f'{arm.name} cooldown wait', 'ms': int(arm.level)}]
+                      + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target}]
+                      + after(arm)
+                      + [{'action': 'wait', 'label': f'{arm.name} cooldown wait', 'ms': cooldown_wait(arm)}]
                       + attempt(label, full_power))
         expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell, None,
                                         str(arm.result), rule,
@@ -2914,7 +2934,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                 + (f' {spec.label_suffix}' if spec.label_suffix else ''),
         'contract': f'{spec.gated_spell} is attempted at {base:g} less {spec.reduction:g} {unit}: without '
                     f'{spec.spell} it must be refused, with it it must go through, and one step beyond the stated '
-                    f'reduction it must be refused again, proving the "{spec.quote}" clause.',
+                    f'reduction it must be refused again, proving the "{spec.quote}" clause.'
+                    + (f' In the arms with {spec.spell}, {[spell for spell, _ in spec.after_casts]} are cast '
+                       f'{spec.after_wait_ms} ms after the priming cast.' if spec.after_casts else ''),
         'players': players,
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -2927,7 +2949,9 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         tuple((int(spell), target) for spell, target in entry.get('setup_casts', ())),
                         entry.get('margin_ms', COST_GATE_MARGIN_MS), entry.get('label_suffix', ''),
                         entry.get('next_arm', False), entry.get('aura_duration_ms'),
-                        entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS))
+                        entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS),
+                        tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
+                        entry.get('after_wait_ms', 0))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000

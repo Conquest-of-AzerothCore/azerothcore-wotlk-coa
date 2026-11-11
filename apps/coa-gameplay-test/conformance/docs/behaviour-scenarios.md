@@ -813,6 +813,13 @@ player, and the caster steps back `CHARGE_OFFSET_YD` before each attempt of a sp
 reduction that leaves no level only it separates (`beyond` below 0, the reduced level at or above the base, or a
 cooldown wait under the global cooldown) is `NotModelled`. Judged exactly (`compare.behaviour_cast_gate_verdict`).
 
+`after_casts` (`[spell, target]` pairs, cooldown gates only) are cast `after_wait_ms` after the priming cast, in the
+arms with the talent only, each after a reset of its own cooldown; the cooldown wait is shortened by the same
+`after_wait_ms`, so every arm is still timed from the priming cast. It is for an active that cuts a running cooldown:
+Profound Enlightenment 680953 "reducing the remaining cooldown of Testaments by $s1%" is cast 20000 ms after Testament
+of Faith 801478, when 160000 ms remain, so `reduction` is 80000; a cut of half the full cooldown would let the
+`beyond` attempt through. A power gate, or an `after_wait_ms` not below the `beyond` wait, is refused.
+
 ### Hit-ratio heals and actors
 
 A `hit_ratio` entry may set `metric: "heal"` to read `spell_heal_total` and `spell_heal_count` instead of the damage
@@ -983,6 +990,7 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Sacred Style 705278 (`variant: "done"`/`"received"`) | hit_ratio (heal) | "Increases your Holy healing done and received by" | 1.08 each | `Effect[1]` aura 136 for the caster's heal of the ally, `Effect[0]` aura 118 for the ally's heal of the caster; Chakra of Light 803845 (fixed heal) |
 | Grace of Aman'thul 301059 (`variant: "righteous_lunge"`/`"sacred_swing"`) | cost_gate (power) | "Reduces the Energy cost of Righteous Lunge by" / "and Sacred Swing by" | 35 and 10 Energy | aura 107 `SPELLMOD_COST` -5 on 570233 (40), -10 on 572769 (20) |
 | Battle Hardened 706309 | cost_gate (cooldown) | "Reduces the cooldown of Righteous Upheaval by" | 15000 ms | aura 107 `SPELLMOD_COOLDOWN` -5000 on 572027 (`CategoryRecoveryTime` 20000) |
+| Profound Enlightenment 680953 | cost_gate (cooldown, `after_casts`) | "reducing the remaining cooldown of Testaments by" | 80000 ms of Testament of Faith 801478's 180000 ms, cut 20000 ms after the priming cast | `AscensionTemplarAbilities.cpp:377-388` (Enlighten, bound at :424-425) replaces the three effect-192 effects: `ModifySpellCooldown(-CalculatePct(remaining, 50))` on each known Testament rank |
 | Guardian of the Light 707364 | cost_gate (power, next, duration) | "Casting Benediction now reduces the cost of your next Temple Guardian by" | 8 Energy for 6000 ms, next cast only | 712378 aura 108 `SPELLMOD_COST` -50% for 6000 ms, one charge (`AscensionTemplarAuras.cpp:116-121`, `AscensionTemplarAbilities.cpp:227-229`) |
 | One-Punch Man 705284 (`variant: "oath_breakers"`/`"condemn"`/`"titanstrike"`) | hit_ratio | "Increases the the damage of Oath Breakers, Condemn, and Titanstrike by" | 1.2 each | `Effect[0]` aura 108 `SPELLMOD_DAMAGE` (masks 16/64/128), `Effect[1]` `SPELLMOD_DOT` on Condemn; fixture power, resistance fixture for Holy |
 | Judgement 300520 (`variant: "titanstrike"`/`"scourgebane"`/`"scarlet_hammer"`) | hit_ratio | "Increases the damage of Scourgebane, Scarlet Hammer, and Titanstrike by" | 1.25 each at 10% health | `AscensionTemplarAbilities.cpp:140-142` (launch damage) and `AscensionTemplarContracts.cpp` `ModifySpellDamageTaken` (Titanstrike's leech damage) |
