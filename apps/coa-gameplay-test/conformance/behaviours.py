@@ -1,9 +1,10 @@
 from dataclasses import dataclass, replace
+import math
 from pathlib import Path
 import re
 
 from hits import (DRAIN_MS, MAIN_HAND, MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, aura_modifiers, cast_steps,
-                  creature_fixture)
+                  creature_fixture, timed)
 from procs import cast_interval, swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import COLOR_CODE, Records
@@ -60,7 +61,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'charge_recharge', 'fixed_count', 'party_stat_ratio', 'cast_gate', 'cast_condition', 'mount_grant',
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
-        'hit_ratio', 'cast_state', 'immunity', 'threat_slope')
+        'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1551,10 +1552,18 @@ class ThreatTickRatioSpec:
     tick_wait_ms: int
     tolerance: float
     aura_stacks: int = 1
+    ticks: int = 1
+    label_suffix: str = ''
 
 
 def threat_tick_ratio_label(spec: ThreatTickRatioSpec, moment: str) -> str:
     return f'{spec.spell} threat aura_gated {moment}'
+
+
+def tick_words(ticks: int) -> tuple[str, str]:
+    if ticks == 1:
+        return 'let exactly one periodic tick fire', 'exactly one of its periodic ticks fires'
+    return f'let exactly {ticks} periodic ticks fire', f'exactly {ticks} of its periodic ticks fire'
 
 
 def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> tuple[dict, list[Expectation]]:
@@ -1562,39 +1571,47 @@ def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> t
     entry = behaviour_entry(records, spec.spell, spec.name, 'threat_tick_ratio', spec.quote, spec.expected_ratio)
     before_label = threat_tick_ratio_label(spec, BEFORE)
     after_label = threat_tick_ratio_label(spec, AFTER)
+    wait_words, contract_words = tick_words(spec.ticks)
     steps = base_steps(class_file) + [
         {'action': 'attack', 'actor': CASTER, 'target': TARGET},
         {'action': 'wait', 'label': 'build threat on the dummy', 'ms': spec.attack_wait_ms},
         {'action': 'stop_attack', 'actor': CASTER},
         measurement(before_label, TARGET, 'threat', target=CASTER),
         {'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura_spell, 'stacks': spec.aura_stacks},
-        {'action': 'wait', 'label': 'let exactly one periodic tick fire', 'ms': spec.tick_wait_ms},
+        {'action': 'wait', 'label': wait_words, 'ms': spec.tick_wait_ms},
         measurement(after_label, TARGET, 'threat', target=CASTER)]
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
     scenario = {
         'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat tick ratio',
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat tick ratio{suffix}',
         'contract': f'The dummy\'s own threat against the caster is read once after the caster builds it through '
                     f'real melee attacks, and once more after {spec.aura_spell} is set directly on the caster and '
-                    f'exactly one of its periodic ticks fires ({spec.tick_wait_ms} ms), isolating the percentage '
+                    f'{contract_words} ({spec.tick_wait_ms} ms), isolating the percentage '
                     f'the tick removes as a ratio rather than an absolute value, since the baseline threat a real '
                     f'attack sequence builds is not a deterministic number.',
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
-    label = f'{spec.spell} behaviour_metric_ratio_delta'
+    label = threat_tick_ratio_entry_label(spec.spell, spec.label_suffix)
     model = {'kind': 'metric_ratio_delta', 'before_label': before_label, 'after_label': after_label,
              'expected_ratio': spec.expected_ratio, 'tolerance': spec.tolerance, 'metric': 'threat',
              'quote': entry.quote}
+    if spec.ticks != 1:
+        model['ticks'] = spec.ticks
     expectation = Expectation(label, BEHAVIOUR_METRIC_RATIO_DELTA, spec.spell, spec.aura_spell, None,
                               str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
+
+
+def threat_tick_ratio_entry_label(spell: int, suffix: str = '') -> str:
+    return f'{spell} {BEHAVIOUR_METRIC_RATIO_DELTA}' + (f' {suffix}' if suffix else '')
 
 
 def threat_tick_ratio_spec(entry: dict) -> ThreatTickRatioSpec:
     return ThreatTickRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
                                entry['aura_spell'], entry.get('attack_wait_ms', 3000),
                                entry.get('tick_wait_ms', 1200), entry.get('tolerance', 0.005),
-                               entry.get('aura_stacks', 1))
+                               entry.get('aura_stacks', 1), entry.get('ticks', 1), entry.get('label_suffix', ''))
 
 
 @dataclass(frozen=True)
@@ -2581,6 +2598,244 @@ def single_target_scenario(class_file: dict, spec: SingleTargetSpec) -> tuple[di
 def single_target_spec(entry: dict) -> SingleTargetSpec:
     return SingleTargetSpec(entry['spell'], entry['name'], entry['quote'],
                             entry.get('wait_ms', SINGLE_TARGET_CAST_WAIT_MS))
+
+
+GROUP_TARGET_FILLERS = ('ally2', 'ally3', 'ally4')
+GROUP_TARGET_RAIDER = 'ally5'
+SPELL_FAILED_BAD_TARGETS = 12
+
+
+@dataclass(frozen=True)
+class GroupTargetSpec:
+    spell: int
+    name: str
+    quote: str
+    outsider_result: int = SPELL_FAILED_BAD_TARGETS
+    raid: bool = True
+
+
+def group_target_label(spell: int, arm: str, metric: str) -> str:
+    return f'{spell} group_target {arm} {metric}'
+
+
+def group_target_arms(spec: GroupTargetSpec) -> list[tuple[str, str, int, int]]:
+    arms = [('outsider', ALLY, spec.outsider_result, 0), ('party', ALLY, NO_CAST_FAILURE, STATE_PRESENT)]
+    if spec.raid:
+        arms.append(('raid', GROUP_TARGET_RAIDER, NO_CAST_FAILURE, STATE_PRESENT))
+    return arms
+
+
+def group_target_scenario(class_file: dict, spec: GroupTargetSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'group_target', spec.quote, NO_CAST_FAILURE)
+    facts = facts_of(records, spec.spell)
+    joins = {'party': [ALLY], 'raid': [*GROUP_TARGET_FILLERS, GROUP_TARGET_RAIDER]}
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    expectations = []
+    rule = prose_rule(entry.quote, spec.spell)
+    model = {'kind': 'group_target', 'quote': entry.quote}
+    for arm, target, result, presence in group_target_arms(spec):
+        steps += [{'action': 'group', 'actor': CASTER, 'target': member} for member in joins.get(arm, ())]
+        cast_label = group_target_label(spec.spell, arm, 'cast')
+        aura_label = group_target_label(spec.spell, arm, 'aura')
+        steps += ([{'action': 'wait', 'label': f'{arm} global cooldown', 'ms': SINGLE_TARGET_GCD_WAIT_MS},
+                   {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+                  + cast_gate_power_step(facts)
+                  + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': target},
+                     {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+                     measurement(cast_label, CASTER, 'cast_failure', spell=spec.spell),
+                     measurement(aura_label, target, 'aura', spell=spec.spell)])
+        expectations += [Expectation(cast_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None,
+                                     str(result), rule, dict(model)),
+                         Expectation(aura_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None,
+                                     str(presence), rule, dict(model))]
+    members = [ALLY, *(GROUP_TARGET_FILLERS + (GROUP_TARGET_RAIDER,) if spec.raid else ())]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour group target',
+        'contract': f'{spec.spell} is cast at an ungrouped player (refused with {spec.outsider_result}, no aura), '
+                    f'then at the same player once grouped (cast goes through, aura present)'
+                    + (f', then the group is filled to a raid and {spec.spell} is cast at the member that '
+                       f'converted it (cast goes through, aura present)' if spec.raid else '')
+                    + f', proving the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file)] + [{**player_fixture(class_file), 'id': member} for member in members],
+        'steps': steps}
+    return scenario, expectations
+
+
+def group_target_spec(entry: dict) -> GroupTargetSpec:
+    return GroupTargetSpec(entry['spell'], entry['name'], entry['quote'],
+                           entry.get('outsider_result', SPELL_FAILED_BAD_TARGETS), entry.get('raid', True))
+
+
+SPELL_FAILED_NOT_READY = 67
+SPELL_FAILED_NO_POWER = 85
+COST_GATE_RESOURCES = {'power': SPELL_FAILED_NO_POWER, 'cooldown': SPELL_FAILED_NOT_READY}
+COST_GATE_MARGIN_MS = 500
+COST_GATE_DURATION_MARGIN_MS = 300
+
+
+@dataclass(frozen=True)
+class CostGateSpec:
+    spell: int
+    name: str
+    quote: str
+    gated_spell: int
+    resource: str
+    reduction: float
+    target: str = TARGET
+    talent_aura: int | None = None
+    setup_casts: tuple[tuple[int, str], ...] = ()
+    margin_ms: int = COST_GATE_MARGIN_MS
+    label_suffix: str = ''
+    next_arm: bool = False
+    aura_duration_ms: int | None = None
+    duration_margin_ms: int = COST_GATE_DURATION_MARGIN_MS
+
+
+@dataclass(frozen=True)
+class CostGateArm:
+    name: str
+    with_talent: bool
+    level: float
+    result: int
+    setup: bool = True
+    held_ms: int = 0
+
+
+def cost_gate_label(spec: CostGateSpec, arm: str) -> str:
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    return f'{spec.spell} cost_gate {spec.gated_spell}{suffix} {arm}'
+
+
+def cost_gate_base(spec: CostGateSpec, facts) -> float:
+    if spec.resource == 'power':
+        if facts.mana_cost <= 0 or facts.mana_cost_percentage or facts.mana_cost_per_level:
+            raise NotModelled(f'{spec.gated_spell} has no plain power cost to gate')
+        return float(facts.mana_cost)
+    if facts.recast_ms <= 0:
+        raise NotModelled(f'{spec.gated_spell} has no cooldown to gate')
+    return float(facts.recast_ms)
+
+
+def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float]:
+    reduced = base - spec.reduction
+    if spec.resource == 'power':
+        allowed = math.ceil(reduced)
+        beyond = allowed - 1 if allowed == reduced else allowed - 2
+        if not 0 <= beyond < allowed < base:
+            raise NotModelled(f'{spec.gated_spell} cost {base:g} less {spec.reduction:g} leaves no power level that '
+                              f'only the reduction separates')
+        return allowed, beyond
+    allowed, beyond = reduced + spec.margin_ms, reduced - spec.margin_ms
+    if not GCD_WAIT_MS <= beyond < allowed < base:
+        raise NotModelled(f'{spec.gated_spell} cooldown {base:g} ms less {spec.reduction:g} ms leaves no wait that '
+                          f'only the reduction separates at {spec.margin_ms} ms')
+    return allowed, beyond
+
+
+def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
+    refused = COST_GATE_RESOURCES[spec.resource]
+    allowed, beyond = cost_gate_levels(spec, base)
+    arms = [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
+    if spec.next_arm:
+        arms.append(CostGateArm('next', True, allowed, refused, setup=False))
+    arms.append(CostGateArm('beyond', True, beyond, refused))
+    if spec.aura_duration_ms is not None:
+        if spec.resource != 'power' or not spec.setup_casts:
+            raise ValueError(f'{spec.spell} aura_duration_ms needs a power gate opened by setup_casts')
+        lead = spec.aura_duration_ms - SINGLE_TARGET_GCD_WAIT_MS
+        if lead - spec.duration_margin_ms <= 0:
+            raise NotModelled(f'{spec.spell} aura of {spec.aura_duration_ms} ms ends within the setup wait')
+        arms += [CostGateArm('held', True, allowed, NO_CAST_FAILURE, held_ms=lead - spec.duration_margin_ms),
+                 CostGateArm('expired', True, allowed, refused, held_ms=lead + spec.duration_margin_ms)]
+    return arms
+
+
+def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list[Expectation]]:
+    if spec.resource not in COST_GATE_RESOURCES:
+        raise ValueError(f'{spec.spell} cost_gate resource {spec.resource!r} is not one of '
+                         f'{sorted(COST_GATE_RESOURCES)}')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'cost_gate', spec.quote, spec.reduction)
+    facts = facts_of(records, spec.gated_spell)
+    base = cost_gate_base(spec, facts)
+    full_power = cast_gate_power_step(facts)
+    approach = ([{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}]
+                if spec.target == ALLY and closes_distance(facts) else [])
+
+    def setup() -> list[dict]:
+        steps = []
+        for spell, target in spec.setup_casts:
+            setup_facts = facts_of(records, spell)
+            steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}]
+                      + cast_gate_power_step(setup_facts) + required_aura_steps(setup_facts)
+                      + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target},
+                         {'action': 'wait', 'ms': SINGLE_TARGET_GCD_WAIT_MS}])
+        return steps
+
+    def attempt(label: str, power: list[dict]) -> list[dict]:
+        return (approach + power + required_aura_steps(facts)
+                + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target},
+                   {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+                   measurement(label, CASTER, 'cast_failure', spell=spec.gated_spell)])
+
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gated_spell}]
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
+        spell for spell, _ in spec.setup_casts)]
+    expectations = []
+    rule = prose_rule(entry.quote, spec.spell)
+    model = {'kind': 'cost_gate', 'resource': spec.resource, 'base': base, 'reduction': spec.reduction,
+             'quote': entry.quote}
+    talent_steps = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 1}]
+                    if spec.talent_aura else [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}])
+    learned = False
+    for arm in cost_gate_arms(spec, base):
+        if arm.with_talent and not learned:
+            steps += talent_steps
+            learned = True
+        label = cost_gate_label(spec, arm.name)
+        steps.append({'action': 'wait', 'label': f'{arm.name} global cooldown', 'ms': SINGLE_TARGET_GCD_WAIT_MS})
+        if arm.setup:
+            steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.gated_spell})
+        opening = setup() if arm.setup else []
+        if arm.held_ms:
+            opening.append({'action': 'wait', 'label': f'{arm.name} aura wait', 'ms': arm.held_ms})
+        if spec.resource == 'power':
+            steps += opening + attempt(label, [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                                                'value': int(arm.level)}])
+        else:
+            steps += (opening + full_power + required_aura_steps(facts)
+                      + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target},
+                         {'action': 'wait', 'label': f'{arm.name} cooldown wait', 'ms': int(arm.level)}]
+                      + attempt(label, full_power))
+        expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell, None,
+                                        str(arm.result), rule,
+                                        {**model, 'arm': arm.name, 'level': arm.level, 'held_ms': arm.held_ms}))
+    unit = 'power' if spec.resource == 'power' else 'ms after a cast'
+    players = [{**player_fixture(class_file), 'allow_regeneration': False}]
+    if spec.target == ALLY:
+        players.append({**player_fixture(class_file), 'id': ALLY})
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cost gate'
+                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
+        'contract': f'{spec.gated_spell} is attempted at {base:g} less {spec.reduction:g} {unit}: without '
+                    f'{spec.spell} it must be refused, with it it must go through, and one step beyond the stated '
+                    f'reduction it must be refused again, proving the "{spec.quote}" clause.',
+        'players': players,
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    return timed(scenario, waited_ms(steps)), expectations
+
+
+def cost_gate_spec(entry: dict) -> CostGateSpec:
+    return CostGateSpec(entry['spell'], entry['name'], entry['quote'], entry['gated_spell'], entry['resource'],
+                        float(entry['reduction']), entry.get('target', TARGET), entry.get('talent_aura'),
+                        tuple((int(spell), target) for spell, target in entry.get('setup_casts', ())),
+                        entry.get('margin_ms', COST_GATE_MARGIN_MS), entry.get('label_suffix', ''),
+                        entry.get('next_arm', False), entry.get('aura_duration_ms'),
+                        entry.get('duration_margin_ms', COST_GATE_DURATION_MARGIN_MS))
 
 
 SPELL_FAILED_TARGET_AURASTATE = 111
@@ -3594,6 +3849,13 @@ class HitRatioSpec:
     force_crit: str | None = None
     target_health_pct: int | None = None
     label_suffix: str = ''
+    metric: str = 'damage'
+    caster: str = CASTER
+    target: str = TARGET
+
+
+HIT_RATIO_METRICS = {'damage': ('spell_damage_total', 'spell_damage_count'),
+                     'heal': ('spell_heal_total', 'spell_heal_count')}
 
 
 def hit_arm(raw: dict) -> HitArm:
@@ -3617,26 +3879,27 @@ def hit_ratio_reads(spec: HitRatioSpec, arm: str) -> list[tuple[str, str]]:
     return [(f'{base} {mark} total', f'{base} {mark} count') for mark in ('start', *range(1, spec.trials + 1))]
 
 
-def hit_ratio_cast(records: Records, spell: int) -> list[dict]:
+def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: str = TARGET) -> list[dict]:
     facts = facts_of(records, spell)
     steps = []
     if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
-    steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell})
-    steps += required_aura_steps(facts)
-    steps.append({'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': TARGET})
+        steps.append({'action': 'set_power', 'actor': actor, 'power': facts.power_type, 'value': facts.mana_cost})
+    steps.append({'action': 'reset_cooldown', 'actor': actor, 'spell': spell})
+    steps += [{**step, 'actor': actor} for step in required_aura_steps(facts)]
+    steps.append({'action': 'cast', 'actor': actor, 'spell': spell, 'target': target})
     steps.append({'action': 'wait', 'ms': max(GCD_WAIT_MS, facts.cast_time_ms + GCD_WAIT_MS)})
     return steps
 
 
 def hit_ratio_steps(records: Records, spec: HitRatioSpec) -> list[dict]:
-    fields = {'spell': spec.observe_spell, 'target': TARGET}
+    fields = {'spell': spec.observe_spell, 'target': spec.target}
     if spec.critical is not None:
         fields['critical'] = spec.critical
+    total_metric, count_metric = HIT_RATIO_METRICS[spec.metric]
 
     def reads(labels: tuple[str, str]) -> list[dict]:
-        return [measurement(labels[0], CASTER, 'spell_damage_total', **fields),
-                measurement(labels[1], CASTER, 'spell_damage_count', **fields)]
+        return [measurement(labels[0], spec.caster, total_metric, **fields),
+                measurement(labels[1], spec.caster, count_metric, **fields)]
 
     steps = []
     if spec.target_health_pct is not None:
@@ -3653,7 +3916,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec) -> list[dict]:
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
-            steps += hit_ratio_cast(records, spec.observe_spell)
+            steps += hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
             if trial == spec.trials:
                 steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
             steps += reads(marks[trial])
@@ -3680,10 +3943,15 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         raise ValueError(f'{spec.spell} hit_ratio arms are identical; the contrast would measure nothing')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} force_crit {spec.force_crit!r} is not one of {sorted(FORCE_CRIT_RATINGS)}')
+    if spec.metric not in HIT_RATIO_METRICS:
+        raise ValueError(f'{spec.spell} hit_ratio metric {spec.metric!r} is not one of {sorted(HIT_RATIO_METRICS)}')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'hit_ratio', spec.quote, spec.expected)
-    learned = (spec.observe_spell, *spec.learn, *spec.control.casts, *spec.treatment.casts)
-    steps = ([{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)] +
+    class_file = armed_for(class_file, records, spec.observe_spell)
+    learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts)
+    steps = ([{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}] +
+             [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
+              if spell != spec.observe_spell or spec.caster != CASTER] +
              hit_ratio_steps(records, spec))
     waited = waited_ms(steps)
     if waited + TIMEOUT_MARGIN_MS > MAX_SCENARIO_MS:
@@ -3694,22 +3962,27 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.force_crit is not None:
         player[FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
     critical = '' if spec.critical is None else f', counting only hits with critical={spec.critical}'
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    players = [player] + ([{**player_fixture(class_file), 'id': ALLY}] if ALLY in (spec.caster, spec.target) else [])
     scenario = {
         'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour hit ratio',
-        'contract': f'{spec.trials} casts of {spec.observe_spell} at the dummy per arm, control first, with the '
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour hit ratio{suffix}',
+        'contract': f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target} per arm, '
+                    f'control first, with the '
                     f'arm\'s auras {list(spec.control.auras)} / {list(spec.treatment.auras)} set and its casts '
                     f'{list(spec.control.casts)} / {list(spec.treatment.casts)} made before every observed cast, '
-                    f'the cumulative damage and hit count read after every trial{critical}; the per-hit mean of the '
-                    f'treatment arm over the control arm must give the stated bonus of {(spec.expected - 1) * 100:+g}%',
-        'players': [player],
+                    f'the cumulative {spec.metric} and hit count read after every trial{critical}; the per-hit mean '
+                    f'of the treatment arm over the control arm must give the stated bonus of '
+                    f'{(spec.expected - 1) * 100:+g}%',
+        'players': players,
         'creatures': [creature_fixture(class_file)],
         'steps': base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     model = {'kind': 'hit_ratio', 'reads': {name: hit_ratio_reads(spec, name) for name in HIT_RATIO_ARMS},
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
              'trial_limit': hit_ratio_trial_limit(class_file, spec),
-             'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)), 'metric': 'spell_damage_total',
+             'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)),
+             'metric': HIT_RATIO_METRICS[spec.metric][0],
              'quote': entry.quote}
     expectation = Expectation(hit_ratio_label(spec.spell, spec.label_suffix), BEHAVIOUR_HIT_RATIO, spec.spell,
                               spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
@@ -3721,7 +3994,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
     return HitRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['observe_spell'],
                         hit_arm(entry.get('control', {})), hit_arm(entry.get('treatment', {})),
                         tuple(entry.get('learn', ())), entry.get('trials', HIT_RATIO_TRIALS), entry.get('critical'),
-                        entry.get('force_crit'), entry.get('target_health_pct'), entry.get('label_suffix', ''))
+                        entry.get('force_crit'), entry.get('target_health_pct'), entry.get('label_suffix', ''),
+                        entry.get('metric', 'damage'), entry.get('caster', CASTER), entry.get('target', TARGET))
 
 
 def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
@@ -3814,6 +4088,10 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return heal_block_scenario(class_file, heal_block_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
+    if entry['kind'] == 'group_target':
+        return group_target_scenario(class_file, group_target_spec(entry))
+    if entry['kind'] == 'cost_gate':
+        return cost_gate_scenario(class_file, cost_gate_spec(entry))
     if entry['kind'] == 'absorb_pierce_ratio':
         return absorb_pierce_ratio_scenario(class_file, absorb_pierce_ratio_spec(entry))
     if entry['kind'] == 'hit_ratio':

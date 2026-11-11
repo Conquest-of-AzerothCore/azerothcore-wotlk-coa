@@ -2501,6 +2501,10 @@ def behaviour_heal_block_verdict(base: Verdict, run: Run, model: dict) -> Verdic
                                f'(expected {expected:g}); {requirement}')
 
 
+def tick_count_words(ticks: int) -> str:
+    return 'one periodic tick' if ticks == 1 else f'{ticks} periodic ticks'
+
+
 def behaviour_metric_ratio_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -2518,7 +2522,8 @@ def behaviour_metric_ratio_delta_verdict(base: Verdict, run: Run, model: dict) -
     return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - tolerance,
                    high=expected_ratio + tolerance,
                    explanation=f'{model["metric"]} measured {before:g} before {model["before_label"]!r} and '
-                               f'{after:g} after one periodic tick {model["after_label"]!r}, ratio {ratio:g}; '
+                               f'{after:g} after {tick_count_words(model.get("ticks", 1))} '
+                               f'{model["after_label"]!r}, ratio {ratio:g}; '
                                f'expected {expected_ratio:g} within {tolerance:g}, a ratio rather than an '
                                f'absolute value since the baseline a real attack sequence builds is not '
                                f'deterministic')

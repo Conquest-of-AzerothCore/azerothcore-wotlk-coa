@@ -74,7 +74,8 @@ BEHAVIOUR_LABELS = {
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
-    'threat_tick_ratio': lambda entry: [f"{entry['spell']} behaviour_metric_ratio_delta"],
+    'threat_tick_ratio': lambda entry: [f"{entry['spell']} behaviour_metric_ratio_delta"
+                                        + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'absorb_pierce_ratio': lambda entry: [f"{entry['spell']} behaviour_absorb_pierce_ratio"],
     'cast_applies_aura': lambda entry: [f"{entry['spell']} behaviour_cast_applies_aura"],
     'cast_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_ratio"],
@@ -90,6 +91,14 @@ BEHAVIOUR_LABELS = {
     'crit_magnitude': lambda entry: [f"{entry['spell']} behaviour_crit_magnitude"],
     'internal_cooldown': lambda entry: [f"{entry['spell']} behaviour_internal_cooldown"],
     'threat_slope': lambda entry: [f"{entry['spell']} behaviour_threat_slope {entry['hit_spell']}"],
+    'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
+                                   for arm in ('outsider', 'party', *(('raid',) if entry.get('raid', True) else ()))
+                                   for metric in ('cast', 'aura')],
+    'cost_gate': lambda entry: [f"{entry['spell']} cost_gate {entry['gated_spell']}"
+                                + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '') + f" {arm}"
+                                for arm in ('without', 'with', *(('next',) if entry.get('next_arm') else ()),
+                                            'beyond',
+                                            *(('held', 'expired') if entry.get('aura_duration_ms') else ()))],
     'cast_state': lambda entry: [f"{entry['spell']} cast_state {moment}" for moment in ('control', 'state', 'allowed')],
     'immunity': lambda entry: [f"{entry['spell']} immunity {subject} {moment}"
                                for subject, moments in ((entry['spell'], ('cast', 'applied')),

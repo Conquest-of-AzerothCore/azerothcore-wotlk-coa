@@ -136,6 +136,10 @@ carries the declaration and its `no_behaviour_route_state`. `clause_coverage` re
 reason, no attempt, an attempt without agent or report, a non-claim entry, a clause that also declares a
 `tool_gap`).
 
+Templar: three clauses declare it with one attempt (`pending`): Righteous Custodian 572808 "for $d" (30 min, beyond
+the longest scenario timeout) and Pious Sweep 520034 "Increases the damage of Chastise by $s1%" and "on enemies above
+75% health or affected by Tranquil Circle." (Chastise's per-hit spread needs about 2000 trials per arm).
+
 ### Two proof statuses
 
 `ClauseCoverage` holds `proven`, `behaviour`, `data` (`proven - behaviour`), `total`, `unproven`, the per-claim

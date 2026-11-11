@@ -731,7 +731,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 89)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 100)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -5828,6 +5828,158 @@ class ThreatSlopeScenarioTests(unittest.TestCase):
     def test_a_hit_that_did_not_land_is_unmeasured(self):
         self.assertEqual(self.judged(self.readings(100.0, 0.0)).status, 'unmeasured')
         self.assertEqual(self.judged(self.readings(400.0, 150.0, cast=34.0)).status, 'unmeasured')
+
+
+
+def variant_entry(spell: int, kind: str, variant: str) -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == spell and entry['kind'] == kind and entry.get('variant') == variant)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ThreatTickPeriodTests(unittest.TestCase):
+    def test_tick_count_arms_carry_their_own_labels_and_waits(self):
+        for variant, wait, ratio in (('before_tick', 600, 1.0), ('period', 3200, 0.941192)):
+            scenario, (expectation,) = behaviour_scenario(
+                CLASS_FILE, variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', variant))
+            run.validate(scenario)
+            self.assertEqual(expectation.label, f'572808 behaviour_metric_ratio_delta {variant}')
+            self.assertEqual(expectation.model['expected_ratio'], ratio)
+            waits = [step['ms'] for step in scenario['steps'] if step.get('label', '').startswith('let exactly')]
+            self.assertEqual(waits, [wait])
+
+    def test_seeded_two_ticks_in_the_three_tick_window_is_alert(self):
+        _, (expectation,) = behaviour_scenario(CLASS_FILE,
+                                               variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', 'period'))
+        model = expectation.model
+        for after, status in ((941.192, 'ok'), (960.4, 'alert'), (922.368, 'alert')):
+            values = FakeRun({model['before_label']: 1000.0, model['after_label']: after})
+            self.assertEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, status)
+
+    def test_the_single_tick_entry_keeps_its_label(self):
+        _, (expectation,) = behaviour_scenario(CLASS_FILE, righteous_custodian_entry())
+        self.assertEqual(expectation.label, '572808 behaviour_metric_ratio_delta')
+        self.assertNotIn('ticks', expectation.model)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class GroupTargetScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE,
+                                                              class_entry(RIGHTEOUS_CUSTODIAN, 'group_target'))
+        self.steps = self.scenario['steps']
+
+    def test_outsider_is_refused_before_the_party_and_raid_arms(self):
+        run.validate(self.scenario)
+        self.assertEqual([(e.label, e.displayed) for e in self.expectations],
+                         [('572808 group_target outsider cast', '12'), ('572808 group_target outsider aura', '0'),
+                          ('572808 group_target party cast', '0'), ('572808 group_target party aura', '1'),
+                          ('572808 group_target raid cast', '0'), ('572808 group_target raid aura', '1')])
+        outsider = first_index(self.steps, label='572808 group_target outsider cast')
+        grouped = first_index(self.steps, action='group', target='ally')
+        raider = first_index(self.steps, action='group', target='ally5')
+        raid_cast = first_index(self.steps, label='572808 group_target raid cast')
+        self.assertLess(outsider, grouped)
+        self.assertLess(grouped, raider)
+        self.assertLess(raider, raid_cast)
+        self.assertEqual(len(self.scenario['players']), 6)
+
+    def test_seeded_outsider_that_receives_the_blessing_is_alert(self):
+        cast, aura = self.expectations[:2]
+        for expectation, value in ((cast, NO_CAST_FAILURE), (aura, 1.0)):
+            verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: float(value)}),
+                                      expectation)
+            self.assertEqual(verdict.status, 'alert')
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioHealTests(unittest.TestCase):
+    def test_the_healer_observes_its_own_heals_on_the_named_target(self):
+        for variant, healer, target in (('done', 'caster', 'ally'), ('received', 'ally', 'caster')):
+            scenario, (expectation,) = behaviour_scenario(CLASS_FILE, variant_entry(705278, 'hit_ratio', variant))
+            validated = run.validate(scenario)
+            self.assertEqual(expectation.label, f'705278 behaviour_hit_ratio {variant}')
+            self.assertEqual(expectation.model['metric'], 'spell_heal_total')
+            reads = [step for step in validated['steps'] if step.get('metric') in ('spell_heal_total',
+                                                                                   'spell_heal_count')]
+            self.assertTrue(reads)
+            self.assertTrue(all(step['actor'] == healer and step['target'] == target for step in reads))
+            casts = [step for step in validated['steps'] if step['action'] == 'cast']
+            self.assertTrue(all(step['actor'] == healer and step['target'] == target for step in casts))
+            self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+
+    def test_the_talent_is_set_only_in_the_treatment_arm(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, variant_entry(705278, 'hit_ratio', 'received'))
+        self.assertAlmostEqual(expectation.model['expected_bonus'], 8.0)
+        steps = scenario['steps']
+        treatment = first_index(steps, label='705278 behaviour_hit_ratio received treatment start total')
+        talent = [index for index, step in enumerate(steps)
+                  if step['action'] == 'set_aura' and step['spell'] == 705278 and step['stacks'] == 1]
+        self.assertTrue(talent)
+        self.assertTrue(all(index > treatment for index in talent))
+
+    def test_an_unknown_metric_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**variant_entry(705278, 'hit_ratio', 'done'), 'metric': 'absorb'})
+
+    def test_the_observed_rank_arms_the_caster(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(572547, 'hit_ratio', 'talent'))
+        plain, _ = behaviour_scenario(CLASS_FILE, variant_entry(705278, 'hit_ratio', 'done'))
+        self.assertNotEqual(scenario['players'][0], plain['players'][0])
+
+
+def cost_gate_entry(spell: int, variant: str | None = None) -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == spell and entry['kind'] == 'cost_gate' and entry.get('variant') == variant)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CostGateScenarioTests(unittest.TestCase):
+    def test_power_gate_refuses_without_the_talent_and_one_point_beyond(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(301059, 'sacred_swing'))
+        validated = run.validate(scenario)
+        self.assertEqual([(e.label, e.displayed, e.model['level']) for e in expectations],
+                         [('301059 cost_gate 572769 without', '85', 10), ('301059 cost_gate 572769 with', '0', 10),
+                          ('301059 cost_gate 572769 beyond', '85', 9)])
+        learn = first_index(validated['steps'], action='learn', spell=301059)
+        self.assertLess(first_index(validated['steps'], label='301059 cost_gate 572769 without'), learn)
+        self.assertLess(learn, first_index(validated['steps'], label='301059 cost_gate 572769 with'))
+        self.assertFalse(scenario['players'][0]['allow_regeneration'])
+
+    def test_cooldown_gate_waits_either_side_of_the_reduced_cooldown(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(706309))
+        run.validate(scenario)
+        self.assertEqual([(e.displayed, e.model['level']) for e in expectations],
+                         [('67', 15500.0), ('0', 15500.0), ('67', 14500.0)])
+        waits = [step['ms'] for step in scenario['steps'] if step.get('label', '').endswith('cooldown wait')]
+        self.assertEqual(waits, [15500, 15500, 14500])
+
+    def test_fractional_reduction_and_the_next_and_duration_arms(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(707364))
+        validated = run.validate(scenario)
+        self.assertEqual([(e.model['arm'], e.displayed, e.model['level'], e.model['held_ms']) for e in expectations],
+                         [('without', '85', 8, 0), ('with', '0', 8, 0), ('next', '85', 8, 0), ('beyond', '85', 6, 0),
+                          ('held', '0', 8, 4100), ('expired', '85', 8, 4700)])
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+        benedictions = [index for index, step in enumerate(validated['steps'])
+                        if step['action'] == 'cast' and step['spell'] == 578276]
+        self.assertEqual(len(benedictions), 5)
+        next_attempt = first_index(validated['steps'], label='707364 cost_gate 803792 next')
+        with_attempt = first_index(validated['steps'], label='707364 cost_gate 803792 with')
+        self.assertFalse(any(with_attempt < index < next_attempt for index in benedictions))
+
+    def test_seeded_reduction_that_does_not_apply_is_alert(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, cost_gate_entry(301059, 'righteous_lunge'))
+        allowed = next(e for e in expectations if e.model['arm'] == 'with')
+        verdict = judge_behaviour(base_verdict(allowed), FakeRun({allowed.label: 85.0}), allowed)
+        self.assertEqual(verdict.status, 'alert')
+        verdict = judge_behaviour(base_verdict(allowed), FakeRun({allowed.label: 0.0}), allowed)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_a_reduction_that_leaves_no_separating_level_is_not_modelled(self):
+        with self.assertRaises(NotModelled):
+            behaviour_scenario(CLASS_FILE, {**cost_gate_entry(301059, 'sacred_swing'), 'reduction': 20})
 
 
 if __name__ == '__main__':

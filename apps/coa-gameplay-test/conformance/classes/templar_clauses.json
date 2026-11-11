@@ -387,7 +387,10 @@
     "labels": [
       "301059 effect_value e0",
       "301059 e0 spell_modifier 570233",
-      "301059 e0 spell_power_cost 570233"
+      "301059 e0 spell_power_cost 570233",
+      "301059 cost_gate 570233 without",
+      "301059 cost_gate 570233 with",
+      "301059 cost_gate 570233 beyond"
     ],
     "kind": "claim"
   },
@@ -396,7 +399,10 @@
     "clause": "and Sacred Swing by $s2.",
     "labels": [
       "301059 e1 spell_modifier 572769",
-      "301059 e1 spell_power_cost 572769"
+      "301059 e1 spell_power_cost 572769",
+      "301059 cost_gate 572769 without",
+      "301059 cost_gate 572769 with",
+      "301059 cost_gate 572769 beyond"
     ],
     "kind": "claim"
   },
@@ -764,11 +770,18 @@
       "520034 effect_value e0 #0",
       "520034 e0 spell_damage_done 503141",
       "520034 e1 spell_modifier 801205",
-      "520034 e1 spell_effect_value 801205",
-      "520034 e1 spell_modifier 521052",
-      "520034 e1 spell_effect_value 521052"
+      "520034 e1 spell_effect_value 801205"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "The behaviour route is a Chastise hit ratio with and without Pious Sweep on a dummy above 75% health. Chastise's non-critical hits spread from 269 to 408 within one arm (stamp 20261111-062655, the Tranquil Circle arm), about 9% per hit, so the 99% half-width at 100 trials per arm is about 4 points against the 1-point power limit of the +25% band (2 points); the judge asks for about 2000 trials per arm and one scenario holds 166 (behaviour_hit_ratio tranquil_circle, insufficient_trials in both runs of this chunk). No lower-variance observation of Chastise's damage exists in the tool.",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520034,
@@ -778,7 +791,16 @@
       "520034 e0 spell_damage_done 503141",
       "520034 e1 spell_modifier 801205"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "Same route and limit as 'Increases the damage of Chastise by $s1%': the Tranquil Circle hit ratio reads +26.5% and +24.9% (insufficient_trials, half-width about 4 points, power limit 1) and the above-75% arm has the same Chastise spread; one scenario holds 166 trials per arm against about 2000 needed.",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520442,
@@ -1316,7 +1338,9 @@
     "labels": [
       "572547 effect_value e0 #0",
       "572547 e0 spell_modifier 807764",
-      "572547 e0 spell_effect_value 807764"
+      "572547 e0 spell_effect_value 807764",
+      "572547 behaviour_hit_ratio talent",
+      "572547 behaviour_hit_ratio without_talent"
     ],
     "kind": "claim"
   },
@@ -1379,7 +1403,14 @@
   {
     "spell": 572808,
     "clause": "Place a blessing on a party or raid member",
-    "labels": [],
+    "labels": [
+      "572808 group_target outsider cast",
+      "572808 group_target outsider aura",
+      "572808 group_target party cast",
+      "572808 group_target party aura",
+      "572808 group_target raid cast",
+      "572808 group_target raid aura"
+    ],
     "kind": "claim"
   },
   {
@@ -1395,7 +1426,10 @@
     "spell": 572808,
     "clause": "every $t1 sec",
     "labels": [
-      "572808 aura_amplitude_ms #1"
+      "572808 aura_amplitude_ms #1",
+      "572808 behaviour_metric_ratio_delta before_tick",
+      "572808 behaviour_metric_ratio_delta",
+      "572808 behaviour_metric_ratio_delta period"
     ],
     "kind": "claim"
   },
@@ -1405,7 +1439,16 @@
     "labels": [
       "572808 aura_duration_ms #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "no_behaviour_route": {
+      "reason": "The stated duration is 1800000 ms (30 min). A behaviour reading needs the blessing present shortly before 30 min and absent after it, inside one scenario; a scenario's timeout_ms is at most 10 minutes under schema 1 and 20 minutes under schema 2 (apps/coa-gameplay-test/README.md, scenario limits), so no expiry pair fits. The duration stays read from the aura (572808 aura_duration_ms #2).",
+      "attempts": [
+        {
+          "agent": "c2-author",
+          "report": "lean/batch1-c2-author.md"
+        }
+      ]
+    }
   },
   {
     "spell": 572808,
@@ -1771,7 +1814,6 @@
     "clause": "and reduces the duration of disarm effects against you by $s2%",
     "labels": [
       "705271 effect_value e1 #1",
-      "705271 e1",
       "705271 behaviour_duration_ratio",
       "705271 behaviour_expiry"
     ],
@@ -1816,10 +1858,22 @@
   {
     "spell": 705278,
     "clause": "Increases your Holy healing done and received by $s1%.",
-    "labels": [
-      "705278 effect_value e0 #0",
-      "705278 e0 spell_healing_taken 803792",
-      "705278 e1 spell_healing_done 803792"
+    "claims": [
+      {
+        "claim": "Increases your Holy healing done ... by $s1%",
+        "labels": [
+          "705278 e1 spell_healing_done 803792",
+          "705278 behaviour_hit_ratio done"
+        ]
+      },
+      {
+        "claim": "and received by $s1%",
+        "labels": [
+          "705278 effect_value e0 #0",
+          "705278 e0 spell_healing_taken 803792",
+          "705278 behaviour_hit_ratio received"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2202,9 +2256,12 @@
     "spell": 706309,
     "clause": "Reduces the cooldown of Righteous Upheaval by $/1000;s1 sec.",
     "labels": [
-      "conformance-templar-value-706309",
-      "706309 e0 spell_modifier 501561 ok",
-      "706309 e0 spell_modifier 572027 ok"
+      "706309 effect_value e0 #0",
+      "706309 e0 spell_modifier 501561",
+      "706309 e0 spell_modifier 572027",
+      "706309 cost_gate 572027 without",
+      "706309 cost_gate 572027 with",
+      "706309 cost_gate 572027 beyond"
     ],
     "kind": "claim"
   },
@@ -2398,7 +2455,14 @@
     "spell": 707364,
     "clause": "Casting Benediction now reduces the cost of your next Temple Guardian by $712378s1% for $712378d.",
     "labels": [
-      "707364 trigger_count ok (273/273)"
+      "707364 trigger_count",
+      "707364 spell_duration 712378 #1",
+      "707364 cost_gate 803792 without",
+      "707364 cost_gate 803792 with",
+      "707364 cost_gate 803792 next",
+      "707364 cost_gate 803792 beyond",
+      "707364 cost_gate 803792 held",
+      "707364 cost_gate 803792 expired"
     ],
     "kind": "claim"
   },
@@ -2406,7 +2470,9 @@
     "spell": 707364,
     "clause": "reduces the cost ... by $712378s1%",
     "labels": [
-      "conformance-templar-value-707364 (effect_value 712378e0, -50)"
+      "707364 cost_gate 803792 without",
+      "707364 cost_gate 803792 with",
+      "707364 cost_gate 803792 beyond"
     ],
     "kind": "claim"
   },
@@ -2414,14 +2480,19 @@
     "spell": 707364,
     "clause": "for $712378d",
     "labels": [
-      "conformance-templar-value-707364 (spell_duration 712378, 6000 ms)"
+      "707364 spell_duration 712378 #1",
+      "707364 cost_gate 803792 held",
+      "707364 cost_gate 803792 expired"
     ],
     "kind": "claim"
   },
   {
     "spell": 707364,
     "clause": "your next Temple Guardian",
-    "labels": [],
+    "labels": [
+      "707364 cost_gate 803792 with",
+      "707364 cost_gate 803792 next"
+    ],
     "kind": "claim"
   },
   {

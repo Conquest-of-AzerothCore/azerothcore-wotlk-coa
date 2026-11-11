@@ -755,6 +755,54 @@ The other ratio checks (`behaviour_ratio`, `behaviour_party_stat_ratio`, `behavi
 range they exclude outside (`compare.with_excluded_band`, the `tolerated` range included for `behaviour_ratio`),
 without a sampling interval.
 
+### Group-target scenarios (`behaviour_cast_condition`, `kind: "group_target"`)
+
+"Place a blessing on a party or raid member" states who may receive a spell. `group_target_scenario` casts `spell` at
+the `ally` player while it is ungrouped (`<spell> group_target outsider cast` must read `outsider_result`,
+`SPELL_FAILED_BAD_TARGETS` 12 by default, and `outsider aura` 0), then groups it and casts again (`party cast` 0,
+`party aura` 1), then, unless `raid` is false, adds three fillers and a fifth member, which converts the full party to
+a raid (`group` action), and casts at that member (`raid cast` 0, `raid aura` 1). The outsider arm is the control:
+the same cast refused without the group. Judged exactly (`compare.behaviour_cast_gate_verdict`).
+
+### Cost-gate scenarios (`behaviour_cast_condition`, `kind: "cost_gate"`)
+
+"Reduces the Energy cost of X by 5" and "Reduces the cooldown of X by 5 sec" state a reduction that decides whether
+a cast goes through. `cost_gate_scenario` attempts `gated_spell` at the reduced level: `resource: "power"` sets the
+caster's power to the reduced cost (rounded up; regeneration is off), `resource: "cooldown"` attempts it
+`reduction` less than its cooldown plus `margin_ms` (500) after a priming cast. Arms, each with its own
+`cast_failure` reading `<spell> cost_gate <gated>[ <label_suffix>] <arm>`:
+
+- `without`: the talent unknown, refused (`SPELL_FAILED_NO_POWER` 85 or `SPELL_FAILED_NOT_READY` 67): the control;
+- `with`: the talent learned (or `talent_aura` set), goes through (0);
+- `next` (`next_arm`): a second attempt right after `with`, without the `setup_casts`, refused: only the next cast
+  is reduced;
+- `beyond`: one power point below the reduced cost (two when the reduced cost is fractional), or `margin_ms` before
+  the reduced cooldown, refused: the reduction is no larger than stated;
+- `held` and `expired` (`aura_duration_ms`, power gates opened by `setup_casts` only): the attempt
+  `duration_margin_ms` (300) before and after the stated end of the aura the setup cast grants, through and refused.
+
+`setup_casts` (`[spell, target]` pairs) are cast before each arm's attempt, for a reduction granted by another cast
+("Casting Benediction now reduces the cost of your next Temple Guardian"). A `target` of `ally` adds the ally
+player, and the caster steps back `CHARGE_OFFSET_YD` before each attempt of a spell that closes the distance. A
+reduction that leaves no level only it separates (`beyond` below 0, the reduced level at or above the base, or a
+cooldown wait under the global cooldown) is `NotModelled`. Judged exactly (`compare.behaviour_cast_gate_verdict`).
+
+### Hit-ratio heals and actors
+
+A `hit_ratio` entry may set `metric: "heal"` to read `spell_heal_total` and `spell_heal_count` instead of the damage
+metrics, `caster` (default `caster`) for the player that casts the observed spell and takes the readings (the
+harness reads a player's own heals), and `target` (default the dummy). An `ally` caster or target adds the ally
+player. The arms' `auras` are still set on the caster, so a talent set in the treatment arm reaches healing done when
+the caster heals and healing received when the ally heals the caster. The caster is armed for the observed rank
+(`values.armed_for`), so a rank that needs a weapon class can be observed.
+
+### Threat-tick periods
+
+A `threat_tick_ratio` entry may set `ticks` (default 1) and `label_suffix`: the wait then lets that many periodic ticks
+fire and the label reads `<spell> behaviour_metric_ratio_delta <suffix>`. Righteous Custodian holds three entries,
+0 ticks at 600 ms (ratio 1, the control), 1 at 1200 ms (0.98) and 3 at 3200 ms (0.98^3 = 0.941192), which together
+place the period in (800, 1067] ms.
+
 ### Expiry pairs (`behaviour_expiry`)
 
 A stated duration is judged by its expiry pair (ADR 0126): the effect is present just before its stated end and
@@ -828,6 +876,13 @@ pair leaves the clause unproven.
 | Courage (Rank 2) 712466, effect 1 | duration_ratio | "reduces the duration of movement slowing effects on you by" | 0.80 | same mechanism and vehicle as Rank 1 |
 | Whirling Tempest 301340, effect 1 | metric_delta | "you now cannot be slowed" | 1 (immune) | round6 `owner-rulings-2026-11-09.md` — **confirmed defect, fixed this round**: `AscensionTemplarContracts.cpp`'s `id == 301340` branch unconditionally zeroed effect 1 (`info->Effects[1].Effect = 0`), discarding the raw DBC's own `SPELL_EFFECT_APPLY_AURA` there with no substitute mechanism anywhere in the Templar files. Fixed by setting that effect to `SPELL_AURA_MECHANIC_IMMUNITY`/`MECHANIC_SNARE` instead (the same per-class idiom already used by `AscensionStarcallerContracts.cpp`/`AscensionPrimalistBoulder.cpp`); the stock `AuraEffect::HandleModMechanicImmunity` grants the immunity for exactly 301340's own application window, which `AscensionTemplarAuras.cpp`'s `aura_ascension_templar_lifecycle` already ties to Righteous Tempest 805409's apply/remove, so no new Templar lifecycle code is needed. The metric is the harness's own `spell_effect_immune` probe (`player->IsImmunedToSpellEffect`) against Hamstring 1715's own snare effect (effect 0), not an actual landed cast of it: an exploratory run cross-checked that an *actual* Hamstring cast at a caster carrying 301340's effect 0 (`SPELL_AURA_MOD_SPEED_ALWAYS`) never lands at all regardless of this fix (`1715 present` reads `0` with the fix applied and with it reverted alike — the same `SPELL_AURA_MOD_SPEED_ALWAYS` aura type, cross-checked with the equal-magnitude but differently-typed Courage Rank 2 712466 (`SPELL_AURA_MOD_INCREASE_SPEED`), which does not reproduce it), an unrelated engine/harness interaction this round did not chase further since the direct immunity probe sidesteps it entirely and is the more precise signal anyway. `gate_spell: 300504` learns the real parent passive between phases (301340 is never itself learnable: the server only casts it internally); `trigger_spell: 805409` is cast in both `cast_steps()` calls so the "before" phase still proves the probe can read `false` while 300504 is unknown. Pre-fix, this entry reads `0` (not immune) after 300504 is learned, against `expected` 1 — an alert; post-fix it reads `1`, matching exactly. Follow-up (2026-11-10, measured with a real slow): catalog scenario `templar-whirling-tempest-slow-immunity` has a hostile creature cast Slow 31589 at the Templar during Righteous Tempest; without 300504 its snare effect 0 lands (amount -60, run speed 0.40), with 300504 the snare is not applied (run speed 1.20, 0.48 if it were) while Slow's unmechanised haste effects still land, and after the window the snare lands again (0.40) |
 | Blessing of Aggramar 300502 | duration_refresh | "now refreshes the duration of Blade of Faith on all nearby enemies." | 30000 ms (`SpellDuration.dbc` id 9) | `AscensionTemplarAbilities.cpp` `Breaker(info)`: `player->HasAura(300502) && spell->GetScriptValue(704576) >= 10` refreshes every nearby Blade of Faith 803872 aura to its own max duration; matches the already-working 9-vs-10-stack threshold the issue scenario `templar-blessing-of-aggramar-blade-refresh-7806.json` (#7806) proves, varying the passive's presence instead of the stack count |
+| Righteous Custodian 572808 (`variant: "before_tick"`/`"period"`) | threat_tick_ratio | "every" | 1.0 at 600 ms, 0.941192 at 3200 ms | `EffectAmplitude[0]` 1000 ms, 572809 at -2% per tick (`ThreatManager.h:150` multiplies) |
+| Righteous Custodian 572808 | group_target | "Place a blessing on a party or raid member" | outsider 12/0, party 0/1, raid 0/1 | `EffectImplicitTargetA[0]` 57 `TARGET_UNIT_TARGET_RAID`; `SpellInfo::CheckExplicitTarget` (`SpellInfo.cpp:2186-2197`) |
+| Holy Upheaval 572547 (`variant: "talent"`/`"without_talent"`) | hit_ratio | "Increases the effectiveness Righteous Upheaval gains per trigger of Zealotry by" | 7.0 with the talent and 30 stacks of 807764, 4.0 without | `Effect[0]` aura 108 `SPELLMOD_EFFECT1` on 807764 (10% per stack); 807764 multiplies `SPELLMOD_DAMAGE`; observed rank 501562 |
+| Sacred Style 705278 (`variant: "done"`/`"received"`) | hit_ratio (heal) | "Increases your Holy healing done and received by" | 1.08 each | `Effect[1]` aura 136 for the caster's heal of the ally, `Effect[0]` aura 118 for the ally's heal of the caster; Chakra of Light 803845 (fixed heal) |
+| Grace of Aman'thul 301059 (`variant: "righteous_lunge"`/`"sacred_swing"`) | cost_gate (power) | "Reduces the Energy cost of Righteous Lunge by" / "and Sacred Swing by" | 35 and 10 Energy | aura 107 `SPELLMOD_COST` -5 on 570233 (40), -10 on 572769 (20) |
+| Battle Hardened 706309 | cost_gate (cooldown) | "Reduces the cooldown of Righteous Upheaval by" | 15000 ms | aura 107 `SPELLMOD_COOLDOWN` -5000 on 572027 (`CategoryRecoveryTime` 20000) |
+| Guardian of the Light 707364 | cost_gate (power, next, duration) | "Casting Benediction now reduces the cost of your next Temple Guardian by" | 8 Energy for 6000 ms, next cast only | 712378 aura 108 `SPELLMOD_COST` -50% for 6000 ms, one charge (`AscensionTemplarAuras.cpp:116-121`, `AscensionTemplarAbilities.cpp:227-229`) |
 | Warrior of Tyr 301253 | metric_delta | "Periodic damage dealt now generates" | 10 (Energy, power type 3) | `AscensionCustomResourceData.h:475` `NativePowerGainRules` (`ClassId 19, PowerType 3, InternalAmount 10, Event PeriodicDamageTick, RequiredAuraSpellId 301253`), consumed by `AscensionCompat.cpp:3632-3680` `OnPeriodicDamageTick`; Condemn 567541 (periodic damage, 3000 ms ticks) is cast as a real tick source, with the scenario's own mana-cost fixture resetting Energy to a known baseline immediately before each cast; matches the already-written issue scenario `templar-5163-warrior-of-tyr-energy-generation.json` (#5163, #4432). No code or SQL fix needed — the prior `triggers` entry for 301253 (removed) searched only the `ProcFlags`/`spell_proc` path and missed this separate native-resource-rule path |
 | Sacred Resistance 301309 | metric_delta | "now increases your Armor by" | 1 (aura present) | round4 `scripted-script-aura` investigation (2026-11): `talent(301309, 680870)` inside `OnSpellCast`'s generic `talent` helper (`AscensionTemplarAbilities.cpp:152-153`), `if (Named(info, 805421)) talent(301309, 680870)` i.e. `if (player->HasAura(301309)) Cast(player, player, 680870)` whenever the player casts a Reckoning rank (805421, family 25, `SpellFamilyFlags[2]` bit 128 set); `680870`'s own armor-percent and duration tokens are already `ok` (`301309 effect_value 680870e0 #0`, `301309 spell_duration 680870 #1`). 301309's own effect 0 (`BasePoints`/`MiscValue` both 0) is a pure flag, read nowhere by value: the metric is `aura {spell: 680870}` before and after learning 301309, around a cast of Reckoning's max rank 572741 (`EffectImplicitTargetA[0]` 6, TARGET_UNIT_TARGET_ENEMY, so `target: "dummy"`) |
 | Keeping the Oath 92109, effect 1 | metric_delta | "you no longer consume your Oaths with Oath Breakers" | 1 (aura present) | round4 `scripted-script-aura` investigation (2026-11): `AscensionTemplarAbilities.cpp:174`, `if (!player->HasAura(92109) && !player->HasAura(803149) && !Named(info, 805409)) ClearOaths(player);` inside the `Breaker(info)` block, run on every cast satisfying `Breaker` (`SpellFamilyFlags[2]` bit 128, or `Named(info, 805409)`, Righteous Tempest); `ClearOaths` removes Oath Chain 704576 among others. Reckoning 572741 (max rank) satisfies `Breaker` through the `SpellFamilyFlags[2]` bit, not through `Named(info, 805409)`, so it exercises the 92109 gate specifically rather than the separate, always-exempt Righteous Tempest case; the scenario measures `aura {spell: 704576}` before and after learning 92109, around a Reckoning cast whose own `required_aura_steps` fixture re-grants Oath Chain fresh immediately before each cast (shared with the Sacred Resistance entry above, same `trigger_spell`) |
