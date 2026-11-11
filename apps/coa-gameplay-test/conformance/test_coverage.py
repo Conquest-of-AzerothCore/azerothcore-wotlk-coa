@@ -24,7 +24,7 @@ from expiry import BEHAVIOUR_EXPIRY
 from profile import (CLASSES_DIR, DBC_DIR, DbcSetMismatch, class_file_paths, ledger_consumption_path, load_class_file,
                      server_dbc_dir, spell_dbc_sha256)
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
-from passives import PASSIVE_DELTA
+from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import PROC_CHECK
 from triggers import TRIGGER_CHECK
 from values import GAP_CLOSER_DISTANCE, Expectation
@@ -308,6 +308,26 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
         proxy = claim('Increases your Holy damage by $s3%.', '1 e2 spell_power 1')
         self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_a_split_clause_names_the_power_without_its_maximum(self):
+        verdicts = [judged('1 e1 max_power 3', PASSIVE_DELTA, 'max_power')]
+        promised = claim('and Energy by $s1%', '1 e1 max_power 3')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your maximum health by $s1%', '1 e1 max_power 3')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_armor_penetration_promises_its_combat_rating(self):
+        verdicts = [judged('1 e1 combat_rating 24', PASSIVE_DELTA, 'combat_rating')]
+        promised = claim('and your Armor penetration by $s2% of your Intellect', '1 e1 combat_rating 24')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('and your Armor by $s2% of your Intellect', '1 e1 combat_rating 24')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_state_promises_name_every_phrase_of_the_passive_tables(self):
+        for metric, names in (('max_power', POWER_NAMES.values()), ('combat_rating', RATING_NAMES.values())):
+            for name in names:
+                with self.subTest(metric=metric, name=name):
+                    self.assertRegex(name, rf'(?i)\b(?:{STATE_PROMISES[metric]})\b')
 
     def test_immunity_and_threat_slope_checks_are_behaviour(self):
         self.assertEqual(EVIDENCE[BEHAVIOUR_IMMUNITY], BEHAVIOUR)

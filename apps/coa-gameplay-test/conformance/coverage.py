@@ -21,7 +21,7 @@ from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, 
                      STATUSES, Verdict, read_verdicts)
 from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
-from passives import PASSIVE_DELTA
+from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK
 from profile import DbcSetMismatch, require_server_sha
 from stack import STACK_DPS, STACK_SOURCE, TALENT_DELTA
@@ -351,13 +351,15 @@ METRIC_EVIDENCE = {
                      'resistance', 'mana_regen', 'moving', 'threat'), STATE),
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
+RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
+POWER_WORDS = '|'.join(sorted(re.escape(name) for name in POWER_NAMES.values()))
 STATE_PROMISES = {
     'stat': r'strength|agility|stamina|intellect|spirit', 'stat_exact': r'strength|agility|stamina|intellect|spirit',
-    'armor': r'armou?r', 'combat_rating': r'rating', 'melee_hit_chance': r'hit chance|chance to hit',
+    'armor': r'armou?r', 'combat_rating': RATING_WORDS, 'melee_hit_chance': r'hit chance|chance to hit',
     'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise',
     'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
-    'max_health': r'maximum health', 'max_power': r'maximum (?:mana|energy|rage|focus)',
+    'max_health': r'maximum health', 'max_power': POWER_WORDS,
     'power': r'mana|energy|rage|focus', 'run_speed_rate': r'movement speed|run speed',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
     'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
