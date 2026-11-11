@@ -4260,7 +4260,7 @@
       "524739 behaviour_event_delay"
     ],
     "kind": "claim",
-    "reason": "Tooltip sentence with no ledger clause before the custom-mechanics batch. The tooltip states no number; Spell.dbc 524739 Effect[1] 183 gives 1500 ms (EffectBasePoints 1499, DieSides 1). The sentence opening the tooltip, \"Target an enemy and leap into the air.\", stays without a clause."
+    "reason": "Tooltip sentence with no ledger clause before the custom-mechanics batch. The tooltip states no number; Spell.dbc 524739 Effect[1] 183 gives 1500 ms (EffectBasePoints 1499, DieSides 1). The sentence opening the tooltip, \"Target an enemy and leap into the air.\", has its own unproven row."
   },
   {
     "spell": 524739,
