@@ -1708,6 +1708,24 @@
   ],
   "behaviours": [
     {
+      "spell": 804932, "variant": "three_stacks", "label_suffix": "three_stacks",
+      "name": "Unbroken Creed", "kind": "metric_delta",
+      "quote": "auto attack your target an amount of times equal to your stack count", "expected": 3,
+      "trigger_spell": 572027, "target": "dummy", "setup_casts": [807268, 807268, 807268], "setup_wait_ms": 1100,
+      "metric": "melee_attack_count", "fields": {"hand": 0},
+      "before_expected": 0, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarEvents.cpp:99-101 and :206-208: a damaging, non-periodic, untriggered hit of an Ability that is not an Oath Breaker grants Unbroken Creed 807648 (StackAmount 3, 10 s); AscensionTemplarAbilities.cpp:102-104 stores its stacks on a damaging Oath Breaker cast and :216-219 removes them and casts 807763 (Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS) with the stack count. Argent Blade 807268 casts build the stacks, Righteous Upheaval 572027 (an Oath Breaker, SpellFamilyFlags[2] 128) consumes them; the reading is the main-hand auto attacks after the Upheaval. Before the learn no stack, no extra attack. 3 stacks: 3 extra attacks."
+    },
+    {
+      "spell": 804932, "variant": "two_stacks", "label_suffix": "two_stacks",
+      "name": "Unbroken Creed", "kind": "metric_delta",
+      "quote": "auto attack your target an amount of times equal to your stack count", "expected": 2,
+      "trigger_spell": 572027, "target": "dummy", "setup_casts": [807268, 807268], "setup_wait_ms": 1100,
+      "metric": "melee_attack_count", "fields": {"hand": 0},
+      "before_expected": 0, "wait_ms": 1000,
+      "observe_source": "AscensionTemplarEvents.cpp:99-101 and :206-208: a damaging, non-periodic, untriggered hit of an Ability that is not an Oath Breaker grants Unbroken Creed 807648 (StackAmount 3, 10 s); AscensionTemplarAbilities.cpp:102-104 stores its stacks on a damaging Oath Breaker cast and :216-219 removes them and casts 807763 (Effect[0] 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS) with the stack count. Argent Blade 807268 casts build the stacks, Righteous Upheaval 572027 (an Oath Breaker, SpellFamilyFlags[2] 128) consumes them; the reading is the main-hand auto attacks after the Upheaval. Before the learn no stack, no extra attack. 2 stacks: 2 extra attacks."
+    },
+    {
       "spell": 803163, "variant": "tick_rate", "label_suffix": "tick_rate",
       "name": "Might of Aggramar", "kind": "metric_delta",
       "quote": "increase the tick rate of your Blade of Faith and Condemn by", "expected": 2700,
