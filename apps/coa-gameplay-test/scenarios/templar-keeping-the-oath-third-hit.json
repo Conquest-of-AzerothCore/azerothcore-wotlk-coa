@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Keeping the Oath: three hits at uneven intervals are repaid in full over the last refreshed 8 s",
-  "contract": "Keeping the Oath 92109 delays 40% of a direct hit into Oathkeeper 803237, which pays it over 8 s (DurationIndex 31, amplitude 1000). A level 60 striker (entry 36) with the fixture's 100-point spell hit bonus, so that no strike misses, casts Light of the Naaru 41394 (1100 Holy, 440 delayed) at a level 60 Templar holding 92109. Each strike adds its 440 to the remaining debt, resets the debt to 8000 ms and restarts its ticks (ADR 0157), so the debt then pays in 8 payments over the refreshed 8 s, the last at the refreshed expiry; the total repaid is 40% of every strike and nothing is paid after the debt ends. Each payment is the remaining debt divided by the ticks left, rounded down, and the first payment of a schedule also takes the integer leftover. Three strikes at 0, 2.3 and 7.1 s, two trials: 2 x 55, then 770 from 2.3 s (98, then 96 each), 4 of those paid before the third strike leave 384, then 824 from 7.1 s in 8 payments of 103, the last at 15.1 s: 14 payments, 1320 paid.",
+  "name": "Keeping the Oath: three hits at uneven intervals are repaid in full by the last refreshed end",
+  "contract": "Keeping the Oath 92109 delays 40% of a direct hit into Oathkeeper 803237, which pays it over 8 s (DurationIndex 31, amplitude 1000). A level 60 striker (entry 36) with the fixture's 100-point spell hit bonus, so that no strike misses, casts Light of the Naaru 41394 (1100 Holy, 440 delayed) at a level 60 Templar holding 92109. Each strike adds its 440 to the remaining debt, resets the debt to 8000 ms and resets its tick count but not its periodic timer (ADR 0157): payments keep their one-second cadence across strikes, 8 more follow the last strike, the last up to 1 s before the refreshed end, and the total repaid is 40% of every strike, with nothing paid after the debt ends. Each payment is the remaining debt divided by the ticks left, rounded down, and the first payment after a change also takes the integer leftover. Three strikes at 0, 2.3 and 7.1 s, two trials: 2 x 55, then 770 from 2.3 s paid 98 and 96 each at 3 to 7 s, then 728 from 7.1 s in 8 payments of 91 at 8 to 15 s, 0.1 s before the refreshed end: 15 payments, 1320 paid.",
   "players": [
     {
       "id": "caster",
@@ -72,10 +72,10 @@
       "action": "snapshot",
       "actor": "caster",
       "metric": "spell_log_count",
+      "save_as": "logs_1_1",
       "spell": 41394,
       "caster": "striker",
-      "target": "caster",
-      "save_as": "logs_1_1"
+      "target": "caster"
     },
     {
       "action": "cast",
@@ -90,15 +90,15 @@
     },
     {
       "action": "assert",
-      "label": "Trial 1: the strike lands, one damage log",
+      "label": "Trial 1: strike 1 lands, one damage log",
       "actor": "caster",
       "metric": "spell_log_count",
-      "spell": 41394,
-      "caster": "striker",
-      "target": "caster",
       "relative_to": "logs_1_1",
       "min": 1,
-      "max": 1
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
     },
     {
       "action": "assert",
@@ -157,10 +157,10 @@
       "action": "snapshot",
       "actor": "caster",
       "metric": "spell_log_count",
+      "save_as": "logs_1_2",
       "spell": 41394,
       "caster": "striker",
-      "target": "caster",
-      "save_as": "logs_1_2"
+      "target": "caster"
     },
     {
       "action": "cast",
@@ -175,15 +175,15 @@
     },
     {
       "action": "assert",
-      "label": "Trial 1: the strike lands, one damage log",
+      "label": "Trial 1: strike 2 lands, one damage log",
       "actor": "caster",
       "metric": "spell_log_count",
-      "spell": 41394,
-      "caster": "striker",
-      "target": "caster",
       "relative_to": "logs_1_2",
       "min": 1,
-      "max": 1
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
     },
     {
       "action": "assert",
@@ -199,12 +199,12 @@
     },
     {
       "action": "wait",
-      "label": "trial 1: 7.0 s after the first strike",
-      "ms": 4400
+      "label": "trial 1: 6.5 s after the first strike",
+      "ms": 3900
     },
     {
       "action": "assert",
-      "label": "Trial 1: four payments of the second schedule before the third strike",
+      "label": "Trial 1: payments keep the cadence at 3, 4, 5 and 6 s",
       "actor": "caster",
       "metric": "spell_damage_count",
       "relative_to": "payments_1",
@@ -215,7 +215,7 @@
     },
     {
       "action": "assert",
-      "label": "Trial 1: 110 + 98 + 3 x 96 paid before the third strike",
+      "label": "Trial 1: 110 + 98 + 3 x 96 paid by 6.5 s",
       "actor": "caster",
       "metric": "spell_damage_total",
       "relative_to": "paid_1",
@@ -227,7 +227,7 @@
     {
       "action": "wait",
       "label": "trial 1: 7.1 s after the first strike",
-      "ms": 100
+      "ms": 600
     },
     {
       "action": "snapshot",
@@ -242,10 +242,10 @@
       "action": "snapshot",
       "actor": "caster",
       "metric": "spell_log_count",
+      "save_as": "logs_1_3",
       "spell": 41394,
       "caster": "striker",
-      "target": "caster",
-      "save_as": "logs_1_3"
+      "target": "caster"
     },
     {
       "action": "cast",
@@ -260,15 +260,15 @@
     },
     {
       "action": "assert",
-      "label": "Trial 1: the strike lands, one damage log",
+      "label": "Trial 1: strike 3 lands, one damage log",
       "actor": "caster",
       "metric": "spell_log_count",
-      "spell": 41394,
-      "caster": "striker",
-      "target": "caster",
       "relative_to": "logs_1_3",
       "min": 1,
-      "max": 1
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
     },
     {
       "action": "assert",
@@ -289,18 +289,18 @@
     },
     {
       "action": "assert",
-      "label": "Trial 1: 13 payments 500 ms before the refreshed debt ends",
+      "label": "Trial 1: 14 payments before the last tick at 15 s",
       "actor": "caster",
       "metric": "spell_damage_count",
       "relative_to": "payments_1",
-      "min": 13,
-      "max": 13,
+      "min": 14,
+      "max": 14,
       "spell": 803237,
       "target": "caster"
     },
     {
       "action": "assert",
-      "label": "Trial 1: the refreshed debt still runs 500 ms before its end",
+      "label": "Trial 1: the refreshed debt still runs before its last tick",
       "actor": "caster",
       "metric": "aura",
       "spell": 803237,
@@ -308,17 +308,17 @@
     },
     {
       "action": "wait",
-      "label": "trial 1: 500 ms after the refreshed debt's end",
+      "label": "trial 1: 500 ms after the refreshed debt's end at 15.1 s",
       "ms": 1000
     },
     {
       "action": "assert",
-      "label": "Trial 1: the last payment lands at the refreshed debt's end",
+      "label": "Trial 1: the last payment lands within 1 s before the refreshed end",
       "actor": "caster",
       "metric": "spell_damage_count",
       "relative_to": "payments_1",
-      "min": 14,
-      "max": 14,
+      "min": 15,
+      "max": 15,
       "spell": 803237,
       "target": "caster"
     },
@@ -400,10 +400,10 @@
       "action": "snapshot",
       "actor": "caster",
       "metric": "spell_log_count",
+      "save_as": "logs_2_1",
       "spell": 41394,
       "caster": "striker",
-      "target": "caster",
-      "save_as": "logs_2_1"
+      "target": "caster"
     },
     {
       "action": "cast",
@@ -418,15 +418,15 @@
     },
     {
       "action": "assert",
-      "label": "Trial 2: the strike lands, one damage log",
+      "label": "Trial 2: strike 1 lands, one damage log",
       "actor": "caster",
       "metric": "spell_log_count",
-      "spell": 41394,
-      "caster": "striker",
-      "target": "caster",
       "relative_to": "logs_2_1",
       "min": 1,
-      "max": 1
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
     },
     {
       "action": "assert",
@@ -485,10 +485,10 @@
       "action": "snapshot",
       "actor": "caster",
       "metric": "spell_log_count",
+      "save_as": "logs_2_2",
       "spell": 41394,
       "caster": "striker",
-      "target": "caster",
-      "save_as": "logs_2_2"
+      "target": "caster"
     },
     {
       "action": "cast",
@@ -503,15 +503,15 @@
     },
     {
       "action": "assert",
-      "label": "Trial 2: the strike lands, one damage log",
+      "label": "Trial 2: strike 2 lands, one damage log",
       "actor": "caster",
       "metric": "spell_log_count",
-      "spell": 41394,
-      "caster": "striker",
-      "target": "caster",
       "relative_to": "logs_2_2",
       "min": 1,
-      "max": 1
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
     },
     {
       "action": "assert",
@@ -527,12 +527,12 @@
     },
     {
       "action": "wait",
-      "label": "trial 2: 7.0 s after the first strike",
-      "ms": 4400
+      "label": "trial 2: 6.5 s after the first strike",
+      "ms": 3900
     },
     {
       "action": "assert",
-      "label": "Trial 2: four payments of the second schedule before the third strike",
+      "label": "Trial 2: payments keep the cadence at 3, 4, 5 and 6 s",
       "actor": "caster",
       "metric": "spell_damage_count",
       "relative_to": "payments_2",
@@ -543,7 +543,7 @@
     },
     {
       "action": "assert",
-      "label": "Trial 2: 110 + 98 + 3 x 96 paid before the third strike",
+      "label": "Trial 2: 110 + 98 + 3 x 96 paid by 6.5 s",
       "actor": "caster",
       "metric": "spell_damage_total",
       "relative_to": "paid_2",
@@ -555,7 +555,7 @@
     {
       "action": "wait",
       "label": "trial 2: 7.1 s after the first strike",
-      "ms": 100
+      "ms": 600
     },
     {
       "action": "snapshot",
@@ -570,10 +570,10 @@
       "action": "snapshot",
       "actor": "caster",
       "metric": "spell_log_count",
+      "save_as": "logs_2_3",
       "spell": 41394,
       "caster": "striker",
-      "target": "caster",
-      "save_as": "logs_2_3"
+      "target": "caster"
     },
     {
       "action": "cast",
@@ -588,15 +588,15 @@
     },
     {
       "action": "assert",
-      "label": "Trial 2: the strike lands, one damage log",
+      "label": "Trial 2: strike 3 lands, one damage log",
       "actor": "caster",
       "metric": "spell_log_count",
-      "spell": 41394,
-      "caster": "striker",
-      "target": "caster",
       "relative_to": "logs_2_3",
       "min": 1,
-      "max": 1
+      "max": 1,
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster"
     },
     {
       "action": "assert",
@@ -617,18 +617,18 @@
     },
     {
       "action": "assert",
-      "label": "Trial 2: 13 payments 500 ms before the refreshed debt ends",
+      "label": "Trial 2: 14 payments before the last tick at 15 s",
       "actor": "caster",
       "metric": "spell_damage_count",
       "relative_to": "payments_2",
-      "min": 13,
-      "max": 13,
+      "min": 14,
+      "max": 14,
       "spell": 803237,
       "target": "caster"
     },
     {
       "action": "assert",
-      "label": "Trial 2: the refreshed debt still runs 500 ms before its end",
+      "label": "Trial 2: the refreshed debt still runs before its last tick",
       "actor": "caster",
       "metric": "aura",
       "spell": 803237,
@@ -636,17 +636,17 @@
     },
     {
       "action": "wait",
-      "label": "trial 2: 500 ms after the refreshed debt's end",
+      "label": "trial 2: 500 ms after the refreshed debt's end at 15.1 s",
       "ms": 1000
     },
     {
       "action": "assert",
-      "label": "Trial 2: the last payment lands at the refreshed debt's end",
+      "label": "Trial 2: the last payment lands within 1 s before the refreshed end",
       "actor": "caster",
       "metric": "spell_damage_count",
       "relative_to": "payments_2",
-      "min": 14,
-      "max": 14,
+      "min": 15,
+      "max": 15,
       "spell": 803237,
       "target": "caster"
     },

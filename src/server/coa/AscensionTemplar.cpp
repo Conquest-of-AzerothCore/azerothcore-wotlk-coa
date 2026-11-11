@@ -194,7 +194,7 @@ void Delay(Player* player, uint32 amount)
     {
         aura->GetEffect(EFFECT_0)->ChangeAmount(int32(std::min<uint64>(INT32_MAX, uint64(std::max(0, old)) + amount)));
         aura->SetDuration(aura->GetMaxDuration());
-        aura->GetEffect(EFFECT_0)->ResetPeriodic(true);
+        aura->GetEffect(EFFECT_0)->ResetTicks();
     }
 }
 void ReduceDebt(Player* player, uint32 percent, bool oneTick)

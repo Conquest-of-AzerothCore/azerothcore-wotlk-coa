@@ -20,14 +20,19 @@ schedule per hit.
   schedules per Templar, not the one aura effect amount the debt uses.
 - Raise the tick limit after a refresh. `GetTotalTicks()` reads the maximum duration, which the refresh does not
   change.
-- Restart the debt's ticks when a hit refreshes it, and spread the whole remaining debt over the 8 ticks of the
-  refreshed duration. Chosen, as the mentor decided.
+- Restart the debt's ticks and its periodic timer when a hit refreshes it (`ResetPeriodic(true)`), so 8 payments
+  follow each hit, the last at the refreshed end. Built first, then dropped after review: every delayed hit reset
+  the timer to a full second, so hits less than 1 s apart, routine on a tank, suspended the payments until the last
+  hit and then charged the whole debt in the next 8 s.
+- Reset the tick count only (`ResetTicks()`), keeping the timer: payments keep their one-second cadence across hits,
+  and the remaining payments spread the new debt. Chosen (option (a), mentor, 2026-11-11, after the re-review).
 
 ## Decision
 
-- `Delay` calls `AuraEffect::ResetPeriodic(true)` on 803237's effect after the refresh: the tick number returns to 0
-  and the periodic timer to one amplitude, so 8 ticks follow, the last at the refreshed expiry. The tick count of
-  ADR 0155 is unchanged.
+- `Delay` calls `AuraEffect::ResetTicks()` on 803237's effect after the refresh: the tick number returns to 0, so
+  up to 8 more ticks follow, and the periodic timer keeps its phase. The ADR 0155 count spreads the whole remaining
+  debt over the ticks the refreshed duration still covers, so it is paid in full by the refreshed end. The last
+  payment lands on the original one-second phase, up to 1 s before the refreshed end, not at it.
 - Each tick pays `remaining - (ticks - 1) x floor(remaining / ticks)`: the remaining debt divided by the ticks left,
   rounded down, with the integer leftover in that payment. Every later payment of the schedule is then exactly the
   rounded-down share, so the leftover goes into one payment. A tick with no debt left pays nothing and sends no log;
@@ -41,10 +46,14 @@ schedule per hit.
 
 - Gameplay-visible: an Oathkeeper under sustained hits now takes all the delayed damage, 40% of every hit, where part
   of it used to vanish; under repeated hits the debt keeps running until 8 s after the last one.
-- Two hits 3.5 s apart: 3 x 55, then 715 as 92 and 7 x 89, 11 payments, 880, the last at 8 s after the second hit.
-  Three hits at 0, 2.3 and 7.1 s: 2 x 55, 98 and 3 x 96, then 824 as 8 x 103, 14 payments, 1320.
+- Payments land every second while hits arrive, whatever their spacing.
+- Two hits 3.5 s apart: 3 x 55, then 715 as 92 and 7 x 89 at 4 to 11 s, 11 payments, 880, the last 0.5 s before the
+  refreshed end. Three hits at 0, 2.3 and 7.1 s: 2 x 55, then 98 and 4 x 96 at 3 to 7 s, then 728 as 8 x 91 at 8 to
+  15 s, 15 payments, 1320, the last 0.1 s before the refreshed end. Ten hits 0.5 s apart from 0 to 4.5 s: one
+  payment each second from 1 to 12 s, 4400.
 - One hit: still 8 x 55 (ADR 0155).
 - A percent reduction (`ReduceDebt`, Holy Books) during a schedule puts its new leftover into the next payment.
-- Regression: catalog scenarios `templar-keeping-the-oath-second-hit` and `templar-keeping-the-oath-third-hit` (count,
-  sum, last payment against the refreshed end, nothing paid after it), `templar-keeping-the-oath-debt-spread`, and the
+- Regression: catalog scenarios `templar-keeping-the-oath-second-hit`, `templar-keeping-the-oath-third-hit` and
+  `templar-keeping-the-oath-rapid-hits` (payment count each second, sum, last payment within 1 s before the refreshed
+  end, nothing paid after it), `templar-keeping-the-oath-debt-spread`, and the
   conformance entries `92109` `delay`, `over` and `706468` `debt`.
