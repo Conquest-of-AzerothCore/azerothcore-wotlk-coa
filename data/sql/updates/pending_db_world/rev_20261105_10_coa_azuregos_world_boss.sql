@@ -101,10 +101,20 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
 (9780910, 280139, 1, 0, 0, 1, 1, 2622.22, -5977.93, 106.0, 4.2121, 300, 0, 0);
 
--- The Treasures of Azeroth chest every world boss gives (978059) has a 5% roll at any world boss item (978060):
+-- The Treasures of Azeroth chest every world boss gives (1615011) has a 5% roll at any world boss item (978060):
 -- his items join that pool.
 INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
   `GroupId`, `MinCount`, `MaxCount`, `Comment`)
 SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
 FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
 WHERE l.`Entry` = 6109 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
+
+-- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 holds;
+-- 978059 keeps its loot for the chests players still hold.
+DELETE FROM `item_loot_template` WHERE `Entry` = 1615011;
+INSERT INTO `item_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`,
+  `MinCount`, `MaxCount`, `Comment`) VALUES
+(1615011, 978059, 978059, 100, 0, 1, 0, 1, 1, 'Treasures of Azeroth - a Heroic Dungeon epic'),
+(1615011, 978060, 978060, 5, 0, 1, 0, 1, 1, 'Treasures of Azeroth - 5% a world boss item'),
+(1615011, 400750, 0, 100, 0, 1, 0, 15, 15, 'Treasures of Azeroth - 15 Raider''s Commendations'),
+(1615011, 978061, 978061, 100, 0, 1, 0, 4, 4, 'Treasures of Azeroth - 1000 Runes of Descension (250 x 4)');
