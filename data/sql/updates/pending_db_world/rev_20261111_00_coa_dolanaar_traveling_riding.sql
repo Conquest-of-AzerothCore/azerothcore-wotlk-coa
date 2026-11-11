@@ -1,7 +1,7 @@
--- Dolanaar's traveling riding NPCs: Sylindra Starweave <Traveling Riding Trainer> (449169), Maelira Rider
--- <Traveling Mount Merchant> (449168) and a Riding Striped Frostsaber (12358) stood together by the Dolanaar stable
--- on Ascension (player screenshot). Entries, names, subnames and Maelira's two reins at 100g come from the db.exil.es
--- mirror; positions from in-game .gps by the reporter. Level, flags and modifiers follow Garion Hunter and Pol Hunter
+-- Dolanaar's traveling riding NPCs: Sylindra Starweave <Traveling Riding Trainer> (449169), Maelira Rider <Traveling
+-- Mount Merchant> (449168) and a Riding Striped Frostsaber (12358) stood together by the Dolanaar stable on Ascension
+-- (gameplay footage). Entries, names, subnames and Maelira's two reins at 100g come from the db.exil.es mirror;
+-- positions from in-game .gps matched to the footage. Level, flags and modifiers follow Garion Hunter and Pol Hunter
 -- in Goldshire, with the Darnassus faction. Ascension's displays 449168/449169 do not resolve in the client, so
 -- Sylindra uses 1727 (closest match) and Maelira 4483 (placeholder). Sylindra trains from Jartsam's riding list
 -- (trainer 40) and his riding gossip (menu 4019), which teaches every Alliance race.
@@ -69,3 +69,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
     0, 'Maelira Rider, traveling mount merchant, beside Sylindra Starweave'),
 (9013402, 12358, 1, 0, 0, 1, 1, 0, 9899.066, 944.86896, 1312.5757, 3.0841384, 300, 0, 0, 0, 0, 0, 0, 0, 0, '', 0,
     0, 'Riding Striped Frostsaber on show beside Maelira Rider');
+
+DELETE FROM `ascension_npc_overhead_icons` WHERE `creature_entry` = 449168;
+INSERT INTO `ascension_npc_overhead_icons` (`creature_entry`, `spell_id`, `enabled`) VALUES
+(449168, 982754, 1);
