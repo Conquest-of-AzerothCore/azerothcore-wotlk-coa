@@ -1652,6 +1652,26 @@
       "per_trigger": 1,
       "per_trigger_text": "triggering Zealotry",
       "handler": "AscensionTemplarAbilities.cpp:305-307 (OnSpellHitResult): if (Named(info, 801446) || info->Id == 500689) Zealotry(player, target); unconditional on every landed hit of the Vindication chain (chain root 801446, rank 573324 per rev_20260831_01_local_spell_progression.sql:1112, matched via Named()'s own GetFirstSpellInChain comparison, AscensionTemplar.cpp:39-42). Reproduced without the attempt_auras fixture (round10 proc-chains): 501 events over 273 trials, far above the per_trigger 1 this unconditional clause alone predicts, because AscensionTemplarAbilities.cpp:155-162 (OnSpellCast) unconditionally grants/stacks Oath: Vindication (805332) via GrantOath() on every Vindication cast, whose own roll at AscensionTemplarAbilities.cpp:311-313 (if (AuraEffect* oath = player->GetAuraEffect(805332, EFFECT_0)) if (roll_chance_i(oath->GetAmount())) Zealotry(...)) then adds a second, cumulative Zealotry trigger on the same or a later landed hit as the stack grows; the attempt_auras fixture clears 805332 to 0 stacks before every attempt so only this unconditional half is measured here; the Oath's own separate chance clause (805332 effect_value 805332e0) is not proven by this entry"
+    },
+    {
+      "aura": 705306, "kind": "magnitude_ratio", "name": "Sacred Defense",
+      "tooltip": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage. Can only occur once per sec. \r\n\r\n@ext:Does not work on Bosses.:ext@",
+      "trigger": {"action": "taken_hit", "spell": 32247, "striker_entry": 36},
+      "trigger_text": "When you take Physical damage", "trigger_metric": "spell_damage_total",
+      "observe_spell": 707720, "observe_source": "EffectTriggerSpell[0] of 705306", "observe_metric": "spell_damage_total",
+      "per_trigger_text": "for $s1% of the damage dealt as Holy damage", "internal_cooldown_ms": 1000,
+      "expected_ratio": 0.15,
+      "expected_ratio_source": "Spell.dbc 705306 EffectBasePoints[0] 14 + EffectDieSides[0] 1 = 15% ($s1), the integer share of AscensionTemplarEvents.cpp:46-49 (Check, case 705306): a direct damage taken by the player with a physical school mask from an actor that is not a dungeon or world boss; :134-138 (Proc) casts Copy(player, actor, 707720, damage * 15 / 100) once per 1 s (State(player).cooldowns); striker spell 32247 ('Karazhan - Chess NPC Action: Melee Attack: DAMAGE (Footman)', SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 1, EffectBasePoints 999 EffectDieSides 1, SPELL_ATTR3_ALWAYS_HIT), the striker of the internal_cooldown_gate entry, so 15% never truncates to 0. Harvest Golem 36 (rank 0, type_flags 32768) is not a boss. 707720 is Holy, so the ratio is judged after the striker's level-based partial resist (ADR 0092)."
+    },
+    {
+      "aura": 705306, "kind": "gate_absence", "name": "Sacred Defense",
+      "tooltip": "When you take Physical damage you now strike back at enemies for $s1% of the damage dealt as Holy damage. Can only occur once per sec. \r\n\r\n@ext:Does not work on Bosses.:ext@",
+      "trigger": {"action": "taken_hit", "spell": 32247, "striker_entry": 31146},
+      "trigger_text": "When you take Physical damage", "trial_metric": "spell_damage_count",
+      "observe_spell": 707720, "observe_source": "EffectTriggerSpell[0] of 705306", "observe_metric": "spell_cast_count",
+      "internal_cooldown_ms": 1000,
+      "gate_text": "@ext:Does not work on Bosses.:ext@: the striker is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, so Creature::isWorldBoss), against the non-boss Harvest Golem 36 of the magnitude_ratio entry, whose every hit strikes back",
+      "handler": "AscensionTemplarEvents.cpp:46-49 (Check, case 705306): a direct damage taken by the player with a physical school mask from an actor that is not a dungeon or world boss; :134-138 (Proc) casts Copy(player, actor, 707720, damage * 15 / 100) once per 1 s (State(player).cooldowns); striker spell 32247 ('Karazhan - Chess NPC Action: Melee Attack: DAMAGE (Footman)', SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 1, EffectBasePoints 999 EffectDieSides 1, SPELL_ATTR3_ALWAYS_HIT), the striker of the internal_cooldown_gate entry, so 15% never truncates to 0"
     }
   ],
   "talent_modifiers": [

@@ -2424,7 +2424,8 @@
     "spell": 705306,
     "clause": "for $s1% of the damage dealt as Holy damage",
     "labels": [
-      "705306 effect_value e0 #0"
+      "705306 effect_value e0 #0",
+      "705306 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -2440,7 +2441,8 @@
     "spell": 705306,
     "clause": "@ext:Does not work on Bosses.:ext@",
     "labels": [
-      "705306 effect_value #1 -- generic: client extension note, never a number"
+      "705306 gate_absence_count",
+      "705306 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
