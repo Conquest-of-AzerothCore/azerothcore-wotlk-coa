@@ -3764,6 +3764,42 @@
       "label_suffix": "downfall",
       "variant": "downfall",
       "observe_source": "801481 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 5000, EffectTriggerSpell 801482 (Downfall), against Glory's DurationIndex 28 (5000 ms): the one tick lands at the end of Glory. Reads of Downfall 801482 on the caster: 0 before any Glory cast (control), 0 4000 ms after the cast (not during Glory), 1 2000 ms later, 6000 ms after the cast (gained after the duration; Downfall itself lasts 5000 ms, DurationIndex 28)."
+    },
+    {
+      "spell": 681483,
+      "name": "Disciplined Mind",
+      "kind": "hit_ratio",
+      "variant": "benediction",
+      "label_suffix": "benediction",
+      "quote": "Increases the healing of Benediction by",
+      "expected": 1.3,
+      "metric": "spell_heal_total",
+      "observe_spell": 578276,
+      "caster": "caster",
+      "target": "ally",
+      "control": {},
+      "treatment": {"auras": [[681483, 1]]},
+      "critical": false,
+      "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "$s1 = 30 (681483 EffectBasePoints[0] 29, EffectDieSides[0] 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE, which also scales heals), EffectSpellClassMask[0] 1073741824 matching Benediction 578276 SpellFamilyFlags[0] 1073741824. The caster heals the ally with Benediction 578276 (rank 8, the level 60 rank; Effect[1] SPELL_EFFECT_HEAL, ${$m2+0+$STA*0.25+$SP*0.3}); control: no talent; treatment: Disciplined Mind set before every heal. A spell power fixture of 20000 makes the $SP*0.3 part (6000) dominate the 56-point die: the first diagnostic without it (.cache/verify-all/20261111-172353) read +31.96% with a 99% half-width of 3.5 points, insufficient_trials. Only non-critical heals are compared. The ratio does not depend on the rank's per-level term, so the ADR 0148 removal does not move it."
+    },
+    {
+      "spell": 803219,
+      "name": "Spiritual Abdicator",
+      "kind": "metric_delta",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "quote": "reduces damage taken by an additional 5% per copy",
+      "expected": 722,
+      "before_expected": 809,
+      "trigger_spell": 1397742,
+      "target": "dummy",
+      "metric": "melee_damage_taken",
+      "fields": {"target": "dummy"},
+      "wait_ms": 3000,
+      "expire_ms": 20500,
+      "observe_source": "Testament of Hope 1397742 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectBasePoints 1 + DieSides 1 = 2 copies; each copy carries 704409, whose Effect[1] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (EffectBasePoints -11 + 1 = -10%, all schools) lands on the caster within 704409's radius. AscensionTemplarContracts.cpp:322-326 (ModifySpellEffectBaseValue) sets that effect to -15 when the copy's owner knows 803219. The reading is the caster's MeleeDamageBonusTaken of 1000 from the dummy (Unit.cpp:11609-11640, TakenTotalMod *= GetTotalAuraMultiplier of aura 87): the multiplier is built by AddPct in float (Util.h:52-61, Unit.cpp:7064-7088), once per copy, and the product is truncated to uint32: two copies give 1.0f + -10% twice = 0.80999994f, 1000 x that = 809.99994, read 809, without the talent (control), and 0.7225f, 722.5, read 722, with it. A reduction that ignored the talent reads 809 in both phases; one that kept a single copy reads 900 or 850."
     }
   ],
   "player_observations": [

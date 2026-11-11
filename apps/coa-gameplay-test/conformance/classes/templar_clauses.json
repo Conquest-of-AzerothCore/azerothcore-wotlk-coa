@@ -1640,7 +1640,8 @@
     "clause": "Increases the healing of Benediction by $s1%",
     "labels": [
       "681483 effect_value e0 #0",
-      "681483 e0 spell_modifier 578276"
+      "681483 e0 spell_modifier 578276",
+      "681483 behaviour_hit_ratio benediction"
     ],
     "kind": "claim"
   },
@@ -2576,8 +2577,8 @@
     "spell": 706468,
     "clause": "Using a Libram now removes $707208s1% of the delayed damage from Oathkeeper.",
     "labels": [
-      "conformance-templar-value-706468 (effect_value 707208e0)",
-      "706468 behaviour_amount_delta ok (referenced)"
+      "706468 effect_value 707208e0 #0",
+      "706468 behaviour_amount_delta"
     ],
     "kind": "claim"
   },
@@ -3613,8 +3614,8 @@
     "spell": 803219,
     "clause": "Your Testament of Hope now reduces damage taken by an additional 5% per copy.",
     "labels": [
-      "803219 effect_value (unmodelled)",
-      "803219 e0 (unmodelled)"
+      "803219 behaviour_metric_delta",
+      "803219 behaviour_metric_delta damage_taken"
     ],
     "kind": "claim"
   },
