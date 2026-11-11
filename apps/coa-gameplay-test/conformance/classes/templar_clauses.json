@@ -748,13 +748,21 @@
     "clause": "and reduces the cooldown of Librams, Force of Golganneth, Divine Force, and Testament of Will by $/1000;505205s1 sec.",
     "labels": [
       "504807 effect_value 505205e0 #0",
-      "504807 trigger_cooldown_delta",
-      "504807 trigger_cooldown_delta 801461",
-      "504807 trigger_cooldown_delta 500694",
-      "504807 trigger_cooldown_delta 806153",
-      "504807 trigger_cooldown_delta 801455"
+      "504807 cost_gate 801461 libram without",
+      "504807 cost_gate 801461 libram with",
+      "504807 cost_gate 801461 libram beyond",
+      "504807 cost_gate 500694 golganneth without",
+      "504807 cost_gate 500694 golganneth with",
+      "504807 cost_gate 500694 golganneth beyond",
+      "504807 cost_gate 806153 divine_force without",
+      "504807 cost_gate 806153 divine_force with",
+      "504807 cost_gate 806153 divine_force beyond",
+      "504807 cost_gate 801455 testament_of_will without",
+      "504807 cost_gate 801455 testament_of_will with",
+      "504807 cost_gate 801455 testament_of_will beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the bare 504807 trigger_cooldown_delta label named no verdict and the per-spell deltas read cooldown_ms (data); four cooldown gates: each spell, primed, is refused 500 ms before its full cooldown without 504807, goes through after one Righteous Upheaval with it, and is refused again 1500 ms before"
   },
   {
     "spell": 504808,
@@ -3332,9 +3340,15 @@
     "clause": "and causes your damaging abilities to reduce the cooldown of Righteous Upheaval by $/1000;575328S1 sec",
     "labels": [
       "801466 effect_value 575328e0 #1",
-      "801466 trigger_cooldown_delta"
+      "801466 trigger_cooldown_delta",
+      "801466 cost_gate 572027 upheaval without",
+      "801466 cost_gate 572027 upheaval with aura",
+      "801466 cost_gate 572027 upheaval with",
+      "801466 cost_gate 572027 upheaval beyond aura",
+      "801466 cost_gate 572027 upheaval beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "cooldown gate of Righteous Upheaval 572027 with Libram of Zeal active: the priming Upheaval and one Argent Blade, two damaging abilities, take 4000 ms off; refused at the full cooldown less 500 ms without the Libram, through at 4000 ms less plus 500, refused at 4000 ms less minus 500"
   },
   {
     "spell": 801466,
@@ -3935,8 +3949,13 @@
   {
     "spell": 804932,
     "clause": "When you use a damaging Oath Breaker or Divine Fury you now consume the stacks and auto attack your target an amount of times equal to your stack count.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "804932 behaviour_metric_delta three_stacks",
+      "804932 behaviour_metric_delta two_stacks",
+      "804932 behaviour_metric_delta divine_fury"
+    ],
+    "kind": "claim",
+    "reason": "no label before; after an Oath Breaker (Righteous Upheaval) 2 and 3 stacks give 2 and 3 extra main-hand auto attacks, after Divine Fury 500689 (one-hand weapon) 3 stacks give 3; none without the passive (AscensionTemplarAbilities.cpp:102-104, :216-219)"
   },
   {
     "spell": 805409,
