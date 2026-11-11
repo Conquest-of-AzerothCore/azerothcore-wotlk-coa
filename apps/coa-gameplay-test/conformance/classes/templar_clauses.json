@@ -109,7 +109,8 @@
     "spell": 300502,
     "clause": "Casting an Oath Breaker with 10 stacks of your Oath Chain now refreshes the duration of Blade of Faith on all nearby enemies.",
     "labels": [
-      "300502 behaviour_duration_refresh"
+      "300502 behaviour_duration_refresh",
+      "300502 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -238,7 +239,8 @@
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
       "300514 spell_duration 102208",
-      "300514 behaviour_cast_applies_aura"
+      "300514 behaviour_cast_applies_aura",
+      "300514 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -540,7 +542,8 @@
     "clause": "Your Argent Blade now also extends the duration of Interdict on your target by $/1000;500014s1 sec.",
     "labels": [
       "500011 effect_value 500014e0",
-      "500011 trigger_duration_delta"
+      "500011 trigger_duration_delta",
+      "500011 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -1767,7 +1770,8 @@
     "labels": [
       "705271 effect_value e1 #1",
       "705271 e1",
-      "705271 behaviour_duration_ratio"
+      "705271 behaviour_duration_ratio",
+      "705271 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2505,7 +2509,8 @@
     "labels": [
       "conformance-templar-value-707754 (effect_value e1 #0, -10, ok)",
       "707754 e1 (unmodelled) -- scripted or crowd-control effect",
-      "707754 behaviour_duration_ratio"
+      "707754 behaviour_duration_ratio",
+      "707754 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2524,7 +2529,8 @@
     "labels": [
       "707851 effect_value e1 #1",
       "707851 e1 (unmodelled)",
-      "707851 behaviour_duration_ratio"
+      "707851 behaviour_duration_ratio",
+      "707851 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2561,7 +2567,8 @@
     "spell": 712346,
     "clause": "Critical strikes now remove 1 sec from the duration of Oathkeeper when used.",
     "labels": [
-      "712346 behaviour_duration (status ok, behaviour-scenarios.md)"
+      "712346 behaviour_duration (status ok, behaviour-scenarios.md)",
+      "712346 behaviour_expiry"
     ],
     "kind": "claim"
   },
@@ -2587,7 +2594,8 @@
     "labels": [
       "712466 effect_value e1 #0",
       "712466 e1 (unmodelled)",
-      "712466 behaviour_duration_ratio"
+      "712466 behaviour_duration_ratio",
+      "712466 behaviour_expiry"
     ],
     "kind": "claim"
   },

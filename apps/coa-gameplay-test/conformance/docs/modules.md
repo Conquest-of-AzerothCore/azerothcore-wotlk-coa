@@ -36,6 +36,10 @@
 - `triggers.py`: `trigger_scenario(class_file, entry, part)` returns one part of the scenario of a `triggers` entry and
   its `Expectation`; `trigger_plan` sizes the parts and `trigger_entries(class_file, auras)` selects the entries (see
   [Trigger entries](trigger-entries.md#trigger-entries)).
+- `expiry.py`: `behaviour_expiry(class_file, entry)` and `trigger_expiry(class_file, entry)` return the expiry-pair
+  scenario of a duration entry and its `behaviour_expiry` expectation (or `None` for another kind); `margins_of`
+  places the readings and `expiry_readings` judges each arm from the recorded step timing (see
+  [Expiry pairs](behaviour-scenarios.md#expiry-pairs-behaviour_expiry)).
 - `compare.py`: `compare(manifest, results_dir, build=None)` judges a run against the manifest and returns
   `Verdict(label, status, measured, expected, low, high, explanation, ..., server_commit, build, runs)`; `evaluate`
   returns the `Comparison` with the judged `Build` and the runs refused as `other_build` (`BuildMismatch` when the

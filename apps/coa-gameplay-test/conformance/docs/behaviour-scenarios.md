@@ -717,6 +717,53 @@ The other ratio checks (`behaviour_ratio`, `behaviour_party_stat_ratio`, `behavi
 range they exclude outside (`compare.with_excluded_band`, the `tolerated` range included for `behaviour_ratio`),
 without a sampling interval.
 
+### Expiry pairs (`behaviour_expiry`)
+
+A stated duration is judged by its expiry pair (ADR 0126): the effect is present just before its stated end and
+absent just after it, timed from the act that applies it. The remaining-time readbacks of the duration kinds above
+(`aura_duration_ms` read by `behaviour_duration`, `behaviour_duration_ratio`, `behaviour_duration_refresh`,
+`behaviour_cast_applies_aura` and the trigger `duration_delta`) stay data-conformant reads; the pair is the
+behaviour proof. `expiry.py` builds one extra scenario per class-file entry of those kinds
+(`conformance-<class>-expiry-...`, manifest kind `expiry`, label `<spell> behaviour_expiry`); the readback scenarios
+are unchanged.
+
+Each scenario has one arm per stated end, each arm one act:
+
+- `cast_applies_aura`: one arm from the cast, ending at the applied aura's DBC duration; the aura is read absent
+  before the cast.
+- `duration_refresh`: without the passive, from the apply cast, ending at the DBC duration (the breaker must not
+  refresh it); with it, from the breaker cast, ending at the DBC duration.
+- `duration_ratio`: one landed vehicle cast per arm, the arms 17 s apart after the first end (diminishing returns
+  reset), ending at the DBC duration, then at `expected_ratio` x the DBC duration.
+- `duration` (a delta per crit): from the striker hit that sets the aura, ending at the DBC duration without the
+  passive and at the DBC duration - `expected_ms` with it; one forced crit per arm (`melee_damage_count`, cumulative:
+  1, then 2).
+- trigger `duration_delta`: from the observed spell's cast, the trigger cast `decay_wait_ms` later, ending at the DBC
+  duration without the passive and at it + `expected_delta_ms` with it.
+
+The act step carries the label `<prefix> <arm> expiry act`; an assert right after it (`aura` >= 1, or the
+duration kind's debt amount, within 2000 ms) bounds when the effect began. The harness runs one step per world tick
+and records each step's `elapsed_ms` (`CoAGameplayTest.cpp` `Progress`, `RunStep`, `Tick`); the time between two
+steps is at most one tick, `max_step_ms`. From the recorded steps the judge (`expiry.arm_reading`) bounds the time
+from the effect's start to each reading: at least the summed `elapsed_ms` of the steps between, at most that sum plus
+`max_step_ms` per step, plus the act's own window (one tick when the assert waited, the act step and the assert
+otherwise). With `E` the stated end and `shift = max(5% of E, 50 ms)`:
+
+- `unmeasured` when the before reading may come at or after `E`, or the after reading less than one tick after `E`
+  (a correct server could read either way), when the before reading may come earlier than `E - shift + max_step_ms`
+  or the after reading as late as `E + shift` (a server `shift` off could read the same), when a stated
+  precondition reads otherwise (the crit count, the absence before the cast), or when the run has no step timing;
+- `alert` when the effect is absent before or present after, or a reading is missing;
+- `ok` otherwise. The verdict states the end interval it shows: after the before reading's lower bound and by the
+  after reading's upper bound; every end outside it is excluded.
+
+The readings are placed from the stated end at generation (`expiry.margins_of`): the before reading
+`max(2.5% of E, (k + 4) x 25 ms + 1)` before `E` and the after reading `min(that, shift - (k + 7) x 25 ms - 1)`
+after it, `k` counting the steps between the act and the readings (a wait counts twice, for its own overshoot). An end
+too short for both conditions at 25 ms per step is `unmodelled` (about 4.5 s with no step between act and readings).
+A clause whose ledger entry lists the `behaviour_expiry` label is behaviour-proven by it; an `unmeasured` or `alert`
+pair leaves the clause unproven.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |

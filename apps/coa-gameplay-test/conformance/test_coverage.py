@@ -17,6 +17,7 @@ from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, COVERAGE_FILE, DATA, EVENT, EVIDENCE, METRIC_EVIDENCE, READBACK, STATE,
                       STATE_PROMISES, UNPROVEN, EvidenceError, clause_coverage, clause_coverage_lines, coverage,
                       fragment_entries, load_clauses, read_fragment, require_claims, write_coverage, write_fragment)
+from expiry import BEHAVIOUR_EXPIRY
 from profile import DBC_DIR, DbcSetMismatch, class_file_paths, load_class_file, server_dbc_dir, spell_dbc_sha256
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA
@@ -252,7 +253,8 @@ SERVER_SHA = 'a' * 64
 CLIENT_SHA = 'b' * 64
 BUILD = 'c' * 64
 OTHER_BUILD = 'd' * 64
-CODE_MODULES = ('values.py', 'hits.py', 'passives.py', 'procs.py', 'triggers.py', 'behaviours.py', 'stack.py')
+CODE_MODULES = ('values.py', 'hits.py', 'passives.py', 'procs.py', 'triggers.py', 'behaviours.py', 'stack.py',
+                'expiry.py')
 
 
 def claim(text, *labels, spell=ARGENT_BLADE):
@@ -330,13 +332,26 @@ class EvidenceStatusTest(unittest.TestCase):
 
     def test_an_outcome_check_of_round_ten_is_behaviour(self):
         clauses = [claim('acts on the target', '1 outcome')]
-        for check in (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_CAST_APPLIES_AURA,
-                      BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE,
-                      BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK,
-                      BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
-                      GAP_CLOSER_DISTANCE):
+        for check in (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_EXPIRY, BEHAVIOUR_CAST_COMBAT,
+                      BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_CAST_GATE, BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT,
+                      BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_RATIO_DELTA,
+                      BEHAVIOUR_MOUNT_GRANT, GAP_CLOSER_DISTANCE):
             with self.subTest(check=check):
                 self.assertEqual(evidence_of(clauses, [judged('1 outcome', check)])[0], [BEHAVIOUR])
+
+    def test_a_remaining_time_readback_after_a_cast_is_data(self):
+        clauses = [claim('Applies Sacred Restraint for $102208d.', '1 readback')]
+        self.assertEqual(evidence_of(clauses, [judged('1 readback', BEHAVIOUR_CAST_APPLIES_AURA)])[0], [DATA])
+        with mock.patch.dict(EVIDENCE, {BEHAVIOUR_CAST_APPLIES_AURA: BEHAVIOUR}):
+            self.assertNotEqual(evidence_of(clauses, [judged('1 readback', BEHAVIOUR_CAST_APPLIES_AURA)])[0],
+                                [DATA])
+
+    def test_an_expiry_pair_lifts_a_readback_clause_to_behaviour(self):
+        clauses = [claim('Applies Sacred Restraint for $102208d.', '1 readback', '1 expiry')]
+        verdicts = [judged('1 readback', BEHAVIOUR_CAST_APPLIES_AURA), judged('1 expiry', BEHAVIOUR_EXPIRY)]
+        self.assertEqual(evidence_of(clauses, verdicts)[0], [BEHAVIOUR])
+        unmeasured = [verdicts[0], judged('1 expiry', BEHAVIOUR_EXPIRY, status='unmeasured')]
+        self.assertEqual(evidence_of(clauses, unmeasured)[0], [UNPROVEN])
 
     def test_a_party_stat_ratio_proves_behaviour_only_for_the_promised_stat(self):
         clauses = [claim('Increases the attack power of all party and raid members $s1%.', '1 party')]

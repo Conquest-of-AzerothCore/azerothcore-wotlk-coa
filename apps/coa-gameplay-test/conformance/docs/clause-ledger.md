@@ -111,13 +111,15 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `max_stacks`, `spell_duration`, `power_cost`, `cooldown_ms`, `known_aura`, `effect_radius`, `aura_amplitude_ms`),
   the trigger cooldown and duration deltas (they read `cooldown_ms` and `aura_duration_ms`), and the behaviour kinds
   that read a live aura's duration or amount (`behaviour_duration`, `behaviour_duration_ratio`,
-  `behaviour_duration_refresh`, `behaviour_amount_delta`).
+  `behaviour_duration_refresh`, `behaviour_amount_delta`, `behaviour_cast_applies_aura`: remaining-time readbacks,
+  ADR 0126).
 - `behaviour`: observed outcomes: hit, melee and periodic means, proc rates and deltas, trigger counts, magnitude
   ratios, self triggers and gate absences, stack DPS, and the behaviour kinds that count hits, casts or auras on units
   (`behaviour_count`, `behaviour_trigger`, `behaviour_crit_guarantee`, `behaviour_aura_grant`,
   `behaviour_oath_consumption_removal`, `behaviour_internal_cooldown_gate`, `behaviour_exclusivity`,
-  `behaviour_single_target`, `behaviour_fixed_count`, `behaviour_internal_cooldown`, `behaviour_heal_block`,
-  `behaviour_cast_applies_aura`), cast allowed or refused (`behaviour_cast_gate`, `behaviour_cast_condition`,
+  `behaviour_single_target`, `behaviour_fixed_count`, `behaviour_internal_cooldown`, `behaviour_heal_block`), a
+  stated duration's expiry pair (`behaviour_expiry`, ADR 0126), cast allowed or refused (`behaviour_cast_gate`,
+  `behaviour_cast_condition`,
   `behaviour_cast_combat`, `behaviour_charge_recharge`: the over-cast refusal and the charge count after real casts),
   units changed by a cast (`behaviour_mount_grant`, `behaviour_aggro_redirect` the creature's victim,
   `gap_closer_distance` the caster's distance after a charge), damage against a live shield

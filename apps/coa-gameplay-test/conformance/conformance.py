@@ -15,6 +15,7 @@ from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_F
 from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_coverage_lines, fragment_entries,
                       load_clauses, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
+from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from passives import passive_scenario
 from hits import (UNMODELLED, Unmodelled, aura_modifiers, casts_needed, hit_parts, melee_scenario, records_of,
                   reference_hit_model, reference_melee_model)
@@ -162,6 +163,11 @@ def add_behaviour(writer: ManifestWriter, entry: dict):
     key = scenario_key(class_file['name'], 'behaviour', entry['spell'], entry.get('kind', ''),
                         entry.get('variant', ''))
     writer.add(key, 'behaviour', None, entry['spell'], expectations, scenario, name=entry['name'])
+    expiry = behaviour_expiry(class_file, entry)
+    if expiry:
+        writer.add(scenario_key(class_file['name'], EXPIRY_KIND, entry['spell'], entry.get('kind', ''),
+                                entry.get('variant', '')), EXPIRY_KIND, None, entry['spell'], expiry[1], expiry[0],
+                   name=entry['name'])
 
 
 def target_gate_entries(class_file: dict, spell_ids: list[int] | None) -> list[dict]:
@@ -271,6 +277,10 @@ def add_trigger(writer: ManifestWriter, entry: dict):
         scenario, expectations = scenario_fn(class_file, entry, part)
         writer.add(scenario_key(class_file['name'], 'trigger', *key_parts, 'part', part + 1), 'trigger', None, aura,
                    expectations, scenario, name=name)
+    expiry = trigger_expiry(class_file, entry)
+    if expiry:
+        writer.add(scenario_key(class_file['name'], EXPIRY_KIND, 'trigger', *key_parts), EXPIRY_KIND, None, aura,
+                   expiry[1], expiry[0], name=name)
 
 
 def add_stack(writer: ManifestWriter, passes: int):

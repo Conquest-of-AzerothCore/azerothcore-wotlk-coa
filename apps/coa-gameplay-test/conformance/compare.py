@@ -25,6 +25,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
+from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
 from mitigation import TargetProfile, expected_mitigation
@@ -3077,7 +3078,19 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_aggro_redirect_verdict(base, run, expectation)
     if expectation.check == BEHAVIOUR_HIT_RATIO:
         return behaviour_hit_ratio_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_EXPIRY:
+        return behaviour_expiry_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
+
+
+def behaviour_expiry_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    readings = expiry_readings(run.values, run.steps, run.max_step_ms, run.key, model)
+    held = float(sum(reading.status == 'ok' for reading in readings))
+    arms = float(len(readings))
+    return replace(base, status=combined_status(readings), measured=held, expected=arms, low=arms, high=arms,
+                   explanation=f'{held:g} of {arms:g} arms present before and absent after their stated end; '
+                               + '; '.join(reading.explanation for reading in readings),
+                   detail={EXPIRY_KIND: [reading.detail for reading in readings]})
 
 
 def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
@@ -3303,7 +3316,7 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
                        detail={'question': question_detail(TEXT_QUESTION, text, [], None)})
     if check == PASSIVE_DELTA:
         return judge_passive(manifest, entry, run, expectation, tooltips)
-    if check in BEHAVIOUR_CHECKS:
+    if check in BEHAVIOUR_CHECKS or check == BEHAVIOUR_EXPIRY:
         return judge_behaviour(base, run, expectation)
     if run is None:
         return replace(base, explanation=f'{entry["key"]} has no scenario to measure {check}')
