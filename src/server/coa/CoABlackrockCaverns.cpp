@@ -1289,7 +1289,12 @@ struct boss_coa_brc_karsh : public BossAI
             float const angle = float(i) * float(M_PI) / 4.0f;
             Position spout = LavaFountainPos;
             spout.RelocateOffset({ std::cos(angle) * 6.0f, std::sin(angle) * 6.0f, 0.0f });
-            me->SummonCreature(NPC_FIRE_ZONE_FILL, spout, TEMPSUMMON_TIMED_DESPAWN, 2000);
+            if (Creature* fill = me->SummonCreature(NPC_FIRE_ZONE_FILL, spout, TEMPSUMMON_TIMED_DESPAWN, 2000))
+                if (Aura* aura = fill->AddAura(SPELL_FIRE_ZONE_FILL, fill))
+                {
+                    aura->SetMaxDuration(2000);
+                    aura->SetDuration(2000);
+                }
         }
     }
 
