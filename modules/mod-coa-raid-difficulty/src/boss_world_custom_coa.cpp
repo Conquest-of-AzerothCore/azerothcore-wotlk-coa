@@ -1018,8 +1018,10 @@ namespace
         SPELL_VEIL_PULSE        = 2119853,
         SPELL_VEIL_POWER        = 2119857,
         SPELL_GHOST             = 22650,
-        SPELL_BLUE_BEAM         = 30945,
+        SPELL_SOUL_BIND         = 2119845,
+        SPELL_SOUL_FLAY_BEAM    = 2146711,
         SPELL_BLUE_SHIELD       = 34648,
+        SPELL_MANA_SHIELD_GLOW  = 31635,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
@@ -1036,6 +1038,12 @@ namespace
     constexpr uint32 ACTION_VESSEL_LINKED = 2;
     constexpr uint32 ACTION_AWAKEN = 3;
     Position const ZuroggLanding = { 3439.56f, -4982.28f, 195.727f, 0.0f };
+
+    void Beam(Unit* from, Unit* to)
+    {
+        if (!from->HasUnitState(UNIT_STATE_CASTING))
+            from->CastSpell(to, SPELL_SOUL_BIND, true);
+    }
 
     void Dormant(Creature* creature, bool on)
     {
@@ -1111,6 +1119,7 @@ namespace
             _spirits.DespawnAll();
             me->InterruptNonMeleeSpells(false);
             me->RemoveAurasDueToSpell(SPELL_BLUE_SHIELD);
+            me->RemoveAurasDueToSpell(SPELL_MANA_SHIELD_GLOW);
             me->SetVisible(state != VESSEL_BROKEN);
             if (state == VESSEL_OPEN)
                 me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
@@ -1121,11 +1130,11 @@ namespace
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             if (state == VESSEL_SHIELDED)
-                DoCastSelf(SPELL_BLUE_SHIELD, true);
+            {
+                me->AddAura(SPELL_BLUE_SHIELD, me);
+                me->AddAura(SPELL_MANA_SHIELD_GLOW, me);
+            }
             _spawn = 3s;
-            if (state == VESSEL_LINKED)
-                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
-                    me->CastSpell(atal, SPELL_BLUE_BEAM, true);
         }
 
         void Click()
@@ -1157,6 +1166,12 @@ namespace
 
         void UpdateAI(uint32 diff) override
         {
+            if (_state == VESSEL_LINKED)
+            {
+                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                    Beam(me, atal);
+                return;
+            }
             if (_state != VESSEL_OPEN)
                 return;
             _spawn -= Milliseconds(diff);
@@ -1245,9 +1260,18 @@ namespace
         void JustSummoned(Creature* summon) override
         {
             _summons.Summon(summon);
-            if (summon->GetEntry() == NPC_DAMNED_WIGHT)
-                if (Unit* t = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
-                    summon->AI()->AttackStart(t);
+            if (summon->GetEntry() != NPC_DAMNED_WIGHT)
+                return;
+            summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+            summon->SetControlled(true, UNIT_STATE_STUNNED);
+            summon->CastSpell(me, SPELL_SOUL_FLAY_BEAM, true);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->InterruptNonMeleeSpells(false);
+                summon->SetControlled(false, UNIT_STATE_STUNNED);
+            }, 2s);
+            if (Unit* t = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
+                summon->AI()->AttackStart(t);
         }
 
         void JustDied(Unit* /*killer*/) override
@@ -1293,8 +1317,8 @@ namespace
                 Unit* t = RandomPlayer(false);
                 if (!t)
                     return;
-                me->SummonCreature(NPC_DAMNED_WIGHT, t->GetPositionX() + frand(-4.0f, 4.0f), t->GetPositionY() + frand(-4.0f, 4.0f),
-                    t->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                me->SummonCreature(NPC_DAMNED_WIGHT, me->GetNearPosition(8.0f + 3.0f * float(_raise % 3),
+                    2.4f * float(_raise)), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                 if (_raise++ % 2 == 0)
                     CastAt(t->GetPosition(), SPELL_CHOKING_CLOUD);
             }
@@ -1356,11 +1380,16 @@ namespace
             Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f);
             if (rogg)
                 rogg->AI()->DoAction(ACTION_AWAKEN);
-            if (Player* p = me->SelectNearestPlayer(300.0f))
+            Player* first = nullptr;
+            for (Player* p : Players(me, [](Player*) { return true; }))
+                if (!first || (p->HasTankSpec() && !first->HasTankSpec()) ||
+                    (p->HasTankSpec() == first->HasTankSpec() && me->GetDistance(p) < me->GetDistance(first)))
+                    first = p;
+            if (first)
             {
-                AttackStart(p);
+                AttackStart(first);
                 if (rogg)
-                    rogg->AI()->AttackStart(p);
+                    rogg->AI()->AttackStart(first);
             }
         }
 
@@ -1372,12 +1401,8 @@ namespace
                 return;
             }
             Dormant(me, true);
-            _beam -= Milliseconds(diff);
-            if (_beam > 0ms || me->HasUnitState(UNIT_STATE_CASTING))
-                return;
-            _beam = 2s;
             if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
-                me->CastSpell(rogg, SPELL_BLUE_BEAM, true);
+                Beam(me, rogg);
         }
 
     private:
@@ -1386,7 +1411,6 @@ namespace
         uint32 _raise = 0;
         bool _phase = false;
         bool _dormant = true;
-        Milliseconds _beam = 0ms;
     };
 
     enum ZulroggEvents { EZ_CRUSH = 1, EZ_FIERCE };

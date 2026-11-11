@@ -87,6 +87,8 @@ namespace
         {
             if (info->Id == 2119819)
                 info->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+            else if (info->Id == 2119845 || info->Id == 2146711)
+                info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
         }
     };
 }

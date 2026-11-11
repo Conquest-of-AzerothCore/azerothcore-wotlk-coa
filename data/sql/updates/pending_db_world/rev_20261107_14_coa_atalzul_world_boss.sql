@@ -92,14 +92,14 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 (9780932, 978090, 0, 0, 0, 1, 1, 3322.411, -4846.606, 172.1479, 5.1839, 300, 0, 0),
 (9780938, 978090, 890, 10281, 10281, 15, 1, 3313, -4844.6, 173.2892, 0, 300, 0, 0);
 
--- In his map Atal'zul stands where the diagonals between the four altars cross, Zul'rogg starts on top of the
--- pyramid and jumps down when the
--- Soul Vessels wake him. Each Soul Vessel is a crystal (the creature) on an altar (978093, a goober players use to
--- click the vessel); breaking it hides the crystal and leaves the altar.
+-- In his map Atal'zul stands where the diagonals between the four altars cross. Zul'rogg starts on top of the
+-- Zul'Mashar pyramid (198 high, where its guards stand) and jumps down to 3439.56, -4982.28, 195.727 when the Soul
+-- Vessels wake him. Each Soul Vessel is a crystal (the creature) on an altar (978093, a goober players use to click
+-- the vessel); breaking it hides the crystal and leaves the altar.
 UPDATE `creature` SET `position_x` = 3363.6626, `position_y` = -4904.645, `position_z` = 159.2667,
   `orientation` = 1.9564 WHERE `guid` = 9780104 AND `id` = 67532;
-UPDATE `creature` SET `position_x` = 3439.5637, `position_y` = -4982.276, `position_z` = 195.7287,
-  `orientation` = 2.3572 WHERE `guid` = 9780105 AND `id` = 67533;
+UPDATE `creature` SET `position_x` = 3461.96, `position_y` = -4971.2, `position_z` = 197.948,
+  `orientation` = 3.6 WHERE `guid` = 9780105 AND `id` = 67533;
 UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 160.5792
 WHERE `guid` = 9780106;
 UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 160.5839
@@ -132,9 +132,9 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650')
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411 WHERE `CreatureID` = 67533;
 
--- The Damned Wights are skeletal warriors (display 200, as Skeletal Warrior 48) and the Soul Vessel crystal is the
+-- The Damned Wights are skeletal warriors (display 734) and the Soul Vessel crystal is the
 -- floating purple crystal (47751); his holograms are half as big again.
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 200, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 734, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
 
