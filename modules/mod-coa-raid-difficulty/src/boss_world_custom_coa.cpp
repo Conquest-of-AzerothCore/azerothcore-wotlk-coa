@@ -1183,6 +1183,8 @@ namespace
             }
             if (_state != VESSEL_OPEN)
                 return;
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                Beam(me, atal);
             _spawn -= Milliseconds(diff);
             if (_spawn > 0ms)
                 return;

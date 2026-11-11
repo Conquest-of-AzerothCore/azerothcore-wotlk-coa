@@ -100,18 +100,18 @@ UPDATE `creature` SET `position_x` = 3363.6626, `position_y` = -4904.645, `posit
   `orientation` = 1.9564 WHERE `guid` = 9780104 AND `id` = 67532;
 UPDATE `creature` SET `position_x` = 3461.96, `position_y` = -4971.2, `position_z` = 197.948,
   `orientation` = 3.6 WHERE `guid` = 9780105 AND `id` = 67533;
-UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 160.7792
+UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 161.5792
 WHERE `guid` = 9780106;
-UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 160.7839
+UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 161.5839
 WHERE `guid` = 9780107;
-UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 160.6575
+UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 161.4575
 WHERE `guid` = 9780108;
-UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 160.6516
+UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 161.4516
 WHERE `guid` = 9780109;
 
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
   `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(978093, 10, 652, 'Altar of the Soul Vessel', '', '', '', 1.5, '', 'go_atalzul_vessel_coa', 12340)
+(978093, 10, 1060152, 'Altar of the Soul Vessel', '', '', '', 0.6, '', 'go_atalzul_vessel_coa', 12340)
 ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
   `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
 DELETE FROM `gameobject` WHERE `guid` BETWEEN 9780941 AND 9780944;
@@ -132,10 +132,10 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650')
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411, `DisplayScale` = 2.95 WHERE `CreatureID` = 67533;
 
--- Models, all checked in the client's own DBC and MPQs: the Damned Wights are Maldraxxus skeletons (96060), the
--- Restless Spirits the Reaper's Ghost Form ghost (5430, from creature 841213), the Soul Vessel crystal the floating
--- purple crystal (47751) and his holograms are half as big again.
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 96060, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
+-- Models, all checked in the client's own DBC and MPQs: the Damned Wights are the armored bone-yellow skeleton in its
+-- HD remodel (3507), the Restless Spirits the Reaper's Ghost Form ghost (5430, from creature 841213), the Soul Vessel
+-- crystal the floating purple crystal (47751) and his holograms are half as big again.
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 3507, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 5430, `DisplayScale` = 1.5 WHERE `CreatureID` = 67535;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
