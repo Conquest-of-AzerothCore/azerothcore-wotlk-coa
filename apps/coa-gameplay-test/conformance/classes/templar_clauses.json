@@ -2638,7 +2638,8 @@
     "spell": 706323,
     "clause": "Increases your damage dealt versus Undead by ${$m1+0}",
     "labels": [
-      "conformance-templar-value-706323 (effect_value e0, 53)"
+      "conformance-templar-value-706323 (effect_value e0, 53)",
+      "706323 behaviour_hit_ratio level_60"
     ],
     "kind": "claim"
   },
@@ -2646,9 +2647,11 @@
     "spell": 706323,
     "clause": "scaling with level",
     "labels": [
-      "706323 e0 (unmodelled) -- unmodelled: damage versus a creature type is level-scaled"
+      "706323 behaviour_hit_ratio level_50",
+      "706323 behaviour_hit_ratio level_60"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proven at caster levels 50 and 60 against a same-level Undead target (Mindless Zombie 1501), same gear, with and without 706323 (ADR 0193): the swing difference is the tooltip's ${$m1+0} at that level (38 and 53, from EffectRealPointsPerLevel 1.5 over SpellLevel 28) times the Templar class tuning 887007 (-16% at 50, -20% at 60), which multiplies every damage dealt to a creature. Base-stat growth does not enter the difference; the class tuning does, and is read in each arm. The earlier free-text label never matched a verdict."
   },
   {
     "spell": 706323,

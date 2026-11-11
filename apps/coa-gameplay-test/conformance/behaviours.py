@@ -9,7 +9,7 @@ from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
-from tooltip import COLOR_CODE, Records
+from tooltip import COLOR_CODE, SKILL_PER_LEVEL, CasterStats, Records, Tooltip
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
                     GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
                     FIXTURE_MAX_HEALTH, fixture_health_step, required_aura_steps,
@@ -4757,6 +4757,11 @@ class HitRatioSpec:
     cast_spell: int | None = None
     cast_wait_ms: int = 0
     cast_power: int | None = None
+    level: int | None = None
+    target_entry: int | None = None
+    refresh: bool = False
+    expected_token: str = ''
+    scale_auras: tuple[tuple[int, int], ...] = ()
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
@@ -4794,6 +4799,10 @@ def hit_ratio_entry_label(entry: dict) -> str:
 def hit_ratio_reads(spec: HitRatioSpec, arm: str) -> list[tuple[str, str]]:
     base = f'{hit_ratio_label(spec.spell, spec.label_suffix)} {arm}'
     return [(f'{base} {mark} total', f'{base} {mark} count') for mark in ('start', *range(1, spec.trials + 1))]
+
+
+def hit_ratio_scale_label(spec: HitRatioSpec, arm: str, spell: int, effect: int) -> str:
+    return f'{hit_ratio_label(spec.spell, spec.label_suffix)} {arm} scale {spell} e{effect}'
 
 
 def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: str = TARGET,
@@ -4839,7 +4848,12 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
             steps += reads(marks[0])
+            steps += [measurement(hit_ratio_scale_label(spec, name, spell, effect), CASTER, 'aura_amount', spell=spell,
+                                  effect=effect) for spell, effect in spec.scale_auras]
             for trial in range(1, spec.trials + 1):
+                if spec.refresh:
+                    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                              for spell, stacks in arm.auras]
                 steps += [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                           {'action': 'wait', 'label': f'{name} swing {trial}', 'ms': swing_ms},
                           {'action': 'stop_attack', 'actor': CASTER},
@@ -4881,9 +4895,33 @@ def hit_ratio_trial_limit(class_file: dict, spec: HitRatioSpec, swing_ms: int = 
     return max(1, (MAX_SCENARIO_MS - TIMEOUT_MARGIN_MS - (one - per_trial)) // per_trial)
 
 
+def hit_ratio_level_value(records: Records, class_file: dict, spec: HitRatioSpec) -> float:
+    skills = {line: SKILL_PER_LEVEL * class_file['level'] for line in class_file.get('skill_lines', [])}
+    values = set()
+    for stat in (0.0, 100.0):
+        caster = CasterStats(class_file['level'], stat, stat, {school: stat for school in range(7)},
+                             {index: stat for index in range(5)}, skills, race=class_file['race'],
+                             class_id=class_file['class_id'])
+        readout = Tooltip(records, spec.spell, caster).read(records.field('Spell', spec.spell, 'Description[enUS]'))
+        values |= {value.value for value in readout.values if value.text == spec.expected_token}
+    if len(values) != 1:
+        raise NotModelled(f'{spec.spell} hit_ratio expected_token {spec.expected_token!r} reads {sorted(values)}, not '
+                          f'one value at level {class_file["level"]} whatever the stats')
+    return values.pop()
+
+
 def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list[Expectation]]:
     if spec.trials < 1:
         raise ValueError(f'{spec.spell} hit_ratio needs at least one trial')
+    if spec.level is not None:
+        if not 0 < spec.level <= class_file['level']:
+            raise ValueError(f'{spec.spell} hit_ratio level {spec.level} lies above the class level '
+                             f'{class_file["level"]} or below 1')
+        class_file = {**class_file, 'level': spec.level}
+    if (spec.expected_token or spec.scale_auras) and spec.swing_hand is None:
+        raise ValueError(f'{spec.spell} hit_ratio judges a flat expected_token on swings only')
+    if spec.scale_auras and not spec.expected_token:
+        raise ValueError(f'{spec.spell} hit_ratio scale_auras scale a flat expected_token')
     if spec.control == spec.treatment:
         raise ValueError(f'{spec.spell} hit_ratio arms are identical; the contrast would measure nothing')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
@@ -4956,15 +4994,28 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                     f'of the treatment arm over the control arm must give the stated bonus of '
                     f'{(spec.expected - 1) * 100:+g}%',
         'players': players,
-        'creatures': [creature_fixture(class_file)],
+        'creatures': [{**creature_fixture(class_file),
+                       **({'entry': spec.target_entry} if spec.target_entry is not None else {})}],
         'steps': base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
+    if spec.expected_token:
+        delta = hit_ratio_level_value(records, class_file, spec)
+        scenario['contract'] += (f'; the treatment arm\'s non-critical, non-glancing swings must exceed the control '
+                                 f'arm\'s by the {spec.expected_token} of {delta:g} the tooltip reads at level '
+                                 f'{class_file["level"]}'
+                                 + (f', times 1 + each percent of the auras {list(spec.scale_auras)} read on the '
+                                    f'caster' if spec.scale_auras else ''))
     model = {'kind': 'hit_ratio', 'reads': {name: hit_ratio_reads(spec, name) for name in HIT_RATIO_ARMS},
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
              'trial_limit': hit_ratio_trial_limit(class_file, spec, swing_ms),
              'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)),
              'metric': spec.metric,
              'quote': entry.quote}
+    if spec.expected_token:
+        model['expected_delta'] = delta
+    if spec.scale_auras:
+        model['scale_reads'] = {name: [hit_ratio_scale_label(spec, name, spell, effect)
+                                       for spell, effect in spec.scale_auras] for name in HIT_RATIO_ARMS}
     expectation = Expectation(hit_ratio_label(spec.spell, spec.label_suffix), BEHAVIOUR_HIT_RATIO, spec.spell,
                               spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                               model)
@@ -4981,7 +5032,9 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('target', TARGET), hit_ratio_fixture(entry.get('fixture', {})),
                         tuple(int(spell) for spell in entry.get('warmup', ())), entry.get('off_hand_item'),
                         entry.get('swing_hand'), entry.get('cast_spell'), int(entry.get('cast_wait_ms', 0)),
-                        entry.get('cast_power'))
+                        entry.get('cast_power'), entry.get('level'), entry.get('target_entry'),
+                        bool(entry.get('refresh', False)), entry.get('expected_token', ''),
+                        tuple((int(spell), int(effect)) for spell, effect in entry.get('scale_auras', ())))
 
 
 CRIT_RATE_TRIALS = 300

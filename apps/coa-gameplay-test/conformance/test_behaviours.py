@@ -741,7 +741,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 304)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 306)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6423,6 +6423,52 @@ ANCIENT_BONE_MACE = 30754
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class LevelFlatHitRatioTests(unittest.TestCase):
+    def values(self, model: dict, control: float, treatment: float, scale: float = -20.0, wobble: float = 1.0):
+        found = {}
+        for arm, marks in model['reads'].items():
+            per_hit = control if arm == 'control' else treatment
+            total = 0.0
+            for index, (total_label, count_label) in enumerate(marks):
+                total += 0.0 if index == 0 else per_hit + (wobble if index % 2 else -wobble)
+                found[total_label] = total
+                found[count_label] = float(index)
+        for arm, labels in model.get('scale_reads', {}).items():
+            found.update(dict.fromkeys(labels, scale))
+        return found
+
+    def test_a_level_entry_puts_caster_and_undead_target_at_its_level_and_refreshes_its_auras(self):
+        entry = variant_entry(706323, 'hit_ratio', 'level_50')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        self.assertEqual(scenario['players'][0]['level'], 50)
+        self.assertEqual((scenario['creatures'][0]['level'], scenario['creatures'][0]['entry']), (50, 1501))
+        self.assertEqual(expectation.model['expected_delta'], 38.0)
+        refreshed = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 54678
+                     and step['stacks'] == 1]
+        self.assertEqual(len(refreshed), 2 * (1 + entry['trials']))
+        scales = [step for step in steps if step.get('metric') == 'aura_amount' and step['spell'] == 887007]
+        self.assertEqual(len(scales), 2)
+        _, [sixty] = behaviour_scenario(CLASS_FILE, variant_entry(706323, 'hit_ratio', 'level_60'))
+        self.assertEqual(sixty.model['expected_delta'], 53.0)
+
+    def test_seeded_flat_difference_is_judged_against_the_scaled_level_value(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(706323, 'hit_ratio', 'level_60'))
+        for treatment, scale, status in ((92.4, -20.0, 'ok'), (103.0, -20.0, 'alert'), (88.0, -20.0, 'alert'),
+                                         (103.0, 0.0, 'ok')):
+            with self.subTest(treatment=treatment, scale=scale):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(
+                    expectation.model, 50.0, treatment, scale)), expectation)
+                self.assertEqual(verdict.status, status)
+
+    def test_a_level_above_the_class_level_or_a_flat_token_without_swings_is_refused(self):
+        entry = variant_entry(706323, 'hit_ratio', 'level_60')
+        for broken in ({**entry, 'level': 61}, {**entry, 'swing_hand': None, 'observe_spell': 706323},
+                       {**entry, 'expected_token': ''}):
+            with self.subTest(broken=broken.get('level')), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, broken)
+
+
 class OffHandHitRatioTests(unittest.TestCase):
     def test_an_off_hand_hit_ratio_wields_the_off_hand_beside_a_one_hand_main_before_its_casts(self):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))

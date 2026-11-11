@@ -80,6 +80,30 @@ def bonus_of(treatment: ArmSample, control: ArmSample, expected: float) -> Bonus
     return Bonus((ratio - 1) * 100, half, expected, min(treatment.trials, control.trials))
 
 
+def delta_of(treatment: ArmSample, control: ArmSample, expected: float) -> Bonus:
+    terms = [(treatment.share, treatment.trials - 1), (control.share, control.trials - 1)]
+    spread = sum(term for term, _ in terms)
+    if math.isinf(spread):
+        half = math.inf
+    elif spread <= 0:
+        half = 0.0
+    else:
+        dof = spread ** 2 / sum(term ** 2 / dof for term, dof in terms if term > 0)
+        half = student_t_quantile(TWO_SIDED_99, dof) * math.sqrt(spread)
+    return Bonus(treatment.mean - control.mean, half, expected, min(treatment.trials, control.trials))
+
+
+def delta_text(bonus: Bonus) -> str:
+    interval = ('no interval' if not math.isfinite(bonus.half)
+                else f'99% interval {bonus.low:+.4g} to {bonus.high:+.4g}')
+    low, high = bonus.excluded
+    excluded = ('excludes no difference (one trial per arm gives no interval)' if not math.isfinite(bonus.half)
+                else f'excludes a difference below {low:+.4g} or above {high:+.4g}')
+    return (f'difference {bonus.measured:+.4g} per hit ({interval}, {bonus.trials} trials per arm) against the '
+            f'stated {bonus.expected:+.4g}, which passes inside +-{bonus.band:.3g} (the larger of {RELATIVE_BAND:.0%} '
+            f'of it and {POINT_BAND:g}); {excluded}')
+
+
 def scaled_trials(trials: int, half: float, target: float) -> int | None:
     if not math.isfinite(half) or target <= EPSILON:
         return None

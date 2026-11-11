@@ -956,6 +956,13 @@ takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
 the reads, for an ability whose hits are another spell's (ADR 0183): Righteous Tempest 807274's aura hits with
 570205 at the cast and every second for 5 s. Its Oaths read +59.4% and +59.6% with two (1 + (30 + 30) / 100, additive)
 and +29.5% to +29.8% with one, at 30 trials per arm.
+A swing entry may also state a flat amount at a level (ADR 0193): `level` puts the caster and the target at that
+level (at most the class level), `target_entry` picks the target creature, `refresh` sets the arms' auras again before
+every swing, `expected_token` names the tooltip token read at that level (it must not depend on stats) and
+`scale_auras` lists [spell, effect] whose percent amounts, read in each arm, multiply it. The judge then compares the
+difference of the per-hit means with that amount inside the larger of 5% of it and 2. Holy Constitution 706323 swings
+at Mindless Zombie 1501 at levels 50 and 60 with Brute Force 54678 removing its armor, scaled by the class tuning
+887007.
 
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 

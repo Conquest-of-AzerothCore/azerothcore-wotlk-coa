@@ -29,6 +29,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
                         DISPEL_TYPE_NAMES, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
+                   delta_of, delta_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
@@ -3538,8 +3539,24 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                        explanation=f'{hits["control"]:g} control and {hits["treatment"]:g} treatment hits counted; '
                                    f'each arm needs at least {minimum} of its {model["trials"]} casts to land')
     control, treatment = (per_event_sample(*series[arm]) for arm in ('control', 'treatment'))
+    flat = model.get('expected_delta')
+    scaled = ''
+    if flat is not None and model.get('scale_reads'):
+        factors = {}
+        for arm, labels in model['scale_reads'].items():
+            amounts = [run.values.get(label) for label in labels]
+            if any(amount is None for amount in amounts):
+                return replace(base, explanation=missing_measurement(run, labels[amounts.index(None)]))
+            factors[arm] = math.prod(1 + amount / 100 for amount in amounts)
+        if len(set(factors.values())) != 1:
+            return replace(base, status='alert', explanation=f'the scaling auras differ between the arms: {factors}')
+        factor = factors['control']
+        scaled = (f'; the stated {float(flat):g} times {factor:.4g}, the measured scaling auras, is '
+                  f'{float(flat) * factor:.4g}')
+        flat = float(flat) * factor
     try:
-        bonus = bonus_of(treatment, control, float(model['expected_bonus']))
+        bonus = (delta_of(treatment, control, float(flat)) if flat is not None
+                 else bonus_of(treatment, control, float(model['expected_bonus'])))
     except ValueError as error:
         return replace(base, status='unmeasured', explanation=f'not judged: {error}')
     status, reason, needed = bonus_status(bonus)
@@ -3553,7 +3570,9 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                    low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
                    explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
                                f'{control.mean:.6g} over {control.events:g} control hits, ratio '
-                               f'{treatment.mean / control.mean:.5g}; {bonus_text(bonus)}; {reason}{beyond}')
+                               f'{treatment.mean / control.mean:.5g}; '
+                               f'{delta_text(bonus) if flat is not None else bonus_text(bonus)}{scaled}; {reason}'
+                               f'{beyond}')
 
 
 RATIO_CHECKS = frozenset({BEHAVIOUR_RATIO, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_DURATION_RATIO,

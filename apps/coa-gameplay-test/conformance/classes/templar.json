@@ -4475,6 +4475,24 @@
       "observe_source": "AscensionTemplarAuras.cpp:66-67 sets Untainted 705299's Effect[0] (SPELL_AURA_MOD_DAMAGE_TAKEN, MiscValue 1, Physical) to int32(-10 - .1f * Stamina); the owner ruled 10 plus 10% of Stamina (2026-11-11), the streamed text. A level 60 striker (entry 36) casts Night Slaughter 23583 (SPELL_EFFECT_SCHOOL_DAMAGE, Physical, EffectBasePoints 66, EffectDieSides 1) at the caster; control without 705299, treatment with it set before every strike. Each landed treatment strike must read the control strike less the truncated 10 + 0.1 x Stamina, the caster's Stamina read before the arm."
     },
     {
+      "spell": 706323, "name": "Holy Constitution", "kind": "hit_ratio", "variant": "level_60",
+      "label_suffix": "level_60", "quote": "Increases your damage dealt versus Undead by ${$m1+0}, scaling with level",
+      "expected": 1.0, "expected_token": "${$m1+0}", "metric": "melee_damage_total", "swing_hand": 0,
+      "critical": false, "level": 60, "target_entry": 1501, "refresh": true, "trials": 60,
+      "scale_auras": [[887007, 0]],
+      "control": {"auras": [[54678, 1]]}, "treatment": {"auras": [[54678, 1], [706323, 1]]},
+      "observe_source": "AscensionTemplar code does not touch 706323 (not in TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS or _EFFECTS, so CancelStockEffectRealPointsPerLevel keeps its per-level term): Effect[0] is SPELL_AURA_MOD_DAMAGE_DONE_CREATURE (59), MiscValue 32 (Undead), EffectBasePoints 4 + EffectDieSides 1 plus EffectRealPointsPerLevel 1.5 from SpellLevel 28 to MaxLevel 60. MeleeDamageBonusDone (Unit.cpp:11415) adds it whole to a swing at an Undead victim, before the done multipliers; the spell path does not read aura 59. The caster at level 60 and Mindless Zombie 1501 (Undead) at level 60 swing for 60 main-hand intervals per arm; both arms carry Brute Force 54678 (SPELL_AURA_MOD_TARGET_RESISTANCE -50000, physical), set before every swing, so the zombie's armor clamps to 0 (CalcArmorReducedDamage) and the flat bonus reaches the damage unscaled; the treatment arm also sets 706323. Non-critical, non-glancing hits only. Every damage the Templar deals to a creature is multiplied by its class tuning aura 887007 (Effect[0] aura 341, SPELL_AURA_ASCENSION_MOD_PVE_DAMAGE_DONE_PCT, read -16 at level 50 and -20 at level 60; GetAscensionNormalTuningDamageMultiplier in MeleeDamageBonusDone), so the expected difference is the tooltip value times 1 + that amount, read in each arm."
+    },
+    {
+      "spell": 706323, "name": "Holy Constitution", "kind": "hit_ratio", "variant": "level_50",
+      "label_suffix": "level_50", "quote": "Increases your damage dealt versus Undead by ${$m1+0}, scaling with level",
+      "expected": 1.0, "expected_token": "${$m1+0}", "metric": "melee_damage_total", "swing_hand": 0,
+      "critical": false, "level": 50, "target_entry": 1501, "refresh": true, "trials": 60,
+      "scale_auras": [[887007, 0]],
+      "control": {"auras": [[54678, 1]]}, "treatment": {"auras": [[54678, 1], [706323, 1]]},
+      "observe_source": "AscensionTemplar code does not touch 706323 (not in TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS or _EFFECTS, so CancelStockEffectRealPointsPerLevel keeps its per-level term): Effect[0] is SPELL_AURA_MOD_DAMAGE_DONE_CREATURE (59), MiscValue 32 (Undead), EffectBasePoints 4 + EffectDieSides 1 plus EffectRealPointsPerLevel 1.5 from SpellLevel 28 to MaxLevel 60. MeleeDamageBonusDone (Unit.cpp:11415) adds it whole to a swing at an Undead victim, before the done multipliers; the spell path does not read aura 59. The caster at level 50 and Mindless Zombie 1501 (Undead) at level 50 swing for 60 main-hand intervals per arm; both arms carry Brute Force 54678 (SPELL_AURA_MOD_TARGET_RESISTANCE -50000, physical), set before every swing, so the zombie's armor clamps to 0 (CalcArmorReducedDamage) and the flat bonus reaches the damage unscaled; the treatment arm also sets 706323. Non-critical, non-glancing hits only. Every damage the Templar deals to a creature is multiplied by its class tuning aura 887007 (Effect[0] aura 341, SPELL_AURA_ASCENSION_MOD_PVE_DAMAGE_DONE_PCT, read -16 at level 50 and -20 at level 60; GetAscensionNormalTuningDamageMultiplier in MeleeDamageBonusDone), so the expected difference is the tooltip value times 1 + that amount, read in each arm."
+    },
+    {
       "spell": 801481, "name": "Glory", "kind": "cast_leech_ratio", "variant": "downfall_heal",
       "label_suffix": "downfall_heal", "quote": "After the duration, you gain", "heal_spell": 803331,
       "expected": 0.5, "cast_spell": 572769, "auras": [[801482, 1]],
