@@ -3851,7 +3851,7 @@
       "target": "dummy",
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "705299 Effect[0] aura 14 SPELL_AURA_MOD_DAMAGE_TAKEN, EffectMiscValue 1 (Physical). AscensionTemplarAuras.cpp:66-67 (CalcAmount) sets the amount to int32(-10 - .1f * Stamina): the reference character's Stamina 79 (class file reference_stats stat 2) gives int32(-17.9) = -17. MeleeDamageBonusTaken adds it as TakenFlatBenefit (Unit.cpp:11617), so 1000 Physical from the dummy reads 983 with 705299 on the caster and 1000 before any cast (control). 705299 is cast on the caster directly; the heal trigger that grants it is proven by the 705298 trigger entry. The tooltip's own formula ${$705299m1+$STA*0.1} with $705299m1 = -10 reads -2.1, not -17.9: the sign reading is an owner question (lean/trial-o-progress.md). Players and the dummy are at level 60."
+      "observe_source": "705299 Effect[0] aura 14 SPELL_AURA_MOD_DAMAGE_TAKEN, EffectMiscValue 1 (Physical). AscensionTemplarAuras.cpp:66-67 (CalcAmount) sets the amount to int32(-10 - .1f * Stamina): the reference character's Stamina 79 (class file reference_stats stat 2) gives int32(-17.9) = -17. MeleeDamageBonusTaken adds it as TakenFlatBenefit (Unit.cpp:11617), so 1000 Physical from the dummy reads 983 with 705299 on the caster and 1000 before any cast (control). 705299 is cast on the caster directly; the heal trigger that grants it is proven by the 705298 trigger entry. The streamed client text (coa_client_spell_description) reads ${-$705299m1+$STA*0.1}, 10 + 0.1 x Stamina, which the server follows; the DBC text's ${$705299m1+$STA*0.1} would read -2.1. melee_damage_taken is the damage-taken calculation of a fixed 1000 with no hit, a readback. Players and the dummy are at level 60."
     },
     {
       "spell": 705298,
@@ -3977,6 +3977,34 @@
       "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_10", "label_suffix": "taken_10",
       "judge": "damage_ratio", "expected": 0.8, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
       "caster_health_pct": 10, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 10% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_81", "label_suffix": "taken_81",
+      "judge": "damage_ratio", "expected": 0.8, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 81, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 10% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_79", "label_suffix": "taken_79",
+      "judge": "damage_ratio", "expected": 1.0, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 79, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 10% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_21", "label_suffix": "taken_21",
+      "judge": "damage_ratio", "expected": 1.0, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 21, "caster_max_health": 100000, "trials": 10,
+      "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 10% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
+    },
+    {
+      "spell": 801202, "name": "Battlepriest", "kind": "taken_hit", "variant": "taken_19", "label_suffix": "taken_19",
+      "judge": "damage_ratio", "expected": 0.8, "quote": "take 20% reduced Magic damage", "strike_spell": 41394,
+      "caster_health_pct": 19, "caster_max_health": 100000, "trials": 10,
       "arms": [{"name": "control"}, {"name": "treatment", "auras": [[801202, 1]]}],
       "observe_source": "AscensionTemplarContracts.cpp:296-298 (Mitigation, applied in ModifySpellDamageTaken at :351): with 801202 on the caster, a magic-school hit taken is multiplied by .8f while HealthAbovePct(80) or HealthBelowPct(20); 801202's own periodic effects and 803843/807903 are dummied (:192-195). A level 60 striker (entry 36) casts Light of the Naaru 41394 (SPELL_EFFECT_SCHOOL_DAMAGE, Holy, EffectBasePoints 1099, EffectDieSides 1, no level scaling) at the caster, held at 10% of 100000 health before every strike; control without 801202, treatment with it set; non-critical hits compared from the damage logs the caster receives."
     },

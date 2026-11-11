@@ -1543,7 +1543,8 @@
       "573452 cost_gate 801461 with",
       "573452 cost_gate 801461 beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The cost gate on Libram of Tenacity 801461 waits 549400 ms of game time, beyond the real-pace cap, so it runs on the accelerated clock only and no --gameplay-clock real reference can check its timing (ADR 0152)."
   },
   {
     "spell": 680397,
@@ -2271,7 +2272,8 @@
     "labels": [
       "705298 trigger_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The label \"705298 trigger_count ok\" was a placeholder for the stored trigger verdict \"705298 trigger_count\" (same spell, the trigger entry's own label); re-pointed by trial-o."
   },
   {
     "spell": 705298,
@@ -2279,7 +2281,8 @@
     "labels": [
       "705298 behaviour_metric_delta damage_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged against the streamed client text (coa_client_spell_description, rev_20261029_240_templar_untainted_tooltip.sql): 705298 \"reduces your Physical damage taken by ${-$705299m1+$STA*0.1}\" and 705299 \"Physical damage taken reduced by ${-$m1+$STA*0.1}\", 10 + 0.1 x Stamina; the DBC text above reads ${$705299m1+$STA*0.1}. The override rests on the owner ruling of 2026-11-10 (as the trial controller records it), so it is independent. The server sets int32(-10 - .1f * Stamina) in the class script (AscensionTemplarAuras.cpp:66-67), 17 at Stamina 79; that truncation is the script's own, outside the int32 rule of SpellInfo.cpp:592, and the check compares exactly against it. The only label reads melee_damage_taken, a readback (trial question 4), so the clause is data conformant."
   },
   {
     "spell": 705298,
@@ -2968,7 +2971,11 @@
       "801202 10 behaviour_ratio",
       "801202 behaviour_hit_ratio taken_90",
       "801202 behaviour_hit_ratio taken_50",
-      "801202 behaviour_hit_ratio taken_10"
+      "801202 behaviour_hit_ratio taken_10",
+      "801202 behaviour_hit_ratio taken_81",
+      "801202 behaviour_hit_ratio taken_79",
+      "801202 behaviour_hit_ratio taken_21",
+      "801202 behaviour_hit_ratio taken_19"
     ],
     "kind": "claim"
   },
@@ -3521,7 +3528,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The not_measured value labels 801481 effect_value 801482e0 #2, 801483e0 #4 and 801483e2 #5 were replaced (trial-o route) by the in-game checks of the same quantities: the Downfall and Redemption heal ratios (801481 803331 behaviour_ratio downfall_heal, redemption_heal) and the Redemption haste (801481 behaviour_metric_delta redemption_haste)."
   },
   {
     "spell": 503141,
