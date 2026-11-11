@@ -1966,11 +1966,12 @@
     "spell": 705285,
     "clause": "Condemn now stacks $s1 additional time.",
     "labels": [
-      "conformance-templar-value-705285",
-      "705285 e0 spell_modifier 567539",
-      "705285 e0 spell_max_stacks 567539"
+      "705285 behaviour_metric_delta",
+      "705285 e0 spell_max_stacks 567539",
+      "705285 e0 spell_modifier 567539"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Behaviour proof: five Condemn 804906 casts give 3 stacks on the dummy without the talent and 4 with it (lean/mech-batch-author.md). The scenario-name label conformance-templar-value-705285 named no verdict and is replaced by the behaviour label."
   },
   {
     "spell": 705286,
@@ -2572,7 +2573,8 @@
     "spell": 707391,
     "clause": "for $s1% of the damage dealt as Holy Damage",
     "labels": [
-      "707391 effect_value e0 #1"
+      "707391 effect_value e0 #1",
+      "707391 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -3935,10 +3937,21 @@
   {
     "spell": 805417,
     "clause": "increasing the healing received by nearby party and raid members by $s3% for $d",
-    "labels": [
-      "805417 effect_value e2 #0",
-      "805417 aura_amount e2 #0",
-      "805417 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "increasing the healing received by nearby party and raid members by $s3%",
+        "labels": [
+          "805417 behaviour_hit_ratio received",
+          "805417 effect_value e2 #0",
+          "805417 aura_amount e2 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805417 aura_duration_ms #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -4127,9 +4140,11 @@
     "spell": 806521,
     "clause": "and extending the duration of your Oath Chain by $/1000;707896s1 sec.",
     "labels": [
-      "806835 effect_value 707896e0 #1"
+      "806835 effect_value 707896e0 #1",
+      "806521 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Our Spell.dbc (707896 EffectBasePoints 2999) and tooltip say 3 sec, measured: the chain ends at 18000 ms with a Titanstrike and at 15000 ms without. The coabuildhub text says 5 sec, an older patch state (lean/mech-batch-author.md)."
   },
   {
     "spell": 806521,
@@ -4237,5 +4252,14 @@
       "1397742 aura_duration_ms 102208 #4"
     ],
     "kind": "claim"
+  },
+  {
+    "spell": 524739,
+    "clause": "After a short delay, you blast them with immense holy force",
+    "labels": [
+      "524739 behaviour_event_delay"
+    ],
+    "kind": "claim",
+    "reason": "Tooltip sentence with no ledger clause before the custom-mechanics batch. The tooltip states no number; Spell.dbc 524739 Effect[1] 183 gives 1500 ms (EffectBasePoints 1499, DieSides 1). The sentence opening the tooltip, \"Target an enemy and leap into the air.\", stays without a clause."
   }
 ]

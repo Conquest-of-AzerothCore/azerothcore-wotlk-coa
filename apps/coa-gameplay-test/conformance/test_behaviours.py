@@ -18,7 +18,8 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         BEHAVIOUR_INTERNAL_COOLDOWN_GATE, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_OATH_CONSUMPTION, BEHAVIOUR_OATH_CONSUMPTION_REMOVAL,
                         BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
-                        BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, IMMUNITY_CASTS, MECHANIC_LAND_ATTEMPTS,
+                        BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, IMMUNITY_CASTS,
+                        MECHANIC_LAND_ATTEMPTS,
                         NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
                         SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
                         BEHAVIOUR_HIT_RATIO, NotModelled, sized_behaviour,
@@ -6160,6 +6161,105 @@ class OffHandHitRatioTests(unittest.TestCase):
             with self.subTest(entry={key: entry.get(key) for key in ('metric', 'swing_hand', 'off_hand_item')}):
                 with self.assertRaises(ValueError):
                     behaviour_scenario(CLASS_FILE, entry)
+
+
+TYRS_BLESSING = 705285
+CONDEMN = 804906
+BARRIER_OF_LIGHT = 805417
+CHAKRA_OF_LIGHT = 803845
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class EventDelayScenarioTests(unittest.TestCase):
+    def setUp(self):
+        self.entry = class_entry(NORGANNONS_WRATH, 'event_delay')
+        self.scenario, (self.expectation,) = behaviour_scenario(CLASS_FILE, self.entry)
+        self.reads = self.expectation.model['reads']
+
+    def readings(self, since_cast: float, since_hit_cast: float, hits=(1.0, 2.0, 3.0)) -> FakeRun:
+        values = {}
+        for read, total in zip(self.reads, hits):
+            values.update({read['since_cast']: since_cast, read['since_hit_cast']: since_hit_cast,
+                           read['hits']: total})
+        return FakeRun(values)
+
+    def judged(self, readings: FakeRun) -> Verdict:
+        return judge_behaviour(base_verdict(self.expectation), readings, self.expectation)
+
+    def test_each_cast_stamps_the_hit_from_both_cast_packets(self):
+        run.validate(self.scenario)
+        self.assertEqual(self.expectation.check, BEHAVIOUR_EVENT_DELAY)
+        stamps = [step for step in self.scenario['steps'] if step.get('metric') == 'event_first_ms']
+        self.assertEqual([step['since_spell'] for step in stamps],
+                         [NORGANNONS_WRATH, NORGANNONS_WRATH_DAMAGE] * len(self.reads))
+        self.assertTrue(all(step['spell'] == NORGANNONS_WRATH_DAMAGE for step in stamps))
+
+    def test_the_stated_delay_after_the_missile_travel_is_ok(self):
+        verdict = self.judged(self.readings(1628.0, 125.0))
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.measured, 1503.0)
+
+    def test_seeded_handler_that_casts_at_once_or_ignores_the_travel_alerts(self):
+        self.assertEqual(self.judged(self.readings(125.0, 125.0)).status, 'alert')
+        self.assertEqual(self.judged(self.readings(1628.0, 0.0)).status, 'alert')
+
+    def test_seeded_handler_that_never_casts_alerts(self):
+        nan = float('nan')
+        self.assertEqual(self.judged(self.readings(nan, nan, (0.0, 0.0, 0.0))).status, 'alert')
+        self.assertEqual(self.judged(self.readings(1628.0, 125.0, (1.0, 1.0, 2.0))).status, 'alert')
+
+    def test_a_delay_on_its_own_cast_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**self.entry, 'observe_spell': NORGANNONS_WRATH})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class StackCapScenarioTests(unittest.TestCase):
+    def test_setup_casts_wait_out_the_global_cooldown_and_five_casts_reach_each_phase(self):
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, class_entry(TYRS_BLESSING, 'metric_delta'))
+        steps = run.validate(scenario)['steps']
+        learned = first_index(steps, action='learn', spell=TYRS_BLESSING)
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len([index for index in casts if index < learned]), 5)
+        self.assertEqual(len([index for index in casts if index > learned]), 5)
+        for index in casts:
+            following = steps[index + 1]
+            self.assertEqual(following['action'], 'wait')
+            self.assertGreater(following['ms'], RECORDS.field('Spell', CONDEMN, 'StartRecoveryTime') - 1)
+
+    def test_seeded_cap_that_ignores_the_modifier_alerts(self):
+        _, (expectation,) = behaviour_scenario(CLASS_FILE, class_entry(TYRS_BLESSING, 'metric_delta'))
+        model = expectation.model
+        ok = judge_behaviour(base_verdict(expectation), FakeRun({model['before_label']: 3.0,
+                                                                 model['after_label']: 4.0}), expectation)
+        ignored = judge_behaviour(base_verdict(expectation), FakeRun({model['before_label']: 3.0,
+                                                                      model['after_label']: 3.0}), expectation)
+        self.assertEqual((ok.status, ignored.status), ('ok', 'alert'))
+
+    def test_an_entry_without_a_setup_wait_casts_back_to_back(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['kind'] == 'metric_delta' and entry.get('setup_casts')
+                     and not entry.get('setup_wait_ms'))
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = scenario['steps']
+        setup = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'cast' and step['spell'] in entry['setup_casts'])
+        self.assertNotEqual(steps[setup + 1]['action'], 'wait')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealingReceivedAuraScenarioTests(unittest.TestCase):
+    def test_the_ally_heals_the_caster_who_casts_the_area_aura_before_every_treatment_heal(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['spell'] == BARRIER_OF_LIGHT and entry['kind'] == 'hit_ratio')
+        scenario, (expectation,) = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        heals = [step for step in steps if step['action'] == 'cast' and step['spell'] == CHAKRA_OF_LIGHT]
+        barriers = [step for step in steps if step['action'] == 'cast' and step['spell'] == BARRIER_OF_LIGHT]
+        self.assertTrue(all(step['actor'] == 'ally' and step['target'] == 'caster' for step in heals))
+        self.assertEqual(len(barriers), entry['trials'])
+        self.assertTrue(all(step['actor'] == 'caster' for step in barriers))
+        self.assertEqual(expectation.label, f'{BARRIER_OF_LIGHT} behaviour_hit_ratio received')
 
 
 if __name__ == '__main__':

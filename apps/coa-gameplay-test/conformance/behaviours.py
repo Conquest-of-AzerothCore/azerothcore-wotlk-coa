@@ -46,6 +46,7 @@ BEHAVIOUR_ABSORB_PIERCE_RATIO = 'behaviour_absorb_pierce_ratio'
 BEHAVIOUR_HIT_RATIO = 'behaviour_hit_ratio'
 BEHAVIOUR_IMMUNITY = 'behaviour_immunity'
 BEHAVIOUR_THREAT_SLOPE = 'behaviour_threat_slope'
+BEHAVIOUR_EVENT_DELAY = 'behaviour_event_delay'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -55,7 +56,8 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_CAST_GATE, BEHAVIOUR_CAST_CONDITION, BEHAVIOUR_MOUNT_GRANT,
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
-                    BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE)
+                    BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
+                    BEHAVIOUR_EVENT_DELAY)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -63,7 +65,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
-        'periodic_dispel')
+        'periodic_dispel', 'event_delay')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1070,6 +1072,7 @@ class MetricDeltaSpec:
     after_expiry_expected: float | None = None
     attack_swings: int = 0
     force_crit: str | None = None
+    setup_wait_ms: int = 0
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -1106,6 +1109,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': setup_spell})
             steps += required_aura_steps(setup_facts)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell, 'target': spec.target})
+            if spec.setup_wait_ms:
+                steps.append({'action': 'wait', 'ms': spec.setup_wait_ms})
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
@@ -1236,7 +1241,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('cast_in_before', True),
                            entry.get('gate_timing', 'between'), entry.get('trigger_only_after', False),
                            entry.get('expiry_wait_ms'), entry.get('after_expiry_expected'),
-                           entry.get('attack_swings', 0), entry.get('force_crit'))
+                           entry.get('attack_swings', 0), entry.get('force_crit'), entry.get('setup_wait_ms', 0))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -1733,6 +1738,14 @@ class CastAppliesAuraSpec:
     control_ms: float | None = None
     control_clear: tuple[int, ...] = ()
     label_suffix: str = ''
+    extra_cast: 'ExtraCast | None' = None
+
+
+@dataclass(frozen=True)
+class ExtraCast:
+    spell: int
+    target: str
+    after_ms: int
 
 
 def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tuple[list[dict], list[dict]]:
@@ -1745,6 +1758,21 @@ def cast_applies_aura_steps(records: Records, spec: CastAppliesAuraSpec) -> tupl
                 'target': spec.cast_target or spec.target}])
 
 
+def extra_cast_setup(records: Records, extra: ExtraCast | None) -> list[dict]:
+    if extra is None:
+        return []
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': extra.spell}]
+            + required_target_health_steps(facts_of(records, extra.spell), extra.target))
+
+
+def extra_cast_steps(records: Records, extra: ExtraCast) -> list[dict]:
+    facts = facts_of(records, extra.spell)
+    return ([{'action': 'wait', 'label': f'{extra.spell} extra cast wait', 'ms': extra.after_ms},
+             {'action': 'reset_cooldown', 'actor': CASTER, 'spell': extra.spell}]
+            + cast_gate_power_step(facts) + required_aura_steps(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': extra.spell, 'target': extra.target}])
+
+
 def cast_applies_aura_label(spec: CastAppliesAuraSpec, moment: str) -> str:
     return f'{spec.spell} {spec.applied_aura} aura_duration_ms cast_applies_aura {moment}'
 
@@ -1755,8 +1783,11 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     before_label = cast_applies_aura_label(spec, BEFORE)
     after_label = cast_applies_aura_label(spec, AFTER)
     learned, cast = cast_applies_aura_steps(records, spec)
+    extra = extra_cast_steps(records, spec.extra_cast) if spec.extra_cast else []
+    expected_ms = spec.expected_ms - (spec.extra_cast.after_ms if spec.extra_cast else 0)
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
-             + [measurement(before_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)] + cast
+             + extra_cast_setup(records, spec.extra_cast)
+             + [measurement(before_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)] + cast + extra
              + [measurement(after_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)])
     scenario = {
         'schema': 1,
@@ -1773,8 +1804,13 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_cast_applies_aura' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    if spec.extra_cast:
+        scenario['contract'] += (f' {spec.extra_cast.spell} is cast at the {spec.extra_cast.target} '
+                                 f'{spec.extra_cast.after_ms} ms after the cast and before the second read, which '
+                                 f'expects the stated {spec.expected_ms:g} ms less those {spec.extra_cast.after_ms} '
+                                 f'ms.')
     model = {'kind': 'cast_applies_aura', 'before_label': before_label, 'after_label': after_label,
-             'expected_ms': spec.expected_ms, 'quote': entry.quote}
+             'expected_ms': expected_ms, 'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_CAST_APPLIES_AURA, spec.spell, spec.applied_aura, None,
                               str(spec.expected_ms), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -1785,11 +1821,16 @@ def cast_applies_aura_spec(entry: dict) -> CastAppliesAuraSpec:
     if control is not None and entry.get('cast_spell') is None:
         raise ValueError(f'{entry["spell"]} cast_applies_aura sets a control arm without a cast_spell to cast '
                          f'before {entry["spell"]} is learned')
+    raw = control.get('extra_cast') if control else None
+    if raw is not None and set(raw) != {'spell', 'target', 'after_ms'}:
+        raise ValueError(f'{entry["spell"]} cast_applies_aura extra_cast names {sorted(raw)}, not spell, target and '
+                         f'after_ms')
+    extra = ExtraCast(raw['spell'], raw['target'], int(raw['after_ms'])) if raw is not None else None
     return CastAppliesAuraSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ms'],
                                entry['applied_aura'], entry.get('target', CASTER), entry.get('cast_spell'),
                                entry.get('cast_target'), control['expected_ms'] if control else None,
                                tuple(control.get('clear_auras', ())) if control else (),
-                               entry.get('label_suffix', ''))
+                               entry.get('label_suffix', ''), extra)
 
 
 DEBT_ASSERT_TIMEOUT_MS = 2000
@@ -3496,6 +3537,76 @@ def threat_slope_spec(entry: dict) -> ThreatSlopeSpec:
                            float(entry['expected_slope']))
 
 
+EVENT_DELAY_TRIALS = 3
+EVENT_DELAY_WAIT_MS = 3000
+
+
+@dataclass(frozen=True)
+class EventDelaySpec:
+    spell: int
+    name: str
+    quote: str
+    expected_ms: float
+    observe_spell: int
+    trials: int = EVENT_DELAY_TRIALS
+    wait_ms: int = EVENT_DELAY_WAIT_MS
+
+
+def event_delay_label(spec: EventDelaySpec, trial: int, reading: str) -> str:
+    return f'{spec.spell} event_delay {trial} {reading}'
+
+
+def event_delay_scenario(class_file: dict, spec: EventDelaySpec) -> tuple[dict, list[Expectation]]:
+    if spec.trials < 1:
+        raise ValueError(f'{spec.spell} event_delay needs at least one trial')
+    if spec.observe_spell == spec.spell:
+        raise ValueError(f'{spec.spell} event_delay observes its own cast; it times a different, delayed spell')
+    if spec.wait_ms <= spec.expected_ms:
+        raise ValueError(f'{spec.spell} event_delay waits {spec.wait_ms} ms per cast, not past the stated '
+                         f'{spec.expected_ms:g} ms')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'event_delay', spec.quote, spec.expected_ms)
+    facts = facts_of(records, spec.spell)
+    stamp = {'stream': 'spell_damage', 'spell': spec.observe_spell, 'target': TARGET}
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    reads = []
+    for trial in range(1, spec.trials + 1):
+        labels = {reading: event_delay_label(spec, trial, reading) for reading in ('since_cast', 'since_hit_cast',
+                                                                                   'hits')}
+        reads.append(labels)
+        steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+                  + cast_gate_power_step(facts) + required_aura_steps(facts)
+                  + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': TARGET},
+                     {'action': 'wait', 'ms': facts.cast_time_ms + spec.wait_ms},
+                     measurement(labels['since_cast'], CASTER, 'event_first_ms', **stamp, since_spell=spec.spell),
+                     measurement(labels['since_hit_cast'], CASTER, 'event_first_ms', **stamp,
+                                 since_spell=spec.observe_spell),
+                     measurement(labels['hits'], CASTER, 'spell_damage_count', spell=spec.observe_spell,
+                                 target=TARGET)])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour event delay',
+        'contract': f'{spec.trials} casts of {spec.spell} at the dummy, {spec.wait_ms} ms apart; after each, the first '
+                    f'damage of {spec.observe_spell} is stamped twice: from the cast packet of {spec.spell} and from '
+                    f'the cast packet of {spec.observe_spell} itself (its own cast-to-hit time, such as a missile\'s '
+                    f'travel). Their difference is the time from the cast to the delayed cast, and must land within '
+                    f'the tolerance of the stated {spec.expected_ms:g} ms.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'event_delay', 'quote': entry.quote, 'expected_ms': spec.expected_ms, 'reads': reads,
+             'observe_spell': spec.observe_spell}
+    expectation = Expectation(f'{spec.spell} {BEHAVIOUR_EVENT_DELAY}', BEHAVIOUR_EVENT_DELAY, spec.spell,
+                              spec.observe_spell, None, f'{spec.expected_ms:g}', prose_rule(entry.quote, spec.spell),
+                              model)
+    return scenario, [expectation]
+
+
+def event_delay_spec(entry: dict) -> EventDelaySpec:
+    return EventDelaySpec(entry['spell'], entry['name'], entry['quote'], float(entry['expected_ms']),
+                          entry['observe_spell'], entry.get('trials', EVENT_DELAY_TRIALS),
+                          entry.get('wait_ms', EVENT_DELAY_WAIT_MS))
+
 AGGRO_SETTLE_MS = 300
 AGGRO_REDIRECT_REACTION = 1
 
@@ -4346,6 +4457,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return immunity_scenario(class_file, immunity_spec(entry))
     if entry['kind'] == 'threat_slope':
         return threat_slope_scenario(class_file, threat_slope_spec(entry))
+    if entry['kind'] == 'event_delay':
+        return event_delay_scenario(class_file, event_delay_spec(entry))
     if entry['kind'] == 'aggro_redirect':
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':

@@ -3104,6 +3104,83 @@
         "attack_power": 20000
       },
       "expected_source": "$s1 = 25 (705276 Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT, EffectBasePoints[0] 24 + 1): AuraEffect::HandleModOffhandDamagePercent (SpellAuraEffects.cpp:5326-5334) calls Unit::UpdateDamagePctDoneMods(OFF_ATTACK), which multiplies the off-hand 0.5 factor by the aura 122 multiplier into UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT (Unit.cpp:13521-13546), so a plain off-hand white swing grows by 1.25. Both arms auto attack the dummy; each trial is one off-hand swing interval (1800 ms), reading plain (not critical, not glancing) off-hand hits. Off-hand Ancient Bone Mace 30754 beside the main-hand Frostmane Club 2259, no Dual Wield grant. The attack power fixture makes the AP part dominate the weapon roll. Control: no talent."
+    },
+    {
+      "spell": 524739,
+      "name": "Norgannon's Wrath",
+      "kind": "event_delay",
+      "quote": "After a short delay, you blast them with immense holy force",
+      "expected_ms": 1500,
+      "observe_spell": 524740,
+      "observe_source": "524739 Effect[1] 183 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED, EffectBasePoints[1] 1499 + EffectDieSides[1] 1 = 1500, EffectTriggerSpell[1] 524740, EffectImplicitTargetA[1] 6 (TARGET_UNIT_TARGET_ENEMY): Spell::EffectAscensionTriggerSpellDelayed (SpellEffects.cpp:1061-1101) schedules a cast of 524740 on the target damage ms later (SpellEffects.cpp:1092). 524740 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE is the blast; no file of src/server/coa names 524739, and the 524740 contract (AscensionTemplarContracts.cpp:270-277) changes its targets and absorb flag, not its timing. 524740 has Speed 30 (a missile), so its first damage log is stamped from the 524739 cast packet and from its own cast packet; their difference, the time from the cast to the delayed cast, is judged, and the second stamp is the in-trial control that removes the travel time. A handler that never casts 524740 leaves no hit (alert); one that casts it at once reads about 0 ms (alert)."
+    },
+    {
+      "spell": 806521,
+      "name": "Titanstrike",
+      "kind": "cast_applies_aura",
+      "quote": "extending the duration of your Oath Chain by $/1000;707896s1 sec.",
+      "expected_ms": 18000,
+      "applied_aura": 704576,
+      "target": "caster",
+      "cast_spell": 804906,
+      "cast_target": "dummy",
+      "control": {
+        "expected_ms": 15000,
+        "extra_cast": {
+          "spell": 806521,
+          "target": "dummy",
+          "after_ms": 3000
+        }
+      },
+      "observe_source": "Titanstrike 806521 Effect[1] SPELL_EFFECT_TRIGGER_SPELL casts Oath Chain 707896, whose Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, EffectMiscValue[0] 704576, EffectBasePoints[0] 2999 + EffectDieSides[0] 1 = 3000, EffectImplicitTargetA[0] 1 (TARGET_UNIT_CASTER); Spell::EffectAscensionModifyAuraDuration (SpellEffects.cpp:899-920) adds the 3000 ms to the caster's own 704576. A Condemn 804906 cast grants the chain at its 15000 ms maximum (AscensionTemplar.cpp:168-181; DurationIndex 8 kept by AscensionTemplarContracts.cpp:100-101). Without arm: the chain ends 15000 ms after Condemn. With arm: Titanstrike cast at the dummy 3000 ms after Condemn (dummy held at 30% health for TargetAuraState 13), so the chain ends 18000 ms after Condemn. 707896 appears in no file of src/server/coa; the Titanstrike cast hook only syncs the Oath durations to the chain before the hit (AscensionTemplarAbilities.cpp:177-178). A handler that does nothing ends the with arm at 15000 ms (alert)."
+    },
+    {
+      "spell": 705285,
+      "name": "Tyr's Blessing",
+      "kind": "metric_delta",
+      "quote": "Condemn now stacks $s1 additional time.",
+      "expected": 4,
+      "before_expected": 3,
+      "trigger_spell": 804906,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804906,
+        "caster": "caster"
+      },
+      "setup_casts": [
+        804906,
+        804906,
+        804906,
+        804906
+      ],
+      "setup_wait_ms": 1500,
+      "wait_ms": 500,
+      "expire_ms": 22000,
+      "observe_source": "Tyr's Blessing 705285 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_MAX_AURA_STACKS, SpellDefines.h:107), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1, EffectSpellClassMask[0] word 0 4194304 matching Condemn 804906 SpellFamilyFlags[0] 4194304. Aura::ModStackAmount reads the cap through SpellInfo::CalcMaxAuraStacks (SpellAuras.cpp:979; SpellInfo.cpp:1473-1486, ApplySpellMod at :1483). Condemn 804906 StackAmount 3, DurationIndex 86 (21000 ms), StartRecoveryTime 1250. Five Condemn casts 1500 ms apart at the dummy, then Condemn's aura_stacks on the dummy from the caster: 3 without the talent (control arm), 4 with it. expire_ms 22000 lets the first phase's Condemn expire before the second phase. A handler that ignores the operation reads 3 in both arms (alert)."
+    },
+    {
+      "spell": 805417,
+      "name": "Barrier of Light",
+      "kind": "hit_ratio",
+      "variant": "received",
+      "label_suffix": "received",
+      "quote": "increasing the healing received by nearby party and raid members by $s3% for $d",
+      "expected": 1.4,
+      "metric": "spell_heal_total",
+      "observe_spell": 803845,
+      "caster": "ally",
+      "target": "caster",
+      "control": {},
+      "treatment": {
+        "casts": [
+          805417
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "expected_source": "$s3 = 40 (805417 EffectBasePoints[2] 39, EffectDieSides[2] 1): Effect[2] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT (handler HandleNoImmediateEffect, SpellAuraEffects.cpp:389), read by Unit::SpellHealingBonusTaken as TakenTotalMod *= GetTotalAuraMultiplier (Unit.cpp:10898). The ally heals the caster with Chakra of Light 803845 (SPELL_EFFECT_HEAL, EffectBasePoints[0] 49, EffectDieSides[0] 1, no CoA script), which goes through SpellHealingBonusTaken. Treatment arm: the caster casts Barrier of Light before every heal (the cooldown is reset each time, so the 15 s aura is fresh for every trial). Control arm: no Barrier of Light. Only non-critical heals are compared. Barrier's Effect[0] aura 87 has value 0 and Effect[1] periodically force-casts the threat redirect 807694; neither touches healing. A handler that does nothing reads a ratio of 1.0 (alert)."
     }
   ],
   "player_observations": [

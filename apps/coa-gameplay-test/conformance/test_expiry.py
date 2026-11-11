@@ -31,6 +31,8 @@ DEEP_SECRETS = 705263
 SACRED_RESTRAINT = 102208
 BECKON = 804914
 FROSTBOLT = 116
+TITANSTRIKE = 806521
+CONDEMN = 804906
 EXPIRY_ENTRIES = (TESTAMENT_OF_STRENGTH, BLESSING_OF_AGGRAMAR, 705271, FINESSE_RANK_2, COURAGE_RANK_1, 712466,
                   SACRED_OATH, BECKON)
 
@@ -201,6 +203,32 @@ class TemplarExpiryScenarioTest(unittest.TestCase):
         self.assertEqual(judged(DEEP_SECRETS).status, 'ok')
         self.assertEqual(judged(DEEP_SECRETS, {'with': 20000.0}).status, 'alert')
         self.assertEqual(judged(DEEP_SECRETS, {'without': 30000.0}).status, 'alert')
+
+    def test_an_extra_cast_arm_learns_the_spell_before_both_casts_and_casts_it_inside_the_with_arm(self):
+        scenario, expectation = built(TITANSTRIKE)
+        self.assertEqual(stated_ends(TITANSTRIKE), {'without': 15000.0, 'with': 18000.0})
+        steps = run.validate(scenario)['steps']
+        labels = [step.get('label') for step in steps]
+        without, with_arm = expectation.model['arms']
+        learned = next(index for index, step in enumerate(steps)
+                       if step['action'] == 'learn' and step['spell'] == TITANSTRIKE)
+        extra = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'cast' and step['spell'] == TITANSTRIKE)
+        self.assertLess(learned, labels.index(without['act_label']))
+        self.assertEqual(steps[labels.index(without['act_label'])]['spell'], CONDEMN)
+        self.assertLess(labels.index(with_arm['applied_label']), extra)
+        self.assertLess(extra, labels.index(with_arm['before_label']))
+        self.assertEqual([step['spell'] for step in steps if step['action'] == 'cast'], [CONDEMN, CONDEMN, TITANSTRIKE])
+
+    def test_seeded_extra_cast_that_leaves_the_duration_unchanged_alerts(self):
+        self.assertEqual(judged(TITANSTRIKE).status, 'ok')
+        self.assertEqual(judged(TITANSTRIKE, {'with': 15000.0}).status, 'alert')
+
+    def test_an_extra_cast_names_its_spell_target_and_delay(self):
+        entry = behaviour(TITANSTRIKE)
+        broken = {**entry, 'control': {**entry['control'], 'extra_cast': {'spell': TITANSTRIKE}}}
+        with self.assertRaises(ValueError):
+            behaviour_expiry(CLASS_FILE, broken)
 
     def test_a_control_arm_needs_a_separate_cast_spell(self):
         entry = {key: value for key, value in behaviour(OATH_FLOW).items() if key not in ('cast_spell', 'cast_target')}

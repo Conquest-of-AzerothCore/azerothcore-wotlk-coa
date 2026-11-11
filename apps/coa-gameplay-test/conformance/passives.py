@@ -94,6 +94,7 @@ BEHAVIOUR_LABELS = {
     'crit_magnitude': lambda entry: [f"{entry['spell']} behaviour_crit_magnitude"],
     'internal_cooldown': lambda entry: [f"{entry['spell']} behaviour_internal_cooldown"],
     'threat_slope': lambda entry: [f"{entry['spell']} behaviour_threat_slope {entry['hit_spell']}"],
+    'event_delay': lambda entry: [f"{entry['spell']} behaviour_event_delay"],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
                                    for arm in ('outsider', 'party', *(('raid',) if entry.get('raid', True) else ()))
                                    for metric in ('cast', 'aura')],
