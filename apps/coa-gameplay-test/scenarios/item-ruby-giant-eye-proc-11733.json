@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Giant Ruby Eye stacks on landed non-critical direct magic damage (#11733)",
+  "contract": "Giant Ruby Eye (equip aura 201009 on the base item and 312231/316231/320231 on the worldforged tiers) is an aura 42 (proc trigger spell) on Ruby Flame 201010/312232/316232/320232. Every record carries Spell.dbc ProcFlags 0 and ProcChance 100, and the world had no spell_proc row, so Aura::GetProcEffectMask found no proc entry and the tooltip's 'Your non-critical direct damaging spell hits increase your spell critical strike rating' never rolled (#11733). The repair grants PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG at the hit phase with HitMask PROC_HIT_NORMAL (non-critical) over every school and spell family and defers Chance to the record's 100. spell_proc_chance reads the loaded entries' 100, and aura_proc_rate replays the aura's native proc decision 40000 times per sample on a synthetic landed non-critical magic-class direct hit naming Frostbolt 116; critical, melee-class and periodic events proc it zero times. Before the repair the chance lookups fail with 'Spell has no proc entry' and every rate reads 0, so the discriminating assertions fail rather than flake. Clearing the stacks on a critical strike is out of scope.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Base item equip aura",
+      "actor": "caster",
+      "spell": 201009,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Top worldforged tier equip aura",
+      "actor": "caster",
+      "spell": 320231,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: base equip aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 201009,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: top tier equip aura is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320231,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: aura 201009 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 201009,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: aura 312231 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312231,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: aura 316231 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316231,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: aura 320231 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320231,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: landed non-critical direct magic damage always procs 201009",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201009,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: landed non-critical direct magic damage always procs 320231",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320231,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a critical hit does not stack the aura",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201009,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a melee-class hit is not magic damage",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201009,
+      "target": "dummy",
+      "trigger_spell": 34027,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic tick is not a landed direct hit",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 201009,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

@@ -11394,6 +11394,79 @@ void ObjectMgr::LoadGameObjectQuestItems()
     LOG_INFO("server.loading", " ");
 }
 
+void ObjectMgr::LoadQuestTargetRespawns()
+{
+    uint32 oldMSTime = getMSTime();
+    _questTargetRespawnStore.clear();
+
+    std::unordered_set<uint32> questLootIds;
+    if (QueryResult result = WorldDatabase.Query("SELECT DISTINCT `Entry` FROM `creature_loot_template` "
+        "WHERE `QuestRequired` = 1 AND `Reference` = 0"))
+    {
+        do
+            questLootIds.insert(result->Fetch()[0].Get<uint32>());
+        while (result->NextRow());
+    }
+
+    std::unordered_set<uint32> killObjectives;
+    for (auto const& [questId, quest] : _questTemplates)
+        for (uint8 i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+            if (quest->RequiredNpcOrGo[i] > 0)
+                killObjectives.insert(uint32(quest->RequiredNpcOrGo[i]));
+
+    // Spawn points per entry on open-world maps; a spawn pool counts once because only one member is up at a time.
+    std::unordered_map<uint32, std::unordered_set<uint64>> openWorldSpawnPoints;
+    for (auto const& [spawnId, data] : _creatureDataStore)
+    {
+        MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
+        if (!mapEntry || !mapEntry->IsWorldMap())
+            continue;
+
+        uint32 const poolId = sPoolMgr->IsPartOfAPool<Creature>(spawnId);
+        uint64 const spawnPoint = poolId ? (uint64(1) << 32) | poolId : uint64(spawnId);
+        for (uint32 entry : { data.id, data.id2, data.id3 })
+            if (entry)
+                openWorldSpawnPoints[entry].insert(spawnPoint);
+    }
+
+    uint32 named = 0;
+    uint32 general = 0;
+    for (auto const& [entry, creatureTemplate] : _creatureTemplateStore)
+    {
+        if (creatureTemplate.rank == CREATURE_ELITE_RARE || creatureTemplate.rank == CREATURE_ELITE_RAREELITE)
+            continue;
+
+        bool const questBoss = creatureTemplate.type_flags & CREATURE_TYPE_FLAG_QUEST_BOSS;
+        if (questBoss)
+        {
+            auto spawnPoints = openWorldSpawnPoints.find(entry);
+            if (spawnPoints == openWorldSpawnPoints.end() || spawnPoints->second.size() <= 1)
+            {
+                _questTargetRespawnStore[entry] = QuestTargetRespawn::Named;
+                ++named;
+                continue;
+            }
+        }
+
+        bool questNeeded = questBoss || killObjectives.contains(entry);
+        for (uint32 credit : creatureTemplate.KillCredit)
+            questNeeded = questNeeded || (credit && killObjectives.contains(credit));
+        questNeeded = questNeeded || (creatureTemplate.lootid && questLootIds.contains(creatureTemplate.lootid));
+        if (CreatureQuestItemList const* questItems = GetCreatureQuestItemList(entry))
+            questNeeded = questNeeded || !questItems->empty();
+
+        if (questNeeded)
+        {
+            _questTargetRespawnStore[entry] = QuestTargetRespawn::General;
+            ++general;
+        }
+    }
+
+    LOG_INFO("server.loading", ">> Loaded {} Named And {} General Quest Target Respawn Classes in {} ms",
+        named, general, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", " ");
+}
+
 void ObjectMgr::LoadCreatureQuestItems()
 {
     uint32 oldMSTime = getMSTime();

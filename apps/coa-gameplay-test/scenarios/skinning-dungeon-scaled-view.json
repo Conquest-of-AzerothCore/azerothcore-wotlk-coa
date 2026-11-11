@@ -2,17 +2,17 @@
   "schema": 1,
   "name": "Skinning in a dungeon follows the level a scaled character is shown (#5289)",
   "contract": [
-    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse.",
-    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1. Inside a scaled five-player dungeon every",
-    "creature stands at the viewer's own level held inside the dungeon's LFGDungeons.dbc band",
+    "Requires CoALegendaryItems.DropChance=0: this scenario checks skinning an otherwise empty corpse. Requires",
+    "DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1. Inside a scaled five-player dungeon a Dungeon Finder",
+    "group's (#11184) creatures stand at the viewer's own level held inside the dungeon's LFGDungeons.dbc band",
     "(ScaleDungeonCreatureLevelForViewer); the Stockade (map 34, finder entry 12) has the band 15-59, so a level-15",
     "character is sent a level-20 creature as level 15. The 3.3.5 client colours a corpse's Skinnable line from the",
     "level it was sent, and the server requirement (Spell::CheckCast: skill < 100 needs (level - 10) * 10) must be",
     "computed from the same level: 50 for the level-15 view, 100 for the authored level 20. Skinning 55 therefore",
     "skins the corpse the client shows as skinnable, Skinning 45 is refused with SPELL_FAILED_LOW_CASTLEVEL (49) as",
-    "the client's red line says, and with open world scaling off the dungeon keeps the level-15 view, so 85 skins",
-    "the third corpse. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money,",
-    "so its corpse becomes skinnable as soon as it dies."
+    "the client's red line says, and with open world scaling off the dungeon keeps the level-15 view, so 85 skins the",
+    "third corpse. Black Riding Wolf 5194 is a beast with skinning table 100001 and no creature loot or money, so its",
+    "corpse becomes skinnable as soon as it dies."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -31,6 +31,12 @@
       "level": 15,
       "melee_hit_rating": 10000,
       "expertise_rating": 10000
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 21,
+      "level": 15
     }
   ],
   "creatures": [
@@ -64,6 +70,18 @@
       "action": "wait",
       "label": "Let spawn AI settle",
       "ms": 2000
+    },
+    {
+      "action": "group",
+      "actor": "ranger",
+      "target": "mate",
+      "loot_method": 0
+    },
+    {
+      "action": "lfg_dungeon",
+      "label": "The group is a Dungeon Finder group assigned the Stockade",
+      "actor": "ranger",
+      "dungeon": 12
     },
     {
       "action": "learn",

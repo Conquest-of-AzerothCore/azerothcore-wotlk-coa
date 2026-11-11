@@ -231,6 +231,11 @@ namespace CoAChallenges
         if (player->IsInWorld() && CoAParse::ListContains(ChallengeRules(challengeID),
             "CHALLENGE_RULES_TYPE_PVE_ONLY") && !AscensionRulesets::Has(player, AscensionRulesets::Ruleset::PvE))
             AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::PvE);
+        if (player->IsInWorld() && IsTrialChallenge(challengeID)
+            && CoAParse::ListContains(ChallengeRules(challengeID), "CHALLENGE_RULES_TYPE_HIGH_RISK_ONLY")
+            && !AscensionRulesets::Has(player, AscensionRulesets::Ruleset::HighRisk)
+            && !AscensionRulesets::HighRiskSuspended(player))
+            AscensionRulesets::Apply(player, AscensionRulesets::Ruleset::HighRisk, true);
         std::vector<Creature*> summons = GetPlayerSummons(player);
         for (uint32 spell : GetChallengeSpells(challengeID, level))
         {

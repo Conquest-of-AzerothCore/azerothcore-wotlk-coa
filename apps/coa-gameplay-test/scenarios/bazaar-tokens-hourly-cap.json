@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Bazaar Tokens: an account earns at most 1250 per hour",
-  "contract": "Requires CoA.BazaarTokens.HourlyCap.Amount = 1250 in the source config (the default 0 turns the limit off); with WindowSeconds 3600 (default) an account earns at most 1250 Bazaar Tokens (975001) in the hour its first earned token opens. A level-60 Human at 1210 earned tokens turns in Scarlet Sweep: Magic and Might (18034, a Call Board daily paying 50 tokens and 2000 Runes of Ascension 375250): only the remaining 40 tokens are paid, the runes in full, and the player is told the limit is reached. At the limit, eight ordinary quests pay none of the Ethereal Bazaar's 0-6 tokens each (EtherealBazaar.Tokens.Quest.Min/Max defaults). Tokens added directly (as a GM .additem does) are not limited. Once the hour that opened 61 minutes ago has run out, eight more ordinary quests pay 0-6 each again: at least 1 in total (all eight paying 0 has probability 7^-8). Only one Call Board daily is used, because CoA.CallboardContracts.DailyCompletions allows one per day. Limiting tokens per hour is a Rexxar choice, not live Ascension behaviour.",
+  "contract": "Requires CoA.BazaarTokens.HourlyCap.Amount = 1250 in the source config (the default 0 turns the limit off); with WindowSeconds 3600 (default) an account earns at most 1250 Bazaar Tokens (975001) in the hour its first earned token opens. A level-60 Human at 1210 earned tokens turns in Scarlet Sweep: Magic and Might (18034, a Call Board daily paying 50 tokens and 2000 Runes of Ascension 375250): only the remaining 40 tokens are paid, the runes in full, and the player is told the limit is reached. At the limit, eight ordinary quests pay none of the Ethereal Bazaar's 0-6 tokens each (EtherealBazaar.Tokens.Quest.Min/Max defaults). Tokens added directly (as a GM .additem does) are not limited. Once the hour that opened 61 minutes ago has run out, eight more ordinary quests pay 0-6 each again: at least 1 in total (all eight paying 0 has probability 7^-8). Only one Call Board daily is used, because CoA.CallboardContracts.DailyCompletions allows one per day. Limiting tokens per hour is a Rexxar choice, not live Ascension behaviour. The server tells the client how many tokens are left and how long the hour lasts in an addon whisper with prefix COABTCAP: \"40 3600\" right after the account is put at 1210 of 1250, and \"NONE\" once the hour has run out; the server-sent quest interface Lua uses it to hide or lower the Bazaar Token quest reward.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -34,6 +34,16 @@
     {
       "action": "console",
       "command": "tokencap set Harnessa 1210"
+    },
+    {
+      "action": "assert",
+      "label": "The client is told 40 tokens are left in an hour of 3600 seconds",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COABTCAP\t40 3600",
+      "equals": 1,
+      "within_ms": 2000
     },
     {
       "action": "snapshot",
@@ -212,6 +222,16 @@
     {
       "action": "console",
       "command": "tokencap set Harnessa 1250 61"
+    },
+    {
+      "action": "assert",
+      "label": "The client is told no hour is open once it has run out",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COABTCAP\tNONE",
+      "equals": 1,
+      "within_ms": 2000
     },
     {
       "action": "snapshot",

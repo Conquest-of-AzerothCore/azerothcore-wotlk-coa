@@ -16,6 +16,7 @@
 #include <utility>
 
 class Creature;
+class Map;
 class Item;
 class Player;
 class Quest;
@@ -25,6 +26,19 @@ struct ItemTemplate;
 
 namespace LocalLevelScaling
 {
+using PersonalInstanceScalingResolver = bool (*)(Map const*, Player const*);
+inline std::atomic<PersonalInstanceScalingResolver> PersonalInstanceScalingOwner{nullptr};
+
+inline bool PersonalInstanceScalingFor(Map const* map, Player const* viewer = nullptr)
+{
+    PersonalInstanceScalingResolver const owner = PersonalInstanceScalingOwner.load(std::memory_order_relaxed);
+    return owner && map && owner(map, viewer);
+}
+
+using CreatureViewDamageResolver = double (*)(Player const*, Creature const*);
+inline std::atomic<CreatureViewDamageResolver> CreatureViewDamageOwner{nullptr};
+AC_GAME_API uint32 PersonalDamageHealthFor(Unit const* source, Unit const* target);
+
 inline std::atomic<bool> QuestEnabled{false};
 inline std::atomic<std::uint8_t> CreatureOffset{4};
 
@@ -77,19 +91,32 @@ inline std::uint8_t ScalingBlocksFor(Player const* player)
     return ChallengeBlocksFor(player);
 }
 
-/// Whether the character stands in a dungeon that scales for everyone inside it, whatever their own or
-/// their leader's choice. The module that owns the dungeon list installs the resolver.
-using ScaledDungeonResolver = bool (*)(Player const*);
+/// Where the character stands for dungeon scaling: outside any scaled dungeon, in one they walked into,
+/// whose creatures and loot keep their authored levels whatever their own or their leader's choice, or in
+/// the one their Dungeon Finder group was assigned, which scales for them whatever that choice. The module
+/// that owns the dungeon list installs the resolver.
+enum class DungeonScaling : std::uint8_t
+{
+    None,
+    WalkedIn,
+    Finder,
+};
+using ScaledDungeonResolver = DungeonScaling (*)(Player const*);
 inline std::atomic<ScaledDungeonResolver> ScaledDungeonOwner{nullptr};
+
+inline DungeonScaling DungeonScalingFor(Player const* player)
+{
+    ScaledDungeonResolver const owner = ScaledDungeonOwner.load(std::memory_order_relaxed);
+    return owner && player ? owner(player) : DungeonScaling::None;
+}
 
 inline bool InScaledDungeon(Player const* player)
 {
-    ScaledDungeonResolver const owner = ScaledDungeonOwner.load(std::memory_order_relaxed);
-    return owner && player && owner(player);
+    return DungeonScalingFor(player) == DungeonScaling::Finder;
 }
 
-/// Whether the loot this character takes is scaled to them: only inside a scaled dungeon, and never
-/// while a challenge holds them to the authored world. Open-world loot keeps its authored stats.
+/// Whether the loot this character takes is scaled to them by the dungeon: only inside the scaled dungeon
+/// their Dungeon Finder group was assigned, and never while a challenge holds them to the authored world.
 inline bool DungeonLootScales(Player const* player)
 {
     return InScaledDungeon(player) && !(ScalingBlocksFor(player) & ChallengeBlocksCreatureScaling);

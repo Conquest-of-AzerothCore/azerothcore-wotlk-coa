@@ -712,6 +712,9 @@ enum RBACPermissions
     RBAC_PERM_COMMAND_GROOT_AWARD                            = 1001,
     RBAC_PERM_COMMAND_GROOT_AUDIT                            = 1002,
     RBAC_PERM_COMMAND_GEAR_UNEQUIP                           = 1003,
+    RBAC_PERM_COMMAND_GM_MOD_CHAT                            = 1009,
+    RBAC_PERM_COMMAND_GM_CM_CHAT                             = 1010,
+    RBAC_PERM_COMMAND_GM_ADMIN_CHAT                          = 1011,
     RBAC_PERM_MAX
 };
 

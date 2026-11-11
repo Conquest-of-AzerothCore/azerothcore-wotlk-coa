@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `coa_ptr_copy_request` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `account` INT UNSIGNED NOT NULL,
+  `source_realm` INT UNSIGNED NOT NULL,
+  `source_guid` INT UNSIGNED NOT NULL,
+  `source_name` VARCHAR(12) NOT NULL,
+  `target_realm` INT UNSIGNED NOT NULL,
+  `dump` LONGTEXT DEFAULT NULL,
+  `requested_at` INT UNSIGNED NOT NULL,
+  `state` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  `result` VARCHAR(255) NOT NULL DEFAULT '',
+  `copy_guid` INT UNSIGNED NOT NULL DEFAULT 0,
+  `copy_name` VARCHAR(12) NOT NULL DEFAULT '',
+  `completed_at` INT UNSIGNED NOT NULL DEFAULT 0,
+  `notified` TINYINT UNSIGNED NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`),
+  KEY `target_state` (`target_realm`, `state`),
+  KEY `source_character` (`source_realm`, `source_guid`),
+  KEY `source_notified` (`source_realm`, `notified`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

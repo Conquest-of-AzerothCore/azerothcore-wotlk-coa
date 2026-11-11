@@ -7498,6 +7498,7 @@ void Player::_SaveAuras(CharacterDatabaseTransaction trans, bool logout)
 
 void Player::_SaveInventory(CharacterDatabaseTransaction trans)
 {
+    sScriptMgr->OnPlayerSaveInventory(this, trans);
     CharacterDatabasePreparedStatement* stmt = nullptr;
     // force items in buyback slots to new state
     // and remove those that aren't already

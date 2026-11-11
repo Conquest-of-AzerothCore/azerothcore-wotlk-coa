@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Effect 182 no eligible target and moving controls",
+  "contract": "The optional aura15473 is required by9931328. With no qualifying player orientation is unchanged. Existing SetFacingToObject moving semantics must remain unchanged.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "near",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Settle native login"
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 0,
+      "x": -8949.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "near",
+      "map": 0,
+      "x": -8949.95,
+      "y": -127.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 0,
+      "x": -8957.95,
+      "y": -132.493,
+      "z": 83.5312,
+      "o": 0
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 92641
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 9931328
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 9931328
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "label": "no_aura_cast_executed",
+      "spell": 9931328,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "position_o",
+      "label": "no_qualified_target_unchanged",
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "actor": "hero",
+      "enabled": true,
+      "unit_state": true
+    },
+    {
+      "action": "cast",
+      "actor": "hero",
+      "spell": 92641
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_go_count",
+      "label": "moving_cast_executed",
+      "spell": 92641,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "position_o",
+      "label": "moving_caster_unchanged",
+      "equals": 0
+    },
+    {
+      "action": "set_moving",
+      "actor": "hero",
+      "enabled": false,
+      "unit_state": true
+    }
+  ]
+}

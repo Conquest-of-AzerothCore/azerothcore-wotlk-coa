@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Barrens Crow cache spawning and delivery",
-  "contract": "Chest and crow spawn at the screenshot coordinates, High-Risk ten-second claiming works, and delivery removes the carry aura and grants five rewards plus materials. The map harness verifies screenshot projection; automatic selection chooses one of four locations.",
+  "contract": "Chest and crow spawn at the screenshot coordinates, High-Risk ten-second claiming works, and delivery removes the carry aura and grants three Heroic Bloodforged rewards, materials, 10 Golden and 5-10 Silver Marks of War and 400 Bazaar Tokens. The map harness verifies screenshot projection; automatic selection chooses one of four locations.",
   "players": [
     {
       "id": "owner",
@@ -183,9 +183,32 @@
       "action": "assert",
       "actor": "owner",
       "metric": "carried_item_count",
-      "equals": 64,
       "within_ms": 1500,
-      "relative_to": "before_rewards"
+      "relative_to": "before_rewards",
+      "min": 477,
+      "max": 482
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1201003,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1201002,
+      "min": 5,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 400
     }
   ]
 }

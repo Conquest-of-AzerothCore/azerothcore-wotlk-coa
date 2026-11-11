@@ -52,14 +52,11 @@ int main()
     assert(ClientCost(123.0f, false) == 123 * 2500);
     assert(ClientCost(124.0f, false) == 124 * 2750);
 
-    assert(ItemFee(179, 1.0) == 492250);
-    assert(ItemFee(60, 1.0) == 60 * 1250);
-    assert(ItemFee(25, 1.0) == 25 * 28);
-    assert(ItemFee(26, 1.0) == 26 * 85);
-    assert(ItemFee(179, 2.0) == 984500);
-    assert(ItemFee(179, 0.0) == 0);
-    assert(ItemFee(179, -1.0) == 0);
-    assert(ItemFee(0, 1.0) == 0);
+    assert(DefaultMaxSlots == 0);
+    assert(ClientCost(74.0f, true) == 211000);
+    assert(ClientCost(105.6f, true) == 257500);
+    assert(Settle(74.0f, true, 1.0, 17, 211000).covered && Settle(74.0f, true, 1.0, 17, 211000).total == 211000);
+    assert(Settle(74.0f, true, 1.0, 1, 0).total == Settle(74.0f, true, 1.0, 17, 0).total);
 
     {
         Settlement const settlement = Settle(179.0f, false, 1.0, 2, 1000000);

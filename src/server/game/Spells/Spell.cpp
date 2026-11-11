@@ -2855,7 +2855,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
 
         int32 gain = caster->HealBySpell(healInfo, crit);
         m_scriptHealingIncludingOverheal = healInfo.GetHeal();
-        float threat = float(gain) * 0.5f;
+        float threat = float(gain) * sWorld->getRate(RATE_THREAT_HEALING);
         if (caster->IsClass(CLASS_PALADIN))
             threat *= 0.5f;
         unitTarget->GetThreatMgr().ForwardThreatForAssistingMe(caster, threat, m_spellInfo);

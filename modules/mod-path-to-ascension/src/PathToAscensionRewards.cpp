@@ -221,6 +221,28 @@ namespace PathToAscension
         return false;
     }
 
+    bool TrackingQuestCollected(Player const* player, uint32 questId)
+    {
+        bool claimed = false;
+        for (uint32 id : trackingQuests.at(questId))
+            if (Tutorial const* tutorial = GetCatalog().Find(id))
+            {
+                if (Claimed(player, id))
+                    claimed = true;
+                else if (Eligible(player, *tutorial))
+                    return false;
+            }
+
+        return claimed;
+    }
+
+    void RecordCollectedTrackingQuest(Player* player, uint32 questId)
+    {
+        if (IsTrackingQuest(questId) && !player->IsActiveQuest(questId) && !player->IsQuestRewarded(questId)
+            && TrackingQuestCollected(player, questId))
+            player->SetRewardedQuest(questId);
+    }
+
     void SyncTracking(Player* player, uint32 tutorialId)
     {
         if (!GetSettings().tracking || !player || !player->IsInWorld() || player->IsGameMaster()
@@ -399,6 +421,7 @@ namespace PathToAscension
             player->RemoveActiveQuest(tutorial->QuestId());
             for (uint32 variant : trackingQuests.at(tutorial->QuestId()))
                 player->UpdatePlayerSetting(TrackingSetting, variant, 0);
+            RecordCollectedTrackingQuest(player, tutorial->QuestId());
         }
 
         // One character save carries the items, the achievement progress and the claim marker.
@@ -445,6 +468,9 @@ namespace PathToAscension
 
         for (auto const& [id, tutorial] : GetCatalog().Tutorials())
             SyncTracking(player, id);
+
+        for (auto const& [questId, variants] : trackingQuests)
+            RecordCollectedTrackingQuest(player, questId);
     }
 
     void PrestigeRewards(Player* player)

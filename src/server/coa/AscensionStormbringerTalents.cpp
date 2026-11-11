@@ -54,6 +54,7 @@ enum StormbringerTalentSpells : uint32
     SPELL_PULSE_CONVERSION = 707619,
     SPELL_PULSE_CONVERSION_HEAL = 504830,
     SPELL_STORM_BARRIER = 707204,
+    SPELL_LIGHTNING_CAGE = 560030,
     SPELL_LIGHTNING_CAGE_BARRIER = 560032,
     SPELL_THORIMS_GIFT = 570173,
     SPELL_THORIMS_GIFT_PATCH = 570174,
@@ -216,6 +217,15 @@ public:
             (player->HasSpell(SPELL_ELECTROCUTIONER_PASSIVE) || player->HasSpell(SPELL_ELECTROCUTIONER_TALENT)) &&
             roll_chance_i(StaticScaledChance(player, SPELL_ELECTROCUTIONER_TALENT)))
             player->CastSpell(player, SPELL_ELECTROCUTIONER, true);
+
+        if (damage && !spell->IsTriggered() && !player->HasAura(SPELL_THUNDER_WARD) &&
+            !spell->GetScriptValue(SPELL_LIGHTNING_CAGE) && player->HasAura(SPELL_LIGHTNING_CAGE))
+            if (SpellInfo const* cage = sSpellMgr->GetSpellInfo(SPELL_LIGHTNING_CAGE))
+                if (info->IsAffected(cage->SpellFamilyName, cage->Effects[EFFECT_1].SpellClassMask))
+                {
+                    spell->SetScriptValue(SPELL_LIGHTNING_CAGE, 1);
+                    player->CastSpell(player, SPELL_GENERATE_STATIC_20, true);
+                }
 
         if (critical && damage && !spell->IsTriggered() && player->HasAura(SPELL_CRITICAL_CIRCUIT) &&
             SpendsStatic(info->Id) && !spell->GetScriptValue(SPELL_CRITICAL_CIRCUIT))

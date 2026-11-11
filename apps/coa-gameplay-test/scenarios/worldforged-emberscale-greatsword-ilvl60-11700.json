@@ -1,0 +1,41 @@
+{
+  "schema": 1,
+  "name": "Emberscale Greatsword upgrades into its ilvl 60 variant before the Zul'Gurub tier (#11700)",
+  "contract": [
+    "ItemAddon.dbc lists Emberscale Greatsword 515223 (item level 47) with an epic item level 60 variant 1388927 and the",
+    "Zul'Gurub variant 1379216 (item level 64). The first-rank recipe 1082 went from the base straight to 1379216. The base",
+    "now upgrades into the item level 60 variant (store key 4388927, always open, 5000 Runes of Ascension) and that variant",
+    "into 1379216 (the old recipe 1082, 5000 runes, open once the account has defeated Hakkar). The base can no longer be",
+    "bought up to the Zul'Gurub tier directly."
+  ],
+  "timeout_ms": 90000,
+  "location": {"map": 309, "x": -11787.4, "y": -1649.34, "z": 54.1017, "o": 4.76475, "ignore_access": true},
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "hakkar", "owner": "hero", "entry": 14834, "level": 63, "health": 20, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the instance settle", "ms": 3000 },
+    { "action": "learn", "label": "Death Touch Copy kills outright", "actor": "hero", "spell": 24080 },
+    { "action": "cast", "label": "Defeat Hakkar so the Zul'Gurub tier is open", "actor": "hero", "spell": 24080, "target": "hakkar" },
+    { "action": "assert", "label": "Hakkar falls", "actor": "hakkar", "metric": "alive", "equals": 0, "within_ms": 45000 },
+    { "action": "add_item", "actor": "hero", "item": 515223 },
+    { "action": "add_item", "actor": "hero", "item": 375250, "count": 10000 },
+    { "action": "client_packet", "label": "Try the old direct upgrade to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1082}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "DISCRIMINATING: the base cannot skip the ilvl 60 variant", "actor": "hero", "metric": "item_count", "item": 1379216, "equals": 0 },
+    { "action": "assert", "label": "and keeps its item", "actor": "hero", "metric": "item_count", "item": 515223, "equals": 1 },
+    { "action": "client_packet", "label": "Upgrade the base into the ilvl 60 variant", "actor": "hero", "opcode": 1723, "fields": [{"u32": 4388927}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The ilvl 60 variant is sold", "actor": "hero", "metric": "item_count", "item": 1388927, "equals": 1 },
+    { "action": "assert", "label": "in place of the base", "actor": "hero", "metric": "item_count", "item": 515223, "equals": 0 },
+    { "action": "assert", "label": "for 5000 runes, on top of Hakkar's 2500", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 7500 },
+    { "action": "client_packet", "label": "Upgrade the ilvl 60 variant to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1082}, {"u32": 1}] },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "The Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1379216, "equals": 1 },
+    { "action": "assert", "label": "in place of the ilvl 60 variant", "actor": "hero", "metric": "item_count", "item": 1388927, "equals": 0 },
+    { "action": "assert", "label": "for another 5000 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 2500 }
+  ]
+}

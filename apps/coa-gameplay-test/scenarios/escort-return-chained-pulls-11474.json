@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Gilthares runs back to where the first pull began after a second pull re-engaged him far from it (#11474)",
+  "contract": [
+    "An escort that leaves combat runs back at a forced run to the spot where it left its route, and only then",
+    "resumes the walking route. A new pull that engages it before that run has brought it home must not move the",
+    "him about 5 yards from where it engaged him; a 70% slow on Gilthares stands for a run back that has only",
+    "started, and a second Scytheclaw engages him there, more than 3 yards from the first spot."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 1,
+    "x": -2095.84,
+    "y": -3650.0,
+    "z": 61.716,
+    "o": 1.5
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 2,
+      "class": 12,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "gilthares",
+      "owner": "hero",
+      "entry": 3465,
+      "distance": 3,
+      "faction": 35,
+      "level": 17,
+      "reaction": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "quest_accept",
+      "actor": "hero",
+      "entry": 3465,
+      "quest": 898
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 898,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Gilthares walks his route before any pull",
+      "actor": "gilthares",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "as": "pull1",
+      "entry": 3256,
+      "distance": 8
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "target": "pull1",
+      "spell": 12494,
+      "stacks": 1,
+      "label": "Hold the first pull in place so he walks up to it"
+    },
+    {
+      "action": "assert",
+      "label": "the first pull engages Gilthares",
+      "actor": "gilthares",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "gilthares",
+      "metric": "position_x",
+      "save_as": "first_x"
+    },
+    {
+      "action": "snapshot",
+      "actor": "gilthares",
+      "metric": "position_y",
+      "save_as": "first_y"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "the first fight has drawn Gilthares away from where it began",
+      "actor": "gilthares",
+      "metric": "position_x",
+      "relative_to": "first_x",
+      "min": 4
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "target": "gilthares",
+      "spell": 58606,
+      "stacks": 1,
+      "label": "Slow Gilthares by 70% (Self Snare) so a run back that has only started is still far from home"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 3256,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Gilthares leaves combat after the first kill",
+      "actor": "gilthares",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "as": "pull2",
+      "entry": 3256,
+      "distance": 8
+    },
+    {
+      "action": "assert",
+      "label": "the second pull engages Gilthares during the slowed run back",
+      "actor": "gilthares",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "the second pull engages him more than 3 yards from where the first began",
+      "actor": "gilthares",
+      "metric": "position_x",
+      "relative_to": "first_x",
+      "min": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "target": "gilthares",
+      "spell": 58606,
+      "stacks": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 3256,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Gilthares leaves combat after the last kill",
+      "actor": "gilthares",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Gilthares runs back",
+      "actor": "gilthares",
+      "metric": "spline_speed",
+      "min": 7.5,
+      "max": 8.5,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Gilthares resumes his walking route",
+      "actor": "gilthares",
+      "metric": "spline_speed",
+      "min": 2.4,
+      "max": 2.6,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "the run ended where the first pull began (x)",
+      "actor": "gilthares",
+      "metric": "position_x",
+      "relative_to": "first_x",
+      "min": -1.5,
+      "max": 1.5
+    },
+    {
+      "action": "assert",
+      "label": "the run ended where the first pull began (y)",
+      "actor": "gilthares",
+      "metric": "position_y",
+      "relative_to": "first_y",
+      "min": -1.5,
+      "max": 1.5
+    }
+  ]
+}

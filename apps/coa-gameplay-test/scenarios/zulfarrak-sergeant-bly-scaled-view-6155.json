@@ -2,12 +2,13 @@
   "schema": 1,
   "name": "Zul'Farrak: Sergeant Bly and Weegli Blastfuse scale with the rest of the crew (COA-6155)",
   "contract": [
-    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default DestinyWeaver.Scaling.DungeonIds.",
-    "Sergeant Bly (7604) and Weegli Blastfuse (7607) carry UNIT_NPC_FLAG_GOSSIP to start the pyramid event, and",
-    "ViewableCreature kept the authored level for any creature with an npcflag, so a level-39 character saw the rest of",
-    "the crew at 39 and Bly at 45. Gossip alone is not a service: a gossip creature that is hostile or neutral now scales",
-    "like its crew (Raven 7605 has no npcflag and is the control). Friendly gossip creatures keep their level through",
-    "the reaction check."
+    "Requires DestinyWeaver.Enable=1 and DestinyWeaver.LevelScaling=1 with the default",
+    "DestinyWeaver.Scaling.DungeonIds. Sergeant Bly (7604) and Weegli Blastfuse (7607) carry UNIT_NPC_FLAG_GOSSIP to",
+    "start the pyramid event, and ViewableCreature kept the authored level for any creature with an npcflag, so a",
+    "level-39 character saw the rest of the crew at 39 and Bly at 45. Gossip alone is not a service: a gossip",
+    "creature that is hostile or neutral now scales like its crew (Raven 7605 has no npcflag and is the control).",
+    "Friendly gossip creatures keep their level through the reaction check. The character is in a Dungeon Finder",
+    "group assigned Zul'Farrak (entry 24): walking in keeps the authored creatures (#11184)."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -19,7 +20,8 @@
     "ignore_access": true
   },
   "players": [
-    { "id": "pyro", "race": 1, "class": 1, "level": 39 }
+    { "id": "pyro", "race": 1, "class": 1, "level": 39 },
+    { "id": "mate", "race": 1, "class": 1, "level": 39 }
   ],
   "creatures": [
     { "id": "raven", "owner": "pyro", "entry": 7605, "level": 44, "distance": 6 },
@@ -28,6 +30,9 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
+    { "action": "group", "actor": "pyro", "target": "mate" },
+    { "action": "lfg_dungeon", "label": "The group is a Dungeon Finder group assigned Zul'Farrak", "actor": "pyro",
+      "dungeon": 24 },
     { "action": "level_scaling_packet", "actor": "pyro", "value": 1 },
     {
       "action": "assert",

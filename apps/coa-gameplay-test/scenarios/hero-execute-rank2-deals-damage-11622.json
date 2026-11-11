@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Execute rank 2 (5309) deals damage and converts rage (#11622)",
+  "contract": "Execute rank 2 (5309) is a dummy effect whose damage is dealt by the Execute script: it deals damage to an enemy below 20% health and converts the remaining rage into extra damage. A cast must therefore produce Execute damage (20647) and leave at most a few points of rage, where the unscripted spell dealt nothing and kept the rage left after its cost.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "warrior",
+      "entry": 36,
+      "level": 80,
+      "distance": 3,
+      "health": 1000000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "warrior",
+      "spell": 5309
+    },
+    {
+      "action": "add_item",
+      "actor": "warrior",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "warrior",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "set_health_pct",
+      "actor": "warrior",
+      "target": "enemy",
+      "pct": 10
+    },
+    {
+      "action": "wait",
+      "ms": 200
+    },
+    {
+      "action": "assert",
+      "label": "The target is below 20% health",
+      "actor": "enemy",
+      "metric": "health_pct",
+      "max": 19
+    },
+    {
+      "action": "set_power",
+      "actor": "warrior",
+      "power": 1,
+      "value": 300
+    },
+    {
+      "action": "cast",
+      "actor": "warrior",
+      "spell": 5309,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "Execute deals its damage",
+      "actor": "warrior",
+      "metric": "spell_damage_count",
+      "spell": 20647,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Execute damage is positive",
+      "actor": "warrior",
+      "metric": "spell_damage_total",
+      "spell": 20647,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Execute converts the remaining rage into damage",
+      "actor": "warrior",
+      "metric": "power",
+      "power": 1,
+      "max": 50
+    }
+  ]
+}
