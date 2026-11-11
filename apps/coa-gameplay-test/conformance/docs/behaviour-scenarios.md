@@ -660,6 +660,17 @@ mechanism's own aura, the same idiom `dispel_removal`/`aura_presence` already us
 Several entries for the same spell (one per creature type under test) are disambiguated by the class file's
 own `variant` field, the same mechanism `whirling_tempest`'s existing multi-entry clauses already use.
 
+### Group-stack-cap scenarios (`behaviour_group_stack_cap`, `kind: "group_stack_cap"`)
+
+"Does not stack with similar effects": `group_stack_cap_scenario` reads `metric` with neither passive known, after
+learning `spell` alone and after also learning `partner`. The judge expects the combined reading at the stronger of
+the two percentages (`effect` of `spell`, `partner_effect` of `partner`, read from the DBC), times any uncapped
+`personal_effect`. The stronger is the one of larger magnitude in the direction both move the metric
+(`behaviours.strongest_percent`): +5% over +4%, and -10% over -6% for reductions, as the server keeps the highest
+absolute amount of an exclusive spell group (`Unit::GetHighestExclusiveSameEffectSpellGroupValue`,
+Unit.cpp:5312-5314) and the most negative amount of a capped negative aura type (`Unit::GetMaxNegativeAuraModifier`,
+Unit.cpp:7107-7121). Two percentages of opposite signs are refused when the scenario is generated.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |

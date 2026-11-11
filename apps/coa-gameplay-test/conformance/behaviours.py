@@ -2402,6 +2402,13 @@ class GroupStackCapSpec:
     mechanism: str = 'spell_group'
 
 
+def strongest_percent(*percents: float) -> float:
+    if any(value > 0 for value in percents) and any(value < 0 for value in percents):
+        raise ValueError(f'percentages {list(percents)} move the metric in opposite directions; the stack cap of '
+                         f'similar effects compares effects of one direction')
+    return max(percents, key=abs)
+
+
 def group_stack_cap_label(spec: GroupStackCapSpec, moment: str) -> str:
     return f'{spec.spell} {spec.partner} {spec.metric} {moment}'
 
@@ -2454,7 +2461,8 @@ def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple
              'mechanism': spec.mechanism, 'metric': spec.metric,
              'personal_pct': personal_pct, 'quote': entry.quote}
     expectation = Expectation(label, BEHAVIOUR_GROUP_STACK_CAP, spec.spell, spec.partner, None,
-                              str(max(own_pct, partner_pct)), prose_rule(entry.quote, spec.spell), model)
+                              str(strongest_percent(own_pct, partner_pct)), prose_rule(entry.quote, spec.spell),
+                              model)
     return scenario, [expectation]
 
 

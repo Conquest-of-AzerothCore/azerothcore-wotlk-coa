@@ -44,7 +44,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         dummy_id,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
                         fixed_target_count_scenario, fixed_target_count_spec,
-                        group_stack_cap_scenario, group_stack_cap_spec,
+                        group_stack_cap_scenario, group_stack_cap_spec, strongest_percent,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, heal_block_scenario, heal_block_spec,
                         icd_gate_scenario, icd_gate_spec, ignores_caster_heal_modifiers,
@@ -2696,7 +2696,7 @@ class GroupStackCapScenarioTests(unittest.TestCase):
         partner_pct = records.single_value(RUNIC_POWER, 0)
         self.assertEqual(expectations[0].model['own_pct'], own_pct)
         self.assertEqual(expectations[0].model['partner_pct'], partner_pct)
-        self.assertEqual(float(expectations[0].displayed), max(own_pct, partner_pct))
+        self.assertEqual(float(expectations[0].displayed), strongest_percent(own_pct, partner_pct))
 
     def test_baseline_measured_before_either_spell_is_learned(self):
         spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
@@ -2768,6 +2768,20 @@ class GroupStackCapScenarioTests(unittest.TestCase):
         spec = group_stack_cap_spec(entry)
         with self.assertRaises(KeyError):
             group_stack_cap_scenario(CLASS_FILE, spec)
+
+
+class StrongestPercentTests(unittest.TestCase):
+    def test_increases_pick_the_largest(self):
+        self.assertEqual(strongest_percent(5.0, 4.0), 5.0)
+        self.assertEqual(strongest_percent(3.0, 3.0), 3.0)
+
+    def test_seeded_reductions_pick_the_most_negative_not_the_largest_value(self):
+        self.assertEqual(strongest_percent(-6.0, -10.0), -10.0)
+        self.assertNotEqual(strongest_percent(-6.0, -10.0), max(-6.0, -10.0))
+
+    def test_opposite_directions_are_refused(self):
+        with self.assertRaisesRegex(ValueError, 'opposite directions'):
+            strongest_percent(5.0, -4.0)
 
 
 class SingleTargetScenarioTests(unittest.TestCase):
@@ -4336,8 +4350,8 @@ class JudgeGroupStackCapTests(unittest.TestCase):
                  'combined_label': 'combined', 'own_pct': own_pct, 'partner_pct': partner_pct,
                  'personal_pct': personal_pct, 'quote': 'Does not stack with similar effects.'}
         return Expectation('label', BEHAVIOUR_GROUP_STACK_CAP, CALL_OF_THE_MONASTERY, UNLEASHED_RAGE, None,
-                           str(max(own_pct, partner_pct)), 'prose: "Does not stack with similar effects." (560550)',
-                           model)
+                           str(strongest_percent(own_pct, partner_pct)),
+                           'prose: "Does not stack with similar effects." (560550)', model)
 
     def test_an_uncapped_personal_effect_keeps_compounding_on_top_of_the_capped_area_effect(self):
         expectation = self.expectation(own_pct=5.0, partner_pct=4.0, personal_pct=5.0)
@@ -4384,6 +4398,22 @@ class JudgeGroupStackCapTests(unittest.TestCase):
         run = FakeRun({'baseline': baseline, 'own': baseline * 1.03, 'combined': baseline * 1.03})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'ok')
+
+    def test_reductions_cap_at_the_larger_reduction(self):
+        expectation = self.expectation(own_pct=-10.0, partner_pct=-6.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 0.90, 'combined': baseline * 0.90})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.expected, 900.0)
+        self.assertIn('capped at the stronger -10%', verdict.explanation)
+
+    def test_seeded_weaker_reduction_in_the_combined_reading_is_an_alert(self):
+        expectation = self.expectation(own_pct=-10.0, partner_pct=-6.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 0.90, 'combined': baseline * 0.94})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'alert')
 
     def test_missing_measurement_leaves_alert_with_explanation(self):
         expectation = self.expectation()

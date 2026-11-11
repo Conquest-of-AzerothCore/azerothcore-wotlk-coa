@@ -21,7 +21,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
                         BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
-                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER)
+                        BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, strongest_percent)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
 from mitigation import TargetProfile, expected_mitigation
@@ -2731,7 +2731,7 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     mechanism = model.get('mechanism', 'spell_group')
     mechanism_phrase = ('same spell_group SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT membership' if
                         mechanism == 'spell_group' else "the same aura type's global cap, no spell_group needed")
-    cap_pct = max(own_pct, partner_pct)
+    cap_pct = strongest_percent(own_pct, partner_pct)
     own_expected = baseline * (1 + own_pct / 100) * (1 + personal_pct / 100)
     combined_expected = baseline * (1 + cap_pct / 100) * (1 + personal_pct / 100)
     own_margin = max(ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE * abs(own_expected))
@@ -2742,9 +2742,9 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     return replace(base, status=status, measured=combined, expected=combined_expected,
                    low=combined_expected - combined_margin, high=combined_expected + combined_margin,
                    explanation=f'baseline {baseline:g}; after learning the own passive alone, measured {own:g} '
-                               f'against expected {own_expected:g} (+{own_pct:g}%, +/-{own_margin:g}); after also '
+                               f'against expected {own_expected:g} ({own_pct:+g}%, +/-{own_margin:g}); after also '
                                f'learning the partner ({partner_pct:g}%, {mechanism_phrase}), measured {combined:g} '
-                               f'against expected {combined_expected:g} (capped at the stronger +{cap_pct:g}%, '
+                               f'against expected {combined_expected:g} (capped at the stronger {cap_pct:+g}%, '
                                f'+/-{combined_margin:g}); a combined reading that reflects the sum of both '
                                f'percentages instead of their cap is always an alert')
 
