@@ -5,6 +5,7 @@
 -- unclosed angle bracket and one-word angle text, so a stage direction may be missing from a few of these.
 -- Two progress texts (175037, 175057) are Spanish in the addon's English field and are translated back from it;
 -- one spelling slip is corrected (175114 'breath'); 175099 is left out, as its field holds an objective line.
+-- The 175142 turn-in gets back its first stage direction, which the addon lacks (video RIEMlZSgbQw 10:55:14).
 
 DELETE FROM `quest_request_items` WHERE `ID` IN (175013, 175014, 175015, 175016, 175017, 175023, 175027, 175035, 175036, 175037, 175041, 175042, 175043, 175044, 175045, 175047, 175051, 175052, 175056, 175057, 175066, 175068, 175069, 175070, 175071, 175072, 175074, 175075, 175077, 175078, 175079, 175080, 175082, 175084, 175085, 175086, 175087, 175089, 175091, 175092, 175097, 175098, 175100, 175101, 175102, 175103, 175104, 175105, 175106, 175108, 175109, 175112, 175113, 175114, 175115, 175116, 175121, 175122, 175123, 175126, 175128, 175129, 175139, 175140, 175141, 175142, 175143, 175144, 175145, 175146, 175147, 175148, 175149, 175150, 175151, 175152, 175153, 175155, 175156, 175157, 175158, 175159, 175160, 175161, 175162, 175163, 175164, 175167, 175168, 175169, 175170, 175171, 175172, 175173, 175176, 175178, 175179, 175180, 175199, 175204, 175206);
 INSERT INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`, `CompletionText`, `VerifiedBuild`) VALUES
@@ -17,7 +18,7 @@ INSERT INTO `quest_request_items` (`ID`, `EmoteOnComplete`, `EmoteOnIncomplete`,
 (175027, 0, 0, '<The elf''s gaze rests on some point upon the horizon, beyond the white peaks that cradle the valley.>', 0),
 (175035, 0, 0, 'Gah...! Curse those Ealdir. It hurts like hell...', 0),
 (175036, 0, 0, 'Well?', 0),
-(175037, 0, 0, 'I am still waiting for that spectacle. Or are you all talk?', 0),
+(175037, 0, 0, 'I am still waiting for that show. Or are you all talk?', 0),
 (175041, 0, 0, 'Is it done? Is my son... resting now?', 0),
 (175042, 0, 0, 'Please... grant them all rest.', 0),
 (175043, 0, 0, '<The creature''s gaze rests upon a point infinitely far away.>', 0),
@@ -131,7 +132,7 @@ INSERT INTO `quest_offer_reward` (`ID`, `Emote1`, `Emote2`, `Emote3`, `Emote4`, 
 (175130, 0, 0, 0, 0, 0, 0, 0, 0, 'What have we here?$B$BCareful! <Alcarian takes a step back. He narrowly avoids injuring himself on the tip.>$B$BAnd you say you plucked this from a murloc? Hm... They looked like sea urchins, then? A most peculiar mutation.$B$BOn behalf of the Academy of Arcane Arts and Sciences, you have my thanks.', 0),
 (175138, 0, 0, 0, 0, 0, 0, 0, 0, 'At last! At last, they send someone!$B$BI was about to lose my mind! If I haven''t lost it already, that is!', 0),
 (175141, 0, 0, 0, 0, 0, 0, 0, 0, '<The chaotic flailing of its lever-like legs reminds you of... a happy dance. You decide to roll with that interpretation.>', 0),
-(175142, 0, 0, 0, 0, 0, 0, 0, 0, '<Once it finishes, a small hatch opens in its chassis to store the components. You deposit the parts inside.>$B$BI CARRY! PART! VALUE!', 0),
+(175142, 0, 0, 0, 0, 0, 0, 0, 0, '<The Alarm-o-Bot reacts by emitting a little jingle that sounds remarkably like a "victory" fanfare.>$B$B<Once it finishes, a small hatch opens in its chassis to store the components. You deposit the parts inside.>$B$BI CARRY! PART! VALUE!', 0),
 (175143, 0, 0, 0, 0, 0, 0, 0, 0, '<Perhaps it''s the oppressive red light that won''t stop flashing, or the constant screeching of its speakers, but you would swear the news of the Dark Iron''s death has made the Alarm-o-Bot happy.>', 0),
 (175145, 0, 0, 0, 0, 0, 0, 0, 0, '<Determination to settle all the region''s woes is reflected in Baugwolf''s gaze.>', 0),
 (175146, 0, 0, 0, 0, 0, 0, 0, 0, 'Reinforcements from Dun Kazad?$B$B<Erdruin''s hope fades as he sees you have arrived alone.>$B$BBetter than nothing, I suppose.$B$B<He gestures toward the interior of the building.>$B$BWhat you see is all that is left: the four of us and Hedgwin, our gryphon. He is wounded, by the way.$B$BThe trolls... they slaughtered everyone else.', 0),
