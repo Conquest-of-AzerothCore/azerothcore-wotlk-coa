@@ -47,7 +47,8 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         dummy_id,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
                         fixed_target_count_scenario, fixed_target_count_spec,
-                        group_stack_cap_scenario, group_stack_cap_spec, strongest_percent,
+                        group_stack_cap_scenario, group_stack_cap_spec, strongest_percent, taken_hit_scenario,
+                        taken_hit_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, heal_block_scenario, heal_block_spec,
                         icd_gate_scenario, icd_gate_spec, ignores_caster_heal_modifiers,
@@ -193,7 +194,8 @@ def call_of_the_monastery_entry() -> dict:
 
 
 def devotion_of_khazgoroth_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DEVOTION_OF_KHAZGOROTH)
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == DEVOTION_OF_KHAZGOROTH and entry['kind'] == 'party_stat_ratio')
 
 
 def serendipity_entry() -> dict:
@@ -738,7 +740,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 250)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 256)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6932,6 +6934,154 @@ class CharmImmunityTests(unittest.TestCase):
         statuses = [judge_behaviour(base_verdict(expectation), FakeRun(landed), expectation).status
                     for expectation in expectations]
         self.assertEqual(statuses, ['ok', 'alert', 'ok', 'alert'])
+
+
+def r1a_entry(spell: int, kind: str, suffix: str = '') -> dict:
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind
+                and entry.get('label_suffix', '') == suffix)
+
+
+def set_aura_indices(steps: list[dict], spell: int) -> list[int]:
+    return [index for index, step in enumerate(steps) if step['action'] == 'set_aura' and step['spell'] == spell]
+
+
+def cast_indices(steps: list[dict], spell: int) -> list[int]:
+    return [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == spell]
+
+
+class PhaseAuraTests(unittest.TestCase):
+    def test_flee_sets_the_fear_in_both_phases_and_the_brand_in_the_after_phase_only(self):
+        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(r1a_entry(300513, 'metric_delta', 'flee')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        brand = set_aura_indices(steps, 300513)
+        fear = set_aura_indices(steps, 12096)
+        self.assertEqual(len(brand), 1)
+        self.assertEqual([steps[index]['stacks'] for index in fear], [1, 0, 1])
+        self.assertTrue(fear[0] < brand[0] < fear[2])
+        self.assertTrue(fear[1] < brand[0])
+        self.assertEqual(steps[brand[0]], {'action': 'set_aura', 'actor': CASTER, 'spell': 300513, 'stacks': 1,
+                                           'caster': 'dummy'})
+
+    def test_speed_cap_sets_courage_on_the_dummy_in_both_phases(self):
+        scenario, _ = metric_delta_scenario(CLASS_FILE,
+                                            metric_delta_spec(r1a_entry(300513, 'metric_delta', 'speed_cap')))
+        steps = scenario['steps']
+        courage = set_aura_indices(steps, 707754)
+        self.assertEqual(len(courage), 2)
+        self.assertEqual(steps[courage[0]], {'action': 'set_aura', 'actor': CASTER, 'spell': 707754, 'stacks': 1,
+                                             'target': 'dummy', 'caster': 'caster'})
+        self.assertTrue(courage[1] < cast_indices(steps, 300513)[0])
+        self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
+
+    def test_phase_aura_refuses_an_unknown_unit(self):
+        entry = {**r1a_entry(300513, 'metric_delta', 'flee'), 'phase_auras': [[12096, 1, 'caster', 'ally']]}
+        with self.assertRaises(ValueError):
+            metric_delta_spec(entry)
+
+    def test_seeded_flee_and_speed_readings_are_judged(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(300513, 'metric_delta', 'speed_cap'))
+        expectation = expectations[0]
+        model = expectation.model
+        capped = {model['before_label']: model['before_expected'], model['after_label']: 1.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(capped), expectation).status, 'ok')
+        uncapped = {model['before_label']: model['before_expected'], model['after_label']: model['before_expected']}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(uncapped), expectation).status, 'alert')
+
+
+class FixedCountAurasTests(unittest.TestCase):
+    def test_libram_is_set_before_every_cast(self):
+        scenario, expectations = fixed_target_count_scenario(
+            CLASS_FILE, fixed_target_count_spec(r1a_entry(803893, 'fixed_count')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 503141)
+        libram = set_aura_indices(steps, 803893)
+        self.assertEqual(len(casts), 5)
+        self.assertEqual(len(libram), 5)
+        self.assertTrue(all(aura < cast for aura, cast in zip(libram, casts)))
+        self.assertEqual(expectations[0].model['expected'], 4)
+
+    def test_seeded_breadth_of_three_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(803893, 'fixed_count'))
+        expectation = expectations[0]
+        model = expectation.model
+
+        def readings(struck: int) -> dict:
+            values = {label: 0.0 for label in model['per_cast']['start']}
+            for cast, labels in enumerate(model['per_cast']['casts'], start=1):
+                values.update({label: float(cast if index <= struck else 0) for index, label in enumerate(labels)})
+            values.update({label: float(5 if index < struck else 0)
+                           for index, label in enumerate(model['dummy_labels'])})
+            values[model['far_label']] = 0.0
+            return values
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(readings(4)), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(readings(3)), expectation).status,
+                         'alert')
+
+
+class AbsorbPierceTargetAuraTests(unittest.TestCase):
+    def test_crit_guard_is_set_on_the_dummy_before_both_casts(self):
+        scenario, _ = absorb_pierce_ratio_scenario(CLASS_FILE, absorb_pierce_ratio_spec(norgannons_wrath_entry()))
+        steps = scenario['steps']
+        guard = set_aura_indices(steps, 33143)
+        casts = cast_indices(steps, NORGANNONS_WRATH)
+        self.assertEqual(len(guard), 2)
+        self.assertTrue(guard[0] < casts[0] < guard[1] < casts[1])
+        self.assertEqual(steps[guard[0]]['target'], 'dummy')
+
+
+class GroupStackCapSwingTests(unittest.TestCase):
+    def test_each_phase_swings_after_its_marker(self):
+        spec = group_stack_cap_spec(r1a_entry(560096, 'group_stack_cap'))
+        scenario, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        markers = cast_indices(steps, 801461)
+        reads = [index for index, step in enumerate(steps) if step.get('label') in (
+            expectations[0].model['baseline_label'], expectations[0].model['own_label'],
+            expectations[0].model['combined_label'])]
+        self.assertEqual(len(markers), 3)
+        self.assertTrue(all(marker < read for marker, read in zip(markers, reads)))
+        self.assertEqual(expectations[0].model['own_pct'], 10.0)
+        self.assertEqual(expectations[0].model['relation'], 'inverse')
+
+    def test_swings_need_the_marker_in_the_interval_read(self):
+        entry = {**r1a_entry(560096, 'group_stack_cap'), 'fields': {'stream': 'melee_hit', 'hand': 0}}
+        with self.assertRaises(ValueError):
+            group_stack_cap_scenario(CLASS_FILE, group_stack_cap_spec(entry))
+
+    def test_seeded_cap_passes_and_a_summed_haste_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(560096, 'group_stack_cap'))
+        expectation = expectations[0]
+        model = expectation.model
+        capped = {model['baseline_label']: 2500.0, model['own_label']: 2500 / 1.1,
+                  model['combined_label']: 2500 / 1.1}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(capped), expectation).status, 'ok')
+        summed = {**capped, model['combined_label']: 2500 / 1.21}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(summed), expectation).status, 'alert')
+        ignored = {**capped, model['own_label']: 2500.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(ignored), expectation).status, 'alert')
+
+
+class TakenHitOpeningCastTests(unittest.TestCase):
+    def test_copies_are_summoned_once_before_the_treatment_trials(self):
+        spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'copies'))
+        scenario, _ = taken_hit_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 1397742)
+        strikes = [index for index, step in enumerate(steps)
+                   if step['action'] == 'cast' and step['actor'] == 'striker']
+        self.assertEqual(len(casts), 1)
+        self.assertEqual(len([index for index in strikes if index < casts[0]]), spec.trials)
+        self.assertEqual(len([index for index in strikes if index > casts[0]]), spec.trials)
+
+    def test_arms_that_differ_only_by_an_opening_cast_are_distinct(self):
+        spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'copies'))
+        self.assertNotEqual(spec.arms[0], spec.arms[1])
+        taken_hit_scenario(CLASS_FILE, spec)
 
 
 if __name__ == '__main__':

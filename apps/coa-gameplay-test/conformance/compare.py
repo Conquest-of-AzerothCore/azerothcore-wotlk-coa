@@ -3172,6 +3172,9 @@ def behaviour_single_target_verdict(base: Verdict, run: Run, model: dict) -> Ver
                                f'any of these three readings missing its expected value is always an alert')
 
 
+INVERSE_RELATION = 'inverse'
+
+
 def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     baseline = run.values.get(model['baseline_label'])
     own = run.values.get(model['own_label'])
@@ -3186,10 +3189,15 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     mechanism_phrase = ('same spell_group SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT membership' if
                         mechanism == 'spell_group' else "the same aura type's global cap, no spell_group needed")
     cap_pct = strongest_percent(own_pct, partner_pct)
-    own_expected = baseline * (1 + own_pct / 100) * (1 + personal_pct / 100)
-    combined_expected = baseline * (1 + cap_pct / 100) * (1 + personal_pct / 100)
-    own_margin = delta_margin(model.get('metric', ''), own_expected)
-    combined_margin = delta_margin(model.get('metric', ''), combined_expected)
+    own_factor = (1 + own_pct / 100) * (1 + personal_pct / 100)
+    combined_factor = (1 + cap_pct / 100) * (1 + personal_pct / 100)
+    inverse = model.get('relation') == INVERSE_RELATION
+    own_expected = baseline / own_factor if inverse else baseline * own_factor
+    combined_expected = baseline / combined_factor if inverse else baseline * combined_factor
+    tolerance = model.get('tolerance')
+    own_margin = tolerance if tolerance is not None else delta_margin(model.get('metric', ''), own_expected)
+    combined_margin = tolerance if tolerance is not None else delta_margin(model.get('metric', ''),
+                                                                           combined_expected)
     own_ok = abs(own - own_expected) <= own_margin
     combined_ok = abs(combined - combined_expected) <= combined_margin
     status = 'ok' if own_ok and combined_ok else 'alert'
@@ -3200,7 +3208,9 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
                                f'learning the partner ({partner_pct:g}%, {mechanism_phrase}), measured {combined:g} '
                                f'against expected {combined_expected:g} (capped at the stronger {cap_pct:+g}%, '
                                f'+/-{combined_margin:g}); a combined reading that reflects the sum of both '
-                               f'percentages instead of their cap is always an alert')
+                               f'percentages instead of their cap is always an alert'
+                               + (f'; the metric is a time between events, so each percent divides it'
+                                  if inverse else ''))
 
 
 def behaviour_crit_magnitude_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

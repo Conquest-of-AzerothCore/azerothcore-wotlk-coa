@@ -1283,3 +1283,24 @@ rank 572741 as `trigger_spell`, which satisfies `Breaker(info)` through its own 
 through `Named(info, 805409)` (Righteous Tempest, which the code exempts from clearing Oaths regardless of 92109),
 so the scenario exercises the 92109 gate itself rather than that unrelated exemption.
 
+
+### Auras set around behaviour casts (ADR 0170)
+
+Four kinds can set auras around their casts. Without the fields every scenario is unchanged.
+
+- `metric_delta` `phase_auras` and `after_auras`: lists of `[spell, stacks, on, by]`, with `on` and `by` each
+  `caster` or `dummy` (the holder and the aura's caster). `phase_auras` are set at the start of both phases,
+  `after_auras` at the start of the after phase only, before the phase auras; a stack count of 0 removes the aura.
+  Crusader's Brand 300513: Courage 707754 on the dummy before and after a brand cast (`speed_cap`), and a fear 12096
+  set on the caster by the dummy in both phases with the brand set on it in the second (`flee`).
+- `fixed_count` `auras`: `[spell, stacks]` set on the caster before every cast. Libram of Consecration 803893 is held
+  before each Chastise, so 804148 strikes the primary and 4 nearby enemies.
+- `absorb_pierce_ratio` `target_auras`: `[spell, stacks]` set on the dummy before both casts. Blessed Resilience
+  33143 (aura 197, -1000% attacker crit chance) keeps either cast from critting, which read 1.5 instead of 1.
+- `group_stack_cap` `value_spell`, `swing_ms`, `marker_spell` and `tolerance`: the own percent is read from
+  `value_spell`'s effect when the learned spell only casts the aura (Devotion of Khaz'goroth 560096 casts 567572).
+  With `swing_ms`, each of the three phases casts `marker_spell` on the caster, swings at the dummy for `swing_ms`
+  and reads `event_interval_median_ms` of the main-hand hits since the marker (an event read); the judge divides the
+  baseline interval by each haste factor (`relation: inverse`) within `tolerance` ms.
+- `taken_hit` arm `opening_casts`: `[spell, target]` cast once before the arm's first read, followed by a 1500 ms
+  settle. Testament of Hope 1397742 summons its two copies once, before the treatment arm's strikes.
