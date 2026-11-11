@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <utility>
+#include <vector>
 
 namespace
 {
@@ -86,17 +88,18 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
     if (!_enabled || _multiplier == 0.0)
         return true;
 
+    uint32 const maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    std::vector<std::pair<ObjectGuid::LowType, uint8>> recipients;
     for (ObjectGuid::LowType guid : run.GetMembers())
     {
         Player* player = ObjectAccessor::FindConnectedPlayer(ObjectGuid::Create<HighGuid::Player>(guid));
         uint8 level = 0;
+        bool blocksExperience = false;
         if (player)
         {
-            if (player->HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN) || player->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME))
-                continue;
-
             level = player->GetLevel();
-            sScriptMgr->OnPlayerBeforeGetLevelForXPGain(player, level);
+            blocksExperience =
+                player->HasPlayerFlag(PLAYER_FLAGS_NO_XP_GAIN) || player->HasPlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME);
         }
         else
         {
@@ -111,13 +114,26 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
             }
 
             Field* fields = result->Fetch();
-            if (fields[1].Get<uint32>() & (PLAYER_FLAGS_NO_XP_GAIN | PLAYER_FLAGS_NO_PLAY_TIME))
-                continue;
-
             level = fields[0].Get<uint8>();
+            blocksExperience = (fields[1].Get<uint32>() & (PLAYER_FLAGS_NO_XP_GAIN | PLAYER_FLAGS_NO_PLAY_TIME)) != 0;
         }
 
-        if (level >= sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+        // A max-level member carries the floor; nobody earns the repeatable dungeon quest XP for it.
+        if (level >= maxLevel)
+            return true;
+
+        if (blocksExperience)
+            continue;
+
+        if (player)
+            sScriptMgr->OnPlayerBeforeGetLevelForXPGain(player, level);
+
+        recipients.emplace_back(guid, level);
+    }
+
+    for (auto const& [guid, level] : recipients)
+    {
+        if (level >= maxLevel)
             continue;
 
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(_dungeonId, level);
