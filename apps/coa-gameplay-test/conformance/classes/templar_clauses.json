@@ -3374,7 +3374,8 @@
     "clause": "increasing your healing received by $s2%",
     "labels": [
       "801463 effect_value e1 #0",
-      "801463 aura_amount e1 #0"
+      "801463 aura_amount e1 #0",
+      "801463 behaviour_hit_ratio healing_received"
     ],
     "kind": "claim"
   },
@@ -3389,14 +3390,18 @@
   {
     "spell": 801463,
     "clause": "to you and nearby allies",
-    "labels": [],
+    "labels": [
+      "801463 behaviour_count",
+      "801463 behaviour_metric_delta grace_self"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801463,
     "clause": "for $d",
     "labels": [
-      "801463 aura_duration_ms #2"
+      "801463 aura_duration_ms #2",
+      "801463 behaviour_expiry"
     ],
     "kind": "claim"
   },

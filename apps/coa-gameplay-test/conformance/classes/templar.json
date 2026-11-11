@@ -4614,6 +4614,26 @@
       "trigger_spell": 807274, "target": "dummy", "metric": "spell_damage_count", "fields": {"spell": 570205, "target": "dummy"},
       "wait_ms": 1050, "expire_ms": 6000,
       "observe_source": "Righteous Tempest 807274 is the level 60 rank (BaseLevel 60, DurationIndex 28: 5000 ms, Effect[0] aura 23 every 1000 ms triggering 570205). 807274 hits at its cast and then every EffectAmplitude 1000 ms (ADR 0150 noted the hit at the cast). The before phase casts 807274 and reads 570205's hits on the dummy 1050 ms later; the after phase, after the first aura has ended (six hits, at 0 to 5000 ms), casts again and reads the cumulative count: six plus the second cast's hits so far. Read 1050 ms after the cast: 2 hit(s) per cast, so the period is at most 1050 ms; with the other entry, (950, 1050] ms."
+    },
+    {
+      "spell": 801463, "name": "Libram of Grace", "kind": "hit_ratio", "variant": "healing_received",
+      "label_suffix": "healing_received", "quote": "increasing your healing received by", "expected": 1.2,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "ally", "target": "caster",
+      "control": {}, "treatment": {"auras": [[801463, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "$s2 = 20 (801463 EffectBasePoints[1] 19 + 1): Effect[1] aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 127, on the caster. The ally heals the caster with Benediction 578276 (rank 8, ${$m2+0+$STA*0.25+$SP*0.3}) at spell power 20000, so the scaled part dominates the die; control: no Libram; treatment: Libram of Grace set on the caster before every heal. A heal is not a damaging ability, so Grace 804150 does not fire. Only non-critical heals are compared."
+    },
+    {
+      "spell": 801463, "name": "Libram of Grace", "kind": "metric_delta", "variant": "grace_self",
+      "label_suffix": "grace_self", "quote": "health to you and nearby allies", "expected": 1, "before_expected": 0,
+      "trigger_spell": 807268, "target": "dummy", "metric": "spell_heal_count", "fields": {"spell": 804150, "target": "caster"},
+      "setup_casts": [801463], "setup_only_after": true, "wait_ms": 1000, "expire_ms": 6000,
+      "observe_source": "AscensionTemplarEvents.cpp:97 (Check, case 801463: a damaging, non-periodic Ability hit) and :200-201 (Proc) cast Grace 804150 (SPELL_EFFECT_HEAL, TARGET_SRC_CASTER / TARGET_UNIT_DEST_AREA_ALLY, 15 yd). One Argent Blade 807268 at the dummy without the Libram heals the caster 0 times with 804150 (control); after Libram of Grace 801463 is cast, one Argent Blade heals the caster once: the 'you' of the clause. The nearby allies are the ally_heal_breadth entry."
+    },
+    {
+      "spell": 801463, "name": "Libram of Grace", "kind": "cast_applies_aura", "quote": "for $d",
+      "expected_ms": 20000, "applied_aura": 801463, "target": "caster", "cast_spell": 801463, "cast_target": "caster",
+      "source": "801463 DurationIndex 18 (SpellDuration.dbc 20000 ms, $d); the Libram applies its own aura on the caster with its instant cast, read absent before it."
     }
   ],
   "player_observations": [
