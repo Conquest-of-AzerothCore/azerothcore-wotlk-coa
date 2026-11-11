@@ -1670,8 +1670,26 @@
       "trigger_text": "When you take Physical damage", "trial_metric": "spell_damage_count",
       "observe_spell": 707720, "observe_source": "EffectTriggerSpell[0] of 705306", "observe_metric": "spell_cast_count",
       "internal_cooldown_ms": 1000,
-      "gate_text": "@ext:Does not work on Bosses.:ext@: the striker is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, so Creature::isWorldBoss), against the non-boss Harvest Golem 36 of the magnitude_ratio entry, whose every hit strikes back",
-      "handler": "AscensionTemplarEvents.cpp:46-49 (Check, case 705306): a direct damage taken by the player with a physical school mask from an actor that is not a dungeon or world boss; :134-138 (Proc) casts Copy(player, actor, 707720, damage * 15 / 100) once per 1 s (State(player).cooldowns); striker spell 32247 ('Karazhan - Chess NPC Action: Melee Attack: DAMAGE (Footman)', SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 1, EffectBasePoints 999 EffectDieSides 1, SPELL_ATTR3_ALWAYS_HIT), the striker of the internal_cooldown_gate entry, so 15% never truncates to 0"
+      "gate_text": "@ext:Does not work on Bosses.:ext@",
+      "handler": "The striker is Heroic Training Dummy 31146 (creature_template rank 3, type_flags 4 CREATURE_TYPE_FLAG_BOSS_MOB, so Creature::isWorldBoss), against the non-boss Harvest Golem 36 of the magnitude_ratio entry, whose every hit strikes back. AscensionTemplarEvents.cpp:46-49 (Check, case 705306): a direct damage taken by the player with a physical school mask from an actor that is not a dungeon or world boss; :134-138 (Proc) casts Copy(player, actor, 707720, damage * 15 / 100) once per 1 s (State(player).cooldowns); striker spell 32247 ('Karazhan - Chess NPC Action: Melee Attack: DAMAGE (Footman)', SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 1, EffectBasePoints 999 EffectDieSides 1, SPELL_ATTR3_ALWAYS_HIT), the striker of the internal_cooldown_gate entry, so 15% never truncates to 0"
+    },
+    {
+      "aura": 572741, "kind": "self_trigger", "name": "Reckoning",
+      "tooltip": "Unleash a powerful |cffffffffOath Breaker|r, dealing ${$m1+0+$AP*0.175+$STA*0.5} Holy damage and restoring $521241s1 Energy for each enemy struck.\r\n\r\nConsumes your |cffffffffOaths|r, dealing additional damage for each consumed.",
+      "trigger": {"action": "cast", "spell": 572741, "target": "dummy"},
+      "trigger_text": "Unleash a powerful Oath Breaker", "trigger_spell_text": "Reckoning",
+      "trial_metric": "spell_damage_count", "observe_spell": 521241,
+      "observe_source": "tooltip token $521241s1 of 572741", "observe_note": "AscensionClassMechanics19To25.cpp:170-181 (HandleAscensionClassMechanics19To25Hit): every untriggered hit of a Reckoning rank (IsTemplarReckoning, :34-49) that lands with damage on an enemy casts 521241 (Energize +15 energy, Effect[0] 30 SPELL_EFFECT_ENERGIZE, EffectBasePoints 14) on the caster. 572741, the level 60 rank, has Effect[0] TargetA 6 TARGET_UNIT_TARGET_ENEMY with EffectChainTarget 1, so one cast strikes one enemy.",
+      "observe_metric": "spell_cast_count", "per_trigger": 1, "per_trigger_text": "for each enemy struck"
+    },
+    {
+      "aura": 572741, "kind": "gate_absence", "name": "Reckoning",
+      "tooltip": "Unleash a powerful |cffffffffOath Breaker|r, dealing ${$m1+0+$AP*0.175+$STA*0.5} Holy damage and restoring $521241s1 Energy for each enemy struck.\r\n\r\nConsumes your |cffffffffOaths|r, dealing additional damage for each consumed.",
+      "trigger": {"action": "cast", "spell": 572027, "target": "dummy"},
+      "trigger_text": "Unleash a powerful Oath Breaker", "trigger_spell_text": "Righteous Upheaval",
+      "trial_metric": "spell_damage_count", "observe_spell": 521241,
+      "observe_source": "tooltip token $521241s1 of 572741", "observe_note": "AscensionClassMechanics19To25.cpp:170-181 (HandleAscensionClassMechanics19To25Hit): every untriggered hit of a Reckoning rank (IsTemplarReckoning, :34-49) that lands with damage on an enemy casts 521241 (Energize +15 energy, Effect[0] 30 SPELL_EFFECT_ENERGIZE, EffectBasePoints 14) on the caster. 572741, the level 60 rank, has Effect[0] TargetA 6 TARGET_UNIT_TARGET_ENEMY with EffectChainTarget 1, so one cast strikes one enemy. The control: another Oath Breaker, Righteous Upheaval 572027, strikes the same dummy with Reckoning known, and no energy follows.",
+      "observe_metric": "spell_cast_count", "gate_text": "for each enemy struck"
     }
   ],
   "talent_modifiers": [

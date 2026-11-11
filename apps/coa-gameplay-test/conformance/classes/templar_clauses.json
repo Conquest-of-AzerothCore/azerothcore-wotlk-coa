@@ -4296,7 +4296,9 @@
     "spell": 805421,
     "clause": "and restoring $521241s1 Energy for each enemy struck",
     "labels": [
-      "572741 effect_value 521241e0 #1"
+      "572741 effect_value 521241e0 #1",
+      "572741 self_trigger_count",
+      "572741 gate_absence_count"
     ],
     "kind": "claim"
   },
