@@ -41,6 +41,7 @@ def valid_set(directory, name_offset=1, strings=b"\0Alpha\0"):
     directory.mkdir(parents=True, exist_ok=True)
     (directory / "Foo.dbc").write_bytes(wdbc([(7, name_offset, 3)], 3, strings))
     (directory / "gtBar.dbc").write_bytes(wdbc([(0.5,), (1.5,)], 1, b"", "<f"))
+    (directory / "SpellRank.dbc").write_bytes(wdbc([(1, 100, 100, 1), (2, 100, 101, 2)], 4))
     return directory
 
 
@@ -68,7 +69,8 @@ class ClientDbcTest(unittest.TestCase):
 
     def test_core_stores_follow_active_loads(self):
         self.assertEqual(client_dbc.core_stores(self.root),
-                         [("Foo.dbc", "nsi", "foo_dbc"), ("gtBar.dbc", "df", "gtbar_dbc")])
+                         [("Foo.dbc", "nsi", "foo_dbc"), ("gtBar.dbc", "df", "gtbar_dbc"),
+                          ("SpellRank.dbc", "niii", "spell_ranks")])
 
     def test_valid_set_has_no_problems(self):
         self.assertEqual(client_dbc.check(valid_set(self.path / "set"), self.root), ([], []))
@@ -81,7 +83,8 @@ class ClientDbcTest(unittest.TestCase):
         self.assertEqual(problems, [
             "Foo.dbc: stored as foo.dbc; case-sensitive systems cannot open it",
             "Foo.dbc: 2 fields, the core expects 3",
-            "gtBar.dbc: missing"])
+            "gtBar.dbc: missing",
+            "SpellRank.dbc: missing"])
 
     def test_string_outside_block_is_a_note(self):
         directory = valid_set(self.path / "set", name_offset=0xFF00FE)
@@ -140,6 +143,20 @@ class ClientDbcTest(unittest.TestCase):
         self.assertTrue((output / client_dbc.MANIFEST).is_file())
         with self.assertRaises(ValueError):
             client_dbc.extract(client, output, mpq, log=lambda _: None, root=self.root)
+
+    def test_spell_rank_is_checked_and_named_like_the_core_reads_it(self):
+        directory = valid_set(self.path / "set")
+        (directory / "SpellRank.dbc").unlink()
+        (directory / "spellrank.dbc").write_bytes(wdbc([(1, 100, 100)], 3))
+        problems, _ = client_dbc.check(directory, self.root)
+        self.assertEqual(problems, ["SpellRank.dbc: stored as spellrank.dbc; case-sensitive systems cannot open it",
+                                    "SpellRank.dbc: 3 fields, the core expects 4"])
+        client = self.path / "Data"
+        client.mkdir()
+        (client / "patch.MPQ").write_bytes(b"")
+        mpq = FakeMpq({"patch.MPQ": {"DBFilesClient\\spellrank.dbc": wdbc([(1, 100, 100, 1)], 4)}})
+        client_dbc.extract(client, self.path / "out", mpq, log=lambda _: None, root=self.root)
+        self.assertTrue((self.path / "out" / "SpellRank.dbc").is_file())
 
     def test_original_reads_untouched_archive_copies(self):
         client = self.path / "Data"
