@@ -10,6 +10,7 @@ import tempfile
 import unittest
 
 from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, ENGINE_ROUNDING, NOT_MEASURED,
+                     PER_LEVEL_ROUNDING, PER_LEVEL_UNMODELLED, per_level_unmodelled,
                      PERCENT_POINT_METRICS,
                      magnitude_excluded,
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
@@ -337,6 +338,48 @@ class CompareTest(unittest.TestCase):
         verdict = self.narrow_roll_verdict(389, 0.25)
         self.assertEqual(verdict.status, 'ok')
         self.assertNotIn(ENGINE_ROUNDING, verdict.detail)
+
+    def per_level_verdict(self, reads, rate=1.085):
+        text = '${$m2+0+$AP*0.805+$sph*0.85}'
+        label = '1001 effect_value e0 #0'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 105
+            return [Displayed(text, roll + 8.68 + 251.965, 0, 'flat')]
+
+        fields = {(RANK, 'EffectRealPointsPerLevel[0]'): rate, (RANK, 'BaseLevel'): 22, (RANK, 'SpellLevel'): 22,
+                  (RANK, 'MaxLevel'): 30}
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
+        labels = sample_labels(label, len(reads))
+        steps = [assert_step(name, str(read)) for name, read in zip(labels, reads)]
+        return self.value_run([item], [text], steps, FakeTooltips(tokens, {(RANK, 0): (101, 7)}, fields))[label]
+
+    def test_reads_the_per_level_truncation_reproduces_are_known_engine_rounding(self):
+        reads = [361, 362, 363, 365, 366, 367, 362, 366, 364, 363, 361, 367, 365, 366, 362, 364, 363, 366, 365, 364]
+        verdict = self.per_level_verdict(reads)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['engine_range'], [361.0, 367.0])
+        self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['truncated_to'], 8.0)
+        self.assertIn('per-level term truncated before the sum (SpellInfo.cpp:497)', verdict.explanation)
+
+    def test_seeded_low_read_the_per_level_truncation_does_not_explain_alerts(self):
+        reads = [361, 362, 363, 365, 366, 367, 362, 366, 364, 363, 361, 367, 365, 366, 362, 364, 363, 366, 365, 364]
+        self.assertEqual(self.per_level_verdict(reads, rate=1.0).status, 'alert')
+        self.fresh()
+        self.assertEqual(self.per_level_verdict([360] + reads[1:]).status, 'alert')
+
+    def test_an_alert_of_a_hit_with_a_per_level_loss_says_the_engine_computation_is_not_modelled(self):
+        fields = {(RANK, 'EffectRealPointsPerLevel[0]'): 1.085, (RANK, 'BaseLevel'): 22, (RANK, 'SpellLevel'): 22,
+                  (RANK, 'MaxLevel'): 30}
+        reader = FakeTooltips([], fields=fields)
+        alert = Verdict('1001 hit_mean', 'alert', 360.0, 365.0, 363.0, 367.0, 'mean out of band', 'k', 1001, RANK,
+                        'hit_mean')
+        labelled = per_level_unmodelled(alert, reader, RANK, 60)
+        self.assertEqual(labelled.status, 'alert')
+        self.assertEqual(labelled.detail[PER_LEVEL_ROUNDING], PER_LEVEL_UNMODELLED)
+        self.assertIn(PER_LEVEL_UNMODELLED, labelled.explanation)
+        self.assertIs(per_level_unmodelled(replace(alert, status='ok'), reader, RANK, 60).status, 'ok')
+        self.assertEqual(per_level_unmodelled(alert, FakeTooltips([]), RANK, 60), alert)
 
     def test_one_read_of_a_rolled_effect_inside_its_roll_range_is_measured(self):
         verdict = self.rolled_verdict([248])

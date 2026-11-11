@@ -112,6 +112,8 @@ DETERMINISTIC_STAT_METRICS = frozenset({'stat', 'stat_exact', 'armor', 'combat_r
 PERCENT_PATH_METRICS = frozenset({'stat', 'armor', 'max_health', 'max_power', 'resistance'})
 PERCENT_PATH_RELATIONS = frozenset({'scale'})
 ENGINE_ROUNDING = 'engine_rounding'
+PER_LEVEL_ROUNDING = 'per_level_rounding'
+PER_LEVEL_UNMODELLED = 'per-level truncation, engine computation not modelled'
 CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
@@ -565,12 +567,34 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
     half = Z_99 * sigma / math.sqrt(len(reads))
     low = expected - half - (TRUNCATED_READ if expected > 0 else 0)
     high = expected + half + (TRUNCATED_READ if expected < 0 else 0)
+    per_level = per_level_loss(tooltips, spell_id, effect, tokens.caster.level)
+    engine = [value - per_level.loss for value in values] if per_level and per_level.loss else None
     rounded, outside = truncation_reads(values, reads)
+    lowered = {read: value for read, value in zip(map(engine_truncation, engine), engine)} if engine else {}
+    if outside and engine and all(read in lowered for read in reads):
+        engine_reads = [engine_truncation(value) for value in engine]
+        engine_mean = fmean(engine_reads)
+        engine_low, engine_high = engine_mean - half, engine_mean + half
+        detail = {**detail, PER_LEVEL_ROUNDING: {
+            'per_level': per_level.term, 'truncated_to': per_level.truncated, 'loss': per_level.loss,
+            'engine_range': [min(engine_reads), max(engine_reads)], 'engine_mean': engine_mean}}
+        status = banded_status(mean, engine_low, engine_high, engine_mean)
+        return replace(base, status=status, measured=mean, expected=engine_mean, low=engine_low, high=engine_high,
+                       detail=detail,
+                       explanation=f'{roll}; known engine rounding, per-level term truncated before the sum '
+                                   f'(SpellInfo.cpp:497): {per_level.levels} levels x {per_level.rate:g} = '
+                                   f'{per_level.term:g} becomes {per_level.truncated:g}, then int32 truncation '
+                                   f'(SpellInfo.cpp:592): the engine reads {min(engine_reads):g} to '
+                                   f'{max(engine_reads):g}, mean {engine_mean:.3f}; every read is one of them; 99% '
+                                   f'interval of the mean around the engine mean +- {half:.3f}')
     if outside:
+        cause = (f'; per-level term {per_level.term:g} truncated to {per_level.truncated:g} (SpellInfo.cpp:497) '
+                 f'reproduces reads {sorted(lowered)} but not {[read for read in reads if read not in lowered]}'
+                 if engine else '')
         return replace(base, status='alert', measured=mean, expected=expected, low=low, high=high, detail=detail,
                        explanation=f'{roll}; reads {outside} lie outside the formula range {min(values):g} to '
                                    f'{max(values):g} and are not its int32 truncation at SpellEffectInfo::CalcValue '
-                                   f'(at most {TRUNCATED_READ:g} toward zero, reproduced from a formula value): '
+                                   f'(at most {TRUNCATED_READ:g} toward zero, reproduced from a formula value){cause}: '
                                    f'a deviation')
     if rounded:
         detail = {**detail, ENGINE_ROUNDING: sorted(set(rounded.values()))}
@@ -583,6 +607,45 @@ def judge_roll(base: Verdict, expectation: Expectation, run: Run, measured: floa
                    explanation=f'{roll}; 99% interval of the mean, expected mean +- Z x sigma / sqrt(reads) '
                                f'{half:.3f}, widened by {TRUNCATED_READ:g} toward zero for the int32 truncation of '
                                f'CalcValue{rounding_note}{tolerated_note}')
+
+
+@dataclass(frozen=True)
+class PerLevelLoss:
+    levels: int
+    rate: float
+    term: float
+    truncated: float
+    loss: float
+
+
+def per_level_loss(tooltips: TooltipSource, spell_id: int, effect: int, caster_level: int) -> PerLevelLoss | None:
+    rate = float32(float(tooltips.spell_field(spell_id, f'EffectRealPointsPerLevel[{effect}]') or 0))
+    if not rate:
+        return None
+    base_level = int(tooltips.spell_field(spell_id, 'BaseLevel') or 0)
+    spell_level = int(tooltips.spell_field(spell_id, 'SpellLevel') or 0)
+    max_level = int(tooltips.spell_field(spell_id, 'MaxLevel') or 0)
+    level = caster_level
+    if max_level > 0 and level > max_level:
+        level = max_level
+    elif level < base_level:
+        level = base_level
+    levels = level - max(base_level, spell_level)
+    term = float32(levels * rate)
+    truncated = float(math.trunc(term))
+    return PerLevelLoss(levels, rate, term, truncated, term - truncated)
+
+
+def per_level_unmodelled(verdict: Verdict, tooltips: TooltipSource, rank_id: int, caster_level: int) -> Verdict:
+    if verdict.status != 'alert':
+        return verdict
+    losses = {effect: found for effect in EFFECTS
+              if (found := per_level_loss(tooltips, rank_id, effect, caster_level)) and found.loss}
+    if not losses:
+        return verdict
+    terms = ', '.join(f'effect {effect} {found.term:g} to {found.truncated:g}' for effect, found in losses.items())
+    return replace(verdict, detail={**(verdict.detail or {}), PER_LEVEL_ROUNDING: PER_LEVEL_UNMODELLED},
+                   explanation=f'{verdict.explanation}; {PER_LEVEL_UNMODELLED} ({terms}, SpellInfo.cpp:497)')
 
 
 def engine_truncation(value: float) -> float:
@@ -3603,7 +3666,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if failure:
         return replace(base, status='unmeasured', measured=measured, explanation=f'cast failed: {failure}')
     if check in HIT_CHECKS:
-        return judge_hit(base, manifest['class_file'], [(entry, run, expectation)], hit_model)
+        return per_level_unmodelled(judge_hit(base, manifest['class_file'], [(entry, run, expectation)], hit_model),
+                                    tooltips, expectation.rank_id, manifest['level'])
     if measured is None:
         return replace(base, explanation=f'no measurement {expectation.label!r} in {run.key} '
                                          f'({run.status}: {run.message})')
@@ -3730,7 +3794,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         first_entry, _, expectation = parts[0]
         base = Verdict(label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                        expectation.rank_id, expectation.check)
-        verdicts[hit_slots[label]] = judge_hit(base, manifest['class_file'], parts, hit_model)
+        verdicts[hit_slots[label]] = per_level_unmodelled(judge_hit(base, manifest['class_file'], parts, hit_model),
+                                                          tooltips, base.rank_id, manifest['level'])
     verdicts += [server_question(manifest, parts[0][2], judge_proc(manifest, parts, tooltips), tooltips)
                  for parts in proc_parts.values()]
     verdicts += [server_question(manifest, parts[0][2], judge_proc_delta(manifest, parts, tooltips), tooltips)
