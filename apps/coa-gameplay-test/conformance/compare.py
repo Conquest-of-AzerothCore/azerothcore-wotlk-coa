@@ -2599,9 +2599,25 @@ def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdi
         far_hit = far_value > 0
         far_detail = f'; beyond-radius dummy hit count {far_value:g} (must stay 0, proving the radius limit)'
     lead = f'{int(measured)} of {len(hits)} additional dummies hit{far_detail}'
+    pulled = True
+    if model.get('pull'):
+        pull = model['pull']
+        readings = [[run.values.get(label) for label in pair] for pair in (*pull['near'], pull['far'])]
+        missing = [label for pair in (*pull['near'], pull['far']) for label in pair if run.values.get(label) is None]
+        if missing:
+            return replace(base, explanation=missing_measurement(run, missing[0]))
+        near, far = readings[:-1], readings[-1]
+        pulled = (all(after <= before - pull['minimum_yd'] for before, after in near)
+                  and abs(far[1] - far[0]) <= pull['still_yd'])
+        lead += ('; distances to the caster before and after: '
+                 + ', '.join(f'{before:g} to {after:g}' for before, after in near)
+                 + f'; beyond the radius {far[0]:g} to {far[1]:g} (each one inside must close by at least '
+                   f'{pull["minimum_yd"]:g} yd, the one beyond must move less than {pull["still_yd"]:g} yd)')
     verdict = (per_cast_count_verdict(base, model, run, len(hits), lead) if model.get('per_cast') else
                exact_count_verdict(base, model, measured, len(hits), lead))
-    return replace(verdict, status='alert') if far_hit and verdict.status != 'unmeasured' else verdict
+    if (far_hit or not pulled) and verdict.status != 'unmeasured':
+        return replace(verdict, status='alert')
+    return verdict
 
 
 PARTY_STAT_RATIO_TOLERANCE = 1e-4

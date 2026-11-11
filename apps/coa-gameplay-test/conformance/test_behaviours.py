@@ -6965,8 +6965,11 @@ class CharmImmunityTests(unittest.TestCase):
 
 
 def r1a_entry(spell: int, kind: str, suffix: str = '') -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind
-                and entry.get('label_suffix', '') == suffix)
+    entry = next((entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind
+                  and entry.get('label_suffix', '') == suffix), None)
+    if entry is None:
+        raise unittest.SkipTest(f'no {kind} entry of {spell} {suffix!r} in this branch\'s class file')
+    return entry
 
 
 def set_aura_indices(steps: list[dict], spell: int) -> list[int]:
@@ -7015,6 +7018,41 @@ class PhaseAuraTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(capped), expectation).status, 'ok')
         uncapped = {model['before_label']: model['before_expected'], model['after_label']: model['before_expected']}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(uncapped), expectation).status, 'alert')
+
+
+class FixedCountPullTests(unittest.TestCase):
+    def entry(self):
+        return {'spell': 520534, 'name': 'Templar Rituals', 'kind': 'fixed_count',
+                'quote': 'you pull enemies within 15 yds towards you.', 'expected': 2, 'uncapped': True,
+                'cast_spell': 807274, 'target_rank': 520694, 'metric': 'aura', 'cast_target': 'caster', 'repeats': 1,
+                'learn': [520534], 'radius': 15.0, 'pull_reads': True, 'radius_reason': 'synthetic'}
+
+    def readings(self, expectation, near_after=0.0, far_after=20.0):
+        model = expectation.model
+        values = {label: 1.0 for label in model['dummy_labels']}
+        values[model['far_label']] = 0.0
+        for before, after in model['pull']['near']:
+            values[before], values[after] = 10.0, near_after
+        values[model['pull']['far'][0]], values[model['pull']['far'][1]] = 20.0, far_after
+        return values
+
+    def test_distances_are_read_before_the_cast_and_after_it(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        steps = run.validate(scenario)['steps']
+        cast = first_index(steps, action='cast', spell=807274)
+        for before, after in (*expectation.model['pull']['near'], expectation.model['pull']['far']):
+            self.assertLess(first_index(steps, label=before), cast)
+            self.assertGreater(first_index(steps, label=after), cast)
+            self.assertEqual(steps[first_index(steps, label=after)]['metric'], 'distance_2d')
+        plain, _ = behaviour_scenario(CLASS_FILE, {**self.entry(), 'pull_reads': False})
+        self.assertFalse([step for step in plain['steps'] if step.get('metric') == 'distance_2d'])
+
+    def test_a_pull_that_does_not_close_or_moves_the_far_dummy_alerts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        judge = lambda values: judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judge(self.readings(expectation)), 'ok')
+        self.assertEqual(judge(self.readings(expectation, near_after=9.5)), 'alert')
+        self.assertEqual(judge(self.readings(expectation, far_after=10.0)), 'alert')
 
 
 class FixedCountAurasTests(unittest.TestCase):

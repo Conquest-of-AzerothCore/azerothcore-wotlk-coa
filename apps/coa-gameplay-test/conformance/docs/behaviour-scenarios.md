@@ -90,6 +90,11 @@ A matching count from a scenario without a candidate beyond the stated number (m
 `insufficient_trials`: a server reaching more would read the same. An ally-heal-breadth entry
 (`kind: "ally_heal_breadth"`) states every offered ally (model `all_offered`), so its match is judged.
 
+A `fixed_count` entry may set `pull_reads`: every dummy's `distance_2d` to the caster is read before the casts and
+after them, and the verdict is an `alert` unless each dummy inside the radius ends at least 1 yd closer and the one
+beyond it moves less than 0.5 yd (ADR 0186). Templar Rituals 520534 pulls the dummies at 3.75, 7.5 and 11.25 yd to
+0, 0 and 1.23 yd, and leaves the one at 20 yd in place, after one Righteous Tempest.
+
 ### Healing-ratio scenarios (`behaviour_ratio`)
 
 Each `targets` entry is either a 2-element `[rank_id, name]` (method `"cast"`, the default) or a 3-element

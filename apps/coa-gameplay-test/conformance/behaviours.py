@@ -249,6 +249,7 @@ class FixedTargetCountSpec:
     learn: tuple[int, ...] = ()
     uncapped: bool = False
     auras: tuple[tuple[int, int], ...] = ()
+    pull_reads: bool = False
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -258,6 +259,12 @@ class FixedTargetCountSpec:
 
 
 FIXED_COUNT_FAR_MARGIN_YD = 5.0
+PULL_MINIMUM_YD = 1.0
+PULL_STILL_YD = 0.5
+
+
+def pull_label(spec, index: int, moment: str) -> str:
+    return f'{spec.spell} {dummy_id(index)} distance {moment}'
 COUNT_HEADROOM = 1
 
 
@@ -283,8 +290,15 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     wait_ms = facts.cast_time_ms + CAST_MARGIN_MS
     per_cast = per_cast_model(spec, dummy_count, 'cast 0')
 
+    def distance_reads(moment: str) -> list[dict]:
+        if not spec.pull_reads:
+            return []
+        return [measurement(pull_label(spec, index, moment), dummy_id(index), 'distance_2d', target=CASTER)
+                for index in range(far_index + 1)]
+
     def cast_steps() -> list[dict]:
         steps = per_cast_reads(spec, dummy_count, 0) if per_cast else []
+        steps += distance_reads(BEFORE)
         for cast in range(1, spec.repeats + 1):
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
                 steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
@@ -304,7 +318,7 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         return steps
 
     def measure() -> list[dict]:
-        return [hit_measurement(spec, index, AFTER) for index in range(far_index + 1)]
+        return distance_reads(AFTER) + [hit_measurement(spec, index, AFTER) for index in range(far_index + 1)]
 
     extra_labels = [hit_label(spec, index, AFTER) for index in range(1, dummy_count)]
     far_label = hit_label(spec, far_index, AFTER)
@@ -330,6 +344,11 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         model['all_offered'] = True
     if per_cast:
         model['per_cast'] = per_cast
+    if spec.pull_reads:
+        model['pull'] = {'near': [[pull_label(spec, index, BEFORE), pull_label(spec, index, AFTER)]
+                                  for index in range(dummy_count)],
+                         'far': [pull_label(spec, far_index, BEFORE), pull_label(spec, far_index, AFTER)],
+                         'minimum_yd': PULL_MINIMUM_YD, 'still_yd': PULL_STILL_YD}
     expectation = Expectation(label, BEHAVIOUR_FIXED_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -1082,7 +1101,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 tuple(entry.get('clear_auras', ())), entry.get('cast_target', TARGET),
                                 entry.get('cast_target_health_pct'), tuple(entry.get('learn', ())),
                                 entry.get('uncapped', False),
-                                tuple((int(spell), int(stacks)) for spell, stacks in entry.get('auras', ())))
+                                tuple((int(spell), int(stacks)) for spell, stacks in entry.get('auras', ())),
+                                bool(entry.get('pull_reads', False)))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
