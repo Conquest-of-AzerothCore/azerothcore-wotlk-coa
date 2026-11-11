@@ -674,7 +674,8 @@ class ProcScenarioTest(unittest.TestCase):
         self.assertFalse([step for step in steps if step['action'] == 'learn' and step['spell'] == OATH_OF_VINDICATION])
         self.assertEqual(steps[first_step(steps, 'set_aura')]['spell'], OATH_OF_VINDICATION)
         self.assertEqual(proc_plan(CLASS_FILE, entry).chance_pct, 20.0)
-        self.assertEqual((expectation.model['chance_spell'], expectation.model['chance_kind']), (VINDICATION, 'percent'))
+        model = expectation.model
+        self.assertEqual((model['chance_spell'], model['chance_kind']), (VINDICATION, 'percent'))
 
     def test_an_applied_by_without_its_source_is_refused(self):
         entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN}}
