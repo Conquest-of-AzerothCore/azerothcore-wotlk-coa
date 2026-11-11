@@ -1859,7 +1859,12 @@
     "spell": 705256,
     "clause": "within $681136d",
     "labels": [
-      "705256 spell_duration 681136 #0"
+      "705256 spell_duration 681136 #0",
+      "705256 cost_gate 573049 next_free without",
+      "705256 cost_gate 573049 next_free with",
+      "705256 cost_gate 573049 next_free next",
+      "705256 cost_gate 573049 next_free held",
+      "705256 cost_gate 573049 next_free expired"
     ],
     "kind": "claim"
   },
