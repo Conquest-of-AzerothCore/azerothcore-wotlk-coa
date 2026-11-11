@@ -3800,6 +3800,20 @@
       "wait_ms": 3000,
       "expire_ms": 20500,
       "observe_source": "Testament of Hope 1397742 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectBasePoints 1 + DieSides 1 = 2 copies; each copy carries 704409, whose Effect[1] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (EffectBasePoints -11 + 1 = -10%, all schools) lands on the caster within 704409's radius. AscensionTemplarContracts.cpp:322-326 (ModifySpellEffectBaseValue) sets that effect to -15 when the copy's owner knows 803219. The reading is the caster's MeleeDamageBonusTaken of 1000 from the dummy (Unit.cpp:11609-11640, TakenTotalMod *= GetTotalAuraMultiplier of aura 87): the multiplier is built by AddPct in float (Util.h:52-61, Unit.cpp:7064-7088), once per copy, and the product is truncated to uint32: two copies give 1.0f + -10% twice = 0.80999994f, 1000 x that = 809.99994, read 809, without the talent (control), and 0.7225f, 722.5, read 722, with it. A reduction that ignored the talent reads 809 in both phases; one that kept a single copy reads 900 or 850."
+    },
+    {
+      "spell": 573452,
+      "name": "Eternally Devoted",
+      "kind": "cost_gate",
+      "quote": "Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by",
+      "gated_spell": 801461,
+      "resource": "cooldown",
+      "reduction": 4000,
+      "target": "caster",
+      "setup_casts": [[705300, "caster"], [572027, "dummy"]],
+      "after_casts": [[572027, "dummy"]],
+      "after_wait_ms": 2000,
+      "observe_source": "$/1000;806106s1 = 4 sec (806106 EffectBasePoints[0] -4001, EffectDieSides[0] 1, -4000 ms). AscensionTemplarAbilities.cpp:182-200: an Oath Breaker cast (Breaker, Righteous Upheaval 572027) with the Eternal Blessing 705300 buff up casts 707111 on the caster; :305-308: a hit of 707111 with 573452 known calls ReduceLibrams(player, 4000) once per spell (AscensionTemplar.cpp:129-133, Libram of Tenacity 801461 among the five Librams). Gated spell Libram of Tenacity 801461, RecoveryTime 180000 ms. Each arm casts Eternal Blessing and a first Righteous Upheaval before the priming cast (no Libram cooldown runs yet), primes the Libram, then, in the arms with 573452, casts Righteous Upheaval at the dummy 2000 ms later. Attempts timed from the priming cast: 176500 ms without 573452 (refused, SPELL_FAILED_NOT_READY 67), 176500 ms with it (goes through), 175500 ms with it (refused: no more than 4 sec). The scenario waits 549400 ms of game time and runs on the accelerated clock only (ADR 0152)."
     }
   ],
   "player_observations": [
