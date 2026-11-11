@@ -7235,7 +7235,9 @@ private:
             Require(!_actors.count(id) && !_targets.count(id), "Duplicate actor id");
             Position position = player->GetPosition();
             position.m_positionX += step.get<float>("distance", 5);
-            TempSummon* creature = player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
+            TempSummon* creature = step.get<bool>("unowned", false)
+                ? player->GetMap()->SummonCreature(step.get<uint32>("entry"), position)
+                : player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
             Require(creature != nullptr, "Could not summon creature: " + id);
             creature->SetPhaseMask(player->GetPhaseMask(), true);
             if (auto aiAction = step.get_optional<int32>("ai_action"))

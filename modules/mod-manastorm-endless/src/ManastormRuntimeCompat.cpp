@@ -4,7 +4,9 @@
 #include "AllMapScript.h"
 #include "AllSpellScript.h"
 #include "Creature.h"
+#include "Group.h"
 #include "Log.h"
+#include "LootMgr.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -13,6 +15,7 @@
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "UnitScript.h"
+#include "World.h"
 
 #include <algorithm>
 #include <cmath>
@@ -40,6 +43,12 @@ namespace
     constexpr uint32 SPELL_CHAOTIC_LINK = 93459;
     constexpr double CHAOTIC_LINK_HEALTH_PER_STACK = 0.25;
     constexpr uint8 ENDGAME_LEVEL = 60;
+
+    constexpr uint32 MAP_BLACKROCK_DEPTHS = 230;
+    constexpr uint32 NPC_SHADOWFORGE_FLAME_KEEPER = 9956;
+    constexpr uint32 ITEM_SHADOWFORGE_TORCH = 11885;
+    constexpr uint32 SEGMENT_MAGMUS_NORMAL = 428;
+    constexpr uint32 SEGMENT_MAGMUS_ENDGAME = 457;
 
     constexpr uint32 MAP_BLACKROCK_SPIRE = 229;
     constexpr uint32 NPC_SPIRESTONE_BATTLE_LORD = 9218;
@@ -904,6 +913,120 @@ namespace
                     run->GetCreatureLevel()));
         }
     };
+
+    class manastorm_magmus_flame_keeper_torch :
+        public UnitScript
+    {
+    public:
+        manastorm_magmus_flame_keeper_torch()
+            : UnitScript(
+                "manastorm_magmus_flame_keeper_torch",
+                true,
+                {UNITHOOK_ON_UNIT_DEATH})
+        {
+        }
+
+        void OnUnitDeath(
+            Unit* unit,
+            Unit* /*killer*/) override
+        {
+            if (!ManastormModuleConfig::Enabled() ||
+                !unit)
+            {
+                return;
+            }
+
+            Creature* creature =
+                unit->ToCreature();
+
+            if (!creature ||
+                creature->GetEntry() !=
+                    NPC_SHADOWFORGE_FLAME_KEEPER ||
+                creature->GetMapId() !=
+                    MAP_BLACKROCK_DEPTHS)
+            {
+                return;
+            }
+
+            ManastormRun* run =
+                GetRunForStageCreature(
+                    creature);
+
+            if (!run ||
+                (run->GetSegment().SegmentId !=
+                    SEGMENT_MAGMUS_NORMAL &&
+                 run->GetSegment().SegmentId !=
+                    SEGMENT_MAGMUS_ENDGAME))
+            {
+                return;
+            }
+
+            Player* looter =
+                creature->GetLootRecipient();
+
+            if (!looter ||
+                creature->loot.lootOwnerGUID !=
+                    looter->GetGUID())
+            {
+                return;
+            }
+
+            Group* group =
+                looter->GetGroup();
+
+            if (!group &&
+                sWorld->getBoolConfig(
+                    CONFIG_SOLO_KILL_REQUIRES_PLAYER_HIT) &&
+                !creature->WasAttackedDirectlyBy(
+                    looter->GetGUID()))
+            {
+                return;
+            }
+
+            ItemTemplate const* torch =
+                sObjectMgr->GetItemTemplate(
+                    ITEM_SHADOWFORGE_TORCH);
+
+            if (!torch ||
+                std::any_of(
+                    creature->loot.items.begin(),
+                    creature->loot.items.end(),
+                    [](LootItem const& item)
+                    {
+                        return item.itemid ==
+                            ITEM_SHADOWFORGE_TORCH;
+                    }))
+            {
+                return;
+            }
+
+            creature->loot.AddItem(
+                LootStoreItem(
+                    ITEM_SHADOWFORGE_TORCH,
+                    0,
+                    100.0f,
+                    false,
+                    LOOT_MODE_DEFAULT,
+                    0,
+                    1,
+                    1));
+
+            if (group &&
+                !creature->loot.items.empty() &&
+                torch->Quality <
+                    uint32(group->GetLootThreshold()))
+            {
+                creature->loot.items.back().is_underthreshold =
+                    true;
+            }
+
+            if (!creature->loot.isLooted())
+            {
+                creature->SetDynamicFlag(
+                    UNIT_DYNFLAG_LOOTABLE);
+            }
+        }
+    };
 }
 
 void AddSC_manastorm_runtime_compat()
@@ -912,4 +1035,5 @@ void AddSC_manastorm_runtime_compat()
     new manastorm_molten_core_play_dead();
     new manastorm_blasted_lands_invincibility_bypass();
     new manastorm_forced_track_restore();
+    new manastorm_magmus_flame_keeper_torch();
 }

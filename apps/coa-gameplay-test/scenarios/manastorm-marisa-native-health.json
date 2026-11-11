@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Manastorm Westfall: stand-in Marisa du'Paige carries the native Manastorm boss health",
+  "contract": [
+    "Segment 526 runs the native Manastorm objective Marisa du'Paige (84270) through the stock template 599, which",
+    "our world database has instead. The stock template's HealthModifier is 1.5 while the native one is 60.6562",
+    "(AscensionDB client captures, 2026-07-02 to 2026-09-09, revision d6494ceb3150), so the boss had about",
+    "1/40 of the intended health and did not scale. Manastorm now applies the native/stand-in modifier ratio to",
+    "the objective boss before depth scaling and Chaotic Link, so its maximum health lies in the native range."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 526"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible to this lane",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 89574
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the preparation bubble at the boss clears its safety aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Marisa's maximum health uses the native Manastorm modifier",
+      "actor": "n",
+      "metric": "nearby_creature_max_health",
+      "entry": 599,
+      "within_ms": 5000,
+      "min": 70000,
+      "max": 110000
+    }
+  ]
+}
