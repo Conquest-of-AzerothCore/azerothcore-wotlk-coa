@@ -1708,6 +1708,22 @@
   ],
   "behaviours": [
     {
+      "spell": 524765, "name": "Light's Guidance", "kind": "hit_ratio", "label_suffix": "next_benediction",
+      "quote": "now causes your next Benediction to heal for", "expected": 1.25,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[524765, 1]]},
+      "critical": false, "trials": 40, "target_health_pct": 50, "fixture": {"spell_power": 20000},
+      "warmup": [578276],
+      "expected_source": "$524766s1 = 25 (524766 EffectBasePoints[0] 24, EffectDieSides[0] 1, aura 108 SPELLMOD_DAMAGE): AscensionTemplarAbilities.cpp:279-280 casts 524766 on a healing hit of Benediction while 524765 is held, AscensionTemplarAuras.cpp:116-120 gives it one charge and ConsumeSelected drops it on the next Benediction (AscensionTemplarAbilities.cpp:32-33). Treatment: 524765 set, so each Benediction 578276 (top rank at 60) heals 25% more after the previous one; the ally is set to 50% health before each heal, since a heal at full health cast no 524766 in diagnostic 20261111-173929; a warm-up Benediction opens each arm, so the first counted treatment heal follows one too. Control: no 524765, no 524766. A spell power fixture of 20000 makes the 0.30 spell power part (AscensionTemplarData.h:63) dominate the heal's 56-point die. Only non-critical heals are compared."
+    },
+    {
+      "spell": 524765, "name": "Light's Guidance", "kind": "cast_applies_aura",
+      "quote": "to heal for", "expected_ms": 30000,
+      "applied_aura": 524766, "target": "caster", "cast_spell": 578276, "cast_target": "caster",
+      "cast_target_health_pct": 50,
+      "observe_source": "524766 DurationIndex 9 (30000 ms); AscensionTemplarAbilities.cpp:279-280 casts it on the caster after a healing hit of Benediction 578276; a heal at full health cast none in diagnostic 20261111-173929, so the caster is set to 50% health first, as the 524765 trigger entry does"
+    },
+    {
       "spell": 573324, "name": "Vindication", "kind": "hit_ratio", "label_suffix": "spell_power",
       "quote": "Physical damage", "expected": 1.259,
       "observe_spell": 573324, "learn": [573324],

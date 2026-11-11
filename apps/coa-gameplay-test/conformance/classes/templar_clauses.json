@@ -997,12 +997,29 @@
   {
     "spell": 524765,
     "clause": "Healing with Benediction now causes your next Benediction to heal for $524766s1% more for $524766d.",
-    "labels": [
-      "524765 effect_value 524766e0 #0",
-      "524765 spell_duration 524766 #1",
-      "524765 trigger_count"
+    "claims": [
+      {
+        "claim": "Healing with Benediction now causes",
+        "labels": [
+          "524765 trigger_count"
+        ]
+      },
+      {
+        "claim": "your next Benediction to heal for $524766s1% more",
+        "labels": [
+          "524765 behaviour_hit_ratio next_benediction"
+        ]
+      },
+      {
+        "claim": "for $524766d",
+        "labels": [
+          "524765 spell_duration 524766 #1",
+          "524765 behaviour_expiry"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "524765 effect_value 524766e0 #0 (not_measured) is replaced by the hit ratio of Benediction 578276 (top rank at 60, ADR 0045 mark: the ratio does not depend on the rank credit) with and without 524765, each heal after a healing Benediction; the duration by the expiry pair of 524766 after a Benediction on the caster at 50% health"
   },
   {
     "spell": 524767,
