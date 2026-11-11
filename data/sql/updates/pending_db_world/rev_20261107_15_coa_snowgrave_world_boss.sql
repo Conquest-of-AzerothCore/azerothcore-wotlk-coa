@@ -34,9 +34,10 @@ INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `Q
 -- his items join that pool.
 INSERT IGNORE INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`,
   `GroupId`, `MinCount`, `MaxCount`, `Comment`)
-SELECT 978060, l.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', i.`name`)
-FROM `creature_loot_template` l JOIN `item_template` i ON i.`entry` = l.`Item`
-WHERE l.`Entry` = 64627 AND l.`LootMode` = 1 AND l.`GroupId` = 1 AND l.`Reference` = 0 AND i.`Quality` = 4;
+SELECT 978060, `l`.`Item`, 0, 0, 0, 1, 1, 1, 1, CONCAT('Treasures of Azeroth - World Boss - ', `i`.`name`)
+FROM `creature_loot_template` `l` JOIN `item_template` `i` ON `i`.`entry` = `l`.`Item`
+WHERE `l`.`Entry` = 64627 AND `l`.`LootMode` = 1 AND `l`.`GroupId` = 1 AND `l`.`Reference` = 0
+  AND `i`.`Quality` = 4;
 
 -- His health is per player in his map (10 to 40): each kill's pool over its players.
 UPDATE `coa_world_boss_level` SET `health` = 1120094, `note` = 'per player; kills 23:24/23:36, 22/24 players'
