@@ -720,9 +720,8 @@ public:
 
         RunWindowLua(player);
         handler->PSendSysMessage(
-            "Sent the Fel Commutation window (SMSG 0x05BC row {}, 0x05B6 row {}). If "
-            "/dump FelCommutationFrame is nil, run /run ChallengeUtil.GetRequirementLocalization(\"{}\")",
-            WindowBootstrapRow, WindowRequirementRow, WindowBootstrapToken);
+            "Sent the Fel Commutation window as hot patch {}. Clients without the hot-patch channel do not "
+            "receive it; /hotpatch lists what the client ran.", WindowBootstrapToken);
         return true;
     }
 
