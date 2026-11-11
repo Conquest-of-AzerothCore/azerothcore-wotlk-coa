@@ -141,8 +141,7 @@ carries the declaration and its `no_behaviour_route_state`. `clause_coverage` re
 reason, no attempt, an attempt without agent or report, a non-claim entry, a clause that also declares a
 `tool_gap`).
 
-One Templar entry declares it, with one attempt (`pending`): Beckon 804914 "for $d", whose 3000 ms end is too short
-for an expiry pair at 25 ms per step.
+No Templar ledger entry declares it.
 
 ### Two proof statuses
 

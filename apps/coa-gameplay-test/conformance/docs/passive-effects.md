@@ -185,9 +185,9 @@ shares the aura), a `duration_delta` entry `trigger_duration_delta`, and a `proc
 (disambiguated with its `proc_spell` and then its trigger, exactly as `proc_scenario` disambiguates its own
 label when more than one `procs` entry shares the aura or the `aura`+`proc_spell` pair) — never the bare,
 undisambiguated label a shared-aura group would otherwise collide on. A `behaviours` entry gets its kind's label
-(`passives.BEHAVIOUR_LABELS`); `hit_ratio` and `cast_applies_aura` carry their `label_suffix` (ADR 0142). A P5 effect with more than one candidate
-entry prefers the ones whose own `effect` field matches this effect index (the same precedence
-`passive_targets`/`effect_overrides`/`effect_notes`/`unmodelled_effects` already use for their
+(`passives.BEHAVIOUR_LABELS`); `hit_ratio` and `cast_applies_aura` carry their `label_suffix` (ADR 0142). A P5
+effect with more than one candidate entry prefers the ones whose own `effect` field matches this effect index (the
+same precedence `passive_targets`/`effect_overrides`/`effect_notes`/`unmodelled_effects` already use for their
 `{spell_id, rank_id}` lookups); when none of the candidates for this effect carries an `effect` field at all,
 every one of them is linked (never an arbitrary single pick), since more than one check can legitimately cover
 the same single effect through different trigger paths (Templar: Might of Aggramar 803163 effect 0, two `procs`

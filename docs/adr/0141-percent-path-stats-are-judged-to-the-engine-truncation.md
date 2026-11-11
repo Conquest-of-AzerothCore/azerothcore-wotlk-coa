@@ -56,4 +56,7 @@ ADR 0135 judged these stats within a symmetric 1-point floor. That accepted one 
   above and two below, and a damage and an attack power reading that never take the rule.
 - The emulation assumes a factor of 1 before the learn. On a character with another percent aura on the same
   quantity it does not follow the engine, and a one-below reading there is judged against the wrong float value.
+- The emulation multiplies the whole before reading. Where the engine adds flat terms after the percent factor
+  (BASE_PCT stat and armor slots, `Player::UpdateArmor`; `lean/sturdy-fix-reading.md` §5) it is not the engine's
+  computation either, so a one-below reading there may be judged against the wrong value.
 - The verdicts re-judged on the stored batch 1 and round 10 results are listed in `lean/rounding-tool.md`.

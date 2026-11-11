@@ -2775,6 +2775,26 @@
     },
     {
       "spell": 704175,
+      "name": "Condemnation (talent without the Oath)",
+      "kind": "metric_delta",
+      "variant": "talent_without_oath",
+      "label_suffix": "talent_without_oath",
+      "quote": "Increases the critical strike chance gained through Condemn by $s1%",
+      "expected": 13.146,
+      "before_expected": 7.146,
+      "trigger_spell": 804906,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "melee_crit_chance_refreshed",
+      "fields": {},
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "observe_source": "The arm the oath variant does not read: Condemnation 704175 learned, no Oath. The crit chance must stay at the reference character's 7.146 (no gain without Condemn) and reach 7.146 + 3 + 3 = 13.146 once a Condemn 804906 cast grants Oath: Condemn 804922. A talent that added its 3% unconditionally would read 10.146 before the cast. melee_crit_chance_refreshed recomputes PLAYER_CRIT_PERCENTAGE (Player::UpdateCritPercentage) before reading, because the plain field read 0 before any learn in diagnostic .cache/verify-all/20261111-124353; the refreshed base 7.146 is from diagnostic 20261111-124435."
+    },
+    {
+      "spell": 704175,
       "name": "Condemnation (Oath: Condemn crit chance)",
       "kind": "metric_delta",
       "variant": "oath",
@@ -2909,7 +2929,7 @@
       "fixture": {
         "attack_power": 20000
       },
-      "expected_source": "$s1 = 15 (705272 EffectBasePoints[0] 14, EffectDieSides[0] 1): Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectMiscValue[0] 2 (Holy). Reckoning 572741 is a Holy spell (SchoolMask 2, DmgClass 1 magic), ${$m1+0+$AP*0.175+$STA*0.5}; the attack power fixture makes its AP part dominate the 49-point die. Forced spell crits, only critical hits compared. Expected 1.15: the whole critical hit x (1 + 15%), the reading the passive check measured (705272 e0 spell_critical_damage 572741: 1500 before and 1725 after the learn, templar/run2/verdicts.json). Control: no talent. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+      "expected_source": "$s1 = 15 (705272 EffectBasePoints[0] 14, EffectDieSides[0] 1): Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, EffectMiscValue[0] 2 (Holy). Reckoning 572741 is a Holy spell (SchoolMask 2, DmgClass 1 magic), ${$m1+0+$AP*0.175+$STA*0.5}; the attack power fixture makes its AP part dominate the 49-point die. Forced spell crits, only critical hits compared. Expected 1.15: the tooltip's 'critical damage ... by 15%' read as the whole critical hit x (1 + 15%); the passive check's readback agrees (705272 e0 spell_critical_damage 572741: 1500 before and 1725 after the learn, templar/run2/verdicts.json). Control: no talent. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
     },
     {
       "spell": 705272,
@@ -2948,7 +2968,7 @@
         "attack_power": 20000,
         "spell_power": 20000
       },
-      "expected_source": "$s1 = 15 (705272 Effect[0] aura 163, EffectMiscValue[0] 2 Holy). Titanstrike 806521 is a Holy ability (SchoolMask 2, DmgClass 2 melee), ${$m1+0+$AP*0.2+$sph*1}, only usable below 35% health, so the dummy is held at 10%; the fixtures make the stat part dominate the 129-point die. Forced melee crits, only critical hits compared. Expected 1.15 as for the spell variant: Unit.cpp:1728-1752 doubles a melee-class crit and raises the bonus by the aura's percent, 2 x 1.15 / 2. Control: no talent. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+      "expected_source": "$s1 = 15 (705272 Effect[0] aura 163, EffectMiscValue[0] 2 Holy). Titanstrike 806521 is a Holy ability (SchoolMask 2, DmgClass 2 melee), ${$m1+0+$AP*0.2+$sph*1}, only usable below 35% health, so the dummy is held at 10%; the fixtures make the stat part dominate the 129-point die. Forced melee crits, only critical hits compared. Expected 1.15 as for the spell variant, the whole critical hit x (1 + 15%); Unit.cpp:1728-1752 doubles a melee-class crit and raises it by the aura's percent, 2 x 1.15 / 2. Control: no talent. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
     },
     {
       "spell": 572548,
@@ -3056,7 +3076,7 @@
       "critical": false,
       "off_hand_item": 30754,
       "trials": 80,
-      "expected_source": "$s1 = 25 (705276 EffectBasePoints[0] 24, EffectDieSides[0] 1), Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT. Zealotry 801450 'Deals $s2% off-hand Weapon Damage as Holy Damage', so a 25% larger off-hand weapon damage gives a 25% larger Zealotry hit if the talent reaches the weapon damage Zealotry reads. No stat fixture: at the reference attack power the weapon roll dominates the hit, so the control arm also gives Zealotry's share of off-hand weapon damage and the hand it reads. Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800, item_template), equipped with no Dual Wield grant (every Templar learns Dual Wield 674 at login, AscensionLiveBaselineData.h:128). Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON (AttributesEx3 16777216; AscensionTemplarContracts.cpp:279-280), so Spell::Spell reads the off hand (m_attackType OFF_ATTACK); the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
+      "expected_source": "$s1 = 25 (705276 EffectBasePoints[0] 24, EffectDieSides[0] 1), Effect[0] aura 122 SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT. Zealotry 801450 'Deals $s2% off-hand Weapon Damage as Holy Damage', so a 25% larger off-hand weapon damage gives a 25% larger Zealotry hit if the talent reaches the weapon damage Zealotry reads. No stat fixture: at the reference attack power 313 the normalized AP term (313 / 14 x 2.4 = 53.7) is about 44% of the damage before the weapon percent (off-hand average 67.1, plus 53.7, plus the 1-point flat part), so the off-hand roll still spreads the hit: the control arm shows the hand Zealotry reads (off hand 0.64 x (51.63..82.65 + 54.7) = 68.0..87.9, main hand 37.2..38.7, with the 80% weapon percent and the -20% Templar tuning aura 887007, a known aura of every scenario), and its share of off-hand weapon damage is the control mean / (0.8 x (67.1 + 53.7 + 1)). Dual wield: the class file's one-hand main hand Frostmane Club 2259 (3.45-5.75) and off-hand Ancient Bone Mace 30754 (51.63-82.65, delay 1800, item_template), equipped with no Dual Wield grant (every Templar learns Dual Wield 674 at login, AscensionLiveBaselineData.h:128). Zealotry 801450 carries SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON (AttributesEx3 16777216; AscensionTemplarContracts.cpp:279-280), so Spell::Spell reads the off hand (m_attackType OFF_ATTACK); the hit is cast directly, outside AscensionTemplar::Zealotry, so no Blade Sermon repeat adds a second hit. Only non-critical hits are compared. Both arms set 823764 ('beeg spellpen': Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, EffectBasePoints[0] -9999, EffectMiscValue[0] 126; Effect[1] aura 108, SpellFamilyName 33, so it modifies no Templar spell) to remove the dummy's level-based magic resistance."
     },
     {
       "spell": 705276,

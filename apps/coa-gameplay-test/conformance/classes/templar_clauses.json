@@ -20,7 +20,7 @@
       "92108 trigger_count"
     ],
     "kind": "claim",
-    "reason": "Proven on the Templar as created: the trigger reads Dual Wield 674 (knows_spell) without granting it and equips the off-hand Cudgel 2492, which the server accepts only with CanDualWield (PlayerStorage.cpp:2047-2058); classes/templar.json triggers, Zealotry dual_wield known_spell. Every Templar learns 674 at login through AscensionLiveBaselineData.h:128 and AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017; lean/templar-offhand-reading.md). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons."
+    "reason": "Proven on the Templar as created: the trigger equips the off-hand Cudgel 2492 without granting Dual Wield 674; the server accepts it only with CanDualWield (PlayerStorage.cpp:2047-2058) and the harness equip step fails the scenario otherwise (CoAGameplayTest.cpp:7841-7849), so the equip is the proof; the knows_spell 674 read is reported, not judged; classes/templar.json triggers, Zealotry dual_wield known_spell. Every Templar learns 674 at login through AscensionLiveBaselineData.h:128 and AscensionClassService::SynchronizeProgression (AscensionCompat.cpp:918, 1013-1017; lean/templar-offhand-reading.md). Owner ruling 'Templar off-hand' (method-study/owner-rulings-2026-11-10.md, 2026-11-11): the live Zealot Templar wields two one-hand weapons."
   },
   {
     "spell": 92109,
@@ -1383,7 +1383,8 @@
     "labels": [
       "572548 behaviour_hit_ratio off_hand"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged under the reading Spell.dbc supports: aura 107 SPELLMOD_EFFECT2 adds $s1 points to Zealotry 801450's 80% weapon percent (90%), a 1.125x hit. The relative reading (the hit x (1 + $s1%)) would alert. Not raised as an owner question: the reading follows server data (lean/gap-batch-report.md)."
   },
   {
     "spell": 572548,
@@ -1401,7 +1402,8 @@
     "labels": [
       "572554 behaviour_hit_ratio off_hand"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged under the reading Spell.dbc supports: aura 107 SPELLMOD_EFFECT2 adds $s1 points to Zealotry 801450's 80% weapon percent (100%), a 1.25x hit. The relative reading (the hit x (1 + $s1%)) would alert. Not raised as an owner question: the reading follows server data (lean/gap-batch-report.md)."
   },
   {
     "spell": 572554,
@@ -1639,7 +1641,8 @@
     "spell": 704175,
     "clause": "Increases the critical strike chance gained through Condemn by $s1%",
     "labels": [
-      "704175 behaviour_metric_delta oath"
+      "704175 behaviour_metric_delta oath",
+      "704175 behaviour_metric_delta talent_without_oath"
     ],
     "kind": "claim"
   },
@@ -1791,7 +1794,8 @@
       "705263 behaviour_expiry libram",
       "705263 behaviour_expiry testament"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proven on one Libram (Libram of Zeal 801466) and one Testament (Testament of Resolve 804228), a representative sample of the 9 spells the class mask names (lean/gap-batch-packets/705263.md); the other Librams and Testaments share the same SPELLMOD_DURATION path."
   },
   {
     "spell": 705266,
@@ -1929,7 +1933,8 @@
     "labels": [
       "705283 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Our Spell.dbc and tooltip say 'by $s1%' (20%: 15000 to 18000 ms, measured); every reference found (bindmysoul, coabuildhub, sidekick) says 'Increases the duration of Oath Chain by 2 sec.' (17000 ms, excluded by the with arm). Owner question in lean/gap-batch-report.md."
   },
   {
     "spell": 705284,
