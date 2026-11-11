@@ -735,7 +735,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 224)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 226)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6852,6 +6852,36 @@ class TakenOutcomeTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(few), expectation)
         self.assertEqual(verdict.status, 'insufficient_trials')
         self.assertIsNotNone(verdict.detail['swings_needed'])
+
+
+class CharmImmunityTests(unittest.TestCase):
+    def test_each_charm_is_read_inside_the_charm_removed_and_its_cleanup_asserted(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(TESTAMENT_OF_RESOLVE, 'charm_immunity'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        charms = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 37122]
+        self.assertEqual(len(charms), 2)
+        self.assertTrue(all(steps[index]['actor'] == 'dummy' and steps[index]['target'] == CASTER
+                            for index in charms))
+        for index, arm in zip(charms, ('without', 'with')):
+            read = steps[index + 2]
+            self.assertEqual((read['label'], read['metric']), (f'804228 charm_immunity 37122 {arm}', 'aura'))
+            self.assertEqual((steps[index + 3]['action'], steps[index + 3]['stacks']), ('set_aura', 0))
+            cleanup = [step for step in steps if step.get('label', '').startswith(f'804228 {arm} CLEANUP')]
+            self.assertEqual([step['metric'] for step in cleanup],
+                             ['aura', 'charmed', 'controls_self', 'faction', 'victim'])
+            self.assertTrue(all('equals' in step and 'min' not in step for step in cleanup))
+        cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast'
+                    and step['spell'] == TESTAMENT_OF_RESOLVE)
+        self.assertLess(charms[0], cast)
+        self.assertLess(cast, charms[1])
+        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '0', '1', '0'])
+
+    def test_seeded_charm_landing_under_the_immunity_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, class_entry(TESTAMENT_OF_RESOLVE, 'charm_immunity'))
+        landed = {expectation.label: 1.0 for expectation in expectations}
+        statuses = [judge_behaviour(base_verdict(expectation), FakeRun(landed), expectation).status
+                    for expectation in expectations]
+        self.assertEqual(statuses, ['ok', 'alert', 'ok', 'alert'])
 
 
 if __name__ == '__main__':

@@ -106,6 +106,8 @@ BEHAVIOUR_LABELS = {
                                    for arm in entry['arms'] for kind, _ in arm['expected']],
     'script_hit': lambda entry: [f"{entry['spell']} script_hit {entry['hit_spell']}"],
     'taken_outcome': lambda entry: [f"{entry['spell']} behaviour_taken_outcome {entry['aura']}"],
+    'charm_immunity': lambda entry: [f"{entry['spell']} charm_immunity {entry['charm_spell']} {arm}"
+                                     for arm in ('without', 'cast', 'applied', 'with')],
     'fixed_count': lambda entry: [f"{entry['spell']} behaviour_fixed_count"],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
                                    for arm in ('outsider', 'party', *(('raid',) if entry.get('raid', True) else ()))

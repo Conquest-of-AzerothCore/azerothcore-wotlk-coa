@@ -4195,6 +4195,17 @@
       "stacks": 5, "expected_points": 15, "arm_ms": 1400000, "attacker_auras": [42716, 62531, 2116852],
       "learn": [705303], "state_metric": "parry_chance",
       "observe_source": "560651 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, $560651s1 = 3 (EffectBasePoints[0] 2, EffectDieSides[0] 1), StackAmount 5: 15 points at 5 stacks. 804912 is not learned in either arm, so its own parry rating from Agility (Effect[0] aura 220) and its parry-triggered stacks stay out of the contrast; Graceful Fighter 705303 is known in both arms, since a Templar parries only once AscensionTemplar.cpp:297-298 (705303) or a parry-percent aura (SpellAuraEffects.cpp HandleAuraModParryPercent) sets CanParry, and a first diagnostic run without it read 0 parries in 219 control swings; the aura is set at 5 stacks every 4000 ms inside its 5000 ms duration. VICTIMSTATE_PARRY 3 (Unit.h:89) is read from SMSG_ATTACKERSTATEUPDATE. The attackers carry Self Root Forever (No Visual) 42716 (aura 26), since without it a diagnostic read three of the eight spread behind the caster, where no swing can be parried, and Molten 62531 (aura 138, +100%) and Enrage 2116852 (aura 192, +100%) so that they swing four times as often."
+    },
+    {
+      "spell": 560835, "name": "Lightkeeper", "kind": "script_hit",
+      "quote": "dealing ${$561277m1*$<scalingbp>+$AP*.22} Holy damage", "hit_spell": 561277,
+      "casts": [[804906, "dummy"]], "settle_ms": 21500, "trials": 40, "minimum_hits": 20,
+      "observe_source": "Spell.dbc 560835 Effect[1] aura 42 (ProcFlags 262144, done periodic, ProcChance 15) triggers 561277 on the target of Condemn 804906's periodic damage; 561277 hits the dummy, its target, inside SpellRadius 8. A measurement for the 801546 fix note: 561277 is in TemplarCoefficients (AP 0.22) and keeps a spell_bonus_data row (ap 0.22, rev_20260918_23)."
+    },
+    {
+      "spell": 804228, "name": "Testament of Resolve", "kind": "charm_immunity",
+      "quote": "granting immunity to fear, charm, and horrify effects", "charm_spell": 37122,
+      "observe_source": "Domination 37122: one effect, aura 6 SPELL_AURA_MOD_CHARM, Mechanic 1 (charm), 10 s, instant, cast by the dummy at the caster through the harness cast action (Unit::CastSpell from the creature). Spell.dbc 804228 names no charm immunity (Effect[0] aura 147 MiscValue 512: SPELL_AURA_MOD_FEAR aura-type immunity, SpellInfo.cpp:2738-2739; Effect[2] aura 77 MECHANIC_HORROR); readback 20261111-213317 read IsImmunedToSpell 0 for 37122 with 804228 up. Mentor approval 2026-11-11: own scenario, read inside the charm, charm removed after each read, cleanup asserted."
     }
   ],
   "player_observations": [

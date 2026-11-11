@@ -1007,6 +1007,14 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_charmed_needs_a_player(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'charmed', 'equals': 0})
+        self.assertIs(run.validate(scenario), scenario)
+        scenario['steps'][-1]['actor'] = 'target'
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
     def test_melee_attacks_taken_keeps_one_victim_state(self):
         for extra in ({'victim_state': 3}, {'victim_state': 0, 'target': 'target'}):
             scenario = copy.deepcopy(self.scenario)

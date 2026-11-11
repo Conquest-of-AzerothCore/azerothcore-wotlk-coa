@@ -5148,6 +5148,8 @@ private:
             return player->GetMap()->IsScriptedPrivateInstance();
         if (metric == "controls_self")
             return player->m_mover == player;
+        if (metric == "charmed")
+            return player->IsCharmed() ? 1.0 : 0.0;
         if (metric == "viewpoint_entry" || metric == "seer_entry")
         {
             WorldObject* object = metric == "viewpoint_entry" ? player->GetViewpoint() : player->GetSeer();

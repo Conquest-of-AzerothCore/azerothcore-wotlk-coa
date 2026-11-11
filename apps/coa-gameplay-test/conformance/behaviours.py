@@ -74,7 +74,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
-        'script_hit', 'taken_outcome')
+        'script_hit', 'taken_outcome', 'charm_immunity')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -5266,6 +5266,91 @@ def taken_outcome_spec(entry: dict) -> TakenOutcomeSpec:
                             entry.get('state_metric', ''))
 
 
+CHARM_READ_MS = 500
+CHARM_CLEANUP_MS = 15000
+CHARM_SPELL_HIT_BONUS = 100.0
+CHARM_FACTION_SNAPSHOT = 'faction_before_charm'
+
+
+@dataclass(frozen=True)
+class CharmImmunitySpec:
+    spell: int
+    name: str
+    quote: str
+    charm_spell: int
+    words: str = 'charm'
+
+
+def charm_immunity_label(spec: CharmImmunitySpec, arm: str) -> str:
+    return f'{spec.spell} charm_immunity {spec.charm_spell} {arm}'
+
+
+def charm_cleanup_steps(spec: CharmImmunitySpec, arm: str) -> list[dict]:
+    def held(label: str, actor: str, metric: str, equals: int, **fields) -> dict:
+        return {'action': 'assert', 'label': f'{spec.spell} {arm} CLEANUP: {label}', 'actor': actor,
+                'metric': metric, **fields, 'equals': equals, 'within_ms': CHARM_CLEANUP_MS}
+
+    return [{'action': 'set_aura', 'actor': CASTER, 'caster': TARGET, 'spell': spec.charm_spell, 'stacks': 0},
+            held('no charm aura', CASTER, 'aura', 0, spell=spec.charm_spell),
+            held('no charmer', CASTER, 'charmed', 0),
+            held('control back', CASTER, 'controls_self', 1),
+            held('faction back', CASTER, 'faction', 0, relative_to=CHARM_FACTION_SNAPSHOT),
+            held('dummy attacks nobody', TARGET, 'victim', 0, target=CASTER),
+            measurement(f'{spec.spell} {arm} dummy combat', TARGET, 'combat')]
+
+
+def charm_immunity_scenario(class_file: dict, spec: CharmImmunitySpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'charm_immunity', spec.quote, STATE_ABSENT)
+    if spec.words not in entry.quote:
+        raise ValueError(f'{spec.spell} charm_immunity quote {entry.quote!r} does not name {spec.words!r}')
+
+    def charm(arm: str) -> list[dict]:
+        return [{'action': 'cast', 'actor': TARGET, 'spell': spec.charm_spell, 'target': CASTER},
+                {'action': 'wait', 'label': f'{arm} charm', 'ms': CHARM_READ_MS},
+                measurement(charm_immunity_label(spec, arm), CASTER, 'aura', spell=spec.charm_spell)]
+
+    applied_label = charm_immunity_label(spec, 'applied')
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                {'action': 'snapshot', 'actor': CASTER, 'metric': 'faction', 'save_as': CHARM_FACTION_SNAPSHOT}]
+             + charm('without') + charm_cleanup_steps(spec, 'without')
+             + self_cast_attempt(spec.spell, facts_of(records, spec.spell), charm_immunity_label(spec, 'cast'))
+             + [measurement(applied_label, CASTER, 'aura', spell=spec.spell)]
+             + charm('with') + charm_cleanup_steps(spec, 'with'))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour charm immunity',
+        'contract': f'The dummy casts {spec.charm_spell} at the caster without {spec.spell} (the control) and again '
+                    f'with {spec.spell} up; each time the charm aura is read {CHARM_READ_MS} ms after the cast, '
+                    f'inside the charm, and the charm is then removed; after each arm the scenario asserts no charm '
+                    f'aura, no charmer, the caster\'s own control and faction back and a dummy that attacks nobody, '
+                    f'and fails otherwise; the dummy\'s combat state is read, not asserted, because a passive '
+                    f'creature keeps a PvE combat reference (CreatureAI::UpdateVictim).',
+        'players': [player_fixture(class_file)],
+        'creatures': [{**creature_fixture(class_file), 'spell_hit_bonus': CHARM_SPELL_HIT_BONUS}],
+        'steps': steps}
+    waited = waited_ms(steps)
+    cleanup_asserts = sum(step.get('within_ms') == CHARM_CLEANUP_MS for step in steps)
+    scenario['timeout_ms'] = waited + cleanup_asserts * CHARM_CLEANUP_MS + TIMEOUT_MARGIN_MS
+    rule = prose_rule(entry.quote, spec.spell)
+    model = {'kind': 'charm_immunity', 'quote': entry.quote}
+    return scenario, [
+        Expectation(charm_immunity_label(spec, 'without'), BEHAVIOUR_IMMUNITY, spec.spell, spec.charm_spell, None,
+                    str(STATE_PRESENT), rule, model),
+        Expectation(charm_immunity_label(spec, 'cast'), BEHAVIOUR_IMMUNITY, spec.spell, spec.spell, None,
+                    str(NO_CAST_FAILURE), rule, model),
+        Expectation(applied_label, BEHAVIOUR_IMMUNITY, spec.spell, spec.spell, None, str(STATE_PRESENT), rule,
+                    model),
+        Expectation(charm_immunity_label(spec, 'with'), BEHAVIOUR_IMMUNITY, spec.spell, spec.charm_spell, None,
+                    str(STATE_ABSENT), rule, model)]
+
+
+def charm_immunity_spec(entry: dict) -> CharmImmunitySpec:
+    return CharmImmunitySpec(entry['spell'], entry['name'], entry['quote'], entry['charm_spell'],
+                             entry.get('words', 'charm'))
+
+
 def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
     if not trials or entry.get('kind') != 'hit_ratio':
         return entry
@@ -5382,6 +5467,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return script_hit_scenario(class_file, script_hit_spec(entry))
     if entry['kind'] == 'taken_outcome':
         return taken_outcome_scenario(class_file, taken_outcome_spec(entry))
+    if entry['kind'] == 'charm_immunity':
+        return charm_immunity_scenario(class_file, charm_immunity_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
