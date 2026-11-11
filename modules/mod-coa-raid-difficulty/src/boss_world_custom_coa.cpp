@@ -57,10 +57,14 @@
  *   Land of the Dead    every 61.4s   six seconds: a Damned Wight a second at
  *                                     the raid, a choking cloud every other
  *   Spectral Veil       at 80/60/40/20%  a channel of up to 100s: shadow damage
- *                                     to everyone each second, growing, and a
- *                                     Restless Spirit that bombs where it lands.
- *                                     One Soul Vessel wakes; its death breaks
- *                                     the veil and gives the raid Soul Release.
+ *                                     to everyone each second, growing. The four
+ *                                     Soul Vessels open: each spawns Restless
+ *                                     Spirits that blow up unless killed or
+ *                                     interrupted. Breaking one vessel ends the
+ *                                     veil, shields the rest and gives the raid
+ *                                     Soul Release.
+ *   Both start ghostly and untouchable until the four Soul Vessels are
+ *   clicked; Zul'rogg then jumps down from the pyramid.
  *   Zul'rogg            Fierce Blow every 7.6s, Titanic Crush every 10.8s,
  *                       Consume Life every 8s; cannot die while Atal'zul lives
  *
@@ -1010,12 +1014,12 @@ namespace
         SPELL_CONSUME_LIFE_AP   = 2119837,
         SPELL_SOUL_RELEASE      = 2119839,
         SPELL_SOUL_RELEASE_HIT  = 2119840,
-        SPELL_SOUL_VESSEL       = 2119844,
-        SPELL_SOUL_BIND         = 2119845,
-        SPELL_SOUL_LINK         = 2119847,
         SPELL_SPECTRAL_VOLLEY   = 2119848,
         SPELL_VEIL_PULSE        = 2119853,
         SPELL_VEIL_POWER        = 2119857,
+        SPELL_GHOST             = 22650,
+        SPELL_BLUE_BEAM         = 30945,
+        SPELL_BLUE_SHIELD       = 31635,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
@@ -1026,8 +1030,31 @@ namespace
 
     enum AtalzulEvents { EA_BOLT = 1, EA_VOLLEY, EA_LAND };
 
-    // Casts the Spectral Bomb where it appears and is gone 2s later; killing it
-    // first stops the bomb.
+    enum VesselState { VESSEL_IDLE, VESSEL_LINKED, VESSEL_SHIELDED, VESSEL_OPEN, VESSEL_BROKEN };
+
+    constexpr uint32 FACTION_FRIENDLY = 35;
+    constexpr uint32 ACTION_VESSEL_BROKEN = 1;
+    constexpr uint32 ACTION_VESSEL_LINKED = 2;
+    constexpr uint32 ACTION_AWAKEN = 3;
+    Position const ZuroggLanding = { 3439.56f, -4982.28f, 195.727f, 0.0f };
+
+    void Dormant(Creature* creature, bool on)
+    {
+        if (on)
+        {
+            creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            creature->SetReactState(REACT_PASSIVE);
+            if (!creature->HasAura(SPELL_GHOST))
+                creature->CastSpell(creature, SPELL_GHOST, true);
+        }
+        else
+        {
+            creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            creature->SetReactState(REACT_AGGRESSIVE);
+            creature->RemoveAurasDueToSpell(SPELL_GHOST);
+        }
+    }
+
     struct npc_restless_spirit_coa : public ScriptedAI
     {
         explicit npc_restless_spirit_coa(Creature* creature) : ScriptedAI(creature) { }
@@ -1038,58 +1065,134 @@ namespace
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void IsSummonedBy(WorldObject* /*summoner*/) override { DoCastSelf(SPELL_SPECTRAL_BOMB); }
+        void IsSummonedBy(WorldObject* /*summoner*/) override { _wait = 1500ms; }
 
         void OnSpellCast(SpellInfo const* spell) override
         {
             if (spell->Id != SPELL_SPECTRAL_BOMB)
                 return;
-            Unit* caster = me;
-            if (TempSummon* s = me->ToTempSummon())
-                if (Unit* atal = s->GetSummonerUnit())
-                    caster = atal;
-            caster->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), SPELL_SPECTRAL_BOMB_HIT, true);
+            Unit* caster = me->FindNearestCreature(NPC_ATALZUL, 400.0f);
+            (caster ? caster : me)->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+                SPELL_SPECTRAL_BOMB_HIT, true);
             me->DespawnOrUnsummon(100ms);
         }
 
-        void UpdateAI(uint32 /*diff*/) override { }
+        void UpdateAI(uint32 diff) override
+        {
+            if (me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+            _wait -= Milliseconds(diff);
+            if (_wait > 0ms)
+                return;
+            DoCastSelf(SPELL_SPECTRAL_BOMB);
+            _wait = 4s;
+        }
+
+    private:
+        Milliseconds _wait = 1500ms;
     };
 
-    // The phylacteries: asleep until Spectral Veil binds one; its death breaks
-    // the veil and releases the soul onto the raid.
     struct npc_soul_vessel_coa : public ScriptedAI
     {
-        explicit npc_soul_vessel_coa(Creature* creature) : ScriptedAI(creature) { }
+        explicit npc_soul_vessel_coa(Creature* creature) : ScriptedAI(creature), _spirits(creature) { }
 
         void Reset() override
         {
             ApplyLevelHealth(me);
             me->SetReactState(REACT_PASSIVE);
             me->SetControlled(true, UNIT_STATE_ROOT);
-            DoCastSelf(SPELL_SOUL_VESSEL, true);
-            Sleep(true);
+            SetState(VESSEL_IDLE);
         }
 
-        void Sleep(bool asleep)
+        VesselState State() const { return _state; }
+
+        void SetState(VesselState state)
         {
-            if (asleep)
-                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            _state = state;
+            _spirits.DespawnAll();
+            me->InterruptNonMeleeSpells(false);
+            me->RemoveAurasDueToSpell(SPELL_BLUE_SHIELD);
+            me->SetVisible(state != VESSEL_BROKEN);
+            me->SetFaction(state == VESSEL_IDLE ? FACTION_FRIENDLY : me->GetCreatureTemplate()->faction);
+            if (state == VESSEL_IDLE)
+                me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
             else
-                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                me->RemoveNpcFlag(UNIT_NPC_FLAG_GOSSIP);
+            if (state == VESSEL_OPEN)
+                me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+            else
+                me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+            if (state == VESSEL_IDLE || state == VESSEL_OPEN)
+                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            else
+                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            if (state == VESSEL_SHIELDED)
+                DoCastSelf(SPELL_BLUE_SHIELD, true);
+            _spawn = 3s;
+            if (state == VESSEL_LINKED)
+                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                    me->CastSpell(atal, SPELL_BLUE_BEAM, true);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void Click()
         {
+            if (_state != VESSEL_IDLE)
+                return;
+            SetState(VESSEL_LINKED);
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                atal->AI()->DoAction(ACTION_VESSEL_LINKED);
+        }
+
+        void JustSummoned(Creature* summon) override { _spirits.Summon(summon); }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/,
+            SpellSchoolMask /*school*/) override
+        {
+            if (_state != VESSEL_OPEN || damage < me->GetHealth())
+                return;
+            damage = 0;
+            SetState(VESSEL_BROKEN);
             for (Player* p : Players(me, [&](Player* x) { return me->IsWithinDistInMap(x, 100.0f); }))
             {
                 me->CastSpell(p, SPELL_SOUL_RELEASE_HIT, true);
                 AddStack(me, p, SPELL_SOUL_RELEASE);
             }
             if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
-                atal->AI()->DoAction(1);
+                atal->AI()->DoAction(ACTION_VESSEL_BROKEN);
         }
 
-        void UpdateAI(uint32 /*diff*/) override { }
+        void UpdateAI(uint32 diff) override
+        {
+            if (_state != VESSEL_OPEN)
+                return;
+            _spawn -= Milliseconds(diff);
+            if (_spawn > 0ms)
+                return;
+            _spawn = 6s;
+            float const angle = frand(0.0f, 2.0f * float(M_PI));
+            me->SummonCreature(NPC_RESTLESS_SPIRIT, me->GetPositionX() + 4.0f * std::cos(angle),
+                me->GetPositionY() + 4.0f * std::sin(angle), me->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 60000);
+        }
+
+    private:
+        SummonList _spirits;
+        VesselState _state = VESSEL_IDLE;
+        Milliseconds _spawn = 3s;
+    };
+
+    class npc_soul_vessel_script : public CreatureScript
+    {
+    public:
+        npc_soul_vessel_script() : CreatureScript("npc_soul_vessel_coa") { }
+        CreatureAI* GetAI(Creature* creature) const override { return new npc_soul_vessel_coa(creature); }
+
+        bool OnGossipHello(Player* player, Creature* creature) override
+        {
+            if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(creature->AI()))
+                ai->Click();
+            CloseGossipMenuFor(player);
+            return true;
+        }
     };
 
     struct boss_atalzul_coa : public custom_world_boss_coa
@@ -1111,6 +1214,16 @@ namespace
             me->ResetPlayerDamageReq();
         }
 
+        template <typename F>
+        void ForVessels(F&& f)
+        {
+            std::list<Creature*> vessels;
+            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 150.0f);
+            for (Creature* v : vessels)
+                if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(v->AI()))
+                    f(ai);
+        }
+
         void Reset() override
         {
             custom_world_boss_coa::Reset();
@@ -1118,19 +1231,13 @@ namespace
             ApplyFlex();
             _summons.DespawnAll();
             _nextVeil = 80;
+            _phase = false;
+            _dormant = true;
             me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
-            std::list<Creature*> vessels;
-            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 150.0f);
-            for (Creature* v : vessels)
-            {
-                if (!v->IsAlive())
-                    v->Respawn(true);
-                else if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(v->AI()))
-                {
-                    v->SetFullHealth();
-                    ai->Sleep(true);
-                }
-            }
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_IDLE); });
+            Dormant(me, true);
         }
 
         void JustEngagedWith(Unit* who) override
@@ -1153,8 +1260,12 @@ namespace
         void JustDied(Unit* /*killer*/) override
         {
             _summons.DespawnAll();
+            ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_BROKEN); });
             if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
-                rogg->DespawnOrUnsummon(10s);
+            {
+                rogg->KillSelf();
+                rogg->DespawnOrUnsummon(3s);
+            }
         }
 
         void Schedule() override
@@ -1176,16 +1287,12 @@ namespace
 
         void OnSpellCast(SpellInfo const* spell) override
         {
-            if (spell->Id == SPELL_SPECTRAL_BOLT)
-            {
-                if (Unit* v = me->GetVictim())
-                    me->CastSpell(v, SPELL_SPECTRAL_BOLT_HIT, true);
-            }
-            else if (spell->Id == SPELL_SPECTRAL_VEIL)
-                BindVessel();
+            if (spell->Id != SPELL_SPECTRAL_BOLT)
+                return;
+            if (Unit* v = me->GetVictim())
+                me->CastSpell(v, SPELL_SPECTRAL_BOLT_HIT, true);
         }
 
-        // Land of the Dead and Spectral Veil tick through their trigger spells.
         void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_RAISE_DEAD)
@@ -1193,7 +1300,6 @@ namespace
                 Unit* t = RandomPlayer(false);
                 if (!t)
                     return;
-                // A wight every second; a choking cloud every other.
                 me->SummonCreature(NPC_DAMNED_WIGHT, t->GetPositionX() + frand(-4.0f, 4.0f), t->GetPositionY() + frand(-4.0f, 4.0f),
                     t->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                 if (_raise++ % 2 == 0)
@@ -1203,52 +1309,90 @@ namespace
             {
                 DoCastAOE(SPELL_VEIL_PULSE, true);
                 AddStack(me, me, SPELL_VEIL_POWER);
-                if (Unit* t = RandomPlayer(false))
-                    me->SummonCreature(NPC_RESTLESS_SPIRIT, t->GetPositionX() + frand(-2.0f, 2.0f), t->GetPositionY() + frand(-2.0f, 2.0f),
-                        t->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 5000);
             }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
         {
             custom_world_boss_coa::DamageTaken(attacker, damage, type, school);
-            if (_nextVeil && !me->HasAura(SPELL_SPECTRAL_VEIL) && me->HealthBelowPctDamaged(_nextVeil, damage))
+            if (_nextVeil && !_phase && me->HealthBelowPctDamaged(_nextVeil, damage))
             {
                 _nextVeil = _nextVeil > 20 ? _nextVeil - 20 : 0;
+                _phase = true;
                 me->InterruptNonMeleeSpells(false);
                 DoCastSelf(SPELL_SPECTRAL_VEIL);
+                ForVessels([](npc_soul_vessel_coa* ai)
+                {
+                    if (ai->State() == VESSEL_SHIELDED)
+                        ai->SetState(VESSEL_OPEN);
+                });
             }
         }
 
-        void BindVessel()
-        {
-            std::list<Creature*> vessels;
-            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 150.0f);
-            vessels.remove_if([](Creature* v) { return !v->IsAlive() || !v->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE); });
-            if (vessels.empty())
-                return;
-            Creature* v = Acore::Containers::SelectRandomContainerElement(vessels);
-            if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(v->AI()))
-                ai->Sleep(false);
-            v->CastSpell(me, SPELL_SOUL_BIND, true);
-            v->CastSpell(me, SPELL_SOUL_LINK, true);
-        }
-
-        // A vessel died: the veil breaks.
         void DoAction(int32 action) override
         {
-            if (action != 1 || !me->HasAura(SPELL_SPECTRAL_VEIL))
-                return;
+            if (action == ACTION_VESSEL_LINKED)
+            {
+                bool all = true;
+                ForVessels([&](npc_soul_vessel_coa* ai) { all = all && ai->State() == VESSEL_LINKED; });
+                if (all && _dormant)
+                    Awaken();
+            }
+            else if (action == ACTION_AWAKEN && _dormant)
+                Awaken();
+            else if (action == ACTION_VESSEL_BROKEN && _phase)
+            {
+                _phase = false;
+                me->InterruptNonMeleeSpells(false);
+                me->RemoveAurasDueToSpell(SPELL_SPECTRAL_VEIL);
+                me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
+                ForVessels([](npc_soul_vessel_coa* ai)
+                {
+                    if (ai->State() == VESSEL_OPEN)
+                        ai->SetState(VESSEL_SHIELDED);
+                });
+            }
+        }
+
+        void Awaken()
+        {
+            _dormant = false;
             me->InterruptNonMeleeSpells(false);
-            me->RemoveAurasDueToSpell(SPELL_SPECTRAL_VEIL);
-            me->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
-            me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
+            Dormant(me, false);
+            ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_SHIELDED); });
+            Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f);
+            if (rogg)
+                rogg->AI()->DoAction(ACTION_AWAKEN);
+            if (Player* p = me->SelectNearestPlayer(300.0f))
+            {
+                AttackStart(p);
+                if (rogg)
+                    rogg->AI()->AttackStart(p);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_dormant)
+            {
+                custom_world_boss_coa::UpdateAI(diff);
+                return;
+            }
+            _beam -= Milliseconds(diff);
+            if (_beam > 0ms || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+            _beam = 2s;
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
+                me->CastSpell(rogg, SPELL_BLUE_BEAM, true);
         }
 
     private:
         SummonList _summons;
         uint8 _nextVeil = 80;
         uint32 _raise = 0;
+        bool _phase = false;
+        bool _dormant = true;
+        Milliseconds _beam = 0ms;
     };
 
     enum ZulroggEvents { EZ_CRUSH = 1, EZ_FIERCE };
@@ -1262,6 +1406,21 @@ namespace
             custom_world_boss_coa::Reset();
             DoCastSelf(SPELL_HAND_OF_SOULREAVER, true);
             DoCastSelf(SPELL_ENDLESS_HUNGER, true);
+            Position const& home = me->GetHomePosition();
+            if (me->GetExactDist(&home) > 2.0f)
+                me->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(),
+                    home.GetOrientation());
+            Dormant(me, true);
+        }
+
+        void DoAction(int32 action) override
+        {
+            if (action != ACTION_AWAKEN)
+                return;
+            Dormant(me, false);
+            me->InterruptNonMeleeSpells(false);
+            if (me->GetExactDist(&ZuroggLanding) > 2.0f)
+                me->GetMotionMaster()->MoveJump(ZuroggLanding, 30.0f, 20.0f);
         }
 
         void JustEngagedWith(Unit* who) override
@@ -1538,7 +1697,7 @@ void AddCoaCustomWorldBossScripts()
     void AddCoaAtalzulInstanceScripts();
     AddCoaAtalzulInstanceScripts();
     new custom_script<boss_zulrogg_coa>("boss_zulrogg_coa");
-    new custom_script<npc_soul_vessel_coa>("npc_soul_vessel_coa");
+    new npc_soul_vessel_script();
     new custom_script<npc_restless_spirit_coa>("npc_restless_spirit_coa");
     new custom_script<npc_custom_add_coa>("npc_custom_add_coa");
     new custom_script<boss_trut_khahn_coa>("boss_trut_khahn_coa");

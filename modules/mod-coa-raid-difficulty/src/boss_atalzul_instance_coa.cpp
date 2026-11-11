@@ -7,9 +7,9 @@ namespace
     // starts at its graveyard (WorldSafeLocs 6090).
     coa_world_boss_instance::Config const Boss = {
         "Atal'zul", 67532, 890,
-        { 3353.02f, -4844.59f, 167.44f, 0.0f },
+        { 3307.54f, -4849.5786f, 167.9613f, 3.2970f },
         978090, 0,
-        { 3335.884f, -4842.772f, 167.134f, 5.1617f },
+        { 3322.411f, -4846.606f, 167.1479f, 5.1839f },
         978091,
     };
 }

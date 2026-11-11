@@ -1,6 +1,6 @@
 -- Atal'zul, the Soulreaver (67532) in his boss map (890), the way Setis is fought: a shrine in the Eastern
 -- Plaguelands by Zul'Mashar takes players in (Normal only), the portal he leaves where he falls and the shrine at
--- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is a taken in game.
+-- the entrance take them back, and players who die in his map rise at its start. The shrine's spot is taken in game.
 
 -- Loot: one roll of his 8 items (item level 74, as the quick guide shows them; loot mode 2 holds their heroic
 -- ones); atalzul_instance_death_coa gives one of them for every four players in his map (never none).
@@ -52,13 +52,13 @@ DELETE FROM `gameobject` WHERE `guid` IN (9780930, 9780931);
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
   `animprogress`, `state`) VALUES
-(9780930, 978090, 0, 0, 0, 1, 1, 3335.8843, -4842.772, 167.1344, 5.1617, 0, 0, 0.531815, -0.846860, 300, 100, 1),
-(9780931, 978092, 890, 10281, 10281, 15, 1, 3358.02, -4839.59, 167.44, 0, 0, 0, 0, 1, 300, 100, 1);
+(9780930, 978090, 0, 0, 0, 1, 1, 3322.411, -4846.606, 167.1479, 5.1839, 0, 0, 0.522383, -0.852711, 300, 100, 1),
+(9780931, 978092, 890, 10281, 10281, 15, 1, 3313, -4844.6, 168.2892, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Players who die in his map rise at its start: WorldSafeLocs.dbc 6090.
 DELETE FROM `game_graveyard` WHERE `ID` = 6090;
 INSERT INTO `game_graveyard` (`ID`, `Map`, `x`, `y`, `z`, `Comment`) VALUES
-(6090, 890, 3353.02, -4844.59, 167.44, 'Atalzulbossmap Boss map Graveyard');
+(6090, 890, 3307.54, -4849.5786, 167.9613, 'Atalzulbossmap Boss map Graveyard');
 DELETE FROM `graveyard_zone` WHERE `ID` = 6090 AND `GhostZone` = 10281;
 INSERT INTO `graveyard_zone` (`ID`, `GhostZone`, `Faction`, `Comment`) VALUES
 (6090, 10281, 0, 'Zul''Mashar (Atal''zul boss map)');
@@ -69,7 +69,8 @@ INSERT INTO `npc_text` (`ID`, `text0_0`, `text0_1`) VALUES
 (978090, 'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.',
   'The shrine seems to notice your presence as you place your hand on its surface to attune to its power.');
 
--- His hologram above the shrine: ghostly (22650), rooted, and frozen in place (16245).
+-- His hologram above each shrine, the one outside and the one inside his map: ghostly (22650), rooted, and frozen in
+-- place (16245).
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
   `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `AIName`, `ScriptName`,
   `VerifiedBuild`) VALUES
@@ -85,22 +86,41 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (978090, '22650 
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 978090;
 INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
 (978090, 1, 0, 0, 1);
-DELETE FROM `creature` WHERE `guid` = 9780932;
+DELETE FROM `creature` WHERE `guid` IN (9780932, 9780938);
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
   `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `MovementType`) VALUES
-(9780932, 978090, 0, 0, 0, 1, 1, 3335.8843, -4842.772, 172.13, 5.1617, 300, 0, 0);
+(9780932, 978090, 0, 0, 0, 1, 1, 3322.411, -4846.606, 172.1479, 5.1839, 300, 0, 0),
+(9780938, 978090, 890, 10281, 10281, 15, 1, 3313, -4844.6, 173.2892, 0, 300, 0, 0);
 
--- In his map Zul'rogg starts on top of the pyramid and the four Soul Vessels stand around it (spots taken in game).
+-- In his map Atal'zul stands at the centre of his room, Zul'rogg starts on top of the pyramid and jumps down when the
+-- Soul Vessels wake him. Each Soul Vessel is a crystal (the creature) on an altar (978093); breaking it hides the
+-- crystal and leaves the altar.
+UPDATE `creature` SET `position_x` = 3386.9883, `position_y` = -4926.9863, `position_z` = 160.7894,
+  `orientation` = 2.3036 WHERE `guid` = 9780104 AND `id` = 67532;
 UPDATE `creature` SET `position_x` = 3439.5637, `position_y` = -4982.276, `position_z` = 195.7287,
   `orientation` = 2.3572 WHERE `guid` = 9780105 AND `id` = 67533;
-UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 159.3792
+UPDATE `creature` SET `position_x` = 3404.716, `position_y` = -4901.075, `position_z` = 160.5792
 WHERE `guid` = 9780106;
-UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 159.3839
+UPDATE `creature` SET `position_x` = 3358.0588, `position_y` = -4949.7046, `position_z` = 160.5839
 WHERE `guid` = 9780107;
-UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 159.2575
+UPDATE `creature` SET `position_x` = 3328.0198, `position_y` = -4888.4087, `position_z` = 160.4575
 WHERE `guid` = 9780108;
-UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 159.2516
+UPDATE `creature` SET `position_x` = 3377.5986, `position_y` = -4873.0796, `position_z` = 160.4516
 WHERE `guid` = 9780109;
+
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
+  `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
+(978093, 5, 7355, 'Altar of the Soul Vessel', '', '', '', 1, '', '', 12340)
+ON DUPLICATE KEY UPDATE `type` = VALUES(`type`), `displayId` = VALUES(`displayId`), `name` = VALUES(`name`),
+  `size` = VALUES(`size`), `ScriptName` = VALUES(`ScriptName`);
+DELETE FROM `gameobject` WHERE `guid` BETWEEN 9780941 AND 9780944;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`,
+  `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`,
+  `animprogress`, `state`) VALUES
+(9780941, 978093, 890, 10281, 10281, 15, 1, 3404.716, -4901.075, 159.3792, 0, 0, 0, 0, 1, 300, 100, 1),
+(9780942, 978093, 890, 10281, 10281, 15, 1, 3358.0588, -4949.7046, 159.3839, 0, 0, 0, 0, 1, 300, 100, 1),
+(9780943, 978093, 890, 10281, 10281, 15, 1, 3328.0198, -4888.4087, 159.2575, 0, 0, 0, 0, 1, 300, 100, 1),
+(9780944, 978093, 890, 10281, 10281, 15, 1, 3377.5986, -4873.0796, 159.2516, 0, 0, 0, 0, 1, 300, 100, 1);
 
 -- Atal'zul and Zul'rogg are undead: both look ghostly (22650), as on Ascension.
 DELETE FROM `creature_template_addon` WHERE `entry` IN (67532, 67533);
@@ -110,6 +130,11 @@ INSERT INTO `creature_template_addon` (`entry`, `auras`) VALUES (67532, '22650')
 -- (79411).
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `CreatureID` IN (67532, 978090);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411 WHERE `CreatureID` = 67533;
+
+-- The Damned Wights are skeletal warriors (display 200, as Skeletal Warrior 48) and the Soul Vessel crystal is the
+-- Scourge Crystal (16135).
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 200, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 16135, `DisplayScale` = 1.5 WHERE `CreatureID` = 67536;
 
 -- World bosses give Ascension's own Treasures of Azeroth chest (1615011), which holds what 978059 holds;
 -- 978059 keeps its loot for the chests players still hold.

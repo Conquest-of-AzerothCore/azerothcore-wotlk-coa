@@ -4,7 +4,7 @@
   "contract": [
     "The shrine (978090) refuses a heroic raid difficulty and on Normal takes the raid leader to",
     "his map (890). His health is per player in his map, 10 to 40, so 12722310 for one",
-    "player. He drops one of his item level 74 items. Every player gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
+    "player. Until the four Soul Vessels are clicked he is ghostly and cannot be attacked; the Awaken action (3) stands in for the four clicks. He drops one of his item level 74 items. Every player gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
     "Azeroth chest; the portal out (978091) opens where he falls and takes the player back."
   ],
   "timeout_ms": 180000,
@@ -168,8 +168,28 @@
       "action": "summon",
       "actor": "raider",
       "entry": 67532,
+      "as": "dormant",
+      "distance": 30
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Before the four Soul Vessels are clicked he is ghostly and cannot be attacked",
+      "actor": "raider",
+      "metric": "nearby_creature_can_attack",
+      "entry": 67532,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 67532,
       "as": "boss",
-      "distance": 4
+      "distance": 4,
+      "ai_action": 3
     },
     {
       "action": "wait",

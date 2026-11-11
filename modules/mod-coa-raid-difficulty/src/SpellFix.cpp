@@ -76,10 +76,24 @@ namespace
                     effect.Mechanic = MECHANIC_SLEEP;
         }
     };
+
+    class coa_spectral_bomb_interrupt : public GlobalScript
+    {
+    public:
+        coa_spectral_bomb_interrupt() : GlobalScript("coa_spectral_bomb_interrupt",
+            {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (info->Id == 2119819)
+                info->InterruptFlags |= SPELL_INTERRUPT_FLAG_INTERRUPT;
+        }
+    };
 }
 
 void AddCoaSpellFixScripts()
 {
     new coa_spell_fix_loader();
     new coa_dragon_sleep_mechanic();
+    new coa_spectral_bomb_interrupt();
 }
