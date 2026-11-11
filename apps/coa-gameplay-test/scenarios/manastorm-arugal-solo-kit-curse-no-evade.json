@@ -11,8 +11,11 @@
     "Setup follows manastorm-arugal-solo-curse-no-evade-8345: a private run of segment 49, phase match, combat",
     "engaged, Chaotic Link present, player not pre-charmed. The case then selects Arugal and forces the kit charm",
     "with '.cast back 2102679 triggered', so Arugal himself casts it onto the player as his event 9001 timer",
-    "would. The closing assertions confirm the player is charmed and that Arugal neither evaded (Unit::",
-    "RemoveEvadeAuras() would strip his Chaotic Link encounter aura 93459) nor became unattackable."
+    "would. The closing assertions confirm the player is charmed and, after Arugal's AI has had map updates to",
+    "react to the empty threat list while the charm still holds, that Arugal did not evade: Unit::",
+    "RemoveEvadeAuras() would strip his Chaotic Link encounter aura 93459. Attackability is checked only after",
+    "the 10 s charm ends, since a charmed player is always friendly to its charmer (Unit::GetReactionTo); the",
+    "player must then be able to attack Arugal again with Chaotic Link still on him."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -131,6 +134,19 @@
       "equals": 1
     },
     {
+      "action": "wait",
+      "label": "Give Arugal's AI map updates to react to the charmed player",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The charm still holds, so the checks below run while Arugal has no hostile attacker",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 2102679,
+      "equals": 1
+    },
+    {
       "action": "assert",
       "label": "Arugal did not evade: his Chaotic Link encounter aura survives the charm",
       "actor": "n",
@@ -141,7 +157,25 @@
     },
     {
       "action": "assert",
-      "label": "Arugal did not evade: he is still attackable, not reset out of combat",
+      "label": "The 10 s charm ends on its own",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 2102679,
+      "within_ms": 12000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Arugal still did not evade once the charm is over",
+      "actor": "n",
+      "metric": "nearby_creature_aura_count",
+      "entry": 4275,
+      "spell": 93459,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Freed from the charm, the player can attack Arugal again and finish the fight",
       "actor": "n",
       "metric": "nearby_creature_can_attack",
       "entry": 4275,
