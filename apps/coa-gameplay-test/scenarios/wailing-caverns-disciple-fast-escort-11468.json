@@ -1,0 +1,42 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: the Disciple of Naralex offers a slow and a fast escort (#11468)",
+  "contract": [
+    "On Ascension the Disciple of Naralex 3678 offered two options in gossip menu 201: 'Let the event begin!', after",
+    "which he walks his path, and a second one after which he runs it at player speed. Both start the same event."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 43, "x": -132.0, "y": 125.4, "z": -78.1, "o": 3.14},
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 20}
+  ],
+  "creatures": [
+    {"id": "walker", "owner": "hero", "entry": 3678, "distance": 3, "faction": 35, "level": 20},
+    {"id": "runner", "owner": "hero", "entry": 3678, "distance": 4, "faction": 35, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"label": "SETUP: the hero is in Wailing Caverns", "action": "assert", "actor": "hero", "metric": "map_id",
+     "equals": 43},
+    {"label": "the hero opens the first Disciple's gossip", "action": "gossip_hello", "actor": "hero",
+     "target": "walker"},
+    {"label": "the Disciple offers both options", "action": "assert", "actor": "hero", "metric": "gossip_options",
+     "equals": 2},
+    {"label": "the first option is the slow escort", "action": "assert", "actor": "hero",
+     "metric": "gossip_option_text", "index": 0, "text": "Let the event begin!", "equals": 1},
+    {"label": "the second option is the fast escort", "action": "assert", "actor": "hero",
+     "metric": "gossip_option_text", "index": 1, "text": "I don't have much time left. Let's hurry!", "equals": 1},
+    {"action": "gossip_select", "actor": "hero", "option": 0, "label": "Let the event begin!"},
+    {"label": "CONTROL: after the first option he walks (2.5 yards per second)", "action": "assert", "actor": "walker",
+     "metric": "spline_speed", "min": 2.4, "max": 2.6, "within_ms": 3000},
+    {"label": "the hero opens the second Disciple's gossip", "action": "gossip_hello", "actor": "hero",
+     "target": "runner"},
+    {"action": "gossip_select", "actor": "hero", "option": 1, "label": "the fast escort"},
+    {"label": "DISCRIMINATING: after the second option he runs (7 x 1.14 = 8 yards per second)", "action": "assert",
+     "actor": "runner", "metric": "spline_speed", "min": 7.8, "max": 8.2, "within_ms": 3000},
+    {"label": "He pauses at his first waypoint", "action": "assert", "actor": "runner", "metric": "spline_speed",
+     "equals": 0, "within_ms": 6000},
+    {"label": "and runs on after the pause", "action": "assert", "actor": "runner", "metric": "spline_speed",
+     "min": 7.8, "max": 8.2, "within_ms": 15000}
+  ]
+}

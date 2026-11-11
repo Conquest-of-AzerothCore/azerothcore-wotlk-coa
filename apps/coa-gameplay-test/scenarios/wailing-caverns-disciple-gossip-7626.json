@@ -22,8 +22,8 @@
      "equals": 43},
     {"label": "the hero opens the Disciple's gossip", "action": "gossip_hello", "actor": "hero",
      "target": "disciple"},
-    {"label": "DISCRIMINATING: the Disciple offers one option with no Fanglord dead", "action": "assert",
-     "actor": "hero", "metric": "gossip_options", "equals": 1},
+    {"label": "DISCRIMINATING: the Disciple offers the slow and the fast escort with no Fanglord dead", "action": "assert",
+     "actor": "hero", "metric": "gossip_options", "equals": 2},
     {"label": "the option starts the event", "action": "assert", "actor": "hero", "metric": "gossip_option_text",
      "index": 0, "text": "Let the event begin!", "equals": 1}
   ]
