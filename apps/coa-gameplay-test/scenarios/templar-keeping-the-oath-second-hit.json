@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Keeping the Oath: a second hit during a repayment refreshes the debt but adds no tick",
-  "contract": "Keeping the Oath 92109 delays 40% of a direct hit into Oathkeeper 803237, which pays it over 8 s. Here a level 60 striker (entry 36) hits a level 60 Templar holding 92109 with Light of the Naaru 41394 (1100 Holy), then again 3.5 s later, two trials. Delay (AscensionTemplar.cpp) adds the second 440 to the debt and resets its duration to 8000 ms, but resets neither the tick count nor the periodic timer, so AuraEffect::Update stops after GetTotalTicks() = 8 ticks counted from the first strike. The debt therefore pays 8 times in all, the last at 8 s after the first strike, then stays until 8 s after the second strike without paying again, and the rest of the 880 is never paid. This behaviour is unchanged by the Keeping the Oath tick count fix; only the spread changes: 3 x 55 before the second strike, then 715 spread over the 8 ticks the refreshed duration still covers, 90, 90, 90, 89, 89, for 613 paid and 267 never paid.",
+  "contract": "Keeping the Oath 92109 delays 40% of a direct hit into Oathkeeper 803237, which pays it over 8 s. Here a level 60 striker (entry 36) with the fixture's 100-point spell hit bonus, so that no strike misses, hits a level 60 Templar holding 92109 with Light of the Naaru 41394 (1100 Holy), then again 3.5 s later, two trials. Delay (AscensionTemplar.cpp) adds the second 440 to the debt and resets its duration to 8000 ms, but resets neither the tick count nor the periodic timer, so AuraEffect::Update stops after GetTotalTicks() = 8 ticks counted from the first strike. The debt therefore pays 8 times in all, the last at 8 s after the first strike, then stays until 8 s after the second strike without paying again, and the rest of the 880 is never paid. This behaviour is unchanged by the Keeping the Oath tick count fix; only the spread changes: 3 x 55 before the second strike, then 715 spread over the 8 ticks the refreshed duration still covers, 90, 90, 90, 89, 89, for 613 paid and 267 never paid.",
   "players": [
     {
       "id": "caster",
@@ -21,7 +21,8 @@
       "level": 60,
       "health": 1000000,
       "distance": 3.0,
-      "stationary": true
+      "stationary": true,
+      "spell_hit_bonus": 100
     }
   ],
   "steps": [

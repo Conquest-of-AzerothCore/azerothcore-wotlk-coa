@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Keeping the Oath pays a delayed hit in eight equal payments over the debt's 8 seconds",
-  "contract": "Keeping the Oath 92109 reads 'You now delay 40% of direct damage taken, instead taking it over $803237d.' and Oathkeeper 803237 '40% of damage taken is now delayed and dealt to you over 8 seconds.' (DurationIndex 31, 8000 ms; Effect[0] amplitude 1000). A level 60 striker (entry 36) casts Light of the Naaru 41394 (1100 Holy, no die) at a level 60 Templar holding 92109, once per trial, four trials. Each strike delays 440. The debt pays one share per 1000 ms tick, including the tick at its 8000 ms expiry (AuraEffect::Update ticks while the duration is 0, and the expired aura is removed after the update), so 8 payments of 55: 7 and 385 at 7.5 s with the debt present, 8 and 440 at 8.5 s with the debt gone, every payment 1000 ms after the previous one. Counting the ticks left from the duration alone, after Aura::Update has taken the update step off it, paid the 440 in 7 payments by 7.5 s.",
+  "contract": "Keeping the Oath 92109 reads 'You now delay 40% of direct damage taken, instead taking it over $803237d.' and Oathkeeper 803237 '40% of damage taken is now delayed and dealt to you over 8 seconds.' (DurationIndex 31, 8000 ms; Effect[0] amplitude 1000). A level 60 striker (entry 36) with the fixture's 100-point spell hit bonus, so that no strike misses, casts Light of the Naaru 41394 (1100 Holy, no die) at a level 60 Templar holding 92109, once per trial, four trials. Each strike delays 440. The debt pays one share per 1000 ms tick, including the tick at its 8000 ms expiry (AuraEffect::Update ticks while the duration is 0, and the expired aura is removed after the update), so 8 payments of 55: 7 and 385 at 7.5 s with the debt present, 8 and 440 at 8.5 s with the debt gone, every payment 1000 ms after the previous one. Counting the ticks left from the duration alone, after Aura::Update has taken the update step off it, paid the 440 in 7 payments by 7.5 s.",
   "players": [
     {
       "id": "caster",
@@ -21,7 +21,8 @@
       "level": 60,
       "health": 1000000,
       "distance": 3.0,
-      "stationary": true
+      "stationary": true,
+      "spell_hit_bonus": 100
     }
   ],
   "steps": [
