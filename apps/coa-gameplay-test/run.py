@@ -38,6 +38,9 @@ TIMELINE_METRICS = {'timeline_count', 'timeline_first_ms', 'timeline_interval_mi
                     'timeline_interval_median_ms'}
 TIMELINE_EVENTS = {'cast', 'aura_applied', 'aura_removed', 'death', 'enter_combat', 'evade', 'spawn', 'boss_state'}
 TIMELINE_FIELDS = {'event', 'source_entry', 'state', 'target_actors', 'exclude_target_actors'}
+EVENT_TIME_METRICS = {'event_first_ms', 'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms'}
+EVENT_STREAMS = {'spell_damage', 'spell_heal', 'spell_energize', 'melee_hit'}
+EVENT_TIME_FIELDS = {'stream', 'since_spell'}
 ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
@@ -51,7 +54,7 @@ SPAWN_TYPES = {'creature', 'gameobject'}
 MAX_PLACEMENT_TOLERANCE = 10
 PLACEMENT_AUDIT_METRICS = {'placement_audit_spawns', 'placement_audit_anomalies', 'placement_audit_event_spawns'}
 MAX_GAMEOBJECT_TYPE = 35
-METRICS = TIMELINE_METRICS | {
+METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -234,7 +237,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries',
-                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked'} | TIMELINE_FIELDS
+                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked'} \
+    | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag', 'unit_state'}),
@@ -423,6 +427,30 @@ def validate_timeline_step(step, where, encounter_started, actor_ids):
             require(isinstance(actors, list) and actors
                     and all(isinstance(actor, str) and actor in actor_ids for actor in actors)
                     and len(set(actors)) == len(actors), f'{where}: {field} must list distinct known actors')
+
+
+def validate_event_time_step(step, where, actor_ids, player_ids):
+    require(step['actor'] in player_ids, f'{where}: event time metrics read a player actor\'s recorded events')
+    stream = step.get('stream')
+    require(isinstance(stream, str) and stream in EVENT_STREAMS, f'{where}: event time metric needs a known stream')
+    melee = stream == 'melee_hit'
+    if melee:
+        for field in ('spell', 'caster', 'target'):
+            require(field not in step, f'{where}: melee_hit records the actor\'s own swings without {field}')
+    else:
+        number(step.get('spell'), f'{where}.spell', 1, 2**32 - 1, True)
+        require('hand' not in step, f'{where}: hand only filters melee_hit')
+    for field in ('caster', 'target'):
+        if field in step:
+            require(step[field] in actor_ids, f'{where}: {field} must be a scenario unit')
+    if 'critical' in step:
+        require(stream != 'spell_energize', f'{where}: energize events carry no critical flag')
+    if 'hand' in step:
+        number(step['hand'], f'{where}.hand', 0, 1, True)
+    if 'since_spell' in step:
+        number(step['since_spell'], f'{where}.since_spell', 1, 2**32 - 1, True)
+    require(step['metric'] != 'event_first_ms' or 'since_spell' in step,
+            f'{where}: event_first_ms needs since_spell')
 
 
 MAX_PLAYERS = {1: 8, 2: 25}
@@ -928,6 +956,11 @@ def validate(scenario):
                 validate_timeline_step(step, where, encounter_started, actor_ids)
             else:
                 require(not TIMELINE_FIELDS & step.keys(), f'{where}: event fields only apply to timeline metrics')
+            if metric in EVENT_TIME_METRICS:
+                validate_event_time_step(step, where, actor_ids, player_ids)
+            else:
+                require(not EVENT_TIME_FIELDS & step.keys(),
+                        f'{where}: stream and since_spell only apply to event time metrics')
             if 'creator_only' in step:
                 require(metric == 'owned_creature_count', f'{where}: creator_only needs owned_creature_count')
                 require(type(step['creator_only']) is bool, f'{where}: creator_only must be boolean')
@@ -1100,7 +1133,7 @@ def validate(scenario):
                 if key in step:
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',
                                        'spell_heal_total', 'spell_effective_heal_total'}
-                            or (key == 'critical' and metric in MELEE_OUTCOME_METRICS)
+                            or (key == 'critical' and metric in MELEE_OUTCOME_METRICS | EVENT_TIME_METRICS)
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',
                                                            'spell_energize_total',
                                                            'armor_reduced_damage', 'spell_effect_value',

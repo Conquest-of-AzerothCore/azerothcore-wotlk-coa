@@ -46,6 +46,14 @@ namespace CoAGameplay
         std::vector<ObjectGuid> excludedTargets;
     };
 
+    struct EventTimes
+    {
+        std::optional<uint64> firstMs;
+        std::vector<uint64> intervals;
+    };
+
+    EventTimes TimesFrom(std::vector<uint64> const& stampsMs, std::optional<uint64> sinceMs);
+
     bool RecordsUnit(uint32 encounterMapId, uint32 encounterInstanceId, uint32 unitMapId, uint32 unitInstanceId);
 
     class Timeline

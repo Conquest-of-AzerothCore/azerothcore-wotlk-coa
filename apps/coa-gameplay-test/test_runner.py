@@ -856,6 +856,43 @@ class RunnerTests(unittest.TestCase):
                 with self.subTest(field=field, actors=actors), self.assertRaises(ValueError):
                     run.validate(invalid)
 
+    def event_time_step(self, **fields):
+        scenario = copy.deepcopy(self.scenario)
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'event_interval_median_ms',
+                'stream': 'spell_damage', 'spell': 116, 'min': 0, **fields}
+        scenario['steps'].append({key: value for key, value in step.items() if value is not None})
+        return scenario
+
+    def test_event_time_metrics_read_streams_without_an_encounter(self):
+        for metric in sorted(run.EVENT_TIME_METRICS):
+            for stream in sorted(run.EVENT_STREAMS):
+                spell = None if stream == 'melee_hit' else 116
+                scenario = self.event_time_step(metric=metric, stream=stream, spell=spell, since_spell=116)
+                with self.subTest(metric=metric, stream=stream):
+                    self.assertIs(run.validate(scenario), scenario)
+        for fields in ({'target': 'target', 'critical': True}, {'caster': 'caster', 'since_spell': 116},
+                       {'stream': 'melee_hit', 'spell': None, 'hand': 1, 'critical': False}):
+            scenario = self.event_time_step(**fields)
+            with self.subTest(fields=fields):
+                self.assertIs(run.validate(scenario), scenario)
+
+    def test_event_time_metrics_refuse_wrong_fields(self):
+        for fields in ({'stream': 'spell_cast'}, {'stream': None}, {'spell': None}, {'spell': 0},
+                       {'stream': 'melee_hit'}, {'stream': 'melee_hit', 'spell': None, 'target': 'target'},
+                       {'stream': 'melee_hit', 'spell': None, 'hand': 2}, {'hand': 0},
+                       {'stream': 'spell_energize', 'critical': True}, {'critical': 1}, {'target': 'absent'},
+                       {'caster': 'absent'}, {'since_spell': 0}, {'metric': 'event_first_ms'},
+                       {'actor': 'target'}, {'pet': True}, {'event': 'cast'}):
+            invalid = self.event_time_step(**fields)
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                run.validate(invalid)
+        for field, value in (('stream', 'spell_damage'), ('since_spell', 116)):
+            other = copy.deepcopy(self.scenario)
+            other['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_damage_count',
+                                   'spell': 116, field: value, 'min': 0})
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, 'event time metrics'):
+                run.validate(other)
+
     def test_set_health_pct_requires_actor_and_one_target(self):
         base = {'action': 'set_health_pct', 'actor': 'caster', 'pct': 50}
         for extra in ({'target': 'target'}, {'entry': 36}):

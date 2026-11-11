@@ -1181,6 +1181,30 @@ The case result gains `timeline`, an array of `{at_ms, event, source_entry, spel
 from `encounter_start` and `target` the scenario actor id, else the native GUID, else empty. It is written whether
 the case passes or fails, so an uncertain expectation keeps its evidence.
 
+### Event times
+
+Every cast packet (`SMSG_SPELL_GO`), spell damage and healing log (direct and periodic), energize log and damaging
+melee swing that a player actor receives is stamped in game time on arrival, without an encounter. The metrics
+`event_first_ms`, `event_interval_min_ms`, `event_interval_max_ms` and `event_interval_median_ms` read those stamps;
+their `actor` is the player whose received events are read. Each takes a `stream`:
+
+| `stream` | Events | Filters |
+| --- | --- | --- |
+| `spell_damage` | positive damage logs of `spell` (direct and periodic) | `caster`, `target`, `critical` |
+| `spell_heal` | positive heal logs of `spell` (direct and periodic) | `caster`, `target`, `critical` |
+| `spell_energize` | energize logs of `spell` (direct and periodic) | `caster`, `target` |
+| `melee_hit` | the actor's own damaging swings | `hand` (0 or 1), `critical` |
+
+`caster` and `target` name scenario units; the caster defaults to the actor. `since_spell` keeps only the events
+at or after the latest received cast of that spell by the same caster (the actor for `melee_hit`), and is not a
+number when no such cast arrived. `event_first_ms` needs it and is the first kept event's time after that cast.
+The intervals are the gaps between consecutive kept events (the median is the mean of the two middle values for an
+even count), not a number with fewer than two. A stamp has the resolution of the world update that sent its packet:
+up to 25 ms in a `wait` on the simulated clock, and creatures update at most once per `MapUpdateInterval`
+([fidelity limits](../../docs/coa/verification.md#fidelity-limits)). The
+[event times scenario](scenarios/event-times-periodic-damage.json) reads the ticks of a 3000 ms periodic damage with
+and without an encounter.
+
 ### Raid bot roles
 
 A player with a `role` (`tank`, `healer`, `melee` or `ranged`) acts on its own every world tick while an encounter

@@ -859,6 +859,7 @@ struct SpellCastEvent
 {
     ObjectGuid caster;
     uint32 spell = 0;
+    uint64 atMs = 0;
 };
 
 struct SpellDamageEvent
@@ -870,6 +871,7 @@ struct SpellDamageEvent
     bool critical = false;
     bool blocked = false;
     uint32 casterEntry = 0;
+    uint64 atMs = 0;
 };
 
 struct SpellHealEvent
@@ -881,6 +883,7 @@ struct SpellHealEvent
     uint32 overheal = 0;
     bool critical = false;
     uint32 casterEntry = 0;
+    uint64 atMs = 0;
 };
 
 struct SpellEnergizeEvent
@@ -890,6 +893,7 @@ struct SpellEnergizeEvent
     uint32 spell = 0;
     uint32 power = 0;
     uint32 amount = 0;
+    uint64 atMs = 0;
 };
 
 struct MeleeHitEvent
@@ -897,6 +901,7 @@ struct MeleeHitEvent
     uint8 hand = BASE_ATTACK;
     uint32 hitInfo = 0;
     uint32 damage = 0;
+    uint64 atMs = 0;
 };
 
 struct MeleeOutcomes
@@ -1076,6 +1081,7 @@ void ObserveSpellCasts(Actor& actor, WorldPacket const& packet)
     response >> itemOrCaster.ReadAsPacked() >> event.caster.ReadAsPacked();
     response.read_skip<uint8>();
     response >> event.spell;
+    event.atMs = GameNowMs();
     actor.spellCasts.push_back(event);
 }
 
@@ -1121,6 +1127,7 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
     if (event.damage)
     {
         event.casterEntry = ResolveLiveEntry(player, event.caster);
+        event.atMs = GameNowMs();
         actor.spellDamage.push_back(event);
     }
 }
@@ -1150,6 +1157,7 @@ void ObserveSpellHealing(Actor& actor, WorldPacket const& packet, Player* player
     if (event.heal)
     {
         event.casterEntry = ResolveLiveEntry(player, event.caster);
+        event.atMs = GameNowMs();
         actor.spellHeals.push_back(event);
     }
 }
@@ -1171,6 +1179,7 @@ void ObserveSpellEnergize(Actor& actor, WorldPacket const& packet)
     }
     response >> event.power >> event.amount;
     Require(event.power < MAX_POWERS, "Invalid native energize power");
+    event.atMs = GameNowMs();
     actor.spellEnergizes.push_back(event);
 }
 
@@ -1475,7 +1484,7 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             {
                 ++actor.meleeDamageByHand[hand];
                 actor.meleeDamageTotalByHand[hand] += damage;
-                actor.meleeHits.push_back({ hand, hitInfo, damage });
+                actor.meleeHits.push_back({ hand, hitInfo, damage, GameNowMs() });
             }
         }
         if (victim == actor.guid)
@@ -2910,6 +2919,89 @@ private:
         return Median(intervals);
     }
 
+    double MeasureEventTimes(std::string const& metric, Tree const& step)
+    {
+        Actor const& actor = _actors.at(step.get<std::string>("actor"));
+        Require(!actor.guid.IsEmpty(), "Event time metrics need a player actor");
+        std::string const stream = step.get<std::string>("stream");
+        bool const melee = stream == "melee_hit";
+        Require(melee || stream == "spell_damage" || stream == "spell_heal" || stream == "spell_energize",
+            "Unknown event stream: " + stream);
+        uint32 const spell = step.get<uint32>("spell", 0);
+        Require(melee == !spell, "Spell event streams need a spell and melee_hit takes none");
+        ObjectGuid caster = actor.guid;
+        if (auto id = step.get_optional<std::string>("caster"))
+        {
+            Require(!melee, "melee_hit records the actor's own swings");
+            caster = GetUnit(*id)->GetGUID();
+        }
+        ObjectGuid target;
+        if (auto id = step.get_optional<std::string>("target"))
+        {
+            Require(!melee, "melee_hit events carry no target");
+            target = GetUnit(*id)->GetGUID();
+        }
+        auto const critical = step.get_optional<bool>("critical");
+        Require(!critical || stream != "spell_energize", "Energize events carry no critical flag");
+        auto const hand = step.get_optional<uint32>("hand");
+        Require(!hand || (melee && *hand < 2), "hand selects main hand or off hand melee hits");
+
+        std::optional<uint64> since;
+        if (auto sinceSpell = step.get_optional<uint32>("since_spell"))
+        {
+            for (SpellCastEvent const& cast : actor.spellCasts)
+                if (cast.spell == *sinceSpell && cast.caster == caster)
+                    since = cast.atMs;
+            if (!since)
+                return std::numeric_limits<double>::quiet_NaN();
+        }
+        Require(since || metric != "event_first_ms", "event_first_ms needs since_spell");
+
+        auto const matches = [&](ObjectGuid eventCaster, ObjectGuid eventTarget, uint32 eventSpell)
+        {
+            return eventCaster == caster && eventSpell == spell && (!target || eventTarget == target);
+        };
+        std::vector<uint64> stamps;
+        if (stream == "spell_damage")
+        {
+            for (SpellDamageEvent const& event : actor.spellDamage)
+                if (matches(event.caster, event.target, event.spell) && (!critical || event.critical == *critical))
+                    stamps.push_back(event.atMs);
+        }
+        else if (stream == "spell_heal")
+        {
+            for (SpellHealEvent const& event : actor.spellHeals)
+                if (matches(event.caster, event.target, event.spell) && (!critical || event.critical == *critical))
+                    stamps.push_back(event.atMs);
+        }
+        else if (stream == "spell_energize")
+        {
+            for (SpellEnergizeEvent const& event : actor.spellEnergizes)
+                if (matches(event.caster, event.target, event.spell))
+                    stamps.push_back(event.atMs);
+        }
+        else
+        {
+            for (MeleeHitEvent const& hit : actor.meleeHits)
+                if ((!hand || hit.hand == *hand)
+                    && (!critical || ((hit.hitInfo & HITINFO_CRITICALHIT) != 0) == *critical))
+                    stamps.push_back(hit.atMs);
+        }
+
+        CoAGameplay::EventTimes const times = CoAGameplay::TimesFrom(stamps, since);
+        double const missing = std::numeric_limits<double>::quiet_NaN();
+        if (metric == "event_first_ms")
+            return times.firstMs ? double(*times.firstMs) : missing;
+        if (times.intervals.empty())
+            return missing;
+        if (metric == "event_interval_min_ms")
+            return double(*std::min_element(times.intervals.begin(), times.intervals.end()));
+        if (metric == "event_interval_max_ms")
+            return double(*std::max_element(times.intervals.begin(), times.intervals.end()));
+        Require(metric == "event_interval_median_ms", "Unknown metric: " + metric);
+        return Median(times.intervals);
+    }
+
     std::string TimelineTargetName(ObjectGuid guid) const
     {
         if (guid.IsEmpty())
@@ -3086,6 +3178,8 @@ private:
     {
         if (std::string const requested = step.get<std::string>("metric"); requested.starts_with("timeline_"))
             return MeasureTimeline(requested, step);
+        else if (requested.starts_with("event_"))
+            return MeasureEventTimes(requested, step);
         else if (requested == "placement_audit_spawns" || requested == "placement_audit_anomalies"
             || requested == "placement_audit_event_spawns")
         {

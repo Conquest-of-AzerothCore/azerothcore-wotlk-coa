@@ -16,6 +16,23 @@ namespace CoAGameplay
         }
     }
 
+    EventTimes TimesFrom(std::vector<uint64> const& stampsMs, std::optional<uint64> sinceMs)
+    {
+        EventTimes times;
+        std::optional<uint64> previous;
+        for (uint64 const stamp : stampsMs)
+        {
+            if (sinceMs && stamp < *sinceMs)
+                continue;
+            if (previous)
+                times.intervals.push_back(stamp - *previous);
+            else if (sinceMs)
+                times.firstMs = stamp - *sinceMs;
+            previous = stamp;
+        }
+        return times;
+    }
+
     bool RecordsUnit(uint32 encounterMapId, uint32 encounterInstanceId, uint32 unitMapId, uint32 unitInstanceId)
     {
         return encounterMapId == unitMapId && encounterInstanceId == unitInstanceId;
