@@ -6154,6 +6154,28 @@ class CostGateScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
+    def trigger_after_cast_entry(self) -> dict:
+        return {'spell': 573452, 'name': 'Eternally Devoted', 'kind': 'cost_gate',
+                'quote': 'Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by',
+                'gated_spell': 801461, 'resource': 'cooldown', 'reduction': 4000, 'target': 'caster',
+                'setup_casts': [[705300, 'caster'], [572027, 'dummy']], 'after_casts': [[572027, 'dummy']],
+                'after_wait_ms': 2000}
+
+    def test_the_control_arm_casts_an_after_cast_that_is_not_the_talent(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.trigger_after_cast_entry())
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        without = first_index(steps, label='573452 cost_gate 801461 without')
+        before_control = [step for step in steps[:without] if step.get('label') == 'without wait before the after casts']
+        self.assertEqual(len(before_control), 1)
+        waits = [step['ms'] for step in steps if step.get('label', '').endswith('cooldown wait')]
+        self.assertEqual(waits, [174500, 174500, 173500])
+
+    def test_the_talent_itself_is_neither_learned_nor_cast_in_the_control_arm(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.after_cast_entry())
+        steps = run.validate(scenario)['steps']
+        without = first_index(steps, label='680953 cost_gate 801478 without')
+        self.assertFalse(any(step.get('spell') == 680953 for step in steps[:without]))
+
     def test_a_cooldown_gate_beyond_the_real_clock_cap_runs_accelerated_only(self):
         entry = {'spell': 573452, 'name': 'Eternally Devoted', 'kind': 'cost_gate',
                  'quote': 'Damage dealt through Eternal Blessing now reduces the cooldown of Libram spells by',
@@ -6572,6 +6594,13 @@ def taken_hit_values(model: dict, trial_values) -> dict:
 
 
 class TakenHitScenarioTests(unittest.TestCase):
+    def test_a_debt_entry_also_counts_the_debt_payments_at_each_read(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, route_entry(92109, 'over'))
+        steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
+        counts = [step for step in steps if step.get('label', '').endswith(('payments early', 'payments late'))]
+        self.assertTrue(counts)
+        self.assertTrue(all(step['metric'] == 'spell_damage_count' and step['spell'] == 803237 for step in counts))
+
     def test_a_striker_spell_hits_the_caster_in_every_trial_of_every_arm(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
