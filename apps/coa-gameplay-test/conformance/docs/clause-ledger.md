@@ -67,7 +67,8 @@ but leaves it without a proving test empties its `labels`, so the clause counts 
 
 `ClauseCoverage` holds `proven`, `behaviour`, `data` (`proven - behaviour`), `total`, `unproven`, the per-claim
 `evidence` and the `not_measured` labels. A proven claim is **behaviour proven** when at least one of its matched
-verdicts is behaviour evidence, otherwise **data conformant**. The figure reported to the owner is `behaviour`; `data` is reported beside it.
+verdicts is behaviour evidence, otherwise **data conformant**. The figure reported to the owner is `behaviour`;
+`data` is reported beside it.
 
 `build` is the build being judged, the verdict set's header `build` (a worldserver sha256). Every verdict carries its
 own `build`, `server_commit` and `runs` ([Verdicts](generate-and-compare.md#verdicts)); a set holding a verdict of
