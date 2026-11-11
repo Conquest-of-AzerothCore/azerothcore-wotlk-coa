@@ -1724,6 +1724,42 @@
   ],
   "behaviours": [
     {
+      "spell": 300513, "name": "Crusader's Brand", "kind": "cast_applies_aura",
+      "quote": "Brand an enemy for", "expected_ms": 20000,
+      "applied_aura": 300513, "target": "dummy", "cast_spell": 300513,
+      "observe_source": "300513 DurationIndex 18 (20000 ms); its three effects (aura 42, 68, 77) target TARGET_UNIT_TARGET_ENEMY 6, so the brand is read on the dummy; its expiry pair times the stated duration from the cast"
+    },
+    {
+      "spell": 803893, "name": "Libram of Consecration", "kind": "cast_applies_aura",
+      "quote": "for", "expected_ms": 20000,
+      "applied_aura": 803893, "target": "caster", "cast_spell": 803893,
+      "observe_source": "803893 (top rank of 801441) DurationIndex 18 (20000 ms); effects 0 (aura 42) and 1 (aura 107) target the caster (EffectImplicitTargetA 1); its expiry pair times the stated duration from the cast"
+    },
+    {
+      "spell": 801461, "name": "Libram of Tenacity", "kind": "cast_applies_aura",
+      "quote": "for", "expected_ms": 20000,
+      "applied_aura": 801461, "target": "caster", "cast_spell": 801461,
+      "observe_source": "801461 DurationIndex 18 (20000 ms); its aura effects 1 and 2 (aura 87) apply to the caster (EffectImplicitTargetA 1 on effect 1); its expiry pair times the stated duration from the cast"
+    },
+    {
+      "spell": 705274, "name": "Sanctify", "kind": "cast_applies_aura",
+      "quote": "increased melee haste for", "expected_ms": 20000,
+      "applied_aura": 705275, "target": "caster", "cast_spell": 801461, "cast_target": "caster",
+      "observe_source": "705275 DurationIndex 18 (20000 ms); 705274 Effect[0] aura 42 casts it on a Libram cast (AscensionTemplarTemporaryLibramProcs.cpp:12-13; 705274 trigger_count ok); Libram of Tenacity 801461 is cast on the caster"
+    },
+    {
+      "spell": 1397742, "name": "Testament of Hope", "kind": "cast_applies_aura",
+      "quote": "Applies Sacred Restraint for", "expected_ms": 60000,
+      "applied_aura": 102208, "target": "caster", "cast_spell": 1397742,
+      "observe_source": "102208 DurationIndex 3 (60000 ms); AscensionTemplarAbilities.cpp:265-267 casts 102208 on the caster when 1397742 is cast; its expiry pair times the stated duration from the cast"
+    },
+    {
+      "spell": 806153, "name": "Divine Force", "kind": "cast_applies_aura",
+      "quote": "stunning them for", "expected_ms": 6000,
+      "applied_aura": 807890, "target": "dummy", "cast_spell": 807805,
+      "observe_source": "807805 (top rank of 806153, BaseLevel 58) Effect[0] 64 SPELL_EFFECT_TRIGGER_SPELL 807890 on TARGET_UNIT_TARGET_ENEMY; 807890 DurationIndex 32 (6000 ms), aura 12 SPELL_AURA_MOD_STUN; its expiry pair times the stated duration from the cast"
+    },
+    {
       "spell": 803159, "name": "Chakra of Light", "kind": "hit_ratio", "label_suffix": "spell_power",
       "quote": "now heal allies around the target for", "expected": 2.5,
       "metric": "spell_heal_total", "observe_spell": 803160, "caster": "caster", "target": "ally",

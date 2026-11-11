@@ -167,9 +167,11 @@
     "spell": 300513,
     "clause": "Brand an enemy for $d,",
     "labels": [
-      "300513 aura_duration_ms"
+      "300513 aura_duration_ms",
+      "300513 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 300513 on the dummy after its cast: present 19500-19575 ms, absent 20500-20625 ms"
   },
   {
     "spell": 300513,
@@ -1165,9 +1167,11 @@
     "spell": 560096,
     "clause": "Increases all party and raid member's melee and ranged haste by $567572s1%.",
     "labels": [
-      "560096 effect_value 567572e0 #0"
+      "560096 effect_value 567572e0 #0",
+      "560096 behaviour_party_stat_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "attack_time_ms of a grouped non-caster ally: 3000 before 560096 is learned, 2727.27 after (1/1.10); 567572 is cast by templar_player::OnPlayerUpdate (AscensionTemplar.cpp:299-302), one aura 192 effect for melee and ranged"
   },
   {
     "spell": 560096,
@@ -1949,9 +1953,11 @@
     "spell": 705274,
     "clause": "for $705275d",
     "labels": [
-      "705274 spell_duration 705275 #1"
+      "705274 spell_duration 705275 #1",
+      "705274 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 705275 after a Libram of Tenacity 801461 cast with 705274 known: present 19500-19575 ms, absent 20500-20625 ms"
   },
   {
     "spell": 705276,
@@ -3089,9 +3095,11 @@
     "spell": 803893,
     "clause": "for $d",
     "labels": [
-      "803893 aura_duration_ms #1"
+      "803893 aura_duration_ms #1",
+      "803893 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 803893 after its cast on the caster: present 19500-19575 ms, absent 20500-20625 ms"
   },
   {
     "spell": 803893,
@@ -3299,9 +3307,11 @@
     "spell": 801461,
     "clause": "for $d",
     "labels": [
-      "801461 aura_duration_ms #2"
+      "801461 aura_duration_ms #2",
+      "801461 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 801461 after its cast on the caster: present 19500-19575 ms, absent 20500-20625 ms"
   },
   {
     "spell": 801461,
@@ -4365,9 +4375,11 @@
     "spell": 806153,
     "clause": "stunning them for $807890d",
     "labels": [
-      "807805 spell_duration 807890 #0"
+      "807805 spell_duration 807890 #0",
+      "806153 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of the stun 807890 on the dummy after a Divine Force 807805 cast (top rank): present 5850-5925 ms, absent 6124-6249 ms after the stun landed"
   },
   {
     "spell": 806153,
@@ -4536,9 +4548,11 @@
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
       "1397742 spell_duration 102208 #4",
-      "1397742 aura_duration_ms 102208 #4"
+      "1397742 aura_duration_ms 102208 #4",
+      "1397742 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of Sacred Restraint 102208 after a 1397742 cast: present 58500-58575 ms, absent 61500-61625 ms"
   },
   {
     "spell": 524739,
