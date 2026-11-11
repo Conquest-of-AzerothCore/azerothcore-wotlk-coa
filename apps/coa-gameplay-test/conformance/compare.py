@@ -24,6 +24,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
+                        BEHAVIOUR_PROC_RESET,
                         strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
@@ -2517,6 +2518,14 @@ def behaviour_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
             return replace(base, explanation=missing_measurement(run, label))
         before_hit.append(before > 0)
         after_hit.append(after - before > 0)
+    for start_label, end_label in model.get('primary_hits', []):
+        start, end = run.values.get(start_label), run.values.get(end_label)
+        if start is None or end is None:
+            return replace(base, explanation=missing_measurement(run, start_label if start is None else end_label))
+        if end - start != 1:
+            return replace(base, status='unmeasured',
+                           explanation=f'the primary dummy took {end - start:g} hits before the read ({end_label}), '
+                                       f'not the one whose spread is counted')
     measured_before, measured_after = sum(before_hit), sum(after_hit)
     if measured_before:
         return replace(base, status='unmeasured', measured=float(measured_after - measured_before),
@@ -3286,6 +3295,67 @@ def behaviour_event_delay_verdict(base: Verdict, run: Run, model: dict) -> Verdi
                                f'{high:g} ms is excluded; cumulative hits {hits}')
 
 
+def proc_reset_trials(run: Run, phase: dict) -> list[tuple[float, float, float]] | str:
+    labels = [phase['start']] + [label for read in phase['reads'] for label in read.values()]
+    missing = next((label for label in labels if label not in run.values), None)
+    if missing is not None:
+        return missing_measurement(run, missing)
+    procs = [run.values[phase['start']]] + [run.values[read['procs']] for read in phase['reads']]
+    return [(later - earlier, run.values[read['cooldown']], run.values[read['power']])
+            for earlier, later, read in zip(procs, procs[1:], phase['reads'])]
+
+
+def proc_reset_faults(trials: list[tuple[float, float, float]], level: float, cost: float,
+                      reduced: float | None, learned: bool) -> list[str]:
+    faults = []
+    after_proc = False
+    for index, (events, cooldown, power) in enumerate(trials, 1):
+        spent = level - power
+        fired = events > 0
+        if fired and not learned:
+            faults.append(f'trial {index}: {events:g} procs without the passive')
+        if fired and cooldown > FLOAT_EPSILON:
+            faults.append(f'trial {index}: a proc fired and the cooldown still reads {cooldown:g} ms')
+        if not fired and cooldown <= FLOAT_EPSILON:
+            faults.append(f'trial {index}: no proc fired and the cooldown reads 0')
+        stated = reduced if after_proc and reduced is not None else cost
+        if abs(spent - stated) > FLOAT_EPSILON:
+            faults.append(f'trial {index}: the cast cost {spent:g} against {stated:g}'
+                          + (' after a proc' if after_proc else ''))
+        after_proc = fired
+    return faults
+
+
+def behaviour_proc_reset_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    level, cost, reduced = float(model['power_level']), float(model['cost']), model.get('reduced_cost')
+    trials = {}
+    for phase in ('without', 'with'):
+        read = proc_reset_trials(run, model['phases'][phase])
+        if isinstance(read, str):
+            return replace(base, explanation=read)
+        trials[phase] = read
+    faults = (proc_reset_faults(trials['without'], level, cost, reduced, False)
+              + proc_reset_faults(trials['with'], level, cost, reduced, True))
+    fired = [index for index, (events, _, _) in enumerate(trials['with']) if events > 0]
+    quiet = len(trials['with']) - len(fired)
+    after = [index for index in fired if index + 1 < len(trials['with'])]
+    counts = (f'{len(fired)} of {len(trials["with"])} casts with the passive fired a proc of '
+              f'{model["marker_spell"]}, {quiet} did not, {len(after)} casts followed a proc; '
+              f'{sum(events for events, _, _ in trials["without"]):g} procs in '
+              f'{len(trials["without"])} casts without it')
+    rule = (f'a proc must reset the cooldown of {model["reset_spell"]} to 0, a cast without one must leave it running, '
+            f'and the cast after a proc must cost {reduced if reduced is not None else cost:g} instead of {cost:g}')
+    detail = {'fired': len(fired), 'quiet': quiet, 'after_proc': len(after), 'faults': faults[:20]}
+    if faults:
+        return replace(base, status='alert', measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
+                       detail=detail, explanation=f'{counts}; {rule}; {len(faults)} faults: {"; ".join(faults[:5])}')
+    least = min(len(fired), quiet, len(after) if reduced is not None else len(fired))
+    status = 'ok' if least >= int(model['min_events']) else 'insufficient_trials'
+    return replace(base, status=status, measured=0.0, expected=0.0, low=0.0, high=0.0, detail=detail,
+                   explanation=f'{counts}; {rule}; no fault' + ('' if status == 'ok' else
+                               f'; fewer than {model["min_events"]} trials in a group, not judged'))
+
+
 def behaviour_mount_grant_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     caster_value = run.values.get(model['caster_label'])
     ally_value = run.values.get(model['ally_label'])
@@ -3439,6 +3509,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_threat_slope_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_EVENT_DELAY:
         return behaviour_event_delay_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_PROC_RESET:
+        return behaviour_proc_reset_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_COUNT:
         return behaviour_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_FIXED_COUNT:

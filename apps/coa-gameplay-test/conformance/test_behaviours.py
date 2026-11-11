@@ -3372,6 +3372,31 @@ class JudgeHolyTempestTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'unmeasured')
 
+    def first_tick_expectation(self):
+        model = {'kind': 'count', 'expected': 1, 'quote': 'spreads Condemn on affected enemies to a nearby enemy',
+                 'dummy_labels': [('b1', 'a1'), ('b2', 'a2')], 'headroom': 1}
+        return Expectation('label', BEHAVIOUR_COUNT, HOLY_TEMPEST, RIGHTEOUS_TEMPEST_RANK, None, '1',
+                           'prose: "spreads Condemn on affected enemies to a nearby enemy" (301339)', model)
+
+    def test_one_of_two_dummies_after_the_first_tick_is_ok(self):
+        expectation = self.first_tick_expectation()
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'ok')
+
+    def test_seeded_spread_to_every_nearby_enemy_alerts(self):
+        expectation = self.first_tick_expectation()
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
+
+    def test_a_read_after_more_than_one_primary_hit_is_unmeasured(self):
+        expectation = self.first_tick_expectation()
+        expectation.model['primary_hits'] = [['hs0', 'he0'], ['hs1', 'he1']]
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 0.0, 'hs0': 0.0, 'he0': 1.0, 'hs1': 6.0, 'he1': 8.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'unmeasured')
+        values['he1'] = 7.0
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'ok')
+
 
 class JudgeHealingRatioTests(unittest.TestCase):
     def expectation(self):

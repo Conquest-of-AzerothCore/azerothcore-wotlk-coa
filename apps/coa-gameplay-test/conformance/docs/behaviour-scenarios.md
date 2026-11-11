@@ -130,6 +130,14 @@ dummy not yet afflicted on every Righteous Tempest hit, so a further dummy would
 server over one cast. A matching count is therefore `insufficient_trials`, not `ok`, until a scenario can show
 that one extra dummy stays clear.
 
+`first_tick: true` reads the spread after one damaging hit instead (ADR 0150). Each phase seeds once, casts
+`target_rank` once and reads every extra dummy half a period after its first tick, before the second; the before
+phase then waits out the periodic buff, so no tick of its cast reaches the after phase. The scenario offers
+`expected + 1` extra dummies (model `headroom` 1), all placed beyond the reach of the periodic trigger's own radius
+(`SPREAD_CLEARANCE_YD` past it) and within `radius` of the primary dummy, so only the primary is hit and every
+copy comes from its hit: one copy on one of two dummies is `ok`, a copy on both is an `alert`. Holy Tempest 301339
+reads 1 of 2 after the first tick of Righteous Tempest 807274 (570205, 5 yd).
+
 ### Shield-break trigger scenarios (`behaviour_trigger`)
 
 This is the first `behaviour_trigger` entry: a tooltip claim that is a scripted "always fires" cast, reachable
@@ -671,6 +679,22 @@ followed by a stamped hit. The second stamp is the in-trial control: a first ver
 cast alone read Norgannon's Wrath's blast at 1628-1636 ms (`.cache/verify-all/20261111-142214`), its 1500 ms delay
 plus the 125 ms flight of 524740 (`Speed` 30). An entry whose `observe_spell` is its own `spell` is refused.
 
+### Proc-reset scenarios (`behaviour_proc_reset`, `kind: "proc_reset"`)
+
+"Melee damage dealt now has a 10% chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by
+50%" states two outcomes of one chance roll. `proc_reset_scenario` casts `reset_spell` `baseline_trials` (20) times
+without the passive and `trials` (100) times with it, each time from a reset cooldown and twice its power cost
+(regeneration off), one cast per `cast_interval`. After each cast it reads the spell's `cooldown_ms`, the power left
+and the cumulative `spell_cast_count` of `marker_spell`, the spell the proc casts. A trial fired when its count rose.
+The judge (`compare.behaviour_proc_reset_verdict`, ADR 0150) needs, in every trial, a fired trial to read no cooldown
+and a quiet one the cooldown still running, and the cast right after a fired trial to cost the reduced amount
+(`marker_spell`'s one `SPELLMOD_COST` percent modifier applied to the cost) and every other cast the full cost; a
+fired trial without the passive is a fault too, so the 20 baseline casts are the control arm. Any fault is an
+`alert`; fewer than `min_events` (3) fired, quiet or discounted trials is `insufficient_trials`. The reset spell's
+cooldown must outlast the interval between trials, or the scenario is `NotModelled`. The cooldown read depends on
+the engine sending the cooldown before the hits (`Spell::_cast`, Spell.cpp:4029 and :4134), so a proc on the cast's
+own hit resets the cooldown that cast started.
+
 ### Aggro-redirect scenarios (`behaviour_aggro_redirect`, `kind: "aggro_redirect"`)
 
 Some tooltips state that casting the spell makes one or more hostile creatures switch their current attack
@@ -971,7 +995,8 @@ Custodian's 30 minutes, therefore runs only through the default accelerated game
 | Testament of Resolve 804228 | immunity | "granting immunity to fear, charm, and horrify effects" | fear and horrify fixtures absent after the cast, present again once 804228 has expired | `Effect[0]` aura 147 misc 512 (bit 9, `SPELL_AURA_MOD_FEAR` aura-type immunity, SpellInfo.cpp:2738-2739), `Effect[2]` aura 77 misc 24 (`MECHANIC_HORROR`); fixtures Fear 12096 and Psychic Horror 64044. Charm has no fixture and no 804228 effect names it |
 | Faith Guard 705259 | threat_slope | "High Threat Holy damage" | 2 | Faith 706466 cast at a fresh dummy, flat 100 from its `Effect[1]` 63; spell_threat pctMod 2 (rev_20261103_01_templar_faith_threat.sql); owner ruling 2026-11-10 |
 | Testament of Resolve 804228 | cast_applies_aura | "Applies Sacred Restraint for" | 60000 ms | `Effect[1]` 64 `SPELL_EFFECT_TRIGGER_SPELL` 102208 on the ally target (the caster here); no CoA code casts 102208 for 804228; proven by its expiry pair |
-| Holy Tempest 301339 | spread | "spreads Condemn on affected enemies to a nearby enemy" | 1 | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
+| Warrior of Dawn 560648 | proc_reset | "chance to reset the cooldown and reduce the Energy cost of your next Argent Blade by" | cooldown 0 after a proc, the next Argent Blade 807268 at 25 Energy instead of 50 | `AscensionTemplarEvents.cpp:71-72` (melee damage, not periodic) and `:152-154` (`Reduce(player, 804929, INT32_MAX)`, `Cast(player, player, 561156)`); 561156 `Effect[0]` aura 108 `SPELLMOD_COST` -50%, one charge (`AscensionTemplarAuras.cpp:116-120`), dropped by the next Argent Blade (`AscensionTemplarAbilities.cpp:26-27`). 561167's effect 195 is not on the path |
+| Holy Tempest 301339 | spread (`first_tick`) | "spreads Condemn on affected enemies to a nearby enemy" | 1 of 2 after the first tick | `AscensionTemplarAbilities.cpp:294-295` (`OnSpellHitResult`): on a confirmed hit of Righteous Tempest's periodic damage (ranks `805410`/`570200..570205`) with the passive known, `AscensionTemplar.cpp:224-257` (`SpreadCondemn`) copies the Condemn aura already present on the hit target onto the first valid, non-already-afflicted, line-of-sight enemy within `Nearby(target, 10.0f)` - a hardcoded radius, not read from any DBC field |
 | Armor of Faith 804930 | trigger | "Whenever the absorption shield from Staffguard breaks, inflict" | 1 | `AscensionTemplarAuras.cpp:213-216` (`aura_ascension_templar_lifecycle::Remove`): when Staffguard 706583's absorb effect is fully depleted (`GetAmount() <= 0`) by `AURA_REMOVE_BY_ENEMY_SPELL` (an enemy's own damage, not an expiry or manual cancel) while the player is alive and knows 804930, it casts Armor of Faith's damage spell 801546 on the player, whose own nearby-enemy Holy damage effect then lands; the amount stays the pre-existing `$801546ppl1` open conformance check (`questions.md:368-374`), unchanged by this entry. Staffguard's absorb is Holy-only (`SchoolMask` 2), so the scenario's striker casts Smite 48123 (`breaker_spell`) directly at the caster rather than swinging at it |
 | Tyr's Guard 560649 | metric_delta | "now summons an additional copy of yourself" | 3 | a plain stock `SPELLMOD_EFFECT1` aura (effect 2 of 560649, `EffectSpellClassMask[6]` matching Testament of Hope 1397742's family flags): the engine's own `Player::ApplySpellMod`/`SpellInfo::CalcValue` path adds 1 to Testament of Hope's summon effect's base points (1 -> 2, `CalcValue` 2 -> 3) with no CoA-specific code involved; `owned_creature_count` of the copy entry 50250 is the metric, before (2, no 560649) and after (3, 560649 learned) |
 | Spiritual Abdicator 803219 | metric_delta | "reduces damage taken by an additional 5% per copy" | -15 | `AscensionTemplarContracts.cpp:278-281` (`templar_scaling::ModifySpellEffectBaseValue`): when the copy's owner (the Templar) has aura 803219, the copy's own owner-area aura 704409 effect 1 (`MOD_DAMAGE_PERCENT_TAKEN`, base `CalcValue` -10, confirmed by the existing Testament of Hope regression scenario) is overridden to -15 at load, the "additional 5%" the tooltip states on top of 704409's own 10%; 803219's own effect 0 is a pure marker (`dummy()` rewrites its `ApplyAuraName` to `SPELL_AURA_DUMMY` at load, no gameplay value of its own); `aura_amount` of spell 704409 effect 1 is the metric, before (-10, no 803219) and after (-15, 803219 learned) |

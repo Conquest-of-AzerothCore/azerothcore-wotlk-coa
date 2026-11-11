@@ -47,6 +47,7 @@ BEHAVIOUR_HIT_RATIO = 'behaviour_hit_ratio'
 BEHAVIOUR_IMMUNITY = 'behaviour_immunity'
 BEHAVIOUR_THREAT_SLOPE = 'behaviour_threat_slope'
 BEHAVIOUR_EVENT_DELAY = 'behaviour_event_delay'
+BEHAVIOUR_PROC_RESET = 'behaviour_proc_reset'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -57,7 +58,7 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_AGGRO_REDIRECT,
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
-                    BEHAVIOUR_EVENT_DELAY)
+                    BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -65,7 +66,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'internal_cooldown', 'cast_combat', 'aggro_redirect', 'dispel_removal', 'aura_presence', 'heal_block',
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
-        'periodic_dispel', 'event_delay')
+        'periodic_dispel', 'event_delay', 'proc_reset')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -871,6 +872,33 @@ class AuraSpreadSpec:
     radius: float
     radius_reason: str
     repeats: int = 3
+    first_tick: bool = False
+
+
+SPREAD_CLEARANCE_YD = 5.0
+SPREAD_EDGE_YD = 0.5
+
+
+def spread_tick(records: Records, rank: int) -> tuple[int, int, float]:
+    for effect in range(3):
+        tick = records.field('Spell', rank, f'EffectTriggerSpell[{effect}]')
+        amplitude = records.field('Spell', rank, f'EffectAmplitude[{effect}]')
+        if tick and amplitude:
+            radii = [records.radius(tick, index) for index in range(3)
+                     if records.field('Spell', tick, f'EffectRadiusIndex[{index}]')]
+            if not radii:
+                raise NotModelled(f'{tick}, the periodic trigger of {rank}, has no radius')
+            return effect, tick, max(radii)
+    raise NotModelled(f'{rank} has no periodic trigger whose first tick can be read alone')
+
+
+def spread_distances(primary: float, reach: float, radius: float, extras: int) -> list[float]:
+    low, high = reach + SPREAD_CLEARANCE_YD, primary + radius - SPREAD_EDGE_YD
+    if extras < 2 or high <= low:
+        raise NotModelled(f'no {extras} dummies fit beyond the {reach:g} yd reach and within {radius:g} yd of the '
+                          f'primary dummy')
+    step = (high - low) / (extras - 1)
+    return [low + step * index for index in range(extras)]
 
 
 def aura_spread_label(spec: AuraSpreadSpec, index: int, moment: str) -> str:
@@ -880,24 +908,41 @@ def aura_spread_label(spec: AuraSpreadSpec, index: int, moment: str) -> str:
 def aura_spread_scenario(class_file: dict, spec: AuraSpreadSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'count', spec.quote, spec.expected)
-    dummy_count = spec.expected + 1
     primary_distance = 3.0
-    distances = [primary_distance] + [
-        primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
+    duration_ms = int(records.duration_ms(spec.target_rank))
+    if spec.first_tick:
+        dummy_count = spec.expected + 2
+        tick_effect, tick_spell, reach = spread_tick(records, spec.target_rank)
+        amplitude = int(records.amplitude_ms(spec.target_rank, tick_effect))
+        distances = [primary_distance] + spread_distances(primary_distance, reach, spec.radius, dummy_count - 1)
+        wait_ms = amplitude // 2
+        settle_ms = duration_ms - wait_ms + CAST_MARGIN_MS
+    else:
+        dummy_count = spec.expected + 1
+        distances = [primary_distance] + [
+            primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
+        wait_ms = duration_ms + CAST_MARGIN_MS
+        settle_ms = 0
     creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(dummy_count)]
 
     seed_facts = facts_of(records, spec.seed_spell)
     tempest_facts = facts_of(records, spec.target_rank)
-    wait_ms = int(records.duration_ms(spec.target_rank)) + CAST_MARGIN_MS
+    repeats = 1 if spec.first_tick else spec.repeats
 
     def power_step(facts) -> list[dict]:
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             return [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
         return []
 
-    def cast_steps() -> list[dict]:
+    def primary_hits(moment: str, edge: str) -> list[dict]:
+        if not spec.first_tick:
+            return []
+        return [measurement(f'{spec.spell} primary hits {moment} {edge}', CASTER, 'spell_damage_count',
+                            spell=tick_spell, target=dummy_id(0))]
+
+    def cast_steps(moment: str) -> list[dict]:
         steps = []
-        for _ in range(spec.repeats):
+        for _ in range(repeats):
             steps += power_step(seed_facts)
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.seed_spell})
             steps += required_aura_steps(seed_facts)
@@ -907,14 +952,18 @@ def aura_spread_scenario(class_file: dict, spec: AuraSpreadSpec) -> tuple[dict, 
             steps += power_step(tempest_facts)
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.target_rank})
             steps += required_aura_steps(tempest_facts)
+            steps += primary_hits(moment, 'start')
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.target_rank})
             steps.append({'action': 'wait', 'ms': wait_ms})
+            steps += primary_hits(moment, 'end')
         return steps
 
     def measure(moment: str) -> list[dict]:
-        return [measurement(aura_spread_label(spec, index, moment), dummy_id(index), 'aura', spell=spec.aura_spell,
-                            caster=CASTER)
-                for index in range(1, dummy_count)]
+        reads = [measurement(aura_spread_label(spec, index, moment), dummy_id(index), 'aura', spell=spec.aura_spell,
+                             caster=CASTER)
+                 for index in range(1, dummy_count)]
+        settle = settle_ms and moment == BEFORE
+        return reads + ([{'action': 'wait', 'label': 'periodic buff end', 'ms': settle_ms}] if settle else [])
 
     before_labels = [aura_spread_label(spec, index, BEFORE) for index in range(1, dummy_count)]
     after_labels = [aura_spread_label(spec, index, AFTER) for index in range(1, dummy_count)]
@@ -923,25 +972,32 @@ def aura_spread_scenario(class_file: dict, spec: AuraSpreadSpec) -> tuple[dict, 
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour count',
-        'contract': f'{spec.repeats} seed+cast cycles per phase: seed {spec.seed_spell} on the primary dummy, cast '
-                    f'{spec.target_rank} and wait its full periodic buff, then count newly-afflicted nearby '
-                    f'dummies: {spec.radius_reason}',
+        'contract': (f'one seed+cast per phase: seed {spec.seed_spell} on the primary dummy, cast {spec.target_rank} '
+                     f'and count the afflicted dummies after the first hit of {tick_spell} on the primary dummy, '
+                     f'with one dummy beyond the stated count, all beyond its reach: {spec.radius_reason}'
+                     if spec.first_tick else
+                     f'{spec.repeats} seed+cast cycles per phase: seed {spec.seed_spell} on the primary dummy, cast '
+                     f'{spec.target_rank} and wait its full periodic buff, then count newly-afflicted nearby '
+                     f'dummies: {spec.radius_reason}'),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
-        'steps': base_steps(class_file) + learn_ranks + cast_steps() + measure(BEFORE) +
-                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_steps() + measure(AFTER)}
+        'steps': base_steps(class_file) + learn_ranks + cast_steps(BEFORE) + measure(BEFORE) +
+                 [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + cast_steps(AFTER) + measure(AFTER)}
     label = f'{spec.spell} behaviour_count'
     model = {'kind': 'count', 'dummy_labels': list(zip(before_labels, after_labels)), 'expected': spec.expected,
-             'headroom': 0, 'quote': entry.quote}
+             'headroom': dummy_count - 1 - spec.expected, 'quote': entry.quote}
+    if spec.first_tick:
+        model['primary_hits'] = [[f'{spec.spell} primary hits {moment} {edge}' for edge in ('start', 'end')]
+                                 for moment in (BEFORE, AFTER)]
     expectation = Expectation(label, BEHAVIOUR_COUNT, spec.spell, spec.target_rank, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
-    return scenario, [expectation]
+    return (timed(scenario, waited_ms(scenario['steps'])) if spec.first_tick else scenario), [expectation]
 
 
 def aura_spread_spec(entry: dict) -> AuraSpreadSpec:
     return AuraSpreadSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['seed_spell'],
                           entry['aura_spell'], entry['target_rank'], entry['radius'], entry['radius_reason'],
-                          entry.get('repeats', 3))
+                          entry.get('repeats', 3), entry.get('first_tick', False))
 
 
 def target_count_spec(entry: dict) -> TargetCountSpec:
@@ -3632,6 +3688,105 @@ def event_delay_spec(entry: dict) -> EventDelaySpec:
                           entry.get('wait_ms', EVENT_DELAY_WAIT_MS))
 
 
+PROC_RESET_TRIALS = 100
+PROC_RESET_BASELINE_TRIALS = 20
+PROC_RESET_MIN_EVENTS = 3
+PROC_RESET_READINGS = ('cooldown', 'power', 'procs')
+SPELL_AURA_ADD_PCT_MODIFIER = 108
+COST_MODIFIER_AURAS = frozenset({107, SPELL_AURA_ADD_PCT_MODIFIER})
+SPELLMOD_COST = 14
+
+
+@dataclass(frozen=True)
+class ProcResetSpec:
+    spell: int
+    name: str
+    quote: str
+    reset_spell: int
+    marker_spell: int
+    trials: int = PROC_RESET_TRIALS
+    baseline_trials: int = PROC_RESET_BASELINE_TRIALS
+    min_events: int = PROC_RESET_MIN_EVENTS
+
+
+def proc_reset_label(spec: ProcResetSpec, phase: str, trial: int, reading: str) -> str:
+    return f'{spec.spell} proc_reset {phase} {trial} {reading}'
+
+
+def next_cast_cost(records: Records, marker: int, cost: int) -> float | None:
+    modifiers = [(records.field('Spell', marker, f'EffectApplyAuraName[{effect}]'),
+                  records.field('Spell', marker, f'EffectBasePoints[{effect}]') + 1) for effect in range(3)
+                 if records.field('Spell', marker, f'EffectMiscValue[{effect}]') == SPELLMOD_COST
+                 and records.field('Spell', marker, f'EffectApplyAuraName[{effect}]') in COST_MODIFIER_AURAS]
+    if len(modifiers) != 1 or modifiers[0][0] != SPELL_AURA_ADD_PCT_MODIFIER:
+        return None
+    return cost * (100 + modifiers[0][1]) / 100
+
+
+def proc_reset_scenario(class_file: dict, spec: ProcResetSpec) -> tuple[dict, list[Expectation]]:
+    if min(spec.trials, spec.baseline_trials) < 1:
+        raise ValueError(f'{spec.spell} proc_reset needs trials with and without the passive')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'proc_reset', spec.quote, 0)
+    facts = facts_of(records, spec.reset_spell)
+    if facts.recast_ms <= 0:
+        raise NotModelled(f'{spec.reset_spell} has no cooldown to reset')
+    if facts.mana_cost <= 0 or facts.mana_cost_percentage or facts.mana_cost_per_level:
+        raise NotModelled(f'{spec.reset_spell} has no plain power cost to read')
+    level = 2 * facts.mana_cost
+    interval = cast_interval(class_file, spec.reset_spell)
+    if interval >= facts.recast_ms:
+        raise NotModelled(f'{spec.reset_spell} recovers in {facts.recast_ms} ms, within the {interval} ms between '
+                          f'its trials')
+    reduced = next_cast_cost(records, spec.marker_spell, facts.mana_cost)
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.reset_spell}]
+    phases = {}
+    for phase, trials in (('without', spec.baseline_trials), ('with', spec.trials)):
+        if phase == 'with':
+            steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
+        start = proc_reset_label(spec, phase, 0, 'procs')
+        steps.append(measurement(start, CASTER, 'spell_cast_count', spell=spec.marker_spell))
+        reads = []
+        for trial in range(1, trials + 1):
+            labels = {reading: proc_reset_label(spec, phase, trial, reading) for reading in PROC_RESET_READINGS}
+            reads.append(labels)
+            steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.reset_spell},
+                       {'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': level}]
+                      + required_aura_steps(facts)
+                      + [{'action': 'cast', 'actor': CASTER, 'spell': spec.reset_spell, 'target': TARGET},
+                         {'action': 'wait', 'ms': interval},
+                         measurement(labels['cooldown'], CASTER, 'cooldown_ms', spell=spec.reset_spell),
+                         measurement(labels['power'], CASTER, 'power', power=facts.power_type),
+                         measurement(labels['procs'], CASTER, 'spell_cast_count', spell=spec.marker_spell)])
+        phases[phase] = {'start': start, 'reads': reads}
+    players = [{**player_fixture(class_file), 'allow_regeneration': False}]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour proc reset',
+        'contract': f'{spec.baseline_trials} casts of {spec.reset_spell} without {spec.spell}, then {spec.trials} '
+                    f'with it, each from a reset cooldown and {level} power: after each cast its cooldown, the power '
+                    f'left and the casts of {spec.marker_spell}, the spell each proc casts, are read. A trial whose '
+                    f'proc fired must read no cooldown, a trial without one the cooldown still running, and the cast '
+                    f'after a proc must cost {reduced if reduced is not None else facts.mana_cost:g} instead of '
+                    f'{facts.mana_cost}, proving the "{spec.quote}" clause.',
+        'players': players,
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'proc_reset', 'quote': entry.quote, 'phases': phases, 'power_level': level,
+             'cost': facts.mana_cost, 'reduced_cost': reduced, 'min_events': spec.min_events,
+             'marker_spell': spec.marker_spell, 'reset_spell': spec.reset_spell}
+    expectation = Expectation(f'{spec.spell} {BEHAVIOUR_PROC_RESET}', BEHAVIOUR_PROC_RESET, spec.spell,
+                              spec.reset_spell, None, '0', prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def proc_reset_spec(entry: dict) -> ProcResetSpec:
+    return ProcResetSpec(entry['spell'], entry['name'], entry['quote'], entry['reset_spell'], entry['marker_spell'],
+                         entry.get('trials', PROC_RESET_TRIALS),
+                         entry.get('baseline_trials', PROC_RESET_BASELINE_TRIALS),
+                         entry.get('min_events', PROC_RESET_MIN_EVENTS))
+
+
 AGGRO_SETTLE_MS = 300
 AGGRO_REDIRECT_REACTION = 1
 
@@ -4484,6 +4639,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return threat_slope_scenario(class_file, threat_slope_spec(entry))
     if entry['kind'] == 'event_delay':
         return event_delay_scenario(class_file, event_delay_spec(entry))
+    if entry['kind'] == 'proc_reset':
+        return proc_reset_scenario(class_file, proc_reset_spec(entry))
     if entry['kind'] == 'aggro_redirect':
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':
