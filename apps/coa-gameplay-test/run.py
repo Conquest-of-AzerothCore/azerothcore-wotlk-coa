@@ -240,7 +240,7 @@ ACTIONS = {
     'dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'ascension_dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'raid_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
-    'console': ({'command'}, {'command'}),
+    'console': ({'command'}, {'command', 'restore'}),
     'game_event': ({'event', 'active'}, {'event', 'active'}),
     'placement_audit': ({'map'}, {'map', 'zone', 'tolerance', 'gameobject_types'}),
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
@@ -608,9 +608,11 @@ def validate(scenario):
         required, allowed = ACTIONS[action]
         keys(step, required | {'action'}, allowed | {'action', 'label'}, where)
         if action in {'console', 'command'}:
-            require(isinstance(step['command'], str) and step['command'].strip()
-                    and '\n' not in step['command'] and '\r' not in step['command'],
-                    f'{where}: expected one command')
+            for field in ('command', 'restore'):
+                if field in step:
+                    require(isinstance(step[field], str) and step[field].strip()
+                            and '\n' not in step[field] and '\r' not in step[field],
+                            f'{where}: expected one {field} command')
             if action == 'command':
                 require(step['command'].startswith('.') and len(step['command']) > 1,
                         f'{where}: player command must start with a dot')

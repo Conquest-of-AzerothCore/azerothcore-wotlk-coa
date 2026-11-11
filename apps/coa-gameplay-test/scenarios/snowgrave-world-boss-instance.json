@@ -6,7 +6,8 @@
     "stage 3 (Zul'Gurub) the shrine leaves the raid on map 1, and at stage 4 it takes raid members to",
     "his map. His health is per player in his map, 10 to 40, so 11200940 for two",
     "players. Every player in his map gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
-    "Azeroth chest (1615011); the portal out (978096) opens at its fixed spot and takes the player back."
+    "Azeroth chest (1615011); the portal out (978096) opens at its fixed spot and takes the player back.",
+    "The case clears the stage override when it ends, also after a failure."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -150,7 +151,8 @@
     {
       "action": "console",
       "label": "SETUP: the realm is at the Zul'Gurub release stage",
-      "command": "raidphase set 3"
+      "command": "raidphase set 3",
+      "restore": "raidphase clear"
     },
     {
       "action": "use_gameobject",
