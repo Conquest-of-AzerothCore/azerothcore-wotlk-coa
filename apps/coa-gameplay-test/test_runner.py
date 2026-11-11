@@ -1007,6 +1007,21 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_melee_attacks_taken_keeps_one_victim_state(self):
+        for extra in ({'victim_state': 3}, {'victim_state': 0, 'target': 'target'}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                      'min': 0, **extra})
+            with self.subTest(extra=extra):
+                self.assertIs(run.validate(scenario), scenario)
+        for step in ({'metric': 'melee_attacks_taken', 'victim_state': 9},
+                     {'metric': 'melee_attacks_taken', 'victim_state': True},
+                     {'metric': 'melee_attack_count', 'victim_state': 3}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'min': 0, **step})
+            with self.subTest(step=step), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_cancel_mount_requires_player(self):
         self.scenario['steps'].append({'action': 'cancel_mount', 'actor': 'caster'})
         self.assertIs(run.validate(self.scenario), self.scenario)

@@ -718,7 +718,8 @@ Both damage metrics also accept the booleans `critical`, `glancing` and `blocked
 packet carries (true) or lacks (false) the critical, glancing or block flag; `critical: false, glancing: false,
 blocked: false` selects plain hits.
 `melee_attacks_taken` counts the melee combat packets whose victim is the player actor, optionally only those from
-the `target` attacker.
+the `target` attacker. `victim_state` (0 to 8, the packet's `VictimState`: 0 missed, 1 hit, 2 dodged, 3 parried,
+5 blocked, 6 evaded, 7 immune, 8 deflected) keeps only the packets with that outcome.
 `pet_melee_swings`, `pet_melee_crits`, `pet_melee_glancing`, `pet_melee_plain_count`, `pet_melee_plain_damage`
 and `pet_melee_damage` read the melee combat packets the player actor received from its current pet, or with
 `entry` from every creature of that entry: all swings, critical hits, glancing blows, the count and summed damage

@@ -195,6 +195,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
 }
 MELEE_OUTCOME_METRICS = {'melee_damage_count', 'melee_damage_total'}
+MAX_VICTIM_STATE = 8
 SPELL_DAMAGE_METRICS = {'spell_damage_count', 'spell_damage_total'}
 PLAYER_STAT_METRICS = {
     'mana_regen', 'mana_regen_interrupted', 'resting',
@@ -242,7 +243,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries',
-                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked'} \
+                 'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'victim_state'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -1148,6 +1149,9 @@ def validate(scenario, clock=REAL_CLOCK):
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
                     'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
+            if 'victim_state' in step:
+                require(metric == 'melee_attacks_taken', f'{where}: victim_state only filters melee attacks taken')
+                number(step['victim_state'], f'{where}.victim_state', 0, MAX_VICTIM_STATE, True)
             for key in ('glancing', 'blocked'):
                 if key in step:
                     require(metric in MELEE_OUTCOME_METRICS or (key == 'blocked' and metric in SPELL_DAMAGE_METRICS),

@@ -1024,6 +1024,7 @@ struct Actor
     uint32 lootReceived = 0;
     std::array<uint32, 2> meleeAttacksByHand{};
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
+    std::map<std::pair<ObjectGuid, uint8>, uint32> meleeVictimStatesTakenFrom;
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
@@ -1539,7 +1540,20 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             }
         }
         if (victim == actor.guid)
+        {
             ++actor.meleeAttacksTakenFrom[attacker];
+            uint32 overkill = 0;
+            uint8 subDamages = 0;
+            response >> overkill >> subDamages;
+            response.read_skip(size_t(subDamages) * (sizeof(uint32) + sizeof(float) + sizeof(uint32)));
+            if (hitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
+                response.read_skip(size_t(subDamages) * sizeof(uint32));
+            if (hitInfo & (HITINFO_FULL_RESIST | HITINFO_PARTIAL_RESIST))
+                response.read_skip(size_t(subDamages) * sizeof(uint32));
+            uint8 victimState = 0;
+            response >> victimState;
+            ++actor.meleeVictimStatesTakenFrom[{ attacker, victimState }];
+        }
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
         outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
         ++outcome.swings;
@@ -4591,6 +4605,18 @@ private:
         if (metric == "melee_attacks_taken")
         {
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            if (auto state = step.get_optional<uint32>("victim_state"))
+            {
+                Require(*state <= VICTIMSTATE_DEFLECTS, "Unknown melee victim state");
+                std::optional<ObjectGuid> only;
+                if (auto attacker = step.get_optional<std::string>("target"))
+                    only = GetUnit(*attacker)->GetGUID();
+                uint32 total = 0;
+                for (auto const& [key, count] : actor.meleeVictimStatesTakenFrom)
+                    if (key.second == *state && (!only || key.first == *only))
+                        total += count;
+                return total;
+            }
             if (auto attacker = step.get_optional<std::string>("target"))
             {
                 auto const found = actor.meleeAttacksTakenFrom.find(GetUnit(*attacker)->GetGUID());
