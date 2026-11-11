@@ -3507,17 +3507,22 @@
     "clause": "increase the tick rate of your Blade of Faith and Condemn by $803164s1%",
     "labels": [
       "803163 effect_value 803164e0 #1",
-      "803163 e0 (unmodelled)"
+      "803163 behaviour_metric_delta tick_rate",
+      "803163 behaviour_metric_delta tick_rate_blade"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the label 803163 e0 (unmodelled) named no verdict; one stack of 803164 shortens the tick interval of Condemn 804906 and of Blade of Faith 803880 from 3000 to 2700 ms (median over 20000 ms, tolerance 150 ms)"
   },
   {
     "spell": 803163,
     "clause": "stacking $803164u times",
     "labels": [
-      "803163 max_stacks 803164 #2"
+      "803163 max_stacks 803164 #2",
+      "803163 behaviour_metric_delta cap",
+      "803163 behaviour_metric_delta below_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "seven casts of 803164 leave 5 stacks and four leave 4"
   },
   {
     "spell": 803219,

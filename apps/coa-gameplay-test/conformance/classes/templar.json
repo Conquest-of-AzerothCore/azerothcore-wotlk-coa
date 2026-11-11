@@ -1708,6 +1708,44 @@
   ],
   "behaviours": [
     {
+      "spell": 803163, "variant": "tick_rate", "label_suffix": "tick_rate",
+      "name": "Might of Aggramar", "kind": "metric_delta",
+      "quote": "increase the tick rate of your Blade of Faith and Condemn by", "expected": 2700,
+      "trigger_spell": 804906, "target": "dummy", "setup_casts": [803164], "setup_only_after": true,
+      "metric": "event_interval_median_ms",
+      "fields": {"stream": "spell_damage", "spell": 804906, "target": "dummy", "since_spell": 804906},
+      "before_expected": 3000, "wait_ms": 20000, "expire_ms": 22000, "tolerance": 150,
+      "observe_source": "$803164s1 = 10: 803164 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 19 (SPELLMOD_ACTIVATION_TIME), EffectBasePoints[0] -11 (-10%), EffectSpellClassMask[0] 4194304 matching Condemn 804906's SpellFamilyFlags[0]; AuraEffect::CalculatePeriodic applies it to the amplitude (SpellAuraEffects.cpp, SPELLMOD_ACTIVATION_TIME). Condemn ticks every 3000 ms (EffectAmplitude[0]); one stack of 803164, cast on the caster before the second Condemn only, gives 2700 ms between ticks. The median interval since the Condemn cast is read 20000 ms after it, over six or seven intervals, so one late world update does not move it (diagnostic 20261111-180552 read 2400 over two intervals; 20261111-180640 read 2700, min and max 2700); the first Condemn (21000 ms) ends before the second phase. Tolerance 150 ms for the world update step, half the 300 ms the stack moves."
+    },
+    {
+      "spell": 803163, "variant": "tick_rate_blade", "label_suffix": "tick_rate_blade",
+      "name": "Might of Aggramar", "kind": "metric_delta",
+      "quote": "increase the tick rate of your Blade of Faith and Condemn by", "expected": 2700,
+      "trigger_spell": 803880, "target": "dummy", "setup_casts": [803164], "setup_only_after": true,
+      "metric": "event_interval_median_ms",
+      "fields": {"stream": "spell_damage", "spell": 803880, "target": "dummy", "since_spell": 803880},
+      "before_expected": 3000, "wait_ms": 20000, "expire_ms": 31000, "tolerance": 150,
+      "observe_source": "The Blade of Faith half of the tick_rate entry: 803164 EffectSpellClassMask[1] 2048 matches Blade of Faith 803880 (SpellFamilyFlags[1] 2048), EffectAmplitude[0] 3000, DurationIndex 9 (30000 ms, so the phases are 31000 ms apart); one stack of 803164 gives 2700 ms between ticks, read over 20000 ms. Tolerance 150 ms."
+    },
+    {
+      "spell": 803163, "variant": "cap", "label_suffix": "cap",
+      "name": "Might of Aggramar", "kind": "metric_delta",
+      "quote": "stacking", "expected": 5,
+      "trigger_spell": 803164, "target": "caster", "setup_casts": [803164, 803164, 803164, 803164, 803164, 803164], "setup_only_after": true,
+      "metric": "aura_stacks", "fields": {"spell": 803164},
+      "before_expected": 1, "wait_ms": 500, "expire_ms": 61000,
+      "observe_source": "$803164u = 5: 803164 StackAmount 5, DurationIndex 3 (60000 ms). The before phase casts 803164 once (1 stack); after it has expired, seven casts of 803164 leave 5 stacks. 803164 is cast directly on the caster: its application by a Physical hit is the stored 803163 proc_rate entries."
+    },
+    {
+      "spell": 803163, "variant": "below_cap", "label_suffix": "below_cap",
+      "name": "Might of Aggramar", "kind": "metric_delta",
+      "quote": "stacking", "expected": 4,
+      "trigger_spell": 803164, "target": "caster", "setup_casts": [803164, 803164, 803164], "setup_only_after": true,
+      "metric": "aura_stacks", "fields": {"spell": 803164},
+      "before_expected": 1, "wait_ms": 500, "expire_ms": 61000,
+      "observe_source": "$803164u = 5: 803164 StackAmount 5, DurationIndex 3 (60000 ms). The before phase casts 803164 once (1 stack); after it has expired, four casts leave 4, so the casts stack and the cap is what stops them. 803164 is cast directly on the caster: its application by a Physical hit is the stored 803163 proc_rate entries."
+    },
+    {
       "spell": 301310, "variant": "rating_8", "label_suffix": "rating_8",
       "name": "Light's Chosen", "kind": "metric_delta",
       "quote": "your critical strike rating by", "expected": 49,
