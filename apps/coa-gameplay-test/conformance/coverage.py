@@ -212,23 +212,33 @@ def text_field(value) -> bool:
     return isinstance(value, str) and bool(value.strip())
 
 
+def require_attempts(clause: dict, field_name: str, what: str):
+    where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+    declared = clause[field_name]
+    if clause.get('kind') != 'claim':
+        raise EvidenceError(f'{where} declares {what} but is not a claim entry')
+    if not isinstance(declared, dict) or not text_field(declared.get('reason')) \
+            or not isinstance(declared.get('attempts'), list):
+        raise EvidenceError(f'{where} declares {declared!r}; {what} is {{"reason": <text>, "attempts": [...]}}')
+    if not declared['attempts']:
+        raise EvidenceError(f'{where} declares {what} with no attempt')
+    for attempt in declared['attempts']:
+        if not isinstance(attempt, dict) or not text_field(attempt.get('agent')) \
+                or not text_field(attempt.get('report')):
+            raise EvidenceError(f'{where} declares the attempt {attempt!r}; an attempt is '
+                                f'{{"agent": <who tried>, "report": <where it is written>}}')
+    return where, declared
+
+
+def attempting_agents(declared: dict) -> set[str]:
+    return {attempt['agent'].strip() for attempt in declared['attempts']}
+
+
 def require_tool_gaps(clauses: list[dict]):
     for clause in clauses:
         if TOOL_GAP not in clause:
             continue
-        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
-        gap = clause[TOOL_GAP]
-        if clause.get('kind') != 'claim':
-            raise EvidenceError(f'{where} declares a tool gap but is not a claim entry')
-        if not isinstance(gap, dict) or not text_field(gap.get('reason')) or not isinstance(gap.get('attempts'), list):
-            raise EvidenceError(f'{where} declares {gap!r}; a tool gap is {{"reason": <text>, "attempts": [...]}}')
-        if not gap['attempts']:
-            raise EvidenceError(f'{where} declares a tool gap with no attempt')
-        for attempt in gap['attempts']:
-            if not isinstance(attempt, dict) or not text_field(attempt.get('agent')) \
-                    or not text_field(attempt.get('report')):
-                raise EvidenceError(f'{where} declares the attempt {attempt!r}; an attempt is '
-                                    f'{{"agent": <who tried>, "report": <where it is written>}}')
+        where, gap = require_attempts(clause, TOOL_GAP, 'a tool gap')
         acceptance = gap.get('owner_acceptance')
         if acceptance is not None and (not isinstance(acceptance, dict) or not text_field(acceptance.get('ruling'))):
             raise EvidenceError(f'{where} declares the owner acceptance {acceptance!r}; it is '
@@ -239,10 +249,34 @@ def tool_gap_state(clause: dict) -> str | None:
     gap = clause.get(TOOL_GAP)
     if gap is None:
         return None
-    agents = {attempt['agent'].strip() for attempt in gap['attempts']}
-    if gap.get('owner_acceptance') or len(agents) >= MIN_TOOL_GAP_AGENTS:
+    if gap.get('owner_acceptance') or len(attempting_agents(gap)) >= MIN_TOOL_GAP_AGENTS:
         return TOOL_GAP_ACCEPTED
     return TOOL_GAP_PENDING
+
+
+NO_BEHAVIOUR_ROUTE = 'no_behaviour_route'
+NO_ROUTE_TERMINAL = 'terminal'
+NO_ROUTE_PENDING = 'pending'
+NO_ROUTE_NOT_DATA = 'not_data'
+MIN_NO_ROUTE_AGENTS = 2
+
+
+def require_no_routes(clauses: list[dict]):
+    for clause in clauses:
+        if NO_BEHAVIOUR_ROUTE not in clause:
+            continue
+        where, _ = require_attempts(clause, NO_BEHAVIOUR_ROUTE, 'no behaviour route')
+        if TOOL_GAP in clause:
+            raise EvidenceError(f'{where} declares both a tool gap and no behaviour route; a tool gap is for an '
+                                f'unproven clause, no behaviour route for a data conformant one')
+
+
+def no_route_state(clause: dict, evidence: str) -> str:
+    if evidence != DATA:
+        return NO_ROUTE_NOT_DATA
+    if len(attempting_agents(clause[NO_BEHAVIOUR_ROUTE])) >= MIN_NO_ROUTE_AGENTS:
+        return NO_ROUTE_TERMINAL
+    return NO_ROUTE_PENDING
 
 
 def clause_proven(labels: list[str], statuses: dict[str, str]) -> bool:
@@ -404,10 +438,19 @@ class ClauseCoverage:
     tool_gaps: list[tuple[dict, str]] = field(default_factory=list)
     promoted: frozenset[str] = frozenset()
     not_consumed: frozenset[str] = frozenset()
+    no_routes: list[tuple[dict, str]] = field(default_factory=list)
 
     @property
     def data(self) -> int:
         return self.proven - self.behaviour
+
+    @property
+    def terminal_no_route(self) -> int:
+        return sum(state == NO_ROUTE_TERMINAL for _, state in self.no_routes)
+
+    @property
+    def open_data(self) -> int:
+        return self.data - self.terminal_no_route
 
     @property
     def accepted_tool_gaps(self) -> int:
@@ -509,6 +552,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     require_known_checks(verdicts)
     require_claims(clauses)
     require_tool_gaps(clauses)
+    require_no_routes(clauses)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
     results = consumption_results(consumption, build)
@@ -522,14 +566,20 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     behaviour = sum(status == BEHAVIOUR for _, status in evidence)
     not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
     tool_gaps = [(clause, tool_gap_state(clause)) for clause in unproven if TOOL_GAP in clause]
+    no_routes = [(clause, no_route_state(clause, status)) for clause, status in evidence
+                 if NO_BEHAVIOUR_ROUTE in clause]
     return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured,
-                          per_claim, tool_gaps, promoted & by_label.keys(), not_consumed & by_label.keys())
+                          per_claim, tool_gaps, promoted & by_label.keys(), not_consumed & by_label.keys(),
+                          no_routes)
 
 
 def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
     lines = [f'clauses proven: {share(result.proven, result.total)}',
              f'behaviour proven: {share(result.behaviour, result.total)}',
              f'data conformant: {share(result.data, result.total)}',
+             f'data conformant, no behaviour route (terminal: a stated reason and attempts by two agents, closed, '
+             f'not resolved): {share(result.terminal_no_route, result.total)}',
+             f'data conformant, still open: {share(result.open_data, result.total)}',
              f'tool gaps accepted (a second attempt by another agent or an owner acceptance, counted resolved, not '
              f'proven): {result.accepted_tool_gaps}',
              f'tool gaps pending (one agent\'s attempt only, counted unresolved): {result.pending_tool_gaps}',
@@ -566,11 +616,22 @@ def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
             accepted = f"; owner acceptance {gap['owner_acceptance']['ruling']}" if gap.get('owner_acceptance') else ''
             lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')}: {state} ({gap['reason']}; attempts "
                          f"by {agents}{accepted})")
+    if result.no_routes:
+        lines.append('No behaviour route:')
+        for clause, state in result.no_routes:
+            declared = clause[NO_BEHAVIOUR_ROUTE]
+            agents = ', '.join(attempt['agent'] for attempt in declared['attempts'])
+            lines.append(f"  spell {clause.get('spell')}: {clause.get('clause')}: {state} ({declared['reason']}; "
+                         f"attempts by {agents})")
     return lines
 
 
 def claim_rows(clause: dict, statuses: list[str], sha: str) -> list[dict]:
     rows = evidence_rows(clause, statuses, sha)
+    if NO_BEHAVIOUR_ROUTE in clause:
+        state = no_route_state(clause, claims_evidence(statuses))
+        rows = [{**row, NO_BEHAVIOUR_ROUTE: clause[NO_BEHAVIOUR_ROUTE], 'no_behaviour_route_state': state}
+                for row in rows]
     if TOOL_GAP not in clause:
         return rows
     return [{**row, TOOL_GAP: clause[TOOL_GAP], 'tool_gap_state': tool_gap_state(clause)}

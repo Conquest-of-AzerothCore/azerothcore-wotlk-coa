@@ -18,6 +18,7 @@ from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EVENT, EVIDENCE, K3, METRIC_EVIDENCE,
                       NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption, EvidenceError, acting,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
+                      NO_BEHAVIOUR_ROUTE, NO_ROUTE_NOT_DATA, NO_ROUTE_PENDING, NO_ROUTE_TERMINAL,
                       fragment_entries, load_clauses, read_fragment, require_claims, write_coverage, write_fragment)
 from expiry import BEHAVIOUR_EXPIRY
 from profile import (CLASSES_DIR, DBC_DIR, DbcSetMismatch, class_file_paths, ledger_consumption_path, load_class_file,
@@ -795,6 +796,68 @@ class ToolGapTest(unittest.TestCase):
         self.assertEqual([(entry['evidence'], entry['tool_gap_state']) for entry in entries],
                          [(UNPROVEN, TOOL_GAP_PENDING)])
         self.assertEqual(entries[0][TOOL_GAP]['attempts'][0]['agent'], 'arm-a')
+
+
+def routeless(text, *agents, labels=(f'{ARGENT_BLADE} effect_value #0',)):
+    declared = {'reason': 'a 180 s cooldown leaves no cast-timing pair in one scenario',
+                'attempts': [{'agent': agent, 'report': f'round/{agent}.md'} for agent in agents]}
+    return {**claim(text, *labels), NO_BEHAVIOUR_ROUTE: declared}
+
+
+class NoBehaviourRouteTest(unittest.TestCase):
+    def test_seeded_one_agent_keeps_the_clause_open_and_a_second_agent_closes_it(self):
+        pending = clause_coverage([routeless('reduces the cooldown', 'author')], [value(ARGENT_BLADE)], BUILD)
+        terminal = clause_coverage([routeless('reduces the cooldown', 'author', 'route')], [value(ARGENT_BLADE)],
+                                   BUILD)
+        self.assertEqual([state for _, state in pending.no_routes], [NO_ROUTE_PENDING])
+        self.assertEqual((pending.data, pending.terminal_no_route, pending.open_data), (1, 0, 1))
+        self.assertEqual([state for _, state in terminal.no_routes], [NO_ROUTE_TERMINAL])
+        self.assertEqual((terminal.data, terminal.terminal_no_route, terminal.open_data, terminal.resolved),
+                         (1, 1, 0, 1))
+        with mock.patch('coverage.MIN_NO_ROUTE_AGENTS', 1):
+            seeded = clause_coverage([routeless('reduces the cooldown', 'author')], [value(ARGENT_BLADE)], BUILD)
+        self.assertEqual(seeded.terminal_no_route, 1)
+
+    def test_two_attempts_by_the_same_agent_stay_pending(self):
+        result = clause_coverage([routeless('reduces the cooldown', 'author', ' author')], [value(ARGENT_BLADE)],
+                                 BUILD)
+        self.assertEqual(result.terminal_no_route, 0)
+
+    def test_an_unproven_or_behaviour_clause_is_not_closed(self):
+        unproven = clause_coverage([routeless('reduces the cooldown', 'author', 'route')], [], BUILD)
+        hit_label = f'{ARGENT_BLADE} hit_mean'
+        behaviour = clause_coverage([routeless('deals damage', 'author', 'route', labels=(hit_label,))],
+                                    [hit(ARGENT_BLADE)], BUILD)
+        self.assertEqual([state for _, state in unproven.no_routes], [NO_ROUTE_NOT_DATA])
+        self.assertEqual([state for _, state in behaviour.no_routes], [NO_ROUTE_NOT_DATA])
+        self.assertEqual((unproven.terminal_no_route, behaviour.terminal_no_route, behaviour.behaviour), (0, 0, 1))
+
+    def test_a_malformed_declaration_is_refused(self):
+        bad = [{**claim('x'), NO_BEHAVIOUR_ROUTE: {'reason': 'r', 'attempts': []}},
+               {**claim('x'), NO_BEHAVIOUR_ROUTE: {'attempts': [{'agent': 'a', 'report': 'r'}]}},
+               {**claim('x'), NO_BEHAVIOUR_ROUTE: {'reason': ' ', 'attempts': [{'agent': 'a', 'report': 'r'}]}},
+               {**routeless('x', 'a'), 'kind': 'no_claim'},
+               {**routeless('x', 'a'), TOOL_GAP: gapped('x', 'a')[TOOL_GAP]}]
+        for clause in bad:
+            with self.subTest(clause=clause), self.assertRaises(EvidenceError):
+                clause_coverage([clause], [value(ARGENT_BLADE)], BUILD)
+
+    def test_the_report_shows_the_terminal_column_and_lists_the_clauses(self):
+        result = clause_coverage([routeless('reduces the cooldown', 'author', 'route'), claim('open')],
+                                 [value(ARGENT_BLADE)], BUILD)
+        lines = clause_coverage_lines(result)
+        self.assertIn('data conformant, no behaviour route (terminal: a stated reason and attempts by two agents, '
+                      'closed, not resolved): 1 of 2 (50.0%)', lines)
+        self.assertIn('data conformant, still open: 0 of 2 (0.0%)', lines)
+        self.assertIn(f'  spell {ARGENT_BLADE}: reduces the cooldown: {NO_ROUTE_TERMINAL} (a 180 s cooldown leaves '
+                      f'no cast-timing pair in one scenario; attempts by author, route)', lines)
+
+    def test_fragment_rows_carry_the_declaration_and_its_state(self):
+        result = clause_coverage([routeless('reduces the cooldown', 'author', 'route')], [value(ARGENT_BLADE)], BUILD)
+        with mock.patch('profile.server_spell_dbc_sha256', return_value=SERVER_SHA):
+            entries = fragment_entries(result, {'spell_dbc_sha256': SERVER_SHA, 'results': 'r'})
+        self.assertEqual([(entry['evidence'], entry['no_behaviour_route_state']) for entry in entries],
+                         [(DATA, NO_ROUTE_TERMINAL)])
 
 
 class FragmentTest(unittest.TestCase):

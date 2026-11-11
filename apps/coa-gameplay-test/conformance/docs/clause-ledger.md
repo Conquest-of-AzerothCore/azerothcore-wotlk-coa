@@ -30,6 +30,9 @@ A JSON array. Each entry is one clause:
 - `tool_gap` (optional, a `"claim"` entry only): a clause an agent could not prove because the tool lacks a metric,
   step or setup, `{"reason": "<what the tool lacks>", "attempts": [{"agent": "<who tried>", "report": "<where>"}],
   "owner_acceptance": {"ruling": "<file#section>"}}` (`owner_acceptance` optional). See [Tool gaps](#tool-gaps).
+- `no_behaviour_route` (optional, a `"claim"` entry only, never beside `tool_gap`): a data conformant clause no
+  behaviour check can reach, `{"reason": "<why no route exists>", "attempts": [{"agent": "<who tried>", "report":
+  "<where>"}]}`. See [No behaviour route](#no-behaviour-route).
 
 ### Stated claims
 
@@ -118,6 +121,20 @@ Example of the shape (one attempt, so `pending`; a second entry in `attempts` by
 ```
 
 No Templar ledger entry declares a `tool_gap` yet.
+
+### No behaviour route
+
+The owner's terminal status of 2026-11-11 (ADR 0136): a clause that only a data check can verify, because no
+behaviour route exists, is **data conformant, no behaviour route** once it states the reason and two agents have
+tried to build a route (two `attempts` with different `agent` values, the I4 rule of tool gaps; no owner acceptance
+replaces the second attempt). `no_route_state` is `terminal` for a data conformant clause with two agents, `pending`
+with one, and `not_data` for a clause that is unproven or behaviour proven (the declaration then closes nothing).
+A terminal clause stays data conformant and in the denominator; it counts as closed, not resolved, and leaves the
+remaining work. `ClauseCoverage.no_routes` lists the declaring clauses with their state; `terminal_no_route` and
+`open_data` (`data - terminal_no_route`) are printed by `coverage --clauses` as their own lines, and a fragment row
+carries the declaration and its `no_behaviour_route_state`. `clause_coverage` refuses a malformed declaration (no
+reason, no attempt, an attempt without agent or report, a non-claim entry, a clause that also declares a
+`tool_gap`).
 
 ### Two proof statuses
 
