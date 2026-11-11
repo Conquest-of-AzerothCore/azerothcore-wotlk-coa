@@ -1724,6 +1724,50 @@
   ],
   "behaviours": [
     {
+      "spell": 803159, "name": "Chakra of Light", "kind": "hit_ratio", "label_suffix": "spell_power",
+      "quote": "now heal allies around the target for", "expected": 2.5,
+      "metric": "spell_heal_total", "observe_spell": 803160, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[966472, 1]]},
+      "critical": false, "trials": 40,
+      "expected_source": "${$m1+$SP*0.35}: $m1 is 71.15 at level 60: 803159 EffectBasePoints[0] 19 with EffectDieSides[0] 1 (20) plus EffectRealPointsPerLevel[0] 1.65 over 31 levels above BaseLevel 29 (51.15). AscensionTemplarContracts.cpp:333-334 sets 803160 e0 to Amount(803159, 0), SpellEffectInfo::CalcValue at the caster's level, and :335-342 add 0.35 x SpellBaseHealingBonusDone(127) (AscensionTemplarData.h, 803160 heal row), truncated to int32. Healing power is 0 at the reference: SpellBaseHealingBonusDone (Unit.cpp:11026-11069) sums healing-done auras, the base spell power (every school reads 0 in reference_stats) and item healing (the reference staff 2495 has none). Treatment: Test Healing Power + 300 966472 (Effect[0] aura 135 SPELL_AURA_MOD_HEALING_DONE, EffectMiscValue[0] 127, EffectBasePoints[0] 299): 71.15 + 105 = 176.15 against 71.15, ratio 2.4758. A coefficient of 0.30 reads 2.265, of 0.40 2.687, and $m1 without its per-level part (20) 6.25, all outside the band. 803160 is cast at the ally directly (AscensionTemplarContracts.cpp:220-224 retargets it to TARGET_UNIT_TARGET_ALLY); its cast by an Oath Breaker is 803159 trigger_count and the ally_heal_breadth entry. The class aura 887007 (-20% healing done) scales both arms. Only non-critical heals are compared. Engine value (review m1): Amount(803159, 0) is CalcValue, int32 71; with +300 healing power 71 + 105 = 176; the class aura 887007 -20% truncates to int(56.8) = 56 and int(140.8) = 140: 140 / 56 = 2.5, the expected ratio. The tooltip value 176.15 / 71.15 = 2.4758 lies inside the same band."
+    },
+    {
+      "spell": 500694, "variant": "at_cast", "label_suffix": "at_cast",
+      "name": "Force of Golganneth", "kind": "metric_delta",
+      "quote": "and triggering Zealotry every", "expected": 1,
+      "trigger_spell": 500694, "target": "dummy",
+      "metric": "spell_cast_count", "fields": {"spell": 801450},
+      "before_expected": 0, "cast_in_before": false, "wait_ms": 500,
+      "observe_source": "Force of Golganneth 500694 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[2] 1000 ($t3), DurationIndex 28 (5000 ms, $d), triggers 803153, whose Effect[1] 64 casts Zealotry 801450 at each enemy in its area. Owner ruling (method-study/owner-rulings-2026-11-10.md, Force of Golganneth clause 62, 2026-11-11): 6 triggers are accepted, one at the cast and then 5 periodic; the regression asserts that shape, so 5 or 7 alert. One cast at the dummy 3 yd away; no Zealotry before the cast. 500 ms after the cast: the one at the cast."
+    },
+    {
+      "spell": 500694, "variant": "period", "label_suffix": "period",
+      "name": "Force of Golganneth", "kind": "metric_delta",
+      "quote": "and triggering Zealotry every", "expected": 3,
+      "trigger_spell": 500694, "target": "dummy",
+      "metric": "spell_cast_count", "fields": {"spell": 801450},
+      "before_expected": 0, "cast_in_before": false, "wait_ms": 2500,
+      "observe_source": "Force of Golganneth 500694 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[2] 1000 ($t3), DurationIndex 28 (5000 ms, $d), triggers 803153, whose Effect[1] 64 casts Zealotry 801450 at each enemy in its area. Owner ruling (method-study/owner-rulings-2026-11-10.md, Force of Golganneth clause 62, 2026-11-11): 6 triggers are accepted, one at the cast and then 5 periodic; the regression asserts that shape, so 5 or 7 alert. One cast at the dummy 3 yd away; no Zealotry before the cast. 2500 ms: the cast and the ticks at 1000 and 2000 ms."
+    },
+    {
+      "spell": 500694, "variant": "duration", "label_suffix": "duration",
+      "name": "Force of Golganneth", "kind": "metric_delta",
+      "quote": "and triggering Zealotry every", "expected": 6,
+      "trigger_spell": 500694, "target": "dummy",
+      "metric": "spell_cast_count", "fields": {"spell": 801450},
+      "before_expected": 0, "cast_in_before": false, "wait_ms": 5500,
+      "observe_source": "Force of Golganneth 500694 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[2] 1000 ($t3), DurationIndex 28 (5000 ms, $d), triggers 803153, whose Effect[1] 64 casts Zealotry 801450 at each enemy in its area. Owner ruling (method-study/owner-rulings-2026-11-10.md, Force of Golganneth clause 62, 2026-11-11): 6 triggers are accepted, one at the cast and then 5 periodic; the regression asserts that shape, so 5 or 7 alert. One cast at the dummy 3 yd away; no Zealotry before the cast. 5500 ms: the cast and the five ticks of the 5000 ms aura."
+    },
+    {
+      "spell": 500694, "variant": "after_duration", "label_suffix": "after_duration",
+      "name": "Force of Golganneth", "kind": "metric_delta",
+      "quote": "and triggering Zealotry every", "expected": 6,
+      "trigger_spell": 500694, "target": "dummy",
+      "metric": "spell_cast_count", "fields": {"spell": 801450},
+      "before_expected": 0, "cast_in_before": false, "wait_ms": 7500,
+      "observe_source": "Force of Golganneth 500694 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[2] 1000 ($t3), DurationIndex 28 (5000 ms, $d), triggers 803153, whose Effect[1] 64 casts Zealotry 801450 at each enemy in its area. Owner ruling (method-study/owner-rulings-2026-11-10.md, Force of Golganneth clause 62, 2026-11-11): 6 triggers are accepted, one at the cast and then 5 periodic; the regression asserts that shape, so 5 or 7 alert. One cast at the dummy 3 yd away; no Zealotry before the cast. 7500 ms: still 6, no tick past the aura."
+    },
+    {
       "spell": 500694, "name": "Force of Golganneth", "kind": "hit_ratio", "variant": "attack_power",
       "label_suffix": "attack_power",
       "quote": "Explode with holy power, dealing", "expected": 1.6294,
@@ -1879,8 +1923,8 @@
       "gate_spell": 804906,
       "metric": "event_interval_median_ms",
       "fields": {"stream": "spell_damage", "spell": 804906, "target": "dummy", "since_spell": 804906},
-      "before_expected": 3000, "wait_ms": 20000, "expire_ms": 22000, "tolerance": 150,
-      "observe_source": "$803164s1 = 10: 803164 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 19 (SPELLMOD_ACTIVATION_TIME), EffectBasePoints[0] -11 (-10%), EffectSpellClassMask[0] 4194304 matching Condemn 804906's SpellFamilyFlags[0]; AuraEffect::CalculatePeriodic applies it to the amplitude (SpellAuraEffects.cpp, SPELLMOD_ACTIVATION_TIME). Condemn ticks every 3000 ms (EffectAmplitude[0]); one stack of 803164, cast on the caster before the second Condemn only, gives 2700 ms between ticks. 803163 itself is not learned (gate_spell is the Condemn rank): its own 25% roll on a Condemn cast left a 60000 ms stack from the first phase in the second, 2400 ms (counted runs 20261111-183543 and -183732, diagnostic 20261111-183937: 2 and 3 casts of 803164). The median interval since the Condemn cast is read 20000 ms after it, over six or seven intervals, so one late world update does not move it (diagnostic 20261111-180552 read 2400 over two intervals; 20261111-180640 read 2700, min and max 2700); the first Condemn (21000 ms) ends before the second phase. Tolerance 150 ms for the world update step, half the 300 ms the stack moves."
+      "before_expected": 3000, "wait_ms": 20000, "expire_ms": 22000, "tolerance": 50,
+      "observe_source": "$803164s1 = 10: 803164 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 19 (SPELLMOD_ACTIVATION_TIME), EffectBasePoints[0] -11 (-10%), EffectSpellClassMask[0] 4194304 matching Condemn 804906's SpellFamilyFlags[0]; AuraEffect::CalculatePeriodic applies it to the amplitude (SpellAuraEffects.cpp, SPELLMOD_ACTIVATION_TIME). Condemn ticks every 3000 ms (EffectAmplitude[0]); one stack of 803164, cast on the caster before the second Condemn only, gives 2700 ms between ticks. 803163 itself is not learned (gate_spell is the Condemn rank): its own 25% roll on a Condemn cast left a 60000 ms stack from the first phase in the second, 2400 ms (counted runs 20261111-183543 and -183732, diagnostic 20261111-183937: 2 and 3 casts of 803164). The median interval since the Condemn cast is read 20000 ms after it, over six or seven intervals, so one late world update does not move it (diagnostic 20261111-180552 read 2400 over two intervals; 20261111-180640 read 2700, min and max 2700); the first Condemn (21000 ms) ends before the second phase. Tolerance 50 ms: the counted reads moved by at most 11 ms (2695.5 to 3011), and a cut from 8.3% to 11.7% fits the band, so a wrong percentage is excluded (review I3)."
     },
     {
       "spell": 803163, "variant": "tick_rate_blade", "label_suffix": "tick_rate_blade",
@@ -1890,8 +1934,8 @@
       "gate_spell": 803880,
       "metric": "event_interval_median_ms",
       "fields": {"stream": "spell_damage", "spell": 803880, "target": "dummy", "since_spell": 803880},
-      "before_expected": 3000, "wait_ms": 20000, "expire_ms": 31000, "tolerance": 150,
-      "observe_source": "The Blade of Faith half of the tick_rate entry: 803164 EffectSpellClassMask[1] 2048 matches Blade of Faith 803880 (SpellFamilyFlags[1] 2048), EffectAmplitude[0] 3000, DurationIndex 9 (30000 ms, so the phases are 31000 ms apart); one stack of 803164 gives 2700 ms between ticks, read over 20000 ms. Tolerance 150 ms."
+      "before_expected": 3000, "wait_ms": 20000, "expire_ms": 31000, "tolerance": 50,
+      "observe_source": "The Blade of Faith half of the tick_rate entry: 803164 EffectSpellClassMask[1] 2048 matches Blade of Faith 803880 (SpellFamilyFlags[1] 2048), EffectAmplitude[0] 3000, DurationIndex 9 (30000 ms, so the phases are 31000 ms apart); one stack of 803164 gives 2700 ms between ticks, read over 20000 ms. Tolerance 50 ms (review I3)."
     },
     {
       "spell": 803163, "variant": "cap", "label_suffix": "cap",
@@ -2538,14 +2582,6 @@
       "quote": "heal allies around the target", "expected": 2,
       "heal_spell": 803160, "trigger_spell": 572027, "near_distance": 17.0,
       "radius_reason": "AscensionTemplarAbilities.cpp:208-213: on an Oath Breaker cast with 803159 known, every unit of Nearby(target, 15.0f) that is the player or in its raid is healed by 803160, which AscensionTemplarContracts.cpp:220-223 retargets to TARGET_UNIT_TARGET_ALLY. The allies stand 17 yd from the caster and 14 yd from the dummy at 3 yd: inside 15 yd of the target, outside 15 yd (plus their size) of the caster, so a heal centred on the caster (803160's own TARGET_SRC_CASTER, radius index 18, 15 yd) would miss them. 572027 alone casts nothing that heals."
-    },
-    {
-      "spell": 803159, "name": "Chakra of Light", "kind": "hit_ratio", "label_suffix": "spell_power",
-      "quote": "now heal allies around the target for", "expected": 2.4758,
-      "metric": "spell_heal_total", "observe_spell": 803160, "caster": "caster", "target": "ally",
-      "control": {}, "treatment": {"auras": [[966472, 1]]},
-      "critical": false, "trials": 40,
-      "expected_source": "${$m1+$SP*0.35}: $m1 is 71.15 at level 60: 803159 EffectBasePoints[0] 19 with EffectDieSides[0] 1 (20) plus EffectRealPointsPerLevel[0] 1.65 over 31 levels above BaseLevel 29 (51.15). AscensionTemplarContracts.cpp:333-334 sets 803160 e0 to Amount(803159, 0), SpellEffectInfo::CalcValue at the caster's level, and :335-342 add 0.35 x SpellBaseHealingBonusDone(127) (AscensionTemplarData.h, 803160 heal row), truncated to int32. Healing power is 0 at the reference: SpellBaseHealingBonusDone (Unit.cpp:11026-11069) sums healing-done auras, the base spell power (every school reads 0 in reference_stats) and item healing (the reference staff 2495 has none). Treatment: Test Healing Power + 300 966472 (Effect[0] aura 135 SPELL_AURA_MOD_HEALING_DONE, EffectMiscValue[0] 127, EffectBasePoints[0] 299): 71.15 + 105 = 176.15 against 71.15, ratio 2.4758. A coefficient of 0.30 reads 2.265, of 0.40 2.687, and $m1 without its per-level part (20) 6.25, all outside the band. 803160 is cast at the ally directly (AscensionTemplarContracts.cpp:220-224 retargets it to TARGET_UNIT_TARGET_ALLY); its cast by an Oath Breaker is 803159 trigger_count and the ally_heal_breadth entry. The class aura 887007 (-20% healing done) scales both arms. Only non-critical heals are compared."
     },
     {
       "spell": 806521, "name": "Titanstrike", "kind": "cast_gate",
