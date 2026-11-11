@@ -1670,7 +1670,8 @@
     {
       "spell": 573049, "name": "Holy Cleave", "kind": "fixed_count",
       "quote": "and an additional nearby enemy", "expected": 1,
-      "radius": 10.0,
+      "radius": 10.0, "clear_auras": [804903],
+      "clear_auras_reason": "Each cast grants Oath: Holy Cleave 804903, whose Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS) is the tooltip's own 'Oath: Your abilities strike $804903s1 additional nearby target' (coa-dbc-viewer record --data /srv/coa/server-data/dbc --id 804903); left in place, a later cast strikes primary + 2 (measured per cast [1, 2] on 2026-11-11, .cache/judges/cmp1). The Oath is cleared before every cast so each cast shows the base breadth this clause states.",
       "radius_reason": "Holy Cleave 573049 DmgClass 2 (SPELL_DAMAGE_CLASS_MELEE, apps/coa-dbc record); its EffectChainTarget[0]=EffectChainTarget[1]=2 on both weapon-damage effects (0 NORMALIZED_WEAPON_DMG, 1 WEAPON_PERCENT_DAMAGE) targets TARGET_UNIT_TARGET_ENEMY, routed through Spell::SelectImplicitTargetObjectTargets, which always calls SelectImplicitChainTargets (src/server/game/Spells/Spell.cpp:1905-1920); Spell::SearchChainTargets's own comment names a 10y jump radius for SPELL_DAMAGE_CLASS_MELEE as used 'for swipe, cleave and similar' when no per-spell JumpDistance override exists (Spell.cpp:2200-2213). The chain is inherent to every cast (ChainTarget 2, i.e. 1 beyond the primary, not gated by any separate passive), so this is a single-phase fixed-count check rather than a before/after passive delta."
     },
     {
@@ -2357,6 +2358,13 @@
       "quote": "Damage dealt pierces all immunities, resistances, and damage absorption effects.",
       "expected_ratio": 1.0, "damage_spell": 524740, "shield_aura": 706583,
       "observe_source": "AscensionTemplarContracts.cpp (around line 265): 'if (id == 524740 && info->Effects[1].TriggerSpell == 520842 && info->Effects[0].TargetB.GetTarget() == TARGET_UNIT_DEST_AREA_ENEMY) { info->AscensionIgnoreAbsorbAndResistance = true; ... }', setting a custom SpellInfo flag on 524740, the Holy damage spell 524739's own effects trigger (round5 investigation, templar.json:204-205). Unit::CalcAbsorbResist (Unit.cpp, around line 2662) starts with 'if (spellInfo && spellInfo->AscensionIgnoreAbsorbAndResistance) return;', before either the magic partial-resist roll or the SPELL_AURA_SCHOOL_ABSORB consumption loop later in that same function, so both are skipped entirely for 524740's hits; coa-dbc-viewer confirms AscensionIgnoreAbsorbAndResistance has no DBC-field counterpart, it is this fork's own SpellInfo member (SpellInfo.h:362). Immunity-piercing is separate and DBC-native: coa-dbc-viewer Spell 524740 Attributes=536870912 (SPELL_ATTR0_NO_IMMUNITIES) and AttributesEx2=67108864 (SPELL_ATTR2_NO_SCHOOL_IMMUNITIES). The scenario measures 524740's own cumulative spell_damage_total against the dummy once with no shield present and once more after 706583 (Staffguard, the Templar's own Holy-school SPELL_AURA_SCHOOL_ABSORB aura, reused from this same class file's shield_break_trigger entries) is set directly on the dummy, expecting an unchanged damage ratio (1.0) and an untouched shield aura_amount; a server that let the shield absorb part of the hit despite AscensionIgnoreAbsorbAndResistance would show up as both a reduced ratio and a drained shield."
+    },
+    {
+      "spell": 520034, "name": "Pious Sweep", "kind": "hit_ratio", "label_suffix": "tranquil_circle",
+      "quote": "on enemies above 75% health or affected by Tranquil Circle.", "expected": 1.25,
+      "observe_spell": 503141, "learn": [520034], "control": {}, "treatment": {"casts": [801205]},
+      "critical": false, "target_health_pct": 50, "trials": 100,
+      "expected_source": "$s1 = 25 (520034 EffectBasePoints[1] 24, EffectDieSides[1] 1). 520034 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 23 (SPELLMOD_EFFECT3, SpellDefines.h:99) adds it to effect 3 of Tranquil Circle 801205, whose Effect[2] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER has EffectBasePoints[2] -1 with EffectDieSides[2] 1 (0 on its own) and EffectImplicitTargetA[2] 16 (TARGET_UNIT_DEST_AREA_ENEMY), so a dummy inside the circle takes 25% more damage from the caster. 520034 Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, EffectMiscValue[0] 23 (AURA_STATE_HEALTH_ABOVE_75_PERCENT, SharedDefines.h:1416) is the other half: the dummy is held at 50% health so it stays closed in both arms. Chastise 503141 Effect[0] SCHOOL_DAMAGE EffectBasePoints[0] 337, EffectDieSides[0] 34; only non-critical hits are compared (all values: coa-dbc-viewer record --data /srv/coa/server-data/dbc)."
     }
   ],
   "player_observations": [

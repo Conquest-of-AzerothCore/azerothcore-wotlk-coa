@@ -8,7 +8,7 @@ import subprocess
 import sys
 from typing import Sequence
 
-from behaviours import behaviour_entries, behaviour_scenario
+from behaviours import behaviour_entries, behaviour_scenario, sized_behaviour
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
 from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, BuildMismatch, ScenarioDrift,
                      evaluate, literal_values, write_levers, write_outputs)
@@ -315,7 +315,7 @@ def selected_passives(class_file: dict, dbc_dir: Path, spell_ids: list[int]) -> 
 def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: list[int] | None = None,
              stack: bool = False, passes: int = PASSES, passives: list[int] | None = None,
              triggers: list[int] | None = None, behaviours: list[int] | None = None,
-             target_gates: list[int] | None = None) -> Path:
+             target_gates: list[int] | None = None, trials: dict[str, int] | None = None) -> Path:
     class_file = load_class_file(class_id)
     dbc_dir = server_dbc_dir(class_file.get('dbc_dir', DBC_DIR))
     out = Path(out)
@@ -349,7 +349,7 @@ def generate(class_id: int, out: Path, spells: list[int] | None = None, procs: l
     for entry in chosen_triggers:
         add_trigger(writer, entry)
     for entry in chosen_behaviours:
-        add_behaviour(writer, entry)
+        add_behaviour(writer, sized_behaviour(entry, trials))
     for entry in chosen_target_gates:
         add_target_gate(writer, entry)
     if stack:
@@ -467,6 +467,7 @@ def mounted_roots(worktree: Path) -> list[Path]:
 
 def prove_command(args) -> int:
     from prove import SUMMARY_FILE, ProveSpec, is_under, prove
+    from pilot import hit_ratio_pilot, sizable_labels
     from prove_ledger import ledger_hooks
     if not (args.behaviour or args.proc or args.trigger):
         raise ValueError('prove needs at least one --behaviour, --proc or --trigger entry of the class file')
@@ -475,13 +476,21 @@ def prove_command(args) -> int:
         raise ValueError(f'--out {args.out} lies outside {[str(root) for root in roots]}, the directories coa-verify '
                          f'mounts; the scenario files would not be visible to the run')
 
-    def make(out: Path) -> Path:
-        return generate(args.class_id, out, procs=args.proc, triggers=args.trigger, behaviours=args.behaviour)
+    def make(out: Path, trials: dict[str, int] | None = None) -> Path:
+        return generate(args.class_id, out, procs=args.proc, triggers=args.trigger, behaviours=args.behaviour,
+                        trials=trials)
+
+    entries = behaviour_entries(load_class_file(args.class_id), args.behaviour) if args.behaviour else []
+    sized = [entry for entry in entries if entry.get('kind') == 'hit_ratio']
+
+    def make_pilot(out: Path, trials: dict[str, int]) -> Path:
+        return generate(args.class_id, out, behaviours=sorted({entry['spell'] for entry in sized}), trials=trials)
 
     out = Path(args.out).resolve()
     spec = ProveSpec(out, args.worktree, args.runs, args.build, args.timeout_ms)
     rows, enrich, annotate = ledger_hooks(args.clauses) if args.clauses else (None, None, None)
-    code = prove(spec, make, rows, enrich, annotate)
+    pilot = hit_ratio_pilot(sizable_labels(sized), make_pilot, make)
+    code = prove(spec, make, rows, enrich, annotate, pilot=pilot)
     print(f'{out / SUMMARY_FILE}: exit {code}')
     return code
 

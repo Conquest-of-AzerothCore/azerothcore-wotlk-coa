@@ -279,7 +279,8 @@ It starts nothing but the `coa-verify` command below.
    run, each
    with `evidence` (`behaviour` only when [clause coverage](clause-ledger.md#two-proof-statuses) gives it in every
    run, else `data`) and the server `Spell.dbc` sha256. Without `--clauses` the fragment is empty.
-5. Writes `DIR/summary.json`: `sizing` (null: no pilot provider exists, see below); per run the `coa-verify`
+5. Writes `DIR/summary.json`: `sizing` (the pilot's trials and per-label records, null without a pilot, see
+   below); per run the `coa-verify`
    command, status, stage seconds (`gameplay_seconds`), scenarios with and without a result (`missing_results`
    names the latter), the worldserver `build`,
    the `server_commit` and the verdict counts per status; `flips`, `not_judged`, `flip_reports`, the `fragment` row
@@ -297,8 +298,11 @@ result, 4 a failed run. Exit 0 needs a result for every scenario of the manifest
 `prove.py` holds the runner; `prove_ledger.py` supplies the ledger rows, their evidence and the coverage per run.
 `prove.prove` also takes a `Pilot` (three callables: generate a pilot manifest or none, size labels from the pilot
 verdicts, generate the sized manifest): the pilot runs once into `DIR/pilot/` before the judged runs, is never
-judged, and the judged runs must be on its build. The command passes none: no kind of the current method takes a
-pilot-sized trial count yet.
+judged, and the judged runs must be on its build. The command passes `pilot.hit_ratio_pilot` when a `--behaviour`
+entry is a `hit_ratio`: the pilot generates those entries at 20 trials (`generate(..., trials={label: n})`), each
+verdict's `detail.sized_trials` (the trials whose 99% half-width would be 0.8 of half the owner's band, ADR 0125)
+sizes the judged runs, never below the pilot's 20 and capped at what one scenario holds (`detail.trial_limit`;
+`capped` in the record); a label without a pilot verdict or interval keeps its class-file trials.
 
 ### Verdicts
 
@@ -441,7 +445,12 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   below 1 (the server truncates stats to integers, `Unit::UpdateStats` `SetStat(stat, int32(value))`) unless a
   parallel `stat_exact` measurement (`Player::GetExactStatValue`, the pre-truncation float) is present, in which
   case the exact delta is judged against the same expected value with a tighter, `stat_exact`-only tolerance
-  (`FRACTIONAL_FLOOR` 0.01) instead of the 1-point floor. Two judged effects
+  (`FRACTIONAL_FLOOR` 0.01) instead of the 1-point floor. Proof status (ADR 0124): a conformant verdict whose
+  reading differs from the expected delta while the metric's floor is wider than the 5% band of that delta (`stat`
+  +6 for an expected +6.6 at 132 Agility: the 1-point floor is 15% of it) carries `detail['data_only']` with the
+  reason (`compare.floor_only_reason`), and so does a `stat_exact` verdict (the integer stat the game uses did not
+  move); coverage counts both as data, not behaviour. An exact reading (+5 expertise for +5) keeps its evidence.
+  Two judged effects
   of one passive on the same metric and fields (no target) are judged together: the product of their factors when
   both scale (Call of the Monastery: 313 x 1.05 x 1.05), the sum of their deltas when they add or share (Paragon:
   10 + 10% of 132 Agility), else `measured`. A `spell_modifier` of a flat duration or cast-time reduction starts

@@ -135,7 +135,8 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `behaviour_party_stat_ratio` (an ally's stat before and after the caster learns the spell), or
   `behaviour_metric_delta` with `detail.contrast` `learned` (not the `setup_only_after` condition contrast), and the
   clause text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor"). A stat read as a proxy
-  for another effect stays data.
+  for another effect stays data. A conformant verdict with `detail['data_only']` (a `passive_delta` the integer
+  floor alone accepted, or whose integer stat did not move; ADR 0124) is data whatever its metric.
 - linked: a `checked by` label (`unmodelled` check closed by the labels it names) is behaviour when one of the
   referenced verdicts is.
 - A `closed` verdict closed by its rule, without a measurement, is data whatever its check.

@@ -44,7 +44,12 @@
 - `prove.py`: `prove(spec, generate, rows, enrich, annotate, runner, compare, pilot)` runs the gameplay passes of a
   generated selection at least twice through `coa-verify`, compares each run, reports flips and unjudged verdicts,
   and writes `fragment.json` and `summary.json` (see [Prove runner](generate-and-compare.md#prove-runner));
-  `prove_ledger.py` supplies the ledger rows, their per-run evidence and the coverage per run.
+  `prove_ledger.py` supplies the ledger rows, their per-run evidence and the coverage per run; `pilot.py`
+  (`hit_ratio_pilot`) runs the hit-ratio entries at 20 trials first and sizes the judged runs from their verdicts.
+- `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
+  two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
+  (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)
+  (see [Hit-ratio scenarios](behaviour-scenarios.md#hit-ratio-scenarios-behaviour_hit_ratio-kind-hit_ratio)).
 - `questions.py`: `questions(verdicts, tooltips)` turns the verdicts that carry a question into one `Question(tooltip,
   spells, kind, question, readings, measured, labels, conditions, observations)` per tooltip and kind, and
   `write_questions(items, out_dir)`

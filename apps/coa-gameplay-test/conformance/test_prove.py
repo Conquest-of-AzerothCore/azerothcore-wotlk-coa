@@ -9,6 +9,7 @@ from unittest import mock
 
 from compare import BuildMismatch, ScenarioDrift, Verdict, write_verdicts
 import prove
+from pilot import hit_ratio_pilot
 from prove import (DRIFT_EXIT, FAILURE_EXIT, FLIP_EXIT, MISSING_EXIT, OK_EXIT, Pilot, ProveSpec, RunTimeout, find_flips,
                    is_under, run_command, verify_command, verify_report)
 from prove_ledger import ledger_coverage, ledger_evidence, ledger_rows
@@ -568,3 +569,46 @@ class DeclaredClaimRowTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class HitRatioPilotTest(unittest.TestCase):
+    def verdict(self, label, status='insufficient_trials', **detail):
+        return Verdict(label, status, 19.0, 20.0, 18.0, 22.0, 'pilot', 'scenario', 1, 1, 'behaviour_hit_ratio',
+                       detail=detail or None)
+
+    def made(self):
+        calls = []
+
+        def make(out, trials):
+            calls.append((Path(out), dict(trials)))
+            return Path(out) / 'manifest.json'
+        return calls, make
+
+    def test_no_hit_ratio_entry_gives_no_pilot(self):
+        calls, make = self.made()
+        self.assertIsNone(hit_ratio_pilot([], make, make))
+
+    def test_the_pilot_generates_every_label_at_the_pilot_trials(self):
+        calls, make = self.made()
+        pilot = hit_ratio_pilot(['a', 'b'], make, make, pilot_trials=20)
+        pilot.generate(Path('/tmp/pilot'))
+        self.assertEqual(calls, [(Path('/tmp/pilot'), {'a': 20, 'b': 20})])
+
+    def test_sizing_takes_the_sized_trials_capped_at_the_scenario_limit(self):
+        calls, make = self.made()
+        pilot = hit_ratio_pilot(['a', 'b', 'c', 'd'], make, make, pilot_trials=20)
+        trials, records = pilot.size([self.verdict('a', sized_trials=60, trial_limit=111),
+                                      self.verdict('b', sized_trials=300, trial_limit=111),
+                                      self.verdict('c', status='unmeasured')])
+        self.assertEqual(trials, {'a': 60, 'b': 111})
+        self.assertEqual([record.get('capped') for record in records], [False, True, None, None])
+        self.assertIn('reads no interval', records[2]['reason'])
+        self.assertIn('holds no verdict', records[3]['reason'])
+        pilot.sized(Path('/tmp/out'), trials)
+        self.assertEqual(calls[-1], (Path('/tmp/out'), {'a': 60, 'b': 111}))
+
+    def test_a_sized_count_below_the_pilot_keeps_the_pilot_trials(self):
+        calls, make = self.made()
+        pilot = hit_ratio_pilot(['a'], make, make, pilot_trials=20)
+        trials, _ = pilot.size([self.verdict('a', status='ok', sized_trials=5, trial_limit=111)])
+        self.assertEqual(trials, {'a': 20})

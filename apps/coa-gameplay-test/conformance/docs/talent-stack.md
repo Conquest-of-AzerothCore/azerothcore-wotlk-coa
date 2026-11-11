@@ -72,10 +72,14 @@ in some passes only makes the delta `unmodelled`. The integer steps
 of a hit (truncation after a modifier, armor) are not modelled here: each moves a hit by under one point, about 0.1%
 of the 1014 measured Argent Blade hit. The bonus is read again with the measured stats: a changed value is an alert.
 Fewer passes than generated in either configuration are `insufficient_trials`; no hit of the source in either
-configuration is `unmeasured`. An interval whose half-width exceeds 1% of the expected ratio 1 + b/100, the bound of
-the hit means (`MEAN_HALF_WIDTH`), is `insufficient_trials` even when it holds the bonus; the explanation gives the
-half-width and the passes that would meet the bound, the current passes times (half-width / 1%)², from the observed
-variance at the same t quantile.
+configuration is `unmeasured`. The bonus is judged on the owner's band of 2026-11-11 (ADR 0125, `bonus.py`): each
+reading passes when the measured bonus lies within the larger of 5% of it and 2 points ("+20%" passes from +18% to
++22%), so two readings inside one band are both conformant. Before that, a 99% interval whose half-width is above
+half the band of the stated bonus, or that holds 0, is `insufficient_trials` even when it holds the bonus; the
+explanation and `detail.trials_needed` give the passes that would meet it, the current passes times
+(half-width / limit)², from the observed variance at the same t quantile. A judged delta states the bonus range it
+excludes (`detail.excluded`, stated bonus -+ (band + half-width)); `low` and `high` stay the Welch interval that
+`levers.md` lists.
 
 `levers(verdicts)` gives one `Lever` per configuration in stack order: the DPS mean and interval, its change in percent
 from the previous configuration, the DPS of each source and the tooltip bonus of the configuration's single judged

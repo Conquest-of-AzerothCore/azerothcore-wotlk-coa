@@ -12,7 +12,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_FIXED_COUNT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_INTERNAL_COOLDOWN, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA,
                         BEHAVIOUR_MOUNT_GRANT, BEHAVIOUR_PARTY_STAT_RATIO, CONDITION_CONTRAST, LEARNED_CONTRAST)
-from compare import NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
+from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, COVERAGE_FILE, DATA, EVENT, EVIDENCE, METRIC_EVIDENCE, READBACK, STATE,
                       STATE_PROMISES, UNPROVEN, EvidenceError, clause_coverage, clause_coverage_lines, coverage,
@@ -295,6 +295,14 @@ class EvidenceStatusTest(unittest.TestCase):
         verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor')]
         self.assertEqual(evidence_of([claim('Increases your Armor by $s1%.', '1 e0 armor')], verdicts)[0],
                          [BEHAVIOUR])
+
+    def test_a_promised_stat_the_floor_alone_accepted_is_data(self):
+        verdicts = [replace(judged('1 e0 stat 1', PASSIVE_DELTA, 'stat'),
+                            detail={'metric': 'stat', DATA_ONLY: 'the 1-point floor is wider than the band'})]
+        clauses = [claim('Increases your Agility by $s1%', '1 e0 stat 1')]
+        self.assertEqual(evidence_of(clauses, verdicts)[0], [DATA])
+        powered = [replace(verdicts[0], detail={'metric': 'stat'})]
+        self.assertEqual(evidence_of(clauses, powered)[0], [BEHAVIOUR])
 
     def test_a_stat_read_as_a_proxy_stays_data(self):
         verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor')]

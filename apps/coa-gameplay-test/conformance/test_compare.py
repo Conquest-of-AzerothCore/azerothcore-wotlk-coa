@@ -9,7 +9,8 @@ import sys
 import tempfile
 import unittest
 
-from compare import (ALERT_COLUMNS, CONFORMANT, EFFECT_VALUE_SCOPE, NOT_MEASURED, PERCENT_POINT_METRICS,
+from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, NOT_MEASURED, PERCENT_POINT_METRICS,
+                     magnitude_excluded,
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
@@ -1088,6 +1089,23 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertIn('truncates', verdict.explanation)
         self.assertEqual(self.single(entry, '132', '135', [Displayed('$s1', 3.0, 0, 'percent')]).status, 'ok')
 
+    def test_a_fractional_stat_delta_the_one_point_floor_alone_accepts_is_data_only(self):
+        entry = passive_expectation(705250, 0, 'stat', 'scale', '$s1', 5.0, fields={'stat': 1})
+        token = [Displayed('$s1', 5.0, 0, 'percent')]
+        floored = self.single(entry, '132', '138', token)
+        self.assertEqual((floored.status, floored.measured), ('ok', 6.0))
+        self.assertAlmostEqual(floored.expected, 6.6)
+        self.assertIn('wider than the 5% band', floored.detail[DATA_ONLY])
+        exact = self.single(entry, '120', '126', token)
+        self.assertEqual(exact.status, 'ok')
+        self.assertNotIn(DATA_ONLY, exact.detail)
+        wide = self.single(entry, '1320', '1385', token)
+        self.assertEqual(wide.status, 'ok')
+        self.assertNotIn(DATA_ONLY, wide.detail)
+        missing = self.single(entry, '132', '132', token)
+        self.assertEqual(missing.status, 'alert')
+        self.assertNotIn(DATA_ONLY, missing.detail)
+
     def test_exact_stat_reading_judges_a_sub_point_delta(self):
         entry = passive_expectation(BELLS_OF_LIGHT, 2, 'stat', 'scale', '$s1', 3.0, fields={'stat': 3}, exact=True)
         token = [Displayed('$s1', 3.0, 0, 'percent')]
@@ -1096,6 +1114,7 @@ class PassiveDeltaTest(unittest.TestCase):
         verdict = self.passive_run(entry.rank_id, {entry: ('32', '32')}, token, extra_steps=genuine)[entry.label]
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 0.96)
+        self.assertIn('the integer stat the game uses read 32 before and 32 after', verdict.detail[DATA_ONLY])
         absent = [assert_step(entry.model['exact_before_label'], '32'),
                  assert_step(entry.model['exact_after_label'], '32')]
         missing = self.passive_run(entry.rank_id, {entry: ('32', '32')}, token, extra_steps=absent)[entry.label]
@@ -1611,3 +1630,17 @@ class ObservationLinesTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class MagnitudeExcludedTest(unittest.TestCase):
+    def test_two_parts_widen_the_band_by_the_half_width_of_their_mean(self):
+        excluded, note = magnitude_excluded(0.475, 0.525, [0.49, 0.51, 0.50])
+        self.assertLess(excluded[0], 0.475)
+        self.assertGreater(excluded[1], 0.525)
+        self.assertAlmostEqual(0.475 - excluded[0], excluded[1] - 0.525)
+        self.assertIn('excludes a ratio below', note)
+
+    def test_one_part_states_only_the_band(self):
+        excluded, note = magnitude_excluded(0.475, 0.525, [0.5])
+        self.assertIsNone(excluded)
+        self.assertIn('1 part gives no sampling interval', note)

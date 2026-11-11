@@ -174,8 +174,27 @@ class StackCompareTest(unittest.TestCase):
         self.assertLess(verdict.low, 20.0)
         self.assertGreater(verdict.high, 20.0)
         self.assertGreater((verdict.high - verdict.low) / 2 / 120, 0.01)
-        self.assertIn('above the 1% bound', verdict.explanation)
+        self.assertIn('half the band', verdict.explanation)
         self.assertIn('passes per configuration would meet it', verdict.explanation)
+        self.assertGreater(verdict.detail['trials_needed'], 5)
+
+    def test_seeded_fourteen_percent_on_a_twenty_percent_tooltip_is_an_alert(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, [114.0, 114.2, 113.8, 114.1, 113.9], delta_expectation())
+        verdict = self.verdicts(base=WITHOUT_TUNING)[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 14.0, places=1)
+
+    def test_nineteen_percent_on_a_twenty_percent_tooltip_passes_inside_the_owner_band(self):
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, [119.0, 119.2, 118.8, 119.1, 118.9], delta_expectation())
+        verdict = self.verdicts(base=WITHOUT_TUNING)[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('passes inside +-2 points', verdict.explanation)
+        low, high = verdict.detail['excluded']
+        self.assertLess(low, 18.0)
+        self.assertGreater(high, 22.0)
+        self.assertIn(f'excludes a bonus below {low:+.4g}% or above {high:+.4g}%', verdict.explanation)
 
     def test_known_modifier_readings_that_disagree_are_an_ambiguous_tooltip(self):
         self.add_config(BASE, 0, BASE_MEANS)
@@ -236,7 +255,7 @@ class StackCompareTest(unittest.TestCase):
         self.assertIn('generated as 20', verdict.explanation)
 
     def test_composition_readings_that_disagree_are_an_ambiguous_tooltip(self):
-        earlier = [{'talent': 1, 'token': '$s1', 'bonus_pct': 20.0}]
+        earlier = [{'talent': 1, 'token': '$s1', 'bonus_pct': 100.0}]
         self.add_config(BASE, 0, BASE_MEANS)
         self.add_config(PALADIN, 1, [110.0, 110.2, 109.8, 110.1, 109.9], delta_expectation(bonus=10.0,
                                                                                           earlier=earlier))
@@ -244,7 +263,16 @@ class StackCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'ambiguous_tooltip')
         self.assertIn('multiplies', verdict.explanation)
         self.assertIn('adds', verdict.explanation)
-        self.assertIn('8.333', verdict.explanation)
+        self.assertIn('expected 5%: alert', verdict.explanation)
+
+    def test_composition_readings_inside_one_band_are_both_conformant(self):
+        earlier = [{'talent': 1, 'token': '$s1', 'bonus_pct': 20.0}]
+        self.add_config(BASE, 0, BASE_MEANS)
+        self.add_config(PALADIN, 1, [110.0, 110.2, 109.8, 110.1, 109.9], delta_expectation(bonus=10.0,
+                                                                                          earlier=earlier))
+        verdict = self.verdicts(bonus_reader(value=10.0), base=WITHOUT_TUNING)[DELTA_LABEL]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('expected 8.333%: ok', verdict.explanation)
 
     def test_configuration_dps_and_sources_are_measured_with_their_interval(self):
         self.add_config(BASE, 0, [100.0] * 5, lost=60000.0)

@@ -64,13 +64,21 @@ times (5, "ever hit at least once" per dummy rather than a single-cast snapshot,
 probe established that the harness's AoE or chain targeting hits every dummy in range on one cast), measures
 `spell_damage_count {spell, target}` per dummy (or, for an entry whose `metric` is `aura`, `aura {spell, caster}`
 read on the dummy itself, for a target spell whose own effect is not a school-damage hit), learns the passive,
-repeats the casts and the measurement. The
-judge (`compare.behaviour_count_verdict`) counts, among the extra dummies only, how many were hit before the learn
-and how many were newly hit after (`after - before > 0`), then judges that count delta against `expected` on the
-delta scale (`compare.delta_status`): `ok` when `|delta - expected| <= max(1, 0.5% of expected)`, *except* that a
-measured delta of exactly 0 against a nonzero `expected` is always `alert`, never `ok`, even though it would fall
-inside that margin (`compare.delta_status`'s explicit zero-vs-nonzero guard); `unmeasured` when an extra dummy was
-already hit before the learn, since the delta cannot then be isolated.
+repeats the casts and the measurement. The scenario offers `expected + 1` extra dummies inside the radius
+(`behaviours.COUNT_HEADROOM`, model `headroom` 1), so a server that reaches one target too many is seen. The judge
+(`compare.behaviour_count_verdict`) counts, among the extra dummies only, how many were hit before the learn and
+how many were newly hit after (`after - before > 0`), then compares that count with `expected` exactly
+(`compare.exact_count_verdict`, ADR 0124): one target too few or too many is an `alert`; `unmeasured` when an extra
+dummy was already hit before the learn (the before phase is the negative arm), since the delta cannot then be
+isolated. For a `spell_damage_count` entry the judged phase also reads every dummy after every cast (model
+`per_cast`); the judge then counts, for each cast that hit the primary dummy, the extra dummies that cast hit, and
+judges the widest cast (`compare.per_cast_count_verdict`), since a melee chain's in-front filter or an aura the
+casts themselves grant can move the targets between casts. A `fixed_count` entry (Holy Cleave 573049) names
+`clear_auras`, set to 0 stacks before every cast: Holy Cleave's own Oath 804903 adds a jump target
+(`SPELLMOD_JUMP_TARGETS`) to the next cast, which the per-cast reads showed as [1, 2] before the Oath was cleared.
+A matching count from a scenario without a candidate beyond the stated number (model `headroom` 0 or absent) is
+`insufficient_trials`: a server reaching more would read the same. An ally-heal-breadth entry
+(`kind: "ally_heal_breadth"`) states every offered ally (model `all_offered`), so its match is judged.
 
 ### Healing-ratio scenarios (`behaviour_ratio`)
 
@@ -111,9 +119,12 @@ explicit target: its own implicit targeting is "nearby enemies"), and waits its 
 (`Records.duration_ms(target_rank)`) before the next repeat. It then measures `aura {aura_spell, caster}` on every
 extra dummy only, never re-measuring the primary (its own copy of `seed_spell`'s aura is a setup fact, not part of
 the behaviour under judgment). The resulting `Expectation` is shaped exactly like `target_count_scenario`'s, so
-`compare.behaviour_count_verdict` judges it with no change: `ok` when every extra dummy gains the aura between the
-before and after phase, `alert` on a measured 0 against a nonzero `expected` (the absent-effect case this check
-exists to catch), `unmeasured` when an extra dummy already carries the aura before the passive is learned.
+`compare.behaviour_count_verdict` judges it: `alert` on a count other than `expected` (the absent-effect case this
+check exists to catch), `unmeasured` when an extra dummy already carries the aura before the passive is learned.
+The scenario offers no dummy beyond `expected` (model `headroom` 0): `SpreadCondemn` copies Condemn to the next
+dummy not yet afflicted on every Righteous Tempest hit, so a further dummy would also be afflicted by a correct
+server over one cast. A matching count is therefore `insufficient_trials`, not `ok`, until a scenario can show
+that one extra dummy stays clear.
 
 ### Shield-break trigger scenarios (`behaviour_trigger`)
 
@@ -671,10 +682,46 @@ absolute amount of an exclusive spell group (`Unit::GetHighestExclusiveSameEffec
 Unit.cpp:5312-5314) and the most negative amount of a capped negative aura type (`Unit::GetMaxNegativeAuraModifier`,
 Unit.cpp:7107-7121). Two percentages of opposite signs are refused when the scenario is generated.
 
+### Hit-ratio scenarios (`behaviour_hit_ratio`, `kind: "hit_ratio"`)
+
+A percent bonus on the damage of one observed spell ("increases the damage of Chastise by 25% on enemies affected by
+Tranquil Circle"): `hit_ratio_scenario` casts `observe_spell` at the dummy `trials` times in a control arm, then
+`trials` times in a treatment arm, each arm with its own `auras` (`set_aura` before every trial) and `casts` (made
+before every observed cast). It reads the cumulative `spell_damage_total` and `spell_damage_count` of the observed
+spell at the dummy (`critical` filters hits) at the start of each arm and after every trial, so each trial gives
+its own damage and hit count. `target_health_pct` holds the dummy at a health percent, `force_crit` forces melee or
+spell crits, `learn` adds spells to learn, `label_suffix` names the label `<spell> behaviour_hit_ratio <suffix>`.
+The trials must fit one scenario (`model.trial_limit`); a larger count is refused when the scenario is generated.
+
+The judge (`compare.behaviour_hit_ratio_verdict`, rules in `bonus.py`, ADR 0125) computes each arm's mean per hit
+and the variance of that mean from the trials (`bonus.per_event_sample`), the bonus `(treatment / control - 1) x
+100` and its 99% Welch half-width in points (`bonus.bonus_of`). The bonus passes inside the band of the owner's
+ruling of 2026-11-11, the larger of 5% of the stated bonus and 2 points (`bonus.bonus_band`: "+20%" passes from +18%
+to +22%, "+100%" from +95% to +105%):
+
+- `alert` when the 99% interval lies outside the band, whatever the trial count;
+- `insufficient_trials` when the half-width is above half the band (power), with `trials_needed` per arm;
+- `insufficient_trials` when the interval holds 0 against a nonzero stated bonus (negative arm: the treatment arm
+  is not told apart from the control arm);
+- otherwise `ok` inside the band, `alert` outside it. There is no `tolerated` status.
+
+Every judged verdict states the interval it actually excludes: a true bonus below `stated - band - half` or above
+`stated + band + half` reads `ok` with less than a 0.5% chance (`bonus.excluded_text`). `detail.sized_trials` is the
+trial count whose half-width would be 0.8 of the power limit; the `prove` pilot (`pilot.hit_ratio_pilot`) runs the
+hit-ratio entries at 20 trials, then generates the judged runs at that size, capped at the trial limit. Fewer hits
+than half the trials in either arm is `unmeasured`.
+
+The other ratio checks (`behaviour_ratio`, `behaviour_party_stat_ratio`, `behaviour_duration_ratio`,
+`behaviour_metric_ratio_delta`, `behaviour_absorb_pierce_ratio`, `behaviour_group_stack_cap`,
+`behaviour_crit_magnitude`) judge one reading each; their explanation and `detail.excluded` state the conformant
+range they exclude outside (`compare.with_excluded_band`, the `tolerated` range included for `behaviour_ratio`),
+without a sampling interval.
+
 ### Templar entries
 
 | Passive | Kind | Quote | Expected | Mechanism |
 |---|---|---|---|---|
+| Pious Sweep 520034 (`label_suffix: "tranquil_circle"`) | hit_ratio | "on enemies above 75% health or affected by Tranquil Circle." | +25% (ratio 1.25) | 520034 `Effect[1]` aura 107 `SPELL_AURA_ADD_FLAT_MODIFIER`, `EffectMiscValue[1]` 23 (`SPELLMOD_EFFECT3`, SpellDefines.h:99), $s1 25, on Tranquil Circle 801205, whose `Effect[2]` aura 271 `SPELL_AURA_MOD_DAMAGE_FROM_CASTER` is 0 on its own; the treatment arm casts 801205 at the dummy before every Chastise 503141, the dummy is held at 50% health so the `Effect[0]` aura 303 versus `AURA_STATE_HEALTH_ABOVE_75_PERCENT` (SharedDefines.h:1416) half stays closed, non-critical hits only. Not cited by the clause ledger until it is proven |
 | Scarlet Judicator 525024 | count | "strikes 2 additional enemies near the primary target" | 2 | Divine Force 807805's school-damage effect (`TARGET_UNIT_TARGET_ENEMY`, `DmgClass` 2/melee) always routes through `Spell::SelectImplicitChainTargets` (`Spell.cpp:1905-1923`), which applies Scarlet Judicator's `SPELLMOD_JUMP_TARGETS` flat modifier to `ChainTarget` and searches a 10-yard jump radius for a melee spell with no `JumpDistance` override (`Spell.cpp:2200-2213`) |
 | Justice 712437 | count | "strikes 1 additional nearby target" | 1 | scripted hook `templar_casts::OnSpellBeforeEffects` (`AscensionTemplarAbilities.cpp:95-102`): casting Interdict 560116 with Justice known adds exactly one unit from `Nearby(primary, 8.0f)`; the DBC's own effect 1 (`PROC_TRIGGER_SPELL` to 712364, Sacred Oath's own trigger) does not implement this sentence at all and is not used |
 | Interdict 560116 (`variant: "undead"`/`"demon"`/`"control"`) | heal_block | "If they are an Undead or Demon they are unable to be healed for the duration." | 561309 present on Undead/Demon, absent on the control | round10 `cc-dispel-movement` — **confirmed defect, fixed this round**: 561309 "Atone for your Sins!" (the `EffectTriggerSpell[1]` the silence effect triggers) applied its `SPELL_AURA_MOD_HEALING_PCT -101` heal-block unconditionally, to every Interdict target regardless of creature type; `Spell::EffectTriggerSpell` (`SpellEffects.cpp`) has no generic creature-type gate, and no CoA script referenced either spell id before this fix. Fixed in `AscensionTemplarAbilities.cpp`'s `templar_casts::OnSpellCalculatedTarget`: `hit.missCondition = SPELL_MISS_IMMUNE` for the 561309 cast when the target's `GetCreatureType()` is neither `CREATURE_TYPE_UNDEAD` nor `CREATURE_TYPE_DEMON`. Creature entry 201 (Brittlebones Skeleton, type 6 Undead) and 416 (Imp, type 3 Demon) prove the block holds (561309 measured present); entry 36 (Harvest Golem, type 9 Mechanical, `DUMMY_ENTRY` elsewhere in this tool) is the positive control proving 561309 stays absent when neither type matches — pre-fix, this control entry alerted (561309 present when it should not be) |

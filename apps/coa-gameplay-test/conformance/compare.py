@@ -16,12 +16,15 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_CHARGE_RECHARGE, BEHAVIOUR_CHECKS, BEHAVIOUR_COUNT, BEHAVIOUR_CRIT_GUARANTEE,
                         BEHAVIOUR_CRIT_MAGNITUDE, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO,
                         BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_EXCLUSIVITY, BEHAVIOUR_FIXED_COUNT,
-                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_INTERNAL_COOLDOWN,
+                        BEHAVIOUR_GROUP_STACK_CAP, BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_HIT_RATIO,
+                        BEHAVIOUR_INTERNAL_COOLDOWN,
                         BEHAVIOUR_INTERNAL_COOLDOWN_GATE,
                         BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_MOUNT_GRANT,
                         BEHAVIOUR_OATH_CONSUMPTION,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER, strongest_percent)
+from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
+                   per_event_sample, sized_trials)
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
 from mitigation import TargetProfile, expected_mitigation
@@ -33,8 +36,8 @@ from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
                        questions, spell_name, write_questions)
-from stack import (ADDS, MEASURED, MELEE_SOURCE, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE, TALENT_DELTA,
-                   levers, mean_interval, ratio_interval)
+from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE,
+                   TALENT_DELTA, levers, mean_interval, ratio_interval)
 from tooltip import CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, Unreadable
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
                       PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
@@ -100,6 +103,9 @@ CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
+DATA_ONLY = 'data_only'
+EXCLUDED = 'excluded'
+EXCLUDING_STATUSES = frozenset({'ok', 'tolerated', 'alert'})
 CONTRAST = 'contrast'
 PARRY_CHANCE = 'parry_chance'
 NO_PARRY_BEFORE = ('parry_chance 0 before the learn: the reference character cannot parry (Player::CanParry false) '
@@ -1302,6 +1308,7 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     trigger_total = trigger_count = observe_total = observe_count = kept_count = 0.0
     without_aura, unmeasured = [], []
     reasons: list[int] = []
+    part_ratios: list[float] = []
     for _, run, part in parts:
         labels = part.model['measurements']
         reasons += failure_reasons(run, model['trigger']['spell'])
@@ -1323,6 +1330,8 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
         observe_total += obs_total
         observe_count += obs_count
         kept_count += kept * obs_count
+        if trig_total > 0 and trig_count > 0 and obs_count > 0:
+            part_ratios.append((obs_total / obs_count) / (trig_total / trig_count))
     usable = len(parts) - len(without_aura) - len(unmeasured)
     notes = f'{usable} usable parts of {model["parts"]}'
     if without_aura:
@@ -1355,13 +1364,25 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
         else str(model['trigger']['spell'])
     resisted = (f' (tooltip {tooltip_ratio:g} x {kept:.4f} kept after the target\'s average partial resist of school '
                 f'mask {model["resisted_school_mask"]})') if model.get('resisted_school_mask') else ''
-    return replace(judged, status=status,
+    excluded, excluded_note = magnitude_excluded(low, high, part_ratios)
+    return replace(judged, status=status, detail={EXCLUDED: excluded},
                    explanation=f'mean {mean_observe:g} {model["observe_metric"]} of {model["observe_spell"]} over '
                                f'{observe_count:g} of its own events, against mean {mean_trigger:g} '
                                f'{model["trigger_metric"]} of {trigger_source} over {trigger_count:g} of its own '
                                f'events, = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
                                f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}{resisted}; '
-                               f'{expectation.rule} ({notes})')
+                               f'{expectation.rule} ({notes}); {excluded_note}')
+
+
+def magnitude_excluded(low: float, high: float, part_ratios: list[float]) -> tuple[list[float] | None, str]:
+    if len(part_ratios) < MINIMUM_PASSES:
+        return None, (f'excludes no ratio by a measured interval: {len(part_ratios)} part gives no sampling '
+                      f'interval, so only the band {low:.6g} to {high:.6g} is stated')
+    mean, part_low, part_high = mean_interval(part_ratios)
+    half = (part_high - part_low) / 2
+    return [low - half, high + half], (f'this check {band_excluded_text(low - half, high + half, "a ratio")} '
+                                       f'(the band widened by the 99% half-width {half:.4g} of the mean of '
+                                       f'{len(part_ratios)} part ratios, {mean:.4f})')
 
 
 DETAIL_KEYS = ('config', 'baseline', 'index', 'passes', 'source', 'talents')
@@ -1483,10 +1504,6 @@ def composition_readings(model: dict, known: list[tuple[str, float]]) -> list[tu
     return readings
 
 
-def passes_needed(passes: int, relative_half: float) -> int:
-    return math.ceil(passes * (relative_half / MEAN_HALF_WIDTH) ** 2)
-
-
 def owner_fallback(statuses: set[str], log_query: str | None) -> str:
     if len(statuses) == 1:
         return next(iter(statuses))
@@ -1549,15 +1566,16 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
     delta, low, high = ratio_interval(current, baseline)
     half = (high - low) / 2
     relative = half / (100 + model['bonus_pct'])
-    if relative > MEAN_HALF_WIDTH + FLOAT_EPSILON:
-        needed = passes_needed(min(len(current), len(baseline)), relative)
+    judged_passes = min(len(current), len(baseline))
+    stated = Bonus(delta, half, model['bonus_pct'], judged_passes)
+    power, reason, needed = bonus_status(stated)
+    if power == 'insufficient_trials':
         return replace(base, status='insufficient_trials', measured=delta, expected=model['bonus_pct'], low=low,
-                       high=high, explanation=f'half-width {half:.3g} points is {relative:.2%} of the expected ratio '
-                                              f'{1 + model["bonus_pct"] / 100:g}, above the {MEAN_HALF_WIDTH:.0%} '
-                                              f'bound of hit means; about {needed} passes per configuration would '
-                                              f'meet it (observed variance, same t quantile); per-hit means of '
-                                              f'{source}: {listed(current)} against {listed(baseline)}{failures}')
-    judged = [(name, expected, 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert', why)
+                       high=high, detail={**base.detail, 'trials_needed': needed},
+                       explanation=f'{bonus_text(stated)}; {reason}; about {needed} passes per configuration would '
+                                   f'meet it (observed variance, same t quantile); per-hit means of {source}: '
+                                   f'{listed(current)} against {listed(baseline)}{failures}')
+    judged = [(name, expected, band_status(Bonus(delta, half, expected, judged_passes)), why)
               for name, expected, why in composition_readings(model, known)]
     statuses = {status for _, _, status, _ in judged}
     log_query = log_query_of(manifest, expectation.label)
@@ -1575,14 +1593,15 @@ def judge_talent_delta(manifest: dict, parts: list[ProcPart], config_runs: dict[
     readings = '; '.join(f'{name} ({why}): expected {expected:.4g}%: {item_status}'
                          for name, expected, item_status, why in judged)
     expected_value = applied[1] if applied else judged[0][1]
-    detail = base.detail
+    applied_bonus = Bonus(delta, half, expected_value, judged_passes)
+    detail = {**base.detail, EXCLUDED: list(applied_bonus.excluded), 'bonus': bonus_detail(applied_bonus)}
     if status == 'ambiguous_tooltip':
-        detail = {**base.detail, 'question': talent_question(manifest, expectation, judged, delta, known, tooltips)}
+        detail = {**detail, 'question': talent_question(manifest, expectation, judged, delta, known, tooltips)}
     return replace(base, status=status, measured=delta, expected=expected_value, low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings}; per-hit means of {source} in {len(current)} and {len(baseline)} '
                                f'passes: {listed(current)} against {listed(baseline)}; 99% Welch interval of the '
                                f'ratio of the means, half-width {relative:.2%} of the expected ratio; '
-                               f'{expectation.rule}{failures}')
+                               f'{expectation.rule}{failures}; {bonus_text(applied_bonus)}')
 
 
 def known_label(row: dict) -> str:
@@ -2110,6 +2129,57 @@ def judge_modifier_target(base: Verdict, manifest: dict, entry: dict, run: Run, 
                    detail={'question': question_detail(TEXT_QUESTION, question, readings, before + delta)})
 
 
+def count_power(model: dict, expected: float) -> str | None:
+    if model.get('all_offered'):
+        return None
+    headroom = int(model.get('headroom', 0))
+    if headroom >= 1:
+        return None
+    return (f'the scenario offers no candidate beyond the stated {expected:g}, so a server that reaches more would '
+            f'read {expected:g} too')
+
+
+def exact_count_verdict(base: Verdict, model: dict, measured: float, offered: int, detail: str) -> Verdict:
+    expected = float(model['expected'])
+    status = 'ok' if abs(measured - expected) <= FLOAT_EPSILON else 'alert'
+    power = count_power(model, expected) if status == 'ok' else None
+    scope = ('every offered candidate is stated' if model.get('all_offered') else
+             f'{offered} candidate{"" if offered == 1 else "s"} offered for {expected:g} stated')
+    explanation = (f'{detail}; {scope}; a count is compared exactly, and a measured 0 against a nonzero expected is '
+                   f'always an alert')
+    if power:
+        return replace(base, status='insufficient_trials', measured=measured, expected=expected, low=expected,
+                       high=expected, explanation=f'{explanation}; not judged: {power}')
+    return replace(base, status=status, measured=measured, expected=expected, low=expected, high=expected,
+                   explanation=explanation)
+
+
+def per_cast_breadths(run: Run, per_cast: dict) -> list[int] | str:
+    marks = []
+    for labels in [per_cast['start'], *per_cast['casts']]:
+        row = [run.values.get(label) for label in labels]
+        missing = next((label for label, value in zip(labels, row) if value is None), None)
+        if missing:
+            return missing_measurement(run, missing)
+        marks.append(row)
+    return [sum(1 for before, after in zip(earlier[1:], later[1:]) if after - before > 0)
+            for earlier, later in zip(marks, marks[1:]) if later[0] - earlier[0] > 0]
+
+
+def per_cast_count_verdict(base: Verdict, model: dict, run: Run, offered: int, lead: str) -> Verdict:
+    breadths = per_cast_breadths(run, model['per_cast'])
+    if isinstance(breadths, str):
+        return replace(base, explanation=breadths)
+    casts = len(model['per_cast']['casts'])
+    if not breadths:
+        return replace(base, status='unmeasured',
+                       explanation=f'{lead}; none of the {casts} casts hit the primary dummy, so no cast shows its '
+                                   f'breadth')
+    return exact_count_verdict(base, model, float(max(breadths)), offered,
+                               f'{lead}; extra dummies hit per cast that hit the primary: {breadths} of {casts} '
+                               f'casts, judged on the widest')
+
+
 def behaviour_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before_hit, after_hit = [], []
     for before_label, after_label in model['dummy_labels']:
@@ -2125,16 +2195,11 @@ def behaviour_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         return replace(base, status='unmeasured', measured=float(measured_after - measured_before),
                        explanation=f'{measured_before} of {len(before_hit)} additional dummies were already hit '
                                    f'before the passive was learned; the delta cannot be isolated')
-    delta = measured_after - measured_before
-    expected = float(model['expected'])
-    status = delta_status(BEHAVIOUR_COUNT, delta, expected)
-    margin = delta_margin(BEHAVIOUR_COUNT, expected)
-    return replace(base, status=status, measured=float(delta), expected=expected, low=expected - margin,
-                   high=expected + margin,
-                   explanation=f'{measured_before} of {len(before_hit)} additional dummies hit before the learn, '
-                               f'{measured_after} after; |measured - expected| <= '
-                               f'max({delta_floor(BEHAVIOUR_COUNT):g}, {RELATIVE_TOLERANCE:.1%} of expected), and '
-                               f'a measured 0 against a nonzero expected is always an alert')
+    lead = (f'{measured_before} of {len(before_hit)} additional dummies hit before the learn, {measured_after} '
+            f'after')
+    if model.get('per_cast'):
+        return per_cast_count_verdict(base, model, run, len(after_hit), lead)
+    return exact_count_verdict(base, model, float(measured_after), len(after_hit), lead)
 
 
 def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -2145,23 +2210,19 @@ def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdi
             return replace(base, explanation=missing_measurement(run, label))
         hits.append(value > 0)
     measured = float(sum(hits))
-    expected = float(model['expected'])
-    status = delta_status(BEHAVIOUR_FIXED_COUNT, measured, expected)
-    margin = delta_margin(BEHAVIOUR_FIXED_COUNT, expected)
     far_label = model.get('far_label')
     far_detail = ''
+    far_hit = False
     if far_label is not None:
         far_value = run.values.get(far_label)
         if far_value is None:
             return replace(base, explanation=missing_measurement(run, far_label))
-        if far_value > 0:
-            status = 'alert'
+        far_hit = far_value > 0
         far_detail = f'; beyond-radius dummy hit count {far_value:g} (must stay 0, proving the radius limit)'
-    return replace(base, status=status, measured=measured, expected=expected, low=expected - margin,
-                   high=expected + margin,
-                   explanation=f'{int(measured)} of {len(hits)} additional dummies hit; |measured - expected| <= '
-                               f'max({delta_floor(BEHAVIOUR_FIXED_COUNT):g}, {RELATIVE_TOLERANCE:.1%} of expected), '
-                               f'and a measured 0 against a nonzero expected is always an alert{far_detail}')
+    lead = f'{int(measured)} of {len(hits)} additional dummies hit{far_detail}'
+    verdict = (per_cast_count_verdict(base, model, run, len(hits), lead) if model.get('per_cast') else
+               exact_count_verdict(base, model, measured, len(hits), lead))
+    return replace(verdict, status='alert') if far_hit and verdict.status != 'unmeasured' else verdict
 
 
 PARTY_STAT_RATIO_TOLERANCE = 1e-4
@@ -2879,8 +2940,69 @@ def observed(expectation: Expectation) -> dict:
     return {key: value for key, value in found.items() if value is not None}
 
 
+def hit_ratio_series(run: Run, reads: list[list[str]]) -> tuple[list[float], list[float]] | str:
+    marks = []
+    for total_label, count_label in reads:
+        total, count = run.values.get(total_label), run.values.get(count_label)
+        if total is None or count is None:
+            return missing_measurement(run, total_label if total is None else count_label)
+        marks.append((total, count))
+    pairs = list(zip(marks, marks[1:]))
+    return [later[0] - earlier[0] for earlier, later in pairs], [later[1] - earlier[1] for earlier, later in pairs]
+
+
+def behaviour_hit_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    series = {}
+    for arm in ('control', 'treatment'):
+        found = hit_ratio_series(run, model['reads'][arm])
+        if isinstance(found, str):
+            return replace(base, explanation=found)
+        series[arm] = found
+    minimum = int(model['minimum_hits'])
+    hits = {arm: sum(counts) for arm, (_, counts) in series.items()}
+    if min(hits.values()) < minimum:
+        return replace(base, status='unmeasured',
+                       explanation=f'{hits["control"]:g} control and {hits["treatment"]:g} treatment hits counted; '
+                                   f'each arm needs at least {minimum} of its {model["trials"]} casts to land')
+    control, treatment = (per_event_sample(*series[arm]) for arm in ('control', 'treatment'))
+    try:
+        bonus = bonus_of(treatment, control, float(model['expected_bonus']))
+    except ValueError as error:
+        return replace(base, status='unmeasured', explanation=f'not judged: {error}')
+    status, reason, needed = bonus_status(bonus)
+    sized = sized_trials(bonus)
+    detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,
+              'trial_limit': model.get('trial_limit')}
+    limit = model.get('trial_limit')
+    beyond = (f'; {needed} trials per arm exceed the {limit} one scenario holds' if needed and limit and needed > limit
+              else '')
+    return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
+                   low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
+                   explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
+                               f'{control.mean:.6g} over {control.events:g} control hits, ratio '
+                               f'{treatment.mean / control.mean:.5g}; {bonus_text(bonus)}; {reason}{beyond}')
+
+
+RATIO_CHECKS = frozenset({BEHAVIOUR_RATIO, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_DURATION_RATIO,
+                          BEHAVIOUR_METRIC_RATIO_DELTA, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_GROUP_STACK_CAP,
+                          BEHAVIOUR_CRIT_MAGNITUDE})
+
+
+def with_excluded_band(verdict: Verdict, check: str) -> Verdict:
+    if (check not in RATIO_CHECKS or verdict.status not in EXCLUDING_STATUSES or verdict.low is None
+            or verdict.high is None or verdict.expected is None):
+        return verdict
+    low, high = verdict.low, verdict.high
+    if check == BEHAVIOUR_RATIO:
+        widened = TOLERATED_RELATIVE * abs(verdict.expected - 1.0)
+        low, high = min(low, verdict.expected - widened), max(high, verdict.expected + widened)
+    return replace(verdict, detail={**(verdict.detail or {}), EXCLUDED: [low, high]},
+                   explanation=f'{verdict.explanation}; this check {band_excluded_text(low, high, "a reading")} '
+                               f'(one reading, no sampling interval)')
+
+
 def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
-    verdict = judged_behaviour(base, run, expectation)
+    verdict = with_excluded_band(judged_behaviour(base, run, expectation), expectation.check)
     stamp = observed(expectation)
     return replace(verdict, detail={**(verdict.detail or {}), **stamp}) if stamp else verdict
 
@@ -2953,13 +3075,32 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_internal_cooldown_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_AGGRO_REDIRECT:
         return behaviour_aggro_redirect_verdict(base, run, expectation)
+    if expectation.check == BEHAVIOUR_HIT_RATIO:
+        return behaviour_hit_ratio_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
 def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Expectation,
                   tooltips: TooltipSource) -> Verdict:
     verdict = passive_verdict(manifest, entry, run, expectation, tooltips)
-    return replace(verdict, detail={**(verdict.detail or {}), PASSIVE_METRIC: expectation.model['metric']})
+    metric = expectation.model['metric']
+    detail = {**(verdict.detail or {}), PASSIVE_METRIC: metric}
+    reason = detail.get(DATA_ONLY) or floor_only_reason(verdict, metric)
+    if reason:
+        detail[DATA_ONLY] = reason
+    return replace(verdict, detail=detail)
+
+
+def floor_only_reason(verdict: Verdict, metric: str) -> str | None:
+    if verdict.status not in CONFORMANT or verdict.measured is None or verdict.expected is None:
+        return None
+    floor = delta_floor(metric)
+    band = TOLERATED_RELATIVE * abs(verdict.expected)
+    if floor <= band + FLOAT_EPSILON or abs(verdict.measured - verdict.expected) <= FLOAT_EPSILON:
+        return None
+    return (f'the {floor:g}-point floor of {metric} is wider than the {TOLERATED_RELATIVE:.0%} band '
+            f'({band:.3g}) of the expected delta {verdict.expected:+.6g}, and the reading {verdict.measured:+.6g} '
+            f'is off it, so it does not tell the stated value')
 
 
 def exact_truncated_verdict(base: Verdict, manifest: dict, run: Run, model: dict, value: float, context: str,
@@ -2977,8 +3118,10 @@ def exact_truncated_verdict(base: Verdict, manifest: dict, run: Run, model: dict
     reading = exact_readings[0]
     margin = max(FRACTIONAL_FLOOR, RELATIVE_TOLERANCE * abs(reading.delta))
     status = 'ok' if abs(exact_delta - reading.delta) <= margin + FLOAT_EPSILON else 'alert'
+    unmoved = (f'the integer {model["metric"]} the game uses read {run.values.get(model["before_label"]):g} '
+               f'before and {run.values.get(model["after_label"]):g} after; only the pre-truncation value moved')
     return replace(base, status=status, measured=exact_delta, expected=reading.delta,
-                   low=reading.delta - margin, high=reading.delta + margin,
+                   low=reading.delta - margin, high=reading.delta + margin, detail={DATA_ONLY: unmoved},
                    explanation=f'{context}; the pre-truncation {model["metric"]} read {exact_before:g} before and '
                                f'{exact_after:g} after, delta {exact_delta:+.6g}; {reading.name} ({reading.why}): '
                                f'expected delta {reading.delta:+.6g}; |delta - expected| <= max({FRACTIONAL_FLOOR:g}, '

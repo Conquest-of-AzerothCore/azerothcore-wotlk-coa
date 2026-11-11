@@ -20,7 +20,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_TRIGGER,
                         MECHANIC_LAND_ATTEMPTS, NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
                         SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER,
-                        NotModelled,
+                        BEHAVIOUR_HIT_RATIO, NotModelled, sized_behaviour,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         absorb_pierce_ratio_scenario, absorb_pierce_ratio_spec,
@@ -59,6 +59,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         single_target_scenario, single_target_spec,
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
+from bonus import bonus_band
 from compare import Verdict, judge_behaviour
 from hits import aura_modifiers
 from procs import cast_interval
@@ -136,6 +137,8 @@ CHAKRA_OF_POWER = 803158
 CHAKRA_OF_POWER_ENERGIZE = 804181
 PATIENCE = 712678
 CHASTISE = 503141
+TRANQUIL_CIRCLE = 801205
+PIOUS_SWEEP = 520034
 MARTIAL_TRAINING = 806525
 LIBRAM_OF_TENACITY = 801461
 TENACIOUS_DEFENDER = 707385
@@ -727,7 +730,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 84)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 85)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -735,16 +738,37 @@ class TargetCountScenarioTests(unittest.TestCase):
         spec = target_count_spec(scarlet_judicator_entry())
         scenario, expectations = target_count_scenario(CLASS_FILE, spec)
         validated = run.validate(scenario)
-        self.assertEqual(len(validated['creatures']), 3)
+        self.assertEqual(len(validated['creatures']), 4)
         self.assertEqual(len(expectations), 1)
         expectation = expectations[0]
         self.assertEqual(expectation.check, BEHAVIOUR_COUNT)
         self.assertTrue(expectation.rule.startswith('prose: "strikes 2 additional enemies'))
-        self.assertEqual(len(expectation.model['dummy_labels']), 2)
+        self.assertEqual(len(expectation.model['dummy_labels']), 3)
+        self.assertEqual(expectation.model['headroom'], 1)
+
+    def test_every_candidate_lies_inside_the_radius_of_the_primary(self):
+        spec = target_count_spec(scarlet_judicator_entry())
+        scenario, _ = target_count_scenario(CLASS_FILE, spec)
+        creatures = {c['id']: c for c in run.validate(scenario)['creatures']}
+        primary = creatures.pop('primary')['distance']
+        self.assertEqual(len(creatures), spec.expected + 1)
+        for creature in creatures.values():
+            self.assertLess(creature['distance'] - primary, spec.radius)
+
+    def test_damage_counts_are_read_on_every_dummy_after_every_cast_of_the_judged_phase(self):
+        spec = target_count_spec(scarlet_judicator_entry())
+        scenario, expectations = target_count_scenario(CLASS_FILE, spec)
+        per_cast = expectations[0].model['per_cast']
+        self.assertEqual(len(per_cast['casts']), spec.repeats)
+        self.assertEqual(per_cast['start'][0], f'{SCARLET_JUDICATOR} primary spell_damage_count before')
+        labels = {step.get('label') for step in run.validate(scenario)['steps']}
+        self.assertTrue(all(label in labels for cast in per_cast['casts'] for label in cast))
+        _, justice = target_count_scenario(CLASS_FILE, target_count_spec(justice_entry()))
+        self.assertNotIn('per_cast', justice[0].model)
 
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, justice_entry())
-        self.assertEqual(len(run.validate(scenario)['creatures']), 2)
+        self.assertEqual(len(run.validate(scenario)['creatures']), 3)
         self.assertEqual(expectations[0].check, BEHAVIOUR_COUNT)
 
     def test_justice_entry_reads_the_silence_aura_not_spell_damage_count(self):
@@ -753,10 +777,10 @@ class TargetCountScenarioTests(unittest.TestCase):
         scenario, _ = target_count_scenario(CLASS_FILE, spec)
         measure_steps = [step for step in scenario['steps']
                          if step.get('metric') == 'aura' and step.get('spell') == INTERDICT]
-        self.assertEqual(len(measure_steps), 4)
+        self.assertEqual(len(measure_steps), 6)
         for step in measure_steps:
             self.assertEqual(step['caster'], 'caster')
-            self.assertIn(step['actor'], ('primary', 'extra1'))
+            self.assertIn(step['actor'], ('primary', 'extra1', 'extra2'))
 
     def test_scarlet_judicator_entry_reads_spell_damage_count(self):
         spec = target_count_spec(scarlet_judicator_entry())
@@ -780,12 +804,13 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         spec = fixed_target_count_spec(holy_cleave_entry())
         scenario, expectations = fixed_target_count_scenario(CLASS_FILE, spec)
         validated = run.validate(scenario)
-        self.assertEqual(len(validated['creatures']), 3)
+        self.assertEqual(len(validated['creatures']), 4)
         self.assertEqual(len(expectations), 1)
         expectation = expectations[0]
         self.assertEqual(expectation.check, BEHAVIOUR_FIXED_COUNT)
         self.assertTrue(expectation.rule.startswith('prose: "and an additional nearby enemy'))
-        self.assertEqual(len(expectation.model['dummy_labels']), 1)
+        self.assertEqual(len(expectation.model['dummy_labels']), 2)
+        self.assertEqual(expectation.model['headroom'], 1)
         self.assertIsNotNone(expectation.model['far_label'])
 
     def test_far_dummy_sits_beyond_the_radius(self):
@@ -793,12 +818,14 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
         validated = run.validate(scenario)
         creatures_by_id = {c['id']: c for c in validated['creatures']}
-        self.assertGreater(creatures_by_id['extra2']['distance'] - creatures_by_id['primary']['distance'],
+        self.assertGreater(creatures_by_id['extra3']['distance'] - creatures_by_id['primary']['distance'],
                            spec.radius)
+        for near in ('extra1', 'extra2'):
+            self.assertLess(creatures_by_id[near]['distance'] - creatures_by_id['primary']['distance'], spec.radius)
 
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, holy_cleave_entry())
-        self.assertEqual(len(run.validate(scenario)['creatures']), 3)
+        self.assertEqual(len(run.validate(scenario)['creatures']), 4)
         self.assertEqual(expectations[0].check, BEHAVIOUR_FIXED_COUNT)
 
     def test_single_phase_has_no_before_measurement(self):
@@ -807,7 +834,25 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         measure_steps = [step for step in scenario['steps']
                          if step.get('action') == 'assert' and step.get('metric') == spec.metric
                          and step.get('spell') == spec.target_rank]
-        self.assertEqual(len(measure_steps), 3)
+        self.assertEqual(len([step for step in measure_steps if step['label'].endswith(' after')]), 4)
+        self.assertFalse([step for step in measure_steps if step['label'].endswith(' before')])
+        self.assertEqual(len(measure_steps), 4 + 3 * (spec.repeats + 1))
+
+    def test_listed_auras_are_cleared_before_every_cast(self):
+        spec = fixed_target_count_spec({**holy_cleave_entry(), 'clear_auras': [804903]})
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), spec.repeats)
+        for index in casts:
+            cleared = [step for step in steps[max(0, index - 4):index]
+                       if step['action'] == 'set_aura' and step['spell'] == 804903 and step['stacks'] == 0]
+            self.assertEqual(len(cleared), 1)
+
+    def test_the_templar_holy_cleave_entry_clears_its_own_oath(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == HOLY_CLEAVE
+                     and entry['kind'] == 'fixed_count')
+        self.assertEqual(fixed_target_count_spec(entry).clear_auras, (804903,))
 
     def test_cast_spell_defaults_to_the_claim_spell(self):
         spec = fixed_target_count_spec(holy_cleave_entry())
@@ -2880,36 +2925,53 @@ def base_verdict(expectation: Expectation) -> Verdict:
 
 
 class JudgeTargetCountTests(unittest.TestCase):
-    def expectation(self, expected=2):
+    def expectation(self, expected=2, headroom=1):
+        pairs = [(f'b{index}', f'a{index}') for index in range(1, expected + 1 + headroom)]
         model = {'kind': 'count', 'expected': expected, 'quote': 'strikes 2 additional enemies',
-                 'dummy_labels': [('b1', 'a1'), ('b2', 'a2')]}
+                 'dummy_labels': pairs, 'headroom': headroom}
         return Expectation('label', BEHAVIOUR_COUNT, SCARLET_JUDICATOR, DIVINE_FORCE_MAX_RANK, None, '2',
                            'prose: "strikes 2 additional enemies" (525024)', model)
 
     def test_delta_matches_expected_is_ok(self):
         expectation = self.expectation()
-        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0}
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0, 'b3': 0.0, 'a3': 0.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'ok')
+        self.assertIn('3 candidates offered for 2 stated', verdict.explanation)
 
     def test_delta_below_expected_is_alert(self):
         expectation = self.expectation()
-        values = {'b1': 0.0, 'a1': 0.0, 'b2': 0.0, 'a2': 0.0}
+        values = {'b1': 0.0, 'a1': 0.0, 'b2': 0.0, 'a2': 0.0, 'b3': 0.0, 'a3': 0.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'alert')
 
-    def test_delta_one_below_expected_is_ok_within_the_shared_tolerance_floor(self):
+    def test_seeded_one_below_expected_is_an_alert(self):
         expectation = self.expectation()
-        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 0.0}
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 0.0, 'b3': 0.0, 'a3': 0.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
-        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 1.0))
+
+    def test_seeded_one_above_expected_is_an_alert(self):
+        expectation = self.expectation()
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0, 'b3': 0.0, 'a3': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 3.0))
+
+    def test_a_match_without_a_candidate_beyond_the_count_is_not_judged(self):
+        expectation = self.expectation(headroom=0)
+        values = {'b1': 0.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('no candidate beyond the stated 2', verdict.explanation)
+        short = judge_behaviour(base_verdict(expectation), FakeRun({**values, 'a2': 0.0}), expectation)
+        self.assertEqual(short.status, 'alert')
 
     def test_zero_delta_against_expected_one_is_alert_not_ok(self):
         model = {'kind': 'count', 'expected': 1, 'quote': 'strikes 1 additional nearby target',
-                 'dummy_labels': [('b1', 'a1')]}
+                 'dummy_labels': [('b1', 'a1'), ('b2', 'a2')], 'headroom': 1}
         expectation = Expectation('label', BEHAVIOUR_COUNT, JUSTICE, INTERDICT, None, '1',
                                   'prose: "strikes 1 additional nearby target" (712437)', model)
-        values = {'b1': 0.0, 'a1': 0.0}
+        values = {'b1': 0.0, 'a1': 0.0, 'b2': 0.0, 'a2': 0.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertEqual(verdict.measured, 0.0)
@@ -2917,7 +2979,7 @@ class JudgeTargetCountTests(unittest.TestCase):
 
     def test_already_hit_before_learn_is_unmeasured(self):
         expectation = self.expectation()
-        values = {'b1': 1.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0}
+        values = {'b1': 1.0, 'a1': 1.0, 'b2': 0.0, 'a2': 1.0, 'b3': 0.0, 'a3': 0.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'unmeasured')
 
@@ -2931,6 +2993,54 @@ class JudgeTargetCountTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), None, expectation)
         self.assertIn('no scenario', verdict.explanation)
+
+
+def per_cast_run(per_cast_hits, start=None):
+    dummies = len(per_cast_hits[0])
+    start_labels = [f's{index}' for index in range(dummies)]
+    casts = [[f'c{cast}d{index}' for index in range(dummies)] for cast in range(1, len(per_cast_hits) + 1)]
+    values = dict(zip(start_labels, start or [0.0] * dummies))
+    running = list(start or [0.0] * dummies)
+    for labels, hits in zip(casts, per_cast_hits):
+        running = [value + hit for value, hit in zip(running, hits)]
+        values.update(zip(labels, running))
+    return {'start': start_labels, 'casts': casts}, values
+
+
+class JudgePerCastCountTests(unittest.TestCase):
+    def expectation(self, per_cast, expected=2):
+        pairs = [(f'b{index}', f'a{index}') for index in range(1, expected + 2)]
+        model = {'kind': 'count', 'expected': expected, 'quote': 'strikes 2 additional enemies',
+                 'dummy_labels': pairs, 'headroom': 1, 'per_cast': per_cast}
+        return Expectation('label', BEHAVIOUR_COUNT, SCARLET_JUDICATOR, DIVINE_FORCE_MAX_RANK, None, '2',
+                           'prose: "strikes 2 additional enemies" (525024)', model)
+
+    def judged(self, per_cast_hits):
+        per_cast, values = per_cast_run(per_cast_hits)
+        values.update({'b1': 0.0, 'b2': 0.0, 'b3': 0.0, 'a1': 1.0, 'a2': 1.0, 'a3': 1.0})
+        expectation = self.expectation(per_cast)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_a_selection_that_moves_between_casts_is_judged_per_cast(self):
+        verdict = self.judged([[1, 1, 1, 0], [1, 0, 1, 1], [1, 1, 0, 1]])
+        self.assertEqual((verdict.status, verdict.measured), ('ok', 2.0))
+        self.assertIn('[2, 2, 2] of 3 casts', verdict.explanation)
+
+    def test_seeded_one_cast_striking_one_target_too_many_is_an_alert(self):
+        verdict = self.judged([[1, 1, 1, 0], [1, 1, 1, 1]])
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 3.0))
+
+    def test_seeded_every_cast_one_short_is_an_alert(self):
+        verdict = self.judged([[1, 1, 0, 0], [1, 0, 1, 0]])
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 1.0))
+
+    def test_a_cast_that_missed_the_primary_is_left_out(self):
+        verdict = self.judged([[0, 1, 1, 1], [1, 1, 1, 0]])
+        self.assertEqual((verdict.status, verdict.measured), ('ok', 2.0))
+
+    def test_no_cast_on_the_primary_is_unmeasured(self):
+        verdict = self.judged([[0, 1, 0, 0], [0, 0, 0, 0]])
+        self.assertEqual(verdict.status, 'unmeasured')
 
 
 class JudgeAllyHealBreadthTests(unittest.TestCase):
@@ -2955,49 +3065,76 @@ class JudgeAllyHealBreadthTests(unittest.TestCase):
         self.assertEqual(verdict.measured, 0.0)
         self.assertEqual(verdict.expected, 2.0)
 
-    def test_only_one_of_two_allies_healed_is_ok_within_the_shared_tolerance_floor(self):
+    def test_seeded_one_of_two_allies_healed_is_an_alert(self):
         expectation = self.expectation()
         (b0, a0), (b1, a1) = expectation.model['dummy_labels']
         values = {b0: 0.0, a0: 1.0, b1: 0.0, a1: 0.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_every_offered_ally_is_stated_so_a_match_is_judged(self):
+        expectation = self.expectation()
+        self.assertTrue(expectation.model['all_offered'])
+        (b0, a0), (b1, a1) = expectation.model['dummy_labels']
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({b0: 0.0, a0: 1.0, b1: 0.0, a1: 1.0}),
+                                  expectation)
         self.assertEqual(verdict.status, 'ok')
+        self.assertIn('every offered candidate is stated', verdict.explanation)
 
 
 class JudgeFixedTargetCountTests(unittest.TestCase):
     def expectation(self, expected=1, far_label='far'):
         model = {'kind': 'fixed_count', 'expected': expected, 'quote': 'and an additional nearby enemy',
-                 'dummy_labels': ['a1'], 'far_label': far_label}
+                 'dummy_labels': ['a1', 'a2'], 'far_label': far_label, 'headroom': 1}
         return Expectation('label', BEHAVIOUR_FIXED_COUNT, HOLY_CLEAVE, HOLY_CLEAVE, None, '1',
                            'prose: "and an additional nearby enemy" (573049)', model)
 
     def test_measured_count_matches_expected_and_far_dummy_unhit_is_ok(self):
         expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'far': 0.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'a2': 0.0, 'far': 0.0}), expectation)
         self.assertEqual(verdict.status, 'ok')
         self.assertEqual(verdict.measured, 1.0)
 
     def test_seeded_zero_hit_against_a_nonzero_expectation_fails(self):
         expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 0.0, 'far': 0.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 0.0, 'a2': 0.0, 'far': 0.0}),
+                                  expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertEqual(verdict.measured, 0.0)
         self.assertEqual(verdict.expected, 1.0)
 
+    def test_per_cast_reads_judge_the_widest_landed_cast_and_keep_the_radius_check(self):
+        per_cast, values = per_cast_run([[1, 1, 0], [0, 0, 0], [1, 0, 1]])
+        expectation = self.expectation()
+        expectation = replace(expectation, model={**expectation.model, 'per_cast': per_cast})
+        verdict = judge_behaviour(base_verdict(expectation),
+                                  FakeRun({**values, 'a1': 1.0, 'a2': 1.0, 'far': 0.0}), expectation)
+        self.assertEqual((verdict.status, verdict.measured), ('ok', 1.0))
+        far = judge_behaviour(base_verdict(expectation), FakeRun({**values, 'a1': 1.0, 'a2': 1.0, 'far': 1.0}),
+                              expectation)
+        self.assertEqual(far.status, 'alert')
+
+    def test_seeded_both_near_candidates_hit_against_one_stated_fails(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'a2': 1.0, 'far': 0.0}),
+                                  expectation)
+        self.assertEqual((verdict.status, verdict.measured), ('alert', 2.0))
+
     def test_seeded_far_dummy_hit_fails_even_though_the_near_count_matches(self):
         expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'far': 1.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'a2': 0.0, 'far': 1.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('beyond-radius dummy hit count 1', verdict.explanation)
 
     def test_missing_far_measurement_leaves_alert_with_explanation(self):
         expectation = self.expectation()
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'a2': 0.0}), expectation)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('far', verdict.explanation)
 
     def test_no_far_label_skips_the_radius_check(self):
         expectation = self.expectation(far_label=None)
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0}), expectation)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'a1': 1.0, 'a2': 0.0}), expectation)
         self.assertEqual(verdict.status, 'ok')
 
     def test_missing_measurement_leaves_alert_with_explanation(self):
@@ -3064,18 +3201,159 @@ class JudgePartyStatRatioTests(unittest.TestCase):
         self.assertIn('no scenario', verdict.explanation)
 
 
+def pious_sweep_hit_ratio_entry():
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'hit_ratio'
+                and entry['spell'] == PIOUS_SWEEP)
+
+
+class HitRatioScenarioTests(unittest.TestCase):
+    def test_pious_sweep_entry_reads_both_arms_after_every_trial(self):
+        entry = pious_sweep_hit_ratio_entry()
+        scenario, expectations = behaviour_scenario(CLASS_FILE, entry)
+        validated = run.validate(scenario)
+        expectation = expectations[0]
+        self.assertEqual(expectation.check, BEHAVIOUR_HIT_RATIO)
+        self.assertEqual(expectation.label, f'{PIOUS_SWEEP} behaviour_hit_ratio tranquil_circle')
+        reads = expectation.model['reads']
+        self.assertEqual([len(reads[arm]) for arm in ('control', 'treatment')], [entry['trials'] + 1] * 2)
+        labels = {step['label'] for step in validated['steps'] if step.get('label')}
+        self.assertTrue(all(label in labels for arm in reads.values() for pair in arm for label in pair))
+        filtered = [step for step in validated['steps'] if step.get('metric') == 'spell_damage_count']
+        self.assertTrue(all(step.get('critical') is False for step in filtered))
+        casts = [step['spell'] for step in validated['steps'] if step['action'] == 'cast']
+        self.assertEqual(casts.count(CHASTISE), 2 * entry['trials'])
+        self.assertEqual(casts.count(TRANQUIL_CIRCLE), entry['trials'])
+        self.assertLess(casts.index(TRANQUIL_CIRCLE), len(casts) - casts[::-1].index(CHASTISE))
+        self.assertEqual(expectation.model['expected_bonus'], 25.0)
+        self.assertLessEqual(entry['trials'], expectation.model['trial_limit'])
+
+    def test_more_trials_than_one_scenario_holds_are_refused(self):
+        entry = {**pious_sweep_hit_ratio_entry(), 'trials': 10000}
+        with self.assertRaises(NotModelled) as raised:
+            behaviour_scenario(CLASS_FILE, entry)
+        self.assertIn('trials fit', str(raised.exception))
+
+    def test_identical_arms_are_refused(self):
+        entry = {**pious_sweep_hit_ratio_entry(), 'treatment': {}}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+    def test_sized_behaviour_replaces_the_trials_of_its_label_only(self):
+        entry = pious_sweep_hit_ratio_entry()
+        label = f'{PIOUS_SWEEP} behaviour_hit_ratio tranquil_circle'
+        self.assertEqual(sized_behaviour(entry, {label: 37})['trials'], 37)
+        self.assertEqual(sized_behaviour(entry, {'other': 37}), entry)
+        self.assertEqual(sized_behaviour(justice_entry(), {label: 37}), justice_entry())
+
+
+def hit_ratio_run(expected, control_hits, treatment_hits, minimum=1):
+    trials = len(control_hits)
+    reads = {arm: [(f'{arm} {mark} total', f'{arm} {mark} count') for mark in ('start', *range(1, trials + 1))]
+             for arm in ('control', 'treatment')}
+    values, total, count = {}, 0.0, 0.0
+    for arm, hits in (('control', control_hits), ('treatment', treatment_hits)):
+        marks = reads[arm]
+        values[marks[0][0]], values[marks[0][1]] = total, count
+        for (total_label, count_label), hit in zip(marks[1:], hits):
+            total, count = total + hit, count + (1 if hit else 0)
+            values[total_label], values[count_label] = total, count
+    model = {'kind': 'hit_ratio', 'reads': reads, 'expected': expected, 'expected_bonus': (expected - 1) * 100,
+             'trials': trials, 'trial_limit': 111, 'minimum_hits': minimum, 'metric': 'spell_damage_total'}
+    expectation = Expectation('label', BEHAVIOUR_HIT_RATIO, PIOUS_SWEEP, CHASTISE, None, str(expected),
+                              'prose: "affected by Tranquil Circle"', model)
+    return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+
+def control_hits(trials):
+    return [1000.0 + 10.0 * ((index * 7) % 11 - 5) for index in range(trials)]
+
+
+class JudgeHitRatioTests(unittest.TestCase):
+    def test_nineteen_percent_on_a_twenty_percent_tooltip_passes(self):
+        control = control_hits(400)
+        verdict = hit_ratio_run(1.20, control, [hit * 1.19 for hit in control])
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 19.0)
+        self.assertAlmostEqual(verdict.low, 18.0)
+        self.assertAlmostEqual(verdict.high, 22.0)
+        self.assertLessEqual(verdict.detail['bonus']['half'], 1.0)
+        self.assertEqual(verdict.detail['metric'], 'spell_damage_total')
+
+    def test_seeded_fourteen_percent_on_a_twenty_percent_tooltip_fails(self):
+        control = control_hits(400)
+        verdict = hit_ratio_run(1.20, control, [hit * 1.14 for hit in control])
+        self.assertEqual(verdict.status, 'alert')
+        self.assertAlmostEqual(verdict.measured, 14.0)
+
+    def test_the_old_five_percent_ratio_band_would_have_passed_the_seeded_server(self):
+        self.assertLessEqual(abs(1.14 - 1.20), 0.05 * 1.20 + 1e-9)
+
+    def test_every_judged_verdict_states_the_interval_it_excludes(self):
+        control = control_hits(400)
+        verdict = hit_ratio_run(1.20, control, [hit * 1.19 for hit in control])
+        half = verdict.detail['bonus']['half']
+        self.assertAlmostEqual(verdict.detail['bonus']['excluded_below'], 20.0 - 2.0 - half)
+        self.assertAlmostEqual(verdict.detail['bonus']['excluded_above'], 20.0 + 2.0 + half)
+        self.assertIn(f'excludes a bonus below {20.0 - 2.0 - half:+.4g}% or above {20.0 + 2.0 + half:+.4g}%',
+                      verdict.explanation)
+
+    def test_an_interval_wider_than_half_the_band_is_not_judged_and_names_the_trials(self):
+        control = control_hits(20)
+        verdict = hit_ratio_run(1.20, control, [hit * 1.19 for hit in control])
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertGreater(verdict.detail['bonus']['half'], 1.0)
+        self.assertGreater(verdict.detail['trials_needed'], 20)
+        self.assertGreater(verdict.detail['sized_trials'], verdict.detail['trials_needed'])
+
+    def test_an_interval_outside_the_band_fails_without_power(self):
+        control = control_hits(20)
+        verdict = hit_ratio_run(1.20, control, [hit * 1.60 for hit in control])
+        self.assertEqual(verdict.status, 'alert')
+
+    def test_an_interval_holding_zero_does_not_tell_the_arms_apart(self):
+        control = control_hits(400)
+        verdict = hit_ratio_run(1.02, control, [hit * 1.002 for hit in control])
+        self.assertEqual(verdict.status, 'insufficient_trials')
+        self.assertIn('not told apart from the control arm', verdict.explanation)
+
+    def test_too_few_hits_in_an_arm_is_unmeasured(self):
+        control = control_hits(40)
+        verdict = hit_ratio_run(1.20, control, [0.0] * 30 + [hit * 1.2 for hit in control[:10]], minimum=20)
+        self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_a_missing_read_names_its_label(self):
+        control = control_hits(10)
+        trials = len(control)
+        reads = {arm: [(f'{arm} {mark} total', f'{arm} {mark} count') for mark in ('start', *range(1, trials + 1))]
+                 for arm in ('control', 'treatment')}
+        model = {'kind': 'hit_ratio', 'reads': reads, 'expected': 1.2, 'expected_bonus': 20.0, 'trials': trials,
+                 'minimum_hits': 1, 'metric': 'spell_damage_total'}
+        expectation = Expectation('label', BEHAVIOUR_HIT_RATIO, PIOUS_SWEEP, CHASTISE, None, '1.2', 'prose', model)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({}), expectation)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('control start total', verdict.explanation)
+
+
+class BonusBandTests(unittest.TestCase):
+    def test_the_band_is_the_larger_of_five_percent_and_two_points(self):
+        self.assertEqual(bonus_band(20.0), 2.0)
+        self.assertEqual(bonus_band(100.0), 5.0)
+        self.assertEqual(bonus_band(-10.0), 2.0)
+        self.assertEqual(bonus_band(60.0), 3.0)
+
+
 class JudgeHolyTempestTests(unittest.TestCase):
     def expectation(self):
         model = {'kind': 'count', 'expected': 1, 'quote': 'spreads Condemn on affected enemies to a nearby enemy',
-                 'dummy_labels': [('b1', 'a1')]}
+                 'dummy_labels': [('b1', 'a1')], 'headroom': 0}
         return Expectation('label', BEHAVIOUR_COUNT, HOLY_TEMPEST, RIGHTEOUS_TEMPEST_RANK, None, '1',
                            'prose: "spreads Condemn on affected enemies to a nearby enemy" (301339)', model)
 
-    def test_condemn_observed_on_the_nearby_dummy_is_ok(self):
+    def test_condemn_on_the_only_nearby_dummy_is_not_judged_without_a_further_candidate(self):
         expectation = self.expectation()
         values = {'b1': 0.0, 'a1': 1.0}
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
-        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.status, 'insufficient_trials')
 
     def test_no_spread_at_all_is_alert_not_ok(self):
         expectation = self.expectation()
@@ -3114,6 +3392,15 @@ class JudgeHealingRatioTests(unittest.TestCase):
         expectation = self.expectation()
         verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 100.0, 'after': 200.0}), expectation)
         self.assertEqual(verdict.status, 'ok')
+
+    def test_a_judged_ratio_states_the_range_it_excludes_with_the_tolerated_band(self):
+        expectation = self.expectation()
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun({'before': 100.0, 'after': 200.0}), expectation)
+        self.assertEqual(verdict.detail['excluded'], [1.95, 2.05])
+        self.assertIn('excludes a reading below 1.95 or above 2.05 (one reading, no sampling interval)',
+                      verdict.explanation)
+        unjudged = judge_behaviour(base_verdict(expectation), FakeRun({'before': 0.0, 'after': 200.0}), expectation)
+        self.assertNotIn('excluded', unjudged.detail or {})
 
     def test_ratio_mismatch_is_alert(self):
         expectation = self.expectation()

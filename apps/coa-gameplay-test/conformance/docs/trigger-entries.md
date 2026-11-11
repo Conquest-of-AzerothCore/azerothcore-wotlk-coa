@@ -396,6 +396,9 @@ trigger spell for `cast`, `melee_damage_count` of the main hand for `attack`), a
 `ratio = (observe_total / observe_count) / (trigger_total / trigger_count)` — the triggered spell's own mean
 amount per occurrence, over the trigger side's own mean amount per attempt — against `expected_ratio` within
 `max(0.01, 5% of expected)` (the owner's own "within 5% on numbers" standard), everything outside is `alert`.
+The explanation and `detail.excluded` state the ratio range the check excludes (`compare.magnitude_excluded`): the
+band widened by the 99% half-width of the mean of the per-part ratios when two parts or more were usable, otherwise
+the band alone with the statement that one part gives no sampling interval.
 When the observed copy is a magic-school `spell_damage_total` struck at the dummy, the scenario also reads the
 dummy's `view_level` and resistance and the expected value is `expected_ratio` times the kept fraction of
 `expected_mitigation` (linear monster resistance with its partial-resist steps, ADR 0092).
