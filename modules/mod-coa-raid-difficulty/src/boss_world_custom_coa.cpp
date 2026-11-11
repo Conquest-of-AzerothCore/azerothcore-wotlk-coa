@@ -286,7 +286,7 @@ namespace
     constexpr uint32 SETIS_SHRINE_TEXT = 64600;
     constexpr uint32 ITEM_RUNE_OF_ASCENSION = 375250;
     constexpr uint32 ITEM_BAZAAR_TOKEN = 975001;
-    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 978059;
+    constexpr uint32 ITEM_TREASURES_OF_AZEROTH = 1615011;
     constexpr uint32 SETIS_RUNES = 250;
     constexpr uint32 SETIS_TOKENS_MIN = 100;
     constexpr uint32 SETIS_TOKENS_MAX = 150;
