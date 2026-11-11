@@ -897,14 +897,16 @@
   {
     "spell": 520534,
     "clause": "and upon dealing damage, you pull enemies within 15 yds towards you.",
-    "labels": [],
+    "labels": [
+      "520534 behaviour_fixed_count"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520534,
     "clause": "@ext:Enemies pulled cannot be pulled this way again within 15 seconds.:ext@",
     "labels": [
-      "520534 effect_value #1"
+      "520534 behaviour_internal_cooldown_gate"
     ],
     "kind": "claim"
   },

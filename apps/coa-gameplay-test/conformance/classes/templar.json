@@ -4715,6 +4715,19 @@
       "gated_spell": 573049, "resource": "power", "reduction": 35, "target": "dummy",
       "setup_casts": [[803792, "ally"]], "next_arm": true, "aura_duration_ms": 5000, "restore_charges": true,
       "observe_source": "AscensionTemplarAbilities.cpp:233-235: a Temple Guardian (Named 801165; 803792 is its level 60 rank) cast with 705256 known casts Determined 681136 on the caster: Effect[0] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT, MiscValue 127, EffectBasePoints -101 + 1 = -100%, DurationIndex 28 (5000 ms, $681136d). The next family-25 ability takes its sequence (Selected, :28-29) and drops its charge (ConsumeSelected, :53-60). Holy Cleave 573049 (35 Energy, no cooldown) is attempted at 0 Energy: refused without Determined (control), through after a Temple Guardian with it, refused again on the next attempt, through 300 ms before the 5000 ms end and refused 300 ms after it. A cost reduced to 0 has no level below it, so there is no beyond arm (ADR 0185). Temple Guardian is a charge (5 to 30 yd): the caster steps back before it and its charges are restored before it, or the fourth arm's charge fails and leaves the caster out of range (a first run read 97 SPELL_FAILED_OUT_OF_RANGE there)."
+    },
+    {
+      "spell": 520534, "name": "Templar Rituals", "kind": "fixed_count", "variant": "pull",
+      "quote": "you pull enemies within 15 yds towards you.", "expected": 2, "uncapped": true,
+      "cast_spell": 807274, "target_rank": 520694, "metric": "aura", "cast_target": "caster", "repeats": 1,
+      "learn": [520534], "radius": 15.0, "pull_reads": true,
+      "radius_reason": "AscensionTemplarAbilities.cpp:352-362: a hit of Righteous Tempest (805410 or family word 0 bit 2, here 570205 of 807274) with 520534 known casts 520544 once per spell and, for every valid enemy of Nearby(player, 15.0f) not carrying the caster's 520694, casts 520695 (Templar Rituals Pull, Effect[0] 124 SPELL_EFFECT_PULL_TOWARDS) and 520694 (a 15000 ms marker, aura 4) on it. Righteous Tempest 807274 is cast at the caster; the dummy at 3.75 yd takes its hit, and the three dummies within 15 yd must read the marker and end closer to the caster, while the one at 20 yd reads neither (ADR 0186). A diagnostic (20261111-232855) read 3.75, 7.5 and 11.25 yd to 0 and 20 to 20."
+    },
+    {
+      "spell": 520534, "name": "Templar Rituals", "kind": "internal_cooldown_gate", "variant": "pull_lockout",
+      "quote": "@ext:Enemies pulled cannot be pulled this way again within 15 seconds.:ext@",
+      "trigger_spell": 807274, "observe_spell": 520695, "internal_cooldown_ms": 15000, "target": "dummy",
+      "source": "AscensionTemplarAbilities.cpp:352-362: a hit of Righteous Tempest (805410 or family word 0 bit 2, here 570205 of 807274) with 520534 known casts 520544 once per spell and, for every valid enemy of Nearby(player, 15.0f) not carrying the caster's 520694, casts 520695 (Templar Rituals Pull, Effect[0] 124 SPELL_EFFECT_PULL_TOWARDS) and 520694 (a 15000 ms marker, aura 4) on it. Three Righteous Tempest casts at the dummy, 7500 ms then 8000 ms apart (each past the 5000 ms aura): the pull 520695 is cast on the dummy by the first, not by the second while its 520694 marker holds, and once more by the third. The first gap outlasts the Tempest, whose recast is refused while its aura is up."
     }
   ],
   "player_observations": [
