@@ -31,7 +31,7 @@ The server only has Normal:
 | **dbc** | installed game client vs `data/dbc` | Map, MapDifficulty, LFGDungeons, DungeonEncounter, Spell, SpellDifficulty: identical |
 | **tavern** | coatavern.com | items, spells and achievements only; NPC and quest pages return 404 |
 | **descension** | Project Descension (78dcaeeb) | stock ZG scripts; WDB and Exiles staging rows for the Loa Avatars and Heart of Hakkar |
-| **video** | YouTube c7iqfz04PmI (launch-day Normal, 7 bosses incl. Hakkar) and 6ihbw1PKc2E (Ascended, 2026-08-04: Arlokk, Thekal, Mar'li wipes) | Zandalar drops, per-kill runes and commendations, avatars in their temples, Mar'li's Ascended Hatch Eggs bar |
+| **video** | YouTube c7iqfz04PmI (launch-day Normal, 7 bosses incl. Hakkar) and 6ihbw1PKc2E (Mythic, 2026-08-04: Arlokk, Thekal, Mar'li wipes) | Zandalar drops, per-kill runes and commendations, avatars in their temples, Mar'li's Ascended Hatch Eggs bar |
 
 A value found only in an archive (exiles, sub, or a lone wdb row that contradicts other sources) needs approval before
 it goes into a fix. Health in exiles and sub does not scale consistently against the log (ratios 5.4x-10.2x), so
@@ -85,7 +85,8 @@ Archive-only boss points (approval needed):
   (`boss_hakkar_coa.cpp`), an id that is "Netherstorm Fel Quests" in sub.
 - Ohgan rank 1, Spawn of Mar'li display 959, Powerful Healing Ward named "Healing Stream Totem" (wdb). Ohgan's
   display 215271 is applied (section 7).
-- Exiles-only spells never cast in the logs: Venoxis 2118081, 2118085, 2118045. Jeklik casts 2106125 Bat-tering
+- Exiles-only spells never cast in the Normal logs: Venoxis 2118081, 2118085, 2118045 (the Ascended logs cast all
+  three). Jeklik casts 2106125 Bat-tering
   Charge every 20 s in `2026-08-02-19.50.33`.
 
 ## 5. Trash and spawns
@@ -184,8 +185,9 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | Gri'lek 15082 has 318,182 health per player on Normal (458,182, 598,182 and 738,182 above), from the tester's video of 3.5 million at 11 players; it was 108,341, about 1.19 million at 11 | `rev_20261104_05` | tester video 2026-11-04, user decision |
 | Ohgan (14988 and its tiers) uses display 215271, model 15271 at a client scale of 2, with its own model info (bounding radius 0.7, combat reach 3); he runs in from the arena entrance when Mandokir is pulled instead of appearing at his side | `rev_20261104_03`, `boss_mandokir_coa.cpp` | wdb, dbc, tester 2026-11-04, user decision |
 | tester feedback of 2026-11-08 checked against the live logs: Jeklik's Terrifying Screech comes the moment her charge stuns (12 of 12 landed charges), or in its place when nobody is in reach, not on its own timer; each Parasitic Serpent hunts a different player from Venoxis's threat list; serpents have 979 and Spawn of Mar'li 3,304 health per player on the ZG ladder; Gri'lek's Ground Slam is cast at his victim and his melee is calibrated to the live median hit (DamageModifier 85.7 / 123.4 / 161.1 / 198.8); Mar'li's Web Spray webs everyone in sight within 35 yards and she is hidden (display 22452) while burrowed; Mandokir cannot be attacked or selected on his ledge, charges a random player out of melee and rides Ohgan's double-size display 215271; Thekal's tiger form starts War Stomp's 2 s cast at 1 s and Speed Slash as it ends (3 s), Speed Slash keeps his threat list and every cut applies Rip; Arlokk Ravages her highest-threat target, a Claw Storm hit applies Razor Claws with an 8% chance (live: 34 of 452 hits) and Vanish follows 44 s after each Ravage; the Shade of Jin'do 14986 never melees and casts Seeking Shadow Bolts (2118556, a Seeking Shadow Bolt on every player every 4 s) until it dies; Hakkar can be taunted (CreatureImmunitiesId -273); the side Sons of Hakkar 49033/49034 respawn after 2 h; the Jinxed Hoodoo Pile's trap 180244 no longer summons the Gurubashi who casts Will of Hakkar | the boss scripts, `rev_20261108_02` | tester, live log, dbc, user decision |
+| tester feedback of 2026-11-12: the Heart of Hakkar 92005 scales with tier and raid size (19,959 / 28,741 / 29,722 / 95,396 per player: Normal and Ascended measured, Mythic by the Bronzebeard Mythic/Normal ratio 1.489, Heroic on the ladder); Arlokk's Zulian Prowlers 15101 (3,304 per player, from 36,342 at 11), Bloodseeker Bats 11368 (1,430 / 2,059 / 3,100 / 6,300, also the temple trash bats) and Frenzied Bloodseeker Bats 14965 (33,403 / 69,252 on Mythic and Ascended) get flex rows; Spawn of Mar'li has 8,431 per player on Mythic and 10,680 on Ascended, and its Mythic swing is 322 (DamageModifier 4.776); the Heroic, Mythic and Ascended templates carry the 2.2 raid health that CoA scaling applies on Normal only; Jeklik summons 6 Bloodseeker Bats every 30 s in both phases (raid-size scaled), plus a Frenzied Bloodseeker Bat every 30 s in bat form on Mythic and Ascended; Mar'li's Drain Life splashes to 32 % of the players within 100 yards (8 of 25; live 16 of 25, user: meet in the middle); Infest and its festering spiderlings only on Ascended; Gri'lek's Ground Slam hits each player once (it was cast at every player and each cast hit everyone) | `rev_20261112_05`, `boss_jeklik_coa.cpp`, `boss_marli_coa.cpp`, `boss_grilek_coa.cpp` | tester, live log, user decision |
 
-Normal boss health is unchanged except Gri'lek's. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
+Normal boss health is unchanged except Gri'lek's and the Heart of Hakkar's. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
 to it in the log.
 
 ## 8. Still open
@@ -232,3 +234,10 @@ to it in the log.
     - No source yet: raid revive checkpoints, and the distance of Jin'do's totems.
     - Gri'lek's melee: the live logs carry no armor, so the calibrated DamageModifier is a floor. The server's mean
       hit before armor with his avatar was 4,598; the live median hit is 17,520.
+17. Tester feedback of 2026-11-12:
+    - Estimated here: the Heroic Heart on the ladder (28,741, close to Mythic's 29,722), Spawn of Mar'li's Ascended
+      10,680 (Bronzebeard Ascended/Normal ratio), the frenzied bat's 30 s interval and first spawn, and the 0.32
+      Drain Life share.
+    - Not changed yet: Corpse Explosion and Evolve gating, Bat Rider 14914, School of Fish 80633, the Festering
+      Spawn creature 80638, Mandokir's Whirlwind, Hakkar's damage, Arlokk's Vanish, and Gri'lek's slam damage above
+      the DBC.

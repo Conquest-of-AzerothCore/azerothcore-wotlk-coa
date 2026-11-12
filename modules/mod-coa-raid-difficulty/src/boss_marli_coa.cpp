@@ -56,6 +56,7 @@
  *     on them (no combat log shows it).
  */
 
+#include "Containers.h"
 #include "CreatureScript.h"
 #include "GameObject.h"
 #include "ScriptedCreature.h"
@@ -63,6 +64,7 @@
 #include "zg_coa_common.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <list>
 #include <vector>
@@ -86,6 +88,7 @@ namespace
 
         INFO_DRAIN_LIFE           = 2118101,
         SPELL_DRAIN_LIFE          = 2118105,
+        SPELL_DRAIN_LIFE_SPLASH   = 2118106,
         SPELL_DRAIN_LIFE_TICK     = 2118107,
         SPELL_DRAIN_LIFE_HEAL     = 2118108,
         SPELL_POISON_BOLT_VOLLEY  = 2118109,
@@ -151,6 +154,9 @@ namespace
     constexpr Milliseconds HATCH_EVERY          = 30s;
     constexpr Milliseconds HATCH_DELAY          = 10s;
     constexpr float EGG_SEARCH_RANGE = 100.0f;
+    constexpr float DRAIN_LIFE_RANGE = 100.0f;
+    constexpr float DRAIN_LIFE_SPLASH_SHARE = 0.32f;
+    constexpr uint8 INFEST_MIN_SPAWN_MODE = 3;
     constexpr float HUNT_THREAT    = 1000000.0f;
 
     struct boss_marli_coa : public BossAI
@@ -192,7 +198,8 @@ namespace
             events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s);
             events.ScheduleEvent(EVENT_HATCH_EGGS, 17s);
             events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
+            if (me->GetMap()->GetSpawnMode() >= INFEST_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
         }
 
@@ -310,6 +317,17 @@ namespace
                 spot->SetFaction(me->GetFaction());
                 spot->CastSpell(spot, SPELL_POISON_SHOCK_HIT, true, nullptr, nullptr, me->GetGUID());
             }
+        }
+
+        void DrainLifeSplash(Unit* primary, int32 tick)
+        {
+            std::vector<Player*> raid = PlayersWithin(me, DRAIN_LIFE_RANGE);
+            size_t const count = size_t(std::lround(raid.size() * DRAIN_LIFE_SPLASH_SHARE));
+            std::erase(raid, primary);
+            Acore::Containers::RandomShuffle(raid);
+            raid.resize(std::min(raid.size(), count));
+            for (Player* p : raid)
+                me->CastCustomSpell(p, SPELL_DRAIN_LIFE_SPLASH, nullptr, &tick, nullptr, true);
         }
 
         void KilledUnit(Unit* victim) override
@@ -466,10 +484,11 @@ namespace
                         events.ScheduleEvent(EVENT_THRASH, 10s, 20s);
                         break;
                     case EVENT_DRAIN_LIFE:
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
+                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, DRAIN_LIFE_RANGE, true))
                         {
                             int32 tick = Info(me, INFO_DRAIN_LIFE);
                             me->CastCustomSpell(target, SPELL_DRAIN_LIFE, nullptr, &tick, nullptr, false);
+                            DrainLifeSplash(target, tick);
                         }
                         events.ScheduleEvent(EVENT_DRAIN_LIFE, 10s, 0, PHASE_TROLL);
                         break;
