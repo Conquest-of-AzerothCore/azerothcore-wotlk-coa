@@ -978,10 +978,11 @@
     "clause": "and critical strike chance of your next Argent Blade by $s1%.",
     "labels": [
       "520608 effect_value e0 #0",
-      "520608 e0 spell_modifier 561167"
+      "520608 e0 spell_modifier 561167",
+      "520608 behaviour_hit_ratio argent_blade_crit_rate"
     ],
     "kind": "claim",
-    "reason": "data conformant (spell modifier readbacks); behaviour read, not final (chance-claim ruling 2026-11-12, ADR 0173): 520608 behaviour_crit_rate measured on 300 Argent Blades per arm, effect present, interval stated; the pooled proof to the band follows with the ext2 pooling extension; see lean/r1-a-progress.md for the interval and the cast count the band needs"
+    "reason": "Argent Blade 807268 with Warrior of Dawn 561156 set before each cast, 520608 set first in the treatment, no crit fixture: pooled rate proof (chance-claim ruling 2026-11-12, ADR 0195 rate mode), 76 parts of 166 casts per arm, 12,616 per arm. Critical share +50.26 points (99% interval +49.11 to +51.41) and +50.40 (+49.26 to +51.55) against +50 inside +-2.5, control 0 critical hits in both runs of one counted pair (20261112-012244, -012512). The 300-cast crit_rate step (ADR 0173) stays as the first reading"
   },
   {
     "spell": 520812,
