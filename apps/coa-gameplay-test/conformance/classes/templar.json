@@ -1783,6 +1783,49 @@
   ],
   "behaviours": [
     {
+      "spell": 92111, "name": "Scourgebane (strike, unresisted)", "kind": "script_hit", "variant": "unresisted",
+      "label_suffix": "unresisted",
+      "quote": "dealing an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage",
+      "hit_spell": 801832, "casts": [[570233, "dummy"]], "caster_auras": [[823764, 1]], "unresisted": true,
+      "settle_ms": 1300, "trials": 300, "minimum_hits": 40,
+      "observe_source": "The weapon part of the strike resolved (review I1): the same 92111 proc on Righteous Lunge hits, with 823764 (beeg spellpen, SpellFamilyName 33, no Templar spell) set before every trial so the dummy's level-based Holy resistance and its partial resists vanish, and the model unresisted (ADR 0220). The strike is then 801832's school part plus 50% of the staff's damage (6.56-10.94 plus 313 AP / 14 x 2.5 s), each fixed to a point or two, so the mean bounds the weapon percent closely; control without 92111: no strike."
+    },
+    {
+      "spell": 300515, "name": "Fortified Body (ally at 42 yd)", "kind": "hit_ratio", "variant": "ally_42",
+      "label_suffix": "ally_42", "expected": 1.06, "ally_distance": 42, "quote": "Allies within $a1 yds receive $s1% more healing.", "observe_spell": 578276, "metric": "spell_heal_total",
+      "caster": "ally", "target": "ally", "control": {}, "treatment": {"auras": [[300515, 1]]}, "critical": false,
+      "trials": 40, "target_health_pct": 50, "fixture": {"spell_power": 20000},
+      "expected_source": "Radius bracket (review M1): the raid aura reaches a unit within 40 yd plus both combat reaches (Unit::IsWithinDistInMap adds them, 1.5 each for players), 43 yd from the Templar's spawn; at 42 yd the ally's Benediction 578276 self heal still grows 6%."
+    },
+    {
+      "spell": 300515, "name": "Fortified Body (ally at 44 yd)", "kind": "hit_ratio", "variant": "ally_44",
+      "label_suffix": "ally_44", "expected": 1.0, "ally_distance": 44, "quote": "Allies within $a1 yds receive $s1% more healing.", "observe_spell": 578276, "metric": "spell_heal_total",
+      "caster": "ally", "target": "ally", "control": {}, "treatment": {"auras": [[300515, 1]]}, "critical": false,
+      "trials": 40, "target_health_pct": 50, "fixture": {"spell_power": 20000},
+      "expected_source": "Radius bracket (review M1): at 44 yd, beyond 40 yd plus both combat reaches (43), the ally's self heal does not grow: 1.0. With ally_42 the reach lies in (42, 44] yd."
+    },
+    {
+      "spell": 300520, "name": "Judgement", "kind": "hit_ratio", "variant": "scourgebane_17",
+      "label_suffix": "scourgebane_17", "quote": "on enemies below 20% health.", "expected": 1.25, "observe_spell": 801832,
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [300520, 1]]}, "critical": false,
+      "trials": 40, "target_health_pct": 17, "fixture": {"attack_power": 20000, "spell_power": 20000},
+      "expected_source": "Health bracket (review M2): the dummy at 17% (it loses under 2% of its 50,000,000 health over the 80 casts, so it stays below 20%): Scourgebane 801832 +25% with 300520 (AscensionTemplarAbilities.cpp:140-142). 823764 in both arms. Non-critical hits only."
+    },
+    {
+      "spell": 300520, "name": "Judgement", "kind": "hit_ratio", "variant": "scourgebane_23",
+      "label_suffix": "scourgebane_23", "quote": "on enemies below 20% health.", "expected": 1.0, "observe_spell": 801832,
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [300520, 1]]}, "critical": false,
+      "trials": 40, "target_health_pct": 23, "fixture": {"attack_power": 20000, "spell_power": 20000},
+      "expected_source": "Health bracket (review M2): the dummy at 23%, losing under 2% over the 80 casts, so it stays above 20%: 300520 adds nothing, 1.0. With scourgebane_17 the threshold lies in (17, 23)%."
+    },
+    {
+      "spell": 705286, "name": "Duty Calls (no Oath)", "kind": "metric_delta", "variant": "non_oath",
+      "label_suffix": "non_oath", "quote": "Casting abilities that grant an Oath now increases", "expected": 0,
+      "before_expected": 0, "trigger_spell": 801832, "target": "dummy", "measure_actor": "caster", "metric": "aura_stacks",
+      "fields": {"spell": 560834}, "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "Condition control (review M3): the Scourgebane strike 801832 is a Templar ability (SpellFamilyName 25) without SpellFamilyFlags[2] bit 1, so it grants no Oath (AscensionTemplarAbilities.cpp:186-194); with 705286 learned it leaves 560834 at 0 stacks, while the stack_cap entry's Righteous Lunges (bit 1) cast it."
+    },
+    {
       "spell": 527023, "name": "Divine Charge (trample ticks by 1250 ms)", "kind": "metric_delta", "variant": "ticks_1250",
       "label_suffix": "ticks_1250", "quote": "Holy Damage every $527270t3 sec", "expected": 2, "before_expected": 0,
       "trigger_spell": 527023, "target": "caster", "cast_in_before": false, "select_dummy": true,
@@ -1830,14 +1873,14 @@
       "quote": "and unleashes Scourgebane, dealing ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} Holy damage.",
       "hit_spell": 801832, "casts": [[807268, "dummy"]], "control_casts": [[570233, "dummy"]], "trials": 40,
       "minimum_hits": 30,
-      "observe_source": "AscensionTemplarAbilities.cpp:141-142 and 309-310: an Argent Blade (Named 804929) hit marks the spell and casts the Scourgebane strike 801832 at its target; AscensionTemplarContracts.cpp:181-186 removes the DBC trigger effect so the script is the only path. Each treatment trial casts Argent Blade 807268 (the level 60 rank) at the dummy; each control trial casts Righteous Lunge 570233 instead (ADR 0206), which unleashes nothing, Scourgebane 92111 not being known. 801832: Effect[0] SCHOOL_DAMAGE 261 + 1, Effect[1] WEAPON_PERCENT_DAMAGE 50%, Templar coefficients 0.25 / 0.25 (AscensionTemplarData.h:77)."
+      "observe_source": "AscensionTemplarAbilities.cpp:141-142 and 309-310: an Argent Blade (Named 804929) hit marks the spell and casts the Scourgebane strike 801832 at its target; AscensionTemplarContracts.cpp:181-186 removes the DBC trigger effect so the script is the only path. Each treatment trial casts Argent Blade 807268 (the level 60 rank) at the dummy; each control trial casts Righteous Lunge 570233 instead (ADR 0206), which unleashes nothing, Scourgebane 92111 not being known. 801832: Effect[0] SCHOOL_DAMAGE 261 + 1, Effect[1] WEAPON_PERCENT_DAMAGE 50%, Templar coefficients 0.25 / 0.25 (AscensionTemplarData.h:76)."
     },
     {
       "spell": 300513, "name": "Crusader's Brand (damage on the branded attacker)", "kind": "script_hit",
       "quote": "and when they deal direct damage they take ${$573020m1*$<scalingbp>+$sph*0.275+$AP*.185} Holy Damage.",
       "hit_spell": 573020, "casts": [[300513, "striker"]], "control_casts": [], "strike_spell": 41394,
       "receiver": "striker", "caster_health_pct": 100, "trials": 40, "minimum_hits": 30,
-      "observe_source": "AscensionTemplarEvents.cpp:120-121 (case 300513): a direct damage hit dealt by the branded unit casts 573020 from the Templar at that unit (300513 Effect[0] aura 42, ProcChance 100). Each treatment trial brands the passive striker (creature 36, 3 yd away), which then casts Light of the Naaru 41394 (direct Holy) at the caster; the control trials make the same strike without the brand (ADR 0206), so no 573020 hit may land. 573020 Effect[0] SCHOOL_DAMAGE 242 + 1, Templar coefficients (AscensionTemplarData.h:61)."
+      "observe_source": "AscensionTemplarEvents.cpp:120-121 (case 300513): a direct damage hit dealt by the branded unit casts 573020 from the Templar at that unit (300513 Effect[0] aura 42, ProcChance 100). Each treatment trial brands the passive striker (creature 36, 3 yd away), which then casts Light of the Naaru 41394 (direct Holy) at the caster; the control trials make the same strike without the brand (ADR 0206), so no 573020 hit may land. 573020 Effect[0] SCHOOL_DAMAGE 242 + 1, Templar coefficients (AscensionTemplarData.h:60)."
     },
     {
       "spell": 300515, "name": "Fortified Body (does not stack, heals)", "kind": "hit_ratio", "variant": "no_stack",
@@ -1873,8 +1916,8 @@
       "spell": 300514, "name": "Testament of Strength (Titanstrike cooldown)", "kind": "cost_gate",
       "variant": "titanstrike", "label_suffix": "titanstrike", "quote": "incur a $s1% reduced cooldown",
       "gated_spell": 806521, "resource": "cooldown", "reduction": 4000, "target": "dummy", "talent_aura": 300514,
-      "talent_aura_each_arm": true, "target_health_pct": 10,
-      "observe_source": "$s1 = 50 (300514 EffectBasePoints[0] -51 + 1, aura 108 SPELLMOD_COOLDOWN, MiscValue 11) on Titanstrike 806521 (RecoveryTime 8000 ms): 4000 ms. The aura is set before each talent arm (talent_aura_each_arm), so each priming cast spends one of its 3 charges (AscensionTemplarAuras.cpp:116-119) and starts the reduced cooldown. Titanstrike's TargetAuraState 13 needs the dummy below 20% health, so the dummy is set to 10% before the arms (ADR 0205); with 300514 its Effect[2] aura 262 would also lift that gate. Arms: 4500 ms after the priming cast without 300514 (refused, SPELL_FAILED_NOT_READY 67), with it (through), and 3500 ms after it with it (refused)."
+      "talent_aura_each_arm": true, "target_health_pct": 10, "charges": 3,
+      "observe_source": "$s1 = 50 (300514 EffectBasePoints[0] -51 + 1, aura 108 SPELLMOD_COOLDOWN, MiscValue 11) on Titanstrike 806521 (RecoveryTime 8000 ms): 4000 ms. The aura is set before each talent arm (talent_aura_each_arm), so each priming cast spends one of its 3 charges (AscensionTemplarAuras.cpp:116-119) and starts the reduced cooldown. Titanstrike's TargetAuraState 13 needs the dummy below 20% health, so the dummy is set to 10% before the arms (ADR 0205); with 300514 its Effect[2] aura 262 would also lift that gate. Arms: 4500 ms after the priming cast without 300514 (refused, SPELL_FAILED_NOT_READY 67), with it (through), and 3500 ms after it with it (refused). The charge chain (ADR 0211): in the with arm the priming Titanstrike and the attempt spend 2 charges; casts 3 and 4, each 4500 ms after the one before, go through, since casts 2 and 3 are still reduced; cast 5 is refused, since cast 4, the fourth Titanstrike, finds no charge and takes the full 8000 ms."
     },
     {
       "spell": 300514, "name": "Testament of Strength (Titanstrike damage)", "kind": "hit_ratio", "variant": "titanstrike",
@@ -1887,7 +1930,7 @@
       "spell": 801455, "name": "Testament of Will (slow and root immunity)", "kind": "immunity", "target": "ally",
       "quote": "making them immune to all movement impairing effects for",
       "effects": [{"spell": 35317, "words": "movement impairing"}, {"spell": 47021, "words": "movement impairing"}],
-      "observe_source": "801455 Effect[0] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK EffectMiscValue 65: bits 0 and 6, which SpellInfo.cpp:2723-2734 turns into aura-type immunity to SPELL_AURA_MOD_ROOT and SPELL_AURA_MOD_DECREASE_SPEED; Effect[1] aura 77 MiscValue 13 (MECHANIC_FREEZE). Fixtures, each a single aura effect at TARGET_UNIT_TARGET_ENEMY: Chilled Blood 35317 (aura 33 MOD_DECREASE_SPEED, -21%, 20 s) and Net 47021 (aura 26 MOD_ROOT, Mechanic 7 root, 20 s). Testament of Will targets an ally (TARGET_UNIT_TARGET_ALLY 21), so it is cast at the grouped ally (ADR 0212), on whom the dummy lands both fixtures before the cast (the control), cannot land them inside the 10 s window, and lands them again after it."
+      "observe_source": "801455 Effect[0] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK EffectMiscValue 65: bits 0 and 6, which SpellInfo.cpp:2723-2734 turns into aura-type immunity to SPELL_AURA_MOD_ROOT and SPELL_AURA_MOD_DECREASE_SPEED; Effect[1] aura 77 MiscValue 13 (MECHANIC_FREEZE). Fixtures, each a single aura effect at TARGET_UNIT_TARGET_ENEMY: Chilled Blood 35317 (aura 33 MOD_DECREASE_SPEED, -20%, 20 s) and Net 47021 (aura 26 MOD_ROOT, Mechanic 7 root, 20 s). Testament of Will targets an ally (TARGET_UNIT_TARGET_ALLY 21), so it is cast at the grouped ally (ADR 0212), on whom the dummy lands both fixtures before the cast (the control), cannot land them inside the 10 s window, and lands them again after it."
     },
     {
       "spell": 560650, "name": "Aggramar's Rage (Holy crit rate, pooled)", "kind": "hit_ratio",
@@ -2186,7 +2229,7 @@
       "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
       "control": {}, "treatment": {"auras": [[520842, 1]]},
       "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
-      "expected_source": "$520842s1 = 10 (520842 EffectBasePoints[1] -11, EffectDieSides[1] 1): Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, EffectMiscValue[1] 127, on the unit that holds it. The treatment sets 520842 on the caster; Benediction 578276 (top rank at 60) heals the ally; a spell power fixture of 20000 makes its 0.30 spell power part (AscensionTemplarData.h:63) dominate the 56-point die. Only non-critical heals are compared."
+      "expected_source": "$520842s1 = 10 (520842 EffectBasePoints[1] -11, EffectDieSides[1] 1): Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, EffectMiscValue[1] 127, on the unit that holds it. The treatment sets 520842 on the caster; Benediction 578276 (top rank at 60) heals the ally; a spell power fixture of 20000 makes its 0.30 spell power part (AscensionTemplarData.h:62) dominate the 56-point die. Only non-critical heals are compared."
     },
     {
       "spell": 524739, "name": "Norgannon's Wrath", "kind": "cast_applies_aura",
@@ -2543,7 +2586,7 @@
       "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
       "control": {}, "treatment": {"auras": [[520537, 1]]},
       "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
-      "expected_source": "$520537s1 = 10 (520537 EffectBasePoints[1] 9, EffectDieSides[1] 1): Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT on the caster. Benediction 578276 (top rank at 60) heals the ally; a spell power fixture of 20000 makes its 0.30 spell power part (AscensionTemplarData.h:63) dominate the 56-point die. Only non-critical heals are compared."
+      "expected_source": "$520537s1 = 10 (520537 EffectBasePoints[1] 9, EffectDieSides[1] 1): Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT on the caster. Benediction 578276 (top rank at 60) heals the ally; a spell power fixture of 20000 makes its 0.30 spell power part (AscensionTemplarData.h:62) dominate the 56-point die. Only non-critical heals are compared."
     },
     {
       "spell": 705290, "name": "Blessing of Eonar", "kind": "cast_applies_aura",
@@ -2576,7 +2619,7 @@
       "control": {}, "treatment": {"auras": [[524765, 1]]},
       "critical": false, "trials": 40, "target_health_pct": 50, "fixture": {"spell_power": 20000},
       "warmup": [578276],
-      "expected_source": "$524766s1 = 25 (524766 EffectBasePoints[0] 24, EffectDieSides[0] 1, aura 108 SPELLMOD_DAMAGE): AscensionTemplarAbilities.cpp:279-280 casts 524766 on a healing hit of Benediction while 524765 is held, AscensionTemplarAuras.cpp:116-120 gives it one charge and ConsumeSelected drops it on the next Benediction (AscensionTemplarAbilities.cpp:32-33). Treatment: 524765 set, so each Benediction 578276 (top rank at 60) heals 25% more after the previous one; the ally is set to 50% health before each heal, since a heal at full health cast no 524766 in diagnostic 20261111-173929; a warm-up Benediction opens each arm, so the first counted treatment heal follows one too. Control: no 524765, no 524766. A spell power fixture of 20000 makes the 0.30 spell power part (AscensionTemplarData.h:63) dominate the heal's 56-point die. Only non-critical heals are compared."
+      "expected_source": "$524766s1 = 25 (524766 EffectBasePoints[0] 24, EffectDieSides[0] 1, aura 108 SPELLMOD_DAMAGE): AscensionTemplarAbilities.cpp:279-280 casts 524766 on a healing hit of Benediction while 524765 is held, AscensionTemplarAuras.cpp:116-120 gives it one charge and ConsumeSelected drops it on the next Benediction (AscensionTemplarAbilities.cpp:32-33). Treatment: 524765 set, so each Benediction 578276 (top rank at 60) heals 25% more after the previous one; the ally is set to 50% health before each heal, since a heal at full health cast no 524766 in diagnostic 20261111-173929; a warm-up Benediction opens each arm, so the first counted treatment heal follows one too. Control: no 524765, no 524766. A spell power fixture of 20000 makes the 0.30 spell power part (AscensionTemplarData.h:62) dominate the heal's 56-point die. Only non-critical heals are compared."
     },
     {
       "spell": 524765, "name": "Light's Guidance", "kind": "cast_applies_aura",
@@ -2591,7 +2634,7 @@
       "observe_spell": 573324, "learn": [573324],
       "control": {}, "treatment": {"auras": [[1140480, 1]]},
       "critical": false, "trials": 160,
-      "expected_source": "${$m1+0+$AP*0.285+$SP*0.75}: $m1 519 (EffectBasePoints[0] 518, EffectDieSides[0] 59, so a hit rolls 519 to 577, mean 548), AP 313 (class file reference_stats, read by the base steps), SP 0 at the reference; AscensionTemplarContracts.cpp:335-342 adds 0.285 x AP + 0.75 x SpellBaseDamageBonusDone(127) (AscensionTemplarData.h:62) to the effect base value, truncated to int32. Treatment: Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, EffectMiscValue[0] 126, EffectBasePoints[0] 219: +220 spell damage) adds 0.75 x 220 = 165, so the mean hit goes from 548 + 89 = 637 to 548 + 254 = 802: ratio 802 / 637 = 1.259. A coefficient of 0.5 reads 1.173, of 1.0 1.345, both outside the band. Only non-critical hits are compared; armor scales both arms alike."
+      "expected_source": "${$m1+0+$AP*0.285+$SP*0.75}: $m1 519 (EffectBasePoints[0] 518, EffectDieSides[0] 59, so a hit rolls 519 to 577, mean 548), AP 313 (class file reference_stats, read by the base steps), SP 0 at the reference; AscensionTemplarContracts.cpp:335-342 adds 0.285 x AP + 0.75 x SpellBaseDamageBonusDone(127) (AscensionTemplarData.h:61) to the effect base value, truncated to int32. Treatment: Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, EffectMiscValue[0] 126, EffectBasePoints[0] 219: +220 spell damage) adds 0.75 x 220 = 165, so the mean hit goes from 548 + 89 = 637 to 548 + 254 = 802: ratio 802 / 637 = 1.259. A coefficient of 0.5 reads 1.173, of 1.0 1.345, both outside the band. Only non-critical hits are compared; armor scales both arms alike."
     },
     {
       "spell": 560648, "name": "Warrior of Dawn", "kind": "proc_reset",
@@ -4255,7 +4298,7 @@
       "target": "caster",
       "cast_spell": 572769,
       "cast_target": "dummy",
-      "observe_source": "AscensionTemplarAbilities.cpp:242-246: a Sacred Swing cast (Named 705293) with 712677 known casts Conviction 712679 on the caster (talent(712677, 712679)); 712679 DurationIndex 8 (15000 ms, $712679d). 712677's own aura 42 effect is dummied at load (712677 is listed in AscensionTemplarData.h:201). Sacred Swing 572769 is cast at the dummy with its CasterAuraSpell 681170 set and its Energy cost filled. The expiry pair reads 712679 before and after its stated end, timed from the cast."
+      "observe_source": "AscensionTemplarAbilities.cpp:242-246: a Sacred Swing cast (Named 705293) with 712677 known casts Conviction 712679 on the caster (talent(712677, 712679)); 712679 DurationIndex 8 (15000 ms, $712679d). 712677's own aura 42 effect is dummied at load (712677 is listed in AscensionTemplarData.h:200). Sacred Swing 572769 is cast at the dummy with its CasterAuraSpell 681170 set and its Energy cost filled. The expiry pair reads 712679 before and after its stated end, timed from the cast."
     },
     {
       "spell": 712677,
@@ -4709,7 +4752,7 @@
       "caster_health_pct": 100, "caster_max_health": 20000,
       "arms": [{"name": "control", "returned_pct": 0},
                {"name": "sacred_defense", "auras": [[705306, 1]], "returned_pct": 15}],
-      "observe_source": "AscensionTemplarEvents.cpp:46-50: 705306 procs on a non-periodic hit taken from another unit with a physical school, not from a dungeon or world boss; :134-139 casts Sacred Defense 707720 at the attacker with uint64(damage) * 15 / 100 as its base points, at most once per second (spell_proc 705306: every proc flag, rev_20260909_04_templar_completion.sql:21). 707720 is a TemplarCopies spell (AscensionTemplarData.h:213-220): it cannot crit and ignores caster and taken modifiers and armor. A level 60 striker (entry 36) casts Void Zone 92559 (1000 Physical, DmgClass none) at the caster, then 1200 ms pass; each landed strike must return exactly floor(15% of its logged damage) as one 707720 hit on the striker, read from the damage logs the caster receives. A 707720 the striker avoids leaves that trial out. Control: no 705306, nothing returned."
+      "observe_source": "AscensionTemplarEvents.cpp:46-50: 705306 procs on a non-periodic hit taken from another unit with a physical school, not from a dungeon or world boss; :134-139 casts Sacred Defense 707720 at the attacker with uint64(damage) * 15 / 100 as its base points, at most once per second (spell_proc 705306: every proc flag, rev_20260909_04_templar_completion.sql:21). 707720 is a TemplarCopies spell (AscensionTemplarData.h:212-219): it cannot crit and ignores caster and taken modifiers and armor. A level 60 striker (entry 36) casts Void Zone 92559 (1000 Physical, DmgClass none) at the caster, then 1200 ms pass; each landed strike must return exactly floor(15% of its logged damage) as one 707720 hit on the striker, read from the damage logs the caster receives. A 707720 the striker avoids leaves that trial out. Control: no 705306, nothing returned."
     },
     {
       "spell": 705298, "name": "Untainted", "kind": "taken_hit", "variant": "reduction", "label_suffix": "reduction",
@@ -5023,7 +5066,7 @@
       "cast_spell": 807274, "observe_spell": 570205, "cast_wait_ms": 2000, "learn": [807274],
       "control": {"auras": [[807274, 0]]}, "treatment": {"auras": [[807274, 0], [1140480, 0], [1140480, 1]]},
       "critical": false, "trials": 70,
-      "expected_source": "Expected from the hit model (hits.rank_hit, the model of the stored '807274 hit_mean', ok at 172.4 against 172.5): Righteous Tempest 807274's hit 570205 at the reference stats (AP 313, spell power 0) is 100% normalized weapon damage of 2495 plus Effect[0] 154 plus 0.3 x SpellBaseDamageBonusDone(127) (TemplarCoefficients, AscensionTemplarData.h:55, added to the base value at AscensionTemplarContracts.cpp:335-342), tooltip mean 236.53, then 887007's -20% and the dummy's armor: 172.40. The same model with spell power +220 (Power of the Ashtongue 1140480, aura 13, MiscValue 126, EffectBasePoints 219) reads tooltip mean 302.53 and 220.20: 1.2773. A diagnostic readback (20261111-230228) reads 570205's Effect[0] value 154 without the aura and 220 with it. 1140480 lasts 5000 ms (DurationIndex 28), so each trial removes the previous Tempest (807274 to 0 stacks), removes and sets the aura again (a set on a present aura does not restart it; a run without the removal read 1.206), casts 807274 at the dummy and reads 570205's hits 3600 ms later (the hits at 0 to 3000 ms), inside the aura; a first design read 5.5 s and lost the boost on the late hits (1.254). Only non-critical hits."
+      "expected_source": "Expected from the hit model (hits.rank_hit, the model of the stored '807274 hit_mean', ok at 172.4 against 172.5): Righteous Tempest 807274's hit 570205 at the reference stats (AP 313, spell power 0) is 100% normalized weapon damage of 2495 plus Effect[0] 154 plus 0.3 x SpellBaseDamageBonusDone(127) (TemplarCoefficients, AscensionTemplarData.h:54, added to the base value at AscensionTemplarContracts.cpp:335-342), tooltip mean 236.53, then 887007's -20% and the dummy's armor: 172.40. The same model with spell power +220 (Power of the Ashtongue 1140480, aura 13, MiscValue 126, EffectBasePoints 219) reads tooltip mean 302.53 and 220.20: 1.2773. A diagnostic readback (20261111-230228) reads 570205's Effect[0] value 154 without the aura and 220 with it. 1140480 lasts 5000 ms (DurationIndex 28), so each trial removes the previous Tempest (807274 to 0 stacks), removes and sets the aura again (a set on a present aura does not restart it; a run without the removal read 1.206), casts 807274 at the dummy and reads 570205's hits 3600 ms later (the hits at 0 to 3000 ms), inside the aura; a first design read 5.5 s and lost the boost on the late hits (1.254). Only non-critical hits."
     },
     {
       "spell": 806522, "name": "Legacy of the Silver Hand", "kind": "hit_ratio", "variant": "critical_damage",
@@ -5137,14 +5180,14 @@
       "cast_spell": 801465, "observe_spell": 801501, "cast_wait_ms": 1000, "learn": [801465],
       "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [35785, 1]]},
       "critical": false, "trials": 30,
-      "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). At the reference AP 313: 300 + 626 = 926 (the tooltip's resolved value). Treatment: Attack Power 980 35785 (aura 99, EffectBasePoints 979) gives 300 + 2 x 1293 = 2886: 2886 / 926 = 3.1166. A coefficient of 1.5 reads 2.587 and of 2.5 3.646. beeg spellpen 823764 in both arms removes the dummy's partial resists; the class aura 887007 scales both arms. Only non-critical hits."
+      "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:73, added at AscensionTemplarContracts.cpp:335-342). At the reference AP 313: 300 + 626 = 926 (the tooltip's resolved value). Treatment: Attack Power 980 35785 (aura 99, EffectBasePoints 979) gives 300 + 2 x 1293 = 2886: 2886 / 926 = 3.1166. A coefficient of 1.5 reads 2.587 and of 2.5 3.646. beeg spellpen 823764 in both arms removes the dummy's partial resists; the class aura 887007 scales both arms. Only non-critical hits."
     },
     {
       "spell": 801465, "name": "Silverhand Incantation", "kind": "fixed_count", "variant": "enemies",
       "quote": "Holy damage to all nearby enemies", "expected": 2, "uncapped": true,
       "cast_spell": 801465, "target_rank": 801501, "metric": "spell_damage_count", "cast_target": "dummy", "repeats": 2,
       "radius": 8.0,
-      "radius_reason": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the primary dummy at 3 yd; the two extra dummies within 8 yd of it are hit, the one 5 yd beyond the radius is not."
+      "radius_reason": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:73, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the primary dummy at 3 yd; the two extra dummies within 8 yd of it are hit, the one 5 yd beyond the radius is not."
     },
     {
       "spell": 801465, "name": "Silverhand Incantation", "kind": "hit_ratio", "variant": "ally_heal",
@@ -5152,7 +5195,7 @@
       "metric": "spell_heal_total", "cast_spell": 801465, "observe_spell": 801501, "cast_wait_ms": 1000,
       "caster": "caster", "target": "ally", "learn": [801465],
       "control": {}, "treatment": {"auras": [[35785, 1]]}, "critical": false, "trials": 30,
-      "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the grouped ally; the heal 801501 lands on it with the same Effect[0] value as the damage: 926 at AP 313, 2886 with Attack Power 980 35785, so the heal ratio is the damage ratio, 3.1166 (the attack_power entry). Only non-critical heals."
+      "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:73, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the grouped ally; the heal 801501 lands on it with the same Effect[0] value as the damage: 926 at AP 313, 2886 with Attack Power 980 35785, so the heal ratio is the damage ratio, 3.1166 (the attack_power entry). Only non-critical heals."
     },
     {
       "spell": 801465, "name": "Silverhand Incantation", "kind": "dispel_removal", "variant": "sacred_restraint",

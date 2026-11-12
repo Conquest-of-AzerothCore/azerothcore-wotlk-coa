@@ -71,20 +71,22 @@
     "clause": "dealing an additional $801832s2% Weapon damage",
     "labels": [
       "92111 effect_value 801832e1",
-      "92111 script_hit 801832"
+      "92111 script_hit 801832",
+      "92111 script_hit 801832 unresisted"
     ],
     "kind": "claim",
-    "reason": "script_hit (ADR 0208): Scourgebane 801832 strikes from 92111's 20% roll on Righteous Lunge hits average 260.6 / 259.5 against the model 258.0 of the school part plus 50% weapon damage (a school-only model reads 236.4, excluded); control without 92111: 0 strikes; counted 20261112-021809 / -021850"
+    "reason": "script_hit (ADR 0208): Scourgebane 801832 strikes from 92111's 20% roll on Righteous Lunge hits average 260.6 / 259.5 against the model 258.0 of the school part plus 50% weapon damage (a school-only model reads 236.4, excluded); control without 92111: 0 strikes; counted 20261112-021809 / -021850; review I1: with the dummy's resistance removed (823764, unresisted model) the strike reads 292.84 / 292.71 against 292.80 (school part 268.0, weapon part 24.8, sigma 0.75, 59-68 hits), which bounds the weapon percent to about 49.5-50.5 against the stated 50; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 92111,
     "clause": "plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage",
     "labels": [
       "92111 effect_value 801832e0",
-      "92111 script_hit 801832"
+      "92111 script_hit 801832",
+      "92111 script_hit 801832 unresisted"
     ],
     "kind": "claim",
-    "reason": "the same strike hit as the weapon part: 260.6 / 259.5 against 258.0 (school part plus weapon part); counted 20261112-021809 / -021850"
+    "reason": "the same strike hit as the weapon part: 260.6 / 259.5 against 258.0 (school part plus weapon part); counted 20261112-021809 / -021850; the unresisted strike 292.84 / 292.71 against 292.80; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 92111,
@@ -188,10 +190,11 @@
       "300513 mount_block 458 unmounted",
       "300513 mount_block 458 allowed",
       "300513 mount_block 458 mounted",
-      "300513 mount_block 458 dismounted"
+      "300513 mount_block 458 dismounted",
+      "300513 mount_block 458 held"
     ],
     "kind": "claim",
-    "reason": "mount_block (ADR 0202): with 300513 on the caster, Brown Horse 458 is refused with SPELL_FAILED_CASTER_AURASTATE 22 and leaves no mount (Spell.cpp:6857-6860); without it the same cast mounts (control); the brand set on the mounted caster removes the mount (AscensionTemplarAuras.cpp:107-112); counted 20261112-013915 / -013954"
+    "reason": "mount_block (ADR 0202): with 300513 on the caster, Brown Horse 458 is refused with SPELL_FAILED_CASTER_AURASTATE 22 and leaves no mount (Spell.cpp:6857-6860); without it the same cast mounts (control); the brand set on the mounted caster removes the mount (AscensionTemplarAuras.cpp:107-112); counted 20261112-013915 / -013954; review M4: the mount is held over the same wait without the brand before the brand removes it; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 300513,
@@ -252,10 +255,13 @@
       "300514 cost_gate 806521 titanstrike with aura",
       "300514 cost_gate 806521 titanstrike with",
       "300514 cost_gate 806521 titanstrike beyond aura",
-      "300514 cost_gate 806521 titanstrike beyond"
+      "300514 cost_gate 806521 titanstrike beyond",
+      "300514 cost_gate 806521 titanstrike cast_3",
+      "300514 cost_gate 806521 titanstrike cast_4",
+      "300514 cost_gate 806521 titanstrike cast_5"
     ],
     "kind": "claim",
-    "reason": "cooldown gate (ADR 0205, dummy at 10%): a Titanstrike 4500 ms after the priming one is refused (67) without 300514, goes through with it, and is refused 3500 ms after it with it: the 8000 ms cooldown is 4000 ms under the aura; counted 20261112-021809 / -021850"
+    "reason": "cooldown gate (ADR 0205, dummy at 10%): a Titanstrike 4500 ms after the priming one is refused (67) without 300514, goes through with it, and is refused 3500 ms after it with it: the 8000 ms cooldown is 4000 ms under the aura; counted 20261112-021809 / -021850; review I2, charge chain (ADR 0211): after the with arm, Titanstrikes 3 and 4 go through 4500 ms after the one before and Titanstrike 5 is refused (67), since the fourth found no charge; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 300514,
@@ -305,10 +311,12 @@
       "300515 e0 spell_healing_taken 803792",
       "300515 behaviour_party_stat_ratio",
       "300515 behaviour_hit_ratio ally_inside",
-      "300515 behaviour_hit_ratio ally_outside"
+      "300515 behaviour_hit_ratio ally_outside",
+      "300515 behaviour_hit_ratio ally_42",
+      "300515 behaviour_hit_ratio ally_44"
     ],
     "kind": "claim",
-    "reason": "heal events (ADR 0207): the grouped ally's Benediction 578276 self heal grows +5.96% / +5.92% with 300515 on the Templar at 30 yd, and +0.11% / -0.01% at 45 yd, beyond the 40 yd radius; counted 20261112-021809 / -021850"
+    "reason": "heal events (ADR 0207): the grouped ally's Benediction 578276 self heal grows +5.96% / +5.92% with 300515 on the Templar at 30 yd, and +0.11% / -0.01% at 45 yd, beyond the 40 yd radius; counted 20261112-021809 / -021850; review M1: +5.95% / +6.01% at 42 yd and +0.03% / +0.01% at 44 yd, so the reach (40 yd plus both combat reaches) lies in (42, 44] yd; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 300515,
@@ -362,10 +370,12 @@
     "labels": [
       "300520 e0",
       "300520 behaviour_hit_ratio scourgebane",
-      "300520 behaviour_hit_ratio scourgebane_above_20"
+      "300520 behaviour_hit_ratio scourgebane_above_20",
+      "300520 behaviour_hit_ratio scourgebane_17",
+      "300520 behaviour_hit_ratio scourgebane_23"
     ],
     "kind": "claim",
-    "reason": "Scourgebane 801832 +25% at a dummy held at 10% health, +0% (within -0.006 to +0.007 points) at 30%; counted 20261112-013915 / -013954"
+    "reason": "Scourgebane 801832 +25% at a dummy held at 10% health, +0% (within -0.006 to +0.007 points) at 30%; counted 20261112-013915 / -013954; review M2: +24.99% / +25.00% at 17% and +0.00% at 23%, so the threshold lies in (17, 23)%; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 300522,
@@ -724,7 +734,7 @@
       "500694 behaviour_hit_ratio spell_power"
     ],
     "kind": "claim",
-    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc. Amount proven on the triggered spell 803153 cast directly: +63% with +980 attack power and +14.2% with +220 holy spell damage, the 0.25 coefficients over the mean hit 389.25 of $803153m1 + $803153ppl1 at the reference. The periodic path through 500694 (aura 23, a triggered cast) reads the same coefficient row: AscensionTemplarContracts.cpp:335-342 keys on the spell id (AscensionTemplarData.h:78), whoever casts it, so the coefficient cannot differ; a modifier gated on an untriggered cast could, and none is known in the scenario. The periodic path itself is not exercised for the amount; its Zealotry casts are clause 62",
+    "reason": "judged against the streamed client text of 500694 (coa_client_spell_description, rev_20261110_02_templar_client_texts.sql), whose Description equals Spell.dbc. Amount proven on the triggered spell 803153 cast directly: +63% with +980 attack power and +14.2% with +220 holy spell damage, the 0.25 coefficients over the mean hit 389.25 of $803153m1 + $803153ppl1 at the reference. The periodic path through 500694 (aura 23, a triggered cast) reads the same coefficient row: AscensionTemplarContracts.cpp:335-342 keys on the spell id (AscensionTemplarData.h:77), whoever casts it, so the coefficient cannot differ; a modifier gated on an untriggered cast could, and none is known in the scenario. The periodic path itself is not exercised for the amount; its Zealotry casts are clause 62",
     "text_source": {
       "table": "coa_client_spell_description",
       "file": "rev_20261110_02_templar_client_texts.sql",
@@ -2256,10 +2266,11 @@
     "spell": 705286,
     "clause": "Casting abilities that grant an Oath now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.",
     "labels": [
-      "705286 trigger_count"
+      "705286 trigger_count",
+      "705286 behaviour_metric_delta non_oath"
     ],
     "kind": "claim",
-    "reason": "label repair: the free-text label '705286 trigger_count ok' named the trigger verdict '705286 trigger_count', one 560834 cast per Oath-granting Righteous Lunge 570233 (273 of 273)"
+    "reason": "label repair: the free-text label '705286 trigger_count ok' named the trigger verdict '705286 trigger_count', one 560834 cast per Oath-granting Righteous Lunge 570233 (273 of 273); review M3: a Scourgebane strike, which grants no Oath, leaves 560834 at 0 with 705286 learned; final pair 20261112-025618 / -025807, build 35cae55aa6ae"
   },
   {
     "spell": 705286,
