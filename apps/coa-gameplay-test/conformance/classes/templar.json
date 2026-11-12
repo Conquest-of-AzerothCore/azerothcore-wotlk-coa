@@ -6678,25 +6678,25 @@
       "spell": 706312, "name": "Holy Edge (Rank 1, Scourgebane)", "kind": "fixed_count", "variant": "scourgebane",
       "label_suffix": "scourgebane", "quote": "now strikes $s1 additional nearby enemy", "expected": 1,
       "radius": 10.0, "learn": [706312], "cast_spell": 801832,
-      "radius_reason": "706312 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1, family mask word 1 bit 8388608 (Scourgebane 801832) and word 0 bit 8192 (Scarlet Hammer 807035). 801832 EffectChainTarget[0] 1, so with the talent Spell::SelectImplicitChainTargets reaches the target and 1 more. 801832 DmgClass 1 (magic): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond that. 801832 is cast directly at the primary; the modifier reads the spell id, not the script path that casts it."
+      "radius_reason": "706312 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1, family mask word 1 bit 8388608 (Scourgebane 801832) and word 0 bit 8192 (Scarlet Hammer 807035). 801832 EffectChainTarget[0] 1, so with the talent Spell::SelectImplicitChainTargets reaches the target and 1 more. 801832 DmgClass 1 (magic): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond that. 801832 is cast directly at the primary; the modifier reads the spell id, not the script path that casts it. The clause states how many enemies the damage of Scourgebane and Scarlet Hammer strikes, an amount of the hit itself, not what triggers it (Scourgebane's trigger is its own tooltip, claims 4 and 5, proven through the script path in R2), so the spell is cast directly."
     },
     {
       "spell": 707853, "name": "Holy Edge (Rank 2, Scourgebane)", "kind": "fixed_count", "variant": "scourgebane",
       "label_suffix": "scourgebane", "quote": "now strikes $s1 additional nearby enemies", "expected": 2,
       "radius": 10.0, "learn": [707853], "cast_spell": 801832,
-      "radius_reason": "707853 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS (EffectMiscValue[0] 17), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = +2, on Scourgebane 801832 (EffectChainTarget[0] 1): the target and 2 more. Magic chain jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond. Cast directly at the primary."
+      "radius_reason": "707853 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS (EffectMiscValue[0] 17), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = +2, on Scourgebane 801832 (EffectChainTarget[0] 1): the target and 2 more. Magic chain jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond. Cast directly at the primary. The clause states how many enemies the damage of Scourgebane and Scarlet Hammer strikes, an amount of the hit itself, not what triggers it (Scourgebane's trigger is its own tooltip, claims 4 and 5, proven through the script path in R2), so the spell is cast directly."
     },
     {
       "spell": 706312, "name": "Holy Edge (Rank 1, Scarlet Hammer)", "kind": "fixed_count",
       "variant": "scarlet_hammer", "label_suffix": "scarlet_hammer",
       "quote": "now strikes $s1 additional nearby enemy", "expected": 1, "radius": 10.0, "learn": [706312], "cast_spell": 807035,
-      "radius_reason": "706312 Effect[0] SPELLMOD_JUMP_TARGETS +1, family mask word 0 bit 8192 (Scarlet Hammer 807035). 807035 EffectChainTarget[0] 1, DmgClass 2 (melee): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2210-2213); the far dummy stands 5 yd beyond. Cast directly at the primary."
+      "radius_reason": "706312 Effect[0] SPELLMOD_JUMP_TARGETS +1, family mask word 0 bit 8192 (Scarlet Hammer 807035). 807035 EffectChainTarget[0] 1, DmgClass 2 (melee): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2210-2213); the far dummy stands 5 yd beyond. Cast directly at the primary. The clause states how many enemies the damage of Scourgebane and Scarlet Hammer strikes, an amount of the hit itself, not what triggers it (Scourgebane's trigger is its own tooltip, claims 4 and 5, proven through the script path in R2), so the spell is cast directly."
     },
     {
       "spell": 707853, "name": "Holy Edge (Rank 2, Scarlet Hammer)", "kind": "fixed_count",
       "variant": "scarlet_hammer", "label_suffix": "scarlet_hammer",
       "quote": "now strikes $s1 additional nearby enemies", "expected": 2, "radius": 10.0, "learn": [707853], "cast_spell": 807035,
-      "radius_reason": "707853 Effect[0] SPELLMOD_JUMP_TARGETS +2 on Scarlet Hammer 807035 (EffectChainTarget[0] 1, DmgClass 2 melee, 10 yd jumps, Spell.cpp:2210-2213): the target and 2 more; the far dummy stands 5 yd beyond. Cast directly at the primary."
+      "radius_reason": "707853 Effect[0] SPELLMOD_JUMP_TARGETS +2 on Scarlet Hammer 807035 (EffectChainTarget[0] 1, DmgClass 2 melee, 10 yd jumps, Spell.cpp:2210-2213): the target and 2 more; the far dummy stands 5 yd beyond. Cast directly at the primary. The clause states how many enemies the damage of Scourgebane and Scarlet Hammer strikes, an amount of the hit itself, not what triggers it (Scourgebane's trigger is its own tooltip, claims 4 and 5, proven through the script path in R2), so the spell is cast directly."
     },
     {
       "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cooldown",
@@ -6719,13 +6719,74 @@
       "spell": 706312, "name": "Holy Edge (Rank 1, Scourgebane control)", "kind": "fixed_count",
       "variant": "scourgebane_control", "label_suffix": "scourgebane_control",
       "quote": "now strikes $s1 additional nearby enemy", "expected": 0, "radius": 10.0, "cast_spell": 801832,
-      "radius_reason": "The control arm of the scourgebane entry: Holy Edge is not learned, so Scourgebane 801832 (EffectChainTarget[0] 1) reaches only its target; one candidate inside 10 yd (Spell.cpp:2214-2221 magic chain jumps) and one beyond it stay unhit."
+      "radius_reason": "The control arm of the scourgebane entry: Holy Edge is not learned, so Scourgebane 801832 (EffectChainTarget[0] 1) reaches only its target; one candidate inside 10 yd (Spell.cpp:2214-2221 magic chain jumps) and one beyond it stay unhit. The clause states how many enemies the damage of Scourgebane and Scarlet Hammer strikes, an amount of the hit itself, not what triggers it (Scourgebane's trigger is its own tooltip, claims 4 and 5, proven through the script path in R2), so the spell is cast directly."
     },
     {
       "spell": 706312, "name": "Holy Edge (Rank 1, Scarlet Hammer control)", "kind": "fixed_count",
       "variant": "scarlet_hammer_control", "label_suffix": "scarlet_hammer_control",
       "quote": "now strikes $s1 additional nearby enemy", "expected": 0, "radius": 10.0, "cast_spell": 807035,
-      "radius_reason": "The control arm of the scarlet_hammer entry: Holy Edge is not learned, so Scarlet Hammer 807035 (EffectChainTarget[0] 1) reaches only its target; one candidate inside 10 yd (Spell.cpp:2210-2213 melee chain jumps) and one beyond it stay unhit."
+      "radius_reason": "The control arm of the scarlet_hammer entry: Holy Edge is not learned, so Scarlet Hammer 807035 (EffectChainTarget[0] 1) reaches only its target; one candidate inside 10 yd (Spell.cpp:2210-2213 melee chain jumps) and one beyond it stay unhit. The clause states how many enemies the damage of Scourgebane and Scarlet Hammer strikes, an amount of the hit itself, not what triggers it (Scourgebane's trigger is its own tooltip, claims 4 and 5, proven through the script path in R2), so the spell is cast directly."
+    },
+    {
+      "spell": 520009, "name": "Paladin Training", "kind": "hit_ratio", "variant": "lunge_damage",
+      "label_suffix": "lunge_damage",
+      "quote": "Increases the damage and reduces the Energy cost of Righteous Lunge and Argent Blade by",
+      "expected": 1.2, "observe_spell": 570233, "learn": [570233], "control": {"auras": [[804904, 0]]},
+      "treatment": {"auras": [[804904, 0], [520009, 1]]}, "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 20 (520009 EffectBasePoints[0] 19 + EffectDieSides[0] 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectSpellClassMask[0] [8, 0, 32]: Righteous Lunge 570233 (SpellFamilyFlags[0] 8, level 58 rank) and Argent Blade 807268 (SpellFamilyFlags[2] 32). The talent aura is set before every treatment trial; the control has none. Each Lunge grants Oath: Righteous Lunge 804904 (AscensionTemplarAbilities.cpp:188), whose +5% reaches Lunge, so the Oath is cleared before every trial in both arms (runs without the clear read +20.45% with a 99% interval of +-9.6 points). Attack power fixture 20000. Only non-critical hits are compared."
+    },
+    {
+      "spell": 520009, "name": "Paladin Training", "kind": "hit_ratio", "variant": "argent_blade_damage",
+      "label_suffix": "argent_blade_damage",
+      "quote": "Increases the damage and reduces the Energy cost of Righteous Lunge and Argent Blade by",
+      "expected": 1.2, "observe_spell": 807268, "learn": [807268], "control": {},
+      "treatment": {"auras": [[520009, 1]]}, "critical": false, "trials": 40, "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 20 (520009 EffectBasePoints[0] 19 + 1), SPELLMOD_DAMAGE on mask word 2 bit 32: Argent Blade 807268 (level 58 rank, a two-hand weapon: the reference staff). Its trigger of Scourgebane is cleared by AscensionTemplarContracts.cpp:181-186, and only 807268's own hits are read. Attack power fixture 20000. Only non-critical hits are compared."
+    },
+    {
+      "spell": 706449, "name": "Holy Light", "kind": "hit_ratio", "variant": "heal", "label_suffix": "heal",
+      "quote": "but now heals for $s2% more", "expected": 2.0, "metric": "spell_heal_total", "observe_spell": 578276,
+      "caster": "caster", "target": "ally", "target_health_pct": 5, "cast_wait_ms": 2500, "control": {},
+      "treatment": {"auras": [[706449, 1]]}, "critical": false, "trials": 40, "fixture": {"spell_power": 20000},
+      "expected_source": "$s2 = 100 (706449 EffectBasePoints[1] 99 + EffectDieSides[1] 1): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 0 (SPELLMOD_DAMAGE, which scales a heal), EffectSpellClassMask[1] word 0 bit 1073741824: Benediction 578276 (level 60 rank, SpellFamilyFlags[0] 1073741824). The talent also gives Benediction a 1500 ms cast time (Effect[0], claim 244), so every trial waits 2500 ms after its cast. The ally is held at 5% health so the heal is not cut by overhealing. Spell power fixture 20000. Only non-critical heals are compared."
+    },
+    {
+      "spell": 706449, "name": "Holy Light (cast time, not yet landed)", "kind": "metric_delta",
+      "variant": "cast_time_early", "label_suffix": "cast_time_early",
+      "quote": "Your Benediction now has a $/1000;S1 sec cast time", "expected": 1, "trigger_spell": 578276,
+      "target": "caster", "metric": "spell_heal_count", "fields": {"spell": 578276, "target": "caster"},
+      "before_expected": 1, "wait_ms": 1300, "expire_ms": 6500,
+      "observe_source": "$/1000;S1 = 1.5 sec (706449 EffectBasePoints[0] 1499 + EffectDieSides[0] 1 = +1500 ms): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), mask word 0 bit 1073741824 (Benediction 578276, CastingTimeIndex 1, instant). The Templar casts Benediction on itself: without the talent its heal lands within 1300 ms (count 1); with it, 1300 ms after the cast starts, no second heal has landed (count still 1). The late entry reads the count 1700 ms after the cast."
+    },
+    {
+      "spell": 706449, "name": "Holy Light (cast time, landed)", "kind": "metric_delta", "variant": "cast_time_late",
+      "label_suffix": "cast_time_late", "quote": "Your Benediction now has a $/1000;S1 sec cast time", "expected": 2,
+      "trigger_spell": 578276, "target": "caster", "metric": "spell_heal_count",
+      "fields": {"spell": 578276, "target": "caster"}, "before_expected": 1, "wait_ms": 1700, "expire_ms": 6500,
+      "observe_source": "As the early entry: with Holy Light the second Benediction's heal has landed 1700 ms after the cast starts (count 2), so the cast ends in (1300, 1700] ms, around the stated 1500 ms; without the talent the heal of the instant cast is counted within 1700 ms (count 1)."
+    },
+    {
+      "spell": 706320, "name": "Combat Training", "kind": "hit_ratio", "variant": "oath_lunge",
+      "label_suffix": "oath_lunge", "quote": "Increases the effectiveness of Oaths by", "expected": 1.0561,
+      "observe_spell": 572027, "learn": [572027], "control": {"auras": [[804904, 1]]},
+      "treatment": {"auras": [[706320, 1], [804904, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 20 (706320 EffectBasePoints[0] 19 + 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS), mask word 2 bit 2147483648, which every Oath carries (13 spells, Oath: Righteous Lunge 804904 SpellFamilyFlags[2] 2181038080). 804904's Effect[0] (+5%) and Effect[2] (+30%) both reach Righteous Upheaval 572027 (the existing 572027 oath entry: 1.05 x 1.30 = 1.365). With Combat Training they read +6% and +36%: 1.06 x 1.36 = 1.4416, so the treatment over the control (both with the Oath, set before every trial; Combat Training set first so the Oath's amounts are computed under it) is 1.4416 / 1.365 = 1.0561. Attack power fixture 20000. Only non-critical hits are compared."
+    },
+    {
+      "spell": 706320, "name": "Combat Training", "kind": "hit_ratio", "variant": "oath_condemn",
+      "label_suffix": "oath_condemn", "quote": "Increases the effectiveness of Oaths by", "expected": 1.0462,
+      "observe_spell": 572027, "learn": [572027], "control": {"auras": [[804922, 1]]},
+      "treatment": {"auras": [[706320, 1], [804922, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 20, SPELLMOD_ALL_EFFECTS on every Oath (mask word 2 bit 2147483648; Oath: Condemn 804922 SpellFamilyFlags[2] bit 31). 804922 Effect[2] aura 108 SPELLMOD_DAMAGE +30% on the Oath Breaker mask (word 2 bit 128) reaches Righteous Upheaval 572027; its Effect[0] (aura 290) and flat Effect[1] do not. With Combat Training +36%: 1.36 / 1.30 = 1.0462. Attack power fixture 20000. Only non-critical hits are compared."
+    },
+    {
+      "spell": 300530, "name": "Martyr", "kind": "metric_delta", "variant": "gift", "label_suffix": "gift",
+      "quote": "Increases the effectiveness of Gift of Zeal by", "expected": 224, "trigger_spell": 300923,
+      "target": "caster", "metric": "stat", "fields": {"stat": 1}, "before_expected": 209, "wait_ms": 1000,
+      "expire_ms": 2000,
+      "observe_source": "$s2 = 20 (300530 EffectBasePoints[1] 19 + EffectDieSides[1] 1): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 8 (SPELLMOD_ALL_EFFECTS), mask word 0 bit 268435456 (Gift of Zeal). Gift of Zeal 300923 (level 60 rank, AscensionSpellProgressionData.h:872) Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 76 + 1 = 77; with Martyr int32(77 x 1.2) = 92. The Templar (reference Agility 132) casts 300923 on itself: Agility 209 after the cast without Martyr, then Martyr is learned and the recast replaces the buff: 224."
     }
   ],
   "player_observations": [

@@ -433,7 +433,8 @@
     "labels": [
       "300530 effect_value e1",
       "300530 e1 spell_modifier 300923",
-      "300530 e1 spell_modifier 300924"
+      "300530 e1 spell_modifier 300924",
+      "300530 behaviour_metric_delta gift"
     ],
     "kind": "claim"
   },
@@ -904,7 +905,9 @@
       "520009 effect_value e0 #0",
       "520009 e0 spell_modifier 570233",
       "520009 e0 spell_modifier 807268",
-      "520009 e0 spell_modifier 504810"
+      "520009 e0 spell_modifier 504810",
+      "520009 behaviour_hit_ratio lunge_damage",
+      "520009 behaviour_hit_ratio argent_blade_damage"
     ],
     "kind": "claim"
   },
@@ -2810,7 +2813,9 @@
     "clause": "Increases the effectiveness of Oaths by $s1%.",
     "labels": [
       "conformance-templar-value-706320",
-      "706320 e0 spell_modifier ok across all 13 listed targets"
+      "706320 e0 spell_modifier ok across all 13 listed targets",
+      "706320 behaviour_hit_ratio oath_lunge",
+      "706320 behaviour_hit_ratio oath_condemn"
     ],
     "kind": "claim"
   },
@@ -2905,8 +2910,8 @@
     "clause": "Increases your parry and dodge chance by $s1%.",
     "labels": [
       "conformance-templar-value-706359",
-      "706359 e0 parry_chance ok",
-      "706359 e1 dodge_chance ok"
+      "706359 e0 parry_chance",
+      "706359 e1 dodge_chance"
     ],
     "kind": "claim"
   },
@@ -2938,7 +2943,9 @@
     "labels": [
       "conformance-templar-value-706449 (effect_value e0)",
       "706449 e0 spell_modifier 578276 ok",
-      "706449 e0 spell_cast_time_ms 578276 ok"
+      "706449 e0 spell_cast_time_ms 578276 ok",
+      "706449 behaviour_metric_delta cast_time_early",
+      "706449 behaviour_metric_delta cast_time_late"
     ],
     "kind": "claim"
   },
@@ -2947,7 +2954,8 @@
     "clause": "but now heals for $s2% more",
     "labels": [
       "conformance-templar-value-706449 (effect_value e1)",
-      "706449 e1 spell_modifier 578276 ok"
+      "706449 e1 spell_modifier 578276 ok",
+      "706449 behaviour_hit_ratio heal"
     ],
     "kind": "claim"
   },
@@ -3129,7 +3137,7 @@
     "spell": 707754,
     "clause": "Increases your movement speed ... by $s2%",
     "labels": [
-      "707754 e0 run_speed_rate ok (+0.1)"
+      "707754 e0 run_speed_rate"
     ],
     "kind": "claim"
   },
