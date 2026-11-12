@@ -61,13 +61,14 @@ Manastorm.Objective.NativeHighlight = 0
 # AscensionCompat.Enable / remote-client admission remain core connection settings.
 
 # Client UI fixes pushed as Lua 5 seconds after login (Mode 2 only, no client files).
+# Only clients with the hot-patch channel (docs/coa/client-hot-patch.md) receive them.
 # Bitmask, 0 = off and the stock client UI is left unchanged:
 #   1 = the group finder keybind also opens inside a Manastorm run
 #   2 = reward icons anchor below the Potential Rewards divider
 #   4 = the queue panel handles an empty enterable-level list and uncached reward items
 #   8 = the loadout flyout hides when there are no loadout spells
 #  15 = all of the above
-# A /reload drops them until the next login.
+# The client reruns them after a /reload.
 Manastorm.ClientUIFixes = 0
 
 # Native Mobility covers all 36 listed class spell families automatically in Mode 2.
