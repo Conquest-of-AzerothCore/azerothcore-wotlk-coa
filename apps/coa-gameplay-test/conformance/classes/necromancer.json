@@ -1126,6 +1126,201 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 583256,
+      "name": "Harvest Plague (heal)",
+      "kind": "metric_delta",
+      "variant": "heal",
+      "label_suffix": "heal",
+      "quote": "healing you for a portion of the damage dealt.",
+      "expected": 8,
+      "before_expected": 0,
+      "trigger_spell": 583256,
+      "target": "dummy",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 24500,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 583256,
+        "target": "caster"
+      },
+      "observe_source": "Harvest Plague 583256 (rank of 500968): Effect[0] aura 53 in Spell.dbc, rewritten to SPELL_AURA_PERIODIC_DAMAGE on the target enemy (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), Amplitude 3000 ($t), DurationIndex 106 (24000 ms, $d). The damage hook multiplies a periodic tick of the 500968 family by 2 - target health percent / 100 (AscensionNecromancerContracts.cpp:419-420); aura_ascension_necromancer_lifecycle::HarvestPlagueSiphon heals the caster for the tick's base roll x (0.3 + 1 - target health fraction) on every tick (AscensionNecromancerAuras.cpp:142-153, 162-163). Heals of 583256 on the caster: none without the cast (control), one per tick (8) after it."
+    },
+    {
+      "spell": 583256,
+      "name": "Harvest Plague (ticks)",
+      "kind": "metric_delta",
+      "variant": "ticks",
+      "label_suffix": "ticks",
+      "quote": "every $t sec",
+      "expected": 8,
+      "before_expected": 0,
+      "trigger_spell": 583256,
+      "target": "dummy",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 24500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 583256,
+        "target": "dummy"
+      },
+      "observe_source": "Harvest Plague 583256 (rank of 500968): Effect[0] aura 53 in Spell.dbc, rewritten to SPELL_AURA_PERIODIC_DAMAGE on the target enemy (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), Amplitude 3000 ($t), DurationIndex 106 (24000 ms, $d). The damage hook multiplies a periodic tick of the 500968 family by 2 - target health percent / 100 (AscensionNecromancerContracts.cpp:419-420); aura_ascension_necromancer_lifecycle::HarvestPlagueSiphon heals the caster for the tick's base roll x (0.3 + 1 - target health fraction) on every tick (AscensionNecromancerAuras.cpp:142-153, 162-163). Hits of 583256 on the dummy: none without the cast (control), 24000 / 3000 = 8 after it."
+    },
+    {
+      "spell": 583256,
+      "name": "Harvest Plague (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 583256,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 23500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 583256,
+        "caster": "caster"
+      },
+      "observe_source": "Harvest Plague 583256 (rank of 500968): Effect[0] aura 53 in Spell.dbc, rewritten to SPELL_AURA_PERIODIC_DAMAGE on the target enemy (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), Amplitude 3000 ($t), DurationIndex 106 (24000 ms, $d). The damage hook multiplies a periodic tick of the 500968 family by 2 - target health percent / 100 (AscensionNecromancerContracts.cpp:419-420); aura_ascension_necromancer_lifecycle::HarvestPlagueSiphon heals the caster for the tick's base roll x (0.3 + 1 - target health fraction) on every tick (AscensionNecromancerAuras.cpp:142-153, 162-163). The caster's 583256 on the dummy: absent without the cast, present 23500 ms after it, gone at 24500 ms: the duration lies in (23500, 24500] ms against the stated 24000."
+    },
+    {
+      "spell": 562213,
+      "name": "Runic Harvest (Runic Power)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "in exchange for $/20;m2 Runic Power.",
+      "expected": 800,
+      "before_expected": 0,
+      "trigger_spell": 562213,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 10500,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 562213
+      },
+      "observe_source": "Runic Harvest 562213 (rank 4 of 562210) Effect[1] aura 64 PERIODIC_MANA_LEECH, BasePoints 79 + 1 = 80 ($m2), Amplitude 1000, DurationIndex 1 (10000 ms). AscensionNecromancerContracts.cpp:317-322 removes Effect[0], makes Effect[1] a 1000 ms periodic dummy on the caster; aura_ascension_necromancer_lifecycle::Tick (AscensionNecromancerAuras.cpp:166-178) takes min(80, mana) from each raised minion (Minions(player, true)) within 40 yd and energizes the caster for half the total in Runic Power (80 mana -> 40 units = 4 Runic Power, $/20;m2). Ghouls 50073 have mana (Scale(), AscensionNecromancerSummons.cpp: level x 30 + Intellect x 5 x cost). The reference character has no haste, so the hasted period (AttributesEx5 0x2000) is the stated 1000 ms. A Ghoul is raised in each phase; no cast (control): no energize. After the cast, two Ghouls for 10 ticks: 2 x 10 x 40 = 800 Runic Power units (4 Runic Power per minion per tick)."
+    },
+    {
+      "spell": 562213,
+      "name": "Runic Harvest (raised minions)",
+      "kind": "metric_delta",
+      "variant": "raised",
+      "label_suffix": "raised",
+      "quote": "Harvest the essence from your Raised minions,",
+      "expected": 400,
+      "before_expected": 0,
+      "trigger_spell": 562213,
+      "target": "caster",
+      "setup_only_after": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 11000,
+      "wait_ms": 10500,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 562213
+      },
+      "observe_source": "Runic Harvest 562213 (rank 4 of 562210) Effect[1] aura 64 PERIODIC_MANA_LEECH, BasePoints 79 + 1 = 80 ($m2), Amplitude 1000, DurationIndex 1 (10000 ms). AscensionNecromancerContracts.cpp:317-322 removes Effect[0], makes Effect[1] a 1000 ms periodic dummy on the caster; aura_ascension_necromancer_lifecycle::Tick (AscensionNecromancerAuras.cpp:166-178) takes min(80, mana) from each raised minion (Minions(player, true)) within 40 yd and energizes the caster for half the total in Runic Power (80 mana -> 40 units = 4 Runic Power, $/20;m2). Ghouls 50073 have mana (Scale(), AscensionNecromancerSummons.cpp: level x 30 + Intellect x 5 x cost). The reference character has no haste, so the hasted period (AttributesEx5 0x2000) is the stated 1000 ms. 562213 is cast in both phases: with no minion (control) no Runic Power, with one Ghoul raised first 10 x 40 = 400."
+    },
+    {
+      "spell": 562213,
+      "name": "Runic Harvest (ticks)",
+      "kind": "metric_delta",
+      "variant": "ticks",
+      "label_suffix": "ticks",
+      "quote": "every $t2 sec",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 562213,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 10500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 562213
+      },
+      "observe_source": "Runic Harvest 562213 (rank 4 of 562210) Effect[1] aura 64 PERIODIC_MANA_LEECH, BasePoints 79 + 1 = 80 ($m2), Amplitude 1000, DurationIndex 1 (10000 ms). AscensionNecromancerContracts.cpp:317-322 removes Effect[0], makes Effect[1] a 1000 ms periodic dummy on the caster; aura_ascension_necromancer_lifecycle::Tick (AscensionNecromancerAuras.cpp:166-178) takes min(80, mana) from each raised minion (Minions(player, true)) within 40 yd and energizes the caster for half the total in Runic Power (80 mana -> 40 units = 4 Runic Power, $/20;m2). Ghouls 50073 have mana (Scale(), AscensionNecromancerSummons.cpp: level x 30 + Intellect x 5 x cost). The reference character has no haste, so the hasted period (AttributesEx5 0x2000) is the stated 1000 ms. Energize events of 562213 over its 10000 ms: none without the cast (control), 10 with it (one per 1000 ms tick, the minions' drains summed into one event); with the duration entry the period is 10000 / 10 = 1000 ms."
+    },
+    {
+      "spell": 562213,
+      "name": "Runic Harvest (mana)",
+      "kind": "metric_delta",
+      "variant": "mana",
+      "label_suffix": "mana",
+      "quote": "draining ${$m2} mana",
+      "expected": 2305,
+      "before_expected": 2385,
+      "trigger_spell": 562213,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "owned_creature_power",
+      "fields": {
+        "entry": 50073,
+        "power": 0
+      },
+      "observe_source": "Runic Harvest 562213 (rank 4 of 562210) Effect[1] aura 64 PERIODIC_MANA_LEECH, BasePoints 79 + 1 = 80 ($m2), Amplitude 1000, DurationIndex 1 (10000 ms). AscensionNecromancerContracts.cpp:317-322 removes Effect[0], makes Effect[1] a 1000 ms periodic dummy on the caster; aura_ascension_necromancer_lifecycle::Tick (AscensionNecromancerAuras.cpp:166-178) takes min(80, mana) from each raised minion (Minions(player, true)) within 40 yd and energizes the caster for half the total in Runic Power (80 mana -> 40 units = 4 Runic Power, $/20;m2). Ghouls 50073 have mana (Scale(), AscensionNecromancerSummons.cpp: level x 30 + Intellect x 5 x cost). The reference character has no haste, so the hasted period (AttributesEx5 0x2000) is the stated 1000 ms. The Ghoul's mana: full (2385, read in the control arm) without the cast, 80 lower (2305) 1500 ms after the cast (one tick at 1000 ms). Creature mana regenerates every 2000 ms from the summon (Creature::Regenerate, stock); the read falls between two regeneration ticks."
+    },
+    {
+      "spell": 562213,
+      "name": "Runic Harvest (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 562213,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 9500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 562213,
+        "caster": "caster"
+      },
+      "observe_source": "Runic Harvest 562213 (rank 4 of 562210) Effect[1] aura 64 PERIODIC_MANA_LEECH, BasePoints 79 + 1 = 80 ($m2), Amplitude 1000, DurationIndex 1 (10000 ms). AscensionNecromancerContracts.cpp:317-322 removes Effect[0], makes Effect[1] a 1000 ms periodic dummy on the caster; aura_ascension_necromancer_lifecycle::Tick (AscensionNecromancerAuras.cpp:166-178) takes min(80, mana) from each raised minion (Minions(player, true)) within 40 yd and energizes the caster for half the total in Runic Power (80 mana -> 40 units = 4 Runic Power, $/20;m2). Ghouls 50073 have mana (Scale(), AscensionNecromancerSummons.cpp: level x 30 + Intellect x 5 x cost). The reference character has no haste, so the hasted period (AttributesEx5 0x2000) is the stated 1000 ms. The caster's own 562213 aura: absent without the cast, present 9500 ms after it, gone at 10500 ms: the duration lies in (9500, 10500] ms against the stated 10000."
+    },
+    {
       "spell": 805029,
       "name": "Unholy Frenzy (duration held)",
       "kind": "metric_delta",

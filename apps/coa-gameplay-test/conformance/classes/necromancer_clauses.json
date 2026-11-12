@@ -3484,12 +3484,32 @@
   {
     "spell": 562213,
     "clause": "Harvest the essence from your Raised minions, draining ${$m2} mana every $t2 sec in exchange for $/20;m2 Runic Power.",
-    "labels": [
-      "562213 effect_value e1 #0",
-      "562213 aura_amount e1 #0",
-      "562213 effect_value e1 #1",
-      "562213 aura_amount e1 #1",
-      "562213 effect_value #3"
+    "claims": [
+      {
+        "claim": "Harvest the essence from your Raised minions",
+        "labels": [
+          "562213 behaviour_metric_delta raised"
+        ]
+      },
+      {
+        "claim": "draining ${$m2} mana",
+        "labels": [
+          "562213 behaviour_metric_delta mana"
+        ]
+      },
+      {
+        "claim": "every $t2 sec",
+        "labels": [
+          "562213 behaviour_metric_delta ticks",
+          "562213 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "in exchange for $/20;m2 Runic Power",
+        "labels": [
+          "562213 behaviour_metric_delta runic_power"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3497,7 +3517,7 @@
     "spell": 562213,
     "clause": "Lasts $d.",
     "labels": [
-      "562213 aura_duration_ms #2"
+      "562213 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
