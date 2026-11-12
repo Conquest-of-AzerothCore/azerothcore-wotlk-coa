@@ -4504,6 +4504,13 @@
       "reason": "As the inside entry, with the grouped ally 45 yd away, beyond the 40 yd radius: the ally stays without 562302 while the caster carries it."
     },
     {
+      "spell": 706323, "name": "Holy Constitution", "kind": "taken_hit", "variant": "disease_resist",
+      "label_suffix": "disease_resist", "judge": "resist_rate", "expected_points": 30,
+      "quote": "increases your chance to resist disease effects by $s2%", "strike_spell": 55604, "trials": 450,
+      "parts": 2, "arms": [{"name": "control"}, {"name": "treatment", "auras": [[706323, 1]]}],
+      "observe_source": "706323 Effect[1] is SPELL_AURA_MOD_DEBUFF_RESISTANCE (178), MiscValue 3 (disease), EffectBasePoints 29 (+30); Unit::MagicSpellHitResult (Unit.cpp:4091) adds its amount x 100 to the miss chance of a magic spell whose effects are all auras, when the spell's Dispel matches. A level 60 striker (entry 36) casts Putrid Bite 30113 (Dispel 3 disease, DmgClass magic, one SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN effect on the target) at the caster; each trial reads whether 30113 is on the caster 300 ms later and removes it. The control arm's resisted share is the same-level creature miss chance; the treatment arm must resist 30 points more often. 450 trials per arm in each of 2 pooled parts."
+    },
+    {
       "spell": 706323, "name": "Holy Constitution", "kind": "hit_ratio", "variant": "level_60",
       "label_suffix": "level_60", "quote": "Increases your damage dealt versus Undead by ${$m1+0}, scaling with level",
       "expected": 1.0, "expected_token": "${$m1+0}", "metric": "melee_damage_total", "swing_hand": 0,

@@ -1,5 +1,5 @@
 import argparse
-from dataclasses import asdict
+from dataclasses import asdict, replace
 import hashlib
 import json
 from pathlib import Path
@@ -168,6 +168,8 @@ def add_behaviour(writer: ManifestWriter, entry: dict):
                         entry.get('variant', ''))
     parts = int(entry.get('parts', 1))
     if parts > 1:
+        expectations = [replace(expectation, model={**(expectation.model or {}), 'parts': parts})
+                        for expectation in expectations]
         for part in range(1, parts + 1):
             writer.add(scenario_key(key.removeprefix('conformance-'), 'part', part), 'behaviour', None,
                        entry['spell'], expectations, {**scenario, 'name': f'{scenario["name"]} part {part}'},

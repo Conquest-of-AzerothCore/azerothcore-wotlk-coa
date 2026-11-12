@@ -2663,17 +2663,19 @@
     "spell": 706323,
     "clause": "increases your chance to resist disease effects by $s2%",
     "labels": [
-      "conformance-templar-value-706323 (effect_value e1, 30)"
+      "706323 behaviour_taken_hit disease_resist"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged by a disease strike (ADR 0196): Death Plague 55604 cast at the caster 900 times per arm resisted in 13.3% / 14.9% without 706323 and 12.3% / 14.9% with it (pair 20261112-000437, -000508), against the 30 more points the tooltip states; Putrid Bite 30113 read the same. The stock MagicSpellHitResult adds aura 178 to a disease's resist chance; the cause is not located. Awaiting the mentor (lean/ext2-progress.md, fix-note finding). The earlier free-text labels never matched a verdict."
   },
   {
     "spell": 706323,
     "clause": "functional application of the disease resist chance",
     "labels": [
-      "706323 e1 (unmodelled) -- unmodelled: scripted or crowd-control effect"
+      "706323 behaviour_taken_hit disease_resist"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Judged by a disease strike (ADR 0196): Death Plague 55604 cast at the caster 900 times per arm resisted in 13.3% / 14.9% without 706323 and 12.3% / 14.9% with it (pair 20261112-000437, -000508), against the 30 more points the tooltip states; Putrid Bite 30113 read the same. The stock MagicSpellHitResult adds aura 178 to a disease's resist chance; the cause is not located. Awaiting the mentor (lean/ext2-progress.md, fix-note finding). The earlier free-text labels never matched a verdict."
   },
   {
     "spell": 706325,

@@ -5159,7 +5159,7 @@ TAKEN_HIT_OPENING_SETTLE_MS = 1500
 TAKEN_HIT_DEBT_MARGIN_MS = 500
 TAKEN_HIT_STRIKER_ENTRY = 36
 TAKEN_HIT_MINIMUM_SHARE = 0.5
-TAKEN_HIT_JUDGES = ('damage_ratio', 'absorb')
+TAKEN_HIT_JUDGES = ('damage_ratio', 'absorb', 'resist_rate')
 TAKEN_HIT_ABSORBS = ('none', 'formula', 'share')
 TAKEN_HIT_KEYS = ('damage', 'count', 'absorb', 'logs')
 TAKEN_HIT_REDUCTIONS = ('none', 'formula')
@@ -5218,6 +5218,7 @@ class TakenHitSpec:
     settle_ms: int = TAKEN_HIT_SETTLE_MS
     striker_race: int = 0
     returned_spell: int = 0
+    expected_points: float | None = None
 
 
 def taken_hit_label(spec: TakenHitSpec) -> str:
@@ -5266,7 +5267,26 @@ def taken_hit_term_label(spec: TakenHitSpec, arm: str, term: int, read: int) -> 
     return taken_hit_mark(spec, arm, 'term', f'{term} {read}')
 
 
+def taken_rate_label(spec: TakenHitSpec, arm: str, trial: int) -> str:
+    return taken_hit_mark(spec, arm, trial, 'applied')
+
+
+def taken_rate_arm_steps(spec: TakenHitSpec, arm: TakenArm) -> list[dict]:
+    auras = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks} for spell, stacks in arm.auras]
+    removals = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+    steps = []
+    for trial in range(1, spec.trials + 1):
+        steps += (removals if arm.refresh else []) + auras
+        steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
+                  {'action': 'wait', 'label': f'{arm.name} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS},
+                  measurement(taken_rate_label(spec, arm.name, trial), CASTER, 'aura', spell=spec.strike_spell),
+                  {'action': 'set_aura', 'actor': CASTER, 'spell': spec.strike_spell, 'stacks': 0}]
+    return steps + removals
+
+
 def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> list[dict]:
+    if spec.judge == 'resist_rate':
+        return taken_rate_arm_steps(spec, arm)
     debt = arm.debt_removed_pct is not None
     auras = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks} for spell, stacks in arm.auras]
     health = []
@@ -5375,6 +5395,11 @@ def taken_hit_validate(spec: TakenHitSpec):
         if (arm.returned_pct is None) != (not spec.returned_spell) or not 0 <= (arm.returned_pct or 0) <= 100:
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} states a returned percent exactly when the '
                              f'entry names a returned_spell')
+    if (spec.judge == 'resist_rate') != (spec.expected_points is not None) or (
+            spec.judge == 'resist_rate' and (names != list(HIT_RATIO_ARMS) or spec.debt_spell or spec.returned_spell
+                                             or spec.absorb_terms or spec.caster_health_pct is not None)):
+        raise ValueError(f'{spec.spell} taken_hit resist_rate states expected_points, compares exactly the arms '
+                         f'{HIT_RATIO_ARMS} and reads no debt, return, absorb or health')
     if spec.returned_spell and (spec.judge != 'absorb' or all(arm.returned_pct == 0 for arm in spec.arms)):
         raise ValueError(f'{spec.spell} taken_hit returned_spell needs the absorb judge and an arm that returns')
 
@@ -5438,6 +5463,15 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
     if spec.striker_race:
         scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
     label = taken_hit_label(spec)
+    if spec.judge == 'resist_rate':
+        model = {'kind': 'taken_rate', 'reads': {arm.name: [taken_rate_label(spec, arm.name, trial)
+                                                            for trial in range(1, spec.trials + 1)]
+                                                 for arm in spec.arms},
+                 'expected_points': float(spec.expected_points), 'trials': spec.trials, 'quote': entry.quote}
+        scenario['contract'] += (f'; each trial reads whether {spec.strike_spell} took hold on the caster and removes it, '
+                                 f'and the treatment arm must resist it {spec.expected_points:g} points more often')
+        return scenario, [Expectation(label, BEHAVIOUR_TAKEN_HIT, spec.spell, spec.strike_spell, None,
+                                      str(spec.expected_points), prose_rule(entry.quote, spec.spell), model)]
     if spec.judge == 'damage_ratio':
         reads = {arm.name: [(taken_hit_mark(spec, arm.name, mark, 'damage'),
                              taken_hit_mark(spec, arm.name, mark, 'count'))
@@ -5513,7 +5547,7 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         entry.get('debt_ends', False),
                         tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())),
                         entry.get('cast_power'), entry.get('settle_ms', TAKEN_HIT_SETTLE_MS),
-                        entry.get('striker_race', 0), entry.get('returned_spell', 0))
+                        entry.get('striker_race', 0), entry.get('returned_spell', 0), entry.get('expected_points'))
 
 
 THREAT_REDIRECT_SWINGS = 3

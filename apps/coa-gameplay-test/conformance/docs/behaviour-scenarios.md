@@ -1159,6 +1159,10 @@ area strike), Lacerating Slash 42395 (1735 Physical every 2 s for 18 s, a period
 (67 Physical). A strike heavier than the caster's health kills it: hold `caster_health_pct` and
 `caster_max_health`.
 
+- `judge: "resist_rate"` with `expected_points` (ADR 0196) reads, 300 ms after each strike, whether its aura is on the
+  caster and removes it; the arms' resisted shares, in percent, must differ by the stated points inside the larger of
+  5% of them and 2 points. With `parts` the parts are pooled.
+
 The control arm is the negative arm: without the talent nothing is absorbed or reduced.
 
 ### Threat-redirect scenarios (`behaviour_threat_redirect`, `kind: "threat_redirect"`)

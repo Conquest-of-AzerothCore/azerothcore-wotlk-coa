@@ -742,7 +742,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 310)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 311)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6527,6 +6527,42 @@ class PooledRateHitRatioTests(unittest.TestCase):
                        self.entry(parts=0)):
             with self.subTest(broken={key: broken.get(key) for key in ('rate', 'parts')}), \
                     self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, broken)
+
+
+class TakenResistRateTests(unittest.TestCase):
+    def test_each_trial_reads_and_removes_the_strike_aura(self):
+        entry = variant_entry(706323, 'taken_hit', 'disease_resist')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        reads = [step for step in steps if step.get('metric') == 'aura' and step['spell'] == entry['strike_spell']]
+        removals = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == entry['strike_spell']]
+        self.assertEqual((len(reads), len(removals)), (2 * entry['trials'], 2 * entry['trials']))
+        self.assertEqual(expectation.model['kind'], 'taken_rate')
+
+    def test_seeded_resist_rates_are_judged_in_points_over_the_pooled_parts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(706323, 'taken_hit', 'disease_resist'))
+        model = expectation.model
+
+        def part(resisted: dict[str, float]):
+            values = {}
+            for arm, labels in model['reads'].items():
+                for index, label in enumerate(labels):
+                    values[label] = 0.0 if index < round(len(labels) * resisted[arm] / 100) else 1.0
+            return FakeRun(values)
+
+        base = base_verdict(expectation)
+        for treatment, status in ((34.0, 'ok'), (4.0, 'alert')):
+            with self.subTest(treatment=treatment):
+                verdict = compare_module.behaviour_taken_rate_verdict(
+                    base, [part({'control': 4.0, 'treatment': treatment})] * 40, model)
+                self.assertEqual(verdict.status, status)
+
+    def test_a_resist_rate_without_its_points_or_with_other_arms_is_refused(self):
+        entry = variant_entry(706323, 'taken_hit', 'disease_resist')
+        for broken in ({**entry, 'expected_points': None}, {**entry, 'arms': [{'name': 'a'}, {'name': 'b'}]},
+                       {**entry, 'judge': 'absorb'}):
+            with self.subTest(broken=broken.get('judge')), self.assertRaises(ValueError):
                 behaviour_scenario(CLASS_FILE, broken)
 
 

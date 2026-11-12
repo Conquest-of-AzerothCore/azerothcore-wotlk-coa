@@ -27,7 +27,8 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
-                        DISPEL_TYPE_NAMES, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, strongest_percent)
+                        DISPEL_TYPE_NAMES, HIT_RATIO_ARMS, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS,
+                        strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
                    delta_of, delta_text,
                    per_event_sample, sized_trials)
@@ -3923,7 +3924,34 @@ def taken_hit_reduced_range(base: int, reduction: int, control: float) -> tuple[
     return math.floor(low), max(math.floor(low), math.ceil(high) - 1)
 
 
+def behaviour_taken_rate_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
+    runs = run if isinstance(run, list) else [run]
+    samples, rates = {}, {}
+    for arm in HIT_RATIO_ARMS:
+        resisted = []
+        for part in runs:
+            for label in model['reads'][arm]:
+                value = part.values.get(label)
+                if value is None:
+                    return replace(base, explanation=missing_measurement(part, label))
+                resisted.append(0.0 if value else 100.0)
+        samples[arm] = per_event_sample(resisted, [1.0] * len(resisted))
+        rates[arm] = samples[arm].mean
+    bonus = delta_of(samples['treatment'], samples['control'], float(model['expected_points']))
+    status, reason, needed = bonus_status(bonus)
+    pooled = f'; {len(runs)} parts pooled' if len(runs) > 1 else ''
+    return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
+                   low=bonus.expected - bonus.band, high=bonus.expected + bonus.band,
+                   detail={'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized_trials(bonus),
+                           **({'parts': len(runs)} if len(runs) > 1 else {})},
+                   explanation=f'resisted in {rates["control"]:.4g}% of {samples["control"].trials} control trials '
+                               f'and {rates["treatment"]:.4g}% of {samples["treatment"].trials} treatment trials; '
+                               f'{delta_text(bonus)} points; {reason}{pooled}')
+
+
 def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    if model.get('kind') == 'taken_rate':
+        return behaviour_taken_rate_verdict(base, run, model)
     faults, summaries, short = [], [], []
     judged = 0
     landed_damage, reductions = {}, {}
@@ -4352,6 +4380,9 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
     return resolved
 
 
+POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
+
+
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
              hit_model: HitModelSource | None = None, build: str | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
@@ -4375,7 +4406,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
             for data in entry['expectations']:
-                if (data.get('model') or {}).get('parts', 1) > 1 and data['check'] == BEHAVIOUR_HIT_RATIO:
+                if (data.get('model') or {}).get('parts', 1) > 1 and data['check'] in POOLED_CHECKS:
                     pooled.setdefault(data['label'], []).append((entry, None, Expectation(**data)))
             continue
         tokens = read_tokens(manifest['class_file'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
@@ -4392,7 +4423,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK,
                                        SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
-            elif expectation.check == BEHAVIOUR_HIT_RATIO and (expectation.model or {}).get('parts', 1) > 1:
+            elif expectation.check in POOLED_CHECKS and (expectation.model or {}).get('parts', 1) > 1:
                 if expectation.label not in hit_slots:
                     hit_slots[expectation.label] = len(verdicts)
                     verdicts.append(None)
@@ -4414,7 +4445,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        ' + '.join(entry['key'] for entry, _, _ in parts), expectation.spell_id, expectation.rank_id,
                        expectation.check)
         present = [run for _, run, _ in parts if run is not None]
-        verdict = (behaviour_hit_ratio_verdict(base, present, expectation.model)
+        pooled_judge = (behaviour_hit_ratio_verdict if expectation.check == BEHAVIOUR_HIT_RATIO
+                        else behaviour_taken_rate_verdict)
+        verdict = (pooled_judge(base, present, expectation.model)
                    if len(present) == expectation.model['parts']
                    else replace(base, status='unmeasured', explanation=f'{len(present)} of '
                                 f'{expectation.model["parts"]} pooled parts ran'))
