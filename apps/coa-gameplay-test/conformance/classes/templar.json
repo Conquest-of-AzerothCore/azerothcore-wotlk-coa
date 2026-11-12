@@ -1783,6 +1783,26 @@
   ],
   "behaviours": [
     {
+      "spell": 527023, "name": "Divine Charge (trample ticks by 1250 ms)", "kind": "metric_delta", "variant": "ticks_1250",
+      "label_suffix": "ticks_1250", "quote": "Holy Damage every $527270t3 sec", "expected": 2, "before_expected": 0,
+      "trigger_spell": 527023, "target": "caster", "cast_in_before": false, "select_dummy": true,
+      "metric": "spell_damage_count", "fields": {"spell": 527269, "target": "dummy"}, "wait_ms": 1250, "expire_ms": 500,
+      "observe_source": "527270 Effect[2] ticks every 500 ms ($527270t3, AscensionTemplarContracts.cpp:244-250 sets the PERIODIC_DUMMY amplitude) and each tick casts the trample 527269 at every enemy in range (AscensionTemplarAuras.cpp:179-191); one dummy stands 3 yd away. The before phase casts nothing and must count 0 trample hits (the control); the after phase casts Divine Charge on the caster and counts the hits on the dummy 1250 ms later: 2 (ticks at 500 and 1000 ms). With the 2750 ms entry (5 hits) the period lies in (458, 550] ms: 2 hits by 1250 ms and 5, not 6, by 2750 ms."
+    },
+    {
+      "spell": 527023, "name": "Divine Charge (trample ticks by 2750 ms)", "kind": "metric_delta", "variant": "ticks_2750",
+      "label_suffix": "ticks_2750", "quote": "Holy Damage every $527270t3 sec", "expected": 5, "before_expected": 0,
+      "trigger_spell": 527023, "target": "caster", "cast_in_before": false, "select_dummy": true,
+      "metric": "spell_damage_count", "fields": {"spell": 527269, "target": "dummy"}, "wait_ms": 2750, "expire_ms": 500,
+      "observe_source": "527270 Effect[2] ticks every 500 ms ($527270t3, AscensionTemplarContracts.cpp:244-250 sets the PERIODIC_DUMMY amplitude) and each tick casts the trample 527269 at every enemy in range (AscensionTemplarAuras.cpp:179-191); one dummy stands 3 yd away. The before phase casts nothing and must count 0 trample hits (the control); the after phase casts Divine Charge on the caster and counts the hits on the dummy 2750 ms later: 5 (ticks at 500 to 2500 ms). With the 1250 ms entry the period lies in (458, 550] ms; a 400 ms period would read 6, a 600 ms period 4."
+    },
+    {
+      "spell": 527023, "name": "Divine Charge (trample duration)", "kind": "cast_applies_aura", "variant": "trample",
+      "label_suffix": "trample", "quote": "every $527270t3 sec for $d.", "expected_ms": 15000, "applied_aura": 527270,
+      "target": "caster", "cast_spell": 527023, "cast_target": "caster",
+      "observe_source": "527023's aura on an unmounted player casts the steed 527272 and the trample aura 527270 (AscensionTemplarAuras.cpp:94-101), DurationIndex 8 (15000 ms), as 527023's own $d. The trample aura is read absent before the cast, and its expiry pair times the stated duration from the cast."
+    },
+    {
       "spell": 527023, "name": "Divine Charge (trample, no attack or spell power)", "kind": "script_hit",
       "variant": "no_power", "label_suffix": "no_power",
       "quote": "and causing them to trample nearby enemies for ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage",

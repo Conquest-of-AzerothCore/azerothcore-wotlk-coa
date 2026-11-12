@@ -1252,14 +1252,16 @@
     "spell": 527023,
     "clause": "and causing them to trample nearby enemies for ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage every $527270t3 sec for $d.",
     "labels": [
-      "527023 effect_value 527270e2 #1",
       "527023 aura_duration_ms #3",
-      "527023 aura_amplitude_ms #2",
       "527023 script_hit 527269",
-      "527023 script_hit 527269 no_power"
+      "527023 script_hit 527269 no_power",
+      "527023 behaviour_metric_delta ticks_1250",
+      "527023 behaviour_metric_delta ticks_2750",
+      "527023 behaviour_cast_applies_aura trample",
+      "527023 behaviour_expiry trample"
     ],
     "kind": "claim",
-    "reason": "trample damage behaviour proven after the fix (ADR 0209, e631a85530): 527269 reads 128.6 / 127.1 per hit against 127.15 for the stated formula at AP 313 and spell power 0 (before the fix 171.6 / 172.1, the AP term twice); control no_power (AP and spell power 0, ADR 0210) 83.4 / 84.8 against 83.85, the base term 119 alone; counted 20261112-023428 / -023500, build 35cae55aa6ae. The 'every $527270t3 sec' part keeps its unmodelled amplitude label and 'for $d' its duration readback; neither has a behaviour reading yet"
+    "reason": "behaviour proven on build 35cae55aa6ae, counted 20261112-023931 / -024004. Damage, after the fix (ADR 0209): 127.1 / 126.8 per trample hit against 127.15; the no_power control (AP and SP 0, ADR 0210) gives 84.0 / 84.4 against 83.85 for the base term. Period: 0 hits with no charge (control), 2 hits 1250 ms after a charge and 5 by 2750 ms, which places the tick period in (458, 550] ms against the stated 0.5 s. Duration: the trample aura 527270 is absent before the cast (control), present 14625-14700 ms after it and absent at 15375-15500 ms, against the stated 15000 ms. Dropped labels: '527023 effect_value 527270e2 #1' (not_measured: the value comes from a CalcAmount hook) and '527023 aura_amplitude_ms #2' (unmodelled); the tick counts replace them"
   },
   {
     "spell": 527023,
