@@ -49,6 +49,10 @@ round uses the [server-fix brief](docs/fix-brief.md).
 
 Each topic lives in its own page under `docs/`, so an agent reads only the page it needs:
 
+- [Class conformance guide](../../../docs/coa/class-conformance.md) — the contributor workflow for taking one class
+  through tooltip → behaviour proof, and its [rulings](../../../docs/coa/class-conformance-rulings.md).
+- [Class map](docs/class-map.md) — `class_map.py`, the per-spell risk map of all 21 classes that starts a class's
+  work.
 - [Conformance modules](docs/modules.md) — one-line responsibility of every `.py` module.
 - [Class spell sets](docs/spell-sets.md) — `class_spells`, ranks, and extra (non-progression) class spells.
 - [Tooltip reading](docs/tooltip-reading.md) — `$`-token parsing, level-scaled and per-level points, `$<name>`
