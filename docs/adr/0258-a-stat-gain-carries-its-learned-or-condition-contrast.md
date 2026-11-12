@@ -101,4 +101,4 @@ The harness gains `applied_aura_count`: the number of aura applications a unit h
     `without` arm).
 - Verdicts judged before this ADR carry no contrast or attribution, so the three scenarios were run again. Naming
   the read changed only the model: the pair 20261112-045107 / -045344 was judged again, with the same scenario
-  files.
+  files. The cast-landed read then changed those three files, and the counted pair is 20261112-051639 / -052004.

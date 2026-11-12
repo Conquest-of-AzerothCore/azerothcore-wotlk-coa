@@ -1621,5 +1621,6 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
 be the stated bonus's step. The judge reads the 99% interval back as the bonuses whose int32 amounts give it. Only
 the stated step passes (amendment of 2026-11-12): `ok` when the interval holds one step and its amounts are the ones
 the engine computation gives at the stated bonus, `insufficient_trials` when it holds the stated step and another,
-and `alert` otherwise (between two steps, another step, or several steps without the stated one). Radiant Blade 524822 and 525080 (+25% and +50% on Oath:
-Righteous Lunge's +5% and +30%): amounts 6 and 37, 7 and 45, against the Oath alone.
+and `alert` otherwise (between two steps, another step, or several steps without the stated one). Radiant Blade
+524822 and 525080 (+25% and +50% on Oath: Righteous Lunge's +5% and +30%): amounts 6 and 37, 7 and 45, against the
+Oath alone.
