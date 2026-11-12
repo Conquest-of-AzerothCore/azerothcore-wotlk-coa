@@ -19,7 +19,8 @@
       "id": "tank",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 60,
+      "security": 2
     }
   ],
   "steps": [
