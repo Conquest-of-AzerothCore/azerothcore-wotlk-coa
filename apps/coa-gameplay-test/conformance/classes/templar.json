@@ -2214,8 +2214,8 @@
       "label_suffix": "damage_physical", "quote": "increases your damage dealt and movement speed by", "expected": 1.1,
       "metric": "melee_damage_total", "swing_hand": 0, "refresh": true,
       "control": {"auras": [[54678, 1]]}, "treatment": {"auras": [[54678, 1], [560834, 5]]},
-      "critical": false, "trials": 30, "fixture": {"attack_power": 20000},
-      "expected_source": "The tooltip says damage dealt, with no school. 560834 Effect[0] aura 79 has EffectMiscValue 126, which leaves out the Physical school (1); a main-hand white swing is Physical, so this arm reads whether a Physical hit gains the 5-stack +10%. Each trial is one main-hand swing interval at the dummy, reading plain (not critical, not glancing) hits; both arms set Brute Force 54678 (physical target resistance -50000) before every swing, so the dummy's armor is 0, and the attack power fixture makes the AP part dominate the weapon roll. 705286 is not learned."
+      "critical": false, "trials": 100, "parts": 3, "fixture": {"attack_power": 20000},
+      "expected_source": "The tooltip says damage dealt, with no school. 560834 Effect[0] aura 79 has EffectMiscValue 126 in the DBC, which leaves out the Physical school (1); the owner ruled that everything is included, Physical too (2026-11-12, Q-r2a-1), and the Templar contract gives it all schools, 127 (ADR 0287). A main-hand white swing is Physical, so this arm reads whether a Physical hit gains the 5-stack +10%. Each trial is one main-hand swing interval at the dummy, reading plain (not critical, not glancing) hits; both arms set Brute Force 54678 (physical target resistance -50000) before every swing, so the dummy's armor is 0, and the attack power fixture makes the AP part dominate the weapon roll. 705286 is not learned. A 30-trial run measured +9.74% with a 99% half-width of 2.28 points and asked for 245 trials (20261112-075907); three pooled parts of 100 trials give 300."
     },
     {
       "spell": 300524, "name": "Focused (Righteous Tempest)", "kind": "hit_ratio", "variant": "righteous_tempest",

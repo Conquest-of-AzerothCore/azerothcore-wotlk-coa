@@ -2402,7 +2402,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "awaiting owner (r2-a question 1): at the cap of 5 stacks of 560834 a Holy Scourgebane hit gains +10.0% (ok), a Physical main-hand swing +0.4% / -0.3% (alert, 99% intervals about -1.3 to +2.6 points); 560834 Effect[0] aura 79 EffectMiscValue 126 leaves out the Physical school, while the tooltip says damage dealt. Movement speed 1.0 to 1.02 (ok). Counted 20261112-013915 / -013954 and 20261112-012437 / -012605"
+    "reason": "owner ruling 2026-11-12 (Q-r2a-1, option b): damage dealt includes Physical; the Templar contract gives 560834 Effect[0] all schools (ADR 0287). At the cap of 5 stacks a Holy Scourgebane hit gains +10.0% and a Physical main-hand swing +9.48% / +9.72% (ok, 300 pooled trials), on the counted pair 20261112-080132 / -080209. Before the fix the swing read +0.4% / -0.3% (20261112-013915 / -013954). Movement speed 1.0 to 1.02 (ok)"
   },
   {
     "spell": 705286,
