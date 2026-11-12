@@ -463,7 +463,8 @@
       "300929 effect_value e0",
       "300929 e0 spell_damage_done 572741",
       "300929 e0 weapon_damage_min 0",
-      "300929 behaviour_party_stat_ratio"
+      "300929 behaviour_party_stat_ratio",
+      "300929 behaviour_hit_ratio party_damage"
     ],
     "kind": "claim"
   },
