@@ -250,6 +250,7 @@ ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag', 'unit_state'}),
     'relocate': ({'actor'}, {'actor', 'dx', 'dy', 'dz'}),
+    'fall': ({'actor', 'height'}, {'actor', 'height'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'client_packet': ({'actor', 'opcode'},
                       {'actor', 'opcode', 'fields', 'consumed', 'early', 'cast_before', 'pet_loading_before'}),
@@ -767,6 +768,9 @@ def validate(scenario, clock=REAL_CLOCK):
         if action == 'relocate':
             for key in ('dx', 'dy', 'dz'):
                 number(step.get(key, 0), f'{where}.{key}', -20, 20)
+        if action == 'fall':
+            require(step['actor'] in player_ids, f'{where}: fall needs a player')
+            number(step['height'], f'{where}.height', 1, 60)
         if 'all_specs' in step:
             require(type(step['all_specs']) is bool, f'{where}: all_specs must be boolean')
         if action == 'talent' and 'command' in step:

@@ -27,6 +27,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
+                        BEHAVIOUR_FALL_DAMAGE,
                         BEHAVIOUR_SOURCE_STACK, DISPEL_TYPE_NAMES, HIT_RATIO_ARMS, TAKEN_HIT_CONTROL_ARM,
                         TAKEN_HIT_RETURNED_KEYS, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
@@ -480,6 +481,21 @@ def deterministic(base: Verdict, measured: float, judged: float, expected: float
                         f'{(judged - expected) / expected if expected else judged - expected:+.1%}: tolerated')
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
                    explanation=explanation)
+
+
+def behaviour_fall_damage_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    lost = {}
+    for arm, (before, after) in model['arms'].items():
+        missing = next((label for label in (before, after) if run.values.get(label) is None), None)
+        if missing:
+            return replace(base, explanation=missing_measurement(run, missing))
+        lost[arm] = float(run.values[before]) - float(run.values[after])
+    without, with_aura = lost['without'], lost['with']
+    status = 'ok' if without > 0 and 0 <= with_aura < without else 'alert'
+    return replace(base, status=status, measured=with_aura, expected=without, low=0.0, high=without,
+                   explanation=f'a harness-simulated landing from {model["height"]:g} yd took {without:g} health '
+                               f'without the aura and {with_aura:g} with it; the loss with the aura must be at least '
+                               f'0 and below the loss without it, and the loss without it above 0')
 
 
 def exact(base: Verdict, measured: float, expected: float, why: str) -> Verdict:
@@ -3348,8 +3364,13 @@ def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectatio
     if measured is None:
         return replace(base, explanation=missing_measurement(run, expectation.label))
     expected = float(expectation.displayed)
+    removal = (expectation.model or {}).get('removal')
+    limit = (f'; a removed cooldown: the second cast is attempted {expectation.model["level"]:g} ms after the first, '
+             f'past the spell\'s {removal["global_cooldown_ms"]} ms global cooldown (the harness waits '
+             f'{removal["gcd_wait_ms"]} ms), so a cooldown left below {expectation.model["level"]:g} ms is not told '
+             f'apart from none' if removal else '')
     return exact(base, float(measured), expected,
-                'cast_failure SpellCastResult reason compared exactly to the expected code')
+                 'cast_failure SpellCastResult reason compared exactly to the expected code' + limit)
 
 
 def behaviour_immunity_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:
@@ -3783,6 +3804,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_dispel_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_TAKEN_OUTCOME:
         return behaviour_taken_outcome_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_FALL_DAMAGE:
+        return behaviour_fall_damage_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CRIT_RATE:
         return behaviour_crit_rate_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_SOURCE_STACK:

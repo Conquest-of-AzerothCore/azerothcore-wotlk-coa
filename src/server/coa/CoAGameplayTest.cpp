@@ -6952,6 +6952,35 @@ private:
                     player->ClearUnitState(UNIT_STATE_MOVING);
             }
         }
+        else if (action == "fall")
+        {
+            float const height = step.get<float>("height");
+            Require(height > 0.0f, "Fall needs a positive height");
+            Require(player->IsAlive() && !player->IsGameMaster() && !player->GetCommandStatus(CHEAT_GOD) &&
+                !player->HasHoverAura() && !player->HasFeatherFallAura() && !player->HasFlyAura() &&
+                !player->IsInFlight() && !player->IsInWater() &&
+                !player->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_NORMAL),
+                "Fall needs a living player that a landing can hurt");
+            MovementInfo start = player->m_movementInfo;
+            start.pos.Relocate(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ() + height,
+                player->GetOrientation());
+            start.fallTime = 0;
+            start.AddMovementFlag(MOVEMENTFLAG_FALLING);
+            player->UpdateFallInformationIfNeed(start, MSG_MOVE_JUMP);
+            MovementInfo landing = player->m_movementInfo;
+            landing.pos.Relocate(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),
+                player->GetOrientation());
+            landing.fallTime = uint32(std::sqrt(2.0f * height / 19.29f) * IN_MILLISECONDS);
+            landing.RemoveMovementFlag(MOVEMENTFLAG_FALLING);
+            uint32 const healthBefore = player->GetHealth();
+            player->HandleFall(landing);
+            player->UpdateFallInformationIfNeed(landing, MSG_MOVE_FALL_LAND);
+            record.put("height", height);
+            record.put("fall_time_ms", landing.fallTime);
+            record.put("safe_fall", player->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL));
+            record.put("fall_damage_rate", sWorld->getRate(RATE_DAMAGE_FALL));
+            record.put("health_lost", healthBefore - player->GetHealth());
+        }
         else if (action == "relocate")
         {
             player->UpdatePosition(player->GetPositionX() + step.get<float>("dx", 0.0f),

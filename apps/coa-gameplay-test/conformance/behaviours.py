@@ -54,6 +54,7 @@ BEHAVIOUR_TAKEN_HIT = 'behaviour_taken_hit'
 BEHAVIOUR_THREAT_REDIRECT = 'behaviour_threat_redirect'
 BEHAVIOUR_DISPEL_COUNT = 'behaviour_dispel_count'
 BEHAVIOUR_TAKEN_OUTCOME = 'behaviour_taken_outcome'
+BEHAVIOUR_FALL_DAMAGE = 'behaviour_fall_damage'
 BEHAVIOUR_CRIT_RATE = 'behaviour_crit_rate'
 BEHAVIOUR_AMOUNT_MATCH = 'behaviour_amount_match'
 BEHAVIOUR_SOURCE_STACK = 'behaviour_source_stack'
@@ -69,7 +70,7 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
                     BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                     BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
-                    BEHAVIOUR_SOURCE_STACK)
+                    BEHAVIOUR_SOURCE_STACK, BEHAVIOUR_FALL_DAMAGE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -79,7 +80,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
-        'source_stack', 'mount_block', 'stat_gain')
+        'source_stack', 'mount_block', 'stat_gain', 'fall_damage')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -3477,6 +3478,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     rule = prose_rule(entry.quote, spec.spell)
     model = {'kind': 'cost_gate', 'resource': spec.resource, 'base': base, 'reduction': spec.reduction,
              'quote': entry.quote}
+    if removes_cooldown(spec, base):
+        model['removal'] = {'global_cooldown_ms': int(records.field('Spell', spec.gated_spell, 'StartRecoveryTime')),
+                            'gcd_wait_ms': GCD_WAIT_MS}
     talent_steps = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 1}]
                     if spec.talent_aura else [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}])
     if spec.talent_aura and spec.talent_aura_each_arm:
@@ -6664,7 +6668,84 @@ def stat_gain_spec(entry: dict) -> StatGainSpec:
                         entry.get('label_suffix', ''), entry.get('wait_ms', STAT_GAIN_WAIT_MS))
 
 
+FALL_DAMAGE_AURA_SETTLE_MS = 1500
+FALL_DAMAGE_SETTLE_MS = 500
+FALL_DAMAGE_ARMS = ('without', 'with')
+
+
+@dataclass(frozen=True)
+class FallDamageSpec:
+    spell: int
+    name: str
+    quote: str
+    cast_spell: int
+    height: float
+    receiver: str = ALLY
+    label_suffix: str = ''
+
+
+def fall_damage_label(spec: FallDamageSpec, arm: str, moment: str) -> str:
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    return f'{spec.spell} {BEHAVIOUR_FALL_DAMAGE}{suffix} {arm} {moment}'
+
+
+def fall_damage_scenario(class_file: dict, spec: FallDamageSpec) -> tuple[dict, list[Expectation]]:
+    if spec.receiver not in (CASTER, ALLY):
+        raise ValueError(f'{spec.spell} fall_damage lands the caster or the ally, not {spec.receiver!r}')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'fall_damage', spec.quote, spec.height)
+    facts = facts_of(records, spec.cast_spell)
+
+    def landing(arm: str) -> list[dict]:
+        return [fixture_health_step(spec.receiver, 100),
+                {'action': 'wait', 'ms': FALL_DAMAGE_SETTLE_MS},
+                measurement(fall_damage_label(spec, arm, BEFORE), spec.receiver, 'health'),
+                {'action': 'fall', 'label': f'{arm} landing', 'actor': spec.receiver, 'height': spec.height},
+                measurement(fall_damage_label(spec, arm, AFTER), spec.receiver, 'health')]
+
+    aura_label = fall_damage_label(spec, 'with', 'aura')
+    group = [{'action': 'group', 'actor': CASTER, 'target': ALLY}] if spec.receiver == ALLY else []
+    steps = (base_steps(class_file) + group
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
+             + landing('without')
+             + cast_gate_power_step(facts) + required_aura_steps(facts)
+             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': CASTER},
+                {'action': 'wait', 'ms': FALL_DAMAGE_AURA_SETTLE_MS},
+                measurement(aura_label, spec.receiver, 'aura', spell=spec.cast_spell)]
+             + landing('with'))
+    players = [player_fixture(class_file)] + ([{**player_fixture(class_file), 'id': ALLY}]
+                                              if spec.receiver == ALLY else [])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour fall damage'
+                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
+        'contract': f'The {spec.receiver} lands from {spec.height:g} yd at {FIXTURE_MAX_HEALTH} maximum health, '
+                    f'once before and once after a real cast of {spec.cast_spell} puts its aura on it. The landing '
+                    f'is harness-simulated: the fall action feeds the server\'s own landing handler '
+                    f'(Player::HandleFall) a MovementInfo, as a client MSG_MOVE_FALL_LAND would. The health lost with '
+                    f'the aura must be below the health lost without it, proving the "{spec.quote}" clause.',
+        'players': players,
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'fall_damage', 'height': spec.height, 'quote': entry.quote,
+             'arms': {arm: [fall_damage_label(spec, arm, BEFORE), fall_damage_label(spec, arm, AFTER)]
+                      for arm in FALL_DAMAGE_ARMS}}
+    rule = prose_rule(entry.quote, spec.spell)
+    return scenario, [
+        Expectation(fall_damage_label(spec, 'with', 'reduced'), BEHAVIOUR_FALL_DAMAGE, spec.spell, spec.cast_spell,
+                    None, 'below the health lost without the aura', rule, model),
+        Expectation(aura_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.cast_spell, None, str(STATE_PRESENT),
+                    rule, {'kind': 'fall_damage', 'reading': 'aura'})]
+
+
+def fall_damage_spec(entry: dict) -> FallDamageSpec:
+    return FallDamageSpec(entry['spell'], entry['name'], entry['quote'], int(entry['cast_spell']),
+                          float(entry['height']), entry.get('receiver', ALLY), entry.get('label_suffix', ''))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    if entry['kind'] == 'fall_damage':
+        return fall_damage_scenario(class_file, fall_damage_spec(entry))
     if entry['kind'] == 'school_lockout':
         from expiry import school_lockout_scenario
         return school_lockout_scenario(class_file, entry)

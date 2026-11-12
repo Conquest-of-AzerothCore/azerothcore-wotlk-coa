@@ -8617,7 +8617,7 @@ class CostGateWeaponIncreaseRemovalTests(unittest.TestCase):
         scenario, expectations = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(707663, 'cost_gate',
                                                                                           'cooldown')))
         run.validate(scenario, run.SIMULATED_CLOCK)
-        self.assertEqual(arm_readings(expectations), {'without': (2100, 67.0), 'with': (2100, 0.0)})
+        self.assertEqual(arm_readings(expectations), {'without': (1700, 67.0), 'with': (1700, 0.0)})
         with_arm = next(expectation for expectation in expectations if expectation.label.endswith(' with'))
         self.assertEqual(seeded(with_arm, 0.0), 'ok')
         self.assertEqual(seeded(with_arm, 67.0), 'alert')
@@ -8685,6 +8685,60 @@ class CastCombatResurrectTests(unittest.TestCase):
         _, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(500688, 'cast_combat'))
         self.assertEqual([expectation.label for expectation in expectations],
                          ['500688 cast_combat combat', '500688 cast_combat cast_failure'])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class FallDamageTests(unittest.TestCase):
+    def test_the_ally_lands_before_and_after_the_aura_at_a_fixed_maximum_health(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(560653, 'fall_damage', 'landing'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        falls = [index for index, step in enumerate(steps) if step['action'] == 'fall']
+        casts = cast_indices(steps, 560653)
+        self.assertEqual(len(falls), 2)
+        self.assertEqual(len(casts), 1)
+        self.assertLess(falls[0], casts[0])
+        self.assertLess(casts[0], falls[1])
+        self.assertTrue(all(steps[index]['actor'] == ALLY and steps[index]['height'] == 30 for index in falls))
+        self.assertIn('harness-simulated', scenario['contract'])
+        self.assertEqual([expectation.check for expectation in expectations],
+                         ['behaviour_fall_damage', 'behaviour_cast_condition'])
+
+    def readings(self, expectation: Expectation, without: float, with_aura: float) -> dict[str, float]:
+        (before_without, after_without), (before_with, after_with) = (expectation.model['arms']['without'],
+                                                                      expectation.model['arms']['with'])
+        return {before_without: 10000.0, after_without: 10000.0 - without, before_with: 10000.0,
+                after_with: 10000.0 - with_aura}
+
+    def test_seeded_landings_that_are_not_reduced_alert(self):
+        _, [expectation, _] = behaviour_scenario(CLASS_FILE, r3b_entry(560653, 'fall_damage', 'landing'))
+        judge = lambda without, with_aura: judge_behaviour(
+            base_verdict(expectation), FakeRun(self.readings(expectation, without, with_aura)), expectation).status
+        self.assertEqual(judge(2974.0, 1174.0), 'ok')
+        self.assertEqual(judge(2974.0, 2974.0), 'alert')
+        self.assertEqual(judge(0.0, 0.0), 'alert')
+        self.assertEqual(judge(1174.0, 2974.0), 'alert')
+
+    def test_an_unknown_receiver_is_refused(self):
+        entry = {**r3b_entry(560653, 'fall_damage', 'landing'), 'receiver': 'dummy'}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CostGateRemovalLimitTests(unittest.TestCase):
+    def test_a_removal_verdict_states_the_global_cooldown_limit(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(707663, 'cost_gate', 'cooldown'))
+        with_arm = next(expectation for expectation in expectations if expectation.label.endswith(' with'))
+        self.assertEqual(with_arm.model['removal'], {'global_cooldown_ms': 1250, 'gcd_wait_ms': 1600})
+        verdict = judge_behaviour(base_verdict(with_arm), FakeRun({with_arm.label: 0.0}), with_arm)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('1250 ms global cooldown', verdict.explanation)
+        self.assertIn('1700 ms', verdict.explanation)
+
+    def test_a_reduction_verdict_carries_no_removal_limit(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(706309, 'cost_gate'))
+        self.assertNotIn('removal', expectations[0].model)
 
 
 if __name__ == '__main__':

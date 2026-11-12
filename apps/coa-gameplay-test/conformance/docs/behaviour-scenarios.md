@@ -1565,3 +1565,13 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
 - `cast_combat` `resurrect: true` (with `cast_spell` and `label_suffix`): the dead ally answers the resurrection
   (`client_packet` 348) before the cast, and must stay dead, and after it, and must be alive (Spiritual Ascension
   500688, rank 500758).
+
+### Fall damage and removed-cooldown limits (ADR 0237, ADR 0238)
+
+- `fall_damage` (`behaviour_fall_damage`): `cast_spell`, `height`, `receiver` (`ally`, the default, grouped, or
+  `caster`). The receiver is set to 10000 maximum health and lands from `height` through the harness `fall` action
+  (a harness-simulated landing through `Player::HandleFall`), before and after a real cast of `cast_spell`; its health
+  is read right before and right after each landing, and the aura on it after the cast. The loss with the aura must be
+  at least 0 and below the loss without it. Harmonic Disposition 560653: 2973 and 1173 from 30 yd.
+- A cost gate that removes a cooldown states, in its verdict, the time of the second cast, the spell's global
+  cooldown and that a cooldown left below that time reads the same as none.
