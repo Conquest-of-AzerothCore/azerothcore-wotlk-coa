@@ -2056,6 +2056,7 @@ class ThreatTickRatioSpec:
     ticks: int = 1
     label_suffix: str = ''
     cast_target: str | None = None
+    threat_unit: str = CASTER
 
 
 def threat_tick_ratio_label(spec: ThreatTickRatioSpec, moment: str) -> str:
@@ -2092,14 +2093,15 @@ def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> t
     after_label = threat_tick_ratio_label(spec, AFTER)
     wait_words, contract_words = tick_words(spec.ticks)
     learned, application = threat_tick_application(records, spec)
-    attack = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
-              {'action': 'wait', 'label': 'build threat on the dummy', 'ms': spec.attack_wait_ms},
-              {'action': 'stop_attack', 'actor': CASTER}]
-    before = [measurement(before_label, TARGET, 'threat', target=CASTER)]
+    attackers = [CASTER] + ([ALLY] if spec.cast_target == ALLY else [])
+    attack = ([{'action': 'attack', 'actor': unit, 'target': TARGET} for unit in attackers]
+              + [{'action': 'wait', 'label': 'build threat on the dummy', 'ms': spec.attack_wait_ms}]
+              + [{'action': 'stop_attack', 'actor': unit} for unit in attackers])
+    before = [measurement(before_label, TARGET, 'threat', target=spec.threat_unit)]
     tick = [{'action': 'wait', 'label': wait_words, 'ms': spec.tick_wait_ms},
-            measurement(after_label, TARGET, 'threat', target=CASTER)]
+            measurement(after_label, TARGET, 'threat', target=spec.threat_unit)]
     ordered = attack + application + before if spec.cast_target else attack + before + application
-    steps = base_steps(class_file) + learned + ordered + tick
+    steps = base_steps(class_file) + ally_group_steps(set(attackers)) + learned + ordered + tick
     suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
     applied = (f'{spec.aura_spell} is cast by the caster on the {spec.cast_target} (its aura read absent before '
                f'the cast and present after it) and' if spec.cast_target
@@ -2107,12 +2109,14 @@ def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> t
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat tick ratio{suffix}',
-        'contract': f'The dummy\'s own threat against the caster is read once after the caster builds it through '
+        'contract': f'The dummy\'s own threat against the {spec.threat_unit} is read once after '
+                    f'{" and ".join(f"the {unit}" for unit in attackers)} build'
+                    f'{"s" if len(attackers) == 1 else ""} it through '
                     f'real melee attacks, and once more after {applied} '
                     f'{contract_words} ({spec.tick_wait_ms} ms), isolating the percentage '
                     f'the tick removes as a ratio rather than an absolute value, since the baseline threat a real '
                     f'attack sequence builds is not a deterministic number.',
-        'players': [player_fixture(class_file)],
+        'players': [player_fixture(class_file)] + ally_players(class_file, set(attackers)),
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     label = threat_tick_ratio_entry_label(spec.spell, spec.label_suffix)
@@ -2135,9 +2139,13 @@ def threat_tick_ratio_entry_label(spell: int, suffix: str = '') -> str:
 
 def threat_tick_ratio_spec(entry: dict) -> ThreatTickRatioSpec:
     cast_target = entry.get('cast_target')
-    if cast_target not in (None, CASTER):
-        raise ValueError(f'{entry["spell"]} threat_tick_ratio casts {entry["aura_spell"]} on {cast_target!r}; the '
-                         f'dummy\'s threat is read against the caster, so the cast target must be {CASTER!r}')
+    threat_unit = entry.get('threat_unit', cast_target or CASTER)
+    if cast_target not in (None, CASTER, ALLY):
+        raise ValueError(f'{entry["spell"]} threat_tick_ratio casts {entry["aura_spell"]} on {cast_target!r}, not '
+                         f'on {CASTER!r} or {ALLY!r}')
+    if threat_unit not in (CASTER, cast_target):
+        raise ValueError(f'{entry["spell"]} threat_tick_ratio reads the threat of {threat_unit!r}, which neither '
+                         f'casts nor receives {entry["aura_spell"]}')
     if cast_target and entry.get('aura_stacks', 1) != 1:
         raise ValueError(f'{entry["spell"]} threat_tick_ratio casts {entry["aura_spell"]}, which applies one stack, '
                          f'not aura_stacks {entry["aura_stacks"]}')
@@ -2145,7 +2153,7 @@ def threat_tick_ratio_spec(entry: dict) -> ThreatTickRatioSpec:
                                entry['aura_spell'], entry.get('attack_wait_ms', 3000),
                                entry.get('tick_wait_ms', 1200), entry.get('tolerance', 0.005),
                                entry.get('aura_stacks', 1), entry.get('ticks', 1), entry.get('label_suffix', ''),
-                               cast_target)
+                               cast_target, threat_unit)
 
 
 @dataclass(frozen=True)

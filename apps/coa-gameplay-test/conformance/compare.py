@@ -2988,7 +2988,7 @@ def cast_application(run: Run, model: dict) -> tuple[bool | None, str] | None:
     after = run.values.get(after_label)
     if before is None or after is None:
         return None, missing_measurement(run, before_label if before is None else after_label)
-    applied = before == 0 and after > 0
+    applied = before == 0 and after != 0
     words = 'applied by the cast' if applied else 'not shown applied by the cast'
     return applied, (f'aura {words}: {before_label!r} {before:g} (absent expected) and {after_label!r} {after:g} '
                      f'(present expected)')

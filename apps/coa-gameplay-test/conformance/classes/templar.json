@@ -3646,6 +3646,31 @@
     {
       "spell": 572808,
       "name": "Righteous Custodian",
+      "kind": "threat_tick_ratio",
+      "variant": "ally",
+      "label_suffix": "ally",
+      "quote": "reducing their total threat by",
+      "aura_spell": 572808,
+      "cast_target": "ally",
+      "expected_ratio": 0.98,
+      "observe_source": "Recipient arm of the magnitude claim (review I1): \"their\" is the blessed party or raid member. The ally is grouped with the caster, the caster and the ally both build threat on the dummy by melee, and the caster casts 572808 on the ally (TARGET_UNIT_TARGET_RAID 57, SpellInfo::CheckExplicitTarget accepts a group member). AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick casts 572809 from the aura holder, and Spell::EffectModifyThreatPercent scales the dummy's threat toward that holder, so one tick in 1200 ms gives the dummy's threat toward the ally a ratio of 0.98."
+    },
+    {
+      "spell": 572808,
+      "name": "Righteous Custodian",
+      "kind": "threat_tick_ratio",
+      "variant": "ally_caster_control",
+      "label_suffix": "ally_caster_control",
+      "quote": "reducing their total threat by",
+      "aura_spell": 572808,
+      "cast_target": "ally",
+      "threat_unit": "caster",
+      "expected_ratio": 1.0,
+      "observe_source": "Control of the recipient arm: the same grouped setup and cast of 572808 on the ally, with the dummy's threat toward the casting Templar read over the same 1200 ms tick window. The tick scales only the holder's threat, so the caster's ratio is 1; a tick that scaled the blessing caster's threat instead would read 0.98 here."
+    },
+    {
+      "spell": 572808,
+      "name": "Righteous Custodian",
       "kind": "group_target",
       "quote": "Place a blessing on a party or raid member",
       "observe_source": "Spell.dbc 572808 EffectImplicitTargetA[0] 57 TARGET_UNIT_TARGET_RAID gives an explicit TARGET_FLAG_UNIT_RAID target; SpellInfo::CheckExplicitTarget (SpellInfo.cpp:2186-2197) accepts it only when caster->IsInRaidWith(target), else SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062). The harness group action (CoAGameplayTest.cpp:6899-6923) converts a full five-member party to a raid before adding the sixth member, so the raid arm's target is a raid member outside a party of five."
