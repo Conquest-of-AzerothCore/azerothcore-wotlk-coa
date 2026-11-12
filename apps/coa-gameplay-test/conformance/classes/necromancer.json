@@ -1993,6 +1993,48 @@
       "wait_ms": 2500,
       "expire_ms": 12000,
       "observe_source": "AscensionNecromancerEvents.cpp:138-139: the caster's own critical damage with Chance(player, 806321) (ProcChance 100, its Effect[0] aura on the caster) calls Plague(player, target), one stack of Crypt Plague 570131 (AscensionNecromancer.cpp:262-272). One Lichfrost 801722 hit at the dummy, forced to crit (spell_crit_rating 100000; Crypt Plague 92121 not known, so Lichfrost adds no stacks of its own), reads 0 stacks without 806321 and 1 with it."
+    },
+    {
+      "spell": 561353,
+      "name": "Unholy Runes (Crypt Swarm)",
+      "kind": "hit_ratio",
+      "variant": "crypt_swarm",
+      "label_suffix": "crypt_swarm",
+      "quote": "Increases the damage of Crypt Swarm and Blight by $s1%",
+      "expected": 1.15,
+      "observe_spell": 800343,
+      "cast_spell": 501886,
+      "cast_wait_ms": 3600,
+      "control": {},
+      "treatment": {
+        "learn": [
+          561353
+        ]
+      },
+      "critical": false,
+      "trials": 51,
+      "parts": 25,
+      "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Crypt Swarm 800343, the damage the Crypt Swarm channel rank 8 501886 (3000 ms, the level-60 rank) triggers every 500 ms; each trial is one channel and its 6 hits (800343 cast directly deals only its 1-point base, the channel sets the amount)."
+    },
+    {
+      "spell": 561353,
+      "name": "Unholy Runes (Blight)",
+      "kind": "hit_ratio",
+      "variant": "blight",
+      "label_suffix": "blight",
+      "quote": "Increases the damage of Crypt Swarm and Blight by $s1%",
+      "expected": 1.15,
+      "observe_spell": 500237,
+      "control": {},
+      "treatment": {
+        "learn": [
+          561353
+        ]
+      },
+      "critical": false,
+      "trials": 166,
+      "parts": 14,
+      "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Blight 500237, the damage Blight's Effect[0] aura 227 triggers every 4000 ms (Blight 500217 ranks), cast directly so each trial is one hit."
     }
   ],
   "player_observations": [],

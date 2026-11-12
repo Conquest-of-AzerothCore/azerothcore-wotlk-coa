@@ -1407,8 +1407,19 @@
   {
     "spell": 561353,
     "clause": "Increases the damage of Crypt Swarm and Blight by $s1%",
-    "labels": [
-      "561353 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases the damage of Crypt Swarm",
+        "labels": [
+          "561353 behaviour_hit_ratio crypt_swarm"
+        ]
+      },
+      {
+        "claim": "and Blight by $s1%",
+        "labels": [
+          "561353 behaviour_hit_ratio blight"
+        ]
+      }
     ],
     "kind": "claim"
   },
