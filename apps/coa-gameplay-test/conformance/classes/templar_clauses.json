@@ -2813,15 +2813,24 @@
   {
     "spell": 706320,
     "clause": "Increases the effectiveness of Oaths by $s1%.",
-    "labels": [
-      "conformance-templar-value-706320",
-      "706320 e0 spell_modifier ok across all 13 listed targets",
-      "706320 behaviour_hit_ratio oath_lunge",
-      "706320 behaviour_hit_ratio oath_condemn",
-      "706320 behaviour_hit_ratio oath_vindication",
-      "804903 combat_training behaviour_fixed_count"
+    "claims": [
+      {
+        "claim": "Increases the effectiveness of Oaths by $s1% (the Oaths' percent effects)",
+        "labels": [
+          "conformance-templar-value-706320",
+          "706320 e0 spell_modifier ok across all 14 listed targets",
+          "706320 behaviour_hit_ratio oath_lunge",
+          "706320 behaviour_hit_ratio oath_condemn",
+          "706320 behaviour_hit_ratio oath_vindication"
+        ]
+      },
+      {
+        "claim": "Increases the effectiveness of Oaths by $s1% (Oath: Holy Cleave's extra target)",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "4 of 14 Oaths in game, 10 by the same effect: 706320 Effect[0] SPELLMOD_ALL_EFFECTS +20% on mask word 2 bit 2147483648, which all 14 family-25 Oaths carry. Oath: Righteous Lunge 804904, Condemn 804922 and Vindication 805332 are proven in Combat Training's own unit (18-22%, ADR 0239). Oath: Holy Cleave 804903 was run in game (804903 combat_training behaviour_fixed_count): int32(1 x 1.2) = 1, so its +1 extra target is unchanged; that part is not cited as proof and is status 5, Q-r3b-2 in lean/owner-questions.md."
   },
   {
     "spell": 706323,
