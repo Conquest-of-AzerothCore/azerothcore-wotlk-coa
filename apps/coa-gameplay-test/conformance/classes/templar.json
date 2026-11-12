@@ -1729,6 +1729,14 @@
   ],
   "behaviours": [
     {
+      "spell": 1397742, "name": "Testament of Hope (copies in combat)", "kind": "metric_delta", "variant": "combat",
+      "label_suffix": "combat", "quote": "charge at a nearby enemy and aid you in combat", "expected": 1,
+      "after_at_least": 1, "trigger_spell": 1397742, "target": "caster", "cast_in_before": false,
+      "select_dummy": true, "metric": "owned_creature_damage_count", "fields": {"entry": 50250},
+      "before_expected": 0, "wait_ms": 6000, "expire_ms": 500,
+      "observe_source": "npc_ascension_templar_hope (AscensionTemplarSummons.cpp UpdateAI) attacks the owner's selected hostile unit, or its victim, and melees it (DoMeleeAttackIfReady). The caster selects the dummy in both phases; without a cast no copy exists and owned_creature_damage_count (copy 50250 hits in the combat log the caster receives, an event read) is 0; 6000 ms after a real 1397742 cast the copies have run to the dummy and hit it at least once. Copy attack time = the owner's (2500 ms)."
+    },
+    {
       "spell": 520608, "name": "Scourge-Defense Training (crit rate)", "kind": "crit_rate", "variant": "argent_blade",
       "quote": "and critical strike chance of your next", "expected": 50, "observe_spell": 807268, "learn": [807268],
       "control": {"auras": [[561156, 1]]}, "treatment": {"auras": [[520608, 1], [561156, 1]]},
@@ -1747,7 +1755,7 @@
         {"name": "treatment", "select": "far", "select_settle_ms": 2500,
          "checks": [{"metric": "owned_creature_count", "entry": 50250, "min_distance": 20, "equals": 2}]}
       ],
-      "observe_source": "704409 Effect[1] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 87 (-10%), radius $704409a1 = 15 yd; UnitAura::FillTargetMap (SpellAuras.cpp:2945-2951) keeps the owner only while the copy IsWithinDistInMap(owner, 15), which adds both combat reaches (Object.cpp:1256-1263; copy 50250 display 775 CombatReach 2.25). The copies attack the owner's selected hostile unit (AscensionTemplarSummons.cpp UpdateAI), so the selection places them: one Testament of Hope cast, the dummy 'near' (12 yd) selected, both copies held within 14 yd; then 'far' (25 yd) selected, both copies beyond 21 yd. Light of the Naaru 41394 (Holy, fixed 1100) from the striker hits 890 with both copies near (0.9 x 0.9, truncated) and 1100 with both far: 1100 / 890 against 1 / 0.81. Both arms run inside the copies' 20 s."
+      "observe_source": "704409 Effect[1] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 87 (-10%), radius $704409a1 = 15 yd; UnitAura::FillTargetMap (SpellAuras.cpp:2945-2951) keeps the owner only while the copy IsWithinDistInMap(owner, 15), which adds both combat reaches (Object.cpp:1256-1263; copy 50250 display 775 CombatReach 2.25). The copies attack the owner's selected hostile unit (AscensionTemplarSummons.cpp UpdateAI), so the selection places them: one Testament of Hope cast, the dummy 'near' (16 yd) selected, both copies held 12-16.5 yd away; then 'far' (24 yd) selected, both copies beyond 20 yd. Light of the Naaru 41394 (Holy, fixed 1100) from the striker hits 890 with both copies near (0.9 x 0.9, truncated) and 1100 with both far: 1100 / 890 against 1 / 0.81. Both arms run inside the copies' 20 s."
     },
     {
       "spell": 806153, "name": "Divine Force interrupt", "kind": "school_lockout", "variant": "lockout",

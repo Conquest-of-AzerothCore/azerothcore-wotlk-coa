@@ -1019,7 +1019,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "520842 set on the caster: Vindication hits -9.9% and Benediction heals -10.0% against the control; expiry pair of 520842 on the dummy after a 524739 cast (present 4875-4950 ms, absent 5074-5199 ms after it landed)"
+    "reason": "520842 set on the caster: Vindication hits -9.9% and Benediction heals -10.0% against the control; expiry pair of 520842 on the dummy after a 524739 cast (present 4875-4950 ms, absent 5074-5199 ms after it landed); the readback 524739 behaviour_cast_applies_aura alerts by design (aura_duration_ms read 0 right after the cast, before the aura lands after the 1500 ms delay); it is not a label of this row, the expiry pair timed from the applied assert is the proof"
   },
   {
     "spell": 524739,
@@ -1038,7 +1038,7 @@
       "524739 behaviour_hit_ratio chastise_modifier"
     ],
     "kind": "claim",
-    "reason": "524740 cast directly: +2.955% with Argent Knight 805407 (a Chastise-only SPELLMOD_DAMAGE, mask word 1 67108864, the bit AscensionTemplarContracts.cpp:260-265 adds to 524740) against none without"
+    "reason": "524740 cast directly: +2.955% with Argent Knight 805407 (a Chastise-only SPELLMOD_DAMAGE, mask word 1 67108864, the bit AscensionTemplarContracts.cpp:260-265 adds to 524740) against none without; caveat: 524740 is cast directly, not through 524739's delayed trigger (Effect[1] 183, AscensionTemplarContracts.cpp), so the amount is proven on the triggered spell and the delayed path is not exercised"
   },
   {
     "spell": 524747,
@@ -1199,7 +1199,7 @@
       "560096 behaviour_group_stack_cap"
     ],
     "kind": "claim",
-    "reason": "main-hand swing interval of the caster: 2509 ms with neither, 2278 / 2292.5 ms with 560096 (2500/1.10 = 2281, within 50 ms) and the same with Elune's Blessing 300876 (spell_group 2000182, same aura 192) learned too, not 2066 summed; event read (ADR 0170)"
+    "reason": "main-hand swing interval of the caster: 2507.5 / 2512.5 ms with neither, 2278 / 2287 ms with 560096 (2500/1.10 = 2281, within 50 ms) and 2286 / 2281 ms with Elune's Blessing 300876 (spell_group 2000182, same aura 192) learned too, not 2066 summed; event read (ADR 0170)"
   },
   {
     "spell": 560096,
@@ -3626,7 +3626,7 @@
       "503141 hit_mean"
     ],
     "kind": "claim",
-    "reason": "route a (ADR 0172): with Martial Training 806525 learned, the Chastise hit model adds 150% of the reference weapon roll to the school part (503141 hit_mean weapon_damage); without it, 503141 hit_mean has no weapon part (control)"
+    "reason": "route a (ADR 0172): with Martial Training 806525 learned, the Chastise hit model adds 150% of the reference weapon roll to the school part (503141 hit_mean weapon_damage); without it, 503141 hit_mean has no weapon part (control). Older references: the sidekick snapshot (data.js) and coabuildhub (talents_templar.json, skills_templar.json, 806525) say \"Your Chastise now deals an additional 50% Weapon Damage.\"; the dating report (coa-video-evidence dating/report-dating.md, Evidence 1) gives Martial Training 50 -> 100 -> 150 with ours the latest. The measurement matches our tooltip (150%), so the clause is conformant and those references are older patch states (older-reference rule, 2026-11-11)"
   },
   {
     "spell": 503141,
@@ -4424,7 +4424,7 @@
       "806153 behaviour_expiry"
     ],
     "kind": "claim",
-    "reason": "the expiry pair of the stun 807890 on the dummy after a Divine Force 807805 cast (top rank): present 5850-5925 ms, absent 6124-6249 ms after the stun landed"
+    "reason": "the expiry pair of the stun 807890 on the dummy after a Divine Force 807805 cast (top rank): present 5850-5925 ms, absent 6124-6249 ms after the stun landed; the readback 806153 behaviour_cast_applies_aura alerts by design (aura_duration_ms read 0 right after the cast, before the aura lands after the leap); it is not a label of this row, the expiry pair timed from the applied assert is the proof"
   },
   {
     "spell": 806153,
@@ -4578,10 +4578,11 @@
     "labels": [
       "1397742 effect_value e0 #0",
       "1397742 behaviour_metric_delta copies",
-      "1397742 behaviour_metric_delta copies_end"
+      "1397742 behaviour_metric_delta copies_end",
+      "1397742 behaviour_metric_delta combat"
     ],
     "kind": "claim",
-    "reason": "owned copies 50250: 0 before the cast, 2 one second after it, 2 at 19000 ms and 0 at 21000 ms"
+    "reason": "owned copies 50250: 0 before the cast, 2 one second after it, 2 at 19000 ms and 0 at 21000 ms; \"charge at a nearby enemy and aid you in combat\": with the dummy selected in both phases, no copy hit before the cast and copy hits on the dummy 6000 ms after a real cast (owned_creature_damage_count, an event read, ADR 0174)"
   },
   {
     "spell": 1397742,
@@ -4629,6 +4630,6 @@
     "clause": "Target an enemy and leap into the air.",
     "labels": [],
     "kind": "claim",
-    "reason": "not observable on the server (status 4): Effect[0] 138 SPELL_EFFECT_LEAP_BACK on a player is Unit::JumpTo, which only sends SMSG_MOVE_KNOCK_BACK (Unit.cpp:17079-17098); the server relocates the player only on the client's CMSG_MOVE_KNOCK_BACK_ACK (MovementHandler.cpp:818-849). Diagnostic 20261111-224427: one knock-back packet (vertical speed 20.1, horizontal 0, the order to leap straight up) and position x and z, moving, spline and in_flight unchanged for 3 s while the cast completed (524738 on the caster, 520842 on the dummy). A client-side check needs the lab client to cast 524739 and read the player position during and after the leap"
+    "reason": "not observable on the server (status 4): Effect[0] 138 SPELL_EFFECT_LEAP_BACK on a player is Unit::JumpTo, which only sends SMSG_MOVE_KNOCK_BACK (Unit.cpp:17079-17098); the server relocates the player only on the client's CMSG_MOVE_KNOCK_BACK_ACK (MovementHandler.cpp:818-849). Diagnostic 20261111-224427: one knock-back packet (vertical speed 20.1, horizontal 0, the order to leap straight up) and position x and z, moving, spline and in_flight unchanged for 3 s while the cast completed (524738 on the caster, 520842 on the dummy). A client-side check needs the lab client to cast 524739 and read the player position during and after the leap; expected client values: launch straight up at 20.1 vertical speed with 0 horizontal, an apex near 20.1^2 / (2 x 19.29) = 10.5 yd (computed, not measured), landing back at the start point; no CoA code handles 524739 or 524738"
   }
 ]
