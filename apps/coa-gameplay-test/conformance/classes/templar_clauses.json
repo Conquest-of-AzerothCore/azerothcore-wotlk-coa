@@ -2196,8 +2196,7 @@
     "spell": 705268,
     "clause": "Doubles the healing done to you by Testament of Fortitude",
     "labels": [
-      "705268 e0 spell_modifier 500678 (and 6 other ranks)",
-      "705268 e0 spell_effect_value 500678 (and 6 other ranks)"
+      "705268 behaviour_hit_ratio fortitude"
     ],
     "kind": "claim"
   },
