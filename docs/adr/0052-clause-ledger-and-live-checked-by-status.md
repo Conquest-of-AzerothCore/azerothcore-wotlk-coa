@@ -1,6 +1,6 @@
 # 0052. A clause coverage ledger, and "checked by" rows resolving to a live verdict status
 
-- Status: accepted
+- Status: accepted; its reference to `docs/ledger-format.md` is superseded by ADR 0302
 - Date: 2026-11-09
 
 ## Context

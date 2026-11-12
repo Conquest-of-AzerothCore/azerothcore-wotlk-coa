@@ -63,9 +63,11 @@ own entries, needs none. Example:
  "kind": "claim"}
 ```
 
-Templar: 12 entries declare claims (92109, 300504, 524739, 560835 burst, 680399, 681483, 705286, 705306, 800424,
-805417, 806522, 807814), 11 from the audit of the clauses counted proven on round 10 (`templar-run2`); 8 of them have
-a claim no label measures and are unproven. Barrier of Light 805417 splits its 40% (behaviour) from its "for $d"
+Templar: 30 entries declare claims, over 28 spells (92109, 300504, 300520, 520034, 524620, 524739, 524765, 560835,
+572769, 573324, 680399, 681483, 705278, 705284, 705286, 705290 twice, 705306, 706320, 800424, 801480, 801481 twice,
+804228, 804781, 805417, 805422, 806522, 807814, 1397742). The first 12 (92109, 300504, 524739, 560835 burst, 680399,
+681483, 705286, 705306, 800424, 805417, 806522, 807814) came 11 from the audit of the clauses counted proven on round
+10 (`templar-run2`); 8 of those then had a claim no label measured. Barrier of Light 805417 splits its 40% (behaviour) from its "for $d"
 (a duration readback), so the clause stays data conformant.
 
 ## How a workstream contributes
