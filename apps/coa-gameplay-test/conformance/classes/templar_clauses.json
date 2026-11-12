@@ -101,7 +101,10 @@
     "clause": "Reduces the cooldown of Testament of Faith by $/1000;s1 sec",
     "labels": [
       "300501 effect_value e0",
-      "300501 e0 spell_modifier 501606"
+      "300501 e0 spell_modifier 501606",
+      "300501 cost_gate 501606 faith_cooldown without",
+      "300501 cost_gate 501606 faith_cooldown with",
+      "300501 cost_gate 501606 faith_cooldown beyond"
     ],
     "kind": "claim"
   },

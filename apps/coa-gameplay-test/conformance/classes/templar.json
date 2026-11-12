@@ -6937,7 +6937,8 @@
         }
       ],
       "observe_source": "Absolution cap (lean/radius.md, task 2): six rooted dummies within 8 yd, each expected taunted by 'all enemies'. 800424 MaxAffectedTargets 5 (Spell.dbc), applied by Spell::SelectImplicitAreaTargets through Acore::Containers::RandomResize: five of the six are taunted, a random one is not."
-    }
+    },
+    {"spell": 300501, "name": "Sacred Candle", "kind": "cost_gate", "variant": "faith_cooldown", "label_suffix": "faith_cooldown", "quote": "Reduces the cooldown of Testament of Faith by", "gated_spell": 501606, "resource": "cooldown", "reduction": 60000, "target": "ally", "observe_source": "$/1000;s1 = 60 sec (300501 EffectBasePoints[0] -60001, EffectDieSides[0] 1, -60000 ms): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), the spell_modifier label on 501606. Testament of Faith 501606 RecoveryTime and CategoryRecoveryTime 180000 ms, cast at the grouped ally (TARGET_UNIT_TARGET_ALLY): reduced to 120000 ms. Arms timed from a priming cast: 120500 ms without the talent (refused, SPELL_FAILED_NOT_READY 67), 120500 ms with it (through), 119500 ms with it (refused). The ally's Sacred Restraint 102208 from the priming cast (60000 ms, 30000 with the talent) has ended before the second cast."}
   ],
   "player_observations": [
     {
