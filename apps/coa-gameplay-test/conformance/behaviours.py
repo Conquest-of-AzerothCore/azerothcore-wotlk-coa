@@ -6129,23 +6129,29 @@ def source_stack_scenario(class_file: dict, spec: SourceStackSpec) -> tuple[dict
                 + [measurement(source_stack_label(spec, f'aura {source}', arm), CASTER, 'aura', spell=spec.spell,
                                caster=source) for source in (CASTER, ALLY)])
 
+    second = {'cast failure': measurement(source_stack_label(spec, 'ally cast failure', 'two'), ALLY, 'cast_failure',
+                                          spell=spec.spell),
+              'own copy': measurement(source_stack_label(spec, 'ally carries ally', 'two'), ALLY, 'aura',
+                                      spell=spec.spell, caster=ALLY)}
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': actor, 'spell': spec.spell} for actor in (CASTER, ALLY)]
              + [{'action': 'group', 'actor': CASTER, 'target': ALLY}]
              + [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
              + [{'action': 'wait', 'label': 'mounted settle', 'ms': spec.wait_ms}]
-             + reads('none') + cast(CASTER) + reads('one') + cast(ALLY) + reads('two'))
+             + reads('none') + cast(CASTER) + reads('one') + cast(ALLY) + reads('two') + list(second.values()))
     model = {'kind': 'source_stack', 'metrics': list(spec.metrics), 'quote': entry.quote,
              'reads': {metric: {arm: source_stack_label(spec, metric, arm) for arm in SOURCE_STACK_ARMS}
                        for metric in spec.metrics},
              'sources': {arm: [source_stack_label(spec, f'aura {source}', arm) for source in (CASTER, ALLY)]
-                         for arm in SOURCE_STACK_ARMS}}
+                         for arm in SOURCE_STACK_ARMS},
+             'second_source': {key: step['label'] for key, step in second.items()}}
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour source stack',
         'contract': f'The caster and a grouped {ALLY}, both carrying {list(spec.caster_auras)}, each cast '
-                    f'{spec.spell}; {list(spec.metrics)} are read on the caster with no source, with its own and with both, and '
-                    f'each stat with both sources must read the one-source value.',
+                    f'{spec.spell}; {list(spec.metrics)} are read on the caster with no source, with its own and '
+                    f'with both, and each stat with both sources must read the one-source value; the ally\'s cast '
+                    f'failure and its own copy are read after its cast.',
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
         'steps': steps}
     return scenario, [Expectation(f'{spec.spell} behaviour_source_stack', BEHAVIOUR_SOURCE_STACK, spec.spell,

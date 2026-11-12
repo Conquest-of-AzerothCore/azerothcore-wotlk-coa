@@ -17,14 +17,15 @@ behaviour.
   auras (a mount here), learn the spell; the stats are read on the caster with no source, after its own cast, and
   after the ally's cast, with the aura from each caster read alongside.
 - Check `behaviour_source_stack`, evidence behaviour: `ok` when every stat moved by one source reads the same with
-  both; `alert` when one moves again; `unmeasured` when no stat moved or the own copy is missing. A second copy that
-  the engine refuses or replaces is stated, not failed.
+  both; `alert` when one moves again; `unmeasured` when no stat moved, when the caster lacks its own copy, or when the
+  second source is not shown: the scenario reads the ally's cast failure (must be 0) and the ally's own copy (must be
+  1) after its cast (review I5). A second copy that the engine keeps off the caster is then stated, not failed.
 
 ## Consequences
 
-- Claim 128 is behaviour proven on one counted pair (20261112-003251, -003320): run speed 1.6 / 2.4 / 2.4, flight
-  speed 1 / 1.5 / 1.5, and the ally's copy never sits on the caster beside its own (the ally's own copy replaced the
-  caster's copy on the ally, probe 20261112-003155). No effect stacks.
+- Claim 128 is behaviour proven on one counted pair (20261112-010225, -010254, build 44ccd3ce350e): run speed 1.6 /
+  2.4 / 2.4, flight speed 1 / 1.5 / 1.5; the ally's cast has no failure and the ally holds its own copy, which never
+  joins the caster's own. No effect stacks. The earlier pair (003251, -003320) lacked the two ally reads.
 - The two flight effects, both +50, are read as one figure.
 - No existing scenario changes.
 - Tests: `test_behaviours.SourceStackTests`.

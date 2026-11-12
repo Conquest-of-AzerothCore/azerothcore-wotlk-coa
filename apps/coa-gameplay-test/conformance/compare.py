@@ -3943,17 +3943,22 @@ def taken_hit_reduced_range(base: int, reduction: int, control: float) -> tuple[
 def behaviour_source_stack_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     labels = [label for reads in model['reads'].values() for label in reads.values()]
     labels += [label for sources in model['sources'].values() for label in sources]
+    labels += list(model['second_source'].values())
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing:
         return replace(base, explanation=missing_measurement(run, missing))
     present = {arm: [run.values[label] for label in sources] for arm, sources in model['sources'].items()}
-    if present['none'] != [0.0, 0.0] or present['one'] != [1.0, 0.0] or not any(present['two']):
+    failure = run.values[model['second_source']['cast failure']]
+    own_copy = run.values[model['second_source']['own copy']]
+    if present['none'] != [0.0, 0.0] or present['one'] != [1.0, 0.0] or present['two'][0] != 1.0:
         return replace(base, status='unmeasured',
-                       explanation=f'the copies on the caster read {present} (own, ally), not none, own, then at '
-                                   f'least one after both cast')
+                       explanation=f'the copies on the caster read {present} (own, ally), not none, own, then own')
+    if failure or own_copy != 1.0:
+        return replace(base, status='unmeasured',
+                       explanation=f'the second source is not shown: the ally\'s cast failure reads {failure:g} and '
+                                   f'its own copy {own_copy:g} (must be 0 and 1)')
     copies = ('both copies were on the caster' if present['two'] == [1.0, 1.0] else
-              f'after both cast the caster held only the {"own" if present["two"][0] else "ally"} copy: the second '
-              f'source did not coexist with the first')
+              'the ally cast without failure and holds its own copy, which did not join the caster\'s own')
     stacked, unmoved, held = [], [], []
     for metric, reads in model['reads'].items():
         none, one, two = (run.values[reads[arm]] for arm in ('none', 'one', 'two'))

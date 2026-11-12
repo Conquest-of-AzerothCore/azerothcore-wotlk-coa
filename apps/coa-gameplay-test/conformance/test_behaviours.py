@@ -6625,7 +6625,11 @@ class SourceStackTests(unittest.TestCase):
             found.update(zip((reads[arm] for arm in ('none', 'one', 'two')), readings[metric]))
         for arm, present in zip(('none', 'one', 'two'), ([0.0, 0.0], [1.0, 0.0], copies)):
             found.update(zip(model['sources'][arm], present))
+        found[model['second_source']['cast failure']] = self.failure
+        found[model['second_source']['own copy']] = self.own_copy
         return FakeRun(found)
+
+    failure, own_copy = 0.0, 1.0
 
     def test_both_templars_cast_and_each_stat_is_read_three_times(self):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'source_stack', None))
@@ -6641,10 +6645,15 @@ class SourceStackTests(unittest.TestCase):
         unmoved = {'run_speed_rate': (1.6, 1.6, 1.6), 'flight_speed_rate': (1.0, 1.0, 1.0)}
         for readings, copies, status in ((held, [1.0, 0.0], 'ok'), (held, [1.0, 1.0], 'ok'),
                                          (stacked, [1.0, 1.0], 'alert'), (unmoved, [1.0, 0.0], 'unmeasured'),
-                                         (held, [0.0, 0.0], 'unmeasured')):
+                                         (held, [0.0, 0.0], 'unmeasured'), (held, [0.0, 1.0], 'unmeasured')):
             with self.subTest(readings=readings, copies=copies):
                 verdict = judge_behaviour(base_verdict(expectation), self.values(model, readings, copies), expectation)
                 self.assertEqual(verdict.status, status)
+        for failure, own_copy in ((91.0, 1.0), (0.0, 0.0)):
+            self.failure, self.own_copy = failure, own_copy
+            with self.subTest(failure=failure, own_copy=own_copy):
+                verdict = judge_behaviour(base_verdict(expectation), self.values(model, held, [1.0, 0.0]), expectation)
+                self.assertEqual(verdict.status, 'unmeasured')
 
 
 class MountedCastTests(unittest.TestCase):

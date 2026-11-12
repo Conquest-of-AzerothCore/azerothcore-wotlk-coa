@@ -1481,7 +1481,7 @@
       "562302 behaviour_source_stack"
     ],
     "kind": "claim",
-    "reason": "Two Templars, each mounted, cast 562302 (ADR 0199): on the caster run_speed_rate reads 1.6 / 2.4 / 2.4 and flight_speed_rate 1 / 1.5 / 1.5 with no source, its own and both, and the second copy never coexists with the first (pair 20261112-003251, -003320). Applied auras with stat reads count as behaviour (mentor, ext2 item 4 calls). The two flight effects (211, 210, both +50) are not told apart by one reading."
+    "reason": "Two Templars, each mounted, cast 562302 (ADR 0199): on the caster run_speed_rate reads 1.6 / 2.4 / 2.4 and flight_speed_rate 1 / 1.5 / 1.5 with no source, its own and both; the ally's cast has no failure and the ally holds its own copy, which never joins the caster's (pair 20261112-010225, -010254). Applied auras with stat reads count as behaviour (mentor, ext2 item 4 calls). The two flight effects (211, 210, both +50) are not told apart by one reading."
   },
   {
     "spell": 572546,
