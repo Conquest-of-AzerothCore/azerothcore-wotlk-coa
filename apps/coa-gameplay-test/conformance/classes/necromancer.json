@@ -159,7 +159,222 @@
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 504861, "name": "Raise: Banshee (raised)", "kind": "metric_delta", "variant": "count",
+      "label_suffix": "count", "quote": "to aid you in combat, occupying 2", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504861, "target": "caster", "cast_in_before": false, "wait_ms": 4000, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 500650},
+      "observe_source": "504861 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 500650; Summon() (AscensionNecromancerSummons.cpp) spawns one 500650 per NecromancerSummons row {504861, 0, 500650, 1}. No cast (control): no Banshee; one Raise: Banshee gives one."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (Life Force)", "kind": "metric_delta", "variant": "life_force",
+      "label_suffix": "life_force", "quote": "occupying 2", "expected": 0, "before_expected": 2,
+      "trigger_spell": 504861, "target": "caster", "cast_in_before": false, "wait_ms": 4000, "expire_ms": 500,
+      "metric": "aura_stacks", "fields": {"spell": 525004},
+      "observe_source": "Life Force 525004 holds Capacity() - Used() stacks (Sync, AscensionNecromancer.cpp), Capacity 2 at the reference character, Cost(504861) = 2. Without a Banshee (control) 2 stacks; one Raise: Banshee leaves none (Sync removes the aura at 0 free)."
+    },
+    {
+      "spell": 500335, "name": "Raise: Abomination (raised)", "kind": "metric_delta", "variant": "count",
+      "label_suffix": "count", "quote": "to aid you in combat, occupying 3", "expected": 1, "before_expected": 0,
+      "trigger_spell": 500335, "target": "caster", "cast_in_before": false, "gate_spell": 92123, "wait_ms": 4000, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 50068},
+      "observe_source": "Cost(500335) = 3 exceeds the reference Life Force 2, so the gate learns Summoning Adept 92123 (Effect[2] SPELLMOD_MAX_AURA_STACKS +1 on Life Force 805011, Capacity() 3) between the phases. No cast before (control): no Abomination; one Raise: Abomination after: one 50068."
+    },
+    {
+      "spell": 500335, "name": "Raise: Abomination (Life Force)", "kind": "metric_delta", "variant": "life_force",
+      "label_suffix": "life_force", "quote": "occupying 3", "expected": 0, "before_expected": 3,
+      "trigger_spell": 500335, "target": "caster", "gate_spell": 92123, "gate_timing": "start", "trigger_only_after": true, "gate_settle_ms": 1500,
+      "wait_ms": 4000,
+      "expire_ms": 500, "metric": "aura_stacks", "fields": {"spell": 525004},
+      "observe_source": "Summoning Adept 92123 learned at the start (Capacity 3). Before the raise (control) 3 free Life Force; after one Raise: Abomination none: it occupies all 3."
+    },
+    {
+      "spell": 500335, "name": "Raise: Abomination (attack speed)", "kind": "metric_delta", "variant": "slow",
+      "label_suffix": "slow", "quote": "and reducing their attack speed by", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [500335], "setup_only_after": true, "gate_spell": 92123, "setup_wait_ms": 4000,
+      "measure_actor": "dummy", "wait_ms": 7000, "expire_ms": 500, "metric": "aura", "fields": {"spell": 578319},
+      "observe_source": "Disease Cloud 578319 (aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE -20%, 15000 ms) on the dummy after the Abomination fought it for 7000 ms (Command: Undead 504868 at the dummy; its cloud 802353 pulses every 3000 ms in combat, UpdateAI event 2). Control: no Abomination, no aura. Summoning Adept 92123 is learned (the setup learns) so the cost 3 fits."
+    },
+    {
+      "spell": 500335, "name": "Raise: Abomination (Command)", "kind": "metric_delta", "variant": "command",
+      "label_suffix": "command", "quote": "Instantly unleashes an empowered disease cloud around it.", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [500335], "setup_only_after": true, "gate_spell": 92123, "setup_wait_ms": 4000, "wait_ms": 1000,
+      "expire_ms": 500, "metric": "spell_damage_count", "fields": {"spell": 504022, "caster_entry": 50068, "target": "dummy"},
+      "observe_source": "npc_ascension_necromancer::DoAction, case 50068: the Command makes the Abomination cast Zombie Plague 504022 on itself with the amount of 504022 Effect[0] plus 505223 Effect[1] (Copy), a cloud around it. Control: no Abomination, no 504022 hit; one Command after a raise: one 504022 hit on the dummy at 3 yd."
+    },
+    {
+      "spell": 500989, "name": "Raise: Decaying Colossus (raised)", "kind": "metric_delta", "variant": "count",
+      "label_suffix": "count", "quote": "to aid you in combat, occupying 3", "expected": 1, "before_expected": 0,
+      "trigger_spell": 500989, "target": "caster", "cast_in_before": false, "gate_spell": 92123, "wait_ms": 4000, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 50115},
+      "observe_source": "Cost(500989) = 3, so the gate learns Summoning Adept 92123 (Capacity 3) between the phases. No cast before (control): none; one Raise: Decaying Colossus after: one 50115."
+    },
+    {
+      "spell": 500989, "name": "Raise: Decaying Colossus (Life Force)", "kind": "metric_delta", "variant": "life_force",
+      "label_suffix": "life_force", "quote": "occupying 3", "expected": 0, "before_expected": 3,
+      "trigger_spell": 500989, "target": "caster", "gate_spell": 92123, "gate_timing": "start", "trigger_only_after": true, "gate_settle_ms": 1500,
+      "wait_ms": 4000,
+      "expire_ms": 500, "metric": "aura_stacks", "fields": {"spell": 525004},
+      "observe_source": "Summoning Adept 92123 learned at the start (Capacity 3): 3 free Life Force before the raise (control), none after one Raise: Decaying Colossus."
+    },
+    {
+      "spell": 500989, "name": "Raise: Decaying Colossus (Command)", "kind": "metric_delta", "variant": "command",
+      "label_suffix": "command", "quote": "Unleash a powerful attack dealing Weapon Damage", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [500989], "setup_only_after": true, "gate_spell": 92123, "setup_wait_ms": 4000, "wait_ms": 7000,
+      "expire_ms": 500, "metric": "spell_go_count", "fields": {"spell": 505229, "entry": 50115},
+      "observe_source": "npc_ascension_necromancer::DoAction, case 50115: the Command schedules event 5 3000 ms later, which casts Command: Bone Smash 505229 (Effect[0] NORMALIZED_WEAPON_DMG and Effect[1] SCHOOL_DAMAGE 100, cone 104) at the commanded target. The read counts the Colossus 50115 casts of 505229 (SMSG_SPELL_GO), not its hits: a NORMALIZED_WEAPON_DMG spell can be dodged or parried by the dummy, a combat roll the claim does not state. Control: no Colossus, no cast; after a raise one cast."
+    },
+    {
+      "spell": 500989, "name": "Raise: Decaying Colossus (damage split)", "kind": "taken_hit", "variant": "split",
+      "label_suffix": "split", "judge": "damage_ratio", "expected": 0.75,
+      "quote": "of all damage taken by the caster is taken by the", "strike_spell": 41394, "caster_health_pct": 100,
+      "caster_max_health": 100000, "trials": 6, "learn": [92123],
+      "arms": [{"name": "control"}, {"name": "treatment", "opening_casts": [[500989, "caster"]]}],
+      "observe_source": "Decaying Colossus Passive 520376 Effect[0] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 81 SPELL_AURA_SPLIT_DAMAGE_PCT 25 ($520376s1 = 25): with the Colossus up the caster takes 75% of a hit. A stationary striker casts Light of the Naaru 41394 (Holy, fixed amount) at the caster: control without a Colossus, treatment after one real Raise: Decaying Colossus (Summoning Adept 92123 learned for Capacity 3). Expected treatment / control = 0.75."
+    },
+    {
+      "spell": 500335, "name": "Raise: Abomination (disease cloud)", "kind": "script_hit", "variant": "cloud",
+      "label_suffix": "cloud", "quote": "Nature damage to enemies", "hit_spell": 802353, "caster_entry": 50068,
+      "trials": 4, "minimum_hits": 6, "learn": [92123],
+      "casts": [[500335, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]],
+      "caster_auras": [[823764, 1]], "unresisted": true, "settle_ms": 7000,
+      "observe_source": "npc_ascension_necromancer::UpdateAI event 2 (every 3000 ms): an Abomination 50068 in combat casts Disease Cloud 802353 (SCHOOL_DAMAGE, Nature, enemies within 10 yd, SPELL_ATTR2_CANT_CRIT) on itself. The Command sends it into combat with the dummy at 3 yd. The control commands without an Abomination and must count no 802353 hit. 823764 on the caster removes partial resists of its minion's spell (GetSpellModOwner), so the hit is modelled unresisted. Summoning Adept 92123 gives the Life Force 3 an Abomination needs."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (first giant)", "kind": "metric_delta", "variant": "giant_first",
+      "label_suffix": "giant_first", "quote": "Rotting Frost Giant", "expected": 1, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 3300, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "Army of the North 561138 (3000 ms cast) applies its aura; the contract makes Effect[0] a PERIODIC_DUMMY every 3000 ms (AscensionNecromancerContracts.cpp, periodic(0, 3000)) and each tick calls Summon(player, 561316) (AscensionNecromancerAuras.cpp), one Rotting Frost Giant 51275 per NecromancerSummons row {561316, 0, 51275, 1} ($561316s1 = 1). No cast (control): none; 561138 carries SPELL_ATTR5_EXTRA_INITIAL_PERIOD, so the first tick comes when the aura applies: 300 ms after the cast ends one giant."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (before the second tick)", "kind": "metric_delta", "variant": "giant_one",
+      "label_suffix": "giant_one", "quote": "repeating every", "expected": 1, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 5700, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "The same cast read 2700 ms after the cast ends, before the 3000 ms period ends: still the one giant of the initial tick."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (second tick)", "kind": "metric_delta", "variant": "giant_two",
+      "label_suffix": "giant_two", "quote": "repeating every", "expected": 2, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 6300, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "3300 ms after the cast ends, past the 3000 ms period ($t1): the repeat has brought a second giant (2700 ms after the cast end there is one), so the repeat comes every 3000 ms."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (all giants)", "kind": "metric_delta", "variant": "giant_all",
+      "label_suffix": "giant_all", "quote": "repeating every", "expected": 6, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 18800, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "561138 DurationIndex 8 (15000 ms, $d) and the 3000 ms period ($t1): the initial tick (SPELL_ATTR5_EXTRA_INITIAL_PERIOD) and 15000 / 3000 = 5 repeats, one giant each, all alive (30000 ms lifetime). Read 15800 ms after the cast ends: 6 giants."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (Runic Power)", "kind": "metric_delta", "variant": "runic_power",
+      "label_suffix": "runic_power", "quote": "Runic Power,", "expected": 300, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 3300, "expire_ms": 500,
+      "metric": "spell_energize_total", "fields": {"spell": 561138},
+      "observe_source": "$/10;561317s1 = 30 Runic Power shown, 300 in internal units (561317 EffectBasePoints[0] 299 + 1). Each tick EnergizeBySpell(player, 561138, 300, POWER_RUNIC_POWER) (AscensionNecromancerAuras.cpp); the caster logs the energize. No cast (control): 0; the initial tick, read 300 ms after the cast ends: 300."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (giant lifetime held)", "kind": "metric_delta", "variant": "lifetime_held",
+      "label_suffix": "lifetime_held", "quote": "to aid you in combat for", "expected": 2, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 6300, "expire_ms": 500,
+      "expiry_wait_ms": 29400, "after_expiry_expected": 5, "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "$561316d = 30000 ms (561316 DurationIndex 9), the giant lifetime (Summon passes the spell duration to SummonCreature as a timed despawn). Giants come at 0, 3000, ..., 15000 ms after the cast ends (initial tick, then every 3000 ms); 3300 ms after the cast end two are up, and 29400 ms later (29700 ms after the second giant came) the five from 3000 ms on are alive: the 0 ms giant has gone at 30000 ms."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (giant lifetime ends)", "kind": "metric_delta", "variant": "lifetime_end",
+      "label_suffix": "lifetime_end", "quote": "to aid you in combat for", "expected": 2, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 6300, "expire_ms": 500,
+      "expiry_wait_ms": 30100, "after_expiry_expected": 4, "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "As the held read, but 30100 ms after the two-giant read (30400 ms after the second giant came): it has despawned at 30000 ms, four remain."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (minion crits)", "kind": "metric_delta", "variant": "crit_hits",
+      "label_suffix": "crit_hits", "quote": "your Undead minions are guaranteed to critically strike", "expected": 2, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [561138, 500971], "setup_only_after": true, "setup_wait_ms": 3600, "wait_ms": 6000,
+      "expire_ms": 500, "after_at_least": 2, "metric": "pet_melee_crits", "fields": {"entry": 50073},
+      "observe_source": "necromancer_scaling::OnBeforeRollMeleeOutcomeAgainst (AscensionNecromancerContracts.cpp) sets a minion melee crit to 10000 while its owner holds 561138. Both phases cast Command: Undead 504868 at the dummy; the treatment first casts Army of the North and then raises a Ghoul 50073 (the raise at the dummy starts its attack), so the Ghoul melees the dummy under the army for 6000 ms (attack time 2000 ms): at least 2 critical swings. Control: no Ghoul, none."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (no plain minion hit)", "kind": "metric_delta", "variant": "crit_no_plain",
+      "label_suffix": "crit_no_plain", "quote": "your Undead minions are guaranteed to critically strike", "expected": 0, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [561138, 500971], "setup_only_after": true, "setup_wait_ms": 3600, "wait_ms": 6000,
+      "expire_ms": 500, "metric": "pet_melee_plain_count", "fields": {"entry": 50073},
+      "observe_source": "Same arms as the minion crit entry: under the army the Ghoul lands no plain (non-critical, non-glancing) melee hit."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (plain hits without it)", "kind": "metric_delta", "variant": "crit_control",
+      "label_suffix": "crit_control", "quote": "For the duration, your Undead minions", "expected": 2, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [500971], "setup_only_after": true, "setup_wait_ms": 3600, "wait_ms": 6000,
+      "expire_ms": 500, "after_at_least": 2, "metric": "pet_melee_plain_count", "fields": {"entry": 50073},
+      "observe_source": "Control for the guaranteed crits: the same Ghoul and Command without Army of the North lands plain melee hits (base crit chance from the owner, about 5%)."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (in combat)", "kind": "metric_delta", "variant": "combat",
+      "label_suffix": "combat", "quote": "to aid you in combat, occupying 2", "expected": 1, "after_at_least": 1,
+      "before_expected": 0, "trigger_spell": 504868, "target": "dummy", "setup_casts": [504861],
+      "setup_only_after": true, "setup_wait_ms": 4000, "metric": "owned_creature_damage_count",
+      "fields": {"entry": 500650}, "wait_ms": 12000, "expire_ms": 500,
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count the hits of 500650 creatures in the caster's combat log for 12000 ms. Control: no minion, 0. The treatment raises one first (at the dummy, so it engages): it hits the dummy at least once."
+    },
+    {
+      "spell": 500989, "name": "Raise: Decaying Colossus (in combat)", "kind": "metric_delta", "variant": "combat",
+      "label_suffix": "combat", "quote": "to aid you in combat, occupying 3", "expected": 1, "after_at_least": 1,
+      "before_expected": 0, "trigger_spell": 504868, "target": "dummy", "setup_casts": [500989],
+      "setup_only_after": true, "gate_spell": 92123, "setup_wait_ms": 4000, "metric": "owned_creature_damage_count",
+      "fields": {"entry": 50115}, "wait_ms": 6000, "expire_ms": 500,
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count the hits of 50115 creatures in the caster's combat log for 6000 ms. Control: no minion, 0. The treatment raises one first (at the dummy, so it engages): it hits the dummy at least once."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (raised)", "kind": "metric_delta", "variant": "count",
+      "label_suffix": "count", "quote": "to aid you in combat occupying 1", "expected": 1, "before_expected": 0,
+      "trigger_spell": 500971, "target": "caster", "cast_in_before": false,
+      "metric": "owned_creature_count", "fields": {"entry": 50073}, "wait_ms": 2500, "expire_ms": 500,
+      "observe_source": "500971 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50073; spell_ascension_necromancer_summon (AscensionNecromancerSummons.cpp) replaces the stock summon with Summon(), which spawns one 50073 per NecromancerSummons row {500971, 0, 50073, 1}. No cast before the learn (control): no Ghoul; one Raise: Ghoul (1500 ms cast) gives one."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (Life Force)", "kind": "metric_delta", "variant": "life_force",
+      "label_suffix": "life_force", "quote": "occupying 1", "expected": 1, "before_expected": 2,
+      "trigger_spell": 500971, "target": "caster", "cast_in_before": false,
+      "metric": "aura_stacks", "fields": {"spell": 525004}, "wait_ms": 2500, "expire_ms": 500,
+      "observe_source": "Life Force 525004 on the caster holds one stack per free Life Force: Sync (AscensionNecromancer.cpp) sets it to Capacity() - Used(), Capacity 2 at the reference character (805011 StackAmount 2, no SPELLMOD_MAX_AURA_STACKS talent), Used the sum of Cost() over the raised minions, Cost(500971) = 1. Without a Ghoul (control) 2 stacks; one Raise: Ghoul leaves 1."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (in combat)", "kind": "metric_delta", "variant": "combat",
+      "label_suffix": "combat", "quote": "to aid you in combat", "expected": 3, "after_at_least": 3,
+      "before_expected": 0, "trigger_spell": 504868, "target": "dummy", "setup_casts": [500971],
+      "setup_only_after": true, "setup_wait_ms": 2500, "metric": "owned_creature_damage_count",
+      "fields": {"entry": 50073}, "wait_ms": 5000, "expire_ms": 500,
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count the hits of Ghoul 50073 creatures in the caster's combat log for 5000 ms (owned_creature_damage_count: melee hits plus spell hits). The control phase has no Ghoul: 0. The treatment raises one Ghoul (500971, 1500 ms cast) before the Command: the Ghoul's Command hit (801514) and at least two melee swings (attack time 2000 ms, Scale() in AscensionNecromancerSummons.cpp) on the dummy, so at least 3 hits."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (Command damage)", "kind": "script_hit", "variant": "command_damage",
+      "label_suffix": "command_damage",
+      "quote": "Plague damage,", "hit_spell": 801514, "hit_effect": 0, "caster_entry": 50073, "trials": 6, "minimum_hits": 6,
+      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]],
+      "caster_auras": [[984954, 1], [823764, 1]], "unresisted": true, "settle_ms": 1000,
+      "observe_source": "Command: Undead 504868 (the Command every non-stationary minion answers, Responds() in AscensionNecromancerSummons.cpp; its Effect[1] keeps the dummy as the explicit target) orders every Ghoul in 60 yd (Order()); each Ghoul casts 801514 at the target (DoAction, case 50073): Effect[0] SCHOOL_DAMAGE on enemies within 10 yd of the Ghoul, Plague (SchoolMask 40). The control commands without a raised Ghoul and must count no 801514 hit; the treatment raises a Ghoul before each Command (Life Force 2 keeps the two newest). 984954 (spell crit -1000 on the caster, copied to the Ghoul's base spell crit by Scale()) removes crits; 823764 (-9999 target resistance on the caster, which Unit::GetEffectiveResistChance applies to its minion through GetSpellModOwner) removes partial resists, so the hit is modelled unresisted."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (Command heal)", "kind": "script_hit", "variant": "command_heal",
+      "label_suffix": "command_heal",
+      "quote": "and healing you for", "hit_spell": 801514, "hit_effect": 2, "caster_entry": 50073, "receiver": "caster",
+      "trials": 6, "minimum_hits": 6,
+      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]],
+      "caster_auras": [[984954, 1], [823764, 1]], "settle_ms": 1000,
+      "observe_source": "801514 Effect[2] HEAL on TARGET_UNIT_MASTER (contract in AscensionNecromancerContracts.cpp) heals the Ghoul's owner once per Ghoul and Command. Same arms as the Command damage entry; the heal is read on the caster from the Ghoul's (entry 50073) heal events."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (auto attack heal)", "kind": "script_hit", "variant": "auto_attack_heal",
+      "label_suffix": "auto_attack_heal",
+      "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster",
+      "trials": 6, "minimum_hits": 6,
+      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000,
+      "observe_source": "aura_ascension_necromancer_event (AscensionNecromancerEvents.cpp): a melee auto attack of a minion carrying Ghoul Passive Healing 805290 (added to every 50073 in npc_ascension_necromancer::IsSummonedBy) casts Ghoul Frenzy 707000 (HEAL, TARGET_UNIT_MASTER) from the Ghoul on its owner. The Command sends the Ghoul to melee the dummy for 4000 ms per trial; the control commands without a Ghoul and must count no 707000 heal."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],

@@ -415,30 +415,75 @@
   {
     "spell": 500335,
     "clause": "Raise an Abomination to aid you in combat, occupying 3 Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Raise an Abomination",
+        "labels": [
+          "500335 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "to aid you in combat",
+        "labels": [
+          "500335 script_hit 802353 cloud"
+        ]
+      },
+      {
+        "claim": "occupying 3 Life Force",
+        "labels": [
+          "500335 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 500335,
     "clause": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage to enemies when they deal damage",
-    "labels": [
-      "500335 effect_value 802353e0 #0"
+    "claims": [
+      {
+        "claim": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage",
+        "labels": [
+          "500335 effect_value 802353e0 #0",
+          "500335 script_hit 802353 cloud"
+        ]
+      },
+      {
+        "claim": "to enemies when they deal damage",
+        "labels": [
+          "500335 script_hit 802353 cloud trigger"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 500335,
     "clause": "and reducing their attack speed by $578319s1% for $578319d.",
-    "labels": [
-      "500335 effect_value 578319e0 #1",
-      "500335 spell_duration 578319 #2"
+    "claims": [
+      {
+        "claim": "and reducing their attack speed by $578319s1%",
+        "labels": [
+          "500335 effect_value 578319e0 #1",
+          "500335 behaviour_metric_delta slow"
+        ]
+      },
+      {
+        "claim": "for $578319d",
+        "labels": [
+          "500335 spell_duration 578319 #2",
+          "500335 behaviour_metric_delta slow"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 500335,
     "clause": "Command: Instantly unleashes an empowered disease cloud around it.",
-    "labels": [],
+    "labels": [
+      "500335 behaviour_metric_delta command"
+    ],
     "kind": "claim"
   },
   {
@@ -523,14 +568,34 @@
   {
     "spell": 500971,
     "clause": "Raise a Ghoul to aid you in combat occupying 1 Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Raise a Ghoul",
+        "labels": [
+          "500971 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "to aid you in combat",
+        "labels": [
+          "500971 behaviour_metric_delta combat"
+        ]
+      },
+      {
+        "claim": "occupying 1 Life Force",
+        "labels": [
+          "500971 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 500971,
     "clause": "Its auto attacks restore ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} health to you.",
     "labels": [
-      "500971 effect_value 707000e0 #0"
+      "500971 effect_value 707000e0 #0",
+      "500971 script_hit 707000 auto_attack_heal"
     ],
     "kind": "claim"
   },
@@ -546,7 +611,8 @@
     "spell": 500971,
     "clause": "dealing ${(($INT*0.28+$SP*0.28)*0.2+($INT*0.504+$SP*0.504)*0.2)+$801514m1} Plague damage,",
     "labels": [
-      "500971 effect_value 801514e0 #2"
+      "500971 effect_value 801514e0 #2",
+      "500971 script_hit 801514 command_damage"
     ],
     "kind": "claim"
   },
@@ -554,7 +620,8 @@
     "spell": 500971,
     "clause": "and healing you for ${$801514m3+$801514ppl3+$SP*0.22+$INT*.50} for each Ghoul.",
     "labels": [
-      "500971 effect_value 801514e2 #3"
+      "500971 effect_value 801514e2 #3",
+      "500971 script_hit 801514 command_heal"
     ],
     "kind": "claim"
   },
@@ -588,22 +655,53 @@
   {
     "spell": 500989,
     "clause": "Raise a Decaying Colossus to aid you in combat, occupying 3 Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Raise a Decaying Colossus",
+        "labels": [
+          "500989 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "to aid you in combat",
+        "labels": [
+          "500989 behaviour_metric_delta combat"
+        ]
+      },
+      {
+        "claim": "occupying 3 Life Force",
+        "labels": [
+          "500989 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 500989,
     "clause": "While active, $520376s1% of all damage taken by the caster is taken by the Decaying Colossus.",
     "labels": [
-      "500989 effect_value 520376e0 #0"
+      "500989 effect_value 520376e0 #0",
+      "500989 behaviour_hit_ratio split"
     ],
     "kind": "claim"
   },
   {
     "spell": 500989,
     "clause": "Command: Unleash a powerful attack dealing Weapon Damage plus ${$505229m2+$505229ppl2} to all enemies in front of it.",
-    "labels": [
-      "500989 effect_value 505229e1 #1"
+    "claims": [
+      {
+        "claim": "Command: Unleash a powerful attack ... to all enemies in front of it",
+        "labels": [
+          "500989 behaviour_metric_delta command"
+        ]
+      },
+      {
+        "claim": "dealing Weapon Damage plus ${$505229m2+$505229ppl2}",
+        "labels": [
+          "500989 effect_value 505229e1 #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -735,7 +833,26 @@
   {
     "spell": 504861,
     "clause": "Raise a Banshee to aid you in combat, occupying 2 Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Raise a Banshee",
+        "labels": [
+          "504861 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "to aid you in combat",
+        "labels": [
+          "504861 behaviour_metric_delta combat"
+        ]
+      },
+      {
+        "claim": "occupying 2 Life Force",
+        "labels": [
+          "504861 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
@@ -1059,9 +1176,22 @@
   {
     "spell": 561138,
     "clause": "Chant a powerful ritual that brings forth $561316s1 Rotting Frost Giant near you to aid you in combat for $561316d",
-    "labels": [
-      "561138 effect_value 561316e0 #0",
-      "561138 spell_duration 561316 #1"
+    "claims": [
+      {
+        "claim": "brings forth $561316s1 Rotting Frost Giant near you to aid you in combat",
+        "labels": [
+          "561138 effect_value 561316e0 #0",
+          "561138 behaviour_metric_delta giant_first"
+        ]
+      },
+      {
+        "claim": "for $561316d",
+        "labels": [
+          "561138 spell_duration 561316 #1",
+          "561138 behaviour_metric_delta lifetime_held",
+          "561138 behaviour_metric_delta lifetime_end"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1069,23 +1199,39 @@
     "spell": 561138,
     "clause": "and generate $/10;561317s1 Runic Power,",
     "labels": [
-      "561138 effect_value 561317e0 #2"
+      "561138 effect_value 561317e0 #2",
+      "561138 behaviour_metric_delta runic_power"
     ],
     "kind": "claim"
   },
   {
     "spell": 561138,
     "clause": "repeating every $t1 sec for $d.",
-    "labels": [
-      "561138 aura_amplitude_ms #3",
-      "561138 aura_duration_ms #4"
+    "claims": [
+      {
+        "claim": "repeating every $t1 sec",
+        "labels": [
+          "561138 behaviour_metric_delta giant_one",
+          "561138 behaviour_metric_delta giant_two"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "561138 behaviour_metric_delta giant_all"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 561138,
     "clause": "For the duration, your Undead minions are guaranteed to critically strike.",
-    "labels": [],
+    "labels": [
+      "561138 behaviour_metric_delta crit_hits",
+      "561138 behaviour_metric_delta crit_no_plain",
+      "561138 behaviour_metric_delta crit_control"
+    ],
     "kind": "claim"
   },
   {
