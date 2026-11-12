@@ -156,6 +156,21 @@
   "passive_targets": [],
   "procs": [
     {
+      "aura": 503740, "name": "Ghoul Mastery",
+      "tooltip": "Damage dealt by your |cffffffffGhouls|r now has a $h% chance to transform them into a |cffffffffFrenzied Ghoul|r.",
+      "aura_on_minion": true, "baseline": true, "chance_token": "$h",
+      "trigger": {"action": "minion", "spell": 500971, "entry": 50073, "swing_ms": 2000,
+                  "swing_source": "Scale() in AscensionNecromancerSummons.cpp: SetAttackTime(BASE_ATTACK, 2000 x the owner's cast speed)"},
+      "trigger_text": "Damage dealt by your Ghouls", "trial_metric": "owned_creature_damage_count",
+      "event_metric": "owned_creature_spell_proc_count", "event_actor": "minion", "proc_spell": 503740,
+      "proc_spell_source": "the native procs of the Ghoul's copy of 503740 (ProcCounter on the Ghoul), each casting Frenzied Ghoul 707014 (EffectTriggerSpell[0])",
+      "events_per_proc": 1,
+      "handler": "503740 Effect[0] 190 puts its aura 42 (kept native by AscensionNecromancerContracts.cpp:52-56 for 707014) on the Ghoul; spell_proc 503740 (rev_20261004_06_ghoul_mastery_native_proc_6335.sql: Chance 15, ProcFlags 332116) and aura_ascension_necromancer_ghoul_mastery's DoCheckProc (a damaging hit of the Ghoul on a valid enemy) gate it. The second path, AscensionNecromancerEvents.cpp:173-174 Chance(player, 503740), needs the aura on the owner, which 190 does not put there (a probe counted 0 owner casts of 707014 in 25 Ghoul swings).",
+      "dbc": {"503740": {"ProcChance": 15, "ProcFlags": 0, "ProcCharges": 0}},
+      "spell_proc": {"503740": {"ProcFlags": 332116, "Chance": 15, "ProcsPerMinute": 0, "Cooldown": 0, "Charges": 0}},
+      "internal_cooldown_ms": 0
+    },
+    {
       "aura": 92122, "name": "Tundra Warriors",
       "tooltip": "|cFF66DDFFLevel 10 Passive|r\r\nCasting any spell now has a $h% chance to grant you |cffffffffTundra Warriors|r.@s:707421:0@",
       "chance_token": "$h", "trigger": {"action": "cast", "spell": 504868}, "trial_casts": true, "baseline": true,
@@ -489,6 +504,12 @@
       "label_suffix": "cost_805044", "quote": "Reduces the cost of all Animates, Raises, and Command spells by", "expected": 2157, "before_expected": 2464,
       "trigger_spell": 805044, "target": "caster", "disable_regeneration": true, "wait_ms": 3100, "expire_ms": 500, "metric": "power", "fields": {"power": 0},
       "observe_source": "Animate: Tomb King 805044 costs ManaCostPercentage 28 of the base mana: 384 (the value scenario power_cost read). Regeneration is off. The before phase casts it once without 504439: mana 2848 - 384 = 2464 (control). 504439 Effect[0] aura 108 SPELLMOD_COST -20 ($s1) on the family 29 mask: the after phase casts it again with 504439 known and spends int(384 x 0.8) = 307: 2157."
+    },
+    {
+      "spell": 92122, "name": "Tundra Warriors (on the minions)", "kind": "metric_delta", "variant": "buff_minions",
+      "label_suffix": "buff_minions", "quote": "to grant you", "expected": 1, "before_expected": 0,
+      "trigger_spell": 707421, "target": "caster", "cast_in_before": false, "setup_casts": [500971], "setup_wait_ms": 3100, "expire_ms": 500, "wait_ms": 500, "metric": "owned_creature_count", "fields": {"entry": 50073, "spell": 707421},
+      "observe_source": "707421 Effect[0] 190 puts its aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1) on the summons. A Ghoul is raised, then 707421 is cast: the Ghoul carries it. Control: no cast, no Ghoul with it."
     },
     {
       "spell": 805044, "name": "Animate: Tomb King (animated)", "kind": "metric_delta", "variant": "count",

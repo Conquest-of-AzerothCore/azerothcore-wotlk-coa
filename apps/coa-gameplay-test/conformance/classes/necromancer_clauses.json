@@ -37,7 +37,8 @@
       {
         "claim": "Casting any spell now has a $h% chance to grant you Tundra Warriors",
         "labels": [
-          "92122 proc_rate"
+          "92122 proc_rate",
+          "92122 behaviour_metric_delta buff_minions"
         ]
       },
       {
@@ -789,10 +790,20 @@
   {
     "spell": 503740,
     "clause": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
-    "labels": [
-      "503740 effect_value #0",
-      "503740 effect_value 707014e1 #1",
-      "503740 spell_duration 707014 #2"
+    "claims": [
+      {
+        "claim": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul",
+        "labels": [
+          "503740 proc_rate"
+        ]
+      },
+      {
+        "claim": "Frenzied Ghoul (pulled sentence 707014: haste +40% for 10 sec)",
+        "labels": [
+          "503740 effect_value 707014e1 #1",
+          "503740 spell_duration 707014 #2"
+        ]
+      }
     ],
     "kind": "claim"
   },
