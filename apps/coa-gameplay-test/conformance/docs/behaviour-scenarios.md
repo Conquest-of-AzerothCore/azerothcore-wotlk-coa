@@ -1093,12 +1093,16 @@ fire and the label reads `<spell> behaviour_metric_ratio_delta <suffix>`. Righte
 0 ticks at 600 ms (ratio 1, the control), 1 at 1200 ms (0.98) and 3 at 3200 ms (0.98^3 = 0.941192), which together
 place the period in (800, 1067] ms.
 
-An entry may also set `cast_target` (only `"caster"`; ADR 0263): the scenario learns `aura_spell` and casts it on the
-caster instead of setting it, reads its `aura_duration_ms` before and after the cast
+An entry may also set `cast_target` (`"caster"` or `"ally"`; ADR 0263): the scenario learns `aura_spell` and casts it
+on that unit instead of setting it, reads its `aura_duration_ms` before and after the cast
 (`<spell> <aura> aura_duration_ms threat_tick_cast before|after`), and reads the threat baseline after the cast, since
-the positive cast's own threat reaches the dummy (Spell::HandleThreatSpells). The verdict is `ok` only when the aura
-reads 0 before the cast and above 0 after it and the ratio is within tolerance. The three Righteous Custodian arms cast
-572808 this way (rule 4 amendment point 2b).
+the positive cast's own threat reaches the dummy (Spell::HandleThreatSpells). With `"ally"`, the ally is grouped with
+the caster and both build threat by melee; `threat_unit` (default the cast target, else `"caster"`) names whose threat
+toward the dummy is read. The verdict is `ok` only when the aura reads 0 before the cast and not 0 after it (-1 is a
+permanent aura) and the ratio is within tolerance. Righteous Custodian casts 572808 in all five arms (rule 4 amendment
+point 2b): the three tick-count arms on the caster, `ally` on a grouped ally (0.98 on the ally's threat) and
+`ally_caster_control` (1 on the caster's threat over the same tick), which separates the blessed unit from the
+blessing's caster (review I1).
 
 ### Expiry pairs (`behaviour_expiry`)
 

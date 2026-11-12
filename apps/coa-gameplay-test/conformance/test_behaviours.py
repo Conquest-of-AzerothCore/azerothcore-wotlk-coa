@@ -2440,11 +2440,52 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
                           expectation.model['aura_before_label']: 0.0})
         self.assertNotEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, 'ok')
 
-    def test_cast_target_other_than_the_caster_is_refused(self):
+    def test_unknown_cast_target_or_threat_unit_is_refused(self):
         with self.assertRaises(ValueError):
-            threat_tick_ratio_spec({**righteous_custodian_entry(), 'cast_target': 'ally'})
+            threat_tick_ratio_spec({**righteous_custodian_entry(), 'cast_target': 'dummy'})
+        with self.assertRaises(ValueError):
+            threat_tick_ratio_spec({**righteous_custodian_entry(), 'threat_unit': 'ally'})
         with self.assertRaises(ValueError):
             threat_tick_ratio_spec({**righteous_custodian_entry(), 'aura_stacks': 2})
+
+    def test_ally_arm_groups_the_ally_and_reads_its_threat(self):
+        scenario, (expectation,) = behaviour_scenario(
+            CLASS_FILE, variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', 'ally'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+        self.assertIn({'action': 'group', 'actor': 'caster', 'target': 'ally'}, steps)
+        self.assertIn({'action': 'attack', 'actor': 'ally', 'target': 'dummy'}, steps)
+        cast = next(step for step in steps if step['action'] == 'cast' and step['spell'] == RIGHTEOUS_CUSTODIAN)
+        self.assertEqual((cast['actor'], cast['target']), ('caster', 'ally'))
+        reads = {step['label']: step for step in steps if step.get('label') in (
+            expectation.model['before_label'], expectation.model['after_label'],
+            expectation.model['aura_before_label'], expectation.model['aura_after_label'])}
+        self.assertEqual(reads[expectation.model['before_label']]['target'], 'ally')
+        self.assertEqual(reads[expectation.model['after_label']]['target'], 'ally')
+        self.assertEqual(reads[expectation.model['aura_after_label']]['actor'], 'ally')
+        self.assertEqual(expectation.label, '572808 behaviour_metric_ratio_delta ally')
+        self.assertEqual(expectation.model['expected_ratio'], 0.98)
+
+    def test_ally_control_reads_the_casters_threat_and_alerts_on_a_caster_side_tick(self):
+        scenario, (expectation,) = behaviour_scenario(
+            CLASS_FILE, variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', 'ally_caster_control'))
+        steps = scenario['steps']
+        threat = [step for step in steps if step.get('metric') == 'threat']
+        self.assertEqual({step['target'] for step in threat}, {'caster'})
+        cast = next(step for step in steps if step['action'] == 'cast' and step['spell'] == RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(cast['target'], 'ally')
+        model = expectation.model
+        for after, status in ((1000.0, 'ok'), (980.0, 'alert')):
+            values = FakeRun({model['before_label']: 1000.0, model['after_label']: after, **cast_applied(model)})
+            self.assertEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, status)
+
+    def test_permanent_aura_after_the_cast_counts_as_applied(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        _, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        values = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 980.0,
+                          **cast_applied(expectation.model, 0.0, -1.0)})
+        self.assertEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, 'ok')
 
     def test_zero_baseline_is_unmeasured_not_alert(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
