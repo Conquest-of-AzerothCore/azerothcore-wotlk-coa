@@ -20,6 +20,7 @@ CAST = 'cast'
 MINION = 'minion'
 MINION_PROC_TRIALS = frozenset({'pet_melee_crits', 'owned_creature_damage_count'})
 MINION_BASELINE_ATTEMPTS = 20
+BASELINE_MISS_RISK = 0.01
 CAST_COUNT = 'spell_cast_count'
 MELEE_EVENTS = 'melee_attack_count'
 MINION_PROC_COUNT = 'owned_creature_spell_proc_count'
@@ -77,6 +78,10 @@ def proc_measurements(aura: int) -> dict[str, str]:
     return {part: f'{aura} proc {part}' for part in ('trials', 'events', 'attempts', 'aura')}
 
 
+def baseline_attempts(chance_pct: float) -> int:
+    return max(MINION_BASELINE_ATTEMPTS, math.ceil(math.log(BASELINE_MISS_RISK) / math.log(1 - chance_pct / 100)))
+
+
 def baseline_labels(aura: int) -> dict[str, str]:
     return {'trials': f'{aura} proc baseline trials', 'events': f'{aura} proc baseline events'}
 
@@ -86,7 +91,7 @@ def minion_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list
     labels = baseline_labels(entry['aura'])
     creature = entry['trigger']['entry']
     events = event_steps(entry)[0]
-    return (minion_attempt_steps(entry, MINION_BASELINE_ATTEMPTS * plan.attempt_ms, 'baseline ')
+    return (minion_attempt_steps(entry, baseline_attempts(plan.chance_pct) * plan.attempt_ms, 'baseline ')
             + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS},
                measurement(labels['trials'], CASTER, entry['trial_metric'], entry=creature),
                {**events, 'label': labels['events']}])
@@ -97,7 +102,7 @@ def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[d
     spell, target = trigger_spell(entry), trigger_target(entry)
     facts = facts_of(records_of(class_file), spell)
     events = event_steps(entry)[0]
-    casts = [aimed(step, target) for _ in range(MINION_BASELINE_ATTEMPTS)
+    casts = [aimed(step, target) for _ in range(baseline_attempts(plan.chance_pct))
              for step in cast_steps(facts, spell, target, plan.attempt_ms, 1, attempt_fixtures(entry))]
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + casts
             + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, {**trials_step(entry, labels['trials'])},
@@ -278,7 +283,7 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     if scheduled < needed:
         raise ValueError(f'{scheduled} attempts are fewer than the {needed} trials a {chance:g}% proc needs')
     interval = attempt_interval(class_file, entry)
-    held = MINION_BASELINE_ATTEMPTS * interval + DRAIN_MS \
+    held = baseline_attempts(chance) * interval + DRAIN_MS \
         if entry['trigger']['action'] in (MINION, CAST) and entry.get('baseline') else 0
     capacity = (PART_BUDGET_MS - held) // interval
     if capacity < 1:
@@ -527,10 +532,11 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
     if baseline:
-        model['baseline'] = {**baseline_labels(aura), 'attempts': MINION_BASELINE_ATTEMPTS}
+        model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct)}
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
     if entry.get('baseline') and entry['trigger']['action'] in (MINION, CAST):
-        rule += f'; no event in the {MINION_BASELINE_ATTEMPTS} baseline attempts before the passive is learned'
+        rule += (f'; no event in the {baseline_attempts(plan.chance_pct)} baseline attempts before the passive is '
+                 f'learned, which a {plan.chance_pct:g}% roll passes with under {BASELINE_MISS_RISK:g} probability')
     if limit is not None:
         model[PER_TRIGGER] = limit
         model['trigger_boundaries'] = trigger_boundaries(entry, plan.per_part)
@@ -539,7 +545,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{rule}{handler_note(entry)}', model)
-    baseline_ms = MINION_BASELINE_ATTEMPTS * plan.attempt_ms + DRAIN_MS if baseline else 0
+    baseline_ms = baseline_attempts(plan.chance_pct) * plan.attempt_ms + DRAIN_MS if baseline else 0
     return timed(scenario, SETTLE_MS + baseline_ms + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
 
 
