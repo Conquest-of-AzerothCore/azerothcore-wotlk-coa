@@ -90,7 +90,8 @@ constexpr bool Travels(Candidate const& guardian)
     bool const row = guardian.Necromancer ? guardian.Properties == NecromancerFollowerProperties :
         guardian.Properties != 0;
     return guardian.Alive && guardian.Owned && !guardian.Leaving && !OnItsWayOut(guardian.Type) &&
-        !guardian.Hidden && row && guardian.Follows && !StaysBehind(guardian.Entry) && (guardian.Necromancer || guardian.Walks) &&
+        !guardian.Hidden && row && guardian.Follows && !StaysBehind(guardian.Entry) &&
+        (guardian.Necromancer || guardian.Walks) &&
         (TimerOf(guardian.Type) != Timer::Countdown || guardian.RemainingMs >= MinimumRemainingMs);
 }
 
@@ -126,10 +127,8 @@ enum class Step : std::uint8_t
 
 constexpr Step Plan(bool worldChanged, bool present, float distance, bool allowed)
 {
-    if (!allowed)
-        return Step::Skip;
     if (worldChanged)
-        return Step::Recreate;
+        return allowed ? Step::Recreate : Step::Skip;
     if (!present)
         return Step::Skip;
     return distance > NearEnough ? Step::Move : Step::Keep;

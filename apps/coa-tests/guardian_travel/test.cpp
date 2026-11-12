@@ -108,6 +108,9 @@ int main()
 
     Expect(Plan(true, false, 0.0f, true) == Step::Recreate, "a new map or instance makes the guardian again");
     Expect(Plan(true, true, 0.0f, false) == Step::Skip, "where the spell cannot be cast, nothing arrives");
+    Expect(Plan(false, true, NearEnough + 1.0f, false) == Step::Move,
+        "a present guardian on the same map is moved even where its spell cannot be cast");
+    Expect(Plan(false, true, 0.0f, false) == Step::Keep, "a near guardian stays even where its spell cannot be cast");
     Expect(Plan(false, false, 0.0f, true) == Step::Skip, "a guardian that left on the same map is not replaced");
     Expect(Plan(false, true, NearEnough, true) == Step::Keep, "a guardian near the player stays");
     Expect(Plan(false, true, NearEnough + 1.0f, true) == Step::Move, "a far guardian is moved to the player");

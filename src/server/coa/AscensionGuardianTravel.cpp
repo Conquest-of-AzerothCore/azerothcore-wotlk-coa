@@ -13,6 +13,7 @@
 #include "PetDefines.h"
 #include "Player.h"
 #include "ScriptMgr.h"
+#include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
@@ -49,6 +50,7 @@ struct TravelingGuardian
     uint8 level = 1;
     bool necromancer = false;
     bool shield = false;
+    int32 shieldAmount = 0;
 };
 
 struct TravelNote final : DataMap::Base
@@ -136,8 +138,15 @@ bool MakeAgain(Player* player, TravelingGuardian const& row, uint32 lifetime, ui
     unit->SetTempSummonType(TempSummonType(GuardianTravel::CopyType(row.type, lifetime)));
     if (lifetime)
         unit->SetTimer(lifetime);
-    if (row.necromancer && !row.shield)
-        unit->RemoveAurasDueToSpell(AscensionNecromancer::SummonShield);
+    if (row.necromancer)
+    {
+        Aura* shield = unit->GetAura(AscensionNecromancer::SummonShield);
+        AuraEffect* effect = shield && row.shield ? shield->GetEffect(EFFECT_0) : nullptr;
+        if (effect)
+            effect->SetAmount(std::min(effect->GetAmount(), row.shieldAmount));
+        else
+            unit->RemoveAurasDueToSpell(AscensionNecromancer::SummonShield);
+    }
     if (unit->IsGuardian() && unit->GetLevel() != row.level)
     {
         unit->SetLevel(row.level);
@@ -185,8 +194,8 @@ void Arrive(Player* player, TravelNote const& note)
             !summon->IsDuringRemoveFromWorld() && !GuardianTravel::OnItsWayOut(uint32(summon->GetSummonType())) &&
             summon->GetOwnerGUID() == player->GetGUID() && !summon->GetCharmerGUID() && !summon->GetTransport() &&
             (!row.necromancer || AscensionNecromancer::IsMinion(player, summon));
-        switch (GuardianTravel::Plan(worldChanged, present, present ? player->GetExactDist(summon) : 0.0f,
-                                     SummonSpellAllowsHere(player, row.spell)))
+        bool const allowed = !worldChanged || SummonSpellAllowsHere(player, row.spell);
+        switch (GuardianTravel::Plan(worldChanged, present, present ? player->GetExactDist(summon) : 0.0f, allowed))
         {
             case GuardianTravel::Step::Keep:
                 ++kept;
@@ -310,7 +319,10 @@ void NoteGuardians(Player* player, uint32 map, float x, float y, float z, uint32
         row.properties = candidate.Properties;
         row.level = summon->GetLevel();
         row.necromancer = classMinion;
-        row.shield = classMinion && summon->HasAura(AscensionNecromancer::SummonShield);
+        Aura* shield = classMinion ? summon->GetAura(AscensionNecromancer::SummonShield) : nullptr;
+        AuraEffect* shieldEffect = shield ? shield->GetEffect(EFFECT_0) : nullptr;
+        row.shield = shieldEffect != nullptr;
+        row.shieldAmount = shieldEffect ? shieldEffect->GetAmount() : 0;
         note.guardians.push_back(row);
     }
     if (!note.guardians.empty())
@@ -335,7 +347,8 @@ public:
     ascension_guardian_travel() :
         PlayerScript("ascension_guardian_travel", {PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_UPDATE}) { }
 
-    bool OnPlayerBeforeTeleport(Player* player, uint32 map, float x, float y, float z, float, uint32 options, Unit*) override
+    bool OnPlayerBeforeTeleport(Player* player, uint32 map, float x, float y, float z, float, uint32 options,
+                                Unit*) override
     {
         if (FollowTravel || player->CustomData.Get<TravelNote>(TravelKey))
             NoteGuardians(player, map, x, y, z, options);
