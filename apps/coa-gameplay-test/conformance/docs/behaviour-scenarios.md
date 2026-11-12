@@ -787,7 +787,8 @@ A `dispel_removal` entry may list `arms` (`name`, `target` `ally` or `dummy`, `r
 `away_yd` back, casts the spell at the target, reads the cast's `cast_failure` (judged exactly against `refused`,
 default 0) and the debuffs again (0 when `removed`, else 1), and steps forward again (ADR 0189). `caster_removed`,
 when set, replaces `removed` for the caster's reads of that arm only (ADR 0291). Silverhand Incantation 801465 clears Sacred
-Restraint 102208 from both on an ally, from neither on the dummy, and from neither when refused out of range (97).
+Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when refused
+out of range (97).
 
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 

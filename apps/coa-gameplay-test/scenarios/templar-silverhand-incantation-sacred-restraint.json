@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Silverhand Incantation removes Sacred Restraint from the caster and a friendly target only",
-  "contract": "Silverhand Incantation 801465 reads '...charging you to them and removing Sacred Restraint from you and them if they are an ally.' With Sacred Restraint 102208 on the level 60 Templar and on its target: a cast at the ally from 60 yd is refused out of range (97) and both keep it; a cast at the ally from 10 yd lands and clears both; a cast at the hostile dummy lands and clears neither (the hostile case keeps the earlier behaviour, an owner question). Every application on the two units is removed, whoever applied it.",
+  "name": "Silverhand Incantation removes Sacred Restraint from the caster on every cast and from a friendly target only",
+  "contract": "Silverhand Incantation 801465 reads '...charging you to them and removing Sacred Restraint from you and them if they are an ally.' With Sacred Restraint 102208 on the level 60 Templar and on its target: a cast at the ally from 60 yd is refused out of range (97) and both keep it; a cast at the ally from 10 yd lands and clears both; a cast at the hostile dummy lands, clears the caster and keeps the dummy's (owner ruling, status-5 Q4 option (a)). Every application on the two units is removed, whoever applied it.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -248,10 +248,10 @@
     },
     {
       "action": "assert",
-      "label": "hostile cast keeps the caster restraint",
+      "label": "hostile cast clears the caster restraint",
       "actor": "templar",
-      "min": 1,
-      "max": 1,
+      "min": 0,
+      "max": 0,
       "metric": "aura",
       "spell": 102208
     },

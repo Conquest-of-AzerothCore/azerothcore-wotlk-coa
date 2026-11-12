@@ -1,6 +1,6 @@
 # 0188. Silverhand Incantation removes Sacred Restraint from an ally
 
-- Status: accepted
+- Status: accepted; the hostile case is superseded by ADR 0292
 - Date: 2026-11-12
 - Decision by: the mentor, approving fix note FN-r1b-2 for the ally case (method-study/owner-rulings-2026-11-10.md,
   "Silverhand Incantation [801465], claim 329")

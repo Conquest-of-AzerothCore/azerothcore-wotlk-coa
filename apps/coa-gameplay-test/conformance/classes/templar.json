@@ -5466,8 +5466,8 @@
       "debuffs": [102208], "wait_ms": 3000,
       "arms": [{"name": "failed", "target": "ally", "removed": false, "away_yd": 60, "refused": 97},
                {"name": "ally", "target": "ally", "removed": true},
-               {"name": "hostile", "target": "dummy", "removed": false}],
-      "observe_source": "AscensionTemplarAbilities.cpp templar_casts::OnSpellCast (ADR 0188): after a cast of 801465 that went through at a friendly unit target other than the caster, every 102208 application on the caster and on that target is removed. Sacred Restraint 102208 is set on the caster and on the arm's target before each cast. failed: the caster steps 60 yd away, beyond 801465's 40 yd (SpellRange 5), so the cast is refused (97 SPELL_FAILED_OUT_OF_RANGE, judged) and both keep it; the other arms' casts must read 0; ally: the cast lands and both lose it; hostile: a cast at the dummy lands and both keep it, the behaviour Q4 asks the owner about."
+               {"name": "hostile", "target": "dummy", "removed": false, "caster_removed": true}],
+      "observe_source": "AscensionTemplarAbilities.cpp templar_casts::OnSpellCast (ADR 0188, ADR 0292): after a cast of 801465 that went through at a unit target other than the caster, every 102208 application on the caster is removed, and on that target only when it is friendly (owner ruling, status-5 Q4 option (a)). Sacred Restraint 102208 is set on the caster and on the arm's target before each cast. failed: the caster steps 60 yd away, beyond 801465's 40 yd (SpellRange 5), so the cast is refused (97 SPELL_FAILED_OUT_OF_RANGE, judged) and both keep it; the other arms' casts must read 0; ally: the cast lands and both lose it; hostile: a cast at the dummy lands, the caster loses it (caster_removed, ADR 0291) and the dummy keeps it."
     },
     {
       "spell": 801465, "name": "Silverhand Incantation", "kind": "amount_match", "variant": "same_amount",
