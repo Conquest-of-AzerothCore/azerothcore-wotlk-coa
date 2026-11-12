@@ -172,6 +172,8 @@ class aura_ascension_necromancer_event : public AuraScript
                 Reduce(player, 801938, std::abs(Amount(806322)));
             if (actor->GetEntry() == 50073 && Chance(player, 503740))
                 Cast(player, actor, 707014);
+            if (actor->GetEntry() == 50385 && (!info || info->Id != 504022))
+                Cast(actor, actor, 504022);
             if (melee && actor->GetEntry() == 50078 && roll_chance_i(sSpellMgr->GetSpellInfo(805023)->ProcChance))
                 Cast(actor, target, 805024);
             if (melee && actor->GetEntry() == 503200 && actor->HasAura(531133))
