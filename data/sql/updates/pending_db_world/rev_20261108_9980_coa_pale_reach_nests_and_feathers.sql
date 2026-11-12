@@ -6,26 +6,33 @@
 -- Evidence: video 9elvxh9Fct0 00:44:40-00:44:42 (wings spread, player pushed ~10 yd down the snow), 00:44:57-00:45:05
 -- (2 s Throw Meat, take-off at 00:45:02, Cleaning at 00:45:03, 1/5) and 00:45:24-00:45:30; o6AaRPzuChg 00:18:42.
 -- The realm's buffet spell is unknown (MobSpells lists only Sit 365372). The gryphons are friendly, so the
--- enemy-only Gryphon Wing Flap (21189) cannot hit a player; stock Knockback (10689, any unit, 10 yd/s out and up)
--- matches the push. The take-off flight is scripted, so the core must not reset its movement flags.
+-- enemy-only Gryphon Wing Flap (21189) cannot hit a player, and stock Knockback (10689) draws a spell swirl on the
+-- player. The gryphon stands, flaps (mount-special emote 377) and pushes with the visual-less 2145722, which has
+-- Knockback's speeds (any unit, 10 yd/s out and up), then sits again. The take-off flight is scripted, so the core
+-- must not reset its movement flags.
 UPDATE `creature_template` SET `AIName` = 'SmartAI', `flags_extra` = `flags_extra` | 512 WHERE `entry` IN (164080, 164188);
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (164080, 164188) AND `source_type` = 0;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
 (164080, 0, 0, 1, 25, 0, 100, 0, 0, 0, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Reset - Set Event Phase 1 (roosting)'),
 (164080, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Linked - Set Fly Off'),
-(164080, 0, 2, 0, 10, 1, 100, 0, 2, 6, 3000, 3000, 1, 0, 80, 16408000, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Player Within 6 yd - Run Script (Knockback)'),
+(164080, 0, 2, 0, 10, 1, 100, 0, 2, 6, 4000, 4000, 1, 0, 80, 16408000, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Player Within 6 yd - Run Script (Knockback)'),
 (164080, 0, 3, 0, 8, 1, 100, 0, 365038, 0, 0, 0, 0, 0, 80, 16408001, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Spellhit Throw Meat - Run Script (Fly Away)'),
 (164080, 0, 4, 0, 34, 2, 100, 0, 8, 1, 0, 0, 0, 0, 69, 2, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, -7130, 250, 540, 0, 'Daumor Gryphon - On Point 1 Reached - Fly South-East Over The Valley'),
 (164188, 0, 0, 1, 25, 0, 100, 0, 0, 0, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Reset - Set Event Phase 1 (roosting)'),
 (164188, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Linked - Set Fly Off'),
-(164188, 0, 2, 0, 10, 1, 100, 0, 2, 6, 3000, 3000, 1, 0, 80, 16408000, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Player Within 6 yd - Run Script (Knockback)'),
+(164188, 0, 2, 0, 10, 1, 100, 0, 2, 6, 4000, 4000, 1, 0, 80, 16408000, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Player Within 6 yd - Run Script (Knockback)'),
 (164188, 0, 3, 0, 8, 1, 100, 0, 365038, 0, 0, 0, 0, 0, 80, 16408001, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Spellhit Throw Meat - Run Script (Fly Away)'),
 (164188, 0, 4, 0, 34, 2, 100, 0, 8, 1, 0, 0, 0, 0, 69, 2, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, -7130, 250, 540, 0, 'Daumor Gryphon - On Point 1 Reached - Fly South-East Over The Valley');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (16408000, 16408001) AND `source_type` = 9;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
-(16408000, 9, 0, 0, 0, 0, 100, 0, 1000, 1000, 0, 0, 0, 0, 11, 10689, 2, 0, 0, 0, 0, 17, 0, 6, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Cast Knockback On Players Within 6 yd'),
+(16408000, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 28, 365372, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Remove Aura Sit'),
+(16408000, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 91, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Stand Up'),
+(16408000, 9, 2, 0, 0, 0, 100, 0, 400, 400, 0, 0, 0, 0, 5, 377, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Flap Wings'),
+(16408000, 9, 3, 0, 0, 0, 100, 0, 600, 600, 0, 0, 0, 0, 11, 2145722, 2, 0, 0, 0, 0, 17, 0, 6, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Cast Knockback On Players Within 6 yd'),
+(16408000, 9, 4, 0, 0, 0, 100, 0, 2000, 2000, 0, 0, 0, 0, 75, 365372, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Add Aura Sit'),
+(16408000, 9, 5, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 90, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Sit Down'),
 (16408001, 9, 0, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 22, 2, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Set Event Phase 2 (leaving)'),
 (16408001, 9, 1, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 28, 365372, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Remove Aura Sit'),
 (16408001, 9, 2, 0, 0, 0, 100, 0, 0, 0, 0, 0, 0, 0, 91, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Actionlist - Stand Up'),
