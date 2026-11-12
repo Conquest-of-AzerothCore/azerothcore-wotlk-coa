@@ -525,7 +525,7 @@
     "clause": "Periodic damage dealt now generates $524987s1 Energy.",
     "labels": [
       "301253 effect_value 524987e0",
-      "301253 e0 behaviour_metric_delta"
+      "301253 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -1360,7 +1360,9 @@
     "spell": 560550,
     "clause": "Does not stack with similar effects.",
     "labels": [
-      "560550 behaviour_group_stack_cap"
+      "560550 behaviour_group_stack_cap",
+      "560550 behaviour_hit_ratio no_stack",
+      "560550 behaviour_hit_ratio partner_alone"
     ],
     "kind": "claim"
   },
@@ -2442,14 +2444,25 @@
   {
     "spell": 572769,
     "clause": "Swing at enemies in front of you",
-    "labels": [],
+    "labels": [
+      "572769 behaviour_fixed_count"
+    ],
     "kind": "claim"
   },
   {
     "spell": 572769,
     "clause": "dealing $s2% High Threat Weapon Damage",
-    "labels": [
-      "conformance-templar-value-572769 (effect_value e1 #0)"
+    "claims": [
+      {
+        "claim": "dealing $s2%",
+        "labels": [
+          "572769 hit_mean"
+        ]
+      },
+      {
+        "claim": "High Threat",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -2457,7 +2470,7 @@
     "spell": 572769,
     "clause": "plus ${$m1+0}",
     "labels": [
-      "conformance-templar-value-572769 (effect_value e0 #1)"
+      "572769 hit_mean"
     ],
     "kind": "claim"
   },
@@ -2465,8 +2478,9 @@
     "spell": 572769,
     "clause": "slowing their attack and movement speed by $301061s1% for $301061d",
     "labels": [
-      "conformance-templar-value-572769 (effect_value 301061e0 #2 ok, -20%)",
-      "conformance-templar-value-572769 (spell_duration 301061 #3 ok)"
+      "572769 behaviour_metric_delta attack_slow",
+      "572769 behaviour_metric_delta run_slow",
+      "572769 behaviour_expiry slow"
     ],
     "kind": "claim"
   },
@@ -2474,7 +2488,7 @@
     "spell": 572769,
     "clause": "for $301061d",
     "labels": [
-      "conformance-templar-value-572769 (spell_duration 301061 #3 ok)"
+      "572769 behaviour_expiry slow"
     ],
     "kind": "claim"
   },
@@ -2697,8 +2711,7 @@
     "spell": 705307,
     "clause": "Increases the damage of Reckoning by $s2%.",
     "labels": [
-      "conformance-templar-value-705307 (effect_value e1)",
-      "705307 e1 spell_modifier 572741 ok"
+      "705307 behaviour_hit_ratio"
     ],
     "kind": "claim"
   },
@@ -2750,7 +2763,6 @@
     "spell": 706323,
     "clause": "Increases your damage dealt versus Undead by ${$m1+0}",
     "labels": [
-      "conformance-templar-value-706323 (effect_value e0, 53)",
       "706323 behaviour_hit_ratio level_60"
     ],
     "kind": "claim"
@@ -2905,7 +2917,7 @@
     "spell": 300923,
     "clause": "Places a Gift on a friendly target, increasing Agility by $s1",
     "labels": [
-      "conformance-templar-value-300923 (effect_value, aura_amount)"
+      "300923 behaviour_metric_delta agility"
     ],
     "kind": "claim"
   },
@@ -2913,7 +2925,7 @@
     "spell": 300923,
     "clause": "for $d",
     "labels": [
-      "conformance-templar-value-300923 (aura_duration_ms, ~1799988/1800000)"
+      "300923 behaviour_expiry gift"
     ],
     "kind": "claim"
   },
@@ -3082,7 +3094,6 @@
     "clause": "reduces the duration of disarm effects against you by $s2%",
     "labels": [
       "707851 effect_value e1 #1",
-      "707851 e1 (unmodelled)",
       "707851 behaviour_duration_ratio",
       "707851 behaviour_expiry"
     ],

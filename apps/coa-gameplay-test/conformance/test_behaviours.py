@@ -746,7 +746,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 408)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 416)
 
 
 class TargetCountScenarioTests(unittest.TestCase):

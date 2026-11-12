@@ -1897,8 +1897,9 @@
     },
     {
       "spell": 705307, "name": "Holy Warstaff", "kind": "hit_ratio", "quote": "Increases the damage of", "expected": 1.2,
-      "observe_spell": 572741, "control": {}, "treatment": {"auras": [[705307, 1]]}, "critical": false, "trials": 40,
-      "expected_source": "$s2 = 20 (705307 EffectBasePoints[1] 19 + 1), Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_DAMAGE, mask-matched to Reckoning 572741 (spell_modifier ok). Reckoning (Holy, magic-class, CasterAuraSpell Oath Chain 704576 set before each cast) at the dummy; the treatment sets 705307. Non-critical hits only: x1.2."
+      "observe_spell": 572741, "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [705307, 1]]},
+      "critical": false, "trials": 166, "parts": 4,
+      "expected_source": "$s2 = 20 (705307 EffectBasePoints[1] 19 + 1), Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_DAMAGE, mask-matched to Reckoning 572741 (spell_modifier ok). Reckoning (Holy, magic-class, CasterAuraSpell Oath Chain 704576 set before each cast) at the dummy; both arms set beeg spellpen 823764 so no hit is partly resisted (a first pair without it read +21.0% inside a 7.8-point half-width; with it, 40 trials read +20.9% inside 3.5 points, so 4 pooled parts of 166, ADR 0195); the treatment sets 705307. Non-critical hits only: x1.2."
     },
     {
       "spell": 572769, "name": "Sacred Swing (enemies in front)", "kind": "fixed_count", "variant": "in_front",
