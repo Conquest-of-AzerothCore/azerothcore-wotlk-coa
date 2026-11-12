@@ -116,11 +116,9 @@ namespace
             BossAI::OnSpellCast(spell);
             if (spell->Id != SPELL_GROUND_SLAM)
                 return;
+            DoCastSelf(SPELL_GROUND_SLAM_HIT, true);
             for (Player* p : Players(me, [](Player*) { return true; }))
-            {
-                me->CastSpell(p, SPELL_GROUND_SLAM_HIT, true);
                 me->CastSpell(p, SPELL_TRAUMA, true);
-            }
             DoCastSelf(SPELL_GROUND_TREMOR, true);
         }
 

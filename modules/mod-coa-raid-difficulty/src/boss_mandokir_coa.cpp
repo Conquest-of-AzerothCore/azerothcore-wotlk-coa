@@ -22,7 +22,10 @@
  *                                            in the charge's place when no
  *                                            one stands out of melee
  *   Mortal Strike     first 8s,  every 12s   the tank in melee range, -25%
- *                                            healing, stacks 3
+ *                                            healing, stacks 3; it and
+ *                                            Decapitate always hit (live:
+ *                                            never dodged, parried or
+ *                                            missed; SpellFix.cpp)
  *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s,
  *                                            then Menacing Gaze for 4s: an
  *                                            active hostile action (a spell

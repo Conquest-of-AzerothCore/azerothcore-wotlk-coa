@@ -91,6 +91,7 @@ namespace
     enum Npcs
     {
         NPC_BLOODSEEKER_BAT = 11368,
+        NPC_FRENZIED_BAT    = 14965,
         NPC_BATRIDER        = 14750,
         NPC_AVATAR_OF_HIREEK = 666992
     };
@@ -107,6 +108,8 @@ namespace
         EVENT_SCREECH,
         EVENT_BAT_RIDER,
         EVENT_FIERCE_BLOW,
+        EVENT_BAT_WAVE,
+        EVENT_FRENZIED_BAT,
     };
 
     enum Phases
@@ -119,6 +122,10 @@ namespace
     constexpr float SCREECH_RANGE      = 100.0f;
     constexpr float SCREECH_FEAR_RANGE = 20.0f;
     constexpr float BATTERING_CHARGE_MAX_RANGE = 25.0f;
+    constexpr uint8 FRENZIED_BAT_MIN_SPAWN_MODE = 2;
+    constexpr Milliseconds BAT_WAVE_FIRST = 52s;
+    constexpr Milliseconds BAT_WAVE_INTERVAL = 30s;
+    constexpr Milliseconds FRENZIED_BAT_INTERVAL = 30s;
 
     Position const SpawnBat[6] =
     {
@@ -171,6 +178,7 @@ namespace
             events.ScheduleEvent(EVENT_CALL_OF_HIREEK, 22s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_GREATER_HEAL, 21s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
+            events.ScheduleEvent(EVENT_BAT_WAVE, BAT_WAVE_FIRST);
         }
 
         void EnterEvadeMode(EvadeReason why) override
@@ -211,6 +219,8 @@ namespace
             events.SetPhase(PHASE_BAT);
             events.ScheduleEvent(EVENT_BATTERING_CHARGE, 2s, 0, PHASE_BAT);
             events.ScheduleEvent(EVENT_BAT_RIDER, 10s, 0, PHASE_BAT);
+            if (me->GetMap()->GetSpawnMode() >= FRENZIED_BAT_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_FRENZIED_BAT, FRENZIED_BAT_INTERVAL, 0, PHASE_BAT);
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -261,11 +271,19 @@ namespace
         void CallOfHireek()
         {
             Talk(EMOTE_SUMMON_BATS);
+            SummonBats(NPC_BLOODSEEKER_BAT, std::size(SpawnBat));
+        }
+
+        void SummonBats(uint32 entry, size_t count)
+        {
             Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true);
-            for (Position const& pos : SpawnBat)
-                if (Creature* bat = me->SummonCreature(NPC_BLOODSEEKER_BAT, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000))
+            for (size_t i = 0; i < count; ++i)
+            {
+                Position const& pos = SpawnBat[i % std::size(SpawnBat)];
+                if (Creature* bat = me->SummonCreature(entry, pos, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 15000))
                     if (target)
                         bat->AI()->AttackStart(target);
+            }
         }
 
         bool CastOnRandom(uint32 spell, bool notTank = false)
@@ -318,7 +336,14 @@ namespace
                         break;
                     case EVENT_CALL_OF_HIREEK:
                         DoCastSelf(SPELL_CALL_OF_HIREEK);
-                        events.ScheduleEvent(EVENT_CALL_OF_HIREEK, 60s, 0, PHASE_TROLL);
+                        break;
+                    case EVENT_BAT_WAVE:
+                        SummonBats(NPC_BLOODSEEKER_BAT, std::size(SpawnBat));
+                        events.ScheduleEvent(EVENT_BAT_WAVE, BAT_WAVE_INTERVAL);
+                        break;
+                    case EVENT_FRENZIED_BAT:
+                        SummonBats(NPC_FRENZIED_BAT, 1);
+                        events.ScheduleEvent(EVENT_FRENZIED_BAT, FRENZIED_BAT_INTERVAL, 0, PHASE_BAT);
                         break;
                     case EVENT_GREATER_HEAL:
                         Talk(EMOTE_GREAT_HEAL);
