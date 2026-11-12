@@ -772,7 +772,7 @@ Restraint 102208 from both on an ally, from neither on the dummy, and from neith
 
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 
-"For the same amount" compares two amounts of one cast (ADR 0190). `amount_match_scenario` casts `cast_spell` at
+"For the same amount" compares two amounts of one cast (ADR 0200). `amount_match_scenario` casts `cast_spell` at
 `cast_target` once per trial, with the entry's `auras` set before each cast, and after `wait_ms` reads the non-critical
 total and count of two sides, `first` and `second` (`metric` `spell_damage_total` or `spell_heal_total`, `spell`,
 `target` the dummy, the ally or the caster). The judge requires, in every trial with an event on both sides, per-event

@@ -4797,7 +4797,7 @@
       "first": {"metric": "spell_damage_total", "spell": 801501, "target": "dummy"},
       "second": {"metric": "spell_heal_total", "spell": 801501, "target": "ally"},
       "auras": [[823764, 1]], "group": true, "trials": 20, "tolerance": 1,
-      "observe_source": "801501 deals its Effect[0] value as Holy damage to enemies and heals allies with the same value (Effect[1] SPELL_EFFECT_HEAL, TARGET_UNIT_SRC_AREA_ALLY, 8 yd) on the caster's arrival; the value is 300 + 2 x AP (TemplarCoefficients on 801465 Effect[0], ADR 0188's spell). The Templar charges to the dummy at 3 yd, the grouped ally stands within 8 yd of the landing point, and each trial compares the non-critical damage on the dummy with the non-critical heal on the ally from the same cast: equal within 1 point of engine rounding (ADR 0190). beeg spellpen 823764 removes the dummy's partial resists; the class aura 887007 applies to both."
+      "observe_source": "801501 deals its Effect[0] value as Holy damage to enemies and heals allies with the same value (Effect[1] SPELL_EFFECT_HEAL, TARGET_UNIT_SRC_AREA_ALLY, 8 yd) on the caster's arrival; the value is 300 + 2 x AP (TemplarCoefficients on 801465 Effect[0], ADR 0188's spell). The Templar charges to the dummy at 3 yd, the grouped ally stands within 8 yd of the landing point, and each trial compares the non-critical damage on the dummy with the non-critical heal on the ally from the same cast: equal within 1 point of engine rounding (ADR 0200). beeg spellpen 823764 removes the dummy's partial resists; the class aura 887007 applies to both."
     }
   ],
   "player_observations": [

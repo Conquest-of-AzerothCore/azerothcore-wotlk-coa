@@ -1,4 +1,4 @@
-# 0191. A hit-ratio expectation from the hit model
+# 0201. A hit-ratio expectation from the hit model
 
 - Status: accepted
 - Date: 2026-11-12
