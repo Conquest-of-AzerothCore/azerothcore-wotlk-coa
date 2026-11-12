@@ -25,5 +25,5 @@ is the ally's. Fixtures for 801455 (aura 147 mask 65: slows and roots, SpellInfo
 ## Consequences
 
 - Claim 312: both fixtures land before the cast, neither lands inside the window (three casts each), both land after it.
-- Caster entries regenerate byte-identical.
+- Caster entries regenerate byte-identical (1693 of 1693 for ADRs 0204-0208 together, 11 new scenarios).
 - Tests: `test_behaviours.AllyImmunityTests`; a fixture landing inside the window alerts.

@@ -24,5 +24,5 @@ ally must be the caster or the target. The contract states it.
 
 - 25: the ally's self heal grows 6% at 30 yd and not at 45 yd. 26 (caster self heals): 300515 with Tree of Life 34123
   reads as 300515 alone, 34123 alone gives 6%.
-- Entries without the field regenerate byte-identical.
+- Entries without the field regenerate byte-identical (1693 of 1693 for ADRs 0204-0208 together, 11 new scenarios).
 - Tests: `test_behaviours.HitRatioAllyDistanceTests`.

@@ -26,7 +26,9 @@ takes its value from 527270's Effect[2] (AscensionTemplarContracts.cpp:331-332),
 
 ## Consequences
 
-- 4 and 5: 260.6 / 259.5 against 258.0 (school only would be 236.4).
+- 4 and 5: 260.6 / 259.5 against 258.0 (school only would be 236.4). With the dummy's resistance removed (823764,
+  unresisted model), the strike reads 292.8 against 292.8 (school part 268.0), which bounds the weapon percent to
+  about 49.5-50.5 (review I1).
 - 387 (Argent Blade's text states the school part only) and 102 (the trample) alert; see the r2-a question and fix note.
-- Other script hits regenerate byte-identical.
+- Other script hits regenerate byte-identical (1693 of 1693 for ADRs 0204-0208 together, 11 new scenarios).
 - Tests: `test_behaviours.ScriptHitWeaponAndValueTests`.

@@ -922,6 +922,9 @@ cooldown wait (Libram of Zeal 801466, 20000 ms, gating Righteous Upheaval's 2000
 
 `target_health_pct` (ADR 0205, the dummy only) sets the dummy to that percent of its health once before the arms, for a
 gated spell with a target health aura state (Titanstrike 806521, below 20%, under Testament of Strength 300514).
+`charges` (ADR 0211, a cooldown gate of a `talent_aura`) attempts the gated spell again after the `with` arm, at the
+same wait and without a fresh aura or a cooldown reset: casts 3 to `charges + 1` go through and cast `charges + 2` is
+refused (labels `... cast_<n>`; Testament of Strength's next 3 Titanstrikes).
 
 A cooldown gate may wait up to the accelerated cap (`hits.MAX_ACCELERATED_SCENARIO_MS`, ADR 0152), as expiry
 scenarios may; a power gate keeps the ten-minute budget. Eternally Devoted 573452 gates Libram of Tenacity 801461's

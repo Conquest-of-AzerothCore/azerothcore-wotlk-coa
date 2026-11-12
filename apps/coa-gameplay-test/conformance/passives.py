@@ -119,8 +119,9 @@ BEHAVIOUR_LABELS = {
                                    for metric in ('cast', 'aura')],
     'cost_gate': lambda entry: [f"{entry['spell']} cost_gate {entry['gated_spell']}"
                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '') + f" {arm}"
-                                for arm in ('without', 'with', *(('next',) if entry.get('next_arm') else ()),
-                                            'beyond',
+                                for arm in ('without', 'with',
+                                            *(f'cast_{cast}' for cast in range(3, (entry.get('charges') or 0) + 3)),
+                                            *(('next',) if entry.get('next_arm') else ()), 'beyond',
                                             *(('held', 'expired') if entry.get('aura_duration_ms') else ()))],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
@@ -130,7 +131,8 @@ BEHAVIOUR_LABELS = {
                                     for arm in ('outside', 'paid', 'spent', 'topped_up')],
     'cast_state': lambda entry: [f"{entry['spell']} cast_state {moment}" for moment in ('control', 'state', 'allowed')],
     'mount_block': lambda entry: [f"{entry['spell']} mount_block {entry.get('mount_spell', 458)} {moment}"
-                                  for moment in ('blocked', 'unmounted', 'allowed', 'mounted', 'dismounted')],
+                                  for moment in ('blocked', 'unmounted', 'allowed', 'mounted', 'held',
+                                                 'dismounted')],
     'immunity': lambda entry: [f"{entry['spell']} immunity {subject} {moment}"
                                for subject, moments in ((entry['spell'], ('cast', 'applied')),
                                                         *((effect['spell'], ('without', 'with'))

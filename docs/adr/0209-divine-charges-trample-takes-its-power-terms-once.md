@@ -10,8 +10,8 @@ ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage every $527270t3 sec for $d."
 nearby enemy by 527270's Effect[2] tick (AscensionTemplarAuras.cpp:179-191). Its Effect[0] value is set to
 Amount(527270, 2) (AscensionTemplarContracts.cpp:331-332), which is SpellEffectInfo::CalcValue of 527270's Effect[2].
 That CalcValue already passes through the same hook, which adds 527270's TemplarCoefficients row
-(AscensionTemplarData.h:44, 0.2 AP + 0.4 SP). 527269's own row (AscensionTemplarData.h:43, the same terms) then added
-them a second time.
+(AscensionTemplarData.h:44 before this change, :43 after it; 0.2 AP + 0.4 SP). 527269's own row
+(AscensionTemplarData.h:43 before this change, the same terms) then added them a second time.
 
 Measured before the fix (counted pair 20261112-021809 / -021850, AP 313, spell power 0): 171.6 / 172.1 per
 non-critical hit. Engine arithmetic: 65 + floor(1.35 x 40) = 119, plus 0.2 x 313 = 181.6, truncated to 181; -20%

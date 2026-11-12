@@ -20,7 +20,7 @@ every 3000 ms). A `hit_ratio` trial reads its hits right after the cast, so a pe
 ## Decision
 
 `hit_ratio` accepts `cast_wait_ms` without a `cast_spell`; it stays refused beside swings. The contract states the
-wait. Entries without that combination regenerate byte-identical.
+wait. Entries without that combination regenerate byte-identical (1692 of 1692, one new scenario).
 
 ## Consequences
 

@@ -27,5 +27,5 @@ each trial, since a set on a present aura keeps its old duration.
 
 - Divine Charge `no_power`: 84.4 per hit against the base-only model 83.85, and the trample 126.1 against 127.15,
   after ADR 0209.
-- Entries without the fields regenerate byte-identical.
+- Entries without the fields regenerate byte-identical (1704 of 1704, one new scenario).
 - Tests: `test_behaviours.ScriptHitStatAuraTests`.

@@ -746,7 +746,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 349)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 355)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -7895,7 +7895,7 @@ class MountBlockScenarioTests(unittest.TestCase):
         self.assertEqual([(e.label, e.check, e.displayed) for e in self.expectations],
                          [(f'{self.BRAND} mount_block {self.MOUNT} {moment}', BEHAVIOUR_CAST_CONDITION, code)
                           for moment, code in (('blocked', '22'), ('unmounted', '0'), ('allowed', '0'),
-                                               ('mounted', '1'), ('dismounted', '0'))])
+                                               ('mounted', '1'), ('held', '1'), ('dismounted', '0'))])
 
     def test_the_brand_is_set_by_the_caster_outdoors_around_the_two_mount_casts(self):
         outdoors = first_index(self.steps, action='teleport')
@@ -7909,12 +7909,12 @@ class MountBlockScenarioTests(unittest.TestCase):
         self.assertLess(brands[0], casts[0])
         self.assertLess(casts[0], brands[1])
         self.assertLess(brands[1], casts[1])
-        self.assertLess(first_index(self.steps, label=f'{self.BRAND} mount_block {self.MOUNT} mounted'), brands[2])
+        self.assertLess(first_index(self.steps, label=f'{self.BRAND} mount_block {self.MOUNT} held'), brands[2])
 
     def test_a_mount_that_goes_through_the_brand_or_survives_it_alerts(self):
         by_moment = {expectation.label.rsplit(' ', 1)[1]: expectation for expectation in self.expectations}
         for moment, value, status in (('blocked', 0.0, 'alert'), ('blocked', 22.0, 'ok'), ('unmounted', 1.0, 'alert'),
-                                      ('allowed', 22.0, 'alert'), ('mounted', 0.0, 'alert'),
+                                      ('allowed', 22.0, 'alert'), ('mounted', 0.0, 'alert'), ('held', 0.0, 'alert'),
                                       ('dismounted', 1.0, 'alert'), ('dismounted', 0.0, 'ok')):
             expectation = by_moment[moment]
             with self.subTest(moment=moment, value=value):
@@ -8323,6 +8323,56 @@ class ScriptHitStatAuraTests(unittest.TestCase):
             and 'variant' not in entry))
         self.assertEqual(expectation.label, '527023 script_hit 527269')
         self.assertNotEqual(scenario['steps'][0]['action'], 'set_aura')
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CostGateChargeTests(unittest.TestCase):
+    def setUp(self):
+        self.entry = variant_entry(TESTAMENT_OF_STRENGTH, 'cost_gate', 'titanstrike')
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, self.entry)
+        self.steps = run.validate(self.scenario)['steps']
+        self.by_label = {expectation.label: expectation for expectation in self.expectations}
+
+    def label(self, arm: str) -> str:
+        return f'{TESTAMENT_OF_STRENGTH} cost_gate 806521 titanstrike {arm}'
+
+    def test_casts_after_the_with_arm_spend_the_charges_without_a_fresh_aura(self):
+        self.assertEqual([self.by_label[self.label(f'cast_{cast}')].displayed for cast in (3, 4, 5)], ['0', '0', '67'])
+        start = first_index(self.steps, label=self.label('with'))
+        end = first_index(self.steps, label=self.label('cast_5'))
+        between = self.steps[start:end]
+        self.assertFalse([step for step in between if step['action'] in ('reset_cooldown', 'set_aura')])
+        self.assertEqual(sum(step['action'] == 'cast' for step in between), 3)
+
+    def test_a_fourth_reduced_cast_or_an_unreduced_control_alerts(self):
+        for arm, value in (('cast_5', 0.0), ('cast_3', 67.0), ('without', 0.0)):
+            expectation = self.by_label[self.label(arm)]
+            with self.subTest(arm=arm):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: value}), expectation)
+                self.assertEqual(verdict.status, 'alert')
+
+    def test_charges_without_a_talent_aura_are_refused(self):
+        bad = {key: value for key, value in self.entry.items() if key not in ('talent_aura', 'talent_aura_each_arm')}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, bad)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ExtensionHitRatioMutantTests(unittest.TestCase):
+    def judged(self, spell: int, variant: str, treatment: float, control: float) -> str:
+        _, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(spell, 'hit_ratio', variant))
+        return judge_behaviour(base_verdict(expectation), FakeRun(ratio_values(expectation.model, treatment, control)),
+                               expectation).status
+
+    def test_an_aura_reaching_beyond_the_radius_alerts(self):
+        self.assertEqual(self.judged(300515, 'ally_44', 1060.0, 1000.0), 'alert')
+        self.assertEqual(self.judged(300515, 'ally_44', 1000.0, 1000.0), 'ok')
+        self.assertEqual(self.judged(300515, 'ally_42', 1000.0, 1000.0), 'alert')
+
+    def test_unraised_periodic_ticks_alert(self):
+        self.assertEqual(self.judged(300524, 'blade_of_faith', 191.0, 191.0), 'alert')
+        self.assertEqual(self.judged(300524, 'blade_of_faith', 239.0, 191.2), 'ok')
 
 
 if __name__ == '__main__':

@@ -23,5 +23,5 @@ after the learns. The contract states it.
 ## Consequences
 
 - Claim 20: refused (67) 4500 ms after the priming cast without 300514, through with it, refused 3500 ms after it.
-- Entries without the field regenerate byte-identical.
+- Entries without the field regenerate byte-identical (1693 of 1693 for ADRs 0204-0208 together, 11 new scenarios).
 - Tests: `test_behaviours.CostGateTargetHealthTests`.

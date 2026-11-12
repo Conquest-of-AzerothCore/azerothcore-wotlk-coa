@@ -26,5 +26,5 @@ the control casts (`control_text`).
 
 - 18: the striker's Light of the Naaru takes 573020 only when branded. 387: Righteous Lunge unleashes no strike.
   102: no Divine Charge, no trample.
-- Entries without the field regenerate byte-identical.
+- Entries without the field regenerate byte-identical (1693 of 1693 for ADRs 0204-0208 together, 11 new scenarios).
 - Tests: `test_behaviours.ScriptHitControlCastTests`.

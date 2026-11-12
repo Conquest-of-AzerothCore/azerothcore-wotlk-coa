@@ -3250,6 +3250,7 @@ class CostGateSpec:
     restore_charges: bool = False
     target_health_pct: int | None = None
     unset_arm: bool = False
+    charges: int | None = None
 
 
 @dataclass(frozen=True)
@@ -3370,6 +3371,10 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                          {'action': 'wait', 'ms': SINGLE_TARGET_GCD_WAIT_MS}])
         return steps
 
+    if spec.charges is not None and (spec.charges < 1 or spec.resource != 'cooldown' or not spec.talent_aura
+                                     or spec.resets or lengthens(spec) or spec.setup_casts or spec.after_casts):
+        raise ValueError(f'{spec.spell} cost_gate charges chain a cooldown gate of a talent aura with no setup or '
+                         f'after casts')
     if spec.target_health_pct is not None and (spec.target != TARGET or not 0 < spec.target_health_pct < 100):
         raise ValueError(f'{spec.spell} cost_gate holds a target health of {spec.target_health_pct}, which needs the '
                          f'dummy as its target and a percent between 0 and 100')
@@ -3441,6 +3446,15 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell, None,
                                         str(arm.result), rule,
                                         {**model, 'arm': arm.name, 'level': arm.level, 'held_ms': arm.held_ms}))
+        if spec.charges and arm.name == 'with':
+            for cast in range(3, spec.charges + 3):
+                chained = cost_gate_label(spec, f'cast_{cast}')
+                steps += ([{'action': 'wait', 'label': f'{chained} cooldown wait', 'ms': cooldown_wait(arm)}]
+                          + attempt(chained, full_power))
+                result = NO_CAST_FAILURE if cast <= spec.charges + 1 else COST_GATE_RESOURCES[spec.resource]
+                expectations.append(Expectation(chained, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell,
+                                                None, str(result), rule,
+                                                {**model, 'arm': f'cast_{cast}', 'level': arm.level, 'held_ms': 0}))
     unit = 'power' if spec.resource == 'power' else 'ms after a cast'
     players = [{**player_fixture(class_file), 'allow_regeneration': False}]
     if ALLY in (spec.target, *(target for _, target in (*spec.setup_casts, *spec.after_casts))):
@@ -3454,6 +3468,10 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                     f'reduction it must be refused again, proving the "{spec.quote}" clause.'
                     + (f' The dummy is set to {spec.target_health_pct}% health before the arms.'
                        if spec.target_health_pct is not None else '')
+                    + (f' After the with arm, {spec.gated_spell} is attempted again at the same wait after each cast, '
+                       f'without a fresh {spec.talent_aura}: casts 3 to {spec.charges + 1} go through and cast '
+                       f'{spec.charges + 2} is refused, since only the first {spec.charges} casts are reduced.'
+                       if spec.charges else '')
                     + (f' The reduction is negative, a longer cooldown: without {spec.spell} the cast goes through '
                        f'{spec.margin_ms} ms after the base cooldown, with it it is refused there, goes through '
                        f'{spec.margin_ms} ms after the lengthened cooldown and is refused {spec.margin_ms} ms before '
@@ -3481,7 +3499,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
                         entry.get('after_wait_ms', 0), entry.get('resets', False),
                         bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)),
-                        entry.get('target_health_pct'), bool(entry.get('unset_arm', False)))
+                        entry.get('target_health_pct'), bool(entry.get('unset_arm', False)), entry.get('charges'))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
@@ -3968,9 +3986,10 @@ def cast_state_spec(entry: dict) -> CastStateSpec:
 SPELL_FAILED_CASTER_AURASTATE = 22
 SPELL_AURA_MOUNTED = 78
 MOUNT_BLOCK_SETTLE_MS = 2000
-MOUNT_BLOCK_MOMENTS = ('blocked', 'unmounted', 'allowed', 'mounted', 'dismounted')
+MOUNT_BLOCK_MOMENTS = ('blocked', 'unmounted', 'allowed', 'mounted', 'held', 'dismounted')
 MOUNT_BLOCK_EXPECTED = {'blocked': SPELL_FAILED_CASTER_AURASTATE, 'unmounted': STATE_ABSENT,
-                        'allowed': NO_CAST_FAILURE, 'mounted': STATE_PRESENT, 'dismounted': STATE_ABSENT}
+                        'allowed': NO_CAST_FAILURE, 'mounted': STATE_PRESENT, 'held': STATE_PRESENT,
+                        'dismounted': STATE_ABSENT}
 
 
 @dataclass(frozen=True)
@@ -4009,6 +4028,8 @@ def mount_block_scenario(class_file: dict, spec: MountBlockSpec) -> tuple[dict, 
              + self_cast_attempt(spec.mount_spell, mount, label('allowed'))
              + [{'action': 'wait', 'ms': mounted_read_ms},
                 measurement(label('mounted'), CASTER, 'aura', spell=spec.mount_spell),
+                {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+                measurement(label('held'), CASTER, 'aura', spell=spec.mount_spell),
                 {**brand, 'stacks': 1},
                 {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                 measurement(label('dismounted'), CASTER, 'aura', spell=spec.mount_spell)])
@@ -4018,7 +4039,8 @@ def mount_block_scenario(class_file: dict, spec: MountBlockSpec) -> tuple[dict, 
         'contract': f'Outdoors, the caster holds {spec.spell} (set by itself, so its apply hooks run) and casts the '
                     f'mount {spec.mount_spell}: refused with code {SPELL_FAILED_CASTER_AURASTATE} and not mounted. '
                     f'Without {spec.spell} the same cast goes through ({NO_CAST_FAILURE}) and mounts (the control). '
-                    f'Then {spec.spell} is set again on the mounted caster, which must lose the mount, proving the '
+                    f'The mount holds over the same wait without {spec.spell}; then {spec.spell} is set again on '
+                    f'the mounted caster, which must lose the mount, proving the '
                     f'"{spec.quote}" clause.',
         'players': [player_fixture(class_file)],
         'steps': steps}
