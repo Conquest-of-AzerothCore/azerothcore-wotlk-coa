@@ -2188,7 +2188,8 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
     learned, cast = cast_applies_aura_steps(records, spec)
     extra = extra_cast_steps(records, spec.extra_cast) if spec.extra_cast else []
     expected_ms = spec.expected_ms - (spec.extra_cast.after_ms if spec.extra_cast else 0)
-    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
+    steps = (base_steps(class_file) + ally_group_steps({spec.cast_target})
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}] + learned
              + extra_cast_setup(records, spec.extra_cast, spec.spell)
              + [measurement(before_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)] + cast + extra
              + [measurement(after_label, spec.target, 'aura_duration_ms', spell=spec.applied_aura)])
@@ -2202,7 +2203,7 @@ def cast_applies_aura_scenario(class_file: dict, spec: CastAppliesAuraSpec) -> t
                     f'of {spec.expected_ms:g} ms, the same instant-cast tick loss every aura_duration_ms check in '
                     f'this tool tolerates), proving the cast itself applies {spec.applied_aura} rather than only '
                     f'its $d token matching when read without a cast.',
-        'players': [cast_applies_aura_player(class_file, spec)],
+        'players': [cast_applies_aura_player(class_file, spec)] + ally_players(class_file, {spec.cast_target}),
         'steps': steps}
     if TARGET in (spec.target, spec.cast_target):
         scenario['creatures'] = [creature_fixture(class_file)]
@@ -5222,6 +5223,26 @@ class TakenHitSpec:
     striker_race: int = 0
     returned_spell: int = 0
     expected_points: float | None = None
+    ally_health_pct: int | None = None
+
+
+def ally_cast_targets(spec: TakenHitSpec) -> bool:
+    return any(target == ALLY for arm in spec.arms for _, target in (*arm.opening_casts, *arm.casts, *arm.after_casts))
+
+
+def ally_players(class_file: dict, targets) -> list[dict]:
+    return [{**player_fixture(class_file), 'id': ALLY}] if ALLY in targets else []
+
+
+def ally_group_steps(targets) -> list[dict]:
+    return [{'action': 'group', 'actor': CASTER, 'target': ALLY}] if ALLY in targets else []
+
+
+def taken_hit_cast(records: Records, spec: TakenHitSpec, spell: int, target: str,
+                   power: int | None = None) -> list[dict]:
+    health = ([fixture_health_step(ALLY, spec.ally_health_pct)]
+              if target == ALLY and spec.ally_health_pct is not None else [])
+    return health + hit_ratio_cast(records, spell, CASTER, target, power)
 
 
 def taken_hit_label(spec: TakenHitSpec) -> str:
@@ -5299,7 +5320,7 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
                    'maximum': maximum}]
     steps = auras + health
     for spell, target in arm.opening_casts:
-        steps += hit_ratio_cast(records, spell, CASTER, target)
+        steps += taken_hit_cast(records, spec, spell, target)
     if arm.opening_casts:
         steps.append({'action': 'wait', 'label': f'{arm.name} opening settle', 'ms': TAKEN_HIT_OPENING_SETTLE_MS})
     if arm.select:
@@ -5318,13 +5339,13 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
     for trial in range(1, spec.trials + 1):
         steps += (removals if arm.refresh else []) + auras + health
         for spell, target in arm.casts:
-            steps += hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
+            steps += taken_hit_cast(records, spec, spell, target, spec.cast_power)
         for _ in range(arm.strikes or spec.strikes):
             steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                       {'action': 'wait', 'label': f'{arm.name} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
         after = []
         for spell, target in arm.after_casts:
-            after += hit_ratio_cast(records, spell, CASTER, target)
+            after += taken_hit_cast(records, spec, spell, target)
         steps += after
         if debt:
             early = int(records.duration_ms(spec.debt_spell)) - TAKEN_HIT_DEBT_MARGIN_MS - \
@@ -5348,6 +5369,9 @@ def taken_hit_validate(spec: TakenHitSpec):
         raise ValueError(f'{spec.spell} taken_hit judge {spec.judge!r} is not one of {TAKEN_HIT_JUDGES}')
     if spec.trials < 1 or spec.strikes < 1:
         raise ValueError(f'{spec.spell} taken_hit needs at least one trial and one strike')
+    if spec.ally_health_pct is not None and (not ally_cast_targets(spec) or not 0 < spec.ally_health_pct < 100):
+        raise ValueError(f'{spec.spell} taken_hit ally health {spec.ally_health_pct} needs a cast at the ally and a '
+                         f'percent between 0 and 100')
     names = [arm.name for arm in spec.arms]
     if len(set(names)) != len(names) or len(names) < 2:
         raise ValueError(f'{spec.spell} taken_hit needs at least two distinct arms, here {names}')
@@ -5423,7 +5447,8 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
     entry = behaviour_entry(records, spec.spell, spec.name, 'taken_hit', spec.quote, spec.expected)
     learned = dict.fromkeys((*spec.learn, *(spell for arm in spec.arms
                                             for spell, _ in (*arm.opening_casts, *arm.casts, *arm.after_casts))))
-    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
+    targets = {target for arm in spec.arms for _, target in (*arm.opening_casts, *arm.casts, *arm.after_casts)}
+    steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned] + ally_group_steps(targets)
     if spec.striker_race:
         steps += [{'action': 'pvp', 'actor': CASTER, 'enabled': True},
                   {'action': 'pvp', 'actor': STRIKER, 'enabled': True},
@@ -5435,10 +5460,9 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
         raise NotModelled(f'{spec.spell} taken_hit waits {waited} ms, beyond one scenario\'s {MAX_SCENARIO_MS} ms')
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': spec.striker_entry, 'level': class_file['level'],
                'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True}
-    targets = {target for arm in spec.arms for _, target in (*arm.opening_casts, *arm.casts, *arm.after_casts)}
     creatures = ([] if spec.striker_race else [striker]) + ([creature_fixture(class_file)] if TARGET in targets else [])
     creatures += [{**creature_fixture(class_file), 'id': name, 'distance': distance} for name, distance in spec.targets]
-    players = [player_fixture(class_file)]
+    players = [player_fixture(class_file)] + ally_players(class_file, targets)
     if spec.striker_race:
         players.append({**player_fixture(class_file), 'id': STRIKER, 'race': spec.striker_race})
     health = (f', the caster held at {spec.caster_health_pct}% of {spec.caster_max_health or FIXTURE_MAX_HEALTH} '
@@ -5550,7 +5574,8 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         entry.get('debt_ends', False),
                         tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())),
                         entry.get('cast_power'), entry.get('settle_ms', TAKEN_HIT_SETTLE_MS),
-                        entry.get('striker_race', 0), entry.get('returned_spell', 0), entry.get('expected_points'))
+                        entry.get('striker_race', 0), entry.get('returned_spell', 0), entry.get('expected_points'),
+                        entry.get('ally_health_pct'))
 
 
 THREAT_REDIRECT_SWINGS = 3

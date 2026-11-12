@@ -1005,6 +1005,8 @@ timed from that cast.
 
 `cast_target_health_pct` sets the `cast_spell` target to that percent of the fixture maximum right before each cast,
 for an aura a heal grants only when it heals (Light's Guidance 524766 after Benediction 578276).
+A `cast_target` of `ally` adds the ally player, grouped with the caster after the base steps, in the readback and in
+the expiry scenario (ADR 0212): Binding Scripture 801457's 707307 on the caster after a heal of the ally.
 
 `force_crit` (`melee` or `spell`, with a `cast_spell`) sets the forced crit rating on the caster in the readback and
 in the expiry scenario, for an aura that only a critical hit grants (ADR 0182): Scarlet Champion 805415's 805416
@@ -1177,6 +1179,11 @@ needs a magic-class strike: a melee-class spell goes to `MeleeSpellHitResult`, w
   5% of them and 2 points. With `parts` the parts are pooled.
 
 The control arm is the negative arm: without the talent nothing is absorbed or reduced.
+
+An arm cast may target `ally` (ADR 0212): the scenario then adds the ally player, grouped with the caster after the
+learns, and `ally_health_pct` sets the ally to that percent of the fixture maximum before every cast at it, so a heal
+is effective. Binding Scripture 801457 heals the ally with Testament of Faith 801478 before each strike: one heal
+reads 0.95, four heals 0.85 (3 stacks); a heal of the caster itself reads 1.00.
 
 ### Threat-redirect scenarios (`behaviour_threat_redirect`, `kind: "threat_redirect"`)
 

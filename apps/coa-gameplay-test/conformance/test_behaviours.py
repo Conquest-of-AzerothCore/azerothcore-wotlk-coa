@@ -7809,5 +7809,74 @@ class MetricDeltaSelectionTests(unittest.TestCase):
         self.assertEqual(self.judged(1.0, 6.0), 'alert')
 
 
+
+def binding_scripture_entry(kind: str, suffix: str) -> dict:
+    return r1a_entry(801457, kind, suffix)
+
+
+def ratio_values(model: dict, treatment_hit: float, control_hit: float = 1100.0) -> dict:
+    found = {}
+    for arm, marks in model['reads'].items():
+        for index, (total, count) in enumerate(marks):
+            found[total] = index * (control_hit if arm == 'control' else treatment_hit)
+            found[count] = float(index)
+    return found
+
+
+class AllyCastTargetTests(unittest.TestCase):
+    def test_a_taken_hit_cast_at_the_ally_groups_it_and_sets_its_health_before_each_cast(self):
+        spec = taken_hit_spec(binding_scripture_entry('taken_hit', 'stack_cap'))
+        scenario, _ = taken_hit_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
+        steps = scenario['steps']
+        groups = [index for index, step in enumerate(steps) if step['action'] == 'group']
+        heals = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['target'] == ALLY]
+        self.assertEqual(len(groups), 1)
+        self.assertEqual(len(heals), 4 * spec.trials)
+        self.assertLess(groups[0], heals[0])
+        for index in heals:
+            health = next(step for step in reversed(steps[:index]) if step['action'] == 'set_health')
+            self.assertEqual((health['actor'], health['value']), (ALLY, 5000))
+
+    def test_a_taken_hit_without_an_ally_cast_has_no_ally(self):
+        scenario, _ = taken_hit_scenario(CLASS_FILE, taken_hit_spec(binding_scripture_entry('taken_hit', 'self_heal')))
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER])
+        self.assertFalse([step for step in scenario['steps'] if step['action'] == 'group'])
+
+    def test_ally_health_without_a_cast_at_the_ally_is_refused(self):
+        entry = {**binding_scripture_entry('taken_hit', 'self_heal'), 'ally_health_pct': 50}
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(CLASS_FILE, taken_hit_spec(entry))
+
+    def test_seeded_reduction_missing_or_uncapped_alerts(self):
+        for suffix, right, wrongs in (('one_heal', 1045.0, (1100.0,)), ('stack_cap', 935.0, (880.0, 990.0)),
+                                      ('self_heal', 1100.0, (1045.0,))):
+            _, expectations = behaviour_scenario(CLASS_FILE, binding_scripture_entry('taken_hit', suffix))
+            expectation = expectations[0]
+            with self.subTest(suffix=suffix):
+                self.assertEqual(judge_behaviour(base_verdict(expectation),
+                                                 FakeRun(ratio_values(expectation.model, right)), expectation).status,
+                                 'ok')
+                for wrong in wrongs:
+                    self.assertEqual(judge_behaviour(base_verdict(expectation),
+                                                     FakeRun(ratio_values(expectation.model, wrong)),
+                                                     expectation).status, 'alert')
+
+    def test_a_cast_applies_aura_at_the_ally_groups_it_in_the_readback_and_the_expiry(self):
+        from expiry import cast_applies_aura_expiry
+        entry = binding_scripture_entry('cast_applies_aura', 'reduction')
+        readback, _ = cast_applies_aura_scenario(CLASS_FILE, cast_applies_aura_spec(entry))
+        expiry, _ = cast_applies_aura_expiry(CLASS_FILE, entry)
+        for scenario in (readback, expiry):
+            run.validate(scenario)
+            self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
+            steps = scenario['steps']
+            group = next(index for index, step in enumerate(steps) if step['action'] == 'group')
+            cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
+            self.assertLess(group, cast)
+            self.assertEqual(steps[cast]['target'], ALLY)
+
+
 if __name__ == '__main__':
     unittest.main()

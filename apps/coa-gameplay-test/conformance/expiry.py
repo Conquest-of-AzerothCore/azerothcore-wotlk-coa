@@ -3,7 +3,8 @@ import math
 from pathlib import Path
 
 from behaviours import (CAST_SETTLE_MS, MECHANIC_DR_RESET_MS, MECHANIC_GAP_MARGIN_MS, STRIKER, STRIKER_DISTANCE,
-                        STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, behaviour_entry, cast_applies_aura_player,
+                        STRIKER_HEALTH, CastAppliesAuraSpec, NotModelled, ally_group_steps, ally_players,
+                        behaviour_entry, cast_applies_aura_player,
                         cast_applies_aura_spec, cast_gate_power_step,
                         cast_applies_aura_steps, duration_refresh_spec, duration_spec, extra_cast_setup,
                         extra_cast_steps, mechanic_duration_spec, prose_rule)
@@ -245,7 +246,7 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
     learn = [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
     if spec.control_ms is None:
         arms = [single_cast_arm(records, spec, prefix, ((absent, 0.0),))]
-        steps = (base_steps(class_file) + learn + learned
+        steps = (base_steps(class_file) + ally_group_steps({spec.cast_target}) + learn + learned
                  + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
                  + cast_arm(cast, arms[0], actor, spec.applied_aura))
         contract = (f'{spec.applied_aura} is absent before {spec.spell} is cast, present {arms[0].before_margin_ms} '
@@ -261,7 +262,7 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
             first, second = learn + learned + extra_cast_setup(records, spec.extra_cast, spec.spell), []
         else:
             first, second = learned, learn
-        steps = (base_steps(class_file) + first
+        steps = (base_steps(class_file) + ally_group_steps({spec.cast_target}) + first
                  + [measurement(absent, actor, PRESENCE_METRIC, spell=spec.applied_aura)]
                  + cast_arm(cast, arms[0], actor, spec.applied_aura) + cleared
                  + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell}] + second
@@ -275,7 +276,7 @@ def cast_applies_aura_expiry(class_file: dict, entry: dict) -> tuple[dict, list[
                     f'{arms[1].after_margin_ms} ms after it, each timed from its cast.')
     scenario = expiry_scenario_shell(
         class_file, f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour expiry', contract, steps)
-    scenario['players'] = [cast_applies_aura_player(class_file, spec)]
+    scenario['players'] = [cast_applies_aura_player(class_file, spec)] + ally_players(class_file, {spec.cast_target})
     if TARGET in (spec.target, spec.cast_target, spec.extra_cast and spec.extra_cast.target):
         scenario['creatures'] = [creature_fixture(class_file)]
     label = expiry_label(spec.spell) + (f' {spec.label_suffix}' if spec.label_suffix else '')
