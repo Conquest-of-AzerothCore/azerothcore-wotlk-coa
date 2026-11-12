@@ -175,7 +175,7 @@ def main():
         subprocess.run(command(cpp, exe), cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
     print('PASS: Heroic and Mythic dungeon difficulties and the Classic raids open in release-stage order (Zul\'Gurub '
-          'before Molten Core, Setis with Zul\'Gurub and Korrim Snowgrave and Atal'zul with Molten Core), each stage keeps the earlier ones open, closed content refuses entry and login with '
+          'before Molten Core, Setis with Zul\'Gurub and Korrim Snowgrave and Atal\'zul with Molten Core), each stage keeps the earlier ones open, closed content refuses entry and login with '
           '"Instance is closed", normal dungeons, Wrath Naxxramas and other maps stay open, the default opens up to '
           'Molten Core, and the stage comes only from the config or .raidphase, never from raid kills')
 
