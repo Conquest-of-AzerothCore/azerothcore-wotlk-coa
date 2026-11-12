@@ -1044,6 +1044,13 @@ owned creatures of that entry in the same phase and within 100 yards, so every c
 `owned_creature_armor` requires a player and a present owned creature selected by `entry`. It reads that creature's
 native `GetArmor()`, zero when absent. `owned_creature_max_health` and `owned_creature_health` read the same
 creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
+`owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
+(`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
+`owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,
+`owned_creature_resistance`, `owned_creature_melee_hit_chance` and `owned_creature_cast_speed` read the same creature's
+`GetSpeedRate(MOVE_RUN)`, `GetTotalAttackPowerValue(BASE_ATTACK)`, `SpellBaseDamageBonusDone` for `school_mask`
+(default Shadow), `GetResistance(school)`, `m_modMeleeHitChance` and `UNIT_MOD_CAST_SPEED`.
+`owned_creature_threat` reads the threat the creature named by `target` holds against it.
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
 in the same phase and within 100 yards. `gameobject_display` reads the native display id shared by every owned
 object of that entry and fails when they differ. `gameobject_scale` reads the single owned object's native

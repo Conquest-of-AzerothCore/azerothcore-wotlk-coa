@@ -234,6 +234,9 @@ measures, already castable on its own without a parent passive) but then casting
 would already include the effect under test, leaving no ungated baseline; `cast_in_before: false` skips the
 `reset_cooldown`/mana-fixture/`cast`/`wait` steps for that one phase while still applying `setup_actor_aura`
 (so a caster-state precondition like being mounted is still set up), and the "after" phase casts normally.
+`setup_in_before: true` (ADR 0360) keeps the setup casts in that uncast "before" phase, so a read of a minion the
+setup raises finds it in both phases: Unholy Frenzy 805029 reads the Ghoul's swing interval, cast speed and run speed
+with a Ghoul raised and no cast, then with a second Ghoul raised and 805029 cast on both.
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).

@@ -1301,6 +1301,7 @@ class MetricDeltaSpec:
     enemy_player_race: int = 0
     gate_settle_ms: int = 0
     learn: tuple[int, ...] = ()
+    setup_in_before: bool = False
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1330,6 +1331,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         raise ValueError(f'{spec.spell} sets setup_only_after without a setup_casts to withhold then apply')
     if (spec.expiry_wait_ms is None) != (spec.after_expiry_expected is None):
         raise ValueError(f'{spec.spell} must set expiry_wait_ms and after_expiry_expected together')
+    if spec.setup_in_before and (spec.cast_in_before or not spec.setup_casts or spec.gate_timing != 'between'
+                                 or spec.setup_only_after):
+        raise ValueError(f'{spec.spell} sets setup_in_before without cast_in_before false, setup_casts and the '
+                         f'default gate timing')
     if spec.expiry_wait_ms is not None and spec.gate_timing != 'start':
         raise ValueError(f'{spec.spell} sets expiry_wait_ms but gate_timing is not "start"')
     if spec.attack_swings and (spec.gate_timing != 'between' or spec.setup_casts or spec.target != TARGET
@@ -1455,12 +1460,15 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
                     f'{spec.expire_ms} ms between phases for the first cast\'s effect to fully expire before the '
                     f'second cast.' + ('' if spec.cast_in_before else ' The before phase skips casting '
-                    f'{spec.trigger_spell} entirely (cast_in_before=False), measuring the baseline state alone.'))
+                    f'{spec.trigger_spell} entirely (cast_in_before=False), measuring the baseline state alone.') +
+                    (f' The before phase still makes the setup casts {list(spec.setup_casts)}, so the measured '
+                     f'unit exists in both phases.' if spec.setup_in_before else ''))
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
         steps = (base_steps(class_file) + learn_steps +
                  cast_steps(include_cast=spec.cast_in_before and not spec.trigger_only_after, after=False) +
+                 (setup_cast_steps() if spec.setup_in_before else []) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
@@ -1518,7 +1526,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            tuple(phase_aura(raw) for raw in entry.get('after_auras', ())),
                            entry.get('select_dummy', False), entry.get('after_at_least'), entry.get('cast_power'),
                            entry.get('enemy_player_race', 0), entry.get('gate_settle_ms', 0),
-                           tuple(entry.get('learn', ())))
+                           tuple(entry.get('learn', ())), entry.get('setup_in_before', False))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

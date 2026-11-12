@@ -404,7 +404,10 @@ METRIC_EVIDENCE = {
                      'power', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
                      'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance', 'weapon_damage_min',
                      'resistance', 'mana_regen', 'moving', 'threat', 'owned_creature_max_health',
-                     'owned_creature_attack_time_ms', 'owned_creature_crit_chance'), STATE),
+                     'owned_creature_attack_time_ms', 'owned_creature_crit_chance', 'owned_creature_armor',
+                     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
+                     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
+                     'owned_creature_threat'), STATE),
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -422,6 +425,10 @@ STATE_PROMISES = {
     'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
     'owned_creature_attack_time_ms': r'haste|attack speed', 'owned_creature_crit_chance': CRIT_WORDS,
+    'owned_creature_armor': r'armou?r', 'owned_creature_run_speed_rate': r'movement speed|run speed',
+    'owned_creature_attack_power': r'attack power', 'owned_creature_spell_power': r'spell power|spell damage',
+    'owned_creature_resistance': r'resistances?', 'owned_creature_melee_hit_chance': r'hit chance|chance to hit',
+    'owned_creature_cast_speed': r'haste|cast speed', 'owned_creature_threat': r'threat',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
