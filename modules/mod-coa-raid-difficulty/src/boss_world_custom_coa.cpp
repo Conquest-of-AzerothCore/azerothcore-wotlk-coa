@@ -57,10 +57,14 @@
  *   Land of the Dead    every 61.4s   six seconds: a Damned Wight a second at
  *                                     the raid, a choking cloud every other
  *   Spectral Veil       at 80/60/40/20%  a channel of up to 100s: shadow damage
- *                                     to everyone each second, growing, and a
- *                                     Restless Spirit that bombs where it lands.
- *                                     One Soul Vessel wakes; its death breaks
- *                                     the veil and gives the raid Soul Release.
+ *                                     to everyone each second, growing. The four
+ *                                     Soul Vessels open: each spawns Restless
+ *                                     Spirits that blow up unless killed or
+ *                                     interrupted. Breaking one vessel ends the
+ *                                     veil, shields the rest and gives the raid
+ *                                     Soul Release.
+ *   Both start ghostly and untouchable until the four Soul Vessels are
+ *   clicked; Zul'rogg then jumps down from the pyramid.
  *   Zul'rogg            Fierce Blow every 7.6s, Titanic Crush every 10.8s,
  *                       Consume Life every 8s; cannot die while Atal'zul lives
  *
@@ -87,6 +91,7 @@
 #include "ScriptedGossip.h"
 #include "LootMgr.h"
 #include "Map.h"
+#include "MoveSpline.h"
 #include "MapMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -1112,24 +1117,61 @@ namespace
         SPELL_CONSUME_LIFE_AP   = 2119837,
         SPELL_SOUL_RELEASE      = 2119839,
         SPELL_SOUL_RELEASE_HIT  = 2119840,
-        SPELL_SOUL_VESSEL       = 2119844,
-        SPELL_SOUL_BIND         = 2119845,
-        SPELL_SOUL_LINK         = 2119847,
         SPELL_SPECTRAL_VOLLEY   = 2119848,
         SPELL_VEIL_PULSE        = 2119853,
         SPELL_VEIL_POWER        = 2119857,
+        SPELL_GHOST             = 22650,
+        SPELL_SOUL_BIND         = 2119845,
+        SPELL_SOUL_FLAY_BEAM    = 2146711,
+        SPELL_SOUL_LINK         = 2119847,
 
         NPC_ATALZUL             = 67532,
         NPC_ZULROGG             = 67533,
         NPC_DAMNED_WIGHT        = 67534,
         NPC_RESTLESS_SPIRIT     = 67535,
         NPC_SOUL_VESSEL         = 67536,
+        NPC_VESSEL_BARRIER      = 67537,
+        NPC_VESSEL_ANCHOR       = 67538,
     };
 
     enum AtalzulEvents { EA_BOLT = 1, EA_VOLLEY, EA_LAND };
 
-    // Casts the Spectral Bomb where it appears and is gone 2s later; killing it
-    // first stops the bomb.
+    enum VesselState { VESSEL_IDLE, VESSEL_LINKED, VESSEL_SHIELDED, VESSEL_OPEN, VESSEL_BROKEN };
+
+    constexpr uint32 ACTION_VESSEL_BROKEN = 1;
+    constexpr uint32 ACTION_VESSEL_LINKED = 2;
+    constexpr uint32 ACTION_AWAKEN = 3;
+    constexpr uint8 SPIRIT_COUNT = 6;
+    constexpr float SPIRIT_HEIGHT = 12.0f;
+    constexpr float SPIRIT_SPREAD = 12.0f;
+    constexpr uint32 ZUROGG_JUMP = 1;
+    Position const ZuroggLanding = { 3368.63f, -4908.01f, 159.4f, 0.0f };
+    constexpr float BARRIER_RISE = -0.4f;
+    constexpr float ANCHOR_RISE = -0.4f;
+
+    void Beam(Unit* from, Unit* to)
+    {
+        if (!from->HasUnitState(UNIT_STATE_CASTING))
+            from->CastSpell(to, SPELL_SOUL_BIND, true);
+    }
+
+    void Dormant(Creature* creature, bool on)
+    {
+        if (on)
+        {
+            creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            creature->SetReactState(REACT_PASSIVE);
+            if (!creature->HasAura(SPELL_GHOST))
+                creature->AddAura(SPELL_GHOST, creature);
+        }
+        else
+        {
+            creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            creature->SetReactState(REACT_AGGRESSIVE);
+            creature->RemoveAurasDueToSpell(SPELL_GHOST);
+        }
+    }
+
     struct npc_restless_spirit_coa : public ScriptedAI
     {
         explicit npc_restless_spirit_coa(Creature* creature) : ScriptedAI(creature) { }
@@ -1140,25 +1182,64 @@ namespace
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void IsSummonedBy(WorldObject* /*summoner*/) override { DoCastSelf(SPELL_SPECTRAL_BOMB); }
+        void IsSummonedBy(WorldObject* /*summoner*/) override
+        {
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->SetHover(true);
+        }
+
+        bool Sent() const { return _sent; }
+
+        void Send(Position const& goal)
+        {
+            _sent = true;
+            _goal = goal;
+            me->SetWalk(false);
+            me->GetMotionMaster()->MovePoint(1, _goal, FORCED_MOVEMENT_NONE, 0.f, false);
+        }
 
         void OnSpellCast(SpellInfo const* spell) override
         {
             if (spell->Id != SPELL_SPECTRAL_BOMB)
                 return;
-            Unit* caster = me;
-            if (TempSummon* s = me->ToTempSummon())
-                if (Unit* atal = s->GetSummonerUnit())
-                    caster = atal;
-            caster->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), SPELL_SPECTRAL_BOMB_HIT, true);
+            Unit* caster = me->FindNearestCreature(NPC_ATALZUL, 400.0f);
+            (caster ? caster : me)->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(),
+                SPELL_SPECTRAL_BOMB_HIT, true);
             me->DespawnOrUnsummon(100ms);
         }
 
-        void UpdateAI(uint32 /*diff*/) override { }
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_sent || me->HasUnitState(UNIT_STATE_CASTING))
+                return;
+            if (me->GetExactDist(&_goal) > 3.0f)
+            {
+                if (me->movespline->Finalized())
+                    me->GetMotionMaster()->MovePoint(1, _goal, FORCED_MOVEMENT_NONE, 0.f, false);
+                return;
+            }
+            if (!_arrived)
+            {
+                _arrived = true;
+                me->StopMoving();
+                me->GetMotionMaster()->Clear();
+                _scheduler.Schedule(0s, [this](TaskContext bomb)
+                {
+                    DoCastSelf(SPELL_SPECTRAL_BOMB);
+                    bomb.Repeat(4s);
+                });
+            }
+            _scheduler.Update(diff);
+        }
+
+    private:
+        Position _goal;
+        bool _sent = false;
+        bool _arrived = false;
+        TaskScheduler _scheduler;
     };
 
-    // The phylacteries: asleep until Spectral Veil binds one; its death breaks
-    // the veil and releases the soul onto the raid.
     struct npc_soul_vessel_coa : public ScriptedAI
     {
         explicit npc_soul_vessel_coa(Creature* creature) : ScriptedAI(creature) { }
@@ -1168,60 +1249,176 @@ namespace
             ApplyLevelHealth(me);
             me->SetReactState(REACT_PASSIVE);
             me->SetControlled(true, UNIT_STATE_ROOT);
-            DoCastSelf(SPELL_SOUL_VESSEL, true);
-            Sleep(true);
+            SetState(VESSEL_IDLE);
         }
 
-        void Sleep(bool asleep)
+        VesselState State() const { return _state; }
+
+        void SetState(VesselState state)
         {
-            if (asleep)
-                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            _state = state;
+            me->InterruptNonMeleeSpells(false);
+            me->SetVisible(state != VESSEL_BROKEN);
+            if (state == VESSEL_OPEN)
+                me->RemoveUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
             else
-                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                me->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE);
+            if (state == VESSEL_OPEN)
+                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            else
+                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            _assaulted = false;
+            Keep(_barrier, state == VESSEL_SHIELDED, NPC_VESSEL_BARRIER, BARRIER_RISE);
+            Keep(_anchor, state == VESSEL_LINKED || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
         }
 
-        void JustDied(Unit* /*killer*/) override
+        void Keep(ObjectGuid& guid, bool wanted, uint32 entry, float rise)
         {
+            Creature* held = ObjectAccessor::GetCreature(*me, guid);
+            if (held && wanted)
+                return;
+            if (held)
+                held->DespawnOrUnsummon();
+            guid.Clear();
+            if (!wanted)
+                return;
+            if (TempSummon* made = me->SummonCreature(entry, me->GetPositionX(), me->GetPositionY(),
+                me->GetPositionZ() + rise, 0, TEMPSUMMON_MANUAL_DESPAWN))
+            {
+                made->SetReactState(REACT_PASSIVE);
+                guid = made->GetGUID();
+            }
+        }
+
+        void Link()
+        {
+            Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f);
+            if (!atal)
+                return;
+            Creature* anchor = ObjectAccessor::GetCreature(*me, _anchor);
+            Beam(anchor ? static_cast<Unit*>(anchor) : static_cast<Unit*>(me), atal);
+        }
+
+        void Click()
+        {
+            if (_state != VESSEL_IDLE)
+                return;
+            SetState(VESSEL_LINKED);
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                atal->AI()->DoAction(ACTION_VESSEL_LINKED);
+        }
+
+        void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/,
+            SpellSchoolMask /*school*/) override
+        {
+            if (_state != VESSEL_OPEN)
+                return;
+            _assaulted = true;
+            if (damage < me->GetHealth())
+                return;
+            damage = 0;
+            SetState(VESSEL_BROKEN);
             for (Player* p : Players(me, [&](Player* x) { return me->IsWithinDistInMap(x, 100.0f); }))
             {
                 me->CastSpell(p, SPELL_SOUL_RELEASE_HIT, true);
                 AddStack(me, p, SPELL_SOUL_RELEASE);
             }
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 200.0f))
-                atal->AI()->DoAction(1);
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
+                atal->AI()->DoAction(ACTION_VESSEL_BROKEN);
         }
 
-        void UpdateAI(uint32 /*diff*/) override { }
+        void UpdateAI(uint32 diff) override
+        {
+            if (_state == VESSEL_LINKED)
+            {
+                Link();
+                return;
+            }
+            if (_state != VESSEL_OPEN)
+                return;
+            Link();
+        }
+
+        bool Assaulted() const { return _state == VESSEL_OPEN && _assaulted; }
+        Position Where() const { return me->GetPosition(); }
+
+    private:
+        ObjectGuid _barrier;
+        bool _assaulted = false;
+        ObjectGuid _anchor;
+        VesselState _state = VESSEL_IDLE;
+    };
+
+    class go_soul_vessel_altar : public GameObjectScript
+    {
+    public:
+        go_soul_vessel_altar() : GameObjectScript("go_atalzul_vessel_coa") { }
+
+        bool OnGossipHello(Player* /*player*/, GameObject* go) override
+        {
+            if (Creature* vessel = go->FindNearestCreature(NPC_SOUL_VESSEL, 5.0f))
+                if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(vessel->AI()))
+                    ai->Click();
+            return true;
+        }
     };
 
     struct boss_atalzul_coa : public custom_world_boss_coa
     {
         explicit boss_atalzul_coa(Creature* creature) : custom_world_boss_coa(creature), _summons(creature) { }
 
+        void ApplyFlex()
+        {
+            Level const* lv = LevelOf(me);
+            if (!lv || !lv->health)
+                return;
+            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), 10, 40);
+            float const pct = me->GetHealthPct();
+            uint32 const health = lv->health * players;
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
+            me->ResetPlayerDamageReq();
+        }
+
+        template <typename F>
+        void ForVessels(F&& f)
+        {
+            std::list<Creature*> vessels;
+            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 150.0f);
+            for (Creature* v : vessels)
+                if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(v->AI()))
+                    f(ai);
+        }
+
         void Reset() override
         {
             custom_world_boss_coa::Reset();
+            me->SetLootMode(me->GetMap()->IsHeroic() ? LOOT_MODE_HARD_MODE_1 : LOOT_MODE_DEFAULT);
+            ApplyFlex();
             _summons.DespawnAll();
             _nextVeil = 80;
+            _phase = false;
+            _dormant = true;
             me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
-            std::list<Creature*> vessels;
-            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 100.0f);
-            for (Creature* v : vessels)
+            me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_INTERRUPT_CAST, true);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_INTERRUPT, true);
+            ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_IDLE); });
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f, false))
             {
-                if (!v->IsAlive())
-                    v->Respawn(true);
-                else if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(v->AI()))
-                {
-                    v->SetFullHealth();
-                    ai->Sleep(true);
-                }
+                if (!rogg->IsAlive())
+                    rogg->Respawn(true);
+                rogg->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
             }
+            Dormant(me, true);
         }
 
         void JustEngagedWith(Unit* who) override
         {
+            ApplyFlex();
             custom_world_boss_coa::JustEngagedWith(who);
-            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 100.0f))
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
                 if (!rogg->IsInCombat())
                     rogg->AI()->AttackStart(who);
         }
@@ -1229,16 +1426,43 @@ namespace
         void JustSummoned(Creature* summon) override
         {
             _summons.Summon(summon);
-            if (summon->GetEntry() == NPC_DAMNED_WIGHT)
-                if (Unit* t = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
-                    summon->AI()->AttackStart(t);
+            if (summon->GetEntry() != NPC_DAMNED_WIGHT)
+                return;
+            summon->SetReactState(REACT_PASSIVE);
+            summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_SUBMERGED);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->HandleEmoteCommand(EMOTE_ONESHOT_EMERGE);
+            }, 1500ms);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
+            }, 2900ms);
+            ObjectGuid bossGuid = me->GetGUID();
+            summon->m_Events.AddEventAtOffset([summon, bossGuid]()
+            {
+                if (Creature* boss = ObjectAccessor::GetCreature(*summon, bossGuid))
+                    summon->CastSpell(boss, SPELL_SOUL_FLAY_BEAM, true);
+            }, 3s);
+            summon->m_Events.AddEventAtOffset([summon]()
+            {
+                summon->InterruptNonMeleeSpells(false);
+                summon->SetReactState(REACT_AGGRESSIVE);
+                if (Player* target = summon->SelectNearestPlayer(150.0f))
+                    summon->AI()->AttackStart(target);
+            }, 4s);
         }
 
         void JustDied(Unit* /*killer*/) override
         {
             _summons.DespawnAll();
-            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 200.0f))
-                rogg->DespawnOrUnsummon(10s);
+            ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_BROKEN); });
+            if (Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f))
+            {
+                rogg->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
+                rogg->KillSelf();
+                rogg->DespawnOrUnsummon(3s);
+            }
         }
 
         void Schedule() override
@@ -1260,16 +1484,12 @@ namespace
 
         void OnSpellCast(SpellInfo const* spell) override
         {
-            if (spell->Id == SPELL_SPECTRAL_BOLT)
-            {
-                if (Unit* v = me->GetVictim())
-                    me->CastSpell(v, SPELL_SPECTRAL_BOLT_HIT, true);
-            }
-            else if (spell->Id == SPELL_SPECTRAL_VEIL)
-                BindVessel();
+            if (spell->Id != SPELL_SPECTRAL_BOLT)
+                return;
+            if (Unit* v = me->GetVictim())
+                me->CastSpell(v, SPELL_SPECTRAL_BOLT_HIT, true);
         }
 
-        // Land of the Dead and Spectral Veil tick through their trigger spells.
         void SpellHit(Unit* /*caster*/, SpellInfo const* spell) override
         {
             if (spell->Id == SPELL_RAISE_DEAD)
@@ -1277,9 +1497,9 @@ namespace
                 Unit* t = RandomPlayer(false);
                 if (!t)
                     return;
-                // A wight every second; a choking cloud every other.
-                me->SummonCreature(NPC_DAMNED_WIGHT, t->GetPositionX() + frand(-4.0f, 4.0f), t->GetPositionY() + frand(-4.0f, 4.0f),
-                    t->GetPositionZ(), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
+                Position pos = me->GetNearPosition(8.0f + 3.0f * float(_raise % 3), 2.4f * float(_raise));
+                me->UpdateGroundPositionZ(pos.m_positionX, pos.m_positionY, pos.m_positionZ);
+                me->SummonCreature(NPC_DAMNED_WIGHT, pos, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 10000);
                 if (_raise++ % 2 == 0)
                     CastAt(t->GetPosition(), SPELL_CHOKING_CLOUD);
             }
@@ -1287,52 +1507,134 @@ namespace
             {
                 DoCastAOE(SPELL_VEIL_PULSE, true);
                 AddStack(me, me, SPELL_VEIL_POWER);
-                if (Unit* t = RandomPlayer(false))
-                    me->SummonCreature(NPC_RESTLESS_SPIRIT, t->GetPositionX() + frand(-2.0f, 2.0f), t->GetPositionY() + frand(-2.0f, 2.0f),
-                        t->GetPositionZ(), 0, TEMPSUMMON_TIMED_DESPAWN, 5000);
             }
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
         {
             custom_world_boss_coa::DamageTaken(attacker, damage, type, school);
-            if (_nextVeil && !me->HasAura(SPELL_SPECTRAL_VEIL) && me->HealthBelowPctDamaged(_nextVeil, damage))
+            if (_nextVeil && !_phase && me->HealthBelowPctDamaged(_nextVeil, damage))
             {
                 _nextVeil = _nextVeil > 20 ? _nextVeil - 20 : 0;
+                _phase = true;
                 me->InterruptNonMeleeSpells(false);
                 DoCastSelf(SPELL_SPECTRAL_VEIL);
+                ForVessels([](npc_soul_vessel_coa* ai)
+                {
+                    if (ai->State() == VESSEL_SHIELDED)
+                        ai->SetState(VESSEL_OPEN);
+                });
+                for (uint8 i = 0; i < SPIRIT_COUNT; ++i)
+                    HoverSpirit(i);
+                _scheduler.CancelAll();
+                _scheduler.Schedule(3s, [this](TaskContext pull)
+                {
+                    PullSpirit();
+                    pull.Repeat(2s);
+                });
             }
         }
 
-        void BindVessel()
-        {
-            std::list<Creature*> vessels;
-            me->GetCreatureListWithEntryInGrid(vessels, NPC_SOUL_VESSEL, 100.0f);
-            vessels.remove_if([](Creature* v) { return !v->IsAlive() || !v->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE); });
-            if (vessels.empty())
-                return;
-            Creature* v = Acore::Containers::SelectRandomContainerElement(vessels);
-            if (auto* ai = dynamic_cast<npc_soul_vessel_coa*>(v->AI()))
-                ai->Sleep(false);
-            v->CastSpell(me, SPELL_SOUL_BIND, true);
-            v->CastSpell(me, SPELL_SOUL_LINK, true);
-        }
-
-        // A vessel died: the veil breaks.
         void DoAction(int32 action) override
         {
-            if (action != 1 || !me->HasAura(SPELL_SPECTRAL_VEIL))
-                return;
+            if (action == ACTION_VESSEL_LINKED)
+            {
+                bool all = true;
+                ForVessels([&](npc_soul_vessel_coa* ai) { all = all && ai->State() == VESSEL_LINKED; });
+                if (all && _dormant)
+                    Awaken();
+            }
+            else if (action == ACTION_AWAKEN && _dormant)
+                Awaken();
+            else if (action == ACTION_VESSEL_BROKEN && _phase)
+            {
+                _phase = false;
+                _summons.DespawnEntry(NPC_RESTLESS_SPIRIT);
+                me->InterruptNonMeleeSpells(false);
+                me->RemoveAurasDueToSpell(SPELL_SPECTRAL_VEIL);
+                me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
+                ForVessels([](npc_soul_vessel_coa* ai)
+                {
+                    if (ai->State() == VESSEL_OPEN)
+                        ai->SetState(VESSEL_SHIELDED);
+                });
+            }
+        }
+
+        void Awaken()
+        {
+            _dormant = false;
             me->InterruptNonMeleeSpells(false);
-            me->RemoveAurasDueToSpell(SPELL_SPECTRAL_VEIL);
-            me->RemoveAurasDueToSpell(SPELL_SOUL_LINK);
-            me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
+            Dormant(me, false);
+            ForVessels([](npc_soul_vessel_coa* ai) { ai->SetState(VESSEL_SHIELDED); });
+            Creature* rogg = me->FindNearestCreature(NPC_ZULROGG, 400.0f);
+            if (rogg)
+            {
+                rogg->AI()->DoAction(ACTION_AWAKEN);
+                me->CastSpell(rogg, SPELL_SOUL_LINK, true);
+            }
+            Player* first = nullptr;
+            for (Player* p : Players(me, [](Player*) { return true; }))
+                if (!first || (p->HasTankSpec() && !first->HasTankSpec()) ||
+                    (p->HasTankSpec() == first->HasTankSpec() && me->GetDistance(p) < me->GetDistance(first)))
+                    first = p;
+            if (first)
+            {
+                AttackStart(first);
+                if (rogg)
+                    rogg->AI()->AttackStart(first);
+            }
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (!_dormant)
+            {
+                if (_phase)
+                    _scheduler.Update(diff);
+                custom_world_boss_coa::UpdateAI(diff);
+                return;
+            }
+            Dormant(me, true);
         }
 
     private:
+        void PullSpirit()
+        {
+            npc_restless_spirit_coa* spirit = nullptr;
+            for (ObjectGuid const& guid : _summons)
+                if (Creature* c = ObjectAccessor::GetCreature(*me, guid))
+                    if (auto* ai = dynamic_cast<npc_restless_spirit_coa*>(c->AI()); ai && !ai->Sent())
+                        spirit = ai;
+            if (!spirit)
+                return;
+            std::vector<Position> goals;
+            for (Player* p : Players(me, [&](Player* x) { return me->GetExactDist2d(x) > SPIRIT_SPREAD; }))
+                goals.push_back(p->GetPosition());
+            ForVessels([&](npc_soul_vessel_coa* ai)
+            {
+                if (ai->Assaulted())
+                    goals.push_back(ai->Where());
+            });
+            spirit->Send(goals.empty() ? me->GetPosition() : Acore::Containers::SelectRandomContainerElement(goals));
+            HoverSpirit(_hovered++);
+        }
+
+        void HoverSpirit(uint32 slot)
+        {
+            float const angle = float(M_PI) * 2.0f * float(slot % SPIRIT_COUNT) / SPIRIT_COUNT;
+            me->SummonCreature(NPC_RESTLESS_SPIRIT, me->GetPositionX() + 8.0f * std::cos(angle),
+                me->GetPositionY() + 8.0f * std::sin(angle), me->GetPositionZ() + SPIRIT_HEIGHT, angle,
+                TEMPSUMMON_TIMED_DESPAWN, 120000);
+        }
+
         SummonList _summons;
+        TaskScheduler _scheduler;
+        uint32 _hovered = 0;
         uint8 _nextVeil = 80;
         uint32 _raise = 0;
+        bool _phase = false;
+        bool _dormant = true;
     };
 
     enum ZulroggEvents { EZ_CRUSH = 1, EZ_FIERCE };
@@ -1346,12 +1648,65 @@ namespace
             custom_world_boss_coa::Reset();
             DoCastSelf(SPELL_HAND_OF_SOULREAVER, true);
             DoCastSelf(SPELL_ENDLESS_HUNGER, true);
+            Position const& home = me->GetHomePosition();
+            if (me->GetExactDist(&home) > 2.0f)
+                me->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(),
+                    home.GetOrientation());
+            _dormant = true;
+            _jumping = false;
+            Dormant(me, true);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_dormant)
+                Dormant(me, true);
+            else if (_jumping)
+                _scheduler.Update(diff);
+            else
+                custom_world_boss_coa::UpdateAI(diff);
+        }
+
+        void AttackStart(Unit* who) override
+        {
+            if (_jumping)
+                _target = who->GetGUID();
+            else
+                custom_world_boss_coa::AttackStart(who);
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (_jumping && type == EFFECT_MOTION_TYPE && id == ZUROGG_JUMP)
+                Land();
+        }
+
+        void Land()
+        {
+            _jumping = false;
+            me->SetReactState(REACT_AGGRESSIVE);
+            if (Unit* t = ObjectAccessor::GetUnit(*me, _target))
+                AttackStart(t);
+        }
+
+        void DoAction(int32 action) override
+        {
+            if (action != ACTION_AWAKEN)
+                return;
+            _dormant = false;
+            Dormant(me, false);
+            me->SetReactState(REACT_PASSIVE);
+            me->InterruptNonMeleeSpells(false);
+            _jumping = true;
+            _scheduler.CancelAll();
+            _scheduler.Schedule(4s, [this](TaskContext) { Land(); });
+            me->GetMotionMaster()->MoveJump(ZuroggLanding, 25.0f, 15.0f, ZUROGG_JUMP);
         }
 
         void JustEngagedWith(Unit* who) override
         {
             custom_world_boss_coa::JustEngagedWith(who);
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 100.0f))
+            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
                 if (!atal->IsInCombat())
                     atal->AI()->AttackStart(who);
         }
@@ -1400,10 +1755,16 @@ namespace
         {
             custom_world_boss_coa::DamageTaken(attacker, damage, type, school);
             if (damage >= me->GetHealth())
-                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 200.0f))
+                if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
                     if (atal->IsAlive())
                         damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
         }
+
+    private:
+        bool _dormant = true;
+        bool _jumping = false;
+        TaskScheduler _scheduler;
+        ObjectGuid _target;
     };
 
     // ------------------------------------------------------------ Trut-K'hahn
@@ -1621,8 +1982,11 @@ void AddCoaCustomWorldBossScripts()
     new custom_script<boss_soggoth_coa>("boss_soggoth_coa");
     new custom_script<npc_psychophage_coa>("npc_psychophage_coa");
     new custom_script<boss_atalzul_coa>("boss_atalzul_coa");
+    void AddCoaAtalzulInstanceScripts();
+    AddCoaAtalzulInstanceScripts();
     new custom_script<boss_zulrogg_coa>("boss_zulrogg_coa");
     new custom_script<npc_soul_vessel_coa>("npc_soul_vessel_coa");
+    new go_soul_vessel_altar();
     new custom_script<npc_restless_spirit_coa>("npc_restless_spirit_coa");
     new custom_script<npc_custom_add_coa>("npc_custom_add_coa");
     new custom_script<boss_trut_khahn_coa>("boss_trut_khahn_coa");

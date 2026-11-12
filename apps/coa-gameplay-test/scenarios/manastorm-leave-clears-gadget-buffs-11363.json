@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Manastorm: leaving a run or failing it by death removes the Manastorm gadget buffs",
+  "contract": [
+    "Player report (#11363): Manastorm gadget buffs cast inside a run, such as the 2-hour Long Haul Liquid, stay on",
+    "the player after leaving the run, also after dying in it, so they work in the open world. The gadgets can only be",
+    "cast inside a run (the cast guard refuses them outside, #11698) and only from the run loadout, so the run exit",
+    "must end them. Every exit removes the baseline run items through ManastormMgr::RemoveBaselineRunItems; it now",
+    "also removes the auras of every active gadget, Millhouse's Magical Escape (93311) and the potion regeneration",
+    "aura (254462). Floor transfers keep them.",
+    "The case uses Long Haul Liquid rank 8 (293453): a 2-hour SPELL_AURA_MOD_INCREASE_HEALTH aura that persists",
+    "through death (SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD). It slots the gadget through the native loadout request,",
+    "casts it inside segment 1, leaves through the native leave request and checks the aura is gone, also after a",
+    "relog. Arcane Intellect (1459), set as an ordinary saved buff, is the control that a leave keeps.",
+    "The reported path follows: a second run, the gadget cast again, the bubble left so the run is active, a solo",
+    "death (the aura survives it by design), and the leave request that fails the ended run and ejects the player."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "n",
+      "spell": 293453
+    },
+    {
+      "action": "cast",
+      "label": "Long Haul Liquid is cast outside a run",
+      "actor": "n",
+      "spell": 293453
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the gadget is refused outside a run",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 293453,
+      "within_ms": 3000,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Long Haul Liquid aura outside a run",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Slot Long Haul Liquid in loadout slot 0",
+      "actor": "n",
+      "opcode": 1673,
+      "early": false,
+      "fields": [ { "u32": 0 }, { "u32": 293453 } ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the loadout request is accepted",
+      "actor": "n",
+      "metric": "server_packet_contains",
+      "opcode": 1674,
+      "text": "SET_MANASTORM_LOADOUT_OK",
+      "within_ms": 5000,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Give the player an ordinary saved buff as the control",
+      "actor": "n",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control buff is present",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Long Haul Liquid is cast inside the run",
+      "actor": "n",
+      "spell": 293453
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the slotted gadget works inside the run",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Leave the run through the native leave request",
+      "actor": "n",
+      "opcode": 1637,
+      "early": false
+    },
+    {
+      "action": "assert",
+      "label": "The player left the private instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the run removes the Long Haul Liquid aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: leaving keeps an ordinary buff",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "n"
+    },
+    {
+      "action": "assert",
+      "label": "The Long Haul Liquid aura does not come back after a relog",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ordinary buff survives the relog",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "The player entered a second private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Long Haul Liquid is cast in the second run",
+      "actor": "n",
+      "spell": 293453
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the gadget aura is present in the second run",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Leave the preparation bubble so the run is active",
+      "actor": "n",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the preparation bubble is gone",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "actor": "n"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Long Haul Liquid persists through death inside the run",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Leave the ended run through the native leave request",
+      "actor": "n",
+      "opcode": 1637,
+      "early": false
+    },
+    {
+      "action": "assert",
+      "label": "Leaving after the solo death ejects the player from the run",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The failed run removes the Long Haul Liquid aura",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 293453,
+      "within_ms": 3000,
+      "equals": 0
+    }
+  ]
+}

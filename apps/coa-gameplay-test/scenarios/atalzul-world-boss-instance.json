@@ -1,0 +1,329 @@
+{
+  "schema": 1,
+  "name": "Atal'zul, the Soulreaver: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
+  "contract": [
+    "The shrine (978090) refuses a heroic raid difficulty and on Normal takes the raid leader to",
+    "his map (890). His health is per player in his map, 10 to 40, so 12722310 for one",
+    "player. Until the four Soul Vessels are clicked he is ghostly and cannot be attacked; the Awaken action (3) stands in for the four clicks. He drops one of his item level 74 items. Every player gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
+    "Azeroth chest; the portal out (978091) opens where he falls and takes the player back.",
+    "His map (890) opens with Molten Core: at release stage 3 (Zul'Gurub) the shrine leaves the raid on",
+    "map 0, at stage 4 it takes raid members to his map. The case clears the stage override when it ends."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": 3356.0,
+    "y": -4841.0,
+    "z": 168.0
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "mate1",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate2",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate3",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate4",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate5",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "The shrine stands in the open world",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780930,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 978090,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978090
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "On a heroic difficulty the shrine refuses",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 0
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate1",
+      "label": "Back on Normal, the raider leads a raid group, as his map takes only raids",
+      "loot_method": 0
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate2"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate3"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate4"
+    },
+    {
+      "action": "group",
+      "actor": "raider",
+      "target": "mate5"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm is at the Zul'Gurub release stage",
+      "command": "raidphase set 3",
+      "restore": "raidphase clear"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978090
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at the Zul'Gurub stage his map stays closed",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm reaches the Molten Core release stage",
+      "command": "raidphase set 4"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978090
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "The shrine takes the raid leader into his map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 890,
+      "within_ms": 8000
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 67532,
+      "as": "dormant",
+      "distance": 45
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Before the four Soul Vessels are clicked he is ghostly and cannot be attacked",
+      "actor": "raider",
+      "metric": "nearby_creature_can_attack",
+      "entry": 67532,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 67532,
+      "as": "boss",
+      "distance": 4,
+      "ai_action": 3
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "His health is ten players' worth for a lone player",
+      "actor": "raider",
+      "metric": "nearby_creature_max_health",
+      "entry": 67532,
+      "equals": 12722310,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 67532,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "He dies",
+      "actor": "boss",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "loot_nearby",
+      "actor": "raider",
+      "entry": 67532
+    },
+    {
+      "action": "assert",
+      "label": "One of his item level 74 items",
+      "actor": "raider",
+      "metric": "loot_gear_item_level",
+      "equals": 74
+    },
+    {
+      "action": "close_loot",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "label": "250 Runes of Ascension",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 250,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "100 to 150 Bazaar Tokens",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 100,
+      "max": 150
+    },
+    {
+      "action": "assert",
+      "label": "A Treasures of Azeroth chest",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 1615011,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The portal out opens where he fell",
+      "actor": "raider",
+      "metric": "nearby_gameobject_count",
+      "entry": 978091,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "raider",
+      "entry": 978091
+    },
+    {
+      "action": "assert",
+      "label": "The portal takes the player back",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "console",
+      "label": "CLEANUP: the release stage returns to the configured one",
+      "command": "raidphase clear"
+    }
+  ]
+}
