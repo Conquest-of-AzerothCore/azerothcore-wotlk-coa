@@ -33,11 +33,21 @@
   {
     "spell": 92122,
     "clause": "Casting any spell now has a $h% chance to grant you Tundra Warriors.",
-    "labels": [
-      "92122 effect_value #0",
-      "92122 spell_duration 707421 #1",
-      "92122 effect_value 707421e0 #2",
-      "92122 max_stacks 707421 #3"
+    "claims": [
+      {
+        "claim": "Casting any spell now has a $h% chance to grant you Tundra Warriors",
+        "labels": [
+          "92122 proc_rate"
+        ]
+      },
+      {
+        "claim": "Tundra Warriors (pulled sentence 707421: 10 sec, +4% minion crit, 3 stacks)",
+        "labels": [
+          "92122 spell_duration 707421 #1",
+          "92122 effect_value 707421e0 #2",
+          "92122 max_stacks 707421 #3"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -139,24 +149,58 @@
   {
     "spell": 300748,
     "clause": "Increases your maximum health and the maximum health of your summons by $s1%.",
-    "labels": [
-      "300748 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases your maximum health ... by $s1%",
+        "labels": [
+          "300748 behaviour_metric_delta own_health"
+        ]
+      },
+      {
+        "claim": "and the maximum health of your summons by $s1%",
+        "labels": [
+          "300748 behaviour_metric_delta summon_health"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 300940,
     "clause": "Casting Command spells now has a $h% chance to reset the cooldown of Ice Barrage",
-    "labels": [
-      "300940 effect_value #0"
+    "claims": [
+      {
+        "claim": "Casting Command spells now has a $h% chance",
+        "labels": [
+          "300940 proc_rate"
+        ]
+      },
+      {
+        "claim": "to reset the cooldown of Ice Barrage",
+        "labels": [
+          "300940 cost_gate 801760 reset"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 300940,
     "clause": "and make your cast next within $800979d instant cast.",
-    "labels": [
-      "300940 spell_duration 800979 #1"
+    "claims": [
+      {
+        "claim": "and make your cast next ... instant cast",
+        "labels": [
+          "300940 behaviour_metric_delta instant"
+        ]
+      },
+      {
+        "claim": "within $800979d",
+        "labels": [
+          "300940 behaviour_metric_delta window_held",
+          "300940 behaviour_metric_delta window_ends"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -164,7 +208,8 @@
     "spell": 300941,
     "clause": "Increases the duration Unholy Frenzy by $/1000;s1 sec",
     "labels": [
-      "300941 effect_value e0 #0"
+      "300941 behaviour_metric_delta duration_held",
+      "300941 behaviour_metric_delta duration_end"
     ],
     "kind": "claim"
   },
@@ -172,7 +217,9 @@
     "spell": 300941,
     "clause": "and casting Command spells now reduces its cooldown by $/1000;301238s1 sec.",
     "labels": [
-      "300941 effect_value 301238e0 #1"
+      "300941 cost_gate 805029 command without",
+      "300941 cost_gate 805029 command with",
+      "300941 cost_gate 805029 command beyond"
     ],
     "kind": "claim"
   },
@@ -218,7 +265,8 @@
     "spell": 300965,
     "clause": "Applying Crypt Plague now extends the duration of Flesh to Worms on the target by $/1000;301337s1 sec.",
     "labels": [
-      "300965 effect_value 301337e0 #0"
+      "300965 behaviour_metric_delta extended",
+      "300965 behaviour_metric_delta extended_end"
     ],
     "kind": "claim"
   },
@@ -289,8 +337,19 @@
   {
     "spell": 301326,
     "clause": "Increases your maximum health and the maximum health of your summons by $s1%.",
-    "labels": [
-      "301326 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases your maximum health ... by $s1%",
+        "labels": [
+          "301326 behaviour_metric_delta own_health"
+        ]
+      },
+      {
+        "claim": "and the maximum health of your summons by $s1%",
+        "labels": [
+          "301326 behaviour_metric_delta summon_health"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -803,8 +862,27 @@
   {
     "spell": 504439,
     "clause": "Reduces the cost of all Animates, Raises, and Command spells by $s1%.",
-    "labels": [
-      "504439 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Animates",
+        "labels": [
+          "504439 behaviour_metric_delta cost_805044"
+        ]
+      },
+      {
+        "claim": "Raises",
+        "labels": [
+          "504439 behaviour_metric_delta cost_500971"
+        ]
+      },
+      {
+        "claim": "and Command spells by $s1%",
+        "labels": [
+          "504439 cost_gate 504868 command without",
+          "504439 cost_gate 504868 command with",
+          "504439 cost_gate 504868 command beyond"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1243,7 +1321,9 @@
     "spell": 561215,
     "clause": "Casting Command spells now reduces the cooldown of your Animates by $/1000;302910S2 sec.",
     "labels": [
-      "561215 effect_value 302910e1 #0"
+      "561215 cost_gate 805044 tomb_king without",
+      "561215 cost_gate 805044 tomb_king with",
+      "561215 cost_gate 805044 tomb_king beyond"
     ],
     "kind": "claim"
   },
@@ -2330,24 +2410,72 @@
   {
     "spell": 805044,
     "clause": "Animate a Tomb King to aid you in combat for $d.",
-    "labels": [
-      "805044 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Animate a Tomb King",
+        "labels": [
+          "805044 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "to aid you in combat",
+        "labels": [
+          "805044 behaviour_metric_delta combat"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805044 behaviour_metric_delta lifetime_held",
+          "805044 behaviour_metric_delta lifetime_end"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 805044,
     "clause": "While active, all of your Undead minion's attacks deal an additional $800027s1% of the damage dealt as Plague damage.",
-    "labels": [
-      "805044 effect_value 800027e0 #1"
+    "claims": [
+      {
+        "claim": "While active, all of your Undead minion's attacks deal an additional ... as Plague damage",
+        "labels": [
+          "805044 behaviour_metric_delta putrid_with",
+          "805044 behaviour_metric_delta putrid_without"
+        ]
+      },
+      {
+        "claim": "$800027s1% of the damage dealt",
+        "labels": [
+          "805044 trigger_magnitude_ratio"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 805048,
     "clause": "Animate a Plaguefather to aid you in combat for $d.",
-    "labels": [
-      "805048 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Animate a Plaguefather",
+        "labels": [
+          "805048 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "to aid you in combat",
+        "labels": [
+          "805048 behaviour_metric_delta combat"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805048 behaviour_metric_delta lifetime_held",
+          "805048 behaviour_metric_delta lifetime_end"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2355,7 +2483,7 @@
     "spell": 805048,
     "clause": "Damage dealt by this minion will emit Zombie Plague, dealing ${$504022m1+$504022ppl1+$SP*0.1} Plague damage to nearby enemies,",
     "labels": [
-      "805048 effect_value 504022e0 #1"
+      "805048 behaviour_metric_delta zombie_plague"
     ],
     "kind": "claim"
   },
@@ -2363,7 +2491,7 @@
     "spell": 805048,
     "clause": "and reducing their attack power by ${-($704706m1+$704706ppl1)}.",
     "labels": [
-      "805048 effect_value 704706e0 #2"
+      "805048 behaviour_metric_delta bone_toss"
     ],
     "kind": "claim"
   },
@@ -2449,8 +2577,20 @@
   {
     "spell": 805675,
     "clause": "Your Virulency now applies Rot Fetishist for $573223d,",
-    "labels": [
-      "805675 spell_duration 573223 #0"
+    "claims": [
+      {
+        "claim": "Your Virulency now applies Rot Fetishist",
+        "labels": [
+          "805675 behaviour_metric_delta applied"
+        ]
+      },
+      {
+        "claim": "for $573223d",
+        "labels": [
+          "805675 behaviour_metric_delta held",
+          "805675 behaviour_metric_delta ends"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2518,7 +2658,9 @@
   {
     "spell": 806328,
     "clause": "Casting Command spells on an enemy now applies Crypt Plague.",
-    "labels": [],
+    "labels": [
+      "806328 behaviour_metric_delta crypt_plague"
+    ],
     "kind": "claim"
   },
   {

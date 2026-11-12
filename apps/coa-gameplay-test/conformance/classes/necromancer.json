@@ -154,8 +154,41 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [],
-  "triggers": [],
+  "procs": [
+    {
+      "aura": 92122, "name": "Tundra Warriors",
+      "tooltip": "|cFF66DDFFLevel 10 Passive|r\r\nCasting any spell now has a $h% chance to grant you |cffffffffTundra Warriors|r.@s:707421:0@",
+      "chance_token": "$h", "trigger": {"action": "cast", "spell": 504868}, "trial_casts": true, "baseline": true,
+      "trigger_text": "Casting any spell",
+      "event_metric": "spell_cast_count", "proc_spell": 707421, "proc_spell_source": "EffectTriggerSpell[0] of 92122 (Tundra Warriors)",
+      "events_per_proc": 1,
+      "handler": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): every non-triggered spell cast of the Necromancer rolls Chance(player, 92122) (ProcChance 25, SPELLMOD_CHANCE_OF_SUCCESS applied) and casts 707421 on the caster; Command: Undead 504868 is the cast (any spell qualifies)",
+      "dbc": {"92122": {"ProcChance": 25, "ProcFlags": 0, "ProcCharges": 0}}, "spell_proc": {}, "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 300940, "name": "Refreshing Chill",
+      "tooltip": "Casting |cff90ee90Command|r spells now has a $h% chance to reset the cooldown of |cffffffffIce Barrage|r and make your cast next within $800979d instant cast.",
+      "chance_token": "$h", "trigger": {"action": "cast", "spell": 504868}, "trial_casts": true, "baseline": true,
+      "trigger_text": "Casting Command spells",
+      "event_metric": "spell_cast_count", "proc_spell": 800979, "proc_spell_source": "EffectTriggerSpell[0] of 300940 (Refreshing Chill 800979)",
+      "events_per_proc": 1,
+      "handler": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a non-triggered Command spell rolls Chance(player, 300940) (ProcChance 20) and, on success, resets Ice Barrage 801760 (Reduce INT32_MAX) and casts 800979 on the caster (Ready)",
+      "dbc": {"300940": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}}, "spell_proc": {}, "internal_cooldown_ms": 0
+    }
+  ],
+  "triggers": [
+    {
+      "aura": 805044, "name": "Animate: Tomb King (Putrid Claws)", "kind": "magnitude_ratio",
+      "tooltip": "While active, all of your Undead minion's attacks deal an additional $800027s1% of the damage dealt as Plague damage.",
+      "trigger": {"action": "minion", "spell": 500971, "entry": 50073, "swing_ms": 2000,
+                  "swing_source": "Scale() in AscensionNecromancerSummons.cpp: SetAttackTime(BASE_ATTACK, 2000 x the owner's cast speed)"},
+      "aura_cast": true, "presence_aura": 800027, "aura_recast_ms": 14000, "caster_power": {"power": 0, "value": 1000},
+      "trigger_metric": "pet_melee_damage", "trigger_text": "all of your Undead minion's attacks",
+      "observe_spell": 570050, "observe_metric": "spell_damage_total", "observe_actor": "minion", "expected_ratio": 0.1,
+      "per_trigger_text": "deal an additional $800027s1% of the damage dealt as Plague damage",
+      "observe_source": "tooltip token $800027s1 of 805044 (800027 EffectBasePoints[0] 9 + 1 = 10). Animate: Tomb King is cast after the Ghoul is raised; its Effect[2] casts Putrid Aura 800027, whose Effect[0] 190 puts it on the Ghoul. AscensionNecromancerEvents.cpp:99-100 has the Ghoul cast Putrid Claws 570050 for damage x 10 / 100 on each of its hits. The Ghoul's melee damage and swings (no misses: its hit and expertise copy the caster's 10000 ratings) against its 570050 hits; the Tomb King is cast again every 14000 ms, inside its 15000 ms lifetime and 800027's 20000 ms."
+    }
+  ],
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
@@ -326,6 +359,214 @@
       "setup_only_after": true, "gate_spell": 92123, "setup_wait_ms": 4000, "metric": "owned_creature_damage_count",
       "fields": {"entry": 50115}, "wait_ms": 6000, "expire_ms": 500,
       "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count the hits of 50115 creatures in the caster's combat log for 6000 ms. Control: no minion, 0. The treatment raises one first (at the dummy, so it engages): it hits the dummy at least once."
+    },
+    {
+      "spell": 806328, "name": "Master of Death", "kind": "metric_delta", "variant": "crypt_plague",
+      "label_suffix": "crypt_plague", "quote": "Casting Command spells on an enemy now applies", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "measure_actor": "dummy", "wait_ms": 1000, "expire_ms": 500, "metric": "aura", "fields": {"spell": 570131},
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a non-triggered Command spell (family 29 word 2 0x1000000) at a valid enemy calls Plague(player, target) when the caster holds 806328, which adds Crypt Plague 570131 to the target. Command: Undead 504868 (usable without minions) at the dummy: without 806328 no 570131 on the dummy (control), with it present."
+    },
+    {
+      "spell": 300965, "name": "Foul Contagion (extended)", "kind": "metric_delta", "variant": "extended",
+      "label_suffix": "extended", "quote": "now extends the duration of Flesh to Worms on the target by", "expected": 1, "before_expected": 0,
+      "trigger_spell": 570132, "target": "dummy", "setup_casts": [500338], "setup_wait_ms": 1600, "measure_actor": "dummy", "expire_ms": 2000, "wait_ms": 16700, "metric": "aura", "fields": {"spell": 500338},
+      "observe_source": "Flesh to Worms 500338 (18000 ms, DurationIndex 85) is cast at the dummy, then Add 1 Crypt Plague 570132 (the Crypt Plague application Master of Death uses; spell_ascension_necromancer_ability calls Plague()) 1600 ms later. Plague() calls ExtendWorms(+|$301337s1| = 1000 ms) when the caster holds 300965 (AscensionNecromancer.cpp). Read 18300 ms after the Flesh to Worms cast: without 300965 it has expired (control, 0); with it still on the dummy (1)."
+    },
+    {
+      "spell": 300965, "name": "Foul Contagion (extension ends)", "kind": "metric_delta", "variant": "extended_end",
+      "label_suffix": "extended_end", "quote": "now extends the duration of Flesh to Worms on the target by", "expected": 0, "before_expected": 0,
+      "trigger_spell": 570132, "target": "dummy", "setup_casts": [500338], "setup_wait_ms": 1600, "measure_actor": "dummy", "expire_ms": 2000, "wait_ms": 17700, "metric": "aura", "fields": {"spell": 500338},
+      "observe_source": "As the extended entry, read 19300 ms after the Flesh to Worms cast: gone in both phases, so the extension is at most 1300 ms; with the 18300 ms read it lies in (300, 1300] ms, around the stated 1000 ms."
+    },
+    {
+      "spell": 300941, "name": "Fleshcrafting (Unholy Frenzy longer)", "kind": "metric_delta", "variant": "duration_held",
+      "label_suffix": "duration_held", "quote": "Increases the duration Unholy Frenzy by", "expected": 2, "before_expected": 0,
+      "trigger_spell": 805029, "target": "caster", "setup_casts": [500971], "setup_wait_ms": 3100, "expire_ms": 6000, "wait_ms": 15500, "metric": "owned_creature_count", "fields": {"entry": 50073, "spell": 805029},
+      "observe_source": "Unholy Frenzy 805029 (15000 ms, DurationIndex 8) puts its auras on the summons (Effect[0..2] 190). 300941 Effect[0] aura 107 SPELLMOD_DURATION +5000 ($/1000;s1 = 5) on 805029. Each phase raises a Ghoul (the second phase has two) and casts Unholy Frenzy; owned_creature_count with spell 805029 counts the Ghouls carrying it 15500 ms later: none without 300941 (control), both with it."
+    },
+    {
+      "spell": 300941, "name": "Fleshcrafting (Unholy Frenzy ends)", "kind": "metric_delta", "variant": "duration_end",
+      "label_suffix": "duration_end", "quote": "Increases the duration Unholy Frenzy by", "expected": 0, "before_expected": 0,
+      "trigger_spell": 805029, "target": "caster", "setup_casts": [500971], "setup_wait_ms": 3100, "expire_ms": 6000, "wait_ms": 20500, "metric": "owned_creature_count", "fields": {"entry": 50073, "spell": 805029},
+      "observe_source": "As the held entry, read 20500 ms after the cast: gone in both phases, so with the held read the duration with 300941 lies in (15500, 20500] ms against the stated 20000."
+    },
+    {
+      "spell": 300941, "name": "Fleshcrafting (Command cooldown)", "kind": "cost_gate", "variant": "command",
+      "label_suffix": "command", "quote": "and casting Command spells now reduces its cooldown by",
+      "gated_spell": 805029, "resource": "cooldown", "reduction": 1000, "target": "caster",
+      "after_casts": [[504868, "dummy"]], "after_wait_ms": 2000,
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a non-triggered Command spell with 300941 known calls Reduce(player, 805029, |Amount(301238)|) = 1000 ms ($/1000;301238s1 = 1). Unholy Frenzy 805029 recovers in 180000 ms. Command: Undead 504868 is cast 2000 ms after the priming Unholy Frenzy in every arm; the talent decides."
+    },
+    {
+      "spell": 561215, "name": "Forbidden Technique (Animate cooldown)", "kind": "cost_gate", "variant": "tomb_king",
+      "label_suffix": "tomb_king", "quote": "Casting Command spells now reduces the cooldown of your Animates by",
+      "gated_spell": 805044, "resource": "cooldown", "reduction": 1000, "target": "caster",
+      "after_casts": [[504868, "dummy"]], "after_wait_ms": 2000,
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): with 561215 known, a non-triggered Command spell calls ModifySpellCooldown(-|Amount(302910, 1)|) = -1000 ms ($/1000;302910S2 = 1) on every known family 29 summon spell that is not a Raise (and on 805040 and 504315). Animate: Tomb King 805044 recovers in 60000 ms; Command: Undead 504868 is cast 2000 ms after it in every arm."
+    },
+    {
+      "spell": 300748, "name": "Hulking Hordes 300748 (summon health)", "kind": "metric_delta", "variant": "summon_health",
+      "label_suffix": "summon_health", "quote": "and the maximum health of your summons by", "expected": 1450, "before_expected": 1380,
+      "trigger_spell": 500971, "target": "caster", "wait_ms": 3100, "expire_ms": 500, "metric": "owned_creature_max_health", "fields": {"entry": 50073},
+      "observe_source": "300748 Effect[1] 190 puts aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +5 ($s1, Effect[1] points set to Effect[0] by AscensionNecromancerContracts.cpp) on the summons. A Ghoul is raised in each phase; its maximum health is read 3100 ms after the cast, before and after 300748 is learned: 1380 and 1450. The Ghoul's health base is a float (Scale(): NakedHealth x 0.66 + Stamina x 5, AscensionNecromancerSummons.cpp) shown truncated: 1380 x 1.05 = 1449, and 1450 needs a base in [1380.95, 1381), which both ranks (5% and 10%) leave for a base just under 1381: the stated percent of the unrounded base, then the engine truncation (G-26 shape)."
+    },
+    {
+      "spell": 300748, "name": "Hulking Hordes 300748 (your health)", "kind": "metric_delta", "variant": "own_health",
+      "label_suffix": "own_health", "quote": "Increases your maximum health", "expected": 2053, "before_expected": 1956,
+      "trigger_spell": 500971, "target": "caster", "wait_ms": 3100, "expire_ms": 500, "metric": "max_health", "fields": {},
+      "observe_source": "300748 Effect[0] aura 133 +5% on the caster: the caster's maximum health (Unit::GetMaxHealth, the client field) around the same Raise: Ghoul casts, before and after 300748 is learned: 1956 and 2053 = int(1956 x 1.05 = 2053.8)."
+    },
+    {
+      "spell": 301326, "name": "Hulking Hordes 301326 (summon health)", "kind": "metric_delta", "variant": "summon_health",
+      "label_suffix": "summon_health", "quote": "and the maximum health of your summons by", "expected": 1519, "before_expected": 1380,
+      "trigger_spell": 500971, "target": "caster", "wait_ms": 3100, "expire_ms": 500, "metric": "owned_creature_max_health", "fields": {"entry": 50073},
+      "observe_source": "301326 Effect[1] 190 puts aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +10 ($s1, Effect[1] points set to Effect[0] by AscensionNecromancerContracts.cpp) on the summons. A Ghoul is raised in each phase; its maximum health is read 3100 ms after the cast, before and after 301326 is learned: 1380 and 1519. The Ghoul's health base is a float (Scale(): NakedHealth x 0.66 + Stamina x 5, AscensionNecromancerSummons.cpp) shown truncated: 1380 x 1.10 = 1518, and 1519 needs a base in [1380.91, 1381), which both ranks (5% and 10%) leave for a base just under 1381: the stated percent of the unrounded base, then the engine truncation (G-26 shape)."
+    },
+    {
+      "spell": 301326, "name": "Hulking Hordes 301326 (your health)", "kind": "metric_delta", "variant": "own_health",
+      "label_suffix": "own_health", "quote": "Increases your maximum health", "expected": 2151, "before_expected": 1956,
+      "trigger_spell": 500971, "target": "caster", "wait_ms": 3100, "expire_ms": 500, "metric": "max_health", "fields": {},
+      "observe_source": "301326 Effect[0] aura 133 +10% on the caster: the caster's maximum health (Unit::GetMaxHealth, the client field) around the same Raise: Ghoul casts, before and after 301326 is learned: 1956 and 2151 = int(1956 x 1.10 = 2151.6)."
+    },
+    {
+      "spell": 805675, "name": "Rot Fetishist (applied)", "kind": "metric_delta", "variant": "applied",
+      "label_suffix": "applied", "quote": "Your Virulency now applies Rot Fetishist for", "expected": 1, "before_expected": 0,
+      "trigger_spell": 801938, "target": "dummy", "setup_casts": [500338], "setup_wait_ms": 1600, "expire_ms": 11000, "wait_ms": 500, "metric": "aura", "fields": {"spell": 573223},
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a cast of Virulency 801938 with 805675 known casts Rot Fetishist 573223 on the caster ($573223d = 10000 ms). Flesh to Worms 500338 is cast at the dummy first (Virulency needs a disease on its target, OnSpellCheckCast). Without 805675 (control) no 573223; with it, 500 ms after the Virulency: present."
+    },
+    {
+      "spell": 805675, "name": "Rot Fetishist (held)", "kind": "metric_delta", "variant": "held",
+      "label_suffix": "held", "quote": "Your Virulency now applies Rot Fetishist for", "expected": 1, "before_expected": 0,
+      "trigger_spell": 801938, "target": "dummy", "setup_casts": [500338], "setup_wait_ms": 1600, "expire_ms": 11000, "wait_ms": 9500, "metric": "aura", "fields": {"spell": 573223},
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a cast of Virulency 801938 with 805675 known casts Rot Fetishist 573223 on the caster ($573223d = 10000 ms). Flesh to Worms 500338 is cast at the dummy first (Virulency needs a disease on its target, OnSpellCheckCast). Without 805675 (control) no 573223; with it, 9500 ms after: still present."
+    },
+    {
+      "spell": 805675, "name": "Rot Fetishist (ends)", "kind": "metric_delta", "variant": "ends",
+      "label_suffix": "ends", "quote": "Your Virulency now applies Rot Fetishist for", "expected": 0, "before_expected": 0,
+      "trigger_spell": 801938, "target": "dummy", "setup_casts": [500338], "setup_wait_ms": 1600, "expire_ms": 11000, "wait_ms": 10500, "metric": "aura", "fields": {"spell": 573223},
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a cast of Virulency 801938 with 805675 known casts Rot Fetishist 573223 on the caster ($573223d = 10000 ms). Flesh to Worms 500338 is cast at the dummy first (Virulency needs a disease on its target, OnSpellCheckCast). Without 805675 (control) no 573223; with it, 10500 ms after: gone."
+    },
+    {
+      "spell": 300940, "name": "Refreshing Chill (instant cast)", "kind": "metric_delta", "variant": "instant",
+      "label_suffix": "instant", "quote": "instant cast", "expected": 1, "before_expected": 0,
+      "trigger_spell": 801760, "target": "dummy", "setup_casts": [800979], "setup_only_after": true, "setup_wait_ms": 1600, "measure_actor": "dummy",
+      "wait_ms": 400, "expire_ms": 3000, "metric": "aura", "fields": {"spell": 801760},
+      "observe_source": "Ice Barrage 801760 has a 2000 ms cast (CastingTimeIndex 5). Refreshing Chill 800979 Effect[1] aura 108 SPELLMOD_CASTING_TIME -100 on it (the contract sets its class mask to word 1 0x40, AscensionNecromancerContracts.cpp). The control casts Ice Barrage without 800979: 400 ms later its aura is not yet on the dummy; the treatment casts 800979 first (the buff a Refreshing Chill proc casts, here cast for real), and the Ice Barrage aura is on the dummy 400 ms after the cast starts."
+    },
+    {
+      "spell": 300940, "name": "Refreshing Chill (window_held)", "kind": "metric_delta", "variant": "window_held",
+      "label_suffix": "window_held", "quote": "and make your cast next within", "expected": 1, "before_expected": 0,
+      "trigger_spell": 800979, "target": "caster", "cast_in_before": false, "expire_ms": 500, "wait_ms": 14500, "metric": "aura", "fields": {"spell": 800979},
+      "observe_source": "$800979d = 15000 ms (800979 DurationIndex 8): the buff that makes the next Ice Barrage instant, read 14500 ms after its cast: present. Control: no cast, absent."
+    },
+    {
+      "spell": 300940, "name": "Refreshing Chill (window_ends)", "kind": "metric_delta", "variant": "window_ends",
+      "label_suffix": "window_ends", "quote": "and make your cast next within", "expected": 0, "before_expected": 0,
+      "trigger_spell": 800979, "target": "caster", "cast_in_before": false, "expire_ms": 500, "wait_ms": 15500, "metric": "aura", "fields": {"spell": 800979},
+      "observe_source": "$800979d = 15000 ms (800979 DurationIndex 8): the buff that makes the next Ice Barrage instant, read 15500 ms after its cast: gone. Control: no cast, absent."
+    },
+    {
+      "spell": 504439, "name": "Grave Mastery (Command cost)", "kind": "cost_gate", "variant": "command",
+      "label_suffix": "command", "quote": "Reduces the cost of all Animates, Raises, and Command spells by",
+      "gated_spell": 504868, "resource": "power", "reduction": 60, "target": "dummy",
+      "observe_source": "504439 Effect[0] aura 108 SPELLMOD_COST (EffectMiscValue 14) -20 ($s1). Command: Undead 504868 costs 300 Runic Power (30 shown): 240 with the talent. Arms: 240 without it refused (SPELL_FAILED_NO_POWER), with it through, 239 with it refused."
+    },
+    {
+      "spell": 805044, "name": "Animate: Tomb King (in combat)", "kind": "metric_delta", "variant": "combat",
+      "label_suffix": "combat", "quote": "to aid you in combat for", "expected": 2, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [805044], "setup_only_after": true, "setup_wait_ms": 1600, "after_at_least": 2,
+      "wait_ms": 8000, "expire_ms": 500, "metric": "owned_creature_damage_count", "fields": {"entry": 50320},
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy; the treatment animates a Tomb King first. Hits of Tomb King 50320 creatures for 8000 ms: at least 2; control without one: 0."
+    },
+    {
+      "spell": 504439, "name": "Grave Mastery (Raise: Ghoul cost)", "kind": "metric_delta", "variant": "cost_500971",
+      "label_suffix": "cost_500971", "quote": "Reduces the cost of all Animates, Raises, and Command spells by", "expected": 2157, "before_expected": 2464,
+      "trigger_spell": 500971, "target": "caster", "disable_regeneration": true, "wait_ms": 3100, "expire_ms": 500, "metric": "power", "fields": {"power": 0},
+      "observe_source": "Raise: Ghoul 500971 costs ManaCostPercentage 28 of the base mana: 384 (the value scenario power_cost read). Regeneration is off. The before phase casts it once without 504439: mana 2848 - 384 = 2464 (control). 504439 Effect[0] aura 108 SPELLMOD_COST -20 ($s1) on the family 29 mask: the after phase casts it again with 504439 known and spends int(384 x 0.8) = 307: 2157."
+    },
+    {
+      "spell": 504439, "name": "Grave Mastery (Animate: Tomb King cost)", "kind": "metric_delta", "variant": "cost_805044",
+      "label_suffix": "cost_805044", "quote": "Reduces the cost of all Animates, Raises, and Command spells by", "expected": 2157, "before_expected": 2464,
+      "trigger_spell": 805044, "target": "caster", "disable_regeneration": true, "wait_ms": 3100, "expire_ms": 500, "metric": "power", "fields": {"power": 0},
+      "observe_source": "Animate: Tomb King 805044 costs ManaCostPercentage 28 of the base mana: 384 (the value scenario power_cost read). Regeneration is off. The before phase casts it once without 504439: mana 2848 - 384 = 2464 (control). 504439 Effect[0] aura 108 SPELLMOD_COST -20 ($s1) on the family 29 mask: the after phase casts it again with 504439 known and spends int(384 x 0.8) = 307: 2157."
+    },
+    {
+      "spell": 805044, "name": "Animate: Tomb King (animated)", "kind": "metric_delta", "variant": "count",
+      "label_suffix": "count", "quote": "Animate a", "expected": 1, "before_expected": 0,
+      "trigger_spell": 805044, "target": "caster", "cast_in_before": false, "wait_ms": 1000, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 50320},
+      "observe_source": "805044 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50320; Summon() spawns one per NecromancerSummons row {805044, 0, 50320, 1}. No cast (control): none; one instant cast: one Tomb King."
+    },
+    {
+      "spell": 805044, "name": "Animate: Tomb King (lifetime held)", "kind": "metric_delta", "variant": "lifetime_held",
+      "label_suffix": "lifetime_held", "quote": "to aid you in combat for", "expected": 1, "before_expected": 0,
+      "trigger_spell": 805044, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 1000, "expire_ms": 500,
+      "expiry_wait_ms": 13500, "after_expiry_expected": 1, "metric": "owned_creature_count", "fields": {"entry": 50320},
+      "observe_source": "$d = 15000 ms (805044 DurationIndex 8); Summon() passes the spell duration as the timed despawn. One Tomb King 1000 ms after the instant cast; 13500 ms later (14500 ms after the cast) still one."
+    },
+    {
+      "spell": 805044, "name": "Animate: Tomb King (lifetime ends)", "kind": "metric_delta", "variant": "lifetime_end",
+      "label_suffix": "lifetime_end", "quote": "to aid you in combat for", "expected": 1, "before_expected": 0,
+      "trigger_spell": 805044, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 1000, "expire_ms": 500,
+      "expiry_wait_ms": 14500, "after_expiry_expected": 0, "metric": "owned_creature_count", "fields": {"entry": 50320},
+      "observe_source": "$d = 15000 ms (805044 DurationIndex 8); Summon() passes the spell duration as the timed despawn. One Tomb King 1000 ms after the instant cast; 14500 ms later (15500 ms after the cast) none."
+    },
+    {
+      "spell": 805044, "name": "Animate: Tomb King (Putrid Claws present)", "kind": "metric_delta", "variant": "putrid_with",
+      "label_suffix": "putrid_with", "quote": "all of your Undead minion", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504868, "setup_casts": [500971, 805044], "after_at_least": 1, "target": "dummy", "setup_only_after": true, "setup_wait_ms": 3000, "wait_ms": 8000, "expire_ms": 500, "metric": "spell_damage_count", "fields": {"spell": 570050, "caster_entry": 50073, "target": "dummy"},
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count Putrid Claws 570050 hits of Ghouls 50073 for 8000 ms. The treatment raises a Ghoul, then casts Animate: Tomb King (its Effect[2] casts Putrid Aura 800027, whose Effect[0] 190 puts it on the Ghoul): the commanded Ghoul's hits cast 570050 (AscensionNecromancerEvents.cpp:99-100), at least one. The before phase has no minion: 0."
+    },
+    {
+      "spell": 805044, "name": "Animate: Tomb King (no Putrid Claws without it)", "kind": "metric_delta", "variant": "putrid_without",
+      "label_suffix": "putrid_without", "quote": "all of your Undead minion", "expected": 0, "before_expected": 0,
+      "trigger_spell": 504868, "setup_casts": [500971], "target": "dummy", "setup_only_after": true, "setup_wait_ms": 3000, "wait_ms": 8000, "expire_ms": 500, "metric": "spell_damage_count", "fields": {"spell": 570050, "caster_entry": 50073, "target": "dummy"},
+      "observe_source": "Control arm: the same Ghoul and Command without Animate: Tomb King: the Ghoul fights the dummy (its Command and melee hits, the Raise: Ghoul combat entry) and casts no 570050."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (animated)", "kind": "metric_delta", "variant": "count",
+      "label_suffix": "count", "quote": "Animate a", "expected": 1, "before_expected": 0,
+      "trigger_spell": 805048, "target": "caster", "cast_in_before": false, "wait_ms": 2500, "expire_ms": 500,
+      "metric": "owned_creature_count", "fields": {"entry": 50385},
+      "observe_source": "805048 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50385, one per NecromancerSummons row {805048, 0, 50385, 1}; 2000 ms cast. No cast (control): none; one cast: one Plaguefather."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (lifetime held)", "kind": "metric_delta", "variant": "lifetime_held",
+      "label_suffix": "lifetime_held", "quote": "Animate a Plaguefather to aid you in combat for", "expected": 1, "before_expected": 0,
+      "trigger_spell": 805048, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 2500, "expire_ms": 500,
+      "expiry_wait_ms": 14000, "after_expiry_expected": 1, "metric": "owned_creature_count", "fields": {"entry": 50385},
+      "observe_source": "$d = 15000 ms (805048 DurationIndex 8), the summon lifetime. One Plaguefather 500 ms after the 2000 ms cast ends; 14000 ms later (14500 ms after it came) still one."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (lifetime ends)", "kind": "metric_delta", "variant": "lifetime_end",
+      "label_suffix": "lifetime_end", "quote": "Animate a Plaguefather to aid you in combat for", "expected": 1, "before_expected": 0,
+      "trigger_spell": 805048, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 2500, "expire_ms": 500,
+      "expiry_wait_ms": 15000, "after_expiry_expected": 0, "metric": "owned_creature_count", "fields": {"entry": 50385},
+      "observe_source": "$d = 15000 ms (805048 DurationIndex 8), the summon lifetime. One Plaguefather 500 ms after the 2000 ms cast ends; 15000 ms later (15500 ms after it came) none."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (in combat)", "kind": "metric_delta", "variant": "combat",
+      "label_suffix": "combat", "quote": "to aid you in combat", "expected": 2, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [805048], "setup_only_after": true,
+      "setup_wait_ms": 2500, "after_at_least": 2, "wait_ms": 9000, "expire_ms": 500,
+      "metric": "owned_creature_damage_count", "fields": {"entry": 50385},
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy; the treatment animates a Plaguefather first (2000 ms cast). The Command sends it into combat (DoAction AttackStart) and, its entry having no own Command attack, casts one Zombie Plague 504022 (DoAction default). Hits of Plaguefather 50385 creatures for 9000 ms: at least 2 (the Command's cloud and a melee hit); control without a Plaguefather: 0."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (Zombie Plague)", "kind": "metric_delta", "variant": "zombie_plague",
+      "label_suffix": "zombie_plague", "quote": "Damage dealt by this minion will emit", "expected": 2, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [805048], "setup_only_after": true,
+      "setup_wait_ms": 2500, "after_at_least": 2, "wait_ms": 9000, "expire_ms": 500,
+      "metric": "spell_damage_count", "fields": {"spell": 504022, "caster_entry": 50385, "target": "dummy"},
+      "observe_source": "Same arms as the in-combat entry: Zombie Plague 504022 hits from the Plaguefather on the dummy. The Command itself casts one; damage dealt by the Plaguefather must emit more, so at least 2. Control: no Plaguefather, 0."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (attack power reduction)", "kind": "metric_delta", "variant": "bone_toss",
+      "label_suffix": "bone_toss", "quote": "and reducing their attack power by", "expected": 1, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [805048], "setup_only_after": true,
+      "setup_wait_ms": 2500, "measure_actor": "dummy", "wait_ms": 9000, "expire_ms": 500,
+      "metric": "aura", "fields": {"spell": 704706},
+      "observe_source": "Bone Toss 704706 (aura 344 made SPELL_AURA_MOD_ATTACK_POWER by AscensionNecromancerContracts.cpp, ${-($704706m1+$704706ppl1)} = 223) on the dummy after the Plaguefather fought it for 7000 ms. Control: no cast, no aura."
     },
     {
       "spell": 500971, "name": "Raise: Ghoul (raised)", "kind": "metric_delta", "variant": "count",
