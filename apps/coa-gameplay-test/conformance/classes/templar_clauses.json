@@ -1110,8 +1110,8 @@
       "524739 effect_radius 524740e0 #2",
       "524739 script_hit 524740",
       "524739 behaviour_fixed_count",
-      "524739 behaviour_fixed_count cap",
-      "524739 behaviour_fixed_count cap_control"
+      "524739 cap behaviour_fixed_count",
+      "524739 cap_control behaviour_fixed_count"
     ],
     "kind": "claim"
   },

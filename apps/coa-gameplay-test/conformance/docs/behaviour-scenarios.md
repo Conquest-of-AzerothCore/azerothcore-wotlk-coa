@@ -1532,7 +1532,8 @@ The harness admits twelve creatures (eight before). `fixed_count` `headroom` set
 count a capped entry offers, `far_dummy: false` places no dummy beyond the radius, and `primary_distance_reads: true`
 reads each additional dummy's `distance_2d` to the primary before the casts, judged under `radius` (a dummy outside
 alerts). Norgannon's Wrath 524739 `cap`: twelve dummies, each cast strikes the primary and exactly 9 others (10 in all);
-`cap_control`: ten dummies, all struck.
+`cap_control`: ten dummies, all struck. Their labels take the suffix after the spell id, as every `fixed_count`
+`label_suffix` does (ADR 0240): `524739 cap behaviour_fixed_count`.
 
 ### Blade of Faith ticks and crit (ADR 0243)
 
