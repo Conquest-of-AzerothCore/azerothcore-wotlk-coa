@@ -25,11 +25,16 @@
         ]
       },
       {
-        "claim": "@s:570131:0@ Crypt Plague: Deals ${$m1+0+$SP*0.06} Plague Damage every $t sec for $d, stacking $u times.",
+        "claim": "@s:570131:0@ Crypt Plague: stacking $u times.",
+        "labels": [
+          "92121 behaviour_metric_delta cap"
+        ]
+      },
+      {
+        "claim": "@s:570131:0@ Crypt Plague: Deals ${$m1+0+$SP*0.06} Plague Damage every $t sec for $d",
         "labels": [
           "92121 effect_value 570131e0 #0",
           "92121 spell_duration 570131 #1",
-          "92121 max_stacks 570131 #2",
           "92121 effect_value #3"
         ]
       }

@@ -2038,6 +2038,35 @@
       "trials": 166,
       "parts": 14,
       "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Blight 500237, the damage Blight's Effect[0] aura 227 triggers every 4000 ms (Blight 500217 ranks), cast directly so each trial is one hit."
+    },
+    {
+      "spell": 92121,
+      "name": "Crypt Plague (stack cap)",
+      "kind": "metric_delta",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "and Lichfrost applies 2 stacks.",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        801722,
+        801722,
+        801722,
+        801722,
+        801722
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 570131,
+        "caster": "caster"
+      },
+      "wait_ms": 1700,
+      "expire_ms": 12000,
+      "observe_source": "Pulled Crypt Plague 570131 tooltip (@s:570131:0@): 'stacking $u times', StackAmount 10. Six Lichfrost 801722 hits 1600 ms apart (2 stacks each with 92121, AscensionNecromancerEvents.cpp:106-107) inside the 10 s Crypt Plague duration (DurationIndex 1; Plague does not refresh it, AscensionNecromancer.cpp:266-270) would give 12: the aura holds 10 (CalcMaxAuraStacks, AscensionNecromancer.cpp:268), 0 without 92121."
     }
   ],
   "player_observations": [],
