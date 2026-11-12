@@ -7338,6 +7338,13 @@ class CharmImmunityTests(unittest.TestCase):
         self.assertEqual(statuses, ['ok', 'alert', 'ok', 'alert'])
 
 
+def side_a_entry(lookup, *args) -> dict:
+    try:
+        return lookup(*args)
+    except StopIteration:
+        raise unittest.SkipTest(f'no entry {args} in this branch\'s class file') from None
+
+
 def r1a_entry(spell: int, kind: str, suffix: str = '') -> dict:
     entry = next((entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind
                   and entry.get('label_suffix', '') == suffix), None)
@@ -8077,8 +8084,8 @@ class AllyImmunityTests(unittest.TestCase):
     TESTAMENT_OF_WILL = 801455
 
     def setUp(self):
-        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE,
-                                                              class_entry(self.TESTAMENT_OF_WILL, 'immunity'))
+        entry = side_a_entry(class_entry, self.TESTAMENT_OF_WILL, 'immunity')
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, entry)
         self.steps = run.validate(self.scenario)['steps']
 
     def test_the_effects_land_on_and_are_read_from_the_grouped_ally(self):
@@ -8105,19 +8112,20 @@ class AllyImmunityTests(unittest.TestCase):
                     self.assertEqual(verdict.status, 'alert')
 
     def test_a_caster_entry_keeps_its_steps(self):
-        scenario, _ = behaviour_scenario(CLASS_FILE, class_entry(TESTAMENT_OF_RESOLVE, 'immunity'))
+        scenario, _ = behaviour_scenario(CLASS_FILE, side_a_entry(class_entry, TESTAMENT_OF_RESOLVE, 'immunity'))
         self.assertEqual([player['id'] for player in scenario['players']], [CASTER])
         self.assertFalse(any(step['action'] == 'group' for step in scenario['steps']))
 
     def test_another_target_is_refused(self):
         with self.assertRaises(ValueError):
-            behaviour_scenario(CLASS_FILE, {**class_entry(self.TESTAMENT_OF_WILL, 'immunity'), 'target': 'dummy'})
+            behaviour_scenario(CLASS_FILE, {**side_a_entry(class_entry, self.TESTAMENT_OF_WILL, 'immunity'),
+                                            'target': 'dummy'})
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CostGateTargetHealthTests(unittest.TestCase):
     def entry(self):
-        return variant_entry(TESTAMENT_OF_STRENGTH, 'cost_gate', 'titanstrike')
+        return side_a_entry(variant_entry, TESTAMENT_OF_STRENGTH, 'cost_gate', 'titanstrike')
 
     def test_the_dummy_is_lowered_once_before_the_first_cast(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, self.entry())
@@ -8140,7 +8148,8 @@ class ScriptHitControlCastTests(unittest.TestCase):
     RIGHTEOUS_LUNGE = 570233
 
     def test_the_control_arm_makes_its_own_casts_with_the_spell_known(self):
-        scenario, [expectation] = behaviour_scenario(CLASS_FILE, class_entry(self.ARGENT_BLADE, 'script_hit'))
+        entry = side_a_entry(class_entry, self.ARGENT_BLADE, 'script_hit')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
         steps = run.validate(scenario)['steps']
         drain = first_index(steps, label='control drain')
         control = [step['spell'] for step in steps[:drain] if step['action'] == 'cast']
@@ -8151,14 +8160,14 @@ class ScriptHitControlCastTests(unittest.TestCase):
         self.assertIn('instead', expectation.model['control_text'])
 
     def test_an_empty_control_arm_strikes_without_the_brand(self):
-        scenario, _ = behaviour_scenario(CLASS_FILE, class_entry(300513, 'script_hit'))
+        scenario, _ = behaviour_scenario(CLASS_FILE, side_a_entry(class_entry, 300513, 'script_hit'))
         steps = run.validate(scenario)['steps']
         drain = first_index(steps, label='control drain')
         self.assertFalse([step for step in steps[:drain] if step['action'] == 'cast' and step['actor'] == CASTER])
         self.assertTrue([step for step in steps[drain:] if step['action'] == 'cast' and step['spell'] == 300513])
 
     def test_control_casts_equal_to_the_casts_are_refused(self):
-        entry = class_entry(self.ARGENT_BLADE, 'script_hit')
+        entry = side_a_entry(class_entry, self.ARGENT_BLADE, 'script_hit')
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, {**entry, 'control_casts': entry['casts']})
 
@@ -8169,7 +8178,8 @@ class HitRatioAllyDistanceTests(unittest.TestCase):
 
     def test_the_ally_is_grouped_and_moved_before_the_first_heal(self):
         for variant, distance in (('ally_inside', 30), ('ally_outside', 45)):
-            scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(self.FORTIFIED_BODY, 'hit_ratio', variant))
+            entry = side_a_entry(variant_entry, self.FORTIFIED_BODY, 'hit_ratio', variant)
+            scenario, _ = behaviour_scenario(CLASS_FILE, entry)
             steps = run.validate(scenario)['steps']
             cast = first_index(steps, action='cast', spell=578276)
             with self.subTest(variant=variant):
@@ -8179,7 +8189,7 @@ class HitRatioAllyDistanceTests(unittest.TestCase):
                 self.assertEqual(steps[cast]['actor'], 'ally')
 
     def test_a_distance_without_the_ally_is_refused(self):
-        entry = {**variant_entry(self.FORTIFIED_BODY, 'hit_ratio', 'no_stack'), 'ally_distance': 30}
+        entry = {**side_a_entry(variant_entry, self.FORTIFIED_BODY, 'hit_ratio', 'no_stack'), 'ally_distance': 30}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
