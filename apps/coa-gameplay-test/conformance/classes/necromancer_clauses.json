@@ -3010,5 +3010,195 @@
       "807813 effect_value #2"
     ],
     "kind": "claim"
+  },
+  {
+    "spell": 500969,
+    "clause": "Raise a Skeletal Rogue to aid you in combat, occupying 1 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500969,
+    "clause": "Has a chance to apply Decaying Poison on hit, reducing the target's casting speed by $805024s1% for $805024d,",
+    "labels": [
+      "500969 effect_value 805024e0 #0",
+      "500969 spell_duration 805024 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500969,
+    "clause": "stacking $805024u times.",
+    "labels": [
+      "500969 max_stacks 805024 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500969,
+    "clause": "Command: Leaps to your target and strikes it $805938s1 times.",
+    "labels": [
+      "500969 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500969,
+    "clause": "Always strikes 5 times on enemies below 35% health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500991,
+    "clause": "Command your Undead to focus their attacks on the target enemy.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500991,
+    "clause": "Usable while casting or channeling.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504868,
+    "clause": "Command your Undead minions to perform a unique attack on your target.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504868,
+    "clause": "Refer to individual Raise spells for their Command effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 562028,
+    "clause": "Shows the location of all nearby Undead on the minimap and increases damage dealt to Undead by $s2% while active.",
+    "labels": [
+      "562028 effect_value e1 #0",
+      "562028 aura_amount e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680283,
+    "clause": "Your Life Force is increased by 1.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800706,
+    "clause": "Transform an enemy into a ghoul, fearing them for $d ($?s302923[9][8] sec vs.",
+    "labels": [
+      "800706 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 800706,
+    "clause": "players).",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800706,
+    "clause": "Only usable on Humanoids.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 800706,
+    "clause": "Damage caused may interrupt the effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801530,
+    "clause": "Channel life into your Raised minions within $a1 yds for $d,",
+    "labels": [
+      "801530 effect_radius e0 #0",
+      "801530 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801530,
+    "clause": "healing them for $801545s1% of their maximum health plus ${$801545m2+$801545ppl2+$SP*.25} every $t2 sec.",
+    "labels": [
+      "801530 effect_value 801545e0 #2",
+      "801530 effect_value 801545e1 #3",
+      "801530 aura_amplitude_ms #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803605,
+    "clause": "Bring a dead ally back to life with $s1 health",
+    "labels": [
+      "803605 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803605,
+    "clause": "and $q1 mana.",
+    "labels": [
+      "803605 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803605,
+    "clause": "Can be used in combat.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803771,
+    "clause": "Create $s1 Bone Reliquaries that restores $803767s1% of your missing health.",
+    "labels": [
+      "803771 effect_value e0 #0",
+      "803771 effect_value 803767e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803771,
+    "clause": "Allies may only use a Bone Reliquary once per minute.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803771,
+    "clause": "Shares a cooldown with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804360,
+    "clause": "Allows you to summon Undead minions using Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804360,
+    "clause": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 804360,
+    "clause": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste and gain expertise from your hit chance.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807941,
+    "clause": "Sacrifices your Undead, returning their Life Force to you, and restoring ${$m1+$SP*.3} health for each Undead minion destroyed.",
+    "labels": [
+      "807941 effect_value e0 #0"
+    ],
+    "kind": "claim"
   }
 ]
