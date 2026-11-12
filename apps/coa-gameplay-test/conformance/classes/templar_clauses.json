@@ -1672,10 +1672,12 @@
     "clause": "reducing their total threat by $572809s1% every $t1 sec for $d",
     "labels": [
       "572808 effect_value 572809e0 #0",
-      "572808 behaviour_metric_ratio_delta"
+      "572808 behaviour_metric_ratio_delta",
+      "572808 behaviour_metric_ratio_delta ally",
+      "572808 behaviour_metric_ratio_delta ally_caster_control"
     ],
     "kind": "claim",
-    "reason": "real cast of 572808 (audit 2026-11-12, rule 4 amendment point 2b; ADR 0263): the caster casts 572808 on itself, its aura_duration_ms reads 0 before the cast and 1800000 after it, and one tick scales the dummy's threat by 0.98 (136 -> 133.28, 130 -> 127.4); counted pair 20261112-051948 / -052121, build c5c62fbff795"
+    "reason": "real cast of 572808 (audit 2026-11-12, rule 4 amendment point 2b; ADR 0263; review I1): the caster casts 572808 on a grouped ally that has built threat, the aura reads 0 on the ally before the cast and 1800000 after it, and one tick scales the dummy's threat toward the ally by 0.98 (109 -> 106.82, 108 -> 105.84) while its threat toward the casting Templar stays at ratio 1 (control: 130 -> 130, 133 -> 133); the self-cast arm reads 0.98 too (128 -> 125.44, 131 -> 128.38); counted pair 20261112-053234 / -053347, build 8aca91c60301 (server 189f4a448982)"
   },
   {
     "spell": 572808,
@@ -1687,7 +1689,7 @@
       "572808 behaviour_metric_ratio_delta period"
     ],
     "kind": "claim",
-    "reason": "real cast of 572808 (audit 2026-11-12, rule 4 amendment point 2b; ADR 0263): each arm starts from the caster's cast of 572808 on itself, aura absent before the cast and present after it; threat ratio 1 after 600 ms (control, 0 ticks), 0.98 after 1200 ms (1 tick), 0.941192 after 3200 ms (3 ticks), so the period lies in (800, 1067] ms; counted pair 20261112-051948 / -052121, build c5c62fbff795"
+    "reason": "real cast of 572808 (audit 2026-11-12, rule 4 amendment point 2b; ADR 0263): each arm starts from the caster's cast of 572808 on itself, aura absent before the cast and present after it; threat ratio 1 after 600 ms (control, 0 ticks), 0.98 after 1200 ms (1 tick), 0.941192 after 3200 ms (3 ticks), so the period lies in about (667, 1300) ms for a first tick anywhere in (600, 1200] ms, and in (800, 1067] ms if the first tick lands one period after the cast (review M2); counted pair 20261112-053234 / -053347, build 8aca91c60301 (server 189f4a448982)"
   },
   {
     "spell": 572808,
