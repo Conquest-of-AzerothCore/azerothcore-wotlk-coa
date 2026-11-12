@@ -18,7 +18,7 @@ generates byte-identical.
 
 ## Consequences
 
-- Sacred Swing's slope is read with a flat of 50, against the Faith Guard convention of x2 until the mentor answers
-  whether that convention governs it (server data: spell_threat pctMod 2.25).
+- Sacred Swing's slope is read with a flat of 50 against the Faith Guard convention of x2; it reads 2.25 (server data:
+  spell_threat pctMod 2.25). The mentor set the claim part to status 5, owner question Q-r3a-1.
 - Seeded tests: the flat includes 301061's 50 and the caster aura precedes the cast; a slope off the stated factor
   alerts.

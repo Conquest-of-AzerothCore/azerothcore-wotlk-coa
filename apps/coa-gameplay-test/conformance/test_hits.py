@@ -1126,6 +1126,7 @@ class ScriptHitTest(unittest.TestCase):
         self.assertIn('does not explain it either', mutant.explanation)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitCastsFloorTest(unittest.TestCase):
     def test_a_floor_raises_the_casts_and_leaves_other_spells_alone(self):
         class_file = {'hit_casts': [{'spell': 572769, 'casts': 40}]}
@@ -1133,6 +1134,15 @@ class HitCastsFloorTest(unittest.TestCase):
         self.assertEqual(floored_casts(class_file, 572769, 55), 55)
         self.assertEqual(floored_casts(class_file, 570233, 2), 2)
         self.assertEqual(floored_casts({}, 572769, 2), 2)
+
+    def test_a_floored_sacred_swing_mean_needs_forty_hits(self):
+        templar = load_class_file(TEMPLAR_CLASS_ID)
+        spell = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}[SACRED_SWING]
+        casts = floored_casts(templar, SACRED_SWING_MAX_RANK,
+                              casts_needed(reference_hit_model(templar, SACRED_SWING_MAX_RANK)))
+        model = hit_expectation(hit_parts(templar, spell, casts)[0][1]).model
+        self.assertEqual(casts, 40)
+        self.assertEqual((model['minimum_hits'], model['scheduled_casts']), (40, 60))
 
     def test_a_floor_below_one_cast_is_refused(self):
         with self.assertRaises(ValueError):

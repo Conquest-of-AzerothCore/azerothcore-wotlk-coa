@@ -1208,7 +1208,8 @@
       "524822 e0 spell_modifier 807929",
       "524822 behaviour_hit_ratio oath_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Radiant Blade's class mask also raises four Oaths its tooltip does not name: Oath: Condemn 805125, Oath: Holy Cleave 805136, Oath: Retribution 805145 and Oath: Vindication 805090 (they share 804904's tooltip). Their spell_modifier reads, labels \"524822 e0 spell_modifier 805125\", \"... 805136\", \"... 805145\" and \"... 805090\", have status measured (reported, not judged; readings in lean/r3-a-progress.md, review fixes). They are named here and not listed as labels: coverage holds a clause unproven while any of its labels is not ok, tolerated or closed (coverage.py:290), and these reads prove nothing about the Oath the tooltip names. Owner information item I-r3a-1 in lean/owner-questions.md."
   },
   {
     "spell": 525024,
@@ -1240,7 +1241,8 @@
       "525080 e0 spell_modifier 807929",
       "525080 behaviour_hit_ratio oath_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Radiant Blade's class mask also raises four Oaths its tooltip does not name: Oath: Condemn 805125, Oath: Holy Cleave 805136, Oath: Retribution 805145 and Oath: Vindication 805090 (they share 804904's tooltip). Their spell_modifier reads, labels \"525080 e0 spell_modifier 805125\", \"... 805136\", \"... 805145\" and \"... 805090\", have status measured (reported, not judged; readings in lean/r3-a-progress.md, review fixes). They are named here and not listed as labels: coverage holds a clause unproven while any of its labels is not ok, tolerated or closed (coverage.py:290), and these reads prove nothing about the Oath the tooltip names. Owner information item I-r3a-1 in lean/owner-questions.md."
   },
   {
     "spell": 527023,
@@ -2460,7 +2462,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Both claims rest on one 572769 hit_mean (60 hits per run, ADR 0224). In the DBC effect order (ADR 0010) the flat $m1 (278) enters before the 180% weapon percent, so the hit is (weapon roll + 278) x 1.8: about +500 of the hit comes from the flat. One weapon cannot separate a compensating pair of errors in the percent and the flat (review M1). The High Threat part is owner question Q-r3a-1."
   },
   {
     "spell": 572769,
@@ -2468,7 +2471,8 @@
     "labels": [
       "572769 hit_mean"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The +278 enters before the 180% (DBC effect order, ADR 0010), so it adds about 278 x 1.8 = 500 to the hit; proven by the same hit_mean as claim 206 (60 hits per run)."
   },
   {
     "spell": 572769,
