@@ -1827,9 +1827,20 @@
   {
     "spell": 704721,
     "clause": "When you cast Unholy Frenzy you now animate $302912s1 Greater Zombies to aid you in combat for $525380d.",
-    "labels": [
-      "704721 effect_value 302912e0 #0",
-      "704721 spell_duration 525380 #1"
+    "claims": [
+      {
+        "claim": "When you cast Unholy Frenzy you now animate $302912s1 Greater Zombies",
+        "labels": [
+          "704721 behaviour_metric_delta zombies"
+        ]
+      },
+      {
+        "claim": "to aid you in combat for $525380d.",
+        "labels": [
+          "704721 behaviour_metric_delta zombies_last",
+          "704721 behaviour_metric_delta zombies_end"
+        ]
+      }
     ],
     "kind": "claim"
   },

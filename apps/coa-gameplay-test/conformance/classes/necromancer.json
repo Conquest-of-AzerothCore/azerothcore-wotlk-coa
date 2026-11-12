@@ -1518,6 +1518,71 @@
       "wait_ms": 4000,
       "expire_ms": 3000,
       "observe_source": "560012 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with aura 290 SPELL_AURA_MOD_CRIT_PCT; aura_ascension_necromancer_lifecycle sets its amount to Amount(523613, 1) = 10 ($523613s2) while a Skeletal Mage 50075 is a minion, else 0 (AscensionNecromancerAuras.cpp:60-61), recalculated by AscensionNecromancer.cpp:395. Life Force: base 2 + Summoning Adept 92123 = 3, a Skeletal Mage (2, Raise: Skeletal Mage 500331) and a Ghoul (1); a later raise evicts the oldest minion (AscensionNecromancerSummons.cpp:132-145). Read on the live Ghoul 50073: melee crit chance (Unit::GetUnitCriticalChance, creature base 5). 560012 known throughout: the Ghoul alone reads 5, with a Skeletal Mage raised first 15."
+    },
+    {
+      "spell": 704721,
+      "name": "Study of Death (Greater Zombies)",
+      "kind": "metric_delta",
+      "variant": "zombies",
+      "label_suffix": "zombies",
+      "quote": "When you cast Unholy Frenzy you now animate $302912s1 Greater Zombies",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 805029,
+      "cast_power": 1373,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "observe_source": "AscensionNecromancerAbilities.cpp:346-353: a cast of Unholy Frenzy 805029 with 704721 known summons min(10, Amount(302912)) Greater Zombies through Animate: Greater Zombie 525380 (creature 503032); 302912 Effect[0] BasePoints 4 + DieSides 1 = 5 ($302912s1); 525380 DurationIndex 8 = 15000 ms ($525380d), the summon lifetime (Summon, AscensionNecromancerSummons.cpp:352-355). Unholy Frenzy costs 15% of base mana: cast_power 1373 (player_class_stats class 23 level 60 BaseMana). Unholy Frenzy cast without 704721: 0 Greater Zombies (control); with it: 5."
+    },
+    {
+      "spell": 704721,
+      "name": "Study of Death (zombies last)",
+      "kind": "metric_delta",
+      "variant": "zombies_last",
+      "label_suffix": "zombies_last",
+      "quote": "to aid you in combat for $525380d.",
+      "expected": 5,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 12500,
+      "after_expiry_expected": 5,
+      "trigger_spell": 805029,
+      "cast_power": 1373,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "wait_ms": 1500,
+      "expire_ms": 1000,
+      "observe_source": "AscensionNecromancerAbilities.cpp:346-353: a cast of Unholy Frenzy 805029 with 704721 known summons min(10, Amount(302912)) Greater Zombies through Animate: Greater Zombie 525380 (creature 503032); 302912 Effect[0] BasePoints 4 + DieSides 1 = 5 ($302912s1); 525380 DurationIndex 8 = 15000 ms ($525380d), the summon lifetime (Summon, AscensionNecromancerSummons.cpp:352-355). Unholy Frenzy costs 15% of base mana: cast_power 1373 (player_class_stats class 23 level 60 BaseMana). With 704721 known: 0 before the cast, 5 at 1500 ms and still 5 at 14000 ms after it, inside the 15000 ms lifetime."
+    },
+    {
+      "spell": 704721,
+      "name": "Study of Death (zombies end)",
+      "kind": "metric_delta",
+      "variant": "zombies_end",
+      "label_suffix": "zombies_end",
+      "quote": "to aid you in combat for $525380d.",
+      "expected": 5,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 15000,
+      "after_expiry_expected": 0,
+      "trigger_spell": 805029,
+      "cast_power": 1373,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "wait_ms": 1500,
+      "expire_ms": 1000,
+      "observe_source": "AscensionNecromancerAbilities.cpp:346-353: a cast of Unholy Frenzy 805029 with 704721 known summons min(10, Amount(302912)) Greater Zombies through Animate: Greater Zombie 525380 (creature 503032); 302912 Effect[0] BasePoints 4 + DieSides 1 = 5 ($302912s1); 525380 DurationIndex 8 = 15000 ms ($525380d), the summon lifetime (Summon, AscensionNecromancerSummons.cpp:352-355). Unholy Frenzy costs 15% of base mana: cast_power 1373 (player_class_stats class 23 level 60 BaseMana). With 704721 known: 0 before the cast, 5 at 1500 ms and 0 at 16500 ms after it, past the 15000 ms lifetime."
     }
   ],
   "player_observations": [],
