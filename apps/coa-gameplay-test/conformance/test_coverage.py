@@ -588,7 +588,7 @@ class ConsumptionTest(unittest.TestCase):
         result = self.coverage([consumed(self.READBACK, NOT_CONSUMED)])
         self.assertEqual(([status for _, status in result.evidence], result.not_consumed), ([DATA], {self.READBACK}))
 
-    def test_one_not_consumed_row_outweighs_a_consumed_row_of_the_same_label(self):
+    def test_one_not_consumed_row_outranks_a_consumed_row_of_the_same_label(self):
         result = self.coverage([consumed(self.READBACK), consumed(self.READBACK, NOT_CONSUMED)])
         self.assertEqual([status for _, status in result.evidence], [DATA])
 
