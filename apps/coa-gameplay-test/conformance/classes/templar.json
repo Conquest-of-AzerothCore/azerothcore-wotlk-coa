@@ -4691,7 +4691,7 @@
       "debuffs": [[3, [55095, 55078]], [4, [2818, 25810]]],
       "arms": [{"name": "control", "expected": [[3, 0], [4, 0]]},
                {"name": "rank_1", "auras": [[680399, 1]], "expected": [[3, 1], [4, 1]]}],
-      "expected_source": "$525052s2 = 1, and the owner ruling 'Disciplined Mind' (2026-11-11) keeps rank 1 at 1 of each. Disciplined Mind ranks cast 525052 from Benediction's OnSpellCast hook (AscensionTemplarAbilities.cpp:231-235); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
+      "expected_source": "$525052s2 = 1, and the owner ruling 'Disciplined Mind' (2026-11-11) keeps rank 1 at 1 of each. Disciplined Mind ranks cast 525052 at every unit Benediction hits, from templar_casts::OnSpellHitResult (ADR 0293); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
     },
     {
       "spell": 681483, "name": "Disciplined Mind", "kind": "dispel_count",
@@ -4699,7 +4699,7 @@
       "debuffs": [[3, [55095, 55078]], [4, [2818, 25810]]],
       "arms": [{"name": "control", "expected": [[3, 0], [4, 0]]},
                {"name": "rank_2", "auras": [[681483, 1]], "expected": [[3, 2], [4, 2]]}],
-      "expected_source": "The owner ruling 'Disciplined Mind' (2026-11-11): rank 2 dispels 2 poison and 2 disease effects per Benediction; 681483 repeats EffectTriggerSpell 525052 on effects 1 and 2 in the DBC. Disciplined Mind ranks cast 525052 from Benediction's OnSpellCast hook (AscensionTemplarAbilities.cpp:231-235); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
+      "expected_source": "The owner ruling 'Disciplined Mind' (2026-11-11): rank 2 dispels 2 poison and 2 disease effects per Benediction; 681483 repeats EffectTriggerSpell 525052 on effects 1 and 2 in the DBC. Disciplined Mind ranks cast 525052 at every unit Benediction hits, from templar_casts::OnSpellHitResult (ADR 0293); 525052 Effect[0] and Effect[1] are SPELL_EFFECT_DISPEL (38), EffectMiscValue 3 (DISPEL_DISEASE) and 4 (DISPEL_POISON), each EffectBasePoints 0 + EffectDieSides 1 = 1 effect. The ally carries Frost Fever 55095 and Blood Plague 55078 (Dispel 3) and Deadly Poison 2818 and Mind-numbing Poison 25810 (Dispel 4)"
     },
     {
       "spell": 681483, "name": "Disciplined Mind", "kind": "dispel_count", "variant": "uneven", "label_suffix": "uneven",

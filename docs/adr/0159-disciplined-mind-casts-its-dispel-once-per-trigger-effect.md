@@ -1,6 +1,6 @@
 # 0159. Disciplined Mind casts its dispel once per trigger effect of the rank
 
-- Status: accepted
+- Status: accepted; the explicit-target shape is superseded by ADR 0293
 - Date: 2026-11-11
 
 ## Context

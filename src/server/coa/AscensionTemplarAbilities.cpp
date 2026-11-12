@@ -243,17 +243,7 @@ class templar_casts : public AllSpellScript
         if (Libram(info) && player->HasAura(706468))
             ReduceDebt(player, 70);
         if (Named(info, 801448))
-        {
             talent(707364, 712378);
-            if (target)
-                for (uint32 rank : {681483u, 680399u})
-                    if (player->HasAura(rank))
-                    {
-                        for (uint32 cast = DispelCasts(rank); cast; --cast)
-                            Cast(player, target, SPELL_DISCIPLINED_MIND_DISPEL);
-                        break;
-                    }
-        }
         if (Named(info, 801165))
         {
             talent(705256, 681136);
@@ -305,6 +295,14 @@ class templar_casts : public AllSpellScript
         bool const hit = miss == SPELL_MISS_NONE;
         if (hit && healing && Named(info, 801448) && player->HasAura(524765))
             Cast(player, player, 524766);
+        if (hit && Named(info, 801448))
+            for (uint32 rank : {681483u, 680399u})
+                if (player->HasAura(rank))
+                {
+                    for (uint32 cast = DispelCasts(rank); cast; --cast)
+                        Cast(player, target, SPELL_DISCIPLINED_MIND_DISPEL);
+                    break;
+                }
         if (hit && damage && Named(info, 804929))
             Copy(player, player, 807414, damage);
         if (Named(info, 804929) && spell->GetScriptValue(801832))
