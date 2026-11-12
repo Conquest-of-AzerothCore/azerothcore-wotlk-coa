@@ -4781,6 +4781,15 @@
       "caster": "caster", "target": "ally", "learn": [801465],
       "control": {}, "treatment": {"auras": [[35785, 1]]}, "critical": false, "trials": 30,
       "expected_source": "Silverhand Incantation 801465 (BaseLevel 58, the level 60 rank) charges to its target (Effect[1] 96 SPELL_EFFECT_CHARGE) and passes its Effect[0] value to 801501 (148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE), which deals it as Holy damage to enemies (TARGET_UNIT_SRC_AREA_ENEMY) and heals allies (TARGET_UNIT_SRC_AREA_ALLY) within 8 yd (EffectRadiusIndex 14) of the caster on arrival. Effect[0] is EffectBasePoints 299 + 1 = 300, no per-level term, plus 2 x AP from TemplarCoefficients (AscensionTemplarData.h:74, added at AscensionTemplarContracts.cpp:335-342). The caster charges to the grouped ally; the heal 801501 lands on it with the same Effect[0] value as the damage: 926 at AP 313, 2886 with Attack Power 980 35785, so the heal ratio is the damage ratio, 3.1166 (the attack_power entry). Only non-critical heals."
+    },
+    {
+      "spell": 801465, "name": "Silverhand Incantation", "kind": "dispel_removal", "variant": "sacred_restraint",
+      "label_suffix": "sacred_restraint", "quote": "and removing Sacred Restraint from you and them if they are an ally",
+      "debuffs": [102208], "wait_ms": 3000,
+      "arms": [{"name": "failed", "target": "ally", "removed": false, "away_yd": 60, "refused": 97},
+               {"name": "ally", "target": "ally", "removed": true},
+               {"name": "hostile", "target": "dummy", "removed": false}],
+      "observe_source": "AscensionTemplarAbilities.cpp templar_casts::OnSpellCast (ADR 0188): after a cast of 801465 that went through at a friendly unit target other than the caster, every 102208 application on the caster and on that target is removed. Sacred Restraint 102208 is set on the caster and on the arm's target before each cast. failed: the caster steps 60 yd away, beyond 801465's 40 yd (SpellRange 5), so the cast is refused (97 SPELL_FAILED_OUT_OF_RANGE, judged) and both keep it; the other arms' casts must read 0; ally: the cast lands and both lose it; hostile: a cast at the dummy lands and both keep it, the behaviour Q4 asks the owner about."
     }
   ],
   "player_observations": [

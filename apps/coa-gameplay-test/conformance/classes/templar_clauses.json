@@ -3437,7 +3437,17 @@
   {
     "spell": 801465,
     "clause": "and removing Sacred Restraint from you and them if they are an ally",
-    "labels": [],
+    "labels": [
+      "801465 failed cast_failure",
+      "801465 behaviour_dispel_removal 102208 failed caster",
+      "801465 behaviour_dispel_removal 102208 failed target",
+      "801465 ally cast_failure",
+      "801465 behaviour_dispel_removal 102208 ally caster",
+      "801465 behaviour_dispel_removal 102208 ally target",
+      "801465 hostile cast_failure",
+      "801465 behaviour_dispel_removal 102208 hostile caster",
+      "801465 behaviour_dispel_removal 102208 hostile target"
+    ],
     "kind": "claim"
   },
   {
