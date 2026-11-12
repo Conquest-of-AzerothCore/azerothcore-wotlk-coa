@@ -8851,7 +8851,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         reads = [index for index, step in enumerate(steps) if step.get('metric') == 'distance_2d']
         self.assertEqual(len(reads), 2)
         self.assertTrue(all(index < cast for index in reads))
-        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '0'])
+        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '1'])
 
     def test_seeded_misplaced_dummy_alerts_even_when_the_victim_matches(self):
         _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
@@ -8875,7 +8875,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         caster_reads = [step for step in steps[:cast] if step.get('actor') == 'caster'
                         and step.get('metric') in ('combat_reach', 'position_z', 'run_speed_rate')]
         self.assertEqual(len(caster_reads), 3)
-        self.assertEqual([expectation.displayed for expectation in expectations], ['0', '0', '0', '0'])
+        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '1', '0', '0'])
 
     def test_the_control_is_a_stock_area_taunt_with_a_guard_inside_its_radius(self):
         [control] = control_entries(19)
