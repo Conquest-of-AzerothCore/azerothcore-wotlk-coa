@@ -10090,5 +10090,33 @@ class MetricDeltaSetupInBeforeTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), hasted, expectation).status, 'ok')
 
 
+class MetricDeltaReadTargetTests(unittest.TestCase):
+    def stance_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 500982 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_enemy_player_read_target_adds_the_enemy_player(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.stance_entry('humanoid_crit')))
+        run.validate(scenario)
+        self.assertIn('enemy', [player['id'] for player in scenario['players']])
+        cast = next(step for step in scenario['steps'] if step.get('action') == 'cast')
+        self.assertEqual(cast['target'], 'caster')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_dummy_read_target_adds_the_dummy(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23),
+                                            metric_delta_spec(self.stance_entry('mechanical_crit_control')))
+        run.validate(scenario)
+        self.assertEqual([creature['id'] for creature in scenario.get('creatures', [])], ['dummy'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_read_of_the_caster_alone_adds_neither(self):
+        entry = {**self.stance_entry('speed')}
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        self.assertNotIn('creatures', scenario)
+        self.assertEqual([player.get('id', 'caster') for player in scenario['players']], ['caster'])
+
+
 if __name__ == '__main__':
     unittest.main()
