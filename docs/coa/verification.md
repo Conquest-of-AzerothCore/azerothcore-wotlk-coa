@@ -66,11 +66,27 @@ when ninja exists:
 ```
 
 On macOS the default also passes `-DREADLINE_LIBRARY` and `-DREADLINE_INCLUDE_DIR` for Homebrew readline when it
-is installed; without them CMake finds the SDK's libedit stub and the worldserver does not compile. It also sets
-`CMAKE_C_FLAGS_RELWITHDEBINFO` and `CMAKE_CXX_FLAGS_RELWITHDEBINFO` to `-O2 -g1 -DNDEBUG` (Clang treats `-g1` as
-`-gline-tables-only`, and GCC accepts it too): object files shrink by an order of magnitude and archives and links
-get faster, while crash backtraces keep file and line but lose class names and arguments. A `cmake_args`
-setting replaces all of these defaults, so repeat the flags there when they are wanted.
+is installed; without them CMake finds the SDK's libedit stub and the worldserver does not compile.
+
+On macOS and Linux it sets `CMAKE_C_FLAGS_RELWITHDEBINFO` and `CMAKE_CXX_FLAGS_RELWITHDEBINFO` to
+`-O2 -g1 -DNDEBUG`. Clang treats `-g1` as `-gline-tables-only`, and GCC accepts it too. Object files shrink by an
+order of magnitude and archives and links get faster. Crash backtraces keep file, line and inlined frames, but
+gdb loses types, locals and arguments.
+
+On Linux it also passes:
+
+- `-DWITH_GAME_UNITY_BUILD=ON`, which compiles `game` as a unity build in batches of 8 (see
+  [build performance](build-performance.md)).
+- `CMAKE_C_ARCHIVE_CREATE`, `CMAKE_C_ARCHIVE_APPEND`, `CMAKE_CXX_ARCHIVE_CREATE` and `CMAKE_CXX_ARCHIVE_APPEND`
+  with `ar qcT` and `ar qT`. The static libraries become thin archives that reference the object files instead of
+  copying them.
+- `-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold` when `mold` is on `PATH`. This needs GCC 12.1 or later, or Clang.
+
+Windows keeps CMake's defaults.
+
+A `cmake_args` setting replaces all of these defaults, so repeat the flags there when they are wanted. An existing
+build directory is not reconfigured, so it keeps the flags it was configured with. To pick up new defaults, point
+`build_directory` at a new directory, or delete the build directory's `CMakeCache.txt`.
 
 The macOS CMake configuration also creates static libraries with `/usr/bin/libtool -static` instead of
 `ar` and `ranlib` (Ninja and Makefile generators; a cached `CMAKE_CXX_CREATE_STATIC_LIBRARY` overrides it), and
@@ -116,6 +132,11 @@ and DBC directory, and expect a full first build and new world-cache copies. Kee
 worktree's worldserver reads module configs from its own `<CONF_DIR>/modules`, so create that directory or set
 `server_modules_dir` to it. Run `--plan` in the worktree to see what is still missing, or verify from the
 primary checkout when that is possible.
+
+The first build of a worktree can reuse another worktree's objects through ccache when both use the same cache
+and `CCACHE_BASEDIR` covers both checkouts. Outside the paths `CCACHE_BASEDIR` rewrites, only `Config.cpp` and
+`GitRevision.cpp` embed the checkout path, so precompiled headers and the unit tests also hit with GCC. Clang
+precompiled headers do not hit across worktrees. Figures: [build performance](build-performance.md).
 
 ## Stages
 
