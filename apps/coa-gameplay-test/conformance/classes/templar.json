@@ -1846,6 +1846,71 @@
   ],
   "behaviours": [
     {
+      "spell": 572769, "name": "Sacred Swing (enemies in front)", "kind": "fixed_count", "variant": "in_front",
+      "quote": "Swing at enemies in front of you", "expected": 3, "radius": 6.0, "uncapped": true,
+      "cast_spell": 572769, "layout": "caster", "behind_yd": 3.0,
+      "radius_reason": "572769 Effect[0..2] (normalized weapon damage, weapon percent damage, trigger 301061) all target TARGET_UNIT_CONE_ENEMY_54 with EffectRadiusIndex 29 (SpellRadius 6 yd). Spell::SelectImplicitConeTargets (Spell.cpp:1277-1304) keeps a unit inside the radius that WorldObjectSpellConeTargetCheck finds in front of the caster within the cone angle (Spell.cpp:9472-9492, isInFront), or within the caster's boundary radius. The four dummies stand 1.2, 2.4, 3.6 and 4.8 yd in front of the caster (caster layout, the primary first), the far one 11 yd away, and one 3 yd behind the caster (ADR 0223); five casts at the primary with the CasterAuraSpell 681170 set and the Energy cost filled: every front dummy is hit, the far and the behind dummies never."
+    },
+    {
+      "spell": 807814, "name": "Light's Hope (Energy over the duration)", "kind": "metric_delta", "variant": "energy",
+      "label_suffix": "energy", "quote": "restoring $o1 Energy over $d", "expected": 100, "trigger_spell": 807814,
+      "target": "caster", "cast_in_before": false, "metric": "spell_energize_total", "fields": {"spell": 807814},
+      "before_expected": 0, "wait_ms": 10600, "expire_ms": 500, "disable_regeneration": true,
+      "observe_source": "807814 Effect[0] aura 24 SPELL_AURA_PERIODIC_ENERGIZE, EffectMiscValue[0] 3 (POWER_ENERGY), EffectBasePoints[0] 9 + EffectDieSides[0] 1 = 10 per tick, EffectAmplitude[0] 1000 ms, DurationIndex 1 (10000 ms): $o1 = 10 x 10 = 100. spell_energize_total sums the SMSG_PERIODICAURALOG energize amounts the caster receives for 807814 (an event read). Before: no cast, 0. After: one real 807814 cast and 10600 ms, the ten ticks at 1000-10000 ms: 100. No CoA code names 807814."
+    },
+    {
+      "spell": 807814, "name": "Light's Hope", "kind": "cast_applies_aura", "label_suffix": "energy",
+      "quote": "restoring $o1 Energy over $d", "expected_ms": 10000, "applied_aura": 807814, "target": "caster",
+      "observe_source": "807814 DurationIndex 1 (10000 ms, $d), both effects on TARGET_UNIT_CASTER; cast on the caster, the aura read present before 10000 ms and gone after it (the expiry pair). Cooldown 60000 ms is reset before the cast."
+    },
+    {
+      "spell": 807814, "name": "Light's Hope (threat, one tick)", "kind": "threat_tick_ratio", "variant": "one_tick",
+      "label_suffix": "one_tick", "quote": "and reducing your threat each second", "expected_ratio": 0.9,
+      "aura_spell": 807814, "tick_wait_ms": 1200, "ticks": 1,
+      "observe_source": "807814 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[1] 1000 ms, EffectTriggerSpell[1] 35009 (Invisibility - Reducing threat): Effect[0] 125 SPELL_EFFECT_MODIFY_THREAT_PERCENT, EffectBasePoints[0] -11 + EffectDieSides[0] 1 = -10, TARGET_SRC_CASTER / TARGET_UNIT_DEST_AREA_ENEMY (SpellRadius 27). Spell::EffectModifyThreatPercent scales the dummy's threat on the caster by 0.9 per tick (ThreatManager ModifyThreatByPercent). One tick lands by 1200 ms after 807814 is set on the caster: 0.9."
+    },
+    {
+      "spell": 807814, "name": "Light's Hope (threat, before the first tick)", "kind": "threat_tick_ratio",
+      "variant": "before_tick", "label_suffix": "before_tick", "quote": "and reducing your threat each second",
+      "expected_ratio": 1.0, "aura_spell": 807814, "tick_wait_ms": 600, "ticks": 0,
+      "observe_source": "Control arm of the period: 807814 EffectAmplitude[1] 1000 ms with no SPELL_ATTR5_START_PERIODIC_AT_APPLY, so no 35009 lands 600 ms after the aura is set and the dummy's threat is unchanged (1.0)."
+    },
+    {
+      "spell": 807814, "name": "Light's Hope (threat, three ticks)", "kind": "threat_tick_ratio", "variant": "period",
+      "label_suffix": "period", "quote": "and reducing your threat each second", "expected_ratio": 0.729,
+      "aura_spell": 807814, "tick_wait_ms": 3200, "ticks": 3,
+      "observe_source": "Each second: with the 1000 ms amplitude, ticks land at 1000, 2000 and 3000 ms, 3 in 3200 ms, each scaling the threat by 0.9: 0.729; 2 ticks (0.81) or 4 (0.6561) fall outside the 0.005 tolerance. With the 0-tick arm at 600 ms and the 1-tick arm at 1200 ms, the first tick lands in (600, 1200] ms."
+    },
+    {
+      "spell": 705253, "name": "Pure Focus (Scourgebane chance, pooled)", "kind": "hit_ratio", "variant": "scourgebane_rate",
+      "label_suffix": "scourgebane_rate", "quote": "Increases the chance to trigger", "expected": 1.0,
+      "observe_spell": 570233, "control": {"auras": [[92111, 1]]}, "treatment": {"auras": [[92111, 1], [705253, 1]]},
+      "rate": "proc", "rate_spell": 801832, "expected_points": 5, "trials": 166, "parts": 2,
+      "expected_source": "$s1 = 5 (705253 EffectBasePoints[0] 4 + 1), aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 18 (SPELLMOD_CHANCE_OF_SUCCESS) on 520007. AscensionTemplarEvents.cpp:58-63: Scourgebane 92111's proc check starts from 20%, applies 520007's SPELLMOD_CHANCE_OF_SUCCESS and rolls roll_chance_f; a non-periodic damaging Righteous Lunge 570233 (normalized weapon damage, no cooldown) at the dummy rolls once and casts 801832 (AscensionTemplarEvents.cpp:128-130). Both arms set Scourgebane 92111; the treatment sets 705253 too. The rate is 801832 hits over Lunge hits per arm; the difference must be 5 points."
+    },
+    {
+      "spell": 707852, "name": "Pure Focus rank 2 (Scourgebane chance, pooled)", "kind": "hit_ratio", "variant": "scourgebane_rate",
+      "label_suffix": "scourgebane_rate", "quote": "Increases the chance to trigger", "expected": 1.0,
+      "observe_spell": 570233, "control": {"auras": [[92111, 1]]}, "treatment": {"auras": [[92111, 1], [707852, 1]]},
+      "rate": "proc", "rate_spell": 801832, "expected_points": 10, "trials": 166, "parts": 2,
+      "expected_source": "$s1 = 10 (707852 EffectBasePoints[0] 9 + 1), SPELLMOD_CHANCE_OF_SUCCESS on 520007, the same path as rank 1 (AscensionTemplarEvents.cpp:58-63, 128-130): Righteous Lunge 570233 at the dummy, Scourgebane 92111 in both arms, 707852 in the treatment; the 801832 share of Lunge hits must rise by 10 points."
+    },
+    {
+      "spell": 520032, "name": "Teachings of the Cathedral (crit rate, pooled)", "kind": "hit_ratio", "variant": "crit_rate",
+      "label_suffix": "crit_rate", "quote": "now provides $s1% additional critical strike chance", "expected": 1.0,
+      "observe_spell": 801832, "control": {"auras": [[823764, 1], [804922, 1]]},
+      "treatment": {"auras": [[823764, 1], [520032, 1], [804922, 1]]}, "rate": "critical", "expected_points": 3,
+      "trials": 166, "parts": 2,
+      "expected_source": "$s1 = 3 (520032 EffectBasePoints[0] 2 + 1), aura 107 SPELLMOD on EffectMiscValue[0] 3 (SPELLMOD_EFFECT1) of Oath: Condemn 804922, whose Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT is 3 (EffectBasePoints 2 + 1): 6 with the talent. Both arms set beeg spellpen 823764 and 804922; the treatment sets 520032 before 804922 so the modifier enters the Oath's amount at apply. Scourgebane 801832 cast at the dummy; the critical share of its hits must differ by 3 points."
+    },
+    {
+      "spell": 524767, "name": "Judgement of the Gods (Titanstrike crit rate, pooled)", "kind": "hit_ratio",
+      "variant": "crit_rate", "label_suffix": "crit_rate", "quote": "Increases the critical strike chance of", "expected": 1.0,
+      "observe_spell": 806835, "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [524767, 1]]},
+      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 2, "target_health_pct": 30,
+      "expected_source": "$s1 = 50 (524767 EffectBasePoints[0] 49 + 1), aura 107 SPELLMOD on EffectMiscValue[0] 7 (SPELLMOD_CRITICAL_CHANCE), mask-matched to Titanstrike 806835 (spell_modifier ok). Titanstrike 806835 (TargetAuraState 13, the dummy held at 30%) cast at the dummy in both arms with beeg spellpen 823764; the treatment sets 524767. The critical share of Titanstrike hits must differ by 50 points."
+    },
+    {
       "spell": 300522, "name": "Deep Meditation", "kind": "cast_applies_aura",
       "quote": "Increases the duration of your Oath Chain by $/1000;s1 sec.", "expected_ms": 20000,
       "applied_aura": 704576, "target": "caster", "cast_spell": 804906, "cast_target": "dummy",

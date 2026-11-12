@@ -1215,8 +1215,6 @@
     "spell": 525024,
     "clause": "Your Divine Force now strikes 2 additional enemies near the primary target.",
     "labels": [
-      "525024 effect_value #0",
-      "525024 e0",
       "525024 behaviour_count"
     ],
     "kind": "claim"
@@ -4970,12 +4968,15 @@
     "claims": [
       {
         "claim": "restoring $o1 Energy",
-        "labels": []
+        "labels": [
+          "807814 behaviour_metric_delta energy"
+        ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "807814 aura_duration_ms #1"
+          "807814 aura_duration_ms #1",
+          "807814 behaviour_expiry energy"
         ]
       }
     ],
@@ -4984,7 +4985,11 @@
   {
     "spell": 807814,
     "clause": "and reducing your threat each second",
-    "labels": [],
+    "labels": [
+      "807814 behaviour_metric_ratio_delta before_tick",
+      "807814 behaviour_metric_ratio_delta one_tick",
+      "807814 behaviour_metric_ratio_delta period"
+    ],
     "kind": "claim"
   },
   {
