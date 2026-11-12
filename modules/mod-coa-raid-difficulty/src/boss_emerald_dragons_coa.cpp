@@ -46,6 +46,7 @@
  * is left out.
  */
 
+#include "AscensionRaidReleasePolicy.h"
 #include "Containers.h"
 #include "CreatureScript.h"
 #include "ScriptedCreature.h"
@@ -170,6 +171,21 @@ namespace
             ScheduleOwn();
         }
 
+        void Gate()
+        {
+            bool const locked = RaidRelease::ReleasedStage() < RaidRelease::StageMoltenCore;
+            if (locked == _locked)
+                return;
+            _locked = locked;
+            if (locked && me->IsInCombat())
+                EnterEvadeMode();
+            me->SetVisible(!locked);
+            if (locked)
+                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+            else
+                me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+        }
+
         virtual void ScheduleOwn() = 0;
         virtual void Own(uint32 eventId) = 0;
         virtual void Nightmare() = 0;
@@ -265,6 +281,7 @@ namespace
 
         void UpdateAI(uint32 diff) override
         {
+            Gate();
             if (!UpdateVictim())
                 return;
 
@@ -340,6 +357,7 @@ namespace
 
     protected:
         uint32 _block;
+        bool _locked = false;
         EventMap _events;
         EventMap _clock;
         uint8 _stage = 1;
