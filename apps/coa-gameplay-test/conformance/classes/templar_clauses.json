@@ -2205,7 +2205,7 @@
     "clause": "and Testament of Faith",
     "labels": [
       "705268 501606 behaviour_ratio",
-      "705268 e1"
+      "705268 behaviour_hit_ratio faith"
     ],
     "kind": "claim"
   },
