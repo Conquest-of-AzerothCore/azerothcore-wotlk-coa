@@ -4375,7 +4375,16 @@
     "spell": 803872,
     "clause": "Consumes your Oaths, dealing additional damage for each consumed.",
     "labels": [
-      "803872 behaviour_oath_consumption"
+      "803872 behaviour_oath_consumption",
+      "803872 behaviour_hit_ratio oaths",
+      "803872 behaviour_hit_ratio oath_lunge",
+      "803872 behaviour_hit_ratio oath_condemn",
+      "803872 behaviour_hit_ratio oath_cleave",
+      "803872 behaviour_hit_ratio oath_retribution",
+      "803872 behaviour_hit_ratio oath_vindication",
+      "803872 behaviour_hit_ratio oath_all",
+      "803872 behaviour_hit_ratio oath_lunge_keeping_the_oath",
+      "572027 behaviour_hit_ratio oath_keeping_the_oath"
     ],
     "kind": "claim"
   },

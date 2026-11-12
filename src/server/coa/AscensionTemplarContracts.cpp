@@ -321,6 +321,23 @@ void GrantBladeOfFaithPeriodicCrit(Unit* target, Aura* aura)
         chance = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), chance, BASE_ATTACK, true);
     effect->SetCritChance(std::max(0.0f, chance));
 }
+constexpr int32 BLADE_OF_FAITH_UNREACHED_OATH_BONUS_PCT = 10;
+constexpr std::array<uint32, 2> BLADE_OF_FAITH_UNREACHED_OATHS = {804904, 804924};
+void AddBladeOfFaithUnreachedOathBonus(AuraEffect const* effect, Unit* caster, int32& amount)
+{
+    if (effect->GetEffIndex() != EFFECT_0 || effect->GetBase()->GetType() != UNIT_AURA_TYPE ||
+        std::find(BLADE_OF_FAITH_RANKS.begin(), BLADE_OF_FAITH_RANKS.end(), effect->GetId()) ==
+            BLADE_OF_FAITH_RANKS.end())
+        return;
+    Player* player = Owner(caster);
+    if (!player)
+        return;
+    int32 oaths = 0;
+    for (uint32 oath : BLADE_OF_FAITH_UNREACHED_OATHS)
+        if (Aura const* held = player->GetAura(oath))
+            oaths += held->GetStackAmount();
+    amount = int32(int64(amount) * (100 + BLADE_OF_FAITH_UNREACHED_OATH_BONUS_PCT * oaths) / 100);
+}
 class templar_scaling : public UnitScript
 {
   public:
@@ -328,8 +345,13 @@ class templar_scaling : public UnitScript
         : UnitScript("templar_scaling", true,
                      {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
                       UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
-                      UNITHOOK_ON_AURA_APPLY})
+                      UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
     {
+    }
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount) override
+    {
+        if (effect && caster)
+            AddBladeOfFaithUnreachedOathBonus(effect, caster, amount);
     }
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
