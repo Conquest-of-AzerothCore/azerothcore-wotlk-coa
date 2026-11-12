@@ -195,6 +195,7 @@
       "name": "Depravity",
       "tooltip": "Increases the melee haste of your Undead minions by $s1% and gives their critical melee auto attacks an $h% chance to trigger |cFFFFFFFFBone Club|r, dealing $s2% of the damage dealt as Shadow Damage.",
       "aura_on_minion": true,
+      "baseline": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -236,6 +237,7 @@
       "name": "Overwhelming Force",
       "tooltip": "Damage dealt by your Undead minions now has a $h% chance to restore $/10;531129s2 Runic Power and $531129s1% of your maximum mana.",
       "aura_on_minion": true,
+      "baseline": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -274,6 +276,7 @@
       "name": "Plague Horde",
       "tooltip": "Damage dealt by your Undead minions now has a $h% chance to cast |cFFFFFFFFPlague Horde|r on themselves for $807653d and emit |cffffffffZombie Plague|r, dealing ${$504022m1*$<scalingbp>+$SP*0.1} Plague damage to their target.@s:807653:0@",
       "aura_on_minion": true,
+      "baseline": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -305,6 +308,7 @@
       "aura": 707001,
       "name": "Putricide's Formula",
       "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+      "baseline": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -345,6 +349,7 @@
       "aura": 707882,
       "name": "Putricide's Formula",
       "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+      "baseline": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
