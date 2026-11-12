@@ -113,7 +113,9 @@
     "clause": "and the duration of Sacred Restraint by $/1000;s2 sec",
     "labels": [
       "300501 effect_value e1",
-      "300501 e1 spell_modifier 102208"
+      "300501 e1 spell_modifier 102208",
+      "300501 behaviour_cast_applies_aura sacred_restraint",
+      "300501 behaviour_expiry sacred_restraint"
     ],
     "kind": "claim"
   },
