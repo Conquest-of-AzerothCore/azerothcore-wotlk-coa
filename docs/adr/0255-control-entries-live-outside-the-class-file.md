@@ -7,9 +7,9 @@
 ## Context
 
 ADR 0253 put the stock Challenging Shout 1161 control in the Templar class file, marked a control in free text only.
-The radius review found that its two expected alerts then appear in every Templar report that selects it, and that
-score.py treats every class-file `behaviours` entry as ground truth (score.py:44-50), so a reader run would score it as a
-miss. A second class-19 file in `classes/` would be shadowed: `load_class_file` returns the first file whose
+The radius review found that its two expected alerts then appear in every Templar report that selects it, and
+that score.py treats every class-file `behaviours` entry as ground truth (score.py:44-50), so a reader run would score
+it as a miss. A second class-19 file in `classes/` would be shadowed: `load_class_file` returns the first file whose
 `class_id` matches (profile.py). The review also found the edge formula of ADR 0253 too general.
 
 ## Decision
