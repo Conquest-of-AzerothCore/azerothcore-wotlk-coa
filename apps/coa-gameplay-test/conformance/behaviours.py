@@ -1293,6 +1293,7 @@ class MetricDeltaSpec:
     after_at_least: float | None = None
     cast_power: int | None = None
     enemy_player_race: int = 0
+    gate_settle_ms: int = 0
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1382,9 +1383,13 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
 
     if spec.gate_timing not in ('between', 'start'):
         raise ValueError(f'unknown gate_timing {spec.gate_timing!r}')
+    if spec.gate_settle_ms and spec.gate_timing != 'start':
+        raise ValueError(f'{spec.spell} sets gate_settle_ms but gate_timing is not "start"')
     gate_spell = spec.gate_spell if spec.gate_spell is not None else spec.spell
     gate_step = [{'action': 'learn', 'actor': CASTER, 'spell': gate_spell}]
     start_gate_steps = gate_step if spec.gate_timing == 'start' else []
+    if start_gate_steps and spec.gate_settle_ms:
+        start_gate_steps = [*gate_step, {'action': 'wait', 'label': 'let the gate settle', 'ms': spec.gate_settle_ms}]
     between_gate_steps = gate_step if spec.gate_timing == 'between' else []
 
     before_label = metric_delta_label(spec, BEFORE)
@@ -1502,7 +1507,7 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            tuple(phase_aura(raw) for raw in entry.get('phase_auras', ())),
                            tuple(phase_aura(raw) for raw in entry.get('after_auras', ())),
                            entry.get('select_dummy', False), entry.get('after_at_least'), entry.get('cast_power'),
-                           entry.get('enemy_player_race', 0))
+                           entry.get('enemy_player_race', 0), entry.get('gate_settle_ms', 0))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -6221,6 +6226,8 @@ class ScriptHitSpec:
     unresisted: bool = False
     stat_auras: tuple[tuple[int, int], ...] = ()
     label_suffix: str = ''
+    caster_entry: int | None = None
+    hit_effect: int | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -6268,7 +6275,7 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     entry = behaviour_entry(records, spec.spell, spec.name, 'script_hit', spec.quote, 1)
     try:
         model = reference_script_hit_model(class_file, spec.spell, spec.hit_spell, spec.value_spell, spec.value_effect,
-                                           spec.model_auras, spec.unresisted)
+                                           spec.model_auras, spec.unresisted, spec.hit_effect)
     except Unmodelled as error:
         raise NotModelled(f'{spec.spell} script_hit {spec.hit_spell}: {error.reason}') from error
     label = script_hit_label(spec)
@@ -6278,7 +6285,7 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         raise ValueError(f'{spec.spell} script_hit reads a hit on the caster only for a heal')
     family = 'spell_heal' if heal else 'spell_damage'
     unblocked = {} if heal else {'blocked': False}
-    receiver = {'target': spec.receiver}
+    receiver = {'target': spec.receiver, **({'caster_entry': spec.caster_entry} if spec.caster_entry else {})}
     labels = {'total': f'{label} total', 'count': f'{label} count'}
     reads = []
     if not heal:
@@ -6352,6 +6359,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         record['model_auras'] = list(spec.model_auras)
     if spec.unresisted:
         record['unresisted'] = True
+    if spec.hit_effect is not None:
+        record['hit_effect'] = spec.hit_effect
     return scenario, [Expectation(label, 'hit_mean', spec.spell, spec.hit_spell, 0, ' | '.join(model.displayed), rule,
                                   record)]
 
@@ -6370,7 +6379,7 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          tuple(int(spell) for spell in entry.get('model_auras', ())),
                          bool(entry.get('unresisted', False)),
                          tuple((int(spell), int(stacks)) for spell, stacks in entry.get('stat_auras', ())),
-                         entry.get('label_suffix', ''))
+                         entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8

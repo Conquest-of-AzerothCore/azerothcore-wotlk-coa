@@ -759,6 +759,9 @@ filters the victim, `pet: true` selects the actor's current pet as caster, `cast
 as a creature fixture, and `critical` filters critical or noncritical hits. `blocked` keeps only the direct hits
 whose log reports (true) or lacks (false) a blocked amount; periodic damage is never blocked. Values accumulate
 throughout the scenario; use snapshots and `relative_to` around a cast.
+`caster_entry` (in place of `entry`, `pet` and `caster`) keeps the events cast by creatures of that entry, as the
+`owned_creature_*` metrics resolve it, without a live creature: it reads 0 when none has cast, so a control arm
+without the summon is observable. The `spell_heal_*` metrics take it too.
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
 `spell_log_count`, `spell_absorb_total` and `spell_resist_total` read the same native direct spell damage logs,
 including a hit that an absorb took whole: they count the logs of `spell`, or sum the absorbed or the resisted amount

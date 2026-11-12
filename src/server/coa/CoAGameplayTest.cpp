@@ -4819,9 +4819,13 @@ private:
                 target = GetUnit(*id)->GetGUID();
             auto critical = step.get_optional<bool>("critical");
             auto blocked = step.get_optional<bool>("blocked");
+            auto casterEntry = step.get_optional<uint32>("caster_entry");
+            Require(!casterEntry || !step.get_optional<uint32>("entry"),
+                "Spell damage query selects an owned creature or a caster entry");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
-                if (caster && event.caster == caster && event.spell == spell &&
+                if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
+                    event.spell == spell &&
                     (!target || event.target == target) && (!critical || event.critical == *critical) &&
                     (!blocked || event.blocked == *blocked))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
@@ -4901,9 +4905,11 @@ private:
                 target = victim->GetGUID();
             }
             auto critical = step.get_optional<bool>("critical");
+            auto casterEntry = step.get_optional<uint32>("caster_entry");
             uint64 value = 0;
             for (SpellHealEvent const& event : _actors.at(step.get<std::string>("actor")).spellHeals)
-                if (caster && event.caster == caster && event.spell == spell &&
+                if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
+                    event.spell == spell &&
                     (!target || event.target == target) && (!critical || event.critical == *critical))
                     value += metric == "spell_heal_count" ? 1 :
                         event.heal - (metric == "spell_effective_heal_total" ? event.overheal : 0);

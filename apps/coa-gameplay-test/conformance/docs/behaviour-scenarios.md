@@ -221,6 +221,10 @@ server — a ~5e-8 IEEE-754 single-precision artifact, not a defect. 1e-5 absorb
 orders of magnitude tighter than the smallest defect this family of checks is meant to catch (a non-stacking
 regression reads ~0.12 off, not ~1e-7).
 
+`gate_settle_ms` (ADR 0320) waits that long after a `gate_timing: "start"` gate is learned, before the first read, for
+a passive whose effect the server applies on its next update (Summoning Adept 92123 raises the Life Force 525004 the
+Necromancer update syncs every 500 ms).
+
 `cast_in_before` (round10, ADR 0052; default `true`, omitting it reproduces every pre-round10 entry's generated
 scenario byte-for-byte) controls whether the "before" phase's `cast_steps()` call casts `trigger_spell` at all.
 Every entry above this field's introduction has `trigger_spell != spec.spell`: a separate active spell whose
@@ -1276,6 +1280,10 @@ of that effect, to the school part (ADR 0208, the Scourgebane strike 801832 from
 `stat_auras` (ADR 0210) are set on the caster before its stats are measured, so the hit model reads the stats they
 leave; `label_suffix` names a second entry of the same hit (Divine Charge `no_power`: Demoralizing Shout 1159613 holds
 attack power at 0, so only the trample's base term is read).
+`caster_entry` (ADR 0320) reads the hits of a minion of that creature entry instead of the caster's, through the
+harness filter of the same name, so a control arm without the minion reads 0; `hit_effect` models one effect of a hit
+spell with a damage and a heal effect (Raise: Ghoul 500971: Command: Ghouls 801514's damage, effect 0, and its heal on
+the owner, effect 2).
 
 ### Taken-outcome scenarios (`behaviour_taken_outcome`, `kind: "taken_outcome"`)
 

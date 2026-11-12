@@ -9574,5 +9574,81 @@ class HitRatioEngineStepTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, entry)
 
 
+class MinionScriptHitTests(unittest.TestCase):
+    RAISE_GHOUL = 500971
+    COMMAND_GHOULS = 801514
+    GHOUL = 50073
+
+    def ghoul_entry(self, suffix: str) -> dict:
+        class_file = load_class_file(23)
+        return next(entry for entry in class_file['behaviours']
+                    if entry['spell'] == self.RAISE_GHOUL and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_caster_entry_reads_the_minion_hits_in_both_arms(self):
+        scenario, expectations = behaviour_scenario(load_class_file(23), self.ghoul_entry('command_damage'))
+        run.validate(scenario)
+        reads = [step for step in scenario['steps'] if step.get('spell') == self.COMMAND_GHOULS
+                 and step.get('metric', '').startswith('spell_damage_')]
+        self.assertEqual(len(reads), 4)
+        for step in reads:
+            self.assertEqual(step['caster_entry'], self.GHOUL)
+            self.assertNotIn('entry', step)
+        self.assertEqual(expectations[0].model['hit_effect'], 0)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_hit_effect_picks_one_effect_of_a_damage_and_heal_spell(self):
+        from hits import Unmodelled, reference_script_hit_model
+        class_file = load_class_file(23)
+        damage = reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS, unresisted=True,
+                                            hit_effect=0)
+        heal = reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS, hit_effect=2)
+        self.assertEqual((damage.kind, damage.mean), ('school', 48.0))
+        self.assertEqual((heal.kind, heal.mean), ('heal', 93.0))
+        with self.assertRaises(Unmodelled):
+            reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_caster_entry_the_reads_keep_the_caster(self):
+        entry = {key: value for key, value in self.ghoul_entry('command_damage').items() if key != 'caster_entry'}
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        reads = [step for step in scenario['steps'] if step.get('spell') == self.COMMAND_GHOULS
+                 and step.get('metric', '').startswith('spell_damage_')]
+        self.assertTrue(reads)
+        self.assertTrue(all('caster_entry' not in step for step in reads))
+
+
+class MetricDeltaGateSettleTests(unittest.TestCase):
+    RAISE_ABOMINATION = 500335
+    SUMMONING_ADEPT = 92123
+
+    def life_force_entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == self.RAISE_ABOMINATION and entry.get('label_suffix') == 'life_force')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_start_gate_settles_before_the_first_read(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.life_force_entry()))
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step.get('action') == 'learn' and step.get('spell') == self.SUMMONING_ADEPT)
+        self.assertEqual(steps[learn + 1], {'action': 'wait', 'label': 'let the gate settle', 'ms': 1500})
+        first_read = next(index for index, step in enumerate(steps) if step.get('metric') == 'aura_stacks')
+        self.assertLess(learn + 1, first_read)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_no_settle_wait_without_the_field(self):
+        entry = {key: value for key, value in self.life_force_entry().items() if key != 'gate_settle_ms'}
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        self.assertFalse(any(step.get('label') == 'let the gate settle' for step in scenario['steps']))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_settle_needs_the_start_gate(self):
+        entry = {**self.life_force_entry(), 'gate_timing': 'between', 'trigger_only_after': False}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+
 if __name__ == '__main__':
     unittest.main()

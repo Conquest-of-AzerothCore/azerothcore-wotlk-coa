@@ -247,7 +247,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries',
-                  'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'victim_state', 'school_mask'} \
+                  'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'victim_state', 'school_mask',
+                  'caster_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -1186,6 +1187,13 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(metric in MELEE_OUTCOME_METRICS or (key == 'blocked' and metric in SPELL_DAMAGE_METRICS),
                             f'{where}: {key} only filters melee or spell damage events')
                     require(type(step[key]) is bool, f'{where}: {key} must be boolean')
+            if 'caster_entry' in step:
+                require(metric in SPELL_DAMAGE_METRICS | {'spell_heal_count', 'spell_heal_total',
+                                                          'spell_effective_heal_total'},
+                        f'{where}: caster_entry only filters spell damage or healing events')
+                require(not ({'entry', 'pet', 'caster'} & step.keys()),
+                        f'{where}: caster_entry replaces the entry, pet and caster filters')
+                number(step['caster_entry'], f'{where}.caster_entry', 1, None, True)
             for key in ('pet', 'critical'):
                 if key in step:
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',

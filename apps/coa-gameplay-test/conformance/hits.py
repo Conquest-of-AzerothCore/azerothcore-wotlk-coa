@@ -668,10 +668,12 @@ def value_readout(readout: Readout, effects: Sequence[int], value_effect: int) -
 
 def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caster: CasterStats,
                      target: TargetProfile, auras: Sequence[int], value_spell: int | None = None,
-                     value_effect: int = 0, unresisted: bool = False) -> HitModel:
+                     value_effect: int = 0, unresisted: bool = False, hit_effect: int | None = None) -> HitModel:
     records = records_of(class_file)
     facts = facts_of(records, hit_spell)
     readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), value_spell or hit_spell)
+    if hit_effect is not None:
+        readout = replace(readout, values=[value for value in readout.values if value.effect_index == hit_effect])
     if value_spell is not None:
         readout = value_readout(readout, facts.effects, value_effect)
     readout, weapon_part = script_weapon_part(readout, facts.effects, caster, weapon_profile(class_file))
@@ -699,9 +701,10 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
 
 def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, value_spell: int | None = None,
                                value_effect: int = 0, model_auras: Sequence[int] = (),
-                               unresisted: bool = False) -> HitModel:
+                               unresisted: bool = False, hit_effect: int | None = None) -> HitModel:
     return script_hit_model(class_file, tooltip_spell, hit_spell, reference_caster(class_file), REFERENCE_TARGET,
-                            [*class_file.get('known_auras', []), *model_auras], value_spell, value_effect, unresisted)
+                            [*class_file.get('known_auras', []), *model_auras], value_spell, value_effect, unresisted,
+                            hit_effect)
 
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
@@ -722,7 +725,8 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
     if 'tooltip_spell' in expectation.model:
         return script_hit_model(class_file, expectation.model['tooltip_spell'], expectation.model['hit_spell'],
                                 caster, target, auras, expectation.model.get('value_spell'),
-                                expectation.model.get('value_effect', 0), expectation.model.get('unresisted', False))
+                                expectation.model.get('value_effect', 0), expectation.model.get('unresisted', False),
+                                expectation.model.get('hit_effect'))
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
