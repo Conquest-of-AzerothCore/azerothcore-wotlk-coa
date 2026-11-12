@@ -1351,9 +1351,11 @@
     "clause": "Increases your Holy critical strike chance by $s1%",
     "labels": [
       "560650 effect_value e0 #0",
-      "560650 e0 spell_crit_chance 1"
+      "560650 e0 spell_crit_chance 1",
+      "560650 behaviour_hit_ratio holy_crit_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "pooled rate (ADR 0195, chance-claim ruling 2026-11-12): the critical share of Holy Scourgebane 801832 hits rises by +2.59 points (99% +1.76 to +3.42) and +3.36 (+2.51 to +4.21), 7,968 Scourgebane hits per arm, control 3.0% / 2.9%; counted 20261112-014753 / -014845; a 166-cast pilot each (20261112-014406) gave the interval first"
   },
   {
     "spell": 560650,
@@ -1439,9 +1441,11 @@
     "clause": "Increases your Holy critical strike chance by $s1%",
     "labels": [
       "561346 effect_value e0 #0",
-      "561346 e0 spell_crit_chance 1"
+      "561346 e0 spell_crit_chance 1",
+      "561346 behaviour_hit_ratio holy_crit_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "pooled rate (ADR 0195, chance-claim ruling 2026-11-12): the critical share of Holy Scourgebane 801832 hits rises by +6.02 points (99% +5.15 to +6.89) and +6.30 (+5.41 to +7.20), 9,296 Scourgebane hits per arm, control 2.7% / 2.9%; counted 20261112-014514 / -014626; a 166-cast pilot each (20261112-014406) gave the interval first"
   },
   {
     "spell": 561346,

@@ -1783,6 +1783,22 @@
   ],
   "behaviours": [
     {
+      "spell": 560650, "name": "Aggramar's Rage (Holy crit rate, pooled)", "kind": "hit_ratio",
+      "variant": "holy_crit_rate", "label_suffix": "holy_crit_rate",
+      "quote": "Increases your Holy critical strike chance by", "expected": 1.0, "observe_spell": 801832,
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [560650, 1]]},
+      "rate": "critical", "expected_points": 3, "trials": 166, "parts": 48,
+      "expected_source": "$s1 = 3 (560650 EffectBasePoints[0] 2 + 1). AscensionTemplarContracts.cpp:133-139 turns Effect[0] (aura 290 SPELL_AURA_MOD_CRIT_PCT, MiscValue 7) into SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL on the Holy school, which Unit::SpellDoneCritChance adds to a magic-class Holy spell. Scourgebane 801832 is Holy (SchoolMask 2) and magic-class (DmgClass 1); it is cast at the dummy, both arms set 823764 (beeg spellpen) so no hit is resisted, the treatment sets 560650 first; no crit rating fixture. Pooled proof of the chance-claim ruling (2026-11-12) with the rate mode of ADR 0195: the critical share of all Scourgebane hits must differ by 3 points between the arms. A one-part pilot (20261112-014406) read 1.8% control and 4.2% treatment; 30 parts of 166 casts per arm (4,980) read 2.8-3.1% control and a 99% half-width of 1.0-1.06 (20261112-014514 / -014626, insufficient_trials); 48 parts (7,968 per arm) size it near 0.85 points, under 1, half the band of +-2."
+    },
+    {
+      "spell": 561346, "name": "Aggramar's Rage rank 2 (Holy crit rate, pooled)", "kind": "hit_ratio",
+      "variant": "holy_crit_rate", "label_suffix": "holy_crit_rate",
+      "quote": "Increases your Holy critical strike chance by", "expected": 1.0, "observe_spell": 801832,
+      "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [561346, 1]]},
+      "rate": "critical", "expected_points": 6, "trials": 166, "parts": 56,
+      "expected_source": "$s1 = 6 (561346 EffectBasePoints[0] 5 + 1), the same contract as rank 1 (AscensionTemplarContracts.cpp:133-139, SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL on Holy). Scourgebane 801832 (Holy, magic-class) at the dummy, 823764 in both arms, 561346 set first in the treatment; no crit rating fixture. Pooled proof of the chance-claim ruling (2026-11-12), rate mode of ADR 0195: the critical shares must differ by 6 points. The one-part pilot (20261112-014406) read 1.8% control and 10.8% treatment; 56 parts of 166 casts per arm (9,296) size a 99% half-width under 1 point."
+    },
+    {
       "spell": 801455, "name": "Testament of Will (immunity window)", "kind": "cast_applies_aura", "variant": "window",
       "label_suffix": "window", "quote": "making them immune to all movement impairing effects for", "expected_ms": 10000,
       "applied_aura": 801455, "target": "ally", "cast_spell": 801455, "cast_target": "ally",
