@@ -993,5 +993,38 @@ class GenerateProcTest(unittest.TestCase):
             shutil.rmtree(out)
 
 
+
+class CastProcBaselineTests(unittest.TestCase):
+    TUNDRA_WARRIORS = 92122
+
+    def entry(self) -> dict:
+        from profile import load_class_file
+        return next(entry for entry in load_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_the_baseline_casts_come_before_the_passive_and_count_casts(self):
+        from procs import proc_scenario
+        from profile import load_class_file
+        scenario, expectations = proc_scenario(load_class_file(23), self.entry())
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step.get('action') == 'learn' and step.get('spell') == self.TUNDRA_WARRIORS)
+        baseline = next(index for index, step in enumerate(steps)
+                        if step.get('label') == f'{self.TUNDRA_WARRIORS} proc baseline trials')
+        self.assertLess(baseline, learn)
+        self.assertEqual(steps[baseline]['metric'], 'spell_cast_count')
+        self.assertIn('baseline', expectations[0].model)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_without_the_fields_the_trials_are_hits_and_no_baseline_runs(self):
+        from procs import proc_scenario
+        from profile import load_class_file
+        entry = {key: value for key, value in self.entry().items() if key not in ('baseline', 'trial_casts')}
+        scenario, expectations = proc_scenario(load_class_file(23), entry)
+        trials = next(step for step in scenario['steps'] if step.get('label') == f'{self.TUNDRA_WARRIORS} proc trials')
+        self.assertEqual(trials['metric'], 'spell_damage_count')
+        self.assertNotIn('baseline', expectations[0].model)
+
+
 if __name__ == '__main__':
     unittest.main()

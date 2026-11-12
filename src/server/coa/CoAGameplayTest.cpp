@@ -4727,7 +4727,8 @@ private:
             return total;
         }
         if (metric == "pet_melee_swings" || metric == "pet_melee_crits" || metric == "pet_melee_glancing" ||
-            metric == "pet_melee_plain_count" || metric == "pet_melee_plain_damage" || metric == "pet_melee_damage")
+            metric == "pet_melee_plain_count" || metric == "pet_melee_plain_damage" || metric == "pet_melee_damage" ||
+            metric == "pet_melee_hits")
         {
             Require(unit->IsPlayer(), "Pet melee query needs a player");
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
@@ -4755,6 +4756,8 @@ private:
                 return sum.plain;
             if (metric == "pet_melee_damage")
                 return double(sum.damage);
+            if (metric == "pet_melee_hits")
+                return sum.crits + sum.glancing + sum.plain;
             return double(sum.plainDamage);
         }
         if (metric == "melee_attack_count" || metric == "melee_damage_count" ||

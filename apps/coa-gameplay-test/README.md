@@ -731,7 +731,9 @@ the `target` attacker. `victim_state` (0 to 8, the packet's `VictimState`: 0 mis
 `pet_melee_swings`, `pet_melee_crits`, `pet_melee_glancing`, `pet_melee_plain_count`, `pet_melee_plain_damage`
 and `pet_melee_damage` read the melee combat packets the player actor received from its current pet, or with
 `entry` from every creature of that entry: all swings, critical hits, glancing blows, the count and summed damage
-of the remaining hits that dealt damage, and the summed damage of every swing. Snapshot them around a fight;
+of the remaining hits that dealt damage, and the summed damage of every swing. `pet_melee_hits` counts the swings
+that hit (critical, glancing and plain), the swings the damage of `pet_melee_damage` came from. Snapshot them around
+a fight;
 `ratio_to` a plain-count snapshot gives an average plain hit.
 These observations do not test delivery to a network client.
 `owned_creature_damage_total`, `owned_creature_damage_count` and `owned_creature_attack_count` require `entry` and

@@ -512,10 +512,18 @@ class EvidenceStatusTest(unittest.TestCase):
                 with mock.patch.dict(METRIC_EVIDENCE, {metric: READBACK}):
                     self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
 
+    def test_a_minion_maximum_health_is_a_state_read_where_the_clause_promises_it(self):
+        label = '1 behaviour_metric_delta'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'owned_creature_max_health', contrast=LEARNED_CONTRAST)
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_max_health'], STATE)
+        self.assertEqual(evidence_of([claim('the maximum health of your summons by 5%', label)], [read])[0],
+                         [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Raise a Ghoul', label)], [read])[0], [DATA])
+
     def test_minion_casts_and_swings_are_event_reads(self):
         label = '1 behaviour_metric_delta'
         clauses = [claim('your Undead minions are guaranteed to critically strike', label)]
-        for metric in ('spell_go_count', 'pet_melee_crits', 'pet_melee_plain_count'):
+        for metric in ('spell_go_count', 'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits'):
             with self.subTest(metric=metric):
                 self.assertEqual(METRIC_EVIDENCE[metric], EVENT)
                 read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)

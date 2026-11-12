@@ -1074,11 +1074,14 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     totals = dict.fromkeys(wanted[1:], 0.0)
     events = 0.0
     counted, without_aura, unmeasured, reasons = [], [], [], []
-    for _, run, _ in parts:
+    baseline_trials = baseline_events = None
+    for _, run, part in parts:
         if trigger:
             reasons += failure_reasons(run, trigger)
         values = [run.values.get(label) for label in wanted]
-        if None in values:
+        part_baseline = part.model.get('baseline')
+        held = [run.values.get(part_baseline[name]) for name in ('trials', 'events')] if part_baseline else [0.0, 0.0]
+        if None in values or None in held:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif values[0] <= 0:
             without_aura.append(run.key)
@@ -1086,8 +1089,16 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             counted.append(run.key)
             for label, value in zip(wanted[1:], values[1:]):
                 totals[label] += value
+            if part_baseline:
+                baseline_trials, baseline_events = held
+                totals[labels['trials']] -= baseline_trials
+                totals[event_labels[0]] -= baseline_events
             events -= player_casts(model, run, trigger)
             events += refund_offset(model, run)
+    if baseline_events:
+        return replace(base, measured=baseline_events, expected=0.0, low=0.0, high=0.0,
+                       explanation=f'{baseline_events:g} events in {baseline_trials:g} baseline trials without the '
+                                   f'passive')
     events += sum(totals[label] for label in event_labels)
     procs = events / model['events_per_proc']
     trials = totals[labels['trials']]
@@ -1123,6 +1134,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         detail = {'question': proc_question(manifest, first_entry, expectation, readings, judged, procs, chance,
                                             tooltips)}
     readings_text = '; '.join(text for *_, text, _ in judged)
+    if baseline_trials is not None:
+        readings_text += f'; no event in {baseline_trials:g} baseline trials without the passive'
     lead = 'the readings of the trials disagree; ' if len(statuses) > 1 else ''
     return replace(base, status=status, measured=rate, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings_text} ({notes}); {expectation.displayed} shows {chance:g}%; '

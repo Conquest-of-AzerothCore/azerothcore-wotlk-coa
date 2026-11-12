@@ -385,7 +385,7 @@ METRIC_EVIDENCE = {
                      'timeline_interval_max_ms', 'timeline_interval_median_ms', 'event_first_ms',
                      'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk',
                      'spell_absorb_total', 'spell_log_count', 'nearby_creature_at_client', 'spell_go_count',
-                     'pet_melee_crits', 'pet_melee_plain_count'),
+                     'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits'),
                     EVENT),
     **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks', 'can_detect',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
@@ -400,7 +400,7 @@ METRIC_EVIDENCE = {
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',
                      'power', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
                      'melee_crit_chance', 'melee_crit_chance_refreshed', 'spell_crit_chance', 'weapon_damage_min',
-                     'resistance', 'mana_regen', 'moving', 'threat'), STATE),
+                     'resistance', 'mana_regen', 'moving', 'threat', 'owned_creature_max_health'), STATE),
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -411,7 +411,7 @@ STATE_PROMISES = {
     'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise',
     'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
-    'max_health': r'maximum health', 'max_power': POWER_WORDS,
+    'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
     'power': r'mana|energy|rage|focus', 'run_speed_rate': r'movement speed|run speed',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
     'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,

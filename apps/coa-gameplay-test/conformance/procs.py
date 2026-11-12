@@ -17,6 +17,9 @@ CHANCE_KIND = 'chance_pct'
 PERCENT_KIND = 'percent'
 ATTACK = 'attack'
 CAST = 'cast'
+MINION = 'minion'
+MINION_PROC_TRIALS = frozenset({'pet_melee_crits', 'owned_creature_damage_count'})
+MINION_BASELINE_ATTEMPTS = 20
 CAST_COUNT = 'spell_cast_count'
 MELEE_EVENTS = 'melee_attack_count'
 EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS})
@@ -71,6 +74,33 @@ def proc_label(aura: int, proc_spell: int | None = None, trigger: int | str | No
 
 def proc_measurements(aura: int) -> dict[str, str]:
     return {part: f'{aura} proc {part}' for part in ('trials', 'events', 'attempts', 'aura')}
+
+
+def baseline_labels(aura: int) -> dict[str, str]:
+    return {'trials': f'{aura} proc baseline trials', 'events': f'{aura} proc baseline events'}
+
+
+def minion_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    from triggers import minion_attempt_steps
+    labels = baseline_labels(entry['aura'])
+    creature = entry['trigger']['entry']
+    events = event_steps(entry)[0]
+    return (minion_attempt_steps(entry, MINION_BASELINE_ATTEMPTS * plan.attempt_ms, 'baseline ')
+            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS},
+               measurement(labels['trials'], CASTER, entry['trial_metric'], entry=creature),
+               {**events, 'label': labels['events']}])
+
+
+def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    labels = baseline_labels(entry['aura'])
+    spell, target = trigger_spell(entry), trigger_target(entry)
+    facts = facts_of(records_of(class_file), spell)
+    events = event_steps(entry)[0]
+    casts = [aimed(step, target) for _ in range(MINION_BASELINE_ATTEMPTS)
+             for step in cast_steps(facts, spell, target, plan.attempt_ms, 1, attempt_fixtures(entry))]
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + casts
+            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, {**trials_step(entry, labels['trials'])},
+               {**events, 'label': labels['events']}])
 
 
 def shares_aura(class_file: dict, entry: dict) -> bool:
@@ -135,6 +165,10 @@ def aura_steps(entry: dict) -> list[dict]:
 
 def trigger_spell(entry: dict) -> int:
     return entry['trigger']['spell'] if entry['trigger']['action'] == CAST else 0
+
+
+def minion_entry(entry: dict) -> int | None:
+    return entry['trigger']['entry'] if entry['trigger']['action'] == MINION else None
 
 
 def trigger_target(entry: dict) -> str:
@@ -209,6 +243,13 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
         if per_trigger_limit(entry) is None:
             return swing
         return swing + (TRIGGER_ACTIONS + boundary_reads(entry)) * READ_STEP_MS
+    if trigger['action'] == MINION:
+        from triggers import checked_minion_trigger
+        checked_minion_trigger(entry['aura'], trigger, entry)
+        if entry.get('trial_metric') not in MINION_PROC_TRIALS:
+            raise ValueError(f'Proc {entry["aura"]} counts {entry.get("trial_metric")!r} minion trials, not one of '
+                             f'{sorted(MINION_PROC_TRIALS)}')
+        return trigger['swing_ms']
     if trigger['action'] != CAST:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of proc {entry["aura"]}')
     facts = facts_of(records_of(class_file), trigger['spell'])
@@ -234,7 +275,9 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     if scheduled < needed:
         raise ValueError(f'{scheduled} attempts are fewer than the {needed} trials a {chance:g}% proc needs')
     interval = attempt_interval(class_file, entry)
-    capacity = PART_BUDGET_MS // interval
+    held = MINION_BASELINE_ATTEMPTS * interval + DRAIN_MS \
+        if entry['trigger']['action'] in (MINION, CAST) and entry.get('baseline') else 0
+    capacity = (PART_BUDGET_MS - held) // interval
     if capacity < 1:
         raise Unmodelled(f'one attempt of {interval} ms exceeds the scenario budget of {PART_BUDGET_MS} ms')
     parts = math.ceil(scheduled / capacity)
@@ -243,6 +286,14 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
 
 
 def trial_rule(entry: dict) -> str:
+    trigger = entry['trigger']
+    if trigger['action'] == MINION:
+        fixtures = ''.join(f'; minion aura {aura["spell"]}' + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
+                           + f' set every {entry["minion_aura_refresh_ms"]} ms by harness set_aura ({aura["source"]})'
+                           for aura in entry.get('minion_auras', []))
+        return (f'trials: {entry["trial_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
+                f'attacking the dummy with the caster, {trigger["swing_ms"]} ms swings ({trigger["swing_source"]})'
+                f'{fixtures}')
     if entry['trigger']['action'] == ATTACK:
         return 'trials: main-hand melee hits dealing damage (melee_damage_count hand 0)'
     if trigger_target(entry) == ALLY:
@@ -252,7 +303,7 @@ def trial_rule(entry: dict) -> str:
 
 def trials_step(entry: dict, label: str) -> dict:
     spell = trigger_spell(entry)
-    if trigger_target(entry) == ALLY:
+    if trigger_target(entry) == ALLY or entry.get('trial_casts'):
         return measurement(label, CASTER, CAST_COUNT, spell=spell)
     return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET)
 
@@ -331,6 +382,13 @@ def per_trigger_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dic
 def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[str, str]) -> list[dict]:
     if per_trigger_limit(entry) is not None:
         return per_trigger_steps(class_file, entry, plan)
+    if entry['trigger']['action'] == MINION:
+        from triggers import minion_attempt_steps
+        creature = entry['trigger']['entry']
+        return (minion_attempt_steps(entry, plan.per_part * plan.attempt_ms, '')
+                + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS},
+                   measurement(labels['trials'], CASTER, entry['trial_metric'], entry=creature),
+                   measurement(labels['attempts'], CASTER, 'pet_melee_swings', entry=creature)])
     if entry['trigger']['action'] == ATTACK:
         return [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                 {'action': 'wait', 'label': 'swings', 'ms': plan.per_part * plan.attempt_ms},
@@ -370,6 +428,11 @@ def event_terms(entry: dict) -> list[tuple[str, dict]]:
 def event_steps(entry: dict) -> list[dict]:
     if counts_charges(entry):
         return []
+    if entry.get('event_actor') == MINION:
+        if entry['event_metric'] != 'spell_damage_count' or minion_entry(entry) is None:
+            raise ValueError(f'Proc {entry["aura"]} reads minion events other than spell_damage_count of a minion')
+        return [measurement(label, CASTER, term['metric'], spell=term['spell'], entry=minion_entry(entry),
+                            target=TARGET) for label, term in event_terms(entry)]
     return [spell_count_step(label, term['metric'], term['spell']) for label, term in event_terms(entry)]
 
 
@@ -419,12 +482,27 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         raise ValueError(f'Proc {entry["aura"]} has parts 0 to {plan.parts - 1}, not {part}')
     aura = entry['aura']
     labels = proc_measurements(aura)
-    steps = aura_steps(entry)
+    minion = entry['trigger']['action'] == MINION
+    cast_baseline = entry['trigger']['action'] == CAST and part == 0 and entry.get('baseline', False)
+    baseline = (minion and part == 0 and entry.get('baseline', False)) or cast_baseline
+    if minion:
+        from triggers import minion_setup_steps
+        steps = minion_setup_steps(class_file, entry['trigger'])
+        steps += minion_baseline_steps(class_file, entry, plan) if baseline else []
+        steps += aura_steps(entry)
+    else:
+        steps = (cast_baseline_steps(class_file, entry, plan) if cast_baseline else []) + aura_steps(entry)
     limit = per_trigger_limit(entry)
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
         steps += added_trial_steps(entry) + event_steps(entry)
-    steps += [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
+    if entry.get('aura_on_minion'):
+        if minion_entry(entry) is None:
+            raise ValueError(f'Proc {aura} reads its aura on a minion without a minion trigger')
+        steps += [measurement(labels['aura'], CASTER, 'owned_creature_count', entry=minion_entry(entry), spell=aura,
+                              caster=CASTER)]
+    else:
+        steps += [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
     name = f'Conformance proc {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {plan.parts}'
     contract = 'Proc rate of an aura over enough triggering hits, summed over its parts, against its tooltip chance.'
     scenario = scenario_shell(class_file, name, contract, steps)
@@ -443,7 +521,11 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                           for reading in trial_readings(entry)]}
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
+    if baseline:
+        model['baseline'] = {**baseline_labels(aura), 'attempts': MINION_BASELINE_ATTEMPTS}
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
+    if entry.get('baseline') and entry['trigger']['action'] in (MINION, CAST):
+        rule += f'; no event in the {MINION_BASELINE_ATTEMPTS} baseline attempts before the passive is learned'
     if limit is not None:
         model[PER_TRIGGER] = limit
         model['trigger_boundaries'] = trigger_boundaries(entry, plan.per_part)
@@ -452,7 +534,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{rule}{handler_note(entry)}', model)
-    return timed(scenario, SETTLE_MS + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
+    baseline_ms = MINION_BASELINE_ATTEMPTS * plan.attempt_ms + DRAIN_MS if baseline else 0
+    return timed(scenario, SETTLE_MS + baseline_ms + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
 
 
 def handler_note(entry: dict) -> str:
