@@ -2365,6 +2365,8 @@ class TakenHitMutantTests(unittest.TestCase):
         self.workspace.close()
 
     def judged(self, check, key, expectation, values):
+        self.workspace.close()
+        self.workspace = Workspace()
         self.workspace.scenario(key, 'trigger', [expectation],
                                 steps=[assert_step(label, str(value)) for label, value in values.items()])
         manifest, results = self.workspace.manifest()
