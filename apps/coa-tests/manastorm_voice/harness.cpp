@@ -1,5 +1,9 @@
+#include <array>
 #include <cassert>
 #include <cstdint>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
 #include <vector>
 
 using uint32 = uint32_t;
@@ -49,20 +53,90 @@ struct Player
     }
 };
 
+enum class VoiceKind
+{
+    None,
+    Intro
+};
+
 struct PendingVoice
 {
     uint64 RunId = 0;
+    uint32 DelayMs = 0;
     uint32 MapId = 0;
     uint32 InstanceId = 0;
     uint32 SoundId = 0;
+    VoiceKind Kind = VoiceKind::None;
     bool FollowMemberPosition = false;
+    std::vector<ObjectGuid::LowType> Members;
 };
+
+enum class ManastormRunState
+{
+    Preparing,
+    Active
+};
+
+struct ManastormSegment
+{
+    uint32 MapId = 0;
+};
+
+struct ManastormRun
+{
+    uint64 runId = 0;
+    ManastormRunState state = ManastormRunState::Preparing;
+    ManastormSegment segment;
+    uint32 instance = 0;
+    std::vector<ObjectGuid::LowType> members;
+
+    uint64 GetRunId() const { return runId; }
+    ManastormRunState GetState() const { return state; }
+    ManastormSegment const& GetSegment() const { return segment; }
+    uint32 GetInstanceId() const { return instance; }
+    std::vector<ObjectGuid::LowType> const& GetMembers() const { return members; }
+};
+
+struct RunVoiceState
+{
+    bool FirstManastorm = false;
+    uint32 IntroSound = 0;
+    std::unordered_set<ObjectGuid::LowType> IntroDeliveredMembers;
+    uint32 LastIntroSound = 0;
+};
+
+std::unordered_map<uint64, RunVoiceState> RunStates;
+std::vector<PendingVoice> PendingVoices;
+
+constexpr uint32 INTRO_FIRST_TIME = 113142;
+constexpr std::array<uint32, 1> INTRO_RECURRING = {{ 113141 }};
+constexpr uint32 INTRO_SETTLE_MS = 500;
+
+uint32 PickSound(std::array<uint32, 1> const& pool, uint32)
+{
+    return pool[0];
+}
+
+PendingVoice BuildVoice(ManastormRun const& run, uint32 soundId, uint32 delayMs, VoiceKind kind)
+{
+    PendingVoice voice;
+    voice.RunId = run.GetRunId();
+    voice.DelayMs = delayMs;
+    voice.MapId = run.GetSegment().MapId;
+    voice.InstanceId = run.GetInstanceId();
+    voice.SoundId = soundId;
+    voice.Kind = kind;
+    voice.Members = run.GetMembers();
+    return voice;
+}
 
 // ACTUAL_READY
 
 // ACTUAL_PLAY
 
-int main()
+// ACTUAL_INTRO
+
+void PlaysLinesFromTheListener()
 {
     WorldSession session;
     Player member;
@@ -105,5 +179,51 @@ int main()
 
     assert(!PlayForMember(nullptr, zoneLine));
     assert(sounds.size() == 2);
+}
+
+void QueuesTheIntroOnceTheArrivalSettles()
+{
+    WorldSession session;
+    Player member;
+    member.guid.value = 9;
+    member.session = &session;
+    member.teleporting = true;
+    member.map = 230;
+    member.instance = 41;
+
+    ManastormRun run;
+    run.runId = 5;
+    run.segment.MapId = 230;
+    run.instance = 41;
+    run.members = {9, 10};
+    RunStates[run.runId].FirstManastorm = true;
+
+    OnPlayerEnteredProtection(run, &member);
+    assert(PendingVoices.empty());
+    assert(!RunStates[run.runId].IntroDeliveredMembers.contains(9));
+
+    member.teleporting = false;
+    member.instance = 40;
+    OnPlayerEnteredProtection(run, &member);
+    assert(PendingVoices.empty());
+    assert(!RunStates[run.runId].IntroDeliveredMembers.contains(9));
+
+    member.instance = 41;
+    OnPlayerEnteredProtection(run, &member);
+    assert(PendingVoices.size() == 1);
+    assert(PendingVoices[0].SoundId == INTRO_FIRST_TIME);
+    assert(PendingVoices[0].Kind == VoiceKind::Intro);
+    assert(PendingVoices[0].DelayMs == INTRO_SETTLE_MS);
+    assert(PendingVoices[0].Members == std::vector<ObjectGuid::LowType>{9});
+    assert(RunStates[run.runId].IntroDeliveredMembers.contains(9));
+
+    OnPlayerEnteredProtection(run, &member);
+    assert(PendingVoices.size() == 1);
+}
+
+int main()
+{
+    PlaysLinesFromTheListener();
+    QueuesTheIntroOnceTheArrivalSettles();
     return 0;
 }

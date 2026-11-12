@@ -1249,6 +1249,16 @@ namespace ManastormVoiceOfMillhouse
         voice.Members.push_back(
             playerGuid);
 
+        // The map-entry callback can still see the member as teleporting.
+        // Leave the member unmarked so the manager's PREPARING retry queues
+        // the intro once the arrival has settled.
+        if (!IsMemberReadyForVoice(
+                player,
+                voice))
+        {
+            return;
+        }
+
         PendingVoices.push_back(
             std::move(voice));
 
