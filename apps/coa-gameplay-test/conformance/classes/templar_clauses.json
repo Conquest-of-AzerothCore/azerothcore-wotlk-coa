@@ -215,10 +215,16 @@
       "300513 behaviour_detection stealth unrevealed",
       "300513 behaviour_detection invisibility hidden",
       "300513 behaviour_detection invisibility revealed",
-      "300513 behaviour_detection invisibility unrevealed"
+      "300513 behaviour_detection invisibility unrevealed",
+      "300513 behaviour_detection client stealth hidden",
+      "300513 behaviour_detection client stealth revealed",
+      "300513 behaviour_detection client stealth unrevealed",
+      "300513 behaviour_detection client invisibility hidden",
+      "300513 behaviour_detection client invisibility revealed",
+      "300513 behaviour_detection client invisibility unrevealed"
     ],
     "kind": "claim",
-    "reason": "Read through Unit::CanSeeOrDetect (can_detect, a readback; ADR 0197): a dummy hidden by stealth and by invisibility is detected by the caster only while it carries 300513 cast by that caster (pair 20261112-001621, -001651). The client's object list did not refresh without movement (diagnostics 20261112-001336, -001430), so no applied-visibility read exists yet: a mentor question."
+    "reason": "Behaviour (route-19, second route attempt, lead a; ADR 0222): the dummy's presence in the caster's client-visible set (nearby_creature_at_client, Player::HaveAtClient) after the server's own visibility update, run by the caster stepping 3 yd aside and back. With stealth 2144558 or invisibility 8149 and no brand (control) it is out of the set (0); with 300513 set by the caster it is in (1); with the brand removed it is out again (0); shown 1 before each hide aura. Pair 20261112-005613, -005720 on build 44ccd3ce350e (server 76064334c187), all 12 labels ok in both. The can_detect predicate (ADR 0197, a readback; pair 20261112-001621, -001651) agrees in the same runs. Lead b (a hostile creature engaging) was not needed."
   },
   {
     "spell": 300514,
