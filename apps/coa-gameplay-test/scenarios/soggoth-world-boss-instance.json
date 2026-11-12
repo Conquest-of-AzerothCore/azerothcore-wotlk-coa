@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "name": "The Will of Soggoth: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
+  "contract": [
+    "The shrine of The Will of Soggoth (280144) in Darkshore refuses a heroic raid difficulty and on a Normal one",
+    "takes the player to his map (883). His health is per player in his map, counted from 10 to 40,",
+    "so 5230000 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
+    "Treasures of Azeroth chest (978059). The portal out (978078) opens where he falls and takes the player back."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 4551.0,
+    "y": 346.0,
+    "z": 49.0
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "The shrine stands in Darkshore",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780916,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 280144,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 280144
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "On a heroic difficulty the shrine refuses",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 280144
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0,
+      "label": "Challenge The Will of Soggoth"
+    },
+    {
+      "action": "assert",
+      "label": "The shrine takes the player into his map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 883,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the map is on the normal difficulty",
+      "actor": "raider",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 64605,
+      "as": "boss",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "His health is ten players' worth for a lone player",
+      "actor": "raider",
+      "metric": "nearby_creature_max_health",
+      "entry": 64605,
+      "equals": 5230000,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64605,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "He dies",
+      "actor": "boss",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "250 Runes of Ascension",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 250,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "100 to 150 Bazaar Tokens",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 100,
+      "max": 150
+    },
+    {
+      "action": "assert",
+      "label": "A Treasures of Azeroth chest",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 1615011,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The portal out opens where he fell",
+      "actor": "raider",
+      "metric": "nearby_gameobject_count",
+      "entry": 978078,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "raider",
+      "entry": 978078
+    },
+    {
+      "action": "assert",
+      "label": "The portal takes the player back to the shrine's world",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}
