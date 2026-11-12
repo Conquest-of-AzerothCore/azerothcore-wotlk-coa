@@ -7542,6 +7542,23 @@ class DispelArmsTests(unittest.TestCase):
         values[hostile.model['after_label']] = 1.0
         self.assertEqual(judge_behaviour(base_verdict(hostile), FakeRun(values), hostile).status, 'ok')
 
+    def test_a_caster_removal_is_judged_apart_from_the_target(self):
+        entry = self.entry()
+        entry['arms'][2] = {'name': 'hostile', 'target': 'dummy', 'removed': False, 'caster_removed': True}
+        scenario, expectations = behaviour_scenario(CLASS_FILE, entry)
+        displayed = {e.label.split(' ', 1)[1]: e.displayed for e in expectations}
+        self.assertEqual(displayed['behaviour_dispel_removal 102208 hostile caster'], '0')
+        self.assertEqual(displayed['behaviour_dispel_removal 102208 hostile target'], '1')
+        self.assertEqual(displayed['behaviour_dispel_removal 102208 ally caster'], '0')
+        self.assertEqual(displayed['behaviour_dispel_removal 102208 failed caster'], '1')
+        self.assertIn('hostile: cast at the dummy from 0 yd, removed on the caster, kept on the target',
+                      scenario['contract'])
+        caster = next(e for e in expectations if e.label.endswith('hostile caster'))
+        values = {caster.model['before_label']: 1.0, caster.model['after_label']: 1.0}
+        self.assertEqual(judge_behaviour(base_verdict(caster), FakeRun(values), caster).status, 'alert')
+        values[caster.model['after_label']] = 0.0
+        self.assertEqual(judge_behaviour(base_verdict(caster), FakeRun(values), caster).status, 'ok')
+
     def test_an_arm_needs_the_dummy_or_the_ally(self):
         bad = {**self.entry(), 'arms': [{'name': 'self', 'target': 'caster', 'removed': True}]}
         with self.assertRaises(ValueError):

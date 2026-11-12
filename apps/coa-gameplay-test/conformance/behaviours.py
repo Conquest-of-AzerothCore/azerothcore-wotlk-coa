@@ -1598,6 +1598,10 @@ class DispelArm:
     removed: bool
     away_yd: float = 0.0
     refused: int = 0
+    caster_removed: bool | None = None
+
+    def removed_on(self, unit: str) -> bool:
+        return self.caster_removed if unit == CASTER and self.caster_removed is not None else self.removed
 
 
 DISPEL_ARM_STEP_YD = 20.0
@@ -1605,6 +1609,11 @@ DISPEL_ARM_STEP_YD = 20.0
 
 def dispel_removal_label(spec: DispelRemovalSpec, debuff: int, moment: str) -> str:
     return f'{spec.spell} aura {debuff} {moment}'
+
+
+def dispel_arm_outcome(arm: DispelArm) -> str:
+    caster, target = ('removed' if arm.removed_on(unit) else 'kept' for unit in (CASTER, arm.target))
+    return caster if caster == target else f'{caster} on the caster, {target} on the target'
 
 
 def dispel_arm_label(spec: DispelRemovalSpec, arm: DispelArm, unit: str, debuff: int, moment: str) -> str:
@@ -1656,18 +1665,19 @@ def dispel_arms_scenario(class_file: dict, spec: DispelRemovalSpec, entry, facts
                   for unit in units for debuff in spec.debuffs]
         steps += dispel_arm_relocation(-arm.away_yd)
         for unit in units:
+            removed = arm.removed_on(unit)
             for debuff in spec.debuffs:
                 model = {'kind': 'metric_delta', 'before_label': dispel_arm_label(spec, arm, unit, debuff, BEFORE),
                          'after_label': dispel_arm_label(spec, arm, unit, debuff, AFTER),
-                         'expected': 0.0 if arm.removed else 1.0, 'before_expected': 1.0, 'metric': 'aura',
+                         'expected': 0.0 if removed else 1.0, 'before_expected': 1.0, 'metric': 'aura',
                          'quote': entry.quote, 'gameplay_clock': spec.gameplay_clock}
                 label = (f'{spec.spell} behaviour_dispel_removal {debuff} {arm.name} '
                          f'{"caster" if unit == CASTER else "target"}')
                 expectations.append(Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None,
-                                                '0' if arm.removed else '1', prose_rule(entry.quote, spec.spell),
+                                                '0' if removed else '1', prose_rule(entry.quote, spec.spell),
                                                 model))
-    arms_text = '; '.join(f'{arm.name}: cast at the {arm.target} from {arm.away_yd:g} yd, '
-                          f'{"removed" if arm.removed else "kept"}' for arm in spec.arms)
+    arms_text = '; '.join(f'{arm.name}: cast at the {arm.target} from {arm.away_yd:g} yd, {dispel_arm_outcome(arm)}'
+                          for arm in spec.arms)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel removal arms',
@@ -1734,7 +1744,9 @@ def dispel_removal_spec(entry: dict) -> DispelRemovalSpec:
                              entry.get('target', CASTER), entry.get('wait_ms', DEFAULT_DISPEL_REMOVAL_WAIT_MS),
                              entry.get('label_suffix', ''), entry.get('gameplay_clock'),
                              tuple(DispelArm(str(arm['name']), str(arm['target']), bool(arm['removed']),
-                                             float(arm.get('away_yd', 0.0)), int(arm.get('refused', 0)))
+                                             float(arm.get('away_yd', 0.0)), int(arm.get('refused', 0)),
+                                             None if arm.get('caster_removed') is None
+                                             else bool(arm['caster_removed']))
                                    for arm in entry.get('arms', ())))
 
 
