@@ -483,7 +483,10 @@
     "clause": "In addition, reduces the cost of your spells and abilities by $s2%.",
     "labels": [
       "300929 effect_value e1",
-      "300929 e1 spell_power_cost 300513"
+      "300929 e1 spell_power_cost 300513",
+      "300929 cost_gate 300513 cost without",
+      "300929 cost_gate 300513 cost with",
+      "300929 cost_gate 300513 cost beyond"
     ],
     "kind": "claim"
   },
