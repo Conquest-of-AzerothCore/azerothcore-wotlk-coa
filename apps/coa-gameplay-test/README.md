@@ -968,6 +968,7 @@ resource type, recipient and current pets. The total is the logged nominal gain 
 `dynamic_object_height` reads how far, in yards, the player's oldest ground effect with that `spell` sits above
 the map's top terrain/collision height at its X/Y; it fails when no such ground effect exists.
 `display_id` reads the unit's selected server display ID; it does not verify client rendering or animations.
+`target_entry` reads the entry of the unit's current target, or zero without one.
 `global_cooldown_ms` requires `spell` and reads the remaining native global cooldown for its recovery category.
 Player commands retain normal permission and gameplay checks; verify their effects with assertions.
 `owned_creature_count` requires a player and `entry`. It counts living creatures of that entry owned, created or summoned by
