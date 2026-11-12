@@ -5,7 +5,7 @@
     "Testers took Gri'lek's (15082) Ground Slam once per raid member: the script cast its damage (2118807, an",
     "area around a point with a 100-yard radius) at every player, so each one was hit by every copy. On live it",
     "hits everyone once with an 8 s Trauma (2118802) each. Two grouped heroes fight him; each Ground Slam",
-    "(2118806) must go off with one damage burst, where the old script sent one per player."
+    "(2118806) must hit each hero with one damage log, where the old script sent one per player."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -158,12 +158,25 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the slam's damage goes off once, not once per player",
+      "label": "DISCRIMINATING: the slam's damage hits the lead once, not once per player",
       "actor": "lead",
-      "metric": "spell_go_count",
-      "entry": 15082,
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "lead",
       "spell": 2118807,
-      "equals": 1
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the slam's damage hits the mate once, not once per player",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "mate",
+      "spell": 2118807,
+      "equals": 1,
+      "within_ms": 2000
     },
     {
       "action": "assert",
@@ -181,12 +194,25 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: still one damage burst per slam",
+      "label": "DISCRIMINATING: still one hit on the lead per slam",
       "actor": "lead",
-      "metric": "spell_go_count",
-      "entry": 15082,
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "lead",
       "spell": 2118807,
-      "equals": 2
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: still one hit on the mate per slam",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "mate",
+      "spell": 2118807,
+      "equals": 2,
+      "within_ms": 2000
     },
     {
       "action": "assert",

@@ -6,9 +6,12 @@
     "middle, so each Drain Life (2118105) adds 2118106 on 0.32 of the players within 100 yards, rounded, besides",
     "its target: one of four. Festering spiderlings from Infest (2118151) belong to Ascended only (round-5",
     "tester): the Ascended Mar'li infests 87 s into the fight and the Mythic one does not. A group of four",
-    "fights a Normal Mar'li; a Mythic and an Ascended hero each fight one alone."
+    "fights a Normal Mar'li; a Mythic and an Ascended hero each fight one alone. The world's eggs (179985) share",
+    "phase 1 and the fixture lives in the lane's own phase, so each solo hero places three untimed eggs after",
+    "her Mar'li's third Hatch Eggs (2118115). No Spawn of Mar'li (15041) appears on Mythic before the next",
+    "Hatch Eggs, which then hatches the placed eggs: an Infest would have found a free egg."
   ],
-  "timeout_ms": 180000,
+  "timeout_ms": 240000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -44,13 +47,15 @@
       "id": "mythic",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 60,
+      "security": 3
     },
     {
       "id": "ascended",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 60,
+      "security": 3
     }
   ],
   "steps": [
@@ -336,13 +341,70 @@
     },
     {
       "action": "assert",
+      "label": "CONTROL: the Ascended Mar'li's third Hatch Eggs, 77 s in",
+      "actor": "ascended",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 3,
+      "within_ms": 90000
+    },
+    {
+      "action": "command",
+      "label": "The ascended hero places three Spider Eggs",
+      "actor": "ascended",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "ascended",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "ascended",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li's third Hatch Eggs, 77 s in",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 3,
+      "within_ms": 90000
+    },
+    {
+      "action": "command",
+      "label": "The mythic hero places three Spider Eggs",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "assert",
       "label": "CONTROL: the Ascended Mar'li infests a spawn 87 s in",
       "actor": "ascended",
       "metric": "spell_go_count",
       "entry": 14510,
       "spell": 2118151,
       "min": 1,
-      "within_ms": 100000
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "label": "Past the Mythic Mar'li's 87 s mark",
+      "ms": 5000
     },
     {
       "action": "assert",
@@ -359,6 +421,33 @@
       "entry": 14510,
       "spell": 2118151,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Spawn of Mar'li came out of the placed eggs on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li's fourth Hatch Eggs",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 4,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: it hatches the placed eggs, so they were free",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "min": 1,
+      "within_ms": 20000
     },
     {
       "action": "assert",
