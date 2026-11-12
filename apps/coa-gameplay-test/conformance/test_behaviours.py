@@ -741,7 +741,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 296)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 297)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -7063,14 +7063,111 @@ class DispelArmsTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, bad)
 
 
+def hit_ratio_readings(expectation, control_mean, treatment_mean, hits_per_trial=1):
+    values = {}
+    for arm, mean in (('control', control_mean), ('treatment', treatment_mean)):
+        for index, (total, count) in enumerate(expectation.model['reads'][arm]):
+            values[total] = float(index * hits_per_trial * mean + (index % 2))
+            values[count] = float(index * hits_per_trial)
+    return values
+
+
+class ExtensionMutantTests(unittest.TestCase):
+    def judge(self, expectation, values):
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_a_forced_crit_aura_that_is_not_applied_alerts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, class_entry(805415, 'cast_applies_aura'))
+        model = expectation.model
+        self.assertEqual(self.judge(expectation, {model['before_label']: 0.0, model['after_label']: 19997.0}), 'ok')
+        self.assertEqual(self.judge(expectation, {model['before_label']: 0.0, model['after_label']: 0.0}), 'alert')
+
+    def test_a_cast_spell_ratio_without_the_oath_bonus_alerts(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['spell'] == 805409 and entry.get('label_suffix') == 'oaths')
+        _, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        self.assertEqual(self.judge(expectation, hit_ratio_readings(expectation, 172.0, 275.2, 6)), 'ok')
+        self.assertEqual(self.judge(expectation, hit_ratio_readings(expectation, 172.0, 172.0, 6)), 'alert')
+
+    def test_a_free_gate_that_still_charges_alerts(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['spell'] == 705256 and entry.get('label_suffix') == 'next_free')
+        _, expectations = behaviour_scenario(CLASS_FILE, entry)
+        for arm in ('with', 'held'):
+            expectation = next(e for e in expectations if e.model['arm'] == arm)
+            self.assertEqual(self.judge(expectation, {expectation.label: 0.0}), 'ok')
+            self.assertEqual(self.judge(expectation, {expectation.label: 85.0}), 'alert')
+
+    def test_a_drained_channel_that_heals_nothing_more_alerts(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['spell'] == 500678 and entry.get('label_suffix') == 'max_health')
+        _, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        self.assertEqual(self.judge(expectation, hit_ratio_readings(expectation, 108.0, 217.0)), 'ok')
+        self.assertEqual(self.judge(expectation, hit_ratio_readings(expectation, 108.0, 108.0)), 'alert')
+
+    def test_the_spell_power_expectation_is_the_hit_models_ratio(self):
+        from dataclasses import replace as replaced
+        from hits import REFERENCE_TARGET, rank_hit, reference_caster, records_of
+        from values import armed_for
+        entry = next(entry for entry in CLASS_FILE['behaviours']
+                     if entry['spell'] == 805409 and entry.get('label_suffix') == 'spell_power')
+        armed = armed_for(CLASS_FILE, records_of(CLASS_FILE), 807274)
+        caster = reference_caster(armed)
+        boosted = replaced(caster, sp_by_school={school: power + 220 for school, power in caster.sp_by_school.items()})
+        auras = armed.get('known_auras', [])
+        ratio = (rank_hit(armed, 807274, boosted, REFERENCE_TARGET, auras).model.mean
+                 / rank_hit(armed, 807274, caster, REFERENCE_TARGET, auras).model.mean)
+        self.assertAlmostEqual(entry['expected'], ratio, places=3)
+
+
+class AmountMatchTests(unittest.TestCase):
+    def expectation(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'amount_match')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        run.validate(scenario)
+        return expectation
+
+    def readings(self, expectation, first, second):
+        values = {}
+        for side, amount in (('first', first), ('second', second)):
+            for index, (total, count) in enumerate(expectation.model['reads'][side]):
+                values[total], values[count] = float(index * amount), float(index)
+        return values
+
+    def judge(self, values):
+        expectation = self.expectation()
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_the_same_amount_is_ok_and_half_the_heal_alerts(self):
+        expectation = self.expectation()
+        self.assertEqual(self.judge(self.readings(expectation, 740.0, 740.0)), 'ok')
+        self.assertEqual(self.judge(self.readings(expectation, 740.0, 741.0)), 'ok')
+        self.assertEqual(self.judge(self.readings(expectation, 740.0, 370.0)), 'alert')
+
+    def test_too_few_trials_with_both_amounts_are_unmeasured(self):
+        expectation = self.expectation()
+        values = self.readings(expectation, 740.0, 740.0)
+        for total, count in expectation.model['reads']['second']:
+            values[total], values[count] = 0.0, 0.0
+        self.assertEqual(self.judge(values), 'unmeasured')
+
+    def test_an_unknown_metric_is_refused(self):
+        entry = next(entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'amount_match')
+        bad = {**entry, 'second': {'metric': 'melee_damage_total', 'spell': 801501, 'target': 'ally'}}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, bad)
+
+
 class CastPowerTests(unittest.TestCase):
     def test_a_cast_power_replaces_the_cost_before_each_cast_of_the_three_kinds(self):
-        entries = [next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 500678
-                        and entry.get('label_suffix') == suffix) for suffix in ('max_health', 'damage_taken', 'tick_1050')]
+        suffixes = ('max_health', 'damage_taken', 'tick_1050')
+        entries = [next(entry for entry in CLASS_FILE['behaviours']
+                        if entry['spell'] == 500678 and entry.get('label_suffix') == suffix) for suffix in suffixes]
         for entry in entries:
             with self.subTest(kind=entry['kind']):
                 steps = run.validate(behaviour_scenario(CLASS_FILE, entry)[0])['steps']
-                casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 500678]
+                casts = [index for index, step in enumerate(steps)
+                         if step['action'] == 'cast' and step['spell'] == 500678]
                 self.assertTrue(casts)
                 for index in casts:
                     power = max(i for i in range(index) if steps[i]['action'] == 'set_power')

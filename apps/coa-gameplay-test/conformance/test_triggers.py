@@ -2356,6 +2356,55 @@ class TakenHitTriggerTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class TakenHitMutantTests(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+        self.entries = TakenHitTriggerTests()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def judged(self, check, key, expectation, values):
+        self.workspace.scenario(key, 'trigger', [expectation],
+                                steps=[assert_step(label, str(value)) for label, value in values.items()])
+        manifest, results = self.workspace.manifest()
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=constant_reader())
+                     if verdict.check == check]
+        return verdict
+
+    def magnitude(self, observe_total):
+        _, [expectation] = magnitude_ratio_scenario(CLASS_FILE, self.entries.magnitude_entry(), 0)
+        labels, target = expectation.model['measurements'], expectation.model['target_measurements']
+        values = {labels['trigger_total']: 949 * 273, labels['trigger_count']: 273,
+                  labels['observe_total']: observe_total, labels['observe_count']: 273, labels['aura']: 1,
+                  target['armor']: 0, target['view_level']: 60, target['resistance 1']: 0}
+        return self.judged(MAGNITUDE_CHECK, f'conformance-templar-trigger-{SACRED_DEFENSE}-part-1', expectation,
+                           values)
+
+    def test_a_strike_back_at_half_the_share_alerts(self):
+        self.assertEqual(self.magnitude(round(949 * 0.15 * 0.88) * 273).status, 'ok')
+        self.assertEqual(self.magnitude(round(949 * 0.075 * 0.88) * 273).status, 'alert')
+
+    def gate(self, entry, events):
+        _, [expectation] = gate_absence_scenario(CLASS_FILE, entry, 0)
+        labels = expectation.model['measurements']
+        key = 'conformance-templar-trigger-705306-gate' + (f'-{entry["label_suffix"]}' if entry.get('label_suffix')
+                                                            else '') + '-part-1'
+        return self.judged(GATE_ABSENCE_CHECK, key, expectation, {labels['trials']: 273, labels['events']: events})
+
+    def test_a_strike_back_from_a_boss_striker_alerts(self):
+        self.assertEqual(self.gate(self.entries.gate_entry(), 0).status, 'ok')
+        self.assertEqual(self.gate(self.entries.gate_entry(), 1).status, 'alert')
+
+    def test_a_strike_back_from_the_suffixed_dungeon_boss_arm_alerts_under_its_own_label(self):
+        entry = {**self.entries.gate_entry(), 'label_suffix': 'dungeon_boss',
+                 'trigger': {'action': 'taken_hit', 'spell': 32247, 'striker_entry': 643}}
+        verdict = self.gate(entry, 2)
+        self.assertEqual((verdict.label, verdict.status),
+                         (f'{SACRED_DEFENSE} gate_absence_count dungeon_boss', 'alert'))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateTriggerTest(unittest.TestCase):
     def test_generate_writes_every_part(self):
         from conformance import generate

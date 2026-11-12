@@ -25,7 +25,8 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                        BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, DISPEL_TYPE_NAMES,
+                        BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
+                        DISPEL_TYPE_NAMES,
                         strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
@@ -3579,10 +3580,36 @@ def judge_behaviour(base: Verdict, run: Run | None, expectation: Expectation) ->
     return replace(verdict, detail={**(verdict.detail or {}), **stamp}) if stamp else verdict
 
 
+def behaviour_amount_match_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    per_trial = {}
+    for side, marks in model['reads'].items():
+        values = [(run.values.get(total), run.values.get(count)) for total, count in marks]
+        missing = next((label for (total, count), pair in zip(marks, values) for label, value
+                        in ((total, pair[0]), (count, pair[1])) if value is None), None)
+        if missing:
+            return replace(base, explanation=missing_measurement(run, missing))
+        per_trial[side] = [(after[0] - before[0], after[1] - before[1]) for before, after in zip(values, values[1:])]
+    first, second = per_trial['first'], per_trial['second']
+    pairs = [(a[0] / a[1], b[0] / b[1]) for a, b in zip(first, second) if a[1] > 0 and b[1] > 0]
+    if len(pairs) < model['minimum_trials']:
+        return replace(base, status='unmeasured',
+                       explanation=f'{len(pairs)} of {model["trials"]} trials read both amounts; at least '
+                                   f'{model["minimum_trials"]} are needed')
+    worst = max(abs(a - b) for a, b in pairs)
+    status = 'ok' if worst <= model['tolerance'] + FLOAT_EPSILON else 'alert'
+    means = sum(a for a, _ in pairs) / len(pairs), sum(b for _, b in pairs) / len(pairs)
+    return replace(base, status=status, measured=means[1] / means[0] if means[0] else None, expected=1.0,
+                   explanation=f'{len(pairs)} trials read both amounts; per-event means {means[0]:g} and {means[1]:g}, '
+                               f'largest difference within a trial {worst:g} against the allowed '
+                               f'{model["tolerance"]:g}: {status}')
+
+
 def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -> Verdict:
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
     model = expectation.model
+    if expectation.check == BEHAVIOUR_AMOUNT_MATCH:
+        return behaviour_amount_match_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CAST_GATE:
         return behaviour_cast_gate_verdict(base, run, expectation)
     if expectation.check == BEHAVIOUR_CAST_CONDITION:

@@ -770,6 +770,15 @@ spell at the target, reads the cast's `cast_failure` (judged exactly against `re
 again (0 when `removed`, else 1), and steps forward again (ADR 0189). Silverhand Incantation 801465 clears Sacred
 Restraint 102208 from both on an ally, from neither on the dummy, and from neither when refused out of range (97).
 
+### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
+
+"For the same amount" compares two amounts of one cast (ADR 0190). `amount_match_scenario` casts `cast_spell` at
+`cast_target` once per trial, with the entry's `auras` set before each cast, and after `wait_ms` reads the non-critical
+total and count of two sides, `first` and `second` (`metric` `spell_damage_total` or `spell_heal_total`, `spell`,
+`target` the dummy, the ally or the caster). The judge requires, in every trial with an event on both sides, per-event
+amounts within `tolerance` (default 1) of each other; fewer than half the trials with both is `unmeasured`. Silverhand
+Incantation 801465 reads 740 damage on the dummy and 740 heal on the grouped ally per cast.
+
 ### Aura-presence scenarios (`behaviour_metric_delta`, `kind: "aura_presence"`)
 
 Some active spells grant a metric's "present" state to a target rather than remove one: a self-targeted area

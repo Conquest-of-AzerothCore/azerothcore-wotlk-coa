@@ -647,7 +647,8 @@ def gate_absence_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple
              'gate_text': entry['gate_text'], 'measurements': labels}
     if control:
         model['away_control'] = control
-    expectation = Expectation(gate_absence_label(aura, entry.get('label_suffix', '')), GATE_ABSENCE_CHECK, aura, aura, None, entry['trigger_text'],
+    label = gate_absence_label(aura, entry.get('label_suffix', ''))
+    expectation = Expectation(label, GATE_ABSENCE_CHECK, aura, aura, None, entry['trigger_text'],
                               gate_absence_rule(entry), model)
     return timed(scenario, SETTLE_MS + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 

@@ -55,6 +55,7 @@ BEHAVIOUR_THREAT_REDIRECT = 'behaviour_threat_redirect'
 BEHAVIOUR_DISPEL_COUNT = 'behaviour_dispel_count'
 BEHAVIOUR_TAKEN_OUTCOME = 'behaviour_taken_outcome'
 BEHAVIOUR_CRIT_RATE = 'behaviour_crit_rate'
+BEHAVIOUR_AMOUNT_MATCH = 'behaviour_amount_match'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -66,7 +67,7 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
                     BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE)
+                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -75,7 +76,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
-        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate')
+        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1656,6 +1657,100 @@ def dispel_removal_spec(entry: dict) -> DispelRemovalSpec:
                              tuple(DispelArm(str(arm['name']), str(arm['target']), bool(arm['removed']),
                                              float(arm.get('away_yd', 0.0)), int(arm.get('refused', 0)))
                                    for arm in entry.get('arms', ())))
+
+
+AMOUNT_MATCH_SIDES = ('first', 'second')
+AMOUNT_MATCH_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
+
+
+@dataclass(frozen=True)
+class AmountSide:
+    metric: str
+    spell: int
+    target: str
+
+
+@dataclass(frozen=True)
+class AmountMatchSpec:
+    spell: int
+    name: str
+    quote: str
+    cast_spell: int
+    cast_target: str
+    first: AmountSide
+    second: AmountSide
+    trials: int = 20
+    tolerance: float = 1.0
+    auras: tuple[tuple[int, int], ...] = ()
+    group: bool = False
+    wait_ms: int = 1000
+
+
+def amount_match_label(spec: AmountMatchSpec) -> str:
+    return f'{spec.spell} {BEHAVIOUR_AMOUNT_MATCH}'
+
+
+def amount_match_reads(spec: AmountMatchSpec, side: str, mark) -> tuple[str, str]:
+    base = f'{amount_match_label(spec)} {side} {mark}'
+    return f'{base} total', f'{base} count'
+
+
+def amount_match_scenario(class_file: dict, spec: AmountMatchSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'amount_match', spec.quote, 1.0)
+    sides = {'first': spec.first, 'second': spec.second}
+    for side in sides.values():
+        if side.metric not in AMOUNT_MATCH_METRICS or side.target not in (TARGET, ALLY, CASTER):
+            raise ValueError(f'{spec.spell} amount_match reads {side.metric!r} on {side.target!r}, not one of '
+                             f'{sorted(AMOUNT_MATCH_METRICS)} on the dummy, the ally or the caster')
+    if spec.trials < 1 or spec.tolerance < 0:
+        raise ValueError(f'{spec.spell} amount_match needs at least one trial and a non-negative tolerance')
+
+    def reads(mark) -> list[dict]:
+        steps = []
+        for name, side in sides.items():
+            total, count = amount_match_reads(spec, name, mark)
+            fields = {'spell': side.spell, 'target': side.target, 'critical': False}
+            steps += [measurement(total, CASTER, side.metric, **fields),
+                      measurement(count, CASTER, AMOUNT_MATCH_METRICS[side.metric], **fields)]
+        return steps
+
+    allies = any(side.target == ALLY for side in sides.values()) or spec.cast_target == ALLY
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}]
+             + ([{'action': 'group', 'actor': CASTER, 'target': ALLY}] if spec.group and allies else [])
+             + reads('start'))
+    for trial in range(1, spec.trials + 1):
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                  for aura, stacks in spec.auras]
+        steps += hit_ratio_cast(records, spec.cast_spell, CASTER, spec.cast_target)
+        steps += [{'action': 'wait', 'label': f'trial {trial} amounts', 'ms': spec.wait_ms}] + reads(trial)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour amount match',
+        'contract': f'{spec.trials} casts of {spec.cast_spell} at the {spec.cast_target}; after each, the non-critical '
+                    f'{spec.first.metric} of {spec.first.spell} on the {spec.first.target} and '
+                    f'{spec.second.metric} of {spec.second.spell} on the {spec.second.target} are read; in every '
+                    f'trial with both, the per-event amounts must be equal within {spec.tolerance:g}.',
+        'players': [player_fixture(class_file)] + ([{**player_fixture(class_file), 'id': ALLY}] if allies else []),
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'amount_match', 'trials': spec.trials, 'tolerance': spec.tolerance, 'quote': entry.quote,
+             'reads': {name: [list(amount_match_reads(spec, name, mark))
+                              for mark in ('start', *range(1, spec.trials + 1))] for name in sides},
+             'minimum_trials': max(1, spec.trials // 2)}
+    expectation = Expectation(amount_match_label(spec), BEHAVIOUR_AMOUNT_MATCH, spec.spell, spec.cast_spell, None,
+                              '1', prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def amount_match_spec(entry: dict) -> AmountMatchSpec:
+    def side(raw: dict) -> AmountSide:
+        return AmountSide(raw['metric'], int(raw['spell']), raw['target'])
+    return AmountMatchSpec(entry['spell'], entry['name'], entry['quote'], int(entry['cast_spell']),
+                           entry.get('cast_target', TARGET), side(entry['first']), side(entry['second']),
+                           int(entry.get('trials', 20)), float(entry.get('tolerance', 1.0)),
+                           tuple((int(spell), int(stacks)) for spell, stacks in entry.get('auras', ())),
+                           bool(entry.get('group', False)), int(entry.get('wait_ms', 1000)))
 
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500
@@ -5756,6 +5851,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':
         return dispel_removal_scenario(class_file, dispel_removal_spec(entry))
+    if entry['kind'] == 'amount_match':
+        return amount_match_scenario(class_file, amount_match_spec(entry))
     if entry['kind'] == 'aura_presence':
         return aura_presence_scenario(class_file, aura_presence_spec(entry))
     if entry['kind'] == 'heal_block':
