@@ -1000,7 +1000,8 @@ def cooldown_gate_scenario(class_file: dict, entry: dict, part: int = 0) -> tupl
     rule = (f'{observe} attempted {entry["gate_wait_ms"]} ms after a priming cast while the creature '
             f'{trigger["entry"]} raised by {trigger["spell"]} attacks: refused (SPELL_FAILED_NOT_READY) without '
             f'{aura}, cast with it ("{entry["per_trigger_text"]}")')
-    expectation = Expectation(f'{aura} {COOLDOWN_GATE_CHECK}', COOLDOWN_GATE_CHECK, aura, aura, None,
+    suffix = f' {entry["label_suffix"]}' if entry.get('label_suffix') else ''
+    expectation = Expectation(f'{aura} {COOLDOWN_GATE_CHECK}{suffix}', COOLDOWN_GATE_CHECK, aura, aura, None,
                               entry['trigger_text'], rule, model)
     return timed(scenario, SETTLE_MS + 2 * (entry['gate_wait_ms'] + 2 * CAST_MARGIN_MS) + DRAIN_MS), [expectation]
 
@@ -1184,8 +1185,8 @@ def duration_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> t
     return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 
 
-def magnitude_label(aura: int) -> str:
-    return f'{aura} trigger_magnitude_ratio'
+def magnitude_label(aura: int, suffix: str = '') -> str:
+    return f'{aura} trigger_magnitude_ratio' + (f' {suffix}' if suffix else '')
 
 
 MAGNITUDE_OBSERVE_COUNT_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count'}
@@ -1307,7 +1308,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
             'caster_level': class_file['level'], 'target_measurements': target_labels}
     if entry.get('trial_spell') is not None:
         model['trial_spell'] = entry['trial_spell']
-    expectation = Expectation(magnitude_label(aura), MAGNITUDE_CHECK, aura, aura, None, entry['trigger_text'],
+    expectation = Expectation(magnitude_label(aura, entry.get('label_suffix', '')), MAGNITUDE_CHECK, aura, aura, None,
+                              entry['trigger_text'],
                               magnitude_trigger_rule(entry), model)
     return timed(scenario, SETTLE_MS + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
 

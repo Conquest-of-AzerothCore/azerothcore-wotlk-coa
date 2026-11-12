@@ -406,20 +406,17 @@
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
-        "spell": 500335,
-        "entry": 50068,
-        "learn": [
-          92123
-        ],
+        "spell": 500970,
+        "entry": 50065,
         "swing_ms": 2000,
-        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+        "swing_source": "creature_template 50065 BaseAttackTime 2000"
       },
       "trigger_text": "Damage dealt by Undead minions",
       "trial_metric": "owned_creature_damage_count",
       "trial_readings": [
         {
-          "name": "Abomination damage events less the blasts",
-          "meaning": "the blasts 707002 on every dummy are the Abomination's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
+          "name": "Skeletal Warrior damage events less the blasts",
+          "meaning": "the blasts 707002 on every dummy are the Skeletal Warrior's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
           "adds": [],
           "minus_events": true
         }
@@ -429,7 +426,7 @@
       "proc_spell": 707002,
       "proc_spell_source": "tooltip tokens $707002i (707002 MaxAffectedTargets 3) and $707002m1",
       "events_per_proc": 3,
-      "handler": "AscensionNecromancerEvents.cpp:187-197: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 at up to Amount(707001) valid enemies within 8 yd of its target; one dummy here, so one blast per proc. Count variant: an Abomination 50068 (Raise: Abomination 500335, Summoning Adept 92123 for its 3 Life Force) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
+      "handler": "AscensionNecromancerEvents.cpp:187-197: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 at up to Amount(707001) valid enemies within 8 yd of its target; one dummy here, so one blast per proc. Count variant: a Lesser Skeletal Warrior 50065 (Raise: Skeletal Warrior 500970, 1 Life Force; it casts no spell of its own, unlike the Abomination's Nature cloud that also hits every dummy) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
       "dbc": {
         "707001": {
           "ProcChance": 10,
@@ -455,20 +452,17 @@
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
-        "spell": 500335,
-        "entry": 50068,
-        "learn": [
-          92123
-        ],
+        "spell": 500970,
+        "entry": 50065,
         "swing_ms": 2000,
-        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+        "swing_source": "creature_template 50065 BaseAttackTime 2000"
       },
       "trigger_text": "Damage dealt by Undead minions",
       "trial_metric": "owned_creature_damage_count",
       "trial_readings": [
         {
-          "name": "Abomination damage events less the blasts",
-          "meaning": "the blasts 707002 on every dummy are the Abomination's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
+          "name": "Skeletal Warrior damage events less the blasts",
+          "meaning": "the blasts 707002 on every dummy are the Skeletal Warrior's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
           "adds": [],
           "minus_events": true
         }
@@ -478,7 +472,7 @@
       "proc_spell": 707002,
       "proc_spell_source": "tooltip tokens $707002i (707002 MaxAffectedTargets 3) and $707002m1",
       "events_per_proc": 3,
-      "handler": "AscensionNecromancerEvents.cpp:187-197: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll. Count variant: an Abomination 50068 (Raise: Abomination 500335, Summoning Adept 92123 for its 3 Life Force) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
+      "handler": "AscensionNecromancerEvents.cpp:187-197: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll. Count variant: a Lesser Skeletal Warrior 50065 (Raise: Skeletal Warrior 500970, 1 Life Force; it casts no spell of its own, unlike the Abomination's Nature cloud that also hits every dummy) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
       "dbc": {
         "707882": {
           "ProcChance": 20,
@@ -515,13 +509,10 @@
       "tooltip": "Critical strikes dealt by your |cffffffffAbominations|r and |cffffffffDecaying Collosi|r now |cFFFFFFFFChomp|r your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
       "trigger": {
         "action": "minion",
-        "spell": 500335,
-        "entry": 50068,
-        "learn": [
-          92123
-        ],
+        "spell": 500970,
+        "entry": 50065,
         "swing_ms": 2000,
-        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+        "swing_source": "creature_template 50065 BaseAttackTime 2000"
       },
       "trigger_text": "Critical strikes dealt by your Abominations and Decaying Collosi",
       "trigger_spell_text": "Raise: Abomination",
@@ -895,6 +886,117 @@
         "value": 1373,
         "source": "player_class_stats class 23 level 60 BaseMana 1373: covers Glacial Impact 704355's 14% base-mana cost"
       }
+    },
+    {
+      "aura": 704721,
+      "name": "Study of Death",
+      "tooltip": "When you cast |cFFFFFFFFUnholy Frenzy|r you now animate $302912s1 |cffffffffGreater Zombies|r to aid you in combat for $525380d.\r\n\r\nFrost and Physical damage dealt by your Undead minions now reduces the cooldown of |cffffffffUnholy Frenzy|r by $/1000;302597S1 sec. \r\n\r\nEach |cffffffffAbominations|r or |cffffffffDecaying Collosus|r active causes damage dealt by your Undead minions to reduce the cooldown by an additional 1 sec.",
+      "kind": "cooldown_gate",
+      "effect": "gate",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Frost and Physical damage dealt by your Undead minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 805029,
+      "gate_wait_ms": 160000,
+      "per_trigger_text": "now reduces the cooldown of Unholy Frenzy by $/1000;302597S1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers the base-mana percentage costs of Unholy Frenzy 805029 (15%) and Fetid Ward 680388 (20%)"
+      },
+      "observe_source": "AscensionNecromancerEvents.cpp:206-212: with 704721 known, a Frost or Physical damage event of a minion reduces Unholy Frenzy 805029 by |Amount(302597)| (302597 BasePoints -501 + 1 = 500 ms, $/1000;302597S1) plus 1000 ms per Abomination 50068 or Decaying Colossus 50115 minion, at most once per 1000 ms (State cooldown 704721). Each cast of 805029 with 704721 known also raises 5 Greater Zombies for 15 s (AscensionNecromancerAbilities.cpp:346-353), whose Physical hits count too. Gate: Unholy Frenzy (180000 ms) primed and attempted again 160000 ms later while a Ghoul (Physical melee) attacks: refused without 704721, cast with it (the zombies' 15 s and the Ghoul's hits remove more than the 20000 ms left)."
+    },
+    {
+      "aura": 704721,
+      "name": "Study of Death (Abomination)",
+      "label_suffix": "abomination",
+      "tooltip": "When you cast |cFFFFFFFFUnholy Frenzy|r you now animate $302912s1 |cffffffffGreater Zombies|r to aid you in combat for $525380d.\r\n\r\nFrost and Physical damage dealt by your Undead minions now reduces the cooldown of |cffffffffUnholy Frenzy|r by $/1000;302597S1 sec. \r\n\r\nEach |cffffffffAbominations|r or |cffffffffDecaying Collosus|r active causes damage dealt by your Undead minions to reduce the cooldown by an additional 1 sec.",
+      "kind": "cooldown_gate",
+      "effect": "abomination_gate",
+      "trigger": {
+        "action": "minion",
+        "spell": 500335,
+        "entry": 50068,
+        "learn": [
+          92123
+        ],
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+      },
+      "trigger_text": "Each Abominations or Decaying Collosus active causes damage dealt by your Undead minions to reduce the cooldown by an additional 1 sec",
+      "trigger_spell_text": "Raise: Abomination",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 805029,
+      "gate_wait_ms": 110000,
+      "per_trigger_text": "reduce the cooldown by an additional 1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers the base-mana percentage costs of Unholy Frenzy 805029 (15%) and Fetid Ward 680388 (20%)"
+      },
+      "observe_source": "AscensionNecromancerEvents.cpp:206-212: with 704721 known, a Frost or Physical damage event of a minion reduces Unholy Frenzy 805029 by |Amount(302597)| (302597 BasePoints -501 + 1 = 500 ms, $/1000;302597S1) plus 1000 ms per Abomination 50068 or Decaying Colossus 50115 minion, at most once per 1000 ms (State cooldown 704721). Each cast of 805029 with 704721 known also raises 5 Greater Zombies for 15 s (AscensionNecromancerAbilities.cpp:346-353), whose Physical hits count too. Gate: Unholy Frenzy primed and attempted again 110000 ms later while an Abomination attacks: with 0.5 s per event the cooldown would still run (110 s + 15 x 0.5 s + 95 s x 0.5 events/s x 0.5 s = 141 s of 180 s); the cast goes through only if each event removes at least 1.12 s, which the stated 0.5 + 1 = 1.5 s does; refused without 704721."
+    },
+    {
+      "aura": 680388,
+      "name": "Fetid Ward (minion)",
+      "tooltip": "Activate a |cffffffffFetid Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, $s1% of your damage dealt heals you and your minions, split evenly amongst them, and healing received is increased by $s2%.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "aura_cast": true,
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers the base-mana percentage costs of Unholy Frenzy 805029 (15%) and Fetid Ward 680388 (20%)"
+      },
+      "trigger_text": "heals you and your minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 681463,
+      "observe_source": "EffectTriggerSpell[0] of 680388",
+      "observe_note": "Casting 680388 with a Ghoul raised copies the ward onto the Ghoul (AscensionNecromancerAuras.cpp:109-118); each damaging hit of a ward holder runs LeechArmy (AscensionNecromancerEvents.cpp:48-54, :95-96), which casts 681463 on the caster and on each minion: 2 casts per Ghoul hit with one minion. The caster's own 5-damage swings give a 0 share, which Copy skips (AscensionNecromancer.cpp:60-65).",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 2,
+      "per_trigger_text": "heals you and your minions, split evenly amongst them"
+    },
+    {
+      "aura": 680388,
+      "name": "Fetid Ward (split)",
+      "label_suffix": "split",
+      "tooltip": "Activate a |cffffffffFetid Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, $s1% of your damage dealt heals you and your minions, split evenly amongst them, and healing received is increased by $s2%.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
+      "kind": "magnitude_ratio",
+      "effect": 1,
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "aura_cast": true,
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers the base-mana percentage costs of Unholy Frenzy 805029 (15%) and Fetid Ward 680388 (20%)"
+      },
+      "trigger_metric": "owned_creature_damage_total",
+      "trigger_text": "of your damage dealt heals you and your minions",
+      "observe_spell": 681463,
+      "observe_metric": "spell_heal_total",
+      "expected_ratio": 0.15,
+      "per_trigger_text": "split evenly amongst them",
+      "observe_source": "EffectTriggerSpell[0] of 680388; LeechArmy (AscensionNecromancerEvents.cpp:48-54) heals the caster and each minion for damage x 30 / (100 x (minions + 1)): with one Ghoul each heal is 15% of the Ghoul hit; both receivers carry the ward's own +10% healing received (Q-b1-2)"
     }
   ],
   "talent_modifiers": [],

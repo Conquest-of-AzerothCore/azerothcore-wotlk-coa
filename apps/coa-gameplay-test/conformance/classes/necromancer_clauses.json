@@ -1572,12 +1572,14 @@
       {
         "claim": "Activate a Fetid Ward on yourself",
         "labels": [
-          "680388 trigger_count"
+          "680388 trigger_count 25307"
         ]
       },
       {
         "claim": "and your Undead minions",
-        "labels": []
+        "labels": [
+          "680388 trigger_count 500971"
+        ]
       },
       {
         "claim": "for $d.",
@@ -1595,13 +1597,15 @@
       {
         "claim": "While active, $s1% of your damage dealt heals you",
         "labels": [
-          "680388 trigger_count",
+          "680388 trigger_count 25307",
           "680388 trigger_magnitude_ratio"
         ]
       },
       {
         "claim": "and your minions,",
-        "labels": []
+        "labels": [
+          "680388 trigger_count 500971"
+        ]
       }
     ],
     "kind": "claim"
@@ -1612,7 +1616,9 @@
     "claims": [
       {
         "claim": "split evenly amongst them,",
-        "labels": []
+        "labels": [
+          "680388 trigger_magnitude_ratio split"
+        ]
       },
       {
         "claim": "and healing received is increased by $s2%.",
@@ -1849,15 +1855,28 @@
   {
     "spell": 704721,
     "clause": "Frost and Physical damage dealt by your Undead minions now reduces the cooldown of Unholy Frenzy by $/1000;302597S1 sec.",
-    "labels": [
-      "704721 effect_value 302597e0 #2"
+    "claims": [
+      {
+        "claim": "Frost and Physical damage dealt by your Undead minions now reduces the cooldown of Unholy Frenzy",
+        "labels": [
+          "704721 trigger_cooldown_gate"
+        ]
+      },
+      {
+        "claim": "by $/1000;302597S1 sec.",
+        "labels": [
+          "704721 effect_value 302597e0 #2"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 704721,
     "clause": "Each Abominations or Decaying Collosus active causes damage dealt by your Undead minions to reduce the cooldown by an additional 1 sec.",
-    "labels": [],
+    "labels": [
+      "704721 trigger_cooldown_gate abomination"
+    ],
     "kind": "claim"
   },
   {
@@ -2058,13 +2077,13 @@
       {
         "claim": "Damage dealt by Undead minions has a $h% chance",
         "labels": [
-          "707001 proc_rate"
+          "707001 proc_rate 707002 500971"
         ]
       },
       {
         "claim": "to blast up to $707002i nearby enemies",
         "labels": [
-          "707001 effect_value #1"
+          "707001 proc_rate 707002 500970"
         ]
       },
       {
@@ -2233,13 +2252,13 @@
       {
         "claim": "Damage dealt by Undead minions has a $h% chance",
         "labels": [
-          "707882 proc_rate"
+          "707882 proc_rate 707002 500971"
         ]
       },
       {
         "claim": "to blast up to $707002i nearby enemies",
         "labels": [
-          "707882 effect_value #1"
+          "707882 proc_rate 707002 500970"
         ]
       },
       {
