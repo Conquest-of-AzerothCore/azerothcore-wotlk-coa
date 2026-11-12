@@ -1489,7 +1489,9 @@ reads the metric again. An arm with `gain` must gain exactly that; an arm withou
 stats it read, inside floor(x) to ceil(x). Improved Benediction 705287: the grouped ally's armor gains 0 without the
 talent, Agility + Stamina with it, and again with Agility 58451 and with Stamina 48101 set; Libram of Fervor 805423:
 Holy spell power +30% of Agility and attack power +30% of Intellect, at the reference stats and with Agility 58451 or
-Intellect 48100 set.
+Intellect 48100 set. The model's `contrast` (ADR 0258) is `learned` when the cast spell is the entry's spell with its
+aura in `clear_auras`, or when the first arm lacks the entry's spell and a later arm learns it; otherwise it is
+`condition`, and coverage keeps the state read at data.
 
 ### An enemy player in metric_delta (ADR 0214)
 

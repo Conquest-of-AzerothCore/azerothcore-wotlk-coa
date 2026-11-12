@@ -8022,6 +8022,35 @@ class StatGainTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             stat_gain_scenario(CLASS_FILE, stat_gain_spec(entry))
 
+    def evidence(self, entry: dict, clause: str, gains: dict, stats: dict) -> str:
+        from coverage import verdict_evidence
+        _, expectations = behaviour_scenario(CLASS_FILE, entry)
+        expectation = expectations[0]
+        values = stat_gain_values(expectation.model, gains, stats)
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        self.assertEqual(verdict.status, 'ok')
+        return verdict_evidence(verdict, clause, {verdict.label: verdict})
+
+    def test_a_withheld_talent_or_the_spells_own_cast_is_a_learned_contrast(self):
+        armor = r1a_entry(705287, 'stat_gain', 'armor')
+        stats = {'without': (132.0, 79.0), 'with': (132.0, 79.0), 'agility': (162.0, 79.0), 'stamina': (132.0, 142.0)}
+        gains = {'without': 0.0, 'with': 211.0, 'agility': 241.0, 'stamina': 274.0}
+        self.assertEqual(self.evidence(armor, 'grants your target armor', gains, stats), 'behaviour')
+        power = r1a_entry(805423, 'stat_gain', 'spell_power')
+        self.assertEqual(self.evidence(power, 'granting you spell power', {'reference': 39.0, 'agility': 48.0},
+                                       {'reference': (132.0,), 'agility': (162.0,)}), 'behaviour')
+
+    def test_arms_that_never_withhold_the_spell_stay_data(self):
+        armor = r1a_entry(705287, 'stat_gain', 'armor')
+        learned_first = {**armor, 'arms': [{**arm, 'learn': [705287]} for arm in armor['arms'][1:]]}
+        stats = {'with': (132.0, 79.0), 'agility': (162.0, 79.0), 'stamina': (132.0, 142.0)}
+        gains = {'with': 211.0, 'agility': 241.0, 'stamina': 274.0}
+        self.assertEqual(self.evidence(learned_first, 'grants your target armor', gains, stats), 'data')
+        power = r1a_entry(805423, 'stat_gain', 'spell_power')
+        kept_aura = {**power, 'clear_auras': []}
+        self.assertEqual(self.evidence(kept_aura, 'granting you spell power', {'reference': 39.0, 'agility': 48.0},
+                                       {'reference': (132.0,), 'agility': (162.0,)}), 'data')
+
 
 class EnemyPlayerMetricDeltaTests(unittest.TestCase):
     def test_the_enemy_player_is_pvp_flagged_and_measured(self):

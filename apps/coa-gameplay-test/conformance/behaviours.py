@@ -6625,6 +6625,13 @@ def stat_gain_mark(spec: StatGainSpec, arm: str, key: str) -> str:
     return f'{stat_gain_label(spec)} {arm} {key}'
 
 
+def stat_gain_contrast(spec: StatGainSpec) -> str:
+    cast_is_the_spell = spec.cast_spell == spec.spell and spec.spell in spec.clear_auras
+    withheld_then_learned = (spec.spell not in spec.arms[0].learn
+                             and any(spec.spell in arm.learn for arm in spec.arms[1:]))
+    return LEARNED_CONTRAST if cast_is_the_spell or withheld_then_learned else CONDITION_CONTRAST
+
+
 def stat_gain_validate(spec: StatGainSpec):
     names = [arm.name for arm in spec.arms]
     if len(names) < 2 or len(set(names)) != len(names):
@@ -6686,7 +6693,7 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
         'players': [player_fixture(class_file)] + ally_players(class_file, {spec.cast_target}),
         'steps': steps}
     model = {'kind': 'stat_gain', 'arms': arms, 'coefficients': [term.coefficient for term in spec.terms],
-             'metric': spec.metric, 'quote': entry.quote}
+             'metric': spec.metric, 'contrast': stat_gain_contrast(spec), 'quote': entry.quote}
     return scenario, [Expectation(stat_gain_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.cast_spell, None,
                                   '0', prose_rule(entry.quote, spec.spell), model)]
 
