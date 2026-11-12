@@ -644,6 +644,8 @@ def packets_command(args) -> int:
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description='Generate class conformance scenarios and compare their results.')
     commands = parser.add_subparsers(dest='command', required=True)
+    from batch_commands import add_batch_commands
+    batch_handlers = add_batch_commands(commands)
     scaffolding = commands.add_parser('scaffold', help='write a minimal classes/<name>.json for a CoA class')
     scaffolding.add_argument('--class', dest='class_id', type=int, required=True)
     scaffolding.add_argument('--out', type=Path, required=True)
@@ -772,6 +774,8 @@ def main(argv=None) -> int:
                            help='a class map JSON ({"classes": {"<class id>": {"spells": [...]}}}), read only')
     packeting.add_argument('--out', type=Path, required=True, help='the directory that receives <spell id>.md')
     args = parser.parse_args(argv)
+    if args.command in batch_handlers:
+        return batch_handlers[args.command](args)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command,
                 'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command, 'sample': sample_command,

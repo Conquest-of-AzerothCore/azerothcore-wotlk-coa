@@ -420,14 +420,14 @@ Aura 354 is `SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT` (`SpellAuraDefines.h:398`)
   - Other classes hook it with `OnEffectProc += AuraEffectProcFn(..., AuraType(354))`, for example
     `AscensionPrimalistSecondary.cpp:134`.
 
-No repository command runs this check; one is future work. Steps:
+Steps:
 1. Build the class map (9.1).
-2. List the class's aura-354 spells with this read-only query. It is not a repository command:
+2. List the class's aura-354 spells:
 
-       python3 -c "import json; d=json.load(open('OUT/class-map.json'));
-       [print(s['spell'], s['name'], s['risk'], s['custom_mechanics'], s['code_hits'][:3]) for s in
-       d['classes']['<id>']['spells'] if any(m.endswith(': aura 354') for m in s['custom_mechanics'])]"
+       python3 -B conformance.py aura354 --class-map OUT/class-map.json --class <id> [--out AURA354.json]
 
+   It prints each spell with its risk, custom mechanics and first code hits, flags `stock` and `data_row` spells as
+   candidate defects, and ends with the counts.
 3. Read each result by its `risk`:
    - **`scripted`**: class code names the spell. Check that the code really handles the 354 effect, through an
      `AuraType(354)` hook or a contract rewrite. Then prove the claim with a `triggers` entry (`trigger_count`). For "X%
@@ -590,12 +590,26 @@ The command:
     python3 -B conformance.py packets --class 19 --sample SAMPLE.json --chunk 2 --buckets BUCKETS.json \
       --class-map CLASS-MAP.json --out PACKETS/
 
-**The bucket file is built by scripts that are not in the repository.** This is future work. The Templar used two
-uncommitted, Templar-only scripts with hard-coded paths and no arguments:
-- a coverage audit, which runs `coverage.clause_coverage` on the ledger with merged verdicts;
-- a bucket builder.
+Build the bucket file with two commands (`CONF/docs/generate-and-compare.md`, Coverage audit and bucket file):
 
-The bucket file is a JSON array of rows, one per ledger claim. Its readers on the branch read these fields:
+    python3 -B conformance.py audit --class 23 --clauses LEDGER --out COVERAGE.json [--results DIR ...] \
+      [--base-results DIR] [--manifest M] [--hooked FILE] [--build B]
+    python3 -B conformance.py buckets --class 23 --coverage COVERAGE.json --out BUCKETS.json [--manifest M] \
+      [--class-map CLASS-MAP.json] [--settled FILE] [--standing-alerts FILE]
+
+- `audit` runs `coverage.clause_coverage` on the ledger with the merged verdicts (a later `--results` replaces the
+  labels of an earlier one; disagreeing labels are listed). With no verdicts, as for a new class, every claim is
+  unproven.
+- `buckets` turns the audit into the bucket file. The class code is the class map's `own_files` (or
+  `src/server/coa/**/Ascension<class name>*` without a map), the family the class's `SpellFamilyName`. Settled alerts
+  and standing alerts from outside the audit are optional input files.
+
+The Templar used two uncommitted scripts with hard-coded paths for the same steps; fed the Templar's inputs,
+`buckets` reproduces the `bucket`, `evidence`, `script_touch` and `token_kind` of all 433 rows of its batch-1 bucket
+file.
+
+The bucket file is a JSON array of rows, one per ledger claim, or `{"clauses": [...]}` with a `definition` block
+(what `buckets` writes). Its readers on the branch read these fields:
 
 | Field | Type | Required by | Meaning |
 |---|---|---|---|
@@ -624,8 +638,8 @@ What the Templar's builder wrote into them:
 - **`script_touch`** and **`script_touch_hits`**: matches in the class code, by id or by family mask; the first is the
   flag, the second the hits in the shape above.
 
-The order of commands on the Templar was scaffold, generate and compare (9.3, 9.5), the ledger (9.4), the two scripts
-above, then `sample` and `packets` (this section).
+The order of commands is scaffold, generate and compare (9.3, 9.5), the ledger (9.4), `audit` and `buckets`, then
+`sample` and `packets` (this section).
 
 Batch sizes used on the Templar:
 - batch 1: about 40 clauses, with a first chunk of 10;
@@ -934,9 +948,7 @@ Sources:
   - Expect to add check kinds; they cost the most per claim (section 10.4).
 - **Not included, future work:**
   - a generator for a class's first ledger (9.4): the Templar ledger came from an agent audit, converted by an
-    uncommitted step;
-  - the bucket builder (9.6);
-  - a command for the aura 354 check (9.2). The query given there is not a repository command.
+    uncommitted step.
 - **The final statuses 2, 4 and 5** have no field in the ledger or in `coverage.py`. The Templar recorded them outside
   the repository.
 - **`prove` calls the `coa-verify` wrapper** from the optional guide tooling by default (`prove.py:57`), with no option

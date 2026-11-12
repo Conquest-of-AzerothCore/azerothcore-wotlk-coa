@@ -78,7 +78,8 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
 - [Scaffolding a class file](docs/scaffolding.md) — `conformance.py scaffold`, what it fills in and what it
   leaves for a human.
 - [Generate and compare](docs/generate-and-compare.md) — `generate`/`compare` CLI, a full class run, the impact
-  report, coverage comparison, behaviour sheets, the `prove` runner, batch samples, per-spell packets, verdict
+  report, coverage comparison, behaviour sheets, the `prove` runner, the coverage audit, bucket file and aura-354
+  check (`audit`, `buckets`, `aura354`), batch samples, per-spell packets, verdict
   statuses, open conformance checks.
 - [Server-fix brief](docs/fix-brief.md) — the method rule for server fixes and the brief template round workflows
   copy into each fix item.

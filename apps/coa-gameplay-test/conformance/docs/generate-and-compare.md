@@ -358,6 +358,56 @@ reads the file beside the ledger: on the verdicts' build, a `consumed` row turns
 behaviour evidence; a `not_consumed` row keeps it data and lists it. K3 is the only consumption route: the K1
 static join needs the value dump, which is not adopted, and no K1+K2 rows are written.
 
+### Coverage audit and bucket file
+
+```sh
+python3 -B conformance.py audit --class 23 --clauses classes/necromancer_clauses.json --out COVERAGE.json \
+  [--results DIR ...] [--base-results DIR] [--manifest MANIFEST.json] [--hooked HOOKED.json] [--build B] \
+  [--consumption classes/<name>_consumption.json]
+python3 -B conformance.py buckets --class 23 --coverage COVERAGE.json --out BUCKETS.json \
+  [--manifest MANIFEST.json] [--class-map CLASS-MAP.json] [--settled SETTLED.json] \
+  [--standing-alerts STANDING.json] [--source-root W] [--dbc-dir DIR]
+python3 -B conformance.py aura354 --class-map CLASS-MAP.json --class 23 [--out AURA354.json]
+```
+
+`audit` merges the verdicts of `--base-results` and then of each `--results` directory in order (a later directory
+replaces the labels of the earlier ones) and runs `coverage.clause_coverage` on the ledger. With no directory it runs
+on no verdicts, as for a new class: every claim comes out unproven. `--manifest` stamps the observed metric of a
+generated manifest on a metric verdict that carries none (verdicts written before the metric was stamped);
+`--hooked` turns the listed labels into `not_measured`; `--build` stamps one audit build on every merged verdict,
+and without it the merged verdicts must come from one build (`coverage.require_build`). The output keeps the inputs,
+`results_replaced` and `results_added` (labels of `--results` over the base), `results_disagree` (labels whose status
+class, conformant or the status itself plus `data_only`, differs between `--results` directories), `figures`
+(`claims`, `behaviour`, `data`, `unproven`, `resolved`, `not_measured`, `tool_gaps_pending`), `no_claim_entries`,
+`statuses` (label to status) and one row per claim: `index` (the claim's position among the ledger's claims),
+`spell`, `clause`, `evidence`, `claim_evidence`, `labels`, `missing_labels`, `label_statuses`, `alert_labels` and
+`alert_explanations` (the first 300 characters).
+
+`buckets` writes the bucket file `sample` and `packets` read: `definition`, `inputs` (with the family, the source
+files and their family masks), `uncited_alert_verdicts`, `uncited_alert_quotes` and one row per audit row with
+`index, spell, spell_name, clause, bucket, evidence, alert_source, script_touch, script_touch_hits, token_kind,
+tokens, literals, token_readbacks, readable_token, token_readbacks_conformant, declared_claims, zero_agent_data,
+labels, missing_labels, label_statuses`. A row is `A` when a standing alert applies (an alert label, an alert verdict
+cited by no clause whose manifest rule or class-file `target_aura_gates` quote gives the clause text, or a
+`--standing-alerts` row), unless `--settled` lists it; otherwise `out_of_scope` when behaviour proven, `U` when
+unproven, `D` when data conformant. The class code is the class map's `own_files` for the class, or without
+`--class-map` the files `src/server/coa/**/Ascension<class name>*` under `--source-root`; the family is the class
+map's `family`, or the most common `SpellFamilyName` of the class spells. `script_touch_hits` matches the clause
+spell, its rank ids (value scenarios of `--manifest`) and the spells its tokens name, by id as a whole word or by a
+family mask the class code tests. `--settled` is a JSON list of `{spell, clause, why}` and `--standing-alerts` of
+`{spell, clause}`. Without `--manifest` there are no rank ids, token readbacks or uncited alert quotes, and the
+spell name comes from `Spell.dbc`.
+
+`aura354` lists the class spells of a class map whose `custom_mechanics` carry aura 354 with their risk, custom
+mechanics and first code hits, and flags a spell of risk `stock` or `data_row` as a candidate defect (guide 9.2).
+
+On the Templar, `buckets` fed the batch-1 audit (`coverage.json`), a manifest regenerated at 6cbd4ed4fe (1233
+scenarios), the class code of that commit, the two settled alerts and the ten standing prototype alerts reproduced
+the batch-1 bucket file on all 433 rows (`bucket`, `evidence`, `script_touch`, `token_kind` and every other row
+field) except two: `spell_name` on 20 rows, where the original had none and `buckets` reads `Spell.dbc`, and the
+wording of `alert_source` on the 9 standing-alert rows, which names the input file. The
+batch-1 audit itself cannot be rerun: its round 10 `verdicts.json` and batch-1 compare outputs no longer exist.
+
 ### Drawing a batch sample
 
 ```sh

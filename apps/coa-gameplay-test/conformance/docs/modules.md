@@ -67,6 +67,13 @@
 - `packets.py`: `write_packets(dbc_dir, class_file, sample, chunk, bucket_rows, out_dir, class_map)` writes one
   Markdown packet per spell of a sample chunk (`packet`, `render_packet`) (see
   [Per-spell packets](generate-and-compare.md#per-spell-packets)).
+- `audit.py`: `audit_document(class_id, ledger, results, base_results, manifest, hooked, build, consumption)` merges
+  compare outputs (a later one replaces earlier labels, `disagreements` lists labels whose status class differs) and
+  runs `coverage.clause_coverage` on the ledger; `buckets.py`: `bucket_document(coverage, manifest, class_file,
+  sources, source_name, family, records, settled, standing, inputs)` turns that audit into the bucket file of
+  `sample` and `packets`; `aura354.py`: `aura354_rows(class_map, class_id)` lists a class's aura-354 spells and flags
+  those without class code; `batch_commands.py` registers the three as `audit`, `buckets` and `aura354` (see
+  [Coverage audit and bucket file](generate-and-compare.md#coverage-audit-and-bucket-file)).
 - `class_map.py`: the command line `--worktree W --out OUT [--dbc-dir DIR] [--log-events EVENTS.csv]` maps every
   spell of the 21 CoA classes to the code that touches it (`risk`, `gap`, `custom_mechanics`, log counts) and writes
   `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)).
