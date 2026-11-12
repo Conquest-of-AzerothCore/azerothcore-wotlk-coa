@@ -3554,7 +3554,10 @@
     "labels": [
       "801457 effect_value 707307e0 #1",
       "801457 spell_duration 705309 #2",
-      "801457 behaviour_metric_delta"
+      "801457 behaviour_metric_delta",
+      "801457 behaviour_hit_ratio one_heal",
+      "801457 behaviour_cast_applies_aura reduction",
+      "801457 behaviour_expiry reduction"
     ],
     "kind": "claim"
   },
@@ -3562,14 +3565,17 @@
     "spell": 801457,
     "clause": "stacking $705309u times",
     "labels": [
-      "801457 max_stacks 705309 #3"
+      "801457 max_stacks 705309 #3",
+      "801457 behaviour_hit_ratio stack_cap"
     ],
     "kind": "claim"
   },
   {
     "spell": 801457,
     "clause": "@ext: Healing yourself does not trigger this effect.:ext@",
-    "labels": [],
+    "labels": [
+      "801457 behaviour_hit_ratio self_heal"
+    ],
     "kind": "claim"
   },
   {

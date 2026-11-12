@@ -5221,6 +5221,148 @@
       "learn": [807268], "control": {"auras": [[561156, 1]]}, "treatment": {"auras": [[520608, 1], [561156, 1]]},
       "rate": "critical", "expected_points": 50, "trials": 166, "parts": 76,
       "expected_source": "$s1 = 50 (520608 EffectBasePoints[0] 49, EffectDieSides[0] 1), as the crit_rate entry: 520608 modifies Warrior of Dawn 561156, whose Effect[2] aura 107 SPELLMOD_CRITICAL_CHANCE on Argent Blade 807268 is 0 on its own; Unit::SpellDoneCritChance applies it to the next Argent Blade, which consumes 561156. Both arms set 561156 before each Argent Blade, the treatment sets 520608 first; no crit rating fixture. Pooled proof of the chance-claim ruling (2026-11-12) with the rate mode of ADR 0195: 76 parts of 166 casts per arm, 12,616 per arm, sized for a 99% half-width of at most 1.25 points (half the band of +-2.5) near 5% / 55%; the critical share of all Argent Blade hits must differ by 50 points between the arms."
+    },
+    {
+      "spell": 801457,
+      "name": "Binding Scripture",
+      "kind": "taken_hit",
+      "variant": "one_heal",
+      "label_suffix": "one_heal",
+      "judge": "damage_ratio",
+      "expected": 0.95,
+      "quote": "and reduces your damage taken by $707307s1% for $705309d",
+      "strike_spell": 41394,
+      "trials": 10,
+      "learn": [
+        801457
+      ],
+      "caster_health_pct": 90,
+      "caster_max_health": 100000,
+      "ally_health_pct": 50,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              707307,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              801478,
+              "ally"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "AscensionTemplarEvents.cpp:79-80 (Check, case 801457: an effective heal by the Templar on a raid member other than the Templar) and :164-166 (Proc: 705309 on the healed ally, 707307 on the Templar). 707307 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127, BasePoints -6 DieSides 1 (-5), StackAmount 3, DurationIndex 1 (10000 ms). The grouped ally is set to 50% health before each Testament of Faith 801478 cast at it (an effective heal, ADR 0212); the treatment arm removes 707307 before each heal, so each strike meets one stack. A level 60 striker (entry 36) casts Light of the Naaru 41394 (Holy, a flat 1100) at the caster, held at 90% of 100000 health; non-critical hits compared from the damage logs the caster receives (ADR 0153). Control: no heal, 1100."
+    },
+    {
+      "spell": 801457,
+      "name": "Binding Scripture",
+      "kind": "taken_hit",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "judge": "damage_ratio",
+      "expected": 0.85,
+      "quote": "stacking $705309u times",
+      "strike_spell": 41394,
+      "trials": 10,
+      "learn": [
+        801457
+      ],
+      "caster_health_pct": 90,
+      "caster_max_health": 100000,
+      "ally_health_pct": 50,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              707307,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              801478,
+              "ally"
+            ],
+            [
+              801478,
+              "ally"
+            ],
+            [
+              801478,
+              "ally"
+            ],
+            [
+              801478,
+              "ally"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "As the one_heal entry, with four Testament of Faith 801478 heals at the grouped ally (each at 50% health, 1500 ms apart, inside 707307's 10000 ms) before each strike: 707307 StackAmount 3 caps the reduction at 3 x -5 = -15%, so 1100 reads 935 (0.85). An uncapped fourth stack would read 0.80, two stacks 0.90; the hit-ratio band excludes both. Control: no heal, 1100."
+    },
+    {
+      "spell": 801457,
+      "name": "Binding Scripture",
+      "kind": "taken_hit",
+      "variant": "self_heal",
+      "label_suffix": "self_heal",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "Healing yourself does not trigger this effect.",
+      "strike_spell": 41394,
+      "trials": 10,
+      "learn": [
+        801457
+      ],
+      "caster_health_pct": 90,
+      "caster_max_health": 100000,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              707307,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              801478,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "AscensionTemplarEvents.cpp:79-80: Check refuses a heal whose action target is the Templar (event.GetActionTarget() != player). The treatment arm casts Testament of Faith 801478 at the caster, held at 90% of 100000 health so the heal is effective, before each Light of the Naaru 41394 strike (Holy, a flat 1100): no 707307, so 1100 against 1100. The positive contrast is the one_heal entry: the same heal at a grouped ally reads 0.95."
+    },
+    {
+      "spell": 801457,
+      "name": "Binding Scripture",
+      "kind": "cast_applies_aura",
+      "label_suffix": "reduction",
+      "quote": "and reduces your damage taken by $707307s1% for $705309d",
+      "expected_ms": 10000,
+      "applied_aura": 707307,
+      "target": "caster",
+      "cast_spell": 801478,
+      "cast_target": "ally",
+      "cast_target_health_pct": 50,
+      "observe_source": "Testament of Faith 801478 heals the grouped ally at 50% health; Binding Scripture's Proc (AscensionTemplarEvents.cpp:164-166) casts 707307 on the Templar. 707307 and 705309 have DurationIndex 1 (10000 ms), the $705309d of the tooltip. The expiry arm is timed from the applied assert on the caster (ADR 0212: the ally cast target adds the grouped ally)."
     }
   ],
   "player_observations": [
