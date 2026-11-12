@@ -4,6 +4,9 @@ Ordinary stage creatures keep the core kill reward path enabled. Loot mode zero 
 item and money loot; reputation remains disabled. Kill XP follows the core's level, group, range and
 no-XP rules, then the existing Manastorm depth/native experience modifiers. Helpers retain their exclusions.
 
+`Manastorm.ExperienceRate` in `manastorm-endless.conf` (default `0.3`, a 70% reduction) multiplies both
+kill XP and newly earned floor XP. It is reloadable; floor XP already earned keeps its saved amount.
+
 Floor XP is a configurable reconstruction, not a recovered original Ascension amount. A successful
 objective completion awards each eligible run member the repeatable RDF reward for their own level.
 Replaying a floor in another run earns it again; entering or using a portal does not award XP.
