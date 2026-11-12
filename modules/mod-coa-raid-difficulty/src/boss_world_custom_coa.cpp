@@ -1224,20 +1224,20 @@ namespace
                 _arrived = true;
                 me->StopMoving();
                 me->GetMotionMaster()->Clear();
-                _wait = 0ms;
+                _scheduler.Schedule(0s, [this](TaskContext bomb)
+                {
+                    DoCastSelf(SPELL_SPECTRAL_BOMB);
+                    bomb.Repeat(4s);
+                });
             }
-            _wait -= Milliseconds(diff);
-            if (_wait > 0ms)
-                return;
-            DoCastSelf(SPELL_SPECTRAL_BOMB);
-            _wait = 4s;
+            _scheduler.Update(diff);
         }
 
     private:
         Position _goal;
         bool _sent = false;
         bool _arrived = false;
-        Milliseconds _wait = 0ms;
+        TaskScheduler _scheduler;
     };
 
     struct npc_soul_vessel_coa : public ScriptedAI
@@ -1526,7 +1526,12 @@ namespace
                 });
                 for (uint8 i = 0; i < SPIRIT_COUNT; ++i)
                     HoverSpirit(i);
-                _pull = 3s;
+                _scheduler.CancelAll();
+                _scheduler.Schedule(3s, [this](TaskContext pull)
+                {
+                    PullSpirit();
+                    pull.Repeat(2s);
+                });
             }
         }
 
@@ -1586,7 +1591,7 @@ namespace
             if (!_dormant)
             {
                 if (_phase)
-                    PullSpirit(diff);
+                    _scheduler.Update(diff);
                 custom_world_boss_coa::UpdateAI(diff);
                 return;
             }
@@ -1594,12 +1599,8 @@ namespace
         }
 
     private:
-        void PullSpirit(uint32 diff)
+        void PullSpirit()
         {
-            _pull -= Milliseconds(diff);
-            if (_pull > 0ms)
-                return;
-            _pull = 2s;
             npc_restless_spirit_coa* spirit = nullptr;
             for (ObjectGuid const& guid : _summons)
                 if (Creature* c = ObjectAccessor::GetCreature(*me, guid))
@@ -1628,7 +1629,7 @@ namespace
         }
 
         SummonList _summons;
-        Milliseconds _pull = 3s;
+        TaskScheduler _scheduler;
         uint32 _hovered = 0;
         uint8 _nextVeil = 80;
         uint32 _raise = 0;
@@ -1661,11 +1662,7 @@ namespace
             if (_dormant)
                 Dormant(me, true);
             else if (_jumping)
-            {
-                _jump -= Milliseconds(diff);
-                if (_jump <= 0ms)
-                    Land();
-            }
+                _scheduler.Update(diff);
             else
                 custom_world_boss_coa::UpdateAI(diff);
         }
@@ -1701,7 +1698,8 @@ namespace
             me->SetReactState(REACT_PASSIVE);
             me->InterruptNonMeleeSpells(false);
             _jumping = true;
-            _jump = 4s;
+            _scheduler.CancelAll();
+            _scheduler.Schedule(4s, [this](TaskContext) { Land(); });
             me->GetMotionMaster()->MoveJump(ZuroggLanding, 25.0f, 15.0f, ZUROGG_JUMP);
         }
 
@@ -1765,7 +1763,7 @@ namespace
     private:
         bool _dormant = true;
         bool _jumping = false;
-        Milliseconds _jump = 0ms;
+        TaskScheduler _scheduler;
         ObjectGuid _target;
     };
 
