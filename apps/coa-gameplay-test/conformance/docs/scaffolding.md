@@ -2,7 +2,8 @@
 
 `scaffold.py` writes a minimal `classes/<name>.json` for any CoA class (12-32) from data, so a new class starts
 from a generated file instead of ~150 hand-written entries. `conformance.py scaffold --class N --out FILE --config
-WORLDSERVER_CONF --mysql MYSQL [--dbc-dir DIR] [--level N]` fills every mandatory field of
+WORLDSERVER_CONF --mysql MYSQL [--dbc-dir DIR] [--level N] [--shared-defines HEADER] [--live-baseline HEADER]`
+fills every mandatory field of
 [Reference character](reference-character.md#reference-character) plus `skill_lines`, leaves every optional coverage field (`procs`,
 `triggers`, `behaviours`, `extra_spells`, the override lists, …) empty, and leaves `reference_stats` empty: no
 coverage field is mechanically derivable (`scale-out-sweep.md`'s own finding), and the reference stats need a

@@ -8,9 +8,11 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 ```sh
 cd apps/coa-gameplay-test/conformance
 python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--passive ID ...] [--proc AURA ...] \
-  [--trigger AURA ...] [--stack [--passes N]] [--controls]
+  [--trigger AURA ...] [--behaviour SPELL ...] [--target-gate SPELL ...] [--learned-hit SPELL ...] \
+  [--stack [--passes N]] [--controls]
 python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
-python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
+python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT] \
+  [--build BUILD]
 ```
 
 `generate` writes the scenarios and a manifest for one class (or a `--spell`/`--passive`/`--proc`/`--trigger`
@@ -81,7 +83,7 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
 - [Server-fix brief](docs/fix-brief.md) — the method rule for server fixes and the brief template round workflows
   copy into each fix item.
 - [Clause ledger and clause coverage](docs/clause-ledger.md) — `classes/<name>_clauses.json` format, how a
-  workstream contributes labels, `coverage.py coverage --clauses`, the behaviour-proven and data-conformant
+  workstream contributes labels, `conformance.py coverage --clauses`, the behaviour-proven and data-conformant
   statuses, tool gaps and the `Spell.dbc` sha256 of fragments.
 
 ## Run

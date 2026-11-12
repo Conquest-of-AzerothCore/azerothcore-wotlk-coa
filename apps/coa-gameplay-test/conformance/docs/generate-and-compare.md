@@ -3,9 +3,11 @@
 ```sh
 cd apps/coa-gameplay-test/conformance
 python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--passive ID ...] [--proc AURA ...] \
-  [--trigger AURA ...] [--stack [--passes N]] [--controls]
+  [--trigger AURA ...] [--behaviour SPELL ...] [--target-gate SPELL ...] [--learned-hit SPELL ...] \
+  [--stack [--passes N]] [--controls]
 python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
-python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
+python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT] \
+  [--build BUILD]
 ```
 
 `generate` writes one no-combat scenario per rank, the hit scenario of each active spell's highest rank, the
@@ -259,6 +261,12 @@ python3 -B conformance.py prove --class 19 [--behaviour SPELL ...] [--proc AURA 
 `prove` runs the gameplay passes of chosen class-file entries deterministically (ADR 0121). Run it from
 `apps/coa-gameplay-test/conformance`, in the foreground; `--timeout-ms` (default 600000) limits one `coa-verify` run.
 It starts nothing but the `coa-verify` command below.
+
+`coa-verify` is optional external tooling from the separate coa-server-guide project, not part of this
+repository: a workstation wrapper that forwards its arguments to `tools/verify_all.py` (its `--ram` route uses an
+in-RAM MySQL). `prove` has no option for another runner (`ProveSpec.verify` defaults to `('coa-verify',)`), so
+without that tooling it cannot run as documented. Run the generated scenarios twice through
+`python -B tools/verify_all.py --stages gameplay --scenario ...` and judge each run with `compare` instead.
 
 1. Generates exactly the given entries into `DIR/scenarios` with `DIR/manifest.json`: the behaviour entries of the
    `--behaviour` spells, the proc entries of the `--proc` auras and the trigger entries of the `--trigger` auras. At
