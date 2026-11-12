@@ -864,19 +864,19 @@
     "clause": "Reduces the cost of all Animates, Raises, and Command spells by $s1%.",
     "claims": [
       {
-        "claim": "Animates",
+        "claim": "Reduces the cost of all Animates ... by $s1%",
         "labels": [
           "504439 behaviour_metric_delta cost_805044"
         ]
       },
       {
-        "claim": "Raises",
+        "claim": "Reduces the cost of all ... Raises ... by $s1%",
         "labels": [
           "504439 behaviour_metric_delta cost_500971"
         ]
       },
       {
-        "claim": "and Command spells by $s1%",
+        "claim": "Reduces the cost of all ... Command spells by $s1%",
         "labels": [
           "504439 cost_gate 504868 command without",
           "504439 cost_gate 504868 command with",
