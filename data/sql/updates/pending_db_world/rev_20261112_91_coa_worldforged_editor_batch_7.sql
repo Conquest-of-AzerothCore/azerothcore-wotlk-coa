@@ -106,3 +106,7 @@ UPDATE `gameobject` SET `position_x` = -5746.8358, `position_y` = -371.4732, `po
 -- #12080
 -- pickup 6941197 (Black Powder Sack) moved 17.1 yd across and 20.89 yd up from under the ship into it, at its Ascension position
 UPDATE `gameobject` SET `position_x` = -14928.543, `position_y` = 84.57, `position_z` = 3.46, `orientation` = 1.86, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.801611, `rotation3` = 0.597846 WHERE `guid` = 6941197 AND `id` = 95762;
+
+-- #12078
+-- pickup 6941280 (Tribal Runners) moved 15.9 yd across and 0.01 yd down to its Ascension position on the ground
+UPDATE `gameobject` SET `position_x` = -12625.549, `position_y` = -108.174, `position_z` = 15.875, `orientation` = 0.0947, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.047347, `rotation3` = 0.998878 WHERE `guid` = 6941280 AND `id` = 95764;
