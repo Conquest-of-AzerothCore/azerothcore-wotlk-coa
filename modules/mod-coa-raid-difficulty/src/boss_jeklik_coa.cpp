@@ -26,7 +26,14 @@
  *                                              everyone in the room, and fears everyone
  *                                              within 20 yards
  *     Vampirism          passive, her hits drain life
- *     Bat Riders         two, from stock, throwing liquid fire
+ *     Bat Riders         Normal and Heroic: two, from stock, throwing liquid fire
+ *     Crazed Bat Riders  Mythic and Ascended, in their place: a Crazed Bat Rider (14914) on a
+ *                                              Frenzied Gurubashi Bat (14965), first 6s, every 30s
+ *                                              (live logs). Both circle stock's rider loop out of
+ *                                              reach; the rider throws Liquid Fire at once and every
+ *                                              4s. Then the bat dives: Frenzy and melee, while the
+ *                                              rider casts Volatile Concoction (6s, interruptible,
+ *                                              recast 3-12s after an interrupt) and dies in its blast.
  *
  *   Both forms
  *     Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
@@ -40,10 +47,18 @@
  *   - the bat riders move from the troll phase to the bat phase with the swap.
  *   - Bat-tering Charge has 100 yards in the DBC; players at 30 yards and more are out of
  *     reach on live (tester, 2026-11-04), so it takes the 25 yards of stock Jeklik's Charge.
+ *   - the bat carries its rider on vehicle 108, an estimated stand-in: the live seat is unknown;
+ *   - the bat dives at a uniform random 16-56s after the pair spawns (live: 15.9-56.7s);
+ *   - the pair flies stock's rider loop at stock's speed, and cannot be attacked before the
+ *     dive (live: both take no damage before it);
+ *   - the rider stops throwing when the bat dives, and the concoction bursts around the rider;
+ *   - the rider is level 60 on the ZG health ladder, like the rest of the instance.
  */
 
+#include "Containers.h"
 #include "CreatureScript.h"
 #include "ScriptedCreature.h"
+#include "Vehicle.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
@@ -86,6 +101,10 @@ namespace
         SPELL_SCREECH_HIT         = 2106136,
         SPELL_SCREECH_FEAR        = 2106137,
         SPELL_VAMPIRISM           = 2106138,
+        SPELL_FRENZY              = 2106160,
+        SPELL_THROW_LIQUID_FIRE   = 2106170,
+        SPELL_VOLATILE_CONCOCTION = 2106175,
+        SPELL_CONCOCTION_BLAST    = 2106176,
     };
 
     enum Npcs
@@ -93,7 +112,13 @@ namespace
         NPC_BLOODSEEKER_BAT = 11368,
         NPC_FRENZIED_BAT    = 14965,
         NPC_BATRIDER        = 14750,
+        NPC_CRAZED_BAT_RIDER = 14914,
         NPC_AVATAR_OF_HIREEK = 666992
+    };
+
+    enum Actions
+    {
+        ACTION_DIVE = 1
     };
 
     enum Events
@@ -109,7 +134,7 @@ namespace
         EVENT_BAT_RIDER,
         EVENT_FIERCE_BLOW,
         EVENT_BAT_WAVE,
-        EVENT_FRENZIED_BAT,
+        EVENT_CRAZED_RIDERS,
     };
 
     enum Phases
@@ -122,10 +147,22 @@ namespace
     constexpr float SCREECH_RANGE      = 100.0f;
     constexpr float SCREECH_FEAR_RANGE = 20.0f;
     constexpr float BATTERING_CHARGE_MAX_RANGE = 25.0f;
-    constexpr uint8 FRENZIED_BAT_MIN_SPAWN_MODE = 2;
+    constexpr float LIQUID_FIRE_RANGE  = 100.0f;
+    constexpr uint8 CRAZED_RIDERS_MIN_SPAWN_MODE = 2;
+    constexpr uint32 CRAZED_RIDERS_VEHICLE = 108;
+    constexpr uint32 CRAZED_RIDERS_CORPSE_DESPAWN_MS = 15000;
+    constexpr uint32 PATH_BATRIDER_LOOP = 147500;
+    constexpr float BATRIDER_LOOP_SPEED = 5.0f;
     constexpr Milliseconds BAT_WAVE_FIRST = 52s;
     constexpr Milliseconds BAT_WAVE_INTERVAL = 30s;
-    constexpr Milliseconds FRENZIED_BAT_INTERVAL = 30s;
+    constexpr Milliseconds CRAZED_RIDERS_FIRST = 6s;
+    constexpr Milliseconds CRAZED_RIDERS_INTERVAL = 30s;
+    constexpr Milliseconds DIVE_MIN = 16s;
+    constexpr Milliseconds DIVE_MAX = 56s;
+    constexpr Milliseconds LIQUID_FIRE_INTERVAL = 4s;
+    constexpr Milliseconds CONCOCTION_RECAST_MIN = 3s;
+    constexpr Milliseconds CONCOCTION_RECAST_MAX = 12s;
+    constexpr Milliseconds CONCOCTION_DEATH_DELAY = 200ms;
 
     Position const SpawnBat[6] =
     {
@@ -218,9 +255,22 @@ namespace
 
             events.SetPhase(PHASE_BAT);
             events.ScheduleEvent(EVENT_BATTERING_CHARGE, 2s, 0, PHASE_BAT);
-            events.ScheduleEvent(EVENT_BAT_RIDER, 10s, 0, PHASE_BAT);
-            if (me->GetMap()->GetSpawnMode() >= FRENZIED_BAT_MIN_SPAWN_MODE)
-                events.ScheduleEvent(EVENT_FRENZIED_BAT, FRENZIED_BAT_INTERVAL, 0, PHASE_BAT);
+            if (me->GetMap()->GetSpawnMode() >= CRAZED_RIDERS_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_CRAZED_RIDERS, CRAZED_RIDERS_FIRST, 0, PHASE_BAT);
+            else
+                events.ScheduleEvent(EVENT_BAT_RIDER, 10s, 0, PHASE_BAT);
+        }
+
+        void SummonCrazedRiders()
+        {
+            TempSummon* bat = me->GetMap()->SummonCreature(NPC_FRENZIED_BAT, SpawnBatRider, nullptr,
+                CRAZED_RIDERS_CORPSE_DESPAWN_MS, me, 0, CRAZED_RIDERS_VEHICLE);
+            if (!bat)
+                return;
+            bat->SetTempSummonType(TEMPSUMMON_CORPSE_TIMED_DESPAWN);
+            if (Creature* rider = me->SummonCreature(NPC_CRAZED_BAT_RIDER, SpawnBatRider, TEMPSUMMON_CORPSE_TIMED_DESPAWN,
+                CRAZED_RIDERS_CORPSE_DESPAWN_MS))
+                rider->EnterVehicle(bat, 0);
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -341,9 +391,9 @@ namespace
                         SummonBats(NPC_BLOODSEEKER_BAT, std::size(SpawnBat));
                         events.ScheduleEvent(EVENT_BAT_WAVE, BAT_WAVE_INTERVAL);
                         break;
-                    case EVENT_FRENZIED_BAT:
-                        SummonBats(NPC_FRENZIED_BAT, 1);
-                        events.ScheduleEvent(EVENT_FRENZIED_BAT, FRENZIED_BAT_INTERVAL, 0, PHASE_BAT);
+                    case EVENT_CRAZED_RIDERS:
+                        SummonCrazedRiders();
+                        events.ScheduleEvent(EVENT_CRAZED_RIDERS, CRAZED_RIDERS_INTERVAL, 0, PHASE_BAT);
                         break;
                     case EVENT_GREATER_HEAL:
                         Talk(EMOTE_GREAT_HEAL);
@@ -388,9 +438,142 @@ namespace
         LoaAvatar _avatar{ NPC_AVATAR_OF_HIREEK, SPELL_DRAIN_POWER };
         ObjectGuid _target;
     };
+
+    void SetOutOfReach(Creature* creature, bool apply)
+    {
+        if (apply)
+            creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        else
+            creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetImmuneToPC(apply, true);
+        creature->SetImmuneToNPC(apply, true);
+    }
+
+    struct npc_frenzied_bat_coa : public ScriptedAI
+    {
+        npc_frenzied_bat_coa(Creature* creature) : ScriptedAI(creature), _carrier(creature->IsVehicle())
+        {
+            if (!_carrier)
+                return;
+            SetOutOfReach(me, true);
+            me->SetReactState(REACT_PASSIVE);
+            me->SetSpeed(MOVE_WALK, BATRIDER_LOOP_SPEED, true);
+            FlyLoop();
+            scheduler.Schedule(DIVE_MIN, DIVE_MAX, [this](TaskContext) { Dive(); });
+        }
+
+        void FlyLoop()
+        {
+            me->SetCanFly(true);
+            me->GetMotionMaster()->MovePath(PATH_BATRIDER_LOOP);
+        }
+
+        void Dive()
+        {
+            _dived = true;
+            SetOutOfReach(me, false);
+            me->SetReactState(REACT_AGGRESSIVE);
+            me->GetMotionMaster()->Clear();
+            DoCastSelf(SPELL_FRENZY, true);
+            DoZoneInCombat();
+            std::vector<Player*> const players = PlayersWithin(me, LIQUID_FIRE_RANGE);
+            if (!players.empty())
+                AttackStart(Acore::Containers::SelectRandomContainerElement(players));
+            if (Unit* rider = me->GetVehicleKit()->GetPassenger(0))
+                if (Creature* creature = rider->ToCreature())
+                    if (creature->IsAIEnabled)
+                        creature->AI()->DoAction(ACTION_DIVE);
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (_carrier && !_dived)
+            {
+                scheduler.Update(diff);
+                if (!_dived && !me->isMoving())
+                    FlyLoop();
+                return;
+            }
+
+            if (!UpdateVictim())
+                return;
+
+            DoMeleeAttackIfReady();
+        }
+
+    private:
+        bool const _carrier;
+        bool _dived = false;
+    };
+
+    struct npc_crazed_bat_rider_coa : public ScriptedAI
+    {
+        npc_crazed_bat_rider_coa(Creature* creature) : ScriptedAI(creature)
+        {
+            SetOutOfReach(me, true);
+            me->SetReactState(REACT_PASSIVE);
+            scheduler.Schedule(0ms, [this](TaskContext context)
+            {
+                ThrowLiquidFire();
+                context.Repeat(LIQUID_FIRE_INTERVAL);
+            });
+        }
+
+        void ThrowLiquidFire()
+        {
+            std::vector<Player*> const players = PlayersWithin(me, LIQUID_FIRE_RANGE);
+            if (players.empty())
+                return;
+            Player* target = Acore::Containers::SelectRandomContainerElement(players);
+            me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(),
+                SPELL_THROW_LIQUID_FIRE, false);
+        }
+
+        void DoAction(int32 action) override
+        {
+            if (action != ACTION_DIVE || _dived)
+                return;
+            _dived = true;
+            scheduler.CancelAll();
+            SetOutOfReach(me, false);
+            DoZoneInCombat();
+            me->InterruptNonMeleeSpells(false);
+            DoCastSelf(SPELL_VOLATILE_CONCOCTION);
+        }
+
+        void OnSpellFailed(SpellInfo const* spell) override
+        {
+            if (spell->Id != SPELL_VOLATILE_CONCOCTION || _bursting)
+                return;
+            scheduler.Schedule(CONCOCTION_RECAST_MIN, CONCOCTION_RECAST_MAX, [this](TaskContext)
+            {
+                DoCastSelf(SPELL_VOLATILE_CONCOCTION);
+            });
+        }
+
+        void OnSpellCast(SpellInfo const* spell) override
+        {
+            if (spell->Id != SPELL_VOLATILE_CONCOCTION || _bursting)
+                return;
+            _bursting = true;
+            me->CastSpell(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), SPELL_CONCOCTION_BLAST, true);
+            scheduler.Schedule(CONCOCTION_DEATH_DELAY, [this](TaskContext) { me->KillSelf(); });
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            scheduler.Update(diff);
+        }
+
+    private:
+        bool _dived = false;
+        bool _bursting = false;
+    };
 }
 
 void AddCoaJeklikScripts()
 {
     RegisterZulGurubCreatureAI(boss_jeklik_coa);
+    RegisterZulGurubCreatureAI(npc_frenzied_bat_coa);
+    RegisterZulGurubCreatureAI(npc_crazed_bat_rider_coa);
 }
