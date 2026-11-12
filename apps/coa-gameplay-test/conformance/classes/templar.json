@@ -5670,7 +5670,7 @@
       "trigger_spell": 803880,
       "target": "dummy",
       "gate_timing": "start",
-      "force_crit": "spell",
+      "force_crit": "melee",
       "trigger_only_after": true,
       "metric": "spell_damage_count",
       "fields": {
@@ -5680,7 +5680,7 @@
       },
       "wait_ms": 9500,
       "expire_ms": 500,
-      "observe_source": "With the forced spell crit rating (spell_crit_chance reads about 7045% on 803880), every periodic tick of Blade of Faith 803880 that can crit is critical. Before: no cast, 0 critical ticks (control). After: a real cast at the dummy and 9500 ms (three ticks, at 3, 6 and 9 s): 3 critical ticks expected. Stock AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1180-1210) gives a periodic aura a crit chance only through a SPELL_AURA_ABILITY_PERIODIC_CRIT aura that names it (or Rupture); diagnostic 20261112-014720 read 0 critical of 13 ticks."
+      "observe_source": "Blade of Faith 803880 is a melee-class spell (DmgClass 2), so Unit::SpellDoneCritChance reads its melee crit (PLAYER_CRIT_PERCENTAGE) and the forced melee crit rating applies. templar_scaling::OnAuraApply (AscensionTemplarContracts.cpp, ADR 0243) sets the periodic effect's crit chance from SpellDoneCritChance and SpellTakenCritChance when a Blade rank is applied or refreshed, the calls of the stock aura-286 path. Before: no cast, 0 critical ticks. After: the scenario's first Blade cast at the dummy and 9500 ms (ticks at 3, 6 and 9 s): 3 critical ticks of 3. Diagnostic 20261112-014720 (before the fix): 0 critical of 13."
     },
     {
       "spell": 803872,
@@ -5700,6 +5700,10 @@
           [
             823764,
             1
+          ],
+          [
+            64481,
+            1
           ]
         ]
       },
@@ -5716,6 +5720,10 @@
           [
             804922,
             1
+          ],
+          [
+            64481,
+            1
           ]
         ]
       },
@@ -5725,7 +5733,7 @@
         "attack_power": 20000,
         "spell_power": 20000
       },
-      "expected_source": "The shared Oath-consumption shape (docs/behaviour-scenarios.md, b003254ae8): no Oath in the control, Oath: Righteous Lunge 804904 and Oath: Condemn 804922 set before every treatment cast, 1.05 x 1.30 x 1.30 = 1.7745 for a Breaker whose damage the SPELLMOD_DAMAGE mods reach. Blade of Faith 803880 (SpellFamilyFlags[2] 128) deals its damage as periodic ticks every 3000 ms; each trial casts it at the dummy and reads the tick 3100 ms later. Attack power and spell power fixtures of 20000 make its ${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)} dominate. beeg spellpen 823764 in both arms. Only non-critical ticks are compared."
+      "expected_source": "The shared Oath-consumption shape (docs/behaviour-scenarios.md, b003254ae8): no Oath in the control, Oath: Righteous Lunge 804904 and Oath: Condemn 804922 set before every treatment cast, 1.05 x 1.30 x 1.30 = 1.7745 for a Breaker whose damage the SPELLMOD_DAMAGE mods reach. Blade of Faith 803880 (SpellFamilyFlags[2] 128) deals its damage as periodic ticks every 3000 ms; each trial casts it at the dummy and reads the tick 3100 ms later. Attack power and spell power fixtures of 20000 make its ${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)} dominate. beeg spellpen 823764 in both arms. Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) in both arms forces the crit chance to 0, since ADR 0243 lets Blade ticks crit; only non-critical ticks are compared as a second guard."
     },
     {
       "spell": 801205,
@@ -5791,6 +5799,10 @@
           [
             823764,
             1
+          ],
+          [
+            64481,
+            1
           ]
         ]
       },
@@ -5808,10 +5820,14 @@
           [
             804904,
             1
+          ],
+          [
+            64481,
+            1
           ]
         ]
       },
-      "expected_source": "Oath: Righteous Lunge 804904: Effect[0] and Effect[2] aura 108 SPELLMOD_DAMAGE (+5%, +30%), which the periodic path (SPELLMOD_DOT, Unit::SpellDamageBonusDone) never reads; Effect[1] SPELLMOD_EFFECT3 on another mask. Data expectation for the tick: 1.0. Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
+      "expected_source": "Oath: Righteous Lunge 804904: Effect[0] and Effect[2] aura 108 SPELLMOD_DAMAGE (+5%, +30%), which the periodic path (SPELLMOD_DOT, Unit::SpellDamageBonusDone) never reads; Effect[1] SPELLMOD_EFFECT3 on another mask. Data expectation for the tick: 1.0. Each trial casts 803880 at the dummy and reads its tick 3100 ms later. No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms. Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) in both arms forces the crit chance to 0, since ADR 0243 lets Blade ticks crit; only non-critical ticks are compared as a second guard."
     },
     {
       "spell": 803872,
@@ -5827,6 +5843,10 @@
         "auras": [
           [
             823764,
+            1
+          ],
+          [
+            64481,
             1
           ]
         ]
@@ -5845,10 +5865,14 @@
           [
             804922,
             1
+          ],
+          [
+            64481,
+            1
           ]
         ]
       },
-      "expected_source": "Oath: Condemn 804922 Effect[1] aura 107 SPELLMOD_EFFECT2 +25 on mask word 1 bit 2048 (Blade of Faith): 803880 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER becomes +25%, so the tick reads 1.25. Effect[2] SPELLMOD_DAMAGE +30% is not read on the periodic path. Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
+      "expected_source": "Oath: Condemn 804922 Effect[1] aura 107 SPELLMOD_EFFECT2 +25 on mask word 1 bit 2048 (Blade of Faith): 803880 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER becomes +25%, so the tick reads 1.25. Effect[2] SPELLMOD_DAMAGE +30% is not read on the periodic path. Each trial casts 803880 at the dummy and reads its tick 3100 ms later. No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms. Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) in both arms forces the crit chance to 0, since ADR 0243 lets Blade ticks crit; only non-critical ticks are compared as a second guard."
     },
     {
       "spell": 803872,
@@ -5864,6 +5888,10 @@
         "auras": [
           [
             823764,
+            1
+          ],
+          [
+            64481,
             1
           ]
         ]
@@ -5882,10 +5910,14 @@
           [
             804903,
             1
+          ],
+          [
+            64481,
+            1
           ]
         ]
       },
-      "expected_source": "Oath: Holy Cleave 804903 Effect[2] aura 107 SPELLMOD_DOT (MiscValue 22) +25 on mask word 1 bit 2048: +25 per tick; the stored 803872 oath_consumption readback reads the +25 (800 to 825). The expected ratio is (191 + 25) / 191 = 1.1309 with 191 the control tick at the reference stats (not derived independently of the run: the tick's own formula is not modelled by the hit model). Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
+      "expected_source": "Oath: Holy Cleave 804903 Effect[2] aura 107 SPELLMOD_DOT (MiscValue 22) +25 on mask word 1 bit 2048: +25 per tick; the stored 803872 oath_consumption readback reads the +25 (800 to 825). The expected ratio is (191 + 25) / 191 = 1.1309 with 191 the control tick at the reference stats (not derived independently of the run: the tick's own formula is not modelled by the hit model). Each trial casts 803880 at the dummy and reads its tick 3100 ms later. No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms. Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) in both arms forces the crit chance to 0, since ADR 0243 lets Blade ticks crit; only non-critical ticks are compared as a second guard."
     },
     {
       "spell": 804784,
@@ -6094,6 +6126,179 @@
       "trials": 40,
       "minimum_hits": 20,
       "observe_source": "AscensionTemplarEvents.cpp:92-101 (Check, case 801463: a damaging, non-periodic Ability hit) and :200-201 (Proc) cast Grace 804150 (SPELL_EFFECT_HEAL, TARGET_SRC_CASTER / TARGET_UNIT_DEST_AREA_ALLY) on the Templar. Treatment: Libram of Grace, then Argent Blade 807268 at the dummy; control: Argent Blade alone, no 804150 (ADR 0206). The Templar is held at 50% of 10000 health so the heal is effective; the heal it receives is read (ADR 0219). Libram of Grace's own +20% healing received (Effect[1] aura 118) is held by the Templar when 804150 heals it, so the model reads 801463 (ADR 0220)."
+    },
+    {
+      "spell": 524739,
+      "name": "Norgannon's Wrath",
+      "kind": "fixed_count",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "to up to $524740i enemies",
+      "expected": 9,
+      "headroom": 2,
+      "far_dummy": false,
+      "primary_distance_reads": true,
+      "radius": 5.0,
+      "cast_spell": 524739,
+      "target_rank": 524740,
+      "cast_target": "dummy",
+      "repeats": 2,
+      "settle_ms": 2500,
+      "radius_reason": "524740 MaxAffectedTargets 10, Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE on TARGET_UNIT_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 8 (5 yd). Twelve dummies (ADR 0221: the harness now admits twelve creatures): the primary at 3 yd and eleven more on the summon line between 3.4 and 7.6 yd, each read under 5 yd from the primary before the casts; each of two casts must strike the primary and exactly 9 of the 11 others (10 in all), per dummy from the damage logs it receives."
+    },
+    {
+      "spell": 524739,
+      "name": "Norgannon's Wrath",
+      "kind": "fixed_count",
+      "variant": "cap_control",
+      "label_suffix": "cap_control",
+      "quote": "to up to $524740i enemies",
+      "expected": 9,
+      "uncapped": true,
+      "far_dummy": false,
+      "primary_distance_reads": true,
+      "radius": 5.0,
+      "cast_spell": 524739,
+      "target_rank": 524740,
+      "cast_target": "dummy",
+      "repeats": 2,
+      "settle_ms": 2500,
+      "radius_reason": "Control of the cap entry: ten dummies, the primary at 3 yd and nine more within 5 yd of it (each read before the casts); with no more candidates than the cap of 10, each cast must strike all ten."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "metric_delta",
+      "quote": "This ability can critically strike.",
+      "before_expected": 0,
+      "trigger_spell": 803880,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "variant": "crit_ticks",
+      "label_suffix": "crit_ticks",
+      "force_crit": "melee",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803880,
+        "target": "dummy"
+      },
+      "expected": 3,
+      "observe_source": "The crit entry's scenario shape (forced melee crit, the first Blade cast, 9500 ms), reading every tick of 803880: 3, so the 3 critical ticks are all of them."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "metric_delta",
+      "quote": "This ability can critically strike.",
+      "before_expected": 0,
+      "trigger_spell": 803880,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "variant": "crit_zero",
+      "label_suffix": "crit_zero",
+      "setup_actor_aura": 64481,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803880,
+        "target": "dummy",
+        "critical": true
+      },
+      "expected": 0,
+      "observe_source": "Control of the crit entry: no crit rating fixture and Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) on the caster in both phases, so SpellDoneCritChance is at most 0: 0 critical ticks after the first Blade cast and 9500 ms."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "metric_delta",
+      "quote": "This ability can critically strike.",
+      "before_expected": 0,
+      "trigger_spell": 803880,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "variant": "crit_zero_ticks",
+      "label_suffix": "crit_zero_ticks",
+      "setup_actor_aura": 64481,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803880,
+        "target": "dummy"
+      },
+      "expected": 3,
+      "observe_source": "The crit_zero shape reading every tick: 3, so the zero is not an absence of ticks."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "metric_delta",
+      "quote": "This ability can critically strike.",
+      "before_expected": 0,
+      "trigger_spell": 803880,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "force_crit": "melee",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803880,
+        "target": "dummy",
+        "critical": true
+      },
+      "expected": 0,
+      "after_at_least": 1,
+      "observe_source": "Information for the multiplier: the summed damage of the 3 critical ticks of the crit shape (judged only as present); set against crit_zero_damage, the ratio is Unit::SpellCriticalDamageBonus's factor (DmgClass melee: +100%). beeg spellpen 823764 on the caster removes the dummy's partial resists from both sums.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "metric_delta",
+      "quote": "This ability can critically strike.",
+      "before_expected": 0,
+      "trigger_spell": 803880,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "variant": "crit_zero_damage",
+      "label_suffix": "crit_zero_damage",
+      "setup_actor_aura": 64481,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803880,
+        "target": "dummy"
+      },
+      "expected": 0,
+      "after_at_least": 1,
+      "observe_source": "Information for the multiplier: the summed damage of the 3 non-critical ticks of the crit_zero shape (judged only as present). beeg spellpen 823764 on the caster removes the dummy's partial resists from both sums.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     }
   ],
   "player_observations": [

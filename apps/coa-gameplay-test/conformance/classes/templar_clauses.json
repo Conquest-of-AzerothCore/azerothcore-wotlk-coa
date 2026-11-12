@@ -1095,7 +1095,9 @@
       "524739 effect_value #1",
       "524739 effect_radius 524740e0 #2",
       "524739 script_hit 524740",
-      "524739 behaviour_fixed_count"
+      "524739 behaviour_fixed_count",
+      "524739 behaviour_fixed_count cap",
+      "524739 behaviour_fixed_count cap_control"
     ],
     "kind": "claim"
   },
@@ -4117,7 +4119,10 @@
     "spell": 803872,
     "clause": "This ability can critically strike.",
     "labels": [
-      "803872 behaviour_metric_delta crit"
+      "803872 behaviour_metric_delta crit",
+      "803872 behaviour_metric_delta crit_ticks",
+      "803872 behaviour_metric_delta crit_zero",
+      "803872 behaviour_metric_delta crit_zero_ticks"
     ],
     "kind": "claim"
   },
