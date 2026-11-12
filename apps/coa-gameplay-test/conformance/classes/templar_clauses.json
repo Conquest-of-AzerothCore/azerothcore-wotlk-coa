@@ -433,7 +433,9 @@
       "300530 e1 spell_modifier 300924",
       "300530 behaviour_metric_delta gift"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "effectiveness_of": 300923,
+    "reason": "subject read (ADR 0268): Gift of Zeal 300923 states one value, \"increasing Agility by $s1\", so the effectiveness Martyr raises is that Agility (FableMentor reading, owner-questions.md, Information decided by FableMentor); 300530 behaviour_metric_delta gift casts Gift of Zeal on the Templar: Agility 209 (132 + 77) without Martyr, the control, and 224 (132 + 92) with it, learned contrast, both runs of the counted pair 20261112-035932 / -040026 on build f8370be27d42; 92 = int32(77 x 1.2), +19.5%, inside the band of the stated +20%"
   },
   {
     "spell": 300607,

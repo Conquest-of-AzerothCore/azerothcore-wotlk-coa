@@ -40,6 +40,10 @@ A JSON array. Each entry is one clause:
 - `no_behaviour_route` (optional, a `"claim"` entry only, never beside `tool_gap`): a data conformant clause no
   behaviour check can reach, `{"reason": "<why no route exists>", "attempts": [{"agent": "<who tried>", "report":
   "<where>"}]}`. See [No behaviour route](#no-behaviour-route).
+- `effectiveness_of` (optional, a `"claim"` entry without `claims`, ADR 0268): the spell id of the buff X in a clause
+  that increases "the effectiveness of X". When X's claim entries state exactly one value (a `$` token other than a
+  duration, radius or range, or a literal number), that clause is added to the claim's words for the state-promise
+  match; with two or more values, or none, nothing changes. Templar: Martyr 300530 names Gift of Zeal 300923.
 
 ### Stated claims
 

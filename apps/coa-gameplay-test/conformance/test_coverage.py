@@ -15,11 +15,13 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         LEARNED_CONTRAST)
 from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour, observed, read_verdicts, write_verdicts
 from conformance import DIFF_EXIT, main
-from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EVENT, EVIDENCE, K3, METRIC_EVIDENCE,
-                      NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption, EvidenceError, acting,
+from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
+                      METRIC_EVIDENCE, NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption,
+                      EvidenceError, acting,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
                       NO_BEHAVIOUR_ROUTE, NO_ROUTE_NOT_DATA, NO_ROUTE_PENDING, NO_ROUTE_TERMINAL,
-                      fragment_entries, load_clauses, read_fragment, require_claims, write_coverage, write_fragment)
+                      fragment_entries, load_clauses, read_fragment, require_claims, states_value, write_coverage,
+                      write_fragment)
 from expiry import BEHAVIOUR_EXPIRY
 from profile import (CLASSES_DIR, DBC_DIR, DbcSetMismatch, class_file_paths, ledger_consumption_path, load_class_file,
                      server_dbc_dir, spell_dbc_sha256)
@@ -336,6 +338,40 @@ class EvidenceStatusTest(unittest.TestCase):
         verdicts = [judged('1 e0 armor', PASSIVE_DELTA, 'armor')]
         self.assertEqual(evidence_of([claim('Increases your Armor by $s1%.', '1 e0 armor')], verdicts)[0],
                          [BEHAVIOUR])
+
+    def effectiveness(self, *buff_clauses, named=2):
+        martyr = {**claim('Increases the effectiveness of Gift of Zeal by $s2%.', '1 behaviour_metric_delta gift',
+                          spell=1), EFFECTIVENESS_OF: named}
+        verdicts = [judged('1 behaviour_metric_delta gift', BEHAVIOUR_METRIC_DELTA, 'stat',
+                           contrast=LEARNED_CONTRAST)]
+        return evidence_of([martyr, *(claim(text, spell=2) for text in buff_clauses)], verdicts)[0][0]
+
+    def test_the_effectiveness_of_a_single_value_buff_promises_that_value(self):
+        self.assertEqual(self.effectiveness('Places a Gift on a friendly target, increasing Agility by $s1',
+                                            'for $d', 'within $a1 yds'), BEHAVIOUR)
+
+    def test_the_effectiveness_of_a_buff_with_two_values_promises_neither(self):
+        self.assertEqual(self.effectiveness('Places a Gift on a friendly target, increasing Agility by $s1',
+                                            'and Stamina by $s2', 'for $d'), DATA)
+
+    def test_an_effectiveness_clause_without_a_named_subject_stays_data(self):
+        self.assertEqual(self.effectiveness('increasing Agility by $s1', named=3), DATA)
+
+    def test_duration_and_range_are_not_stated_values(self):
+        for text, stated in (('for $d', False), ('for $803237d', False), ('within $a1 yds', False),
+                             ('increasing Agility by $s1', True), ('by 20%', True), ('for ${$m1+1} sec', True),
+                             ('a $/1000;s1 sec cast time', True)):
+            with self.subTest(text=text):
+                self.assertEqual(states_value(text), stated)
+
+    def test_malformed_effectiveness_subjects_are_refused(self):
+        cases = {'does not increase': {**claim('Increases your Agility by $s1%.', 'l1'), EFFECTIVENESS_OF: 2},
+                 'spell id': {**claim('Increases the effectiveness of Gift of Zeal.', 'l1'), EFFECTIVENESS_OF: '2'},
+                 'not a claim entry': {**claim('Increases the effectiveness of Gift of Zeal.', 'l1'),
+                                       'kind': 'no_claim', EFFECTIVENESS_OF: 2}}
+        for message, clause in cases.items():
+            with self.subTest(message=message), self.assertRaisesRegex(EvidenceError, message):
+                clause_coverage([clause], [], BUILD)
 
     def test_spell_damage_promises_the_spell_power_stat(self):
         verdicts = [judged('1 e2 spell_power 1', PASSIVE_DELTA, 'spell_power')]

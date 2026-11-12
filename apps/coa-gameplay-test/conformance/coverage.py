@@ -183,6 +183,49 @@ def clause_claims(clause: dict) -> list[dict]:
     return [{CLAIM_WORDS: words, 'labels': list(clause.get('labels') or [])}]
 
 
+EFFECTIVENESS_OF = 'effectiveness_of'
+EFFECTIVENESS_WORDS = re.compile(r'\beffectiveness of\b', re.IGNORECASE)
+TOOLTIP_TOKEN = re.compile(r'\$(?:/\d+;)?(?:\{|\d*([A-Za-z])\d*)')
+UNSTATED_PROPERTY_TOKENS = frozenset('dar')
+LITERAL_NUMBER = re.compile(r'\b\d+(?:\.\d+)?\b')
+
+
+def states_value(text: str) -> bool:
+    tokens = [match.group(1) for match in TOOLTIP_TOKEN.finditer(text)]
+    if any(token is None or token.lower() not in UNSTATED_PROPERTY_TOKENS for token in tokens):
+        return True
+    return LITERAL_NUMBER.search(TOOLTIP_TOKEN.sub(' ', text)) is not None
+
+
+def require_effectiveness_subjects(clauses: list[dict]):
+    for clause in clauses:
+        if EFFECTIVENESS_OF not in clause:
+            continue
+        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+        if clause.get('kind') != 'claim' or DECLARED_CLAIMS in clause:
+            raise EvidenceError(f'{where} names an effectiveness subject but is not a claim entry with its own '
+                                f'labels')
+        named = clause[EFFECTIVENESS_OF]
+        if not isinstance(named, int) or isinstance(named, bool):
+            raise EvidenceError(f'{where} names the effectiveness subject {named!r}; it is the spell id of the buff '
+                                f'the clause names')
+        if not EFFECTIVENESS_WORDS.search(clause.get('clause', '')):
+            raise EvidenceError(f'{where} names an effectiveness subject but does not increase "the effectiveness '
+                                f'of" a buff')
+
+
+def subject_claims(clause: dict, clauses: list[dict]) -> list[dict]:
+    found = clause_claims(clause)
+    named = clause.get(EFFECTIVENESS_OF)
+    if named is None:
+        return found
+    stated = [other['clause'] for other in clauses
+              if other.get('kind') == 'claim' and other.get('spell') == named and states_value(other['clause'])]
+    if len(stated) != 1:
+        return found
+    return [{**claim, CLAIM_WORDS: f'{claim[CLAIM_WORDS]} ({stated[0]})'} for claim in found]
+
+
 def clause_labels(clause: dict) -> list[str]:
     return [label for claim in clause_claims(clause) for label in claim['labels']]
 
@@ -591,6 +634,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     require_claims(clauses)
     require_tool_gaps(clauses)
     require_no_routes(clauses)
+    require_effectiveness_subjects(clauses)
     require_text_sources(clauses, frozenset(streamed_texts()) if streamed is None else streamed)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
@@ -598,7 +642,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     promoted = frozenset(label for label, result in results.items() if result == CONSUMED)
     not_consumed = frozenset(label for label, result in results.items() if result == NOT_CONSUMED)
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
-    per_claim = [[claim_evidence(claim, by_label, statuses, promoted) for claim in clause_claims(clause)]
+    per_claim = [[claim_evidence(claim, by_label, statuses, promoted) for claim in subject_claims(clause, claims)]
                  for clause in claims]
     project_text = [clause for clause in claims if not independent_text(clause)]
     evidence = [(clause, UNPROVEN if any(clause is other for other in project_text) else claims_evidence(found))
