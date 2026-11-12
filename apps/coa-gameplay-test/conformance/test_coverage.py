@@ -276,6 +276,41 @@ def evidence_of(clauses, verdicts, build=BUILD):
     return [status for _, status in result.evidence], result
 
 
+class StreamedTextSourceTest(unittest.TestCase):
+    def sourced(self, basis: str, clause: str = 'deals damage', dbc_clause: str | None = None) -> dict:
+        entry = {**claim(clause, f'{ARGENT_BLADE} hit_mean'),
+                 'text_source': {'spell': ARGENT_BLADE, 'file': 'f.sql', 'commit': 'c', 'pr': None, 'basis': basis,
+                                 'ruling': None, 'dbc_differs': 'Description'}}
+        return {**entry, 'dbc_clause': dbc_clause} if dbc_clause is not None else entry
+
+    def coverage(self, clauses: list[dict]):
+        return clause_coverage(clauses, [hit(ARGENT_BLADE)], BUILD, streamed=frozenset({ARGENT_BLADE}))
+
+    def test_a_streamed_spell_without_its_text_source_is_refused(self):
+        with self.assertRaises(EvidenceError):
+            self.coverage([claim('deals damage', f'{ARGENT_BLADE} hit_mean')])
+        with self.assertRaises(EvidenceError):
+            self.coverage([self.sourced('guess')])
+
+    def test_a_changed_project_text_is_counted_unproven_and_listed(self):
+        changed = self.sourced('align_to_server', 'deals 12 damage', 'deals 10 damage')
+        result = self.coverage([changed])
+        self.assertEqual(([status for _, status in result.evidence], result.project_text), ([UNPROVEN], [changed]))
+        unchanged = self.sourced('align_to_server')
+        self.assertEqual([status for _, status in self.coverage([unchanged]).evidence], [BEHAVIOUR])
+        ruled = self.sourced('owner_ruling', 'deals 12 damage', 'deals 10 damage')
+        self.assertEqual([status for _, status in self.coverage([ruled]).evidence], [BEHAVIOUR])
+
+    def test_a_text_correction_counts_only_when_every_figure_is_the_same(self):
+        spelled = self.sourced('text_correction', 'Only occurs once every 0.5 sec.',
+                               'Cnly occur once every 0.5 sec.')
+        renumbered = self.sourced('text_correction', 'Only occurs once every 0.5 sec.',
+                                  'Cnly occur once every 1.5 sec.')
+        self.assertEqual([status for _, status in self.coverage([spelled]).evidence], [BEHAVIOUR])
+        result = self.coverage([renumbered])
+        self.assertEqual(([status for _, status in result.evidence], result.project_text), ([UNPROVEN], [renumbered]))
+
+
 class EvidenceStatusTest(unittest.TestCase):
     def test_a_readback_proves_data_only(self):
         statuses, result = evidence_of([claim('deals extra damage', f'{ARGENT_BLADE} effect_value #0')],

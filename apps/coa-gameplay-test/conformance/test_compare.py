@@ -1858,3 +1858,23 @@ class MagnitudeExcludedTest(unittest.TestCase):
         excluded, note = magnitude_excluded(0.475, 0.525, [0.5])
         self.assertIsNone(excluded)
         self.assertIn('1 part gives no sampling interval', note)
+
+
+class ShareNeighbourTest(unittest.TestCase):
+    def verdict(self, measured: float, expected: float) -> Verdict:
+        return Verdict('1 e1 combat_rating 24', 'ok', measured, expected, expected - 1, expected + 1, '', 'key', 1, 1,
+                       'passive_delta')
+
+    def test_an_integer_share_a_one_percent_neighbour_also_explains_is_data(self):
+        from types import SimpleNamespace
+        from compare import share_neighbour_reason
+        model = {'relation': 'share', 'source_label': 'stat 3'}
+        small = share_neighbour_reason(self.verdict(16.0, 16.0), model, SimpleNamespace(values={'stat 3': 32.0}),
+                                       'combat_rating')
+        self.assertIn('+51%', small)
+        large = share_neighbour_reason(self.verdict(150.0, 150.0), model, SimpleNamespace(values={'stat 3': 300.0}),
+                                       'combat_rating')
+        self.assertIsNone(large)
+        scaled = share_neighbour_reason(self.verdict(16.0, 16.0), {'relation': 'scale'},
+                                        SimpleNamespace(values={}), 'combat_rating')
+        self.assertIsNone(scaled)

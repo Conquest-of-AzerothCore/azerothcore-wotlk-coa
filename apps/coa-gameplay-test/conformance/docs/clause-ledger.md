@@ -32,9 +32,11 @@ A JSON array. Each entry is one clause:
   "owner_acceptance": {"ruling": "<file#section>"}}` (`owner_acceptance` optional). See [Tool gaps](#tool-gaps).
 - `text_source` (optional): the `coa_client_spell_description` row the spell's text is read from (ADR 0192):
   `spell`, `file`, `commit`, `pr`, `basis` (`owner_ruling`, `live_source`, `text_correction` or `align_to_server`),
-  `ruling` and `dbc_differs`. A claim judged against a row whose basis is `align_to_server` and whose text differs
-  from the DBC has no independent expectation and is listed for the mentor. `dbc_clause` keeps the client DBC's words
-  of a clause the streamed text changed.
+  `ruling` and `dbc_differs`. Coverage refuses a ledger entry whose spell has a streamed row and no `text_source`
+  (ADR 0198). `dbc_clause` keeps the client DBC's words of a clause the streamed text changed; such a claim counts only
+  when its basis is `owner_ruling` or `live_source`, or `text_correction` with every number, `$` token and colour-named
+  spell the same in both (`streamed.figures`). Otherwise it is counted unproven and listed as judged against a
+  project-written text.
 - `no_behaviour_route` (optional, a `"claim"` entry only, never beside `tool_gap`): a data conformant clause no
   behaviour check can reach, `{"reason": "<why no route exists>", "attempts": [{"agent": "<who tried>", "report":
   "<where>"}]}`. See [No behaviour route](#no-behaviour-route).

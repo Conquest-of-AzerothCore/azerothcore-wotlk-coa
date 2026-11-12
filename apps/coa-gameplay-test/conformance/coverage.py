@@ -24,6 +24,7 @@ from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK
 from profile import DbcSetMismatch, require_server_sha
+from streamed import same_figures, streamed_texts
 from stack import STACK_DPS, STACK_SOURCE, TALENT_DELTA
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK, SELF_TRIGGER_CHECK,
                       TRIGGER_CHECK)
@@ -449,6 +450,7 @@ class ClauseCoverage:
     promoted: frozenset[str] = frozenset()
     not_consumed: frozenset[str] = frozenset()
     no_routes: list[tuple[dict, str]] = field(default_factory=list)
+    project_text: list[dict] = field(default_factory=list)
 
     @property
     def data(self) -> int:
@@ -556,13 +558,39 @@ def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[s
     return claims_evidence([claim_evidence(claim, by_label, statuses, promoted) for claim in clause_claims(clause)])
 
 
+TEXT_SOURCE = 'text_source'
+DBC_CLAUSE = 'dbc_clause'
+INDEPENDENT_BASES = frozenset({'owner_ruling', 'live_source'})
+TEXT_CORRECTION = 'text_correction'
+TEXT_BASES = INDEPENDENT_BASES | {TEXT_CORRECTION, 'align_to_server'}
+
+
+def require_text_sources(clauses: list[dict], streamed: frozenset[int]):
+    for clause in clauses:
+        source = clause.get(TEXT_SOURCE)
+        where = f"spell {clause.get('spell')}: {clause.get('clause')!r}"
+        if clause.get('spell') in streamed and source is None:
+            raise EvidenceError(f'{where} is read from a streamed client text and names no {TEXT_SOURCE}')
+        if source is not None and source.get('basis') not in TEXT_BASES:
+            raise EvidenceError(f'{where} has a {TEXT_SOURCE} basis {source.get("basis")!r}, not one of '
+                                f'{sorted(TEXT_BASES)}')
+
+
+def independent_text(clause: dict) -> bool:
+    source = clause.get(TEXT_SOURCE)
+    if source is None or source['basis'] in INDEPENDENT_BASES or DBC_CLAUSE not in clause:
+        return True
+    return source['basis'] == TEXT_CORRECTION and same_figures(clause[DBC_CLAUSE], clause['clause'])
+
+
 def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | None = None,
-                    consumption=()) -> ClauseCoverage:
+                    consumption=(), streamed: frozenset[int] | None = None) -> ClauseCoverage:
     require_build(verdicts, build, 'clause coverage')
     require_known_checks(verdicts)
     require_claims(clauses)
     require_tool_gaps(clauses)
     require_no_routes(clauses)
+    require_text_sources(clauses, frozenset(streamed_texts()) if streamed is None else streamed)
     by_label = {verdict.label: verdict for verdict in verdicts}
     statuses = {verdict.label: verdict.status for verdict in verdicts}
     results = consumption_results(consumption, build)
@@ -571,7 +599,9 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
     per_claim = [[claim_evidence(claim, by_label, statuses, promoted) for claim in clause_claims(clause)]
                  for clause in claims]
-    evidence = [(clause, claims_evidence(found)) for clause, found in zip(claims, per_claim)]
+    project_text = [clause for clause in claims if not independent_text(clause)]
+    evidence = [(clause, UNPROVEN if any(clause is other for other in project_text) else claims_evidence(found))
+                for clause, found in zip(claims, per_claim)]
     unproven = [clause for clause, status in evidence if status == UNPROVEN]
     behaviour = sum(status == BEHAVIOUR for _, status in evidence)
     not_measured = sorted(verdict.label for verdict in verdicts if verdict.status == NOT_MEASURED)
@@ -580,7 +610,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
                  if NO_BEHAVIOUR_ROUTE in clause]
     return ClauseCoverage(len(claims) - len(unproven), behaviour, len(claims), unproven, evidence, not_measured,
                           per_claim, tool_gaps, promoted & by_label.keys(), not_consumed & by_label.keys(),
-                          no_routes)
+                          no_routes, project_text)
 
 
 def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
@@ -604,6 +634,9 @@ def clause_coverage_lines(result: ClauseCoverage) -> list[str]:
         if labels:
             lines.append(title)
             lines += [f'  {label}' for label in sorted(labels)]
+    if result.project_text:
+        lines.append('Judged against a project-written text, no independent expectation (counted unproven):')
+        lines += [f"  spell {clause.get('spell')}: {clause.get('clause')}" for clause in result.project_text]
     if result.not_measured:
         lines.append('Not measured labels:')
         lines += [f'  {label}' for label in result.not_measured]

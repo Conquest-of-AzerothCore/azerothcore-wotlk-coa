@@ -2140,7 +2140,8 @@
       "705281 effect_value e1 #1",
       "705281 e1 combat_rating 24"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data conformant by the stat-passives ruling (2026-11-11, \"where rounding cannot separate the stated value the clause stays data conformant\"; status 2): combat_rating 24 reads 0 to 16 from Intellect 32 x 50%, and +51% gives the same truncated 16 (PlayerUpdates.cpp:667-668, int32(CalculatePct)), so the reading does not tell the stated 50% (compare.share_neighbour_reason). ADR 0190's wording lets the clause name its rating; a fixture with Intellect of 200 or more would separate 1%."
   },
   {
     "spell": 705283,

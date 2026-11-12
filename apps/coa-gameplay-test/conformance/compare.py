@@ -3899,7 +3899,8 @@ def taken_hit_returned_fault(arm: dict, trial: dict) -> tuple[str | None, bool]:
     return None, True
 
 
-def taken_hit_reduction_faults(model: dict, landed: dict[str, list[float]], reductions: dict[str, int]) -> list[str]:
+def taken_hit_reduction_faults(model: dict, landed: dict[str, list[float]], reductions: dict[str, int],
+                               notes: list[str] | None = None, short: list[str] | None = None) -> list[str]:
     reference = sorted(set(landed.get(TAKEN_HIT_CONTROL_ARM, [])))
     faults = []
     for arm in model['arms']:
@@ -3910,6 +3911,19 @@ def taken_hit_reduction_faults(model: dict, landed: dict[str, list[float]], redu
             continue
         low, high = taken_hit_reduced_range(model['strike_base'], reductions[arm['name']], reference[0])
         wrong = sorted({damage for damage in landed[arm['name']] if not low <= damage <= high})
+        fitting = [reduction for reduction in range(model['strike_base'] + 1)
+                   if all(taken_hit_reduced_range(model['strike_base'], reduction, reference[0])[0] <= damage
+                          <= taken_hit_reduced_range(model['strike_base'], reduction, reference[0])[1]
+                          for damage in landed[arm['name']])]
+        band = bonus_band(reductions[arm['name']])
+        if notes is not None:
+            notes.append(f'{arm["name"]}: control strike {reference[0]:g}, accepted damage {low}-{high}; the strikes '
+                         f'fit a reduction of {fitting[0] if fitting else "none"}-{fitting[-1] if fitting else "none"} '
+                         f'against the stated {reductions[arm["name"]]} (band +-{band:g}), excluding any other')
+        if (short is not None and fitting and (fitting[0] < reductions[arm['name']] - band
+                                               or fitting[-1] > reductions[arm['name']] + band)):
+            short.append(f'{arm["name"]}: the strikes fit reductions {fitting[0]}-{fitting[-1]}, wider than the '
+                         f'band')
         if wrong:
             faults.append(f'{arm["name"]}: strikes read {wrong} against {low}-{high}, the {TAKEN_HIT_CONTROL_ARM} '
                           f'strike {reference[0]:g} scaled from {model["strike_base"]} to '
@@ -4019,7 +4033,9 @@ def behaviour_taken_hit_verdict(base: Verdict, run: Run, model: dict) -> Verdict
                 f', {returned} non-critical returned hits judged ({arm["returned_pct"]}% of the strike)')
         summaries.append(f'{arm["name"]}: {landed} landed trials, absorbed {sorted(set(absorbs))} ({stated}{debt})'
                          f'{reduced}{back}')
-    faults += taken_hit_reduction_faults(model, landed_damage, reductions)
+    notes = []
+    faults += taken_hit_reduction_faults(model, landed_damage, reductions, notes, short)
+    summaries += notes
     status = 'alert' if faults else 'unmeasured' if short else 'ok'
     reason = '; '.join(faults[:6]) if faults else '; '.join(short) if short else 'every landed trial matches'
     return replace(base, status=status, measured=float(len(faults)), expected=0.0, low=0.0, high=0.0,
@@ -4065,10 +4081,29 @@ def judge_passive(manifest: dict, entry: dict, run: Run | None, expectation: Exp
     verdict = passive_verdict(manifest, entry, run, expectation, tooltips)
     metric = expectation.model['metric']
     detail = {**(verdict.detail or {}), PASSIVE_METRIC: metric}
-    reason = detail.get(DATA_ONLY) or (None if ENGINE_ROUNDING in detail else floor_only_reason(verdict, metric))
+    reason = (detail.get(DATA_ONLY) or (None if ENGINE_ROUNDING in detail else floor_only_reason(verdict, metric))
+              or share_neighbour_reason(verdict, expectation.model, run, metric))
     if reason:
         detail[DATA_ONLY] = reason
     return replace(verdict, detail=detail)
+
+
+def share_neighbour_reason(verdict: Verdict, model: dict, run: Run | None, metric: str) -> str | None:
+    if (verdict.status not in CONFORMANT or verdict.expected is None or verdict.measured is None or run is None
+            or model.get('relation') != 'share' or metric in FRACTIONAL_METRICS):
+        return None
+    source = run.values.get(model.get('source_label'))
+    if not source:
+        return None
+    stated = verdict.expected * 100 / source
+    reading = truncated(verdict.expected)
+    neighbours = [percent for percent in (stated - 1, stated + 1)
+                  if truncated(source * percent / 100) == reading]
+    if not neighbours:
+        return None
+    return (f'the integer {metric} reading {reading:g} also follows from '
+            f'{" and ".join(f"{percent:+.4g}%" for percent in neighbours)} of {source:g}, so it does not tell the '
+            f'stated {stated:+.4g}%')
 
 
 def floor_only_reason(verdict: Verdict, metric: str) -> str | None:

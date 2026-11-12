@@ -159,3 +159,14 @@ def streamed_field(spell: int, name: str, updates: Path = SQL_UPDATES) -> str | 
     if TEXT_FIELDS[name] == 'description':
         return text.description
     return text.tooltip or None
+
+
+FIGURE = re.compile(r'\$\{[^}]*\}|\$[\w/;]+|\d+(?:\.\d+)?|\|c[0-9a-fA-F]{8}(.*?)\|r')
+
+
+def figures(text: str) -> list[str]:
+    return [match.group(0) if match.group(1) is None else match.group(1) for match in FIGURE.finditer(text)]
+
+
+def same_figures(first: str, second: str) -> bool:
+    return figures(first) == figures(second)
