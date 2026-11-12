@@ -278,7 +278,7 @@
       "300514 behaviour_hit_ratio titanstrike"
     ],
     "kind": "claim",
-    "reason": "Titanstrike 806521 +24.95% / +25.06% with 300514 set before each cast, against no 300514; counted 20261112-021809 / -021850; `300514 effect_value e1 #1` dropped: not_measured, 1 DoEffectCalcAmount hook sets the amount after CalcValue; `300514 aura_amount e1 #1` reads the applied 25, labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "Titanstrike 806521 +24.95% / +25.06% with 300514 set before each cast, against no 300514; counted 20261112-021809 / -021850; `300514 effect_value e1 #1` dropped: not_measured, 1 DoEffectCalcAmount hook sets the amount after CalcValue; `300514 aura_amount e1 #1` reads the applied 25, labels pair 20261112-043429 / -043850 (build 928222268d2b); final pair 20261112-025618 / -025807 (build 35cae55aa6ae): +25.00% / +25.05%"
   },
   {
     "spell": 300514,
@@ -372,7 +372,7 @@
       "300520 behaviour_hit_ratio scourgebane_23"
     ],
     "kind": "claim",
-    "reason": "Scourgebane 801832 +25% at a dummy held at 10% health, +0% (within -0.006 to +0.007 points) at 30%; counted 20261112-013915 / -013954; review M2: +24.99% / +25.00% at 17% and +0.00% at 23%, so the threshold lies in (17, 23)%; final pair 20261112-025618 / -025807, build 35cae55aa6ae; `300520 e0` dropped: unmodelled, its explanation defers to a hit-mean comparison at full and sub-20% health, which the four behaviour_hit_ratio labels are"
+    "reason": "Scourgebane 801832 +25% at a dummy held at 10% health, +0% (within -0.006 to +0.007 points) at 30%; counted 20261112-013915 / -013954; review M2: +24.99% / +25.00% at 17% and +0.00% at 23%, so the threshold lies in (17, 23)%; final pair 20261112-025618 / -025807, build 35cae55aa6ae; `300520 e0` dropped: unmodelled, its explanation defers to a hit-mean comparison at full and sub-20% health, which the four behaviour_hit_ratio labels are; the gate is shown on Scourgebane; Scarlet Hammer 807035 and Titanstrike 806521 share the same condition (AscensionTemplarAbilities.cpp:158-159, one HealthBelowPct(20) conjunct for the three)"
   },
   {
     "spell": 300522,
@@ -592,7 +592,7 @@
       "301310 behaviour_hit_ratio spell_penetration"
     ],
     "kind": "claim",
-    "reason": "fixed (ADR 0156), behaviour proven by a pooled proof (ADR 0195): Zealotry 801450 at the level 60 dummy, 12 parts x 160 trials per arm, +7.47% and +6.93% against the +7.5% that 33 penetration gives, inside +-2 points, in both runs of one counted pair (20261111-235509, -235545). Earlier: (ADR 0156, mentor decision 2026-11-11). The confirmed defect: 301369's amount (AscensionTemplarAuras.cpp, +10% of Intellect) was added to the target's resistance (Unit.cpp:2615), so Zealotry 801450 at the level 60 dummy read -9.52% and -8.32% on the trial's final counted runs (20261111-194717, -194914) against the +7.5% that 33 penetration gives. The amount is now negative. Readback (catalog scenario templar-lights-chosen-penetration-readback, spell_resist_chance): the dummy's 60 Holy resistance, 12%, reads 27, 5.4%, with the talent, against 93, 18.6%, before the fix. The behaviour label 301310 behaviour_hit_ratio spell_penetration needs about 1,100 trials per arm to resolve the +7.5% within its tolerance; one scenario holds about 160, so the clause stays data conformant until pooled trials exist"
+    "reason": "fixed (ADR 0156), behaviour proven by a pooled proof (ADR 0195): Zealotry 801450 at the level 60 dummy, 12 parts x 160 trials per arm, +7.47% and +6.93% against the +7.5% that 33 penetration gives, inside +-2 points, in both runs of one counted pair (20261111-235509, -235545). Earlier: (ADR 0156, mentor decision 2026-11-11). The confirmed defect: 301369's amount (AscensionTemplarAuras.cpp, +10% of Intellect) was added to the target's resistance (Unit.cpp:2615), so Zealotry 801450 at the level 60 dummy read -9.52% and -8.32% on the trial's final counted runs (20261111-194717, -194914) against the +7.5% that 33 penetration gives. The amount is now negative. Readback (catalog scenario templar-lights-chosen-penetration-readback, spell_resist_chance): the dummy's 60 Holy resistance, 12%, reads 27, 5.4%, with the talent, against 93, 18.6%, before the fix. The behaviour label 301310 behaviour_hit_ratio spell_penetration needs about 1,100 trials per arm to resolve the +7.5% within its tolerance; one scenario holds about 160, so the clause stays data conformant until pooled trials exist; labels pair 20261112-043429 / -043850 (build 928222268d2b), the same 12 parts: +8.03% / +7.68%"
   },
   {
     "spell": 301311,
@@ -1410,7 +1410,7 @@
       "560650 behaviour_hit_ratio holy_crit_rate"
     ],
     "kind": "claim",
-    "reason": "pooled rate (ADR 0195, chance-claim ruling 2026-11-12): the critical share of Holy Scourgebane 801832 hits rises by +2.59 points (99% +1.76 to +3.42) and +3.36 (+2.51 to +4.21), 7,968 Scourgebane hits per arm, control 3.0% / 2.9%; counted 20261112-014753 / -014845; a 166-cast pilot each (20261112-014406) gave the interval first; `560650 e0 spell_crit_chance 1` (the passive scenario since 03ee6e5943) reads Holy spell crit +3 on learning, labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "pooled rate (ADR 0195, chance-claim ruling 2026-11-12): the critical share of Holy Scourgebane 801832 hits rises by +2.59 points (99% +1.76 to +3.42) and +3.36 (+2.51 to +4.21), 7,968 Scourgebane hits per arm, control 3.0% / 2.9%; counted 20261112-014753 / -014845; a 166-cast pilot each (20261112-014406) gave the interval first; `560650 e0 spell_crit_chance 1` (the passive scenario since 03ee6e5943) reads Holy spell crit +3 on learning, labels pair 20261112-043429 / -043850 (build 928222268d2b); final pair 20261112-025618 / -025807 (build 35cae55aa6ae): +2.77 / +2.95 points"
   },
   {
     "spell": 560650,
@@ -1502,7 +1502,7 @@
       "561346 behaviour_hit_ratio holy_crit_rate"
     ],
     "kind": "claim",
-    "reason": "pooled rate (ADR 0195, chance-claim ruling 2026-11-12): the critical share of Holy Scourgebane 801832 hits rises by +6.02 points (99% +5.15 to +6.89) and +6.30 (+5.41 to +7.20), 9,296 Scourgebane hits per arm, control 2.7% / 2.9%; counted 20261112-014514 / -014626; a 166-cast pilot each (20261112-014406) gave the interval first; `561346 e0 spell_crit_chance 1` (the passive scenario since 03ee6e5943) reads Holy spell crit +6 on learning, labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "pooled rate (ADR 0195, chance-claim ruling 2026-11-12): the critical share of Holy Scourgebane 801832 hits rises by +6.02 points (99% +5.15 to +6.89) and +6.30 (+5.41 to +7.20), 9,296 Scourgebane hits per arm, control 2.7% / 2.9%; counted 20261112-014514 / -014626; a 166-cast pilot each (20261112-014406) gave the interval first; `561346 e0 spell_crit_chance 1` (the passive scenario since 03ee6e5943) reads Holy spell crit +6 on learning, labels pair 20261112-043429 / -043850 (build 928222268d2b); final pair 20261112-025618 / -025807 (build 35cae55aa6ae): +5.58 / +5.25 points"
   },
   {
     "spell": 561346,
@@ -2374,7 +2374,7 @@
       "705287 behaviour_metric_delta armor"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): the grouped ally's armor gains 0 without 705287, 211 with it (Agility + Stamina read), 241 with Agility 58451 and 274 with Stamina 48101; withheld-talent contrast: 801409 read absent before every cast, present after it in the with, agility and stamina arms, none applied without 705287, no other aura appeared, armor back to 299 after 801409 is removed, attribution pair 20261112-045107 / -045344 (build dc8da2d960db)"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): the grouped ally's armor gains 0 without 705287, 211 with it (Agility + Stamina read), 241 with Agility 58451 and 274 with Stamina 48101; withheld-talent contrast: 801409 read absent before every cast, present after it in the with, agility and stamina arms, none applied without 705287, no other aura appeared, armor back to 299 after 801409 is removed, attribution pair 20261112-045107 / -045344 (build dc8da2d960db); read named in the verdict (rule 4 amendment 2d): Unit::GetArmor (client field UNIT_FIELD_RESISTANCES + 0); judged again with it as x2 on the same pair"
   },
   {
     "spell": 705287,
@@ -2386,7 +2386,7 @@
       "705287 behaviour_expiry armor"
     ],
     "kind": "claim",
-    "reason": "801409 lasts 15 s after the fix of ADR 0215: cast_applies_aura 14997 ms right after Benediction, expiry after 14625 and by 15500 ms (r2-b final pair 20261112-034743 / -034923, build c634e1026f90); 705287 e0 reads 15000 and its SPELL_AURA_ADD_FLAT_MODIFIER adds +15000 to 801409, labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "801409 lasts 15 s after the fix of ADR 0215: cast_applies_aura 14997 ms right after Benediction, expiry after 14625 and by 15500 ms (r2-b final pair 20261112-034743 / -034923, build e69f54c8ec94); 705287 e0 reads 15000 and its SPELL_AURA_ADD_FLAT_MODIFIER adds +15000 to 801409, labels pair 20261112-043429 / -043850 (build 928222268d2b)"
   },
   {
     "spell": 705290,
@@ -4903,7 +4903,7 @@
       "805423 behaviour_metric_delta spell_power"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): Holy spell power gains 39 on a real cast of 805423 after the aura is cleared (30% of Agility read, 39.6, truncated) and 48 with Agility 58451 (48.6); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, spell power back to 0 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db)"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): Holy spell power gains 39 on a real cast of 805423 after the aura is cleared (30% of Agility read, 39.6, truncated) and 48 with Agility 58451 (48.6); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, spell power back to 0 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db); the read is Holy (school 1) spell power: Effect[1] MiscValue 126 covers schools 1-6, and SpellBaseDamageBonusDone adds the amount for any school in that mask (Unit.cpp:10194, GetMiscValue() & schoolMask); no other school was read; read named in the verdict (rule 4 amendment 2d): Unit::SpellBaseDamageBonusDone(Holy), which UpdateSpellDamageAndHealingBonus copies to PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1; judged again with it as x2 on the same pair"
   },
   {
     "spell": 805423,
@@ -4914,7 +4914,7 @@
       "805423 behaviour_metric_delta attack_power"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): attack power gains 9 on a real cast of 805423 after the aura is cleared (30% of Intellect read, 9.6, truncated) and 24 with Intellect 48100 (24.0); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, attack power back to 313 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db)"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): attack power gains 9 on a real cast of 805423 after the aura is cleared (30% of Intellect read, 9.6, truncated) and 24 with Intellect 48100 (24.0); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, attack power back to 313 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db); read named in the verdict (rule 4 amendment 2d): Unit::GetTotalAttackPowerValue(BASE_ATTACK), from the client fields UNIT_FIELD_ATTACK_POWER, _MODS and _MULTIPLIER; judged again with it as x2 on the same pair"
   },
   {
     "spell": 805423,
