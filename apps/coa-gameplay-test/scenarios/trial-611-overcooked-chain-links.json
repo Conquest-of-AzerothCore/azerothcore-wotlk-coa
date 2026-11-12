@@ -1,0 +1,55 @@
+{
+  "schema": 1,
+  "name": "The Pyrewood Armorer drops Overcooked Chain Links for Oh, the Places You'll Go",
+  "contract": [
+    "Hardcore - Oh, the Places You'll Go (611) requires looting Overcooked Chain Links 421531 before level 15 (LOOT_ITEM_BEFORE_LEVEL 1/421531/15).",
+    "The item had no item_template row and no loot entry, so it could never drop and the objective could not be completed.",
+    "Expected (Conquest of Azeroth item cache, Exiles DB mirror of db.exil.es): Pyrewood Armorer 3528 drops it at 100%, and looting it below level 15 completes the objective, which the module reports with SMSG_COA_CHALLENGE_CRITERIA_UPDATED (0x59A): word 1 the challenge, word 5 the objective's item, word 6 its progress.",
+    "A level 1 character on the trial kills a 1-health Armorer fixture, finds the item in the corpse, loots it into its bags and receives the completed criterion for 611 and 421531."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 1 }
+  ],
+  "creatures": [
+    { "id": "armorer", "owner": "hero", "entry": 3528, "level": 14, "health": 1, "distance": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "start_challenge", "label": "Start Oh, the Places You'll Go", "actor": "hero", "challenge": 611, "level": 1 },
+    { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
+    { "action": "attack", "actor": "hero", "target": "armorer" },
+    { "action": "assert", "actor": "armorer", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "snapshot", "label": "Criteria updates before looting", "actor": "hero",
+      "metric": "server_packets", "opcode": 1434, "save_as": "criteria_before"
+    },
+    { "action": "loot_creature", "actor": "hero", "target": "armorer" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Armorer's corpse holds the chain links", "actor": "hero",
+      "metric": "loot_count", "item": 421531, "equals": 1
+    },
+    { "action": "loot_slot", "actor": "hero", "item": 421531 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the item reaches the bags", "actor": "hero",
+      "metric": "item_count", "item": 421531, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Looting sends a criteria update", "actor": "hero",
+      "metric": "server_packets", "opcode": 1434, "relative_to": "criteria_before", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It is for Oh, the Places You'll Go", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 1434, "index": 1, "equals": 611
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: for the chain links objective", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 1434, "index": 5, "equals": 421531
+    },
+    {
+      "action": "assert", "label": "And marks it done", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 1434, "index": 6, "equals": 1
+    }
+  ]
+}
