@@ -74,6 +74,11 @@
   `sample` and `packets`; `aura354.py`: `aura354_rows(class_map, class_id)` lists a class's aura-354 spells and flags
   those without class code; `batch_commands.py` registers the three as `audit`, `buckets` and `aura354` (see
   [Coverage audit and bucket file](generate-and-compare.md#coverage-audit-and-bucket-file)).
+- `ledger.py`: `ledger(class_file, dbc_dir, text_bases)` writes a class's first clause ledger from the tooltips of
+  its class spell set (`raw_clauses` cuts each tooltip, `clause_label_lists` maps its `$` tokens to the value
+  scenario's labels, `no_claim_reason` names the rows without a mechanic) and returns `Ledger(entries, unlabelled)`;
+  `write_ledger(entries, out)` never overwrites a file (see
+  [Writing a first ledger](clause-ledger.md#writing-a-first-ledger)).
 - `class_map.py`: the command line `--worktree W --out OUT [--dbc-dir DIR] [--log-events EVENTS.csv]` maps every
   spell of the 21 CoA classes to the code that touches it (`risk`, `gap`, `custom_mechanics`, log counts) and writes
   `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)).

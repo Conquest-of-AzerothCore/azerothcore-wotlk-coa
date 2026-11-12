@@ -95,7 +95,7 @@ Templar examples:
 
 ### 3.1 Behaviour against data
 
-The tool computes two proof statuses from closed tables, never by hand (ADR 0120; `LEDGER:161-234`).
+The tool computes two proof statuses from closed tables, never by hand (ADR 0120; `LEDGER:209-282`).
 - **Data conformant**: a readback of a computed value. Examples: a stored modifier, a calculation function called by the
   harness, a spell's computed effect value.
 - **Behaviour proven**: the value is shown to be consumed by the path that acts. Examples: the hit that landed, the
@@ -467,11 +467,13 @@ Measure the reference stats with a naked scenario (`CONF/docs/scaffolding.md:43-
 The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, labels, kind}` entries, with optional
 `claims`, `tool_gap`, `text_source`, `no_behaviour_route` and `effectiveness_of` (`LEDGER:7-47`).
 - `kind` is `claim` or `no_claim`. A `no_claim` row comes only from the initial generation or an owner ruling
-  (`LEDGER:88-92`).
+  (`LEDGER:136-140`).
 - Other workstreams never edit the ledger directly. They write a fragment, and the integrator merges it by `(spell,
-  clause)` (`LEDGER:73-92`).
+  clause)` (`LEDGER:121-140`).
 
-**No repository tool builds a class's first ledger.** This is future work.
+**`conformance.py ledger` builds a class's first ledger** from data, by the rules below (ADR 0310;
+`LEDGER`, "Writing a first ledger"). Review its output before the first batch: it declares no `claims`, adds no
+behaviour labels, and needs `--text-basis` for each streamed spell. The Templar ledger predates it:
 - The Templar ledger was added once, in commit e32d5308b5 (2026-11-09), from a round 10 clause audit of 450 rows that
   agents wrote. ADR 0052 calls it "generated once"; the conversion step was never committed. The commit adds the ledger
   and no generator.
@@ -495,8 +497,8 @@ The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, la
   `dbc_clause` keeps the DBC words when the streamed text changed them (ADR 0192, ADR 0198);
 - `effectiveness_of`: the spell id of X in a clause "the effectiveness of X" (ADR 0268).
 
-**Splitting tooltips into claims.** No written rule set exists. The rules below are the ones the Templar ledger and
-`coverage.py` apply. Write a new class's ledger by them.
+**Splitting tooltips into claims.** The rules below are the ones the Templar ledger and `coverage.py` apply;
+`conformance.py ledger` applies a fixed form of them (`LEDGER`, "Writing a first ledger").
 - **Sentence to clauses.** A sentence is cut where a part carries its own effect or value. Each clause is one row with
   the exact tooltip words. The cut is not fully regular.
   - Absolution, "Taunt all enemies within 8 yds for $d and increase your movement speed by $520659s1% for $520659d.",
@@ -564,7 +566,7 @@ Use your class id in place of 19.
 - `generate` also takes `--behaviour`, `--target-gate` and `--learned-hit` to select class-file entries
   (`conformance.py:662-669`).
 
-Coverage against the ledger (`LEDGER:238-239`):
+Coverage against the ledger (`LEDGER:286-287`):
 
     python conformance.py coverage --before <dir> --after <dir> --clauses classes/templar_clauses.json
 
@@ -940,15 +942,15 @@ Sources:
 
 ## 13. Known limits and open points
 
+- **The first-ledger generator** (`conformance.py ledger`, 9.4) cuts clauses by fixed rules. Run on the Templar it
+  gives 187 of the hand ledger's 452 `(spell, clause)` rows exactly, so its output is a start that batch authors
+  refine, not a finished ledger. It declares no `claims` and cannot label a spell whose value scenario is unmodelled.
 - **The tool has only run on the Templar.** The generation from data (spell set, tooltip reading, value, passive and hit
   scenarios) is written to be class-agnostic. The behaviour, trigger and proc entries are hand-written per spell.
   - Of the 64 behaviour kinds in `classes/templar.json`, 35 have a single entry.
   - The Python names one Templar spell id, `DEFAULT_CHAIN_AURA` (Oath Chain), which an entry can override.
   - The tests are Templar fixtures.
   - Expect to add check kinds; they cost the most per claim (section 10.4).
-- **Not included, future work:**
-  - a generator for a class's first ledger (9.4): the Templar ledger came from an agent audit, converted by an
-    uncommitted step.
 - **The final statuses 2, 4 and 5** have no field in the ledger or in `coverage.py`. The Templar recorded them outside
   the repository.
 - **`prove` calls the `coa-verify` wrapper** from the optional guide tooling by default (`prove.py:57`), with no option

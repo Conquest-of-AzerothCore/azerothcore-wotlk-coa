@@ -22,6 +22,7 @@ from passives import passive_scenario
 from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts, gate_stacks,
                   MELEE_LABEL, hit_parts, melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model,
                   reference_melee_model)
+from ledger import ledger, parse_text_bases, write_ledger
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
 from profile import (DBC_DIR, DbcSetMismatch, control_entries, ledger_consumption_path, load_class_file,
@@ -545,6 +546,22 @@ def coverage_command(args) -> int:
     return 0
 
 
+def ledger_command(args) -> int:
+    class_file = load_class_file(args.class_id)
+    dbc_dir = server_dbc_dir(args.dbc_dir or class_file.get('dbc_dir', DBC_DIR))
+    written = ledger(class_file, dbc_dir, parse_text_bases(args.text_basis))
+    entries = written.entries
+    clause_coverage(entries, [])
+    write_ledger(entries, args.out)
+    claims = sum(entry['kind'] == 'claim' for entry in entries)
+    spells = len({entry['spell'] for entry in entries})
+    print(f'{args.out}: {len(entries)} clauses of {spells} spells, {claims} claims, {len(entries) - claims} no_claim, '
+          f'{sum("text_source" in entry for entry in entries)} streamed')
+    for spell, reason in sorted(written.unlabelled.items()):
+        print(f'spell {spell}: no labels, its value scenario is unmodelled ({reason})')
+    return 0
+
+
 def mutate_command(args) -> int:
     from mutants import MANIFEST_KEY, load_mutants, mutate
     path = mutate(args.manifest, load_mutants(args.mutants))
@@ -773,13 +790,23 @@ def main(argv=None) -> int:
     packeting.add_argument('--class-map', dest='class_map', type=Path,
                            help='a class map JSON ({"classes": {"<class id>": {"spells": [...]}}}), read only')
     packeting.add_argument('--out', type=Path, required=True, help='the directory that receives <spell id>.md')
+    ledgering = commands.add_parser('ledger', help="write a class's first clause ledger from its tooltips: one entry "
+                                                   'per clause, level labels, empty tooltips and acquisition notes '
+                                                   'as no_claim, labels from the value scenarios')
+    ledgering.add_argument('--class', dest='class_id', type=int, required=True)
+    ledgering.add_argument('--out', type=Path, required=True, help='the ledger file to write; never overwritten')
+    ledgering.add_argument('--dbc-dir', dest='dbc_dir', type=Path,
+                           help=f"the server DBC set (the class file's dbc_dir, else {DBC_DIR})")
+    ledgering.add_argument('--text-basis', dest='text_basis', action='append',
+                           help='<spell>=<basis> of a spell read from coa_client_spell_description: owner_ruling, '
+                                'live_source, text_correction or align_to_server; required for each such spell')
     args = parser.parse_args(argv)
     if args.command in batch_handlers:
         return batch_handlers[args.command](args)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
                 'compare': compare_command, 'diff': diff_command, 'coverage': coverage_command,
                 'prove': prove_command, 'mutate': mutate_command, 'k3': k3_command, 'sample': sample_command,
-                'packets': packets_command}
+                'packets': packets_command, 'ledger': ledger_command}
     return handlers[args.command](args)
 
 

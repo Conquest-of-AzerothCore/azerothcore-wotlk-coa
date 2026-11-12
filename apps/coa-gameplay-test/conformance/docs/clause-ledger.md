@@ -70,6 +70,54 @@ Templar: 30 entries declare claims, over 28 spells (92109, 300504, 300520, 52003
 10 (`templar-run2`); 8 of those then had a claim no label measured. Barrier of Light 805417 splits its 40% (behaviour) from its "for $d"
 (a duration readback), so the clause stays data conformant.
 
+## Writing a first ledger
+
+`conformance.py ledger` writes a class's first ledger from data (ADR 0310). It never overwrites a file, and the same
+inputs give the same bytes.
+
+```
+python3 -B conformance.py ledger --class 23 --out classes/necromancer_clauses.json \
+  [--dbc-dir DIR] [--text-basis 638403=text_correction ...]
+```
+
+- **Spells.** The class spell set of `generate` (`classes.class_spells`, with the class file's `extra_spells`), one
+  tooltip per spell: the `Description[enUS]` of its highest rank at the class file's `level`. The entry's `spell` is
+  that rank, the id its labels use.
+- **Clauses.** Colour codes and `@s:<id>:<flags>@` markup are removed from the words. Each line (`\r\n`, `\n`,
+  `|n`) and each sentence (`.`, `!` or `?` before a space, a line break, a `$?` conditional or an `@ext:` note) is
+  cut off. Inside a sentence the candidate cuts are after `, ` and before ` and `. A cut is made only when both sides
+  state a value (a `${...}` formula, any `$` token, or a literal number) and the left side does not end with a
+  function word (`your`, `of`, `the`, ...). A `${...}` formula, a `$?` conditional, an `@ext:...:ext@` note and a
+  texture are never cut inside. A piece without words (an `@s` markup, a blank line) joins the clause before it.
+- **`no_claim`.** Only three fixed patterns, each with a fixed `reason`: an empty tooltip (one entry, clause
+  `(empty tooltip)`), a level label line (`Level 10 Passive`, `Level <n>` and capitalised words), and an `@ext:` note
+  that starts with a continent name followed by a colon (a trainer location list such as Tithe 804781). Everything
+  else is a `claim`.
+- **Labels.** Each clause gets the labels that `values.value_scenario` gives the `$` tokens it holds, counted by the
+  same `#n` ordinals: the clause pieces are read with the same caster as the value scenario, and the command stops
+  if the pieces read differently from the whole tooltip. An `@s` expansion's tokens belong to the clause the markup
+  joined. An unreadable `@ext` note keeps its `effect_value #n` label; a stray `|` escape gets none. Labels of
+  behaviour, proc or trigger entries are never added: batch authors add them by fragments.
+- **No `claims`.** No rule derives the words of each stated claim, so the command declares none. A clause that states
+  several values keeps the labels of its tokens; its authors declare `claims` when those labels do not cover each
+  value.
+- **Streamed text.** A spell with a `coa_client_spell_description` row (`streamed.py`) is read in the streamed words.
+  Every entry of that spell carries `text_source`: `table`, `file`, `commit` and `pr` (the commit that added the SQL
+  file and the `(#N)` of its subject), `spell`, `ruling` (`null`), `dbc_differs` (which fields differ) and `basis`.
+  The basis is a judgement about the change, not data: give it with `--text-basis <spell>=<basis>`; the command
+  stops for a streamed spell without one. When the streamed Description differs from Spell.dbc, a clause whose DBC
+  words differ carries them as `dbc_clause` (paired by position; when the two texts cut into different counts, the
+  whole DBC text).
+- **Unlabelled spells.** When a spell's value scenario raises `Unmodelled` (for example a target aura state with no
+  fixture), its clauses are written without labels and the command prints the spell and the reason.
+- The command runs the written entries through `coverage.clause_coverage` before writing them.
+
+Templar check (`test_ledger.py`): run on class 19, the command reproduces the 16 `no_claim` rows of the Templar
+ledger that these rules cover (14 level labels, Shoot 3018, Tithe 804781); the 17th, Righteous Tempest's tick 805410,
+is an owner ruling. It also marks Scourgebane 92111's level label, which the hand ledger has no row for. At a2f6330902
+the run gives 362 entries, of which 187 have the exact `(spell, clause)` of one of the 452 hand-ledger entries: the
+hand ledger cut sentences less regularly and often dropped the final full stop or `and`.
+
 ## How a workstream contributes
 
 A workstream other than the one that owns and merges the ledger never edits `classes/<name>_clauses.json`
