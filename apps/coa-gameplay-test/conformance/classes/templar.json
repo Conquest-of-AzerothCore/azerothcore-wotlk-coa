@@ -2061,9 +2061,10 @@
     {
       "spell": 300524, "name": "Focused (Blade of Faith)", "kind": "hit_ratio", "variant": "blade_of_faith",
       "label_suffix": "blade_of_faith", "quote": "Increases the damage of Blade of Faith and Righteous Tempest by",
-      "expected": 1.25, "observe_spell": 803880, "cast_wait_ms": 3500, "control": {"auras": [[823764, 1]]},
-      "treatment": {"auras": [[823764, 1], [300524, 1]]}, "critical": false, "trials": 30,
-      "expected_source": "$s1 = 25 (300524 EffectBasePoints[1] 24 + 1): Effect[1] aura 108 SPELLMOD_DOT (EffectMiscValue 22) on Blade of Faith; its DBC target TARGET_UNIT_NEARBY_ENEMY is moved to the caster by AscensionTemplarContracts.cpp:126-131. Blade of Faith 803880 (rank 9, the level 60 rank) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE every 3000 ms; each trial casts it at the dummy and reads its ticks for 3500 ms. Its caster aura Oath Chain 704576 is set before each cast. Both arms set 823764 (beeg spellpen) to remove the dummy's magic resistance, whose partial resists spread the Holy ticks. Control: no 300524. Only non-critical ticks are compared."
+      "expected": 1.25, "observe_spell": 803880, "cast_wait_ms": 3500,
+      "control": {"auras": [[823764, 1], [64481, 1]]},
+      "treatment": {"auras": [[823764, 1], [300524, 1], [64481, 1]]}, "critical": false, "trials": 30,
+      "expected_source": "$s1 = 25 (300524 EffectBasePoints[1] 24 + 1): Effect[1] aura 108 SPELLMOD_DOT (EffectMiscValue 22) on Blade of Faith; its DBC target TARGET_UNIT_NEARBY_ENEMY is moved to the caster by AscensionTemplarContracts.cpp:126-131. Blade of Faith 803880 (rank 9, the level 60 rank) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE every 3000 ms; each trial casts it at the dummy and reads its ticks for 3500 ms. Its caster aura Oath Chain 704576 is set before each cast. Both arms set 823764 (beeg spellpen) to remove the dummy's magic resistance, whose partial resists spread the Holy ticks. Control: no 300524. Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) in both arms forces the crit chance to 0, since ADR 0243 lets Blade ticks crit; only non-critical ticks are compared as a second guard."
     },
     {
       "spell": 803219, "name": "Spiritual Abdicator", "kind": "taken_hit", "variant": "copies", "label_suffix": "copies",
