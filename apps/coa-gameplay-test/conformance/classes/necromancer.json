@@ -1126,6 +1126,323 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 500985,
+      "name": "Undead: Protect (defensive)",
+      "kind": "metric_delta",
+      "variant": "defensive",
+      "label_suffix": "defensive",
+      "quote": "Your undead minions assume a defensive behavior,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 6000,
+      "select_dummy": true,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "npc_ascension_necromancer::UpdateAI event 1 (AscensionNecromancerSummons.cpp:760-790): without Undead: Assault 500982 the minion is REACT_DEFENSIVE and engages only the caster's victim or attackers. The layout of the Undead: Assault (aggressive) entry, with Undead: Protect cast instead: the Ghoul makes no hit on the selected dummy (5 yd, hostile) in 6000 ms, where under Undead: Assault it attacks it unprompted (that entry is the contrast)."
+    },
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (caster armor)",
+      "kind": "metric_delta",
+      "variant": "caster_armor",
+      "label_suffix": "caster_armor",
+      "quote": "increasing threat and Armor.",
+      "expected": 94,
+      "before_expected": 94,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "armor",
+      "fields": {},
+      "observe_source": "Undead: Protect 500985 puts its armor aura on the summons only (Effect[2] 190): the caster's own armor stays 94 with and without it. This is the armor the Ghoul's base takes x 0.35 in the armor entry."
+    },
+    {
+      "spell": 500982,
+      "name": "Undead: Assault (movement speed)",
+      "kind": "metric_delta",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "increasing movement speed by $s2%.",
+      "expected": 1.485718,
+      "before_expected": 1.14286,
+      "trigger_spell": 500982,
+      "tolerance": 0.0001,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_run_speed_rate",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Undead: Assault 500982 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-183): Effect[1] 190 aura 129 SPELL_AURA_MOD_SPEED_ALWAYS +30 ($s2) on the summons; Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190), amount 5 ($560595s1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63), added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance, Unit.cpp:4558). The Ghoul 50073 (speed_run 1.14286): 1.14286 with no stance (control), 1.3 x 1.14286 = 1.48572 after the cast (Unit::UpdateSpeed, Unit.cpp:12419, 12498)."
+    },
+    {
+      "spell": 500982,
+      "name": "Undead: Assault (aggressive)",
+      "kind": "metric_delta",
+      "variant": "aggressive",
+      "label_suffix": "aggressive",
+      "quote": "Your undead minions assume an aggresive behaviour,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500982,
+      "after_at_least": 1,
+      "select_dummy": true,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 6000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Undead: Assault 500982 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-183): Effect[1] 190 aura 129 SPELL_AURA_MOD_SPEED_ALWAYS +30 ($s2) on the summons; Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190), amount 5 ($560595s1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63), added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance, Unit.cpp:4558). npc_ascension_necromancer::UpdateAI event 1 (AscensionNecromancerSummons.cpp:760-790): with 500982 on the caster the minion is REACT_AGGRESSIVE and attacks the first valid hostile unit within 20 yd although the caster attacks nothing. The Ghoul hits the dummy (Harvest Golem 36, hostile, 5 yd) unprompted only after the stance: 0 hits without it (control), at least 1 with it. The caster selects the dummy (select, no attack)."
+    },
+    {
+      "spell": 500982,
+      "name": "Undead: Assault (crit against Humanoids)",
+      "kind": "metric_delta",
+      "variant": "humanoid_crit",
+      "label_suffix": "humanoid_crit",
+      "quote": "Your critical strike chance against Humanoids is increased by $560595s1%.",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        560595
+      ],
+      "enemy_player_race": 2,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "enemy"
+      },
+      "observe_source": "Undead: Assault 500982 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-183): Effect[1] 190 aura 129 SPELL_AURA_MOD_SPEED_ALWAYS +30 ($s2) on the summons; Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190), amount 5 ($560595s1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63), added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance, Unit.cpp:4558). 560595 known. The caster's melee crit chance against an enemy player (race 2, a Humanoid; GetCreatureType of a player is Humanoid) rises from 0 to 5 after the stance."
+    },
+    {
+      "spell": 500982,
+      "name": "Undead: Assault (no crit without 560595)",
+      "kind": "metric_delta",
+      "variant": "humanoid_crit_control",
+      "label_suffix": "humanoid_crit_control",
+      "quote": "Your critical strike chance against Humanoids is increased by $560595s1%.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "enemy_player_race": 2,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "enemy"
+      },
+      "observe_source": "Undead: Assault 500982 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-183): Effect[1] 190 aura 129 SPELL_AURA_MOD_SPEED_ALWAYS +30 ($s2) on the summons; Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190), amount 5 ($560595s1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63), added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance, Unit.cpp:4558). 560595 not known: the stance leaves the crit chance against the enemy player unchanged ($?s560595 false)."
+    },
+    {
+      "spell": 500982,
+      "name": "Undead: Assault (no crit against a Mechanical)",
+      "kind": "metric_delta",
+      "variant": "mechanical_crit_control",
+      "label_suffix": "mechanical_crit_control",
+      "quote": "Your critical strike chance against Humanoids is increased by $560595s1%.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        560595
+      ],
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "observe_source": "Undead: Assault 500982 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-183): Effect[1] 190 aura 129 SPELL_AURA_MOD_SPEED_ALWAYS +30 ($s2) on the summons; Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190), amount 5 ($560595s1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63), added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance, Unit.cpp:4558). 560595 known: the stance leaves the crit chance against the dummy (Harvest Golem 36, creature type 9 Mechanical) unchanged."
+    },
+    {
+      "spell": 500982,
+      "name": "Undead: Assault (one stance)",
+      "kind": "metric_delta",
+      "variant": "one_stance",
+      "label_suffix": "one_stance",
+      "quote": "Only 1 Undead Stance can be active at a time.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500982
+      ],
+      "setup_wait_ms": 1600,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 500982,
+        "caster": "caster"
+      },
+      "observe_source": "Stance exclusivity: aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:83-93) removes the other Undead stances (500982, 500983, 500985) from the caster and its minions when one is applied. Undead: Assault is cast in both phases; the caster holds it without a second stance (control) and loses it when Undead: Protect 500985 is cast after it."
+    },
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (armor)",
+      "kind": "metric_delta",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "increasing threat and Armor.",
+      "expected": 36,
+      "before_expected": 32,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_armor",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Undead: Protect 500985 (DurationIndex forced to 21): Effect[0] 190 aura 10 SPELL_AURA_MOD_THREAT +1000 on the summons, Effect[2] 190 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +10 armor on the summons; Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), amount -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). The Ghoul's armor is Scale()'s base, the caster's armor x 0.35 (AscensionNecromancerSummons.cpp:316-321): 32 with no stance (control), truncated from 94 x 0.35 = 32.9 (the caster's armor 94, read by the player armor entry); x 1.10 = 36.19, read 36, after the stance (Unit::UpdateArmor TOTAL_PCT, stock; the stat is truncated to an integer at each read)."
+    },
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (minion threat)",
+      "kind": "metric_delta",
+      "variant": "minion_threat",
+      "label_suffix": "minion_threat",
+      "quote": "increasing threat and Armor.",
+      "expected": 11,
+      "before_expected": 1,
+      "trigger_spell": 500985,
+      "tolerance": 0.0001,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_threat_multiplier",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Undead: Protect 500985 (DurationIndex forced to 21): Effect[0] 190 aura 10 SPELL_AURA_MOD_THREAT +1000 on the summons, Effect[2] 190 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +10 armor on the summons; Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), amount -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). The Ghoul's threat multiplier (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT), the factor ThreatManager::UpdateMySpellSchoolModifiers caches and CalculateModifiedThreat applies, ThreatManager.cpp:722, 835): 1 with no stance (control), 1 + 1000% = 11 after it."
+    },
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (your threat)",
+      "kind": "metric_delta",
+      "variant": "your_threat",
+      "label_suffix": "your_threat",
+      "quote": "Reduces your threat generated by $560595s3%.",
+      "expected": 0.25,
+      "before_expected": 1,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        560595
+      ],
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "threat_multiplier",
+      "fields": {},
+      "observe_source": "Undead: Protect 500985 (DurationIndex forced to 21): Effect[0] 190 aura 10 SPELL_AURA_MOD_THREAT +1000 on the summons, Effect[2] 190 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +10 armor on the summons; Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), amount -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). 560595 known. The caster's threat multiplier: 1 with no stance (control), 1 - 75% = 0.25 after it."
+    },
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (your threat without 560595)",
+      "kind": "metric_delta",
+      "variant": "your_threat_control",
+      "label_suffix": "your_threat_control",
+      "quote": "Reduces your threat generated by $560595s3%.",
+      "expected": 1,
+      "before_expected": 1,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "threat_multiplier",
+      "fields": {},
+      "observe_source": "Undead: Protect 500985 (DurationIndex forced to 21): Effect[0] 190 aura 10 SPELL_AURA_MOD_THREAT +1000 on the summons, Effect[2] 190 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +10 armor on the summons; Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), amount -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). 560595 not known: the caster's threat multiplier stays 1 after the stance ($?s560595 false)."
+    },
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (one stance)",
+      "kind": "metric_delta",
+      "variant": "one_stance",
+      "label_suffix": "one_stance",
+      "quote": "Only 1 Undead Stance can be active at a time.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500985
+      ],
+      "setup_wait_ms": 1600,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 500985,
+        "caster": "caster"
+      },
+      "observe_source": "Stance exclusivity: aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:83-93) removes the other Undead stances (500982, 500983, 500985) from the caster and its minions when one is applied. Undead: Protect is cast in both phases; the caster holds it without a second stance (control) and loses it when Undead: Assault 500982 is cast after it."
+    },
+    {
       "spell": 583256,
       "name": "Harvest Plague (heal)",
       "kind": "metric_delta",
