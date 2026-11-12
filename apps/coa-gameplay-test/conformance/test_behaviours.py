@@ -68,7 +68,7 @@ from bonus import bonus_band
 from compare import Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
-from profile import CASTER, DBC_DIR, load_class_file
+from profile import CASTER, DBC_DIR, control_entries, load_class_file
 from tooltip import Records
 from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
 
@@ -747,7 +747,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 468)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 467)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -8690,10 +8690,23 @@ class AggroRedirectRangeTests(unittest.TestCase):
         self.assertEqual([expectation.displayed for expectation in expectations], ['0', '0', '0', '0'])
 
     def test_the_control_is_a_stock_area_taunt_with_a_guard_inside_its_radius(self):
-        scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(1161, 'aggro_redirect', 'edge'))
+        [control] = control_entries(19)
+        self.assertEqual((control['spell'], control['control_for']), (1161, 800424))
+        scenario, expectations = behaviour_scenario(CLASS_FILE, control)
         run.validate(scenario)
         self.assertEqual(len(cast_indices(scenario['steps'], 1161)), 1)
         self.assertEqual([expectation.displayed for expectation in expectations], ['1', '0', '0', '0', '0'])
+
+    def test_the_control_stays_out_of_the_class_file_and_its_full_generation(self):
+        self.assertFalse([entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 1161])
+        manifest_dir = Path(tempfile.mkdtemp())
+        try:
+            import conformance
+            conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--controls'])
+            files = sorted(path.name for path in (manifest_dir / 'scenarios').glob('*.json'))
+            self.assertEqual(files, ['conformance-templar-behaviour-1161-aggro-redirect-edge.json'])
+        finally:
+            shutil.rmtree(manifest_dir)
 
     def test_geometry_without_roots_is_refused(self):
         entry = {**r1a_entry(800424, 'aggro_redirect', 'edge'), 'rooted': False}

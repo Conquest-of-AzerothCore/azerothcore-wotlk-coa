@@ -7,6 +7,7 @@ from typing import Mapping
 from tooltip import SKILL_PER_LEVEL, CasterStats
 
 CLASSES_DIR = Path(__file__).resolve().parent / 'classes'
+CONTROLS_DIR = Path(__file__).resolve().parent / 'controls'
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 SETTLE_MS = 5000
 UNBOUNDED = 10**9
@@ -110,6 +111,14 @@ def load_class_file(class_id: int) -> dict:
                 server_dbc_dir(class_file['dbc_dir'])
             return class_file
     raise ValueError(f'No class file for class {class_id}')
+
+
+def control_entries(class_id: int) -> list[dict]:
+    for path in sorted(CONTROLS_DIR.glob('*.json')):
+        controls = json.loads(path.read_text(encoding='utf-8'))
+        if controls['class_id'] == class_id:
+            return controls['behaviours']
+    return []
 
 
 def player_fixture(class_file: dict) -> dict:

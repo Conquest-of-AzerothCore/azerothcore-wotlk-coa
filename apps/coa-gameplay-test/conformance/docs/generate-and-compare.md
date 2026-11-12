@@ -3,7 +3,7 @@
 ```sh
 cd apps/coa-gameplay-test/conformance
 python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--passive ID ...] [--proc AURA ...] \
-  [--trigger AURA ...] [--stack [--passes N]]
+  [--trigger AURA ...] [--stack [--passes N]] [--controls]
 python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```
@@ -13,7 +13,8 @@ with/without scenario of each passive (kind `passive`, no `hit` entry), the part
 and, without `--spell`, `--passive`, `--proc` or `--trigger`, the melee scenario, into `DIR/scenarios/`, and
 `DIR/manifest.json`. `--spell` takes a class spell id or a rank id, `--passive` a passive class spell id or rank id
 (its passive scenario only; an active spell is an error), `--proc` the aura of a proc entry, `--trigger` the aura of
-a trigger entry, `--stack` the passes of the talent stack (`--passes`, 5 by default); each selects only what it
+a trigger entry, `--stack` the passes of the talent stack (`--passes`, 5 by default), `--controls` the control entries of
+`controls/<class>.json` (stock spells that check engine behaviour, ADR 0255); each selects only what it
 names. A passive scenario is named `conformance-<class>-passive-<rank>`, a proc part
 `conformance-<class>-proc-<aura>-part-<n>`, a trigger part `conformance-<class>-trigger-<aura>-part-<n>`, a stack
 pass `conformance-<class>-stack-<config>-pass-<n>`. A hit expectation that is entirely

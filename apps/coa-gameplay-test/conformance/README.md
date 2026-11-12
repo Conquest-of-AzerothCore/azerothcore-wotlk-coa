@@ -8,7 +8,7 @@ Expected values come from the effective client DBC set (`/srv/coa/server-data/db
 ```sh
 cd apps/coa-gameplay-test/conformance
 python3 -B conformance.py generate --class 19 --out DIR [--spell ID ...] [--passive ID ...] [--proc AURA ...] \
-  [--trigger AURA ...] [--stack [--passes N]]
+  [--trigger AURA ...] [--stack [--passes N]] [--controls]
 python -B ../../../tools/verify_all.py --stages gameplay --scenario DIR/scenarios/*.json
 python3 -B conformance.py compare --manifest DIR/manifest.json --results .cache/verify-all/STAMP [--out OUT]
 ```

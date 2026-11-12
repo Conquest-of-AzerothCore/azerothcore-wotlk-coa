@@ -1,6 +1,6 @@
 # 0253. Aggro-redirect edge geometry and a stock area-taunt control
 
-- Status: accepted
+- Status: accepted; the control's placement and the edge formula of its consequences are superseded by ADR 0255
 - Date: 2026-11-12
 
 ## Context

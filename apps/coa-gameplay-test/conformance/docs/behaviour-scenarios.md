@@ -1575,7 +1575,9 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
   `combat_reach` and `position_z` and the caster's `combat_reach`, `position_z` and `run_speed_rate`, as information
   for the edge arithmetic; nothing is judged on them. Absolution 800424 `edge` brackets the engine's edge (11.6-12.35
   yd), `cap` places six dummies within 8 yd against MaxAffectedTargets 5, and the stock Challenging Shout 1161 `edge`
-  (9.5 yd, then 13.6-14.35 yd) is the control: a class-file entry for a stock spell, no Templar claim.
+  (9.5 yd, then 13.6-14.35 yd) is the control. Controls live in `controls/<class>.json` (`class_id`, `behaviours`,
+  each entry with `control_for`), outside the class file, its ledger, coverage and score; `generate --controls`
+  writes only them, with the same scenario keys (ADR 0255).
 - A class-file `cast_auras` entry now also sets its auras before every cast of the rank's hit and periodic-total
   scenarios. Blade of Faith's ranks set Reduce Critical Strike Chance -100% 64481, so their tick reads stay at a 0 crit
   chance.
