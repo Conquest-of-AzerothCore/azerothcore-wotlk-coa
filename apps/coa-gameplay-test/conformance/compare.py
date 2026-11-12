@@ -3369,8 +3369,10 @@ def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectatio
              f'past the spell\'s {removal["global_cooldown_ms"]} ms global cooldown (the harness waits '
              f'{removal["gcd_wait_ms"]} ms), so a cooldown left below {expectation.model["level"]:g} ms is not told '
              f'apart from none' if removal else '')
-    return exact(base, float(measured), expected,
-                 'cast_failure SpellCastResult reason compared exactly to the expected code' + limit)
+    what = ('the remaining cooldown read right after the cast, in ms, compared exactly'
+            if (expectation.model or {}).get('reading') == 'cooldown_ms'
+            else 'cast_failure SpellCastResult reason compared exactly to the expected code')
+    return exact(base, float(measured), expected, what + limit)
 
 
 def behaviour_immunity_verdict(base: Verdict, run: Run, expectation: Expectation) -> Verdict:
@@ -3602,6 +3604,27 @@ def hit_ratio_series(run: Run, reads: list[list[str]]) -> tuple[list[float], lis
     return [later[0] - earlier[0] for earlier, later in pairs], [later[1] - earlier[1] for earlier, later in pairs]
 
 
+def stated_bonus_of_ratio(ratio: float, parts: list[float]) -> float:
+    def ratio_of(bonus: float) -> float:
+        return math.prod(1 + part * (1 + bonus / 100) / 100 for part in parts) / math.prod(1 + part / 100
+                                                                                           for part in parts)
+    low, high = -100.0, 1000.0
+    for _ in range(200):
+        middle = (low + high) / 2
+        low, high = (middle, high) if ratio_of(middle) < ratio else (low, middle)
+    return (low + high) / 2
+
+
+def stated_bonus(bonus: Bonus, stated: dict) -> Bonus:
+    parts = stated['parts']
+    measured = stated_bonus_of_ratio(1 + bonus.measured / 100, parts)
+    if not math.isfinite(bonus.half):
+        return Bonus(measured, math.inf, float(stated['bonus']), bonus.trials)
+    low = stated_bonus_of_ratio(1 + (bonus.measured - bonus.half) / 100, parts)
+    high = stated_bonus_of_ratio(1 + (bonus.measured + bonus.half) / 100, parts)
+    return Bonus(measured, max(measured - low, high - measured), float(stated['bonus']), bonus.trials)
+
+
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
@@ -3644,6 +3667,9 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                  else bonus_of(treatment, control, float(model['expected_bonus'])))
     except ValueError as error:
         return replace(base, status='unmeasured', explanation=f'not judged: {error}')
+    stated = model.get('stated')
+    if stated and flat is None:
+        bonus = stated_bonus(bonus, stated)
     status, reason, needed = bonus_status(bonus)
     sized = sized_trials(bonus)
     detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,
@@ -3656,6 +3682,9 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     if model.get('rate'):
         beyond += f'; the {model["rate"]} rate is in percent of the counted events'
     ratio = f', ratio {treatment.mean / control.mean:.5g}' if control.mean else ''
+    if stated and flat is None:
+        ratio += (f', read as the stated bonus on the parts {stated["parts"]} '
+                  f'(ratio = prod(1 + part x (1 + bonus)) / prod(1 + part))')
     return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
                    low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
                    explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '

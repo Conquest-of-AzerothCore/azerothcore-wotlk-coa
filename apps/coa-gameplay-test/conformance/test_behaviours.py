@@ -747,7 +747,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 459)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 463)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -8578,7 +8578,7 @@ def r3b_entry(spell: int, kind: str, suffix: str = '') -> dict:
 
 def arm_readings(expectations: list[Expectation]) -> dict[str, tuple[float, float]]:
     return {expectation.label.rsplit(' ', 1)[1]: (expectation.model['level'], float(expectation.displayed))
-            for expectation in expectations}
+            for expectation in expectations if 'level' in expectation.model}
 
 
 def seeded(expectation: Expectation, value: float) -> str:
@@ -8617,7 +8617,7 @@ class CostGateWeaponIncreaseRemovalTests(unittest.TestCase):
         scenario, expectations = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(707663, 'cost_gate',
                                                                                           'cooldown')))
         run.validate(scenario, run.SIMULATED_CLOCK)
-        self.assertEqual(arm_readings(expectations), {'without': (1700, 67.0), 'with': (1700, 0.0)})
+        self.assertEqual(arm_readings(expectations), {'without': (1350, 67.0), 'with': (1350, 0.0)})
         with_arm = next(expectation for expectation in expectations if expectation.label.endswith(' with'))
         self.assertEqual(seeded(with_arm, 0.0), 'ok')
         self.assertEqual(seeded(with_arm, 67.0), 'alert')
@@ -8734,11 +8734,60 @@ class CostGateRemovalLimitTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(with_arm), FakeRun({with_arm.label: 0.0}), with_arm)
         self.assertEqual(verdict.status, 'ok')
         self.assertIn('1250 ms global cooldown', verdict.explanation)
-        self.assertIn('1700 ms', verdict.explanation)
+        self.assertIn('1350 ms', verdict.explanation)
+
+    def test_the_removal_reads_the_cooldown_right_after_the_first_cast(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(707663, 'cost_gate', 'cooldown'))
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'cooldown_ms']
+        self.assertEqual(len(reads), 2)
+        read = next(expectation for expectation in expectations if expectation.label.endswith(' with cooldown'))
+        self.assertEqual(read.displayed, '0')
+        self.assertEqual(seeded(read, 0.0), 'ok')
+        self.assertEqual(seeded(read, 600.0), 'alert')
+
+    def test_a_removal_wait_inside_the_global_cooldown_is_refused(self):
+        entry = {**r3b_entry(707663, 'cost_gate', 'cooldown'), 'removal_wait_ms': 1200}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
 
     def test_a_reduction_verdict_carries_no_removal_limit(self):
         _, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(706309, 'cost_gate'))
         self.assertNotIn('removal', expectations[0].model)
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioStatedBonusTests(unittest.TestCase):
+    def runs(self, expectation: Expectation, ratio: float, spread: float = 0.002) -> FakeRun:
+        values = {}
+        for arm, scale in (('control', 1.0), ('treatment', ratio)):
+            for index, (total, count) in enumerate(expectation.model['reads'][arm]):
+                trial = index
+                values[total] = sum(10000.0 * scale * (1 + spread * ((step % 3) - 1)) for step in range(trial))
+                values[count] = float(trial)
+        return FakeRun(values)
+
+    def test_the_bonus_is_judged_in_the_stated_unit(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r3b_entry(706320, 'hit_ratio', 'oath_condemn'))
+        self.assertEqual(expectation.model['stated'], {'bonus': 20.0, 'parts': [30.0]})
+        from behaviours import stated_ratio
+        from compare import stated_bonus_of_ratio
+        self.assertAlmostEqual(stated_bonus_of_ratio(stated_ratio(20.0, (30.0,)), [30.0]), 20.0, places=6)
+        self.assertAlmostEqual(stated_bonus_of_ratio(stated_ratio(11.0, (5.0, 30.0)), [5.0, 30.0]), 11.0, places=6)
+
+    def test_a_ratio_that_was_ok_in_the_derived_unit_alerts_in_the_stated_one(self):
+        from behaviours import stated_ratio
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r3b_entry(706320, 'hit_ratio', 'oath_condemn'))
+        judge = lambda bonus: judge_behaviour(base_verdict(expectation), self.runs(
+            expectation, stated_ratio(bonus, (30.0,)), 0.0), expectation)
+        self.assertEqual(judge(20.0).status, 'ok')
+        self.assertEqual(judge(12.0).status, 'alert')
+        self.assertEqual(judge(28.0).status, 'alert')
+
+    def test_an_expected_ratio_off_the_stated_bonus_is_refused(self):
+        entry = {**r3b_entry(706320, 'hit_ratio', 'oath_condemn'), 'expected': 1.06}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
 
 
 if __name__ == '__main__':

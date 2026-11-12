@@ -1575,3 +1575,8 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
   at least 0 and below the loss without it. Harmonic Disposition 560653: 2973 and 1173 from 30 yd.
 - A cost gate that removes a cooldown states, in its verdict, the time of the second cast, the spell's global
   cooldown and that a cooldown left below that time reads the same as none.
+- `hit_ratio` `stated` (`bonus`, `parts`, ADR 0239) judges a talent that scales other effects in the talent's own unit:
+  the measured ratio is read back as the bonus with prod(1 + part x (1 + bonus)) / prod(1 + part), and the band applies
+  to it (Combat Training 706320, 20% on an Oath's +30%: 18-22%). A cost gate's `removal_wait_ms` attempts the second
+  cast that long after the first, past the spell's own global cooldown, and reads the remaining cooldown right after the
+  first cast (0 with the talent).

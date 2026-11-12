@@ -3297,6 +3297,7 @@ class CostGateSpec:
     charges: int | None = None
     arm_wait_ms: int = 0
     cast_power: int | None = None
+    removal_wait_ms: int | None = None
 
 
 @dataclass(frozen=True)
@@ -3334,7 +3335,7 @@ def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float | No
         return opened, opened
     reduced = base - spec.reduction
     if removes_cooldown(spec, base):
-        allowed = GCD_WAIT_MS + spec.margin_ms
+        allowed = spec.removal_wait_ms if spec.removal_wait_ms is not None else GCD_WAIT_MS + spec.margin_ms
         if not allowed < base:
             raise NotModelled(f'{spec.gated_spell} cooldown {base:g} ms leaves no wait above the global cooldown '
                               f'that only its removal separates')
@@ -3479,8 +3480,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     model = {'kind': 'cost_gate', 'resource': spec.resource, 'base': base, 'reduction': spec.reduction,
              'quote': entry.quote}
     if removes_cooldown(spec, base):
-        model['removal'] = {'global_cooldown_ms': int(records.field('Spell', spec.gated_spell, 'StartRecoveryTime')),
-                            'gcd_wait_ms': GCD_WAIT_MS}
+        global_cooldown = int(records.field('Spell', spec.gated_spell, 'StartRecoveryTime'))
+        if spec.removal_wait_ms is not None and not global_cooldown < spec.removal_wait_ms < base:
+            raise ValueError(f'{spec.spell} removal_wait_ms {spec.removal_wait_ms} must lie between the '
+                             f'{global_cooldown} ms global cooldown and the {base:g} ms cooldown')
+        model['removal'] = {'global_cooldown_ms': global_cooldown, 'gcd_wait_ms': GCD_WAIT_MS}
     talent_steps = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.talent_aura, 'stacks': 1}]
                     if spec.talent_aura else [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}])
     if spec.talent_aura and spec.talent_aura_each_arm:
@@ -3509,6 +3513,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         else:
             steps += (opening + full_power + required_aura_steps(facts)
                       + [{'action': 'cast', 'actor': CASTER, 'spell': spec.gated_spell, 'target': spec.target}]
+                      + ([measurement(f'{label} cooldown', CASTER, 'cooldown_ms', spell=spec.gated_spell)]
+                         if spec.removal_wait_ms is not None else [])
                       + after(arm)
                       + [{'action': 'wait', 'label': f'{arm.name} cooldown wait', 'ms': cooldown_wait(arm)}]
                       + attempt(label, full_power))
@@ -3524,6 +3530,10 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                 expectations.append(Expectation(chained, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.gated_spell,
                                                 None, str(result), rule,
                                                 {**model, 'arm': f'cast_{cast}', 'level': arm.level, 'held_ms': 0}))
+        if spec.removal_wait_ms is not None and arm.with_talent:
+            expectations.append(Expectation(f'{label} cooldown', BEHAVIOUR_CAST_CONDITION, spec.spell,
+                                            spec.gated_spell, None, '0', rule,
+                                            {'kind': 'cost_gate', 'arm': arm.name, 'reading': 'cooldown_ms'}))
     unit = 'power' if spec.resource == 'power' else 'ms after a cast'
     players = [{**player_fixture(class_file), 'allow_regeneration': False}]
     if ALLY in (spec.target, *(target for _, target in (*spec.setup_casts, *spec.after_casts))):
@@ -3575,7 +3585,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         entry.get('after_wait_ms', 0), entry.get('resets', False),
                         bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)),
                         entry.get('target_health_pct'), bool(entry.get('unset_arm', False)), entry.get('charges'),
-                        int(entry.get('arm_wait_ms', 0)), entry.get('cast_power'))
+                        int(entry.get('arm_wait_ms', 0)), entry.get('cast_power'), entry.get('removal_wait_ms'))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
@@ -5105,6 +5115,11 @@ class HitRatioSpec:
     rate_spell: int | None = None
     expected_points: float | None = None
     ally_distance: float | None = None
+    stated: tuple[float, tuple[float, ...]] | None = None
+
+
+def stated_ratio(bonus: float, parts: tuple[float, ...]) -> float:
+    return math.prod(1 + part * (1 + bonus / 100) / 100 for part in parts) / math.prod(1 + part / 100 for part in parts)
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
@@ -5385,6 +5400,13 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.parts > 1:
         model['parts'] = spec.parts
         scenario['contract'] += f'; one of {spec.parts} identical parts whose trials are pooled'
+    if spec.stated is not None:
+        bonus, parts = spec.stated
+        if abs(stated_ratio(bonus, parts) - spec.expected) > 5e-4:
+            raise ValueError(f'{spec.spell} hit_ratio expected {spec.expected} is not the ratio '
+                             f'{stated_ratio(bonus, parts):.5g} that a {bonus:g}% bonus on the parts {list(parts)} '
+                             f'gives')
+        model['stated'] = {'bonus': bonus, 'parts': list(parts)}
     if spec.scale_auras:
         model['scale_reads'] = {name: [hit_ratio_scale_label(spec, name, spell, effect)
                                        for spell, effect in spec.scale_auras] for name in HIT_RATIO_ARMS}
@@ -5408,7 +5430,9 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         bool(entry.get('refresh', False)), entry.get('expected_token', ''),
                         tuple((int(spell), int(effect)) for spell, effect in entry.get('scale_auras', ())),
                         int(entry.get('parts', 1)), entry.get('rate', ''), entry.get('rate_spell'),
-                        entry.get('expected_points'), entry.get('ally_distance'))
+                        entry.get('expected_points'), entry.get('ally_distance'),
+                        None if entry.get('stated') is None else
+                        (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])))
 
 
 CRIT_RATE_TRIALS = 300
