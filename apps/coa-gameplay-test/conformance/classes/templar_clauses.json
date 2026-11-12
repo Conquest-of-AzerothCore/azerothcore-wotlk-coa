@@ -175,7 +175,9 @@
       "300512 effect_value e1",
       "300512 e1 spell_modifier 807274",
       "300512 e1 spell_effect_value 807274",
-      "300512 behaviour_metric_delta while_active"
+      "300512 behaviour_metric_delta while_active",
+      "805409 behaviour_hit_ratio argent_knight",
+      "300512 behaviour_hit_ratio tempest_without_talent"
     ],
     "kind": "claim"
   },
