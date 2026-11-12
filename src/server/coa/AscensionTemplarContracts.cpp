@@ -298,6 +298,23 @@ float Mitigation(Player* player, Unit* attacker, uint32 school)
 }
 constexpr uint32 SPELL_TRANQUIL_STATE = 850010;
 constexpr int32 TRANQUIL_STATE_PLAYER_DURATION = 8000;
+constexpr std::array<uint32, 9> BLADE_OF_FAITH_RANKS = {803872, 803873, 803874, 803875, 803876,
+                                                         803877, 803878, 803879, 803880};
+void GrantBladeOfFaithPeriodicCrit(Unit* target, Aura* aura)
+{
+    if (std::find(BLADE_OF_FAITH_RANKS.begin(), BLADE_OF_FAITH_RANKS.end(), aura->GetId()) ==
+        BLADE_OF_FAITH_RANKS.end())
+        return;
+    Unit* caster = aura->GetCaster();
+    AuraEffect* effect = aura->GetEffect(EFFECT_0);
+    if (!caster || !effect || effect->GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE)
+        return;
+    SpellInfo const* info = aura->GetSpellInfo();
+    float chance = caster->SpellDoneCritChance(nullptr, info, info->GetSchoolMask(), BASE_ATTACK, true);
+    if (chance > 0.0f)
+        chance = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), chance, BASE_ATTACK, true);
+    effect->SetCritChance(std::max(0.0f, chance));
+}
 class templar_scaling : public UnitScript
 {
   public:
@@ -310,6 +327,8 @@ class templar_scaling : public UnitScript
     }
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
+        if (unit && aura)
+            GrantBladeOfFaithPeriodicCrit(unit, aura);
         if (unit && unit->IsPlayer() && aura && aura->GetId() == SPELL_TRANQUIL_STATE &&
             aura->GetMaxDuration() > TRANQUIL_STATE_PLAYER_DURATION)
         {
