@@ -4005,7 +4005,22 @@
       "801480 e2 spell_modifier 805423",
       "801480 e2 spell_modifier 801463",
       "801480 e2 spell_modifier 801461",
-      "801480 e2 spell_modifier 801466"
+      "801480 e2 spell_modifier 801466",
+      "801480 cost_gate 801461 cooldown_tenacity without",
+      "801480 cost_gate 801461 cooldown_tenacity with",
+      "801480 cost_gate 801461 cooldown_tenacity beyond",
+      "801480 cost_gate 803893 cooldown_consecration without",
+      "801480 cost_gate 803893 cooldown_consecration with",
+      "801480 cost_gate 803893 cooldown_consecration beyond",
+      "801480 cost_gate 801463 cooldown_grace without",
+      "801480 cost_gate 801463 cooldown_grace with",
+      "801480 cost_gate 801463 cooldown_grace beyond",
+      "801480 cost_gate 801466 cooldown_zeal without",
+      "801480 cost_gate 801466 cooldown_zeal with",
+      "801480 cost_gate 801466 cooldown_zeal beyond",
+      "801480 cost_gate 805423 cooldown_fervor without",
+      "801480 cost_gate 805423 cooldown_fervor with",
+      "801480 cost_gate 805423 cooldown_fervor beyond"
     ],
     "kind": "claim"
   },
