@@ -1051,5 +1051,41 @@ class MinionNativeProcTests(unittest.TestCase):
             proc_plan(load_class_file(23), entry)
 
 
+
+BASELINE_LABELS = {'trials': '92111 proc baseline trials', 'events': '92111 proc baseline events'}
+
+
+class ProcBaselineCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, baseline_events: int):
+        expectation = proc_expectation()
+        expectation = replace(expectation, model={**expectation.model,
+                                                  'baseline': {**BASELINE_LABELS, 'attempts': 20}})
+        steps = proc_steps(1699 + 20, 340 + baseline_events) + [
+            assert_step(BASELINE_LABELS['trials'], '20'), assert_step(BASELINE_LABELS['events'], str(baseline_events))]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_the_baseline_is_taken_out_of_the_judged_trials(self):
+        verdict = self.verdict(0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 340 / 1699)
+        self.assertIn('no event in 20 baseline trials without the passive', verdict.explanation)
+
+    def test_a_proc_without_the_passive_is_an_alert(self):
+        verdict = self.verdict(2)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('2 events in 20 baseline trials without the passive', verdict.explanation)
+
+
 if __name__ == '__main__':
     unittest.main()

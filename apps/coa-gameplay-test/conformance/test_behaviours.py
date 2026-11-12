@@ -9678,5 +9678,25 @@ class MinionFixedCountTests(unittest.TestCase):
         self.assertTrue(all('caster_entry' not in step for step in reads))
 
 
+
+class MinionModelAuraTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours'] if entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_aura_is_modelled_without_a_cast(self):
+        _, [expectation] = behaviour_scenario(load_class_file(23), self.entry('auto_attack_heal_modelled'))
+        self.assertEqual(expectation.model['model_auras'], [805290])
+        self.assertEqual(expectation.model['reference']['mean'], 17.0)
+        _, [plain] = behaviour_scenario(load_class_file(23), self.entry('auto_attack_heal'))
+        self.assertEqual(plain.model['reference']['mean'], 25.0)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_aura_needs_a_minion_caster(self):
+        entry = {key: value for key, value in self.entry('auto_attack_heal_modelled').items() if key != 'caster_entry'}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), entry)
+
+
 if __name__ == '__main__':
     unittest.main()

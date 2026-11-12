@@ -6234,6 +6234,7 @@ class ScriptHitSpec:
     label_suffix: str = ''
     caster_entry: int | None = None
     hit_effect: int | None = None
+    minion_model_auras: tuple[int, ...] = ()
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -6256,6 +6257,9 @@ def script_hit_validate(spec: ScriptHitSpec):
     cast = {spell for spell, _ in spec.casts}
     if any(aura not in cast for aura in spec.model_auras):
         raise ValueError(f'{spec.spell} script_hit models auras {list(spec.model_auras)} that its casts do not apply')
+    if spec.minion_model_auras and not spec.caster_entry:
+        raise ValueError(f'{spec.spell} script_hit models minion auras {list(spec.minion_model_auras)} without a '
+                         f'minion caster_entry')
     if spec.control_casts is not None and tuple(spec.control_casts) == tuple(spec.casts):
         raise ValueError(f'{spec.spell} script_hit control_casts repeat the casts; the arms would differ in nothing')
 
@@ -6281,7 +6285,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     entry = behaviour_entry(records, spec.spell, spec.name, 'script_hit', spec.quote, 1)
     try:
         model = reference_script_hit_model(class_file, spec.spell, spec.hit_spell, spec.value_spell, spec.value_effect,
-                                           spec.model_auras, spec.unresisted, spec.hit_effect)
+                                           (*spec.model_auras, *spec.minion_model_auras), spec.unresisted,
+                                           spec.hit_effect)
     except Unmodelled as error:
         raise NotModelled(f'{spec.spell} script_hit {spec.hit_spell}: {error.reason}') from error
     label = script_hit_label(spec)
@@ -6361,8 +6366,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         record['control_text'] = control_rule
     if spec.value_spell is not None:
         record.update({'value_spell': spec.value_spell, 'value_effect': spec.value_effect})
-    if spec.model_auras:
-        record['model_auras'] = list(spec.model_auras)
+    if spec.model_auras or spec.minion_model_auras:
+        record['model_auras'] = [*spec.model_auras, *spec.minion_model_auras]
     if spec.unresisted:
         record['unresisted'] = True
     if spec.hit_effect is not None:
@@ -6385,7 +6390,8 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          tuple(int(spell) for spell in entry.get('model_auras', ())),
                          bool(entry.get('unresisted', False)),
                          tuple((int(spell), int(stacks)) for spell, stacks in entry.get('stat_auras', ())),
-                         entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'))
+                         entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'),
+                         tuple(int(spell) for spell in entry.get('minion_model_auras', ())))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8
