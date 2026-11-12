@@ -36,6 +36,10 @@
     {"spell": 803792, "primary_effect": 1, "secondary_effect": 2, "secondary_actor": "caster",
      "reason": "Spell.dbc 803792 has two SPELL_EFFECT_HEAL effects with identical EffectBasePoints (285), EffectDieSides (7) and EffectRealPointsPerLevel (1.155): effect 1 targets TARGET_UNIT_TARGET_ALLY ('them') and effect 2 targets TARGET_UNIT_CASTER ('you'), confirmed via coa-dbc-viewer record --table Spell --id 803792. hit_kind groups both into one heal kind (hits_per_cast 2), so the generic hit_mean check already requires both heal events to land to reach its minimum_hits; this entry adds an explicit target=caster measurement so the heal to the caster is proven by recipient, not only by combined event count."}
   ],
+  "hit_casts": [
+    {"spell": 572769, "casts": 40,
+     "reason": "Sacred Swing's weapon model has a sigma of about 1.9 on a mean of 472.6, so the model sizes the mean at 2 casts (3 scheduled). The floor of 40 (60 scheduled) reads the mean of claims 206 and 207 on 40 or more hits (ADR 0224)."}
+  ],
   "learned_hits": [
     {"spell": 806525, "name": "Martial Training", "rank": 503141, "label_suffix": "weapon_damage",
      "quote": "plus an additional $806525s1% Weapon Damage",
@@ -1845,6 +1849,33 @@
     {"name": "c7_scarlet", "talents": [301065, 520812, 806525]}
   ],
   "behaviours": [
+    {
+      "spell": 524822, "name": "Radiant Blade (Oath: Righteous Lunge heal)", "kind": "hit_ratio", "variant": "oath_heal",
+      "label_suffix": "oath_heal", "quote": "Increases the effectiveness of", "expected": 1.4609375,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally", "control": {},
+      "treatment": {"auras": [[524822, 1], [804904, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "$s1 = 25 (524822 EffectBasePoints[0] 24 + 1), aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS) on Oath: Righteous Lunge 804904 (spell_modifier ok). The Oath's Benediction heal is x1.05 (Effect[0]) x 1.30 (Effect[1], the Breaker bonus): 1.365 without the talent (804904 heal entry, r1-a). With it, 1.05 and 1.30 grow by 25% of their bonus: 1.0625 x 1.375 = 1.4609; the engine truncates each modified amount to an integer (6 and 37), 1.06 x 1.37 = 1.4522, inside the band; 1.365 is outside. The treatment sets 524822 before 804904 so the modifier enters the Oath's amounts. Benediction 578276 on the grouped ally, spell power 20000, non-critical heals only."
+    },
+    {
+      "spell": 525080, "name": "Radiant Blade rank 2 (Oath: Righteous Lunge heal)", "kind": "hit_ratio",
+      "variant": "oath_heal", "label_suffix": "oath_heal", "quote": "Increases the effectiveness of",
+      "expected": 1.55875, "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {}, "treatment": {"auras": [[525080, 1], [804904, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "$s1 = 50 (525080 EffectBasePoints[0] 49 + 1), SPELLMOD_ALL_EFFECTS on 804904: 1.075 x 1.45 = 1.5588; the engine's integer amounts 7 and 45 give 1.07 x 1.45 = 1.5515, inside the band; rank 1's 1.4609 and the bare Oath's 1.365 are outside. Same arms as rank 1."
+    },
+    {
+      "spell": 560833, "name": "Spiritual", "kind": "metric_delta", "quote": "Increases your Energy regeneration by $s1%.",
+      "expected": 36, "before_expected": 30, "tolerance": 1, "trigger_spell": 300514, "target": "caster",
+      "metric": "power", "fields": {"power": 3}, "wait_ms": 3000,
+      "observe_source": "560833 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, EffectMiscValue[0] 3 (Energy), EffectBasePoints 19 + 1 = +20%. Player::UpdateEnergyRegen folds it into the regen per second (StatSystem.cpp:1137) and Player::Regenerate adds it per elapsed millisecond (Player.cpp:2026-2035); stock base 10 per second (no Templar energy rule but Warrior of Tyr's, AscensionCustomResourceData.h:475). Testament of Strength 300514 (40 Energy, a self buff, no damage) is cast with exactly its cost, leaving 0; 3000 ms later the Energy read is 30 without Spiritual and 36 with it, within 1 for the regen tick that straddles the read."
+    },
+    {
+      "spell": 572769, "name": "Sacred Swing (High Threat)", "kind": "threat_slope", "quote": "High Threat Weapon Damage",
+      "hit_spell": 572769, "expected_slope": 2, "flat_spells": [301061],
+      "observe_source": "No number in the tooltip. Owner answer 2026-11-10 (owner-rulings-2026-11-10.md, decision page answers): Faith Guard 'High Threat' is the project convention, threat x2 on damage with the flat kept; that x2 is the expected slope here, pending the mentor's answer on whether it governs Sacred Swing. Server data: spell_threat 572769 pctMod 2.25 (rev_20261021_16_templar_sacred_swing_threat.sql, 'the Revenge multiplier'). 572769 has no SPELL_EFFECT_THREAT of its own; its Effect[2] triggers 301061 on the dummy, whose Effect[2] 63 SPELL_EFFECT_THREAT is 50 (EffectBasePoints 49 + 1), the flat part (ADR 0225). One cast at a fresh dummy with 681170 set."
+    },
     {
       "spell": 560550, "name": "Call of the Monastery (does not stack, hits)", "kind": "hit_ratio", "variant": "no_stack",
       "label_suffix": "no_stack", "quote": "Does not stack with similar effects.", "expected": 1.0,

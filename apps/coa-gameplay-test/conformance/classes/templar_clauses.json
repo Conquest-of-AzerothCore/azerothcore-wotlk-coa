@@ -1206,10 +1206,7 @@
       "524822 e0 spell_modifier 804904",
       "524822 e0 spell_modifier 805079",
       "524822 e0 spell_modifier 807929",
-      "524822 e0 spell_modifier 805125",
-      "524822 e0 spell_modifier 805136",
-      "524822 e0 spell_modifier 805145",
-      "524822 e0 spell_modifier 805090"
+      "524822 behaviour_hit_ratio oath_heal"
     ],
     "kind": "claim"
   },
@@ -1241,10 +1238,7 @@
       "525080 e0 spell_modifier 804904",
       "525080 e0 spell_modifier 805079",
       "525080 e0 spell_modifier 807929",
-      "525080 e0 spell_modifier 805125",
-      "525080 e0 spell_modifier 805136",
-      "525080 e0 spell_modifier 805145",
-      "525080 e0 spell_modifier 805090"
+      "525080 behaviour_hit_ratio oath_heal"
     ],
     "kind": "claim"
   },
@@ -1435,7 +1429,7 @@
     "clause": "Increases your Energy regeneration by $s1%.",
     "labels": [
       "560833 effect_value e0 #0",
-      "560833 e0"
+      "560833 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -2461,7 +2455,9 @@
       },
       {
         "claim": "High Threat",
-        "labels": []
+        "labels": [
+          "572769 behaviour_threat_slope 572769"
+        ]
       }
     ],
     "kind": "claim"
