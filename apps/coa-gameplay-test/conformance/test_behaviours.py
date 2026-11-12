@@ -192,7 +192,8 @@ def holy_cleave_entry() -> dict:
 
 
 def call_of_the_monastery_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == CALL_OF_THE_MONASTERY)
+    return next(entry for entry in CLASS_FILE['behaviours']
+                if entry['spell'] == CALL_OF_THE_MONASTERY and entry['kind'] == 'party_stat_ratio')
 
 
 def devotion_of_khazgoroth_entry() -> dict:
