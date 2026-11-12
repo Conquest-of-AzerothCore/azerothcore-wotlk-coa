@@ -4386,7 +4386,8 @@
       "803872 behaviour_hit_ratio oath_lunge_keeping_the_oath",
       "572027 behaviour_hit_ratio oath_keeping_the_oath"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "owner ruling 2026-11-12 (Q-r2b-1, option b): +10% per consumed Oath that adds nothing to the ticks, additive, provisional (ADR 0289). Fixture: the Oaths are applied by harness set_aura before every real Blade cast, and Blade reads them only at cast time. Pre-fix read 20261112-081220: Lunge and Retribution x1.000, Condemn and Vindication x1.246, Holy Cleave x1.131. Counted pair 20261112-081901 / -081939: Lunge, Retribution and Lunge under Keeping the Oath x1.0995, Condemn and Vindication x1.246, Holy Cleave x1.131, all five x2.031. 572027 oath_keeping_the_oath is the direct-Breaker control for the Keeping the Oath arm, not a part of 803872"
   },
   {
     "spell": 804228,

@@ -58,7 +58,7 @@ would drop the bonus. No engine path that does so for Blade was found. The engin
 
 ## Consequences
 
-One tick of Blade of Faith 803880 (rank 9, level 60, crit forced to 0). m = measured on the counted pair
+One tick of Blade of Faith 803880 (rank 9, level 60, crit forced to 0). The Lunge + Condemn row comes from the `oaths` entry, run at attack and spell power 20000, so its ticks are 191 times the measured ratio. m = measured on the counted pair
 20261112-081901 / 20261112-081939 (worldserver ead9e58d…), identical in both runs; c = computed.
 
 | Oath(s) consumed | Before | After |
@@ -69,7 +69,7 @@ One tick of Blade of Faith 803880 (rank 9, level 60, crit forced to 0). m = meas
 | Condemn 804922 | 238 (m) | 238 (m) |
 | Vindication 805332 | 238 (m) | 238 (m) |
 | Holy Cleave 804903 | 216 (m) | 216 (m) |
-| Lunge + Condemn | 238.7 (m, x1.2499) | 262.6 (m, x1.3749) |
+| Lunge + Condemn | 238.7 (c: 191 x the measured x1.2499) | 262.6 (c: 191 x the measured x1.3749) |
 | all five | 324 (m, x1.6963) | 388 (m, x2.0314) |
 | Lunge under Keeping the Oath | 191 (m) | 210 (m) |
 

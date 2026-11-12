@@ -1,8 +1,8 @@
 {
   "schema": 1,
   "name": "Duty Calls raises Physical weapon damage as well as Holy spell damage",
-  "contract": "Duty Calls 705286 says \"increases your damage dealt and movement speed by $560834s1%\" (2% per stack of 560834, 5 stacks). Its buff 560834 carried aura 79 on the magic schools only (EffectMiscValue 126); the owner ruled that everything is included, Physical too (ADR 0287). At 5 stacks the Templar's main-hand weapon damage, which white swings and weapon abilities such as Righteous Lunge 570233 use, reads x1.10, and the Holy control Scourgebane 801832 reads x1.10 as before. Absolute reads at level 60 with item 2495 (authoring run 20261112-075907): minimum main-hand damage 62.455 without and 68.701 with the buff, Scourgebane 800 and 880 of a 1000 base.",
-  "timeout_ms": 60000,
+  "contract": "Duty Calls 705286 says \"Casting abilities that grant an Oath now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.\" Its buff 560834 carried aura 79 on the magic schools only (EffectMiscValue 126); the owner ruled that everything is included, Physical too (ADR 0287). The buff comes from the talent itself (rule 4 amendment point 6): five Oath-granting Righteous Lunges 570233 without Duty Calls give no buff (control), and five more with it learned give the 5-stack cap. The Templar's main-hand weapon damage, which white swings and weapon abilities use, then reads x1.10, and the Holy control Scourgebane 801832 reads x1.10 as before. The Lunge Oath and its chain are cleared before each read so they cannot enter the Holy read. Absolute reads at level 60 with item 2495 (authoring run 20261112-075907): minimum main-hand damage 62.455 without and 68.701 with the buff, Scourgebane 800 and 880 of a 1000 base.",
+  "timeout_ms": 90000,
   "players": [
     {
       "id": "templar",
@@ -45,8 +45,135 @@
       "spell": 801832
     },
     {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Control, without Duty Calls: Righteous Lunge 1",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Control, without Duty Calls: Righteous Lunge 2",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Control, without Duty Calls: Righteous Lunge 3",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Control, without Duty Calls: Righteous Lunge 4",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Control, without Duty Calls: Righteous Lunge 5",
+      "ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 0
+    },
+    {
       "action": "assert",
-      "label": "The Templar starts without Duty Calls' buff",
+      "label": "Control: five Lunges without Duty Calls give no buff",
       "actor": "templar",
       "metric": "aura",
       "spell": 560834,
@@ -86,14 +213,135 @@
       "save_as": "holy_without"
     },
     {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 705286
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "With Duty Calls: Righteous Lunge 1",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "With Duty Calls: Righteous Lunge 2",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "With Duty Calls: Righteous Lunge 3",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "With Duty Calls: Righteous Lunge 4",
+      "ms": 1500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 570233
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 570233,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "With Duty Calls: Righteous Lunge 5",
+      "ms": 1500
+    },
+    {
       "action": "set_aura",
       "actor": "templar",
-      "spell": 560834,
-      "stacks": 5
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 0
     },
     {
       "action": "assert",
-      "label": "Duty Calls' buff is on the Templar at 5 stacks",
+      "label": "Five Oath-granting Lunges with Duty Calls stack its buff to the cap of 5",
       "actor": "templar",
       "metric": "aura_stacks",
       "spell": 560834,

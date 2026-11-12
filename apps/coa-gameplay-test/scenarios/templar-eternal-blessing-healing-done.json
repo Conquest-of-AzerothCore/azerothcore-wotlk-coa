@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Eternal Blessing raises the Templar's healing done, not the healing the Templar receives",
-  "contract": "Eternal Blessing 705300 says \"Increases your Holy damage and healing done by $s1%\" ($s1 = 15). The owner ruled that its healing part raises healing done and no longer healing received (ADR 0286). Benediction 578276 from the Templar to an ally reads x1.15 with the aura; the same Benediction from the ally to the Templar reads x1.00 with the aura on the Templar. Absolute reads at level 60 (authoring run 20261112-075042): healing done 800 without and 920 with the aura, healing taken 1000 in both.",
+  "contract": "Eternal Blessing 705300 says \"Increases your Holy damage and healing done by $s1%\" ($s1 = 15). The owner ruled that its healing part raises healing done and no longer healing received (ADR 0286). The Templar casts Eternal Blessing for real (rule 4 amendment point 6); Benediction 578276 from the Templar to an ally then reads x1.15; the same Benediction from the ally to the Templar reads x1.00 with the aura on the Templar. Absolute reads at level 60 (authoring run 20261112-075042): healing done 800 without and 920 with the aura, healing taken 1000 in both.",
   "timeout_ms": 60000,
   "players": [
     {
@@ -78,14 +78,30 @@
       "save_as": "taken_without"
     },
     {
-      "action": "set_aura",
+      "action": "learn",
+      "actor": "templar",
+      "spell": 705300
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
       "actor": "templar",
       "spell": 705300,
-      "stacks": 1
+      "target": "templar"
+    },
+    {
+      "action": "wait",
+      "label": "Eternal Blessing's cast and global cooldown",
+      "ms": 1500
     },
     {
       "action": "assert",
-      "label": "Eternal Blessing is on the Templar",
+      "label": "The real cast put Eternal Blessing on the Templar",
       "actor": "templar",
       "metric": "aura",
       "spell": 705300,
