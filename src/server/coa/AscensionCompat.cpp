@@ -5871,8 +5871,6 @@ private:
         }
         if (redirectsEmpoweredGate)
           Ascension::ClientSpellPatches::Instance().Register(id);
-        for (std::size_t const text : {SPELL_WIRE_DESCRIPTION, SPELL_WIRE_TOOLTIP})
-          row.Strings[text] = AscensionBloodmage::RuntimeEmpoweredDescription(family, row.Strings[text]);
         requested.erase(id);
       }
     }
@@ -5897,6 +5895,9 @@ private:
     {
       if (auto const tier = blacksmithingTiers.find(row.Values[0]); tier != blacksmithingTiers.end())
         row.Strings[SPELL_WIRE_RANK] = tier->second;
+      uint32 const family = row.Values[SPELL_WIRE_SLOT(SPELL_FAMILY_NAME_FIELD)];
+      for (std::size_t const text : {SPELL_WIRE_DESCRIPTION, SPELL_WIRE_TOOLTIP})
+        row.Strings[text] = AscensionBloodmage::RuntimeEmpoweredDescription(family, row.Strings[text]);
       row.RequiresRegistration = !descriptionIds.contains(row.Values[0]);
     }
     return rows;
