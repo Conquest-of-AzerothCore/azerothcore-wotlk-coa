@@ -1026,5 +1026,30 @@ class CastProcBaselineTests(unittest.TestCase):
         self.assertNotIn('baseline', expectations[0].model)
 
 
+
+class MinionNativeProcTests(unittest.TestCase):
+    GHOUL_MASTERY = 503740
+
+    def entry(self) -> dict:
+        from profile import load_class_file
+        return next(entry for entry in load_class_file(23)['procs'] if entry['aura'] == self.GHOUL_MASTERY)
+
+    def test_native_procs_are_read_on_the_minion_without_a_target(self):
+        from procs import event_steps
+        steps = event_steps(self.entry())
+        self.assertEqual(len(steps), 1)
+        self.assertEqual((steps[0]['metric'], steps[0]['entry'], steps[0]['spell']),
+                         ('owned_creature_spell_proc_count', 50073, self.GHOUL_MASTERY))
+        self.assertNotIn('target', steps[0])
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_native_procs_need_the_minion_event_actor(self):
+        from procs import proc_plan
+        from profile import load_class_file
+        entry = {key: value for key, value in self.entry().items() if key != 'event_actor'}
+        with self.assertRaises(ValueError):
+            proc_plan(load_class_file(23), entry)
+
+
 if __name__ == '__main__':
     unittest.main()
