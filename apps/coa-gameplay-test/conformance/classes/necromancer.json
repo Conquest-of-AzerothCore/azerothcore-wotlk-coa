@@ -598,6 +598,15 @@
       "observe_source": "Bone Toss 704706 (aura 344 made SPELL_AURA_MOD_ATTACK_POWER by AscensionNecromancerContracts.cpp, ${-($704706m1+$704706ppl1)} = 223) on the dummy after the Plaguefather fought it for 7000 ms. Control: no cast, no aura."
     },
     {
+      "spell": 500971, "name": "Raise: Ghoul (Command targets)", "kind": "fixed_count", "variant": "command_targets",
+      "label_suffix": "command_targets", "quote": "Command: Expels leeching plague that strikes up to",
+      "expected": 4, "radius": 8, "layout": "caster",
+      "radius_reason": "801514 Effect[0] TARGET_UNIT_SRC_AREA_ENEMY around the Ghoul, SpellRadius 13 = 10 yd, MaxAffectedTargets 5 ($801514i); the Ghoul stands about 1.5-2.5 yd from the caster (Formation), so dummies up to 8 yd from the caster lie within 10 yd of it and the far dummy at 13 yd lies beyond",
+      "cast_spell": 504868, "target_rank": 801514, "caster_entry": 50073, "setup_casts": [[500971, "caster"]],
+      "repeats": 3, "settle_ms": 1000,
+      "observe_source": "One Ghoul is raised, then Command: Undead 504868 at the primary dummy three times; every Ghoul Command casts 801514, read per dummy from the Ghoul's (entry 50073) hits. Up to 5 enemies ($801514i) is the primary dummy and 4 more: the judge counts the additional dummies each cast that hit the primary also hit. Six candidates within 8 yd of the caster for the 4 additional, one at 13 yd that must stay unhit."
+    },
+    {
       "spell": 500971, "name": "Raise: Ghoul (raised)", "kind": "metric_delta", "variant": "count",
       "label_suffix": "count", "quote": "to aid you in combat occupying 1", "expected": 1, "before_expected": 0,
       "trigger_spell": 500971, "target": "caster", "cast_in_before": false,

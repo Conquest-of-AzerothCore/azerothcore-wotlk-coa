@@ -663,7 +663,7 @@
     "spell": 500971,
     "clause": "Command: Expels leeching plague that strikes up to $801514i nearby enemies,",
     "labels": [
-      "500971 effect_value #1"
+      "500971 command_targets behaviour_fixed_count"
     ],
     "kind": "claim"
   },
