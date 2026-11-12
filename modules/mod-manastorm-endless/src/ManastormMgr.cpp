@@ -6887,7 +6887,8 @@ void ManastormMgr::OnPlayerGiveXP(
 
     double xpMultiplier =
         GetEndlessExperienceMultiplier(
-            run->GetDepth());
+            run->GetDepth()) *
+        ManastormModuleConfig::ExperienceRate();
 
     // Match C_Manastorm.GetStageBonusExperience's first return:
     // ManastormModifiers word 11 * Manastorm word 6.

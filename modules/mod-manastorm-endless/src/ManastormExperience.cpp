@@ -1,4 +1,5 @@
 #include "ManastormExperience.h"
+#include "ManastormModuleConfig.h"
 #include "ManastormRun.h"
 #include "LFGMgr.h"
 #include "Log.h"
@@ -144,7 +145,8 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
             return false;
         }
 
-        uint32 const baseXP = ClampXP(double(quest->XPValue(level)) * _multiplier);
+        uint32 const baseXP =
+            ClampXP(double(quest->XPValue(level)) * _multiplier * ManastormModuleConfig::ExperienceRate());
         if (!baseXP)
             continue;
 
