@@ -472,7 +472,9 @@
     "spell": 300929,
     "clause": "Does not stack with similar effects.",
     "labels": [
-      "300929 behaviour_group_stack_cap"
+      "300929 behaviour_group_stack_cap",
+      "300929 behaviour_hit_ratio partner_alone",
+      "300929 behaviour_hit_ratio stack_cap"
     ],
     "kind": "claim"
   },
