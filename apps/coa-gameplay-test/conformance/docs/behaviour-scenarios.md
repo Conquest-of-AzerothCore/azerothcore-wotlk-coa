@@ -1333,3 +1333,10 @@ Newcombe interval of the difference of the critical shares (Wilson per arm) agai
 stated, not final", with the hits per arm an interval inside the band would need). Scourge-Defense Training 520608:
 300 Argent Blades per arm with Warrior of Dawn 561156, 520608 set first in the treatment.
 
+### Selected dummy and lower bound in metric_delta (ADR 0174)
+
+`metric_delta` `select_dummy` (default `false`) adds the dummy fixture and selects it at the start of both phases;
+`after_at_least` (default none) judges the after read as at least that value instead of equal to `expected`, while
+the before read stays exact. Testament of Hope 1397742 `combat`: the copies attack the selected dummy, 0
+`owned_creature_damage_count` before the cast and at least 1 hit 6000 ms after it (6 in the diagnostic).
+

@@ -1203,6 +1203,8 @@ class MetricDeltaSpec:
     setup_wait_ms: int = 0
     phase_auras: tuple[tuple[int, int, str, str], ...] = ()
     after_auras: tuple[tuple[int, int, str, str], ...] = ()
+    select_dummy: bool = False
+    after_at_least: float | None = None
 
 
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
@@ -1265,7 +1267,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         return steps
 
     def cast_steps(apply_setup_casts: bool = True, include_cast: bool = True, after: bool = True) -> list[dict]:
-        steps = []
+        steps = [{'action': 'select', 'actor': CASTER, 'target': TARGET}] if spec.select_dummy else []
         if spec.setup_actor_aura is not None:
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
         steps += [phase_aura_step(aura) for aura in (*(spec.after_auras if after else ()), *spec.phase_auras)]
@@ -1362,7 +1364,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         scenario['players'][0][FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
     if spec.attack_swings:
         timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
-    if TARGET in (spec.target, spec.measure_actor) or any(
+    if spec.select_dummy or TARGET in (spec.target, spec.measure_actor) or any(
             TARGET in aura[2:] for aura in (*spec.phase_auras, *spec.after_auras)):
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
@@ -1371,6 +1373,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
              'contrast': CONDITION_CONTRAST if spec.setup_only_after else LEARNED_CONTRAST, 'quote': entry.quote}
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
+    if spec.after_at_least is not None:
+        model['after_at_least'] = spec.after_at_least
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected
@@ -1393,7 +1397,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('expiry_wait_ms'), entry.get('after_expiry_expected'),
                            entry.get('attack_swings', 0), entry.get('force_crit'), entry.get('setup_wait_ms', 0),
                            tuple(phase_aura(raw) for raw in entry.get('phase_auras', ())),
-                           tuple(phase_aura(raw) for raw in entry.get('after_auras', ())))
+                           tuple(phase_aura(raw) for raw in entry.get('after_auras', ())),
+                           entry.get('select_dummy', False), entry.get('after_at_least'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

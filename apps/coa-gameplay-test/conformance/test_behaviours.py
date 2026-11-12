@@ -741,7 +741,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 259)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 260)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -7085,7 +7085,6 @@ class TakenHitOpeningCastTests(unittest.TestCase):
         taken_hit_scenario(CLASS_FILE, spec)
 
 
-
 class TakenHitSelectionTests(unittest.TestCase):
     def test_copies_are_placed_by_selecting_a_dummy_at_each_arm_distance(self):
         spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'radius'))
@@ -7140,7 +7139,6 @@ class TakenHitSelectionTests(unittest.TestCase):
         taken_hit_scenario(CLASS_FILE, spec)
 
 
-
 class CritRateTests(unittest.TestCase):
     def built(self):
         return behaviour_scenario(CLASS_FILE, r1a_entry(520608, 'crit_rate'))
@@ -7183,6 +7181,35 @@ class CritRateTests(unittest.TestCase):
     def test_a_forced_crit_is_refused(self):
         with self.assertRaisesRegex(ValueError, 'no forced crit'):
             behaviour_scenario(CLASS_FILE, {**r1a_entry(520608, 'crit_rate'), 'force_crit': 'melee'})
+
+
+
+class MetricDeltaSelectionTests(unittest.TestCase):
+    def built(self):
+        return behaviour_scenario(CLASS_FILE, r1a_entry(1397742, 'metric_delta', 'combat'))
+
+    def judged(self, before: float, after: float) -> str:
+        _, [expectation] = self.built()
+        values = {expectation.model['before_label']: before, expectation.model['after_label']: after}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_the_dummy_is_selected_in_both_phases_and_only_the_second_casts(self):
+        scenario, _ = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        selections = [index for index, step in enumerate(steps) if step['action'] == 'select']
+        casts = cast_indices(steps, 1397742)
+        self.assertEqual(len(selections), 2)
+        self.assertEqual(len(casts), 1)
+        self.assertLess(selections[0], casts[0])
+        self.assertLess(selections[1], casts[0])
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], ['dummy'])
+
+    def test_a_lower_bound_judges_the_after_read_and_the_before_read_stays_exact(self):
+        self.assertEqual(self.judged(0.0, 6.0), 'ok')
+        self.assertEqual(self.judged(0.0, 1.0), 'ok')
+        self.assertEqual(self.judged(0.0, 0.0), 'alert')
+        self.assertEqual(self.judged(1.0, 6.0), 'alert')
 
 
 if __name__ == '__main__':

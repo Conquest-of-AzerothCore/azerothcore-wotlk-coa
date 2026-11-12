@@ -2765,7 +2765,8 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
     expected = float(model['expected'])
     tolerance = float(model.get('tolerance', METRIC_DELTA_FLOAT_TOLERANCE))
     before_ok = abs(before - before_expected) <= tolerance
-    after_ok = abs(after - expected) <= tolerance
+    at_least = model.get('after_at_least')
+    after_ok = after >= float(at_least) if at_least is not None else abs(after - expected) <= tolerance
     expired_label = model.get('expired_label')
     expired, expired_ok, expired_explanation = None, True, ''
     if expired_label is not None:
@@ -2777,16 +2778,18 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
         expired_explanation = (f'; {expired:g} once the triggering aura has actually expired (expected '
                                f'{after_expiry_expected:g}), ruling out the effect outliving its own aura')
     status = 'ok' if before_ok and after_ok and expired_ok else 'alert'
+    after_text = f'at least {float(at_least):g}' if at_least is not None else f'{expected:g}'
     explanation = (f'{model["metric"]} measured {before:g} before the learn (expected '
-                   f'{before_expected:g}) and {after:g} after (expected {expected:g}); match within '
+                   f'{before_expected:g}) and {after:g} after (expected {after_text}); match within '
                    f'{tolerance:g} required' + expired_explanation)
     explanation += (', wide enough to absorb IEEE-754 float32 round-trip noise on a ratio metric '
                     '(observed ~1e-7) but far below any real defect in this family of checks, with no '
                     'combat-roll variance of its own') if tolerance <= METRIC_DELTA_FLOAT_TOLERANCE else (
                     ', an explicit per-entry tolerance wide enough to absorb this metric\'s own simulated-clock '
                     'tick jitter but far below the magnitude of any real defect this check would need to catch')
-    return replace(base, status=status, measured=after, expected=expected, low=expected - tolerance,
-                   high=expected + tolerance, explanation=explanation)
+    low, high = (float(at_least), None) if at_least is not None else (expected - tolerance, expected + tolerance)
+    return replace(base, status=status, measured=after, expected=expected, low=low, high=high,
+                   explanation=explanation)
 
 
 def behaviour_heal_block_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
