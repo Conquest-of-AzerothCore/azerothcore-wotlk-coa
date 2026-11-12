@@ -740,7 +740,8 @@ by creatures of that entry, or sum their healing including or excluding overheal
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
-as a creature fixture, and `critical` filters critical or noncritical hits. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
+as a creature fixture, `caster_entry` counts every caster of that creature entry from the recorded events (a
+creature another unit summoned, alive or not), and `critical` filters critical or noncritical hits. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
 `spell_heal_count`, `spell_heal_total` and `spell_effective_heal_total` similarly observe native direct and
 periodic healing logs, counting positive heals, summing healing including overhealing, or summing effective
@@ -1115,6 +1116,8 @@ all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM ac
 `nearest_creature_distance` requires player `entry` and reads the 2D distance from the player to the nearest living creature with that entry in its phase within 60 yards, or -1 when there is none.
 `nearby_creature_orientation` requires a player and `entry`, and returns the orientation in radians (0 to 2 pi) of the
 nearest living creature with that entry within 60 yards; it requires one to exist there.
+`nearby_creature_height` takes the same creature and returns its height in yards above the unit `target` (an actor
+or creature alias), negative when below it.
 `nearby_creature_count` requires a player and `entry`, and counts living creatures in the same phase within
 60 yards. Optional `min_level` and `max_level` filter their native levels; `min_home_distance` keeps creatures
 at least that many yards from their own home positions (2D), and `spell` those carrying that aura. This can

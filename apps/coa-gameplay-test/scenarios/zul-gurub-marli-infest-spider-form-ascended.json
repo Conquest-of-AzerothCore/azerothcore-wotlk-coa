@@ -1,0 +1,310 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Mar'li Infests a spawn in her spider form on Ascended, not on Mythic",
+  "contract": [
+    "Infest (2118151) belongs to Ascended only (round-5 tester: the Mythic and Ascended mechanics) and to the",
+    "spider form: the Ascended log of 2025-12-21 shows a Festering Spawn of Mar'li that carries Putrid Cloud",
+    "(2118170, 10 yd every 1 s; 2118171 becomes 2118174 on Ascended) and leaves a Festering Cloud (2118176,",
+    "2118179 on Ascended) where it dies. Mar'li (14510) Infests 15 s into her spider form, hatching the nearest",
+    "free egg (179985) as a Spawn of Mar'li (15041, an estimated stand-in). A Mythic and an Ascended hero each",
+    "fight one Mar'li alone; the world's eggs share phase 1 and the fixture lives in the lane's own phase, so",
+    "each hero places one untimed egg once the first Hatch Eggs (2118115, 17 s, then every 30 s) has passed and",
+    "her spider form has begun. Infest then has the egg before the second Hatch Eggs at 47 s; on Mythic the",
+    "egg stays free until that Hatch Eggs hatches it."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "ascended",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "ascended",
+      "value": 3
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "ascended",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero is on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended hero is on Ascended",
+      "actor": "ascended",
+      "metric": "map_difficulty",
+      "equals": 3
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14510,
+      "as": "marli_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "ascended",
+      "entry": 14510,
+      "as": "marli_ascended",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Mythic Mar'li",
+      "actor": "mythic",
+      "target": "marli_mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li fights",
+      "actor": "marli_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Ascended Mar'li",
+      "actor": "ascended",
+      "target": "marli_ascended"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Mar'li fights",
+      "actor": "marli_ascended",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ascended"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li's first Hatch Eggs, 17 s in, finds no egg",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Mar'li's first Hatch Eggs, 17 s in, finds no egg",
+      "actor": "ascended",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118115,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the Mythic Mar'li below half health",
+      "actor": "mythic",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the Ascended Mar'li below half health",
+      "actor": "ascended",
+      "entry": 14510,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li takes her spider form",
+      "actor": "marli_mythic",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended Mar'li takes her spider form",
+      "actor": "marli_ascended",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "command",
+      "label": "The Mythic hero places one Spider Egg",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "label": "The Ascended hero places one Spider Egg",
+      "actor": "ascended",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ascended Mar'li Infests 15 s into her spider form",
+      "actor": "ascended",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118151,
+      "min": 1,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the infested spawn carries Putrid Cloud",
+      "actor": "ascended",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118170,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: its cloud hits with the Ascended Putrid Cloud",
+      "actor": "ascended",
+      "metric": "spell_damage_count",
+      "caster_entry": 15041,
+      "spell": 2118174,
+      "target": "ascended",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li still fights in her spider form",
+      "actor": "marli_mythic",
+      "metric": "aura",
+      "spell": 2118125,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Mar'li never Infests",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118151,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: so the Mythic egg has not hatched",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The Ascended hero kills the festering spawn",
+      "actor": "ascended",
+      "entry": 15041,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: it leaves the Ascended Festering Cloud where it dies",
+      "actor": "ascended",
+      "metric": "spell_damage_count",
+      "caster": "marli_ascended",
+      "spell": 2118179,
+      "target": "ascended",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Mar'li's second Hatch Eggs hatches the free egg",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "min": 1,
+      "within_ms": 30000
+    }
+  ]
+}

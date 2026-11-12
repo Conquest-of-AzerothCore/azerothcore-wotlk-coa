@@ -4284,6 +4284,12 @@ private:
             Require(creature != nullptr, "Orientation needs an existing nearby creature");
             return creature->GetOrientation();
         }
+        if (metric == "nearby_creature_height")
+        {
+            Creature* creature = player->FindNearestCreature(step.get<uint32>("entry"), 60.0f);
+            Require(creature != nullptr, "Height needs an existing nearby creature");
+            return creature->GetPositionZ() - GetUnit(step.get<std::string>("target"))->GetPositionZ();
+        }
         if (metric == "nearby_creature_count")
         {
             std::list<Creature*> creatures;
@@ -4526,13 +4532,17 @@ private:
                     "Spell damage query selects one of pet, entry or caster");
                 caster = GetUnit(*id)->GetGUID();
             }
+            auto const casterEntry = step.get_optional<uint32>("caster_entry");
+            Require(!casterEntry || (!step.get_optional<bool>("pet") && !step.get_optional<uint32>("entry") &&
+                !step.get_optional<std::string>("caster")), "Spell damage query selects one caster source");
             ObjectGuid target;
             if (auto id = step.get_optional<std::string>("target"))
                 target = GetUnit(*id)->GetGUID();
             auto critical = step.get_optional<bool>("critical");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
-                if (caster && event.caster == caster && event.spell == spell &&
+                if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
+                    event.spell == spell &&
                     (!target || event.target == target) && (!critical || event.critical == *critical))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);

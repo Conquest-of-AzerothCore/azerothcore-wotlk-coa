@@ -20,9 +20,9 @@
  *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
- *     Evolve             first 22s, every 60s   an egg hatches a colossal spider
- *     Infest             first 87s, every 60s   an egg hatches a festering
- *                                               spider that bursts on death
+ *     Evolve             first 22s, every 60s   an egg hatches a colossal spider;
+ *                                               Mythic and Ascended only (tester,
+ *                                               round 5)
  *
  *   At 50% she drains the Avatar of Shadra (see LoaAvatar), taking ~1% damage
  *   while it dies; then the Gift of the Blood God and her spider form.
@@ -38,8 +38,9 @@
  *                                               and hidden (the Hide Body display
  *                                               of Burrow's misc value 24417, as
  *                                               Kurinnaxx's Tunneling);
- *                                               she comes up on the player
- *                                               farthest from her and stays on
+ *                                               she comes up where the player
+ *                                               farthest from her stands (tester,
+ *                                               2026-11-12) and stays on
  *                                               them for 8s, untauntable (tester,
  *                                               live, 2026-11-04); on Mythic and
  *                                               Ascended for 21s, through Poison
@@ -48,12 +49,19 @@
  *     Poison Shock       1.8s after she comes up (both logs), Poison Nova,
  *                                               20 yards around her, less the
  *                                               farther away
+ *     Infest             first 15s, every 60s   Ascended only: an egg hatches a
+ *                                               festering spider that carries
+ *                                               Putrid Cloud and leaves a
+ *                                               Festering Cloud where it dies
+ *                                               (the Ascended log of 2025-12-21)
  *     Furious Strikes    passive, her hits speed her up
  *
  * Decided here, not in the data:
- *   - Evolve and Infest act on an egg she hatches for it: the spawn of Evolve
- *     is twice the size with twice the health; the spawn of Infest bursts for
- *     Poison Shock's damage where it dies;
+ *   - Evolve and Infest act on an egg she hatches for it at once (live, Infest's
+ *     egg hatches about 15s later); the spawn of Evolve is twice the size with
+ *     twice the health;
+ *   - the festering spawn is a Spawn of Mar'li (15041), estimated: the live
+ *     Festering Spawn of Mar'li has no creature data in any source;
  *   - Drain Life heals her for what each tick deals;
  *   - Poison Nova falls off evenly to nothing at 20 yards (the tooltip says
  *     reduced, not by how much);
@@ -114,13 +122,14 @@ namespace
         SPELL_MENACING_GAZE       = 2118141,
         SPELL_POISON_NOVA         = 2118150,
         SPELL_INFEST              = 2118151,
+        SPELL_PUTRID_CLOUD        = 2118170,
+        SPELL_FESTERING_CLOUD     = 2118176,
     };
 
     enum Misc
     {
         GO_SPIDER_EGGS     = 179985,
         NPC_SPAWN_OF_MARLI = 15041,
-        NPC_WORLD_TRIGGER  = 12999,
         NPC_AVATAR_OF_SHADRA = 666990
     };
 
@@ -207,9 +216,8 @@ namespace
             events.ScheduleEvent(EVENT_DRAIN_LIFE, 6s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s);
             events.ScheduleEvent(EVENT_HATCH_EGGS, 17s);
-            events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
-            if (me->GetMap()->GetSpawnMode() >= INFEST_MIN_SPAWN_MODE)
-                events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
+            if (MythicOrHigher())
+                events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
         }
 
@@ -245,6 +253,8 @@ namespace
             events.ScheduleEvent(EVENT_ACID_SPIT, 1s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_WEB_SPRAY, 15s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_BURROW, 20500ms, 0, PHASE_SPIDER);
+            if (me->GetMap()->GetSpawnMode() >= INFEST_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_INFEST, 15s, 0, PHASE_SPIDER);
         }
 
         bool MythicOrHigher() const
@@ -312,6 +322,7 @@ namespace
                     break;
                 case SPELL_INFEST:
                     _festering.insert(target->GetGUID());
+                    target->CastSpell(target, SPELL_PUTRID_CLOUD, true);
                     break;
                 // Drain Life heals her for what each tick deals.
                 case SPELL_DRAIN_LIFE_TICK:
@@ -325,17 +336,14 @@ namespace
             }
         }
 
-        // A festering spawn bursts where it dies.
+        // A festering spawn bursts into a Festering Cloud where it dies.
         void SummonedCreatureDies(Creature* summon, Unit* killer) override
         {
             BossAI::SummonedCreatureDies(summon, killer);
             if (!_festering.erase(summon->GetGUID()))
                 return;
-            if (Creature* spot = me->SummonCreature(NPC_WORLD_TRIGGER, summon->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 5000))
-            {
-                spot->SetFaction(me->GetFaction());
-                spot->CastSpell(spot, SPELL_POISON_SHOCK_HIT, true, nullptr, nullptr, me->GetGUID());
-            }
+            me->CastSpell(summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ(),
+                SPELL_FESTERING_CLOUD, true);
         }
 
         void DrainLifeSplash(Unit* primary, int32 tick)
@@ -367,12 +375,19 @@ namespace
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
-        void HuntFarthest()
+        void EmergeAtFarthest()
         {
             Unit* prey = SelectTarget(SelectTargetMethod::MaxDistance, 0, 0.0f, true);
-            if (!prey)
-                return;
+            if (prey)
+                me->NearTeleportTo(prey->GetPositionX(), prey->GetPositionY(), prey->GetPositionZ(),
+                    me->GetAngle(prey));
+            Emerge();
+            if (prey)
+                Hunt(prey);
+        }
 
+        void Hunt(Unit* prey)
+        {
             _hunted = prey->GetGUID();
             _huntThreat = HighestThreat() * 2.0f + HUNT_THREAT;
             me->AddAura(SPELL_MENACING_GAZE, prey);
@@ -530,7 +545,7 @@ namespace
                     case EVENT_INFEST:
                         if (Creature* spawn = HatchNearestEgg())
                             DoCast(spawn, SPELL_INFEST);
-                        events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_ACID_SPIT:
                         DoCastVictim(SPELL_ACID_SPIT);
@@ -560,8 +575,7 @@ namespace
                         events.ScheduleEvent(EVENT_BURROW, SpiderCycle(), 0, PHASE_SPIDER);
                         break;
                     case EVENT_EMERGE:
-                        Emerge();
-                        HuntFarthest();
+                        EmergeAtFarthest();
                         events.ScheduleEvent(EVENT_POISON_SHOCK, POISON_SHOCK_AFTER_EMERGE, 0, PHASE_SPIDER);
                         break;
                     case EVENT_END_HUNT:
