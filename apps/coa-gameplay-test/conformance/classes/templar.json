@@ -6548,6 +6548,107 @@
         }
       ],
       "observe_source": "800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (8 yd; spell_effect_radius reads 8), MaxAffectedTargets 5. Two rooted dummies (Self Root Forever 42716), each read by distance_2d right before the self-centred cast (ADR 0244): 7.5 yd, inside the stated 8 yd, must be taunted; 8.5 yd, outside it, must not. Stock Spell::SelectImplicitAreaTargets adds the caster's GetLeewayBonusRadius (2.66 yd for a player whose run speed exceeds 4.97, Object.cpp:1786-1806, Spell.cpp:1391-1395) and WorldObjectSpellAreaTargetCheck the target's combat reach (1.275 for the dummy, Spell.cpp:9428-9432), so the engine's edge is about 11.9 yd: diagnostics 20261112-033832 to -034042 taunt rooted dummies at 10.5 and 11.5 yd and not at 12.5. FN-r2b-3."
+    },
+    {
+      "spell": 804928, "name": "Mark of Aggramar", "kind": "cost_gate", "variant": "fortitude",
+      "label_suffix": "fortitude", "quote": "Reduces the Energy cost of your Testaments by", "gated_spell": 500678,
+      "resource": "power", "reduction": 7.5, "target": "caster",
+      "observe_source": "$s1 = 50 (804928 EffectBasePoints[0] -51, EffectDieSides[0] 1, -50%): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 14 (SPELLMOD_COST), family mask word 2 bit 2097152 (Testament of Fortitude 500678). 500678 ManaCost 15, PowerType 3 (Energy): 50% off leaves 7.5, so the allowed level is 8 Energy and the beyond level 6. Arms: 8 Energy without the talent (refused, SPELL_FAILED_NO_POWER 85), 8 with it (through), 6 with it (refused)."
+    },
+    {
+      "spell": 804928, "name": "Mark of Aggramar", "kind": "cost_gate", "variant": "hope", "label_suffix": "hope",
+      "quote": "Reduces the Energy cost of your Testaments by", "gated_spell": 1397742, "resource": "power",
+      "reduction": 25, "target": "caster",
+      "observe_source": "$s1 = 50 (804928 EffectBasePoints[0] -51, -50%), SPELLMOD_COST, family mask word 0 bit 128 (Testament of Hope 1397742). 1397742 ManaCost 50, PowerType 3: 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 804928, "name": "Mark of Aggramar", "kind": "cost_gate", "variant": "resolve",
+      "label_suffix": "resolve", "quote": "Reduces the Energy cost of your Testaments by", "gated_spell": 804228,
+      "resource": "power", "reduction": 25, "target": "ally",
+      "observe_source": "$s1 = 50 (804928 EffectBasePoints[0] -51, -50%), SPELLMOD_COST, family mask word 2 bit 1073741824 (Testament of Resolve 804228). 804228 ManaCost 50, PowerType 3, cast at a friendly target (EffectImplicitTargetA 21), here the grouped ally: 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 804928, "name": "Mark of Aggramar", "kind": "cost_gate", "variant": "will", "label_suffix": "will",
+      "quote": "Reduces the Energy cost of your Testaments by", "gated_spell": 801455, "resource": "power",
+      "reduction": 25, "target": "ally",
+      "observe_source": "$s1 = 50 (804928 EffectBasePoints[0] -51, -50%), SPELLMOD_COST, family mask word 0 bit 32 (Testament of Will 801455). 801455 ManaCost 50, PowerType 3, cast at the grouped ally: 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 804928, "name": "Mark of Aggramar", "kind": "cost_gate", "variant": "faith", "label_suffix": "faith",
+      "quote": "Reduces the Energy cost of your Testaments by", "gated_spell": 501606, "resource": "power",
+      "reduction": 25, "target": "ally",
+      "observe_source": "$s1 = 50 (804928 EffectBasePoints[0] -51, -50%), SPELLMOD_COST, family mask word 1 bit 4194304 (Testament of Faith; 501606 is its level 58 rank, AscensionSpellProgressionData.h:911). 501606 ManaCost 50, PowerType 3, cast at the grouped ally: 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 520009, "name": "Paladin Training", "kind": "cost_gate", "variant": "lunge", "label_suffix": "lunge",
+      "quote": "reduces the Energy cost of Righteous Lunge and Argent Blade by", "gated_spell": 570233,
+      "resource": "power", "reduction": 8,
+      "observe_source": "$s1 = 20 (520009 EffectBasePoints[1] -21, EffectDieSides[1] 1, -20%): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST). Righteous Lunge 570233 (level 58 rank, AscensionSpellProgressionData.h:884) ManaCost 40, PowerType 3: 20% off leaves 32, beyond 31. Arms: 32 without the talent (refused, 85), 32 with it (through), 31 with it (refused)."
+    },
+    {
+      "spell": 520009, "name": "Paladin Training", "kind": "cost_gate", "variant": "argent_blade",
+      "label_suffix": "argent_blade", "quote": "reduces the Energy cost of Righteous Lunge and Argent Blade by",
+      "gated_spell": 807268, "resource": "power", "reduction": 10,
+      "observe_source": "$s1 = 20 (520009 EffectBasePoints[1] -21, -20%), SPELLMOD_COST. Argent Blade 807268 (level 58 rank, AscensionSpellProgressionData.h:941) ManaCost 50, PowerType 3, a two-hand weapon (the reference staff): 20% off leaves 40, beyond 39. Arms: 40 without the talent (refused, 85), 40 with it (through), 39 with it (refused)."
+    },
+    {
+      "spell": 706318, "name": "Radiance", "kind": "cost_gate", "quote": "Reduces the Energy cost of Vindication by",
+      "gated_spell": 573324, "resource": "power", "reduction": 5,
+      "observe_source": "$s1 = 5 (706318 EffectBasePoints[0] -6, EffectDieSides[0] 1): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 14 (SPELLMOD_COST). Vindication 573324 (level 60 rank, AscensionSpellProgressionData.h:898) ManaCost 35, PowerType 3: 30 allowed, 29 beyond. Arms: 30 without the talent (refused, 85), 30 with it (through), 29 with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "upheaval",
+      "label_suffix": "upheaval", "quote": "Reduces the Energy cost of your Oath Breakers by", "gated_spell": 572027,
+      "resource": "power", "reduction": 10,
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11, EffectDieSides[0] 1): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 14 (SPELLMOD_COST), family mask word 2 bit 128 (the Oath Breakers) and word 0 bit 4. Righteous Upheaval 572027 ManaCost 35, PowerType 3, CasterAuraSpell Oath Chain 704576 (set before each attempt): 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "chastise",
+      "label_suffix": "chastise", "quote": "Reduces the Energy cost of your Oath Breakers by", "gated_spell": 503141,
+      "resource": "power", "reduction": 10,
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 2 bit 128. Chastise 503141 ManaCost 25, PowerType 3, CasterAuraSpell 704576: 15 allowed, 14 beyond. Arms: 15 without the talent (refused, 85), 15 with it (through), 14 with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "benediction",
+      "label_suffix": "benediction", "quote": "Reduces the Energy cost of your Oath Breakers by",
+      "gated_spell": 578276, "resource": "power", "reduction": 10, "target": "ally",
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 2 bit 128. Benediction 578276 ManaCost 20, PowerType 3, CasterAuraSpell 704576, cast at the grouped ally: 10 allowed, 9 beyond. Arms: 10 without the talent (refused, 85), 10 with it (through), 9 with it (refused)."
+    },
+    {
+      "spell": 524747, "name": "Holy Crusader", "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Divine Force by", "gated_spell": 807805, "resource": "cooldown",
+      "reduction": 30000, "target": "dummy",
+      "observe_source": "$/1000;s1 = 30 sec (524747 EffectBasePoints[0] -30001, EffectDieSides[0] 1, -30000 ms): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN). Divine Force 807805 (level 58 rank, AscensionSpellProgressionData.h:959) CategoryRecoveryTime 120000 ms, cast at the dummy, so the reduced cooldown is 90000 ms. Arms timed from a priming cast: 90500 ms without the talent (refused, SPELL_FAILED_NOT_READY 67), 90500 ms with it (through), 89500 ms with it (refused)."
+    },
+    {
+      "spell": 705266, "name": "Liberty", "kind": "cost_gate", "variant": "tenacity", "label_suffix": "tenacity",
+      "quote": "Reduces the cooldown of your Libram spells by", "gated_spell": 801461, "resource": "cooldown",
+      "reduction": 30000, "target": "caster",
+      "observe_source": "$/1000;s1 = 30 sec (705266 EffectBasePoints[0] -30001, EffectDieSides[0] 1): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), family mask word 2 bit 2048 (the five Librams). Libram of Tenacity 801461 RecoveryTime 180000 ms: reduced to 150000 ms. Arms timed from a priming cast: 150500 ms without the talent (refused, 67), 150500 ms with it (through), 149500 ms with it (refused)."
+    },
+    {
+      "spell": 705266, "name": "Liberty", "kind": "cost_gate", "variant": "consecration",
+      "label_suffix": "consecration", "quote": "Reduces the cooldown of your Libram spells by", "gated_spell": 803893,
+      "resource": "cooldown", "reduction": 30000, "target": "caster",
+      "observe_source": "$/1000;s1 = 30 sec (705266 EffectBasePoints[0] -30001), SPELLMOD_COOLDOWN, family mask word 2 bit 2048. Libram of Consecration 803893 CategoryRecoveryTime 180000 ms (a category cooldown, where Tenacity's is RecoveryTime): reduced to 150000 ms. Arms: 150500 ms without the talent (refused, 67), 150500 ms with it (through), 149500 ms with it (refused)."
+    },
+    {
+      "spell": 705266, "name": "Liberty", "kind": "cost_gate", "variant": "grace", "label_suffix": "grace",
+      "quote": "Reduces the cooldown of your Libram spells by", "gated_spell": 801463, "resource": "cooldown",
+      "reduction": 30000, "target": "caster",
+      "observe_source": "$/1000;s1 = 30 sec (705266 EffectBasePoints[0] -30001), SPELLMOD_COOLDOWN, family mask word 2 bit 2048. Libram of Grace 801463 RecoveryTime 180000 ms: reduced to 150000 ms. Arms: 150500 ms without the talent (refused, 67), 150500 ms with it (through), 149500 ms with it (refused)."
+    },
+    {
+      "spell": 705266, "name": "Liberty", "kind": "cost_gate", "variant": "zeal", "label_suffix": "zeal",
+      "quote": "Reduces the cooldown of your Libram spells by", "gated_spell": 801466, "resource": "cooldown",
+      "reduction": 30000, "target": "caster",
+      "observe_source": "$/1000;s1 = 30 sec (705266 EffectBasePoints[0] -30001), SPELLMOD_COOLDOWN, family mask word 2 bit 2048. Libram of Zeal 801466 RecoveryTime 180000 ms: reduced to 150000 ms. Arms: 150500 ms without the talent (refused, 67), 150500 ms with it (through), 149500 ms with it (refused)."
+    },
+    {
+      "spell": 705266, "name": "Liberty", "kind": "cost_gate", "variant": "fervor", "label_suffix": "fervor",
+      "quote": "Reduces the cooldown of your Libram spells by", "gated_spell": 805423, "resource": "cooldown",
+      "reduction": 30000, "target": "caster",
+      "observe_source": "$/1000;s1 = 30 sec (705266 EffectBasePoints[0] -30001), SPELLMOD_COOLDOWN, family mask word 2 bit 2048. Libram of Fervor 805423 RecoveryTime 180000 ms: reduced to 150000 ms. Arms: 150500 ms without the talent (refused, 67), 150500 ms with it (through), 149500 ms with it (refused)."
     }
   ],
   "player_observations": [

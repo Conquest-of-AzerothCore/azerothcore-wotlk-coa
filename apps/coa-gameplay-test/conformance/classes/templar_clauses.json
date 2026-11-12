@@ -913,7 +913,13 @@
       "520009 e1 spell_modifier 807268",
       "520009 e1 spell_power_cost 570233",
       "520009 e1 spell_power_cost 807268",
-      "520009 e1 spell_power_cost 504810"
+      "520009 e1 spell_power_cost 504810",
+      "520009 cost_gate 570233 lunge without",
+      "520009 cost_gate 570233 lunge with",
+      "520009 cost_gate 570233 lunge beyond",
+      "520009 cost_gate 807268 argent_blade without",
+      "520009 cost_gate 807268 argent_blade with",
+      "520009 cost_gate 807268 argent_blade beyond"
     ],
     "kind": "claim"
   },
@@ -1156,7 +1162,10 @@
     "labels": [
       "524747 effect_value e0 #0",
       "524747 e0 spell_modifier 807805",
-      "524747 e0 spell_modifier 807890"
+      "524747 e0 spell_modifier 807890",
+      "524747 cost_gate 807805 without",
+      "524747 cost_gate 807805 with",
+      "524747 cost_gate 807805 beyond"
     ],
     "kind": "claim"
   },
@@ -1937,7 +1946,16 @@
     "labels": [
       "704180 effect_value e0 #0",
       "704180 e0 spell_modifier (multiple targets)",
-      "704180 e0 spell_power_cost (multiple targets)"
+      "704180 e0 spell_power_cost (multiple targets)",
+      "704180 cost_gate 572027 upheaval without",
+      "704180 cost_gate 572027 upheaval with",
+      "704180 cost_gate 572027 upheaval beyond",
+      "704180 cost_gate 503141 chastise without",
+      "704180 cost_gate 503141 chastise with",
+      "704180 cost_gate 503141 chastise beyond",
+      "704180 cost_gate 578276 benediction without",
+      "704180 cost_gate 578276 benediction with",
+      "704180 cost_gate 578276 benediction beyond"
     ],
     "kind": "claim"
   },
@@ -2091,7 +2109,22 @@
     "clause": "Reduces the cooldown of your Libram spells by $/1000;s1 sec.",
     "labels": [
       "705266 effect_value e0 #0",
-      "705266 e0 spell_modifier (multiple targets)"
+      "705266 e0 spell_modifier (multiple targets)",
+      "705266 cost_gate 801461 tenacity without",
+      "705266 cost_gate 801461 tenacity with",
+      "705266 cost_gate 801461 tenacity beyond",
+      "705266 cost_gate 803893 consecration without",
+      "705266 cost_gate 803893 consecration with",
+      "705266 cost_gate 803893 consecration beyond",
+      "705266 cost_gate 801463 grace without",
+      "705266 cost_gate 801463 grace with",
+      "705266 cost_gate 801463 grace beyond",
+      "705266 cost_gate 801466 zeal without",
+      "705266 cost_gate 801466 zeal with",
+      "705266 cost_gate 801466 zeal beyond",
+      "705266 cost_gate 805423 fervor without",
+      "705266 cost_gate 805423 fervor with",
+      "705266 cost_gate 805423 fervor beyond"
     ],
     "kind": "claim"
   },
@@ -4415,7 +4448,22 @@
       "804928 e0 spell_power_cost 1397742",
       "804928 e0 spell_power_cost 804228",
       "804928 e0 spell_power_cost 801455",
-      "804928 e0 spell_power_cost 501606"
+      "804928 e0 spell_power_cost 501606",
+      "804928 cost_gate 500678 fortitude without",
+      "804928 cost_gate 500678 fortitude with",
+      "804928 cost_gate 500678 fortitude beyond",
+      "804928 cost_gate 1397742 hope without",
+      "804928 cost_gate 1397742 hope with",
+      "804928 cost_gate 1397742 hope beyond",
+      "804928 cost_gate 804228 resolve without",
+      "804928 cost_gate 804228 resolve with",
+      "804928 cost_gate 804228 resolve beyond",
+      "804928 cost_gate 801455 will without",
+      "804928 cost_gate 801455 will with",
+      "804928 cost_gate 801455 will beyond",
+      "804928 cost_gate 501606 faith without",
+      "804928 cost_gate 501606 faith with",
+      "804928 cost_gate 501606 faith beyond"
     ],
     "kind": "claim"
   },
