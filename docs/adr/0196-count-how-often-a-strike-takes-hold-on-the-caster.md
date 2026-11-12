@@ -27,11 +27,15 @@ resist is a rate: the share of disease strikes that do not take hold.
 
 ## Consequences
 
-- Holy Constitution's disease resist, Death Plague 55604 (disease, magic, a periodic damage and a slow aura), 2 parts
-  of 450 trials per arm: resisted 13.3% and 14.9% without 706323, 12.3% and 14.9% with it, in both runs of one counted
-  pair. The stated +30 points lies outside the 99% interval: an alert. Putrid Bite 30113 read the same in a diagnostic.
-  The aura's amount reads 30 on the caster. The cause is not located; it is a finding for the mentor, not a fix.
-- A rate judged to +-2 points needs many trials: about 17,500 per arm for a 30-point difference near 4% and 34%. An
-  alert whose interval excludes the band needs far fewer.
+- The strike must be a magic-class disease (DmgClass 1): `Unit::SpellHitResult` sends a melee- or ranged-class spell
+  to `MeleeSpellHitResult` (Unit.cpp:4166-4170), which never reads aura 178. Death Plague 55604 and Putrid Bite 30113
+  are melee-class (DmgClass 2), so the first counted pair (20261112-000437, -000508: 13.3% / 12.3% and 14.9% / 14.9%
+  resisted without and with the talent) measured melee misses, dodges and parries, not the claim. That was an
+  incorrect test, found by the review (lean/ext2-review.md, I4), not a defect.
+- With Tetanus 8014 (Dispel 3 disease, DmgClass 1 magic, one SPELL_AURA_MOD_STAT effect, family 0): step one, 800
+  trials per arm (20261112-003655), +32.1 points (99% +27.5 to +36.8), not judged; pooled proof, 28 parts x 800 =
+  22,400 per arm, one counted pair (20261112-003747, -003837): +29.90 (+29.02 to +30.79) and +30.62 (+29.74 to
+  +31.50) points against +30, inside +-2 in both. Claims 234 and 235 are behaviour proven.
+- A rate judged to +-2 points needs many trials: about 17,500 per arm for a 30-point difference near 4% and 34%.
 - No existing scenario changes.
 - Tests: `test_behaviours.TakenResistRateTests`.

@@ -1161,10 +1161,11 @@ a trial with fewer logs than strikes did not land and is left out; each arm need
   damage) as damage plus absorbed plus resisted; a strike the striker avoided is left out, and half the trials must
   be judged.
 
-Strikes the class file uses: Light of the Naaru 41394 (1100 Holy, DmgClass melee), Void Zone 92559 (1000
-Physical, DmgClass none: it neither misses nor crits), Holy Nova 101350 (2000 Holy around the striker, 15 yd, an
-area strike), Lacerating Slash 42395 (1735 Physical every 2 s for 18 s, a periodic strike) and Night Slaughter 23583
-(67 Physical). A strike heavier than the caster's health kills it: hold `caster_health_pct` and
+Strikes the class file uses: Light of the Naaru 41394 (1100 Holy, DmgClass 1 magic), Void Zone 92559 (1000
+Physical, DmgClass 0 none: it neither misses nor crits), Holy Nova 101350 (2000 Holy around the striker, 15 yd, an
+area strike, magic), Lacerating Slash 42395 (1735 Physical every 2 s for 18 s, a periodic strike), Night Slaughter
+23583 (67 Physical, DmgClass 2 melee: it can miss and crit) and Tetanus 8014 (a magic-class disease). A resist rate
+needs a magic-class strike: a melee-class spell goes to `MeleeSpellHitResult`, which reads no debuff resistance. A strike heavier than the caster's health kills it: hold `caster_health_pct` and
 `caster_max_health`.
 
 - `judge: "resist_rate"` with `expected_points` (ADR 0196) reads, 300 ms after each strike, whether its aura is on the
