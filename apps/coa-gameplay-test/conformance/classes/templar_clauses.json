@@ -439,11 +439,11 @@
     "spell": 300607,
     "clause": "Your Titanstrike now heals you for twice the damage dealt.",
     "labels": [
-      "300607 e0",
       "300607 806835 leech_ratio before",
       "300607 806835 leech_ratio after"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: 300607 e0 is unmodelled (no own token) and is dropped; Titanfall 806835 heals 0.80 of its damage before the learn and 1.60 after (1.0 and 2.0 under the -20% healing modifier 887007), counted pair 20261112-035932 / -040026 on build f8370be27d42"
   },
   {
     "spell": 300929,
@@ -903,11 +903,11 @@
       "520009 effect_value e0 #0",
       "520009 e0 spell_modifier 570233",
       "520009 e0 spell_modifier 807268",
-      "520009 e0 spell_modifier 504810",
       "520009 behaviour_hit_ratio lunge_damage",
       "520009 behaviour_hit_ratio argent_blade_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: 520009 e0 spell_modifier 504810 is dropped: Holy Master 504810 is in the class mask but the clause names Righteous Lunge and Argent Blade only, so the read is reported, not judged (measured); Lunge hits +20.01% and Argent Blade +20.00% against the talent-less control (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 520009,
@@ -1427,12 +1427,12 @@
     "spell": 560653,
     "clause": "You radiate a harmonic disposition to nearby party and raid members, causing fall damage to be reduced",
     "labels": [
-      "560653 effect_value #0",
       "560653 hit_mean",
       "560653 behaviour_fall_damage landing with reduced",
       "560653 behaviour_fall_damage landing with aura"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: 560653 effect_value #0 is unmodelled (prose-only effect, no $ token) and is dropped; the fall_damage pair proves the reduction (counted pair 20261112-035932 / -040026 on build f8370be27d42): a harness-simulated landing from 30 yd costs the grouped ally 2973 health without the aura and 1173 with it"
   },
   {
     "spell": 560653,
@@ -1956,8 +1956,26 @@
     "clause": "Reduces the Energy cost of your Oath Breakers by $s1.",
     "labels": [
       "704180 effect_value e0 #0",
-      "704180 e0 spell_modifier (multiple targets)",
-      "704180 e0 spell_power_cost (multiple targets)",
+      "704180 e0 spell_modifier 501567",
+      "704180 e0 spell_modifier 503141",
+      "704180 e0 spell_modifier 572027",
+      "704180 e0 spell_modifier 572741",
+      "704180 e0 spell_modifier 578276",
+      "704180 e0 spell_modifier 704573",
+      "704180 e0 spell_modifier 801477",
+      "704180 e0 spell_modifier 803880",
+      "704180 e0 spell_modifier 8054099",
+      "704180 e0 spell_modifier 807274",
+      "704180 e0 spell_power_cost 501567",
+      "704180 e0 spell_power_cost 503141",
+      "704180 e0 spell_power_cost 572027",
+      "704180 e0 spell_power_cost 572741",
+      "704180 e0 spell_power_cost 578276",
+      "704180 e0 spell_power_cost 704573",
+      "704180 e0 spell_power_cost 801477",
+      "704180 e0 spell_power_cost 803880",
+      "704180 e0 spell_power_cost 8054099",
+      "704180 e0 spell_power_cost 807274",
       "704180 cost_gate 572027 upheaval without",
       "704180 cost_gate 572027 upheaval with",
       "704180 cost_gate 572027 upheaval beyond",
@@ -1980,7 +1998,8 @@
       "704180 cost_gate 807274 righteous_tempest with",
       "704180 cost_gate 807274 righteous_tempest beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the '(multiple targets)' labels named the ten passive verdicts 704180 e0 spell_modifier (-10 each) and the ten spell_power_cost verdicts (7 costed targets -10, 501567, 572741 and 704573 closed: no power cost); every costed masked spell is refused at its reduced cost without the talent, accepted at it with the talent and refused one point below (counted pair 20261112-035932 / -040026 on build f8370be27d42); Blade Tempest 8054099 is reached by the mask though the class's Breaker() does not count it"
   },
   {
     "spell": 705250,
@@ -2132,7 +2151,11 @@
     "clause": "Reduces the cooldown of your Libram spells by $/1000;s1 sec.",
     "labels": [
       "705266 effect_value e0 #0",
-      "705266 e0 spell_modifier (multiple targets)",
+      "705266 e0 spell_modifier 801461",
+      "705266 e0 spell_modifier 801463",
+      "705266 e0 spell_modifier 801466",
+      "705266 e0 spell_modifier 803893",
+      "705266 e0 spell_modifier 805423",
       "705266 cost_gate 801461 tenacity without",
       "705266 cost_gate 801461 tenacity with",
       "705266 cost_gate 801461 tenacity beyond",
@@ -2149,7 +2172,8 @@
       "705266 cost_gate 805423 fervor with",
       "705266 cost_gate 805423 fervor beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: '705266 e0 spell_modifier (multiple targets)' named the five passive verdicts 705266 e0 spell_modifier 801461, 801463, 801466, 803893 and 805423 (-30000 each); every Libram is refused at 150500 ms without the talent, accepted with it and refused at 149500 ms (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 705268,
@@ -2792,30 +2816,30 @@
     "spell": 706312,
     "clause": "Damage dealt by Scourgebane and Scarlet Hammer now strikes $s1 additional nearby enemy.",
     "labels": [
-      "conformance-templar-value-706312",
-      "706312 e0 spell_modifier 807035 ok",
-      "706312 e0 spell_modifier 801832 ok",
+      "706312 effect_value e0 #0",
+      "706312 e0 spell_modifier 807035",
+      "706312 e0 spell_modifier 801832",
       "706312 scourgebane behaviour_fixed_count",
       "706312 scarlet_hammer behaviour_fixed_count",
       "706312 scourgebane_control behaviour_fixed_count",
       "706312 scarlet_hammer_control behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the scenario name and free-text labels named 706312 effect_value e0 #0 and 706312 e0 spell_modifier 807035 and 801832 (+1); direct casts of Scourgebane and Scarlet Hammer strike 1 of 2 extra dummies with the talent and 0 in the talent-less controls, the far dummy 0 (counted pair 20261112-035932 / -040026 on build f8370be27d42); the clause states the hit's target count, not its trigger"
   },
   {
     "spell": 706318,
     "clause": "Reduces the Energy cost of Vindication by $s1.",
     "labels": [
-      "conformance-templar-value-706318",
-      "706318 e0 spell_modifier 573324 ok",
-      "706318 e0 spell_power_cost 573324 ok",
-      "706318 e0 spell_modifier 500689 measured (-5.0, matching, no mismatch)",
-      "706318 e0 spell_power_cost 500689 closed (no power cost to modify)",
+      "706318 effect_value e0 #0",
+      "706318 e0 spell_modifier 573324",
+      "706318 e0 spell_power_cost 573324",
       "706318 cost_gate 573324 without",
       "706318 cost_gate 573324 with",
       "706318 cost_gate 573324 beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: 'conformance-templar-value-706318' was a scenario name (now 706318 effect_value e0 #0), and the free-text labels named 706318 e0 spell_modifier 573324 and spell_power_cost 573324 (35 -> 30); the Divine Fury 500689 labels are dropped: the clause names Vindication only, and the modifier read on 500689 is reported, not judged (measured), its cost read closed (no power cost); Vindication with a one-hand mace is refused at 30 Energy without the talent, accepted with it and refused at 29 (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 706320,
@@ -2929,11 +2953,12 @@
     "spell": 706359,
     "clause": "Increases your parry and dodge chance by $s1%.",
     "labels": [
-      "conformance-templar-value-706359",
+      "706359 effect_value e0 #0",
       "706359 e0 parry_chance",
       "706359 e1 dodge_chance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: 'conformance-templar-value-706359' was a scenario name, replaced by its expectation 706359 effect_value e0 #0; parry 5 -> 8 and dodge 9.44 -> 12.44 on learning (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 706385,
@@ -2961,23 +2986,25 @@
     "spell": 706449,
     "clause": "Your Benediction now has a $/1000;S1 sec cast time",
     "labels": [
-      "conformance-templar-value-706449 (effect_value e0)",
-      "706449 e0 spell_modifier 578276 ok",
-      "706449 e0 spell_cast_time_ms 578276 ok",
+      "706449 effect_value e0 #0",
+      "706449 e0 spell_modifier 578276",
+      "706449 e0 spell_cast_time_ms 578276",
       "706449 behaviour_metric_delta cast_time_early",
       "706449 behaviour_metric_delta cast_time_late"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the scenario name and free-text labels named 706449 effect_value e0 #0, 706449 e0 spell_modifier 578276 and spell_cast_time_ms 578276 (0 -> 1500); the heal count reads 1 at 1440 ms and 2 at 1525 ms after the cast, so the cast ends in (1440, 1550] ms (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 706449,
     "clause": "but now heals for $s2% more",
     "labels": [
-      "conformance-templar-value-706449 (effect_value e1)",
-      "706449 e1 spell_modifier 578276 ok",
+      "706449 effect_value e1 #1",
+      "706449 e1 spell_modifier 578276",
       "706449 behaviour_hit_ratio heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the scenario name and free-text label named 706449 effect_value e1 #1 and 706449 e1 spell_modifier 578276; Benediction heals +99.7% / +100.1% against the talent-less control (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 706468,
@@ -3060,12 +3087,13 @@
     "spell": 707385,
     "clause": "heals you for $s1% of your maximum health",
     "labels": [
-      "conformance-templar-value-707385",
-      "707385 e0 spell_modifier 801461 ok",
-      "707385 e0 spell_effect_value 801461 ok",
+      "707385 effect_value e0 #0",
+      "707385 e0 spell_modifier 801461",
+      "707385 e0 spell_effect_value 801461",
       "801461 behaviour_metric_delta heal_event"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the scenario name and free-text labels named 707385 effect_value e0 #0, 707385 e0 spell_modifier 801461 and spell_effect_value 801461 (0 -> 20); Libram of Tenacity heals the caster 0 without the talent and 347 with it, int(int(0.20 x 2173) x 0.8) (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 707385,
@@ -3133,26 +3161,29 @@
     "spell": 707663,
     "clause": "Removes the cooldown from Benediction",
     "labels": [
-      "707663 e0 spell_modifier 578276 ok (-1000, full removal)",
+      "707663 e0 spell_modifier 578276",
       "707663 cost_gate 578276 cooldown without",
       "707663 cost_gate 578276 cooldown with",
+      "707663 cost_gate 578276 cooldown with cooldown",
       "707663 behaviour_metric_delta cooldown_read"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the free-text label '707663 e0 spell_modifier 578276 ok (-1000, full removal)' named the passive verdict 707663 e0 spell_modifier 578276 (1000 -> 0); a second Benediction 1350 ms after the first is refused (67) without the talent and accepted (0) with it, the remaining cooldown reads 0 (counted pair 20261112-035932 / -040026 on build f8370be27d42); a cooldown left below 1350 ms is not told apart from none (ADR 0238)"
   },
   {
     "spell": 707663,
     "clause": "increases its Energy cost by $s2",
     "labels": [
-      "conformance-templar-value-707663 (effect_value e1)",
-      "707663 e1 spell_modifier 578276 ok",
-      "707663 e1 spell_power_cost 578276 ok",
+      "707663 effect_value e1 #0",
+      "707663 e1 spell_modifier 578276",
+      "707663 e1 spell_power_cost 578276",
       "707663 cost_gate 578276 cost without",
       "707663 cost_gate 578276 cost base",
       "707663 cost_gate 578276 cost with",
       "707663 cost_gate 578276 cost beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the scenario name and free-text labels named 707663 effect_value e1 #0, 707663 e1 spell_modifier 578276 and spell_power_cost 578276 (20 -> 30); Benediction at 20 Energy is accepted without the talent and refused with it, at 30 accepted and at 29 refused with it (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 707754,
@@ -3167,11 +3198,12 @@
     "spell": 707754,
     "clause": "reduces the duration of movement slowing effects on you by $s2%",
     "labels": [
-      "conformance-templar-value-707754 (effect_value e1 #0, -10, ok)",
+      "707754 effect_value e1 #0",
       "707754 behaviour_duration_ratio",
       "707754 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the free-text label 'conformance-templar-value-707754 (effect_value e1 #0, -10, ok)' named 707754 effect_value e1 #0; Hamstring 1715 ends in (14625, 15500] ms without the talent and in (13162, 13963] ms with it, stated 15000 and 13500 (counted pair 20261112-035932 / -040026 on build f8370be27d42)"
   },
   {
     "spell": 707851,
