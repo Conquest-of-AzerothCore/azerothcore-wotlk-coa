@@ -98,3 +98,7 @@ UPDATE `gameobject` SET `position_x` = -5605.7082, `position_y` = -3010.7274, `p
 -- #12089
 -- pickup 6940950 (Bear Left Overs) moved 0.42 yd up out of the ground
 UPDATE `gameobject` SET `position_x` = -5814.6, `position_y` = -258.2, `position_z` = 353.21, `orientation` = 6.0879, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.097473, `rotation3` = -0.995238 WHERE `guid` = 6940950 AND `id` = 95681;
+
+-- #12088
+-- pickup 6941321 (Warm Whoolies) moved 3.3 yd across and 0.78 yd up onto the ground, checked in the editor
+UPDATE `gameobject` SET `position_x` = -5746.8358, `position_y` = -371.4732, `position_z` = 366.9209, `orientation` = 5.0409, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.581969, `rotation3` = -0.813211 WHERE `guid` = 6941321 AND `id` = 95679;
