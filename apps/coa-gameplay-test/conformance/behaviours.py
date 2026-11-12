@@ -5253,6 +5253,7 @@ HIT_RATIO_HEALTH_SETTLE_MS = 500
 class HitArm:
     auras: tuple[tuple[int, int], ...] = ()
     casts: tuple[int, ...] = ()
+    learn: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -5326,11 +5327,12 @@ def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
 
 
 def hit_arm(raw: dict) -> HitArm:
-    unknown = set(raw) - {'auras', 'casts'}
+    unknown = set(raw) - {'auras', 'casts', 'learn'}
     if unknown:
-        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras or casts')
+        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras, casts or learn')
     return HitArm(tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ())),
-                  tuple(int(spell) for spell in raw.get('casts', ())))
+                  tuple(int(spell) for spell in raw.get('casts', ())),
+                  tuple(int(spell) for spell in raw.get('learn', ())))
 
 
 def hit_ratio_label(spell: int, suffix: str = '') -> str:
@@ -5395,9 +5397,12 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = hit_ratio_reads(spec, name)
+        steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in arm.learn]
         if spec.swing_hand is not None:
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
+            for spell in spec.warmup:
+                steps += hit_ratio_cast(records, spell)
             steps += reads(marks[0])
             steps += [measurement(hit_ratio_scale_label(spec, name, spell, effect), CASTER, 'aura_amount', spell=spell,
                                   effect=effect) for spell, effect in spec.scale_auras]
@@ -5405,12 +5410,15 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                 if spec.refresh:
                     steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                               for spell, stacks in arm.auras]
+                for cast in arm.casts:
+                    steps += hit_ratio_cast(records, cast)
                 steps += [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                           {'action': 'wait', 'label': f'{name} swing {trial}', 'ms': swing_ms},
                           {'action': 'stop_attack', 'actor': CASTER},
                           {'action': 'wait', 'label': f'{name} swing {trial} settle', 'ms': SWING_SETTLE_MS}]
                 steps += reads(marks[trial])
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+            steps += [{'action': 'unlearn', 'actor': CASTER, 'spell': spell} for spell in arm.learn]
             continue
         if spec.warmup:
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
@@ -5431,6 +5439,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                 steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
             steps += reads(marks[trial])
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+        steps += [{'action': 'unlearn', 'actor': CASTER, 'spell': spell} for spell in arm.learn]
     return steps
 
 
@@ -5489,10 +5498,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if swinging != (spec.metric == SWING_METRIC) or (swinging and spec.swing_hand not in SWING_HANDS):
         raise ValueError(f'{spec.spell} hit_ratio reads {SWING_METRIC} exactly when it sets a swing_hand of '
                          f'{sorted(SWING_HANDS)}, here metric {spec.metric!r} and swing_hand {spec.swing_hand!r}')
-    if swinging and (spec.caster != CASTER or spec.target != TARGET or spec.warmup or spec.target_health_pct
-                     or spec.control.casts or spec.treatment.casts):
-        raise ValueError(f'{spec.spell} hit_ratio swings at the dummy from the caster, with no casts, warmup or '
-                         f'target health')
+    if swinging and (spec.caster != CASTER or spec.target != TARGET or spec.target_health_pct):
+        raise ValueError(f'{spec.spell} hit_ratio swings at the dummy from the caster, with no target health')
     if swinging and spec.swing_hand and spec.off_hand_item is None:
         raise ValueError(f'{spec.spell} hit_ratio reads off-hand swings without an off_hand_item')
     if (spec.cast_spell is None and spec.cast_wait_ms and swinging) or (spec.cast_spell is not None and swinging) or \
@@ -5548,6 +5555,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     wielded = f', off-hand item {spec.off_hand_item} equipped' if spec.off_hand_item is not None else ''
     if spec.ally_distance is not None:
         wielded += f', the ally grouped with the caster and {spec.ally_distance:g} yd away'
+    if spec.control.learn or spec.treatment.learn:
+        wielded += (f', the spells {list(spec.control.learn)} / {list(spec.treatment.learn)} learned for their own arm '
+                    f'only')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour hit ratio{suffix}',

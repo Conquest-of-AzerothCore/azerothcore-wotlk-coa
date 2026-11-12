@@ -48,7 +48,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         dummy_id,
                         exclusivity_chain_scenario, exclusivity_chain_spec,
                         fixed_target_count_scenario, fixed_target_count_spec,
-                        group_stack_cap_scenario, group_stack_cap_spec, strongest_percent, taken_hit_scenario,
+                        group_stack_cap_scenario, group_stack_cap_spec, strongest_percent, taken_hit_scenario, hit_arm,
                         taken_hit_spec,
                         health_ratio_spec, health_threshold_ratio_scenario, healing_ratio_scenario,
                         healing_ratio_spec, heal_block_scenario, heal_block_spec,
@@ -8520,6 +8520,36 @@ class ScriptHitControlCastTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioArmLearnTests(unittest.TestCase):
+    def test_a_swing_arm_learns_its_talent_for_its_own_arm_and_refreshes_the_stacks_by_real_casts(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, r1a_entry(705286, 'hit_ratio', 'damage_physical'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        learns = [index for index, step in enumerate(steps) if step['action'] == 'learn' and step['spell'] == 705286]
+        unlearns = [index for index, step in enumerate(steps)
+                    if step['action'] == 'unlearn' and step['spell'] == 705286]
+        self.assertEqual(len(learns), 1)
+        self.assertEqual(len(unlearns), 1)
+        swings = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+        control_swings = [index for index in swings if index < learns[0]]
+        self.assertTrue(control_swings)
+        self.assertTrue(all(learns[0] < index < unlearns[0] for index in swings if index > learns[0]))
+        lunges = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 570233]
+        self.assertEqual(len([index for index in lunges if index < control_swings[0]]), 6)
+        self.assertFalse(any(step['action'] == 'set_aura' and step['spell'] == 560834 for step in steps))
+
+    def test_an_arm_learn_is_not_learned_for_the_other_arm(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, r1a_entry(705286, 'hit_ratio', 'damage_holy'))
+        steps = scenario['steps']
+        first_read = next(index for index, step in enumerate(steps)
+                          if step.get('label', '').endswith('control start total'))
+        self.assertFalse(any(step['action'] == 'learn' and step['spell'] == 705286 for step in steps[:first_read]))
+
+    def test_an_unknown_arm_field_is_refused(self):
+        with self.assertRaises(ValueError):
+            hit_arm({'learn': [705286], 'unlearn': [705286]})
+
+
 class HitRatioAllyDistanceTests(unittest.TestCase):
     FORTIFIED_BODY = 300515
 
