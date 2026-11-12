@@ -56,6 +56,7 @@ BEHAVIOUR_DISPEL_COUNT = 'behaviour_dispel_count'
 BEHAVIOUR_TAKEN_OUTCOME = 'behaviour_taken_outcome'
 BEHAVIOUR_CRIT_RATE = 'behaviour_crit_rate'
 BEHAVIOUR_AMOUNT_MATCH = 'behaviour_amount_match'
+BEHAVIOUR_SOURCE_STACK = 'behaviour_source_stack'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -67,7 +68,8 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
                     BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH)
+                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
+                    BEHAVIOUR_SOURCE_STACK)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -76,7 +78,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
-        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection')
+        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
+        'source_stack')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -6048,6 +6051,72 @@ def detection_spec(entry: dict) -> DetectionSpec:
                          int(entry.get('wait_ms', DETECTION_WAIT_MS)))
 
 
+SOURCE_STACK_WAIT_MS = 1500
+SOURCE_STACK_ARMS = ('none', 'one', 'two')
+
+
+@dataclass(frozen=True)
+class SourceStackSpec:
+    spell: int
+    name: str
+    quote: str
+    metrics: tuple[str, ...]
+    caster_auras: tuple[int, ...] = ()
+    wait_ms: int = SOURCE_STACK_WAIT_MS
+
+
+def source_stack_label(spec: SourceStackSpec, metric: str, arm: str) -> str:
+    return f'{spec.spell} behaviour_source_stack {metric} {arm}'
+
+
+def source_stack_scenario(class_file: dict, spec: SourceStackSpec) -> tuple[dict, list[Expectation]]:
+    if not spec.metrics:
+        raise ValueError(f'{spec.spell} source_stack reads at least one stat')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'source_stack', spec.quote, 1.0)
+    facts = facts_of(records, spec.spell)
+
+    def cast(actor: str) -> list[dict]:
+        return ([{'action': 'set_aura', 'actor': actor, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
+                + [{'action': 'reset_cooldown', 'actor': actor, 'spell': spec.spell}]
+                + [{**step, 'actor': actor} for step in required_aura_steps(facts)]
+                + [{'action': 'cast', 'actor': actor, 'spell': spec.spell, 'target': actor},
+                   {'action': 'wait', 'label': f'{actor} {spec.spell} settle', 'ms': spec.wait_ms}])
+
+    def reads(arm: str) -> list[dict]:
+        return ([measurement(source_stack_label(spec, metric, arm), CASTER, metric) for metric in spec.metrics]
+                + [measurement(source_stack_label(spec, f'aura {source}', arm), CASTER, 'aura', spell=spec.spell,
+                               caster=source) for source in (CASTER, ALLY)])
+
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': actor, 'spell': spec.spell} for actor in (CASTER, ALLY)]
+             + [{'action': 'group', 'actor': CASTER, 'target': ALLY}]
+             + [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1} for aura in spec.caster_auras]
+             + [{'action': 'wait', 'label': 'mounted settle', 'ms': spec.wait_ms}]
+             + reads('none') + cast(CASTER) + reads('one') + cast(ALLY) + reads('two'))
+    model = {'kind': 'source_stack', 'metrics': list(spec.metrics), 'quote': entry.quote,
+             'reads': {metric: {arm: source_stack_label(spec, metric, arm) for arm in SOURCE_STACK_ARMS}
+                       for metric in spec.metrics},
+             'sources': {arm: [source_stack_label(spec, f'aura {source}', arm) for source in (CASTER, ALLY)]
+                         for arm in SOURCE_STACK_ARMS}}
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour source stack',
+        'contract': f'The caster and a grouped {ALLY}, both carrying {list(spec.caster_auras)}, each cast '
+                    f'{spec.spell}; {list(spec.metrics)} are read on the caster with no source, with its own and with both, and '
+                    f'each stat with both sources must read the one-source value.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'steps': steps}
+    return scenario, [Expectation(f'{spec.spell} behaviour_source_stack', BEHAVIOUR_SOURCE_STACK, spec.spell,
+                                  spec.spell, None, 'one source', prose_rule(entry.quote, spec.spell), model)]
+
+
+def source_stack_spec(entry: dict) -> SourceStackSpec:
+    return SourceStackSpec(entry['spell'], entry['name'], entry['quote'], tuple(entry['metrics']),
+                           tuple(int(aura) for aura in entry.get('caster_auras', ())),
+                           int(entry.get('wait_ms', SOURCE_STACK_WAIT_MS)))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'school_lockout':
         from expiry import school_lockout_scenario
@@ -6168,6 +6237,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return charm_immunity_scenario(class_file, charm_immunity_spec(entry))
     if entry['kind'] == 'detection':
         return detection_scenario(class_file, detection_spec(entry))
+    if entry['kind'] == 'source_stack':
+        return source_stack_scenario(class_file, source_stack_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 

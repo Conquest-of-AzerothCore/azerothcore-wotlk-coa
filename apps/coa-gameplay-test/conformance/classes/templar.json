@@ -4487,6 +4487,12 @@
       "observe_source": "AscensionTemplarAuras.cpp:66-67 sets Untainted 705299's Effect[0] (SPELL_AURA_MOD_DAMAGE_TAKEN, MiscValue 1, Physical) to int32(-10 - .1f * Stamina); the owner ruled 10 plus 10% of Stamina (2026-11-11), the streamed text. A level 60 striker (entry 36) casts Night Slaughter 23583 (SPELL_EFFECT_SCHOOL_DAMAGE, Physical, EffectBasePoints 66, EffectDieSides 1) at the caster; control without 705299, treatment with it set before every strike. Each landed treatment strike must read the control strike less the truncated 10 + 0.1 x Stamina, the caster's Stamina read before the arm."
     },
     {
+      "spell": 562302, "name": "Crusader's Presence (mounted speed)", "kind": "source_stack",
+      "quote": "Does not stack with similar effects.", "metrics": ["run_speed_rate", "flight_speed_rate"],
+      "caster_auras": [458],
+      "observe_source": "562302's three effects (raid area auras, 40 yd) are SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK (172), 211 and SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACKING (210), each +50. The caster and a grouped ally, both on Brown Horse 458, each cast 562302 (the cast_auras mount first), so the caster carries two copies, its own and the ally's; Unit::UpdateSpeed takes the highest NOT_STACK amount. Run and flight speed rates are read with no source, the own copy and both copies; each must read the same with both as with one."
+    },
+    {
       "spell": 562302, "name": "Crusader's Presence (mounted speed)", "kind": "cast_applies_aura", "quote": "for $d",
       "expected_ms": 15000, "applied_aura": 562302, "target": "caster", "caster_auras": [458],
       "observe_source": "Mounted on Brown Horse 458 (aura 78) first, as the Templar OnSpellCheckCast hook requires (SPELL_FAILED_ONLY_MOUNTED, 91, otherwise; cast_condition entry above). 562302 DurationIndex 8 (15000 ms), Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID on the caster; its expiry pair times the stated duration."

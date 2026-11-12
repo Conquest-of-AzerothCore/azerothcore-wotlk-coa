@@ -979,6 +979,10 @@ percent points inside the larger of 5% of it and 2 points.
 away) with the dummy shown, hidden by each of `hide_auras`, with `reveal_aura` set on it by the caster, and with it
 removed; hidden, revealed and unrevealed are each compared exactly. It is a readback.
 
+`kind: "source_stack"` (ADR 0199) has the caster and a grouped ally, both carrying `caster_auras`, cast the spell in
+turn; `metrics` are read on the caster with no source, its own and both. Each stat one source moved must read the same
+with both (`behaviour_source_stack`, behaviour evidence); a second copy the engine refuses is stated.
+
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 
 "Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`

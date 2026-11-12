@@ -742,7 +742,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 313)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 314)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6585,6 +6585,35 @@ class DetectionTests(unittest.TestCase):
             values = {revealed.model['before_label']: 0.0, revealed.model['after_label']: after}
             with self.subTest(after=after):
                 self.assertEqual(judge_behaviour(base_verdict(revealed), FakeRun(values), revealed).status, status)
+
+
+class SourceStackTests(unittest.TestCase):
+    def values(self, model: dict, readings: dict[str, tuple[float, float, float]], copies: list[float]):
+        found = {}
+        for metric, reads in model['reads'].items():
+            found.update(zip((reads[arm] for arm in ('none', 'one', 'two')), readings[metric]))
+        for arm, present in zip(('none', 'one', 'two'), ([0.0, 0.0], [1.0, 0.0], copies)):
+            found.update(zip(model['sources'][arm], present))
+        return FakeRun(found)
+
+    def test_both_templars_cast_and_each_stat_is_read_three_times(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'source_stack', None))
+        steps = run.validate(scenario)['steps']
+        self.assertEqual([step['actor'] for step in steps if step['action'] == 'cast'], [CASTER, ALLY])
+        self.assertEqual(sorted(expectation.model['reads']), ['flight_speed_rate', 'run_speed_rate'])
+
+    def test_seeded_stacking_or_unmoved_stats_are_not_passed(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(562302, 'source_stack', None))
+        model = expectation.model
+        held = {'run_speed_rate': (1.6, 2.4, 2.4), 'flight_speed_rate': (1.0, 1.5, 1.5)}
+        stacked = {**held, 'flight_speed_rate': (1.0, 1.5, 2.0)}
+        unmoved = {'run_speed_rate': (1.6, 1.6, 1.6), 'flight_speed_rate': (1.0, 1.0, 1.0)}
+        for readings, copies, status in ((held, [1.0, 0.0], 'ok'), (held, [1.0, 1.0], 'ok'),
+                                         (stacked, [1.0, 1.0], 'alert'), (unmoved, [1.0, 0.0], 'unmeasured'),
+                                         (held, [0.0, 0.0], 'unmeasured')):
+            with self.subTest(readings=readings, copies=copies):
+                verdict = judge_behaviour(base_verdict(expectation), self.values(model, readings, copies), expectation)
+                self.assertEqual(verdict.status, status)
 
 
 class MountedCastTests(unittest.TestCase):

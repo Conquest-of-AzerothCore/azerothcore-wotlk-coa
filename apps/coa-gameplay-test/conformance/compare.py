@@ -27,8 +27,8 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
-                        DISPEL_TYPE_NAMES, HIT_RATIO_ARMS, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS,
-                        strongest_percent)
+                        BEHAVIOUR_SOURCE_STACK, DISPEL_TYPE_NAMES, HIT_RATIO_ARMS, TAKEN_HIT_CONTROL_ARM,
+                        TAKEN_HIT_RETURNED_KEYS, strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
                    delta_of, delta_text,
                    per_event_sample, sized_trials)
@@ -3728,6 +3728,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_taken_outcome_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CRIT_RATE:
         return behaviour_crit_rate_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_SOURCE_STACK:
+        return behaviour_source_stack_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
@@ -3936,6 +3938,38 @@ def taken_hit_reduced_range(base: int, reduction: int, control: float) -> tuple[
     low = Fraction(reduced * int(control), base)
     high = Fraction(reduced * (int(control) + 1), base)
     return math.floor(low), max(math.floor(low), math.ceil(high) - 1)
+
+
+def behaviour_source_stack_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = [label for reads in model['reads'].values() for label in reads.values()]
+    labels += [label for sources in model['sources'].values() for label in sources]
+    missing = next((label for label in labels if run.values.get(label) is None), None)
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing))
+    present = {arm: [run.values[label] for label in sources] for arm, sources in model['sources'].items()}
+    if present['none'] != [0.0, 0.0] or present['one'] != [1.0, 0.0] or not any(present['two']):
+        return replace(base, status='unmeasured',
+                       explanation=f'the copies on the caster read {present} (own, ally), not none, own, then at '
+                                   f'least one after both cast')
+    copies = ('both copies were on the caster' if present['two'] == [1.0, 1.0] else
+              f'after both cast the caster held only the {"own" if present["two"][0] else "ally"} copy: the second '
+              f'source did not coexist with the first')
+    stacked, unmoved, held = [], [], []
+    for metric, reads in model['reads'].items():
+        none, one, two = (run.values[reads[arm]] for arm in ('none', 'one', 'two'))
+        text = f'{metric} {none:g} / {one:g} / {two:g}'
+        if abs(one - none) <= FLOAT_EPSILON:
+            unmoved.append(text)
+        elif abs(two - one) > FLOAT_EPSILON:
+            stacked.append(text)
+        else:
+            held.append(text)
+    status = 'alert' if stacked else 'ok' if held else 'unmeasured'
+    parts = ([f'held at one source: {", ".join(held)}'] if held else []) + \
+            ([f'stacked: {", ".join(stacked)}'] if stacked else []) + \
+            ([f'not moved by one source, so not judged: {", ".join(unmoved)}'] if unmoved else [])
+    return replace(base, status=status, measured=float(len(stacked)), expected=0.0, low=0.0, high=0.0,
+                   explanation=f'no source / own / both: {"; ".join(parts)}; {copies}')
 
 
 def behaviour_taken_rate_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:

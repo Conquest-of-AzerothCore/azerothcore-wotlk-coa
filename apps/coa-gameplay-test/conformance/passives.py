@@ -109,6 +109,7 @@ BEHAVIOUR_LABELS = {
     'charm_immunity': lambda entry: [f"{entry['spell']} charm_immunity {entry['charm_spell']} {arm}"
                                      for arm in ('without', 'cast', 'applied', 'with')],
     'fixed_count': lambda entry: [f"{entry['spell']} behaviour_fixed_count"],
+    'source_stack': lambda entry: [f"{entry['spell']} behaviour_source_stack"],
     'detection': lambda entry: [f"{entry['spell']} behaviour_detection {name} {moment}"
                                 for _, name in entry['hide_auras'] for moment in ('hidden', 'revealed', 'unrevealed')],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
