@@ -23,7 +23,7 @@ def audit_command(args) -> int:
     try:
         document = audit_document(args.class_id, args.clauses, args.results, args.base_results, args.manifest,
                                   args.hooked, args.build, args.consumption)
-    except (EvidenceError, DbcSetMismatch, ValueError) as error:
+    except (EvidenceError, DbcSetMismatch, ValueError, OSError) as error:
         print(f'No coverage audit: {error}', file=sys.stderr)
         return FAILED
     write_json(args.out, document)
@@ -66,7 +66,7 @@ def buckets_command(args) -> int:
                                     'class_map': str(args.class_map) if args.class_map else None,
                                     'source_root': str(args.source_root), 'dbc_dir': str(dbc_dir),
                                     'standing_alerts': str(args.standing_alerts) if args.standing_alerts else None})
-    except (BucketError, DbcSetMismatch, ValueError, KeyError) as error:
+    except (BucketError, DbcSetMismatch, ValueError, KeyError, OSError) as error:
         print(f'No bucket file: {error}', file=sys.stderr)
         return FAILED
     write_json(args.out, document)
@@ -79,7 +79,7 @@ def buckets_command(args) -> int:
 def aura354_command(args) -> int:
     try:
         rows = aura354_rows(json.loads(args.class_map.read_text(encoding='utf-8')), args.class_id)
-    except Aura354Error as error:
+    except (Aura354Error, OSError, ValueError) as error:
         print(error, file=sys.stderr)
         return FAILED
     print('\n'.join(aura354_lines(rows, args.class_id)))

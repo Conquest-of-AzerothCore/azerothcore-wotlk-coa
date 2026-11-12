@@ -131,6 +131,8 @@ class AuditTest(unittest.TestCase):
         with mock.patch('sys.stderr'):
             self.assertEqual(main(['audit', '--class', '23', '--clauses', str(self.ledger), '--results', str(first),
                                    str(second), '--out', str(self.root / 'x.json')]), 2)
+            self.assertEqual(main(['audit', '--class', '23', '--clauses', str(self.root / 'missing.json'), '--out',
+                                   str(self.root / 'x.json')]), 2)
 
 
 if __name__ == '__main__':
