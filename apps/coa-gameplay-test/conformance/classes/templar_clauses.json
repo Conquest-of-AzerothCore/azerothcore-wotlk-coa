@@ -2566,7 +2566,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Both claims rest on one 572769 hit_mean (60 hits per run, ADR 0224). In the DBC effect order (ADR 0010) the flat $m1 (278) enters before the 180% weapon percent, so the hit is (weapon roll + 278) x 1.8: about +500 of the hit comes from the flat. One weapon cannot separate a compensating pair of errors in the percent and the flat (review M1). The High Threat part is owner question Q-r3a-1."
+    "reason": "Both claims rest on one 572769 hit_mean (60 hits per run, ADR 0224). In the DBC effect order (ADR 0010) the flat $m1 (278) enters before the 180% weapon percent, so the hit is (weapon roll + 278) x 1.8: about +500 of the hit comes from the flat. One weapon cannot separate a compensating pair of errors in the percent and the flat (review M1). The High Threat part follows owner ruling Q-r3a-1 (2026-11-12): threat x2, the 301061 flat kept; spell_threat 2 since rev_20261112_21 (ADR 0296); slope 2 counted 20261112-075609 / -075749."
   },
   {
     "spell": 572769,
@@ -4682,7 +4682,8 @@
     "clause": "Whenever the absorption shield from Staffguard breaks, inflict ${$801546m1+$801546ppl1+$AP*0.2+$sph*0.5} High Threat Holy damage to nearby enemies.",
     "labels": [
       "804930 effect_value 801546e0 #0",
-      "804930 script_hit 801546"
+      "804930 script_hit 801546",
+      "804930 behaviour_threat_slope 801546"
     ],
     "kind": "claim"
   },
