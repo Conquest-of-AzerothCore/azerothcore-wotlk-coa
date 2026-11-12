@@ -5,7 +5,7 @@
 
 DELETE FROM `creature` WHERE `guid` IN (12101014, 12101015, 12101016, 12101017);
 
-INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES 
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
 (12101014, 7584, 1, 0, 0, 1, 1, 0, -4318.128521159883, 441.2642836837341, 54.529093776515985, 2.0665924978728163, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101015, 7584, 1, 0, 0, 1, 1, 0, -4236.409979571428, 412.475361500019, 55.621944019597585, 1.019877657877653, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101016, 7584, 1, 0, 0, 1, 1, 0, -4242.297707502, 63.886411524258484, 57.13522093639013, 0.7215630138836048, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
@@ -13,7 +13,7 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 
 DELETE FROM `creature_addon` WHERE `guid` IN (12101014, 12101015, 12101016, 12101017);
 
-INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES 
+INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (12101014, 121010140, 0, 0, 0, 0, 0, NULL),
 (12101015, 121010150, 0, 0, 0, 0, 0, NULL),
 (12101016, 121010160, 0, 0, 0, 0, 0, NULL),
@@ -21,7 +21,7 @@ INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `e
 
 DELETE FROM `waypoint_data` WHERE `id` IN (121010140, 121010150, 121010160, 121010170);
 
-INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES (121010140, 1, -4318.994457449675, 444.315827606658, 53.63116245183915, NULL, 0, 0, 0, 0, 0, 100, 0),
+INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES(121010140, 1, -4318.994457449675, 444.315827606658, 53.63116245183915, NULL, 0, 0, 0, 0, 0, 100, 0),
 (121010140, 2, -4317.794917273208, 480.4141964944727, 55.68121281009723, NULL, 0, 0, 0, 0, 0, 100, 0),
 (121010140, 3, -4344.770375228132, 531.636014931155, 49.58630016930434, NULL, 0, 0, 0, 0, 0, 100, 0),
 (121010140, 4, -4391.581950567497, 549.1590938903025, 53.61323217287428, NULL, 0, 0, 0, 0, 0, 100, 0),
