@@ -3975,7 +3975,8 @@
     "clause": "Increases the damage dealt by Libram of Consecration by $s1%",
     "labels": [
       "801480 effect_value e0 #0",
-      "801480 e0 spell_modifier 804148"
+      "801480 e0 spell_modifier 804148",
+      "801480 behaviour_hit_ratio consecration"
     ],
     "kind": "claim"
   },
