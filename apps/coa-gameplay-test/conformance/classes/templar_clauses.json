@@ -435,7 +435,7 @@
     ],
     "kind": "claim",
     "effectiveness_of": 300923,
-    "reason": "subject read (ADR 0268): Gift of Zeal 300923 states one value, \"increasing Agility by $s1\", so the effectiveness Martyr raises is that Agility (FableMentor reading, owner-questions.md, Information decided by FableMentor); 300530 behaviour_metric_delta gift casts Gift of Zeal on the Templar: Agility 209 (132 + 77) without Martyr, the control, and 224 (132 + 92) with it, learned contrast, both runs of the counted pair 20261112-035932 / -040026 on build f8370be27d42; 92 = int32(77 x 1.2), +19.5%, inside the band of the stated +20%"
+    "reason": "subject read (ADR 0268): Gift of Zeal 300923 states one value, \"increasing Agility by $s1\", so the effectiveness Martyr raises is that Agility (FableMentor reading, owner-questions.md, Information decided by FableMentor); 300530 behaviour_metric_delta gift casts Gift of Zeal on the Templar: Agility reads 209 without Martyr, the control, and 224 with it, learned contrast, ok in both runs of the counted pair 20261112-035932 / -040026 on build f8370be27d42; the class file's derivation of those expectations (reference Agility 132, Gift 77 and int32(77 x 1.2) = 92, +19.5%, inside the band of the stated +20%) agrees with the reads"
   },
   {
     "spell": 300607,

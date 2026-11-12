@@ -344,7 +344,8 @@ class EvidenceStatusTest(unittest.TestCase):
                           spell=1), EFFECTIVENESS_OF: named}
         verdicts = [judged('1 behaviour_metric_delta gift', BEHAVIOUR_METRIC_DELTA, 'stat',
                            contrast=LEARNED_CONTRAST)]
-        return evidence_of([martyr, *(claim(text, spell=2) for text in buff_clauses)], verdicts)[0][0]
+        buff = [entry if isinstance(entry, dict) else claim(entry, spell=2) for entry in buff_clauses]
+        return evidence_of([martyr, *buff], verdicts)[0][0]
 
     def test_the_effectiveness_of_a_single_value_buff_promises_that_value(self):
         self.assertEqual(self.effectiveness('Places a Gift on a friendly target, increasing Agility by $s1',
@@ -353,6 +354,21 @@ class EvidenceStatusTest(unittest.TestCase):
     def test_the_effectiveness_of_a_buff_with_two_values_promises_neither(self):
         self.assertEqual(self.effectiveness('Places a Gift on a friendly target, increasing Agility by $s1',
                                             'and Stamina by $s2', 'for $d'), DATA)
+
+    def test_two_values_in_one_entry_promise_neither(self):
+        self.assertEqual(self.effectiveness('Places a Gift on a friendly target, increasing Agility by $s1 and '
+                                            'Stamina by $s2', 'for $d'), DATA)
+
+    def test_a_second_value_in_a_no_claim_entry_promises_neither(self):
+        second = {'spell': 2, 'clause': 'and Stamina by $s2', 'kind': 'no_claim', 'labels': [], 'reason': 'r'}
+        self.assertEqual(self.effectiveness('Places a Gift on a friendly target, increasing Agility by $s1', second,
+                                            'for $d'), DATA)
+
+    def test_one_value_named_in_two_entries_is_still_one_value(self):
+        self.assertEqual(self.effectiveness('increasing Agility by $s1', 'Agility by $S1 for $d'), BEHAVIOUR)
+
+    def test_a_period_or_stack_count_beside_the_value_is_a_second_value(self):
+        self.assertEqual(self.effectiveness('increasing Agility by $s1 every $t1 sec, stacking $u times'), DATA)
 
     def test_an_effectiveness_clause_without_a_named_subject_stays_data(self):
         self.assertEqual(self.effectiveness('increasing Agility by $s1', named=3), DATA)

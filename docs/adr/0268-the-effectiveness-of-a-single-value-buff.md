@@ -31,12 +31,17 @@ Option 2, under the reading's limit.
 - **The field.** A claim entry may carry `"effectiveness_of": <spell id of X>`. Coverage refuses the field in three
   cases: on an entry that is not a claim or that declares `claims`; with a value that is not a spell id; and on a
   clause without the words "effectiveness of".
-- **X's stated values.** These are X's claim entries in the same ledger whose clause states a value. That means a `$`
-  token other than a duration (`d`), a radius (`a`) or a range (`r`), or a literal number. `for $d` and
-  `within $a1 yds` state no value.
-- **The match.** When X has exactly one stated value, that clause is appended to the claim's words, so the state
-  promise (`promised_state`) can match its stat. With none, or with two or more, the words are unchanged, and a state
-  read stays data.
+- **X's stated values.** These are counted across every ledger entry of spell X, whatever its `kind`, so two values in
+  one entry and a value in a `no_claim` entry both count. A stated value is a `${...}` formula, a `$` token other than a
+  duration (`d`), a radius (`a`) or a range (`r`), or a literal number. Tokens are compared case-blind with their spell
+  and index, so `$s1` named in two entries is one value. A period (`$t`), a stack count (`$u`), charges (`$n`) or a
+  chance (`$h`) count as stated values. The reading excludes only what the tooltip does not state as an effect amount,
+  and keeping these tokens leaves the claim at data, which is the conservative side.
+- **The match.** When X states exactly one value, the entries carrying it are appended to the claim's words, so the
+  state promise (`promised_state`) can match its stat. With none, or with two or more, the words are unchanged, and a
+  state read stays data.
+- **Not checked.** The ledger has no spell names, so the id is not compared with the buff the clause names. The id is
+  read in review, as the labels are.
 - **Unchanged.** Nothing else changes. Labels, conformance and the learned-contrast requirement are the same.
 
 ## Consequences
@@ -45,7 +50,10 @@ Option 2, under the reading's limit.
   ("for $d").
 - Seeded tests:
   - the single-value case counts, with a duration and a range beside the value;
-  - the two-value case (Agility and Stamina) stays data;
+  - the two-value case stays data in three shapes: split over two entries, in one entry, and with the second
+    value in a `no_claim` entry;
+  - one value named in two entries is one value; a period and a stack count beside
+    the value make it a two-value buff;
   - a subject spell with no ledger entry stays data;
   - duration, radius and range tokens state no value;
   - malformed fields are refused.
