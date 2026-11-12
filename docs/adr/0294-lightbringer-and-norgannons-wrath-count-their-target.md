@@ -32,8 +32,14 @@ more enemies stand in range. Below the cap nothing changes. Bound by `spell_scri
 
 ## Consequences
 
-- Regressions `templar-area-counts-include-target` (Lightbringer: 6 more dummies give exactly 5 per cast, the target
-  once per cast; control with 2 more gives 3) and `templar-norgannons-wrath-counts-include-target` (11 more dummies
-  give exactly 10 per blast). Conformance entries 560835 `fixed_count` `burst` (4 extras) and 524739 `cap`,
-  `cap_cluster` (9 extras, per cast) read the stated count on every cast; `cap_control` stays 9.
+- Regressions, each asserting every cast on its own (a snapshot before it, the count after it):
+  - `templar-area-counts-include-target`: Lightbringer with 8 more dummies in range strikes exactly 5 enemies on each
+    of 10 casts, the target once per cast; the control, a target with 2 more, strikes exactly 3 on each of 10 casts.
+  - `templar-norgannons-wrath-counts-include-target`: 11 more dummies in range, exactly 10 enemies on each of 16
+    blasts, the target once per blast. The harness admits twelve creatures, so its below-cap control is conformance
+    entry 524739 `cap_control`.
+  - The old code keeps the target in the random cap with probability 5/9 (Lightbringer) and 10/12 (Norgannon's Wrath)
+    per cast, so a single run of it would pass with probability 0.3% and 5.4%.
+- Conformance entries 560835 `fixed_count` `burst` (4 extras) and 524739 `cap`, `cap_cluster` (9 extras, per cast)
+  read the stated count on every cast; `cap_control` stays 9.
 - Gameplay change: the 520842 debuff of Norgannon's Wrath lands on 10 enemies in all, no longer up to 11.
