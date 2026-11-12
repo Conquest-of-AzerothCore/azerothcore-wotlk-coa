@@ -1508,16 +1508,105 @@ class DispelRemovalSpec:
     wait_ms: int = DEFAULT_DISPEL_REMOVAL_WAIT_MS
     label_suffix: str = ''
     gameplay_clock: str | None = None
+    arms: tuple['DispelArm', ...] = ()
+
+
+@dataclass(frozen=True)
+class DispelArm:
+    name: str
+    target: str
+    removed: bool
+    away_yd: float = 0.0
+    refused: int = 0
+
+
+DISPEL_ARM_STEP_YD = 20.0
 
 
 def dispel_removal_label(spec: DispelRemovalSpec, debuff: int, moment: str) -> str:
     return f'{spec.spell} aura {debuff} {moment}'
 
 
+def dispel_arm_label(spec: DispelRemovalSpec, arm: DispelArm, unit: str, debuff: int, moment: str) -> str:
+    return f'{spec.spell} {arm.name} {unit} aura {debuff} {moment}'
+
+
+def dispel_arm_cast_label(spec: DispelRemovalSpec, arm: DispelArm) -> str:
+    return f'{spec.spell} {arm.name} cast_failure'
+
+
+def dispel_arm_relocation(distance: float) -> list[dict]:
+    steps, left = [], abs(distance)
+    while left > 0:
+        step = min(DISPEL_ARM_STEP_YD, left)
+        steps.append({'action': 'relocate', 'actor': CASTER, 'dx': step if distance > 0 else -step})
+        left -= step
+    return steps
+
+
+def dispel_set_step(unit: str, debuff: int) -> dict:
+    if unit == TARGET:
+        return {'action': 'set_aura', 'actor': CASTER, 'spell': debuff, 'stacks': 1, 'target': TARGET}
+    return {'action': 'set_aura', 'actor': unit, 'spell': debuff, 'stacks': 1}
+
+
+def dispel_arms_scenario(class_file: dict, spec: DispelRemovalSpec, entry, facts) -> tuple[dict, list[Expectation]]:
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+    expectations = []
+    for arm in spec.arms:
+        if arm.target not in (TARGET, ALLY) or arm.away_yd < 0:
+            raise ValueError(f'{spec.spell} dispel arm {arm.name} casts at {arm.target!r} from {arm.away_yd} yd; it '
+                             f'needs the dummy or the ally and a distance of at least 0')
+        units = (CASTER, arm.target)
+        steps += [dispel_set_step(unit, debuff) for unit in units for debuff in spec.debuffs]
+        steps += [measurement(dispel_arm_label(spec, arm, unit, debuff, BEFORE), unit, 'aura', spell=debuff)
+                  for unit in units for debuff in spec.debuffs]
+        steps += dispel_arm_relocation(arm.away_yd)
+        if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
+                          'value': facts.mana_cost})
+        steps += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}] + required_aura_steps(facts)
+        steps += [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': arm.target},
+                  {'action': 'wait', 'ms': spec.wait_ms},
+                  measurement(dispel_arm_cast_label(spec, arm), CASTER, 'cast_failure', spell=spec.spell)]
+        expectations.append(Expectation(dispel_arm_cast_label(spec, arm), BEHAVIOUR_CAST_CONDITION, spec.spell,
+                                        spec.spell, None, str(arm.refused), prose_rule(entry.quote, spec.spell),
+                                        {'kind': 'cast_gate', 'arm': arm.name, 'quote': entry.quote}))
+        steps += [measurement(dispel_arm_label(spec, arm, unit, debuff, AFTER), unit, 'aura', spell=debuff)
+                  for unit in units for debuff in spec.debuffs]
+        steps += dispel_arm_relocation(-arm.away_yd)
+        for unit in units:
+            for debuff in spec.debuffs:
+                model = {'kind': 'metric_delta', 'before_label': dispel_arm_label(spec, arm, unit, debuff, BEFORE),
+                         'after_label': dispel_arm_label(spec, arm, unit, debuff, AFTER),
+                         'expected': 0.0 if arm.removed else 1.0, 'before_expected': 1.0, 'metric': 'aura',
+                         'quote': entry.quote, 'gameplay_clock': spec.gameplay_clock}
+                label = (f'{spec.spell} behaviour_dispel_removal {debuff} {arm.name} '
+                         f'{"caster" if unit == CASTER else "target"}')
+                expectations.append(Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.spell, None,
+                                                '0' if arm.removed else '1', prose_rule(entry.quote, spec.spell),
+                                                model))
+    arms_text = '; '.join(f'{arm.name}: cast at the {arm.target} from {arm.away_yd:g} yd, '
+                          f'{"removed" if arm.removed else "kept"}' for arm in spec.arms)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour dispel removal arms',
+        'contract': f'Debuffs {list(spec.debuffs)} set on the caster and on the arm\'s target, each read before and '
+                    f'{spec.wait_ms} ms after a cast of {spec.spell} at that target ({arms_text}).',
+        'players': [player_fixture(class_file)] + ([{**player_fixture(class_file), 'id': ALLY}]
+                                                   if any(arm.target == ALLY for arm in spec.arms) else []),
+        'steps': steps}
+    if any(arm.target == TARGET for arm in spec.arms):
+        scenario['creatures'] = [creature_fixture(class_file)]
+    return scenario, expectations
+
+
 def dispel_removal_scenario(class_file: dict, spec: DispelRemovalSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'dispel_removal', spec.quote, 0.0)
     facts = facts_of(records, spec.spell)
+    if spec.arms:
+        return dispel_arms_scenario(class_file, spec, entry, facts)
 
     debuff_steps = [{'action': 'set_aura', 'actor': spec.target, 'spell': debuff, 'stacks': 1}
                    for debuff in spec.debuffs]
@@ -1563,7 +1652,10 @@ def dispel_removal_scenario(class_file: dict, spec: DispelRemovalSpec) -> tuple[
 def dispel_removal_spec(entry: dict) -> DispelRemovalSpec:
     return DispelRemovalSpec(entry['spell'], entry['name'], entry['quote'], tuple(entry['debuffs']),
                              entry.get('target', CASTER), entry.get('wait_ms', DEFAULT_DISPEL_REMOVAL_WAIT_MS),
-                             entry.get('label_suffix', ''), entry.get('gameplay_clock'))
+                             entry.get('label_suffix', ''), entry.get('gameplay_clock'),
+                             tuple(DispelArm(str(arm['name']), str(arm['target']), bool(arm['removed']),
+                                             float(arm.get('away_yd', 0.0)), int(arm.get('refused', 0)))
+                                   for arm in entry.get('arms', ())))
 
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500

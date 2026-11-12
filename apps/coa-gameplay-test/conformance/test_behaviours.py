@@ -7020,6 +7020,49 @@ class PhaseAuraTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(uncapped), expectation).status, 'alert')
 
 
+class DispelArmsTests(unittest.TestCase):
+    def entry(self):
+        return {'spell': 801465, 'name': 'Silverhand Incantation', 'kind': 'dispel_removal', 'label_suffix': 'arms',
+                'quote': 'and removing Sacred Restraint from you and them if they are an ally', 'debuffs': [102208],
+                'wait_ms': 3000, 'arms': [{'name': 'failed', 'target': 'ally', 'removed': False, 'away_yd': 60,
+                                           'refused': 97},
+                                          {'name': 'ally', 'target': 'ally', 'removed': True},
+                                          {'name': 'hostile', 'target': 'dummy', 'removed': False}]}
+
+    def test_each_arm_sets_and_reads_the_debuff_on_the_caster_and_its_target(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, self.entry())
+        steps = run.validate(scenario)['steps']
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', 'ally'])
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], ['dummy'])
+        relocations = [step['dx'] for step in steps if step['action'] == 'relocate']
+        self.assertEqual(relocations, [20.0, 20.0, 20.0, -20.0, -20.0, -20.0])
+        self.assertEqual([(e.label.split(' ', 1)[1], e.displayed) for e in expectations],
+                         [('failed cast_failure', '97'),
+                          ('behaviour_dispel_removal 102208 failed caster', '1'),
+                          ('behaviour_dispel_removal 102208 failed target', '1'),
+                          ('ally cast_failure', '0'),
+                          ('behaviour_dispel_removal 102208 ally caster', '0'),
+                          ('behaviour_dispel_removal 102208 ally target', '0'),
+                          ('hostile cast_failure', '0'),
+                          ('behaviour_dispel_removal 102208 hostile caster', '1'),
+                          ('behaviour_dispel_removal 102208 hostile target', '1')])
+        dummy_set = [step for step in steps if step['action'] == 'set_aura' and step.get('target') == 'dummy']
+        self.assertEqual(len(dummy_set), 1)
+
+    def test_a_removal_in_a_kept_arm_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, self.entry())
+        hostile = next(e for e in expectations if e.label.endswith('hostile target'))
+        values = {hostile.model['before_label']: 1.0, hostile.model['after_label']: 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(hostile), FakeRun(values), hostile).status, 'alert')
+        values[hostile.model['after_label']] = 1.0
+        self.assertEqual(judge_behaviour(base_verdict(hostile), FakeRun(values), hostile).status, 'ok')
+
+    def test_an_arm_needs_the_dummy_or_the_ally(self):
+        bad = {**self.entry(), 'arms': [{'name': 'self', 'target': 'caster', 'removed': True}]}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, bad)
+
+
 class CastPowerTests(unittest.TestCase):
     def test_a_cast_power_replaces_the_cost_before_each_cast_of_the_three_kinds(self):
         entries = [next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 500678

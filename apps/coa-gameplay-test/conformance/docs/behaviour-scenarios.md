@@ -764,6 +764,12 @@ The judge (`compare.behaviour_mount_grant_verdict`) reads both of a moment's lab
 entry's own `mount_display_id` for exact equality (`FLOAT_EPSILON`): `ok` only when both the caster and the ally
 read the expected display id, `alert` if either does not, with the explanation naming both readings.
 
+A `dispel_removal` entry may list `arms` (`name`, `target` `ally` or `dummy`, `removed`, optional `away_yd` and
+`refused`): each arm sets the debuffs on the caster and on its target, reads them, steps `away_yd` back, casts the
+spell at the target, reads the cast's `cast_failure` (judged exactly against `refused`, default 0) and the debuffs
+again (0 when `removed`, else 1), and steps forward again (ADR 0189). Silverhand Incantation 801465 clears Sacred
+Restraint 102208 from both on an ally, from neither on the dummy, and from neither when refused out of range (97).
+
 ### Aura-presence scenarios (`behaviour_metric_delta`, `kind: "aura_presence"`)
 
 Some active spells grant a metric's "present" state to a target rather than remove one: a self-targeted area
