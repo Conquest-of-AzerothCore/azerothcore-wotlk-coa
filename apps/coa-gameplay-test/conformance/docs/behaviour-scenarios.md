@@ -978,6 +978,9 @@ percent points inside the larger of 5% of it and 2 points.
 `kind: "detection"` (ADR 0197) reads `can_detect` (`Unit::CanSeeOrDetect` of the caster for a dummy `distance` yd
 away) with the dummy shown, hidden by each of `hide_auras`, with `reveal_aura` set on it by the caster, and with it
 removed; hidden, revealed and unrevealed are each compared exactly. It is a readback.
+`read: "client"` (ADR 0222) reads `nearby_creature_at_client` (`Player::HaveAtClient`, the caster's client-visible
+set) instead. Before each read, the caster steps `step_yd` (3) aside and back, `step_wait_ms` (1000) apart, so the
+server runs its own visibility update. The labels read `behaviour_detection client`, and the read counts as behaviour.
 
 `kind: "source_stack"` (ADR 0199) has the caster and a grouped ally, both carrying `caster_auras`, cast the spell in
 turn; `metrics` are read on the caster with no source, its own and both. Each stat one source moved must read the same

@@ -4581,6 +4581,12 @@
       "observe_source": "300513 Effect[1] is SPELL_AURA_MOD_STALKED (68); Unit::IsAlwaysDetectableFor (Unit.cpp:12358-12364) makes a unit carrying it always detectable by that aura's caster. A dummy 10 yd away is hidden by Stealth Dummy 2144558 (aura 16, stealth 1000000) and then by Super Invis 8149 (aura 18, invisibility type 0, 10000); each time the brand is set on it with the caster as its caster, then removed; can_detect reads Unit::CanSeeOrDetect of the caster for the dummy, the predicate the server's visibility updates apply. The client's object list (nearby_creature_at_client) did not refresh without movement in diagnostics 20261112-001336 and -001430, so it is not read."
     },
     {
+      "spell": 300513, "name": "Crusader's Brand", "kind": "detection", "variant": "client", "read": "client",
+      "quote": "While marked enemies can always be seen by the Crusader even while stealthed or invisible.",
+      "reveal_aura": 300513, "hide_auras": [[2144558, "stealth"], [8149, "invisibility"]],
+      "observe_source": "Same arms as the predicate entry, read as the server applies them: before each read the caster steps 3 yd aside and back, 1000 ms apart, so Map::PlayerRelocation queues NOTIFY_VISIBILITY_CHANGED and Unit::ExecuteDelayedUnitRelocationEvent (the move exceeds DynamicVisibility's 1 yd requiredMoveDistance) runs a PlayerRelocationNotifier; Player::UpdateVisibilityOf then adds or destroys the dummy with CanSeeOrDetect(target, false, true). nearby_creature_at_client reads Player::HaveAtClient, the client-visible set that decision leaves. A stationary dummy's aura change alone runs no update (ExecuteDelayedUnitRelocationEvent returns below that distance), hence the step."
+    },
+    {
       "spell": 560835, "name": "Lightkeeper", "kind": "fixed_count", "variant": "burst",
       "quote": "to up to $561277i1 enemies", "expected": 4, "radius": 5.0, "cast_spell": 561277,
       "target_rank": 561277, "learn": [560835],

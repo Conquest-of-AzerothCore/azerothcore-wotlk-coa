@@ -742,7 +742,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 314)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 315)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6585,6 +6585,37 @@ class DetectionTests(unittest.TestCase):
             values = {revealed.model['before_label']: 0.0, revealed.model['after_label']: after}
             with self.subTest(after=after):
                 self.assertEqual(judge_behaviour(base_verdict(revealed), FakeRun(values), revealed).status, status)
+
+    def test_the_client_read_steps_the_caster_aside_and_back_before_reading_the_visible_set(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, variant_entry(300513, 'detection', 'client'))
+        steps = run.validate(scenario)['steps']
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'nearby_creature_at_client']
+        self.assertEqual([steps[index]['label'].rsplit(' ', 2)[-2:] for index in reads],
+                         [[name, moment] for name in ('stealth', 'invisibility')
+                          for moment in ('shown', 'hidden', 'revealed', 'unrevealed')])
+        for index in reads:
+            moves = [(step['action'], step.get('dy'), step.get('ms')) for step in steps[index - 4:index]]
+            self.assertEqual(moves, [('relocate', 3.0, None), ('wait', None, 1000), ('relocate', -3.0, None),
+                                     ('wait', None, 1000)])
+            self.assertEqual(steps[index]['entry'], scenario['creatures'][0]['entry'])
+        self.assertFalse(any(step.get('metric') == 'can_detect' for step in steps))
+        self.assertEqual([(expectation.label.split()[2], expectation.model['metric'], expectation.model['expected'])
+                          for expectation in expectations],
+                         [('client', 'nearby_creature_at_client', expected) for expected in (0.0, 1.0, 0.0) * 2])
+
+    def test_seeded_brand_that_leaves_the_dummy_out_of_the_visible_set_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, variant_entry(300513, 'detection', 'client'))
+        for moment, before, after in (('revealed', 0.0, 0.0), ('hidden', 1.0, 1.0)):
+            expectation = next(item for item in expectations if item.label.endswith(f'stealth {moment}'))
+            with self.subTest(moment=moment):
+                for reading, status in ((expectation.model['expected'], 'ok'), (after, 'alert')):
+                    values = {expectation.model['before_label']: before, expectation.model['after_label']: reading}
+                    self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
+                                     status)
+
+    def test_a_detection_read_outside_predicate_and_client_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**variant_entry(300513, 'detection', 'client'), 'read': 'packet'})
 
 
 class SourceStackTests(unittest.TestCase):

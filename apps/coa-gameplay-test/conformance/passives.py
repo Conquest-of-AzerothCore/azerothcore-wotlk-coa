@@ -110,7 +110,8 @@ BEHAVIOUR_LABELS = {
                                      for arm in ('without', 'cast', 'applied', 'with')],
     'fixed_count': lambda entry: [f"{entry['spell']} behaviour_fixed_count"],
     'source_stack': lambda entry: [f"{entry['spell']} behaviour_source_stack"],
-    'detection': lambda entry: [f"{entry['spell']} behaviour_detection {name} {moment}"
+    'detection': lambda entry: [f"{entry['spell']} behaviour_detection"
+                                f"{' client' if entry.get('read') == 'client' else ''} {name} {moment}"
                                 for _, name in entry['hide_auras'] for moment in ('hidden', 'revealed', 'unrevealed')],
     'group_target': lambda entry: [f"{entry['spell']} group_target {arm} {metric}"
                                    for arm in ('outsider', 'party', *(('raid',) if entry.get('raid', True) else ()))

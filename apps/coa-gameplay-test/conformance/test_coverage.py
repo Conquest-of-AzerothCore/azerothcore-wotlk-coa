@@ -550,6 +550,12 @@ class ConsumptionTest(unittest.TestCase):
         self.assertFalse(acting(judged('1 e0 armor', PASSIVE_DELTA, 'armor', **{DATA_ONLY: 'floor'})))
         self.assertFalse(acting(hit(ARGENT_BLADE, 'alert')))
 
+    def test_the_client_visible_set_acts_where_the_detection_predicate_is_a_readback(self):
+        self.assertTrue(acting(judged('300513 behaviour_detection client stealth revealed', BEHAVIOUR_METRIC_DELTA,
+                                      'nearby_creature_at_client')))
+        self.assertFalse(acting(judged('300513 behaviour_detection stealth revealed', BEHAVIOUR_METRIC_DELTA,
+                                       'can_detect')))
+
     def test_consumption_files_are_not_class_files(self):
         self.assertEqual(ledger_consumption_path(CLASSES_DIR / 'templar_clauses.json'),
                          CLASSES_DIR / 'templar_consumption.json')
