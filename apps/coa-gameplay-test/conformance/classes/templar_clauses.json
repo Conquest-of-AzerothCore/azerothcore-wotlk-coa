@@ -1671,19 +1671,23 @@
     "spell": 572808,
     "clause": "reducing their total threat by $572809s1% every $t1 sec for $d",
     "labels": [
-      "572808 effect_value 572809e0 #0"
+      "572808 effect_value 572809e0 #0",
+      "572808 behaviour_metric_ratio_delta"
     ],
     "kind": "claim",
-    "reason": "behaviour arm pending (real cast of 572808), audit 2026-11-12: `572808 behaviour_metric_ratio_delta` left out of the evidence, its arms start from a harness set_aura of 572808 (rule 4 amendment point 2b); data until then"
+    "reason": "real cast of 572808 (audit 2026-11-12, rule 4 amendment point 2b; ADR 0263): the caster casts 572808 on itself, its aura_duration_ms reads 0 before the cast and 1800000 after it, and one tick scales the dummy's threat by 0.98 (136 -> 133.28, 130 -> 127.4); counted pair 20261112-051948 / -052121, build c5c62fbff795"
   },
   {
     "spell": 572808,
     "clause": "every $t1 sec",
     "labels": [
-      "572808 aura_amplitude_ms #1"
+      "572808 aura_amplitude_ms #1",
+      "572808 behaviour_metric_ratio_delta before_tick",
+      "572808 behaviour_metric_ratio_delta",
+      "572808 behaviour_metric_ratio_delta period"
     ],
     "kind": "claim",
-    "reason": "behaviour arm pending (real cast of 572808), audit 2026-11-12: `572808 behaviour_metric_ratio_delta before_tick`, `572808 behaviour_metric_ratio_delta`, `572808 behaviour_metric_ratio_delta period` left out of the evidence, its arms start from a harness set_aura of 572808 (rule 4 amendment point 2b); data until then"
+    "reason": "real cast of 572808 (audit 2026-11-12, rule 4 amendment point 2b; ADR 0263): each arm starts from the caster's cast of 572808 on itself, aura absent before the cast and present after it; threat ratio 1 after 600 ms (control, 0 ticks), 0.98 after 1200 ms (1 tick), 0.941192 after 3200 ms (3 ticks), so the period lies in (800, 1067] ms; counted pair 20261112-051948 / -052121, build c5c62fbff795"
   },
   {
     "spell": 572808,
