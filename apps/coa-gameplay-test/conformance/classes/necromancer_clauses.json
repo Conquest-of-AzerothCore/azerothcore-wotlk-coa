@@ -1180,14 +1180,12 @@
       {
         "claim": "brings forth $561316s1 Rotting Frost Giant near you to aid you in combat",
         "labels": [
-          "561138 effect_value 561316e0 #0",
           "561138 behaviour_metric_delta giant_first"
         ]
       },
       {
         "claim": "for $561316d",
         "labels": [
-          "561138 spell_duration 561316 #1",
           "561138 behaviour_metric_delta lifetime_held",
           "561138 behaviour_metric_delta lifetime_end"
         ]
@@ -1199,7 +1197,6 @@
     "spell": 561138,
     "clause": "and generate $/10;561317s1 Runic Power,",
     "labels": [
-      "561138 effect_value 561317e0 #2",
       "561138 behaviour_metric_delta runic_power"
     ],
     "kind": "claim"
