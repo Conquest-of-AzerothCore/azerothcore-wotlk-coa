@@ -2596,16 +2596,15 @@ class MinionMagnitudeTests(unittest.TestCase):
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_melee_hits_and_the_minion_observation_are_read(self):
         from profile import load_class_file
-        from triggers import magnitude_ratio_scenario
+        from triggers import magnitude_measurement_labels, magnitude_ratio_scenario
         scenario, _ = magnitude_ratio_scenario(load_class_file(23), self.tomb_king_entry())
+        labels = magnitude_measurement_labels(self.TOMB_KING)
         reads = {step['label']: step for step in scenario['steps'] if step.get('action') == 'assert'}
-        trigger_count = next(step for label, step in reads.items() if label.endswith('trigger_count'))
+        trigger_count = reads[labels['trigger_count']]
         self.assertEqual((trigger_count['metric'], trigger_count['entry']), ('pet_melee_hits', 50073))
-        observed = [step for step in reads.values() if step.get('spell') == 570050]
-        self.assertEqual(len(observed), 2)
-        self.assertTrue(all(step['caster_entry'] == 50073 for step in observed))
-        presence = next(step for label, step in reads.items() if label.endswith('aura'))
-        self.assertEqual(presence['spell'], 800027)
+        observed = [reads[labels['observe_total']], reads[labels['observe_count']]]
+        self.assertTrue(all(step['spell'] == 570050 and step['caster_entry'] == 50073 for step in observed))
+        self.assertEqual(reads[labels['aura']]['spell'], 800027)
 
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_the_cast_aura_is_cast_again_with_its_power(self):
