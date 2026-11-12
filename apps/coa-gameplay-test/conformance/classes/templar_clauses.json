@@ -1955,7 +1955,13 @@
       "704180 cost_gate 503141 chastise beyond",
       "704180 cost_gate 578276 benediction without",
       "704180 cost_gate 578276 benediction with",
-      "704180 cost_gate 578276 benediction beyond"
+      "704180 cost_gate 578276 benediction beyond",
+      "704180 cost_gate 803880 blade_of_faith without",
+      "704180 cost_gate 803880 blade_of_faith with",
+      "704180 cost_gate 803880 blade_of_faith beyond",
+      "704180 cost_gate 801477 grace without",
+      "704180 cost_gate 801477 grace with",
+      "704180 cost_gate 801477 grace beyond"
     ],
     "kind": "claim"
   },
@@ -3012,14 +3018,17 @@
     "labels": [
       "conformance-templar-value-707385",
       "707385 e0 spell_modifier 801461 ok",
-      "707385 e0 spell_effect_value 801461 ok"
+      "707385 e0 spell_effect_value 801461 ok",
+      "801461 behaviour_metric_delta heal_event"
     ],
     "kind": "claim"
   },
   {
     "spell": 707385,
     "clause": "Casting Libram of Tenacity now also heals you",
-    "labels": [],
+    "labels": [
+      "801461 behaviour_metric_delta heal_event"
+    ],
     "kind": "claim"
   },
   {
@@ -3107,7 +3116,6 @@
     "clause": "reduces the duration of movement slowing effects on you by $s2%",
     "labels": [
       "conformance-templar-value-707754 (effect_value e1 #0, -10, ok)",
-      "707754 e1 (unmodelled) -- scripted or crowd-control effect",
       "707754 behaviour_duration_ratio",
       "707754 behaviour_expiry"
     ],
@@ -3192,7 +3200,6 @@
     "clause": "reduces the duration of movement slowing effects on you by $s2%",
     "labels": [
       "712466 effect_value e1 #0",
-      "712466 e1 (unmodelled)",
       "712466 behaviour_duration_ratio",
       "712466 behaviour_expiry"
     ],

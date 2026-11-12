@@ -6649,6 +6649,54 @@
       "quote": "Reduces the cooldown of your Libram spells by", "gated_spell": 805423, "resource": "cooldown",
       "reduction": 30000, "target": "caster",
       "observe_source": "$/1000;s1 = 30 sec (705266 EffectBasePoints[0] -30001), SPELLMOD_COOLDOWN, family mask word 2 bit 2048. Libram of Fervor 805423 RecoveryTime 180000 ms: reduced to 150000 ms. Arms: 150500 ms without the talent (refused, 67), 150500 ms with it (through), 149500 ms with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "blade_tempest",
+      "label_suffix": "blade_tempest", "quote": "Reduces the Energy cost of your Oath Breakers by",
+      "gated_spell": 8054099, "resource": "power", "reduction": 10,
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 0 bit 4. Blade Tempest 8054099 (SpellFamilyFlags[0] 4) ManaCost 35, PowerType 3, CasterAuraSpell 704575 (set before each attempt): 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "blade_of_faith",
+      "label_suffix": "blade_of_faith", "quote": "Reduces the Energy cost of your Oath Breakers by",
+      "gated_spell": 803880, "resource": "power", "reduction": 10,
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 2 bit 128. Blade of Faith 803880 ManaCost 35, PowerType 3, CasterAuraSpell 704576: 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "grace", "label_suffix": "grace",
+      "quote": "Reduces the Energy cost of your Oath Breakers by", "gated_spell": 801477, "resource": "power",
+      "reduction": 10, "target": "caster",
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 2 bit 128. Grace of Aman'Thul 801477 ManaCost 20, PowerType 3, CasterAuraSpell 704575, self cast: 10 allowed, 9 beyond. Arms: 10 without the talent (refused, 85), 10 with it (through), 9 with it (refused)."
+    },
+    {
+      "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "righteous_tempest",
+      "label_suffix": "righteous_tempest", "quote": "Reduces the Energy cost of your Oath Breakers by",
+      "gated_spell": 807274, "resource": "power", "reduction": 10,
+      "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 0 bit 4. Righteous Tempest 807274 ManaCost 30, PowerType 3, CasterAuraSpell 704576: 20 allowed, 19 beyond. Arms: 20 without the talent (refused, 85), 20 with it (through), 19 with it (refused)."
+    },
+    {
+      "spell": 706312, "name": "Holy Edge (Rank 1, Scourgebane)", "kind": "fixed_count", "variant": "scourgebane",
+      "label_suffix": "scourgebane", "quote": "now strikes $s1 additional nearby enemy", "expected": 1,
+      "radius": 10.0, "cast_spell": 801832,
+      "radius_reason": "706312 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1, family mask word 1 bit 8388608 (Scourgebane 801832) and word 0 bit 8192 (Scarlet Hammer 807035). 801832 EffectChainTarget[0] 1, so with the talent Spell::SelectImplicitChainTargets reaches the target and 1 more. 801832 DmgClass 1 (magic): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond that. 801832 is cast directly at the primary; the modifier reads the spell id, not the script path that casts it."
+    },
+    {
+      "spell": 707853, "name": "Holy Edge (Rank 2, Scourgebane)", "kind": "fixed_count", "variant": "scourgebane",
+      "label_suffix": "scourgebane", "quote": "now strikes $s1 additional nearby enemies", "expected": 2,
+      "radius": 10.0, "cast_spell": 801832,
+      "radius_reason": "707853 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS (EffectMiscValue[0] 17), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = +2, on Scourgebane 801832 (EffectChainTarget[0] 1): the target and 2 more. Magic chain jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond. Cast directly at the primary."
+    },
+    {
+      "spell": 706312, "name": "Holy Edge (Rank 1, Scarlet Hammer)", "kind": "fixed_count",
+      "variant": "scarlet_hammer", "label_suffix": "scarlet_hammer",
+      "quote": "now strikes $s1 additional nearby enemy", "expected": 1, "radius": 10.0, "cast_spell": 807035,
+      "radius_reason": "706312 Effect[0] SPELLMOD_JUMP_TARGETS +1, family mask word 0 bit 8192 (Scarlet Hammer 807035). 807035 EffectChainTarget[0] 1, DmgClass 2 (melee): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2210-2213); the far dummy stands 5 yd beyond. Cast directly at the primary."
+    },
+    {
+      "spell": 707853, "name": "Holy Edge (Rank 2, Scarlet Hammer)", "kind": "fixed_count",
+      "variant": "scarlet_hammer", "label_suffix": "scarlet_hammer",
+      "quote": "now strikes $s1 additional nearby enemies", "expected": 2, "radius": 10.0, "cast_spell": 807035,
+      "radius_reason": "707853 Effect[0] SPELLMOD_JUMP_TARGETS +2 on Scarlet Hammer 807035 (EffectChainTarget[0] 1, DmgClass 2 melee, 10 yd jumps, Spell.cpp:2210-2213): the target and 2 more; the far dummy stands 5 yd beyond. Cast directly at the primary."
     }
   ],
   "player_observations": [
