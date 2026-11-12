@@ -509,10 +509,13 @@
       "tooltip": "Critical strikes dealt by your |cffffffffAbominations|r and |cffffffffDecaying Collosi|r now |cFFFFFFFFChomp|r your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
       "trigger": {
         "action": "minion",
-        "spell": 500970,
-        "entry": 50065,
+        "spell": 500335,
+        "entry": 50068,
+        "learn": [
+          92123
+        ],
         "swing_ms": 2000,
-        "swing_source": "creature_template 50065 BaseAttackTime 2000"
+        "swing_source": "creature_template 50068 BaseAttackTime 2000"
       },
       "trigger_text": "Critical strikes dealt by your Abominations and Decaying Collosi",
       "trigger_spell_text": "Raise: Abomination",
