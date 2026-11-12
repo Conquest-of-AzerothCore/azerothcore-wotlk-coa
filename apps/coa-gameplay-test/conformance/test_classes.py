@@ -12,6 +12,8 @@ DBC_DIR = Path('/srv/coa/server-data/dbc')
 HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 
 TEMPLAR_CLASS_ID = 19
+NECROMANCER_CLASS_ID = 23
+NECROMANCER_LOGGED_UNDER_ANOTHER_NAME = {500970: 'Raise: Greater Skeletal Warrior', 562210: 'Siphon Mana'}
 TEMPLAR_SPELL_IDS = 172
 TEMPLAR_SPELL_IDS_WITH_RANKS = 221
 SHARED_CLASS_TYPE = 12
@@ -226,6 +228,23 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(outside_chain, {TEMPLE_GUARDIAN: TEMPLE_GUARDIAN_RANK_6})
         self.assertEqual(records[TEMPLE_GUARDIAN_RANK_6]['Rank[enUS]'], 'Rank 6')
         self.assertEqual(len(extended), TEMPLAR_SPELL_IDS + len(entries))
+
+    def test_necromancer_extra_spells_cite_a_logged_rank_of_their_chain(self):
+        entries = load_class_file(NECROMANCER_CLASS_ID)['extra_spells']
+        extended = {spell.spell_id: spell for spell in class_spells(
+            DBC_DIR, NECROMANCER_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
+        records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell', ['SpellName[enUS]'])}
+        renamed = {}
+        for entry in entries:
+            citation = CITATION.match(entry['citation'])
+            self.assertIsNotNone(citation, entry['spell'])
+            logged_id, logged_name = int(citation.group(1)), citation.group(2)
+            self.assertIn(logged_id, extended[entry['spell']].ranks, entry['spell'])
+            self.assertEqual(records[entry['spell']]['SpellName[enUS]'], entry['name'], entry['spell'])
+            if logged_name != entry['name']:
+                renamed[entry['spell']] = logged_name
+        self.assertEqual(renamed, NECROMANCER_LOGGED_UNDER_ANOTHER_NAME)
+        self.assertEqual(len(entries), 29)
 
     def test_passive_flag_is_present_for_some_but_not_all_spells(self):
         passives = [spell for spell in self.templar if spell.passive]
