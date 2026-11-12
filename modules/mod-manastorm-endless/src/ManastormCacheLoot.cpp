@@ -197,6 +197,21 @@ namespace
             item->Class == ITEM_CLASS_ARMOR;
     }
 
+    bool PlayerCanUseGear(
+        Player const* player,
+        ItemTemplate const* item)
+    {
+        if (player->CanUseItem(item) !=
+            EQUIP_ERR_OK)
+            return false;
+
+        uint32 const skill =
+            item->GetSkill();
+
+        return !skill ||
+            player->GetSkillValue(skill);
+    }
+
     struct WeightedLootCandidate
     {
         LootStoreItem* Entry = nullptr;
@@ -329,7 +344,12 @@ namespace
             std::vector<WeightedLootCandidate>
                 candidates;
 
+            std::vector<WeightedLootCandidate>
+                usable;
+
             uint64 totalWeight = 0;
+
+            uint64 usableWeight = 0;
 
             for (LootStoreItem* entry :
                 entries)
@@ -367,6 +387,32 @@ namespace
                     });
 
                 totalWeight += weight;
+
+                if (PlayerCanUseGear(
+                    player,
+                    item))
+                {
+                    usable.push_back(
+                        {
+                            entry,
+                            weight
+                        });
+
+                    usableWeight += weight;
+                }
+            }
+
+            //
+            // Only pieces the player can use now; when none is usable the
+            // whole pool stays as it was.
+            //
+            if (!usable.empty())
+            {
+                candidates =
+                    std::move(usable);
+
+                totalWeight =
+                    usableWeight;
             }
 
             if (candidates.empty() ||
