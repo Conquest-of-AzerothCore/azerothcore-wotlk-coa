@@ -520,6 +520,12 @@ class EvidenceStatusTest(unittest.TestCase):
                          [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Raise a Ghoul', label)], [read])[0], [DATA])
 
+    def test_a_power_read_counts_where_the_clause_states_a_cost(self):
+        label = '1 behaviour_metric_delta'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'power', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim('Reduces the cost of all Raises by 20%', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Raise a Ghoul', label)], [read])[0], [DATA])
+
     def test_minion_casts_and_swings_are_event_reads(self):
         label = '1 behaviour_metric_delta'
         clauses = [claim('your Undead minions are guaranteed to critically strike', label)]
