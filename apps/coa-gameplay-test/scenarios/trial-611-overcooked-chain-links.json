@@ -1,33 +1,45 @@
 {
   "schema": 1,
-  "name": "The Pyrewood Armorer drops Overcooked Chain Links for Oh, the Places You'll Go",
+  "name": "Both forms of the Pyrewood Armorer drop Overcooked Chain Links for Oh, the Places You'll Go",
   "contract": [
     "Hardcore - Oh, the Places You'll Go (611) requires looting Overcooked Chain Links 421531 before level 15 (LOOT_ITEM_BEFORE_LEVEL 1/421531/15).",
-    "The item had no item_template row and no loot entry, so it could never drop and the objective could not be completed.",
-    "Expected (Conquest of Azeroth item cache, Exiles DB mirror of db.exil.es): Pyrewood Armorer 3528 drops it at 100%, and looting it below level 15 completes the objective, which the module reports with SMSG_COA_CHALLENGE_CRITERIA_UPDATED (0x59A): word 1 the challenge, word 5 the objective's item, word 6 its progress.",
-    "A level 1 character on the trial kills a 1-health Armorer fixture, finds the item in the corpse, loots it into its bags and receives the completed criterion for 611 and 421531."
+    "The item had no item_template row and no loot entry, so it could never drop and the objective could not be completed (issue #9053).",
+    "The Armorer's one spawn is Pyrewood Armorer 3528 (faction 123, friendly to the Alliance) and turns into Moonrage Armorer 3529 (faction 24) by SmartAI, so an Alliance character can only kill the worgen form. The Exiles DB mirror of db.exil.es lists the item at 100% from the human form only; by the contributor's decision both forms drop it at 100%.",
+    "Looting it below level 15 completes the objective, which the module reports with SMSG_COA_CHALLENGE_CRITERIA_UPDATED (0x59A): word 1 the challenge, word 5 the objective's item, word 6 its progress.",
+    "A level 1 Alliance character on the trial cannot attack the human form, kills a 1-health Moonrage Armorer with its own faction, loots the item and receives the completed criterion for 611 and 421531. A second character kills a human-form fixture and finds the item as well."
   ],
-  "timeout_ms": 90000,
+  "timeout_ms": 120000,
   "players": [
-    { "id": "hero", "race": 1, "class": 1, "level": 1 }
+    { "id": "hero", "race": 1, "class": 1, "level": 1 },
+    { "id": "other", "race": 2, "class": 1, "level": 1 }
   ],
   "creatures": [
-    { "id": "armorer", "owner": "hero", "entry": 3528, "level": 14, "health": 1, "distance": 2 }
+    { "id": "worgen", "owner": "hero", "entry": 3529, "faction": 24, "level": 14, "health": 1, "distance": 2 },
+    { "id": "villager", "owner": "hero", "entry": 3528, "faction": 123, "level": 14, "health": 1, "distance": 8 },
+    { "id": "armorer", "owner": "other", "entry": 3528, "level": 14, "health": 1, "distance": 2 }
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the human Armorer is friendly to the Alliance", "actor": "hero",
+      "metric": "can_attack", "target": "villager", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the worgen form can be attacked", "actor": "hero",
+      "metric": "can_attack", "target": "worgen", "equals": 1
+    },
     { "action": "start_challenge", "label": "Start Oh, the Places You'll Go", "actor": "hero", "challenge": 611, "level": 1 },
     { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
-    { "action": "attack", "actor": "hero", "target": "armorer" },
-    { "action": "assert", "actor": "armorer", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "attack", "actor": "hero", "target": "worgen" },
+    { "action": "assert", "actor": "worgen", "metric": "alive", "equals": 0, "within_ms": 30000 },
     { "action": "wait", "ms": 500 },
     {
       "action": "snapshot", "label": "Criteria updates before looting", "actor": "hero",
       "metric": "server_packets", "opcode": 1434, "save_as": "criteria_before"
     },
-    { "action": "loot_creature", "actor": "hero", "target": "armorer" },
+    { "action": "loot_creature", "actor": "hero", "target": "worgen" },
     {
-      "action": "assert", "label": "DISCRIMINATING: the Armorer's corpse holds the chain links", "actor": "hero",
+      "action": "assert", "label": "DISCRIMINATING: the Moonrage Armorer's corpse holds the chain links", "actor": "hero",
       "metric": "loot_count", "item": 421531, "equals": 1
     },
     { "action": "loot_slot", "actor": "hero", "item": 421531 },
@@ -50,6 +62,14 @@
     {
       "action": "assert", "label": "And marks it done", "actor": "hero",
       "metric": "server_packet_u32", "opcode": 1434, "index": 6, "equals": 1
+    },
+    { "action": "attack", "actor": "other", "target": "armorer" },
+    { "action": "assert", "actor": "armorer", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "loot_creature", "actor": "other", "target": "armorer" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the human form drops the chain links too", "actor": "other",
+      "metric": "loot_count", "item": 421531, "equals": 1
     }
   ]
 }
