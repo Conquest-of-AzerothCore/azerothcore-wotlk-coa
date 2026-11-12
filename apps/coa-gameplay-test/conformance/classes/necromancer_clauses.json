@@ -9,17 +9,30 @@
   {
     "spell": 92121,
     "clause": "Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague",
-    "labels": [],
+    "labels": [
+      "92121 behaviour_metric_delta crypt_swarm"
+    ],
     "kind": "claim"
   },
   {
     "spell": 92121,
     "clause": "and Lichfrost applies 2 stacks.",
-    "labels": [
-      "92121 effect_value 570131e0 #0",
-      "92121 spell_duration 570131 #1",
-      "92121 max_stacks 570131 #2",
-      "92121 effect_value #3"
+    "claims": [
+      {
+        "claim": "and Lichfrost applies 2 stacks.",
+        "labels": [
+          "92121 behaviour_metric_delta lichfrost"
+        ]
+      },
+      {
+        "claim": "@s:570131:0@ Crypt Plague: Deals ${$m1+0+$SP*0.06} Plague Damage every $t sec for $d, stacking $u times.",
+        "labels": [
+          "92121 effect_value 570131e0 #0",
+          "92121 spell_duration 570131 #1",
+          "92121 max_stacks 570131 #2",
+          "92121 effect_value #3"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2013,8 +2026,20 @@
   {
     "spell": 707283,
     "clause": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
-    "labels": [
-      "707283 effect_value 707284e0 #0"
+    "claims": [
+      {
+        "claim": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target",
+        "labels": [
+          "707283 trigger_count 500335",
+          "707283 trigger_count 500989"
+        ]
+      },
+      {
+        "claim": "dealing ${$707284m1+($SP*2.25)*0.5} damage to them",
+        "labels": [
+          "707283 effect_value 707284e0 #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2371,23 +2396,81 @@
     "spell": 804371,
     "clause": "Transform into an undead monstrosity for $d,",
     "labels": [
-      "804371 aura_duration_ms #0"
+      "804371 aura_duration_ms #0",
+      "804371 behaviour_cast_applies_aura",
+      "804371 behaviour_expiry"
     ],
     "kind": "claim"
   },
   {
     "spell": 804371,
     "clause": "increasing your maximum Stamina by $s2% and causing you and your Undead minions to emit a damaging disease cloud.",
-    "labels": [
-      "804371 effect_value e1 #1",
-      "804371 aura_amount e1 #1"
+    "claims": [
+      {
+        "claim": "increasing your maximum Stamina by $s2%",
+        "labels": [
+          "804371 effect_value e1 #1",
+          "804371 aura_amount e1 #1",
+          "804371 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "and causing you and your Undead minions to emit a damaging disease cloud.",
+        "labels": [
+          "804371 behaviour_metric_delta cloud",
+          "804371 behaviour_metric_delta minion_cloud"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 804371,
     "clause": "While transformed you are immune to Fear, Sleep, Charm, and Disease effects.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "While transformed you are immune to Fear",
+        "labels": [
+          "804371 immunity 804371 cast",
+          "804371 immunity 804371 applied",
+          "804371 immunity 804371 expired",
+          "804371 immunity 12096 without",
+          "804371 immunity 12096 with",
+          "804371 immunity 12096 control"
+        ]
+      },
+      {
+        "claim": "Sleep",
+        "labels": [
+          "804371 immunity 804371 cast",
+          "804371 immunity 804371 applied",
+          "804371 immunity 804371 expired",
+          "804371 immunity 9159 without",
+          "804371 immunity 9159 with",
+          "804371 immunity 9159 control"
+        ]
+      },
+      {
+        "claim": "Charm",
+        "labels": [
+          "804371 charm_immunity 37122 without",
+          "804371 charm_immunity 37122 cast",
+          "804371 charm_immunity 37122 applied",
+          "804371 charm_immunity 37122 with"
+        ]
+      },
+      {
+        "claim": "and Disease effects.",
+        "labels": [
+          "804371 immunity 804371 cast",
+          "804371 immunity 804371 applied",
+          "804371 immunity 804371 expired",
+          "804371 immunity 50356 without",
+          "804371 immunity 50356 with",
+          "804371 immunity 50356 control"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {

@@ -268,6 +268,113 @@
         }
       ],
       "minion_aura_refresh_ms": 8000
+    },
+    {
+      "aura": 680388,
+      "name": "Fetid Ward",
+      "tooltip": "Activate a |cffffffffFetid Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, $s1% of your damage dealt heals you and your minions, split evenly amongst them, and healing received is increased by $s2%.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_text": "of your damage dealt heals you",
+      "trigger_spell_text": "",
+      "trial_metric": "melee_damage_count",
+      "observe_spell": 681463,
+      "observe_source": "EffectTriggerSpell[0] of 680388",
+      "observe_note": "Effect[0] aura 354 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61); the event script LeechArmy (AscensionNecromancerEvents.cpp:48-54, called at :95-96) casts 681463 on the caster and on each minion for every damaging hit of a ward holder",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "heals you and your minions",
+      "aura_cast": true
+    },
+    {
+      "aura": 680388,
+      "name": "Fetid Ward",
+      "tooltip": "Activate a |cffffffffFetid Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, $s1% of your damage dealt heals you and your minions, split evenly amongst them, and healing received is increased by $s2%.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
+      "kind": "magnitude_ratio",
+      "effect": 0,
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_metric": "melee_damage_total",
+      "trigger_text": "of your damage dealt heals you",
+      "observe_spell": 681463,
+      "observe_metric": "spell_heal_total",
+      "expected_ratio": 0.3,
+      "per_trigger_text": "$s1% of your damage dealt heals you",
+      "aura_cast": true,
+      "observe_source": "EffectTriggerSpell[0] of 680388; with no minion LeechArmy heals the caster alone for damage x 30 / 100 (AscensionNecromancerEvents.cpp:48-51), $s1 = EffectBasePoints[0] 29 + 1"
+    },
+    {
+      "aura": 300241,
+      "name": "Vampiric Aura",
+      "tooltip": "While you are below 50% health, your Undead minions now heal you for $560607s2% of their damage dealt.",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "your Undead minions now heal you",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 561095,
+      "observe_source": "tooltip token $560607s2 of 300241",
+      "observe_note": "300241 Effect[1] refreshes 560607 on the caster every 1000 ms; 560607 Effect[1] (aura 354, rewritten to SPELL_AURA_DUMMY by AscensionNecromancerContracts.cpp:57-61) reaches the summons through effect 190, and AscensionNecromancerEvents.cpp:97-98 casts the heal 561095 on the owner for each damaging hit of a minion carrying the owner 560607 while the owner is below 50% health",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "heal you for $560607s2% of their damage dealt",
+      "caster_health_pct": 30,
+      "minion_aura_refresh_ms": 4000
+    },
+    {
+      "aura": 300241,
+      "name": "Vampiric Aura",
+      "tooltip": "While you are below 50% health, your Undead minions now heal you for $560607s2% of their damage dealt.",
+      "kind": "gate_absence",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "your Undead minions now heal you",
+      "gate_text": "While you are below 50% health",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 561095,
+      "observe_source": "tooltip token $560607s2 of 300241",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "heal you for $560607s2% of their damage dealt",
+      "caster_health_pct": 100,
+      "minion_aura_refresh_ms": 4000
+    },
+    {
+      "aura": 300241,
+      "name": "Vampiric Aura",
+      "tooltip": "While you are below 50% health, your Undead minions now heal you for $560607s2% of their damage dealt.",
+      "kind": "magnitude_ratio",
+      "effect": 1,
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_metric": "owned_creature_damage_total",
+      "trigger_text": "your Undead minions now heal you",
+      "observe_spell": 561095,
+      "observe_metric": "spell_heal_total",
+      "expected_ratio": 0.1,
+      "per_trigger_text": "heal you for $560607s2% of their damage dealt",
+      "observe_source": "tooltip token $560607s2 of 300241 (560607 EffectBasePoints[1] 9 + 1 = 10); AscensionNecromancerEvents.cpp:97-98 heals for damage x Amount(560607, 1) / 100",
+      "caster_health_pct": 30,
+      "minion_aura_refresh_ms": 4000
     }
   ],
   "talent_modifiers": [],
@@ -777,6 +884,168 @@
       "trials": 6, "minimum_hits": 6,
       "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000,
       "observe_source": "aura_ascension_necromancer_event (AscensionNecromancerEvents.cpp): a melee auto attack of a minion carrying Ghoul Passive Healing 805290 (added to every 50073 in npc_ascension_necromancer::IsSummonedBy) casts Ghoul Frenzy 707000 (HEAL, TARGET_UNIT_MASTER) from the Ghoul on its owner. The Command sends the Ghoul to melee the dummy for 4000 ms per trial; the control commands without a Ghoul and must count no 707000 heal."
+    },
+    {
+      "spell": 804371,
+      "name": "Foul Invocation",
+      "kind": "cast_applies_aura",
+      "quote": "Transform into an undead monstrosity for $d",
+      "expected_ms": 20000,
+      "applied_aura": 804371,
+      "target": "caster",
+      "cast_spell": 804371,
+      "cast_target": "caster",
+      "observe_source": "804371 DurationIndex 18 (20000 ms, $d), its own aura on the caster (Effect[0] aura 56 transform, TARGET_UNIT_CASTER). A real cast of 804371, read on the caster before the cast (absent) and right after it, and its expiry pair around 20000 ms."
+    },
+    {
+      "spell": 804371,
+      "name": "Foul Invocation",
+      "kind": "stat_gain",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "increasing your maximum Stamina by $s2%",
+      "cast_spell": 804371,
+      "cast_target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "clear_auras": [
+        804371
+      ],
+      "wait_ms": 500,
+      "terms": [
+        {
+          "coefficient": 0.4,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "reference"
+        },
+        {
+          "name": "stamina",
+          "auras": [
+            [
+              48101,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "804371 Effect[1] aura 80 SPELL_AURA_MOD_PERCENT_STAT, MiscValue 2 (Stamina), BasePoints 39 DieSides 1 (40, $s2). The caster's Stamina is read before and after a real cast of 804371 (its aura removed first), at the reference Stamina and with Stamina 48101 set, so the gain follows Stamina; the reading before each cast is the no-transform control (ADR 0213)."
+    },
+    {
+      "spell": 804371,
+      "name": "Foul Invocation",
+      "kind": "immunity",
+      "quote": "While transformed you are immune to Fear, Sleep, Charm, and Disease effects.",
+      "effects": [
+        {
+          "spell": 12096,
+          "words": "Fear"
+        },
+        {
+          "spell": 9159,
+          "words": "Sleep"
+        },
+        {
+          "spell": 50356,
+          "words": "Disease"
+        }
+      ],
+      "observe_source": "aura_ascension_necromancer_lifecycle casts Lich Form 504747 on the caster when 804371 applies (AscensionNecromancerAuras.cpp:122-123) and removes it with 804371 (:252-253): 504747 carries aura 77 SPELL_AURA_MECHANIC_IMMUNITY with MiscValue 1 (charm), 5 (fear) and 10 (sleep); the same hook applies IMMUNITY_DISPEL DISPEL_DISEASE (:126-127, removed at :254-255). Fixtures, each one aura effect at TARGET_UNIT_TARGET_ENEMY, cast by the dummy: Fear 12096 (aura 7, Mechanic 5), Sleep 9159 (aura 12, Mechanic 10, 10 s) and Inject Plague 50356 (aura 3, Dispel 3 disease, 30 yd range: the melee-range Tetanus 8014 failed its control cast out of range, 97, after the Fear control moved the caster, pair 20261112 prove-2)."
+    },
+    {
+      "spell": 804371,
+      "name": "Foul Invocation",
+      "kind": "charm_immunity",
+      "quote": "While transformed you are immune to Fear, Sleep, Charm, and Disease effects.",
+      "words": "Charm",
+      "charm_spell": 37122,
+      "observe_source": "Domination 37122: one effect, aura 6 SPELL_AURA_MOD_CHARM, Mechanic 1 (charm), 10 s, cast by the dummy at the caster. Lich Form 504747, cast with 804371 (AscensionNecromancerAuras.cpp:122-123), carries aura 77 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 1 (MECHANIC_CHARM): the charm must be refused with 804371 up and land without it (the control)."
+    },
+    {
+      "spell": 92121,
+      "name": "Crypt Plague (Lichfrost)",
+      "kind": "metric_delta",
+      "variant": "lichfrost",
+      "label_suffix": "lichfrost",
+      "quote": "and Lichfrost applies 2 stacks.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 570131,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 12000,
+      "observe_source": "AscensionNecromancerEvents.cpp:106-107: the caster's own damage from a Lichfrost spell (SpellFamilyFlags[2] 0x8000000, Lichfrost 801722 rank 1) with 92121 known calls Plague(player, target, 2), which adds 2 stacks of Crypt Plague 570131 (AscensionNecromancer.cpp:262-272). One Lichfrost 801722 hit on the dummy (its direct damage Effect[0]; Effect[2] is a slow, no damage) reads 570131 stacks by the caster 2500 ms after the cast starts (1500 ms cast time, CastingTimeIndex 16, plus its 30 yd/s missile): 0 without 92121 (control), 2 with it. 570131 lasts 10 s (DurationIndex 1), so the 12 s wait clears the control's state."
+    },
+    {
+      "spell": 92121,
+      "name": "Crypt Plague (Crypt Swarm)",
+      "kind": "metric_delta",
+      "variant": "crypt_swarm",
+      "label_suffix": "crypt_swarm",
+      "quote": "Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague",
+      "expected": 6,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 570131,
+        "caster": "caster"
+      },
+      "wait_ms": 3600,
+      "expire_ms": 12000,
+      "observe_source": "AscensionNecromancerEvents.cpp:106-107: each damage of Crypt Swarm 800343 by the caster with 92121 known calls Plague(player, target, 1). Crypt Swarm rank 8 501886 (BaseLevel 54, the level-60 rank) is a 3000 ms channel (DurationIndex 27) whose Effect[0] aura 227 triggers 800343 every 500 ms: 6 hits, so 6 stacks of 570131 (StackAmount 10, below the cap) 3600 ms after the cast with 92121, 0 without it (control)."
+    },
+    {
+      "spell": 804371,
+      "name": "Foul Invocation (disease cloud)",
+      "kind": "metric_delta",
+      "variant": "cloud",
+      "label_suffix": "cloud",
+      "quote": "and causing you and your Undead minions to emit a damaging disease cloud.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 804371,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520891,
+        "target": "dummy"
+      },
+      "cast_in_before": false,
+      "wait_ms": 1500,
+      "expire_ms": 21000,
+      "observe_source": "aura_ascension_necromancer_lifecycle casts the cloud 520891 from the caster when 804371 applies to it (AscensionNecromancerAuras.cpp:209-214): 520891 Effect[0] SCHOOL_DAMAGE, TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY, radius 5 yd (SpellRadius 8). The dummy stands 3 yd away. Before the cast no 520891 hit (control); one real cast of 804371 lands one 520891 hit on the dummy."
+    },
+    {
+      "spell": 680388,
+      "name": "Fetid Ward",
+      "kind": "exclusivity",
+      "quote": "Only 1 Ward can be active at a time.",
+      "chain": [
+        680388,
+        681460,
+        681529
+      ],
+      "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:109-118): when Fetid Ward 680388, Glacial Ward 681460 or Bone Ward 681529 applies to the caster it removes the other two from the caster and its minions. Each ward is cast in turn, looping back to Fetid Ward."
     }
   ],
   "player_observations": [],
