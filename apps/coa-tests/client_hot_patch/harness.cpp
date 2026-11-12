@@ -113,6 +113,14 @@ namespace
     }
 }
 
+std::string PayloadLua(WorldPacket const& packet)
+{
+    std::size_t offset = 0;
+    Sized(packet.bytes, offset);
+    Sized(packet.bytes, offset);
+    return Sized(packet.bytes, offset);
+}
+
 int main()
 {
     Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Unsupported,
@@ -122,22 +130,31 @@ int main()
     BeginAscensionClientLuaSession(7);
     Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Queue,
         "right after login chunks wait for the client's capability packet");
-    Check(Run(Chunk()).empty(), "a chunk sent before the capability packet is queued, nothing is sent");
     {
-        AscensionClientLuaChunk updated = Chunk();
-        updated.Lua = "Sample = 2";
-        Run(updated);
+        AscensionClientLuaChunk full = Chunk();
+        full.Lua = "State = {}";
+        Check(Run(full).empty(), "a chunk sent before the capability packet is queued, nothing is sent");
+        AscensionClientLuaChunk refresh = Chunk();
+        refresh.Lua = "State.now = 1";
+        Run(refresh);
         AscensionClientLuaChunk other = Chunk();
         other.Token = "FEL_COMMUTATION_WINDOW";
         Run(other);
     }
     {
-        std::vector<AscensionClientLuaChunk> const pending = SetAscensionClientLuaCapability(7, 1, 1);
-        Check(pending.size() == 2, "a capability packet hands back each queued token once");
-        Check(pending.size() == 2 && pending[0].Token == "MANASTORM_UI_FIXES" && pending[0].Lua == "Sample = 2",
-            "a token queued twice keeps its place and its latest Lua");
-        Check(pending.size() == 2 && pending[1].Token == "FEL_COMMUTATION_WINDOW", "queued tokens keep their order");
-        Check(SetAscensionClientLuaCapability(7, 1, 1).empty(), "a repeated capability packet (after /reload) resends nothing");
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 1, 1) == 3, "the capability packet sends every queued chunk");
+        Check(session.sent.size() == 3 && OnlyHotPatches(session.sent), "queued chunks go out as 0x8F0 packets");
+        if (session.sent.size() == 3)
+        {
+            Check(PayloadLua(session.sent[0]) == "State = {}" && PayloadLua(session.sent[1]) == "State.now = 1",
+                "two chunks for one token both arrive, the full state before the refresh that needs it");
+            std::size_t offset = 0;
+            Check(Sized(session.sent[2].bytes, offset) == "FEL_COMMUTATION_WINDOW", "queued chunks keep their order");
+        }
+        WorldSession again;
+        Check(SetAscensionClientLuaCapability(&again, 1, 1) == 0 && again.sent.empty(),
+            "a repeated capability packet (after /reload) resends nothing");
     }
     Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::HotPatch, "a protocol 1 client gets the hot-patch route");
     {
@@ -159,16 +176,28 @@ int main()
         Check(Sized(sent[0].bytes, offset).empty() && offset + 4 + 13 == sent[0].bytes.size(),
             "an empty target is sent as a zero length without a zero-sized append");
     }
+
+    ForgetAscensionClientLuaCapability(7);
+    BeginAscensionClientLuaSession(7);
     {
+        AscensionClientLuaChunk big = Chunk();
+        big.Lua.assign(AscensionClientLuaQueueLimit / 2 - 64, 'x');
+        Run(big);
+        Run(big);
+        Run(big);
         WorldSession session;
-        SendAscensionClientLuaHotPatch(&session, Chunk());
-        Check(session.sent.size() == 1 && OnlyHotPatches(session.sent), "a flushed queued chunk goes out as 0x8F0");
+        Check(SetAscensionClientLuaCapability(&session, 1, 2) == 2,
+            "the queue holds at most AscensionClientLuaQueueLimit bytes and refuses chunks beyond it");
     }
 
     ForgetAscensionClientLuaCapability(7);
     BeginAscensionClientLuaSession(7);
     Run(Chunk());
-    Check(SetAscensionClientLuaCapability(7, 0, 2).empty(), "a protocol 0 client drops what was queued");
+    {
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 0, 2) == 0 && session.sent.empty(),
+            "a protocol 0 client drops what was queued");
+    }
     Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Unsupported, "a protocol 0 client has no channel");
     Check(Run(Chunk()).empty(), "a protocol 0 client is sent nothing");
 
@@ -177,10 +206,16 @@ int main()
     Run(Chunk());
     ForgetAscensionClientLuaCapability(7);
     Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::Unsupported, "logout forgets the capability");
-    Check(SetAscensionClientLuaCapability(7, 1, 2).empty(), "logout discards the queue");
+    {
+        WorldSession session;
+        Check(SetAscensionClientLuaCapability(&session, 1, 2) == 0 && session.sent.empty(), "logout discards the queue");
+    }
 
     ForgetAscensionClientLuaCapability(7);
-    SetAscensionClientLuaCapability(7, 1, 2);
+    {
+        WorldSession session;
+        SetAscensionClientLuaCapability(&session, 1, 2);
+    }
     BeginAscensionClientLuaSession(7);
     Check(GetAscensionClientLuaRoute(7) == AscensionClientLuaRoute::HotPatch,
         "a capability that arrives on the network thread before the login hook survives the login hook");

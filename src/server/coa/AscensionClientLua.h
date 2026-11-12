@@ -5,7 +5,7 @@
 #include "Define.h"
 #include <string>
 #include <string_view>
-#include <vector>
+#include <cstddef>
 
 class Player;
 class WorldSession;
@@ -29,9 +29,10 @@ enum class AscensionClientLuaRoute : uint8
 constexpr uint16 AscensionClientLuaHotPatchOpcode = 0x8F0;
 constexpr uint16 AscensionClientLuaCapabilityOpcode = 0x8F1;
 constexpr uint16 AscensionClientLuaResultOpcode = 0x8F2;
+constexpr std::size_t AscensionClientLuaQueueLimit = 128 * 1024;
 
 void BeginAscensionClientLuaSession(uint32 accountId);
-std::vector<AscensionClientLuaChunk> SetAscensionClientLuaCapability(uint32 accountId, uint32 protocolVersion, uint8 mode);
+std::size_t SetAscensionClientLuaCapability(WorldSession* session, uint32 protocolVersion, uint8 mode);
 void ForgetAscensionClientLuaCapability(uint32 accountId);
 AscensionClientLuaRoute GetAscensionClientLuaRoute(uint32 accountId);
 void SendAscensionClientLuaHotPatch(WorldSession* session, AscensionClientLuaChunk const& chunk);

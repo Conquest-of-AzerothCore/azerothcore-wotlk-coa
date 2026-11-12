@@ -16,7 +16,7 @@ Ascension DLL, receive no interface Lua, so the Fel Commutation window, the Mana
 the Extra Quests window and the Bazaar Token cap quest rewards are unavailable to them.
 
 The `RequirementTypeId` and `RequirementId` of a chunk are unused by the sender. The
-`.clientpush requirementtype` GM command still sends a raw `0x5BC` formatter row on request,
+`.clientpush reqtype` GM command still sends a raw `0x5BC` formatter row on request,
 for testing clients that accept one.
 
 ## Hot-patch channel
@@ -38,8 +38,11 @@ the patch when that addon loads, with that addon's trust. Outcomes are 0 ran, 1 
 The server forgets an account's capability at logout. `0x8F1` is handled on the network thread
 as it arrives, so it can land before the world thread runs the login hook; the login hook therefore
 keeps a capability that is already known. A chunk sent before the client has announced itself is
-queued, latest Lua per token, and sent as soon as
-`0x8F1` arrives, however late; logout discards the queue. The protocol version is the switch:
+queued in arrival order, up to 128 KB of chunks per account, and sent as soon as `0x8F1`
+arrives, however late; logout discards the queue. Every chunk is kept, because a later one may
+depend on an earlier one (the Manastorm reward clock refresh needs the full reward state first).
+Queueing, flushing and direct sends share one lock, so a chunk sent while the queue is flushed
+never overtakes a queued one. The protocol version is the switch:
 the server only sends `0x8F0` to clients announcing version 1 or later, and drops the queue of a
 client announcing 0. A client that never sends `0x8F1` is sent nothing.
 

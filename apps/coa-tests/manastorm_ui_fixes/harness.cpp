@@ -173,11 +173,9 @@ int main(int argc, char** argv)
         BeginAscensionClientLuaSession(1);
         RunAscensionClientLua(&player, chunk);
         Check(session.sent.empty(), "before the capability packet the chunk waits, with no 0x5BC formatter fallback");
-        std::vector<AscensionClientLuaChunk> const pending = SetAscensionClientLuaCapability(1, 1, 2);
-        Check(pending.size() == 1 && pending[0].Lua == chunk.Lua, "the capability packet releases the waiting chunk");
-        RunAscensionClientLua(&player, chunk);
-        Check(session.sent.size() == 1 && session.sent[0].opcode == AscensionClientLuaHotPatchOpcode,
-            "a hot-patch client gets one 0x8F0 packet");
+        Check(SetAscensionClientLuaCapability(&session, 1, 2) == 1 && session.sent.size() == 1 &&
+            session.sent[0].opcode == AscensionClientLuaHotPatchOpcode,
+            "the capability packet releases the waiting chunk as one 0x8F0 packet");
         if (session.sent.size() == 1)
         {
             Reader hotPatch{ session.sent[0].bytes };
@@ -201,7 +199,10 @@ int main(int argc, char** argv)
     }
 
     BeginAscensionClientLuaSession(1);
-    SetAscensionClientLuaCapability(1, 1, 2);
+    {
+        WorldSession session;
+        SetAscensionClientLuaCapability(&session, 1, 2);
+    }
     {
         WorldSession session;
         Player player;

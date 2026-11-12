@@ -4,9 +4,9 @@
 #include "Player.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include <algorithm>
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -38,6 +38,7 @@ if AscensionClientLuaTokens then
         uint32 ProtocolVersion = 0;
         uint8 Mode = 0;
         std::vector<AscensionClientLuaChunk> Pending;
+        std::size_t PendingBytes = 0;
     };
 
     std::mutex CapabilityMutex;
@@ -82,18 +83,24 @@ void BeginAscensionClientLuaSession(uint32 accountId)
     Capabilities.try_emplace(accountId);
 }
 
-std::vector<AscensionClientLuaChunk> SetAscensionClientLuaCapability(uint32 accountId, uint32 protocolVersion, uint8 mode)
+std::size_t SetAscensionClientLuaCapability(WorldSession* session, uint32 protocolVersion, uint8 mode)
 {
+    if (!session)
+        return 0;
+
     std::lock_guard<std::mutex> lock(CapabilityMutex);
-    Capability& capability = Capabilities[accountId];
+    Capability& capability = Capabilities[session->GetAccountId()];
     capability.Known = true;
     capability.ProtocolVersion = protocolVersion;
     capability.Mode = mode;
     std::vector<AscensionClientLuaChunk> pending = std::move(capability.Pending);
     capability.Pending.clear();
+    capability.PendingBytes = 0;
     if (protocolVersion < HotPatchProtocolVersion)
-        pending.clear();
-    return pending;
+        return 0;
+    for (AscensionClientLuaChunk const& chunk : pending)
+        SendAscensionClientLuaHotPatch(session, chunk);
+    return pending.size();
 }
 
 void ForgetAscensionClientLuaCapability(uint32 accountId)
@@ -141,29 +148,30 @@ void RunAscensionClientLua(Player* player, AscensionClientLuaChunk const& chunk)
     if (!session)
         return;
 
-    AscensionClientLuaRoute route = AscensionClientLuaRoute::Unsupported;
-    {
-        std::lock_guard<std::mutex> lock(CapabilityMutex);
-        auto it = Capabilities.find(session->GetAccountId());
-        if (it != Capabilities.end())
-        {
-            route = RouteOf(it->second);
-            if (route == AscensionClientLuaRoute::Queue)
-            {
-                std::vector<AscensionClientLuaChunk>& pending = it->second.Pending;
-                auto queued = std::find_if(pending.begin(), pending.end(),
-                    [&chunk](AscensionClientLuaChunk const& other) { return other.Token == chunk.Token; });
-                if (queued != pending.end())
-                    *queued = chunk;
-                else
-                    pending.push_back(chunk);
-            }
-        }
-    }
-
+    std::lock_guard<std::mutex> lock(CapabilityMutex);
+    auto it = Capabilities.find(session->GetAccountId());
+    AscensionClientLuaRoute const route = it == Capabilities.end() ? AscensionClientLuaRoute::Unsupported
+        : RouteOf(it->second);
     if (route == AscensionClientLuaRoute::HotPatch)
+    {
         SendAscensionClientLuaHotPatch(session, chunk);
-    else if (route == AscensionClientLuaRoute::Unsupported)
+        return;
+    }
+    if (route == AscensionClientLuaRoute::Unsupported)
+    {
         LOG_DEBUG("coa.hotpatch", "Account {} has no hot-patch channel; interface Lua {} not sent",
             session->GetAccountId(), chunk.Token);
+        return;
+    }
+
+    Capability& capability = it->second;
+    std::size_t const size = chunk.Token.size() + chunk.TargetAddon.size() + chunk.Lua.size();
+    if (capability.PendingBytes + size > AscensionClientLuaQueueLimit)
+    {
+        LOG_DEBUG("coa.hotpatch", "Account {} hot-patch queue is full; interface Lua {} not queued",
+            session->GetAccountId(), chunk.Token);
+        return;
+    }
+    capability.Pending.push_back(chunk);
+    capability.PendingBytes += size;
 }

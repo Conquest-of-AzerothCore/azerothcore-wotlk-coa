@@ -37,12 +37,9 @@ namespace
 
         uint32 const protocolVersion = packet.read<uint32>();
         uint8 const mode = packet.read<uint8>();
-        std::vector<AscensionClientLuaChunk> const pending =
-            SetAscensionClientLuaCapability(session->GetAccountId(), protocolVersion, mode);
-        LOG_DEBUG("coa.hotpatch", "Account {} accepts hot patches (protocol {}, mode {}), {} queued",
-            session->GetAccountId(), protocolVersion, mode, pending.size());
-        for (AscensionClientLuaChunk const& chunk : pending)
-            SendAscensionClientLuaHotPatch(session, chunk);
+        std::size_t const flushed = SetAscensionClientLuaCapability(session, protocolVersion, mode);
+        LOG_DEBUG("coa.hotpatch", "Account {} accepts hot patches (protocol {}, mode {}), {} queued sent",
+            session->GetAccountId(), protocolVersion, mode, flushed);
         return true;
     }
 
