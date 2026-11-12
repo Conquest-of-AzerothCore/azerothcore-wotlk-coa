@@ -671,6 +671,17 @@ without the allowing attribute: must be refused with `blocked_result`), reads `a
 comes first because the spell under test may remove the state it is allowed in. The three readings are judged by
 `compare.behaviour_cast_gate_verdict` (exact).
 
+### Mount-block scenarios (`behaviour_cast_condition`, `kind: "mount_block"`, ADR 0202)
+
+"preventing them from mounting" states that a unit holding `spell` cannot mount. `mount_block_scenario` teleports the
+caster to the open-world outdoor site of the `cast_condition` kind (mounts are OUTDOORS_ONLY), learns `mount_spell`
+(default Brown Horse 458, which must apply SPELL_AURA_MOUNTED), and sets `spell` on the caster with `set_aura`, cast by
+the caster itself so that the aura's apply hooks run. It then attempts the mount: `<spell> mount_block <mount>
+blocked` must read SPELL_FAILED_CASTER_AURASTATE (22) and `... unmounted` (the mount aura, after the cast time) 0.
+`spell` is removed and the mount attempted again: `... allowed` reads 0 and `... mounted` 1, the control that the
+mount works at this site. `spell` is then set again on the mounted caster: `... dismounted` must read 0. The five
+readings are judged exactly (`compare.behaviour_cast_gate_verdict`).
+
 ### Immunity scenarios (`behaviour_immunity`, `kind: "immunity"`)
 
 "granting immunity to fear, charm, and horrify effects" states that named effects no longer land. `effects` lists

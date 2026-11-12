@@ -79,7 +79,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
-        'source_stack')
+        'source_stack', 'mount_block')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -3894,6 +3894,76 @@ def cast_state_spec(entry: dict) -> CastStateSpec:
                          entry['blocked_result'])
 
 
+SPELL_FAILED_CASTER_AURASTATE = 22
+SPELL_AURA_MOUNTED = 78
+MOUNT_BLOCK_SETTLE_MS = 2000
+MOUNT_BLOCK_MOMENTS = ('blocked', 'unmounted', 'allowed', 'mounted', 'dismounted')
+MOUNT_BLOCK_EXPECTED = {'blocked': SPELL_FAILED_CASTER_AURASTATE, 'unmounted': STATE_ABSENT,
+                        'allowed': NO_CAST_FAILURE, 'mounted': STATE_PRESENT, 'dismounted': STATE_ABSENT}
+
+
+@dataclass(frozen=True)
+class MountBlockSpec:
+    spell: int
+    name: str
+    quote: str
+    mount_spell: int = GENERIC_GROUND_MOUNT_SPELL
+
+
+def mount_block_label(spec: MountBlockSpec, moment: str) -> str:
+    return f'{spec.spell} mount_block {spec.mount_spell} {moment}'
+
+
+def mount_block_scenario(class_file: dict, spec: MountBlockSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'mount_block', spec.quote, NO_CAST_FAILURE)
+    mount = facts_of(records, spec.mount_spell)
+    if SPELL_AURA_MOUNTED not in mount.aura_names:
+        raise ValueError(f'{spec.spell} mount_block mount {spec.mount_spell} applies no SPELL_AURA_MOUNTED')
+
+    def label(moment: str) -> str:
+        return mount_block_label(spec, moment)
+
+    brand = {'action': 'set_aura', 'actor': CASTER, 'spell': spec.spell}
+    mounted_read_ms = mount.cast_time_ms + CAST_GATE_WAIT_MS
+    steps = (base_steps(class_file)
+             + [{'action': 'teleport', 'actor': CASTER, **OUTDOOR_LOCATION},
+                {'action': 'wait', 'ms': MOUNT_BLOCK_SETTLE_MS},
+                {'action': 'learn', 'actor': CASTER, 'spell': spec.mount_spell},
+                {**brand, 'stacks': 1}]
+             + self_cast_attempt(spec.mount_spell, mount, label('blocked'))
+             + [{'action': 'wait', 'ms': mounted_read_ms},
+                measurement(label('unmounted'), CASTER, 'aura', spell=spec.mount_spell),
+                {**brand, 'stacks': 0}]
+             + self_cast_attempt(spec.mount_spell, mount, label('allowed'))
+             + [{'action': 'wait', 'ms': mounted_read_ms},
+                measurement(label('mounted'), CASTER, 'aura', spell=spec.mount_spell),
+                {**brand, 'stacks': 1},
+                {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+                measurement(label('dismounted'), CASTER, 'aura', spell=spec.mount_spell)])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour mount block',
+        'contract': f'Outdoors, the caster holds {spec.spell} (set by itself, so its apply hooks run) and casts the '
+                    f'mount {spec.mount_spell}: refused with code {SPELL_FAILED_CASTER_AURASTATE} and not mounted. '
+                    f'Without {spec.spell} the same cast goes through ({NO_CAST_FAILURE}) and mounts (the control). '
+                    f'Then {spec.spell} is set again on the mounted caster, which must lose the mount, proving the '
+                    f'"{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'mount_block', 'quote': entry.quote}
+    rule = prose_rule(entry.quote, spec.spell)
+    expectations = [Expectation(label(moment), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.mount_spell, None,
+                                str(MOUNT_BLOCK_EXPECTED[moment]), rule, dict(model))
+                    for moment in MOUNT_BLOCK_MOMENTS]
+    return scenario, expectations
+
+
+def mount_block_spec(entry: dict) -> MountBlockSpec:
+    return MountBlockSpec(entry['spell'], entry['name'], entry['quote'],
+                          int(entry.get('mount_spell', GENERIC_GROUND_MOUNT_SPELL)))
+
+
 IMMUNITY_CASTS = 3
 IMMUNITY_CAST_WAIT_MS = CAST_MARGIN_MS
 
@@ -6261,6 +6331,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return cast_combat_scenario(class_file, cast_combat_spec(entry))
     if entry['kind'] == 'cast_state':
         return cast_state_scenario(class_file, cast_state_spec(entry))
+    if entry['kind'] == 'mount_block':
+        return mount_block_scenario(class_file, mount_block_spec(entry))
     if entry['kind'] == 'immunity':
         return immunity_scenario(class_file, immunity_spec(entry))
     if entry['kind'] == 'threat_slope':

@@ -128,6 +128,8 @@ BEHAVIOUR_LABELS = {
     'site_purchase': lambda entry: [f"{entry['spell']} site_purchase {arm}"
                                     for arm in ('outside', 'paid', 'spent', 'topped_up')],
     'cast_state': lambda entry: [f"{entry['spell']} cast_state {moment}" for moment in ('control', 'state', 'allowed')],
+    'mount_block': lambda entry: [f"{entry['spell']} mount_block {entry.get('mount_spell', 458)} {moment}"
+                                  for moment in ('blocked', 'unmounted', 'allowed', 'mounted', 'dismounted')],
     'immunity': lambda entry: [f"{entry['spell']} immunity {subject} {moment}"
                                for subject, moments in ((entry['spell'], ('cast', 'applied')),
                                                         *((effect['spell'], ('without', 'with'))
