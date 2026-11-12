@@ -94,3 +94,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940824) AND `id` IN (9
 -- #12091
 -- pickup 6941185 (Sword of Stone) moved 2.8 yd across and 0.77 yd down to the rock, checked in the editor
 UPDATE `gameobject` SET `position_x` = -5605.7082, `position_y` = -3010.7274, `position_z` = 388.4308, `orientation` = 1.8763, `rotation0` = 0.024881996438814044, `rotation1` = 0.6924965616933979, `rotation2` = 0.2951423079295177, `rotation3` = 0.6578148800126664 WHERE `guid` = 6941185 AND `id` = 95524;
+
+-- #12089
+-- pickup 6940950 (Bear Left Overs) moved 0.42 yd up out of the ground
+UPDATE `gameobject` SET `position_x` = -5814.6, `position_y` = -258.2, `position_z` = 353.21, `orientation` = 6.0879, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.097473, `rotation3` = -0.995238 WHERE `guid` = 6940950 AND `id` = 95681;
