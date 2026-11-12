@@ -2314,7 +2314,9 @@
   {
     "spell": 705287,
     "clause": "Benediction now grants your target armor based on your Agility and Stamina",
-    "labels": [],
+    "labels": [
+      "705287 behaviour_metric_delta armor"
+    ],
     "kind": "claim"
   },
   {
@@ -2322,7 +2324,9 @@
     "clause": "for $/1000;s1 sec",
     "labels": [
       "conformance-templar-value-705287",
-      "705287 e0 spell_modifier 801409 ok"
+      "705287 e0 spell_modifier 801409 ok",
+      "705287 behaviour_cast_applies_aura armor",
+      "705287 behaviour_expiry armor"
     ],
     "kind": "claim"
   },
@@ -3213,7 +3217,9 @@
     "spell": 800424,
     "clause": "for $d",
     "labels": [
-      "800424 aura_duration_ms #0"
+      "800424 aura_duration_ms #0",
+      "800424 behaviour_cast_applies_aura taunt",
+      "800424 behaviour_expiry taunt"
     ],
     "kind": "claim"
   },
@@ -3222,7 +3228,9 @@
     "clause": "increase your movement speed by $520659s1% for $520659d",
     "labels": [
       "800424 effect_value 520659e0 #1",
-      "800424 spell_duration 520659 #2"
+      "800424 spell_duration 520659 #2",
+      "800424 behaviour_metric_delta speed",
+      "800424 behaviour_cast_applies_aura speed"
     ],
     "kind": "claim"
   },
@@ -3309,7 +3317,9 @@
     "spell": 801205,
     "clause": "Place a holy circle on the ground at the target location for $d",
     "labels": [
-      "801205 aura_duration_ms #0"
+      "801205 aura_duration_ms #0",
+      "801205 behaviour_cast_applies_aura circle",
+      "801205 behaviour_expiry circle"
     ],
     "kind": "claim"
   },
@@ -3317,8 +3327,8 @@
     "spell": 801205,
     "clause": "slowing enemy movement speed by $s1%",
     "labels": [
-      "801205 effect_value e0 #1",
-      "801205 aura_amount e0 #1"
+      "801205 aura_amount e0 #1",
+      "801205 behaviour_metric_delta slow"
     ],
     "kind": "claim"
   },
@@ -3326,7 +3336,8 @@
     "spell": 801205,
     "clause": "Every $t2 sec, enemies within the radius enter a tranquil state",
     "labels": [
-      "801205 aura_amplitude_ms #2"
+      "801205 aura_amplitude_ms #2",
+      "801205 behaviour_metric_delta first_tick"
     ],
     "kind": "claim"
   },
@@ -3334,14 +3345,17 @@
     "spell": 850010,
     "clause": "falling asleep for $850010d",
     "labels": [
-      "801205 spell_duration 850010 #3"
+      "801205 spell_duration 850010 #3",
+      "801205 behaviour_metric_delta sleep"
     ],
     "kind": "claim"
   },
   {
     "spell": 850010,
     "clause": "(8 sec vs players)",
-    "labels": [],
+    "labels": [
+      "801205 behaviour_metric_delta sleep_player"
+    ],
     "kind": "claim"
   },
   {
@@ -4084,14 +4098,18 @@
     "spell": 803872,
     "clause": "over $d",
     "labels": [
-      "803880 aura_duration_ms #1"
+      "803880 aura_duration_ms #1",
+      "803872 behaviour_cast_applies_aura dot",
+      "803872 behaviour_expiry dot"
     ],
     "kind": "claim"
   },
   {
     "spell": 803872,
     "clause": "This ability can critically strike.",
-    "labels": [],
+    "labels": [
+      "803872 behaviour_metric_delta crit"
+    ],
     "kind": "claim"
   },
   {
@@ -4742,7 +4760,8 @@
     "clause": "granting you spell power equal to $s2% of your Agility",
     "labels": [
       "805423 effect_value e1 #0",
-      "805423 aura_amount e1 #0"
+      "805423 aura_amount e1 #0",
+      "805423 behaviour_metric_delta spell_power"
     ],
     "kind": "claim"
   },
@@ -4751,7 +4770,8 @@
     "clause": "and attack power equal to $s1% of your Intellect",
     "labels": [
       "805423 effect_value e0 #1",
-      "805423 aura_amount e0 #1"
+      "805423 aura_amount e0 #1",
+      "805423 behaviour_metric_delta attack_power"
     ],
     "kind": "claim"
   },
@@ -4759,7 +4779,9 @@
     "spell": 805423,
     "clause": "for $d",
     "labels": [
-      "805423 aura_duration_ms #2"
+      "805423 aura_duration_ms #2",
+      "805423 behaviour_cast_applies_aura fervor",
+      "805423 behaviour_expiry fervor"
     ],
     "kind": "claim"
   },
@@ -4767,8 +4789,8 @@
     "spell": 805423,
     "clause": "@ext:Only 1 Libram spell can be active at a time.:ext@",
     "labels": [
-      "805423 effect_value #3",
-      "805423 behaviour_exclusivity"
+      "805423 behaviour_exclusivity",
+      "801466 behaviour_exclusivity"
     ],
     "kind": "claim"
   },

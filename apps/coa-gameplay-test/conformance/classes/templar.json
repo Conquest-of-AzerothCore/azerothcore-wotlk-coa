@@ -5363,6 +5363,529 @@
       "cast_target": "ally",
       "cast_target_health_pct": 50,
       "observe_source": "Testament of Faith 801478 heals the grouped ally at 50% health; Binding Scripture's Proc (AscensionTemplarEvents.cpp:164-166) casts 707307 on the Templar. 707307 and 705309 have DurationIndex 1 (10000 ms), the $705309d of the tooltip. The expiry arm is timed from the applied assert on the caster (ADR 0212: the ally cast target adds the grouped ally)."
+    },
+    {
+      "spell": 705287,
+      "name": "Improved Benediction",
+      "kind": "stat_gain",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "now grants your target armor based on your Agility and Stamina",
+      "cast_spell": 578276,
+      "cast_target": "ally",
+      "target_health_pct": 50,
+      "metric": "armor",
+      "clear_auras": [
+        801409
+      ],
+      "wait_ms": 1500,
+      "terms": [
+        {
+          "coefficient": 1.0,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 1
+            },
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "without",
+          "gain": 0
+        },
+        {
+          "name": "with",
+          "learn": [
+            705287
+          ]
+        },
+        {
+          "name": "agility",
+          "auras": [
+            [
+              58451,
+              1
+            ]
+          ]
+        },
+        {
+          "name": "stamina",
+          "auras": [
+            [
+              48101,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Benediction 578276 (rank 8, BaseLevel 58) Effect[0] 64 triggers 801409 on its target (TARGET_UNIT_TARGET_ALLY): Effect[0] aura 22 SPELL_AURA_MOD_RESISTANCE, MiscValue 1 (armor). aura_ascension_templar_lifecycle::Calculate (AscensionTemplarAuras.cpp:64-65) sets its amount to int32(GetStat(STAT_AGILITY) + GetStat(STAT_STAMINA)) of the Templar when 705287 is known, else 0. The grouped ally's armor is read before and after each Benediction (ally at 50% health, 801409 removed first): without the talent +0 (control), with it +AGI+STA of the Templar as read, and again with Agility 58451 and then Stamina 48101 set on the Templar, so the gain follows each stat (ADR 0213)."
+    },
+    {
+      "spell": 705287,
+      "name": "Improved Benediction",
+      "kind": "cast_applies_aura",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "for $/1000;s1 sec",
+      "expected_ms": 15000,
+      "applied_aura": 801409,
+      "target": "ally",
+      "cast_spell": 578276,
+      "cast_target": "ally",
+      "cast_target_health_pct": 50,
+      "observe_source": "801409's DurationEntry is set to 8 (15000 ms) by ApplyContracts (AscensionTemplarContracts.cpp:204-205); 705287 Effect[0] is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION) of +15000 on 801409 (the $/1000;s1 of the tooltip). Benediction 578276 cast at the grouped ally (ADR 0212) with 705287 learned; 801409 read on the ally."
+    },
+    {
+      "spell": 805423,
+      "name": "Libram of Fervor",
+      "kind": "stat_gain",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "granting you spell power equal to $s2% of your Agility",
+      "cast_spell": 805423,
+      "cast_target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 1
+      },
+      "clear_auras": [
+        805423
+      ],
+      "wait_ms": 500,
+      "terms": [
+        {
+          "coefficient": 0.3,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 1
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "reference"
+        },
+        {
+          "name": "agility",
+          "auras": [
+            [
+              58451,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "805423 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (the magic schools), MiscValueB 1 (Agility), BasePoints 29 DieSides 1 (30). The engine adds int32(30% of Agility) to the spell power of each school (Unit::SpellBaseDamageBonusDone). The Templar's Holy spell power is read before and after a real cast of 805423, at the reference Agility and with Agility 58451 set, so the gain follows Agility; the reading before each cast is the no-Libram control (ADR 0213)."
+    },
+    {
+      "spell": 805423,
+      "name": "Libram of Fervor",
+      "kind": "stat_gain",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "and attack power equal to $s1% of your Intellect",
+      "cast_spell": 805423,
+      "cast_target": "caster",
+      "metric": "attack_power",
+      "clear_auras": [
+        805423
+      ],
+      "wait_ms": 500,
+      "terms": [
+        {
+          "coefficient": 0.3,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 3
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "reference"
+        },
+        {
+          "name": "intellect",
+          "auras": [
+            [
+              48100,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "805423 Effect[0] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 3 (Intellect), BasePoints 29 DieSides 1 (30). The engine adds 30% of Intellect to the attack power modifier (Player::UpdateAttackPowerAndDamage). The Templar's attack power is read before and after a real cast of 805423, at the reference Intellect and with Intellect 48100 set, so the gain follows Intellect (ADR 0213)."
+    },
+    {
+      "spell": 805423,
+      "name": "Libram of Fervor",
+      "kind": "cast_applies_aura",
+      "variant": "fervor",
+      "label_suffix": "fervor",
+      "quote": "for $d",
+      "expected_ms": 20000,
+      "applied_aura": 805423,
+      "target": "caster",
+      "observe_source": "805423 DurationIndex 18 (20000 ms), checked by ApplyAscensionTemplarLibramContracts (AscensionTemplarLibrams.cpp:8-31); a real cast at the caster."
+    },
+    {
+      "spell": 801205,
+      "name": "Tranquil Circle",
+      "kind": "cast_applies_aura",
+      "variant": "circle",
+      "label_suffix": "circle",
+      "quote": "Place a holy circle on the ground at the target location for $d",
+      "expected_ms": 4000,
+      "applied_aura": 801205,
+      "target": "dummy",
+      "cast_spell": 801205,
+      "cast_target": "dummy",
+      "observe_source": "801205 Effect[0..2] 27 SPELL_EFFECT_PERSISTENT_AREA_AURA at the target location (TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 14: 8 yd), DurationIndex 35 (4000 ms). Cast at the dummy, the circle's aura is read on the dummy standing in it: present before the stated end, absent after."
+    },
+    {
+      "spell": 801205,
+      "name": "Tranquil Circle",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing enemy movement speed by $s1%",
+      "expected": 0.5714285714,
+      "before_expected": 1.1428571429,
+      "trigger_spell": 801205,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "801205 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -51 DieSides 1 (-50), on enemies in the circle. The dummy's own run speed rate is 1.1428571429 (8/7); 500 ms after a real cast at the dummy it reads half of it. Control: the before reading, no circle."
+    },
+    {
+      "spell": 801205,
+      "name": "Tranquil Circle",
+      "kind": "metric_delta",
+      "variant": "first_tick",
+      "label_suffix": "first_tick",
+      "quote": "Every $t2 sec, enemies within the radius enter a tranquil state",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 801205,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 850010
+      },
+      "wait_ms": 1900,
+      "expire_ms": 500,
+      "expiry_wait_ms": 200,
+      "after_expiry_expected": 1,
+      "observe_source": "801205 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 2000, triggers Tranquil State 850010 (aura 12 stun) on the enemies in the circle; without Tome of Light 807004 the periodic timer is not zeroed (AscensionTemplarAuras.cpp:73-74, 90-91). The dummy has no 850010 before the cast (control), none 1900 ms after it, and has it 2100 ms after it: the first trigger comes in (1900, 2100] ms."
+    },
+    {
+      "spell": 800424,
+      "name": "Absolution",
+      "kind": "cast_applies_aura",
+      "variant": "taunt",
+      "label_suffix": "taunt",
+      "quote": "Taunt all enemies within 8 yds for $d",
+      "expected_ms": 4000,
+      "applied_aura": 800424,
+      "target": "dummy",
+      "cast_spell": 800424,
+      "cast_target": "caster",
+      "observe_source": "800424 Effect[0] aura 11 SPELL_AURA_MOD_TAUNT on the enemies within 8 yd of the caster (TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14), DurationIndex 35 (4000 ms). A real self-centred cast; the taunt aura is read on the dummy at 3 yd."
+    },
+    {
+      "spell": 800424,
+      "name": "Absolution",
+      "kind": "metric_delta",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "increase your movement speed by $520659s1% for $520659d",
+      "expected": 1.5,
+      "before_expected": 1.0,
+      "trigger_spell": 800424,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "wait_ms": 3800,
+      "expire_ms": 500,
+      "expiry_wait_ms": 400,
+      "after_expiry_expected": 1.0,
+      "observe_source": "spell_ascension_templar_ability::Absolve (AscensionTemplarAbilities.cpp:424-428, AfterCast) casts 520659 on the Templar after Absolution 800424: Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 49 DieSides 1 (+50%). 520659 DurationIndex 35 (4000 ms). The caster's run speed rate reads 1.0 before (control, no cast), 1.5 3800 ms after a real cast and 1.0 again 4200 ms after it: +50% that ends in (3800, 4200] ms."
+    },
+    {
+      "spell": 800424,
+      "name": "Absolution",
+      "kind": "cast_applies_aura",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "increase your movement speed by $520659s1% for $520659d",
+      "expected_ms": 4000,
+      "applied_aura": 520659,
+      "target": "caster",
+      "cast_spell": 800424,
+      "cast_target": "caster",
+      "observe_source": "520659 DurationIndex 35 (4000 ms), cast on the Templar by Absolve after Absolution 800424 (AscensionTemplarAbilities.cpp:424-428)."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "cast_applies_aura",
+      "variant": "dot",
+      "label_suffix": "dot",
+      "quote": "Holy damage over $d",
+      "expected_ms": 30000,
+      "applied_aura": 803880,
+      "target": "dummy",
+      "cast_spell": 803880,
+      "cast_target": "dummy",
+      "observe_source": "Blade of Faith 803880 is the level 60 rank (the stored ok 803880 hit_mean): Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE every 3000 ms, DurationIndex 9 (30000 ms). A real cast at the dummy; its aura is read on the dummy."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "metric_delta",
+      "variant": "crit",
+      "label_suffix": "crit",
+      "quote": "This ability can critically strike.",
+      "expected": 3,
+      "before_expected": 0,
+      "trigger_spell": 803880,
+      "target": "dummy",
+      "gate_timing": "start",
+      "force_crit": "spell",
+      "trigger_only_after": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803880,
+        "target": "dummy",
+        "critical": true
+      },
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "observe_source": "With the forced spell crit rating (spell_crit_chance reads about 7045% on 803880), every periodic tick of Blade of Faith 803880 that can crit is critical. Before: no cast, 0 critical ticks (control). After: a real cast at the dummy and 9500 ms (three ticks, at 3, 6 and 9 s): 3 critical ticks expected. Stock AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1180-1210) gives a periodic aura a crit chance only through a SPELL_AURA_ABILITY_PERIODIC_CRIT aura that names it (or Rupture); diagnostic 20261112-014720 read 0 critical of 13 ticks."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "hit_ratio",
+      "variant": "oaths",
+      "label_suffix": "oaths",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "expected": 1.7745,
+      "observe_spell": 803880,
+      "cast_wait_ms": 3100,
+      "learn": [
+        803880
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            804904,
+            1
+          ],
+          [
+            804922,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "attack_power": 20000,
+        "spell_power": 20000
+      },
+      "expected_source": "The shared Oath-consumption shape (docs/behaviour-scenarios.md, b003254ae8): no Oath in the control, Oath: Righteous Lunge 804904 and Oath: Condemn 804922 set before every treatment cast, 1.05 x 1.30 x 1.30 = 1.7745 for a Breaker whose damage the SPELLMOD_DAMAGE mods reach. Blade of Faith 803880 (SpellFamilyFlags[2] 128) deals its damage as periodic ticks every 3000 ms; each trial casts it at the dummy and reads the tick 3100 ms later. Attack power and spell power fixtures of 20000 make its ${($d*1000/$T1)*($m1+0+$SP*.2+$AP*0.1)} dominate. beeg spellpen 823764 in both arms. Only non-critical ticks are compared."
+    },
+    {
+      "spell": 801205,
+      "name": "Tranquil Circle",
+      "kind": "metric_delta",
+      "variant": "sleep",
+      "label_suffix": "sleep",
+      "quote": "falling asleep for $850010d",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 801205,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 850010
+      },
+      "wait_ms": 41800,
+      "expire_ms": 500,
+      "expiry_wait_ms": 400,
+      "after_expiry_expected": 0,
+      "observe_source": "Tranquil State 850010 (aura 12 stun) DurationIndex 64 (40000 ms) on a creature. Its first application comes in (1900, 2100] ms after the cast (the first_tick entry); the circle's 4000 ms tick does not refresh it (diagnostic 20261112-014937: 39900 ms left at 2100 ms, 37888 at 4100). The dummy has no 850010 before the cast (control), has it 41800 ms after the cast and not 42200 ms after it: it ends 40000 ms after its application, within the reads' 400 ms."
+    },
+    {
+      "spell": 801205,
+      "name": "Tranquil Circle",
+      "kind": "metric_delta",
+      "variant": "sleep_player",
+      "label_suffix": "sleep_player",
+      "quote": "(8 sec vs players)",
+      "expected": 1,
+      "before_expected": 0,
+      "enemy_player_race": 2,
+      "trigger_spell": 801205,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 850010
+      },
+      "wait_ms": 9800,
+      "expire_ms": 500,
+      "expiry_wait_ms": 400,
+      "after_expiry_expected": 0,
+      "observe_source": "templar_scaling::OnAuraApply (AscensionTemplarContracts.cpp:313-320) caps 850010 at 8000 ms on a player (TRANQUIL_STATE_PLAYER_DURATION). A PvP-flagged orc of the caster's class at the Elwynn PvP location (ADR 0214) stands in the circle cast at it: no 850010 before (control), present 9800 ms after the cast and absent 10200 ms after it, so it ends 8000 ms after its application at about 2000 ms (diagnostic 20261112-014937: 7894 ms left at 2100 ms). The creature arm of the same cast lasts 40000 ms (the sleep entry)."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "hit_ratio",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "observe_spell": 803880,
+      "cast_wait_ms": 3100,
+      "learn": [
+        803880
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "variant": "oath_lunge",
+      "label_suffix": "oath_lunge",
+      "expected": 1.0,
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            804904,
+            1
+          ]
+        ]
+      },
+      "expected_source": "Oath: Righteous Lunge 804904: Effect[0] and Effect[2] aura 108 SPELLMOD_DAMAGE (+5%, +30%), which the periodic path (SPELLMOD_DOT, Unit::SpellDamageBonusDone) never reads; Effect[1] SPELLMOD_EFFECT3 on another mask. Data expectation for the tick: 1.0. Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "hit_ratio",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "observe_spell": 803880,
+      "cast_wait_ms": 3100,
+      "learn": [
+        803880
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "variant": "oath_condemn",
+      "label_suffix": "oath_condemn",
+      "expected": 1.25,
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            804922,
+            1
+          ]
+        ]
+      },
+      "expected_source": "Oath: Condemn 804922 Effect[1] aura 107 SPELLMOD_EFFECT2 +25 on mask word 1 bit 2048 (Blade of Faith): 803880 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER becomes +25%, so the tick reads 1.25. Effect[2] SPELLMOD_DAMAGE +30% is not read on the periodic path. Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
+    },
+    {
+      "spell": 803872,
+      "name": "Blade of Faith",
+      "kind": "hit_ratio",
+      "quote": "Consumes your Oaths, dealing additional damage for each consumed.",
+      "observe_spell": 803880,
+      "cast_wait_ms": 3100,
+      "learn": [
+        803880
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "variant": "oath_cleave",
+      "label_suffix": "oath_cleave",
+      "expected": 1.1309,
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            804903,
+            1
+          ]
+        ]
+      },
+      "expected_source": "Oath: Holy Cleave 804903 Effect[2] aura 107 SPELLMOD_DOT (MiscValue 22) +25 on mask word 1 bit 2048: +25 per tick; the stored 803872 oath_consumption readback reads the +25 (800 to 825). The expected ratio is (191 + 25) / 191 = 1.1309 with 191 the control tick at the reference stats (not derived independently of the run: the tick's own formula is not modelled by the hit model). Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
     }
   ],
   "player_observations": [
