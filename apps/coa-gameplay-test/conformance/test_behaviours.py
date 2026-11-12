@@ -8550,6 +8550,7 @@ class HitRatioArmLearnTests(unittest.TestCase):
             hit_arm({'learn': [705286], 'unlearn': [705286]})
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitRatioAllyDistanceTests(unittest.TestCase):
     FORTIFIED_BODY = 300515
 
