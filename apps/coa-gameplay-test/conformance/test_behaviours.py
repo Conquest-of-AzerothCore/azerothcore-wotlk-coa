@@ -7961,7 +7961,7 @@ class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, entry)
 
 
-def stat_gain_values(model: dict, gains: dict, stats: dict) -> dict:
+def stat_gain_values(model: dict, gains: dict, stats: dict, changed: dict | None = None) -> dict:
     values = {}
     for arm in model['arms']:
         values[arm['before']] = 1000.0
@@ -7969,7 +7969,14 @@ def stat_gain_values(model: dict, gains: dict, stats: dict) -> dict:
         for term in arm['terms']:
             for index, label in enumerate(term):
                 values[label] = stats[arm['name']][index]
-    return values
+        reads = arm.get('attribution')
+        if reads:
+            values.update({label: 0.0 for _, label in reads['before']['auras']})
+            values.update({label: 1.0 for _, label in reads['after']['auras']})
+            values[reads['before']['count']] = 5.0
+            values[reads['after']['count']] = 5.0 + len(reads['after']['auras'])
+            values[reads['return']] = 1000.0
+    return {**values, **(changed or {})}
 
 
 class StatGainTests(unittest.TestCase):
@@ -8022,34 +8029,115 @@ class StatGainTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             stat_gain_scenario(CLASS_FILE, stat_gain_spec(entry))
 
-    def evidence(self, entry: dict, clause: str, gains: dict, stats: dict) -> str:
+    ARMOR_STATS = {'without': (132.0, 79.0), 'with': (132.0, 79.0), 'agility': (162.0, 79.0),
+                   'stamina': (132.0, 142.0)}
+    ARMOR_GAINS = {'without': 0.0, 'with': 211.0, 'agility': 241.0, 'stamina': 274.0}
+    POWER_STATS = {'reference': (132.0,), 'agility': (162.0,)}
+    POWER_GAINS = {'reference': 39.0, 'agility': 48.0}
+
+    def verdict(self, expectation: Expectation, gains: dict, stats: dict, changed: dict | None = None) -> Verdict:
+        values = stat_gain_values(expectation.model, gains, stats, changed)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def evidence(self, expectation: Expectation, clause: str, gains: dict, stats: dict,
+                 changed: dict | None = None) -> str:
         from coverage import verdict_evidence
-        _, expectations = behaviour_scenario(CLASS_FILE, entry)
-        expectation = expectations[0]
-        values = stat_gain_values(expectation.model, gains, stats)
-        verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+        verdict = self.verdict(expectation, gains, stats, changed)
         self.assertEqual(verdict.status, 'ok')
         return verdict_evidence(verdict, clause, {verdict.label: verdict})
 
+    def armor(self, entry: dict | None = None) -> Expectation:
+        _, expectations = behaviour_scenario(CLASS_FILE, entry or r1a_entry(705287, 'stat_gain', 'armor'))
+        return expectations[0]
+
+    def power(self, entry: dict | None = None) -> Expectation:
+        _, expectations = behaviour_scenario(CLASS_FILE, entry or r1a_entry(805423, 'stat_gain', 'spell_power'))
+        return expectations[0]
+
+    def reads(self, expectation: Expectation, arm: str) -> dict:
+        return next(item for item in expectation.model['arms'] if item['name'] == arm)['attribution']
+
+    def test_the_cast_aura_is_read_cleared_before_and_the_stat_read_back_after_its_removal(self):
+        from behaviours import stat_gain_scenario, stat_gain_spec
+        scenario, _ = stat_gain_scenario(CLASS_FILE, stat_gain_spec(r1a_entry(705287, 'stat_gain', 'armor')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        labels = [step.get('label') for step in steps]
+        for arm in ('without', 'with'):
+            mark = f'705287 behaviour_metric_delta armor {arm}'
+            cleared, before = labels.index(f'{mark} aura 801409 before'), labels.index(f'{mark} before')
+            present, after, back = (labels.index(f'{mark} aura 801409 after'), labels.index(f'{mark} after'),
+                                    labels.index(f'{mark} return'))
+            cast = next(index for index in cast_indices(steps, 578276) if index > before)
+            removal = next(index for index in set_aura_indices(steps, 801409) if index > present)
+            self.assertLess(cleared, before)
+            self.assertLess(before, cast)
+            self.assertLess(cast, after)
+            self.assertLess(after, present)
+            self.assertLess(present, removal)
+            self.assertLess(removal, back)
+            self.assertEqual(steps[cleared]['metric'], 'aura')
+            self.assertEqual(steps[cleared]['actor'], ALLY)
+            self.assertEqual(steps[back]['metric'], 'armor')
+
     def test_a_withheld_talent_or_the_spells_own_cast_is_a_learned_contrast(self):
-        armor = r1a_entry(705287, 'stat_gain', 'armor')
-        stats = {'without': (132.0, 79.0), 'with': (132.0, 79.0), 'agility': (162.0, 79.0), 'stamina': (132.0, 142.0)}
-        gains = {'without': 0.0, 'with': 211.0, 'agility': 241.0, 'stamina': 274.0}
-        self.assertEqual(self.evidence(armor, 'grants your target armor', gains, stats), 'behaviour')
-        power = r1a_entry(805423, 'stat_gain', 'spell_power')
-        self.assertEqual(self.evidence(power, 'granting you spell power', {'reference': 39.0, 'agility': 48.0},
-                                       {'reference': (132.0,), 'agility': (162.0,)}), 'behaviour')
+        armor = self.armor()
+        self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS),
+                         'behaviour')
+        verdict = self.verdict(armor, self.ARMOR_GAINS, self.ARMOR_STATS)
+        self.assertEqual(verdict.detail['applied_auras'], {arm: [801409] for arm in self.ARMOR_GAINS})
+        power = self.power()
+        self.assertEqual(self.evidence(power, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
+                         'behaviour')
 
     def test_arms_that_never_withhold_the_spell_stay_data(self):
-        armor = r1a_entry(705287, 'stat_gain', 'armor')
-        learned_first = {**armor, 'arms': [{**arm, 'learn': [705287]} for arm in armor['arms'][1:]]}
-        stats = {'with': (132.0, 79.0), 'agility': (162.0, 79.0), 'stamina': (132.0, 142.0)}
-        gains = {'with': 211.0, 'agility': 241.0, 'stamina': 274.0}
+        entry = r1a_entry(705287, 'stat_gain', 'armor')
+        learned_first = self.armor({**entry, 'arms': [{**arm, 'learn': [705287]} for arm in entry['arms'][1:]]})
+        gains = {arm: gain for arm, gain in self.ARMOR_GAINS.items() if arm != 'without'}
+        stats = {arm: stat for arm, stat in self.ARMOR_STATS.items() if arm != 'without'}
         self.assertEqual(self.evidence(learned_first, 'grants your target armor', gains, stats), 'data')
-        power = r1a_entry(805423, 'stat_gain', 'spell_power')
-        kept_aura = {**power, 'clear_auras': []}
-        self.assertEqual(self.evidence(kept_aura, 'granting you spell power', {'reference': 39.0, 'agility': 48.0},
-                                       {'reference': (132.0,), 'agility': (162.0,)}), 'data')
+        kept_aura = self.power({**r1a_entry(805423, 'stat_gain', 'spell_power'), 'clear_auras': []})
+        self.assertEqual(self.evidence(kept_aura, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
+                         'data')
+
+    def test_seeded_attribution_failures_keep_the_gain_at_data(self):
+        power = self.power()
+        reads = self.reads(power, 'reference')
+        mutants = {
+            'aura not cleared': {reads['before']['auras'][0][1]: 1.0},
+            'aura absent after the cast': {reads['after']['auras'][0][1]: 0.0},
+            'an unlisted aura appeared': {reads['after']['count']: 7.0},
+            'stat not back after removal': {reads['return']: 1039.0},
+        }
+        for name, changed in mutants.items():
+            with self.subTest(mutant=name):
+                self.assertEqual(self.evidence(power, 'granting you spell power', self.POWER_GAINS,
+                                               self.POWER_STATS, changed), 'data')
+
+    def test_the_arm_without_the_talent_need_not_apply_the_aura(self):
+        armor = self.armor()
+        without, treated = self.reads(armor, 'without'), self.reads(armor, 'with')
+        absent = {without['after']['auras'][0][1]: 0.0, without['after']['count']: 5.0}
+        self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS, absent),
+                         'behaviour')
+        missing = {treated['after']['auras'][0][1]: 0.0, treated['after']['count']: 5.0}
+        self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS,
+                                       missing), 'data')
+
+    def test_another_applied_aura_needs_an_arm_without_the_spell(self):
+        def with_extra_aura(expectation: Expectation) -> Expectation:
+            model = json.loads(json.dumps(expectation.model))
+            model['attribution']['candidates'].append(999999)
+            for arm in model['arms']:
+                for moment in ('before', 'after'):
+                    arm['attribution'][moment]['auras'].append([999999, f'{arm["name"]} aura 999999 {moment}'])
+            return replace(expectation, model=model)
+        power = with_extra_aura(self.power())
+        self.assertEqual(self.evidence(power, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
+                         'data')
+        armor = with_extra_aura(self.armor())
+        self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS),
+                         'behaviour')
 
 
 class EnemyPlayerMetricDeltaTests(unittest.TestCase):

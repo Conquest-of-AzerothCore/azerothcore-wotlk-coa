@@ -6590,6 +6590,7 @@ def source_stack_spec(entry: dict) -> SourceStackSpec:
 
 STAT_GAIN_SETTLE_MS = 200
 STAT_GAIN_WAIT_MS = 500
+STAT_GAIN_RETURN = 'return'
 
 
 @dataclass(frozen=True)
@@ -6625,11 +6626,49 @@ def stat_gain_mark(spec: StatGainSpec, arm: str, key: str) -> str:
     return f'{stat_gain_label(spec)} {arm} {key}'
 
 
-def stat_gain_contrast(spec: StatGainSpec) -> str:
-    cast_is_the_spell = spec.cast_spell == spec.spell and spec.spell in spec.clear_auras
-    withheld_then_learned = (spec.spell not in spec.arms[0].learn
-                             and any(spec.spell in arm.learn for arm in spec.arms[1:]))
-    return LEARNED_CONTRAST if cast_is_the_spell or withheld_then_learned else CONDITION_CONTRAST
+STAT_GAIN_AURA_EFFECTS = frozenset({6, 35, 65, 119, 128, 129, 143})
+STAT_GAIN_TRIGGER_EFFECTS = frozenset({64, 142})
+STAT_GAIN_ATTRIBUTION = 'attribution'
+
+
+def applies_aura(records: Records, spell: int) -> bool:
+    return any(effect in STAT_GAIN_AURA_EFFECTS for effect in facts_of(records, spell).effects)
+
+
+def cast_auras(records: Records, spell: int) -> list[int]:
+    found = [spell] if applies_aura(records, spell) else []
+    for effect, kind in enumerate(facts_of(records, spell).effects):
+        triggered = records.field('Spell', spell, f'EffectTriggerSpell[{effect}]')
+        if kind in STAT_GAIN_TRIGGER_EFFECTS and triggered and applies_aura(records, triggered):
+            found.append(triggered)
+    return found
+
+
+def stat_gain_withheld_arm(spec: StatGainSpec) -> str | None:
+    if spec.spell in spec.arms[0].learn or not any(spec.spell in arm.learn for arm in spec.arms[1:]):
+        return None
+    return spec.arms[0].name
+
+
+def stat_gain_attribution(records: Records, spec: StatGainSpec) -> dict | None:
+    own_cast = spec.cast_spell == spec.spell and spec.spell in spec.clear_auras
+    withheld = stat_gain_withheld_arm(spec)
+    if not spec.clear_auras or not (own_cast or withheld):
+        return None
+    candidates = list(dict.fromkeys([*spec.clear_auras, *cast_auras(records, spec.cast_spell)]))
+    return {'spell': spec.spell, 'auras': list(spec.clear_auras), 'candidates': candidates, 'withheld_arm': withheld}
+
+
+def target_aura_steps(spec: StatGainSpec, spells, stacks: int = 0) -> list[dict]:
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks,
+             **({'target': spec.cast_target} if spec.cast_target != CASTER else {})} for spell in spells]
+
+
+def stat_gain_aura_reads(spec: StatGainSpec, arm: str, candidates: list[int], moment: str) -> tuple[list, dict]:
+    labels = [[aura, stat_gain_mark(spec, arm, f'aura {aura} {moment}')] for aura in candidates]
+    count = stat_gain_mark(spec, arm, f'auras {moment}')
+    steps = [measurement(label, spec.cast_target, 'aura', spell=aura) for aura, label in labels]
+    return steps + [measurement(count, spec.cast_target, 'applied_aura_count')], {'auras': labels, 'count': count}
 
 
 def stat_gain_validate(spec: StatGainSpec):
@@ -6651,6 +6690,7 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'stat_gain', spec.quote, 0.0)
     facts = facts_of(records, spec.cast_spell)
+    attribution = stat_gain_attribution(records, spec)
     steps = (base_steps(class_file) + ally_group_steps({spec.cast_target})
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}])
     arms = []
@@ -6658,9 +6698,7 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
         steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in arm.learn]
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                   for spell, stacks in arm.auras]
-        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0,
-                   **({'target': spec.cast_target} if spec.cast_target != CASTER else {})}
-                  for spell in spec.clear_auras]
+        steps += target_aura_steps(spec, spec.clear_auras)
         steps.append({'action': 'wait', 'label': f'{arm.name} settle', 'ms': STAT_GAIN_SETTLE_MS})
         terms = []
         for term_index, term in enumerate(spec.terms):
@@ -6671,6 +6709,10 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
                 labels.append(label)
             terms.append(labels)
         before, after = stat_gain_mark(spec, arm.name, BEFORE), stat_gain_mark(spec, arm.name, AFTER)
+        reads = {}
+        if attribution:
+            aura_steps, reads[BEFORE] = stat_gain_aura_reads(spec, arm.name, attribution['candidates'], BEFORE)
+            steps += aura_steps
         steps.append(measurement(before, spec.cast_target, spec.metric, **dict(spec.fields)))
         if spec.target_health_pct is not None:
             steps.append(fixture_health_step(spec.cast_target, spec.target_health_pct))
@@ -6679,8 +6721,15 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
                   + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': spec.cast_target},
                      {'action': 'wait', 'label': f'{arm.name} cast wait', 'ms': facts.cast_time_ms + spec.wait_ms},
                      measurement(after, spec.cast_target, spec.metric, **dict(spec.fields))])
+        if attribution:
+            aura_steps, reads[AFTER] = stat_gain_aura_reads(spec, arm.name, attribution['candidates'], AFTER)
+            reads[STAT_GAIN_RETURN] = stat_gain_mark(spec, arm.name, STAT_GAIN_RETURN)
+            steps += (aura_steps + target_aura_steps(spec, spec.clear_auras)
+                      + [{'action': 'wait', 'label': f'{arm.name} return', 'ms': STAT_GAIN_SETTLE_MS},
+                         measurement(reads[STAT_GAIN_RETURN], spec.cast_target, spec.metric, **dict(spec.fields))])
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
-        arms.append({'name': arm.name, 'before': before, 'after': after, 'gain': arm.gain, 'terms': terms})
+        arms.append({'name': arm.name, 'before': before, 'after': after, 'gain': arm.gain, 'terms': terms,
+                     **({STAT_GAIN_ATTRIBUTION: reads} if attribution else {})})
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour stat gain'
@@ -6689,11 +6738,15 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
                     f'reads the caster\'s stats the formula names, then the {spec.metric} of the '
                     f'{spec.cast_target} right before and right after a real cast of {spec.cast_spell} at it; the '
                     f'gain is judged exactly against the arm\'s stated gain, or within the truncation of the '
-                    f'formula on the stats read.',
+                    f'formula on the stats read.'
+                    + (f' Around each cast it reads the auras {attribution["candidates"]} and the aura count of the '
+                       f'{spec.cast_target}, then removes {attribution["auras"]} and reads the {spec.metric} again.'
+                       if attribution else ''),
         'players': [player_fixture(class_file)] + ally_players(class_file, {spec.cast_target}),
         'steps': steps}
     model = {'kind': 'stat_gain', 'arms': arms, 'coefficients': [term.coefficient for term in spec.terms],
-             'metric': spec.metric, 'contrast': stat_gain_contrast(spec), 'quote': entry.quote}
+             'metric': spec.metric, 'quote': entry.quote,
+             **({STAT_GAIN_ATTRIBUTION: attribution} if attribution else {})}
     return scenario, [Expectation(stat_gain_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.cast_spell, None,
                                   '0', prose_rule(entry.quote, spec.spell), model)]
 

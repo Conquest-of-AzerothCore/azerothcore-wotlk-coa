@@ -27,9 +27,10 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
-                        BEHAVIOUR_FALL_DAMAGE,
-                        BEHAVIOUR_SOURCE_STACK, DISPEL_TYPE_NAMES, HIT_RATIO_ARMS, TAKEN_HIT_CONTROL_ARM,
-                        TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio, strongest_percent)
+                        BEHAVIOUR_FALL_DAMAGE, BEHAVIOUR_SOURCE_STACK, CONDITION_CONTRAST, DISPEL_TYPE_NAMES,
+                        HIT_RATIO_ARMS, LEARNED_CONTRAST, STAT_GAIN_ATTRIBUTION, STAT_GAIN_RETURN,
+                        TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
+                        strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
                    bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
@@ -2849,10 +2850,47 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                    explanation=explanation)
 
 
+def stat_gain_arm_labels(arm: dict) -> list[str]:
+    reads = arm.get(STAT_GAIN_ATTRIBUTION)
+    if not reads:
+        return []
+    return [*(label for moment in ('before', 'after') for _, label in reads[moment]['auras']),
+            reads['before']['count'], reads['after']['count'], reads[STAT_GAIN_RETURN]]
+
+
+def stat_gain_attributed(run: Run, model: dict) -> tuple[bool, dict, list[str]]:
+    attribution = model[STAT_GAIN_ATTRIBUTION]
+    held, applied, notes = True, {}, []
+    for arm in model['arms']:
+        reads = arm[STAT_GAIN_ATTRIBUTION]
+        before = {aura: run.values[label] for aura, label in reads['before']['auras']}
+        after = {aura: run.values[label] for aura, label in reads['after']['auras']}
+        listed = [aura for aura in after if before[aura] < 0.5 <= after[aura]]
+        applied[arm['name']] = listed
+        appeared = run.values[reads['after']['count']] - run.values[reads['before']['count']]
+        start, back = run.values[arm['before']], run.values[reads[STAT_GAIN_RETURN]]
+        others = [aura for aura in listed if aura not in attribution['auras']]
+        failures = [*(f'{aura} not read absent before the cast' for aura in attribution['auras']
+                      if before[aura] >= 0.5),
+                    *(f'{aura} not read present after it' for aura in attribution['auras']
+                      if after[aura] < 0.5 and arm['name'] != attribution['withheld_arm']),
+                    *([f'{appeared:g} auras appeared, {len(listed)} listed'] if abs(appeared - len(listed)) > 0.5
+                      else []),
+                    *([f'other auras {others} and no arm without {attribution["spell"]}']
+                      if others and not attribution['withheld_arm'] else []),
+                    *([f'returned to {back:g}, not {start:g}']
+                      if abs(back - start) > METRIC_DELTA_FLOAT_TOLERANCE else [])]
+        held = held and not failures
+        notes.append(f'{arm["name"]}: cast applied {listed}, {model["metric"]} back to {back:g} from {start:g}'
+                     + (f' ({"; ".join(failures)})' if failures else ''))
+    return held, applied, notes
+
+
 def behaviour_stat_gain_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     parts, failed, first = [], False, None
     for arm in model['arms']:
-        labels = [arm['before'], arm['after'], *(label for term in arm['terms'] for label in term)]
+        labels = [arm['before'], arm['after'], *(label for term in arm['terms'] for label in term),
+                  *stat_gain_arm_labels(arm)]
         missing = next((label for label in labels if run.values.get(label) is None), None)
         if missing:
             return replace(base, explanation=missing_measurement(run, missing))
@@ -2872,8 +2910,14 @@ def behaviour_stat_gain_verdict(base: Verdict, run: Run, model: dict) -> Verdict
         parts.append(f'{arm["name"]}: {model["metric"]} gained {gain:g}, expected {stated}: '
                      f'{"held" if held else "missed"}')
     gain, expected, low, high = first
+    contrast, detail = CONDITION_CONTRAST, {}
+    if STAT_GAIN_ATTRIBUTION in model:
+        held, applied, notes = stat_gain_attributed(run, model)
+        parts += notes
+        contrast = LEARNED_CONTRAST if held and not failed else CONDITION_CONTRAST
+        detail = {'applied_auras': applied}
     return replace(base, status='alert' if failed else 'ok', measured=gain, expected=expected, low=low, high=high,
-                   explanation='; '.join(parts))
+                   explanation='; '.join(parts), detail={**(base.detail or {}), **detail, CONTRAST: contrast})
 
 
 def behaviour_heal_block_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

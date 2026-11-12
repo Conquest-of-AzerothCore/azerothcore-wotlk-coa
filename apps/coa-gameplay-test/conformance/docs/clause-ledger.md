@@ -210,7 +210,7 @@ not in the table fails the whole run (`EvidenceError`, no default):
   counts as behaviour when it is the stat the clause promises, read in a learned/unlearned contrast: the check is
   `passive_delta`, `behaviour_party_stat_ratio` (an ally's stat before and after the caster learns the spell), or
   `behaviour_metric_delta` with `detail.contrast` `learned` (not the `setup_only_after` condition contrast; a
-  `stat_gain` model stamps its own, ADR 0258), and the
+  `stat_gain` verdict gets it from its judge under attribution reads, ADR 0258), and the
   clause text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell
   power" or "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating"
   or a `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A stat read as a proxy for another

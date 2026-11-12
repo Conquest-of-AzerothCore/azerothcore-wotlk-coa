@@ -1489,9 +1489,23 @@ reads the metric again. An arm with `gain` must gain exactly that; an arm withou
 stats it read, inside floor(x) to ceil(x). Improved Benediction 705287: the grouped ally's armor gains 0 without the
 talent, Agility + Stamina with it, and again with Agility 58451 and with Stamina 48101 set; Libram of Fervor 805423:
 Holy spell power +30% of Agility and attack power +30% of Intellect, at the reference stats and with Agility 58451 or
-Intellect 48100 set. The model's `contrast` (ADR 0258) is `learned` when the cast spell is the entry's spell with its
-aura in `clear_auras`, or when the first arm lacks the entry's spell and a later arm learns it; otherwise it is
-`condition`, and coverage keeps the state read at data.
+Intellect 48100 set.
+
+An entry has an `attribution` (ADR 0258) when the cast spell is the entry's spell with its aura in `clear_auras`, or
+when the first arm lacks the entry's spell and a later arm learns it. Each arm then reads these on the cast target:
+- before and after the cast, the `clear_auras` and the auras the DBC says the cast applies, plus
+  `applied_aura_count`;
+- after the `clear_auras` are removed, the stat again (`return`).
+
+The judge stamps `contrast: learned` when all of the following hold in every arm:
+- the attributed auras read absent before the cast, and present after it in every arm except the withheld control
+  arm;
+- no unlisted aura appeared;
+- any other applied aura comes with an arm without the spell;
+- the stat returns to its reading before the cast.
+
+Otherwise it stamps `condition`, and coverage keeps the state read at data. `applied_auras` in the detail lists what
+each arm's cast applied.
 
 ### An enemy player in metric_delta (ADR 0214)
 

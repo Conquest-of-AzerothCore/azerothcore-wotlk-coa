@@ -3829,6 +3829,8 @@ private:
             Require(info != nullptr, "Incoming spell damage needs a spell");
             return unit->SpellDamageBonusTaken(attacker, info, 1000, SPELL_DIRECT_DAMAGE);
         }
+        if (metric == "applied_aura_count")
+            return static_cast<double>(unit->GetAppliedAuras().size());
         if (metric == "carried_aura_count")
         {
             ObjectGuid caster;
