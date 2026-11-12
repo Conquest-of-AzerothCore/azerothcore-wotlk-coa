@@ -19,5 +19,6 @@ every class file without the section, generate as before.
 ## Consequences
 
 - Sacred Swing schedules 60 casts and needs 40 hits for its mean.
+- `conformance.py scaffold` writes an empty `hit_casts` section, as for the other list sections.
 - Seeded tests: the floor raises the casts, a larger model count is kept, other ranks are untouched, a floor of 0 is
   refused.
