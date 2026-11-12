@@ -38,4 +38,7 @@ same aura for a healing-done effect (`AscensionSunClericContracts.cpp`, 704909).
   `705300 behaviour_hit_ratio healing_received` (x1.00, the ally heals the caster) are ok on the counted pair
   20261112-075403 / 20261112-075458 (worldserver fe5cc405…): +15.08% / +14.98% and -0.01% / -0.05%.
   `holy_damage` (+14.88% / +15.07%) is the unchanged-part control.
+- After review (rule 4 amendment point 6), both healing arms and the catalog scenario cast 705300 for real instead
+  of setting its aura. On the counted pair 20261112-084520 / 20261112-084607 (worldserver 4d20e7ca…, commit
+  21e6485e36), `healing_done` reads +14.89% / +14.85% and `healing_received` +0.01% / 0.00%, both ok.
 - A Templar who relied on Eternal Blessing to raise healing received from others loses that bonus.

@@ -38,4 +38,10 @@ Keeping the Oath's absorb.
 - Conformance: `705286 behaviour_hit_ratio damage_physical` reads +9.48% / +9.72% (ok, three pooled parts of 100
   swings, 99% half-width about 0.7 points) on the counted pair 20261112-080132 / 20261112-080209; `damage_holy`
   (+10.00%) and `speed` (1.02) are the unchanged-part controls.
+- After review (rule 4 amendment point 6), the stacks come from the talent itself. The damage arms learn 705286 in
+  the treatment arm only (the hit-ratio arm `learn` field). Both arms cast five Oath-granting Righteous Lunges before
+  their first read and one before every read; the physical arm is five parts of 60 swings. The catalog scenario
+  reads the five-Lunge control without the talent, then 5 stacks with it.
+- On the counted pair 20261112-084520 / 20261112-084607 (worldserver 4d20e7ca…, commit 21e6485e36):
+  `damage_physical` +10.08% / +9.97% (99% half-width 0.53), `damage_holy` +10.00% / +10.00%, both ok.
 - Physical abilities and white swings gain up to 10% while Duty Calls is stacked.
