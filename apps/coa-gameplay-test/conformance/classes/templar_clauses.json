@@ -2897,7 +2897,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "label repair: 'conformance-templar-value-706320' was a scenario name (now 706320 effect_value e0 #0), and the free-text label '706320 e0 spell_modifier ok across all 14 listed targets' is now the 14 per-target 706320 e0 spell_modifier labels; 4 of 14 Oaths in game, 10 by the same effect: 706320 Effect[0] SPELLMOD_ALL_EFFECTS +20% on mask word 2 bit 2147483648, which all 14 family-25 Oaths carry. Oath: Righteous Lunge 804904, Condemn 804922 and Vindication 805332 are proven in Combat Training's own unit (18-22%, ADR 0239). Oath: Holy Cleave 804903 was run in game (804903 combat_training behaviour_fixed_count): int32(1 x 1.2) = 1, so its +1 extra target is unchanged; that part is not cited as proof and is status 5, Q-r3b-2 in lean/owner-questions.md."
+    "reason": "label repair: 'conformance-templar-value-706320' was a scenario name (now 706320 effect_value e0 #0), and the free-text label '706320 e0 spell_modifier ok across all 14 listed targets' is now the 14 per-target 706320 e0 spell_modifier labels; 4 of 14 Oaths in game, 10 by the same effect: 706320 Effect[0] SPELLMOD_ALL_EFFECTS +20% on mask word 2 bit 2147483648, which all 14 family-25 Oaths carry. Oath: Righteous Lunge 804904, Condemn 804922 and Vindication 805332 are proven in Combat Training's own unit (18-22%, ADR 0239). Oath: Holy Cleave 804903 was run in game (804903 combat_training behaviour_fixed_count): int32(1 x 1.2) = 1, so its +1 extra target is unchanged; owner ruling 2026-11-12 (Q-r3b-2), option (a): truncation is accepted for target counts, so that part is conformant by the ruling (status 2)."
   },
   {
     "spell": 706323,
@@ -4684,7 +4684,7 @@
       "807268 script_hit 801832"
     ],
     "kind": "claim",
-    "reason": "awaiting owner (r2-a question 2): the Scourgebane strike Argent Blade 807268 unleashes averages 257.9 / 260.0 against 236.4 for the stated ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} (alert); it is the same 801832 strike as Scourgebane's, whose 50% weapon part (92111's tooltip) makes 258.0; counted 20261112-021809 / -021850"
+    "reason": "Owner ruling 2026-11-12 (Q-r2a-2): option (a), the server is right. The Scourgebane strike Argent Blade 807268 unleashes averages 257.9 / 260.0 against 236.4 for the stated ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25}; it is the same 801832 strike as Scourgebane's, whose 50% weapon part (92111's tooltip) makes 258.0; counted 20261112-021809 / -021850. Conformant by the ruling (status 2)."
   },
   {
     "spell": 804930,
@@ -5196,9 +5196,11 @@
       "806522 e1 spell_modifier 801832",
       "806522 e1 spell_critical_damage 801832",
       "806522 e1 spell_modifier 92111/520007/801861/804916/807268 (measured, delta 0)",
-      "806522 e1 spell_critical_damage 92111/520007/801861/804916/807268 (measured, delta 0)"
+      "806522 e1 spell_critical_damage 92111/520007/801861/804916/807268 (measured, delta 0)",
+      "806522 behaviour_hit_ratio critical_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner ruling 2026-11-12 (Q-r1b-1): option (a), the bonus reading: $s2% of the critical bonus. 806522 behaviour_hit_ratio critical_damage reads +8.33 / +8.34 against 8.33 (25% of the 50% crit bonus), ok, counted 20261111-231340 / -231411."
   },
   {
     "spell": 806525,
