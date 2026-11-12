@@ -620,7 +620,7 @@ def prove_command(args) -> int:
         return generate(args.class_id, out, behaviours=sorted({entry['spell'] for entry in sized}), trials=trials)
 
     out = Path(args.out).resolve()
-    spec = ProveSpec(out, args.worktree, args.runs, args.build, args.timeout_ms)
+    spec = ProveSpec(out, args.worktree, args.runs, args.build, args.timeout_ms, db_workers=args.db_workers)
     rows, enrich, annotate = ledger_hooks(args.clauses) if args.clauses else (None, None, None)
     pilot = hit_ratio_pilot(sizable_labels(sized), make_pilot, make)
     code = prove(spec, make, rows, enrich, annotate, pilot=pilot)
@@ -714,6 +714,8 @@ def main(argv=None) -> int:
     proving.add_argument('--build', action='store_true', help='include the build stage in run 1 only')
     proving.add_argument('--timeout-ms', dest='timeout_ms', type=int, default=600000,
                          help='limit of one coa-verify run in milliseconds (600000)')
+    proving.add_argument('--gameplay-db-workers', dest='db_workers', type=int,
+                         help='passed to every coa-verify run, for a gameplay set that shares the test MySQL')
     proving.add_argument('--clauses', type=Path,
                          help='a clause ledger: the fragment lists its claims whose labels all run here, and the '
                               'summary reports its coverage on each run')

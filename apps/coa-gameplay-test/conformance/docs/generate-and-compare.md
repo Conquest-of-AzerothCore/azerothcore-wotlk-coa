@@ -255,7 +255,7 @@ as ground truth.
 
 ```sh
 python3 -B conformance.py prove --class 19 [--behaviour SPELL ...] [--proc AURA ...] [--trigger AURA ...] \
-    --out DIR --worktree W [--runs 2] [--build] [--timeout-ms 600000] [--clauses LEDGER]
+    --out DIR --worktree W [--runs 2] [--build] [--timeout-ms 600000] [--gameplay-db-workers N] [--clauses LEDGER]
 ```
 
 `prove` runs the gameplay passes of chosen class-file entries deterministically (ADR 0121). Run it from
@@ -273,7 +273,8 @@ without that tooling it cannot run as documented. Run the generated scenarios tw
    least one is required; `DIR` must be new or empty and lie under the worktree or its main checkout, the two
    directories `coa-verify` mounts.
 2. For each run (at least 2), executes in the foreground `coa-verify --worktree W --ram --stages gameplay --scenario
-   <every scenario file>` (`build,gameplay` on run 1 only with `--build`), with the timeout; never `--jobs`. A timeout
+   <every scenario file>` (`build,gameplay` on run 1 only with `--build`, and `--gameplay-db-workers N` on every
+   run when given, for a set that shares the test MySQL), with the timeout; never `--jobs`. A timeout
    stops the process group (SIGTERM, then SIGKILL after 30 s) and the run fails. The run directory comes from the
    `VERIFY ALL: <status> <report.json>` line of `DIR/run<n>/verify.log`; `INCOMPLETE` is the normal status of
    exploratory scenario files. A failed build stage, scenario drift, results of several builds, or a run (pilot
