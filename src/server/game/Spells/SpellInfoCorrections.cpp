@@ -5509,6 +5509,13 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Attributes |= SPELL_ATTR0_ON_NEXT_SWING;
     });
 
+    // CoA: Sacrifice (Zevrim Thornhoof): the 2100215 tooltip drains 17% maximum health per second, but the
+    // periodic effect of 2100216 ticked every 2 seconds.
+    ApplySpellFix({ 2100216 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->Effects[EFFECT_1].Amplitude = 1000;
+    });
+
     // CoA: Summon Eye of Immol'thar puts the eyes anywhere up to 30 yards away; keep them close around him.
     ApplySpellFix({ 2100246 }, [](SpellInfo* spellInfo)
     {
