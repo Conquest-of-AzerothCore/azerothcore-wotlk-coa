@@ -33,24 +33,12 @@
   {
     "spell": 92122,
     "clause": "Casting any spell now has a $h% chance to grant you Tundra Warriors.",
-    "claims": [
-      {
-        "claim": "Casting any spell now has a $h% chance to grant you Tundra Warriors",
-        "labels": [
-          "92122 proc_rate",
-          "92122 behaviour_metric_delta buff_minions"
-        ]
-      },
-      {
-        "claim": "Tundra Warriors (pulled sentence 707421: 10 sec, +4% minion crit, 3 stacks)",
-        "labels": [
-          "92122 spell_duration 707421 #1",
-          "92122 effect_value 707421e0 #2",
-          "92122 max_stacks 707421 #3"
-        ]
-      }
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"25% ... +4%, stacking 3 times, 10 seconds\"; logs: 1880 applications, 1053 doses, 86039 refreshes of 707421.",
+    "labels": [
+      "92122 proc_rate",
+      "92122 behaviour_metric_delta buff_minions"
+    ]
   },
   {
     "spell": 92123,
@@ -164,7 +152,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"5%\"; logs: nothing found by id."
   },
   {
     "spell": 300940,
@@ -183,7 +172,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Chance proven (pooled 19.96% [19.38, 20.56]); reset part open (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"20% ... next within 15 seconds free of cost\", older than our \"instant cast\" (G-9); logs: 2422 applications of 800979."
   },
   {
     "spell": 300940,
@@ -203,7 +193,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"20% ... next within 15 seconds free of cost\", older than our \"instant cast\" (G-9); logs: 2422 applications of 800979."
   },
   {
     "spell": 300941,
@@ -212,7 +203,8 @@
       "300941 behaviour_metric_delta duration_held",
       "300941 behaviour_metric_delta duration_end"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"+5 sec ... -1 sec\"; logs: 342 Unholy Frenzy casts, 3944 applications."
   },
   {
     "spell": 300941,
@@ -222,7 +214,8 @@
       "300941 cost_gate 805029 command with",
       "300941 cost_gate 805029 command beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"+5 sec ... -1 sec\"; logs: 342 Unholy Frenzy casts, 3944 applications."
   },
   {
     "spell": 300945,
@@ -269,7 +262,8 @@
       "300965 behaviour_metric_delta extended",
       "300965 behaviour_metric_delta extended_end"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"by 1 sec\"; logs: nothing found for 301337."
   },
   {
     "spell": 301198,
@@ -352,7 +346,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul nothing found; logs: nothing found by id."
   },
   {
     "spell": 301333,
@@ -495,7 +490,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
   },
   {
     "spell": 500335,
@@ -515,7 +511,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Amount proven; trigger part status 5 (Q-a1-7: 3000 ms pulse; live cloud casts are not tied to enemies dealing damage, mode 10 s gap). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
   },
   {
     "spell": 500335,
@@ -536,7 +533,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 5 (Q-a1-2). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
   },
   {
     "spell": 500335,
@@ -544,7 +542,8 @@
     "labels": [
       "500335 behaviour_metric_delta command"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
   },
   {
     "spell": 501861,
@@ -648,7 +647,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
   },
   {
     "spell": 500971,
@@ -657,7 +657,8 @@
       "500971 effect_value 707000e0 #0",
       "500971 script_hit 707000 auto_attack_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 5 (Q-a1-6, part 2: 805290 -30% healing done). Part 1, the missing Intellect/spell power term, fixed by ADR 0322 (regression arms 17 and 20 against 14 before). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
   },
   {
     "spell": 500971,
@@ -665,7 +666,8 @@
     "labels": [
       "500971 command_targets behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
   },
   {
     "spell": 500971,
@@ -674,7 +676,8 @@
       "500971 effect_value 801514e0 #2",
       "500971 script_hit 801514 command_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2, mentor decision 2026-11-12: conformant to the cast spell's tooltip (Command: Ghouls 504021, 88 measured), live logs agree (G-1 + G-11 order); the Raise: Ghoul text (48) is the one to align. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
   },
   {
     "spell": 500971,
@@ -683,7 +686,8 @@
       "500971 effect_value 801514e2 #3",
       "500971 script_hit 801514 command_heal"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 5 (Q-a1-6: 805290 -30% healing done, 65 against 93). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
   },
   {
     "spell": 500981,
@@ -735,7 +739,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same (25%, +100), coabuildhub +100+1.0 per level; logs: 1244 Bone Smash hits, 807 Colossus swings, no 520376 event; exiles creature 50115 spells exclude 520376."
   },
   {
     "spell": 500989,
@@ -744,26 +749,28 @@
       "500989 effect_value 520376e0 #0",
       "500989 behaviour_hit_ratio split"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 5 (Q-a1-3). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same (25%, +100), coabuildhub +100+1.0 per level; logs: 1244 Bone Smash hits, 807 Colossus swings, no 520376 event; exiles creature 50115 spells exclude 520376."
   },
   {
     "spell": 500989,
     "clause": "Command: Unleash a powerful attack dealing Weapon Damage plus ${$505229m2+$505229ppl2} to all enemies in front of it.",
     "claims": [
       {
-        "claim": "Command: Unleash a powerful attack ... to all enemies in front of it",
+        "claim": "Command: Unleash a powerful attack",
         "labels": [
           "500989 behaviour_metric_delta command"
         ]
       },
       {
-        "claim": "dealing Weapon Damage plus ${$505229m2+$505229ppl2}",
+        "claim": "dealing Weapon Damage plus ${$505229m2+$505229ppl2} to all enemies in front of it",
         "labels": [
           "500989 effect_value 505229e1 #1"
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Attack (cast) proven; the damage and the cone part open (route pending: minion weapon model). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same (25%, +100), coabuildhub +100+1.0 per level; logs: 1244 Bone Smash hits, 807 Colossus swings, no 520376 event; exiles creature 50115 spells exclude 520376."
   },
   {
     "spell": 503738,
@@ -790,22 +797,11 @@
   {
     "spell": 503740,
     "clause": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
-    "claims": [
-      {
-        "claim": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul",
-        "labels": [
-          "503740 proc_rate"
-        ]
-      },
-      {
-        "claim": "Frenzied Ghoul (pulled sentence 707014: haste +40% for 10 sec)",
-        "labels": [
-          "503740 effect_value 707014e1 #1",
-          "503740 spell_duration 707014 #2"
-        ]
-      }
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"15% ... haste by 40% for 10 seconds\"; logs: 2018 Frenzied Ghoul applications or refreshes, self-cast by Ghouls, over 14482 Ghoul melee hits (13.9%).",
+    "labels": [
+      "503740 proc_rate"
+    ]
   },
   {
     "spell": 503757,
@@ -895,7 +891,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"-20%\"; logs: nothing found by id."
   },
   {
     "spell": 504489,
@@ -942,13 +939,15 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"Drains 20% (up to 40%)\", an older state (G-9); logs: no Banshee events found."
   },
   {
     "spell": 504861,
     "clause": "It will channel on your target, dealing damage and draining their mana over time.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open: channel 572211 on an enemy player left one leech-sized mana drop and no 572212 hit in 9 s; triage pending. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"Drains 20% (up to 40%)\", an older state (G-9); logs: no Banshee events found."
   },
   {
     "spell": 504861,
@@ -967,7 +966,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 5 (Q-a1-4: 154 drained = 20% of the Banshee's maximum mana). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"Drains 20% (up to 40%)\", an older state (G-9); logs: no Banshee events found."
   },
   {
     "spell": 504866,
@@ -1290,7 +1290,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
   },
   {
     "spell": 561138,
@@ -1298,7 +1299,8 @@
     "labels": [
       "561138 behaviour_metric_delta runic_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
   },
   {
     "spell": 561138,
@@ -1318,7 +1320,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
   },
   {
     "spell": 561138,
@@ -1328,7 +1331,8 @@
       "561138 behaviour_metric_delta crit_no_plain",
       "561138 behaviour_metric_delta crit_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Not status 1: one plain (non-critical, non-blocked) Ghoul swing reproduced inside the army (probe 20261112-233646, aura 15.0-30.0 s, read 29.3 s); cause not found (finding C1). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
   },
   {
     "spell": 561164,
@@ -1346,7 +1350,8 @@
       "561215 cost_gate 805044 tomb_king with",
       "561215 cost_gate 805044 tomb_king beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"-1 sec\"; logs: nothing found by id."
   },
   {
     "spell": 561353,
@@ -2452,7 +2457,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"10%\"; logs: 127 casts, 3037 Putrid Aura applications, 16488 Putrid Claws hits."
   },
   {
     "spell": 805044,
@@ -2472,7 +2478,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Magnitude 0.1153-0.1174 against 0.10, inside the G-19 band (8-12%): status 1 tolerated by mentor decision 2026-11-13 (level-60 target); owner observation: the copy reads the proc DamageInfo (AscensionNecromancerEvents.cpp:99-100), so the share would grow with target armor. The tool verdict stays alert (its model applies an average partial resist). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"10%\"; logs: 127 casts, 3037 Putrid Aura applications, 16488 Putrid Claws hits."
   },
   {
     "spell": 805048,
@@ -2498,7 +2505,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"79 + 10% SP ... attack power by 223\"; logs: Plaguefather 1341 swings, 1004 Zombie Plague casts (869 of 1341 swings followed within 50 ms, no ICD), 294 Bone Toss applications by the Plaguefather, none at a Zombie Plague hit, median gap 1.24 s."
   },
   {
     "spell": 805048,
@@ -2506,7 +2514,8 @@
     "labels": [
       "805048 behaviour_metric_delta zombie_plague"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Fix note FN-3 revised (not built): live rate 65% per swing, no source states a chance. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"79 + 10% SP ... attack power by 223\"; logs: Plaguefather 1341 swings, 1004 Zombie Plague casts (869 of 1341 swings followed within 50 ms, no ICD), 294 Bone Toss applications by the Plaguefather, none at a Zombie Plague hit, median gap 1.24 s."
   },
   {
     "spell": 805048,
@@ -2514,7 +2523,8 @@
     "labels": [
       "805048 behaviour_metric_delta bone_toss"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 5 (Q-a1-8: live Bone Toss is not tied to Zombie Plague). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"79 + 10% SP ... attack power by 223\"; logs: Plaguefather 1341 swings, 1004 Zombie Plague casts (869 of 1341 swings followed within 50 ms, no ICD), 294 Bone Toss applications by the Plaguefather, none at a Zombie Plague hit, median gap 1.24 s."
   },
   {
     "spell": 805369,
@@ -2613,13 +2623,15 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"for 10 seconds ... 20%\"; logs: 9 applications of 573223, 288 hits of 573242."
   },
   {
     "spell": 805675,
     "clause": "causing you to replicate 20% of your periodic damage dealt as direct damage.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open: route pending (periodic magnitude with a Virulency recast). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"for 10 seconds ... 20%\"; logs: 9 applications of 573223, 288 hits of 573242."
   },
   {
     "spell": 806086,
@@ -2682,7 +2694,8 @@
     "labels": [
       "806328 behaviour_metric_delta crypt_plague"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text; logs: nothing found by id."
   },
   {
     "spell": 807494,
@@ -3506,5 +3519,64 @@
       "807941 effect_value e0 #0"
     ],
     "kind": "claim"
+  },
+  {
+    "spell": 503740,
+    "clause": "Transformed into a Frenzied Ghoul, increasing haste by $s2% for $d.",
+    "claims": [
+      {
+        "claim": "Transformed into a Frenzied Ghoul",
+        "labels": [
+          "503740 behaviour_metric_delta frenzied"
+        ]
+      },
+      {
+        "claim": "increasing haste by $s2%",
+        "labels": [
+          "503740 effect_value 707014e1 #1"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "503740 spell_duration 707014 #2"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Pulled sentence (@s:) of 707014, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"15% ... haste by 40% for 10 seconds\"; logs: 2018 Frenzied Ghoul applications or refreshes, self-cast by Ghouls, over 14482 Ghoul melee hits (13.9%)."
+  },
+  {
+    "spell": 503740,
+    "clause": "Immune to movement slowing effects.",
+    "labels": [],
+    "kind": "claim",
+    "reason": "Pulled sentence (@s:) of 707014, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"15% ... haste by 40% for 10 seconds\"; logs: 2018 Frenzied Ghoul applications or refreshes, self-cast by Ghouls, over 14482 Ghoul melee hits (13.9%)."
+  },
+  {
+    "spell": 92122,
+    "clause": "For $d, the critical strike chance of your Undead minions is increased by $s1%, stacking $u times.",
+    "claims": [
+      {
+        "claim": "For $d",
+        "labels": [
+          "92122 spell_duration 707421 #1"
+        ]
+      },
+      {
+        "claim": "the critical strike chance of your Undead minions is increased by $s1%",
+        "labels": [
+          "92122 effect_value 707421e0 #2"
+        ]
+      },
+      {
+        "claim": "stacking $u times",
+        "labels": [
+          "92122 max_stacks 707421 #3"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Pulled sentence (@s:) of 707421, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"25% ... +4%, stacking 3 times, 10 seconds\"; logs: 1880 applications, 1053 doses, 86039 refreshes of 707421."
   }
 ]

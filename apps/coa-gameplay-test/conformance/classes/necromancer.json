@@ -325,6 +325,34 @@
       "observe_source": "$/10;561317s1 = 30 Runic Power shown, 300 in internal units (561317 EffectBasePoints[0] 299 + 1). Each tick EnergizeBySpell(player, 561138, 300, POWER_RUNIC_POWER) (AscensionNecromancerAuras.cpp); the caster logs the energize. No cast (control): 0; the initial tick, read 300 ms after the cast ends: 300."
     },
     {
+      "spell": 561138, "name": "Army of the North (no tick after the duration)", "kind": "metric_delta",
+      "variant": "giant_after", "label_suffix": "giant_after", "quote": "repeating every", "expected": 6,
+      "before_expected": 0, "trigger_spell": 561138, "target": "caster", "cast_in_before": false,
+      "wait_ms": 21800, "expire_ms": 500, "metric": "owned_creature_count", "fields": {"entry": 51275},
+      "observe_source": "Upper bound of $d = 15000 ms: read 18800 ms after the cast ends, past the 18000 ms tick an 18 s or longer aura would make: still the 6 giants of 0, 3, ..., 15000 ms (each lives 30000 ms), no seventh."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (blocked swings under the army)", "kind": "metric_delta",
+      "variant": "crit_blocked", "label_suffix": "crit_blocked", "quote": "your Undead minions are guaranteed to critically strike",
+      "expected": 0, "before_expected": 0, "trigger_spell": 504868, "target": "dummy", "setup_casts": [561138, 500971],
+      "setup_only_after": true, "setup_wait_ms": 3600, "wait_ms": 7000, "expire_ms": 500,
+      "metric": "pet_melee_blocked", "fields": {"entry": 50073}, "observe_source": "Blocked Ghoul swings under the army (pet_melee_blocked, HITINFO_BLOCK): the stock roll puts block before crit (Unit.cpp:3495-3510), so a blocked swing would be a non-critical hit; read 0, so a block is not what gives the plain hit of the reproduction (progress.md C1)."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (aura army_held)", "kind": "metric_delta", "variant": "army_held",
+      "label_suffix": "army_held", "quote": "For the duration", "expected": 1, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 17700, "expire_ms": 500,
+      "metric": "aura", "fields": {"spell": 561138},
+      "observe_source": "The army's own aura 561138 on the caster (the aura the crit hook reads, AscensionNecromancerContracts.cpp OnBeforeRollMeleeOutcomeAgainst), read 17700 ms after the cast starts (3000 ms cast, $d = 15000 ms): present. Control: no cast, absent."
+    },
+    {
+      "spell": 561138, "name": "Army of the North (aura army_ends)", "kind": "metric_delta", "variant": "army_ends",
+      "label_suffix": "army_ends", "quote": "For the duration", "expected": 0, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 18300, "expire_ms": 500,
+      "metric": "aura", "fields": {"spell": 561138},
+      "observe_source": "The army's own aura 561138 on the caster (the aura the crit hook reads, AscensionNecromancerContracts.cpp OnBeforeRollMeleeOutcomeAgainst), read 18300 ms after the cast starts (3000 ms cast, $d = 15000 ms): gone. Control: no cast, absent."
+    },
+    {
       "spell": 561138, "name": "Army of the North (giant lifetime held)", "kind": "metric_delta", "variant": "lifetime_held",
       "label_suffix": "lifetime_held", "quote": "to aid you in combat for", "expected": 2, "before_expected": 0,
       "trigger_spell": 561138, "target": "caster", "gate_timing": "start", "trigger_only_after": true, "wait_ms": 6300, "expire_ms": 500,
@@ -396,14 +424,14 @@
     {
       "spell": 300941, "name": "Fleshcrafting (Unholy Frenzy longer)", "kind": "metric_delta", "variant": "duration_held",
       "label_suffix": "duration_held", "quote": "Increases the duration Unholy Frenzy by", "expected": 2, "before_expected": 0,
-      "trigger_spell": 805029, "target": "caster", "setup_casts": [500971], "setup_wait_ms": 3100, "expire_ms": 6000, "wait_ms": 15500, "metric": "owned_creature_count", "fields": {"entry": 50073, "spell": 805029},
-      "observe_source": "Unholy Frenzy 805029 (15000 ms, DurationIndex 8) puts its auras on the summons (Effect[0..2] 190). 300941 Effect[0] aura 107 SPELLMOD_DURATION +5000 ($/1000;s1 = 5) on 805029. Each phase raises a Ghoul (the second phase has two) and casts Unholy Frenzy; owned_creature_count with spell 805029 counts the Ghouls carrying it 15500 ms later: none without 300941 (control), both with it."
+      "trigger_spell": 805029, "target": "caster", "setup_casts": [500971], "setup_wait_ms": 3100, "expire_ms": 6000, "wait_ms": 19500, "metric": "owned_creature_count", "fields": {"entry": 50073, "spell": 805029},
+      "observe_source": "Unholy Frenzy 805029 (15000 ms, DurationIndex 8) puts its auras on the summons (Effect[0..2] 190). 300941 Effect[0] aura 107 SPELLMOD_DURATION +5000 ($/1000;s1 = 5) on 805029. Each phase raises a Ghoul (the second phase has two) and casts Unholy Frenzy; owned_creature_count with spell 805029 counts the Ghouls carrying it 19500 ms later: none without 300941 (control), both with it."
     },
     {
       "spell": 300941, "name": "Fleshcrafting (Unholy Frenzy ends)", "kind": "metric_delta", "variant": "duration_end",
       "label_suffix": "duration_end", "quote": "Increases the duration Unholy Frenzy by", "expected": 0, "before_expected": 0,
       "trigger_spell": 805029, "target": "caster", "setup_casts": [500971], "setup_wait_ms": 3100, "expire_ms": 6000, "wait_ms": 20500, "metric": "owned_creature_count", "fields": {"entry": 50073, "spell": 805029},
-      "observe_source": "As the held entry, read 20500 ms after the cast: gone in both phases, so with the held read the duration with 300941 lies in (15500, 20500] ms against the stated 20000."
+      "observe_source": "As the held entry, read 20500 ms after the cast: gone in both phases, so with the held read the duration with 300941 lies in (19500, 20500] ms against the stated 15000 + 5000; a +4 s or +6 s change fails one of the two reads."
     },
     {
       "spell": 300941, "name": "Fleshcrafting (Command cooldown)", "kind": "cost_gate", "variant": "command",
@@ -605,6 +633,22 @@
       "cast_spell": 504868, "target_rank": 801514, "caster_entry": 50073, "setup_casts": [[500971, "caster"]],
       "repeats": 3, "settle_ms": 1000,
       "observe_source": "One Ghoul is raised, then Command: Undead 504868 at the primary dummy three times; every Ghoul Command casts 801514, read per dummy from the Ghoul's (entry 50073) hits. Up to 5 enemies ($801514i) is the primary dummy and 4 more: the judge counts the additional dummies each cast that hit the primary also hit. Six candidates within 8 yd of the caster for the 4 additional, one at 13 yd that must stay unhit."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (auto attack heal, minion healing modelled)", "kind": "script_hit",
+      "variant": "auto_attack_heal_modelled", "label_suffix": "auto_attack_heal_modelled",
+      "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster",
+      "minion_model_auras": [805290], "trials": 6, "minimum_hits": 6,
+      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000,
+      "observe_source": "Regression of the 707000 coefficient row (ADR 0322): the tooltip value ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} read with the measured stats, then Ghoul Passive Healing 805290 Effect[1] (aura 136 -30% healing done, on every Ghoul from IsSummonedBy) modelled on the Ghoul's heal; the -30% itself is owner question Q-a1-6. Control: no Ghoul, no 707000 heal."
+    },
+    {
+      "spell": 500971, "name": "Raise: Ghoul (auto attack heal, more Intellect)", "kind": "script_hit",
+      "variant": "auto_attack_heal_intellect", "label_suffix": "auto_attack_heal_intellect",
+      "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster",
+      "minion_model_auras": [805290], "stat_auras": [[43002, 1]], "trials": 6, "minimum_hits": 6,
+      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000,
+      "observe_source": "Second arm of the 707000 coefficient regression: Arcane Brilliance 43002 (Effect[0] SPELL_AURA_MOD_STAT +60 Intellect) is set on the caster before its stats are measured (a precondition fixture; the claim is the heal's Intellect term), so the model reads the higher Intellect and the heal rises by 0.504 x 0.07 = 0.03528 per point before the -30%. Without the coefficient row both arms read the same heal."
     },
     {
       "spell": 500971, "name": "Raise: Ghoul (raised)", "kind": "metric_delta", "variant": "count",
