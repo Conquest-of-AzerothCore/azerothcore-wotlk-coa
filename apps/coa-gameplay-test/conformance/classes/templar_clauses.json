@@ -931,7 +931,8 @@
     "labels": [
       "520032 effect_value e0 #0",
       "520032 e0 spell_modifier 804922",
-      "520032 e0 spell_effect_value 804922"
+      "520032 e0 spell_effect_value 804922",
+      "520032 behaviour_hit_ratio crit_rate"
     ],
     "kind": "claim"
   },
@@ -1192,7 +1193,8 @@
     "labels": [
       "524767 effect_value e0 #0",
       "524767 e0 spell_modifier 806835",
-      "524767 e0 spell_done_crit_chance 806835"
+      "524767 e0 spell_done_crit_chance 806835",
+      "524767 behaviour_hit_ratio crit_rate"
     ],
     "kind": "claim"
   },
@@ -1986,7 +1988,8 @@
     "clause": "Increases the chance to trigger Scourgebane by $s1%",
     "labels": [
       "705253 effect_value e0 #0",
-      "705253 e0 spell_modifier 520007"
+      "705253 e0 spell_modifier 520007",
+      "705253 behaviour_hit_ratio scourgebane_rate"
     ],
     "kind": "claim"
   },
@@ -3090,7 +3093,8 @@
     "clause": "Increases the chance to trigger Scourgebane by $s1%",
     "labels": [
       "707852 effect_value e0 #0",
-      "707852 e0 spell_modifier 520007"
+      "707852 e0 spell_modifier 520007",
+      "707852 behaviour_hit_ratio scourgebane_rate"
     ],
     "kind": "claim"
   },

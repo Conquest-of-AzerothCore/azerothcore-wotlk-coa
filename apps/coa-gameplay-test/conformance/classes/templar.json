@@ -1846,6 +1846,61 @@
   ],
   "behaviours": [
     {
+      "spell": 560550, "name": "Call of the Monastery (does not stack, hits)", "kind": "hit_ratio", "variant": "no_stack",
+      "label_suffix": "no_stack", "quote": "Does not stack with similar effects.", "expected": 1.0,
+      "observe_spell": 572741, "control": {"auras": [[823764, 1], [560550, 1]]},
+      "treatment": {"auras": [[823764, 1], [560550, 1], [30802, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"attack_power": 20000},
+      "expected_source": "Spell group 2000180 (stack rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; rev_20260908_05_guardian_completion.sql) holds 560550's raid area effect 0 (aura 166, +5%) and Unleashed Rage 30802's area effect 1 (aura 166, +4%); Unit::GetHighestExclusiveSameEffectSpellGroupValue keeps the larger. Reckoning 572741 deals 165 + 0.175 x AP + 0.5 x Stamina Holy damage; with attack power +20000 (fixture, TOTAL_VALUE, under the percent auras) the AP term dominates. Both arms set beeg spellpen 823764 (no partial resists) and 560550; the treatment adds 30802: the hit reads the same, 1.0, not about 1.037 (a summed area +9%). Non-critical hits only; the group_stack_cap entry reads the same cap as a stat."
+    },
+    {
+      "spell": 560550, "name": "Call of the Monastery (the partner alone, hits)", "kind": "hit_ratio",
+      "variant": "partner_alone", "label_suffix": "partner_alone", "quote": "Does not stack with similar effects.",
+      "expected": 1.0378, "observe_spell": 572741, "control": {"auras": [[823764, 1]]},
+      "treatment": {"auras": [[823764, 1], [30802, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"attack_power": 20000},
+      "expected_source": "Control of the no_stack entry: Unleashed Rage 30802 alone (+4% attack power) raises the same Reckoning 572741 hit. Attack power (313 + 20000) x 1.04 against 20313; damage 165 + 0.175 x AP + 0.5 x 79 Stamina: (204.5 + 3697.0) / (204.5 + 3554.8) = 1.0378. A no_stack reading of 1.0 then shows a cap, not a partner without effect."
+    },
+    {
+      "spell": 572769, "name": "Sacred Swing (movement slow)", "kind": "metric_delta", "variant": "run_slow",
+      "label_suffix": "run_slow", "quote": "slowing their attack and movement speed by $301061s1%",
+      "expected": 0.9142857143, "before_expected": 1.1428571429, "trigger_spell": 572769, "target": "dummy",
+      "measure_actor": "dummy", "cast_in_before": false, "metric": "run_speed_rate", "fields": {}, "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "572769 Effect[2] 64 triggers 301061 on each enemy in the cone: Effect[1] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, EffectBasePoints -21 + EffectDieSides 1 = -20. The dummy's run speed rate is 1.1428571429 (8/7, as in Tranquil Circle's entry); 500 ms after a real Sacred Swing at the dummy it reads 0.8 of it. Control: the before reading, no swing."
+    },
+    {
+      "spell": 572769, "name": "Sacred Swing (attack slow)", "kind": "metric_delta", "variant": "attack_slow",
+      "label_suffix": "attack_slow", "quote": "slowing their attack and movement speed by $301061s1%",
+      "expected": 2400, "before_expected": 2000, "trigger_spell": 572769, "target": "dummy",
+      "measure_actor": "dummy", "cast_in_before": false, "metric": "attack_time_ms", "fields": {}, "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301061 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, EffectBasePoints -21 + EffectDieSides 1 = -20: Unit::ApplyAttackTimePercentMod multiplies the attack time by 1.2 for a negative amount (ApplyPercentModFloatVar with -amount, apply). The dummy's base attack time read before the swing, then 500 ms after a real Sacred Swing at the dummy, 1.2 times it."
+    },
+    {
+      "spell": 572769, "name": "Sacred Swing (slow duration)", "kind": "cast_applies_aura", "label_suffix": "slow",
+      "quote": "for $301061d", "expected_ms": 10000, "applied_aura": 301061, "target": "dummy", "cast_spell": 572769,
+      "cast_target": "dummy",
+      "observe_source": "301061 DurationIndex 1 (10000 ms, $301061d), applied to the dummy by 572769 Effect[2] (TRIGGER_SPELL). Sacred Swing cast at the dummy with its CasterAuraSpell 681170 set and its Energy cost filled; 301061 read on the dummy before and after its stated end."
+    },
+    {
+      "spell": 300923, "name": "Gift of Zeal", "kind": "metric_delta", "variant": "agility", "label_suffix": "agility",
+      "quote": "Places a Gift on a friendly target, increasing Agility by $s1", "expected": 209, "before_expected": 132,
+      "trigger_spell": 300923, "target": "caster", "cast_in_before": false, "metric": "stat", "fields": {"stat": 1},
+      "wait_ms": 500, "expire_ms": 500,
+      "observe_source": "300923 Effect[0] aura 29 SPELL_AURA_MOD_STAT, EffectMiscValue 1 (Agility), EffectBasePoints 76 + EffectDieSides 1 = 77, on TARGET_UNIT_TARGET_ALLY (the Templar is a friendly target of its own cast). The Templar's Agility reads 132 (reference stats) with no Gift, and 209 = 132 + 77 500 ms after a real cast. No CoA code names 300923."
+    },
+    {
+      "spell": 300923, "name": "Gift of Zeal", "kind": "cast_applies_aura", "label_suffix": "gift", "quote": "for $d",
+      "expected_ms": 1800000, "applied_aura": 300923, "target": "ally", "cast_spell": 300923, "cast_target": "ally",
+      "observe_source": "300923 DurationIndex 30 (1800000 ms, $d), TARGET_UNIT_TARGET_ALLY. Cast at the grouped ally (ADR 0212); 300923 read on the ally before and after its stated end (accelerated clock, ADR 0139)."
+    },
+    {
+      "spell": 705307, "name": "Holy Warstaff", "kind": "hit_ratio", "quote": "Increases the damage of", "expected": 1.2,
+      "observe_spell": 572741, "control": {}, "treatment": {"auras": [[705307, 1]]}, "critical": false, "trials": 40,
+      "expected_source": "$s2 = 20 (705307 EffectBasePoints[1] 19 + 1), Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_DAMAGE, mask-matched to Reckoning 572741 (spell_modifier ok). Reckoning (Holy, magic-class, CasterAuraSpell Oath Chain 704576 set before each cast) at the dummy; the treatment sets 705307. Non-critical hits only: x1.2."
+    },
+    {
       "spell": 572769, "name": "Sacred Swing (enemies in front)", "kind": "fixed_count", "variant": "in_front",
       "quote": "Swing at enemies in front of you", "expected": 3, "radius": 6.0, "uncapped": true,
       "cast_spell": 572769, "layout": "caster", "behind_yd": 3.0,
@@ -1885,14 +1940,14 @@
       "spell": 705253, "name": "Pure Focus (Scourgebane chance, pooled)", "kind": "hit_ratio", "variant": "scourgebane_rate",
       "label_suffix": "scourgebane_rate", "quote": "Increases the chance to trigger", "expected": 1.0,
       "observe_spell": 570233, "control": {"auras": [[92111, 1]]}, "treatment": {"auras": [[92111, 1], [705253, 1]]},
-      "rate": "proc", "rate_spell": 801832, "expected_points": 5, "trials": 166, "parts": 2,
+      "rate": "proc", "rate_spell": 801832, "expected_points": 5, "trials": 166, "parts": 161,
       "expected_source": "$s1 = 5 (705253 EffectBasePoints[0] 4 + 1), aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 18 (SPELLMOD_CHANCE_OF_SUCCESS) on 520007. AscensionTemplarEvents.cpp:58-63: Scourgebane 92111's proc check starts from 20%, applies 520007's SPELLMOD_CHANCE_OF_SUCCESS and rolls roll_chance_f; a non-periodic damaging Righteous Lunge 570233 (normalized weapon damage, no cooldown) at the dummy rolls once and casts 801832 (AscensionTemplarEvents.cpp:128-130). Both arms set Scourgebane 92111; the treatment sets 705253 too. The rate is 801832 hits over Lunge hits per arm; the difference must be 5 points."
     },
     {
       "spell": 707852, "name": "Pure Focus rank 2 (Scourgebane chance, pooled)", "kind": "hit_ratio", "variant": "scourgebane_rate",
       "label_suffix": "scourgebane_rate", "quote": "Increases the chance to trigger", "expected": 1.0,
       "observe_spell": 570233, "control": {"auras": [[92111, 1]]}, "treatment": {"auras": [[92111, 1], [707852, 1]]},
-      "rate": "proc", "rate_spell": 801832, "expected_points": 10, "trials": 166, "parts": 2,
+      "rate": "proc", "rate_spell": 801832, "expected_points": 10, "trials": 166, "parts": 172,
       "expected_source": "$s1 = 10 (707852 EffectBasePoints[0] 9 + 1), SPELLMOD_CHANCE_OF_SUCCESS on 520007, the same path as rank 1 (AscensionTemplarEvents.cpp:58-63, 128-130): Righteous Lunge 570233 at the dummy, Scourgebane 92111 in both arms, 707852 in the treatment; the 801832 share of Lunge hits must rise by 10 points."
     },
     {
@@ -1900,14 +1955,14 @@
       "label_suffix": "crit_rate", "quote": "now provides $s1% additional critical strike chance", "expected": 1.0,
       "observe_spell": 801832, "control": {"auras": [[823764, 1], [804922, 1]]},
       "treatment": {"auras": [[823764, 1], [520032, 1], [804922, 1]]}, "rate": "critical", "expected_points": 3,
-      "trials": 166, "parts": 2,
+      "trials": 166, "parts": 90,
       "expected_source": "$s1 = 3 (520032 EffectBasePoints[0] 2 + 1), aura 107 SPELLMOD on EffectMiscValue[0] 3 (SPELLMOD_EFFECT1) of Oath: Condemn 804922, whose Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT is 3 (EffectBasePoints 2 + 1): 6 with the talent. Both arms set beeg spellpen 823764 and 804922; the treatment sets 520032 before 804922 so the modifier enters the Oath's amount at apply. Scourgebane 801832 cast at the dummy; the critical share of its hits must differ by 3 points."
     },
     {
       "spell": 524767, "name": "Judgement of the Gods (Titanstrike crit rate, pooled)", "kind": "hit_ratio",
       "variant": "crit_rate", "label_suffix": "crit_rate", "quote": "Increases the critical strike chance of", "expected": 1.0,
       "observe_spell": 806835, "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [524767, 1]]},
-      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 2, "target_health_pct": 30,
+      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 75, "target_health_pct": 30,
       "expected_source": "$s1 = 50 (524767 EffectBasePoints[0] 49 + 1), aura 107 SPELLMOD on EffectMiscValue[0] 7 (SPELLMOD_CRITICAL_CHANCE), mask-matched to Titanstrike 806835 (spell_modifier ok). Titanstrike 806835 (TargetAuraState 13, the dummy held at 30%) cast at the dummy in both arms with beeg spellpen 823764; the treatment sets 524767. The critical share of Titanstrike hits must differ by 50 points."
     },
     {
