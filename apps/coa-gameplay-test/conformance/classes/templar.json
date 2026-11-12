@@ -5439,7 +5439,7 @@
       "cast_spell": 578276,
       "cast_target": "ally",
       "cast_target_health_pct": 50,
-      "observe_source": "801409's DurationEntry is set to 8 (15000 ms) by ApplyContracts (AscensionTemplarContracts.cpp:204-205); 705287 Effect[0] is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION) of +15000 on 801409 (the $/1000;s1 of the tooltip). Benediction 578276 cast at the grouped ally (ADR 0212) with 705287 learned; 801409 read on the ally."
+      "observe_source": "801409 has no Spell.dbc duration (DurationIndex 0); 705287 Effect[0] is aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION) of +15000 on 801409 (the $/1000;s1 of the tooltip), which gives the 15000 ms alone (ADR 0215 removed a contract that added a 15000 ms base: 30 s before the fix). Benediction 578276 cast at the grouped ally (ADR 0212) with 705287 learned; 801409 read on the ally."
     },
     {
       "spell": 805423,
