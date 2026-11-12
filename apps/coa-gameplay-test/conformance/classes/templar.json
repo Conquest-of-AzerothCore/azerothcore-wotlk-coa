@@ -3559,6 +3559,12 @@
       "observe_source": "Spell.dbc 804228 Effect[1] 64 SPELL_EFFECT_TRIGGER_SPELL, EffectTriggerSpell[1] 102208, EffectImplicitTargetA[1] 21 TARGET_UNIT_TARGET_ALLY (the caster is a valid ally target); 102208 DurationIndex 3, 60000 ms (Records.duration_ms). No CoA code casts 102208 for 804228 (AscensionTemplarAbilities.cpp:265-267 names 801478, 801455, 1397742 and 300514 only), so the DBC trigger effect is the path under test; its expiry pair is the behaviour proof of the clause"
     },
     {
+      "spell": 804228, "name": "Testament of Resolve (immunity duration)", "kind": "cast_applies_aura",
+      "variant": "immunity", "label_suffix": "immunity", "quote": "horrify effects for $d", "expected_ms": 10000,
+      "applied_aura": 804228, "target": "caster", "cast_spell": 804228,
+      "observe_source": "804228 DurationIndex 1 (10000 ms, $d); its immunity effects (Effect[0] aura 147 mask 512, Effect[2] aura 77 MiscValue 24) are carried by the 804228 aura itself, at TARGET_UNIT_TARGET_ALLY 21 with the caster as the target, so the aura is read on the caster; its expiry pair times the stated duration from a real level 60 cast."
+    },
+    {
       "spell": 804228, "name": "Testament of Resolve", "kind": "cast_state",
       "quote": "Usable while feared.", "state_aura": 12096, "control_spell": 300514, "blocked_result": 34,
       "observe_source": "Spell.dbc 804228 AttributesEx5 131072 SPELL_ATTR5_ALLOW_WHILE_FLEEING; the control Testament of Strength 300514 has AttributesEx5 0. Spell::CheckCasterAuras (Spell.cpp:7143-7144) refuses a fleeing caster with SPELL_FAILED_FLEEING (34, SharedDefines.h:1084) unless the spell carries that attribute. The fear fixture is the creature spell Fear 12096 (one effect, aura 7 SPELL_AURA_MOD_FEAR, Mechanic 5), applied by the dummy through set_aura's caster field (CoAGameplayTest.cpp set_aura, AddAura from the dummy). The control is attempted first because 804228 purges fear on its own cast (AttributesEx SPELL_ATTR1_IMMUNITY_PURGES_EFFECT)"
