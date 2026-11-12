@@ -2385,7 +2385,10 @@
     "spell": 705300,
     "clause": "$?s573452[Dealing damage this way reduces the cooldown of your Librams by $/1000;806106s1 sec.][]",
     "labels": [
-      "573452 trigger_cooldown_delta"
+      "573452 trigger_cooldown_delta",
+      "573452 cost_gate 801461 without",
+      "573452 cost_gate 801461 with",
+      "573452 cost_gate 801461 beyond"
     ],
     "kind": "claim"
   },
