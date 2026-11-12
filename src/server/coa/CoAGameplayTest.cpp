@@ -4687,6 +4687,11 @@ private:
         }
         if (metric == "melee_crit_chance")
             return player->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
+        if (metric == "melee_crit_chance_against")
+            return player->GetUnitCriticalChance(BASE_ATTACK, GetUnit(step.get<std::string>("target")));
+        if (metric == "threat_multiplier")
+            return unit->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT,
+                step.get<uint32>("school_mask", SPELL_SCHOOL_MASK_NORMAL));
         if (metric == "melee_crit_chance_refreshed")
         {
             player->UpdateCritPercentage(BASE_ATTACK);
@@ -5414,7 +5419,8 @@ private:
         if (metric == "owned_creature_run_speed_rate" || metric == "owned_creature_attack_power" ||
             metric == "owned_creature_spell_power" || metric == "owned_creature_resistance" ||
             metric == "owned_creature_melee_hit_chance" || metric == "owned_creature_cast_speed" ||
-            metric == "owned_creature_threat" || metric == "owned_creature_power")
+            metric == "owned_creature_threat" || metric == "owned_creature_power" ||
+            metric == "owned_creature_threat_multiplier")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Owned creature stat observation needs a present owned creature");
@@ -5438,6 +5444,9 @@ private:
                 return creature->m_modMeleeHitChance;
             if (metric == "owned_creature_cast_speed")
                 return creature->GetFloatValue(UNIT_MOD_CAST_SPEED);
+            if (metric == "owned_creature_threat_multiplier")
+                return creature->GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT,
+                    step.get<uint32>("school_mask", SPELL_SCHOOL_MASK_NORMAL));
             if (metric == "owned_creature_power")
             {
                 uint32 const power = step.get<uint32>("power", POWER_MANA);

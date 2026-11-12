@@ -237,6 +237,9 @@ would already include the effect under test, leaving no ungated baseline; `cast_
 `setup_in_before: true` (ADR 0360) keeps the setup casts in that uncast "before" phase, so a read of a minion the
 setup raises finds it in both phases: Unholy Frenzy 805029 reads the Ghoul's swing interval, cast speed and run speed
 with a Ghoul raised and no cast, then with a second Ghoul raised and 805029 cast on both.
+A read's `target` field that names the enemy player (with `enemy_player_race`) or the dummy brings that unit into the
+scenario like a cast target does (ADR 0360): Undead: Assault 500982, a self cast, reads the caster's
+`melee_crit_chance_against` an enemy player and the dummy.
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).

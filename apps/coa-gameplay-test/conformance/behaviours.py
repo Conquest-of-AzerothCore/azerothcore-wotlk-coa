@@ -1344,7 +1344,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'attack phases and takes no setup casts, setup aura or after-only trigger')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} has an unknown force_crit {spec.force_crit!r}')
-    if bool(spec.enemy_player_race) != (ENEMY_PLAYER in (spec.target, spec.measure_actor)):
+    if bool(spec.enemy_player_race) != (ENEMY_PLAYER in (spec.target, spec.measure_actor, spec.fields.get('target'))):
         raise ValueError(f'{spec.spell} names the enemy player as its target or measured unit only with an '
                          f'enemy_player_race, and the race only with it')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
@@ -1490,7 +1490,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
     if spec.attack_swings:
         timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
-    if spec.select_dummy or TARGET in (spec.target, spec.measure_actor) or any(
+    if spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target')) or any(
             TARGET in aura[2:] for aura in (*spec.phase_auras, *spec.after_auras)):
         scenario['creatures'] = [creature_fixture(class_file)]
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')

@@ -1052,6 +1052,10 @@ creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 (default Shadow), `GetResistance(school)`, `m_modMeleeHitChance` and `UNIT_MOD_CAST_SPEED`.
 `owned_creature_threat` reads the threat the creature named by `target` holds against it.
 `owned_creature_power` reads the same creature's current `power` (default mana).
+`owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
+applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
+`melee_crit_chance_against` reads the player's melee crit chance against the unit named by `target`
+(`GetUnitCriticalChance(BASE_ATTACK)`, the conditional crit modifiers included).
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
 in the same phase and within 100 yards. `gameobject_display` reads the native display id shared by every owned
 object of that entry and fails when they differ. `gameobject_scale` reads the single owned object's native
