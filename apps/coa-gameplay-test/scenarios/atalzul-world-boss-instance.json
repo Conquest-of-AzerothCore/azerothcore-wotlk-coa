@@ -5,7 +5,9 @@
     "The shrine (978090) refuses a heroic raid difficulty and on Normal takes the raid leader to",
     "his map (890). His health is per player in his map, 10 to 40, so 12722310 for one",
     "player. Until the four Soul Vessels are clicked he is ghostly and cannot be attacked; the Awaken action (3) stands in for the four clicks. He drops one of his item level 74 items. Every player gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a Treasures of",
-    "Azeroth chest; the portal out (978091) opens where he falls and takes the player back."
+    "Azeroth chest; the portal out (978091) opens where he falls and takes the player back.",
+    "His map (890) opens with Molten Core: at release stage 3 (Zul'Gurub) the shrine leaves the raid on",
+    "map 0, at stage 4 it takes raid members to his map. The case clears the stage override when it ends."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -147,6 +149,38 @@
       "ms": 500
     },
     {
+      "action": "console",
+      "label": "SETUP: the realm is at the Zul'Gurub release stage",
+      "command": "raidphase set 3",
+      "restore": "raidphase clear"
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978090
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at the Zul'Gurub stage his map stays closed",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "console",
+      "label": "SETUP: the realm reaches the Molten Core release stage",
+      "command": "raidphase set 4"
+    },
+    {
       "action": "use_gameobject",
       "actor": "raider",
       "entry": 978090
@@ -285,6 +319,11 @@
       "metric": "map_id",
       "equals": 0,
       "within_ms": 8000
+    },
+    {
+      "action": "console",
+      "label": "CLEANUP: the release stage returns to the configured one",
+      "command": "raidphase clear"
     }
   ]
 }
