@@ -3983,18 +3983,29 @@
   {
     "spell": 801480,
     "clause": "increases the effectiveness of your Librams by $s2%",
-    "labels": [
-      "801480 effect_value e1 #1",
-      "801480 e1 spell_modifier 803893",
-      "801480 e1 spell_modifier 805423",
-      "801480 e1 spell_modifier 801463",
-      "801480 e1 spell_modifier 801461",
-      "801480 e1 spell_modifier 801466",
-      "801480 behaviour_hit_ratio grace",
-      "801480 behaviour_metric_delta fervor_spell_power",
-      "801480 behaviour_metric_delta zeal_haste"
+    "claims": [
+      {
+        "claim": "increases the effectiveness of your Librams by $s2% (Libram of Grace, Libram of Fervor, Libram of Zeal)",
+        "labels": [
+          "801480 effect_value e1 #1",
+          "801480 e1 spell_modifier 801463",
+          "801480 e1 spell_modifier 805423",
+          "801480 e1 spell_modifier 801466",
+          "801480 behaviour_hit_ratio grace",
+          "801480 behaviour_metric_delta fervor_spell_power",
+          "801480 behaviour_metric_delta zeal_haste"
+        ]
+      },
+      {
+        "claim": "increases the effectiveness of your Librams by $s2% (Libram of Tenacity, Libram of Consecration)",
+        "labels": [
+          "801480 e1 spell_modifier 801461",
+          "801480 e1 spell_modifier 803893"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "3 of 5 Librams in game (Grace 801463 healing received, Fervor 805423 spell power from Agility, Zeal 801466 melee haste), each doubled by 801480 Effect[1] SPELLMOD_ALL_EFFECTS on the Libram mask (word 2 bit 2048); status 1 rests on these three only. Tenacity 801461 and Consecration 803893 are a separate part, read as data (spell_modifier by effect and mask) and not measured in game. They are not 'not reachable': both are obtainable on live. Tenacity: advancement.tsv node 34340 (Monk, Class, Ability) in all three realm slices, db.exil.es class_spell, the bindmysoul calculator, video 2QVjZeKQauQ 2026-08-22 2:34 and 18:32 T. Consecration: no advancement.tsv or calculator row, but db.exil.es skill_line_ability 803890-803893 and 801441 on skill line 72 (Crusader), the coabuildhub skills_templar tooltip, video 73yeWB1vKDQ 2026-08-14 0:54 T and 2QVjZeKQauQ 2026-08-22 18:42 T (Rank 5, 803893) with 18:23 S in a Libram rotation, and Ascension combat logs (extra_spells 801441 citation 2026-05-17, spell 803890; coa-history 804148 hits). The no-path list was not needed for the conclusion, which rests on live evidence; the fork grants Consecration through AscensionCustomClassData.h:314 and AscensionSpellProgressionData.h:874-877. The 'not reachable' branch of the 2026-11-12 ruling does not apply, so this part is not final: it needs its own in-game proof (Tenacity's Physical damage taken, Consecration's extra targets)."
   },
   {
     "spell": 801480,
