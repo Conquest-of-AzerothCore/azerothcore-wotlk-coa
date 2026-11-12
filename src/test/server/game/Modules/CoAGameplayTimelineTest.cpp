@@ -184,3 +184,44 @@ TEST(CoAGameplayTimeline, RecorderIgnoresOtherInstances)
     EXPECT_TRUE(RecordsUnit(409, 7, 409, 7));
     EXPECT_FALSE(RecordsUnit(409, 7, 0, 0));
 }
+
+TEST(CoAGameplayEventTimes, IntervalsBetweenSuccessiveStamps)
+{
+    EventTimes const times = TimesFrom({1000, 4000, 7025}, std::nullopt);
+    EXPECT_EQ(times.intervals, (std::vector<uint64>{3000, 3025}));
+    EXPECT_NE(times.intervals, (std::vector<uint64>{3000, 3000}));
+}
+
+TEST(CoAGameplayEventTimes, FirstNeedsAReferenceStamp)
+{
+    EXPECT_FALSE(TimesFrom({1000, 4000}, std::nullopt).firstMs.has_value());
+}
+
+TEST(CoAGameplayEventTimes, ReferenceDropsEarlierStampsAndStartsTheFirst)
+{
+    EventTimes const times = TimesFrom({1000, 4000, 10000, 13000, 16000}, 7000);
+    EXPECT_EQ(times.firstMs, std::optional<uint64>(3000));
+    EXPECT_NE(times.firstMs, std::optional<uint64>(9000));
+    EXPECT_EQ(times.intervals, (std::vector<uint64>{3000, 3000}));
+}
+
+TEST(CoAGameplayEventTimes, StampAtTheReferenceCountsAsFirst)
+{
+    EventTimes const times = TimesFrom({7000, 10000}, 7000);
+    EXPECT_EQ(times.firstMs, std::optional<uint64>(0));
+    EXPECT_EQ(times.intervals, (std::vector<uint64>{3000}));
+}
+
+TEST(CoAGameplayEventTimes, NothingAfterTheReference)
+{
+    EventTimes const times = TimesFrom({1000, 4000}, 5000);
+    EXPECT_FALSE(times.firstMs.has_value());
+    EXPECT_TRUE(times.intervals.empty());
+}
+
+TEST(CoAGameplayEventTimes, OneStampHasNoInterval)
+{
+    EventTimes const times = TimesFrom({4000}, 1000);
+    EXPECT_EQ(times.firstMs, std::optional<uint64>(3000));
+    EXPECT_TRUE(times.intervals.empty());
+}

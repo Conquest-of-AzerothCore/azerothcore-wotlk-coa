@@ -1,0 +1,416 @@
+{
+  "schema": 1,
+  "name": "spell_resist_total reads the partial resists of a level 60 dummy",
+  "contract": "Positive control for spell_resist_total (ADR 0154). A level 60 Templar without beeg spellpen 823764 casts Chastise 803157 (Holy) twelve times at a level 60 dummy (entry 36). CoA.MonsterResistance gives the dummy 60 Holy resistance, a 12% average resist: Unit::CalcAbsorbResist resists 0, 10, 20 or 30% of a hit with probability 0.20, 0.45, 0.30 and 0.05, so a hit is partially resisted with probability 0.8 and all twelve escape with probability 0.2^12, about 4e-9. The resisted total must be positive; a reader that always returned 0 fails.",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803157
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803157,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Let the Chastise land and the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Every Chastise leaves a damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 803157,
+      "target": "dummy",
+      "min": 12,
+      "max": 12
+    },
+    {
+      "action": "assert",
+      "label": "The dummy's 60 Holy resistance partially resists some Chastise hits",
+      "actor": "caster",
+      "metric": "spell_resist_total",
+      "spell": 803157,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "The resist chance read back is the dummy's 12%",
+      "actor": "caster",
+      "metric": "spell_resist_chance",
+      "school": 1,
+      "target": "dummy",
+      "min": 11.99,
+      "max": 12.01
+    }
+  ],
+  "timeout_ms": 60000
+}

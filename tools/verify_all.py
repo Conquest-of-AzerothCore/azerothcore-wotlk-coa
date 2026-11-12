@@ -864,7 +864,7 @@ def resolve_scenarios(args):
         if value in known:
             selected.append(value)
         elif Path(value).is_file():
-            selected.append(scenario_file(value, rows))
+            selected.append(scenario_file(value, rows, args.gameplay_clock))
         else:
             raise ValueError(f'Unknown scenario (neither a catalog id nor a file): {value}')
     if filtered:
@@ -876,14 +876,14 @@ def resolve_scenarios(args):
     return [] if set(selected) == known else selected
 
 
-def scenario_file(value, rows):
+def scenario_file(value, rows, clock=REAL_CLOCK):
     resolved = Path(value).resolve()
     catalog_id = next((row['id'] for row in rows if (ROOT / row['path']).resolve() == resolved), None)
     if catalog_id:
         return catalog_id
     runner = gameplay_module('run')
     try:
-        runner.validate(runner.read_json(resolved))
+        runner.validate(runner.read_json(resolved), clock)
     except (OSError, ValueError, KeyError, TypeError) as error:
         raise ValueError(f'Invalid scenario file {value}: {error}') from None
     return str(resolved)

@@ -858,6 +858,15 @@ class BatchTests(unittest.TestCase):
         cases[0].exclusive = True
         self.assertEqual([case.key for case in batch.longest_first(cases)], ['alpha', 'crash', 'hang', 'beta'])
 
+    def test_only_a_simulated_batch_admits_an_exploratory_case_beyond_the_real_clock_cap(self):
+        probe = self.path / 'long.json'
+        self.write(probe, {**SCENARIOS['alpha'], 'contract': 'Half an hour of game time', 'timeout_ms': 1900000})
+        cases = batch.select_cases([str(probe)], self.definitions, clock=batch.SIMULATED_CLOCK)
+        self.assertEqual([case.timeout_seconds for case in cases], [1900.0])
+        for clock in ({'clock': batch.REAL_CLOCK}, {}):
+            with self.assertRaisesRegex(ValueError, 'too large'):
+                batch.select_cases([str(probe)], self.definitions, **clock)
+
     def test_simulated_lanes_run_cases_concurrently_with_write_ahead(self):
         code, result = self.simulated('--lanes', '2', '--scenario', *SLOW, 'beta')
         self.assertEqual(code, 0, self.stderr.getvalue())

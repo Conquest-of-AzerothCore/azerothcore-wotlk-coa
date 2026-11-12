@@ -1,0 +1,27 @@
+{
+ "schema": 1,
+ "name": "Templar Patience lengthens Interdict's cooldown by 5 seconds",
+ "contract": "Patience 712678 reads \"Increases the duration of Interdict by $/1000;s1 sec and its cooldown by $/1000;s2 sec.\" (2 and 5 sec). Its Spell.dbc effect 1 is a flat cooldown modifier of -5001 (-5000 ms), but the owner ruled on 2026-11-10 that the tooltip governs: the cooldown is lengthened. AscensionTemplarContracts.cpp dummies both Patience effects at load and rewrites effect 1 to 4999 (+5000 ms); AscensionTemplarAbilities.cpp adds that amount to Interdict 560116's cooldown after each cast while Patience is known. Interdict's RecoveryTime is 120000 ms. Read right after each cast, the cooldown with Patience must exceed the one without by 5000 ms; a reduction reads -5000 and a missing hook 0.",
+ "timeout_ms": 120000,
+ "players": [
+  { "id": "templar", "race": 1, "class": 19, "level": 60 }
+ ],
+ "creatures": [
+  { "id": "dummy", "owner": "templar", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true }
+ ],
+ "steps": [
+  { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+  { "action": "learn", "actor": "templar", "spell": 560116 },
+  { "action": "reset_cooldown", "actor": "templar", "spell": 560116 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 560116, "target": "dummy" },
+  { "action": "snapshot", "actor": "templar", "metric": "cooldown_ms", "spell": 560116, "save_as": "without_patience" },
+  { "action": "assert", "label": "Interdict starts its 120 sec cooldown without Patience", "actor": "templar", "metric": "cooldown_ms", "spell": 560116, "min": 110000, "max": 120000 },
+  { "action": "learn", "actor": "templar", "spell": 712678 },
+  { "action": "wait", "label": "Let the first silence expire", "ms": 20500 },
+  { "action": "reset_cooldown", "actor": "templar", "spell": 560116 },
+  { "action": "set_power", "actor": "templar", "power": 3, "value": 100 },
+  { "action": "cast", "actor": "templar", "spell": 560116, "target": "dummy" },
+  { "action": "assert", "label": "Patience adds 5 sec to Interdict's cooldown", "actor": "templar", "metric": "cooldown_ms", "spell": 560116, "relative_to": "without_patience", "min": 4900, "max": 5100 }
+ ]
+}

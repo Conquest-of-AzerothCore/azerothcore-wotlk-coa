@@ -5,6 +5,7 @@ The existing client-compatibility C++ test is selected separately for CI, where 
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 from fnmatch import fnmatchcase
 import json
 import os
@@ -17,6 +18,7 @@ from check_change_boundaries import ROOT, changed_paths
 
 
 GAMEPLAY = 'apps/coa-gameplay-test/'
+CONFORMANCE = GAMEPLAY + 'conformance/'
 DBC = 'apps/coa-dbc/'
 MECHANICS = 'apps/coa-mechanics/'
 COA = 'src/server/coa/'
@@ -68,6 +70,26 @@ SUITES = {
                      [GAMEPLAY + 'test_verification.py'], [GAMEPLAY + 'test_batch.py'],
                      [GAMEPLAY + 'catalog.py', '--check']],
     },
+    'conformance': {
+        'paths': [CONFORMANCE + '*', GAMEPLAY + 'run.py', GAMEPLAY + 'batch.py', GAMEPLAY + 'catalog.py',
+                  GAMEPLAY + 'verification.py', GAMEPLAY + 'world_cache.py', DBC + '*.py',
+                  COA + 'AscensionSpellProgressionData.h', COA + 'AscensionLiveBaselineData.h',
+                  'src/server/shared/SharedDefines.h'],
+        'commands': [[CONFORMANCE + 'test_mitigation.py'], [CONFORMANCE + 'test_classes.py'],
+                     [CONFORMANCE + 'test_tooltip.py'], [CONFORMANCE + 'test_values.py'],
+                     [CONFORMANCE + 'test_hits.py'], [CONFORMANCE + 'test_compare.py'],
+                     [CONFORMANCE + 'test_procs.py'], [CONFORMANCE + 'test_stack.py'],
+                     [CONFORMANCE + 'test_diff.py'], [CONFORMANCE + 'test_passives.py'],
+                     [CONFORMANCE + 'test_behaviours.py'], [CONFORMANCE + 'test_observations.py'],
+                     [CONFORMANCE + 'test_tooltip_readings.py'],
+                     [CONFORMANCE + 'test_triggers.py'], [CONFORMANCE + 'test_questions.py'],
+                     [CONFORMANCE + 'test_coverage.py'], [CONFORMANCE + 'test_scaffold.py'],
+                     [CONFORMANCE + 'test_sheets.py'], [CONFORMANCE + 'test_records.py'],
+                     [CONFORMANCE + 'test_score.py'], [CONFORMANCE + 'test_prove.py'],
+                     [CONFORMANCE + 'test_expiry.py'], [CONFORMANCE + 'test_mutants.py'],
+                     [CONFORMANCE + 'test_k3.py'], [CONFORMANCE + 'test_sample.py'],
+                     [CONFORMANCE + 'test_packets.py'], [CONFORMANCE + 'test_class_map.py']],
+    },
     'world-content': {
         'paths': [CONTENT + '*.py'],
         'commands': [[CONTENT + 'test_validate_content.py'], [CONTENT + 'test_archive.py']],
@@ -110,23 +132,28 @@ def commands_for(selection, base, all_checks=False, allow_historical_sql=False):
     return [boundaries, comments, *(command for key in selection['checks'] for command in SUITES[key]['commands'])]
 
 
-def execute(commands, root=ROOT):
-    records = []
+def run_command(arguments, root, environment):
+    started = time.monotonic()
+    record = {'command': [sys.executable, '-B', *arguments], 'status': 'failed'}
+    try:
+        result = subprocess.run(record['command'], cwd=root, capture_output=True, text=True,
+                                timeout=120, env=environment)
+        record.update(status='passed' if result.returncode == 0 else 'failed', returncode=result.returncode,
+                      output=(result.stdout + result.stderr)[-20000:])
+    except (OSError, subprocess.TimeoutExpired) as error:
+        record['message'] = str(error)
+    record['seconds'] = round(time.monotonic() - started, 3)
+    return record
+
+
+def execute(commands, root=ROOT, jobs=None):
     environment = dict(os.environ)
     environment.pop('PYTHONOPTIMIZE', None)
-    for arguments in commands:
-        started = time.monotonic()
-        record = {'command': [sys.executable, '-B', *arguments], 'status': 'failed'}
-        try:
-            result = subprocess.run(record['command'], cwd=root, capture_output=True, text=True,
-                                    timeout=120, env=environment)
-            record.update(status='passed' if result.returncode == 0 else 'failed', returncode=result.returncode,
-                          output=(result.stdout + result.stderr)[-20000:])
-        except (OSError, subprocess.TimeoutExpired) as error:
-            record['message'] = str(error)
-        record['seconds'] = round(time.monotonic() - started, 3)
-        records.append(record)
-    return records
+    workers = max(1, min(jobs or os.cpu_count() or 1, len(commands))) if commands else 1
+    if workers <= 1:
+        return [run_command(arguments, root, environment) for arguments in commands]
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(lambda arguments: run_command(arguments, root, environment), commands))
 
 
 def main(argv=None):
@@ -137,6 +164,7 @@ def main(argv=None):
     parser.add_argument('--allow-historical-sql', action='store_true',
                         help='Only for an explicitly authorized SQL exception; CI uses its maintainer label')
     parser.add_argument('--github-output', type=Path, help='Append the client_compat selection for the CI build step')
+    parser.add_argument('--jobs', type=int, help='Concurrent commands to run; defaults to the CPU count')
     args = parser.parse_args(argv)
     try:
         paths = changed_paths(args.base)
@@ -151,7 +179,7 @@ def main(argv=None):
             with args.github_output.open('a', encoding='utf-8') as output:
                 output.write('client_compat=' + str(selection['client_compat']).lower() + '\n')
         if not args.plan:
-            result['results'] = execute(commands)
+            result['results'] = execute(commands, jobs=args.jobs)
             result['status'] = 'failed' if any(r['status'] == 'failed' for r in result['results']) else 'passed'
         print(json.dumps(result, indent=2))
         return int(result['status'] == 'failed')

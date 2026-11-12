@@ -832,6 +832,17 @@ class GameplayTests(WorkspaceTest):
         args = verify_all.parser().parse_args(['--scenario', str(SCENARIO)])
         self.assertEqual(verify_all.resolve_scenarios(args), ['frostbolt'])
 
+    def test_exploratory_files_beyond_the_real_clock_cap_need_the_simulated_clock(self):
+        workspace = self.workspace()
+        long = json.loads(SCENARIO.read_text(encoding='utf-8')) | {'contract': 'Long probe', 'timeout_ms': 1900000}
+        probe = write(workspace.base / 'long.json', json.dumps(long))
+        with patch.object(verify_all, 'load_catalog', return_value=fake_catalog()):
+            simulated = verify_all.parser().parse_args(['--scenario', str(probe)])
+            self.assertEqual(verify_all.resolve_scenarios(simulated), [str(probe.resolve())])
+            real = verify_all.parser().parse_args(['--gameplay-clock', 'real', '--scenario', str(probe)])
+            with self.assertRaisesRegex(ValueError, 'too large'):
+                verify_all.resolve_scenarios(real)
+
     def test_invalid_exploratory_scenario_files_are_rejected_before_any_stage(self):
         workspace = self.workspace()
         broken = write(workspace.base / 'broken.json', '{"name": "broken", ')

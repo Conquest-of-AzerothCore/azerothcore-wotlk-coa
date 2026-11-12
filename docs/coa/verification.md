@@ -144,7 +144,9 @@ Stages run in this order. Each reports `passed`, `failed`, `unavailable` (a prer
 `blocked` (the build failed) or `skipped` (not selected).
 
 1. `source`: `tools/check_source.py`, which covers SQL boundaries, comments in CoA-owned code, loader
-   registrations and the tooling test suites. See [Source comparison base](#source-comparison-base).
+   registrations and the tooling test suites. See [Source comparison base](#source-comparison-base). Its
+   commands run concurrently (`--jobs N`, default the CPU count; each command isolates its own temp directories
+   and mocked tools, so none of them share state); the stage's wall time is close to its single slowest command.
 2. `build`: configures a build directory as described for `cmake_args`, reconfigures one that has
    `BUILD_TESTING` off with `-DBUILD_TESTING=ON`, then runs `cmake --build <build> --parallel <jobs>` (with
    `--config` for a multi-config generator). The directory holding `mysql_config` is put first on `PATH`.
@@ -241,6 +243,27 @@ python -B tools/verify_all.py --stages gameplay --scenario /path/to/audit-zone.j
 
 The file is exploratory, so the run ends `INCOMPLETE` even when the audit passes, and it never blocks a PR. The
 report is the `placement_audit` step record in `gameplay/exploratory/<key>/result.json` of the output directory.
+
+### Class tooltip conformance
+
+`apps/coa-gameplay-test/conformance/` generates exploratory scenarios that check a class's spells, passives,
+passive triggers, procs and talent stack against their client tooltips, and judges a run with `conformance.py compare`
+([README](../../apps/coa-gameplay-test/conformance/README.md), method in
+[ADR 0011](../adr/0011-class-tooltip-conformance.md), passives in
+[ADR 0012](../adr/0012-passive-conformance-by-with-and-without-measurement.md), their modifier targets in
+[ADR 0017](../adr/0017-passive-modifier-targets-by-mask-namesake-and-sentence.md), rolled values in
+[ADR 0018](../adr/0018-rolled-tooltip-values-judged-on-the-mean-of-repeated-reads.md)). The scenarios run as exploratory
+files, so the run ends `INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result.
+Its unit tests are the `conformance` suite of the source stage. `compare` writes `alerts.tsv`,
+`report.md`, `verdicts.json`, `questions.md` (the checks that only players on live can settle,
+in English and in what a player sees) and, for stack runs, `levers.md`. `conformance.py diff`
+compares two outputs verdict by verdict (`impact.md`), and `conformance.py coverage
+--before OUT_A --after OUT_B` writes `coverage.md`: verdicts per status and the class spells, passives and actives
+judged on each side.
+
+```sh
+python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar-2/scenarios/*.json
+```
 
 ## Results and exit codes
 
@@ -361,6 +384,12 @@ the `batch.py` defaults (`--step-ms`, `--active-wait-cap-ms`, `--poll-cap-ms`), 
 change. `wait`, `within_ms` and step `elapsed_ms` use game time on both clocks; on the real clock it follows the
 wall clock at world-tick resolution. `timeout_ms` covers the real setup time until every actor is ready plus the
 game time after that, and the server fails a case that runs three times `timeout_ms` of real time from admission.
+An accelerated case may set `timeout_ms` up to one hour of game time under either schema; at real pace (the real
+clock, single mode and a `pace: real` diagnostic) the cap stays 10 minutes under schema 1 and 20 minutes under
+schema 2 ([ADR 0139](../adr/0139-accelerated-scenarios-may-run-an-hour-of-game-time.md)). Catalog definitions keep
+the real-pace cap so that they run on both clocks; only a `--scenario` file outside the catalog can use the longer
+one, and `verify_all.py --gameplay-clock real` rejects such a file before any stage. The hang rule below scales
+with the case's own `timeout_ms`, so only a case that asks for more time waits longer before it counts as hung.
 The runner treats a case as hung `3 * timeout_ms / 1000 + 60` seconds after a lane could first have admitted it, not
 after it wrote the file ahead: the count starts once the case is among the first `lanes` unfinished case files and
 no exclusive case keeps it waiting (an exclusive case counts only once it is the first).

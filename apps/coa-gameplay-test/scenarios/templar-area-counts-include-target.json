@@ -1,0 +1,1245 @@
+{
+  "schema": 1,
+  "name": "Lightbringer counts its target among its five enemies",
+  "contract": "Lightkeeper's burst Lightbringer 561277 reads 'to up to $561277i1 enemies' (MaxAffectedTargets 5, Effect[0] school damage on TARGET_UNIT_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY, 5 yd). Owner ruling, status-5 Q-ext2-2 option (a): N in all, the target counts (ADR 0294). The level 60 Templar casts it directly at a primary dummy with 8 more level 60 dummies within 5 yd of it, 10 times: each cast strikes exactly 5 enemies, the primary among them (before the fix the area cap kept 5 of the 9 candidates and added the primary when it was left out, 5 or 6 per cast). Control: a second group 25 yd away, a primary with 2 more dummies within 5 yd (below the cap), 10 casts: each strikes exactly 3, the primary among them, and each of the three is struck 10 times.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "cap_primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.0,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.2,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.4,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.6,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.8,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.0,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra6",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.2,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra7",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.4,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra8",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.6,
+      "stationary": true
+    },
+    {
+      "id": "control_primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25.0,
+      "stationary": true
+    },
+    {
+      "id": "control_extra1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25.3,
+      "stationary": true
+    },
+    {
+      "id": "control_extra2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25.6,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561277
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra1 stands within 5 yd of the cap primary",
+      "actor": "cap_extra1",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra2 stands within 5 yd of the cap primary",
+      "actor": "cap_extra2",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra3 stands within 5 yd of the cap primary",
+      "actor": "cap_extra3",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra4 stands within 5 yd of the cap primary",
+      "actor": "cap_extra4",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra5 stands within 5 yd of the cap primary",
+      "actor": "cap_extra5",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra6 stands within 5 yd of the cap primary",
+      "actor": "cap_extra6",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra7 stands within 5 yd of the cap primary",
+      "actor": "cap_extra7",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra8 stands within 5 yd of the cap primary",
+      "actor": "cap_extra8",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "control_extra1 stands within 5 yd of the control primary",
+      "actor": "control_extra1",
+      "metric": "distance_2d",
+      "target": "control_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "control_extra2 stands within 5 yd of the control primary",
+      "actor": "control_extra2",
+      "metric": "distance_2d",
+      "target": "control_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "the control group stands beyond 5 yd of the cap group",
+      "actor": "control_primary",
+      "metric": "distance_2d",
+      "target": "cap_extra8",
+      "min": 10,
+      "max": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_1"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 1 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 1 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_1",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 1 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_1",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_2"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 2 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 2 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_2",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 2 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_2",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_3"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 3 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 3 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_3",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 3 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_3",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_4"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 4 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 4 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_4",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 4 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_4",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_5"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 5 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 5 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_5",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 5 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_5",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_6"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 6 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 6 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_6",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 6 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_6",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_7"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 7 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 7 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_7",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 7 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_7",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_8"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 8 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 8 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_8",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 8 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_8",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_9"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 9 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 9 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_9",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 9 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_9",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "cap_all_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "save_as": "cap_primary_10"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 10 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 10 strikes 5 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "cap_all_10",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap cast 10 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "relative_to": "cap_primary_10",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra1 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra1",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra2 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra2",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra3 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra3",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra4 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra4",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra5 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra5",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra6 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra6",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra7 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra7",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra8 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra8",
+      "min": 0,
+      "max": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_1"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 1 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 1 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_1",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 1 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_1",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_2"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 2 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 2 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_2",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 2 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_2",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_3"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 3 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 3 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_3",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 3 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_3",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_4"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 4 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 4 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_4",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 4 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_4",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_5"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 5 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 5 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_5",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 5 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_5",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_6"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_6"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 6 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 6 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_6",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 6 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_6",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_7"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_7"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 7 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 7 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_7",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 7 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_7",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_8"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_8"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 8 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 8 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_8",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 8 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_8",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_9"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_9"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 9 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 9 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_9",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 9 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_9",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "control_all_10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "save_as": "control_primary_10"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 10 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control cast 10 strikes 3 enemies in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "control_all_10",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "control cast 10 strikes its primary",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "relative_to": "control_primary_10",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "control: control_primary is struck by each of the 10 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "control: control_extra1 is struck by each of the 10 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_extra1",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "control: control_extra2 is struck by each of the 10 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_extra2",
+      "equals": 10
+    }
+  ]
+}

@@ -66,6 +66,7 @@ Eternal Blessing's damage reduces Libram cooldowns once per cast when its talent
 spread preserves the owner's rank, stack count, remaining duration, amount and next periodic tick.
 Crusader's Brand reacts to direct damage by the marked unit, keeps native tracking, prevents fleeing,
 caps running speed at normal and rejects mounting. Its retaliation uses the Templar as damage owner.
+"Fleeing" is a creature's low-health flee for assistance (`SPELL_AURA_PREVENTS_FLEEING`); fear still applies.
 
 Tenacity reduces physical damage by 30% in PvE and 15% against players or their controlled units.
 Battlepriest reduces magic damage by 20% only above 80% or below 20% health. Hope counts live owned
@@ -90,10 +91,46 @@ Choices behind the 2026-09-17 audit fixes, where the shutdown tooltip names more
   it hits and ignores absorbs and resistances (tooltip, and the client SpellCustomAttr bit shared with Dragon's
   Wrath). A missed primary hit roll still cancels the blast.
 - Devotion of Khaz'goroth refunds 0.5 sec on every Libram rank (tooltip and 2025-08-04 changelog) instead of its
-  helper's per-spell values. Aggramar's Rage's crit applies only to its masked Holy abilities; the 2026-01-07
-  changelog's extra Chastise damage has no shutdown data and is not implemented.
+  helper's per-spell values. Aggramar's Rage's crit is a Holy-school crit chance aura (tooltip "Holy critical
+  strike chance", owner ruling of 2026-11-10), so every Holy ability gains it, melee or magic, and Physical abilities
+  such as Blade of Faith do not; the 2026-01-07 changelog's extra Chastise damage has no shutdown data and is not
+  implemented.
 - Fury of Aggramar also doubles Libram of Consecration's extra jump targets through the client data; no tooltip or
   changelog confirms that, and it is left unchanged.
+
+Owner rulings of 2026-11-10 ([ADR 0104](../adr/0104-templar-owner-rulings-of-2026-11-10.md)). Where two places in
+the game disagree, the ruling governs the server data, scripts, conformance class file, scenarios and these docs:
+
+- A coefficient follows the text of the spell the player learns or casts, never a triggered spell's own description
+  or a buff tooltip. Righteous Tempest's ticks add 30% of spell power (spellbook, not the tick spells' 15%).
+  Scourgebane adds 25% of attack power and 25% of Holy spell power (its passive and Argent Blade, not the strike's
+  15% of attack power "over $d"). Chakra of Light heals for the talent rank's base plus 35% of healing power (talent,
+  not the heal's 1 + 14% spell power + 8% attack power). Force of Golganneth deals Holy damage with 25% of attack
+  power and 25% of Holy spell power (spellbook, not the buff tooltip's Physical damage with 40% of attack power).
+- High General's Chastise deals the tooltip's `$s1`% (100%) increased direct damage and always crits.
+- Patience lengthens Interdict's silence by 2 sec and its cooldown by 5 sec, as its tooltip says ("Increases"),
+  against the sign of `Spell.dbc` effect 1 (-5001): the load contract rewrites that effect's points to +5000 ms.
+- Righteous Tempest's tick spells (805410, 570200 to 570205) have no rows in `AscensionSpellProgressionData.h`;
+  conformance reads their rank chain from the cast ranks' `EffectTriggerSpell`
+  ([ADR 0094](../adr/0094-conformance-triggered-rank-chains-come-from-the-dbc.md)).
+- Readings kept as the server applies them: Devotion of Khaz'goroth's "Does not stack with similar effects" is the
+  strongest of the same-type party haste auras of spell group 2000182; Crusader's Presence's is the engine's
+  strongest mounted-speed bonus; Faith Guard's "High Threat" doubles Faith's damage threat and keeps its flat +100;
+  Sacred Swing opens after a dodge or parry only, not after a hit, miss or block; Improved Benediction's armor stays
+  Agility + Stamina.
+- Heaven's Finest hits do not refresh The Finest of Heaven ("Additional applications do not refresh the
+  duration.").
+- Owner ruling of 2026-11-11 ([ADR 0130](../adr/0130-a-scourgebane-strike-never-triggers-scourgebane.md)), replacing
+  the eight-strike chain cap of 2026-11-10: a Scourgebane strike never triggers Scourgebane again; the chance is 20%
+  per direct-damage event, weapon hits and direct-damage abilities alike, and a strike never chains
+  ([ADR 0301](../adr/0301-scourgebane-rolls-on-every-direct-damage-event.md)). Regression
+  `templar-scourgebane-strike-never-retriggers`.
+- Texts only the client shows that state a losing option are restated through `coa_client_spell_description`
+  ([ADR 0105](../adr/0105-templar-client-texts-restated-from-the-server.md),
+  `rev_20261110_02_templar_client_texts.sql`, regression `templar-ruling-client-texts`): the tick spells' and
+  Scourgebane strike's descriptions, Chakra of Light's heal (the held talent rank's base through `$?s803844`), and the
+  Force of Golganneth and Righteous Tempest buff tooltips. That the client renders them is still to be checked in the
+  lab client.
 
 The 113 coefficient slots preserve normal weapon contributions while adding separately authored terms
 once. The recovered parent values override stale Scourgebane/Tempest/Chakra helpers. Copied-result helpers
@@ -118,8 +155,9 @@ Testament of Hope retains the native two-creature summon effect and 20-second li
 uses the native clone-caster appearance/equipment aura, follows the owner and fights valid targets.
 Display 775 is the verified classic fallback before the clone aura. Divine Charge uses existing display
 14584, a finite aura-owned mount, and scoped cast permission while that exact mount is active. Allies
-provide the trample center; the Templar remains its damage owner. Aura removal cleans up the mount even
-if its original caster is gone. The copied appearance and movement still need gameplay acceptance.
+provide the trample center; the Templar remains its damage owner. The trample reaches enemies within Divine
+Trample's own DBC radius (3 yd, combat reaches added), per the owner's 2026-11-10 ruling. Aura removal cleans
+up the mount even if its original caster is gone. The copied appearance and movement still need gameplay acceptance.
 
 Install only after an explicit build request. Use matching source, pending world SQL04 and the combined
 client candidate, preserving the pending Necromancer SQL03 and its source. SQL04 has 86 exact bindings,

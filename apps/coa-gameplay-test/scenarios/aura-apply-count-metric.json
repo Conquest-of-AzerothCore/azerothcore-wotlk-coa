@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "aura_apply_count reads 1 after a direct Unit::AddAura fixture",
+  "contract": "aura_apply_count (AuraApplyCounter, hooked off UnitScript::OnAuraApply) must count an aura application made outside the cast pipeline, such as set_aura's own Unit::AddAura call, the same way the Divine Strikes trigger entry relies on it counting AscensionTemplarAbilities.cpp's player->AddAura(803372, target).",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 2
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    {
+      "action": "assert", "label": "no application recorded before the fixture aura is applied",
+      "actor": "caster", "metric": "aura_apply_count", "spell": 818059, "equals": 0
+    },
+    { "action": "set_aura", "actor": "caster", "spell": 818059, "stacks": 1 },
+    {
+      "action": "assert", "label": "Unit::AddAura through set_aura is recorded exactly once",
+      "actor": "caster", "metric": "aura_apply_count", "spell": 818059, "equals": 1, "within_ms": 500
+    }
+  ]
+}

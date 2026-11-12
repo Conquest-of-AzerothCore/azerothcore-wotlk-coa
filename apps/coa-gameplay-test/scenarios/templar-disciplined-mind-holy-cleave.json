@@ -1,0 +1,819 @@
+{
+  "schema": 1,
+  "name": "Disciplined Mind dispels every ally Benediction heals when Holy Cleave stacks heal a second ally",
+  "contract": "Disciplined Mind rank 2 681483 ('causes it to dispel 2 poison and disease effects') casts 525052 at every unit Benediction 578276 hits, from templar_casts::OnSpellHitResult, once per 525052 trigger effect of the rank (ADR 0159, ADR 0293; owner ruling, status-5 Q1 option (a): Benediction dispels every ally it heals). Oath: Holy Cleave 804903 adds jump targets (aura 107 SPELLMOD_JUMP_TARGETS, family mask matching Benediction 578276), so Benediction cast at one grouped level 60 ally also heals a second. Both allies carry Frost Fever 55095, Blood Plague 55078, Deadly Poison 2818 and Mind-numbing Poison 25810. Two trials: both allies are healed once and both lose all four. Control: the same Holy Cleave stack without 681483, both allies are healed once and both keep all four.",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally_2",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally_2"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578276
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 681483,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 25810,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally_2",
+      "value": 1000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 25810,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally",
+      "save_as": "heals_ally_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally_2",
+      "save_as": "heals_ally_2_1"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 20
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 578276
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804903,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578276,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "trial 1: Benediction and its dispels land",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: Benediction heals ally",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally",
+      "relative_to": "heals_ally_1",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: Benediction heals ally_2",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally_2",
+      "relative_to": "heals_ally_2_1",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the cast target ally loses 55095",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the cast target ally loses 55078",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the cast target ally loses 2818",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the cast target ally loses 25810",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 25810,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the second healed ally loses 55095",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the second healed ally loses 55078",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the second healed ally loses 2818",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the second healed ally loses 25810",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 25810,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 25810,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55078,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 2818,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 25810,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804903,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 25810,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally_2",
+      "value": 1000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 25810,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally",
+      "save_as": "heals_ally_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally_2",
+      "save_as": "heals_ally_2_2"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 20
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 578276
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804903,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578276,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "trial 2: Benediction and its dispels land",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: Benediction heals ally",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally",
+      "relative_to": "heals_ally_2",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: Benediction heals ally_2",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally_2",
+      "relative_to": "heals_ally_2_2",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the cast target ally loses 55095",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the cast target ally loses 55078",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the cast target ally loses 2818",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the cast target ally loses 25810",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 25810,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the second healed ally loses 55095",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the second healed ally loses 55078",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the second healed ally loses 2818",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the second healed ally loses 25810",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 25810,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 25810,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55078,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 2818,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 25810,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804903,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 681483,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 1000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 25810,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "ally_2",
+      "value": 1000,
+      "maximum": 20000
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55095,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55078,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 2818,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 25810,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally",
+      "save_as": "heals_ally_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally_2",
+      "save_as": "heals_ally_2_3"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 20
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 578276
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804903,
+      "stacks": 2
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578276,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "label": "control: Benediction lands without Disciplined Mind",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "Control: Benediction heals ally",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally",
+      "relative_to": "heals_ally_3",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: Benediction heals ally_2",
+      "actor": "caster",
+      "metric": "spell_heal_count",
+      "spell": 578276,
+      "target": "ally_2",
+      "relative_to": "heals_ally_2_3",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the cast target ally keeps 55095",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the cast target ally keeps 55078",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the cast target ally keeps 2818",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the cast target ally keeps 25810",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 25810,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the second healed ally keeps 55095",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 55095,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the second healed ally keeps 55078",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 55078,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the second healed ally keeps 2818",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 2818,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: the second healed ally keeps 25810",
+      "actor": "ally_2",
+      "metric": "aura",
+      "spell": 25810,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 55078,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 2818,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 25810,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55095,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 55078,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 2818,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally_2",
+      "spell": 25810,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804903,
+      "stacks": 0
+    }
+  ],
+  "timeout_ms": 45000
+}

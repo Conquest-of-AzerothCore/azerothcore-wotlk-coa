@@ -1,0 +1,254 @@
+{
+  "schema": 1,
+  "name": "Event times of a fixed-period damage over time without an encounter",
+  "contract": "Condemn 567539 in the supplied Spell.dbc: instant (CastingTimeIndex 1), Effect[0] 6 with EffectApplyAuraName[0] 3 (periodic damage), EffectAmplitude[0] 3000 ms, DurationIndex 86 = 21000 ms, AttributesEx5 0 (no tick on apply), costs 30 Energy, refilled before each cast. Seven ticks land per cast. Each tick is stamped in game time when the actor receives its periodic log; the first one comes one amplitude after the cast and every interval equals the amplitude, both within one 25 ms wait step. The first cast runs without an encounter; the second runs under encounter_start, whose timeline places the aura application in the cast's world tick, so the event clock and the timeline clock agree.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and local level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "Condemn is known",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 567539,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 30
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 567539,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Whole duration and one more tick step",
+      "ms": 23000
+    },
+    {
+      "action": "assert",
+      "label": "First cast: seven ticks over the 21000 ms duration",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 567539,
+      "target": "dummy",
+      "min": 7,
+      "max": 7
+    },
+    {
+      "action": "assert",
+      "label": "First cast: first tick one 3000 ms amplitude after the cast",
+      "actor": "caster",
+      "metric": "event_first_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "First cast: shortest tick interval",
+      "actor": "caster",
+      "metric": "event_interval_min_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "First cast: longest tick interval",
+      "actor": "caster",
+      "metric": "event_interval_max_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "First cast: median tick interval",
+      "actor": "caster",
+      "metric": "event_interval_median_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "encounter_start",
+      "actor": "caster",
+      "boss_entry": 36,
+      "radius": 30
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 30
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 567539
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 567539,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "Whole duration and one more tick step",
+      "ms": 23000
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: seven ticks over the 21000 ms duration",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 567539,
+      "target": "dummy",
+      "min": 14,
+      "max": 14
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: first tick one 3000 ms amplitude after the cast",
+      "actor": "caster",
+      "metric": "event_first_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: shortest tick interval",
+      "actor": "caster",
+      "metric": "event_interval_min_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: longest tick interval",
+      "actor": "caster",
+      "metric": "event_interval_max_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: median tick interval",
+      "actor": "caster",
+      "metric": "event_interval_median_ms",
+      "min": 2975,
+      "max": 3025,
+      "stream": "spell_damage",
+      "spell": 567539,
+      "target": "dummy",
+      "since_spell": 567539
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: one recorded application",
+      "actor": "caster",
+      "metric": "timeline_count",
+      "event": "aura_applied",
+      "spell": 567539,
+      "target_actors": [
+        "dummy"
+      ],
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "timeline_first_ms",
+      "event": "cast",
+      "spell": 567539,
+      "save_as": "second_cast"
+    },
+    {
+      "action": "assert",
+      "label": "Second cast: the aura is applied in the cast's world tick",
+      "actor": "caster",
+      "metric": "timeline_first_ms",
+      "event": "aura_applied",
+      "spell": 567539,
+      "target_actors": [
+        "dummy"
+      ],
+      "relative_to": "second_cast",
+      "min": 0,
+      "max": 25
+    }
+  ]
+}
