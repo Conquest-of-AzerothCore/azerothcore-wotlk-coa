@@ -1034,9 +1034,19 @@
   {
     "spell": 531128,
     "clause": "Damage dealt by your Undead minions now has a $h% chance to restore $/10;531129s2 Runic Power",
-    "labels": [
-      "531128 effect_value #0",
-      "531128 effect_value 531129e1 #1"
+    "claims": [
+      {
+        "claim": "Damage dealt by your Undead minions now has a $h% chance",
+        "labels": [
+          "531128 proc_rate"
+        ]
+      },
+      {
+        "claim": "to restore $/10;531129s2 Runic Power",
+        "labels": [
+          "531128 effect_value 531129e1 #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1997,10 +2007,25 @@
   {
     "spell": 707001,
     "clause": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
-    "labels": [
-      "707001 effect_value #0",
-      "707001 effect_value #1",
-      "707001 effect_value 707002e0 #2"
+    "claims": [
+      {
+        "claim": "Damage dealt by Undead minions has a $h% chance",
+        "labels": [
+          "707001 proc_rate"
+        ]
+      },
+      {
+        "claim": "to blast up to $707002i nearby enemies",
+        "labels": [
+          "707001 effect_value #1"
+        ]
+      },
+      {
+        "claim": "for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+        "labels": [
+          "707001 effect_value 707002e0 #2"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2157,10 +2182,25 @@
   {
     "spell": 707882,
     "clause": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
-    "labels": [
-      "707882 effect_value #0",
-      "707882 effect_value #1",
-      "707882 effect_value 707002e0 #2"
+    "claims": [
+      {
+        "claim": "Damage dealt by Undead minions has a $h% chance",
+        "labels": [
+          "707882 proc_rate"
+        ]
+      },
+      {
+        "claim": "to blast up to $707002i nearby enemies",
+        "labels": [
+          "707882 effect_value #1"
+        ]
+      },
+      {
+        "claim": "for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+        "labels": [
+          "707882 effect_value 707002e0 #2"
+        ]
+      }
     ],
     "kind": "claim"
   },
