@@ -34,3 +34,32 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- Salvage Crate
 DELETE FROM `gameobject` WHERE `guid` = 6976014;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976014, 188076, 0, 1, 1, -786.75, 69, 9.05, 5.4056, 0, 0, 0.424865, -0.905257, 300, 100, 1);
+
+-- #12096
+-- pickup 6941271 (Trapper's Lone Band) moved 5.3 yd across and 0.17 yd down into the nest, checked in the editor
+UPDATE `gameobject` SET `position_x` = 101.9794, `position_y` = -4125.5704, `position_z` = 173.6403, `orientation` = 4.5647, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.757335, `rotation3` = -0.653026 WHERE `guid` = 6941271 AND `id` = 95797;
+-- the Ascension nest and troll remains around the ring were missing (Ascension positions)
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (96086, 5, 1017804, 'Nest Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1017804, `name` = 'Nest Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (96087, 5, 1048715, 'Troll Skull Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1048715, `name` = 'Troll Skull Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (96088, 5, 1044954, 'Troll Skull 2 Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1044954, `name` = 'Troll Skull 2 Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (96089, 5, 1044955, 'Troll Skull 3 Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1044955, `name` = 'Troll Skull 3 Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (96090, 5, 1044951, 'Troll Skeleton Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1044951, `name` = 'Troll Skeleton Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (96091, 5, 1044343, 'Troll Skeleton Arm Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 1044343, `name` = 'Troll Skeleton Arm Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+-- Nest Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976015;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976015, 96086, 0, 1, 1, 101.928, -4125.439, 172.756, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
+-- Troll Skull Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976016;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976016, 96087, 0, 1, 1, 101.359, -4125.56, 173.425, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
+-- Troll Skull 2 Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976017;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976017, 96088, 0, 1, 1, 98.254, -4124.36, 172.931, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
+-- Troll Skull 3 Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976018;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976018, 96089, 0, 1, 1, 104.197, -4126.83, 172.794, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
+-- Troll Skeleton Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976019;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976019, 96090, 0, 1, 1, 104.035, -4124.86, 172.762, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
+-- Troll Skeleton Arm Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976020;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976020, 96091, 0, 1, 1, 102.4749, -4124.6673, 173.6533, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
