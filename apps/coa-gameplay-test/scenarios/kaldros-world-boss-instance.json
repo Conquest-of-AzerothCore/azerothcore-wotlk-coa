@@ -1,0 +1,234 @@
+{
+  "schema": 1,
+  "name": "Kaldros Depthbreaker: the shrine takes players to Depthbreaker's Hollow (Normal only), he casts his kit, pays every player and leaves a portal back",
+  "contract": [
+    "The Shrine of Kaldros (978080) on the Feralas shore refuses a heroic raid difficulty and on Normal takes the",
+    "player to Depthbreaker's Hollow (884). Kaldros Depthbreaker (978080) has 1120000 health per player, counted from",
+    "10 to 40, so 11200000 for one player; he casts Eroding Armor (700145) and Tidal Rupture (700120). He drops one",
+    "of his item level 74 items; every player gets 250 Runes of Ascension, 100 to 150 Bazaar Tokens and a",
+    "Treasures of Azeroth chest; the portal out (978081) opens where he falls and takes the player back to Feralas."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": -4745.0,
+    "y": 2700.0,
+    "z": -152.7
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "The shrine stands on the Feralas shore",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780920,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 978080,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978080
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "On a heroic difficulty the shrine refuses",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 978080
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0,
+      "label": "Challenge Kaldros Depthbreaker"
+    },
+    {
+      "action": "assert",
+      "label": "The shrine takes the player into Depthbreaker's Hollow",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 884,
+      "within_ms": 8000
+    },
+    {
+      "action": "summon",
+      "actor": "raider",
+      "entry": 978080,
+      "as": "boss",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "His health is ten players' worth for a lone player",
+      "actor": "raider",
+      "metric": "nearby_creature_max_health",
+      "entry": 978080,
+      "equals": 11200000,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 978080
+    },
+    {
+      "action": "assert",
+      "label": "Eroding Armor on his tank",
+      "actor": "boss",
+      "metric": "spell_cast_count",
+      "spell": 700145,
+      "min": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "Tidal Rupture",
+      "actor": "boss",
+      "metric": "spell_cast_count",
+      "spell": 700120,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 978080,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "He dies",
+      "actor": "boss",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "raider",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "One of his item level 74 items",
+      "actor": "raider",
+      "metric": "loot_gear_item_level",
+      "equals": 74
+    },
+    {
+      "action": "close_loot",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "label": "250 Runes of Ascension",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 250,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "100 to 150 Bazaar Tokens",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 100,
+      "max": 152
+    },
+    {
+      "action": "assert",
+      "label": "A Treasures of Azeroth chest",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 1615011,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The portal out opens where he fell",
+      "actor": "raider",
+      "metric": "nearby_gameobject_count",
+      "entry": 978081,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "raider",
+      "entry": 978081
+    },
+    {
+      "action": "assert",
+      "label": "The portal takes the player back to Feralas",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}

@@ -1406,6 +1406,105 @@ namespace
         }
     };
 
+    // ----------------------------------------------------- Kaldros Depthbreaker
+    // No log: his kit is his spell block (700120-700145), every timer is designed. His health is per player in his
+    // map (10 to 40).
+    enum KaldrosSpells
+    {
+        SPELL_ERODING_ARMOR     = 700145,
+        SPELL_TIDAL_RUPTURE     = 700120,
+        SPELL_DROWN             = 700130,
+        SPELL_WATERLOGGED       = 700121,
+        SPELL_ROCKFALL          = 700126,
+        SPELL_CRUSHING_ROCKS    = 700128,
+        SPELL_SEISMIC_SMASH     = 700129,
+        SPELL_SWELLING_ANGER    = 700136,
+    };
+
+    enum KaldrosEvents { EK2_ERODE = 1, EK2_RUPTURE, EK2_DROWN, EK2_WATERLOGGED, EK2_ROCKFALL, EK2_CRUSH, EK2_SMASH };
+
+    constexpr uint32 KALDROS_MIN_FLEX = 10;
+    constexpr uint32 KALDROS_MAX_FLEX = 40;
+
+    struct boss_kaldros_coa : public custom_world_boss_coa
+    {
+        explicit boss_kaldros_coa(Creature* creature) : custom_world_boss_coa(creature) { }
+
+        void Reset() override
+        {
+            custom_world_boss_coa::Reset();
+            _angry = false;
+            ApplyFlex();
+        }
+
+        void JustEngagedWith(Unit* who) override
+        {
+            ApplyFlex();
+            custom_world_boss_coa::JustEngagedWith(who);
+        }
+
+        void ApplyFlex()
+        {
+            Level const* lv = LevelOf(me);
+            if (!lv || !lv->health)
+                return;
+            uint32 const players = std::clamp<uint32>(me->GetMap()->GetPlayersCountExceptGMs(), KALDROS_MIN_FLEX,
+                KALDROS_MAX_FLEX);
+            float const pct = me->GetHealthPct();
+            uint32 const health = lv->health * players;
+            me->SetCreateHealth(health);
+            me->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(health));
+            me->UpdateMaxHealth();
+            me->SetHealth(std::max<uint32>(uint32(me->GetMaxHealth() * pct / 100.0f), 1));
+        }
+
+        void Schedule() override
+        {
+            events.ScheduleEvent(EK2_ERODE, 5s);
+            events.ScheduleEvent(EK2_RUPTURE, 12s);
+            events.ScheduleEvent(EK2_WATERLOGGED, 18s);
+            events.ScheduleEvent(EK2_DROWN, 25s);
+            events.ScheduleEvent(EK2_ROCKFALL, 30s);
+            events.ScheduleEvent(EK2_CRUSH, 38s);
+            events.ScheduleEvent(EK2_SMASH, 50s);
+        }
+
+        void Execute(uint32 eventId) override
+        {
+            switch (eventId)
+            {
+                case EK2_ERODE: DoCastVictim(SPELL_ERODING_ARMOR); events.Repeat(10s); break;
+                case EK2_RUPTURE: DoCastAOE(SPELL_TIDAL_RUPTURE); events.Repeat(20s); break;
+                case EK2_WATERLOGGED:
+                    if (Unit* t = RandomPlayer())
+                        DoCast(t, SPELL_WATERLOGGED);
+                    events.Repeat(25s);
+                    break;
+                case EK2_DROWN: DoCastAOE(SPELL_DROWN); events.Repeat(30s); break;
+                case EK2_ROCKFALL:
+                    if (Unit* t = RandomPlayer(false))
+                        CastAt(t->GetPosition(), SPELL_ROCKFALL);
+                    events.Repeat(30s);
+                    break;
+                case EK2_CRUSH: DoCastAOE(SPELL_CRUSHING_ROCKS); events.Repeat(35s); break;
+                case EK2_SMASH: DoCastAOE(SPELL_SEISMIC_SMASH); events.Repeat(50s); break;
+            }
+        }
+
+        void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
+        {
+            custom_world_boss_coa::DamageTaken(attacker, damage, type, school);
+            if (!_angry && me->HealthBelowPctDamaged(30, damage))
+            {
+                _angry = true;
+                DoCastSelf(SPELL_SWELLING_ANGER, true);
+            }
+        }
+
+    private:
+        bool _angry = false;
+    };
+
     // ------------------------------------------------------------ Trut-K'hahn
     enum TrutSpells
     {
@@ -1627,4 +1726,7 @@ void AddCoaCustomWorldBossScripts()
     new custom_script<npc_custom_add_coa>("npc_custom_add_coa");
     new custom_script<boss_trut_khahn_coa>("boss_trut_khahn_coa");
     new custom_script<npc_feather_storm_coa>("npc_feather_storm_coa");
+    new custom_script<boss_kaldros_coa>("boss_kaldros_coa");
+    void AddCoaKaldrosInstanceScripts();
+    AddCoaKaldrosInstanceScripts();
 }
