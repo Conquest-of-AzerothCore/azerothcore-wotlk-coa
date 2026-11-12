@@ -1657,3 +1657,13 @@ the engine computation gives at the stated bonus, `insufficient_trials` when it 
 and `alert` otherwise (between two steps, another step, or several steps without the stated one). Radiant Blade
 524822 and 525080 (+25% and +50% on Oath: Righteous Lunge's +5% and +30%): amounts 6 and 37, 7 and 45, against the
 Oath alone.
+
+### Minion stats in metric_delta (ADR 0341)
+
+`metric_delta` takes `learn`, spells learned with the trigger spell (Life Force capacity passives), and three
+read-only harness metrics read the live unit: `owned_creature_attack_time_ms` (`entry`), the minion's swing interval;
+`owned_creature_crit_chance` (`entry`, `target` the victim), its melee crit chance; and `owned_aura` (`spell`), whether
+the actor owns an aura it may not hold itself (a summons-only aura). The two creature reads are `state` promised by
+haste and crit words, so a learned contrast is behaviour; `owned_aura` is a readback. Army of the Dead 525600 reads the
+Ghoul's swing interval and crit chance with an Abomination raised in both phases, and its condition arm raises the
+Abomination in the second phase only (`setup_only_after`).

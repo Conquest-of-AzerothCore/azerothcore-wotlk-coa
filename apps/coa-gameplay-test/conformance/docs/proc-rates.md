@@ -330,3 +330,19 @@ The off-hand-swing (92108) and Oath: Vindication (805332) sources named by the s
 measurable by this harness for reasons already on their own entries (92108: no `CanDualWield` path for Templar;
 805332/504107: no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round
 introduces, and out of scope for a `baseline_co_learn` fixture to close.
+
+### Minion procs (ADR 0340, ADR 0343)
+
+A `procs` entry may take the minion trigger action of
+[trigger entries](trigger-entries.md#minion-trigger-entries-adr-0340-adr-0342-adr-0343) with a `trial_metric` of
+`pet_melee_crits` or `owned_creature_damage_count`; the minion is raised before the passive is learned. `event_actor: "minion"` reads the proc spell cast by the minion; `aura_on_minion` reads a summons-only
+passive on the minion. `baseline: true` swings the minion before the learn for `max(20, ceil(log 0.01 / log(1 -
+p)))` attempts at the stated chance `p` (90 at 5%, 44 at 10%, 21 at 20%): any event there is an alert, and those
+trials and events are left out of the rate. Minion entries are keyed by their summon spell, so two rigs of one aura
+keep separate labels (`<aura> proc_rate <proc spell> <summon>`). `extra_dummies` places more dummies at the given
+distances from the caster and reads the proc spell on every dummy, with `events_per_proc` the targets per proc.
+
+`energize_amounts` (`{"power", "expected" or "percent_of_max", "source"}`) adds a `proc_energize_amount <power>`
+expectation per power: the summed `spell_energize_total` of the proc spell must equal its count times the stated
+amount, or times `floor(max_power x percent_of_max / 100)` read in the same part (Overwhelming Force 531128: 20
+Runic Power and 2% of maximum mana).

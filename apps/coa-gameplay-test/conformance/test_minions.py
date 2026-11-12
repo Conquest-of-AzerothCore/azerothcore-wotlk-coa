@@ -1,0 +1,228 @@
+import copy
+import json
+from pathlib import Path
+import unittest
+
+from compare import compare
+from procs import (PROC_CHECK, PROC_ENERGIZE_CHECK, baseline_attempts, baseline_labels, energize_labels,
+                   proc_measurements, proc_plan, proc_scenario)
+from profile import DBC_DIR
+from test_compare import Workspace, assert_step, constant_reader
+from tooltip import Displayed
+from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, MINION_COOLDOWN_BAND, TRIGGER_TRIALS, checked_entry,
+                      cooldown_gate_label, cooldown_gate_scenario, cooldown_label, cooldown_measurement_labels,
+                      cooldown_trial_label, minion_cooldown_event_label, minion_cooldown_scenario, trigger_scenario)
+from values import Expectation
+
+CLASSES_DIR = Path(__file__).resolve().parent / 'classes'
+NECROMANCER = json.loads((CLASSES_DIR / 'necromancer.json').read_text(encoding='utf-8'))
+CHOMP = 707283
+PANDEMIC = 560798
+OVERWHELMING_FORCE = 531128
+GHOUL = 50073
+RAISE_GHOUL = 500971
+VIRULENCY = 801938
+WINDOW_MS = 3000
+
+
+def necromancer_entry(section: str, aura: int, kind: str | None = None) -> dict:
+    return next(entry for entry in NECROMANCER[section]
+                if entry['aura'] == aura and entry.get('kind') == kind)
+
+
+def minion_cooldown_model(baseline: int, attempts: int) -> dict:
+    return {'part': 0, 'parts': 1, 'scheduled_attempts': attempts, 'part_attempts': attempts,
+            'baseline_attempts': baseline, 'attempt_ms': 4000, 'minimum_trials': TRIGGER_TRIALS,
+            'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL, 'swing_ms': 2000,
+                        'swing_source': 'creature_template'},
+            'observe_spell': VIRULENCY, 'observe_metric': 'cooldown_ms', 'expected_delta_ms': 1000,
+            'trial_metric': 'owned_creature_damage_count', 'window_ms': WINDOW_MS, 'minion_auras': [],
+            'measurements': cooldown_measurement_labels(PANDEMIC)}
+
+
+def minion_cooldown_steps(baseline_cuts: list[float], measured_cuts: list[float], per_window: int = 2) -> list:
+    steps, events = [], 0
+    for phase, cuts in (('baseline', baseline_cuts), ('measured', measured_cuts)):
+        for index, cut in enumerate(cuts):
+            before = 60000.0
+            steps.append(assert_step(cooldown_trial_label(PANDEMIC, phase, index, 'before'), str(before)))
+            steps.append(assert_step(minion_cooldown_event_label(PANDEMIC, phase, index, 'before'), str(events)))
+            steps.append({'action': 'wait', 'label': 'window', 'status': 'completed', 'elapsed_ms': str(WINDOW_MS)})
+            events += per_window
+            steps.append(assert_step(cooldown_trial_label(PANDEMIC, phase, index, 'after'),
+                                     str(before - WINDOW_MS - cut)))
+            steps.append(assert_step(minion_cooldown_event_label(PANDEMIC, phase, index, 'after'), str(events)))
+    steps.append(assert_step(cooldown_measurement_labels(PANDEMIC)['aura'], '1'))
+    return steps
+
+
+class MinionJudgeTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, check: str, reader=None):
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results, tooltips=reader or constant_reader())
+                    if verdict.check == check]
+        self.assertEqual(len(verdicts), 1)
+        return verdicts[0]
+
+    def minion_cooldown(self, baseline_cut: float, measured_cut: float):
+        expectation = Expectation(cooldown_label(PANDEMIC), COOLDOWN_CHECK, PANDEMIC, PANDEMIC, None, 'Damage',
+                                  'rule', minion_cooldown_model(20, TRIGGER_TRIALS))
+        self.workspace.scenario('conformance-necromancer-trigger-560798-part-1', 'trigger', [expectation],
+                                steps=minion_cooldown_steps([baseline_cut] * 20, [measured_cut] * TRIGGER_TRIALS))
+        return self.verdict(COOLDOWN_CHECK)
+
+    def test_minion_cooldown_per_event_reduction_is_ok(self):
+        verdict = self.minion_cooldown(0, 2000)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertLessEqual(abs(verdict.measured - 1000), MINION_COOLDOWN_BAND * 1000)
+
+    def test_minion_cooldown_mutant_with_half_the_reduction_alerts(self):
+        self.assertEqual(self.minion_cooldown(0, 1000).status, 'alert')
+
+    def test_minion_cooldown_baseline_reduction_alerts(self):
+        verdict = self.minion_cooldown(2000, 2000)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('without the passive', verdict.explanation)
+
+    def cooldown_gate(self, without: int, with_: int):
+        model = {'arms': {arm: cooldown_gate_label(PANDEMIC, arm) for arm in ('without', 'with')},
+                 'events': {arm: f'{cooldown_gate_label(PANDEMIC, arm)} events' for arm in ('without', 'with')},
+                 'primed': {arm: f'{cooldown_gate_label(PANDEMIC, arm)} primed' for arm in ('without', 'with')},
+                 'gate_wait_ms': 50000, 'observe_spell': VIRULENCY,
+                 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL},
+                 'measurements': cooldown_measurement_labels(PANDEMIC)}
+        expectation = Expectation(f'{PANDEMIC} {COOLDOWN_GATE_CHECK}', COOLDOWN_GATE_CHECK, PANDEMIC, PANDEMIC, None,
+                                  'Damage', 'rule', model)
+        steps = [assert_step(model['primed'][arm], '59994') for arm in ('without', 'with')]
+        steps += [assert_step(model['events'][arm], '25') for arm in ('without', 'with')]
+        steps += [assert_step(model['arms']['without'], str(without)), assert_step(model['arms']['with'], str(with_)),
+                  assert_step(model['measurements']['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-trigger-560798-gate-part-1', 'trigger', [expectation],
+                                steps=steps)
+        return self.verdict(COOLDOWN_GATE_CHECK)
+
+    def test_cooldown_gate_refused_without_and_cast_with_is_ok(self):
+        self.assertEqual(self.cooldown_gate(67, 0).status, 'ok')
+
+    def test_cooldown_gate_mutant_refused_with_the_passive_alerts(self):
+        self.assertEqual(self.cooldown_gate(67, 67).status, 'alert')
+
+    def test_cooldown_gate_mutant_cast_without_the_passive_alerts(self):
+        self.assertEqual(self.cooldown_gate(0, 0).status, 'alert')
+
+    def proc_model(self, baseline: bool) -> dict:
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        model = {'part': 0, 'parts': 1, 'chance_pct': 5.0, 'minimum_trials': 504, 'scheduled_attempts': 756,
+                 'part_attempts': 756, 'attempt_ms': 2000,
+                 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL}, 'proc_spell': 531129,
+                 'event_metric': 'spell_cast_count', 'events_per_proc': 1, 'measurements': labels,
+                 'event_labels': [labels['events']], 'exclude_trigger_casts': False,
+                 'readings': [{'name': 'triggering hits only', 'labels': [labels['trials']], 'minus_events': False}]}
+        if baseline:
+            model['baseline'] = {**baseline_labels(OVERWHELMING_FORCE), 'attempts': 90}
+        return model
+
+    def proc(self, baseline_events: int):
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        held = baseline_labels(OVERWHELMING_FORCE)
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_CHECK}', PROC_CHECK, OVERWHELMING_FORCE,
+                                  OVERWHELMING_FORCE, None, '$h', 'rule', self.proc_model(True))
+        steps = [assert_step(held['trials'], '90'), assert_step(held['events'], str(baseline_events)),
+                 assert_step(labels['trials'], '890'), assert_step(labels['attempts'], '890'),
+                 assert_step(labels['events'], str(40 + baseline_events)), assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-531128-part-1', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_CHECK, constant_reader(Displayed('$h', 5.0, None, 'chance_pct')))
+
+    def test_minion_proc_rate_leaves_the_baseline_out(self):
+        verdict = self.proc(0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 40 / 800)
+        self.assertIn('no event in 90 baseline trials', verdict.explanation)
+
+    def test_minion_proc_mutant_firing_without_the_passive_alerts(self):
+        verdict = self.proc(3)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('baseline trials without the passive', verdict.explanation)
+
+    def energize(self, each: int):
+        labels = energize_labels(OVERWHELMING_FORCE, 6)
+        model = {'part': 0, 'parts': 1, 'power': 6, 'expected': 20, 'percent_of_max': None, 'measurements': labels}
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_ENERGIZE_CHECK} 6', PROC_ENERGIZE_CHECK,
+                                  OVERWHELMING_FORCE, OVERWHELMING_FORCE, None, '20', 'rule', model)
+        steps = [assert_step(labels['total'], str(each * 41)), assert_step(labels['count'], '41')]
+        self.workspace.scenario('conformance-necromancer-proc-531128-energize', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_ENERGIZE_CHECK)
+
+    def test_proc_energize_of_the_stated_amount_is_ok(self):
+        self.assertEqual(self.energize(20).status, 'ok')
+
+    def test_proc_energize_mutant_of_another_amount_alerts(self):
+        self.assertEqual(self.energize(10).status, 'alert')
+
+
+class MinionPlanTest(unittest.TestCase):
+    def test_baseline_attempts_follow_the_stated_chance(self):
+        self.assertEqual([baseline_attempts(chance) for chance in (5, 10, 20, 50)], [90, 44, 21, 20])
+
+    def test_a_minion_trigger_needs_its_swing_source(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', CHOMP))
+        del entry['trigger']['swing_source']
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_minion_auras_need_a_refresh_interval(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', CHOMP))
+        del entry['minion_aura_refresh_ms']
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class MinionScenarioTest(unittest.TestCase):
+    def test_chomp_raises_its_minion_and_refreshes_the_crit_fixture_by_remove_and_add(self):
+        scenario, expectations = trigger_scenario(NECROMANCER, necromancer_entry('triggers', CHOMP))
+        steps = scenario['steps']
+        raised = next(step for step in steps if step.get('metric') == 'owned_creature_count')
+        self.assertEqual((raised['entry'], raised['equals']), (50068, 1))
+        fixtures = [step for step in steps if step['action'] == 'set_aura']
+        self.assertEqual([fixture['stacks'] for fixture in fixtures[:2]], [0, 1])
+        self.assertEqual(fixtures[1]['amount'], 100)
+        trials = next(step for step in steps if step.get('label') == f'{CHOMP} trigger trials')
+        self.assertEqual((trials['metric'], trials['entry']), ('pet_melee_crits', 50068))
+        events = next(step for step in steps if step.get('label') == f'{CHOMP} trigger events')
+        self.assertEqual((events['metric'], events['spell'], events['entry']), ('spell_damage_count', 707284, 50068))
+        self.assertEqual(expectations[0].model['trigger']['action'], 'minion')
+
+    def test_pandemic_windows_read_the_cooldown_and_the_minion_events(self):
+        entry = necromancer_entry('triggers', PANDEMIC, 'cooldown_delta')
+        scenario, _ = minion_cooldown_scenario(NECROMANCER, entry)
+        labels = [step.get('label') for step in scenario['steps']]
+        self.assertIn(cooldown_trial_label(PANDEMIC, 'baseline', 0, 'before'), labels)
+        self.assertIn(minion_cooldown_event_label(PANDEMIC, 'measured', 0, 'after'), labels)
+        cleared = [step for step in scenario['steps'] if step['action'] == 'set_aura' and step['spell'] == 803782]
+        self.assertTrue(cleared and all(step['stacks'] == 0 for step in cleared))
+
+    def test_pandemic_gate_attempts_virulency_in_both_arms(self):
+        entry = necromancer_entry('triggers', PANDEMIC, 'cooldown_gate')
+        scenario, expectations = cooldown_gate_scenario(NECROMANCER, entry)
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'cast_failure']
+        self.assertEqual([read['label'] for read in reads],
+                         [cooldown_gate_label(PANDEMIC, 'without'), cooldown_gate_label(PANDEMIC, 'with')])
+        self.assertEqual(expectations[0].check, COOLDOWN_GATE_CHECK)
+
+    def test_overwhelming_force_proc_reads_its_baseline_and_energize_amounts(self):
+        entry = necromancer_entry('procs', OVERWHELMING_FORCE)
+        plan = proc_plan(NECROMANCER, entry)
+        scenario, expectations = proc_scenario(NECROMANCER, entry)
+        labels = {step.get('label') for step in scenario['steps']}
+        self.assertTrue(set(baseline_labels(OVERWHELMING_FORCE).values()) <= labels)
+        self.assertEqual({expectation.check for expectation in expectations}, {PROC_CHECK, PROC_ENERGIZE_CHECK})
+        self.assertEqual(expectations[0].model['baseline']['attempts'], baseline_attempts(plan.chance_pct))
