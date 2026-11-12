@@ -181,6 +181,7 @@ namespace
                 return;
             _locked = locked;
             me->SetVisible(!locked);
+            me->SetReactState(locked ? REACT_PASSIVE : REACT_AGGRESSIVE);
             if (locked)
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
             else

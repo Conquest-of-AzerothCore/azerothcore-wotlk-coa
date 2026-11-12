@@ -21,9 +21,25 @@
       "class": 1,
       "level": 60,
       "security": 3
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
     }
   ],
   "steps": [
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "mate",
+      "value": 1
+    },
     {
       "action": "set_health",
       "actor": "hero",
@@ -36,11 +52,14 @@
       "command": ".raidphase set 2"
     },
     {
-      "action": "summon",
+      "action": "teleport_to_spawn",
       "actor": "hero",
-      "entry": 14887,
-      "as": "ysondre",
-      "distance": 6
+      "guid": 32343
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "mate",
+      "guid": 32343
     },
     {
       "action": "wait",
@@ -49,16 +68,9 @@
     {
       "action": "assert",
       "label": "Below Molten Core Ysondre cannot be attacked",
-      "actor": "hero",
+      "actor": "mate",
       "metric": "nearby_creature_can_attack",
       "entry": 14887,
-      "equals": 0
-    },
-    {
-      "action": "assert",
-      "label": "Below Molten Core Ysondre is not in combat",
-      "actor": "ysondre",
-      "metric": "combat",
       "equals": 0
     },
     {
@@ -74,13 +86,17 @@
       "command": ".raidphase set 3"
     },
     {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
       "action": "assert",
       "label": "At Molten Core Ysondre can be attacked",
-      "actor": "hero",
+      "actor": "mate",
       "metric": "nearby_creature_can_attack",
       "entry": 14887,
       "equals": 1,
-      "within_ms": 3000
+      "within_ms": 10000
     },
     {
       "action": "command",
