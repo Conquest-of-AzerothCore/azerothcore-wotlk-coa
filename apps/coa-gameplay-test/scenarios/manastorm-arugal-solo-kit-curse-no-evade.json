@@ -15,7 +15,10 @@
     "react to the empty threat list while the charm still holds, that Arugal did not evade: Unit::",
     "RemoveEvadeAuras() would strip his Chaotic Link encounter aura 93459. Attackability is checked only after",
     "the 10 s charm ends, since a charmed player is always friendly to its charmer (Unit::GetReactionTo); the",
-    "player must then be able to attack Arugal again with Chaotic Link still on him."
+    "player must then be able to attack Arugal again with Chaotic Link still on him.",
+    "A second report (#12046) saw Arugal heal to full health while the player was charmed. The case takes 15% of",
+    "his health before the charm; an evade reset or out-of-combat regeneration would bring him back to 100%,",
+    "while Arugal kept in combat cannot regenerate (Creature::Regenerate runs only out of combat)."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -109,6 +112,21 @@
       "equals": 1
     },
     {
+      "action": "attack_nearby",
+      "label": "Wound Arugal so a reset to full health would be visible",
+      "actor": "n",
+      "entry": 4275,
+      "damage_pct": 15
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal is below full health before the charm",
+      "actor": "n",
+      "metric": "nearby_creature_health_pct",
+      "entry": 4275,
+      "max": 90
+    },
+    {
       "action": "select_nearby",
       "label": "Select Arugal so '.cast back' can resolve him as the caster",
       "actor": "n",
@@ -172,6 +190,14 @@
       "entry": 4275,
       "spell": 93459,
       "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Arugal did not heal to full health while the player was charmed",
+      "actor": "n",
+      "metric": "nearby_creature_health_pct",
+      "entry": 4275,
+      "max": 90
     },
     {
       "action": "assert",

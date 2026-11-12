@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Nightmare trials make a level 1 character take x4 physical and x6 magic damage",
+  "contract": [
+    "Every Nightmare trial's text and aura tooltip promise 300% more damage from physical attacks and 500% more from spells.",
+    "Nightmare (challenge 61) applies 93132, whose SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN effects had base points 150/250 plus 3.75/6.25 per level with MaxLevel 10, so a level 1 character took +151%/+251% (x2.51/x3.51) and level 10 and above +184%/+307%. The CoA contract sets base points 299/499 with no per-level scaling, so with DieSides 1 the effects resolve to +300%/+500% at every level.",
+    "Nightmare - Lost in Horror (challenge 186) applies 93178, which has no damage-taken effect, so the trial added nothing (x1). The hidden client aura 93179 carries flat 299/499; a spell_linked_spell aura link (type 2) applies it with 93178 and removes it with 93178.",
+    "Native path: Unit::MeleeDamageBonusTaken and Unit::SpellDamageBonusTaken multiply by GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN) for the hit's school mask. melee_damage_taken (white hit, Physical) and spell_damage_taken with Fireball 133 (SchoolMask 4, Fire) read those calculations at a fixed base of 1000, with no hit roll, crit or mitigation.",
+    "All three characters are level 1, the same race and class, and are measured against the same attacker. The trial characters must take exactly 4x the control's physical and 6x its fire damage; after Lost in Horror stops, 93178 and 93179 are both gone and damage taken returns to 1x."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 1, "level": 1 },
+    { "id": "nightmare", "race": 1, "class": 1, "level": 1 },
+    { "id": "horror", "race": 1, "class": 1, "level": 1 }
+  ],
+  "creatures": [
+    { "id": "attacker", "owner": "control", "entry": 36, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "start_challenge", "label": "Start Nightmare", "actor": "nightmare", "challenge": 61, "level": 1 },
+    { "action": "assert", "actor": "nightmare", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
+    { "action": "start_challenge", "label": "Start Lost in Horror", "actor": "horror", "challenge": 186, "level": 1 },
+    { "action": "assert", "actor": "horror", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
+    {
+      "action": "assert", "label": "SETUP: Nightmare applies its aura", "actor": "nightmare",
+      "metric": "aura", "spell": 93132, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "SETUP: Lost in Horror applies its visible aura", "actor": "horror",
+      "metric": "aura", "spell": 93178, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the visible aura brings the hidden damage aura with it",
+      "actor": "horror", "metric": "aura", "spell": 93179, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "snapshot", "label": "Physical damage taken outside any trial", "actor": "control",
+      "metric": "melee_damage_taken", "target": "attacker", "save_as": "physical_base"
+    },
+    {
+      "action": "snapshot", "label": "Fire damage taken outside any trial", "actor": "control",
+      "metric": "spell_damage_taken", "spell": 133, "target": "attacker", "save_as": "fire_base"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Nightmare at level 1 takes x4 physical (was x2.51)",
+      "actor": "nightmare", "metric": "melee_damage_taken", "target": "attacker",
+      "ratio_to": "physical_base", "min": 3.99, "max": 4.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Nightmare at level 1 takes x6 fire (was x3.51)",
+      "actor": "nightmare", "metric": "spell_damage_taken", "spell": 133, "target": "attacker",
+      "ratio_to": "fire_base", "min": 5.99, "max": 6.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Lost in Horror takes x4 physical (was x1)",
+      "actor": "horror", "metric": "melee_damage_taken", "target": "attacker",
+      "ratio_to": "physical_base", "min": 3.99, "max": 4.01
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Lost in Horror takes x6 fire (was x1)",
+      "actor": "horror", "metric": "spell_damage_taken", "spell": 133, "target": "attacker",
+      "ratio_to": "fire_base", "min": 5.99, "max": 6.01
+    },
+    { "action": "stop_challenge", "label": "Stop Lost in Horror", "actor": "horror", "challenge": 186 },
+    {
+      "action": "assert", "label": "Stopping the trial removes its visible aura", "actor": "horror",
+      "metric": "aura", "spell": 93178, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the hidden damage aura leaves with it", "actor": "horror",
+      "metric": "aura", "spell": 93179, "equals": 0, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Damage taken returns to normal", "actor": "horror",
+      "metric": "melee_damage_taken", "target": "attacker", "ratio_to": "physical_base", "min": 0.999, "max": 1.001
+    }
+  ]
+}

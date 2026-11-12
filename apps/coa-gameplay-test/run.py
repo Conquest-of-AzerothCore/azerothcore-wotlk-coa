@@ -142,7 +142,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
     'nearby_gameobject_flags', 'nearby_gameobject_quest',
     'nearby_gameobject_display', 'nearby_gameobject_ground_offset', 'nearby_gameobject_orientation',
-    'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'map_creature_count',
+    'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'nearby_creature_height',
+    'map_creature_count',
     'map_creatures_below_floor',
     'nearby_gameobject_at_client',
     'voidportal_group',
@@ -150,7 +151,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
     'spell_hit_bonus_taken', 'rooted', 'stunned', 'school_prohibited', 'spell_cast_count', 'spell_go_count',
-    'cast_failure',
+    'cast_failure', 'guid_counter',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
     'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
@@ -240,7 +241,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'aura_state', 'school', 'hand',
                  'rating', 'op', 'subclass',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
-                 'min_distance', 'owner_display', 'creator_only', 'ranged_weapon_subclass', 'sheath_state', 'skill',
+                 'min_distance', 'owner_display', 'creator_only', 'caster_entry', 'ranged_weapon_subclass',
+                 'sheath_state', 'skill',
                  'cache', 'table', 'exclude', 'dungeon', 'source', 'opcode', 'from', 'slot', 'achievement', 'title',
                  'type_mask', 'hit_mask', 'spell_type_mask', 'items',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
@@ -302,7 +304,7 @@ ACTIONS = {
     'die': ({'actor'}, {'actor', 'revived', 'pet'}),
     'release_spirit': ({'actor'}, {'actor'}),
     'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination'}),
-    'gossip_hello': ({'actor'}, {'actor', 'target'}),
+    'gossip_hello': ({'actor'}, {'actor', 'target', 'entry'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'personal_bank_open': ({'actor', 'entry'}, {'actor', 'entry'}),
     'personal_bank_swap': ({'actor', 'entry', 'direction'},
@@ -353,7 +355,8 @@ ACTIONS = {
     'set_item_random_property': ({'actor', 'item', 'property'}, {'actor', 'item', 'property'}),
     'fill_bags': ({'actor'}, {'actor', 'slots'}),
     'equip': ({'actor', 'item', 'slot'}, {'actor', 'item', 'slot', 'rejected'}),
-    'use_item': ({'actor', 'item', 'spell'}, {'actor', 'item', 'spell', 'target', 'target_item', 'destination'}),
+    'use_item': ({'actor', 'item', 'spell'}, {'actor', 'item', 'spell', 'target', 'target_item',
+                                              'target_gameobject', 'destination'}),
     'use_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
     'summon_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'distance', 'duration_s'}),
     'loot_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
@@ -1097,9 +1100,11 @@ def validate(scenario, clock=REAL_CLOCK):
                             f'{where}.entries must be a non-empty list')
                     for index, entry in enumerate(step['entries']):
                         number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
-            if metric in {'nearest_creature_distance', 'nearby_creature_orientation'}:
+            if metric in {'nearest_creature_distance', 'nearby_creature_orientation', 'nearby_creature_height'}:
                 require(step['actor'] in player_ids, f'{where}: creature distance needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            if metric == 'nearby_creature_height':
+                require(step.get('target') in actor_ids, f'{where}: creature height needs the reference unit')
             if metric == 'map_creatures_below_floor':
                 require(step['actor'] in player_ids, f'{where}: floor check needs a player')
             if metric == 'nearby_creature_count':
@@ -1203,6 +1208,11 @@ def validate(scenario, clock=REAL_CLOCK):
                 require('pet' not in step, f'{where}: spell combat query selects either pet or entry')
             if metric in {'spell_go_count', 'spell_damage_count', 'spell_damage_total'} and 'caster' in step:
                 require('pet' not in step and 'entry' not in step, f'{where}: cast query selects one caster source')
+            if 'caster_entry' in step:
+                require(metric in {'spell_damage_count', 'spell_damage_total'},
+                        f'{where}: caster_entry only filters spell damage events')
+                number(step['caster_entry'], f'{where}.caster_entry', 1, 2**32 - 1, True)
+                require(not {'pet', 'entry', 'caster'} & step.keys(), f'{where}: cast query selects one caster source')
             if 'target_pet' in step:
                 require(metric in {'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
                                    'spell_energize_count', 'spell_energize_total'}

@@ -1,0 +1,339 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Heart of Hakkar, prowlers, bats and Spawn of Mar'li scale with difficulty and raid size",
+  "contract": [
+    "The round-5 testers found the Heart of Hakkar (92005), Arlokk's Zulian Prowlers (15101), Bloodseeker Bats",
+    "(11368), Frenzied Bloodseeker Bats (14965) and the Spawn of Mar'li (15041) on the wrong health per tier, and",
+    "trash on Heroic and above weaker than on Normal: CoA's raid health x2.2 applies on Normal only. Health per",
+    "player from the live logs: heart 19,959 Normal; prowler 3,304 and 6,212; bat 1,430 and 3,100; frenzied bat",
+    "33,403 Mythic; Spawn of Mar'li 8,431 Mythic (tester value). The heart follows Hakkar's ladder (x1.88 Mythic,",
+    "x2.32 Ascended: 37,523 and 46,305; user decision 2026-11-12), not the Ascended log's 95,396, whose Hakkar had",
+    "about 5x his Normal health. Raid flex counts at least 10 players. A Mythic Gurubashi Headhunter (3,052",
+    "level-60 warrior health x 11.2219) gets x1.88 x2.2 = 141,655 health, where the variant without the raid factor",
+    "had 64,389. Each hero is alone in an instance."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "ascended",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "ascended",
+      "value": 3
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "ascended",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: ascended is in Zul'Gurub on Ascended",
+      "actor": "ascended",
+      "metric": "map_difficulty",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in Zul'Gurub on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in Zul'Gurub on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "ascended",
+      "entry": 92005,
+      "as": "heart_ascended",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 92005,
+      "as": "heart_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 15101,
+      "as": "prowler_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 11368,
+      "as": "bat_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14965,
+      "as": "frenzied_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 15041,
+      "as": "spawn_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 11351,
+      "as": "headhunter_mythic",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 92005,
+      "as": "heart_normal",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 15101,
+      "as": "prowler_normal",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 11368,
+      "as": "bat_normal",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic headhunter uses its Mythic template",
+      "actor": "mythic",
+      "metric": "nearby_creature_template",
+      "entry": 11351,
+      "equals": 211351
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ascended heart has 46,305 per player",
+      "actor": "ascended",
+      "metric": "nearby_creature_max_health",
+      "entry": 92005,
+      "min": 460735,
+      "max": 465365,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic heart has 37,523 per player",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 92005,
+      "min": 373354,
+      "max": 377106,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal heart has 19,959 per player",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 92005,
+      "min": 198592,
+      "max": 200588,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Mythic Zulian Prowler has 6,212 per player",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 15101,
+      "min": 61809,
+      "max": 62431,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Normal Zulian Prowler has 3,304 per player",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 15101,
+      "min": 32874,
+      "max": 33206,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Mythic Bloodseeker Bat has 3,100 per player",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11368,
+      "min": 30845,
+      "max": 31155,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Normal Bloodseeker Bat has 1,430 per player",
+      "actor": "normal",
+      "metric": "nearby_creature_max_health",
+      "entry": 11368,
+      "min": 14228,
+      "max": 14372,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Mythic Frenzied Bloodseeker Bat has 33,403 per player",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 14965,
+      "min": 332359,
+      "max": 335701,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Mythic Spawn of Mar'li has 8,431 per player",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 15041,
+      "min": 83888,
+      "max": 84732,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Mythic Gurubashi Headhunter carries the raid x2.2 on top of its x1.88",
+      "actor": "mythic",
+      "metric": "nearby_creature_max_health",
+      "entry": 11351,
+      "min": 140946,
+      "max": 142364,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended hero survived",
+      "actor": "ascended",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero survived",
+      "actor": "mythic",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal hero survived",
+      "actor": "normal",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

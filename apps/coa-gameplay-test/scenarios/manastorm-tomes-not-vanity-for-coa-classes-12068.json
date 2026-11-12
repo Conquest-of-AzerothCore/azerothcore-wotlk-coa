@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Millhouse's Hero-only tomes stay buyable on every CoA-class character (#12068)",
+  "contract": [
+    "The client VanityCollection.dbc rows of the Manastorm utility tomes carry ClassMask 512 (class 10 Hero only), so",
+    "a CoA-class character cannot claim them from the Vanity collection. With CoA.UnlockAllVanity = 0 a Witch Hunter",
+    "who buys Eye of Kilrogg 1500126 from Millhouse Manastorm 179538 for ItemExtendedCost 4221 (150 Bedlam Bullion",
+    "1297307) gets the tome, but no SMSG_VANITY_COLLECTION_ADDED 0x6F8, and the tome stays listed for another",
+    "Witch Hunter on the same account. A Mind Soothe tome 1500128 already recorded in the account's collection (as on",
+    "accounts that bought one before the fix) no longer hides it from a class the row excludes."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": {"unlock_all": false, "starter_items": [1500128]},
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [
+    {"id": "main", "race": 1, "class": 15, "level": 60},
+    {"id": "alt", "race": 1, "class": 15, "level": 60, "account_of": "main"}
+  ],
+  "creatures": [{"id": "millhouse", "owner": "main", "entry": 179538, "faction": 35, "level": 63, "distance": 2}],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Open Manastorm Rewards", "actor": "main", "opcode": 414,
+     "fields": [{"actor_guid": "millhouse"}], "consumed": false},
+    {"action": "assert", "label": "The store opens", "actor": "main", "metric": "vendor_list_packets", "equals": 1,
+     "within_ms": 2000},
+    {"action": "assert", "label": "Eye of Kilrogg is sold for Bedlam Bullion", "actor": "main",
+     "metric": "vendor_extended_cost", "item": 1500126, "equals": 4221},
+    {"action": "assert", "label": "DISCRIMINATING: the recorded Hero-only Mind Soothe tome is still listed",
+     "actor": "main", "metric": "vendor_extended_cost", "item": 1500128, "equals": 4221},
+    {"action": "add_item", "actor": "main", "item": 1297307, "count": 150},
+    {"action": "snapshot", "label": "Count Vanity collection notices before the purchase", "actor": "main",
+     "metric": "server_packets", "opcode": 1784, "save_as": "vanity_added"},
+    {"action": "client_packet", "label": "Buy Eye of Kilrogg", "actor": "main", "opcode": 418, "consumed": false,
+     "fields": [{"actor_guid": "millhouse"}, {"u32": 1500126}, {"u32": 27}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "The tome is bought", "actor": "main", "metric": "item_count", "item": 1500126,
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "The bullion is spent", "actor": "main", "metric": "item_count", "item": 1297307,
+     "equals": 0},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "DISCRIMINATING: no Vanity collection notice for a Hero-only row", "actor": "main",
+     "metric": "server_packets", "opcode": 1784, "relative_to": "vanity_added", "equals": 0},
+    {"action": "relog", "actor": "alt"},
+    {"action": "client_packet", "label": "The alt opens Manastorm Rewards", "actor": "alt", "opcode": 414,
+     "fields": [{"actor_guid": "millhouse"}], "consumed": false},
+    {"action": "assert", "label": "The alt's store opens", "actor": "alt", "metric": "vendor_list_packets",
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "DISCRIMINATING: the alt can still buy Eye of Kilrogg", "actor": "alt",
+     "metric": "vendor_extended_cost", "item": 1500126, "equals": 4221},
+    {"action": "assert", "label": "The alt can still buy Mind Soothe", "actor": "alt",
+     "metric": "vendor_extended_cost", "item": 1500128, "equals": 4221}
+  ]
+}

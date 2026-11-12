@@ -62,6 +62,18 @@ set_target_properties(game
     FOLDER
       "server")
 
+if (WITH_GAME_UNITY_BUILD)
+  set_source_files_properties(
+    ${CMAKE_CURRENT_SOURCE_DIR}/AI/ScriptedAI/ScriptedFollowerAI.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/AI/SmartScripts/SmartScript.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Movement/Spline/MovementPacketBuilder.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Spells/SpellInfo.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Spells/SpellMgr.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Warden/WardenMac.cpp
+    PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  set_target_properties(game PROPERTIES UNITY_BUILD ON UNITY_BUILD_BATCH_SIZE 8)
+endif()
+
 # Generate precompiled header
 if (USE_COREPCH)
   add_cxx_pch(game ${PRIVATE_PCH_HEADER})

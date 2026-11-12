@@ -526,7 +526,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `die` | Player `actor`: fixture death through self damage equal to current health; the body stays unreleased. `pet: true` kills the actor's current pet the same way. |
 | `release_spirit` | Player `actor`: native `CMSG_REPOP_REQUEST` for an unreleased body; fails if the player is neither a ghost nor alive afterwards. |
 | `cast_charm` | Same fields: native pet-cast handler, with the charmed unit as the default target. `pet: true` casts from the player's pet instead. |
-| `gossip_hello` | `actor`, optional `target`: native gossip handler; defaults to the actor's summoned companion. |
+| `gossip_hello` | `actor`, optional `target` or `entry`: native gossip handler; defaults to the actor's summoned companion. `entry` picks the nearest living creature of that entry within 40 yards, such as one the server spawned, and walks the actor up to it first. |
 | `banker_activate` | `actor`, optional `target`, or optional `owner` + `entry`: native banker click (`CMSG_BANKER_ACTIVATE`); defaults to the actor's summoned companion, and `owner` aims it at a companion another actor summoned, walking up to it first. |
 | `personal_bank_open` | `actor`, bank object `entry`: native Personal Bank open (`CMSG_GUILD_BANKER_ACTIVATE`) on the nearest vault of that entry within 20 yards. |
 | `personal_bank_swap` | `actor`, vault `entry`, `direction` `deposit` or `withdraw`, optional bank `slot` (default 0) and split `count` (0 moves the stack); `deposit` needs `item`, the first carried item of that entry. Withdrawals optionally take backpack `inventory_slot` (23-38), otherwise use automatic storage. Sends native `CMSG_GUILD_BANK_SWAP_ITEMS` into or out of the open Personal Bank. |
@@ -756,9 +756,10 @@ by creatures of that entry, or sum their healing including or excluding overheal
 `spell_damage_count` and `spell_damage_total` require `spell` and count positive direct or periodic spell
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
-as a creature fixture, and `critical` filters critical or noncritical hits. `blocked` keeps only the direct hits
-whose log reports (true) or lacks (false) a blocked amount; periodic damage is never blocked. Values accumulate
-throughout the scenario; use snapshots and `relative_to` around a cast.
+as a creature fixture, `caster_entry` counts every caster of that creature entry from the recorded events (a
+creature another unit summoned, alive or not), and `critical` filters critical or noncritical hits. `blocked`
+keeps only the direct hits whose log reports (true) or lacks (false) a blocked amount; periodic damage is never
+blocked. Values accumulate throughout the scenario; use snapshots and `relative_to` around a cast.
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
 `spell_log_count`, `spell_absorb_total` and `spell_resist_total` read the same native direct spell damage logs,
 including a hit that an absorb took whole: they count the logs of `spell`, or sum the absorbed or the resisted amount
@@ -806,6 +807,9 @@ that the false-failure probability is acceptable, and assert a `min` on the coun
 `spell_cast_count` requires `spell` and counts the casts of that exact spell the actor completed since the scenario
 started, triggered casts included. Use it where a script casts the effect directly, so no aura is named as the trigger
 and `spell_proc_count` reads zero.
+Both counts belong to the unit in its own map instance. Creature GUIDs are generated per map, so creatures in
+separate instances can share one; their counts stay separate. `guid_counter` reads the actor's GUID counter:
+snapshot it on one unit and assert another `relative_to` it to show that two units share a counter.
 These two count metrics accept each other's snapshots with `relative_to`. Subtract an engraving aura's proc count
 from its payload's total cast count to isolate a talent that casts the same payload without aura attribution.
 `spell_proc_chance` requires `spell` and reads the loaded `spell_proc` Chance, after a zero is replaced by the DBC
@@ -1146,6 +1150,8 @@ all 19 map/mode pairs per tier and a real VanCleef killing blow, without a GM ac
 `nearest_creature_distance` requires player `entry` and reads the 2D distance from the player to the nearest living creature with that entry in its phase within 60 yards, or -1 when there is none.
 `nearby_creature_orientation` requires a player and `entry`, and returns the orientation in radians (0 to 2 pi) of the
 nearest living creature with that entry within 60 yards; it requires one to exist there.
+`nearby_creature_height` takes the same creature and returns its height in yards above the unit `target` (an actor
+or creature alias), negative when below it.
 `nearby_creature_count` requires a player and `entry`, and counts living creatures in the same phase within
 60 yards. Optional `min_level` and `max_level` filter their native levels; `min_home_distance` keeps creatures
 at least that many yards from their own home positions (2D), and `spell` those carrying that aura. This can

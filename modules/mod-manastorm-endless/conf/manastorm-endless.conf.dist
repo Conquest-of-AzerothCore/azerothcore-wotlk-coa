@@ -33,6 +33,11 @@ Manastorm.WeeklyCacheLockout.Limit = 5
 # Individual progression affixes still require their matching native unlock/toast; those depths are unchanged.
 Manastorm.AffixMinimumLevel = 50
 
+# Multiplies all Manastorm experience: stage creature kill XP (after the depth/native modifiers) and the
+# floor completion XP earned from now on. 0.3 grants 30% (a 70% reduction), 1.0 the full amount, 0 none.
+# Negative or invalid values log an error and fall back to 0.3. Reloadable.
+Manastorm.ExperienceRate = 0.3
+
 # 1 = caches follow Ascension.CallboardCache.ReleaseStage in coa.conf:
 # 0 Normal Dungeons, 1 Heroic Dungeons, 2 Mythic Dungeons, 3 Zul'Gurub, 4 Molten Core ... 8 Naxxramas.
 # A closed cache tier falls back to the highest eligible lower bracket; DB depth/unlock requirements still apply.

@@ -14,6 +14,7 @@ namespace ManastormModuleConfig
     void Load(bool reload);
     bool Enabled();
     uint8 AffixMinimumLevel();
+    double ExperienceRate();
     bool WeeklyCacheLockoutEnabled();
     uint32 WeeklyCacheLockoutLimit();
     bool CoALootModeEnabled();
