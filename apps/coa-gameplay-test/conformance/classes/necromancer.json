@@ -340,10 +340,10 @@
     },
     {
       "spell": 561138, "name": "Army of the North (minion crits)", "kind": "metric_delta", "variant": "crit_hits",
-      "label_suffix": "crit_hits", "quote": "your Undead minions are guaranteed to critically strike", "expected": 2, "before_expected": 0,
+      "label_suffix": "crit_hits", "quote": "your Undead minions are guaranteed to critically strike", "expected": 1, "before_expected": 0,
       "trigger_spell": 504868, "target": "dummy", "setup_casts": [561138, 500971], "setup_only_after": true, "setup_wait_ms": 3600, "wait_ms": 10000,
-      "expire_ms": 500, "after_at_least": 2, "metric": "pet_melee_crits", "fields": {"entry": 50073},
-      "observe_source": "necromancer_scaling::OnBeforeRollMeleeOutcomeAgainst (AscensionNecromancerContracts.cpp) sets a minion melee crit to 10000 while its owner holds 561138. Both phases cast Command: Undead 504868 at the dummy; the treatment first casts Army of the North and then raises a Ghoul 50073 (the raise at the dummy starts its attack), so the Ghoul melees the dummy under the army for 10000 ms (attack time 2000 ms): at least 2 critical swings. Control: no Ghoul, none."
+      "expire_ms": 500, "after_at_least": 1, "metric": "pet_melee_crits", "fields": {"entry": 50073},
+      "observe_source": "necromancer_scaling::OnBeforeRollMeleeOutcomeAgainst (AscensionNecromancerContracts.cpp) sets a minion melee crit to 10000 while its owner holds 561138. Both phases cast Command: Undead 504868 at the dummy; the treatment first casts Army of the North and then raises a Ghoul 50073 (the raise at the dummy starts its attack), so the Ghoul melees the dummy under the army for 10000 ms (attack time 2000 ms): at least one critical swing (the Rotting Frost Giants the army brings crowd the dummy, so the Ghoul may land only one swing in some runs; the no-plain entry carries the every-hit-crits part). Control: no Ghoul, none."
     },
     {
       "spell": 561138, "name": "Army of the North (no plain minion hit)", "kind": "metric_delta", "variant": "crit_no_plain",
