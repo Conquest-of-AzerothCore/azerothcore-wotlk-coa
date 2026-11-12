@@ -42,6 +42,7 @@ MINION_ACTOR = 'minion'
 MINION_TRIAL_METRICS = frozenset({'pet_melee_crits', 'pet_melee_swings', 'owned_creature_damage_count'})
 MINION_OBSERVE_METRICS = frozenset({'spell_damage_count'})
 MINION_SETTLE_MS = 8000
+MINION_COOLDOWN_BAND = 0.05
 TAKEN_HIT_MIN_INTERVAL_MS = 500
 TAKEN_HIT_HEALTH_PCT = 100
 TRIGGER_TARGETS = frozenset({SELF, TARGET, ALLY})
@@ -79,9 +80,34 @@ def trigger_measurements(aura: int) -> dict[str, str]:
             'aura': f'{aura} trigger aura', 'trials': f'{aura} trigger trials', 'events': f'{aura} trigger events'}
 
 
+def checked_minion_cooldown_entry(entry: dict) -> dict:
+    aura = entry['aura']
+    checked_minion_trigger(aura, entry['trigger'], entry)
+    if entry.get('trial_metric') not in MINION_TRIAL_METRICS:
+        raise ValueError(f'Minion cooldown-delta trigger {aura} counts {entry.get("trial_metric")!r}, not one of '
+                         f'{sorted(MINION_TRIAL_METRICS)}')
+    if entry.get('observe_metric') != 'cooldown_ms' or not entry.get('expected_delta_ms', 0) > 0:
+        raise ValueError(f'Minion cooldown-delta trigger {aura} reads cooldown_ms with a positive expected_delta_ms')
+    if not entry.get('window_ms', 0) > 0:
+        raise ValueError(f'Minion cooldown-delta trigger {aura} needs a positive window_ms')
+    if entry.get('observe_target') not in (None, SELF, TARGET):
+        raise ValueError(f'Minion cooldown-delta trigger {aura} casts its observed spell at self or the dummy')
+    for fixture in entry.get('observe_cleared_auras', []):
+        if set(fixture) != {'spell', 'source'} or not isinstance(fixture['spell'], int):
+            raise ValueError(f'Minion cooldown-delta trigger {aura} clears {{"spell", "source"}} auras of the caster')
+    for fixture in entry.get('observe_target_auras', []):
+        if set(fixture) != {'spell', 'source'} or not isinstance(fixture['spell'], int) \
+                or entry.get('observe_target') != TARGET:
+            raise ValueError(f'Minion cooldown-delta trigger {aura} sets {{"spell", "source"}} auras on the dummy '
+                             f'it casts its observed spell at')
+    return entry
+
+
 def checked_cooldown_entry(entry: dict) -> dict:
     aura = entry['aura']
     trigger = entry['trigger']
+    if trigger['action'] == MINION:
+        return checked_minion_cooldown_entry(entry)
     if trigger['action'] != CAST:
         raise ValueError(f'Cooldown-delta trigger {aura} must cast, not {trigger["action"]!r}')
     if trigger.get('target') not in TRIGGER_TARGETS:
@@ -342,6 +368,15 @@ def aura_steps(class_file: dict, entry: dict) -> list[dict]:
     return steps
 
 
+def aura_measurement(entry: dict, label: str) -> dict:
+    if entry.get('aura_on_minion'):
+        if entry['trigger']['action'] != MINION:
+            raise ValueError(f'Trigger {entry["aura"]} reads its aura on a minion without a minion action')
+        return measurement(label, CASTER, 'owned_creature_count', entry=entry['trigger']['entry'], spell=entry['aura'],
+                           caster=CASTER)
+    return measurement(label, CASTER, 'aura', spell=entry['aura'])
+
+
 def minion_setup_steps(class_file: dict, trigger: dict) -> list[dict]:
     facts = facts_of(records_of(class_file), trigger['spell'])
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in trigger.get('learn', [])]
@@ -390,6 +425,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
     if trigger['action'] == PERIODIC:
         return trigger['amplitude_ms']
     if trigger['action'] == MINION:
+        if entry.get('kind') == COOLDOWN_DELTA_KIND:
+            return 2 * cast_interval(class_file, entry['observe_spell'], 0) + entry['window_ms']
         return trigger['swing_ms']
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
@@ -631,7 +668,7 @@ def trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in entry.get('co_learn', [])]
     steps += attempt_steps(class_file, entry, plan, attempts, '')
     steps += counts(entry, labels['trials'], labels['events'])
-    steps.append(measurement(labels['aura'], CASTER, 'aura', spell=aura))
+    steps.append(aura_measurement(entry, labels['aura']))
     parts = len(plan.part_attempts)
     name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {parts}'
     contract = ('Events of an always-on passive trigger: none before the learn, one per trigger after it, summed over '
@@ -855,6 +892,47 @@ def cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) 
     return steps
 
 
+def minion_cooldown_event_label(aura: int, phase: str, index: int, moment: str) -> str:
+    return f'{aura} trigger cooldown {phase} {index} {moment} events'
+
+
+def minion_cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase: str) -> list[dict]:
+    aura, observe = entry['aura'], entry['observe_spell']
+    facts = facts_of(records_of(class_file), observe)
+    target = TARGET if entry.get('observe_target') == TARGET else None
+    creature = entry['trigger']['entry']
+    steps = []
+    for index in range(count):
+        steps += minion_aura_steps(entry)
+        held = [{'action': 'set_aura', 'actor': CASTER, 'spell': fixture['spell'], 'stacks': 0}
+                for fixture in entry.get('observe_cleared_auras', [])]
+        held += [{'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER, 'spell': fixture['spell'],
+                  'stacks': 1} for fixture in entry.get('observe_target_auras', [])]
+        steps += cast_steps(facts, observe, target, 0, 1, power_steps(entry) + held)
+        for moment in ('before', 'after'):
+            if moment == 'after':
+                steps.append({'action': 'wait', 'label': f'{phase} minion window', 'ms': entry['window_ms']})
+            steps.append(measurement(cooldown_trial_label(aura, phase, index, moment), CASTER, 'cooldown_ms',
+                                     spell=observe))
+            steps.append(measurement(minion_cooldown_event_label(aura, phase, index, moment), CASTER,
+                                     entry['trial_metric'], entry=creature))
+        steps.append({'action': 'wait', 'label': f'{phase} spacing', 'ms': cast_interval(class_file, observe, 0)})
+    return steps
+
+
+def minion_cooldown_rule(entry: dict) -> str:
+    trigger = entry['trigger']
+    held = ''.join(f'; before each cast of {entry["observe_spell"]} the caster loses {fixture["spell"]} by harness '
+                   f'set_aura ({fixture["source"]})' for fixture in entry.get('observe_cleared_auras', []))
+    held += ''.join(f'; before each cast of {entry["observe_spell"]} the dummy gets {fixture["spell"]} from the caster '
+                    f'by harness set_aura ({fixture["source"]})' for fixture in entry.get('observe_target_auras', []))
+    return (f'cooldown_ms of {entry["observe_spell"]} read before and after a {entry["window_ms"]} ms window in which '
+            f'the creature {trigger["entry"]} raised by {trigger["spell"]} attacks the dummy with the caster; the '
+            f'drop less the elapsed time, summed over at least {TRIGGER_TRIALS} windows, per {entry["trial_metric"]} '
+            f'event in them, matches {entry["expected_delta_ms"]:g} ms within 5%, and is 0 per event in '
+            f'{BASELINE_ATTEMPTS} windows without the passive ("{entry["per_trigger_text"]}"){held}')
+
+
 def cooldown_trigger_rule(entry: dict) -> str:
     fixtures = ''.join(f'; before each trial, {spell} is reset and cast at self'
                        for spell in entry.get('setup_casts', []))
@@ -867,7 +945,45 @@ def cooldown_trigger_rule(entry: dict) -> str:
             f'{fixtures}')
 
 
+def minion_cooldown_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    plan = trigger_plan(class_file, entry)
+    if not 0 <= part < len(plan.part_attempts):
+        raise ValueError(f'Trigger {entry["aura"]} has parts 0 to {len(plan.part_attempts) - 1}, not {part}')
+    aura, trigger = entry['aura'], entry['trigger']
+    attempts = plan.part_attempts[part]
+    baseline = BASELINE_ATTEMPTS if part == 0 else 0
+    labels = cooldown_measurement_labels(aura)
+    steps = minion_setup_steps(class_file, trigger) + [{'action': 'learn', 'actor': CASTER,
+                                                         'spell': entry['observe_spell']},
+                                                        {'action': 'attack', 'actor': CASTER, 'target': TARGET}]
+    if baseline:
+        steps += minion_cooldown_trial_steps(class_file, entry, baseline, 'baseline')
+    steps += aura_steps(class_file, entry)
+    steps += minion_cooldown_trial_steps(class_file, entry, attempts, 'measured')
+    steps += [{'action': 'stop_attack', 'actor': CASTER}, aura_measurement(entry, labels['aura'])]
+    parts = len(plan.part_attempts)
+    name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {parts}'
+    contract = ('Cooldown reduction of an always-on passive per hit of a raised minion: none before the learn, the '
+                'stated reduction per counted minion event after it, summed over its parts, against its tooltip.')
+    scenario = scenario_shell(class_file, name, contract, steps)
+    scenario['creatures'] = [creature_fixture(class_file)]
+    model = {'part': part, 'parts': parts, 'scheduled_attempts': plan.scheduled, 'part_attempts': attempts,
+             'baseline_attempts': baseline, 'attempt_ms': plan.attempt_ms, 'minimum_trials': TRIGGER_TRIALS,
+             'trigger': dict(trigger), 'observe_spell': entry['observe_spell'],
+             'observe_metric': entry['observe_metric'], 'expected_delta_ms': entry['expected_delta_ms'],
+             'trial_metric': entry['trial_metric'], 'window_ms': entry['window_ms'],
+             'minion_auras': [dict(aura) for aura in entry.get('minion_auras', [])], 'measurements': labels}
+    label = cooldown_label(aura, entry['observe_spell']) if shares_cooldown_aura(class_file, entry) \
+        else cooldown_label(aura)
+    expectation = Expectation(label, COOLDOWN_CHECK, aura, aura, None, entry['trigger_text'],
+                              minion_cooldown_rule(entry), model)
+    baseline_ms = baseline * plan.attempt_ms if baseline else 0
+    return timed(scenario, SETTLE_MS + baseline_ms + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
+
+
 def cooldown_trigger_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    if entry['trigger']['action'] == MINION:
+        return minion_cooldown_scenario(class_file, entry, part)
     class_file = armed_for(class_file, records_of(class_file), entry['trigger']['spell'])
     class_file = armed_for(class_file, records_of(class_file), entry['observe_spell'])
     for spell in entry.get('setup_casts', []):

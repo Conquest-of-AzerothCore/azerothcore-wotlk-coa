@@ -52,7 +52,8 @@ from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STA
 from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
                      Unreadable)
 from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
-                      PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
+                      MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label,
+                      duration_trial_label, minion_cooldown_event_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFECTS, FIXED_DIE_SIDES,
                     GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation,
                     calc_amount_hooks_label, dataset, effect_modifier_label, mean_samples, roll_range, sample_labels)
@@ -1458,9 +1459,85 @@ def cooldown_trial_windows(run: Run, aura: int, labels: dict, phase: str,
     return found
 
 
+def minion_cooldown_windows(run: Run, aura: int, phase: str, count: int,
+                            wait_ms: float) -> list[tuple[float, float, float]] | None:
+    found = []
+    for index in range(count):
+        labels = [cooldown_trial_label(aura, phase, index, moment) for moment in ('before', 'after')]
+        events = [minion_cooldown_event_label(aura, phase, index, moment) for moment in ('before', 'after')]
+        values = [run.values.get(label) for label in labels + events]
+        upper = elapsed_between(run, labels[0], labels[1])
+        if None in values or upper is None:
+            return None
+        before, after, events_before, events_after = values
+        found.append((before - after - max(upper, wait_ms), before - after - wait_ms, events_after - events_before))
+    return found
+
+
+def judge_minion_cooldown(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    aura = expectation.spell_id
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    expected = model['expected_delta_ms']
+    band = MINION_COOLDOWN_BAND * expected
+    windows = {'baseline': [], 'measured': []}
+    without_aura, unmeasured = [], []
+    for _, run, part in parts:
+        aura_value = run.values.get(part.model['measurements']['aura'])
+        found = {phase: minion_cooldown_windows(run, aura, phase, count, model['window_ms'])
+                 for phase, count in (('baseline', part.model['baseline_attempts']),
+                                      ('measured', part.model['part_attempts']))}
+        if aura_value is None or None in found.values():
+            unmeasured.append(unusable_run(run))
+            continue
+        if aura_value <= 0:
+            without_aura.append(run.key)
+            continue
+        for phase, rows in found.items():
+            windows[phase] += rows
+    notes = f'{len(windows["measured"])} measured windows across {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {aura} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no cooldown measurements in {", ".join(unmeasured)}'
+
+    def per_event(rows: list[tuple[float, float, float]]) -> tuple[float, float, float] | None:
+        events = sum(row[2] for row in rows)
+        if events <= 0:
+            return None
+        return sum(row[0] for row in rows) / events, sum(row[1] for row in rows) / events, events
+
+    baseline = per_event(windows['baseline'])
+    if baseline is None:
+        return replace(base, status='unmeasured', explanation=f'no minion event in the baseline windows ({notes})')
+    if baseline[0] > band or baseline[1] < -band:
+        return replace(base, measured=baseline[1], expected=0.0, low=-band, high=band,
+                       explanation=f'{baseline[0]:g} to {baseline[1]:g} ms of cooldown per minion event over '
+                                   f'{baseline[2]:g} events without the passive ({notes})')
+    measured = per_event(windows['measured'])
+    if measured is None:
+        status = 'alert' if unmeasured and not without_aura else 'unmeasured'
+        return replace(base, status=status, explanation=f'no minion event with the passive learned ({notes})')
+    low, high = expected - band, expected + band
+    judged = replace(base, measured=measured[1], expected=expected, low=low, high=high)
+    counts = (f'{measured[0]:g} to {measured[1]:g} ms of cooldown per {model["trial_metric"]} event over '
+              f'{measured[2]:g} events (the window bounded by the wait and the elapsed steps), '
+              f'{baseline[0]:g} to {baseline[1]:g} ms per event over {baseline[2]:g} events without the passive')
+    if len(windows['measured']) < model['minimum_trials']:
+        return replace(judged, status='insufficient_trials',
+                       explanation=f'{counts}; {len(windows["measured"])} windows, fewer than the '
+                                   f'{model["minimum_trials"]} the check needs ({notes})')
+    status = 'ok' if measured[0] <= high + FLOAT_EPSILON and measured[1] >= low - FLOAT_EPSILON else 'alert'
+    return replace(judged, status=status, explanation=f'{counts}; {expectation.rule} ({notes})')
+
+
 def judge_trigger_cooldown(parts: list[ProcPart]) -> Verdict:
     first_entry, _, expectation = parts[0]
     model = expectation.model
+    if model['trigger']['action'] == MINION:
+        return judge_minion_cooldown(parts)
     aura = expectation.spell_id
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)

@@ -1004,14 +1004,26 @@
   {
     "spell": 525600,
     "clause": "While only 1 Abomination is active,",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "While only 1 Abomination is active,",
+        "labels": [
+          "525600 behaviour_metric_delta abomination_aura",
+          "525600 behaviour_metric_delta abomination"
+        ]
+      },
+      {
+        "claim": "only",
+        "labels": []
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 525600,
     "clause": "the critical strike chance of your Ghouls is increased by $525388s2%",
     "labels": [
-      "525600 effect_value 525388e1 #0"
+      "525600 behaviour_metric_delta crit"
     ],
     "kind": "claim"
   },
@@ -1019,7 +1031,7 @@
     "spell": 525600,
     "clause": "and haste by $525388s1%.",
     "labels": [
-      "525600 effect_value 525388e0 #1"
+      "525600 behaviour_metric_delta haste"
     ],
     "kind": "claim"
   },
@@ -1095,7 +1107,7 @@
     "spell": 537208,
     "clause": "Critical strikes dealt by your Undead minions now reduce the cooldown of Unholy Frenzy by $/1000;680553S1 sec.",
     "labels": [
-      "537208 effect_value 680553e0 #0"
+      "537208 trigger_cooldown_delta"
     ],
     "kind": "claim"
   },
@@ -1108,8 +1120,19 @@
   {
     "spell": 560012,
     "clause": "While a Skeletal Mage is active the critical strike chance of your Undead minions is now increased by $523613s2%.",
-    "labels": [
-      "560012 effect_value 523613e1 #0"
+    "claims": [
+      {
+        "claim": "While a Skeletal Mage is active",
+        "labels": [
+          "560012 behaviour_metric_delta mage"
+        ]
+      },
+      {
+        "claim": "the critical strike chance of your Undead minions is now increased by $523613s2%.",
+        "labels": [
+          "560012 behaviour_metric_delta crit"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1254,7 +1277,7 @@
     "spell": 560798,
     "clause": "Damage dealt by your Undead minions now reduces the cooldown of Virulency by $/1000;806322s1 sec.",
     "labels": [
-      "560798 effect_value 806322e0 #0"
+      "560798 trigger_cooldown_delta"
     ],
     "kind": "claim"
   },
@@ -1489,7 +1512,7 @@
     "spell": 638403,
     "clause": "Increases the melee haste of your Undead minions by $s1%",
     "labels": [
-      "638403 effect_value e0 #0"
+      "638403 behaviour_metric_delta haste"
     ],
     "kind": "claim",
     "text_source": {
@@ -1507,7 +1530,7 @@
     "spell": 638403,
     "clause": "and gives their critical melee auto attacks a $h% chance to trigger Bone Club,",
     "labels": [
-      "638403 effect_value #1"
+      "638403 proc_rate"
     ],
     "kind": "claim",
     "dbc_clause": "and gives their critical melee auto attacks an $h% chance to trigger Bone Club,",

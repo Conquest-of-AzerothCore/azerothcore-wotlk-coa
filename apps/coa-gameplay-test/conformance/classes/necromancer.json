@@ -583,6 +583,82 @@
       "observe_source": "tooltip token $560607s2 of 300241 (560607 EffectBasePoints[1] 9 + 1 = 10); AscensionNecromancerEvents.cpp:97-98 heals for damage x Amount(560607, 1) / 100",
       "caster_health_pct": 30,
       "minion_aura_refresh_ms": 4000
+    },
+    {
+      "aura": 560798,
+      "name": "Pandemic",
+      "aura_on_minion": true,
+      "tooltip": "Damage dealt by your Undead minions now reduces the cooldown of |cffffffffVirulency|r by $/1000;806322s1 sec.",
+      "kind": "cooldown_delta",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by your Undead minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 801938,
+      "observe_target": "dummy",
+      "observe_cleared_auras": [
+        {
+          "spell": 803782,
+          "source": "precondition fixture: a Virulency cast opens Infestation 803782 for 10 s (AscensionNecromancerAbilities.cpp:108), during which the next Virulency infests instead and leaves the cooldown unset (AscensionNecromancerAbilities.cpp:58-80); clearing it lets every trial cast the cooldown-starting Virulency"
+        }
+      ],
+      "observe_target_auras": [
+        {
+          "spell": 570131,
+          "source": "precondition fixture: Virulency refreshes and copies the caster's diseases and is refused (111, SPELL_FAILED_TARGET_AURASTATE) on a target without one; Crypt Plague 570131 is a Necromancer disease (Disease, AscensionNecromancer.cpp:238-242); the claim is Pandemic's cooldown reduction, not the disease"
+        }
+      ],
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 1000,
+      "window_ms": 3000,
+      "observe_source": "tooltip token $/1000;806322s1 of 560798: 806322 Effect[0] BasePoints -1001 + 1 = -1000 ms; AscensionNecromancerEvents.cpp:171-172 reduces Virulency 801938 by |Amount(806322)| for each damaging hit of a minion carrying the caster 560798 (Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS)",
+      "per_trigger_text": "reduces the cooldown of Virulency by $/1000;806322s1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the base-mana percentage costs of Virulency 801938 (18%) and Unholy Frenzy 805029 (15%)"
+      }
+    },
+    {
+      "aura": 537208,
+      "name": "Dominion of Frost",
+      "tooltip": "Critical strikes dealt by your Undead minions now reduce the cooldown of |cffffffffUnholy Frenzy|r by $/1000;680553S1 sec. Can only occur once per sec.",
+      "kind": "cooldown_delta",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Critical strikes dealt by your Undead minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "pet_melee_crits",
+      "minion_auras": [
+        {
+          "spell": 280912,
+          "amount": 100,
+          "source": "precondition fixture: Anointed 280912 (aura 290 SPELL_AURA_MOD_CRIT_PCT, 10 s) at amount 100 makes the minion crit (Unit::GetUnitCriticalChance, Unit.cpp:4534-4536); the claim is the cooldown each crit removes, not the crit"
+        }
+      ],
+      "minion_aura_refresh_ms": 8000,
+      "observe_spell": 805029,
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 3000,
+      "window_ms": 3000,
+      "observe_source": "tooltip token $/1000;680553S1 of 537208: 680553 Effect[0] BasePoints -3001 + 1 = -3000 ms; AscensionNecromancerEvents.cpp:181-182 reduces Unholy Frenzy 805029 by |Amount(680553)| on a minion crit, Chance(player, 537208, 1, 1000) (ProcChance 100, 1000 ms internal cooldown); a single Ghoul crits every 2000 ms, so the internal cooldown never binds here",
+      "per_trigger_text": "reduce the cooldown of Unholy Frenzy by $/1000;680553S1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the base-mana percentage costs of Virulency 801938 (18%) and Unholy Frenzy 805029 (15%)"
+      }
     }
   ],
   "talent_modifiers": [],
@@ -1358,6 +1434,90 @@
       "wait_ms": 4000,
       "expire_ms": 3000,
       "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:215-224): while 525600 ticks on the caster and exactly one Abomination 50068 is a minion (Count(player, {50068}) == 1), every Ghoul (holder of 805290, cast on each Ghoul at AscensionNecromancerAuras.cpp:65-66) gets 525388: Effect[0] aura 192 haste, BasePoints 9 + 1 = 10 ($525388s1), Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT 10 ($525388s2). Life Force: base 2 (Capacity, AscensionNecromancer.cpp:103-108) + Summoning Adept 92123 + Scourge Apprentice Training 680283 = 4, an Abomination (3) and a Ghoul (1); a later raise evicts the oldest minion (Evict, AscensionNecromancerSummons.cpp:132-145), so one Abomination stays. Read on the live Ghoul (harness owned_creature_*). With 525600 known throughout: a Ghoul alone reads 5 (no Abomination), then with one Abomination raised 15."
+    },
+    {
+      "spell": 525600,
+      "name": "Army of the Dead (one Abomination, aura)",
+      "kind": "metric_delta",
+      "variant": "abomination_aura",
+      "label_suffix": "abomination_aura",
+      "quote": "While only 1 Abomination is active,",
+      "expected": 1,
+      "before_expected": 0,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 525388,
+        "caster": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "AscensionNecromancerAuras.cpp:215-224: with 525600 known throughout, the Ghoul carries the caster's 525388 only while one Abomination 50068 is a minion: 0 Ghouls with 525388 when the Ghoul is raised alone, 1 when an Abomination is raised first (Life Force 4: 92123 + 680283)."
+    },
+    {
+      "spell": 560012,
+      "name": "Death and Ice",
+      "kind": "metric_delta",
+      "variant": "crit",
+      "label_suffix": "crit",
+      "quote": "While a Skeletal Mage is active the critical strike chance of your Undead minions is now increased by $523613s2%.",
+      "expected": 15,
+      "before_expected": 5,
+      "tolerance": 0.0001,
+      "trigger_spell": 500971,
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "560012 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with aura 290 SPELL_AURA_MOD_CRIT_PCT; aura_ascension_necromancer_lifecycle sets its amount to Amount(523613, 1) = 10 ($523613s2) while a Skeletal Mage 50075 is a minion, else 0 (AscensionNecromancerAuras.cpp:60-61), recalculated by AscensionNecromancer.cpp:395. Life Force: base 2 + Summoning Adept 92123 = 3, a Skeletal Mage (2, Raise: Skeletal Mage 500331) and a Ghoul (1); a later raise evicts the oldest minion (AscensionNecromancerSummons.cpp:132-145). Read on the live Ghoul 50073: melee crit chance (Unit::GetUnitCriticalChance, creature base 5). A Skeletal Mage raised in both phases: 5 without 560012, 15 with it."
+    },
+    {
+      "spell": 560012,
+      "name": "Death and Ice (Skeletal Mage)",
+      "kind": "metric_delta",
+      "variant": "mage",
+      "label_suffix": "mage",
+      "quote": "While a Skeletal Mage is active",
+      "expected": 15,
+      "before_expected": 5,
+      "tolerance": 0.0001,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "560012 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with aura 290 SPELL_AURA_MOD_CRIT_PCT; aura_ascension_necromancer_lifecycle sets its amount to Amount(523613, 1) = 10 ($523613s2) while a Skeletal Mage 50075 is a minion, else 0 (AscensionNecromancerAuras.cpp:60-61), recalculated by AscensionNecromancer.cpp:395. Life Force: base 2 + Summoning Adept 92123 = 3, a Skeletal Mage (2, Raise: Skeletal Mage 500331) and a Ghoul (1); a later raise evicts the oldest minion (AscensionNecromancerSummons.cpp:132-145). Read on the live Ghoul 50073: melee crit chance (Unit::GetUnitCriticalChance, creature base 5). 560012 known throughout: the Ghoul alone reads 5, with a Skeletal Mage raised first 15."
     }
   ],
   "player_observations": [],
