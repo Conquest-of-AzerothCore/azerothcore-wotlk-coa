@@ -491,8 +491,6 @@ struct boss_coa_brc_romogg : public BossAI
             if (Creature* old = ObjectAccessor::GetCreature(*me, _chains))
                 if (old != summon)
                     old->DespawnOrUnsummon();
-            if (TempSummon* chains = summon->ToTempSummon())
-                chains->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
             _chains = summon->GetGUID();
         }
         else if (summon->GetEntry() == NPC_ANGERED_EARTH)
@@ -635,7 +633,17 @@ struct npc_coa_brc_chains_of_woe : public ScriptedAI
     }
 
     void AttackStart(Unit* ) override { }
-    void UpdateAI(uint32 ) override { }
+    void UpdateAI(uint32 ) override
+    {
+        if (_held)
+            return;
+        _held = true;
+        if (TempSummon* chains = me->ToTempSummon())
+            chains->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+    }
+
+private:
+    bool _held = false;
 };
 
 struct npc_coa_brc_raz : public ScriptedAI
