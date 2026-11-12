@@ -3181,6 +3181,54 @@ namespace
     constexpr double CHAOTIC_LINK_HEALTH_PER_STACK = 0.25;
     constexpr double CHAOTIC_LINK_DAMAGE_PER_STACK = 0.10;
 
+    // Raid creatures are sized for forty players. Manastorm brings them to
+    // the level-60 dungeon scale using the median HealthModifier gaps in
+    // creature_template: bosses 292.03 (Molten Core) / 29.0 (dungeon),
+    // elite trash 41.25 / 4.0.
+    constexpr double RAID_BOSS_HEALTH_DIVISOR = 292.03 / 29.0;
+    constexpr double RAID_TRASH_HEALTH_DIVISOR = 41.25 / 4.0;
+
+    double GetRaidCreatureHealthRatio(
+        Creature const* creature)
+    {
+        CreatureTemplate const* creatureTemplate =
+            creature->GetCreatureTemplate();
+
+        double ratio =
+            1.0 /
+            (creatureTemplate->rank == CREATURE_ELITE_WORLDBOSS
+                ? RAID_BOSS_HEALTH_DIVISOR
+                : RAID_TRASH_HEALTH_DIVISOR);
+
+        //
+        // Onyxia's Lair uses expansion-2 templates. Below level 80 their base
+        // health falls back to the Burning Crusade column, so rebase them on
+        // the Classic column like every other Manastorm raid creature.
+        //
+        if (creatureTemplate->expansion > EXPANSION_CLASSIC &&
+            creatureTemplate->expansion < MAX_EXPANSIONS)
+        {
+            if (CreatureBaseStats const* stats =
+                sObjectMgr->GetCreatureBaseStats(
+                    creature->GetLevel(),
+                    creatureTemplate->unit_class))
+            {
+                uint32 const expansionBaseHealth =
+                    stats->BaseHealth[creatureTemplate->expansion];
+
+                if (expansionBaseHealth &&
+                    stats->BaseHealth[EXPANSION_CLASSIC])
+                {
+                    ratio *=
+                        double(stats->BaseHealth[EXPANSION_CLASSIC]) /
+                        double(expansionBaseHealth);
+                }
+            }
+        }
+
+        return ratio;
+    }
+
     // Recovered Ascension Heart Proc chance for ordinary monsters.
     // The roll is owned by OnUnitDeath(), matching the kill-associated
     // trash Heart behavior while boss Hearts remain HP-threshold driven.
@@ -6977,6 +7025,18 @@ void ManastormMgr::ApplyCreatureHealthScaling(
             ManastormSubstitutedObjectives::Ratio(
                 nativeTemplate->ManaModifier,
                 runtimeTemplate->ModMana));
+    }
+
+    if (Map const* map = creature->FindMap();
+        map && map->IsRaid())
+    {
+        normalizedMaxHealth =
+            std::max<uint32>(
+                1,
+                ScaleUnsignedValue(
+                    normalizedMaxHealth,
+                    GetRaidCreatureHealthRatio(
+                        creature)));
     }
 
     double endlessMultiplier =
