@@ -28,8 +28,16 @@ conditions.
 
 The generator gives an entry an `attribution` model in two cases, and no attribution otherwise:
 - **Own cast.** The cast spell is the entry's spell and its aura is in `clear_auras`. This is Libram of Fervor.
-- **Withheld talent.** The first arm lacks the entry's spell and a later arm learns it. This is Improved Benediction:
-  arm `without`, then `with` 705287. Its attributed aura is 801409, the armor aura that Benediction triggers.
+- **Withheld talent.** The first arm lacks the entry's spell, states its control `gain`, and a later arm learns the
+  spell. This is Improved Benediction: arm `without` (gain 0), then `with` 705287. Its attributed aura is 801409, the
+  armor aura that Benediction triggers.
+
+The entry's metric also needs a named read (`STAT_GAIN_READS`, rule 4 amendment point 2, 2026-11-12):
+- `armor` is `Unit::GetArmor`, the client field `UNIT_FIELD_RESISTANCES` + 0;
+- `attack_power` is `GetTotalAttackPowerValue(BASE_ATTACK)`, from the client fields `UNIT_FIELD_ATTACK_POWER`, its
+  mods and its multiplier;
+- `spell_power` is `SpellBaseDamageBonusDone`, the function the engine calls at use time.
+  `UpdateSpellDamageAndHealingBonus` copies that function into `PLAYER_FIELD_MOD_DAMAGE_DONE_POS`.
 
 The listed auras are the `clear_auras` plus the auras the cast applies according to the DBC: the cast spell itself
 when an effect applies an aura, and each spell triggered by effect 64 or 142 that applies one.
@@ -48,7 +56,8 @@ The judge stamps `contrast: learned` only when the gain checks hold and, in ever
 - the return read equals the reading before the cast.
 
 Every other case gets `contrast: condition`. The verdict detail lists the auras each arm's cast applied
-(`applied_auras`). The model carries no `contrast`, so `compare.observed` stamps none.
+(`applied_auras`) and the read used (`read`, also in the explanation). The model carries no `contrast`, so
+`compare.observed` stamps none.
 
 **Amendment of ADR 0120.** ADR 0120 counts a state read as behaviour in a learned/unlearned contrast of
 `passive_delta`, `behaviour_party_stat_ratio`, or `behaviour_metric_delta` outside its `setup_only_after` mode. For a
@@ -67,10 +76,21 @@ The harness gains `applied_aura_count`: the number of aura applications a unit h
   byte-identical.
 - Seeded tests:
   - Both entries count as behaviour, and their applied auras are listed.
-  - Seven mutants stay data: arms that all learn 705287; a Libram entry without `clear_auras`; the aura not
-    cleared; the aura absent after the cast (Libram, and Benediction's `with` arm); an unlisted aura that appears;
-    and a stat that does not return.
+  - Ten mutants stay data:
+    - arms that all learn 705287;
+    - a withheld arm with no stated control gain;
+    - a cast other than the entry's spell, with that spell's aura in `clear_auras`;
+    - a Libram entry without `clear_auras`;
+    - a metric with no named read;
+    - the aura not cleared;
+    - the aura absent after the cast (Libram, and Benediction's `with` arm);
+    - an unlisted aura that appears;
+    - a stat that does not return.
+  - A coverage-class extension cannot fail with an alert: these mutants keep their ok status. Their signal is the
+    evidence class, data instead of behaviour. That is how this ADR meets the goal's "a mutant that must alert".
   - Benediction's `without` arm stays behaviour with no aura after the cast.
   - A second applied aura keeps the Libram at data (no arm without it) and keeps Benediction behaviour (its
     `without` arm).
-- Verdicts judged before this ADR carry no contrast or attribution, so the three scenarios were run again.
+- Verdicts judged before this ADR carry no contrast or attribution, so the three scenarios were run again. Naming
+  the read changed only the model: the pair 20261112-045107 / -045344 was judged again, with the same scenario
+  files.

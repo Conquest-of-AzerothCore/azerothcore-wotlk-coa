@@ -2913,9 +2913,9 @@ def behaviour_stat_gain_verdict(base: Verdict, run: Run, model: dict) -> Verdict
     contrast, detail = CONDITION_CONTRAST, {}
     if STAT_GAIN_ATTRIBUTION in model:
         held, applied, notes = stat_gain_attributed(run, model)
-        parts += notes
+        parts += [*notes, f'{model["metric"]} read through {model[STAT_GAIN_ATTRIBUTION]["read"]}']
         contrast = LEARNED_CONTRAST if held and not failed else CONDITION_CONTRAST
-        detail = {'applied_auras': applied}
+        detail = {'applied_auras': applied, 'read': model[STAT_GAIN_ATTRIBUTION]['read']}
     return replace(base, status='alert' if failed else 'ok', measured=gain, expected=expected, low=low, high=high,
                    explanation='; '.join(parts), detail={**(base.detail or {}), **detail, CONTRAST: contrast})
 

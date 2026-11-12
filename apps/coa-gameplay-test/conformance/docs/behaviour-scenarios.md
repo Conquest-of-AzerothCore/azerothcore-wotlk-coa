@@ -1491,8 +1491,12 @@ talent, Agility + Stamina with it, and again with Agility 58451 and with Stamina
 Holy spell power +30% of Agility and attack power +30% of Intellect, at the reference stats and with Agility 58451 or
 Intellect 48100 set.
 
-An entry has an `attribution` (ADR 0258) when the cast spell is the entry's spell with its aura in `clear_auras`, or
-when the first arm lacks the entry's spell and a later arm learns it. Each arm then reads these on the cast target:
+An entry has an `attribution` (ADR 0258) when two things hold:
+- the cast spell is the entry's spell with its aura in `clear_auras`, or the first arm lacks the entry's spell,
+  states its control `gain`, and a later arm learns the spell;
+- the metric has a named read in `STAT_GAIN_READS`, which the verdict reports as `read`.
+
+Each arm then reads these on the cast target:
 - before and after the cast, the `clear_auras` and the auras the DBC says the cast applies, plus
   `applied_aura_count`;
 - after the `clear_auras` are removed, the stat again (`return`).

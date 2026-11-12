@@ -8100,6 +8100,26 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(kept_aura, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
                          'data')
 
+    def test_the_verdict_names_the_stat_read(self):
+        armor = self.verdict(self.armor(), self.ARMOR_GAINS, self.ARMOR_STATS)
+        self.assertIn('UNIT_FIELD_RESISTANCES', armor.detail['read'])
+        power = self.verdict(self.power(), self.POWER_GAINS, self.POWER_STATS)
+        self.assertIn('SpellBaseDamageBonusDone', power.detail['read'])
+        self.assertIn(power.detail['read'], power.explanation)
+
+    def test_seeded_entries_without_an_attributable_contrast_stay_data(self):
+        armor = r1a_entry(705287, 'stat_gain', 'armor')
+        unstated_control = self.armor({**armor, 'arms': [{'name': 'without'}, *armor['arms'][1:]]})
+        gains = {**self.ARMOR_GAINS, 'without': 211.0}
+        self.assertEqual(self.evidence(unstated_control, 'grants your target armor', gains, self.ARMOR_STATS), 'data')
+        other_cast = self.power({**r1a_entry(805423, 'stat_gain', 'spell_power'), 'cast_spell': 578276})
+        self.assertEqual(self.evidence(other_cast, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
+                         'data')
+        unnamed_read = self.power({**r1a_entry(805423, 'stat_gain', 'spell_power'), 'metric': 'max_health',
+                                   'fields': {}})
+        self.assertEqual(self.evidence(unnamed_read, 'granting you maximum health', self.POWER_GAINS,
+                                       self.POWER_STATS), 'data')
+
     def test_seeded_attribution_failures_keep_the_gain_at_data(self):
         power = self.power()
         reads = self.reads(power, 'reference')

@@ -6629,6 +6629,13 @@ def stat_gain_mark(spec: StatGainSpec, arm: str, key: str) -> str:
 STAT_GAIN_AURA_EFFECTS = frozenset({6, 35, 65, 119, 128, 129, 143})
 STAT_GAIN_TRIGGER_EFFECTS = frozenset({64, 142})
 STAT_GAIN_ATTRIBUTION = 'attribution'
+STAT_GAIN_READS = {
+    'armor': 'Unit::GetArmor, the client field UNIT_FIELD_RESISTANCES + 0',
+    'attack_power': 'Unit::GetTotalAttackPowerValue(BASE_ATTACK), from the client fields UNIT_FIELD_ATTACK_POWER, '
+                    'UNIT_FIELD_ATTACK_POWER_MODS and UNIT_FIELD_ATTACK_POWER_MULTIPLIER',
+    'spell_power': 'Unit::SpellBaseDamageBonusDone(school mask), the function the engine calls at use time; '
+                   'Player::UpdateSpellDamageAndHealingBonus copies it to PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school',
+}
 
 
 def applies_aura(records: Records, spell: int) -> bool:
@@ -6645,7 +6652,8 @@ def cast_auras(records: Records, spell: int) -> list[int]:
 
 
 def stat_gain_withheld_arm(spec: StatGainSpec) -> str | None:
-    if spec.spell in spec.arms[0].learn or not any(spec.spell in arm.learn for arm in spec.arms[1:]):
+    if (spec.spell in spec.arms[0].learn or spec.arms[0].gain is None
+            or not any(spec.spell in arm.learn for arm in spec.arms[1:])):
         return None
     return spec.arms[0].name
 
@@ -6653,10 +6661,12 @@ def stat_gain_withheld_arm(spec: StatGainSpec) -> str | None:
 def stat_gain_attribution(records: Records, spec: StatGainSpec) -> dict | None:
     own_cast = spec.cast_spell == spec.spell and spec.spell in spec.clear_auras
     withheld = stat_gain_withheld_arm(spec)
-    if not spec.clear_auras or not (own_cast or withheld):
+    read = STAT_GAIN_READS.get(spec.metric)
+    if not spec.clear_auras or not (own_cast or withheld) or read is None:
         return None
     candidates = list(dict.fromkeys([*spec.clear_auras, *cast_auras(records, spec.cast_spell)]))
-    return {'spell': spec.spell, 'auras': list(spec.clear_auras), 'candidates': candidates, 'withheld_arm': withheld}
+    return {'spell': spec.spell, 'auras': list(spec.clear_auras), 'candidates': candidates, 'withheld_arm': withheld,
+            'read': read}
 
 
 def target_aura_steps(spec: StatGainSpec, spells, stacks: int = 0) -> list[dict]:
