@@ -2171,7 +2171,7 @@
       "705271 e0 melee_crit_chance_refreshed"
     ],
     "kind": "claim",
-    "reason": "crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 2a)"
+    "reason": "crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 5: meets point 2a)"
   },
   {
     "spell": 705271,
@@ -2376,7 +2376,7 @@
       "705287 behaviour_metric_delta armor"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): the grouped ally's armor gains 0 without 705287, 211 with it (Agility + Stamina read), 241 with Agility 58451 and 274 with Stamina 48101; withheld-talent contrast: 801409 read absent before every cast, present after it in the with, agility and stamina arms, none applied without 705287, no other aura appeared, armor back to 299 after 801409 is removed, attribution pair 20261112-045107 / -045344 (build dc8da2d960db), cast-landed pair 20261112-051639 / -052004 (build 66781182ccd6), one landed cast per arm; read named in the verdict (rule 4 amendment 2d): Unit::GetArmor (client field UNIT_FIELD_RESISTANCES + 0); judged again with it as x2 on the same pair; control arm cast-landed read pending, re-review 2026-11-12: the without arm (no 705287) reads 801409 0 to 0, aura count and armor unchanged, which a refused cast would also give, so `705287 behaviour_metric_delta armor` is out of the evidence; data on `705287 e1` (closed: the armor amount is set in aura_ascension_templar_lifecycle::Calculate keyed on 705287) until then; promoted again: pair 20261112-051639 / -052004 (build 66781182ccd6) reads one landed Benediction 578276 (spell_cast_count, OnSpellCast) in every arm, the without arm included, so its 801409 0 to 0 and armor 299 to 299 come from a landed cast without 705287"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): the grouped ally's armor gains 0 without 705287, 211 with it (Agility + Stamina read), 241 with Agility 58451 and 274 with Stamina 48101; withheld-talent contrast: 801409 read absent before every cast, present after it in the with, agility and stamina arms, none applied without 705287, no other aura appeared, armor back to 299 after 801409 is removed, attribution pair 20261112-045107 / -045344 (build dc8da2d960db), cast-landed pair 20261112-051639 / -052004 (build 66781182ccd6), one landed cast per arm; read named in the verdict (rule 4 amendment 2d): Unit::GetArmor (client field UNIT_FIELD_RESISTANCES + 0); judged again with it as x2 on the same pair; the cast-landed pair 20261112-051639 / -052004 (build 66781182ccd6) reads one landed Benediction 578276 (spell_cast_count, OnSpellCast) in every arm, the without arm included, so its 801409 0 to 0 and armor 299 to 299 come from a landed cast without 705287"
   },
   {
     "spell": 705287,
@@ -3175,7 +3175,7 @@
       "707851 e0 melee_crit_chance_refreshed"
     ],
     "kind": "claim",
-    "reason": "crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 2a)"
+    "reason": "crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 5: meets point 2a)"
   },
   {
     "spell": 707851,
@@ -4409,7 +4409,7 @@
       "804906 behaviour_metric_delta oath_crit"
     ],
     "kind": "claim",
-    "reason": "melee crit chance 7.146 before a Condemn cast and 10.146 after it, with Oath: Condemn 804922; the not_measured value label of the other rank was dropped; crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 2a)"
+    "reason": "melee crit chance 7.146 before a Condemn cast and 10.146 after it, with Oath: Condemn 804922; the not_measured value label of the other rank was dropped; crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 5: meets point 2a)"
   },
   {
     "spell": 804912,
