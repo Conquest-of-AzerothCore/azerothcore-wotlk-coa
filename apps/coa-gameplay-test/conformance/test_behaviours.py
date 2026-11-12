@@ -205,7 +205,8 @@ def serendipity_entry() -> dict:
 
 
 def fortified_body_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FORTIFIED_BODY)
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == FORTIFIED_BODY
+                and entry['kind'] == 'party_stat_ratio')
 
 
 def libram_of_grace_entry() -> dict:
@@ -242,7 +243,8 @@ def titanstrike_cast_gate_entry() -> dict:
 
 
 def divine_charge_cast_condition_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DIVINE_CHARGE)
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == DIVINE_CHARGE
+                and entry['kind'] == 'cast_condition')
 
 
 def crusaders_presence_cast_condition_entry() -> dict:
