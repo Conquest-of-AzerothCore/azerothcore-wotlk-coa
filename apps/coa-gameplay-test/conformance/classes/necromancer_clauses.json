@@ -3758,16 +3758,27 @@
     "spell": 805029,
     "clause": "Enrage your Undead minions for $d,",
     "labels": [
-      "805029 aura_duration_ms #0"
+      "805029 behaviour_metric_delta duration_held",
+      "805029 behaviour_metric_delta duration_end"
     ],
     "kind": "claim"
   },
   {
     "spell": 805029,
     "clause": "increasing their haste by $s2%",
-    "labels": [
-      "805029 effect_value e1 #1",
-      "805029 aura_amount e1 #1"
+    "claims": [
+      {
+        "claim": "increasing their (melee) haste by $s2%",
+        "labels": [
+          "805029 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "increasing their (spell) haste by $s2%",
+        "labels": [
+          "805029 behaviour_metric_delta spell_haste"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3775,8 +3786,7 @@
     "spell": 805029,
     "clause": "and movement speed by $s1%.",
     "labels": [
-      "805029 effect_value e0 #2",
-      "805029 aura_amount e0 #2"
+      "805029 behaviour_metric_delta speed"
     ],
     "kind": "claim"
   },

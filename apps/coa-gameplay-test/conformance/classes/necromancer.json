@@ -1126,6 +1126,138 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 805029,
+      "name": "Unholy Frenzy (duration held)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Enrage your Undead minions for $d,",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 14500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 805029
+      },
+      "observe_source": "Unholy Frenzy 805029 DurationIndex 8 (15000 ms, $d) puts its three auras on the summons (Effect[0..2] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS). A Ghoul 50073 is raised (Raise: Ghoul 500971) in each phase; owned_creature_count with spell 805029 counts the Ghouls carrying the aura: 0 with the Ghoul raised and no cast (control), both Ghouls 14500 ms after 805029 is cast."
+    },
+    {
+      "spell": 805029,
+      "name": "Unholy Frenzy (duration ends)",
+      "kind": "metric_delta",
+      "variant": "duration_end",
+      "label_suffix": "duration_end",
+      "quote": "Enrage your Undead minions for $d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 14500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 805029
+      },
+      "observe_source": "Unholy Frenzy 805029 DurationIndex 8 (15000 ms, $d) puts its three auras on the summons (Effect[0..2] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS). owned_creature_count with spell 805029 counts the Ghouls 50073 carrying it: 0 with no cast, 1 at 14500 ms after a Ghoul is raised (Raise: Ghoul 500971) and 805029 cast, 0 at 15500 ms; with the held entry the duration lies in (14500, 15500] ms against the stated 15000."
+    },
+    {
+      "spell": 805029,
+      "name": "Unholy Frenzy (melee haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "increasing their haste by $s2%",
+      "expected": 1538.4615,
+      "before_expected": 2000,
+      "tolerance": 0.01,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_attack_time_ms",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "805029 Effect[1] 190 with aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints 29 + 1 = 30 ($s2), on the summons. The Ghoul 50073 (creature_template BaseAttackTime 2000; Scale() in AscensionNecromancerSummons.cpp sets 2000 x the owner's cast speed 1.0) swings every 2000 ms without the cast (control) and 2000 x 100 / 130 = 1538.46 ms with it (Unit::ApplyAttackTimePercentMod, stock). Read on the live Ghoul: UNIT_FIELD_BASEATTACKTIME."
+    },
+    {
+      "spell": 805029,
+      "name": "Unholy Frenzy (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "increasing their haste by $s2%",
+      "expected": 0.7692308,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_cast_speed",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "805029 Effect[2] 190 with aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 29 + 1 = 30 ($s2), on the summons. The Ghoul's UNIT_MOD_CAST_SPEED reads 1.0 without the cast (control; Scale() keeps the owner's cast speed 1.0) and 100 / 130 = 0.76923 with it (Unit::ApplyCastTimePercentMod, stock)."
+    },
+    {
+      "spell": 805029,
+      "name": "Unholy Frenzy (movement speed)",
+      "kind": "metric_delta",
+      "variant": "speed",
+      "label_suffix": "speed",
+      "quote": "and movement speed by $s1%.",
+      "expected": 1.71429,
+      "before_expected": 1.14286,
+      "tolerance": 0.0001,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_run_speed_rate",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "805029 Effect[0] 190 with aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 49 + 1 = 50 ($s1), on the summons. Unit::UpdateSpeed (Unit.cpp:12418, 12498-12518, stock) multiplies 1 + 50% by the creature_template speed_run of the Ghoul 50073, 1.14286: 1.14286 without the cast (control), 1.71429 with it. Read on the live Ghoul: GetSpeedRate(MOVE_RUN)."
+    },
+    {
       "spell": 504861, "name": "Raise: Banshee (raised)", "kind": "metric_delta", "variant": "count",
       "label_suffix": "count", "quote": "to aid you in combat, occupying 2", "expected": 1, "before_expected": 0,
       "trigger_spell": 504861, "target": "caster", "cast_in_before": false, "wait_ms": 4000, "expire_ms": 500,
