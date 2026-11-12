@@ -3474,7 +3474,8 @@
     "spell": 801465,
     "clause": "and heal nearby allies for the same amount",
     "labels": [
-      "801465 behaviour_hit_ratio ally_heal"
+      "801465 behaviour_hit_ratio ally_heal",
+      "801465 behaviour_amount_match"
     ],
     "kind": "claim"
   },
