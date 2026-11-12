@@ -1141,6 +1141,9 @@ namespace
     constexpr uint32 ACTION_VESSEL_BROKEN = 1;
     constexpr uint32 ACTION_VESSEL_LINKED = 2;
     constexpr uint32 ACTION_AWAKEN = 3;
+    constexpr uint8 SPIRIT_COUNT = 6;
+    constexpr float SPIRIT_HEIGHT = 12.0f;
+    constexpr float SPIRIT_SPREAD = 12.0f;
     constexpr uint32 ZUROGG_JUMP = 1;
     Position const ZuroggLanding = { 3368.63f, -4908.01f, 159.4f, 0.0f };
     constexpr float BARRIER_RISE = -0.4f;
@@ -1179,11 +1182,21 @@ namespace
             me->SetReactState(REACT_PASSIVE);
         }
 
-        void IsSummonedBy(WorldObject* summoner) override
+        void IsSummonedBy(WorldObject* /*summoner*/) override
         {
-            _goal = summoner->GetPosition();
+            me->SetDisableGravity(true);
+            me->SetCanFly(true);
+            me->SetHover(true);
+        }
+
+        bool Sent() const { return _sent; }
+
+        void Send(Position const& goal)
+        {
+            _sent = true;
+            _goal = goal;
             me->SetWalk(false);
-            me->GetMotionMaster()->MovePoint(1, _goal);
+            me->GetMotionMaster()->MovePoint(1, _goal, FORCED_MOVEMENT_NONE, 0.f, false);
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -1198,12 +1211,12 @@ namespace
 
         void UpdateAI(uint32 diff) override
         {
-            if (me->HasUnitState(UNIT_STATE_CASTING))
+            if (!_sent || me->HasUnitState(UNIT_STATE_CASTING))
                 return;
-            if (me->GetExactDist2d(&_goal) > 4.0f)
+            if (me->GetExactDist(&_goal) > 3.0f)
             {
                 if (me->movespline->Finalized())
-                    me->GetMotionMaster()->MovePoint(1, _goal);
+                    me->GetMotionMaster()->MovePoint(1, _goal, FORCED_MOVEMENT_NONE, 0.f, false);
                 return;
             }
             if (!_arrived)
@@ -1222,13 +1235,14 @@ namespace
 
     private:
         Position _goal;
+        bool _sent = false;
         bool _arrived = false;
         Milliseconds _wait = 0ms;
     };
 
     struct npc_soul_vessel_coa : public ScriptedAI
     {
-        explicit npc_soul_vessel_coa(Creature* creature) : ScriptedAI(creature), _spirits(creature) { }
+        explicit npc_soul_vessel_coa(Creature* creature) : ScriptedAI(creature) { }
 
         void Reset() override
         {
@@ -1243,7 +1257,6 @@ namespace
         void SetState(VesselState state)
         {
             _state = state;
-            _spirits.DespawnAll();
             me->InterruptNonMeleeSpells(false);
             me->SetVisible(state != VESSEL_BROKEN);
             if (state == VESSEL_OPEN)
@@ -1257,7 +1270,6 @@ namespace
             _assaulted = false;
             Keep(_barrier, state == VESSEL_SHIELDED, NPC_VESSEL_BARRIER, BARRIER_RISE);
             Keep(_anchor, state == VESSEL_LINKED || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
-            _spawn = 3s;
         }
 
         void Keep(ObjectGuid& guid, bool wanted, uint32 entry, float rise)
@@ -1296,12 +1308,6 @@ namespace
                 atal->AI()->DoAction(ACTION_VESSEL_LINKED);
         }
 
-        void JustSummoned(Creature* summon) override
-        {
-            if (summon->GetEntry() == NPC_RESTLESS_SPIRIT)
-                _spirits.Summon(summon);
-        }
-
         void DamageTaken(Unit* /*attacker*/, uint32& damage, DamageEffectType /*type*/,
             SpellSchoolMask /*school*/) override
         {
@@ -1331,23 +1337,16 @@ namespace
             if (_state != VESSEL_OPEN)
                 return;
             Link();
-            if (!_assaulted)
-                return;
-            _spawn -= Milliseconds(diff);
-            if (_spawn > 0ms)
-                return;
-            _spawn = 4s;
-            if (Creature* atal = me->FindNearestCreature(NPC_ATALZUL, 400.0f))
-                me->SummonCreature(NPC_RESTLESS_SPIRIT, atal->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 60000);
         }
 
+        bool Assaulted() const { return _state == VESSEL_OPEN && _assaulted; }
+        Position Where() const { return me->GetPosition(); }
+
     private:
-        SummonList _spirits;
         ObjectGuid _barrier;
         bool _assaulted = false;
         ObjectGuid _anchor;
         VesselState _state = VESSEL_IDLE;
-        Milliseconds _spawn = 3s;
     };
 
     class go_soul_vessel_altar : public GameObjectScript
@@ -1525,6 +1524,14 @@ namespace
                     if (ai->State() == VESSEL_SHIELDED)
                         ai->SetState(VESSEL_OPEN);
                 });
+                for (uint8 i = 0; i < SPIRIT_COUNT; ++i)
+                {
+                    float const angle = float(M_PI) * 2.0f * i / SPIRIT_COUNT;
+                    me->SummonCreature(NPC_RESTLESS_SPIRIT, me->GetPositionX() + 8.0f * std::cos(angle),
+                        me->GetPositionY() + 8.0f * std::sin(angle), me->GetPositionZ() + SPIRIT_HEIGHT, angle,
+                        TEMPSUMMON_TIMED_DESPAWN, 120000);
+                }
+                _pull = 3s;
             }
         }
 
@@ -1542,6 +1549,7 @@ namespace
             else if (action == ACTION_VESSEL_BROKEN && _phase)
             {
                 _phase = false;
+                _summons.DespawnEntry(NPC_RESTLESS_SPIRIT);
                 me->InterruptNonMeleeSpells(false);
                 me->RemoveAurasDueToSpell(SPELL_SPECTRAL_VEIL);
                 me->RemoveAurasDueToSpell(SPELL_VEIL_POWER);
@@ -1582,6 +1590,8 @@ namespace
         {
             if (!_dormant)
             {
+                if (_phase)
+                    PullSpirit(diff);
                 custom_world_boss_coa::UpdateAI(diff);
                 return;
             }
@@ -1589,7 +1599,32 @@ namespace
         }
 
     private:
+        void PullSpirit(uint32 diff)
+        {
+            _pull -= Milliseconds(diff);
+            if (_pull > 0ms)
+                return;
+            _pull = 2s;
+            npc_restless_spirit_coa* spirit = nullptr;
+            for (ObjectGuid const& guid : _summons)
+                if (Creature* c = ObjectAccessor::GetCreature(*me, guid))
+                    if (auto* ai = dynamic_cast<npc_restless_spirit_coa*>(c->AI()); ai && !ai->Sent())
+                        spirit = ai;
+            if (!spirit)
+                return;
+            std::vector<Position> goals;
+            for (Player* p : Players(me, [&](Player* x) { return me->GetExactDist2d(x) > SPIRIT_SPREAD; }))
+                goals.push_back(p->GetPosition());
+            ForVessels([&](npc_soul_vessel_coa* ai)
+            {
+                if (ai->Assaulted())
+                    goals.push_back(ai->Where());
+            });
+            spirit->Send(goals.empty() ? me->GetPosition() : Acore::Containers::SelectRandomContainerElement(goals));
+        }
+
         SummonList _summons;
+        Milliseconds _pull = 3s;
         uint8 _nextVeil = 80;
         uint32 _raise = 0;
         bool _phase = false;

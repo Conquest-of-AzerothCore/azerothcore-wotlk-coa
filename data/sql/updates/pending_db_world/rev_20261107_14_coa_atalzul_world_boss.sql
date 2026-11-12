@@ -133,10 +133,12 @@ UPDATE `creature_template_model` SET `CreatureDisplayID` = 79329 WHERE `Creature
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411, `DisplayScale` = 2.95 WHERE `CreatureID` = 67533;
 
 -- Models, all checked in the client's own DBC and MPQs: the Damned Wights are the armored Risen Alliance Soldier
--- skeleton (27550), the Restless Spirits the Reaper's Ghost Form ghost (5430, from creature 841213), the Soul Vessel
+-- skeleton (27550), the Restless Spirits the green Terrordale ghost (10700) that flies, the Soul Vessel
 -- crystal the floating purple crystal (47751) and his holograms are half as big again.
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 27550, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
-UPDATE `creature_template_model` SET `CreatureDisplayID` = 5430, `DisplayScale` = 1.5 WHERE `CreatureID` = 67535;
+UPDATE `creature_template_model` SET `CreatureDisplayID` = 10700, `DisplayScale` = 1.5 WHERE `CreatureID` = 67535;
+DELETE FROM `creature_template_movement` WHERE `CreatureId` = 67535;
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES (67535, 1, 0, 1, 0);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
 
