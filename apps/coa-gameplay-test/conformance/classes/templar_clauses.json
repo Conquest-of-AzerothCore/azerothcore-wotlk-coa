@@ -1128,7 +1128,6 @@
     "clause": "dealing ${$524740m1+$524740ppl1+$sph*1+$AP*1} Holy damage to up to $524740i enemies within $524740a1 yds",
     "labels": [
       "524739 effect_value 524740e0 #0",
-      "524739 effect_value #1",
       "524739 effect_radius 524740e0 #2",
       "524739 script_hit 524740",
       "524739 behaviour_fixed_count",
@@ -1136,7 +1135,8 @@
       "524739 cap_control behaviour_fixed_count",
       "524739 cap_cluster behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: '524739 effect_value #1' was the count token $524740i, unmodelled (unmeasurable: count token without a no-combat metric); the count is read by the four 524739 fixed_count labels. Owner ruling 2026-11-12 (Q-ext2-2): option (a), N in all, and the target counts among the N; since CountPrimary (ADR 0294) cap and cap_cluster read 9 extras, 10 in all, on every cast, counted 20261112-080800 / -081046 and 20261112-081157 / -081241."
   },
   {
     "spell": 524739,
@@ -5216,12 +5216,10 @@
       "806522 effect_value e1 #0",
       "806522 e1 spell_modifier 801832",
       "806522 e1 spell_critical_damage 801832",
-      "806522 e1 spell_modifier 92111/520007/801861/804916/807268 (measured, delta 0)",
-      "806522 e1 spell_critical_damage 92111/520007/801861/804916/807268 (measured, delta 0)",
       "806522 behaviour_hit_ratio critical_damage"
     ],
     "kind": "claim",
-    "reason": "Owner ruling 2026-11-12 (Q-r1b-1): option (a), the bonus reading: $s2% of the critical bonus. 806522 behaviour_hit_ratio critical_damage reads +8.33 / +8.34 against 8.33 (25% of the 50% crit bonus), ok, counted 20261111-231340 / -231411."
+    "reason": "Owner ruling 2026-11-12 (Q-r1b-1): option (a), the bonus reading: $s2% of the critical bonus. 806522 behaviour_hit_ratio critical_damage reads +8.33 / +8.33 (8.3285 / 8.3341) against 8.33 (25% of the 50% crit bonus), ok, counted 20261111-231340 / -231411. label repair: the two free-text labels '806522 e1 spell_modifier / spell_critical_damage 92111/520007/801861/804916/807268 (measured, delta 0)' matched no verdict and are dropped; the critical_damage read is the proof."
   },
   {
     "spell": 806525,
