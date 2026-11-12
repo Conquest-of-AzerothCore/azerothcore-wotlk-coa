@@ -1850,6 +1850,11 @@
   ],
   "behaviours": [
     {
+      "spell": 572769, "name": "Sacred Swing (High Threat, control)", "kind": "threat_slope", "variant": "control",
+      "quote": "High Threat Weapon Damage", "hit_spell": 570233, "expected_slope": 1,
+      "observe_source": "Control of the Sacred Swing threat slope: Righteous Lunge 570233 (normalized weapon damage plus weapon percent, Physical melee, the same class of hit) has no spell_threat row and no SPELL_EFFECT_THREAT, so its threat should equal its damage on the same character and dummy. Measured (20261112-034411 / -034442): threat 432 on 373 health lost and 431 on 372, slope 1.158 against 1 (alert): across the two runs threat rises 1 per point of damage (factor 1.0) plus a constant 59 whose source is not found in the CoA code. Sacred Swing in the same runs: 1109.75 on 471 and 1116.5 on 474, factor 2.25 with a constant 50, the flat of 301061 (ADR 0225)."
+    },
+    {
       "spell": 524822, "name": "Radiant Blade (Oath: Righteous Lunge heal)", "kind": "hit_ratio", "variant": "oath_heal",
       "label_suffix": "oath_heal", "quote": "Increases the effectiveness of", "expected": 1.4609375,
       "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally", "control": {},
