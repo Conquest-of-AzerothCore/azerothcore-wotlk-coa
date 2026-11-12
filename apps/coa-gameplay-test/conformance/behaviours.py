@@ -152,8 +152,13 @@ def dummy_fixture(index: int, class_file: dict, distance: float) -> dict:
     return fixture
 
 
+def count_label_prefix(spec) -> str:
+    suffix = getattr(spec, 'label_suffix', '')
+    return f'{spec.spell} {suffix}' if suffix else f'{spec.spell}'
+
+
 def hit_label(spell: TargetCountSpec, index: int, moment: str) -> str:
-    return f'{spell.spell} {dummy_id(index)} {spell.metric} {moment}'
+    return f'{count_label_prefix(spell)} {dummy_id(index)} {spell.metric} {moment}'
 
 
 def per_cast_label(spec, index: int, cast: int) -> str:
@@ -379,7 +384,7 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
                  relocation + cast_steps() + measure()}
     if spec.settle_ms:
         timed(scenario, waited_ms(scenario['steps']))
-    label = f'{spec.spell} behaviour_fixed_count' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    label = f'{count_label_prefix(spec)} behaviour_fixed_count'
     if primary_distances:
         scenario['contract'] += (f' Every additional dummy\'s distance to the primary is read before the casts and '
                                  f'must be under {spec.radius:g} yd.')
@@ -3289,6 +3294,8 @@ class CostGateSpec:
     target_health_pct: int | None = None
     unset_arm: bool = False
     charges: int | None = None
+    arm_wait_ms: int = 0
+    cast_power: int | None = None
 
 
 @dataclass(frozen=True)
@@ -3325,10 +3332,21 @@ def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float | No
                              f'{opened} ms after the priming cast below the {base:g} ms cooldown')
         return opened, opened
     reduced = base - spec.reduction
+    if removes_cooldown(spec, base):
+        allowed = GCD_WAIT_MS + spec.margin_ms
+        if not allowed < base:
+            raise NotModelled(f'{spec.gated_spell} cooldown {base:g} ms leaves no wait above the global cooldown '
+                              f'that only its removal separates')
+        return allowed, None
     if spec.resource == 'power':
         allowed = math.ceil(reduced)
         if allowed == reduced == 0 < base:
             return 0, None
+        if lengthens(spec):
+            if reduced != allowed or not base < allowed - 1:
+                raise NotModelled(f'{spec.gated_spell} cost {base:g} plus {-spec.reduction:g} leaves no whole power '
+                                  f'level that only the increase separates')
+            return allowed, allowed - 1
         beyond = allowed - 1 if allowed == reduced else allowed - 2
         if not 0 <= beyond < allowed < base:
             raise NotModelled(f'{spec.gated_spell} cost {base:g} less {spec.reduction:g} leaves no power level that '
@@ -3347,7 +3365,11 @@ def cost_gate_levels(spec: CostGateSpec, base: float) -> tuple[float, float | No
 
 
 def lengthens(spec: CostGateSpec) -> bool:
-    return spec.resource == 'cooldown' and spec.reduction < 0
+    return spec.reduction < 0
+
+
+def removes_cooldown(spec: CostGateSpec, base: float) -> bool:
+    return spec.resource == 'cooldown' and spec.reduction == base and not spec.resets
 
 
 def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
@@ -3358,7 +3380,7 @@ def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
     if lengthens(spec):
         if spec.next_arm or spec.aura_duration_ms is not None or spec.after_casts:
             raise ValueError(f'{spec.spell} lengthens a cooldown, which takes no next, duration or after-cast arms')
-        opened = base + spec.margin_ms
+        opened = base + spec.margin_ms if spec.resource == 'cooldown' else base
         return [CostGateArm('without', False, opened, NO_CAST_FAILURE), CostGateArm('base', True, opened, refused),
                 CostGateArm('with', True, allowed, NO_CAST_FAILURE), CostGateArm('beyond', True, beyond, refused)]
     arms = [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
@@ -3386,13 +3408,17 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         raise ValueError(f'{spec.spell} cost_gate resource {spec.resource!r} is not one of '
                          f'{sorted(COST_GATE_RESOURCES)}')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    class_file = armed_for(class_file, records, spec.gated_spell)
     entry = behaviour_entry(records, spec.spell, spec.name, 'cost_gate', spec.quote, spec.reduction)
     facts = facts_of(records, spec.gated_spell)
     base = cost_gate_base(spec, facts)
     if spec.after_casts and not spec.resets and (spec.resource != 'cooldown'
                                                  or not 0 <= spec.after_wait_ms < cost_gate_levels(spec, base)[1]):
         raise ValueError(f'{spec.spell} after_casts needs a cooldown gate and an after_wait_ms below the beyond wait')
-    full_power = cast_gate_power_step(facts)
+    if spec.cast_power is not None and spec.resource != 'cooldown':
+        raise ValueError(f'{spec.spell} cost_gate cast_power sets the power of a cooldown gate only')
+    full_power = (cast_gate_power_step(facts) if spec.cast_power is None
+                  else [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': spec.cast_power}])
     approach = ([{'action': 'relocate', 'actor': CASTER, 'dx': CHARGE_OFFSET_YD}]
                 if spec.target == ALLY and closes_distance(facts) else [])
 
@@ -3461,7 +3487,8 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
             steps += talent_steps
             learned = True
         label = cost_gate_label(spec, arm.name)
-        steps.append({'action': 'wait', 'label': f'{arm.name} global cooldown', 'ms': SINGLE_TARGET_GCD_WAIT_MS})
+        steps.append({'action': 'wait', 'label': f'{arm.name} global cooldown',
+                      'ms': SINGLE_TARGET_GCD_WAIT_MS + spec.arm_wait_ms})
         if arm.setup:
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.gated_spell})
         opening = setup() if arm.setup and not arm.skip_setup else []
@@ -3513,7 +3540,13 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                     + (f' The reduction is negative, a longer cooldown: without {spec.spell} the cast goes through '
                        f'{spec.margin_ms} ms after the base cooldown, with it it is refused there, goes through '
                        f'{spec.margin_ms} ms after the lengthened cooldown and is refused {spec.margin_ms} ms before '
-                       f'it.' if lengthens(spec) else '')
+                       f'it.' if lengthens(spec) and spec.resource == 'cooldown' else '')
+                    + (f' The reduction is negative, a higher cost: without {spec.spell} the cast goes through at '
+                       f'{base:g} power, with it it is refused there, goes through at the raised cost and is refused '
+                       f'one point below it.' if lengthens(spec) and spec.resource == 'power' else '')
+                    + (f' The talent removes the cooldown: the attempt comes {spec.margin_ms} ms after the global '
+                       f'cooldown, refused without {spec.spell}, through with it; no later wait is refused, so there '
+                       f'is no beyond arm.' if removes_cooldown(spec, base) else '')
                     + (f' The talent resets the running cooldown: both arms attempt {spec.gated_spell} '
                        f'{spec.margin_ms} ms after the after casts, refused without {spec.spell}, through with it.'
                        if spec.resets else '')
@@ -3537,7 +3570,8 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
                         entry.get('after_wait_ms', 0), entry.get('resets', False),
                         bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)),
-                        entry.get('target_health_pct'), bool(entry.get('unset_arm', False)), entry.get('charges'))
+                        entry.get('target_health_pct'), bool(entry.get('unset_arm', False)), entry.get('charges'),
+                        int(entry.get('arm_wait_ms', 0)), entry.get('cast_power'))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
@@ -3899,36 +3933,62 @@ def cast_condition_spec(entry: dict) -> CastConditionSpec:
 CAST_COMBAT_SETTLE_MS = CAST_MARGIN_MS
 
 
+CAST_COMBAT_RESURRECT_RESPONSE_OPCODE = 348
+CAST_COMBAT_RESURRECT_SETTLE_MS = 1000
+
+
 @dataclass(frozen=True)
 class CastCombatSpec:
     spell: int
     name: str
     quote: str
+    cast_spell: int = 0
+    resurrect: bool = False
+    label_suffix: str = ''
+
+    def __post_init__(self):
+        if not self.cast_spell:
+            object.__setattr__(self, 'cast_spell', self.spell)
 
 
-def cast_combat_label(spell: int, metric: str) -> str:
-    return f'{spell} cast_combat {metric}'
+def cast_combat_label(spell: int, metric: str, suffix: str = '') -> str:
+    return f'{spell} cast_combat {suffix} {metric}' if suffix else f'{spell} cast_combat {metric}'
+
+
+def resurrect_response(label: str) -> list[dict]:
+    return [{'action': 'client_packet', 'label': label, 'actor': ALLY, 'opcode': CAST_COMBAT_RESURRECT_RESPONSE_OPCODE,
+             'fields': [{'actor_guid': CASTER}, {'u8': 1}], 'consumed': False},
+            {'action': 'wait', 'ms': CAST_COMBAT_RESURRECT_SETTLE_MS}]
 
 
 def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, list[Expectation]]:
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'cast_combat', spec.quote, NO_CAST_FAILURE)
-    facts = facts_of(records, spec.spell)
-    combat_label = cast_combat_label(spec.spell, 'combat')
-    cast_label = cast_combat_label(spec.spell, 'cast_failure')
+    facts = facts_of(records, spec.cast_spell)
+    combat_label = cast_combat_label(spec.spell, 'combat', spec.label_suffix)
+    cast_label = cast_combat_label(spec.spell, 'cast_failure', spec.label_suffix)
+    alive_before = cast_combat_label(spec.spell, 'alive before', spec.label_suffix)
+    alive_after = cast_combat_label(spec.spell, 'alive after', spec.label_suffix)
+    control = (resurrect_response('accept with no resurrection offered')
+               + [measurement(alive_before, ALLY, 'alive')]) if spec.resurrect else []
+    revival = (resurrect_response('accept the resurrection')
+               + [measurement(alive_after, ALLY, 'alive')]) if spec.resurrect else []
     steps = (base_steps(class_file)
-            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
-               {'action': 'die', 'actor': ALLY},
+            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell},
+               {'action': 'die', 'actor': ALLY}]
+            + control
+            + [
                {'action': 'attack', 'actor': CASTER, 'target': TARGET},
                {'action': 'wait', 'ms': CAST_COMBAT_SETTLE_MS},
                measurement(combat_label, CASTER, 'combat'),
-               {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+               {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell}]
             + cast_gate_power_step(facts)
             + required_aura_steps(facts)
-            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': ALLY},
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': ALLY},
                {'action': 'wait', 'ms': facts.cast_time_ms + CAST_GATE_WAIT_MS},
-               measurement(cast_label, CASTER, 'cast_failure', spell=spec.spell),
-               {'action': 'stop_attack', 'actor': CASTER}])
+               measurement(cast_label, CASTER, 'cast_failure', spell=spec.cast_spell),
+               {'action': 'stop_attack', 'actor': CASTER}]
+            + revival)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast combat',
@@ -3937,7 +3997,10 @@ def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, 
                     f'({spec.spell}\'s only effect is SPELL_EFFECT_RESURRECT, the same dead-ally fixture shape '
                     f'proven by the generic rank scenario\'s own targets_resurrect() path) while still fighting '
                     f'the dummy; cast_failure must read {NO_CAST_FAILURE} (no refusal), proving the '
-                    f'"{spec.quote}" clause.',
+                    f'"{spec.quote}" clause.'
+                    + (f' The dead ally sends the resurrection response before the cast (the control: it stays '
+                       f'dead) and after it (it must be alive), the stock CMSG_RESURRECT_RESPONSE '
+                       f'{CAST_COMBAT_RESURRECT_RESPONSE_OPCODE}.' if spec.resurrect else ''),
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -3948,11 +4011,18 @@ def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, 
         Expectation(cast_label, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
                    prose_rule(entry.quote, spec.spell), dict(model)),
     ]
+    if spec.resurrect:
+        expectations += [
+            Expectation(alive_before, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.cast_spell, None, str(STATE_ABSENT),
+                        prose_rule(entry.quote, spec.spell), {**model, 'reading': 'alive', 'arm': 'control'}),
+            Expectation(alive_after, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.cast_spell, None, str(STATE_PRESENT),
+                        prose_rule(entry.quote, spec.spell), {**model, 'reading': 'alive', 'arm': 'cast'})]
     return scenario, expectations
 
 
 def cast_combat_spec(entry: dict) -> CastCombatSpec:
-    return CastCombatSpec(entry['spell'], entry['name'], entry['quote'])
+    return CastCombatSpec(entry['spell'], entry['name'], entry['quote'], int(entry.get('cast_spell', 0)),
+                          bool(entry.get('resurrect', False)), entry.get('label_suffix', ''))
 
 
 STATE_PRESENT = 1

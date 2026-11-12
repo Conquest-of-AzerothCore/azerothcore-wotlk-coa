@@ -8572,5 +8572,120 @@ class ThreatSlopeFlatSpellsTests(unittest.TestCase):
         self.assertEqual(judge(850.0), 'alert')
 
 
+def r3b_entry(spell: int, kind: str, suffix: str = '') -> dict:
+    return r1a_entry(spell, kind, suffix)
+
+
+def arm_readings(expectations: list[Expectation]) -> dict[str, tuple[float, float]]:
+    return {expectation.label.rsplit(' ', 1)[1]: (expectation.model['level'], float(expectation.displayed))
+            for expectation in expectations}
+
+
+def seeded(expectation: Expectation, value: float) -> str:
+    return judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: value}), expectation).status
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CostGateWeaponIncreaseRemovalTests(unittest.TestCase):
+    def test_the_gated_spell_gets_a_weapon_it_can_be_cast_with(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        scenario, expectations = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(706318, 'cost_gate')))
+        run.validate(scenario)
+        equipped = [step['item'] for step in scenario['steps'] if step['action'] == 'equip']
+        self.assertEqual(equipped, [CLASS_FILE['alternate_weapons'][0]['item']])
+        self.assertEqual(seeded(expectations[1], 0.0), 'ok')
+        self.assertEqual(seeded(expectations[1], 29.0), 'alert')
+
+    def test_a_gated_spell_the_reference_weapon_fits_keeps_its_scenario(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        scenario, _ = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(301059, 'cost_gate')))
+        equipped = [step['item'] for step in scenario['steps'] if step['action'] == 'equip']
+        self.assertEqual(equipped, [CLASS_FILE['weapon']['item']])
+
+    def test_a_cost_increase_is_refused_at_the_base_cost_and_allowed_at_the_raised_one(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        scenario, expectations = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(707663, 'cost_gate',
+                                                                                          'cost')))
+        run.validate(scenario)
+        self.assertEqual(arm_readings(expectations), {'without': (20, 0.0), 'base': (20, 85.0), 'with': (30, 0.0),
+                                                      'beyond': (29, 85.0)})
+        with_arm = next(expectation for expectation in expectations if expectation.label.endswith(' with'))
+        self.assertEqual(seeded(with_arm, 85.0), 'alert')
+
+    def test_a_removed_cooldown_is_attempted_after_the_global_cooldown_with_no_beyond_arm(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        scenario, expectations = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(707663, 'cost_gate',
+                                                                                          'cooldown')))
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertEqual(arm_readings(expectations), {'without': (2100, 67.0), 'with': (2100, 0.0)})
+        with_arm = next(expectation for expectation in expectations if expectation.label.endswith(' with'))
+        self.assertEqual(seeded(with_arm, 0.0), 'ok')
+        self.assertEqual(seeded(with_arm, 67.0), 'alert')
+        powers = {step['value'] for step in scenario['steps'] if step['action'] == 'set_power'}
+        self.assertEqual(powers, {100})
+
+    def test_cast_power_on_a_power_gate_is_refused(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        entry = {**r3b_entry(707663, 'cost_gate', 'cost'), 'cast_power': 100}
+        with self.assertRaises(ValueError):
+            cost_gate_scenario(CLASS_FILE, cost_gate_spec(entry))
+
+    def test_an_increase_with_no_whole_level_between_is_not_modelled(self):
+        from behaviours import NotModelled, cost_gate_scenario, cost_gate_spec
+        entry = {**r3b_entry(707663, 'cost_gate', 'cost'), 'reduction': -0.5}
+        with self.assertRaises(NotModelled):
+            cost_gate_scenario(CLASS_FILE, cost_gate_spec(entry))
+
+    def test_the_arm_wait_lengthens_every_global_cooldown_wait(self):
+        from behaviours import SINGLE_TARGET_GCD_WAIT_MS, cost_gate_scenario, cost_gate_spec
+        scenario, _ = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r3b_entry(704180, 'cost_gate',
+                                                                              'righteous_tempest')))
+        waits = [step['ms'] for step in scenario['steps'] if step.get('label', '').endswith(' global cooldown')]
+        self.assertEqual(waits, [SINGLE_TARGET_GCD_WAIT_MS + 5500] * 3)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class FixedCountLabelSuffixTests(unittest.TestCase):
+    def test_two_entries_of_one_spell_read_disjoint_labels(self):
+        def labels(suffix: str) -> set[str]:
+            scenario, [expectation] = fixed_target_count_scenario(
+                CLASS_FILE, fixed_target_count_spec(r3b_entry(706312, 'fixed_count', suffix)))
+            reads = {step['label'] for step in scenario['steps'] if step.get('metric') == 'spell_damage_count'}
+            self.assertTrue(all(label.startswith(f'706312 {suffix} ') for label in reads))
+            return reads | {expectation.label}
+        self.assertFalse(labels('scourgebane') & labels('scarlet_hammer'))
+
+    def test_the_talent_is_learned_and_the_count_label_carries_the_suffix(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r3b_entry(707853, 'fixed_count', 'scourgebane'))
+        self.assertEqual(expectation.label, '707853 scourgebane behaviour_fixed_count')
+        self.assertIn(707853, [step['spell'] for step in behaviour_scenario(
+            CLASS_FILE, r3b_entry(707853, 'fixed_count', 'scourgebane'))[0]['steps'] if step['action'] == 'learn'])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CastCombatResurrectTests(unittest.TestCase):
+    def test_the_dead_ally_answers_before_and_after_the_cast(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(500688, 'cast_combat', 'revive'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        answers = [index for index, step in enumerate(steps) if step['action'] == 'client_packet']
+        casts = cast_indices(steps, 500758)
+        self.assertEqual(len(answers), 2)
+        self.assertEqual(len(casts), 1)
+        self.assertLess(answers[0], casts[0])
+        self.assertLess(casts[0], answers[1])
+        alive = {expectation.label: expectation for expectation in expectations if 'alive' in expectation.label}
+        before, after = alive['500688 cast_combat revive alive before'], alive['500688 cast_combat revive alive after']
+        self.assertEqual((before.displayed, after.displayed), ('0', '1'))
+        self.assertEqual(seeded(after, 1.0), 'ok')
+        self.assertEqual(seeded(after, 0.0), 'alert')
+        self.assertEqual(seeded(before, 1.0), 'alert')
+
+    def test_the_base_entry_keeps_its_labels(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r3b_entry(500688, 'cast_combat'))
+        self.assertEqual([expectation.label for expectation in expectations],
+                         ['500688 cast_combat combat', '500688 cast_combat cast_failure'])
+
+
 if __name__ == '__main__':
     unittest.main()

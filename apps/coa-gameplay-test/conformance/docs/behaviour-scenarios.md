@@ -1548,3 +1548,20 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
 - A class-file `cast_auras` entry now also sets its auras before every cast of the rank's hit and periodic-total
   scenarios. Blade of Faith's ranks set Reduce Critical Strike Chance -100% 64481, so their tick reads stay at a 0 crit
   chance.
+
+### Cost-gate weapons, raised costs and removed cooldowns; fixed-count suffixes; resurrections (ADR 0233-0236)
+
+- `cost_gate` arms the gated spell's weapon (an alternate weapon when the reference one does not fit: Vindication
+  573324 under Radiance 706318). `arm_wait_ms` lengthens the wait before every arm, for a gated spell whose own aura
+  would still be running (Righteous Tempest 807274, 5500). `cast_power` sets a cooldown gate's power before each cast
+  (Justicar of the Light's cooldown arm, whose talent also raises Benediction's cost).
+- A negative `reduction` on a power gate is a raised cost: `without` at the base cost goes through, `base` with the
+  talent there is refused, `with` at the raised cost goes through, `beyond` one point below it is refused (Justicar of
+  the Light 707663: Benediction 20 -> 30). A cooldown gate whose `reduction` equals the cooldown is a removal: both arms
+  are attempted `margin_ms` after the global-cooldown wait, refused without the talent and through with it, and there
+  is no `beyond` arm.
+- `fixed_count` `label_suffix` puts the suffix after the spell id in the count and every dummy read, for two entries
+  of one talent (Holy Edge on Scourgebane and Scarlet Hammer, with `learn` and expected-0 controls).
+- `cast_combat` `resurrect: true` (with `cast_spell` and `label_suffix`): the dead ally answers the resurrection
+  (`client_packet` 348) before the cast, and must stay dead, and after it, and must be alive (Spiritual Ascension
+  500688, rank 500758).
