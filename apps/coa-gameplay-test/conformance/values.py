@@ -52,8 +52,12 @@ READ_STEP_MS = 25
 READ_BUDGET_MS = DEFAULT_TIMEOUT_MS // 2
 FIXED_DIE_SIDES = (0, 1)
 SAMPLE_SUFFIX = ' sample '
+AURA_STATE_HEALTHLESS_20_PERCENT = 2
+AURA_STATE_FROZEN = 4
 AURA_STATE_HEALTHLESS_35_PERCENT = 13
-TARGET_HEALTH_FIXTURES = {AURA_STATE_HEALTHLESS_35_PERCENT: 30}
+TARGET_HEALTH_FIXTURES = {AURA_STATE_HEALTHLESS_20_PERCENT: 15, AURA_STATE_HEALTHLESS_35_PERCENT: 30}
+FROST_NOVA = 122
+TARGET_STATE_AURAS = {AURA_STATE_FROZEN: FROST_NOVA}
 TARGET_HEALTH_WAIT_MS = 1000
 FORCED_CRIT_RATING = 100000
 FORCE_CRIT_RATINGS = {'melee': 'melee_crit_rating', 'spell': 'spell_crit_rating'}
@@ -197,6 +201,9 @@ def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
 def required_target_health_steps(facts: RankFacts, target: str = TARGET) -> list[dict]:
     if not facts.target_aura_state:
         return []
+    if facts.target_aura_state in TARGET_STATE_AURAS:
+        return [{'action': 'set_aura', 'actor': CASTER, 'target': target,
+                 'spell': TARGET_STATE_AURAS[facts.target_aura_state], 'stacks': 1}]
     if facts.target_aura_state not in TARGET_HEALTH_FIXTURES:
         raise Unmodelled(f'target aura state {facts.target_aura_state} has no scenario fixture')
     pct = TARGET_HEALTH_FIXTURES[facts.target_aura_state]

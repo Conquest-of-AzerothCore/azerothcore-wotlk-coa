@@ -12,8 +12,8 @@ from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_pa
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
-from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH,
-                    GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
+from values import (ALLY, AURA_STATE_FROZEN, AURA_STATE_HEALTHLESS_20_PERCENT, AURA_STATE_HEALTHLESS_35_PERCENT,
+                    CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
                     calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
                     foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
@@ -788,6 +788,16 @@ class RequiredTargetHealthStepsTest(unittest.TestCase):
         facts = facts_of(self.records, TITANSTRIKE_MAX_RANK)
         steps = required_target_health_steps(facts, 'leech_before')
         self.assertEqual(steps[0]['target'], 'leech_before')
+
+    def test_a_frozen_target_state_is_set_by_a_frost_nova_fixture_on_the_target(self):
+        facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK), target_aura_state=AURA_STATE_FROZEN)
+        self.assertEqual(required_target_health_steps(facts, 'dummy'),
+                         [{'action': 'set_aura', 'actor': CASTER, 'target': 'dummy', 'spell': 122, 'stacks': 1}])
+
+    def test_the_healthless_20_percent_state_sets_the_target_to_15_percent(self):
+        facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK),
+                        target_aura_state=AURA_STATE_HEALTHLESS_20_PERCENT)
+        self.assertEqual(required_target_health_steps(facts)[0]['pct'], 15)
 
     def test_an_unmapped_aura_state_raises_unmodelled_instead_of_a_silent_skip(self):
         facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK), target_aura_state=99)

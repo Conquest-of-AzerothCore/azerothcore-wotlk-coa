@@ -20,7 +20,7 @@ from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
 from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts, gate_stacks,
-                  hit_parts, melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model,
+                  MELEE_LABEL, hit_parts, melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model,
                   reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
@@ -279,7 +279,12 @@ def add_melee(writer: ManifestWriter):
         swings = casts_needed(reference_melee_model(class_file))
     except Unmodelled:
         swings = 1
-    scenario, expectations = melee_scenario(class_file, swings)
+    try:
+        scenario, expectations = melee_scenario(class_file, swings)
+    except ValueError as error:
+        writer.add(scenario_key(class_file['name'], 'melee'), 'melee', None, 0,
+                   [Expectation(MELEE_LABEL, 'unmodelled', 0, 0, None, '', UNMODELLED + str(error))])
+        return
     if all(expectation.check == 'unmodelled' for expectation in expectations):
         scenario = None
     writer.add(scenario_key(class_file['name'], 'melee'), 'melee', None, 0, expectations, scenario)
