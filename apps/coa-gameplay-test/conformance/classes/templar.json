@@ -1729,6 +1729,12 @@
   ],
   "behaviours": [
     {
+      "spell": 520608, "name": "Scourge-Defense Training (crit rate)", "kind": "crit_rate", "variant": "argent_blade",
+      "quote": "and critical strike chance of your next", "expected": 50, "observe_spell": 807268, "learn": [807268],
+      "control": {"auras": [[561156, 1]]}, "treatment": {"auras": [[520608, 1], [561156, 1]]},
+      "expected_source": "$s1 = 50 (520608 EffectBasePoints[0] 49, EffectDieSides[0] 1). 520608's effects (aura 107, EffectSpellClassMask word 2 16777216) modify Warrior of Dawn 561156, whose Effect[2] aura 107 SPELLMOD_CRITICAL_CHANCE (EffectMiscValue 7) on Argent Blade 807268 is 0 on its own; Unit::SpellDoneCritChance applies it (ApplySpellMod SPELLMOD_CRITICAL_CHANCE) to the next Argent Blade, which consumes 561156 (AscensionTemplarAbilities.cpp ConsumeSelected). Both arms set 561156 before each of 300 Argent Blades, the treatment sets 520608 first; no crit rating fixture. The landed hits and the critical ones are counted per arm; the treatment's critical share must exceed the control's by 50 points. Chance-claim ruling of 2026-11-12: 300 casts per arm give an interval, recorded as effect present, not final; the pooled proof to the band follows with the ext2 pooling extension."
+    },
+    {
       "spell": 1397742, "name": "Testament of Hope (copy radius)", "kind": "taken_hit", "variant": "radius",
       "label_suffix": "radius", "judge": "damage_ratio", "expected": 1.2345679, "quote": "While within",
       "strike_spell": 41394, "caster_health_pct": 100, "caster_max_health": 100000, "trials": 6,
@@ -1848,9 +1854,10 @@
       "spell": 801461, "name": "Libram of Tenacity (Tenacious Defender heal)", "kind": "metric_delta", "variant": "heal_event", "label_suffix": "heal_event",
       "quote": "and instantly healing you for", "expected": 347,
       "trigger_spell": 801461, "target": "caster", "gate_spell": 707385,
+      "phase_auras": [[984954, 1, "caster", "caster"]],
       "metric": "spell_heal_total", "fields": {"spell": 801461, "target": "caster"},
       "before_expected": 0, "wait_ms": 500, "expire_ms": 500,
-      "observe_source": "801461 Effect[0] 136 SPELL_EFFECT_HEAL_PCT, EffectBasePoints[0] -1 + EffectDieSides[0] 1 = 0% without Tenacious Defender; 707385 Effect[0] aura 107 SPELLMOD_EFFECT1 +20 (EffectBasePoints[0] 19) on 801461 (mask word 0 65536). spell_heal_total counts the heal events the caster logs for 801461 (raw amount, overheal included): none before 707385 is learned; after, 20% of the reference character's 2173 maximum health (805422 behaviour_ratio reads 2173) is int(434.6) = 434, and the class aura 887007 (-20% healing done, as on every Templar heal in this file) gives int(434 x 0.8) = 347."
+      "observe_source": "801461 Effect[0] 136 SPELL_EFFECT_HEAL_PCT, EffectBasePoints[0] -1 + EffectDieSides[0] 1 = 0% without Tenacious Defender; 707385 Effect[0] aura 107 SPELLMOD_EFFECT1 +20 (EffectBasePoints[0] 19) on 801461 (mask word 0 65536). spell_heal_total counts the heal events the caster logs for 801461 (raw amount, overheal included): none before 707385 is learned; after, 20% of the reference character's 2173 maximum health (805422 behaviour_ratio reads 2173) is int(434.6) = 434, and the class aura 887007 (-20% healing done, as on every Templar heal in this file) gives int(434 x 0.8) = 347. The heal can crit (520 = 1.5 x 347 in run 20261111-234729): 984954 Effect[1] aura 57 SPELL_AURA_MOD_SPELL_CRIT_CHANCE -1000 (EffectBasePoints[1] -1001) is set on the caster in both phases, so PLAYER_SPELL_CRIT_PERCENTAGE (Player::UpdateSpellCritChance, StatSystem.cpp:999-1020, not clamped) and SpellDoneCritChance for the Holy heal are negative; its Effect[0] aura 52 (weapon crit) does not touch a spell heal or the maximum health. A target-side attacker crit aura would not do: SpellTakenCritChance applies it only to negative spells (Unit.cpp:10340)."
     },
     {
       "spell": 1397742, "name": "Testament of Hope (copies)", "kind": "metric_delta", "variant": "copies", "label_suffix": "copies",

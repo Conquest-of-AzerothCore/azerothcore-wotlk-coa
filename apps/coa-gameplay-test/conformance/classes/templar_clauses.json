@@ -927,7 +927,8 @@
       "520608 effect_value e0 #0",
       "520608 e0 spell_modifier 561167"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "data conformant (spell modifier readbacks); behaviour read, not final (chance-claim ruling 2026-11-12, ADR 0173): 520608 behaviour_crit_rate measured on 300 Argent Blades per arm, effect present, interval stated; the pooled proof to the band follows with the ext2 pooling extension; see lean/r1-a-progress.md for the interval and the cast count the band needs"
   },
   {
     "spell": 520812,
