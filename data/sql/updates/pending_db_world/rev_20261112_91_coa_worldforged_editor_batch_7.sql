@@ -90,3 +90,7 @@ UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940827) AND `id` IN (9
 UPDATE `gameobject` SET `position_x` = -4774.7238, `position_y` = -4145.2983, `position_z` = 304.5644, `orientation` = 4.1254, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.881447, `rotation3` = -0.472283 WHERE `guid` = 6940251 AND `id` = 95529;
 -- duplicate Ogre Loincloth 1 yd from 6940251
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940824) AND `id` IN (95529);
+
+-- #12091
+-- pickup 6941185 (Sword of Stone) moved 2.8 yd across and 0.77 yd down to the rock, checked in the editor
+UPDATE `gameobject` SET `position_x` = -5605.7082, `position_y` = -3010.7274, `position_z` = 388.4308, `orientation` = 1.8763, `rotation0` = 0.024881996438814044, `rotation1` = 0.6924965616933979, `rotation2` = 0.2951423079295177, `rotation3` = 0.6578148800126664 WHERE `guid` = 6941185 AND `id` = 95524;
