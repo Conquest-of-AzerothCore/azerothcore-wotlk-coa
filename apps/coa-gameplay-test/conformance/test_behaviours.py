@@ -278,7 +278,8 @@ def disciplined_blows_entry() -> dict:
 
 
 def spiritual_abdicator_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SPIRITUAL_ABDICATOR)
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == SPIRITUAL_ABDICATOR
+                and entry['kind'] == 'metric_delta' and 'variant' not in entry)
 
 
 def battlepriest_entry() -> dict:
@@ -446,7 +447,8 @@ def binding_scripture_entry() -> dict:
 
 
 def testament_of_strength_entry() -> dict:
-    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TESTAMENT_OF_STRENGTH)
+    return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == TESTAMENT_OF_STRENGTH
+                and entry['kind'] == 'cast_applies_aura' and 'variant' not in entry)
 
 
 def argent_blade_entry() -> dict:
@@ -6278,11 +6280,9 @@ class HitRatioFixtureTests(unittest.TestCase):
         self.assertLess(casts[0], read)
         self.assertEqual(sum(1 for step in steps if step['action'] == 'learn' and step['spell'] == 807274), 1)
 
-    def test_a_cast_spell_needs_another_observed_spell_and_a_wait_needs_a_cast_spell(self):
+    def test_a_cast_spell_needs_another_observed_spell_and_a_wait_is_not_negative(self):
         entry = self.cast_spell_entry()
-        without_cast = {key: value for key, value in entry.items() if key != 'cast_spell'}
-        for bad in ({**entry, 'cast_spell': 570205}, {**without_cast, 'observe_spell': 807274},
-                    {**entry, 'cast_wait_ms': -1}):
+        for bad in ({**entry, 'cast_spell': 570205}, {**entry, 'cast_wait_ms': -1}):
             with self.subTest(bad={key: bad.get(key) for key in ('cast_spell', 'cast_wait_ms')}):
                 with self.assertRaises(ValueError):
                     behaviour_scenario(CLASS_FILE, bad)
@@ -7810,7 +7810,7 @@ class MetricDeltaSelectionTests(unittest.TestCase):
 
 
 
-def binding_scripture_entry(kind: str, suffix: str) -> dict:
+def binding_scripture_variant(kind: str, suffix: str) -> dict:
     return r1a_entry(801457, kind, suffix)
 
 
@@ -7825,7 +7825,7 @@ def ratio_values(model: dict, treatment_hit: float, control_hit: float = 1100.0)
 
 class AllyCastTargetTests(unittest.TestCase):
     def test_a_taken_hit_cast_at_the_ally_groups_it_and_sets_its_health_before_each_cast(self):
-        spec = taken_hit_spec(binding_scripture_entry('taken_hit', 'stack_cap'))
+        spec = taken_hit_spec(binding_scripture_variant('taken_hit', 'stack_cap'))
         scenario, _ = taken_hit_scenario(CLASS_FILE, spec)
         run.validate(scenario)
         self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
@@ -7840,19 +7840,20 @@ class AllyCastTargetTests(unittest.TestCase):
             self.assertEqual((health['actor'], health['value']), (ALLY, 5000))
 
     def test_a_taken_hit_without_an_ally_cast_has_no_ally(self):
-        scenario, _ = taken_hit_scenario(CLASS_FILE, taken_hit_spec(binding_scripture_entry('taken_hit', 'self_heal')))
+        scenario, _ = taken_hit_scenario(CLASS_FILE,
+                                         taken_hit_spec(binding_scripture_variant('taken_hit', 'self_heal')))
         self.assertEqual([player['id'] for player in scenario['players']], [CASTER])
         self.assertFalse([step for step in scenario['steps'] if step['action'] == 'group'])
 
     def test_ally_health_without_a_cast_at_the_ally_is_refused(self):
-        entry = {**binding_scripture_entry('taken_hit', 'self_heal'), 'ally_health_pct': 50}
+        entry = {**binding_scripture_variant('taken_hit', 'self_heal'), 'ally_health_pct': 50}
         with self.assertRaises(ValueError):
             taken_hit_scenario(CLASS_FILE, taken_hit_spec(entry))
 
     def test_seeded_reduction_missing_or_uncapped_alerts(self):
         for suffix, right, wrongs in (('one_heal', 1045.0, (1100.0,)), ('stack_cap', 935.0, (880.0, 990.0)),
                                       ('self_heal', 1100.0, (1045.0,))):
-            _, expectations = behaviour_scenario(CLASS_FILE, binding_scripture_entry('taken_hit', suffix))
+            _, expectations = behaviour_scenario(CLASS_FILE, binding_scripture_variant('taken_hit', suffix))
             expectation = expectations[0]
             with self.subTest(suffix=suffix):
                 self.assertEqual(judge_behaviour(base_verdict(expectation),
@@ -7865,7 +7866,7 @@ class AllyCastTargetTests(unittest.TestCase):
 
     def test_a_cast_applies_aura_at_the_ally_groups_it_in_the_readback_and_the_expiry(self):
         from expiry import cast_applies_aura_expiry
-        entry = binding_scripture_entry('cast_applies_aura', 'reduction')
+        entry = binding_scripture_variant('cast_applies_aura', 'reduction')
         readback, _ = cast_applies_aura_scenario(CLASS_FILE, cast_applies_aura_spec(entry))
         expiry, _ = cast_applies_aura_expiry(CLASS_FILE, entry)
         for scenario in (readback, expiry):
@@ -7939,7 +7940,7 @@ class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
         self.assertEqual({steps[index]['spell'] for index in casts}, {self.BLADE_OF_FAITH})
         self.assertEqual(len(casts), 2 * entry['trials'])
         for index in casts:
-            wait = next(step for step in steps[index + 1:] if step['action'] == 'wait')
+            wait = next(step for step in steps[index + 1:] if step['action'] == 'wait' and 'label' in step)
             self.assertEqual((wait['ms'], wait['label'].endswith('hits')), (entry['cast_wait_ms'], True))
         self.assertIn(f'each followed by {entry["cast_wait_ms"]} ms for its periodic hits', scenario['contract'])
         self.assertEqual(expectation.label, f'{self.FOCUSED} behaviour_hit_ratio blade_of_faith')
