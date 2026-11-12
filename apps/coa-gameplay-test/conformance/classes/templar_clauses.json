@@ -1389,7 +1389,7 @@
       {
         "claim": "to up to $561277i1 enemies",
         "labels": [
-          "560835 effect_value #6"
+          "560835 behaviour_fixed_count"
         ]
       },
       {
@@ -1399,7 +1399,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The count part is judged by a fixed_count entry (Lightbringer 561277 cast at the first of 7 dummies): the target plus up to 5 more are hit, 6 enemies against the stated 5 (pair 20261112-000920, -000949); awaiting the owner (owner-questions Q-ext2-2). The unmodelled count read never measured it."
   },
   {
     "spell": 561346,

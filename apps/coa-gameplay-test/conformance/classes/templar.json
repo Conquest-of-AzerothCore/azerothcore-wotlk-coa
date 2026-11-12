@@ -4569,6 +4569,12 @@
       "observe_source": "Redemption 801483 $s1 = 30 (EffectBasePoints[0] 29, EffectDieSides[0] 1): Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, active from 10000 to 15000 ms after a Glory cast (Glory's own 30% haste ends at 5000 ms, Downfall has none). Unit::ApplyAttackTimePercentMod multiplies the 2500 ms reference swing by 100.0f / 130.0f in float: 1923.076904296875 read 12000 ms after the cast; the before phase does not cast Glory and reads 2500 (control)."
     },
     {
+      "spell": 560835, "name": "Lightkeeper", "kind": "fixed_count", "variant": "burst",
+      "quote": "to up to $561277i1 enemies", "expected": 4, "radius": 5.0, "cast_spell": 561277,
+      "target_rank": 561277, "learn": [560835],
+      "radius_reason": "Lightbringer 561277 (the burst a Condemn tick triggers through 560835 Effect[1], aura 42) has Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE with TARGET_UNIT_TARGET_ENEMY and TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 8 (5 yd) and MaxAffectedTargets 5; it is cast here at the first dummy directly, so the Condemn periodic path is not exercised (its 15% chance is proven by the 560835 proc_rate entry), and each cast must strike the target and at most 4 more of the dummies within 5 yd of it (5 enemies, $561277i1), never the one beyond."
+    },
+    {
       "spell": 680397, "name": "Disciplined Blows", "kind": "fixed_count", "variant": "area",
       "quote": "to nearby enemies", "expected": 3, "radius": 5.0, "cast_spell": 578276, "target_rank": 680398,
       "cast_target": "caster", "cast_target_health_pct": 50, "learn": [680397], "uncapped": true,
