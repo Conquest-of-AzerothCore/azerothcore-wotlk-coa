@@ -2839,8 +2839,8 @@ def behaviour_stat_gain_verdict(base: Verdict, run: Run, model: dict) -> Verdict
         else:
             expected = sum(coefficient * sum(run.values[label] for label in term)
                            for coefficient, term in zip(model['coefficients'], arm['terms']))
-            low, high = math.floor(expected + FLOAT_EPSILON), math.ceil(expected - FLOAT_EPSILON)
-            stated = f'{expected:g} from the stats read (truncation window {low:g} to {high:g})'
+            low = high = math.floor(expected + FLOAT_EPSILON)
+            stated = f'{expected:g} from the stats read, truncated to {low:g}'
         held = low - METRIC_DELTA_FLOAT_TOLERANCE <= gain <= high + METRIC_DELTA_FLOAT_TOLERANCE
         failed = failed or not held
         if first is None and arm['gain'] is None:
@@ -3523,8 +3523,18 @@ def behaviour_aggro_redirect_verdict(base: Verdict, run: Run, expectation: Expec
     if measured is None:
         return replace(base, explanation=missing_measurement(run, expectation.label))
     expected = float(expectation.displayed)
-    return exact(base, float(measured), expected,
-                'victim (Unit::GetVictim() == caster) compared exactly to whether the clause redirects it')
+    verdict = exact(base, float(measured), expected,
+                    'victim (Unit::GetVictim() == caster) compared exactly to whether the clause redirects it')
+    label = expectation.model.get('distance_label')
+    if label is None:
+        return verdict
+    distance = run.values.get(label)
+    if distance is None:
+        return replace(base, explanation=missing_measurement(run, label))
+    placed = abs(distance - expectation.model['distance']) <= expectation.model['placement_yd']
+    explanation = (f'{verdict.explanation}; distance to the caster before the cast {distance:g} yd, placed '
+                   f'{expectation.model["distance"]:g} yd (within {expectation.model["placement_yd"]:g} required)')
+    return replace(verdict, status=verdict.status if placed else 'alert', explanation=explanation)
 
 
 def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

@@ -1527,3 +1527,12 @@ alerts). Norgannon's Wrath 524739 `cap`: twelve dummies, each cast strikes the p
 Blade of Faith's periodic ticks can crit since ADR 0243. Its crit entries force melee crit (it is a melee-class spell),
 and the control forces 0 with Reduce Critical Strike Chance -100% 64481; every scenario that reads a Blade tick value
 sets 64481 in both arms instead of only selecting non-critical ticks.
+
+### Aggro-redirect range arms and cast auras in hit scenarios (ADR 0244, ADR 0245)
+
+- `aggro_redirect` `rooted: true` roots every dummy (Self Root Forever 42716) before the engagement and reads its
+  `distance_2d` to the caster right before the cast; a read more than 0.25 yd from the placed distance alerts.
+  `label_suffix` names a second entry of the same spell. Absolution 800424 `range`: dummies read at 7.5 and 8.5 yd.
+- A class-file `cast_auras` entry now also sets its auras before every cast of the rank's hit and periodic-total
+  scenarios. Blade of Faith's ranks set Reduce Critical Strike Chance -100% 64481, so their tick reads stay at a 0 crit
+  chance.

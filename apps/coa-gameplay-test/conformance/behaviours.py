@@ -353,9 +353,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
                     f'least once" per dummy, single phase (the breadth is '
                     f'inherent to the cast, not gated by a separate passive learn), '
                     f'{spec.expected + headroom} candidates inside the radius for {spec.expected} stated, '
-                    f'plus one dummy '
-                    f'{FIXED_COUNT_FAR_MARGIN_YD:g} yd beyond the radius that must stay unhit, proving the limit '
-                    f'and not only the count: {spec.radius_reason}',
+                    + (f'plus one dummy '
+                       f'{FIXED_COUNT_FAR_MARGIN_YD:g} yd beyond the radius that must stay unhit, proving the limit '
+                       f'and not only the count: ' if spec.far_dummy else 'with no dummy beyond the radius: ')
+                    + f'{spec.radius_reason}',
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
@@ -365,9 +366,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         timed(scenario, waited_ms(scenario['steps']))
     label = f'{spec.spell} behaviour_fixed_count' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     if primary_distances:
-        far_note = '' if spec.far_dummy else ' (no dummy beyond the radius)'
         scenario['contract'] += (f' Every additional dummy\'s distance to the primary is read before the casts and '
-                                 f'must be under {spec.radius:g} yd{far_note}.')
+                                 f'must be under {spec.radius:g} yd.')
     model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'far_label': far_label, 'expected': spec.expected,
              'headroom': headroom, 'quote': entry.quote}
     if spec.uncapped:
@@ -4431,10 +4431,16 @@ class AggroRedirectSpec:
     quote: str
     targets: tuple[AggroTarget, ...]
     self_cast: bool = False
+    label_suffix: str = ''
+    rooted: bool = False
 
 
-def aggro_redirect_label(spell: int, index: int, moment: str) -> str:
-    return f'{spell} aggro_redirect {dummy_id(index)} {moment}'
+AGGRO_REDIRECT_ROOT = 42716
+AGGRO_REDIRECT_PLACEMENT_YD = 0.25
+
+
+def aggro_redirect_label(spell: int, index: int, moment: str, suffix: str = '') -> str:
+    return f'{spell} aggro_redirect {suffix + " " if suffix else ""}{dummy_id(index)} {moment}'
 
 
 def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[dict, list[Expectation]]:
@@ -4444,7 +4450,9 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
     creatures = [{**dummy_fixture(index, class_file, target.distance), 'reaction': AGGRO_REDIRECT_REACTION}
                 for index, target in enumerate(spec.targets)]
     swing_ms = swing_interval(class_file)
-    engage_steps = []
+    engage_steps = [{'action': 'set_aura', 'actor': CASTER, 'target': dummy_id(index), 'caster': dummy_id(index),
+                     'spell': AGGRO_REDIRECT_ROOT, 'stacks': 1}
+                    for index in range(len(spec.targets))] if spec.rooted else []
     ally_offset = 0.0
     for index, target in enumerate(spec.targets):
         engage_steps += [
@@ -4452,9 +4460,13 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
             {'action': 'attack', 'actor': ALLY, 'target': dummy_id(index)},
             {'action': 'wait', 'ms': swing_ms + AGGRO_SETTLE_MS},
             {'action': 'stop_attack', 'actor': ALLY},
-            measurement(aggro_redirect_label(spec.spell, index, 'before'), dummy_id(index), 'victim', target=ALLY),
+            measurement(aggro_redirect_label(spec.spell, index, 'before', spec.label_suffix), dummy_id(index),
+                        'victim', target=ALLY),
         ]
         ally_offset = target.distance
+    distance_reads = [measurement(aggro_redirect_label(spec.spell, index, 'distance', spec.label_suffix),
+                                  dummy_id(index), 'distance_2d', target=CASTER)
+                      for index in range(len(spec.targets))] if spec.rooted else []
     cast_step = {'action': 'cast', 'actor': CASTER, 'spell': spec.spell}
     if not spec.self_cast:
         cast_step['target'] = dummy_id(0)
@@ -4464,10 +4476,11 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
             + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
             + cast_gate_power_step(facts)
             + required_aura_steps(facts)
+            + distance_reads
             + [cast_step, {'action': 'wait', 'ms': facts.cast_time_ms + CAST_GATE_WAIT_MS}])
     for index in range(len(spec.targets)):
-        steps.append(measurement(aggro_redirect_label(spec.spell, index, 'after'), dummy_id(index), 'victim',
-                                 target=CASTER))
+        steps.append(measurement(aggro_redirect_label(spec.spell, index, 'after', spec.label_suffix),
+                                 dummy_id(index), 'victim', target=CASTER))
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aggro redirect',
@@ -4491,19 +4504,27 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
         'creatures': creatures,
         'steps': steps}
+    if spec.rooted:
+        scenario['contract'] += (f' Every dummy is rooted (Self Root Forever {AGGRO_REDIRECT_ROOT}), and its distance '
+                                 f'to the caster is read right before the cast: within {AGGRO_REDIRECT_PLACEMENT_YD:g} '
+                                 f'yd of its placed distance.')
     model = {'kind': 'aggro_redirect', 'quote': entry.quote}
     expectations = []
     for index, target in enumerate(spec.targets):
         expected = '1' if target.expected_redirect else '0'
-        expectations.append(Expectation(aggro_redirect_label(spec.spell, index, 'after'), BEHAVIOUR_AGGRO_REDIRECT,
-                                        spec.spell, spec.spell, None, expected,
-                                        prose_rule(entry.quote, spec.spell), dict(model)))
+        placement = ({'distance_label': aggro_redirect_label(spec.spell, index, 'distance', spec.label_suffix),
+                      'distance': target.distance, 'placement_yd': AGGRO_REDIRECT_PLACEMENT_YD}
+                     if spec.rooted else {})
+        expectations.append(Expectation(aggro_redirect_label(spec.spell, index, 'after', spec.label_suffix),
+                                        BEHAVIOUR_AGGRO_REDIRECT, spec.spell, spec.spell, None, expected,
+                                        prose_rule(entry.quote, spec.spell), {**model, **placement}))
     return scenario, expectations
 
 
 def aggro_redirect_spec(entry: dict) -> AggroRedirectSpec:
     targets = tuple(AggroTarget(raw['distance'], raw['expected_redirect']) for raw in entry['targets'])
-    return AggroRedirectSpec(entry['spell'], entry['name'], entry['quote'], targets, entry.get('self_cast', False))
+    return AggroRedirectSpec(entry['spell'], entry['name'], entry['quote'], targets, entry.get('self_cast', False),
+                             entry.get('label_suffix', ''), bool(entry.get('rooted', False)))
 
 
 @dataclass(frozen=True)

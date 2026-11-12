@@ -13,7 +13,8 @@ from tooltip import (MIXED_PERIOD, OVER_TICKS, CasterStats, ForcedPoints, Readou
                      mixed_period_reason, period_reading, read_tooltip)
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMMY_ENTRY, DUMMY_HEALTH, EFFECT_TOKEN,
                     EFFECTS, GAP_CLOSER_DISTANCE, MEAN_HALF_WIDTH, READ_STEP_MS, TARGET, UNREADABLE,
-                    Z_99, Expectation, RankFacts, Unmodelled, armed_for, closes_distance, dataset, equip_requirement,
+                    Z_99, Expectation, RankFacts, Unmodelled, armed_for, cast_aura_steps, closes_distance, dataset,
+                    equip_requirement,
                     facts_of, gap_closer_expectation, gap_closer_target, is_hostile, required_aura_steps,
                     required_target_health_steps, targets_ally)
 
@@ -925,6 +926,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
         if (ally and closes_distance(hit.facts)) or (gap_closing and cast_target) else []
     if gate is not None:
         cast_fixtures = cast_fixtures + gate_fixture_steps(gate[0], stacks, label)
+    cast_fixtures = cast_fixtures + cast_aura_steps(class_file, rank_id)
     dual = dual_target_entry(class_file, rank_id) if not hostile else None
     if dual and model.kind != 'heal':
         raise ValueError(f'{rank_id} dual_target_effects needs a heal-kind model, got {model.kind!r}')

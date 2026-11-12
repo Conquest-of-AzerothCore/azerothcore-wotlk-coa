@@ -746,7 +746,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 389)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 396)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -8006,10 +8006,10 @@ class StatGainTests(unittest.TestCase):
                 self.assertEqual(self.judged(armor, stat_gain_values(armor.model, {**right, arm: wrong}, stats)),
                                  'alert')
 
-    def test_a_percent_gain_passes_within_its_truncation_only(self):
+    def test_a_percent_gain_passes_at_its_truncation_only(self):
         power = self.expectation(805423, 'spell_power')
         stats = {'reference': (132.0,), 'agility': (162.0,)}
-        for reference, status in ((39.0, 'ok'), (40.0, 'ok'), (33.0, 'alert'), (41.0, 'alert')):
+        for reference, status in ((39.0, 'ok'), (40.0, 'alert'), (33.0, 'alert'), (41.0, 'alert')):
             with self.subTest(reference=reference):
                 values = stat_gain_values(power.model, {'reference': reference, 'agility': 48.0}, stats)
                 self.assertEqual(self.judged(power, values), status)
@@ -8386,7 +8386,6 @@ class ExtensionHitRatioMutantTests(unittest.TestCase):
         self.assertEqual(self.judged(300524, 'blade_of_faith', 239.0, 191.2), 'ok')
 
 
-
 class FixedCountCapArmTests(unittest.TestCase):
     def test_the_cap_arm_places_twelve_dummies_inside_the_radius_and_reads_their_distances(self):
         spec = fixed_target_count_spec(r1a_entry(524739, 'fixed_count', 'cap'))
@@ -8448,6 +8447,61 @@ class BladeOfFaithCritTests(unittest.TestCase):
             with self.subTest(suffix=suffix):
                 self.assertIn([64481, 1], entry['control']['auras'])
                 self.assertIn([64481, 1], entry['treatment']['auras'])
+
+
+    def test_side_a_focused_blade_ratio_forces_a_zero_crit_chance_in_both_arms(self):
+        entry = side_a_entry(variant_entry, 300524, 'hit_ratio', 'blade_of_faith')
+        self.assertIn([64481, 1], entry['control']['auras'])
+        self.assertIn([64481, 1], entry['treatment']['auras'])
+
+
+class AggroRedirectRangeTests(unittest.TestCase):
+    def test_rooted_dummies_are_read_by_distance_right_before_the_cast(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        roots = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 42716]
+        self.assertEqual(len(roots), 2)
+        cast = cast_indices(steps, 800424)[0]
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'distance_2d']
+        self.assertEqual(len(reads), 2)
+        self.assertTrue(all(index < cast for index in reads))
+        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '0'])
+
+    def test_seeded_misplaced_dummy_alerts_even_when_the_victim_matches(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
+        inside = expectations[0]
+        placed = {inside.label: 1.0, inside.model['distance_label']: 7.5}
+        moved = {inside.label: 1.0, inside.model['distance_label']: 9.5}
+        self.assertEqual(judge_behaviour(base_verdict(inside), FakeRun(placed), inside).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(inside), FakeRun(moved), inside).status, 'alert')
+
+    def test_an_entry_without_roots_keeps_its_labels(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, next(
+            entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 800424
+            and entry['kind'] == 'aggro_redirect' and 'variant' not in entry))
+        self.assertEqual(expectations[0].label, '800424 aggro_redirect primary after')
+        self.assertNotIn('distance_label', expectations[0].model)
+
+
+class HitCastAuraTests(unittest.TestCase):
+    def test_blade_hit_and_periodic_total_scenarios_set_the_zero_crit_aura_before_each_cast(self):
+        manifest_dir = Path(tempfile.mkdtemp())
+        try:
+            import conformance
+            conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--spell', '803880'])
+            files = sorted((manifest_dir / 'scenarios').glob('conformance-templar-*-803880-part-*.json'))
+            self.assertTrue(files)
+            for path in files:
+                steps = json.loads(path.read_text())['steps']
+                casts = cast_indices(steps, 803880)
+                self.assertTrue(casts)
+                for index in casts:
+                    before = [step for step in steps[:index] if step['action'] == 'set_aura'
+                              and step['spell'] == 64481]
+                    self.assertTrue(before, path.name)
+        finally:
+            shutil.rmtree(manifest_dir)
 
 
 if __name__ == '__main__':

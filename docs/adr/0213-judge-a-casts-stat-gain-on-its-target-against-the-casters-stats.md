@@ -37,3 +37,8 @@ rounding). At least two arms, at least one judged by the formula.
   32) and +24 with Intellect 80.
 - Seeded tests: a gain off the stats in any arm alerts; a percent gain passes inside its truncation window only; an
   entry with no formula arm is refused. Existing scenarios regenerate byte-identical.
+
+## Addendum (review fixes, 2026-11-12)
+
+The formula arm is judged at floor(x) only, the integer the engine's truncation gives, not floor(x) to ceil(x): every
+read was floor or exact (39, 48, 9, 24, 211, 241, 274).

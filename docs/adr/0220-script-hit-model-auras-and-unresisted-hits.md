@@ -29,3 +29,12 @@ against 1280.65 (524740): each the tooltip value times the auras held, which the
   inside the engine model with 887007 -20% and 801463 +20% (58.5); 524740 1455.0, the model's 1819 x 0.8 exactly.
 - Seeded tests: the Libram is among the heal model's modifiers; Eternal Blessing's aura 79 +15% is among the strike
   model's; the unresisted strike has no spread; a model aura no cast applies is refused.
+
+## Addendum (review fixes, 2026-11-12)
+
+- The four first alerts were 219, 295, 324 and 89; 295 (Libram of Consecration 803893, 804148) read 150.6 against a
+  model of 132.5 and 131.7 after the fix.
+- The first script_hit scenarios of 705300, 803893 and 524739 set beeg spellpen 823764 on every trial, which removed
+  the dummy's partial resists while the model kept them. The fix dropped 823764 from those entries (219 and 295: the
+  scenario changed; 324 and 89: only the model changed). For 219 the 163.5 against 125.7 gap is Eternal Blessing's +15%
+  and the removed partial resists together.
