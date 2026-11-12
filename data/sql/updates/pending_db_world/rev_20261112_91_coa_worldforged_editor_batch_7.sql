@@ -11,3 +11,7 @@ UPDATE `gameobject` SET `position_x` = 10932.6, `position_y` = 933.4, `position_
 -- #12100
 -- pickup 6941017 (Garmet Supplies) moved 2.8 yd across and 0.10 yd up out of the ground, checked in the editor
 UPDATE `gameobject` SET `position_x` = 2456.6999, `position_y` = -1685.6573, `position_z` = 103.3423, `orientation` = 0.1718, `rotation0` = 0, `rotation1` = 0, `rotation2` = -0.08578582856422419, `rotation3` = -0.9963136010401291 WHERE `guid` = 6941017 AND `id` = 340047;
+
+-- #12098
+-- pickup 6941019 (Slightly-Damaged Chest) moved 16.4 yd across and 6.22 yd down to the ground, checked in the editor
+UPDATE `gameobject` SET `position_x` = 2087.626, `position_y` = -1530.4155, `position_z` = 66.256, `orientation` = 3.6325, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.970026, `rotation3` = -0.243001 WHERE `guid` = 6941019 AND `id` = 96243;
