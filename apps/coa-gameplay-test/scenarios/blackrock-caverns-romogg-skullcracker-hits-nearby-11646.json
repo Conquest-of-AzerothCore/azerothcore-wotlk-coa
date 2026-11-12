@@ -151,6 +151,20 @@
       "ignore_access": true
     },
     {
+      "action": "set_aura",
+      "actor": "near",
+      "spell": 54303,
+      "stacks": 1
+    },
+    {
+      "label": "CONTROL: near wears 60000 extra armor",
+      "action": "assert",
+      "actor": "near",
+      "metric": "aura_stacks",
+      "spell": 54303,
+      "equals": 1
+    },
+    {
       "action": "set_health",
       "actor": "near",
       "value": 100000,

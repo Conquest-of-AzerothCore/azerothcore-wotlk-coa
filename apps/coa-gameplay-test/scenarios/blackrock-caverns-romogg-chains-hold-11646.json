@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Blackrock Caverns: Rom'ogg's Chains of Woe hold until they are broken (#11646)",
+  "contract": [
+    "The Chains of Woe (40447) from Rom'ogg Bonecrusher 39665's cast lasted 15 s, while The Skullcracker after them",
+    "casts for 12.5 s, so the chains could run out before the hit. They now stay until the group breaks them or",
+    "nobody bound survives the Skullcracker. A bound player who survives stays bound after the Skullcracker."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 645,
+      "x": 225.0,
+      "y": 949.0,
+      "z": 191.2,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "label": "CONTROL: the player is in Blackrock Caverns",
+      "action": "assert",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 645,
+      "within_ms": 10000
+    },
+    {
+      "action": "command",
+      "actor": "tank",
+      "command": ".cheat god on"
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 39665,
+      "as": "romogg",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "romogg"
+    },
+    {
+      "label": "Rom'ogg puts the Chains of Woe down",
+      "action": "assert",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 40447,
+      "equals": 1,
+      "within_ms": 40000
+    },
+    {
+      "label": "CONTROL: the player is bound",
+      "action": "assert",
+      "actor": "tank",
+      "metric": "aura_stacks",
+      "spell": 5011010,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 18000
+    },
+    {
+      "label": "DISCRIMINATING: the Chains are still there 18 s later, after the Skullcracker",
+      "action": "assert",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 40447,
+      "equals": 1
+    },
+    {
+      "label": "the surviving player is still bound",
+      "action": "assert",
+      "actor": "tank",
+      "metric": "aura_stacks",
+      "spell": 5011010,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "tank",
+      "entry": 40447,
+      "kill": true
+    },
+    {
+      "label": "breaking the Chains frees the player",
+      "action": "assert",
+      "actor": "tank",
+      "metric": "aura_stacks",
+      "spell": 5011010,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}
