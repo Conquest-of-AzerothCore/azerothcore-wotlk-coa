@@ -70,17 +70,21 @@
     "spell": 92111,
     "clause": "dealing an additional $801832s2% Weapon damage",
     "labels": [
-      "92111 effect_value 801832e1"
+      "92111 effect_value 801832e1",
+      "92111 script_hit 801832"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "script_hit (ADR 0208): Scourgebane 801832 strikes from 92111's 20% roll on Righteous Lunge hits average 260.6 / 259.5 against the model 258.0 of the school part plus 50% weapon damage (a school-only model reads 236.4, excluded); control without 92111: 0 strikes; counted 20261112-021809 / -021850"
   },
   {
     "spell": 92111,
     "clause": "plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage",
     "labels": [
-      "92111 effect_value 801832e0"
+      "92111 effect_value 801832e0",
+      "92111 script_hit 801832"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the same strike hit as the weapon part: 260.6 / 259.5 against 258.0 (school part plus weapon part); counted 20261112-021809 / -021850"
   },
   {
     "spell": 92111,
@@ -139,8 +143,11 @@
   {
     "spell": 300504,
     "clause": "@ext: Movement speed gained in this way stacks with Courage.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300504 behaviour_metric_delta stacks_with_courage"
+    ],
+    "kind": "claim",
+    "reason": "run speed with Courage 707754 (+10%) held in both phases: 1.10 before 300504 is learned, 1.32 after a Righteous Tempest 805409 cast with it (1.20 x 1.10, not max(10, 20)%); counted 20261112-021809 / -021850"
   },
   {
     "spell": 300512,
@@ -209,9 +216,11 @@
     "spell": 300513,
     "clause": "and when they deal direct damage they take ${$573020m1*$<scalingbp>+$sph*0.275+$AP*.185} Holy Damage.",
     "labels": [
-      "300513 effect_value 573020e0"
+      "300513 effect_value 573020e0",
+      "300513 script_hit 573020"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "script_hit with control casts (ADR 0206): the branded striker's Light of the Naaru takes 573020 hits of 211.9 / 208.3 against the model 209.0; the same strike without the brand: 0 hits; counted 20261112-021809 / -021850"
   },
   {
     "spell": 300513,
@@ -238,9 +247,15 @@
     "clause": "Your next 3 Titanstrikes incur a $s1% reduced cooldown,",
     "labels": [
       "300514 effect_value e0",
-      "300514 aura_amount e0"
+      "300514 aura_amount e0",
+      "300514 cost_gate 806521 titanstrike without",
+      "300514 cost_gate 806521 titanstrike with aura",
+      "300514 cost_gate 806521 titanstrike with",
+      "300514 cost_gate 806521 titanstrike beyond aura",
+      "300514 cost_gate 806521 titanstrike beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "cooldown gate (ADR 0205, dummy at 10%): a Titanstrike 4500 ms after the priming one is refused (67) without 300514, goes through with it, and is refused 3500 ms after it with it: the 8000 ms cooldown is 4000 ms under the aura; counted 20261112-021809 / -021850"
   },
   {
     "spell": 300514,
@@ -255,9 +270,11 @@
     "clause": "and deal $s2% increased damage.",
     "labels": [
       "300514 effect_value e1",
-      "300514 aura_amount e1"
+      "300514 aura_amount e1",
+      "300514 behaviour_hit_ratio titanstrike"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Titanstrike 806521 +24.95% / +25.06% with 300514 set before each cast, against no 300514; counted 20261112-021809 / -021850"
   },
   {
     "spell": 300514,
@@ -286,17 +303,23 @@
       "300515 effect_radius e0",
       "300515 effect_value e0 #1",
       "300515 e0 spell_healing_taken 803792",
-      "300515 behaviour_party_stat_ratio"
+      "300515 behaviour_party_stat_ratio",
+      "300515 behaviour_hit_ratio ally_inside",
+      "300515 behaviour_hit_ratio ally_outside"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "heal events (ADR 0207): the grouped ally's Benediction 578276 self heal grows +5.96% / +5.92% with 300515 on the Templar at 30 yd, and +0.11% / -0.01% at 45 yd, beyond the 40 yd radius; counted 20261112-021809 / -021850"
   },
   {
     "spell": 300515,
     "clause": "Does not stack with similar effects.",
     "labels": [
-      "300515 behaviour_group_stack_cap"
+      "300515 behaviour_group_stack_cap",
+      "300515 behaviour_hit_ratio no_stack",
+      "300515 behaviour_hit_ratio partner_alone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "heal events: a Benediction 578276 self heal with Fortified Body 300515 and Tree of Life 34123 (both aura 118 +6%) reads the same as with 300515 alone (+0.03% / -0.03%), while 34123 alone gives +6.03% / +5.96%; counted 20261112-021809 / -021850"
   },
   {
     "spell": 300515,
@@ -1231,9 +1254,11 @@
     "labels": [
       "527023 effect_value 527270e2 #1",
       "527023 aura_duration_ms #3",
-      "527023 aura_amplitude_ms #2"
+      "527023 aura_amplitude_ms #2",
+      "527023 script_hit 527269"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fix note (r2-a fix note 1), not final: the trample 527269 averages 171.6 / 172.1 against 127.2 for the stated formula (alert); AscensionTemplarContracts.cpp:331-332 sets it to Amount(527270, 2), whose CalcValue already adds 527270's TemplarCoefficients row (0.2 AP + 0.4 SP), and 527269's own row (AscensionTemplarData.h:43) adds the same terms again; counted 20261112-021809 / -021850"
   },
   {
     "spell": 527023,
@@ -3476,10 +3501,19 @@
     "labels": [
       "801455 aura_duration_ms #0",
       "801455 hit_mean",
-      "801455 behaviour_expiry window"
+      "801455 behaviour_expiry window",
+      "801455 immunity 801455 cast",
+      "801455 immunity 801455 applied",
+      "801455 immunity 35317 without",
+      "801455 immunity 35317 with",
+      "801455 immunity 35317 control",
+      "801455 immunity 47021 without",
+      "801455 immunity 47021 with",
+      "801455 immunity 47021 control",
+      "801455 immunity 801455 expired"
     ],
     "kind": "claim",
-    "reason": "the expiry pair of 801455 on the grouped ally after a cast at it (ADR 0212): present 9750-9825 ms, absent 10250-10375 ms; counted 20261112-013915 / -013954. The immunity itself (aura 147 mask 65: slows and roots; aura 77 freeze) is not read by an applied slow or root"
+    "reason": "immunity at the grouped ally (ADR 0204): a slow (Chilled Blood 35317, aura 33) and a root (Net 47021, aura 26) land on the ally before the cast, cannot land three times each inside the window, and land again after 801455 has expired; the expiry pair of 801455 on the ally: present 9750-9825 ms, absent 10250-10375 ms; counted 20261112-021809 / -021850 (expiry also 20261112-013915 / -013954)"
   },
   {
     "spell": 102208,
@@ -4333,9 +4367,11 @@
     "spell": 804929,
     "clause": "unleashes Scourgebane, dealing ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} Holy damage",
     "labels": [
-      "807268 effect_value 801832e0 #2"
+      "807268 effect_value 801832e0 #2",
+      "807268 script_hit 801832"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "awaiting owner (r2-a question 2): the Scourgebane strike Argent Blade 807268 unleashes averages 257.9 / 260.0 against 236.4 for the stated ${$801832m1*$<scalingbp>+$sph*0.25+$AP*0.25} (alert); it is the same 801832 strike as Scourgebane's, whose 50% weapon part (92111's tooltip) makes 258.0; counted 20261112-021809 / -021850"
   },
   {
     "spell": 804930,
