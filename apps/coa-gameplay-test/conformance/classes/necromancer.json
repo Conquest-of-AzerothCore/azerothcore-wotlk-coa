@@ -733,6 +733,32 @@
       },
       "effect": "gate",
       "gate_wait_ms": 100000
+    },
+    {
+      "aura": 705745,
+      "name": "Harrowing Winds",
+      "tooltip": "Damage dealt by |cffffffffGlacial Impact|r now deals an additional $s1% of the damage dealt as Frost damage to enemies within $707575a1 yds of the primary target.",
+      "kind": "magnitude_ratio",
+      "effect": 0,
+      "trigger": {
+        "action": "cast",
+        "spell": 704355,
+        "target": "dummy"
+      },
+      "trial_spell": 707592,
+      "target_state_fixture": true,
+      "trigger_metric": "spell_damage_total",
+      "trigger_text": "Damage dealt by Glacial Impact",
+      "observe_spell": 707575,
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.5,
+      "per_trigger_text": "deals an additional $s1% of the damage dealt as Frost damage",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers Glacial Impact 704355's 14% base-mana cost"
+      },
+      "observe_source": "705745 Effect[0] aura 354 (rewritten to SPELL_AURA_DUMMY, AscensionNecromancerContracts.cpp:57-61), BasePoints 49 + 1 = 50 ($s1); AscensionNecromancerEvents.cpp:158-161 casts 707575 at the primary target with BasePoints0 = damage x 50 / 100 for each Glacial Impact 707592 hit (707575 Effect[0] SCHOOL_DAMAGE in SpellRadius 29 around the target, BonusMultiplier 0 by contract, AscensionNecromancerContracts.cpp:379-381). Glacial Impact 704355 (Effect[0] trigger 707592) needs a frozen target: Frost Nova 122 on the dummy (ADR 0303 fixture, the claim is not a freeze). One dummy: the splash lands on it alone; both hits are Frost and the dummy's partial resist is read."
     }
   ],
   "talent_modifiers": [],
@@ -1693,6 +1719,42 @@
       "wait_ms": 2000,
       "expire_ms": 1000,
       "observe_source": "Diagnostic for fix note F-b1-2: Unit::GetAura(560012) on the caster (the harness aura read), 0 before and still 0 after the learn: the 500 ms recalculation's player->GetAura(560012) (AscensionNecromancer.cpp:395-397) finds nothing."
+    },
+    {
+      "spell": 92123,
+      "name": "Summoning Adept",
+      "kind": "metric_delta",
+      "quote": "Increases your maximum Life Force by $s3.",
+      "expected": 3,
+      "before_expected": 2,
+      "trigger_spell": 500971,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 805011
+      },
+      "wait_ms": 2000,
+      "expire_ms": 1500,
+      "observe_source": "92123 Effect[2] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 31 (SPELLMOD_MAX_AURA_STACKS) on Life Force 805011, BasePoints 0 + DieSides 1 = +1 ($s3). Capacity (AscensionNecromancer.cpp:103-108) is 2 plus that modifier, and Sync (AscensionNecromancer.cpp:187-204, every 500 ms) sets the stacks of the caster's Life Force 805011 to it: 2 without 92123, 3 with it. A Ghoul is raised in each phase (1 Life Force)."
+    },
+    {
+      "spell": 806321,
+      "name": "Plague Revenant",
+      "kind": "metric_delta",
+      "quote": "Critical strikes now apply a stack of Crypt Plague.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 801722,
+      "force_crit": "spell",
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 570131,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 12000,
+      "observe_source": "AscensionNecromancerEvents.cpp:138-139: the caster's own critical damage with Chance(player, 806321) (ProcChance 100, its Effect[0] aura on the caster) calls Plague(player, target), one stack of Crypt Plague 570131 (AscensionNecromancer.cpp:262-272). One Lichfrost 801722 hit at the dummy, forced to crit (spell_crit_rating 100000; Crypt Plague 92121 not known, so Lichfrost adds no stacks of its own), reads 0 stacks without 806321 and 1 with it."
     }
   ],
   "player_observations": [],

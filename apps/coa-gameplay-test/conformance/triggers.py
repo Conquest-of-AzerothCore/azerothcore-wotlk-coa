@@ -9,7 +9,7 @@ from mitigation import PHYSICAL_SCHOOL_MASK
 from procs import ATTACK, CAST, ENTRY_STATUSES, PART_BUDGET_MS, cast_interval, swing_interval, tick_spacing
 from profile import CASTER, SETTLE_MS, measurement, off_hand_steps, one_hand_main, player_fixture
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING, TARGET, Expectation,
-                    RankFacts, armed_for, closes_distance, facts_of, fixture_health_step)
+                    RankFacts, armed_for, closes_distance, facts_of, fixture_health_step, required_target_health_steps)
 
 TRIGGER_CHECK = 'trigger_count'
 COOLDOWN_DELTA_KIND = 'cooldown_delta'
@@ -1197,6 +1197,8 @@ def magnitude_measurement_labels(aura: int) -> dict[str, str]:
 
 def magnitude_trigger_descriptor(entry: dict) -> str:
     trigger = entry['trigger']
+    if entry.get('trial_spell') is not None:
+        return f'{entry["trigger_metric"]} of {entry["trial_spell"]}, the hit of {trigger["spell"]}'
     if trigger['action'] == ATTACK:
         return f'{entry["trigger_metric"]} of main-hand melee attacks'
     if trigger['action'] == MINION:
@@ -1239,7 +1241,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
         steps = [{'action': 'learn', 'actor': CASTER, 'spell': trigger['spell']}] + aura_steps(class_file, entry)
         if trigger.get('target') == ALLY:
             steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
-        steps += cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts, power_steps(entry))
+        held = required_target_health_steps(facts, TARGET) if entry.get('target_state_fixture') else []
+        steps += cast_steps(facts, trigger['spell'], cast_target, plan.attempt_ms, attempts, power_steps(entry) + held)
     elif trigger['action'] == TAKEN_HIT:
         cast_target = STRIKER
         steps = [{'action': 'learn', 'actor': CASTER, 'spell': aura}]
@@ -1256,8 +1259,9 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
                  {'action': 'stop_attack', 'actor': CASTER}]
     steps.append({'action': 'wait', 'label': f'{aura} magnitude drain', 'ms': DRAIN_MS})
     if trigger['action'] == CAST:
-        steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], spell=trigger['spell']))
-        steps.append(measurement(labels['trigger_count'], CASTER, 'spell_damage_count', spell=trigger['spell']))
+        hit = entry.get('trial_spell', trigger['spell'])
+        steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], spell=hit))
+        steps.append(measurement(labels['trigger_count'], CASTER, 'spell_damage_count', spell=hit))
     elif trigger['action'] == TAKEN_HIT:
         for label, metric in ((labels['trigger_total'], entry['trigger_metric']),
                               (labels['trigger_count'], 'spell_damage_count')):

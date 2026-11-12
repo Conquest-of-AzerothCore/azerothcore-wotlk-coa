@@ -1107,7 +1107,8 @@
     "spell": 537208,
     "clause": "Critical strikes dealt by your Undead minions now reduce the cooldown of Unholy Frenzy by $/1000;680553S1 sec.",
     "labels": [
-      "537208 trigger_cooldown_delta"
+      "537208 trigger_cooldown_delta",
+      "537208 trigger_cooldown_gate"
     ],
     "kind": "claim"
   },
@@ -1277,7 +1278,8 @@
     "spell": 560798,
     "clause": "Damage dealt by your Undead minions now reduces the cooldown of Virulency by $/1000;806322s1 sec.",
     "labels": [
-      "560798 trigger_cooldown_delta"
+      "560798 trigger_cooldown_delta",
+      "560798 trigger_cooldown_gate"
     ],
     "kind": "claim"
   },
