@@ -254,6 +254,8 @@ class FixedTargetCountSpec:
     uncapped: bool = False
     auras: tuple[tuple[int, int], ...] = ()
     pull_reads: bool = False
+    settle_ms: int = 0
+    layout: str = ''
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -277,9 +279,12 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     entry = behaviour_entry(records, spec.spell, spec.name, 'fixed_count', spec.quote, spec.expected)
     if spec.cast_target not in (TARGET, CASTER):
         raise ValueError(f'{spec.spell} fixed_count casts at {TARGET} or {CASTER}, not {spec.cast_target!r}')
+    if spec.layout not in ('', CASTER) or spec.settle_ms < 0:
+        raise ValueError(f'{spec.spell} fixed_count layout {spec.layout!r} is not the caster, or its settle is '
+                         f'negative')
     headroom = 0 if spec.uncapped else COUNT_HEADROOM
     dummy_count = spec.expected + 1 + headroom
-    if spec.cast_target == CASTER:
+    if spec.cast_target == CASTER or spec.layout == CASTER:
         distances = [spec.radius * (index + 1) / (dummy_count + 1) for index in range(dummy_count)]
         distances.append(spec.radius + FIXED_COUNT_FAR_MARGIN_YD)
     else:
@@ -317,6 +322,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
             cast_target = dummy_id(0) if spec.cast_target == TARGET else spec.cast_target
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': cast_target})
             steps.append({'action': 'wait', 'ms': wait_ms})
+            if spec.settle_ms:
+                steps.append({'action': 'wait', 'label': f'cast {cast} settle', 'ms': spec.settle_ms})
             if per_cast:
                 steps += per_cast_reads(spec, dummy_count, cast)
         return steps
@@ -341,6 +348,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
                                            for spell in dict.fromkeys((*spec.learn, spec.cast_spell))] +
                  cast_steps() + measure()}
+    if spec.settle_ms:
+        timed(scenario, waited_ms(scenario['steps']))
     label = f'{spec.spell} behaviour_fixed_count'
     model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'far_label': far_label, 'expected': spec.expected,
              'headroom': headroom, 'quote': entry.quote}
@@ -1106,7 +1115,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 entry.get('cast_target_health_pct'), tuple(entry.get('learn', ())),
                                 entry.get('uncapped', False),
                                 tuple((int(spell), int(stacks)) for spell, stacks in entry.get('auras', ())),
-                                bool(entry.get('pull_reads', False)))
+                                bool(entry.get('pull_reads', False)), int(entry.get('settle_ms', 0)),
+                                entry.get('layout', ''))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
@@ -3239,6 +3249,7 @@ class CostGateSpec:
     talent_aura_each_arm: bool = False
     restore_charges: bool = False
     target_health_pct: int | None = None
+    unset_arm: bool = False
 
 
 @dataclass(frozen=True)
@@ -3249,6 +3260,7 @@ class CostGateArm:
     result: int
     setup: bool = True
     held_ms: int = 0
+    skip_setup: bool = False
 
 
 def cost_gate_label(spec: CostGateSpec, arm: str) -> str:
@@ -3313,6 +3325,10 @@ def cost_gate_arms(spec: CostGateSpec, base: float) -> list[CostGateArm]:
     arms = [CostGateArm('without', False, allowed, refused), CostGateArm('with', True, allowed, NO_CAST_FAILURE)]
     if spec.next_arm:
         arms.append(CostGateArm('next', True, allowed, refused, setup=False))
+    if spec.unset_arm:
+        if not spec.setup_casts:
+            raise ValueError(f'{spec.spell} cost_gate unset_arm withholds setup_casts it does not have')
+        arms.append(CostGateArm('unset', True, allowed, refused, skip_setup=True))
     if beyond is not None:
         arms.append(CostGateArm('beyond', True, beyond, refused))
     if spec.aura_duration_ms is not None:
@@ -3405,7 +3421,7 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
         steps.append({'action': 'wait', 'label': f'{arm.name} global cooldown', 'ms': SINGLE_TARGET_GCD_WAIT_MS})
         if arm.setup:
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.gated_spell})
-        opening = setup() if arm.setup else []
+        opening = setup() if arm.setup and not arm.skip_setup else []
         if arm.held_ms:
             opening.append({'action': 'wait', 'label': f'{arm.name} aura wait', 'ms': arm.held_ms})
         if spec.talent_aura and arm.with_talent:
@@ -3465,7 +3481,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         tuple((int(spell), target) for spell, target in entry.get('after_casts', ())),
                         entry.get('after_wait_ms', 0), entry.get('resets', False),
                         bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)),
-                        entry.get('target_health_pct'))
+                        entry.get('target_health_pct'), bool(entry.get('unset_arm', False)))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
@@ -3712,7 +3728,13 @@ SPELL_FAILED_ONLY_OUTDOORS = 93
 SPELL_FAILED_ONLY_MOUNTED = 91
 CAST_CONDITION_OUTDOORS = 'outdoors'
 CAST_CONDITION_MOUNTED = 'mounted'
-CAST_CONDITIONS = (CAST_CONDITION_OUTDOORS, CAST_CONDITION_MOUNTED)
+CAST_CONDITION_AVOIDED = 'avoided'
+CAST_CONDITIONS = (CAST_CONDITION_OUTDOORS, CAST_CONDITION_MOUNTED, CAST_CONDITION_AVOIDED)
+AVOIDING_ATTACKER = 'attacker'
+AVOIDING_ROOT = 42716
+AVOIDING_DODGE = 26669
+AVOIDING_ENGAGE_MS = 2800
+AVOIDING_SWINGS_MS = 6000
 GENERIC_GROUND_MOUNT_SPELL = 458
 OUTDOOR_LOCATION = {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053}
 INDOOR_LOCATION = {'map': 0, 'x': -4840.67, 'y': -857.094, 'z': 501.997}
@@ -3725,6 +3747,16 @@ class CastConditionSpec:
     quote: str
     condition: str
     blocked_result: int
+    learn: tuple[int, ...] = ()
+
+
+def avoided_setup(spell: int) -> list[dict]:
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': AVOIDING_DODGE, 'stacks': 1},
+            {'action': 'attack', 'actor': CASTER, 'target': AVOIDING_ATTACKER},
+            {'action': 'wait', 'label': 'engage the attacker', 'ms': AVOIDING_ENGAGE_MS},
+            {'action': 'stop_attack', 'actor': CASTER},
+            {'action': 'wait', 'label': 'attacker swings', 'ms': AVOIDING_SWINGS_MS},
+            measurement(cast_condition_label(spell, 'dodges'), CASTER, 'melee_attacks_taken', victim_state=2)]
 
 
 def cast_condition_label(spell: int, moment: str) -> str:
@@ -3757,6 +3789,16 @@ def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[
                     f'map {INDOOR_LOCATION["map"]} ({INDOOR_LOCATION["x"]}, {INDOOR_LOCATION["y"]}, '
                     f'{INDOOR_LOCATION["z"]}), open-world outdoor at ({OUTDOOR_LOCATION["x"]}, '
                     f'{OUTDOOR_LOCATION["y"]}, {OUTDOOR_LOCATION["z"]}).')
+    elif spec.condition == CAST_CONDITION_AVOIDED:
+        setup_blocked = [{'action': 'set_health', 'actor': CASTER, 'value': STRIKER_HEALTH, 'maximum': STRIKER_HEALTH},
+                         {'action': 'set_aura', 'actor': CASTER, 'target': AVOIDING_ATTACKER,
+                          'caster': AVOIDING_ATTACKER, 'spell': AVOIDING_ROOT, 'stacks': 1}]
+        setup_allowed = avoided_setup(spec.spell)
+        mechanism = (f'An aggressive, rooted attacker (creature {TAKEN_HIT_STRIKER_ENTRY}, Self Root Forever '
+                     f'{AVOIDING_ROOT}) stands 3 yd in front of the caster. Blocked: no attack has been avoided yet. '
+                     f'Allowed: with Evasion {AVOIDING_DODGE} on the caster, the caster engages the attacker with one '
+                     f'swing interval and stops, then takes its swings for {AVOIDING_SWINGS_MS} ms; the dodges are '
+                     f'read.')
     else:
         setup_blocked = [{'action': 'set_aura', 'actor': CASTER, 'spell': GENERIC_GROUND_MOUNT_SPELL, 'stacks': 0}]
         setup_allowed = [{'action': 'set_aura', 'actor': CASTER, 'spell': GENERIC_GROUND_MOUNT_SPELL, 'stacks': 1}]
@@ -3764,7 +3806,7 @@ def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[
                     f'Horse, Spell.dbc EffectApplyAuraName[0] SPELL_AURA_MOUNTED), independent of any class '
                     f'mount ability.')
     steps = (base_steps(class_file)
-            + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
+            + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in (spec.spell, *spec.learn)]
             + setup_blocked
             + cast_condition_attempt(spec.spell, facts, 'blocked')
             + setup_allowed
@@ -3779,6 +3821,10 @@ def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
+    if spec.condition == CAST_CONDITION_AVOIDED:
+        scenario['creatures'].append({'id': AVOIDING_ATTACKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY,
+                                      'level': class_file['level'], 'health': STRIKER_HEALTH,
+                                      'distance': STRIKER_DISTANCE, 'reaction': 2, 'stationary': True})
     model = {'kind': 'cast_condition', 'quote': entry.quote}
     expectations = [
         Expectation(blocked_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None,
@@ -3791,7 +3837,7 @@ def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[
 
 def cast_condition_spec(entry: dict) -> CastConditionSpec:
     return CastConditionSpec(entry['spell'], entry['name'], entry['quote'], entry['condition'],
-                             entry['blocked_result'])
+                             entry['blocked_result'], tuple(entry.get('learn', ())))
 
 
 CAST_COMBAT_SETTLE_MS = CAST_MARGIN_MS
@@ -5766,7 +5812,7 @@ def threat_redirect_spec(entry: dict) -> ThreatRedirectSpec:
 
 
 SCRIPT_HIT_SETTLE_MS = 500
-SCRIPT_HIT_RECEIVERS = (TARGET, STRIKER)
+SCRIPT_HIT_RECEIVERS = (TARGET, STRIKER, CASTER)
 
 
 @dataclass(frozen=True)
@@ -5788,6 +5834,8 @@ class ScriptHitSpec:
     control_casts: tuple[tuple[int, str], ...] | None = None
     value_spell: int | None = None
     value_effect: int = 0
+    model_auras: tuple[int, ...] = ()
+    unresisted: bool = False
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -5807,6 +5855,9 @@ def script_hit_validate(spec: ScriptHitSpec):
         raise ValueError(f'{spec.spell} script_hit is received by a striker that never strikes')
     if spec.caster_health_pct is not None and not 0 < spec.caster_health_pct <= 100:
         raise ValueError(f'{spec.spell} script_hit caster health {spec.caster_health_pct} is not a percent')
+    cast = {spell for spell, _ in spec.casts}
+    if any(aura not in cast for aura in spec.model_auras):
+        raise ValueError(f'{spec.spell} script_hit models auras {list(spec.model_auras)} that its casts do not apply')
     if spec.control_casts is not None and tuple(spec.control_casts) == tuple(spec.casts):
         raise ValueError(f'{spec.spell} script_hit control_casts repeat the casts; the arms would differ in nothing')
 
@@ -5831,12 +5882,15 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'script_hit', spec.quote, 1)
     try:
-        model = reference_script_hit_model(class_file, spec.spell, spec.hit_spell, spec.value_spell, spec.value_effect)
+        model = reference_script_hit_model(class_file, spec.spell, spec.hit_spell, spec.value_spell, spec.value_effect,
+                                           spec.model_auras, spec.unresisted)
     except Unmodelled as error:
         raise NotModelled(f'{spec.spell} script_hit {spec.hit_spell}: {error.reason}') from error
     label = script_hit_label(spec)
     school_mask = records.field('Spell', spec.hit_spell, 'SchoolMask')
     heal = model.kind in HEAL_KINDS
+    if spec.receiver == CASTER and not heal:
+        raise ValueError(f'{spec.spell} script_hit reads a hit on the caster only for a heal')
     family = 'spell_heal' if heal else 'spell_damage'
     unblocked = {} if heal else {'blocked': False}
     receiver = {'target': spec.receiver}
@@ -5906,6 +5960,10 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         record['control_text'] = control_rule
     if spec.value_spell is not None:
         record.update({'value_spell': spec.value_spell, 'value_effect': spec.value_effect})
+    if spec.model_auras:
+        record['model_auras'] = list(spec.model_auras)
+    if spec.unresisted:
+        record['unresisted'] = True
     return scenario, [Expectation(label, 'hit_mean', spec.spell, spec.hit_spell, 0, ' | '.join(model.displayed), rule,
                                   record)]
 
@@ -5920,7 +5978,9 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          tuple(entry.get('learn', ())), entry.get('receiver', TARGET),
                          None if 'control_casts' not in entry
                          else tuple((int(spell), str(target)) for spell, target in entry['control_casts']),
-                         entry.get('value_spell'), int(entry.get('value_effect', 0)))
+                         entry.get('value_spell'), int(entry.get('value_effect', 0)),
+                         tuple(int(spell) for spell in entry.get('model_auras', ())),
+                         bool(entry.get('unresisted', False)))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8

@@ -40,7 +40,7 @@ TRIGGERED_WEAPON = 'triggered_weapon'
 WEAPON_KINDS = frozenset({'weapon', TRIGGERED_WEAPON})
 TICKING_KINDS = frozenset(PERIODIC_KINDS.values()) | {TRIGGERED_WEAPON}
 HEAL_KINDS = frozenset({'heal', 'periodic_heal'})
-MODIFIER_AURAS = {341: 'damage', 136: 'heal'}
+MODIFIER_AURAS = {341: 'damage', 136: 'heal', 79: 'damage', 118: 'heal'}
 MAGIC_SCHOOLS = range(1, 7)
 NO_MITIGATION = MitigationModel(mean=1.0, variance=0.0)
 DRAIN_MS = 3000
@@ -658,7 +658,7 @@ def value_readout(readout: Readout, effects: Sequence[int], value_effect: int) -
 
 def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caster: CasterStats,
                      target: TargetProfile, auras: Sequence[int], value_spell: int | None = None,
-                     value_effect: int = 0) -> HitModel:
+                     value_effect: int = 0, unresisted: bool = False) -> HitModel:
     records = records_of(class_file)
     facts = facts_of(records, hit_spell)
     readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), value_spell or hit_spell)
@@ -669,7 +669,8 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
     if kind not in SCRIPT_HIT_KINDS:
         raise Unmodelled(f'script-cast spell {hit_spell} is a {kind} hit, not one direct damage or heal effect')
     school_mask = records.field('Spell', hit_spell, 'SchoolMask')
-    mitigation = NO_MITIGATION if kind in HEAL_KINDS else mitigation_for(school_mask, target, caster.level)
+    mitigation = NO_MITIGATION if kind in HEAL_KINDS or unresisted else mitigation_for(school_mask, target,
+                                                                                        caster.level)
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
     rolls = rolled_values(records, hit_spell, caster, readout, indexes, tooltip_spell=tooltip_spell)
     model = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
@@ -687,9 +688,10 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
 
 
 def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, value_spell: int | None = None,
-                               value_effect: int = 0) -> HitModel:
+                               value_effect: int = 0, model_auras: Sequence[int] = (),
+                               unresisted: bool = False) -> HitModel:
     return script_hit_model(class_file, tooltip_spell, hit_spell, reference_caster(class_file), REFERENCE_TARGET,
-                            class_file.get('known_auras', []), value_spell, value_effect)
+                            [*class_file.get('known_auras', []), *model_auras], value_spell, value_effect, unresisted)
 
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
@@ -704,12 +706,13 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
             resistances={1 << school: int(measured[resistance_label(school)])
                          for school in magic_schools(expectation.model['school_mask'])})
     auras = [aura for aura in class_file.get('known_auras', []) if measured[known_aura_label(aura)] > 0]
+    auras += expectation.model.get('model_auras', [])
     if expectation.model['kind'] == 'melee':
         return melee_model(class_file, caster, target, auras)
     if 'tooltip_spell' in expectation.model:
         return script_hit_model(class_file, expectation.model['tooltip_spell'], expectation.model['hit_spell'],
                                 caster, target, auras, expectation.model.get('value_spell'),
-                                expectation.model.get('value_effect', 0))
+                                expectation.model.get('value_effect', 0), expectation.model.get('unresisted', False))
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \

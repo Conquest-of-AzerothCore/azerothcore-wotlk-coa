@@ -1487,3 +1487,23 @@ Intellect 48100 set.
 players are flagged for PvP after the base steps. The entry's `target` and `measure_actor` may then name `enemy`, and
 only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an orc in the circle (read 9800 ms and
 10200 ms after the cast, its first tick at about 2000 ms) and 40000 ms on the dummy.
+
+### Cost-gate unset arm, fixed_count settle and layout, avoided casts (ADR 0216-0218)
+
+- `cost_gate` `unset_arm: true` adds an arm `unset` after `with`: the talent known, the cooldown reset and the gated
+  spell primed, but the `setup_casts` skipped; the attempt at the reduced level is refused. Transcending Strikes 804897:
+  Divine Force 806153 primed at a dummy without Blade of Faith keeps its full 120000 ms cooldown.
+- `fixed_count` `settle_ms` waits after each cast (the timeout then covers the waits), and `layout: "caster"` places the
+  dummies around the caster while the cast still targets the primary dummy. Pulverizing 524620: five Condemns 804906
+  at the primary, 21500 ms each; its pulse 524619 at the Templar's position hits the four dummies within 5 yd and never
+  the one at 10 yd. Norgannon's Wrath 524739: `settle_ms` 2500 for the delayed strike.
+- `cast_condition` `condition: "avoided"` (with `learn`) adds an aggressive, rooted attacker in front of the caster. The
+  blocked attempt comes before any attack; the allowed one after Evasion 26669, one engaging swing interval and 6000 ms
+  of the attacker's swings (the dodges are read). The attempts set no caster aura. Sacred Swing 572769 with Keeping the
+  Oath 92109: 22 before, 0 after.
+- `script_hit` `receiver: "caster"` reads a heal the script casts on the caster (a damage hit on the caster is refused);
+  `model_auras` names auras the treatment casts put on the caster, which the hit model then counts among its modifiers
+  (they must be cast by the entry), and `unresisted: true` drops the resistance mitigation for a hit that ignores it.
+  The hit model now reads SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) and SPELL_AURA_MOD_HEALING_PCT (118) modifiers of
+  those auras (ADR 0219, ADR 0220). Libram of Grace 801463's Grace 804150 on the Templar under its own +20% healing
+  received, Eternal Blessing 705300's 707111 under its own +15% Holy damage, Norgannon's Wrath's 524740 unresisted.

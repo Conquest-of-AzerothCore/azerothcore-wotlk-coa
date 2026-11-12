@@ -8205,5 +8205,104 @@ class ScriptHitWeaponAndValueTests(unittest.TestCase):
             reference_script_hit_model(CLASS_FILE, 527023, 527270, 527270, 2)
 
 
+class CostGateUnsetArmTests(unittest.TestCase):
+    def test_the_unset_arm_primes_without_its_setup_cast_and_expects_a_refusal(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        scenario, expectations = cost_gate_scenario(CLASS_FILE, cost_gate_spec(r1a_entry(804897, 'cost_gate', 'blade')))
+        run.validate(scenario)
+        unset = next(expectation for expectation in expectations if expectation.label.endswith(' unset'))
+        self.assertEqual(unset.displayed, '67')
+        steps = scenario['steps']
+        start = next(index for index, step in enumerate(steps) if step.get('label') == 'unset global cooldown')
+        end = next(index for index, step in enumerate(steps) if step.get('label') == unset.label)
+        self.assertEqual(cast_indices(steps[start:end], 803880), [])
+        self.assertEqual(len(cast_indices(steps[start:end], 806153)), 2)
+        self.assertEqual(len(cast_indices(steps, 803880)), 3)
+
+    def test_an_unset_arm_without_setup_casts_is_refused(self):
+        from behaviours import cost_gate_scenario, cost_gate_spec
+        entry = {**r1a_entry(804897, 'cost_gate', 'blade'), 'setup_casts': []}
+        with self.assertRaises(ValueError):
+            cost_gate_scenario(CLASS_FILE, cost_gate_spec(entry))
+
+    def test_seeded_reduction_without_blade_of_faith_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(804897, 'cost_gate', 'blade'))
+        unset = next(expectation for expectation in expectations if expectation.label.endswith(' unset'))
+        self.assertEqual(judge_behaviour(base_verdict(unset), FakeRun({unset.label: 67.0}), unset).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(unset), FakeRun({unset.label: 0.0}), unset).status, 'alert')
+
+
+class FixedCountSettleLayoutTests(unittest.TestCase):
+    def test_every_cast_settles_and_the_dummies_stand_around_the_caster(self):
+        spec = fixed_target_count_spec(r1a_entry(524620, 'fixed_count'))
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        settles = [step for step in scenario['steps'] if step.get('label', '').endswith(' settle')
+                   and step['action'] == 'wait']
+        self.assertEqual([step['ms'] for step in settles], [21500] * spec.repeats)
+        distances = {creature['id']: creature['distance'] for creature in scenario['creatures']}
+        far = dummy_id(spec.expected + 1)
+        self.assertTrue(all(distance < spec.radius for name, distance in distances.items() if name != far))
+        self.assertGreater(distances[far], spec.radius)
+        self.assertGreater(scenario['timeout_ms'], spec.repeats * 21500)
+        casts = cast_indices(scenario['steps'], 804906)
+        self.assertTrue(all(scenario['steps'][index]['target'] == dummy_id(0) for index in casts))
+
+    def test_an_unknown_layout_is_refused(self):
+        entry = {**r1a_entry(524620, 'fixed_count'), 'layout': 'dummy'}
+        with self.assertRaises(ValueError):
+            fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
+
+
+class AvoidedCastConditionTests(unittest.TestCase):
+    def test_the_swing_is_attempted_before_and_after_the_dodged_attacks_with_no_aura_set(self):
+        scenario, _ = cast_condition_scenario(CLASS_FILE, cast_condition_spec(r1a_entry(572769, 'cast_condition')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertFalse([step for step in steps if step['action'] == 'set_aura' and step['spell'] == 681170])
+        casts = cast_indices(steps, 572769)
+        swings = next(index for index, step in enumerate(steps) if step.get('label') == 'attacker swings')
+        self.assertEqual(len(casts), 2)
+        self.assertLess(casts[0], swings)
+        self.assertLess(swings, casts[1])
+        self.assertIn('attacker', [creature['id'] for creature in scenario['creatures']])
+
+    def test_seeded_swing_before_any_avoided_attack_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(572769, 'cast_condition'))
+        blocked = expectations[0]
+        self.assertEqual(judge_behaviour(base_verdict(blocked), FakeRun({blocked.label: 22.0}), blocked).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(blocked), FakeRun({blocked.label: 0.0}), blocked).status,
+                         'alert')
+
+
+class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
+    def test_a_heal_on_the_caster_is_read_on_the_caster_with_the_libram_in_the_model(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(801463, 'script_hit'))
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        heals = [step for step in scenario['steps'] if step.get('metric') == 'spell_heal_total']
+        self.assertTrue(heals)
+        self.assertTrue(all(step['target'] == CASTER for step in heals))
+        self.assertEqual(expectation.model['model_auras'], [801463])
+        self.assertIn(801463, [modifier['spell_id'] for modifier in expectation.model['modifiers']])
+
+    def test_a_damage_hit_on_the_caster_is_refused(self):
+        entry = {**r1a_entry(803893, 'script_hit'), 'receiver': CASTER}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+    def test_a_model_aura_no_cast_applies_is_refused(self):
+        entry = {**r1a_entry(705300, 'script_hit'), 'model_auras': [801463]}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+    def test_the_damage_done_aura_and_the_unresisted_strike_shape_the_model(self):
+        _, [breaker] = behaviour_scenario(CLASS_FILE, r1a_entry(705300, 'script_hit'))
+        self.assertIn((705300, 79, 15), [(modifier['spell_id'], modifier['aura'], modifier['percent'])
+                                         for modifier in breaker.model['modifiers']])
+        _, [strike] = behaviour_scenario(CLASS_FILE, r1a_entry(524739, 'script_hit'))
+        self.assertTrue(strike.model['unresisted'])
+        self.assertEqual(strike.model['reference']['sigma'], 0.0)
+
+
 if __name__ == '__main__':
     unittest.main()
