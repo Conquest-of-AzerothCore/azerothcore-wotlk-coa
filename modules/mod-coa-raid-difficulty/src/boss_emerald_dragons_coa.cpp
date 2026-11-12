@@ -153,6 +153,7 @@ namespace
             _events.Reset();
             _clock.Reset();
             _stage = 1;
+            _locked = false;
             _fogs.clear();
             _sleepers.clear();
             CoaApplyWorldHealth(me);
@@ -174,11 +175,11 @@ namespace
         void Gate()
         {
             bool const locked = RaidRelease::ReleasedStage() < RaidRelease::StageMoltenCore;
+            if (locked && me->IsInCombat())
+                EnterEvadeMode();
             if (locked == _locked)
                 return;
             _locked = locked;
-            if (locked && me->IsInCombat())
-                EnterEvadeMode();
             me->SetVisible(!locked);
             if (locked)
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
