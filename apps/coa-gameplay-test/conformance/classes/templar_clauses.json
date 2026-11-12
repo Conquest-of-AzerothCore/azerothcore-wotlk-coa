@@ -3392,14 +3392,24 @@
         "labels": [
           "800424 aggro_redirect primary after",
           "800424 aggro_redirect extra1 after",
-          "800424 aggro_redirect extra2 after"
+          "800424 aggro_redirect extra2 after",
+          "800424 aggro_redirect cap primary after",
+          "800424 aggro_redirect cap extra1 after",
+          "800424 aggro_redirect cap extra2 after",
+          "800424 aggro_redirect cap extra3 after",
+          "800424 aggro_redirect cap extra4 after",
+          "800424 aggro_redirect cap extra5 after"
         ]
       },
       {
         "claim": "within 8 yds",
         "labels": [
           "800424 aggro_redirect range primary after",
-          "800424 aggro_redirect range extra1 after"
+          "800424 aggro_redirect range extra1 after",
+          "800424 aggro_redirect edge primary after",
+          "800424 aggro_redirect edge extra1 after",
+          "800424 aggro_redirect edge extra2 after",
+          "800424 aggro_redirect edge extra3 after"
         ]
       }
     ],

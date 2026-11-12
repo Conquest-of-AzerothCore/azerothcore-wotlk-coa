@@ -101,6 +101,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[2].ApplyAuraName = SPELL_AURA_MOD_HEALING_DONE_PERCENT;
     if (id == 560834)
         info->Effects[0].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    if (id == 800424)
+        info->MaxAffectedTargets = 0;
     if (id == 707111)
         info->Effects[0].Effect = info->Effects[1].Effect = 0;
     if (id == 803163)

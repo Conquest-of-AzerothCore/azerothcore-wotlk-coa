@@ -6604,10 +6604,10 @@
         },
         {
           "distance": 8.5,
-          "expected_redirect": false
+          "expected_redirect": true
         }
       ],
-      "observe_source": "800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (8 yd; spell_effect_radius reads 8), MaxAffectedTargets 5. Two rooted dummies (Self Root Forever 42716), each read by distance_2d right before the self-centred cast (ADR 0244): 7.5 yd, inside the stated 8 yd, must be taunted; 8.5 yd, outside it, must not. Stock Spell::SelectImplicitAreaTargets adds the caster's GetLeewayBonusRadius (2.66 yd for a player whose run speed exceeds 4.97, Object.cpp:1786-1806, Spell.cpp:1391-1395) and WorldObjectSpellAreaTargetCheck the target's combat reach (1.275 for the dummy, Spell.cpp:9428-9432), so the engine's edge is about 11.9 yd: diagnostics 20261112-033832 to -034042 taunt rooted dummies at 10.5 and 11.5 yd and not at 12.5. FN-r2b-3."
+      "observe_source": "800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (8 yd; spell_effect_radius reads 8), DBC MaxAffectedTargets 5, which the Templar contract clears (owner ruling Q-rad-2, ADR 0288). Two rooted dummies (Self Root Forever 42716), each read by distance_2d right before the self-centred cast (ADR 0244): 7.5 yd, inside the stated 8 yd, must be taunted; 8.5 yd, outside the stated 8 yd but inside the engine's effective edge, is taunted too, because the owner accepted the engine's effective radius as known engine behaviour (2026-11-12, Q-rad-1). Stock Spell::SelectImplicitAreaTargets adds the caster's GetLeewayBonusRadius (2.66 yd for a player whose run speed exceeds 4.97, Object.cpp:1786-1806, Spell.cpp:1391-1395) and WorldObjectSpellAreaTargetCheck the target's combat reach (1.275 for the dummy, Spell.cpp:9428-9432), so the engine's edge is about 11.9 yd: diagnostics 20261112-033832 to -034042 taunt rooted dummies at 10.5 and 11.5 yd and not at 12.5. FN-r2b-3."
     },
     {
       "spell": 804928, "name": "Mark of Aggramar", "kind": "cost_gate", "variant": "fortitude",
@@ -6895,11 +6895,11 @@
       "targets": [
         {
           "distance": 11.6,
-          "expected_redirect": false
+          "expected_redirect": true
         },
         {
           "distance": 11.85,
-          "expected_redirect": false
+          "expected_redirect": true
         },
         {
           "distance": 12.1,
@@ -6910,7 +6910,7 @@
           "expected_redirect": false
         }
       ],
-      "observe_source": "Claim 279 edge bracket (lean/radius.md). 800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (RadiusMin 8, RadiusMax 8), MaxAffectedTargets 5: four rooted dummies, fewer than the cap, read by distance_2d, height and combat reach right before the self-centred cast, with the caster's combat reach, height and run speed rate. Expected by the tooltip: none taunted beyond 8 yd. The engine's arithmetic: 8 (SpellEffectInfo::CalcRadius) + 2.66 (Spell::SelectImplicitAreaTargets adds WorldObject::GetLeewayBonusRadius for TARGET_UNIT_SRC_AREA_ENEMY) + the dummy's combat reach (WorldObjectSpellAreaTargetCheck for a player-controlled caster and a SRC reference) against the target's exact distance, an edge near 11.935 yd."
+      "observe_source": "Claim 279 edge bracket (lean/radius.md). 800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (RadiusMin 8, RadiusMax 8), no count cap (DBC MaxAffectedTargets 5, cleared by the Templar contract, ADR 0288): four rooted dummies, read by distance_2d, height and combat reach right before the self-centred cast, with the caster's combat reach, height and run speed rate. Expected by the owner's ruling (2026-11-12, Q-rad-1: the engine's effective radius is known engine behaviour): 11.6 and 11.85 yd taunted, 12.1 and 12.35 yd not; the 0.085 yd margin at 11.85 needs the caster in run mode, as the generated caster is. The engine's arithmetic: 8 (SpellEffectInfo::CalcRadius) + 2.66 (Spell::SelectImplicitAreaTargets adds WorldObject::GetLeewayBonusRadius for TARGET_UNIT_SRC_AREA_ENEMY) + the dummy's combat reach (WorldObjectSpellAreaTargetCheck for a player-controlled caster and a SRC reference) against the target's exact distance, an edge near 11.935 yd."
     },
     {
       "spell": 800424,
@@ -6947,7 +6947,7 @@
           "expected_redirect": true
         }
       ],
-      "observe_source": "Absolution cap (lean/radius.md, task 2): six rooted dummies within 8 yd, each expected taunted by 'all enemies'. 800424 MaxAffectedTargets 5 (Spell.dbc), applied by Spell::SelectImplicitAreaTargets through Acore::Containers::RandomResize: five of the six are taunted, a random one is not."
+      "observe_source": "Absolution cap (lean/radius.md, task 2): six rooted dummies within 8 yd, each expected taunted by 'all enemies'. 800424 MaxAffectedTargets 5 (Spell.dbc), applied by Spell::SelectImplicitAreaTargets through Acore::Containers::RandomResize, taunted five of the six, a random one not; the owner ruled that all means no count cap and the radius stays the limit (2026-11-12, Q-rad-2), and the Templar contract sets it to 0 (ADR 0288)."
     },
     {"spell": 300501, "name": "Sacred Candle", "kind": "cost_gate", "variant": "faith_cooldown", "label_suffix": "faith_cooldown", "quote": "Reduces the cooldown of Testament of Faith by", "gated_spell": 501606, "resource": "cooldown", "reduction": 60000, "target": "ally", "observe_source": "$/1000;s1 = 60 sec (300501 EffectBasePoints[0] -60001, EffectDieSides[0] 1, -60000 ms): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), the spell_modifier label on 501606. Testament of Faith 501606 RecoveryTime and CategoryRecoveryTime 180000 ms, cast at the grouped ally (TARGET_UNIT_TARGET_ALLY): reduced to 120000 ms. Arms timed from a priming cast: 120500 ms without the talent (refused, SPELL_FAILED_NOT_READY 67), 120500 ms with it (through), 119500 ms with it (refused). The ally's Sacred Restraint 102208 from the priming cast (60000 ms, 30000 with the talent) has ended before the second cast."},
     {"spell": 300501, "name": "Sacred Candle (Sacred Restraint)", "kind": "cast_applies_aura", "variant": "sacred_restraint", "label_suffix": "sacred_restraint", "quote": "and the duration of Sacred Restraint by", "expected_ms": 30000, "applied_aura": 102208, "target": "ally", "cast_spell": 501606, "cast_target": "ally", "control": {"expected_ms": 60000}, "observe_source": "$/1000;s2 = 30 sec (300501 EffectBasePoints[1] -30001, EffectDieSides[1] 1, -30000 ms): Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 1 (SPELLMOD_DURATION), the spell_modifier label on 102208. AscensionTemplarAbilities.cpp:289-291 (OnSpellCast): a cast of the Testament of Faith chain with a unit target casts Sacred Restraint 102208 (DurationIndex 3, 60000 ms) on that target. Testament of Faith 501606 is cast at the grouped ally: 60000 ms before Sacred Candle is learned (control), 30000 ms after; the expiry pair times both from the cast."},
