@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: a Dreadsteed from the portal runs at the rider's Riding speed (#11970)",
+  "contract": [
+    "Dreadsteed Portal 804774 summons portal 50268; talking to it cast Dreadsteed Portal 804775 on the rider, which",
+    "only applied SPELL_AURA_MOUNTED (display 914505) with no speed aura and kept the portal visual on the rider.",
+    "Expected: the portal mounts the rider with Dreadsteed 23161 (same model). Like any ground mount: Riding 150 gives +100% (run speed rate 2.0), Riding 75 +60% (1.6), below apprentice Riding +40% (1.4), as GetRidingGroundMountSpeed."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "squire",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    },
+    {
+      "id": "page",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "portal",
+      "owner": "knight",
+      "entry": 50268,
+      "level": 60,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "portal2",
+      "owner": "squire",
+      "entry": 50268,
+      "level": 60,
+      "distance": 2,
+      "faction": 35
+    },
+    {
+      "id": "portal3",
+      "owner": "page",
+      "entry": 50268,
+      "level": 60,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_skill",
+      "actor": "page",
+      "skill": 762,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "set_skill",
+      "actor": "knight",
+      "skill": 762,
+      "value": 150,
+      "maximum": 150
+    },
+    {
+      "action": "set_skill",
+      "actor": "squire",
+      "skill": 762,
+      "value": 75,
+      "maximum": 75
+    },
+    {
+      "action": "gossip_hello",
+      "label": "The knight takes a Dreadsteed",
+      "actor": "knight",
+      "target": "portal"
+    },
+    {
+      "action": "gossip_hello",
+      "label": "The squire takes a Dreadsteed",
+      "actor": "squire",
+      "target": "portal2"
+    },
+    {
+      "action": "gossip_hello",
+      "label": "The page, below apprentice Riding (1), takes a Dreadsteed",
+      "actor": "page",
+      "target": "portal3"
+    },
+    {
+      "action": "assert",
+      "label": "the knight rides a Dreadsteed",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 23161,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the portal aura and its visual are not left on the rider",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 804775,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the knight sits on the Dreadsteed model",
+      "actor": "knight",
+      "metric": "mount_display_id",
+      "equals": 14554
+    },
+    {
+      "action": "assert",
+      "label": "at the Riding 150 speed, +100%",
+      "actor": "knight",
+      "metric": "run_speed_rate",
+      "min": 1.95,
+      "max": 2.05
+    },
+    {
+      "action": "assert",
+      "label": "the squire rides a Dreadsteed",
+      "actor": "squire",
+      "metric": "aura",
+      "spell": 23161,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "at the Riding 75 speed, +60%",
+      "actor": "squire",
+      "metric": "run_speed_rate",
+      "min": 1.55,
+      "max": 1.65
+    },
+    {
+      "action": "assert",
+      "label": "the page rides a Dreadsteed",
+      "actor": "page",
+      "metric": "aura",
+      "spell": 23161,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "at the novice speed every CoA ground mount uses, +40%",
+      "actor": "page",
+      "metric": "run_speed_rate",
+      "min": 1.35,
+      "max": 1.45
+    }
+  ]
+}

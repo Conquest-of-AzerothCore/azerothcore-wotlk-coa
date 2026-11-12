@@ -1,6 +1,8 @@
 {
   "schema": 1,
   "exclusive": {
+    "setis-world-boss-altar-loot": "Sets the process-global raid release stage (.raidphase) that gates every raid map",
+    "snowgrave-world-boss-instance": "Sets the process-global raid release stage (.raidphase) that gates every raid map",
     "bloodforged-high-risk-drop": "set_phase 1 affects live creatures outside the case's lane phase",
     "coa-prestige-chromie-spawns": "set_phase 1 affects live creatures outside the case's lane phase",
     "who-custom-classes": "The Who list is process-global and would list players of other running cases",

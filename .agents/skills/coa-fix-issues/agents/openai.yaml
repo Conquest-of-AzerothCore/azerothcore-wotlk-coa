@@ -1,3 +1,0 @@
-interface:
-  display_name: "CoA Fix Issues"
-  short_description: "Fix topic issues in batches of 32 with tests and a PR per batch"

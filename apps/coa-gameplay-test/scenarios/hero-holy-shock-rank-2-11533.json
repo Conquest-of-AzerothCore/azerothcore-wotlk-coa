@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Hero Holy Shock rank 2 (20485) damages an enemy and heals a friend (#11533)",
+  "contract": [
+    "#11533: Holy Shock 20485 had no effect on an enemy or a player.",
+    "The client's SpellRank.dbc puts 20485 between 20473 and 20929 as rank 2 of Holy Shock, and its damage (25912) and",
+    "healing (25914) chains gain matching rank 2 spells 25915 and 25917. The server kept the stock spell_ranks, where",
+    "20485 is in no chain: spell_pal_holy_shock (-20473) never ran, so its dummy effect cast nothing.",
+    "With the client's chains, 20485 hurts an enemy with 25915 and heals a friend with 25917; rank 1 and rank 3 keep",
+    "their own damage spells (25912, 25911)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "hero",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 20485
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Hero knows Holy Shock rank 2",
+      "actor": "hero",
+      "metric": "knows_spell",
+      "spell": 20485,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 25915,
+      "target": "enemy",
+      "save_as": "rank2_hits"
+    },
+    {
+      "action": "cast",
+      "label": "Holy Shock rank 2 on the enemy",
+      "actor": "hero",
+      "spell": 20485,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: rank 2 hits the enemy with its rank 2 damage spell 25915",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 25915,
+      "target": "enemy",
+      "relative_to": "rank2_hits",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 does not use the rank 1 damage spell",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 25912,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 20485
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_heal_count",
+      "spell": 25917,
+      "target": "hero",
+      "save_as": "rank2_heals"
+    },
+    {
+      "action": "cast",
+      "label": "Holy Shock rank 2 on the Hero itself",
+      "actor": "hero",
+      "spell": 20485,
+      "target": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: rank 2 heals a friend with its rank 2 healing spell 25917",
+      "actor": "hero",
+      "metric": "spell_heal_count",
+      "spell": 25917,
+      "target": "hero",
+      "relative_to": "rank2_heals",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "label": "CONTROL: learn rank 3 (20929)",
+      "actor": "hero",
+      "spell": 20929
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "hero",
+      "spell": 20929
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 25911,
+      "target": "enemy",
+      "save_as": "rank3_hits"
+    },
+    {
+      "action": "cast",
+      "label": "Holy Shock rank 3 on the enemy",
+      "actor": "hero",
+      "spell": 20929,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: rank 3 hits with the rank 3 damage spell 25911",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 25911,
+      "target": "enemy",
+      "relative_to": "rank3_hits",
+      "min": 1
+    }
+  ]
+}

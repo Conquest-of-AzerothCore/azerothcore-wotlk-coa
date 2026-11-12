@@ -1,0 +1,141 @@
+{
+  "schema": 1,
+  "name": "Dispelling Unstable Affliction rank 2 (30124) backfires on the dispeller",
+  "contract": [
+    "These ranks exist only in the client's SpellRank.dbc. Under the stock spell_ranks chains they had no first rank, so the first-rank script that turns their dummy effect into the real one never ran and the cast did nothing.",
+    "Unstable Affliction 30124 (rank 2 of 30108) keeps its damage over time either way; its first-rank aura script is what makes a dispel backfire with 31117."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": 1170.2,
+    "y": -1716.6,
+    "z": 61.11,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "wl",
+      "name": "Rankwarlock",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "foe",
+      "name": "Rankdispel",
+      "race": 2,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "pvp",
+      "actor": "wl",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "foe",
+      "enabled": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the players can attack each other",
+      "actor": "wl",
+      "metric": "can_attack",
+      "target": "foe",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "30124 is rank 2 of 30108",
+      "actor": "wl",
+      "metric": "spell_rank",
+      "spell": 30124,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "30124 belongs to the 30108 chain",
+      "actor": "wl",
+      "metric": "first_rank_spell",
+      "spell": 30124,
+      "equals": 30108
+    },
+    {
+      "action": "learn",
+      "actor": "wl",
+      "spell": 30124
+    },
+    {
+      "action": "learn",
+      "actor": "foe",
+      "spell": 527
+    },
+    {
+      "action": "cast",
+      "actor": "wl",
+      "spell": 30124,
+      "target": "foe"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Unstable Affliction 30124 is on the dispeller",
+      "actor": "foe",
+      "metric": "aura",
+      "spell": 30124,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "wl",
+      "metric": "spell_damage_count",
+      "spell": 31117,
+      "target": "foe",
+      "save_as": "backfire"
+    },
+    {
+      "action": "cast",
+      "label": "The dispeller removes it with Dispel Magic",
+      "actor": "foe",
+      "spell": 527,
+      "target": "foe"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: dispelling Unstable Affliction 30124 backfires with 31117",
+      "actor": "wl",
+      "metric": "spell_damage_count",
+      "spell": 31117,
+      "target": "foe",
+      "relative_to": "backfire",
+      "min": 1
+    }
+  ]
+}

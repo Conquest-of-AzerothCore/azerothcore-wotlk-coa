@@ -1,0 +1,9 @@
+#ifndef AC_TRAINING_DUMMY_DEFINES_H
+#define AC_TRAINING_DUMMY_DEFINES_H
+
+enum TrainingDummyData
+{
+    DATA_HEALING_PRACTICE_ACTIVE = 1
+};
+
+#endif

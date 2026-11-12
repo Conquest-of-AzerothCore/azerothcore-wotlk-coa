@@ -9,6 +9,7 @@
   "steps": [
     { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
     { "action": "learn", "actor": "v", "spell": 803212 },
+    { "action": "learn", "actor": "v", "spell": 706940 },
     { "action": "learn", "actor": "v", "spell": 804980 },
     { "action": "assert", "label": "SETUP: no form is active yet", "actor": "v", "metric": "aura", "spell": 803212, "equals": 0 },
     { "action": "cast", "actor": "v", "spell": 803212 },

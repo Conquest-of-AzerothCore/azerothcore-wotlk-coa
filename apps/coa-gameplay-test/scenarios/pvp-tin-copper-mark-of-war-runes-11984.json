@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Tin and Copper Marks of War pay their Runes of Ascension (#11984)",
+  "contract": [
+    "Tin Mark of War 1303552 reads \"Awards 10 Runes of Ascension.\" and Copper Mark of War 1201001 reads \"Awards 100",
+    "Runes of Ascension.\" (spells 413113/413115). Their dummy spells pay nothing, so a right click did nothing.",
+    "Expected: each use spends exactly one mark and adds its runes (item 375250) to the Currency tab."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 25, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 2000},
+    {"action": "add_item", "actor": "hero", "item": 1303552, "count": 1},
+    {"action": "add_item", "actor": "hero", "item": 1201001, "count": 1},
+    {"action": "assert", "actor": "hero", "metric": "token_count", "item": 375250, "equals": 0},
+    {"action": "use_item", "actor": "hero", "item": 1303552, "spell": 413113},
+    {"action": "assert", "label": "the tin mark is spent", "actor": "hero", "metric": "item_count", "item": 1303552,
+     "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "10 runes reach the Currency tab", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 10, "within_ms": 2000},
+    {"action": "use_item", "actor": "hero", "item": 1201001, "spell": 413115},
+    {"action": "assert", "label": "the copper mark is spent", "actor": "hero", "metric": "item_count",
+     "item": 1201001, "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "the runes add up to 110", "actor": "hero", "metric": "token_count",
+     "item": 375250, "equals": 110, "within_ms": 2000}
+  ]
+}

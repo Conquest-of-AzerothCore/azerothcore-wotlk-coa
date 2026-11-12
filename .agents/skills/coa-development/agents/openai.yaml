@@ -1,0 +1,4 @@
+interface:
+  display_name: "CoA Development"
+  short_description: "Repository workflow: issues, batches, scenarios, PRs, CoA facts"
+  default_prompt: "Use $coa-development to work on this CoA repository task."

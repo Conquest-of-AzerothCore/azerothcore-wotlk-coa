@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "name": "Manastorm floor XP: a run with a max-level member grants no floor XP to its lower-level members",
+  "contract": [
+    "ManastormExperience::PrepareCompletion (modules/mod-manastorm-endless/src/ManastormExperience.cpp) queues the",
+    "repeatable RDF 258 quest XP for every run member below MaxPlayerLevel on each completed floor. On Rexxar a",
+    "level-60 player cleared a difficulty-2 run while a level-56 member collected that reward on 26 floors in about",
+    "12 minutes (run 149, 2026-11-11) and reached 60 without fighting. A run that holds a member at MaxPlayerLevel now",
+    "grants no floor XP to anyone. This realm's effective MaxPlayerLevel is 80, so the carrier is level 80.",
+    "In a dungeon every group member on the map shares kill XP regardless of distance, so the carried member holds",
+    "Servant's Errand (192), whose SPELL_AURA_MOD_XP_PCT -100 covers only the kill XP source; the floor reward is",
+    "quest XP and stays payable. Floor XP settles in the same update as the objective death, so XP is read right",
+    "after the kill, before the next floor's teleport can add exploration XP. Kill XP sharing is unchanged.",
+    "manastorm-floor-xp-without-max-level is the control: the same layout pays floor XP when no member is at",
+    "max level."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "carrier",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "security": 2
+    },
+    {
+      "id": "carried",
+      "race": 5,
+      "class": 23,
+      "level": 56,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "carried joins the carrier's group so both are run members",
+      "actor": "carrier",
+      "target": "carried"
+    },
+    {
+      "action": "command",
+      "actor": "carrier",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the carrier entered a private Manastorm instance",
+      "actor": "carrier",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the carried member was brought into the same run",
+      "actor": "carried",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the carried member starts the floor with no XP",
+      "actor": "carried",
+      "metric": "xp",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "Servant's Errand blocks only kill XP for the low-level member",
+      "actor": "carried",
+      "command": ".aura 192"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the low-level member holds Servant's Errand",
+      "actor": "carried",
+      "metric": "aura",
+      "spell": 192,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible to this lane",
+      "actor": "carrier",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Only the carrier goes to Taragaman",
+      "actor": "carrier",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the carrier left the entrance protection at the boss",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "carrier",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "The carried member received no floor XP when the objective kill completed the floor",
+      "actor": "carried",
+      "metric": "xp",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the objective kill completed the floor and the next floor restored entrance protection",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    }
+  ]
+}

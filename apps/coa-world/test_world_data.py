@@ -4,8 +4,10 @@ import gzip
 import hashlib
 import json
 from pathlib import Path
+import subprocess
 import tempfile
 import unittest
+from unittest import mock
 import zipfile
 
 from export_baseline import extract_tables
@@ -98,6 +100,19 @@ class WorldDataTests(unittest.TestCase):
         for name in ("acore_auth", "coa_characters", "world; DROP DATABASE x", "world`"):
             with self.subTest(name=name), self.assertRaises(ValueError):
                 MySQL("mysql", name)
+
+    def test_login_paths_are_disabled_only_when_the_client_supports_it(self):
+        for executable, help_text, expected in (
+                ("mysql-8.4", "  --no-login-paths    Don't read login paths from the login path file.\n", True),
+                ("mysql-8.0.46", "  --login-path=name   Read this path from the login file.\n", False)):
+            with self.subTest(executable=executable), mock.patch(
+                    "world_data.subprocess.run",
+                    return_value=subprocess.CompletedProcess([executable, "--help"], 0, stdout=help_text)):
+                self.assertEqual("--no-login-paths" in MySQL(executable, "coa_world").command, expected)
+
+    def test_unreadable_client_help_keeps_login_paths_disabled(self):
+        with mock.patch("world_data.subprocess.run", side_effect=FileNotFoundError):
+            self.assertIn("--no-login-paths", MySQL("missing-mysql", "coa_world").command)
 
     def test_native_hash_matches_platform_text_mode(self):
         crlf = b"UPDATE `example` SET `value`=1;\r\n"

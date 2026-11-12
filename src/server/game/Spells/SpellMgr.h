@@ -749,6 +749,9 @@ public:
     [[nodiscard]] uint8 GetSpellRank(uint32 spell_id) const;
     // not strict check returns provided spell if rank not avalible
     [[nodiscard]] uint32 GetSpellWithRank(uint32 spell_id, uint32 rank, bool strict = false) const;
+    /// The spell of relatedSpellId's rank in the chain of stockFirstRank, or of its twin when relatedSpellId is a twin:
+    /// twin chains keep their own rank numbers, which can differ from the stock chain's
+    [[nodiscard]] uint32 GetSpellWithRankFor(uint32 stockFirstRank, uint32 relatedSpellId, bool strict = false) const;
 
     // Spell Required table
     [[nodiscard]] Acore::IteratorPair<SpellRequiredMap::const_iterator>GetSpellsRequiredForSpellBounds(uint32 spell_id) const;
@@ -855,6 +858,7 @@ public:
     void UnloadSpellInfoChains();
     void LoadSpellTalentRanks();
     void LoadSpellRanks();
+    [[nodiscard]] std::vector<std::vector<uint32>> LoadClientSpellRankChains() const;
     /// rank chains a module adds after `spell_ranks`; a chain touching an already ranked spell is skipped
     using AddedSpellRanks = std::vector<std::vector<uint32>> (*)();
     void SetAddedSpellRanks(AddedSpellRanks ranks) { _addedSpellRanks = ranks; }

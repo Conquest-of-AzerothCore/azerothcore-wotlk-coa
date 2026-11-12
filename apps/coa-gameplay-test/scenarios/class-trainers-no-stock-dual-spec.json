@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Class trainers do not offer the stock Dual Talent Specialization",
+  "contract": [
+    "Ascension has no stock Dual Talent Specialization; specializations come from spec books and the specialization swap",
+    "spells. A class trainer's menu offers training and unlearning talents only: no \"I wish to know about Dual Talent",
+    "Specialization.\" and no 1000 gold purchase, at a level where stock AzerothCore would show them (40+, one spec)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8413.0,
+    "y": 545.0,
+    "z": 96.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "h",
+      "name": "Specprobe",
+      "race": 3,
+      "class": 3,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "ulfir",
+      "owner": "h",
+      "entry": 5516,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "h",
+      "target": "ulfir"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the trainer offers training first",
+      "actor": "h",
+      "metric": "gossip_option_text",
+      "index": 0,
+      "text": "I seek training in the ways of the Hunter.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: no Dual Talent Specialization option (second slot)",
+      "actor": "h",
+      "metric": "gossip_option_text",
+      "index": 1,
+      "text": "I wish to know about Dual Talent Specialization.",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: no Dual Talent Specialization option (third slot)",
+      "actor": "h",
+      "metric": "gossip_option_text",
+      "index": 2,
+      "text": "I wish to know about Dual Talent Specialization.",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: no Dual Talent Specialization option (fourth slot)",
+      "actor": "h",
+      "metric": "gossip_option_text",
+      "index": 3,
+      "text": "I wish to know about Dual Talent Specialization.",
+      "equals": 0
+    }
+  ]
+}

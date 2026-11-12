@@ -1,0 +1,238 @@
+{
+  "schema": 1,
+  "name": "Slam and Execute ranks that only SpellRank.dbc lists run their first-rank scripts",
+  "contract": [
+    "These ranks exist only in the client's SpellRank.dbc. Under the stock spell_ranks chains they had no first rank, so the first-rank script that turns their dummy effect into the real one never ran and the cast did nothing.",
+    "Slam 1466 and 1465 (ranks 2-3 of 1464) cast the Slam damage 50783; Execute 5309 (rank 2 of 5308) casts 20647 once."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "w",
+      "name": "Rankwarrior",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "w",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Rankwarrior"
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "w",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "w",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "1466 is rank 2 of 1464",
+      "actor": "w",
+      "metric": "spell_rank",
+      "spell": 1466,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "1466 belongs to the 1464 chain",
+      "actor": "w",
+      "metric": "first_rank_spell",
+      "spell": 1466,
+      "equals": 1464
+    },
+    {
+      "action": "assert",
+      "label": "1465 is rank 3 of 1464",
+      "actor": "w",
+      "metric": "spell_rank",
+      "spell": 1465,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "1465 belongs to the 1464 chain",
+      "actor": "w",
+      "metric": "first_rank_spell",
+      "spell": 1465,
+      "equals": 1464
+    },
+    {
+      "action": "assert",
+      "label": "5309 is rank 2 of 5308",
+      "actor": "w",
+      "metric": "spell_rank",
+      "spell": 5309,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "5309 belongs to the 5308 chain",
+      "actor": "w",
+      "metric": "first_rank_spell",
+      "spell": 5309,
+      "equals": 5308
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1466
+    },
+    {
+      "action": "set_power",
+      "actor": "w",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 50783,
+      "target": "enemy",
+      "save_as": "d1466"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Slam 1466",
+      "actor": "w",
+      "spell": 1466,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Slam 1466 produces 50783",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 50783,
+      "target": "enemy",
+      "relative_to": "d1466",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 1465
+    },
+    {
+      "action": "set_power",
+      "actor": "w",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 50783,
+      "target": "enemy",
+      "save_as": "d1465"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Slam 1465",
+      "actor": "w",
+      "spell": 1465,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Slam 1465 produces 50783",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 50783,
+      "target": "enemy",
+      "relative_to": "d1465",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "w",
+      "spell": 5309
+    },
+    {
+      "action": "set_health",
+      "actor": "enemy",
+      "value": 200000
+    },
+    {
+      "action": "set_power",
+      "actor": "w",
+      "power": 1,
+      "value": 300
+    },
+    {
+      "action": "snapshot",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 20647,
+      "target": "enemy",
+      "save_as": "d5309"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Execute 5309",
+      "actor": "w",
+      "spell": 5309,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Execute 5309 deals its damage exactly once (the chain and the old per-rank script row do not stack)",
+      "actor": "w",
+      "metric": "spell_damage_count",
+      "spell": 20647,
+      "target": "enemy",
+      "relative_to": "d5309",
+      "equals": 1
+    }
+  ]
+}

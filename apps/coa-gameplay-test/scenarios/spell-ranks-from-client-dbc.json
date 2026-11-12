@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Spell rank chains come from the client's SpellRank.dbc, with `spell_ranks` for chains it does not list",
+  "contract": [
+    "The server reads the client's SpellRank.dbc for spell rank chains. A chain it lists replaces the stock",
+    "`spell_ranks` chain: Holy Shock 20485 is rank 2 (damage 25915, healing 25917 rank 2), Slam 1466/1465 are ranks 2-3,",
+    "Greater Heal 2050 runs on through 2054 and 2060, and Ice Armor 7302 continues Frost Armor 168. Off-hand Plague",
+    "Strike starts at 66216, as the death knight script expects. A `spell_ranks` chain the client does not list",
+    "stays (Kidney Shot 8643 is rank 2 of 408), and a `spell_ranks` chain that extends a client chain keeps its extra",
+    "ranks (Chromatic Shard 567544 is rank 9 of 801292). Talent ranks still come from Talent.dbc."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 1, "class": 10, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Holy Shock 20485 is rank 2", "actor": "p", "metric": "spell_rank", "spell": 20485, "equals": 2 },
+    { "action": "assert", "label": "Holy Shock 20485 belongs to the 20473 chain", "actor": "p", "metric": "first_rank_spell", "spell": 20485, "equals": 20473 },
+    { "action": "assert", "label": "Holy Shock 20929 moves to rank 3", "actor": "p", "metric": "spell_rank", "spell": 20929, "equals": 3 },
+    { "action": "assert", "label": "Holy Shock damage 25915 is rank 2", "actor": "p", "metric": "spell_rank", "spell": 25915, "equals": 2 },
+    { "action": "assert", "label": "Holy Shock healing 25917 is rank 2", "actor": "p", "metric": "spell_rank", "spell": 25917, "equals": 2 },
+    { "action": "assert", "label": "Slam 1466 is rank 2", "actor": "p", "metric": "spell_rank", "spell": 1466, "equals": 2 },
+    { "action": "assert", "label": "Greater Heal 2054 continues the 2050 chain", "actor": "p", "metric": "first_rank_spell", "spell": 2054, "equals": 2050 },
+    { "action": "assert", "label": "Greater Heal 2060 is rank 8", "actor": "p", "metric": "spell_rank", "spell": 2060, "equals": 8 },
+    { "action": "assert", "label": "Ice Armor 7302 continues Frost Armor", "actor": "p", "metric": "first_rank_spell", "spell": 7302, "equals": 168 },
+    { "action": "assert", "label": "Off-hand Plague Strike 66988 starts at 66216", "actor": "p", "metric": "first_rank_spell", "spell": 66988, "equals": 66216 },
+    { "action": "assert", "label": "TABLE ONLY: Kidney Shot 8643 is rank 2 of 408", "actor": "p", "metric": "first_rank_spell", "spell": 8643, "equals": 408 },
+    { "action": "assert", "label": "TABLE ONLY: Kidney Shot 8643 rank", "actor": "p", "metric": "spell_rank", "spell": 8643, "equals": 2 },
+    { "action": "assert", "label": "TABLE EXTENDS CLIENT: Chromatic Shard 567544 is rank 9", "actor": "p", "metric": "spell_rank", "spell": 567544, "equals": 9 },
+    { "action": "assert", "label": "TABLE EXTENDS CLIENT: Chromatic Shard 567544 belongs to 801292", "actor": "p", "metric": "first_rank_spell", "spell": 567544, "equals": 801292 },
+    { "action": "assert", "label": "TALENT: Improved Heroic Strike rank 2 (12663) still comes from Talent.dbc", "actor": "p", "metric": "first_rank_spell", "spell": 12663, "equals": 12282 }
+  ]
+}

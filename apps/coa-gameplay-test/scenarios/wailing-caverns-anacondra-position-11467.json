@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: Lady Anacondra stands in the circle where the Disciple of Naralex stops (#11467)",
+  "contract": [
+    "On Ascension Lady Anacondra (3671) stands in the circle where the Disciple of Naralex pauses at his waypoint 12",
+    "(-54.1 274.7 -92.8) and the three cobras attack him. Her one spawn serves every difficulty."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "player", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "actor": "player", "value": 1 },
+    { "action": "teleport", "actor": "player", "map": 43, "x": -60.0, "y": 268.0, "z": -92.8, "o": 0.0 },
+    { "action": "assert", "label": "CONTROL: player is in Wailing Caverns", "actor": "player", "metric": "map_id", "equals": 43,
+      "within_ms": 15000 },
+    { "action": "assert", "label": "Lady Anacondra exists once nearby", "actor": "player", "metric": "nearby_creature_count",
+      "entry": 3671, "equals": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "She stands in the Disciple's circle, 9 yards from the player", "actor": "player",
+      "metric": "nearest_creature_distance", "entry": 3671, "min": 7, "max": 11 },
+    { "action": "teleport", "actor": "player", "map": 43, "x": -53.5451, "y": 274.873, "z": -92.8442, "o": 0.0 },
+    { "action": "assert", "label": "Standing on her new spot, the player finds her right there", "actor": "player",
+      "metric": "nearest_creature_distance", "entry": 3671, "min": 0, "max": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: her spawn 27366 is loaded at the circle spot, height included",
+      "actor": "player", "metric": "spawn_distance", "guid": 27366, "spawn_type": "creature",
+      "x": -53.5451, "y": 274.873, "z": -92.8442, "max": 0.5 }
+  ]
+}

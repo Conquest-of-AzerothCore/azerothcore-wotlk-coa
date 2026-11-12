@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Warmth applies its health buff to the ally a direct heal lands on (#9162)",
+  "contract": "#9162 reports that Warmth 704563 stopped applying. Warmth is a passive self-aura (Spell.dbc effect 0: APPLY_AURA, aura 42 SPELL_AURA_PROC_TRIGGER_SPELL, TARGET_UNIT_CASTER) whose tooltip reads 'Direct healing now increases the target's health by ${$704564m1+$704564ppl1} for $704564d.' The scripted proc in AscensionSunClericEvents.cpp gates on `healing && direct` and casts 704564 on the healed target. 704564 is APPLY_AURA aura 34 SPELL_AURA_MOD_INCREASE_HEALTH with TARGET_UNIT_TARGET_ALLY, so the buff must land on the ally the heal was aimed at, not on the Sun Cleric. The fixture heals a damaged ally with a direct heal and asserts the 704564 aura appears on that ally. A periodic-only heal must not trigger it, so the discriminating step also checks that a heal-over-time tick alone leaves no 704564 behind.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60 },
+    { "id": "ally", "race": 1, "class": 1, "level": 60, "allow_regeneration": false }
+  ],
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "group", "actor": "cleric", "target": "ally" },
+    { "action": "learn", "actor": "cleric", "spell": 704563 },
+    { "action": "learn", "actor": "cleric", "spell": 500143 },
+    {
+      "action": "assert", "label": "SETUP: the Warmth passive is active on the Sun Cleric", "actor": "cleric",
+      "metric": "aura", "spell": 704563, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: no Warmth health buff is on the ally before any heal", "actor": "ally",
+      "metric": "aura", "spell": 704564, "equals": 0
+    },
+    { "action": "set_health", "label": "Leave the ally room for the heal", "actor": "ally", "value": 1000 },
+    { "action": "cast", "actor": "cleric", "spell": 500143, "target": "ally" },
+    {
+      "action": "assert", "label": "SETUP: the direct heal lands on the ally", "actor": "cleric",
+      "metric": "spell_heal_count", "spell": 500143, "target": "ally", "min": 1, "within_ms": 6000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Warmth 704564 lands on the healed ally", "actor": "ally",
+      "metric": "aura", "spell": 704564, "caster": "cleric", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Warmth health buff is not on the Sun Cleric", "actor": "cleric",
+      "metric": "aura", "spell": 704564, "equals": 0
+    }
+  ]
+}

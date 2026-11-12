@@ -1,0 +1,12 @@
+{
+  "schema": 1,
+  "name": "Pale Reach: Kerebor Guards look like Blackrock orcs, not dwarves (#10449)",
+  "contract": "Kerebor Fort in the Pale Reach is held by the Blackrock (Blackrock Champion Kurgan 164267, Karegor Grimfang 164266, Blackrock Orc 164253), and its Kerebor Guards (164271, faction 40) are the orcs players fight there. Their model row used display 1598, a dwarf. Expected: the Kerebor Guard template shows display 6029, the Blackrock Sentry orc of stock Blackrock Sentry 4065.",
+  "timeout_ms": 30000,
+  "players": [ { "id": "p", "race": 1, "class": 12, "level": 45 } ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "SETUP: the stock Blackrock Sentry uses display 6029", "actor": "p", "metric": "creature_model_display", "entry": 4065, "equals": 6029 },
+    { "action": "assert", "label": "DISCRIMINATING: the Kerebor Guard uses the Blackrock Sentry orc", "actor": "p", "metric": "creature_model_display", "entry": 164271, "equals": 6029 }
+  ]
+}

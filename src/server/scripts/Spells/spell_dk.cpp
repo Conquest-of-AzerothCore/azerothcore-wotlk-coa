@@ -2885,7 +2885,7 @@ class spell_dk_threat_of_thassarian : public AuraScript
         if (!target)
             return;
 
-        spellId = sSpellMgr->GetSpellWithRank(spellId, spellInfo->GetRank());
+        spellId = sSpellMgr->GetSpellWithRankFor(spellId, spellInfo->Id);
         caster->CastSpell(target, spellId, true, nullptr, aurEff);
     }
 

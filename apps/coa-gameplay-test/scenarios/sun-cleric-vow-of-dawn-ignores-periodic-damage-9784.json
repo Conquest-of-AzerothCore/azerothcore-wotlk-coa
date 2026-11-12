@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Vow of Dawn ignores periodic damage from Hammer of Kings (#9784, #9787)",
+  "contract": [
+    "Vow of Dawn (803491) reads 'Direct ability damage or healing generates 1 Solar Power and bounces",
+    "to $803492s1 additional nearby targets with less value per target struck.' Hammer of Kings (804751)",
+    "applies SPELL_AURA_PERIODIC_TRIGGER_SPELL (aura 23, amplitude 3000) which casts 804752 -- a plain",
+    "SCHOOL_DAMAGE -- on every tick. AuraEffect::HandlePeriodicTriggerSpellAuraTick casts that trigger",
+    "with TRIGGERED_FULL_MASK, so the resulting proc arrives with PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG",
+    "and no PROC_FLAG_DONE_PERIODIC. Before the fix AscensionSunClericEvents::Check() therefore computed",
+    "direct == true for those ticks and the Vow fired: the cleric gained Solar Power per tick and the tick",
+    "bounced 803493 onto nearby enemies, contradicting the tooltip. Check() now also treats a spell whose",
+    "GetTriggeredByAuraSpellInfo() carries a periodic-trigger aura as periodic, except for Sunslam's own",
+    "periodic weapon-damage tick which #9148 requires to fulfil the Vow. With Vow of Dawn active and only",
+    "Hammer of Kings ticking, Solar Power must not rise and no 803493 may land."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 27, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "target1", "owner": "caster", "entry": 36, "faction": 14, "level": 80, "health": 100000, "distance": 5 },
+    { "id": "splash_a", "owner": "caster", "entry": 36, "faction": 14, "level": 80, "health": 100000, "distance": 7 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "caster", "spell": 803491 },
+    { "action": "learn", "actor": "caster", "spell": 804751 },
+    { "action": "cast", "actor": "caster", "spell": 803491 },
+    { "action": "assert", "label": "Vow of Dawn is active on the caster", "actor": "caster", "metric": "aura", "spell": 803491, "caster": "caster", "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 1200, "label": "Vow of Dawn and Hammer of Kings share StartRecoveryCategory 133 (1000 ms); let that GCD clear" },
+    { "action": "snapshot", "label": "Record Solar Power before Hammer of Kings starts ticking", "actor": "caster", "metric": "aura_stacks", "spell": 500149, "save_as": "solar_before" },
+    { "action": "cast", "actor": "caster", "spell": 804751 },
+    { "action": "wait", "ms": 14000, "label": "Hammer of Kings lasts 12 s and ticks every 3 s; wait past the whole duration so every tick resolves" },
+    { "action": "assert", "label": "Hammer of Kings periodic ticks deal damage to the nearby enemy", "actor": "caster", "metric": "spell_damage_count", "spell": 804752, "target": "target1", "min": 2 },
+    { "action": "assert", "label": "Periodic damage must not bounce Vow of Dawn onto nearby enemies", "actor": "caster", "metric": "spell_damage_count", "spell": 803493, "target": "splash_a", "equals": 0 },
+    { "action": "assert", "label": "Periodic damage must not bounce Vow of Dawn onto the original target", "actor": "caster", "metric": "spell_damage_count", "spell": 803493, "target": "target1", "equals": 0 },
+    { "action": "assert", "label": "Periodic damage must not generate Solar Power", "actor": "caster", "metric": "aura_stacks", "spell": 500149, "relative_to": "solar_before", "equals": 0 }
+  ]
+}

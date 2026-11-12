@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Crossroads: the Weapon Crate no longer stands inside Thork (#10879)",
+  "contract": "#10879 reported the Weapon Crate (gameobject guid 13310, entry 3661) at Thork's feet with Thork partly inside it. #7212 had moved Thork (creature guid 14344) to his QuestSuperTrack point (-481.527, -2594.870, 103.450), 0.6 yd from the crate, which kept its stock position (-481.966, -2595.26, 103.638). The crate now stands on Thork's former spot (-473.202, -2595.7, 103.806) on the same tower floor, at least 3 yd from Thork, on the ground and clear of walls. Thork keeps his QuestSuperTrack point.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -476.0,
+    "y": -2595.5,
+    "z": 104.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Thork keeps his QuestSuperTrack point",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 14344,
+      "spawn_type": "creature",
+      "x": -481.527,
+      "y": -2594.870,
+      "z": 103.450,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Weapon Crate stands at least 3 yd from Thork (was 0.6 yd)",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 13310,
+      "spawn_type": "gameobject",
+      "x": -481.527,
+      "y": -2594.870,
+      "z": 103.450,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "The Weapon Crate stands on the tower floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 13310,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "The Weapon Crate is clear of the tower walls",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 1,
+      "guid": 13310,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

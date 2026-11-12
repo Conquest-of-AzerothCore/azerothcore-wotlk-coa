@@ -1,0 +1,582 @@
+{
+  "schema": 1,
+  "name": "Warcraft Reborn: Reborn Slam, Charge and Holy Shock ranks keep their own rank's results",
+  "contract": [
+    "Reborn chains (1100000 + the stock id) carry no Ascension-inserted ranks, so rank N of a Reborn chain is not rank N of the stock chain once SpellRank.dbc inserts a stock rank. Scripts map the rank inside the twin chain (SpellMgr::GetSpellWithRankFor): Reborn Holy Shock 1120929/1120930 cast 1125911/1125902 and heal with 1125913/1125903, not the stock 25911/25902 or the inserted stock rank 25915. Reborn Slam 1101465-1101467 and 1108820 cast 1150783; Reborn Charge 1106178 and 1111578 generate rage."
+  ],
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rw",
+      "name": "Rebornwar",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "c1",
+      "name": "Rebornchrg",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "c2",
+      "name": "Reborncharg",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rp",
+      "name": "Rebornpal",
+      "race": 1,
+      "class": 2,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "rw",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 3
+    },
+    {
+      "id": "far_c1",
+      "owner": "c1",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 15
+    },
+    {
+      "id": "far_c2",
+      "owner": "c2",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 15
+    },
+    {
+      "id": "enemy_rp",
+      "owner": "rp",
+      "entry": 28168,
+      "level": 60,
+      "health": 2000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and spawns settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "1101465 is rank 2 of 1101464",
+      "actor": "rw",
+      "metric": "spell_rank",
+      "spell": 1101465,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "1101465 belongs to the 1101464 chain",
+      "actor": "rw",
+      "metric": "first_rank_spell",
+      "spell": 1101465,
+      "equals": 1101464
+    },
+    {
+      "action": "assert",
+      "label": "1108820 is rank 5 of 1101464",
+      "actor": "rw",
+      "metric": "spell_rank",
+      "spell": 1108820,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "1108820 belongs to the 1101464 chain",
+      "actor": "rw",
+      "metric": "first_rank_spell",
+      "spell": 1108820,
+      "equals": 1101464
+    },
+    {
+      "action": "assert",
+      "label": "1106178 is rank 2 of 1100100",
+      "actor": "rw",
+      "metric": "spell_rank",
+      "spell": 1106178,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "1106178 belongs to the 1100100 chain",
+      "actor": "rw",
+      "metric": "first_rank_spell",
+      "spell": 1106178,
+      "equals": 1100100
+    },
+    {
+      "action": "assert",
+      "label": "1120929 is rank 2 of 1120473",
+      "actor": "rw",
+      "metric": "spell_rank",
+      "spell": 1120929,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "1120929 belongs to the 1120473 chain",
+      "actor": "rw",
+      "metric": "first_rank_spell",
+      "spell": 1120929,
+      "equals": 1120473
+    },
+    {
+      "action": "assert",
+      "label": "1120930 is rank 3 of 1120473",
+      "actor": "rw",
+      "metric": "spell_rank",
+      "spell": 1120930,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "1120930 belongs to the 1120473 chain",
+      "actor": "rw",
+      "metric": "first_rank_spell",
+      "spell": 1120930,
+      "equals": 1120473
+    },
+    {
+      "action": "learn",
+      "actor": "rw",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "rw",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "rw",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "rw",
+      "spell": 1101465
+    },
+    {
+      "action": "set_power",
+      "actor": "rw",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "save_as": "d1101465"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Slam 1101465",
+      "actor": "rw",
+      "spell": 1101465,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Slam 1101465 produces 1150783",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "relative_to": "d1101465",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "rw",
+      "spell": 1101466
+    },
+    {
+      "action": "set_power",
+      "actor": "rw",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "save_as": "d1101466"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Slam 1101466",
+      "actor": "rw",
+      "spell": 1101466,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Slam 1101466 produces 1150783",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "relative_to": "d1101466",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "rw",
+      "spell": 1101467
+    },
+    {
+      "action": "set_power",
+      "actor": "rw",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "save_as": "d1101467"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Slam 1101467",
+      "actor": "rw",
+      "spell": 1101467,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Slam 1101467 produces 1150783",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "relative_to": "d1101467",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "rw",
+      "spell": 1108820
+    },
+    {
+      "action": "set_power",
+      "actor": "rw",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "save_as": "d1108820"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Slam 1108820",
+      "actor": "rw",
+      "spell": 1108820,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Slam 1108820 produces 1150783",
+      "actor": "rw",
+      "metric": "spell_damage_count",
+      "spell": 1150783,
+      "target": "enemy",
+      "relative_to": "d1108820",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "c1",
+      "spell": 1106178
+    },
+    {
+      "action": "set_power",
+      "actor": "c1",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "label": "Reborn Charge 1106178",
+      "actor": "c1",
+      "spell": 1106178,
+      "target": "far_c1"
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Charge 1106178 generates rage",
+      "actor": "c1",
+      "metric": "power",
+      "power": 1,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "c2",
+      "spell": 1111578
+    },
+    {
+      "action": "set_power",
+      "actor": "c2",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "label": "Reborn Charge 1111578",
+      "actor": "c2",
+      "spell": 1111578,
+      "target": "far_c2"
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Charge 1111578 generates rage",
+      "actor": "c2",
+      "metric": "power",
+      "power": 1,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rp",
+      "spell": 1120929
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rp",
+      "spell": 1120929
+    },
+    {
+      "action": "snapshot",
+      "actor": "rp",
+      "metric": "spell_damage_count",
+      "spell": 1125911,
+      "target": "enemy_rp",
+      "save_as": "d1120929"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Holy Shock 1120929 on the enemy",
+      "actor": "rp",
+      "spell": 1120929,
+      "target": "enemy_rp"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Holy Shock 1120929 on the enemy produces 1125911",
+      "actor": "rp",
+      "metric": "spell_damage_count",
+      "spell": 1125911,
+      "target": "enemy_rp",
+      "relative_to": "d1120929",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Reborn Holy Shock 1120929 does not cast the stock damage rank",
+      "actor": "rp",
+      "metric": "spell_damage_count",
+      "spell": 25911,
+      "target": "enemy_rp",
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rp",
+      "spell": 1120929
+    },
+    {
+      "action": "set_health",
+      "actor": "rp",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rp",
+      "metric": "spell_heal_count",
+      "spell": 1125913,
+      "target": "rp",
+      "save_as": "h1120929"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Holy Shock 1120929 on the paladin itself",
+      "actor": "rp",
+      "spell": 1120929,
+      "target": "rp"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Holy Shock 1120929 on the paladin itself produces 1125913",
+      "actor": "rp",
+      "metric": "spell_heal_count",
+      "spell": 1125913,
+      "target": "rp",
+      "relative_to": "h1120929",
+      "min": 1
+    },
+    {
+      "action": "learn",
+      "actor": "rp",
+      "spell": 1120930
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rp",
+      "spell": 1120930
+    },
+    {
+      "action": "snapshot",
+      "actor": "rp",
+      "metric": "spell_damage_count",
+      "spell": 1125902,
+      "target": "enemy_rp",
+      "save_as": "d1120930"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Holy Shock 1120930 on the enemy",
+      "actor": "rp",
+      "spell": 1120930,
+      "target": "enemy_rp"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Holy Shock 1120930 on the enemy produces 1125902",
+      "actor": "rp",
+      "metric": "spell_damage_count",
+      "spell": 1125902,
+      "target": "enemy_rp",
+      "relative_to": "d1120930",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "Reborn Holy Shock 1120930 does not cast the stock damage rank",
+      "actor": "rp",
+      "metric": "spell_damage_count",
+      "spell": 25902,
+      "target": "enemy_rp",
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rp",
+      "spell": 1120930
+    },
+    {
+      "action": "set_health",
+      "actor": "rp",
+      "value": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rp",
+      "metric": "spell_heal_count",
+      "spell": 1125903,
+      "target": "rp",
+      "save_as": "h1120930"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Reborn Holy Shock 1120930 on the paladin itself",
+      "actor": "rp",
+      "spell": 1120930,
+      "target": "rp"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Reborn Holy Shock 1120930 on the paladin itself produces 1125903",
+      "actor": "rp",
+      "metric": "spell_heal_count",
+      "spell": 1125903,
+      "target": "rp",
+      "relative_to": "h1120930",
+      "min": 1
+    }
+  ]
+}

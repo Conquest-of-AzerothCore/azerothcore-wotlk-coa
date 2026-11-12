@@ -7,7 +7,6 @@
 #include "Random.h"
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
-#include "AscensionClientLua.h"
 #include "AscensionPersonalBank.h"
 #include "AscensionHighRisk.h"
 #include "LocalLevelScaling.h"
@@ -4185,11 +4184,6 @@ void Addmod_coa_challengesScripts()
     AscensionPersonalBank::RegisterAccessGuard(&CoAChallenges::ChallengeAllowsBankAccess);
     HighRisk::RegisterLootGuard(&CoAChallenges::ChallengeAllowsHighRiskLoot);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
-    RegisterAscensionChallengeStateSync([](Player* player)
-    {
-        CoAChallenges::SendActiveList(player);
-        CoAChallenges::SendCriteriaState(player);
-    });
     LocalLevelScaling::ChallengeBlocksOwner.store(&CoAChallenges::LevelScalingBlocks, std::memory_order_relaxed);
     new CoAChallenges::CoAChallengesPlayer();
     new CoAChallenges::CoAChallengesWorld();

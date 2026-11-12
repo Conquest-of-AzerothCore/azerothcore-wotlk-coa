@@ -142,8 +142,17 @@ void LoginDatabaseConnection::DoPrepareStatements()
         "WITH RECURSIVE ancestors AS (SELECT id, recruiter FROM account WHERE id = ? "
         "UNION DISTINCT SELECT a.id, a.recruiter FROM account a JOIN ancestors p ON a.id = p.recruiter) "
         "UPDATE account recruit JOIN (SELECT COUNT(*) AS blocked FROM ancestors WHERE id = ?) ancestry "
-        "SET recruit.recruiter = ? WHERE recruit.id = ? AND recruit.recruiter = 0 AND ancestry.blocked = 0",
+        "JOIN (SELECT COUNT(*) AS used FROM raf_accounts r JOIN account a ON a.id = r.account_id "
+        "WHERE a.recruiter <> 0 AND r.shared_address = ?) shared "
+        "SET recruit.recruiter = ? WHERE recruit.id = ? AND recruit.recruiter = 0 AND ancestry.blocked = 0 "
+        "AND (? IS NULL OR shared.used < ?)",
         CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_INS_RAF_LINKED_ACCOUNT,
+        "INSERT IGNORE INTO raf_accounts (account_id, started_at, shared_address) "
+        "SELECT id, UNIX_TIMESTAMP(), ? FROM account WHERE id = ? AND recruiter = ?", CONNECTION_ASYNC);
+    PrepareStatement(LOGIN_SEL_RAF_SHARED_ADDRESS_LINKS,
+        "SELECT COUNT(*) FROM raf_accounts r JOIN account a ON a.id = r.account_id "
+        "WHERE a.recruiter <> 0 AND r.shared_address = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_RAF_STATUS, "SELECT recruiter FROM account WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(LOGIN_SEL_ACCOUNT_RECRUITER, "SELECT 1 FROM account WHERE recruiter = ?", CONNECTION_SYNCH);
     PrepareStatement(LOGIN_SEL_BANS, "SELECT 1 FROM account_banned WHERE id = ? AND active = 1 UNION SELECT 1 FROM ip_banned WHERE ip = ?", CONNECTION_SYNCH);

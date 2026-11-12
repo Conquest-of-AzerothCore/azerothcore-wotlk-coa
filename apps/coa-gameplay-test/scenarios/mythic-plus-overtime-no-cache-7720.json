@@ -3,8 +3,9 @@
   "name": "Mythic+ run out of time gives no cache (#7720)",
   "contract": [
     "#7720: a keystone run finished after its time limit still paid a Mythical Cache. A run out of time now pays",
-    "neither a cache nor Mythic Coins. Scarlet Monastery - Armory (LFG 2853, limit 1620 s) needs Herod and 80",
-    "forces; the run is set to 1700 s elapsed before it is finished, so the +1 completes out of time."
+    "neither a cache nor Mythic Coins, and the key drops one level (#11755). Scarlet Monastery - Armory (LFG 2853,",
+    "limit 1620 s) needs Herod and 80 forces; the run is set to 1700 s elapsed before it is finished, so the +2",
+    "completes out of time."
   ],
   "timeout_ms": 180000,
   "location": {
@@ -56,13 +57,13 @@
     {
       "action": "add_item",
       "actor": "hero",
-      "item": 1233152,
+      "item": 1233263,
       "count": 1
     },
     {
       "action": "use_item",
       "actor": "hero",
-      "item": 1233152,
+      "item": 1233263,
       "spell": 161
     },
     {
@@ -604,6 +605,22 @@
       "actor": "hero",
       "metric": "item_count",
       "item": 1414500,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: out of time the key drops to +1",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "keystone drops to level 1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the +2 key is gone",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1233263,
       "equals": 0
     }
   ]

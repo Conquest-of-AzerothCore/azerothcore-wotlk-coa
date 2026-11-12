@@ -376,6 +376,7 @@ void AddSC_AscensionChronomancerMovement();
 void AddSC_AscensionAdventurerCache();
 void AddSC_AscensionBankVoucher();
 void AddSC_AscensionRunePouches();
+void AddSC_AscensionGoldSatchels();
 void AddSC_AscensionUpgradeKits();
 void AddSC_AscensionProfessionRanks();
 void AddSC_AscensionPrestigiousCache();
@@ -384,6 +385,7 @@ void AddSC_AscensionCallboardContracts();
 void AddSC_AscensionQuestMarkers();
 void AddSC_AscensionFireLordCache();
 void AddSC_AscensionTierTokenVendor();
+void AddSC_AscensionWarcraftRebornScrollShops();
 void AddSC_CoALevelBoostNpc();
 void AddSC_AscensionFeatherOfAncients();
 void AddSC_AscensionVultureCultQuests();
@@ -452,6 +454,7 @@ void AddSC_AscensionLfgObjective();
 void AddSC_AscensionBushcraft();
 void AddSC_AscensionVoidPortal();
 void AddSC_AscensionWoollyPride();
+void AddSC_AscensionIdleGaze();
 
 void AddSC_XPHotspots();
 
@@ -681,6 +684,7 @@ void AddCoAScripts()
     AddSC_AscensionAdventurerCache();
     AddSC_AscensionBankVoucher();
     AddSC_AscensionRunePouches();
+    AddSC_AscensionGoldSatchels();
     AddSC_AscensionUpgradeKits();
     AddSC_AscensionProfessionRanks();
     AddSC_AscensionPrestigiousCache();
@@ -689,6 +693,7 @@ void AddCoAScripts()
     AddSC_AscensionQuestMarkers();
     AddSC_AscensionFireLordCache();
     AddSC_AscensionTierTokenVendor();
+    AddSC_AscensionWarcraftRebornScrollShops();
     AddSC_CoALevelBoostNpc();
     AddSC_AscensionFeatherOfAncients();
     AddSC_AscensionVultureCultQuests();
@@ -906,4 +911,5 @@ void AddCoAScripts()
     AddSC_AscensionBushcraft();
     AddSC_AscensionVoidPortal();
     AddSC_AscensionWoollyPride();
+    AddSC_AscensionIdleGaze();
 }
