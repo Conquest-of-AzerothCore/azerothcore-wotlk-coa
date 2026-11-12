@@ -15,6 +15,7 @@ constexpr std::uint32_t MapTempleOfAhnQiraj = 531;
 constexpr std::uint32_t MapNaxxramas = 533;
 constexpr std::uint32_t MapSetis = 880;
 constexpr std::uint32_t MapKorrimSnowgrave = 889;
+constexpr std::uint32_t MapAtalzul = 890;
 
 constexpr std::uint32_t StageHeroicDungeons = 1;
 constexpr std::uint32_t StageMythicDungeons = 2;
@@ -35,11 +36,12 @@ struct RaidStage
     std::uint32_t stage;
 };
 
-constexpr std::array<RaidStage, 8> RaidStages = {{
+constexpr std::array<RaidStage, 9> RaidStages = {{
     { MapZulGurub, StageZulGurub },
     { MapSetis, StageZulGurub },
     { MapMoltenCore, StageMoltenCore },
     { MapKorrimSnowgrave, StageMoltenCore },
+    { MapAtalzul, StageMoltenCore },
     { MapOnyxiasLair, StageOnyxiasLair },
     { MapBlackwingLair, StageBlackwingLair },
     { MapRuinsOfAhnQiraj, StageAhnQiraj },
