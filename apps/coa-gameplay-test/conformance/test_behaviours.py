@@ -742,7 +742,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 323)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 335)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -7876,6 +7876,78 @@ class AllyCastTargetTests(unittest.TestCase):
             cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
             self.assertLess(group, cast)
             self.assertEqual(steps[cast]['target'], ALLY)
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class MountBlockScenarioTests(unittest.TestCase):
+    BRAND = 300513
+    MOUNT = 458
+
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, class_entry(self.BRAND, 'mount_block'))
+        self.steps = run.validate(self.scenario)['steps']
+
+    def test_the_mount_is_refused_under_the_brand_allowed_without_it_and_lost_when_it_lands(self):
+        self.assertEqual([(e.label, e.check, e.displayed) for e in self.expectations],
+                         [(f'{self.BRAND} mount_block {self.MOUNT} {moment}', BEHAVIOUR_CAST_CONDITION, code)
+                          for moment, code in (('blocked', '22'), ('unmounted', '0'), ('allowed', '0'),
+                                               ('mounted', '1'), ('dismounted', '0'))])
+
+    def test_the_brand_is_set_by_the_caster_outdoors_around_the_two_mount_casts(self):
+        outdoors = first_index(self.steps, action='teleport')
+        brands = [index for index, step in enumerate(self.steps)
+                  if step['action'] == 'set_aura' and step['spell'] == self.BRAND]
+        casts = [index for index, step in enumerate(self.steps)
+                 if step['action'] == 'cast' and step['spell'] == self.MOUNT]
+        self.assertEqual([self.steps[index]['stacks'] for index in brands], [1, 0, 1])
+        self.assertTrue(all('caster' not in self.steps[index] for index in brands))
+        self.assertLess(outdoors, brands[0])
+        self.assertLess(brands[0], casts[0])
+        self.assertLess(casts[0], brands[1])
+        self.assertLess(brands[1], casts[1])
+        self.assertLess(first_index(self.steps, label=f'{self.BRAND} mount_block {self.MOUNT} mounted'), brands[2])
+
+    def test_a_mount_that_goes_through_the_brand_or_survives_it_alerts(self):
+        by_moment = {expectation.label.rsplit(' ', 1)[1]: expectation for expectation in self.expectations}
+        for moment, value, status in (('blocked', 0.0, 'alert'), ('blocked', 22.0, 'ok'), ('unmounted', 1.0, 'alert'),
+                                      ('allowed', 22.0, 'alert'), ('mounted', 0.0, 'alert'),
+                                      ('dismounted', 1.0, 'alert'), ('dismounted', 0.0, 'ok')):
+            expectation = by_moment[moment]
+            with self.subTest(moment=moment, value=value):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: value}),
+                                          expectation)
+                self.assertEqual(verdict.status, status)
+
+    def test_a_mount_spell_without_a_mounted_aura_is_refused(self):
+        entry = {**class_entry(self.BRAND, 'mount_block'), 'mount_spell': self.BRAND}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
+    FOCUSED = 300524
+    BLADE_OF_FAITH = 803880
+
+    def test_a_periodic_observed_spell_waits_for_its_own_ticks_after_each_cast(self):
+        entry = variant_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith')
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual({steps[index]['spell'] for index in casts}, {self.BLADE_OF_FAITH})
+        self.assertEqual(len(casts), 2 * entry['trials'])
+        for index in casts:
+            wait = next(step for step in steps[index + 1:] if step['action'] == 'wait')
+            self.assertEqual((wait['ms'], wait['label'].endswith('hits')), (entry['cast_wait_ms'], True))
+        self.assertIn(f'each followed by {entry["cast_wait_ms"]} ms for its periodic hits', scenario['contract'])
+        self.assertEqual(expectation.label, f'{self.FOCUSED} behaviour_hit_ratio blade_of_faith')
+
+    def test_a_cast_wait_beside_swings_is_still_refused(self):
+        entry = {**variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing'), 'cast_wait_ms': 500}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
 
 
 if __name__ == '__main__':

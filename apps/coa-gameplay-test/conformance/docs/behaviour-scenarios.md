@@ -839,6 +839,8 @@ spell at the dummy (`critical` filters hits) at the start of each arm and after 
 its own damage and hit count. `target_health_pct` holds the dummy at a health percent, `force_crit` forces melee or
 spell crits, `learn` adds spells to learn, `label_suffix` names the label `<spell> behaviour_hit_ratio <suffix>`.
 The trials must fit one scenario (`model.trial_limit`); a larger count is refused when the scenario is generated.
+`cast_wait_ms` without a `cast_spell` (ADR 0203) waits that long after each cast of `observe_spell` itself, for an
+observed spell whose hits are its own periodic ticks (Blade of Faith 803880, every 3000 ms: 3500 ms per trial).
 
 The judge (`compare.behaviour_hit_ratio_verdict`, rules in `bonus.py`, ADR 0125) computes each arm's mean per hit
 and the variance of that mean from the trials (`bonus.per_event_sample`), the bonus `(treatment / control - 1) x

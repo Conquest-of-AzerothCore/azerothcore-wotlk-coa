@@ -5055,7 +5055,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                          f'target health')
     if swinging and spec.swing_hand and spec.off_hand_item is None:
         raise ValueError(f'{spec.spell} hit_ratio reads off-hand swings without an off_hand_item')
-    if (spec.cast_spell is None and spec.cast_wait_ms) or (spec.cast_spell is not None and swinging) or \
+    if (spec.cast_spell is None and spec.cast_wait_ms and swinging) or (spec.cast_spell is not None and swinging) or \
             spec.cast_spell == spec.observe_spell or spec.cast_wait_ms < 0:
         raise ValueError(f'{spec.spell} hit_ratio casts {spec.cast_spell} to read the hits of another spell, with a '
                          f'non-negative cast_wait_ms and no swings')
@@ -5097,7 +5097,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                      f'{swing_ms} ms at {spec.target}' if swinging
                      else f'{spec.trials} casts of {spec.cast_spell}, each followed by {spec.cast_wait_ms} ms for the '
                           f'hits of {spec.observe_spell}, by {spec.caster} at {spec.target}' if spec.cast_spell
-                     else f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target}')
+                     else f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target}'
+                          + (f', each followed by {spec.cast_wait_ms} ms for its periodic hits' if spec.cast_wait_ms
+                             else ''))
     wielded = f', off-hand item {spec.off_hand_item} equipped' if spec.off_hand_item is not None else ''
     scenario = {
         'schema': 1,
