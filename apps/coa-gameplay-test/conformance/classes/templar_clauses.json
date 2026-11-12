@@ -384,7 +384,8 @@
       "300522 effect_value e0",
       "300522 e0 spell_modifier 704576",
       "300522 e0 spell_modifier 706426",
-      "300522 e0 spell_modifier 707896"
+      "300522 e0 spell_modifier 707896",
+      "300522 behaviour_expiry"
     ],
     "kind": "claim"
   },

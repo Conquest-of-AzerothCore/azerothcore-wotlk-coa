@@ -1846,6 +1846,13 @@
   ],
   "behaviours": [
     {
+      "spell": 300522, "name": "Deep Meditation", "kind": "cast_applies_aura",
+      "quote": "Increases the duration of your Oath Chain by $/1000;s1 sec.", "expected_ms": 20000,
+      "applied_aura": 704576, "target": "caster", "cast_spell": 804906, "cast_target": "dummy",
+      "control": {"expected_ms": 15000},
+      "observe_source": "A Condemn 804906 cast grants an Oath through AscensionTemplar::GrantOath, which casts Oath Chain 704576 on the caster at GetMaxDuration() (as Oath Flow 705283's entry). 704576 DurationIndex 8 (15000 ms). Deep Meditation 300522 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 1 (SPELLMOD_DURATION), EffectBasePoints[0] 4999 + EffectDieSides[0] 1 = +5000 ms, mask-matched to 704576 (spell_modifier ok). Control arm: Condemn cast before the learn, the chain ending at 15000 ms; with arm: Condemn cast again after the learn and a cooldown reset, ending at 20000 ms."
+    },
+    {
       "spell": 92111, "name": "Scourgebane (strike, unresisted)", "kind": "script_hit", "variant": "unresisted",
       "label_suffix": "unresisted",
       "quote": "dealing an additional $801832s2% Weapon damage plus ${$801832m1*$<scalingbp>+$SP*.25+$AP*.25} Holyflame Damage",
