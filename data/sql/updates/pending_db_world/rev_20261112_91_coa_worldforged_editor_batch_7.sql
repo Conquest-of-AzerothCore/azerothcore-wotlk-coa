@@ -80,3 +80,7 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- Old Shoulderpad
 DELETE FROM `gameobject` WHERE `guid` = 6976023;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976023, 517315, 0, 1, 1, -107.1163, -1132.7348, 37.6179, 0.2297, -0.29011166199269955, -0.033460786749330625, 0.10958330385498313, 0.9501089931382484, 300, 100, 1);
+
+-- #12093
+-- second Ol' Blunderbuss; 6940826 is the one at the LootCollector and Ascension spot
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940827) AND `id` IN (95527);
