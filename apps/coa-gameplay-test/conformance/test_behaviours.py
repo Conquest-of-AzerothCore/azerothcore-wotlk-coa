@@ -8790,5 +8790,50 @@ class HitRatioStatedBonusTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, entry)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioEngineStepTests(unittest.TestCase):
+    def judged(self, spell: int, ratio: float, spread: float = 0.0) -> Verdict:
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(spell, 'hit_ratio', 'oath_heal'))
+        values = {}
+        for arm, scale in (('control', 1.0), ('treatment', ratio)):
+            for trial, (total, count) in enumerate(expectation.model['reads'][arm]):
+                values[total] = sum(10000.0 * scale * (1 + spread * ((step % 3) - 1)) for step in range(trial))
+                values[count] = float(trial)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_the_stated_bonus_is_read_through_int32_amounts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(524822, 'hit_ratio', 'oath_heal'))
+        self.assertEqual(expectation.model['stated'], {'bonus': 25.0, 'parts': [5.0, 30.0], 'truncated': True})
+        from behaviours import stated_ratio
+        self.assertAlmostEqual(stated_ratio(25.0, (5.0, 30.0), True), 1.06 * 1.37 / 1.365, places=9)
+        self.assertAlmostEqual(stated_ratio(50.0, (5.0, 30.0), True), 1.07 * 1.45 / 1.365, places=9)
+        self.assertAlmostEqual(stated_ratio(20.0, (5.0, 30.0), True), 1.06 * 1.36 / 1.365, places=9)
+
+    def test_the_engine_step_inside_the_band_passes_and_states_it(self):
+        verdict = self.judged(524822, 1.06 * 1.37 / 1.365)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, (70 / 3 + 80 / 3) / 2, places=3)
+        self.assertIn('[6, 37]', verdict.explanation)
+        self.assertEqual(self.judged(525080, 1.07 * 1.45 / 1.365).status, 'ok')
+
+    def test_seeded_amounts_no_bonus_in_the_band_gives_alert(self):
+        self.assertEqual(self.judged(524822, 1.05 * 1.35 / 1.365).status, 'alert')
+        self.assertEqual(self.judged(524822, 1.0).status, 'alert')
+        self.assertEqual(self.judged(525080, 1.06 * 1.37 / 1.365).status, 'alert')
+
+    def test_a_ratio_between_two_engine_steps_alerts(self):
+        verdict = self.judged(524822, 1.06 * 1.375 / 1.365)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('between two engine steps', verdict.explanation)
+
+    def test_an_interval_across_steps_and_outside_the_band_is_not_judged(self):
+        self.assertEqual(self.judged(524822, 1.06 * 1.37 / 1.365, 0.2).status, 'insufficient_trials')
+
+    def test_an_expected_ratio_off_the_truncated_amounts_is_refused(self):
+        entry = {**r1a_entry(524822, 'hit_ratio', 'oath_heal'), 'expected': 1.0703}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
 if __name__ == '__main__':
     unittest.main()

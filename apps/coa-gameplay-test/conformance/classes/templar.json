@@ -1856,19 +1856,21 @@
     },
     {
       "spell": 524822, "name": "Radiant Blade (Oath: Righteous Lunge heal)", "kind": "hit_ratio", "variant": "oath_heal",
-      "label_suffix": "oath_heal", "quote": "Increases the effectiveness of", "expected": 1.4522,
-      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally", "control": {},
-      "treatment": {"auras": [[524822, 1], [804904, 1]]}, "critical": false, "trials": 40,
+      "label_suffix": "oath_heal", "quote": "Increases the effectiveness of", "expected": 1.0639,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {"auras": [[804904, 1]]}, "treatment": {"auras": [[524822, 1], [804904, 1]]}, "critical": false,
+      "trials": 40, "stated": {"bonus": 25, "parts": [5, 30], "truncated": true},
       "fixture": {"spell_power": 20000},
-      "expected_source": "$s1 = 25 (524822 EffectBasePoints[0] 24 + 1), aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS) on Oath: Righteous Lunge 804904 (spell_modifier ok). The Oath's Benediction heal is x1.05 (Effect[0]) x 1.30 (Effect[1], the Breaker bonus): 1.365 without the talent (804904 heal entry, r1-a). With it, the tooltip's +25% gives 1.0625 x 1.375 = 1.4609; the expected value is the engine computation: SpellEffectInfo::CalcValue applies SPELLMOD_ALL_EFFECTS and truncates each amount to int32 (5 x 1.25 = 6.25 -> 6, 30 x 1.25 = 37.5 -> 37), 1.06 x 1.37 = 1.4522, the integer-truncation ruling of 2026-11-11 (each amount less than 1 below, toward zero). The bare Oath's 1.365 is outside the band. The treatment sets 524822 before 804904 so the modifier enters the Oath's amounts. Benediction 578276 on the grouped ally, spell power 20000, non-critical heals only."
+      "expected_source": "$s1 = 25 (524822 EffectBasePoints[0] 24 + 1), aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS) on Oath: Righteous Lunge 804904 (spell_modifier ok). The Oath's Benediction heal is x1.05 (Effect[0]) x 1.30 (Effect[1], the Breaker bonus): 1.365 (804904 heal entry, r1-a), the control arm. With the talent, SpellEffectInfo::CalcValue applies SPELLMOD_ALL_EFFECTS and truncates each amount to int32 (5 x 1.25 = 6.25 -> 6, 30 x 1.25 = 37.5 -> 37): 1.06 x 1.37 = 1.4522, the integer-truncation ruling of 2026-11-11, so the treatment over the control is 1.4522 / 1.365 = 1.0639. Judged in the talent's own unit (ADR 0239) through those int32 amounts (ADR 0241): the reading names the engine's amounts, and passes when a bonus within +23% to +27% (the ruled band on +25%) gives them. The treatment sets 524822 before 804904 so the modifier enters the Oath's amounts. Benediction 578276 on the grouped ally, spell power 20000, non-critical heals only."
     },
     {
       "spell": 525080, "name": "Radiant Blade rank 2 (Oath: Righteous Lunge heal)", "kind": "hit_ratio",
       "variant": "oath_heal", "label_suffix": "oath_heal", "quote": "Increases the effectiveness of",
-      "expected": 1.5515, "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
-      "control": {}, "treatment": {"auras": [[525080, 1], [804904, 1]]}, "critical": false, "trials": 40,
+      "expected": 1.1366, "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
+      "control": {"auras": [[804904, 1]]}, "treatment": {"auras": [[525080, 1], [804904, 1]]}, "critical": false,
+      "trials": 40, "stated": {"bonus": 50, "parts": [5, 30], "truncated": true},
       "fixture": {"spell_power": 20000},
-      "expected_source": "$s1 = 50 (525080 EffectBasePoints[0] 49 + 1), SPELLMOD_ALL_EFFECTS on 804904: the tooltip's +50% gives 1.075 x 1.45 = 1.5588; the expected value is the engine computation, int32 amounts 7 (7.5) and 45: 1.07 x 1.45 = 1.5515 (integer-truncation ruling of 2026-11-11). Rank 1's 1.4522 and the bare Oath's 1.365 are outside the band. Same arms as rank 1."
+      "expected_source": "$s1 = 50 (525080 EffectBasePoints[0] 49 + 1), SPELLMOD_ALL_EFFECTS on 804904: int32 amounts 7 (7.5) and 45, 1.07 x 1.45 = 1.5515 (integer-truncation ruling of 2026-11-11), over the Oath alone 1.365: 1.1366. Judged in the talent's own unit through those int32 amounts (ADR 0239, ADR 0241), against +47.5% to +52.5%. Rank 1's amounts 6 and 37 are another engine step. Same arms as rank 1."
     },
     {
       "spell": 560833, "name": "Spiritual", "kind": "metric_delta", "quote": "Increases your Energy regeneration by $s1%.",

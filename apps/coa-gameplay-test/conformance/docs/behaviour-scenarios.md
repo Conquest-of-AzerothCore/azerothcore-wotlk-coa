@@ -1581,3 +1581,13 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
   to it (Combat Training 706320, 20% on an Oath's +30%: 18-22%). A cost gate's `removal_wait_ms` attempts the second
   cast that long after the first, past the spell's own global cooldown, and reads the remaining cooldown right after the
   first cast (0 with the talent).
+
+### A stated bonus read through int32 amounts (ADR 0241)
+
+`hit_ratio` `stated` `truncated: true` scales each part as `SpellEffectInfo::CalcValue` does, int32 toward zero
+(the integer-truncation ruling of 2026-11-11), so the ratio is a step function of the bonus. The expected ratio must
+be the stated bonus's step. The judge reads the 99% interval back as the bonuses whose int32 amounts give it:
+`alert` when it lies between two steps or no bonus inside the band gives those amounts, `ok` when every such bonus
+lies inside the band or the interval holds one step that a bonus inside the band gives, and `insufficient_trials` when
+it holds several steps and reaches outside the band. Radiant Blade 524822 and 525080 (+25% and +50% on Oath:
+Righteous Lunge's +5% and +30%): amounts 6 and 37, 7 and 45, against the Oath alone.

@@ -29,9 +29,9 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
                         BEHAVIOUR_FALL_DAMAGE,
                         BEHAVIOUR_SOURCE_STACK, DISPEL_TYPE_NAMES, HIT_RATIO_ARMS, TAKEN_HIT_CONTROL_ARM,
-                        TAKEN_HIT_RETURNED_KEYS, strongest_percent)
-from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
-                   delta_of, delta_text,
+                        TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio, strongest_percent)
+from bonus import (POINT_BAND, RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_band, bonus_detail,
+                   bonus_of, bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
@@ -3625,6 +3625,68 @@ def stated_bonus(bonus: Bonus, stated: dict) -> Bonus:
     return Bonus(measured, max(measured - low, high - measured), float(stated['bonus']), bonus.trials)
 
 
+@dataclass(frozen=True)
+class EngineStepReading:
+    bonus: Bonus
+    status: str
+    reason: str
+    passes: tuple[float, float]
+    text: str
+
+
+def first_bonus_where(holds: Callable[[float], bool]) -> float:
+    low, high = -100.0, 1000.0
+    for _ in range(200):
+        middle = (low + high) / 2
+        low, high = (low, middle) if holds(middle) else (middle, high)
+    return high
+
+
+def engine_step_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
+    parts = tuple(float(part) for part in stated['parts'])
+    expected = float(stated['bonus'])
+    band = bonus_band(expected)
+    ratio_of = lambda value: stated_ratio(value, parts, True)
+    amounts = lambda value: [engine_amount(part * (1 + value / 100)) for part in parts]
+    reaching = lambda low, high: (first_bonus_where(lambda value: ratio_of(value) >= low - FLOAT_EPSILON),
+                                  first_bonus_where(lambda value: ratio_of(value) > high + FLOAT_EPSILON))
+    passes = reaching(ratio_of(expected - band), ratio_of(expected + band))
+    continuous = stated_bonus_of_ratio(1 + bonus.measured / 100, list(parts))
+    stated_text = (f'the stated {expected:g}% passes inside +-{band:.3g} points (the larger of {RELATIVE_BAND:.0%} of '
+                   f'it and {POINT_BAND:g} points), so the amounts on the parts {list(parts)} that a bonus from '
+                   f'{expected - band:.4g}% to {expected + band:.4g}% gives pass: a bonus from {passes[0]:.4g}% to '
+                   f'{passes[1]:.4g}% reads as one of them')
+    if not math.isfinite(bonus.half):
+        return EngineStepReading(Bonus(continuous, math.inf, expected, bonus.trials), 'insufficient_trials',
+                                 'not judged: one trial per arm gives no interval', passes,
+                                 f'no interval; {stated_text}')
+    low_ratio, high_ratio = 1 + bonus.low / 100, 1 + bonus.high / 100
+    interval = f'99% ratio interval {low_ratio:.5g} to {high_ratio:.5g}'
+    start, end = reaching(low_ratio, high_ratio)
+    level = ratio_of(start)
+    if level > high_ratio + FLOAT_EPSILON:
+        return EngineStepReading(Bonus(continuous, math.inf, expected, bonus.trials), 'alert',
+                                 'the 99% interval holds no ratio the engine\'s int32 amounts give', passes,
+                                 f'{interval} lies between two engine steps; {stated_text}')
+    found = Bonus((start + end) / 2, (end - start) / 2, expected, bonus.trials)
+    one_step = first_bonus_where(lambda value: ratio_of(value) > level + FLOAT_EPSILON) >= end - FLOAT_EPSILON
+    held = (f'one engine step, the amounts {amounts(start)}' if one_step
+            else f'the engine steps from the amounts {amounts(start)} on')
+    text = (f'{interval} holds {held}, which a bonus from {start:.4g}% to {end:.4g}% gives; {stated_text}; the '
+            f'engine resolves the bonus no finer than its steps')
+    band_low, band_high = expected - band, expected + band
+    if end <= band_low + FLOAT_EPSILON or start >= band_high - FLOAT_EPSILON:
+        return EngineStepReading(found, 'alert', 'no bonus inside the band gives the amounts read', passes, text)
+    if band_low - FLOAT_EPSILON <= start and end <= band_high + FLOAT_EPSILON:
+        return EngineStepReading(found, 'ok', 'every bonus that gives the amounts read lies inside the band', passes,
+                                 text)
+    if one_step:
+        return EngineStepReading(found, 'ok', 'a bonus inside the band gives the amounts read, and the engine '
+                                              'resolves no finer', passes, text)
+    return EngineStepReading(found, 'insufficient_trials', 'not judged: the 99% interval holds more than one engine '
+                                                           'step and reaches outside the band', passes, text)
+
+
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
@@ -3668,10 +3730,15 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     except ValueError as error:
         return replace(base, status='unmeasured', explanation=f'not judged: {error}')
     stated = model.get('stated')
-    if stated and flat is None:
-        bonus = stated_bonus(bonus, stated)
-    status, reason, needed = bonus_status(bonus)
-    sized = sized_trials(bonus)
+    stepped = stated and flat is None and stated.get('truncated') and engine_step_reading(bonus, stated)
+    if stepped:
+        bonus = stepped.bonus
+        status, reason, needed = stepped.status, stepped.reason, None
+    else:
+        if stated and flat is None:
+            bonus = stated_bonus(bonus, stated)
+        status, reason, needed = bonus_status(bonus)
+    sized = None if stepped else sized_trials(bonus)
     detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,
               'trial_limit': model.get('trial_limit'), **({'parts': len(runs)} if len(runs) > 1 else {})}
     limit = model.get('trial_limit') and model['trial_limit'] * len(runs)
@@ -3685,11 +3752,16 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     if stated and flat is None:
         ratio += (f', read as the stated bonus on the parts {stated["parts"]} '
                   f'(ratio = prod(1 + part x (1 + bonus)) / prod(1 + part))')
+    if stepped:
+        detail['engine_step'] = {'passes_from': stepped.passes[0], 'passes_to': stepped.passes[1]}
+        ratio += ' with each scaled amount truncated to int32 (the integer-truncation ruling of 2026-11-11)'
+    low, high = stepped.passes if stepped else (bonus.expected - bonus.band, bonus.expected + bonus.band)
+    reading = (stepped.text if stepped else delta_text(bonus) if flat is not None else bonus_text(bonus))
     return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
-                   low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
+                   low=low, high=high, detail=detail,
                    explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
                                f'{control.mean:.6g} over {control.events:g} control hits{ratio}; '
-                               f'{delta_text(bonus) if flat is not None else bonus_text(bonus)}{scaled}; {reason}'
+                               f'{reading}{scaled}; {reason}'
                                f'{beyond}')
 
 

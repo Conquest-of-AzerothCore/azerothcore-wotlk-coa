@@ -5116,9 +5116,20 @@ class HitRatioSpec:
     expected_points: float | None = None
     ally_distance: float | None = None
     stated: tuple[float, tuple[float, ...]] | None = None
+    stated_truncated: bool = False
 
 
-def stated_ratio(bonus: float, parts: tuple[float, ...]) -> float:
+ENGINE_AMOUNT_EPSILON = 1e-6
+
+
+def engine_amount(amount: float) -> int:
+    return int(amount + math.copysign(ENGINE_AMOUNT_EPSILON, amount))
+
+
+def stated_ratio(bonus: float, parts: tuple[float, ...], truncated: bool = False) -> float:
+    if truncated:
+        return (math.prod(1 + engine_amount(part * (1 + bonus / 100)) / 100 for part in parts)
+                / math.prod(1 + part / 100 for part in parts))
     return math.prod(1 + part * (1 + bonus / 100) / 100 for part in parts) / math.prod(1 + part / 100 for part in parts)
 
 
@@ -5402,11 +5413,14 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         scenario['contract'] += f'; one of {spec.parts} identical parts whose trials are pooled'
     if spec.stated is not None:
         bonus, parts = spec.stated
-        if abs(stated_ratio(bonus, parts) - spec.expected) > 5e-4:
+        ratio = stated_ratio(bonus, parts, spec.stated_truncated)
+        if abs(ratio - spec.expected) > 5e-4:
             raise ValueError(f'{spec.spell} hit_ratio expected {spec.expected} is not the ratio '
-                             f'{stated_ratio(bonus, parts):.5g} that a {bonus:g}% bonus on the parts {list(parts)} '
-                             f'gives')
+                             f'{ratio:.5g} that a {bonus:g}% bonus on the parts {list(parts)} '
+                             f'gives' + (' with int32 amounts' if spec.stated_truncated else ''))
         model['stated'] = {'bonus': bonus, 'parts': list(parts)}
+        if spec.stated_truncated:
+            model['stated']['truncated'] = True
     if spec.scale_auras:
         model['scale_reads'] = {name: [hit_ratio_scale_label(spec, name, spell, effect)
                                        for spell, effect in spec.scale_auras] for name in HIT_RATIO_ARMS}
@@ -5432,7 +5446,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         int(entry.get('parts', 1)), entry.get('rate', ''), entry.get('rate_spell'),
                         entry.get('expected_points'), entry.get('ally_distance'),
                         None if entry.get('stated') is None else
-                        (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])))
+                        (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])),
+                        bool((entry.get('stated') or {}).get('truncated', False)))
 
 
 CRIT_RATE_TRIALS = 300
