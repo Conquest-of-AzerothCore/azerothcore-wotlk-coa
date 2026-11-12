@@ -1,0 +1,432 @@
+{
+  "schema": 1,
+  "name": "Lightbringer counts its target among its five enemies",
+  "contract": "Lightkeeper's burst Lightbringer 561277 reads 'to up to $561277i1 enemies' (MaxAffectedTargets 5, Effect[0] school damage on TARGET_UNIT_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY, 5 yd). Owner ruling, status-5 Q-ext2-2 option (a): N in all, the target counts (ADR 0294). The level 60 Templar casts it directly at a primary dummy with 6 more level 60 dummies within 5 yd of it, 5 times: exactly 25 damage events in all and 5 on the primary (before the fix the area cap left 5 others besides the target, 5 or 6 per cast). Control: a second group 25 yd away, a primary with 2 more dummies within 5 yd (below the cap), 5 casts: exactly 15 events, 5 on each.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "cap_primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.0,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.2,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.4,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.6,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.8,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.0,
+      "stationary": true
+    },
+    {
+      "id": "cap_extra6",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.2,
+      "stationary": true
+    },
+    {
+      "id": "control_primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25.0,
+      "stationary": true
+    },
+    {
+      "id": "control_extra1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25.3,
+      "stationary": true
+    },
+    {
+      "id": "control_extra2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25.6,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561277
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra1 stands within 5 yd of the cap primary",
+      "actor": "cap_extra1",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra2 stands within 5 yd of the cap primary",
+      "actor": "cap_extra2",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra3 stands within 5 yd of the cap primary",
+      "actor": "cap_extra3",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra4 stands within 5 yd of the cap primary",
+      "actor": "cap_extra4",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra5 stands within 5 yd of the cap primary",
+      "actor": "cap_extra5",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra6 stands within 5 yd of the cap primary",
+      "actor": "cap_extra6",
+      "metric": "distance_2d",
+      "target": "cap_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "control_extra1 stands within 5 yd of the control primary",
+      "actor": "control_extra1",
+      "metric": "distance_2d",
+      "target": "control_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "control_extra2 stands within 5 yd of the control primary",
+      "actor": "control_extra2",
+      "metric": "distance_2d",
+      "target": "control_primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "the control group stands beyond 5 yd of the cap group",
+      "actor": "control_primary",
+      "metric": "distance_2d",
+      "target": "cap_extra6",
+      "min": 10,
+      "max": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 1 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 2 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 3 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 4 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "cap_primary"
+    },
+    {
+      "action": "wait",
+      "label": "cap cast 5 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "5 casts at the cap primary with 6 more enemies in range strike 25 times in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "the cap primary is struck by each of the 5 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_primary",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra1 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra1",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra2 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra2",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra3 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra3",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra4 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra4",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra5 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra5",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "cap_extra6 is struck at most once per cast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "cap_extra6",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "save_as": "before_control"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 1 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 2 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 3 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 4 lands",
+      "ms": 600
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561277,
+      "target": "control_primary"
+    },
+    {
+      "action": "wait",
+      "label": "control cast 5 lands",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "control: 5 casts at a primary with 2 more enemies in range strike 15 times in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "relative_to": "before_control",
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "control: control_primary is struck by each of the 5 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_primary",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "control: control_extra1 is struck by each of the 5 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_extra1",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "control: control_extra2 is struck by each of the 5 casts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 561277,
+      "target": "control_extra2",
+      "equals": 5
+    }
+  ]
+}

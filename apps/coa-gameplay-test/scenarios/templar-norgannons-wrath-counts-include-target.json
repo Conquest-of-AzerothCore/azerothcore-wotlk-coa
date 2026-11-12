@@ -1,0 +1,453 @@
+{
+  "schema": 1,
+  "name": "Norgannon's Wrath counts its target among its ten enemies",
+  "contract": "Norgannon's Wrath 524739 leaps and, 1500 ms later, casts its blast 524740 at the target: 'to up to $524740i enemies within 5 yds' (MaxAffectedTargets 10, Effect[0] school damage and Effect[1] trigger of 520842 on TARGET_UNIT_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY, 5 yd). Owner ruling, status-5 Q-ext2-2 option (a): N in all, the target counts (ADR 0294). The level 60 Templar casts it at a primary dummy with 11 more level 60 dummies within 5 yd of it, 4 times: exactly 40 blast damage events in all and 4 on the primary (before the fix the area cap left 10 others besides the target, 10 or 11 per blast). The below-cap control is conformance entry 524739 fixed_count cap_control (nine more dummies, all struck).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "primary",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.0,
+      "stationary": true
+    },
+    {
+      "id": "extra1",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.2,
+      "stationary": true
+    },
+    {
+      "id": "extra2",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.4,
+      "stationary": true
+    },
+    {
+      "id": "extra3",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.6,
+      "stationary": true
+    },
+    {
+      "id": "extra4",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.8,
+      "stationary": true
+    },
+    {
+      "id": "extra5",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.0,
+      "stationary": true
+    },
+    {
+      "id": "extra6",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.2,
+      "stationary": true
+    },
+    {
+      "id": "extra7",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.4,
+      "stationary": true
+    },
+    {
+      "id": "extra8",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.6,
+      "stationary": true
+    },
+    {
+      "id": "extra9",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.8,
+      "stationary": true
+    },
+    {
+      "id": "extra10",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5.0,
+      "stationary": true
+    },
+    {
+      "id": "extra11",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5.2,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "assert",
+      "label": "extra1 stands within 5 yd of the primary",
+      "actor": "extra1",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra2 stands within 5 yd of the primary",
+      "actor": "extra2",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra3 stands within 5 yd of the primary",
+      "actor": "extra3",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra4 stands within 5 yd of the primary",
+      "actor": "extra4",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra5 stands within 5 yd of the primary",
+      "actor": "extra5",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra6 stands within 5 yd of the primary",
+      "actor": "extra6",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra7 stands within 5 yd of the primary",
+      "actor": "extra7",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra8 stands within 5 yd of the primary",
+      "actor": "extra8",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra9 stands within 5 yd of the primary",
+      "actor": "extra9",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra10 stands within 5 yd of the primary",
+      "actor": "extra10",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "assert",
+      "label": "extra11 stands within 5 yd of the primary",
+      "actor": "extra11",
+      "metric": "distance_2d",
+      "target": "primary",
+      "min": 0,
+      "max": 4.9
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 1: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 2: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 3: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 524739
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 524739,
+      "target": "primary"
+    },
+    {
+      "action": "wait",
+      "label": "cast 4: the blast lands 1500 ms after the leap",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "4 casts with 11 more enemies in range strike 40 times in all",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "label": "the primary is struck by each of the 4 blasts",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "primary",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra1 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra1",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra2 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra2",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra3 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra3",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra4 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra4",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra5 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra5",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra6 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra6",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra7 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra7",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra8 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra8",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra9 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra9",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra10 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra10",
+      "min": 0,
+      "max": 4
+    },
+    {
+      "action": "assert",
+      "label": "extra11 is struck at most once per blast",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 524740,
+      "target": "extra11",
+      "min": 0,
+      "max": 4
+    }
+  ]
+}

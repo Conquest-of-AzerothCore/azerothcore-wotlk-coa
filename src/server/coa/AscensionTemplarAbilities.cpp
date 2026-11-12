@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionTemplar.h"
+#include "Containers.h"
 #include "DBCStores.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
@@ -444,8 +445,21 @@ class spell_ascension_templar_ability : public SpellScript
                 player->ModifySpellCooldown(pair.first, delta);
         }
     }
+    void CountPrimary(std::list<WorldObject*>& targets)
+    {
+        Unit* primary = GetExplTargetUnit();
+        if (!primary)
+            return;
+        targets.remove(primary);
+        if (uint32 const cap = GetSpellValue()->MaxAffectedTargets)
+            Acore::Containers::RandomResize(targets, cap - 1 +
+                GetCaster()->GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, GetSpellInfo()));
+    }
     void Register() override
     {
+        if (m_scriptSpellId == 561277 || m_scriptSpellId == 524740)
+            OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+                spell_ascension_templar_ability::CountPrimary, EFFECT_ALL, TARGET_UNIT_DEST_AREA_ENEMY);
         if (SpellInfo const* info = sSpellMgr->GetSpellInfo(m_scriptSpellId); Named(info, 801448))
             OnEffectLaunchTarget +=
                 SpellEffectFn(spell_ascension_templar_ability::Launch, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
