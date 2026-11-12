@@ -6520,6 +6520,23 @@ class PooledRateHitRatioTests(unittest.TestCase):
                 verdict = compare_module.behaviour_hit_ratio_verdict(base_verdict(expectation), FakeRun(values), model)
                 self.assertEqual(verdict.status, status)
 
+    def test_a_control_arm_that_never_crits_is_judged(self):
+        entry = variant_entry(520608, 'hit_ratio', 'argent_blade_crit_rate')
+        _, [expectation] = behaviour_scenario(CLASS_FILE, entry)
+        model = expectation.model
+        self.assertEqual((model['rate'], model['parts'], model['expected_delta']), ('critical', 76, 50.0))
+        for treatment, status in ((0.5, 'ok'), (0.45, 'alert')):
+            values = {}
+            for arm, marks in model['reads'].items():
+                rate, crits = (0.0 if arm == 'control' else treatment), 0.0
+                for index, (total, count) in enumerate(marks):
+                    crits += 0.0 if index == 0 or not rate else rate + (0.01 if index % 2 else -0.01)
+                    values[total], values[count] = crits, float(index)
+            with self.subTest(treatment=treatment):
+                verdict = compare_module.behaviour_hit_ratio_verdict(base_verdict(expectation), FakeRun(values), model)
+                self.assertEqual(verdict.status, status)
+                self.assertNotIn('ratio', verdict.explanation.split(';')[0])
+
     def test_a_rate_without_its_points_or_its_proc_spell_is_refused(self):
         for broken in (self.entry(rate='critical', critical=None, parts=1),
                        self.entry(rate='proc', expected_points=20, critical=None, parts=1),

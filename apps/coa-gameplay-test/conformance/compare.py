@@ -3579,11 +3579,11 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
         beyond += f'; {len(runs)} parts pooled'
     if model.get('rate'):
         beyond += f'; the {model["rate"]} rate is in percent of the counted events'
+    ratio = f', ratio {treatment.mean / control.mean:.5g}' if control.mean else ''
     return replace(base, status=status, measured=bonus.measured, expected=bonus.expected,
                    low=bonus.expected - bonus.band, high=bonus.expected + bonus.band, detail=detail,
                    explanation=f'per-hit mean {treatment.mean:.6g} over {treatment.events:g} treatment hits against '
-                               f'{control.mean:.6g} over {control.events:g} control hits, ratio '
-                               f'{treatment.mean / control.mean:.5g}; '
+                               f'{control.mean:.6g} over {control.events:g} control hits{ratio}; '
                                f'{delta_text(bonus) if flat is not None else bonus_text(bonus)}{scaled}; {reason}'
                                f'{beyond}')
 
