@@ -63,3 +63,20 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- Troll Skeleton Arm Prop
 DELETE FROM `gameobject` WHERE `guid` = 6976020;
 INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976020, 96091, 0, 1, 1, 102.4749, -4124.6673, 173.6533, 4.5647, 0, 0, 0.757335, -0.653026, 300, 100, 1);
+
+-- #12094
+-- pickup 6940753 (Old Shoulderpad) moved 7.3 yd across and 0.01 yd up into the wrecked boat, next to its matching prop
+UPDATE `gameobject` SET `position_x` = -107.0908, `position_y` = -1132.8808, `position_z` = 37.5963, `orientation` = 0.2297, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.114578, `rotation3` = 0.993414 WHERE `guid` = 6940753 AND `id` = 517314;
+-- the Ascension wrecked boat, crate and matching left shoulderpad were missing (Ascension positions)
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (95988, 5, 223, 'Wrecked Boat Prop', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 223, `name` = 'Wrecked Boat Prop', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (515580, 5, 3791, 'RPG PROP Damaged Crate', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 3791, `name` = 'RPG PROP Damaged Crate', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `size`, `Data0`, `Data1`, `AIName`, `ScriptName`) VALUES (517315, 5, 515521, 'Old Shoulderpad', 1, 0, 0, '', '') ON DUPLICATE KEY UPDATE `type` = 5, `displayId` = 515521, `name` = 'Old Shoulderpad', `size` = 1, `Data0` = 0, `Data1` = 0, `AIName` = '', `ScriptName` = '';
+-- Wrecked Boat Prop
+DELETE FROM `gameobject` WHERE `guid` = 6976021;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976021, 95988, 0, 1, 1, -107.5877, -1131.2096, 37.0567, 1.9922, 0.4844348845763111, 0.7367121377001131, 0.4021393310184849, 0.24670230485115327, 300, 100, 1);
+-- RPG PROP Damaged Crate
+DELETE FROM `gameobject` WHERE `guid` = 6976022;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976022, 515580, 0, 1, 1, -106.7629, -1132.4815, 37.3503, 0.2297, 0, 0, 0.114578, 0.993414, 300, 100, 1);
+-- Old Shoulderpad
+DELETE FROM `gameobject` WHERE `guid` = 6976023;
+INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`) VALUES (6976023, 517315, 0, 1, 1, -107.1163, -1132.7348, 37.6179, 0.2297, -0.29011166199269955, -0.033460786749330625, 0.10958330385498313, 0.9501089931382484, 300, 100, 1);
