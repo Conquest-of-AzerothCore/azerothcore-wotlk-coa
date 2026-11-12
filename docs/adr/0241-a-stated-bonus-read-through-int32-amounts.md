@@ -1,6 +1,6 @@
 # 0241. A stated bonus read through int32 amounts
 
-- Status: accepted
+- Status: accepted, amended 2026-11-12 (see Amendment)
 - Date: 2026-11-12
 - Extends: ADR 0239
 
@@ -46,3 +46,36 @@ amounts 6 and 37) and 1.1366 (rank 2, 7 and 45).
   judged; an expected ratio off the truncated amounts is refused.
 - Entries without `truncated` regenerate byte-identical. The two Radiant Blade scenarios change (their control arm
   and model) and are rerun twice.
+
+## Amendment (2026-11-12)
+
+### Context
+
+The misc review (lean/misc-review.md, A-I1) found that the one-step `ok` branch passed amounts the engine does not
+give at the stated bonus. Both stored R3 verdicts of 524822 (pair 20261112-045309 / -050012) printed a pass range of
++20% to +30%: rank 1's amounts 6 and 36 (+20% to +23.3%) and 6 and 38 (+26.7% to +30%) read ok, although the ruled
+band is +23% to +27% and the measurement resolves those steps. Rank 2 printed +46.67% to +53.33%, its lower edge from
+7 and 44. That contradicts ADR 0145 (one below only where a per-roll value truncates to it), the integer-truncation
+ruling of 2026-11-11 (the engine's computation reproduces the observed value) and the tool rule of the per-level
+ruling (ok only when the full engine computation reproduces the read exactly; a same-size mutant still alerts).
+
+### Decision
+
+`ok` only on the stated step: the int32 amounts the engine computation gives at the stated bonus.
+- `ok` when the 99% interval holds one engine step and its amounts are the stated bonus's;
+- `alert` when it holds no ratio of int32 amounts, one step with other amounts, or several steps without the stated
+  one;
+- `insufficient_trials` when it holds the stated step and another.
+
+The band no longer decides. The verdict's low and high are the bonuses that give the stated amounts: +23.33% to
++26.67% (6 and 37) and +50% to +53.33% (7 and 45).
+
+### Consequences
+
+- Seeded mutants one amount off the stated step alert: 6 and 36, 6 and 38 (rank 1), 7 and 44, 7 and 46 (rank 2).
+  Several steps that leave the stated one out alert. Under the first decision the first three read ok.
+- The Consequences bullet that let a bonus inside the band pass with other amounts is withdrawn.
+- The stored pair re-judged without rerunning: 524822 ok in both runs, pass range +20%-+30% before, +23.33%-+26.67%
+  after; 525080 ok in both runs, +46.67%-+53.33% before, +50%-+53.33% after. No other status of the 367 labels moved.
+- `engine_amount` nudges by 1e-6 before truncating, so where two parts cross an integer at the same bonus (+20% on
+  5 and 30) the model holds a step about 2e-5 points wide (6 and 35). The stated steps are not at such a bonus.

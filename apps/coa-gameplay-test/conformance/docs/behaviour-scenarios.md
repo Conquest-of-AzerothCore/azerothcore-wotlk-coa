@@ -1586,8 +1586,8 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
 
 `hit_ratio` `stated` `truncated: true` scales each part as `SpellEffectInfo::CalcValue` does, int32 toward zero
 (the integer-truncation ruling of 2026-11-11), so the ratio is a step function of the bonus. The expected ratio must
-be the stated bonus's step. The judge reads the 99% interval back as the bonuses whose int32 amounts give it:
-`alert` when it lies between two steps or no bonus inside the band gives those amounts, `ok` when every such bonus
-lies inside the band or the interval holds one step that a bonus inside the band gives, and `insufficient_trials` when
-it holds several steps and reaches outside the band. Radiant Blade 524822 and 525080 (+25% and +50% on Oath:
+be the stated bonus's step. The judge reads the 99% interval back as the bonuses whose int32 amounts give it. Only
+the stated step passes (amendment of 2026-11-12): `ok` when the interval holds one step and its amounts are the ones
+the engine computation gives at the stated bonus, `insufficient_trials` when it holds the stated step and another,
+and `alert` otherwise (between two steps, another step, or several steps without the stated one). Radiant Blade 524822 and 525080 (+25% and +50% on Oath:
 Righteous Lunge's +5% and +30%): amounts 6 and 37, 7 and 45, against the Oath alone.

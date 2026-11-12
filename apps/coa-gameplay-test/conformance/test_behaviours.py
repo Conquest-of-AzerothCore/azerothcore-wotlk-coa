@@ -8809,12 +8809,34 @@ class HitRatioEngineStepTests(unittest.TestCase):
         self.assertAlmostEqual(stated_ratio(50.0, (5.0, 30.0), True), 1.07 * 1.45 / 1.365, places=9)
         self.assertAlmostEqual(stated_ratio(20.0, (5.0, 30.0), True), 1.06 * 1.36 / 1.365, places=9)
 
-    def test_the_engine_step_inside_the_band_passes_and_states_it(self):
+    def test_the_stated_step_passes_and_states_it(self):
         verdict = self.judged(524822, 1.06 * 1.37 / 1.365)
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, (70 / 3 + 80 / 3) / 2, places=3)
+        self.assertAlmostEqual(verdict.low, 70 / 3, places=3)
+        self.assertAlmostEqual(verdict.high, 80 / 3, places=3)
         self.assertIn('[6, 37]', verdict.explanation)
-        self.assertEqual(self.judged(525080, 1.07 * 1.45 / 1.365).status, 'ok')
+        rank_two = self.judged(525080, 1.07 * 1.45 / 1.365)
+        self.assertEqual(rank_two.status, 'ok')
+        self.assertAlmostEqual(rank_two.low, 50.0, places=3)
+        self.assertAlmostEqual(rank_two.high, 160 / 3, places=3)
+
+    def test_seeded_mutants_one_amount_off_the_stated_step_alert(self):
+        for spell, ratio, amounts in ((524822, 1.06 * 1.36 / 1.365, '[6, 36]'),
+                                      (524822, 1.06 * 1.38 / 1.365, '[6, 38]'),
+                                      (525080, 1.07 * 1.44 / 1.365, '[7, 44]'),
+                                      (525080, 1.07 * 1.46 / 1.365, '[7, 46]')):
+            with self.subTest(spell=spell, amounts=amounts):
+                verdict = self.judged(spell, ratio)
+                self.assertEqual(verdict.status, 'alert')
+                self.assertIn(f'one engine step, the amounts {amounts}', verdict.explanation)
+
+    def test_steps_that_leave_out_the_stated_one_alert(self):
+        reading = compare_module.engine_step_reading(
+            compare_module.Bonus(7.55, 0.55, 25.0, 40),
+            {'bonus': 25.0, 'parts': [5.0, 30.0]})
+        self.assertEqual(reading.status, 'alert')
+        self.assertIn('the engine steps from the amounts [6, 38] on', reading.text)
 
     def test_seeded_amounts_no_bonus_in_the_band_gives_alert(self):
         self.assertEqual(self.judged(524822, 1.05 * 1.35 / 1.365).status, 'alert')
