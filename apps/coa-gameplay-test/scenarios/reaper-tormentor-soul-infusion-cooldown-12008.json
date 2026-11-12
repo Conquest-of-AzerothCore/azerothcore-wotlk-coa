@@ -56,7 +56,7 @@
     },
     {
       "action": "assert", "label": "Tormentor takes 3 seconds off Tormented Souls", "actor": "reaper",
-      "metric": "cooldown_ms", "spell": 500483, "relative_to": "cd_talent", "max": -3000
+      "metric": "cooldown_ms", "spell": 500483, "relative_to": "cd_talent", "min": -4000, "max": -3000
     }
   ]
 }
