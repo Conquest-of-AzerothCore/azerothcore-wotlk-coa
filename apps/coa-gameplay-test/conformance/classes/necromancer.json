@@ -274,19 +274,25 @@
       "name": "Fetid Ward",
       "tooltip": "Activate a |cffffffffFetid Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, $s1% of your damage dealt heals you and your minions, split evenly amongst them, and healing received is increased by $s2%.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
       "trigger": {
-        "action": "attack",
-        "spell": 0
+        "action": "cast",
+        "spell": 25307,
+        "target": "dummy"
       },
       "trigger_text": "of your damage dealt heals you",
-      "trigger_spell_text": "",
-      "trial_metric": "melee_damage_count",
+      "trigger_spell_text": "Shadow Bolt",
+      "trial_metric": "spell_damage_count",
       "observe_spell": 681463,
       "observe_source": "EffectTriggerSpell[0] of 680388",
       "observe_note": "Effect[0] aura 354 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61); the event script LeechArmy (AscensionNecromancerEvents.cpp:48-54, called at :95-96) casts 681463 on the caster and on each minion for every damaging hit of a ward holder",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "heals you and your minions",
-      "aura_cast": true
+      "aura_cast": true,
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the 20% (Fetid Ward 680388) and 15% (Shadow Bolt 25307) base-mana costs"
+      }
     },
     {
       "aura": 680388,
@@ -295,16 +301,22 @@
       "kind": "magnitude_ratio",
       "effect": 0,
       "trigger": {
-        "action": "attack",
-        "spell": 0
+        "action": "cast",
+        "spell": 25307,
+        "target": "dummy"
       },
-      "trigger_metric": "melee_damage_total",
+      "trigger_metric": "spell_damage_total",
       "trigger_text": "of your damage dealt heals you",
       "observe_spell": 681463,
       "observe_metric": "spell_heal_total",
       "expected_ratio": 0.3,
       "per_trigger_text": "$s1% of your damage dealt heals you",
       "aura_cast": true,
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the 20% (Fetid Ward 680388) and 15% (Shadow Bolt 25307) base-mana costs"
+      },
       "observe_source": "EffectTriggerSpell[0] of 680388; with no minion LeechArmy heals the caster alone for damage x 30 / 100 (AscensionNecromancerEvents.cpp:48-51), $s1 = EffectBasePoints[0] 29 + 1"
     },
     {
@@ -1045,6 +1057,7 @@
         681460,
         681529
       ],
+      "wait_ms": 1500,
       "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:109-118): when Fetid Ward 680388, Glacial Ward 681460 or Bone Ward 681529 applies to the caster it removes the other two from the caster and its minions. Each ward is cast in turn, looping back to Fetid Ward."
     }
   ],

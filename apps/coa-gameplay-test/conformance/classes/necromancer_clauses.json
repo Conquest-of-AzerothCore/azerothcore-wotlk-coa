@@ -121,14 +121,18 @@
   {
     "spell": 300241,
     "clause": "While you are below 50% health,",
-    "labels": [],
+    "labels": [
+      "300241 gate_absence_count",
+      "300241 trigger_count"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300241,
     "clause": "your Undead minions now heal you for $560607s2% of their damage dealt.",
     "labels": [
-      "300241 effect_value 560607e1 #0"
+      "300241 trigger_count",
+      "300241 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -1529,26 +1533,58 @@
   {
     "spell": 680388,
     "clause": "Activate a Fetid Ward on yourself and your Undead minions for $d.",
-    "labels": [
-      "680388 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Activate a Fetid Ward on yourself",
+        "labels": [
+          "680388 trigger_count"
+        ]
+      },
+      {
+        "claim": "and your Undead minions",
+        "labels": []
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "680388 aura_duration_ms #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 680388,
     "clause": "While active, $s1% of your damage dealt heals you and your minions,",
-    "labels": [
-      "680388 effect_value e0 #1",
-      "680388 aura_amount e0 #1"
+    "claims": [
+      {
+        "claim": "While active, $s1% of your damage dealt heals you",
+        "labels": [
+          "680388 trigger_count",
+          "680388 trigger_magnitude_ratio"
+        ]
+      },
+      {
+        "claim": "and your minions,",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 680388,
     "clause": "split evenly amongst them, and healing received is increased by $s2%.",
-    "labels": [
-      "680388 effect_value e1 #2",
-      "680388 aura_amount e1 #2"
+    "claims": [
+      {
+        "claim": "split evenly amongst them,",
+        "labels": []
+      },
+      {
+        "claim": "and healing received is increased by $s2%.",
+        "labels": [
+          "680388 trigger_magnitude_ratio"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1556,7 +1592,7 @@
     "spell": 680388,
     "clause": "@ext:Only 1 Ward can be active at a time.:ext@",
     "labels": [
-      "680388 effect_value #3"
+      "680388 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
@@ -2396,7 +2432,6 @@
     "spell": 804371,
     "clause": "Transform into an undead monstrosity for $d,",
     "labels": [
-      "804371 aura_duration_ms #0",
       "804371 behaviour_cast_applies_aura",
       "804371 behaviour_expiry"
     ],
@@ -2409,17 +2444,18 @@
       {
         "claim": "increasing your maximum Stamina by $s2%",
         "labels": [
-          "804371 effect_value e1 #1",
-          "804371 aura_amount e1 #1",
           "804371 behaviour_metric_delta stamina"
         ]
       },
       {
-        "claim": "and causing you and your Undead minions to emit a damaging disease cloud.",
+        "claim": "and causing you",
         "labels": [
-          "804371 behaviour_metric_delta cloud",
-          "804371 behaviour_metric_delta minion_cloud"
+          "804371 behaviour_metric_delta cloud"
         ]
+      },
+      {
+        "claim": "and your Undead minions to emit a damaging disease cloud.",
+        "labels": []
       }
     ],
     "kind": "claim"
