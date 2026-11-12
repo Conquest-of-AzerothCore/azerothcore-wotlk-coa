@@ -1331,7 +1331,7 @@
       "561138 behaviour_metric_delta crit_control"
     ],
     "kind": "claim",
-    "reason": "Not status 1: one plain (non-critical, non-blocked) Ghoul swing reproduced inside the army (probe 20261112-233646, aura 15.0-30.0 s, read 29.3 s); cause not found (finding C1). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
+    "reason": "Not status 1: one plain (non-critical, non-blocked) Ghoul swing reproduced inside the army (probe 20261112-233646, aura 15.0-30.0 s, read 29.3 s); cause not found (finding C1). Parked (25 agent-min): the aura is on the caster 300 ms after the cast ends (army_applied) and until 17.7-18.3 s after the cast starts, and the Ghoul was raised after it, so the swing fell inside the aura; the harness keeps no time per minion swing, so its roll time is not known. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
   },
   {
     "spell": 561164,
@@ -2511,10 +2511,11 @@
     "spell": 805048,
     "clause": "Damage dealt by this minion will emit Zombie Plague, dealing ${$504022m1+$504022ppl1+$SP*0.1} Plague damage to nearby enemies,",
     "labels": [
-      "805048 behaviour_metric_delta zombie_plague"
+      "805048 behaviour_metric_delta zombie_plague",
+      "805048 behaviour_metric_delta damaging_hits"
     ],
     "kind": "claim",
-    "reason": "Fix note FN-3 revised (not built): live rate 65% per swing, no source states a chance. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"79 + 10% SP ... attack power by 223\"; logs: Plaguefather 1341 swings, 1004 Zombie Plague casts (869 of 1341 swings followed within 50 ms, no ICD), 294 Bone Toss applications by the Plaguefather, none at a Zombie Plague hit, median gap 1.24 s."
+    "reason": "Fixed by ADR 0324 (every damaging hit, mentor-approved FN-3): p15 reads 5 damaging hits and 6 Zombie Plague hits (5 plus the Command's) in both runs, control 0. The live rate (64.8% of 1341 damaging swings) is owner question Q-a1-9. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"79 + 10% SP ... attack power by 223\"; logs: Plaguefather 1341 swings, 1004 Zombie Plague casts (869 of 1341 swings followed within 50 ms, no ICD), 294 Bone Toss applications by the Plaguefather, none at a Zombie Plague hit, median gap 1.24 s."
   },
   {
     "spell": 805048,

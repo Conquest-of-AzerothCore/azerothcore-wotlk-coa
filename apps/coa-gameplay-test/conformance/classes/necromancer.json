@@ -339,6 +339,13 @@
       "metric": "pet_melee_blocked", "fields": {"entry": 50073}, "observe_source": "Blocked Ghoul swings under the army (pet_melee_blocked, HITINFO_BLOCK): the stock roll puts block before crit (Unit.cpp:3495-3510), so a blocked swing would be a non-critical hit; read 0, so a block is not what gives the plain hit of the reproduction (progress.md C1)."
     },
     {
+      "spell": 561138, "name": "Army of the North (aura applied)", "kind": "metric_delta", "variant": "army_applied",
+      "label_suffix": "army_applied", "quote": "For the duration", "expected": 1, "before_expected": 0,
+      "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 3300, "expire_ms": 500,
+      "metric": "aura", "fields": {"spell": 561138},
+      "observe_source": "The army's aura 561138 on the caster 300 ms after its 3000 ms cast ends: present, so it covers every Ghoul swing of the crit entries (the Ghoul is raised after the army). Control: no cast, absent."
+    },
+    {
       "spell": 561138, "name": "Army of the North (aura army_held)", "kind": "metric_delta", "variant": "army_held",
       "label_suffix": "army_held", "quote": "For the duration", "expected": 1, "before_expected": 0,
       "trigger_spell": 561138, "target": "caster", "cast_in_before": false, "wait_ms": 17700, "expire_ms": 500,
@@ -615,7 +622,15 @@
       "trigger_spell": 504868, "target": "dummy", "setup_casts": [805048], "setup_only_after": true,
       "setup_wait_ms": 2500, "after_at_least": 2, "wait_ms": 9000, "expire_ms": 500,
       "metric": "spell_damage_count", "fields": {"spell": 504022, "caster_entry": 50385, "target": "dummy"},
-      "observe_source": "Same arms as the in-combat entry: Zombie Plague 504022 hits from the Plaguefather on the dummy. The Command itself casts one; damage dealt by the Plaguefather must emit more, so at least 2. Control: no Plaguefather, 0."
+      "observe_source": "Same arms as the in-combat entry: Zombie Plague 504022 hits from the Plaguefather on the dummy. The Command itself casts one; each damaging hit of the Plaguefather then casts one more (AscensionNecromancerEvents.cpp, ADR 0324), so the count is the damaging hits of the damaging_hits entry plus one, at least 2. Control: no Plaguefather, 0."
+    },
+    {
+      "spell": 805048, "name": "Animate: Plaguefather (damaging hits)", "kind": "metric_delta", "variant": "damaging_hits",
+      "label_suffix": "damaging_hits", "quote": "Damage dealt by this minion will emit", "expected": 2, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "setup_casts": [805048], "setup_only_after": true,
+      "setup_wait_ms": 2500, "after_at_least": 2, "wait_ms": 9000, "expire_ms": 500,
+      "metric": "pet_melee_hits", "fields": {"entry": 50385},
+      "observe_source": "The Plaguefather 50385's damaging melee swings in the same arms as the Zombie Plague entry (9000 ms after the Command): the count each Zombie Plague hit is set against (ADR 0324: one Zombie Plague per damaging hit, plus the one the Command casts). Control: no Plaguefather, 0."
     },
     {
       "spell": 805048, "name": "Animate: Plaguefather (attack power reduction)", "kind": "metric_delta", "variant": "bone_toss",
