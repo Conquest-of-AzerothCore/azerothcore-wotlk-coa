@@ -6652,7 +6652,7 @@
     },
     {
       "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "blade_tempest",
-      "label_suffix": "blade_tempest", "quote": "Reduces the Energy cost of your Oath Breakers by",
+      "arm_wait_ms": 5500, "label_suffix": "blade_tempest", "quote": "Reduces the Energy cost of your Oath Breakers by",
       "gated_spell": 8054099, "resource": "power", "reduction": 10,
       "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 0 bit 4. Blade Tempest 8054099 (SpellFamilyFlags[0] 4) ManaCost 35, PowerType 3, CasterAuraSpell 704575 (set before each attempt): 25 allowed, 24 beyond. Arms: 25 without the talent (refused, 85), 25 with it (through), 24 with it (refused)."
     },
@@ -6670,33 +6670,62 @@
     },
     {
       "spell": 704180, "name": "Blessed Strikes", "kind": "cost_gate", "variant": "righteous_tempest",
-      "label_suffix": "righteous_tempest", "quote": "Reduces the Energy cost of your Oath Breakers by",
+      "arm_wait_ms": 5500, "label_suffix": "righteous_tempest", "quote": "Reduces the Energy cost of your Oath Breakers by",
       "gated_spell": 807274, "resource": "power", "reduction": 10,
       "observe_source": "$s1 = 10 (704180 EffectBasePoints[0] -11), SPELLMOD_COST, family mask word 0 bit 4. Righteous Tempest 807274 ManaCost 30, PowerType 3, CasterAuraSpell 704576: 20 allowed, 19 beyond. Arms: 20 without the talent (refused, 85), 20 with it (through), 19 with it (refused)."
     },
     {
       "spell": 706312, "name": "Holy Edge (Rank 1, Scourgebane)", "kind": "fixed_count", "variant": "scourgebane",
       "label_suffix": "scourgebane", "quote": "now strikes $s1 additional nearby enemy", "expected": 1,
-      "radius": 10.0, "cast_spell": 801832,
+      "radius": 10.0, "learn": [706312], "cast_spell": 801832,
       "radius_reason": "706312 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1, family mask word 1 bit 8388608 (Scourgebane 801832) and word 0 bit 8192 (Scarlet Hammer 807035). 801832 EffectChainTarget[0] 1, so with the talent Spell::SelectImplicitChainTargets reaches the target and 1 more. 801832 DmgClass 1 (magic): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond that. 801832 is cast directly at the primary; the modifier reads the spell id, not the script path that casts it."
     },
     {
       "spell": 707853, "name": "Holy Edge (Rank 2, Scourgebane)", "kind": "fixed_count", "variant": "scourgebane",
       "label_suffix": "scourgebane", "quote": "now strikes $s1 additional nearby enemies", "expected": 2,
-      "radius": 10.0, "cast_spell": 801832,
+      "radius": 10.0, "learn": [707853], "cast_spell": 801832,
       "radius_reason": "707853 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS (EffectMiscValue[0] 17), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = +2, on Scourgebane 801832 (EffectChainTarget[0] 1): the target and 2 more. Magic chain jumps up to 10 yd (Spell.cpp:2214-2221); the far dummy stands 5 yd beyond. Cast directly at the primary."
     },
     {
       "spell": 706312, "name": "Holy Edge (Rank 1, Scarlet Hammer)", "kind": "fixed_count",
       "variant": "scarlet_hammer", "label_suffix": "scarlet_hammer",
-      "quote": "now strikes $s1 additional nearby enemy", "expected": 1, "radius": 10.0, "cast_spell": 807035,
+      "quote": "now strikes $s1 additional nearby enemy", "expected": 1, "radius": 10.0, "learn": [706312], "cast_spell": 807035,
       "radius_reason": "706312 Effect[0] SPELLMOD_JUMP_TARGETS +1, family mask word 0 bit 8192 (Scarlet Hammer 807035). 807035 EffectChainTarget[0] 1, DmgClass 2 (melee): Spell::SearchChainTargets jumps up to 10 yd (Spell.cpp:2210-2213); the far dummy stands 5 yd beyond. Cast directly at the primary."
     },
     {
       "spell": 707853, "name": "Holy Edge (Rank 2, Scarlet Hammer)", "kind": "fixed_count",
       "variant": "scarlet_hammer", "label_suffix": "scarlet_hammer",
-      "quote": "now strikes $s1 additional nearby enemies", "expected": 2, "radius": 10.0, "cast_spell": 807035,
+      "quote": "now strikes $s1 additional nearby enemies", "expected": 2, "radius": 10.0, "learn": [707853], "cast_spell": 807035,
       "radius_reason": "707853 Effect[0] SPELLMOD_JUMP_TARGETS +2 on Scarlet Hammer 807035 (EffectChainTarget[0] 1, DmgClass 2 melee, 10 yd jumps, Spell.cpp:2210-2213): the target and 2 more; the far dummy stands 5 yd beyond. Cast directly at the primary."
+    },
+    {
+      "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cooldown",
+      "label_suffix": "cooldown", "quote": "Removes the cooldown from Benediction", "gated_spell": 578276,
+      "resource": "cooldown", "reduction": 6000, "target": "ally", "cast_power": 100,
+      "observe_source": "707663 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%: the whole cooldown. Benediction 578276 CategoryRecoveryTime 6000 ms (Category 100), StartRecoveryTime 1250 ms, CasterAuraSpell Oath Chain 704576 (set before each attempt), cast at the grouped ally. Energy is set to 100 before each cast (cast_power): the talent also raises the cost to 30 (claim 262), which the plain 20 would refuse. Arms timed from a priming cast: 2100 ms later (500 ms after the 1600 ms global cooldown wait) without the talent, refused (SPELL_FAILED_NOT_READY 67); with it, through. A removed cooldown has no later wait that is refused, so there is no beyond arm."
+    },
+    {
+      "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cost",
+      "label_suffix": "cost", "quote": "but increases its Energy cost by", "gated_spell": 578276, "resource": "power",
+      "reduction": -10, "target": "ally",
+      "observe_source": "$s2 = 10 (707663 EffectBasePoints[1] 9, EffectDieSides[1] 1): Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST). Benediction 578276 ManaCost 20, PowerType 3 (Energy), cast at the grouped ally: the raised cost is 30. Arms: 20 Energy without the talent (through), 20 with it (refused, SPELL_FAILED_NO_POWER 85), 30 with it (through), 29 with it (refused)."
+    },
+    {
+      "spell": 500688, "name": "Spiritual Ascension", "kind": "cast_combat", "variant": "revive",
+      "label_suffix": "revive", "quote": "bringing them back to life", "cast_spell": 500758, "resurrect": true,
+      "observe_source": "500688's chain (AscensionSpellProgressionData.h:853-856); 500758 is the level 60 rank: Effect[0] 18 SPELL_EFFECT_RESURRECT, EffectBasePoints[0] 819 (health), EffectMiscValue[0] 1030 (mana), CastingTimeIndex 5 (2000 ms), RangeIndex 3. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) that the dead ally takes with CMSG_RESURRECT_RESPONSE 348 (the bloodmage-vampyr-bite-resurrect-3994 scenario's accept packet). Control: the dead ally sends the response before any cast and stays dead; after the cast it sends it again and must be alive. The cast is made in combat, as the base entry's."
+    },
+    {
+      "spell": 706312, "name": "Holy Edge (Rank 1, Scourgebane control)", "kind": "fixed_count",
+      "variant": "scourgebane_control", "label_suffix": "scourgebane_control",
+      "quote": "now strikes $s1 additional nearby enemy", "expected": 0, "radius": 10.0, "cast_spell": 801832,
+      "radius_reason": "The control arm of the scourgebane entry: Holy Edge is not learned, so Scourgebane 801832 (EffectChainTarget[0] 1) reaches only its target; one candidate inside 10 yd (Spell.cpp:2214-2221 magic chain jumps) and one beyond it stay unhit."
+    },
+    {
+      "spell": 706312, "name": "Holy Edge (Rank 1, Scarlet Hammer control)", "kind": "fixed_count",
+      "variant": "scarlet_hammer_control", "label_suffix": "scarlet_hammer_control",
+      "quote": "now strikes $s1 additional nearby enemy", "expected": 0, "radius": 10.0, "cast_spell": 807035,
+      "radius_reason": "The control arm of the scarlet_hammer entry: Holy Edge is not learned, so Scarlet Hammer 807035 (EffectChainTarget[0] 1) reaches only its target; one candidate inside 10 yd (Spell.cpp:2210-2213 melee chain jumps) and one beyond it stay unhit."
     }
   ],
   "player_observations": [
