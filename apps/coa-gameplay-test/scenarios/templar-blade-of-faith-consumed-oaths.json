@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Blade of Faith's ticks gain 10% for each consumed Oath that adds nothing to them",
-  "contract": "Blade of Faith says \"Consumes your Oaths, dealing additional damage for each consumed.\" Righteous Lunge's and Retribution's Oaths carry only SPELLMOD_DAMAGE mods, which the periodic path never reads, so they added nothing to the ticks. The owner ruled +10% per such consumed Oath, a provisional value, additive (ADR 0289). Condemn and Vindication (+25% through aura 271) and Holy Cleave (+25 per tick) keep their own effects with no extra 10%. Each arm casts rank 9 (803880) at its own level 60 dummy with crit chance forced to 0 and the dummy's resistance removed, and reads the first tick against the no-Oath tick. Two stacks of the Lunge Oath count as two Oaths (x1.20). Under Keeping the Oath the Oath is held, not consumed, and the tick still gains 10%, mirroring the direct Oath Breakers. The dummies stand 11 yd apart, beyond a melee chain jump and the Templar moves 3 yd from each in turn, so Holy Cleave's extra target cannot reach another arm's dummy. Absolute reads at level 60 (authoring run 20261112-081755): 191 with no Oath, 210 for Lunge, Retribution and Lunge under Keeping the Oath, 238 for Condemn and Vindication, 216 for Holy Cleave and 388 for all five.",
+  "contract": "Blade of Faith says \"Consumes your Oaths, dealing additional damage for each consumed.\" Righteous Lunge's and Retribution's Oaths carry only SPELLMOD_DAMAGE mods, which the periodic path never reads, so they added nothing to the ticks. The owner ruled +10% per such consumed Oath, a provisional value, additive (ADR 0289). Condemn and Vindication (+25% through aura 271) and Holy Cleave (+25 per tick) keep their own effects with no extra 10%. Each arm casts rank 9 (803880) at its own level 60 dummy with crit chance forced to 0 and the dummy's resistance removed, and reads the first tick against the no-Oath tick. Two stacks of the Lunge Oath count as two Oaths (x1.20). Under Keeping the Oath the Oath is held, not consumed, and the tick still gains 10%, mirroring the direct Oath Breakers. The dummies stand 11 yd apart, and the two arms with Holy Cleave's extra target come last, 15 yd from their neighbours and the Templar moves 3 yd from each in turn, so Holy Cleave's extra target cannot reach another arm's dummy. Absolute reads at level 60 (authoring run 20261112-081755): 191 with no Oath, 210 for Lunge, Retribution and Lunge under Keeping the Oath, 238 for Condemn and Vindication, 216 for Holy Cleave and 388 for all five.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -70,7 +70,7 @@
       "stationary": true
     },
     {
-      "id": "d_cleave",
+      "id": "d_keeping_the_oath",
       "owner": "templar",
       "entry": 36,
       "level": 60,
@@ -79,21 +79,21 @@
       "stationary": true
     },
     {
+      "id": "d_cleave",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 84,
+      "stationary": true
+    },
+    {
       "id": "d_all",
       "owner": "templar",
       "entry": 36,
       "level": 60,
       "health": 50000000,
-      "distance": 80,
-      "stationary": true
-    },
-    {
-      "id": "d_keeping_the_oath",
-      "owner": "templar",
-      "entry": 36,
-      "level": 60,
-      "health": 50000000,
-      "distance": 91,
+      "distance": 99,
       "stationary": true
     }
   ],
@@ -339,7 +339,7 @@
     },
     {
       "action": "assert",
-      "label": "lunge_two: the cast consumed both stacks of the Oaths",
+      "label": "lunge_two: the cast consumed the Oaths",
       "actor": "templar",
       "metric": "aura",
       "spell": 804904,
@@ -634,6 +634,114 @@
     },
     {
       "action": "assert",
+      "label": "The Templar stands 3 yd from d_keeping_the_oath",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_keeping_the_oath",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 92109,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_keeping_the_oath"
+    },
+    {
+      "action": "wait",
+      "label": "keeping_the_oath: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "keeping_the_oath: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_keeping_the_oath",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Keeping the Oath: the Lunge Oath is still held after the cast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 92109,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Keeping the Oath 92109 held: the Lunge Oath is not consumed, and the tick still gains 10%, as a direct Breaker keeps its Oath bonus under it",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_keeping_the_oath",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 15
+    },
+    {
+      "action": "assert",
       "label": "The Templar stands 3 yd from d_cleave",
       "actor": "templar",
       "metric": "distance",
@@ -720,7 +828,7 @@
     {
       "action": "relocate",
       "actor": "templar",
-      "dx": 11
+      "dx": 15
     },
     {
       "action": "assert",
@@ -841,102 +949,6 @@
       "critical": false,
       "min": 387,
       "max": 389
-    },
-    {
-      "action": "relocate",
-      "actor": "templar",
-      "dx": 11
-    },
-    {
-      "action": "assert",
-      "label": "The Templar stands 3 yd from d_keeping_the_oath",
-      "actor": "templar",
-      "metric": "distance",
-      "target": "d_keeping_the_oath",
-      "min": 2.5,
-      "max": 3.5
-    },
-    {
-      "action": "set_aura",
-      "actor": "templar",
-      "spell": 823764,
-      "stacks": 1
-    },
-    {
-      "action": "set_aura",
-      "actor": "templar",
-      "spell": 64481,
-      "stacks": 1
-    },
-    {
-      "action": "set_aura",
-      "actor": "templar",
-      "spell": 92109,
-      "stacks": 1
-    },
-    {
-      "action": "set_aura",
-      "actor": "templar",
-      "spell": 804904,
-      "stacks": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "templar",
-      "power": 3,
-      "value": 35
-    },
-    {
-      "action": "reset_cooldown",
-      "actor": "templar",
-      "spell": 803880
-    },
-    {
-      "action": "set_aura",
-      "actor": "templar",
-      "spell": 704576,
-      "stacks": 1
-    },
-    {
-      "action": "cast",
-      "actor": "templar",
-      "spell": 803880,
-      "target": "d_keeping_the_oath"
-    },
-    {
-      "action": "wait",
-      "label": "keeping_the_oath: first tick at 3 sec",
-      "ms": 4700
-    },
-    {
-      "action": "assert",
-      "label": "keeping_the_oath: one non-critical tick landed",
-      "actor": "templar",
-      "metric": "spell_damage_count",
-      "spell": 803880,
-      "target": "d_keeping_the_oath",
-      "critical": false,
-      "equals": 1
-    },
-    {
-      "action": "assert",
-      "label": "Keeping the Oath: the Lunge Oath is still held after the cast",
-      "actor": "templar",
-      "metric": "aura",
-      "spell": 804904,
-      "equals": 1
-    },
-    {
-      "action": "assert",
-      "label": "Keeping the Oath 92109 held: the Lunge Oath is not consumed, and the tick still gains 10%, as a direct Breaker keeps its Oath bonus under it",
-      "actor": "templar",
-      "metric": "spell_damage_total",
-      "spell": 803880,
-      "target": "d_keeping_the_oath",
-      "critical": false,
-      "ratio_to": "tick_none",
-      "min": 1.09,
-      "max": 1.11
     }
   ]
 }
