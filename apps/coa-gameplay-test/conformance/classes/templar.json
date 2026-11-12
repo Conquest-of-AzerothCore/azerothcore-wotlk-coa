@@ -1783,6 +1783,16 @@
   ],
   "behaviours": [
     {
+      "spell": 527023, "name": "Divine Charge (trample, no attack or spell power)", "kind": "script_hit",
+      "variant": "no_power", "label_suffix": "no_power",
+      "quote": "and causing them to trample nearby enemies for ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage",
+      "hit_spell": 527269, "value_spell": 527270, "value_effect": 2, "casts": [[527023, "caster"]], "control_casts": [],
+      "stat_auras": [[1159613, 1]],
+      "caster_auras": [[527023, 0], [527272, 0], [527270, 0], [1159613, 0], [1159613, 1]], "settle_ms": 1600,
+      "trials": 30, "minimum_hits": 30,
+      "observe_source": "Control of the trample entry (ADR 0209, 0210): Demoralizing Shout 1159613 (aura 99, -501 attack power) is set on the caster before its stats are measured and again before every trial, so its attack power reads 0 (Unit::GetTotalAttackPowerValue clamps below 0) beside a Holy spell power of 0. The trample then carries only the base term $527270m3 + $527270ppl3 = 65 + floor(1.35 x 40) = 119, whatever the AP and SP terms do; the same casts, controls and dummy as the trample entry."
+    },
+    {
       "spell": 527023, "name": "Divine Charge (trample)", "kind": "script_hit",
       "quote": "and causing them to trample nearby enemies for ${$527270m3+$527270ppl3+$AP*.2+$sph*.4} Holy Damage",
       "hit_spell": 527269, "value_spell": 527270, "value_effect": 2, "casts": [[527023, "caster"]], "control_casts": [],
