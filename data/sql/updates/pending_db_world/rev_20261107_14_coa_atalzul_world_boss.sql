@@ -138,12 +138,14 @@ UPDATE `creature_template_model` SET `CreatureDisplayID` = 79411, `DisplayScale`
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 27550, `DisplayScale` = 1 WHERE `CreatureID` = 67534;
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 10700, `DisplayScale` = 1.5 WHERE `CreatureID` = 67535;
 DELETE FROM `creature_template_movement` WHERE `CreatureId` = 67535;
-INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES (67535, 1, 0, 1, 0);
+INSERT INTO `creature_template_movement` (`CreatureId`, `Ground`, `Swim`, `Flight`, `Rooted`) VALUES
+(67535, 1, 0, 1, 0);
 UPDATE `creature_template_model` SET `CreatureDisplayID` = 47751, `DisplayScale` = 1 WHERE `CreatureID` = 67536;
 UPDATE `creature_template_model` SET `DisplayScale` = 1.5 WHERE `CreatureID` = 978090;
 
 -- The shielded Soul Vessel carries a creature whose model is the state effect of Sinister Shield (55706), the Arcane
--- Bomb missile model (display 461865, a sphere 8.3 yards across, scaled to 30 round the altar and the crystal), as auras
+-- Bomb missile model (display 461865, a sphere 8.3 yards across, scaled to 30 round the altar and the
+-- crystal), as auras
 -- never showed; and an invisible stalker (display 11686) the beam to Atal'zul leaves from, at the middle of the
 -- crystal.
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `minlevel`, `maxlevel`, `faction`, `npcflag`,
