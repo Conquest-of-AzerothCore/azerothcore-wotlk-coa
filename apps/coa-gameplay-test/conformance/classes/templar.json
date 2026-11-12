@@ -6701,8 +6701,8 @@
     {
       "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cooldown",
       "label_suffix": "cooldown", "quote": "Removes the cooldown from Benediction", "gated_spell": 578276,
-      "resource": "cooldown", "reduction": 6000, "target": "ally", "cast_power": 100, "margin_ms": 100,
-      "observe_source": "707663 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%: the whole cooldown. Benediction 578276 CategoryRecoveryTime 6000 ms (Category 100), StartRecoveryTime 1250 ms, CasterAuraSpell Oath Chain 704576 (set before each attempt), cast at the grouped ally. Energy is set to 100 before each cast (cast_power): the talent also raises the cost to 30 (claim 262), which the plain 20 would refuse. Arms timed from a real priming cast: the second cast 1700 ms later (100 ms after the harness's 1600 ms global cooldown wait, 450 ms after Benediction's 1250 ms StartRecoveryTime) without the talent, refused for its cooldown (SPELL_FAILED_NOT_READY 67); with it, accepted. The global cooldown is the limit: a cooldown left below 1700 ms would read the same. A removed cooldown has no later wait that is refused, so there is no beyond arm."
+      "resource": "cooldown", "reduction": 6000, "target": "ally", "cast_power": 100, "removal_wait_ms": 1350,
+      "observe_source": "707663 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%: the whole cooldown. Benediction 578276 CategoryRecoveryTime 6000 ms (Category 100), StartRecoveryTime 1250 ms, CasterAuraSpell Oath Chain 704576 (set before each attempt), cast at the grouped ally. Energy is set to 100 before each cast (cast_power): the talent also raises the cost to 30 (claim 262), which the plain 20 would refuse. Arms timed from a real priming cast: Benediction's remaining cooldown is read right after it (cooldown_ms; with the talent it must be 0, so no residual is left), and the second cast comes 1350 ms later (100 ms after Benediction's 1250 ms StartRecoveryTime, the earliest the global cooldown allows): without the talent refused for its cooldown (SPELL_FAILED_NOT_READY 67), with it accepted. A removed cooldown has no later wait that is refused, so there is no beyond arm."
     },
     {
       "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cost",
@@ -6755,31 +6755,31 @@
       "variant": "cast_time_early", "label_suffix": "cast_time_early",
       "quote": "Your Benediction now has a $/1000;S1 sec cast time", "expected": 1, "trigger_spell": 578276,
       "target": "caster", "metric": "spell_heal_count", "fields": {"spell": 578276, "target": "caster"},
-      "before_expected": 1, "wait_ms": 1300, "expire_ms": 6500,
-      "observe_source": "$/1000;S1 = 1.5 sec (706449 EffectBasePoints[0] 1499 + EffectDieSides[0] 1 = +1500 ms): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), mask word 0 bit 1073741824 (Benediction 578276, CastingTimeIndex 1, instant). The Templar casts Benediction on itself: without the talent its heal lands within 1300 ms (count 1); with it, 1300 ms after the cast starts, no second heal has landed (count still 1). The late entry reads the count 1700 ms after the cast."
+      "before_expected": 1, "wait_ms": 1440, "expire_ms": 6500,
+      "observe_source": "$/1000;S1 = 1.5 sec (706449 EffectBasePoints[0] 1499 + EffectDieSides[0] 1 = +1500 ms): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), mask word 0 bit 1073741824 (Benediction 578276, CastingTimeIndex 1, instant). The Templar casts Benediction on itself: without the talent its heal lands within 1440 ms (count 1); with it, 1440 ms after the cast starts, no second heal has landed (count still 1). The late entry reads the count 1525 ms after the cast: the reads bracket the stated 1500 ms within the 75 ms shift of the duration rule (ADR 0126), each read one world tick after its wait."
     },
     {
       "spell": 706449, "name": "Holy Light (cast time, landed)", "kind": "metric_delta", "variant": "cast_time_late",
       "label_suffix": "cast_time_late", "quote": "Your Benediction now has a $/1000;S1 sec cast time", "expected": 2,
       "trigger_spell": 578276, "target": "caster", "metric": "spell_heal_count",
-      "fields": {"spell": 578276, "target": "caster"}, "before_expected": 1, "wait_ms": 1700, "expire_ms": 6500,
-      "observe_source": "As the early entry: with Holy Light the second Benediction's heal has landed 1700 ms after the cast starts (count 2), so the cast ends in (1300, 1700] ms, around the stated 1500 ms; without the talent the heal of the instant cast is counted within 1700 ms (count 1)."
+      "fields": {"spell": 578276, "target": "caster"}, "before_expected": 1, "wait_ms": 1525, "expire_ms": 6500,
+      "observe_source": "As the early entry: with Holy Light the second Benediction's heal has landed 1525 ms after the cast starts (count 2), so the cast ends after 1440 ms and by about 1525 ms plus one world tick, against the stated 1500 ms; without the talent the heal of the instant cast is counted within 1525 ms (count 1)."
     },
     {
       "spell": 706320, "name": "Combat Training", "kind": "hit_ratio", "variant": "oath_lunge",
       "label_suffix": "oath_lunge", "quote": "Increases the effectiveness of Oaths by", "expected": 1.0561,
       "observe_spell": 572027, "learn": [572027], "control": {"auras": [[804904, 1]]},
-      "treatment": {"auras": [[706320, 1], [804904, 1]]}, "critical": false, "trials": 40,
+      "treatment": {"auras": [[706320, 1], [804904, 1]]}, "critical": false, "trials": 80, "parts": 3, "stated": {"bonus": 20, "parts": [5, 30]},
       "fixture": {"attack_power": 20000},
-      "expected_source": "$s1 = 20 (706320 EffectBasePoints[0] 19 + 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS), mask word 2 bit 2147483648, which every Oath carries (13 spells, Oath: Righteous Lunge 804904 SpellFamilyFlags[2] 2181038080). 804904's Effect[0] (+5%) and Effect[2] (+30%) both reach Righteous Upheaval 572027 (the existing 572027 oath entry: 1.05 x 1.30 = 1.365). With Combat Training they read +6% and +36%: 1.06 x 1.36 = 1.4416, so the treatment over the control (both with the Oath, set before every trial; Combat Training set first so the Oath's amounts are computed under it) is 1.4416 / 1.365 = 1.0561. Attack power fixture 20000. Only non-critical hits are compared."
+      "expected_source": "$s1 = 20 (706320 EffectBasePoints[0] 19 + 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS), mask word 2 bit 2147483648, which every Oath carries (13 spells, Oath: Righteous Lunge 804904 SpellFamilyFlags[2] 2181038080). 804904's Effect[0] (+5%) and Effect[2] (+30%) both reach Righteous Upheaval 572027 (the existing 572027 oath entry: 1.05 x 1.30 = 1.365). With Combat Training they read +6% and +36%: 1.06 x 1.36 = 1.4416, so the treatment over the control (both with the Oath, set before every trial; Combat Training set first so the Oath's amounts are computed under it) is 1.4416 / 1.365 = 1.0561. Attack power fixture 20000. Only non-critical hits are compared. Judged in Combat Training's own unit (ADR 0239): the measured ratio is read back as the bonus x for which prod(1 + part x (1 + x)) / prod(1 + part) equals it, over the Oath's parts that reach Upheaval, and x must lie from 18% to 22%; 3 parts of 80 trials per arm are pooled."
     },
     {
       "spell": 706320, "name": "Combat Training", "kind": "hit_ratio", "variant": "oath_condemn",
       "label_suffix": "oath_condemn", "quote": "Increases the effectiveness of Oaths by", "expected": 1.0462,
       "observe_spell": 572027, "learn": [572027], "control": {"auras": [[804922, 1]]},
-      "treatment": {"auras": [[706320, 1], [804922, 1]]}, "critical": false, "trials": 40,
+      "treatment": {"auras": [[706320, 1], [804922, 1]]}, "critical": false, "trials": 80, "parts": 3, "stated": {"bonus": 20, "parts": [30]},
       "fixture": {"attack_power": 20000},
-      "expected_source": "$s1 = 20, SPELLMOD_ALL_EFFECTS on every Oath (mask word 2 bit 2147483648; Oath: Condemn 804922 SpellFamilyFlags[2] bit 31). 804922 Effect[2] aura 108 SPELLMOD_DAMAGE +30% on the Oath Breaker mask (word 2 bit 128) reaches Righteous Upheaval 572027; its Effect[0] (aura 290) and flat Effect[1] do not. With Combat Training +36%: 1.36 / 1.30 = 1.0462. Attack power fixture 20000. Only non-critical hits are compared."
+      "expected_source": "$s1 = 20, SPELLMOD_ALL_EFFECTS on every Oath (mask word 2 bit 2147483648; Oath: Condemn 804922 SpellFamilyFlags[2] bit 31). 804922 Effect[2] aura 108 SPELLMOD_DAMAGE +30% on the Oath Breaker mask (word 2 bit 128) reaches Righteous Upheaval 572027; its Effect[0] (aura 290) and flat Effect[1] do not. With Combat Training +36%: 1.36 / 1.30 = 1.0462. Attack power fixture 20000. Only non-critical hits are compared. Judged in Combat Training's own unit (ADR 0239): the measured ratio is read back as the bonus x for which prod(1 + part x (1 + x)) / prod(1 + part) equals it, over the Oath's parts that reach Upheaval, and x must lie from 18% to 22%; 3 parts of 80 trials per arm are pooled."
     },
     {
       "spell": 300530, "name": "Martyr", "kind": "metric_delta", "variant": "gift", "label_suffix": "gift",
@@ -6798,9 +6798,9 @@
       "spell": 706320, "name": "Combat Training", "kind": "hit_ratio", "variant": "oath_vindication",
       "label_suffix": "oath_vindication", "quote": "Increases the effectiveness of Oaths by", "expected": 1.0462,
       "observe_spell": 572027, "learn": [572027], "control": {"auras": [[805332, 1]]},
-      "treatment": {"auras": [[706320, 1], [805332, 1]]}, "critical": false, "trials": 40,
+      "treatment": {"auras": [[706320, 1], [805332, 1]]}, "critical": false, "trials": 80, "parts": 3, "stated": {"bonus": 20, "parts": [30]},
       "fixture": {"attack_power": 20000},
-      "expected_source": "$s1 = 20, SPELLMOD_ALL_EFFECTS on every Oath (mask word 2 bit 2147483648; Oath: Vindication 805332 SpellFamilyFlags [0, 0, 2415919104]). 805332 is a scripted Oath: AscensionTemplarAuras.cpp:78 sums its Effect[2] into Righteous Tempest, AscensionTemplarAbilities.cpp:354 rolls its Effect[0] amount for Zealotry, AscensionTemplarContracts.cpp:79-83 sets its stack amount. Its Effect[2] aura 108 SPELLMOD_DAMAGE +30% on the Oath Breaker mask (word 2 bit 128) reaches Righteous Upheaval 572027; with Combat Training +36%: 1.36 / 1.30 = 1.0462. Its Effect[0] (SPELLMOD 18 on word 2 bit 134217728) and Effect[1] (word 1 bit 2048) do not reach Upheaval. Attack power fixture 20000. Only non-critical hits are compared."
+      "expected_source": "$s1 = 20, SPELLMOD_ALL_EFFECTS on every Oath (mask word 2 bit 2147483648; Oath: Vindication 805332 SpellFamilyFlags [0, 0, 2415919104]). 805332 is a scripted Oath: AscensionTemplarAuras.cpp:78 sums its Effect[2] into Righteous Tempest, AscensionTemplarAbilities.cpp:354 rolls its Effect[0] amount for Zealotry, AscensionTemplarContracts.cpp:79-83 sets its stack amount. Its Effect[2] aura 108 SPELLMOD_DAMAGE +30% on the Oath Breaker mask (word 2 bit 128) reaches Righteous Upheaval 572027; with Combat Training +36%: 1.36 / 1.30 = 1.0462. Its Effect[0] (SPELLMOD 18 on word 2 bit 134217728) and Effect[1] (word 1 bit 2048) do not reach Upheaval. Attack power fixture 20000. Only non-critical hits are compared. Judged in Combat Training's own unit (ADR 0239): the measured ratio is read back as the bonus x for which prod(1 + part x (1 + x)) / prod(1 + part) equals it, over the Oath's parts that reach Upheaval, and x must lie from 18% to 22%; 3 parts of 80 trials per arm are pooled."
     },
     {
       "spell": 804903, "name": "Oath: Holy Cleave (under Combat Training)", "kind": "fixed_count",
@@ -6814,6 +6814,13 @@
       "expected": 0, "trigger_spell": 578276, "target": "caster", "cast_power": 100, "metric": "cooldown_ms",
       "fields": {"spell": 578276}, "before_expected": 5900, "tolerance": 150, "wait_ms": 100, "expire_ms": 6500,
       "observe_source": "Supporting data for the cost gate's removal arms (a readback, not the proof): Benediction 578276's remaining cooldown 100 ms after a cast on the Templar, about 5900 of its 6000 ms CategoryRecoveryTime without Justicar of the Light, 0 with it (707663 Effect[0] SPELLMOD_COOLDOWN -100%). Energy is set to 100 before each cast, since the talent raises the cost to 30."
+    },
+    {
+      "spell": 707754, "name": "Courage (Rank 1, movement speed)", "kind": "metric_delta", "variant": "speed",
+      "label_suffix": "speed", "quote": "Increases your movement speed", "expected": 1.1, "trigger_spell": 578276,
+      "target": "caster", "metric": "run_speed_rate", "fields": {}, "before_expected": 1.0, "wait_ms": 1000,
+      "expire_ms": 6500,
+      "observe_source": "$s2 = 10 (707754 EffectBasePoints[0] 9 + EffectDieSides[0] 1): Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The Templar's run speed rate is read before Courage is learned (the control, 1.0) and after (1.1), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 10% alerts (the passive scenario's run_speed_rate verdict uses a 1-point floor and stays data). A learned contrast of the run speed the clause promises (ADR 0190)."
     }
   ],
   "player_observations": [

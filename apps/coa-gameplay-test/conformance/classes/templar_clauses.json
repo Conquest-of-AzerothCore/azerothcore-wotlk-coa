@@ -3142,7 +3142,8 @@
     "spell": 707754,
     "clause": "Increases your movement speed ... by $s2%",
     "labels": [
-      "707754 e0 run_speed_rate"
+      "707754 e0 run_speed_rate",
+      "707754 behaviour_metric_delta speed"
     ],
     "kind": "claim"
   },
