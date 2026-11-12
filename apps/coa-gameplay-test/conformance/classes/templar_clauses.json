@@ -486,7 +486,10 @@
       "300929 e1 spell_power_cost 300513",
       "300929 cost_gate 300513 cost without",
       "300929 cost_gate 300513 cost with",
-      "300929 cost_gate 300513 cost beyond"
+      "300929 cost_gate 300513 cost beyond",
+      "300929 cost_gate 807268 cost_argent_blade without",
+      "300929 cost_gate 807268 cost_argent_blade with",
+      "300929 cost_gate 807268 cost_argent_blade beyond"
     ],
     "kind": "claim"
   },
@@ -3983,23 +3986,51 @@
   {
     "spell": 801480,
     "clause": "increases the effectiveness of your Librams by $s2%",
-    "labels": [
-      "801480 effect_value e1 #1",
-      "801480 e1 spell_modifier 801463",
-      "801480 e1 spell_modifier 805423",
-      "801480 e1 spell_modifier 801466",
-      "801480 behaviour_hit_ratio grace",
-      "801480 behaviour_metric_delta fervor_spell_power",
-      "801480 behaviour_metric_delta zeal_haste",
-      "801480 e1 spell_modifier 801461",
-      "801480 e1 spell_modifier 803893",
-      "801480 behaviour_hit_ratio tenacity",
-      "801480 behaviour_hit_ratio tenacity_without_talent",
-      "801480 consecration_targets behaviour_fixed_count",
-      "803893 behaviour_fixed_count"
+    "claims": [
+      {
+        "claim": "increases the effectiveness of your Librams by $s2%: Libram of Grace's healing received",
+        "labels": [
+          "801480 effect_value e1 #1",
+          "801480 e1 spell_modifier 801463",
+          "801480 behaviour_hit_ratio grace_cast",
+          "801480 behaviour_hit_ratio grace_cast_without_talent",
+          "801480 behaviour_hit_ratio grace"
+        ]
+      },
+      {
+        "claim": "increases the effectiveness of your Librams by $s2%: Libram of Fervor's spell power from Agility",
+        "labels": [
+          "801480 e1 spell_modifier 805423",
+          "801480 behaviour_metric_delta fervor_learned",
+          "801480 behaviour_metric_delta fervor_spell_power"
+        ]
+      },
+      {
+        "claim": "increases the effectiveness of your Librams by $s2%: Libram of Zeal's melee haste",
+        "labels": [
+          "801480 e1 spell_modifier 801466",
+          "801480 behaviour_metric_delta zeal_haste"
+        ]
+      },
+      {
+        "claim": "increases the effectiveness of your Librams by $s2%: Libram of Tenacity's Physical damage taken",
+        "labels": [
+          "801480 e1 spell_modifier 801461",
+          "801480 behaviour_hit_ratio tenacity",
+          "801480 behaviour_hit_ratio tenacity_without_talent"
+        ]
+      },
+      {
+        "claim": "increases the effectiveness of your Librams by $s2%: Libram of Consecration's nearby enemies struck",
+        "labels": [
+          "801480 e1 spell_modifier 803893",
+          "801480 consecration_targets behaviour_fixed_count",
+          "803893 behaviour_fixed_count"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "All 5 Librams in game, each doubled by 801480 Effect[1] SPELLMOD_ALL_EFFECTS on the Libram mask (word 2 bit 2048), against the same Libram without the talent on the same build: Grace 801463 healing received 1.2 -> 1.4 (hit_ratio grace); Fervor 805423 spell power 30% -> 60% of Agility (stat_gain fervor_spell_power against 805423 spell_power); Zeal 801466 attack time 2500/1.2 -> 2500/1.4 ms (metric_delta zeal_haste); Tenacity 801461 Physical damage taken 0.7 -> 0.4 (taken_hit tenacity_without_talent, tenacity; real casts); Consecration 803893 extra targets of 804148 4 -> 8 (fixed_count 803893 and consecration_targets). Tenacity and Consecration are reachable on live: Tenacity has advancement.tsv node 34340 (Monk, Class, Ability) in all three realm slices, db.exil.es class_spell, the bindmysoul calculator and video 2QVjZeKQauQ 2026-08-22 2:34 and 18:32; Consecration has no advancement.tsv or calculator row, but db.exil.es skill_line_ability 803890-803893 and 801441 on skill line 72 (Crusader), the coabuildhub skills_templar tooltip, videos 73yeWB1vKDQ 2026-08-14 0:54 and 2QVjZeKQauQ 2026-08-22 18:42 (Rank 5, 803893) and 18:23 (Libram rotation), and Ascension combat logs (extra_spells 801441 citation 2026-05-17, spell 803890; coa-history 804148 hits). Fixtures: Grace and Consecration applied by harness set_aura (the talent is learned for real, with a contrast on one build, and the outcome is an applied heal or the targets actually hit; rule 4 amendment point 6). Limit: a set_aura fixture does not show that the effect also holds when the Libram comes from a player's real cast, if the talent acts at cast time; Tenacity, Fervor and Zeal are cast for real and behave the same. Why no cast: Consecration's check is a fixed_count, whose entry can set auras but has no cast step for a second spell (only the strike, Chastise 503141), so a real Libram cast there needs a tool extension; Grace's check copies the set_aura design of the existing 801463 healing_received entry, and the hit_ratio arm cast that would replace it was not tried in this batch."
+    "reason": "All 5 Librams in game, each doubled by 801480 Effect[1] SPELLMOD_ALL_EFFECTS on the Libram mask (word 2 bit 2048), against the same Libram without the talent on the same build: Grace 801463 healing received 1.2 -> 1.4 after real Libram casts (hit_ratio grace_cast_without_talent, grace_cast; the set_aura hit_ratio grace is kept as support); Fervor 805423 Holy spell power 39 -> 79 after real casts before and after the talent is learned (metric_delta fervor_learned; stat_gain fervor_spell_power against 805423 spell_power as support); Zeal 801466 attack time 2500/1.2 -> 2500/1.4 ms (metric_delta zeal_haste); Tenacity 801461 Physical damage taken 0.7 -> 0.4 (taken_hit tenacity_without_talent, tenacity; real casts); Consecration 803893 extra targets of 804148 4 -> 8 (fixed_count 803893 and consecration_targets). Tenacity and Consecration are reachable on live: Tenacity has advancement.tsv node 34340 (Monk, Class, Ability) in all three realm slices, db.exil.es class_spell, the bindmysoul calculator and video 2QVjZeKQauQ 2026-08-22 2:34 and 18:32; Consecration has no advancement.tsv or calculator row, but db.exil.es skill_line_ability 803890-803893 and 801441 on skill line 72 (Crusader), the coabuildhub skills_templar tooltip, videos 73yeWB1vKDQ 2026-08-14 0:54 and 2QVjZeKQauQ 2026-08-22 18:42 (Rank 5, 803893) and 18:23 (Libram rotation), and Ascension combat logs (extra_spells 801441 citation 2026-05-17, spell 803890; coa-history 804148 hits). One claim per Libram (declared claims): each part names that Libram's effect, so the Fervor and Zeal parts are stat claims read on the live unit after real casts with a learned contrast (rule 4 amendment point 2). Fixture: Consecration applied by harness set_aura (rule 4 amendment point 6); the talent is learned for real, with the 803893 contrast on the same build, and the outcome is the targets actually hit. Limit: a set_aura fixture does not show that the effect also holds when the Libram comes from a player's real cast, if the talent acts at cast time; Grace, Tenacity, Fervor and Zeal are cast for real and behave the same. Why no cast for Consecration: the fixed_count kind can set auras but has no cast step besides the strike (Chastise 503141), so a real Libram cast there needs a tool extension."
   },
   {
     "spell": 801480,
@@ -5162,7 +5193,8 @@
       "806525 e1 spell_modifier 807035",
       "806525 e1 spell_effect_value 807035",
       "503141 hit_mean weapon_damage",
-      "806525 behaviour_hit_ratio scarlet_hammer"
+      "806525 behaviour_hit_ratio scarlet_hammer",
+      "503141 hit_mean"
     ],
     "kind": "claim"
   },
