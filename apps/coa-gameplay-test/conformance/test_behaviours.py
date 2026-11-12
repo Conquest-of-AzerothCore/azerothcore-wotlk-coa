@@ -742,7 +742,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 312)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 313)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -6564,6 +6564,27 @@ class TakenResistRateTests(unittest.TestCase):
                        {**entry, 'judge': 'absorb'}):
             with self.subTest(broken=broken.get('judge')), self.assertRaises(ValueError):
                 behaviour_scenario(CLASS_FILE, broken)
+
+
+class DetectionTests(unittest.TestCase):
+    def test_each_hide_aura_is_read_shown_hidden_revealed_and_unrevealed(self):
+        entry = variant_entry(300513, 'detection', None)
+        scenario, expectations = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        reads = [step['label'].rsplit(' ', 2)[-2:] for step in steps if step.get('metric') == 'can_detect']
+        self.assertEqual(reads, [[name, moment] for name in ('stealth', 'invisibility')
+                                 for moment in ('shown', 'hidden', 'revealed', 'unrevealed')])
+        reveals = [step for step in steps if step['action'] == 'set_aura' and step['spell'] == 300513]
+        self.assertTrue(all(step['target'] == 'dummy' and step['caster'] == CASTER for step in reveals))
+        self.assertEqual([expectation.model['expected'] for expectation in expectations], [0.0, 1.0, 0.0] * 2)
+
+    def test_seeded_brand_that_does_not_reveal_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, variant_entry(300513, 'detection', None))
+        revealed = next(expectation for expectation in expectations if expectation.label.endswith('stealth revealed'))
+        for after, status in ((1.0, 'ok'), (0.0, 'alert')):
+            values = {revealed.model['before_label']: 0.0, revealed.model['after_label']: after}
+            with self.subTest(after=after):
+                self.assertEqual(judge_behaviour(base_verdict(revealed), FakeRun(values), revealed).status, status)
 
 
 class MountedCastTests(unittest.TestCase):

@@ -209,8 +209,16 @@
   {
     "spell": 300513,
     "clause": "While marked enemies can always be seen by the Crusader even while stealthed or invisible.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300513 behaviour_detection stealth hidden",
+      "300513 behaviour_detection stealth revealed",
+      "300513 behaviour_detection stealth unrevealed",
+      "300513 behaviour_detection invisibility hidden",
+      "300513 behaviour_detection invisibility revealed",
+      "300513 behaviour_detection invisibility unrevealed"
+    ],
+    "kind": "claim",
+    "reason": "Read through Unit::CanSeeOrDetect (can_detect, a readback; ADR 0197): a dummy hidden by stealth and by invisibility is detected by the caster only while it carries 300513 cast by that caster (pair 20261112-001621, -001651). The client's object list did not refresh without movement (diagnostics 20261112-001336, -001430), so no applied-visibility read exists yet: a mentor question."
   },
   {
     "spell": 300514,

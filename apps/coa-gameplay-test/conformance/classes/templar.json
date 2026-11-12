@@ -4569,6 +4569,12 @@
       "observe_source": "Redemption 801483 $s1 = 30 (EffectBasePoints[0] 29, EffectDieSides[0] 1): Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, active from 10000 to 15000 ms after a Glory cast (Glory's own 30% haste ends at 5000 ms, Downfall has none). Unit::ApplyAttackTimePercentMod multiplies the 2500 ms reference swing by 100.0f / 130.0f in float: 1923.076904296875 read 12000 ms after the cast; the before phase does not cast Glory and reads 2500 (control)."
     },
     {
+      "spell": 300513, "name": "Crusader's Brand", "kind": "detection",
+      "quote": "While marked enemies can always be seen by the Crusader even while stealthed or invisible.",
+      "reveal_aura": 300513, "hide_auras": [[2144558, "stealth"], [8149, "invisibility"]],
+      "observe_source": "300513 Effect[1] is SPELL_AURA_MOD_STALKED (68); Unit::IsAlwaysDetectableFor (Unit.cpp:12358-12364) makes a unit carrying it always detectable by that aura's caster. A dummy 10 yd away is hidden by Stealth Dummy 2144558 (aura 16, stealth 1000000) and then by Super Invis 8149 (aura 18, invisibility type 0, 10000); each time the brand is set on it with the caster as its caster, then removed; can_detect reads Unit::CanSeeOrDetect of the caster for the dummy, the predicate the server's visibility updates apply. The client's object list (nearby_creature_at_client) did not refresh without movement in diagnostics 20261112-001336 and -001430, so it is not read."
+    },
+    {
       "spell": 560835, "name": "Lightkeeper", "kind": "fixed_count", "variant": "burst",
       "quote": "to up to $561277i1 enemies", "expected": 4, "radius": 5.0, "cast_spell": 561277,
       "target_rank": 561277, "learn": [560835],

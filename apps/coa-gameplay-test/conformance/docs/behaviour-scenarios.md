@@ -975,6 +975,10 @@ trials of every part and needs all of them to have run. `rate: "critical"` (crit
 spell) or `rate: "proc"` (hits of `rate_spell` over them) with `expected_points` judges the arms' difference of rates in
 percent points inside the larger of 5% of it and 2 points.
 
+`kind: "detection"` (ADR 0197) reads `can_detect` (`Unit::CanSeeOrDetect` of the caster for a dummy `distance` yd
+away) with the dummy shown, hidden by each of `hide_auras`, with `reveal_aura` set on it by the caster, and with it
+removed; hidden, revealed and unrevealed are each compared exactly. It is a readback.
+
 ### Site-purchase scenarios (`behaviour_cast_condition`, `kind: "site_purchase"`)
 
 "Pay a tithe of 1 silver to learn a special new ability" states a price and a place. `site_purchase_scenario`

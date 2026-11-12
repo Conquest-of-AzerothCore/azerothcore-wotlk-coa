@@ -335,7 +335,7 @@ METRIC_EVIDENCE = {
                      'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk',
                      'spell_absorb_total', 'spell_log_count'),
                     EVENT),
-    **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks',
+    **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks', 'can_detect',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
                      'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms', 'aura_charges', 'cooldown_ms',
                      'spell_cooldown_packet_ms',

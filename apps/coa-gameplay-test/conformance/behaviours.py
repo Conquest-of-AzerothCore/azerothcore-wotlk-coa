@@ -76,7 +76,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
-        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match')
+        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -5468,8 +5468,8 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
                                                             for trial in range(1, spec.trials + 1)]
                                                  for arm in spec.arms},
                  'expected_points': float(spec.expected_points), 'trials': spec.trials, 'quote': entry.quote}
-        scenario['contract'] += (f'; each trial reads whether {spec.strike_spell} took hold on the caster and removes it, '
-                                 f'and the treatment arm must resist it {spec.expected_points:g} points more often')
+        scenario['contract'] += (f'; each trial reads whether {spec.strike_spell} took hold on the caster and removes '
+                                 f'it, and the treatment arm must resist it {spec.expected_points:g} points more often')
         return scenario, [Expectation(label, BEHAVIOUR_TAKEN_HIT, spec.spell, spec.strike_spell, None,
                                       str(spec.expected_points), prose_rule(entry.quote, spec.spell), model)]
     if spec.judge == 'damage_ratio':
@@ -5977,6 +5977,77 @@ def sized_behaviour(entry: dict, trials: dict[str, int] | None) -> dict:
     return {**entry, 'trials': trials[label]} if label in trials else entry
 
 
+DETECTION_WAIT_MS = 1500
+DETECTION_DISTANCE_YD = 10.0
+DETECTION_METRIC = 'can_detect'
+DETECTION_MOMENTS = ('shown', 'hidden', 'revealed', 'unrevealed')
+
+
+@dataclass(frozen=True)
+class DetectionSpec:
+    spell: int
+    name: str
+    quote: str
+    reveal_aura: int
+    hide_auras: tuple[tuple[int, str], ...]
+    distance: float = DETECTION_DISTANCE_YD
+    wait_ms: int = DETECTION_WAIT_MS
+
+
+def detection_label(spec: DetectionSpec, name: str, moment: str) -> str:
+    return f'{spec.spell} behaviour_detection {name} {moment}'
+
+
+def detection_scenario(class_file: dict, spec: DetectionSpec) -> tuple[dict, list[Expectation]]:
+    if not spec.hide_auras or len({name for _, name in spec.hide_auras}) != len(spec.hide_auras):
+        raise ValueError(f'{spec.spell} detection needs hide auras with distinct names')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'detection', spec.quote, 1.0)
+    dummy = {**creature_fixture(class_file), 'distance': spec.distance}
+
+    def read(name: str, moment: str) -> list[dict]:
+        return [{'action': 'wait', 'label': f'{name} {moment} settle', 'ms': spec.wait_ms},
+                measurement(detection_label(spec, name, moment), CASTER, DETECTION_METRIC, target=TARGET)]
+
+    def aura(spell: int, stacks: int, caster: str | None = None) -> dict:
+        return {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'spell': spell, 'stacks': stacks,
+                **({'caster': caster} if caster else {})}
+
+    steps = base_steps(class_file)
+    expectations = []
+    for hide, name in spec.hide_auras:
+        steps += (read(name, 'shown') + [aura(hide, 1)] + read(name, 'hidden')
+                  + [aura(spec.reveal_aura, 1, CASTER)] + read(name, 'revealed')
+                  + [aura(spec.reveal_aura, 0, CASTER)] + read(name, 'unrevealed') + [aura(hide, 0)])
+        for before, after, before_expected, expected in (('shown', 'hidden', 1.0, 0.0),
+                                                         ('hidden', 'revealed', 0.0, 1.0),
+                                                         ('revealed', 'unrevealed', 1.0, 0.0)):
+            model = {'kind': 'metric_delta', 'before_label': detection_label(spec, name, before),
+                     'after_label': detection_label(spec, name, after), 'expected': expected,
+                     'before_expected': before_expected, 'metric': DETECTION_METRIC, 'quote': entry.quote}
+            expectations.append(Expectation(detection_label(spec, name, after), BEHAVIOUR_METRIC_DELTA, spec.spell,
+                                            spec.reveal_aura, None, f'{expected:g}',
+                                            prose_rule(entry.quote, spec.spell), model))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour detection',
+        'contract': f'The caster can detect a dummy {spec.distance:g} yd away (Unit::CanSeeOrDetect); for each of '
+                    f'{list(spec.hide_auras)} it is hidden by that aura (not detected), then {spec.reveal_aura} is set '
+                    f'on it with the caster as its caster (detected again), then removed (hidden again); each read '
+                    f'follows {spec.wait_ms} ms.',
+        'players': [player_fixture(class_file)],
+        'creatures': [dummy],
+        'steps': steps}
+    return scenario, expectations
+
+
+def detection_spec(entry: dict) -> DetectionSpec:
+    return DetectionSpec(entry['spell'], entry['name'], entry['quote'], int(entry['reveal_aura']),
+                         tuple((int(spell), str(name)) for spell, name in entry['hide_auras']),
+                         float(entry.get('distance', DETECTION_DISTANCE_YD)),
+                         int(entry.get('wait_ms', DETECTION_WAIT_MS)))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'school_lockout':
         from expiry import school_lockout_scenario
@@ -6095,6 +6166,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return taken_outcome_scenario(class_file, taken_outcome_spec(entry))
     if entry['kind'] == 'charm_immunity':
         return charm_immunity_scenario(class_file, charm_immunity_spec(entry))
+    if entry['kind'] == 'detection':
+        return detection_scenario(class_file, detection_spec(entry))
     raise NotModelled(f'behaviour kind {entry["kind"]!r} has no scenario builder')
 
 
