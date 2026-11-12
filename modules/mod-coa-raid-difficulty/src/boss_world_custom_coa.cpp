@@ -1525,12 +1525,7 @@ namespace
                         ai->SetState(VESSEL_OPEN);
                 });
                 for (uint8 i = 0; i < SPIRIT_COUNT; ++i)
-                {
-                    float const angle = float(M_PI) * 2.0f * i / SPIRIT_COUNT;
-                    me->SummonCreature(NPC_RESTLESS_SPIRIT, me->GetPositionX() + 8.0f * std::cos(angle),
-                        me->GetPositionY() + 8.0f * std::sin(angle), me->GetPositionZ() + SPIRIT_HEIGHT, angle,
-                        TEMPSUMMON_TIMED_DESPAWN, 120000);
-                }
+                    HoverSpirit(i);
                 _pull = 3s;
             }
         }
@@ -1621,10 +1616,20 @@ namespace
                     goals.push_back(ai->Where());
             });
             spirit->Send(goals.empty() ? me->GetPosition() : Acore::Containers::SelectRandomContainerElement(goals));
+            HoverSpirit(_hovered++);
+        }
+
+        void HoverSpirit(uint32 slot)
+        {
+            float const angle = float(M_PI) * 2.0f * float(slot % SPIRIT_COUNT) / SPIRIT_COUNT;
+            me->SummonCreature(NPC_RESTLESS_SPIRIT, me->GetPositionX() + 8.0f * std::cos(angle),
+                me->GetPositionY() + 8.0f * std::sin(angle), me->GetPositionZ() + SPIRIT_HEIGHT, angle,
+                TEMPSUMMON_TIMED_DESPAWN, 120000);
         }
 
         SummonList _summons;
         Milliseconds _pull = 3s;
+        uint32 _hovered = 0;
         uint8 _nextVeil = 80;
         uint32 _raise = 0;
         bool _phase = false;
