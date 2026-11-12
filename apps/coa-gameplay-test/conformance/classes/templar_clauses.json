@@ -256,9 +256,11 @@
     "spell": 300514,
     "clause": "Lasts $d.",
     "labels": [
-      "300514 aura_duration_ms"
+      "300514 aura_duration_ms",
+      "300514 behaviour_expiry lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 300514 on the caster after its cast: present 58500-58575 ms, absent 61500-61625 ms"
   },
   {
     "spell": 300514,
@@ -1269,9 +1271,11 @@
     "spell": 560116,
     "clause": "Forbid an enemy from sinning, silencing them for $d.",
     "labels": [
-      "560116 aura_duration_ms #0"
+      "560116 aura_duration_ms #0",
+      "560116 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of the silence 560116 on the dummy after its cast: present 5850-5925 ms, absent 6124-6249 ms"
   },
   {
     "spell": 560116,
@@ -1949,17 +1953,21 @@
     "spell": 705255,
     "clause": "for $803372d",
     "labels": [
-      "705255 spell_duration 803372 #1"
+      "705255 spell_duration 803372 #1",
+      "705255 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 803372 on the dummy after a Scourgebane strike 801832 with 705255 held: present 5850-5925 ms, absent 6124-6249 ms"
   },
   {
     "spell": 705255,
     "clause": "stacking $803372u times",
     "labels": [
-      "705255 max_stacks 803372 #2"
+      "705255 max_stacks 803372 #2",
+      "705255 behaviour_metric_delta stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "eleven Scourgebane strikes 801832 at the dummy: 0 stacks of 803372 without 705255, the cap of 10 with it"
   },
   {
     "spell": 705256,
@@ -2203,9 +2211,10 @@
     "spell": 705286,
     "clause": "Casting abilities that grant an Oath now increases your damage dealt and movement speed by $560834s1% for $560834d, stacking $560834u times.",
     "labels": [
-      "705286 trigger_count ok"
+      "705286 trigger_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "label repair: the free-text label '705286 trigger_count ok' named the trigger verdict '705286 trigger_count', one 560834 cast per Oath-granting Righteous Lunge 570233 (273 of 273)"
   },
   {
     "spell": 705286,
@@ -2219,7 +2228,9 @@
       },
       {
         "claim": "and movement speed by $560834s1%",
-        "labels": []
+        "labels": [
+          "705286 behaviour_metric_delta speed"
+        ]
       }
     ],
     "kind": "claim"
@@ -2228,17 +2239,19 @@
     "spell": 705286,
     "clause": "for $560834d",
     "labels": [
-      "705286 spell_duration 560834 #1 ok"
+      "705286 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 560834 on the caster after an Oath-granting Righteous Lunge 570233: present 14625-14700 ms, absent 15375-15500 ms; the free-text label '705286 spell_duration 560834 #1 ok' is dropped"
   },
   {
     "spell": 705286,
     "clause": "stacking $560834u times",
     "labels": [
-      "705286 max_stacks 560834 #2 ok"
+      "705286 behaviour_metric_delta stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "six Righteous Lunges 570233: 0 stacks of 560834 without 705286, the cap of 5 with it; the free-text label '705286 max_stacks 560834 #2 ok' is dropped"
   },
   {
     "spell": 705287,
@@ -2930,11 +2943,10 @@
     "spell": 707606,
     "clause": "grants you Oath: Retribution",
     "labels": [
-      "707606 effect_value 804924e0 #0",
       "707606 behaviour_metric_delta oath_aura"
     ],
     "kind": "claim",
-    "reason": "Oath: Retribution 804924 absent after Righteous Upheaval 572027 without 707606, present with it"
+    "reason": "Oath: Retribution 804924 absent after Righteous Upheaval 572027 without 707606, present with it (counted again in r2-a c1, 20261112-012437 / -012605). The label '707606 effect_value 804924e0 #0' is dropped: it reads the Oath's own effect amount from the embedded @s:804924:0@ tooltip, not the grant, and stays not_measured on a fresh value scenario because an aura script CalcAmount hook bound to 804924 sets the amount after CalcValue"
   },
   {
     "spell": 707606,

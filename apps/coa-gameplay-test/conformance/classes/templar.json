@@ -1783,6 +1783,51 @@
   ],
   "behaviours": [
     {
+      "spell": 560116, "name": "Interdict (silence)", "kind": "cast_applies_aura", "quote": "silencing them for",
+      "expected_ms": 6000, "applied_aura": 560116, "target": "dummy", "cast_spell": 560116,
+      "observe_source": "560116 DurationIndex 32 (6000 ms); Effect[0] aura 27 SPELL_AURA_MOD_SILENCE at TARGET_UNIT_TARGET_ENEMY 6, so the silence is read on the dummy; its expiry pair times the stated duration from the cast. Patience 712678 is not learned."
+    },
+    {
+      "spell": 300514, "name": "Testament of Strength (duration)", "kind": "cast_applies_aura", "variant": "lasts",
+      "label_suffix": "lasts", "quote": "Lasts", "expected_ms": 60000, "applied_aura": 300514, "target": "caster",
+      "cast_spell": 300514,
+      "observe_source": "300514 DurationIndex 3 (60000 ms), its three effects at TARGET_UNIT_CASTER 1; AscensionTemplarAuras.cpp:116-119 sets 3 charges on apply, and no Titanstrike is cast, so no charge is spent; its expiry pair times the stated duration from the cast."
+    },
+    {
+      "spell": 705255, "name": "Divine Strikes (duration)", "kind": "cast_applies_aura", "quote": "for $803372d",
+      "expected_ms": 6000, "applied_aura": 803372, "target": "dummy", "cast_spell": 801832, "cast_target": "dummy",
+      "observe_source": "AscensionTemplarAbilities.cpp:311-315 (OnSpellHit): a landed Scourgebane strike 801832 adds 803372 to its target while the caster holds 705255. 803372 DurationIndex 32 (6000 ms). The strike is cast at the dummy directly; its expiry pair times the stated duration from that cast."
+    },
+    {
+      "spell": 705255, "name": "Divine Strikes (stack cap)", "kind": "metric_delta", "variant": "stack_cap",
+      "label_suffix": "stack_cap", "quote": "stacking $803372u times", "expected": 10, "before_expected": 0,
+      "trigger_spell": 801832, "target": "dummy",
+      "setup_casts": [801832, 801832, 801832, 801832, 801832, 801832, 801832, 801832, 801832, 801832],
+      "setup_wait_ms": 200, "measure_actor": "dummy", "metric": "aura_stacks", "fields": {"spell": 803372, "caster": "caster"},
+      "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "$803372u = 10: 803372 StackAmount 10, DurationIndex 32 (6000 ms). Each phase casts the Scourgebane strike 801832 (no global cooldown, StartRecoveryTime 0) eleven times at the dummy, 200 ms apart, and reads the caster's 803372 stacks on the dummy. Without 705255 the strikes add none (control, AscensionTemplarAbilities.cpp:313); with it each landed strike adds one (AddAura), and the count reads the cap of 10, not 11."
+    },
+    {
+      "spell": 705286, "name": "Duty Calls (duration)", "kind": "cast_applies_aura", "quote": "for $560834d",
+      "expected_ms": 15000, "applied_aura": 560834, "target": "caster", "cast_spell": 570233, "cast_target": "dummy",
+      "observe_source": "AscensionTemplarAbilities.cpp:186-194 (OnSpellCast): a cast with SpellFamilyFlags[2] bit 1 grants an Oath and, while 705286 is held, casts 560834 on the caster. Righteous Lunge 570233 carries that bit (SpellFamilyFlags[2] 1). 560834 DurationIndex 8 (15000 ms); its expiry pair times the stated duration from the Lunge cast."
+    },
+    {
+      "spell": 705286, "name": "Duty Calls (stack cap)", "kind": "metric_delta", "variant": "stack_cap",
+      "label_suffix": "stack_cap", "quote": "stacking $560834u times", "expected": 5, "before_expected": 0,
+      "trigger_spell": 570233, "target": "dummy", "setup_casts": [570233, 570233, 570233, 570233, 570233],
+      "setup_wait_ms": 1300, "measure_actor": "caster", "metric": "aura_stacks", "fields": {"spell": 560834},
+      "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "$560834u = 5: 560834 StackAmount 5, DurationIndex 8 (15000 ms). Each phase casts Righteous Lunge 570233 six times at the dummy, 1300 ms apart (StartRecoveryTime 1250), each an Oath-granting cast (SpellFamilyFlags[2] bit 1, AscensionTemplarAbilities.cpp:186-194). Without 705286 no 560834 is cast (control); with it each Lunge casts 560834 on the caster, and the stack count reads the cap of 5, not 6."
+    },
+    {
+      "spell": 705286, "name": "Duty Calls (movement speed)", "kind": "metric_delta", "variant": "speed",
+      "label_suffix": "speed", "quote": "increases your damage dealt and movement speed by", "expected": 1.02,
+      "before_expected": 1.0, "trigger_spell": 570233, "target": "dummy", "measure_actor": "caster",
+      "metric": "run_speed_rate", "fields": {}, "wait_ms": 500, "expire_ms": 1000,
+      "observe_source": "560834 Effect[1] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, EffectBasePoints[1] 1 + EffectDieSides 1 = +2% ($560834s1 = 2). One Righteous Lunge 570233 at the dummy in each phase: without 705286 the caster runs at 1.0; with it the Lunge casts 560834 (one stack) and Unit::UpdateSpeed reads 1.02."
+    },
+    {
       "spell": 1397742, "name": "Testament of Hope (copies in combat)", "kind": "metric_delta", "variant": "combat",
       "label_suffix": "combat", "quote": "charge at a nearby enemy and aid you in combat", "expected": 1,
       "after_at_least": 1, "trigger_spell": 1397742, "target": "caster", "cast_in_before": false,
