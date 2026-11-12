@@ -5836,10 +5836,12 @@ class ScriptHitSpec:
     value_effect: int = 0
     model_auras: tuple[int, ...] = ()
     unresisted: bool = False
+    stat_auras: tuple[tuple[int, int], ...] = ()
+    label_suffix: str = ''
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
-    return f'{spec.spell} script_hit {spec.hit_spell}'
+    return f'{spec.spell} script_hit {spec.hit_spell}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
 
 
 def script_hit_validate(spec: ScriptHitSpec):
@@ -5946,10 +5948,13 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
         'contract': f'Each trial the caster {" and ".join(setup)}, {spec.trials} trials {control_text} '
                     f'(the control, which must count no {spec.hit_spell} hit) and {spec.trials} with it; the mean '
                     f'non-critical {spec.hit_spell} hit on {spec.receiver} is judged against the {spec.spell} '
-                    f'tooltip read with the measured stats, its known modifiers and mitigation.',
+                    f'tooltip read with the measured stats, its known modifiers and mitigation.'
+                    + (f' {[spell for spell, _ in spec.stat_auras]} are set on the caster before its stats are '
+                       f'measured.' if spec.stat_auras else ''),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
-        'steps': base_steps(class_file) + steps,
+        'steps': [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                  for spell, stacks in spec.stat_auras] + base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     rule = f'{model.kind} hit of script-cast spell {spec.hit_spell} read from the {spec.spell} tooltip, ' \
            f'integer steps modelled; control arm {control_rule}; {prose_rule(entry.quote, spec.spell)}'
@@ -5980,7 +5985,9 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          else tuple((int(spell), str(target)) for spell, target in entry['control_casts']),
                          entry.get('value_spell'), int(entry.get('value_effect', 0)),
                          tuple(int(spell) for spell in entry.get('model_auras', ())),
-                         bool(entry.get('unresisted', False)))
+                         bool(entry.get('unresisted', False)),
+                         tuple((int(spell), int(stacks)) for spell, stacks in entry.get('stat_auras', ())),
+                         entry.get('label_suffix', ''))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8

@@ -1241,6 +1241,9 @@ A hit of one school damage effect and one weapon percent effect adds the weapon 
 of that effect, to the school part (ADR 0208, the Scourgebane strike 801832 from 92111's tooltip); `value_spell` and
 `value_effect` read the hit's value from another spell's effect token onto its school effect (Divine Charge's trample
 527269 from `$527270m3`).
+`stat_auras` (ADR 0210) are set on the caster before its stats are measured, so the hit model reads the stats they
+leave; `label_suffix` names a second entry of the same hit (Divine Charge `no_power`: Demoralizing Shout 1159613 holds
+attack power at 0, so only the trample's base term is read).
 
 ### Taken-outcome scenarios (`behaviour_taken_outcome`, `kind: "taken_outcome"`)
 

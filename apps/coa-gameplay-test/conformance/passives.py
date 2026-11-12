@@ -104,7 +104,8 @@ BEHAVIOUR_LABELS = {
                                    + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')
                                    + f" {arm['name']} {DISPEL_TYPE_NAMES[int(kind)]}"
                                    for arm in entry['arms'] for kind, _ in arm['expected']],
-    'script_hit': lambda entry: [f"{entry['spell']} script_hit {entry['hit_spell']}"],
+    'script_hit': lambda entry: [f"{entry['spell']} script_hit {entry['hit_spell']}"
+                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'taken_outcome': lambda entry: [f"{entry['spell']} behaviour_taken_outcome {entry['aura']}"],
     'charm_immunity': lambda entry: [f"{entry['spell']} charm_immunity {entry['charm_spell']} {arm}"
                                      for arm in ('without', 'cast', 'applied', 'with')],

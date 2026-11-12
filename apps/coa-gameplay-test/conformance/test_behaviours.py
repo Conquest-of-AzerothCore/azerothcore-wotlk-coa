@@ -8304,5 +8304,26 @@ class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
         self.assertEqual(strike.model['reference']['sigma'], 0.0)
 
 
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ScriptHitStatAuraTests(unittest.TestCase):
+    def entry(self):
+        return variant_entry(527023, 'script_hit', 'no_power')
+
+    def test_the_stat_auras_come_before_the_stat_measurements(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        steps = run.validate(scenario)['steps']
+        self.assertEqual(steps[0], {'action': 'set_aura', 'actor': CASTER, 'spell': 1159613, 'stacks': 1})
+        self.assertLess(0, first_index(steps, label='attack_power'))
+        self.assertEqual(expectation.label, '527023 script_hit 527269 no_power')
+
+    def test_an_entry_without_stat_auras_keeps_its_label_and_first_step(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, next(
+            entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 527023 and entry['kind'] == 'script_hit'
+            and 'variant' not in entry))
+        self.assertEqual(expectation.label, '527023 script_hit 527269')
+        self.assertNotEqual(scenario['steps'][0]['action'], 'set_aura')
+
+
 if __name__ == '__main__':
     unittest.main()
