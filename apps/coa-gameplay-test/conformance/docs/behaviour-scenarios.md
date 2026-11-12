@@ -1494,6 +1494,14 @@ players are flagged for PvP after the base steps. The entry's `target` and `meas
 only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an orc in the circle (read 9800 ms and
 10200 ms after the cast, its first tick at about 2000 ms) and 40000 ms on the dummy.
 
+### A fixed-count dummy behind the caster (ADR 0223)
+
+A `fixed_count` entry may set `behind_yd` (inside `radius`) for a cone: every dummy spawns `2 x behind_yd` further
+out, one more dummy spawns `behind_yd` from the caster, and the caster is relocated `2 x behind_yd` along its facing
+before the first cast, so that dummy stands `behind_yd` behind it and must stay unhit (model `behind_label`). Sacred
+Swing 572769, "Swing at enemies in front of you": the four dummies 1.2 to 4.8 yd in front hit, the one 11 yd away and
+the one 3 yd behind never.
+
 ### Cost-gate unset arm, fixed_count settle and layout, avoided casts (ADR 0216-0218)
 
 - `cost_gate` `unset_arm: true` adds an arm `unset` after `with`: the talent known, the cooldown reset and the gated

@@ -8504,5 +8504,46 @@ class HitCastAuraTests(unittest.TestCase):
             shutil.rmtree(manifest_dir)
 
 
+class FixedCountBehindTests(unittest.TestCase):
+    def entry(self, **changes):
+        return {'spell': 572769, 'name': 'Sacred Swing', 'kind': 'fixed_count',
+                'quote': 'Swing at enemies in front of you', 'expected': 3, 'radius': 6.0, 'uncapped': True,
+                'cast_spell': 572769, 'layout': 'caster', 'behind_yd': 3.0, 'radius_reason': 'synthetic', **changes}
+
+    def readings(self, expectation, behind=0.0):
+        model = expectation.model
+        values = {label: 1.0 for label in model['dummy_labels']}
+        values[model['far_label']] = 0.0
+        values[model['behind_label']] = behind
+        for cast in model['per_cast']['casts']:
+            values.update({label: 1.0 for label in cast})
+        values.update({label: 0.0 for label in model['per_cast']['start']})
+        return values
+
+    def test_the_caster_steps_past_one_dummy_before_the_casts(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        steps = run.validate(scenario)['steps']
+        distances = [creature['distance'] for creature in scenario['creatures']]
+        self.assertEqual(distances, [7.2, 8.4, 9.6, 10.8, 17.0, 3.0])
+        relocate = first_index(steps, action='relocate', actor=CASTER)
+        self.assertEqual(steps[relocate]['dx'], 6.0)
+        self.assertLess(relocate, cast_indices(steps, 572769)[0])
+        self.assertEqual(expectation.model['behind_label'], f'572769 {dummy_id(5)} spell_damage_count after')
+        plain, [plain_expectation] = behaviour_scenario(CLASS_FILE, {**self.entry(), 'behind_yd': None})
+        self.assertFalse([step for step in plain['steps'] if step['action'] == 'relocate'])
+        self.assertNotIn('behind_label', plain_expectation.model)
+        self.assertEqual([creature['distance'] for creature in plain['creatures']], [1.2, 2.4, 3.6, 4.8, 11.0])
+
+    def test_a_behind_dummy_outside_the_radius_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, self.entry(behind_yd=7.0))
+
+    def test_seeded_hit_behind_the_caster_alerts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        judge = lambda values: judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judge(self.readings(expectation)), 'ok')
+        self.assertEqual(judge(self.readings(expectation, behind=1.0)), 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

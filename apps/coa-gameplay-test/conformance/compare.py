@@ -2602,6 +2602,14 @@ def behaviour_fixed_count_verdict(base: Verdict, run: Run, model: dict) -> Verdi
             return replace(base, explanation=missing_measurement(run, far_label))
         far_hit = far_value > 0
         far_detail = f'; beyond-radius dummy hit count {far_value:g} (must stay 0, proving the radius limit)'
+    behind_label = model.get('behind_label')
+    if behind_label is not None:
+        behind_value = run.values.get(behind_label)
+        if behind_value is None:
+            return replace(base, explanation=missing_measurement(run, behind_label))
+        far_hit = far_hit or behind_value > 0
+        far_detail += (f'; dummy behind the caster, inside the radius, hit count {behind_value:g} (must stay 0, '
+                       f'proving the facing)')
     lead = f'{int(measured)} of {len(hits)} additional dummies hit{far_detail}'
     placed = True
     if model.get('primary_distances'):
