@@ -189,6 +189,194 @@
       "events_per_proc": 1,
       "handler": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a non-triggered Command spell rolls Chance(player, 300940) (ProcChance 20) and, on success, resets Ice Barrage 801760 (Reduce INT32_MAX) and casts 800979 on the caster (Ready)",
       "dbc": {"300940": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}}, "spell_proc": {}, "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 638403,
+      "name": "Depravity",
+      "tooltip": "Increases the melee haste of your Undead minions by $s1% and gives their critical melee auto attacks an $h% chance to trigger |cFFFFFFFFBone Club|r, dealing $s2% of the damage dealt as Shadow Damage.",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "their critical melee auto attacks",
+      "trial_metric": "pet_melee_crits",
+      "minion_auras": [
+        {
+          "spell": 280912,
+          "amount": 100,
+          "source": "precondition fixture: Anointed 280912 (aura 290 SPELL_AURA_MOD_CRIT_PCT, 10 s) at amount 100 makes the minion crit (Unit::GetUnitCriticalChance, Unit.cpp:4534-4536); the claim is the proc on each crit, not the crit"
+        }
+      ],
+      "minion_aura_refresh_ms": 8000,
+      "event_metric": "spell_damage_count",
+      "event_actor": "minion",
+      "proc_spell": 801241,
+      "proc_spell_source": "EffectTriggerSpell[1] of 638403 (Bone Club)",
+      "events_per_proc": 1,
+      "handler": "AscensionNecromancerEvents.cpp:183-184: a minion melee crit with Chance(player, 638403) (ProcChance 50) casts 801241 from the minion at its target",
+      "dbc": {
+        "638403": {
+          "ProcChance": 50,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "638403": {}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 531128,
+      "name": "Overwhelming Force",
+      "tooltip": "Damage dealt by your Undead minions now has a $h% chance to restore $/10;531129s2 Runic Power and $531129s1% of your maximum mana.",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by your Undead minions",
+      "trial_metric": "owned_creature_damage_count",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 531129,
+      "proc_spell_source": "tooltip tokens $531129s2 and $531129s1",
+      "events_per_proc": 1,
+      "handler": "two paths: AscensionNecromancerEvents.cpp:165-170 Chance(player, 531128, minion cost) casts 531129 on the caster; the minion copy of 531128 keeps its native aura 42 to 531131 (AscensionNecromancerContracts.cpp:52-56; spell_proc Chance 5, rev_20261101_30), whose Effect[0] 140 makes the master cast 531129. A Ghoul costs 1 Life Force.",
+      "dbc": {
+        "531128": {
+          "ProcChance": 5,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "531128": {
+          "ProcFlags": 332116,
+          "Chance": 5,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 802986,
+      "name": "Plague Horde",
+      "tooltip": "Damage dealt by your Undead minions now has a $h% chance to cast |cFFFFFFFFPlague Horde|r on themselves for $807653d and emit |cffffffffZombie Plague|r, dealing ${$504022m1*$<scalingbp>+$SP*0.1} Plague damage to their target.@s:807653:0@",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by your Undead minions",
+      "trial_metric": "owned_creature_damage_count",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 807653,
+      "proc_spell_source": "tooltip reference @s:807653:0@ and $807653d",
+      "events_per_proc": 1,
+      "handler": "AscensionNecromancerEvents.cpp:198-202: Chance(player, 802986) (ProcChance 10) has the caster cast 807653 on the minion and the minion cast Zombie Plague 504022",
+      "dbc": {
+        "802986": {
+          "ProcChance": 10,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "802986": {}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 707001,
+      "name": "Putricide's Formula",
+      "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by Undead minions",
+      "trial_metric": "owned_creature_damage_count",
+      "trial_readings": [
+        {
+          "name": "minion damage events less the blasts",
+          "meaning": "the blasts 707002 are the minion's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
+          "adds": [],
+          "minus_events": true
+        }
+      ],
+      "event_metric": "spell_damage_count",
+      "event_actor": "minion",
+      "proc_spell": 707002,
+      "proc_spell_source": "tooltip tokens $707002i and $707002m1",
+      "events_per_proc": 1,
+      "handler": "AscensionNecromancerEvents.cpp:187-197: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 at up to Amount(707001) valid enemies within 8 yd of its target; one dummy here, so one blast per proc",
+      "dbc": {
+        "707001": {
+          "ProcChance": 10,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "707001": {}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 707882,
+      "name": "Putricide's Formula",
+      "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by Undead minions",
+      "trial_metric": "owned_creature_damage_count",
+      "trial_readings": [
+        {
+          "name": "minion damage events less the blasts",
+          "meaning": "the blasts 707002 are the minion's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
+          "adds": [],
+          "minus_events": true
+        }
+      ],
+      "event_metric": "spell_damage_count",
+      "event_actor": "minion",
+      "proc_spell": 707002,
+      "proc_spell_source": "tooltip tokens $707002i and $707002m1",
+      "events_per_proc": 1,
+      "handler": "AscensionNecromancerEvents.cpp:187-197: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll",
+      "dbc": {
+        "707882": {
+          "ProcChance": 20,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "707882": {}
+      },
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
