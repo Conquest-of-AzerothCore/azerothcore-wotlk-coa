@@ -2855,12 +2855,13 @@ def stat_gain_arm_labels(arm: dict) -> list[str]:
     if not reads:
         return []
     return [*(label for moment in ('before', 'after') for _, label in reads[moment]['auras']),
-            reads['before']['count'], reads['after']['count'], reads[STAT_GAIN_RETURN]]
+            reads['before']['count'], reads['after']['count'], reads['before']['casts'], reads['after']['casts'],
+            reads[STAT_GAIN_RETURN]]
 
 
 def stat_gain_attributed(run: Run, model: dict) -> tuple[bool, dict, list[str]]:
     attribution = model[STAT_GAIN_ATTRIBUTION]
-    held, applied, notes = True, {}, []
+    held, applied, notes, others_seen = True, {}, [], set()
     for arm in model['arms']:
         reads = arm[STAT_GAIN_ATTRIBUTION]
         before = {aura: run.values[label] for aura, label in reads['before']['auras']}
@@ -2870,7 +2871,10 @@ def stat_gain_attributed(run: Run, model: dict) -> tuple[bool, dict, list[str]]:
         appeared = run.values[reads['after']['count']] - run.values[reads['before']['count']]
         start, back = run.values[arm['before']], run.values[reads[STAT_GAIN_RETURN]]
         others = [aura for aura in listed if aura not in attribution['auras']]
-        failures = [*(f'{aura} not read absent before the cast' for aura in attribution['auras']
+        others_seen.update(others)
+        landed = run.values[reads['after']['casts']] - run.values[reads['before']['casts']]
+        failures = [*([f'the cast did not land ({landed:g} casts counted)'] if landed < 0.5 else []),
+                    *(f'{aura} not read absent before the cast' for aura in attribution['auras']
                       if before[aura] >= 0.5),
                     *(f'{aura} not read present after it' for aura in attribution['auras']
                       if after[aura] < 0.5 and arm['name'] != attribution['withheld_arm']),
@@ -2881,8 +2885,14 @@ def stat_gain_attributed(run: Run, model: dict) -> tuple[bool, dict, list[str]]:
                     *([f'returned to {back:g}, not {start:g}']
                       if abs(back - start) > METRIC_DELTA_FLOAT_TOLERANCE else [])]
         held = held and not failures
-        notes.append(f'{arm["name"]}: cast applied {listed}, {model["metric"]} back to {back:g} from {start:g}'
+        notes.append(f'{arm["name"]}: {landed:g} cast landed, applied {listed}, {model["metric"]} back to {back:g} '
+                     f'from {start:g}'
                      + (f' ({"; ".join(failures)})' if failures else ''))
+    control = attribution['withheld_arm']
+    unshown = sorted(others_seen - set(applied.get(control, ()))) if control else []
+    if unshown:
+        held = False
+        notes.append(f'other auras {unshown} do not appear in the {control} arm')
     return held, applied, notes
 
 

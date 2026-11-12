@@ -6634,7 +6634,8 @@ STAT_GAIN_READS = {
     'attack_power': 'Unit::GetTotalAttackPowerValue(BASE_ATTACK), from the client fields UNIT_FIELD_ATTACK_POWER, '
                     'UNIT_FIELD_ATTACK_POWER_MODS and UNIT_FIELD_ATTACK_POWER_MULTIPLIER',
     'spell_power': 'Unit::SpellBaseDamageBonusDone(school mask), the function the engine calls at use time; '
-                   'Player::UpdateSpellDamageAndHealingBonus copies it to PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school',
+                   'in the source, Player::UpdateSpellDamageAndHealingBonus (StatSystem.cpp:282-291) copies it to '
+                   'PLAYER_FIELD_MOD_DAMAGE_DONE_POS + school, a field this run does not read',
 }
 
 
@@ -6677,8 +6678,11 @@ def target_aura_steps(spec: StatGainSpec, spells, stacks: int = 0) -> list[dict]
 def stat_gain_aura_reads(spec: StatGainSpec, arm: str, candidates: list[int], moment: str) -> tuple[list, dict]:
     labels = [[aura, stat_gain_mark(spec, arm, f'aura {aura} {moment}')] for aura in candidates]
     count = stat_gain_mark(spec, arm, f'auras {moment}')
+    casts = stat_gain_mark(spec, arm, f'casts {moment}')
     steps = [measurement(label, spec.cast_target, 'aura', spell=aura) for aura, label in labels]
-    return steps + [measurement(count, spec.cast_target, 'applied_aura_count')], {'auras': labels, 'count': count}
+    steps += [measurement(count, spec.cast_target, 'applied_aura_count'),
+              measurement(casts, CASTER, 'spell_cast_count', spell=spec.cast_spell)]
+    return steps, {'auras': labels, 'count': count, 'casts': casts}
 
 
 def stat_gain_validate(spec: StatGainSpec):
@@ -6750,7 +6754,8 @@ def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list
                     f'gain is judged exactly against the arm\'s stated gain, or within the truncation of the '
                     f'formula on the stats read.'
                     + (f' Around each cast it reads the auras {attribution["candidates"]} and the aura count of the '
-                       f'{spec.cast_target}, then removes {attribution["auras"]} and reads the {spec.metric} again.'
+                       f'{spec.cast_target} and the caster\'s casts of {spec.cast_spell}, then removes '
+                       f'{attribution["auras"]} and reads the {spec.metric} again.'
                        if attribution else ''),
         'players': [player_fixture(class_file)] + ally_players(class_file, {spec.cast_target}),
         'steps': steps}

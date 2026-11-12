@@ -1498,10 +1498,11 @@ An entry has an `attribution` (ADR 0258) when two things hold:
 
 Each arm then reads these on the cast target:
 - before and after the cast, the `clear_auras` and the auras the DBC says the cast applies, plus
-  `applied_aura_count`;
+  `applied_aura_count` and the caster's `spell_cast_count` of the cast spell (the cast landed);
 - after the `clear_auras` are removed, the stat again (`return`).
 
 The judge stamps `contrast: learned` when all of the following hold in every arm:
+- the cast landed;
 - the attributed auras read absent before the cast, and present after it in every arm except the withheld control
   arm;
 - no unlisted aura appeared;

@@ -45,14 +45,19 @@ when an effect applies an aura, and each spell triggered by effect 64 or 142 tha
 Each arm with attribution adds these reads on the cast target:
 - before the cast, every listed aura and `applied_aura_count`, after the clear step: a read, not only a request;
 - after the cast, the same auras and count;
+- before and after the cast, the caster's `spell_cast_count` of the cast spell. The harness counts a cast in the
+  server's `OnSpellCast` hook, which runs only for a cast that passed its checks. This is the cast-landed read;
 - then the `clear_auras` are removed and the stat is read again (`return`).
 
 The judge stamps `contrast: learned` only when the gain checks hold and, in every arm, all of the following hold:
+- the cast landed: the cast count rose. In the withheld control arm, this read is what tells "no aura without the
+  talent" apart from a refused cast (re-review I1, 2026-11-12);
 - each attributed aura reads absent before the cast. It reads present after the cast in every arm except the
   withheld one, which is the control: without 705287, Benediction leaves no 801409 at all;
 - the aura count rises by exactly the number of listed auras that appeared, so no unlisted aura appeared;
-- any other aura the cast applied comes with an arm without the spell. This is stricter than the ruling, which asks
-  for that arm only when the other aura touches the same stat;
+- any other aura the cast applied comes with an arm without the spell, and that aura also appears in the arm without
+  the spell. This is stricter than the ruling, which asks for that arm only when the other aura touches the same
+  stat;
 - the return read equals the reading before the cast.
 
 Every other case gets `contrast: condition`. The verdict detail lists the auras each arm's cast applied
@@ -76,16 +81,19 @@ The harness gains `applied_aura_count`: the number of aura applications a unit h
   byte-identical.
 - Seeded tests:
   - Both entries count as behaviour, and their applied auras are listed.
-  - Ten mutants stay data:
+  - Thirteen mutants stay data:
     - arms that all learn 705287;
     - a withheld arm with no stated control gain;
     - a cast other than the entry's spell, with that spell's aura in `clear_auras`;
     - a Libram entry without `clear_auras`;
     - a metric with no named read;
-    - the aura not cleared;
-    - the aura absent after the cast (Libram, and Benediction's `with` arm);
+    - the aura not cleared but refreshed, with the aura count unchanged;
+    - the aura absent after the cast (Libram, and Benediction's `with` arm), count unchanged;
     - an unlisted aura that appears;
-    - a stat that does not return.
+    - a stat that does not return;
+    - a cast that did not land, in a treated arm and in the control arm;
+    - another aura that the control arm does not show.
+  - Each attribution mutant holds the other checks equal, so only its own guard catches it (re-review M1).
   - A coverage-class extension cannot fail with an alert: these mutants keep their ok status. Their signal is the
     evidence class, data instead of behaviour. That is how this ADR meets the goal's "a mutant that must alert".
   - Benediction's `without` arm stays behaviour with no aura after the cast.

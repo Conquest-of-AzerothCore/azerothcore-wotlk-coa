@@ -7975,6 +7975,8 @@ def stat_gain_values(model: dict, gains: dict, stats: dict, changed: dict | None
             values.update({label: 1.0 for _, label in reads['after']['auras']})
             values[reads['before']['count']] = 5.0
             values[reads['after']['count']] = 5.0 + len(reads['after']['auras'])
+            values[reads['before']['casts']] = 3.0
+            values[reads['after']['casts']] = 4.0
             values[reads['return']] = 1000.0
     return {**values, **(changed or {})}
 
@@ -8079,6 +8081,11 @@ class StatGainTests(unittest.TestCase):
             self.assertEqual(steps[cleared]['metric'], 'aura')
             self.assertEqual(steps[cleared]['actor'], ALLY)
             self.assertEqual(steps[back]['metric'], 'armor')
+            casts_before, casts_after = labels.index(f'{mark} casts before'), labels.index(f'{mark} casts after')
+            self.assertLess(casts_before, cast)
+            self.assertLess(cast, casts_after)
+            read = steps[casts_before]
+            self.assertEqual((read['metric'], read['actor'], read['spell']), ('spell_cast_count', CASTER, 578276))
 
     def test_a_withheld_talent_or_the_spells_own_cast_is_a_learned_contrast(self):
         armor = self.armor()
@@ -8092,7 +8099,8 @@ class StatGainTests(unittest.TestCase):
 
     def test_arms_that_never_withhold_the_spell_stay_data(self):
         entry = r1a_entry(705287, 'stat_gain', 'armor')
-        learned_first = self.armor({**entry, 'arms': [{**arm, 'learn': [705287]} for arm in entry['arms'][1:]]})
+        learned_first = self.armor({**entry, 'arms': [{**entry['arms'][1], 'learn': [705287], 'gain': 211},
+                                                      *({**arm, 'learn': [705287]} for arm in entry['arms'][2:])]})
         gains = {arm: gain for arm, gain in self.ARMOR_GAINS.items() if arm != 'without'}
         stats = {arm: stat for arm, stat in self.ARMOR_STATS.items() if arm != 'without'}
         self.assertEqual(self.evidence(learned_first, 'grants your target armor', gains, stats), 'data')
@@ -8112,7 +8120,7 @@ class StatGainTests(unittest.TestCase):
         unstated_control = self.armor({**armor, 'arms': [{'name': 'without'}, *armor['arms'][1:]]})
         gains = {**self.ARMOR_GAINS, 'without': 211.0}
         self.assertEqual(self.evidence(unstated_control, 'grants your target armor', gains, self.ARMOR_STATS), 'data')
-        other_cast = self.power({**r1a_entry(805423, 'stat_gain', 'spell_power'), 'cast_spell': 578276})
+        other_cast = self.power({**r1a_entry(805423, 'stat_gain', 'spell_power'), 'cast_spell': 801832})
         self.assertEqual(self.evidence(other_cast, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
                          'data')
         unnamed_read = self.power({**r1a_entry(805423, 'stat_gain', 'spell_power'), 'metric': 'max_health',
@@ -8123,9 +8131,11 @@ class StatGainTests(unittest.TestCase):
     def test_seeded_attribution_failures_keep_the_gain_at_data(self):
         power = self.power()
         reads = self.reads(power, 'reference')
+        held_count = {reads['after']['count']: 5.0}
         mutants = {
-            'aura not cleared': {reads['before']['auras'][0][1]: 1.0},
-            'aura absent after the cast': {reads['after']['auras'][0][1]: 0.0},
+            'aura not cleared, refreshed by the cast': {reads['before']['auras'][0][1]: 1.0, **held_count},
+            'aura absent after the cast': {reads['after']['auras'][0][1]: 0.0, **held_count},
+            'cast did not land': {reads['after']['casts']: 3.0},
             'an unlisted aura appeared': {reads['after']['count']: 7.0},
             'stat not back after removal': {reads['return']: 1039.0},
         }
@@ -8144,6 +8154,14 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS,
                                        missing), 'data')
 
+    def test_the_control_arms_cast_must_land(self):
+        armor = self.armor()
+        without = self.reads(armor, 'without')
+        refused = {without['after']['auras'][0][1]: 0.0, without['after']['count']: 5.0,
+                   without['after']['casts']: 3.0}
+        self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS, refused),
+                         'data')
+
     def test_another_applied_aura_needs_an_arm_without_the_spell(self):
         def with_extra_aura(expectation: Expectation) -> Expectation:
             model = json.loads(json.dumps(expectation.model))
@@ -8158,6 +8176,9 @@ class StatGainTests(unittest.TestCase):
         armor = with_extra_aura(self.armor())
         self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS),
                          'behaviour')
+        absent_in_control = {'without aura 999999 after': 0.0, self.reads(armor, 'without')['after']['count']: 6.0}
+        self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS,
+                                       absent_in_control), 'data')
 
 
 class EnemyPlayerMetricDeltaTests(unittest.TestCase):
