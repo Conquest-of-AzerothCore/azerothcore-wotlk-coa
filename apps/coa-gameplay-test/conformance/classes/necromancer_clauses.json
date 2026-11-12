@@ -1,0 +1,2490 @@
+[
+  {
+    "spell": 92121,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92121,
+    "clause": "Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 92121,
+    "clause": "and Lichfrost applies 2 stacks.",
+    "labels": [
+      "92121 effect_value 570131e0 #0",
+      "92121 spell_duration 570131 #1",
+      "92121 max_stacks 570131 #2",
+      "92121 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92122,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92122,
+    "clause": "Casting any spell now has a $h% chance to grant you Tundra Warriors.",
+    "labels": [
+      "92122 effect_value #0",
+      "92122 spell_duration 707421 #1",
+      "92122 effect_value 707421e0 #2",
+      "92122 max_stacks 707421 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92123,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92123,
+    "clause": "Increases your maximum Life Force by $s3.",
+    "labels": [
+      "92123 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300233,
+    "clause": "Reduces the duration of root and slow effects against you by $s1%.",
+    "labels": [
+      "300233 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300234,
+    "clause": "Increases your Shadow and Frost damage dealt against Humanoids and Undead by $s1%.",
+    "labels": [
+      "300234 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300235,
+    "clause": "Periodic damage dealt now has a $h% chance to increase your and your Undead minion's haste by $301334s1% for $301334d.",
+    "labels": [
+      "300235 effect_value #0",
+      "300235 effect_value 301334e0 #1",
+      "300235 spell_duration 301334 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300236,
+    "clause": "Each stack of Expunge now increases the target's damage taken from your Plague of Undeath by an additional $s1%.",
+    "labels": [
+      "300236 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300240,
+    "clause": "Increases the range of your Rime spells by $s1 yds",
+    "labels": [
+      "300240 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300240,
+    "clause": "and increases the Frost critical strike chance of you and your summons by $s2%.",
+    "labels": [
+      "300240 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300241,
+    "clause": "While you are below 50% health,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300241,
+    "clause": "your Undead minions now heal you for $560607s2% of their damage dealt.",
+    "labels": [
+      "300241 effect_value 560607e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300580,
+    "clause": "Each of your summons now reduces your damage taken by $s2%,",
+    "labels": [
+      "300580 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300580,
+    "clause": "up to a maximum of $q2%.",
+    "labels": [
+      "300580 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300748,
+    "clause": "Increases your maximum health and the maximum health of your summons by $s1%.",
+    "labels": [
+      "300748 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300940,
+    "clause": "Casting Command spells now has a $h% chance to reset the cooldown of Ice Barrage",
+    "labels": [
+      "300940 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300940,
+    "clause": "and make your cast next within $800979d instant cast.",
+    "labels": [
+      "300940 spell_duration 800979 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300941,
+    "clause": "Increases the duration Unholy Frenzy by $/1000;s1 sec",
+    "labels": [
+      "300941 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300941,
+    "clause": "and casting Command spells now reduces its cooldown by $/1000;301238s1 sec.",
+    "labels": [
+      "300941 effect_value 301238e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300945,
+    "clause": "Increases the Armor of your Undead minions by ${$m1+$ppl1}, scaling with your level.",
+    "labels": [
+      "300945 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300958,
+    "clause": "Increases critical strike chance of all party and raid members by $s1%.",
+    "labels": [
+      "300958 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300958,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 300958,
+    "clause": "In addition, increases the critical strike chance of Ice Barrage by $s2% against Frozen targets.",
+    "labels": [
+      "300958 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300960,
+    "clause": "Increases the critical strike chance of Flesh to Worms by $s1% against enemies below 35% maximum health.",
+    "labels": [
+      "300960 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300965,
+    "clause": "Applying Crypt Plague now extends the duration of Flesh to Worms on the target by $/1000;301337s1 sec.",
+    "labels": [
+      "300965 effect_value 301337e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301198,
+    "clause": "Reduces the cooldown of your Champion spells by $/1000;s1 sec.",
+    "labels": [
+      "301198 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301207,
+    "clause": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+    "labels": [
+      "301207 effect_value 805017e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301207,
+    "clause": "and causes you to periodically regenerate $805017s3% maximum health every $t2 sec.",
+    "labels": [
+      "301207 effect_value 805017e2 #1",
+      "301207 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301250,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 301250,
+    "clause": "Allows Crypt Plague to stack $s1 additional times.",
+    "labels": [
+      "301250 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301303,
+    "clause": "Increases your critical damage with Frost spells by $s1%.",
+    "labels": [
+      "301303 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301304,
+    "clause": "Increases the damage of Flesh to Worms by $s1% and allows its periodic damage to scale with your spell haste.",
+    "labels": [
+      "301304 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301325,
+    "clause": "Increases your Shadow and Frost damage dealt against Humanoids and Undead by $s1%.",
+    "labels": [
+      "301325 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301326,
+    "clause": "Increases your maximum health and the maximum health of your summons by $s1%.",
+    "labels": [
+      "301326 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301333,
+    "clause": "Increases the amount slowed by Lichfrost by $s1%.",
+    "labels": [
+      "301333 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302518,
+    "clause": "Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archer.",
+    "labels": [
+      "302518 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302519,
+    "clause": "Your Glacial Tap now generates an additional $/10;s1 Runic Power,",
+    "labels": [
+      "302519 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302519,
+    "clause": "but its cost is increased by $s3%.",
+    "labels": [
+      "302519 effect_value e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302888,
+    "clause": "Reduces the mana cost of Lichfrost and Crypt Swarm by $s1%.",
+    "labels": [
+      "302888 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302888,
+    "clause": "Blight now refunds 25% of its base mana cost if it lasts the full duration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 302920,
+    "clause": "Reduces the mana cost of Lichfrost and Crypt Swarm by $s1%.",
+    "labels": [
+      "302920 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302920,
+    "clause": "Blight now refunds 50% of its base mana cost if it lasts the full duration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 302921,
+    "clause": "Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archers.",
+    "labels": [
+      "302921 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302923,
+    "clause": "Increases the durations of Ghoulify and Mass Grave by $s1%.",
+    "labels": [
+      "302923 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500329,
+    "clause": "Raise a fallen Gargoyle to aid you in combat, occupying 3 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500329,
+    "clause": "Command: Shoots necrotic bile at an enemy, dealing ${$707598m1+$707598ppl1+$SP*0.65} Plague damage,",
+    "labels": [
+      "500329 effect_value 707598e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500329,
+    "clause": "dealing 50% increased damage for each of your diseases on the target.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500331,
+    "clause": "Raise a Skeletal Mage to aid you in combat, occupying $?s807937[1][2] Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500331,
+    "clause": "Command: Unleashes ice at your target and enemies within $801513a1 yds,",
+    "labels": [
+      "500331 effect_radius 801513e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500331,
+    "clause": "dealing ${$801513m1+$801513ppl1+$spfr*.8} Frost damage.",
+    "labels": [
+      "500331 effect_value 801513e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500335,
+    "clause": "Raise an Abomination to aid you in combat, occupying 3 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500335,
+    "clause": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage to enemies when they deal damage",
+    "labels": [
+      "500335 effect_value 802353e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500335,
+    "clause": "and reducing their attack speed by $578319s1% for $578319d.",
+    "labels": [
+      "500335 effect_value 578319e0 #1",
+      "500335 spell_duration 578319 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500335,
+    "clause": "Command: Instantly unleashes an empowered disease cloud around it.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 501861,
+    "clause": "Disease an enemy, dealing ${$m1+0+$sps*0.11055} Plague damage",
+    "labels": [
+      "501861 effect_value e0 #0",
+      "501861 aura_amount e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501861,
+    "clause": "and generating Runic Power every $t1 sec for $d.",
+    "labels": [
+      "501861 aura_amplitude_ms #1",
+      "501861 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501861,
+    "clause": "@ext:Periodic damage dealt by this can critically strike.:ext@",
+    "labels": [
+      "501861 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500342,
+    "clause": "For the next $d your diseases mutate causing them to act with accelerated lethality,",
+    "labels": [
+      "500342 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500342,
+    "clause": "allowing your freshly applied diseases to tick $s1% faster.",
+    "labels": [
+      "500342 effect_value e0 #1",
+      "500342 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500572,
+    "clause": "Casting Command spells on an enemy now applies Crypt Plague to $500573i enemies near the primary target.",
+    "labels": [
+      "500572 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500933,
+    "clause": "Create a Phylactery near you for $d.",
+    "labels": [
+      "500933 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500933,
+    "clause": "Upon taking damage which would bring you below 10% health, become a Shade, protecting you from all physical attacks and spells, but during that time you cannot attack or cast spells.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500933,
+    "clause": "Reaching your Phylactery in this state revives you with $500802s2% of your maximum health.",
+    "labels": [
+      "500933 effect_value 500802e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500933,
+    "clause": "If you do not reach it in time you will die.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500971,
+    "clause": "Raise a Ghoul to aid you in combat occupying 1 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500971,
+    "clause": "Its auto attacks restore ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} health to you.",
+    "labels": [
+      "500971 effect_value 707000e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500971,
+    "clause": "Command: Expels leeching plague that strikes up to $801514i nearby enemies,",
+    "labels": [
+      "500971 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500971,
+    "clause": "dealing ${(($INT*0.28+$SP*0.28)*0.2+($INT*0.504+$SP*0.504)*0.2)+$801514m1} Plague damage,",
+    "labels": [
+      "500971 effect_value 801514e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500971,
+    "clause": "and healing you for ${$801514m3+$801514ppl3+$SP*0.22+$INT*.50} for each Ghoul.",
+    "labels": [
+      "500971 effect_value 801514e2 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500981,
+    "clause": "Transform into a Lich, becoming Undead increasing your Frost damage dealt by $s2%.",
+    "labels": [
+      "500981 effect_value e1 #0",
+      "500981 aura_amount e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500981,
+    "clause": "While active you generate $/10;s1 Runic Power every $t1 sec.",
+    "labels": [
+      "500981 effect_value e0 #1",
+      "500981 aura_amount e0 #1",
+      "500981 aura_amplitude_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500981,
+    "clause": "@ext:While Undead, you are immune to fear, sleep, and charm effects.:ext@",
+    "labels": [
+      "500981 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500989,
+    "clause": "Raise a Decaying Colossus to aid you in combat, occupying 3 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 500989,
+    "clause": "While active, $520376s1% of all damage taken by the caster is taken by the Decaying Colossus.",
+    "labels": [
+      "500989 effect_value 520376e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500989,
+    "clause": "Command: Unleash a powerful attack dealing Weapon Damage plus ${$505229m2+$505229ppl2} to all enemies in front of it.",
+    "labels": [
+      "500989 effect_value 505229e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503738,
+    "clause": "Increases all damage dealt by party and raid members by $s1%.",
+    "labels": [
+      "503738 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503738,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 503738,
+    "clause": "In addition, increases the damage of Corpse Explosion by $s2%.",
+    "labels": [
+      "503738 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503740,
+    "clause": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
+    "labels": [
+      "503740 effect_value #0",
+      "503740 effect_value 707014e1 #1",
+      "503740 spell_duration 707014 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503757,
+    "clause": "Reduces the mana cost and cast time of your Raise and Animate spells by $s1%.",
+    "labels": [
+      "503757 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504050,
+    "clause": "Command your Decaying Colossus to blight the ground in a $801534a1 yd radius beneath it, reducing healing received by $801534s2% for enemies inside for $801534d.",
+    "labels": [
+      "504050 effect_radius 801534e0 #0",
+      "504050 effect_value 801534e1 #1",
+      "504050 spell_duration 801534 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504050,
+    "clause": "@ext:Not usable while in Undead: Pacify.:ext@",
+    "labels": [
+      "504050 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504316,
+    "clause": "Command your Abominations to hook an enemy to their location, slowing their movement speed to a halt for $800043d.",
+    "labels": [
+      "504316 spell_duration 800043 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504316,
+    "clause": "@ext:Not usable while in Undead: Pacify.:ext@",
+    "labels": [
+      "504316 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504357,
+    "clause": "Increases the chance to trigger Refreshing Chill by $s1%.",
+    "labels": [
+      "504357 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504431,
+    "clause": "Increases your maximum Life Force by 1.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504439,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 504439,
+    "clause": "Reduces the cost of all Animates, Raises, and Command spells by $s1%.",
+    "labels": [
+      "504439 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504489,
+    "clause": "Command your Skeletal Mages to freeze enemies at target location for $504845d (8 sec vs players).",
+    "labels": [
+      "504489 spell_duration 504845 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504489,
+    "clause": "Damage taken may end the effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504489,
+    "clause": "@ext:Not usable while in Undead: Pacify.:ext@",
+    "labels": [
+      "504489 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504861,
+    "clause": "Raise a Banshee to aid you in combat, occupying 2 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504861,
+    "clause": "It will channel on your target, dealing damage and draining their mana over time.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 504861,
+    "clause": "Command: Drains $504862m1% of your target's mana (up to a maximum of ${$504862m1*2}% of their own maximum mana) and deals Frost damage equal to the mana drained.",
+    "labels": [
+      "504861 effect_value 504862e0 #0",
+      "504861 effect_value 504862e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 504866,
+    "clause": "When you summon a Raised minion, it now raises with a shield absorbing Magic damage equal to $s1% of their maximum health.",
+    "labels": [
+      "504866 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524687,
+    "clause": "Increases the damage of Ice Barrage by $s1%.",
+    "labels": [
+      "524687 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525600,
+    "clause": "While only 1 Abomination is active,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 525600,
+    "clause": "the critical strike chance of your Ghouls is increased by $525388s2%",
+    "labels": [
+      "525600 effect_value 525388e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525600,
+    "clause": "and haste by $525388s1%.",
+    "labels": [
+      "525600 effect_value 525388e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531126,
+    "clause": "Each active Skeletal Archer now increases your haste by $805025s3%.",
+    "labels": [
+      "531126 effect_value 805025e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531128,
+    "clause": "Damage dealt by your Undead minions now has a $h% chance to restore $/10;531129s2 Runic Power",
+    "labels": [
+      "531128 effect_value #0",
+      "531128 effect_value 531129e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531128,
+    "clause": "and $531129s1% of your maximum mana.",
+    "labels": [
+      "531128 effect_value 531129e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531130,
+    "clause": "Animate a Bone Construct to aid you in combat for $d.",
+    "labels": [
+      "531130 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531130,
+    "clause": "It moves at a slow speed, but upon reaching an enemy, deals ${$531132m1+$531132ppl1+$SP*2+$AP*.5} Shadow damage, piercing all invulnerabilities, resistances, and immunities.",
+    "labels": [
+      "531130 effect_value 531132e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531135,
+    "clause": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
+    "labels": [
+      "531135 effect_value 706732e0 #0",
+      "531135 spell_duration 706732 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 531135,
+    "clause": "stacking $706732u times.",
+    "labels": [
+      "531135 max_stacks 706732 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 537208,
+    "clause": "Critical strikes dealt by your Undead minions now reduce the cooldown of Unholy Frenzy by $/1000;680553S1 sec.",
+    "labels": [
+      "537208 effect_value 680553e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 537208,
+    "clause": "Can only occur once per sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560012,
+    "clause": "While a Skeletal Mage is active the critical strike chance of your Undead minions is now increased by $523613s2%.",
+    "labels": [
+      "560012 effect_value 523613e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560045,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 560045,
+    "clause": "Increases your spell power by $s3% of your Intellect.",
+    "labels": [
+      "560045 effect_value e2 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560537,
+    "clause": "Increases the spell haste of all party and raid members by $s1%.",
+    "labels": [
+      "560537 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560537,
+    "clause": "Does not stack with similar effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560537,
+    "clause": "In addition, increases your Magic damage dealt by $s2%.",
+    "labels": [
+      "560537 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560595,
+    "clause": "Each Undead Stance now provides an additional bonus:",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560595,
+    "clause": "Undead: Assault: Increases your critical strike chance against Humanoids by $s1%.",
+    "labels": [
+      "560595 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560595,
+    "clause": "Undead: Protect: Reduces your threat generated by $s3%.",
+    "labels": [
+      "560595 effect_value e2 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560595,
+    "clause": "Undead: Pacify: Reduces your damage taken by $s2%.",
+    "labels": [
+      "560595 effect_value e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560596,
+    "clause": "Your Crypt Swarm now bounces to 2 additional nearby enemies,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560596,
+    "clause": "at ${-($800343f1-1)*100}% reduced value per enemy struck.",
+    "labels": [
+      "560596 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560613,
+    "clause": "Increases the effectiveness of your Mandates by $s1%.",
+    "labels": [
+      "560613 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560615,
+    "clause": "Increases your spell haste by $s1%.",
+    "labels": [
+      "560615 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560616,
+    "clause": "Increases your spell haste by $s1%.",
+    "labels": [
+      "560616 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560620,
+    "clause": "Increases the spell power scaling of Lichfrost and Ice Barrage by $s1%.",
+    "labels": [
+      "560620 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560622,
+    "clause": "Increases your Shadow and Frost resistances by 0.5 per level.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 560727,
+    "clause": "Increases your spell haste by $s1%.",
+    "labels": [
+      "560727 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560730,
+    "clause": "Damage dealt now has a $h% chance to apply Parasites for $560729d.",
+    "labels": [
+      "560730 effect_value #0",
+      "560730 spell_duration 560729 #1",
+      "560730 effect_value 561319e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560798,
+    "clause": "Damage dealt by your Undead minions now reduces the cooldown of Virulency by $/1000;806322s1 sec.",
+    "labels": [
+      "560798 effect_value 806322e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560800,
+    "clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+    "labels": [
+      "560800 aura_amplitude_ms #0",
+      "560800 effect_value 500585e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560848,
+    "clause": "Soulfreeze now increases the enemy's Frost damage taken by you by $801728s2% per tick for $/1000;s2 sec,",
+    "labels": [
+      "560848 effect_value 801728e1 #0",
+      "560848 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560848,
+    "clause": "stacking $801728u times.",
+    "labels": [
+      "560848 max_stacks 801728 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560851,
+    "clause": "Increases the damage of Glacial Impact by $s1%.",
+    "labels": [
+      "560851 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560852,
+    "clause": "Your Glacial Impact is now guaranteed to critically strike against Frozen targets.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561138,
+    "clause": "Chant a powerful ritual that brings forth $561316s1 Rotting Frost Giant near you to aid you in combat for $561316d",
+    "labels": [
+      "561138 effect_value 561316e0 #0",
+      "561138 spell_duration 561316 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561138,
+    "clause": "and generate $/10;561317s1 Runic Power,",
+    "labels": [
+      "561138 effect_value 561317e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561138,
+    "clause": "repeating every $t1 sec for $d.",
+    "labels": [
+      "561138 aura_amplitude_ms #3",
+      "561138 aura_duration_ms #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561138,
+    "clause": "For the duration, your Undead minions are guaranteed to critically strike.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 561164,
+    "clause": "Each Skeletal Warrior or Skeletal Rogue now increases the damage of your Ice Barrage by $805016s2%.",
+    "labels": [
+      "561164 effect_value 805016e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561215,
+    "clause": "Casting Command spells now reduces the cooldown of your Animates by $/1000;302910S2 sec.",
+    "labels": [
+      "561215 effect_value 302910e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561353,
+    "clause": "Increases the damage of Crypt Swarm and Blight by $s1%",
+    "labels": [
+      "561353 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561353,
+    "clause": "and damage dealt by Blight now has a $h% chance to reset the cooldown of Corpse Explosion.",
+    "labels": [
+      "561353 effect_value #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570046,
+    "clause": "Increases the effectiveness of your Wards by $s1%.",
+    "labels": [
+      "570046 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570136,
+    "clause": "Increases the damage of Crypt Plague by $s1%",
+    "labels": [
+      "570136 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570136,
+    "clause": "and Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target.",
+    "labels": [
+      "570136 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570226,
+    "clause": "Increases the effectiveness of your Wards by $s1%.",
+    "labels": [
+      "570226 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572023,
+    "clause": "All Frost damage you deal to Frozen targets now has a $h% chance to unleash Soulfreeze on them.",
+    "labels": [
+      "572023 effect_value #0",
+      "572023 effect_value 801728e0 #1",
+      "572023 spell_duration 801724 #2",
+      "572023 effect_value #3",
+      "572023 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572130,
+    "clause": "You may now Infest an additional target after using Virulency.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 572638,
+    "clause": "Increases your Stamina by $s2%.",
+    "labels": [
+      "572638 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572638,
+    "clause": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+    "labels": [
+      "572638 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 573426,
+    "clause": "Reduces the cooldown of your Unholy Frenzy by $/1000;s1 sec.",
+    "labels": [
+      "573426 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574138,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574138,
+    "clause": "Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions, increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.",
+    "labels": [
+      "574138 effect_value 573131e0 #0",
+      "574138 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 638403,
+    "clause": "Increases the melee haste of your Undead minions by $s1%",
+    "labels": [
+      "638403 effect_value e0 #0"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261101_112_necromancer_depravity_tooltip.sql",
+      "commit": "167cf6d164",
+      "pr": "#10615",
+      "basis": "text_correction",
+      "ruling": null,
+      "spell": 638403,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 638403,
+    "clause": "and gives their critical melee auto attacks a $h% chance to trigger Bone Club,",
+    "labels": [
+      "638403 effect_value #1"
+    ],
+    "kind": "claim",
+    "dbc_clause": "and gives their critical melee auto attacks an $h% chance to trigger Bone Club,",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261101_112_necromancer_depravity_tooltip.sql",
+      "commit": "167cf6d164",
+      "pr": "#10615",
+      "basis": "text_correction",
+      "ruling": null,
+      "spell": 638403,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 638403,
+    "clause": "dealing $s2% of the damage dealt as Shadow Damage.",
+    "labels": [
+      "638403 effect_value e1 #2"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261101_112_necromancer_depravity_tooltip.sql",
+      "commit": "167cf6d164",
+      "pr": "#10615",
+      "basis": "text_correction",
+      "ruling": null,
+      "spell": 638403,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 680388,
+    "clause": "Activate a Fetid Ward on yourself and your Undead minions for $d.",
+    "labels": [
+      "680388 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680388,
+    "clause": "While active, $s1% of your damage dealt heals you and your minions,",
+    "labels": [
+      "680388 effect_value e0 #1",
+      "680388 aura_amount e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680388,
+    "clause": "split evenly amongst them, and healing received is increased by $s2%.",
+    "labels": [
+      "680388 effect_value e1 #2",
+      "680388 aura_amount e1 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680388,
+    "clause": "@ext:Only 1 Ward can be active at a time.:ext@",
+    "labels": [
+      "680388 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704163,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 704163,
+    "clause": "Your diseases and Crypt Swarm now deal $s1% increased damage to enemies below 20% health.",
+    "labels": [
+      "704163 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707402,
+    "clause": "Requires Frozen Target",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707402,
+    "clause": "Call down icy boulders onto a Frozen enemy, dealing ${$m1+0+$spfr*1.405} Frost damage.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707402,
+    "clause": "$?s560852[\r\n\r\nThis spell is guaranteed to critically strike.][]",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707402,
+    "clause": "@ext:Damage scales with your critical strike rating. :ext@",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704528,
+    "clause": "Increases the Runic Power generated by Crypt Swarm by $/10;s1 per tick.",
+    "labels": [
+      "704528 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704669,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 704669,
+    "clause": "Increases your critical damage by $s1% against Frozen targets.",
+    "labels": [
+      "704669 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704670,
+    "clause": "Increases your Frost damage by $s2%",
+    "labels": [
+      "704670 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704670,
+    "clause": "and your maximum Runic Power by $/10;s1.",
+    "labels": [
+      "704670 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704676,
+    "clause": "While your Lich Form is active, your Champion spells will now cooldown faster.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704680,
+    "clause": "Your Glacial Impact now generates $/10;804111s1 Runic Power.",
+    "labels": [
+      "704680 effect_value 804111e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704681,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 704681,
+    "clause": "Gives your spells a $h% chance to grant you the Permafrost,",
+    "labels": [
+      "704681 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704681,
+    "clause": "which treats your next 2 spells cast as if the target were Frozen.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704681,
+    "clause": "Lasts $801747d.",
+    "labels": [
+      "704681 spell_duration 801747 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704682,
+    "clause": "Increases the duration of Skeletal Archers by $/1000;s1 sec.",
+    "labels": [
+      "704682 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704701,
+    "clause": "Casting Command spells now grants you a stack of Underking for $302516d.",
+    "labels": [
+      "704701 spell_duration 302516 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704701,
+    "clause": "At 10 stacks,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704701,
+    "clause": "the cooldown of$?s805032[][ Animate: Tomb King,]$?s805044[][ Animate: Bone Wraith] or Animate: Plaguefather is reduced by $/1000;302517s1 sec at random",
+    "labels": [
+      "704701 effect_value 302517e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704701,
+    "clause": "and you animate a Greater Zombie for $525380d.",
+    "labels": [
+      "704701 spell_duration 525380 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704713,
+    "clause": "Reduces the Runic Power cost of your Command spells by $/10;s1.",
+    "labels": [
+      "704713 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704715,
+    "clause": "Reduces the cast time of Sacrifice Undead by $/1000;S1 sec.",
+    "labels": [
+      "704715 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704717,
+    "clause": "Removes the cooldown from March of the Dead, but gives it a $/1000;s2 sec cast time.",
+    "labels": [
+      "704717 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704718,
+    "clause": "Reduces the channel time of your Crypt Swarm by $s1%.",
+    "labels": [
+      "704718 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704721,
+    "clause": "When you cast Unholy Frenzy you now animate $302912s1 Greater Zombies to aid you in combat for $525380d.",
+    "labels": [
+      "704721 effect_value 302912e0 #0",
+      "704721 spell_duration 525380 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704721,
+    "clause": "Frost and Physical damage dealt by your Undead minions now reduces the cooldown of Unholy Frenzy by $/1000;302597S1 sec.",
+    "labels": [
+      "704721 effect_value 302597e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704721,
+    "clause": "Each Abominations or Decaying Collosus active causes damage dealt by your Undead minions to reduce the cooldown by an additional 1 sec.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704723,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 704723,
+    "clause": "Casting spells now grants you 1 stack of Diabolical,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 704723,
+    "clause": "stacking up to $706504u times,",
+    "labels": [
+      "704723 max_stacks 706504 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704723,
+    "clause": "for $706504d.",
+    "labels": [
+      "704723 spell_duration 706504 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704723,
+    "clause": "Damage dealt by your Crypt Swarm will consume a stack to deal $707133s1% increased damage per stack.",
+    "labels": [
+      "704723 effect_value 707133e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704724,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 704724,
+    "clause": "Casting Command spells now has a $h% chance to cause their next use within $572777d to be free of cost.",
+    "labels": [
+      "704724 effect_value #0",
+      "704724 spell_duration 572777 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704729,
+    "clause": "Increases your maximum Runic Power by $s1%.",
+    "labels": [
+      "704729 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705745,
+    "clause": "Damage dealt by Glacial Impact now deals an additional $s1% of the damage dealt as Frost damage to enemies within $707575a1 yds of the primary target.",
+    "labels": [
+      "705745 effect_value e0 #0",
+      "705745 effect_radius 707575e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705746,
+    "clause": "You absorb $s1% of healing taken",
+    "labels": [
+      "705746 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705746,
+    "clause": "and gain a shield for the amount absorbed, lasting $707194d.",
+    "labels": [
+      "705746 spell_duration 707194 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705747,
+    "clause": "Damage dealt by Harvest Plague now has a $h% chance to animate a Lesser Zombie to aid you in combat for $525379d.",
+    "labels": [
+      "705747 effect_value #0",
+      "705747 spell_duration 525379 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705750,
+    "clause": "Dealing Magic damage now has a $706473h% chance to increase your haste by $705751s1% for $705751d.",
+    "labels": [
+      "705750 effect_value #0",
+      "705750 effect_value 705751e0 #1",
+      "705750 spell_duration 705751 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705752,
+    "clause": "Direct critical strikes regenerate $705753s2% of your maximum mana",
+    "labels": [
+      "705752 effect_value 705753e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705752,
+    "clause": "and $705753s1% of your maximum runic power.",
+    "labels": [
+      "705752 effect_value 705753e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705752,
+    "clause": "Periodic critical strikes regenerate $706424s1% of your maximum mana.",
+    "labels": [
+      "705752 effect_value 706424e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705754,
+    "clause": "Casting Command spells on an enemy now applies Expunge if they are Diseased.",
+    "labels": [
+      "705754 effect_value 573233e0 #0",
+      "705754 spell_duration 573233 #1",
+      "705754 max_stacks 573233 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706472,
+    "clause": "Increases your Stamina by $s2%.",
+    "labels": [
+      "706472 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706472,
+    "clause": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+    "labels": [
+      "706472 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706948,
+    "clause": "Dealing Shadow damage now increases the damage the target takes from your Skeletal Warriors by $706949s1% for $706949d,",
+    "labels": [
+      "706948 effect_value 706949e0 #0",
+      "706948 spell_duration 706949 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706948,
+    "clause": "stacking $706949u times.",
+    "labels": [
+      "706948 max_stacks 706949 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706953,
+    "clause": "Reduces the mana cost and cooldown of Sacrifice Undead by $s1%.",
+    "labels": [
+      "706953 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707001,
+    "clause": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+    "labels": [
+      "707001 effect_value #0",
+      "707001 effect_value #1",
+      "707001 effect_value 707002e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707006,
+    "clause": "Increases the damage of Lichfrost by $s1%",
+    "labels": [
+      "707006 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707006,
+    "clause": "and its Runic Power generated by $s2%.",
+    "labels": [
+      "707006 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707007,
+    "clause": "Beckon the restless dead to rise and march forward.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 707007,
+    "clause": "When they reach an enemy they explode, dealing ${$707010m1*$<scalingbp>+$SP*.75} Plague damage to nearby enemies",
+    "labels": [
+      "707007 effect_value 707010e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707007,
+    "clause": "and slowing their movement speed by $707010s2% for $707010d.",
+    "labels": [
+      "707007 effect_value 707010e1 #1",
+      "707007 spell_duration 707010 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707113,
+    "clause": "Allows Expunge to stack an additional time and increases the range of your Death spells by $s2%.",
+    "labels": [
+      "707113 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707175,
+    "clause": "Casting Command spells now has a $h% chance to make your next Lichfrost or Blight free of cost and instant cast.",
+    "labels": [
+      "707175 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707283,
+    "clause": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
+    "labels": [
+      "707283 effect_value 707284e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707445,
+    "clause": "Reduces the cooldown of Animate: Skeletal Archers and Command: Hook by $s2%.",
+    "labels": [
+      "707445 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707562,
+    "clause": "When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies.",
+    "labels": [
+      "707562 effect_value 712434e0 #0",
+      "707562 spell_duration 712434 #1",
+      "707562 max_stacks 712434 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707588,
+    "clause": "Critical strikes with Frost spells now refund $707886s1% of your maximum mana.",
+    "labels": [
+      "707588 effect_value 707886e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707627,
+    "clause": "Increases the damage and critical damage of Lichfrost by $s1% against against Diseased targets.",
+    "labels": [
+      "707627 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707670,
+    "clause": "Reduces the cast time of your Raise spells by $s1%.",
+    "labels": [
+      "707670 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707739,
+    "clause": "Reduces the Runic Power cost of Corpse Explosion by $/10;s1.",
+    "labels": [
+      "707739 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707880,
+    "clause": "Damage dealt by Harvest Plague now has a $h% chance to animate a Lesser Zombie to aid you in combat for $525379d.",
+    "labels": [
+      "707880 effect_value #0",
+      "707880 spell_duration 525379 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707881,
+    "clause": "Increases the damage of Lichfrost by $s1%",
+    "labels": [
+      "707881 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707881,
+    "clause": "and its Runic Power generated by $s2%.",
+    "labels": [
+      "707881 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707882,
+    "clause": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+    "labels": [
+      "707882 effect_value #0",
+      "707882 effect_value #1",
+      "707882 effect_value 707002e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801733,
+    "clause": "Every 3rd Command spell now freezes the target in place for $704860d.",
+    "labels": [
+      "801733 spell_duration 704860 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801733,
+    "clause": "Damage dealt may end this effect.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801739,
+    "clause": "Chill an enemy's heart, interrupting their current spell cast.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801739,
+    "clause": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
+    "labels": [
+      "801739 effect_value 803677e0 #0",
+      "801739 spell_duration 803677 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501997,
+    "clause": "Unleash a relentless volley of glacial shards, dealing ${$m1+0+$SP*.5971} Frost damage every $t1 sec for $d.",
+    "labels": [
+      "501997 effect_value e0 #0",
+      "501997 aura_amount e0 #0",
+      "501997 aura_duration_ms #1",
+      "501997 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 501997,
+    "clause": "At the end of the duration, you entomb your target in ice, freezing them for $804328d.",
+    "labels": [
+      "501997 spell_duration 804328 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801938,
+    "clause": "Reinvigorate your diseases, refreshing all diseases on the target enemy and copying them, preserving their power and duration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 801938,
+    "clause": "You may use this abilty again within 10 sec to Infest another target, applying the copied diseases.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 503640,
+    "clause": "Disease an enemy dealing ${$m1+0+$sps*0.25} Plague damage every $T1 sec",
+    "labels": [
+      "503640 effect_value e0 #0",
+      "503640 aura_amount e0 #0",
+      "503640 effect_value #5"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503640,
+    "clause": "and reduces the targets Holy healing received by $s3% for $d.",
+    "labels": [
+      "503640 effect_value e2 #1",
+      "503640 aura_amount e2 #1",
+      "503640 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503640,
+    "clause": "If Plague of Undeath is dispelled, the enemy takes ${$680928m1+$680928ppl1+$sps*1.25} Plague damage",
+    "labels": [
+      "503640 effect_value 680928e0 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503640,
+    "clause": "and is stunned for $680928d.",
+    "labels": [
+      "503640 spell_duration 680928 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 503640,
+    "clause": "@ext:Periodic damage dealt by this benefits from your spell haste.:ext@",
+    "labels": [
+      "503640 effect_value #6"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802121,
+    "clause": "Siphon life from your undead minions, sacrificing $s1% of their health to grant yourself an absorb shield equal to half of the health stolen for $802122d.",
+    "labels": [
+      "802121 effect_value e0 #0",
+      "802121 spell_duration 802122 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802121,
+    "clause": "Usable while stunned.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 802132,
+    "clause": "Disease an enemy, dealing ${$m1+0+$SP*0.22} Plague damage every $t1 sec for $d.",
+    "labels": [
+      "802132 effect_value e0 #0",
+      "802132 aura_amount e0 #0",
+      "802132 aura_amplitude_ms #1",
+      "802132 aura_duration_ms #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802132,
+    "clause": "Damage increased by $704291s1% for each Necromancer disease on the enemy.",
+    "labels": [
+      "802132 effect_value 704291e0 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802986,
+    "clause": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+    "labels": [
+      "802986 effect_value #0",
+      "802986 spell_duration 807653 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802986,
+    "clause": "and emit Zombie Plague, dealing ${$504022m1*$<scalingbp>+$SP*0.1} Plague damage to their target.",
+    "labels": [
+      "802986 effect_value 504022e0 #2",
+      "802986 spell_duration 807653 #3",
+      "802986 effect_value 807765e0 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802988,
+    "clause": "Reduces the cast time of Lichfrost by $s2%",
+    "labels": [
+      "802988 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802988,
+    "clause": "and reduces your spell pushback suffered from taking damage by $s1%.",
+    "labels": [
+      "802988 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802990,
+    "clause": "Increases the duration of your diseases by $s1%.",
+    "labels": [
+      "802990 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803291,
+    "clause": "Increases the duration of Lichfrost's movement speed slow by $/1000;s1 sec",
+    "labels": [
+      "803291 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803291,
+    "clause": "and your hit chance by $s2%.",
+    "labels": [
+      "803291 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803741,
+    "clause": "Transform up to $i nearby enemies into a ghoul,",
+    "labels": [
+      "803741 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803741,
+    "clause": "fearing them for $d ($?s302923[9][8]).",
+    "labels": [
+      "803741 aura_duration_ms #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803741,
+    "clause": "Only affects Humanoids.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803741,
+    "clause": "While above 50 Runic Power this spell is instant cast.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803777,
+    "clause": "Create $s1 Frozen Reliquary that restores $803773s1% of your missing mana.",
+    "labels": [
+      "803777 effect_value e0 #0",
+      "803777 effect_value 803773e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803777,
+    "clause": "Allies may only use a Frozen Reliquary once per minute.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 803797,
+    "clause": "Every 3rd Command spell now makes your next Lichfrost within $807856d guaranteed to critically strike.",
+    "labels": [
+      "803797 spell_duration 807856 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803850,
+    "clause": "Increases your Frost damage by $s2%",
+    "labels": [
+      "803850 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803850,
+    "clause": "and your maximum Runic Power by $/10;s1.",
+    "labels": [
+      "803850 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804371,
+    "clause": "Transform into an undead monstrosity for $d,",
+    "labels": [
+      "804371 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804371,
+    "clause": "increasing your maximum Stamina by $s2% and causing you and your Undead minions to emit a damaging disease cloud.",
+    "labels": [
+      "804371 effect_value e1 #1",
+      "804371 aura_amount e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804371,
+    "clause": "While transformed you are immune to Fear, Sleep, Charm, and Disease effects.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805032,
+    "clause": "Animate a Bone Wraith to aid you in combat for $d.",
+    "labels": [
+      "805032 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805032,
+    "clause": "While active, it will periodically unleash a Bonestorm, striking up to $801411i nearby enemies for ${$801411m1+$801411ppl1+$SP*.4} Physical damage every $801412t1 sec for $801412d.",
+    "labels": [
+      "805032 effect_value #1",
+      "805032 effect_value 801411e0 #2",
+      "805032 aura_amplitude_ms #3",
+      "805032 spell_duration 801412 #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805038,
+    "clause": "Summon a ritual circle at your location for $d.",
+    "labels": [
+      "805038 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805038,
+    "clause": "While active, you may cast Ritual Return to return to it.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805040,
+    "clause": "Animate ${$500330m1} Skeletal Archers to aid you in combat for $500330d.",
+    "labels": [
+      "805040 effect_value 500330e0 #0",
+      "805040 spell_duration 500330 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805044,
+    "clause": "Animate a Tomb King to aid you in combat for $d.",
+    "labels": [
+      "805044 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805044,
+    "clause": "While active, all of your Undead minion's attacks deal an additional $800027s1% of the damage dealt as Plague damage.",
+    "labels": [
+      "805044 effect_value 800027e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805048,
+    "clause": "Animate a Plaguefather to aid you in combat for $d.",
+    "labels": [
+      "805048 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805048,
+    "clause": "Damage dealt by this minion will emit Zombie Plague, dealing ${$504022m1+$504022ppl1+$SP*0.1} Plague damage to nearby enemies,",
+    "labels": [
+      "805048 effect_value 504022e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805048,
+    "clause": "and reducing their attack power by ${-($704706m1+$704706ppl1)}.",
+    "labels": [
+      "805048 effect_value 704706e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805369,
+    "clause": "Tap into necrotic energies, instantly regenerating $/10;s1 Runic Power.",
+    "labels": [
+      "805369 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805424,
+    "clause": "Reduces the channel and cast time of Ice Barrage by $s1%.",
+    "labels": [
+      "805424 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805427,
+    "clause": "Casting Unholy Frenzy now summons a Rotting Frost Giant to aid you in combat for the duration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805428,
+    "clause": "Animate a Frost Wyrm that flies behind the Necromancer that blasts nearby enemies every 2 sec for $d,",
+    "labels": [
+      "805428 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805428,
+    "clause": "dealing ${$807339m1+(($spfr*0.702)+($INT*0.702))*0.212} Frost damage.",
+    "labels": [
+      "805428 effect_value 807339e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805429,
+    "clause": "Increases your Intellect by $s2%",
+    "labels": [
+      "805429 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805429,
+    "clause": "and the Frost damage dealt by your Undead minions by $s1%.",
+    "labels": [
+      "805429 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805649,
+    "clause": "Your Command spells now have a $h% chance to refund a portion of their Runic Power cost.",
+    "labels": [
+      "805649 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805674,
+    "clause": "Casting Animate or Command spells now increases your haste by $805786s1% for $805786d,",
+    "labels": [
+      "805674 effect_value 805786e0 #0",
+      "805674 spell_duration 805786 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805674,
+    "clause": "stacking $805786u times.",
+    "labels": [
+      "805674 max_stacks 805786 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805675,
+    "clause": "Your Virulency now applies Rot Fetishist for $573223d,",
+    "labels": [
+      "805675 spell_duration 573223 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805675,
+    "clause": "causing you to replicate 20% of your periodic damage dealt as direct damage.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806086,
+    "clause": "Periodic damage dealt now has an $h% chance to summon $806087s1 Rotlings that will run towards the enemy",
+    "labels": [
+      "806086 effect_value #0",
+      "806086 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806086,
+    "clause": "and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+    "labels": [
+      "806086 aura_amplitude_ms #1",
+      "806086 effect_value 500585e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806149,
+    "clause": "Increases your Shadow damage by $s1%,",
+    "labels": [
+      "806149 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806149,
+    "clause": "doubled against enemies below 35% health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806321,
+    "clause": "Critical strikes now apply a stack of Crypt Plague.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806324,
+    "clause": "Reduces the cost of Command spells by $s1%",
+    "labels": [
+      "806324 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806324,
+    "clause": "and causes them to increase the target's spell damage taken by $806325s1% for $806325d.",
+    "labels": [
+      "806324 effect_value 806325e0 #1",
+      "806324 spell_duration 806325 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806328,
+    "clause": "Casting Command spells on an enemy now applies Crypt Plague.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807494,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 807494,
+    "clause": "Increases your maximum Life Force by $s1",
+    "labels": [
+      "807494 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807494,
+    "clause": "and your Undead minion's Stamina by $s2%.",
+    "labels": [
+      "807494 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807700,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 807700,
+    "clause": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
+    "labels": [
+      "807700 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807700,
+    "clause": "In addition, periodic damage dealt now has a chance to animate a Lesser Zombie for $302586d.",
+    "labels": [
+      "807700 spell_duration 302586 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807796,
+    "clause": "Force a target to accept the reality of death, removing any invulnerability or immunity effects from them and cursing them for $d.",
+    "labels": [
+      "807796 aura_duration_ms #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807796,
+    "clause": "If the target's health is below 20% at the end of duration,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807796,
+    "clause": "they take ${$m2+0+$SP*2} Shadowfrost Damage.",
+    "labels": [
+      "807796 effect_value e1 #1",
+      "807796 aura_amount e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807924,
+    "clause": "Increases your Intellect by $s2%",
+    "labels": [
+      "807924 effect_value e1 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807924,
+    "clause": "and the Frost damage dealt by your Undead minions by $s1%.",
+    "labels": [
+      "807924 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807925,
+    "clause": "Increases your Shadow damage by $s1%,",
+    "labels": [
+      "807925 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807925,
+    "clause": "doubled against enemies below 35% health.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807937,
+    "clause": "Your Skeletal Mages now only cost 1 Life Force.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 807960,
+    "clause": "Increases your critical strike and hit chance by $s1%.",
+    "labels": [
+      "807960 effect_value e0 #0"
+    ],
+    "kind": "claim"
+  }
+]
