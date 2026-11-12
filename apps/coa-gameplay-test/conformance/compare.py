@@ -2965,7 +2965,11 @@ def behaviour_metric_ratio_delta_verdict(base: Verdict, run: Run, model: dict) -
     ratio = after / before
     expected_ratio = float(model['expected_ratio'])
     tolerance = float(model['tolerance'])
-    status = 'ok' if abs(ratio - expected_ratio) <= tolerance else 'alert'
+    application = cast_application(run, model)
+    if application is not None and application[0] is None:
+        return replace(base, explanation=application[1])
+    applied = application is None or application[0]
+    status = 'ok' if applied and abs(ratio - expected_ratio) <= tolerance else 'alert'
     return replace(base, status=status, measured=ratio, expected=expected_ratio, low=expected_ratio - tolerance,
                    high=expected_ratio + tolerance,
                    explanation=f'{model["metric"]} measured {before:g} before {model["before_label"]!r} and '
@@ -2973,7 +2977,21 @@ def behaviour_metric_ratio_delta_verdict(base: Verdict, run: Run, model: dict) -
                                f'{model["after_label"]!r}, ratio {ratio:g}; '
                                f'expected {expected_ratio:g} within {tolerance:g}, a ratio rather than an '
                                f'absolute value since the baseline a real attack sequence builds is not '
-                               f'deterministic')
+                               f'deterministic' + ('' if application is None else f'; {application[1]}'))
+
+
+def cast_application(run: Run, model: dict) -> tuple[bool | None, str] | None:
+    if 'aura_before_label' not in model:
+        return None
+    before_label, after_label = model['aura_before_label'], model['aura_after_label']
+    before = run.values.get(before_label)
+    after = run.values.get(after_label)
+    if before is None or after is None:
+        return None, missing_measurement(run, before_label if before is None else after_label)
+    applied = before == 0 and after > 0
+    words = 'applied by the cast' if applied else 'not shown applied by the cast'
+    return applied, (f'aura {words}: {before_label!r} {before:g} (absent expected) and {after_label!r} {after:g} '
+                     f'(present expected)')
 
 
 def behaviour_absorb_pierce_ratio_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

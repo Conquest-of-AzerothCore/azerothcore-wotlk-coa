@@ -467,6 +467,14 @@ def righteous_custodian_entry() -> dict:
                if entry['spell'] == RIGHTEOUS_CUSTODIAN and entry['kind'] == 'threat_tick_ratio')
 
 
+def set_aura_custodian_entry() -> dict:
+    return {key: value for key, value in righteous_custodian_entry().items() if key != 'cast_target'}
+
+
+def cast_applied(model: dict, before: float = 0.0, after: float = 1799000.0) -> dict:
+    return {model['aura_before_label']: before, model['aura_after_label']: after}
+
+
 def norgannons_wrath_entry() -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                 if entry['spell'] == NORGANNONS_WRATH and entry['kind'] == 'absorb_pierce_ratio')
@@ -2355,7 +2363,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         self.assertEqual(steps[attack_index]['target'], 'dummy')
 
     def test_set_aura_happens_between_the_before_and_after_measurements(self):
-        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        spec = threat_tick_ratio_spec(set_aura_custodian_entry())
         scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
         steps = scenario['steps']
         measure_indexes = [index for index, step in enumerate(steps) if step.get('metric') == 'threat']
@@ -2377,12 +2385,66 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         _, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
         expectation = expectations[0]
-        wrong_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 1000.0})
+        applied = cast_applied(expectation.model)
+        wrong_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 1000.0,
+                             **applied})
         verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
         self.assertEqual(verdict.status, 'alert')
-        right_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 980.0})
+        right_run = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 980.0,
+                             **applied})
         verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
         self.assertEqual(verdict.status, 'ok')
+
+    def test_cast_replaces_set_aura_and_brackets_the_threat_baseline(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        scenario, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertFalse(any(step.get('action') == 'set_aura' and step.get('spell') == RIGHTEOUS_CUSTODIAN
+                             for step in steps))
+        position = {step.get('label', step['action']): index for index, step in enumerate(steps)}
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['spell'] == RIGHTEOUS_CUSTODIAN)
+        cast = next(index for index, step in enumerate(steps)
+                    if step['action'] == 'cast' and step['spell'] == RIGHTEOUS_CUSTODIAN)
+        self.assertEqual(steps[cast]['actor'], 'caster')
+        self.assertEqual(steps[cast]['target'], 'caster')
+        order = [learn, position['stop_attack'], position[expectation.model['aura_before_label']], cast,
+                 position[expectation.model['aura_after_label']], position[expectation.model['before_label']],
+                 position[expectation.model['after_label']]]
+        self.assertEqual(order, sorted(order))
+        for label in (expectation.model['aura_before_label'], expectation.model['aura_after_label']):
+            self.assertEqual(steps[position[label]]['metric'], 'aura_duration_ms')
+            self.assertEqual(steps[position[label]]['spell'], RIGHTEOUS_CUSTODIAN)
+
+    def test_set_aura_entry_keeps_no_cast_reads(self):
+        spec = threat_tick_ratio_spec(set_aura_custodian_entry())
+        scenario, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        self.assertNotIn('aura_before_label', expectation.model)
+        self.assertFalse(any(step['action'] == 'cast' for step in scenario['steps']))
+
+    def test_seeded_aura_present_before_or_absent_after_the_cast_is_alert(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        _, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        threat = {expectation.model['before_label']: 1000.0, expectation.model['after_label']: 980.0}
+        for before, after, status in ((0.0, 1799000.0, 'ok'), (1799000.0, 1799000.0, 'alert'), (0.0, 0.0, 'alert')):
+            values = FakeRun({**threat, **cast_applied(expectation.model, before, after)})
+            verdict = judge_behaviour(base_verdict(expectation), values, expectation)
+            self.assertEqual(verdict.status, status)
+            self.assertIn('aura_duration_ms threat_tick_cast before', verdict.explanation)
+
+    def test_missing_aura_read_is_not_ok(self):
+        spec = threat_tick_ratio_spec(righteous_custodian_entry())
+        _, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
+        values = FakeRun({expectation.model['before_label']: 1000.0, expectation.model['after_label']: 980.0,
+                          expectation.model['aura_before_label']: 0.0})
+        self.assertNotEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, 'ok')
+
+    def test_cast_target_other_than_the_caster_is_refused(self):
+        with self.assertRaises(ValueError):
+            threat_tick_ratio_spec({**righteous_custodian_entry(), 'cast_target': 'ally'})
+        with self.assertRaises(ValueError):
+            threat_tick_ratio_spec({**righteous_custodian_entry(), 'aura_stacks': 2})
 
     def test_zero_baseline_is_unmeasured_not_alert(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
@@ -5924,7 +5986,7 @@ class ThreatTickPeriodTests(unittest.TestCase):
                                                variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', 'period'))
         model = expectation.model
         for after, status in ((941.192, 'ok'), (960.4, 'alert'), (922.368, 'alert')):
-            values = FakeRun({model['before_label']: 1000.0, model['after_label']: after})
+            values = FakeRun({model['before_label']: 1000.0, model['after_label']: after, **cast_applied(model)})
             self.assertEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, status)
 
     def test_the_single_tick_entry_keeps_its_label(self):

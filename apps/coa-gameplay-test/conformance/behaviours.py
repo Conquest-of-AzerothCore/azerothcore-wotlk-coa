@@ -2055,10 +2055,28 @@ class ThreatTickRatioSpec:
     aura_stacks: int = 1
     ticks: int = 1
     label_suffix: str = ''
+    cast_target: str | None = None
 
 
 def threat_tick_ratio_label(spec: ThreatTickRatioSpec, moment: str) -> str:
     return f'{spec.spell} threat aura_gated {moment}'
+
+
+def threat_tick_aura_label(spec: ThreatTickRatioSpec, moment: str) -> str:
+    return f'{spec.spell} {spec.aura_spell} aura_duration_ms threat_tick_cast {moment}'
+
+
+def threat_tick_application(records: Records, spec: ThreatTickRatioSpec) -> tuple[list[dict], list[dict]]:
+    if spec.cast_target is None:
+        return [], [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura_spell, 'stacks': spec.aura_stacks}]
+    facts = facts_of(records, spec.aura_spell)
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': spec.aura_spell}],
+            [measurement(threat_tick_aura_label(spec, BEFORE), spec.cast_target, 'aura_duration_ms',
+                         spell=spec.aura_spell)]
+            + cast_gate_power_step(facts) + required_aura_steps(facts)
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spec.aura_spell, 'target': spec.cast_target},
+               measurement(threat_tick_aura_label(spec, AFTER), spec.cast_target, 'aura_duration_ms',
+                           spell=spec.aura_spell)])
 
 
 def tick_words(ticks: int) -> tuple[str, str]:
@@ -2073,20 +2091,24 @@ def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> t
     before_label = threat_tick_ratio_label(spec, BEFORE)
     after_label = threat_tick_ratio_label(spec, AFTER)
     wait_words, contract_words = tick_words(spec.ticks)
-    steps = base_steps(class_file) + [
-        {'action': 'attack', 'actor': CASTER, 'target': TARGET},
-        {'action': 'wait', 'label': 'build threat on the dummy', 'ms': spec.attack_wait_ms},
-        {'action': 'stop_attack', 'actor': CASTER},
-        measurement(before_label, TARGET, 'threat', target=CASTER),
-        {'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura_spell, 'stacks': spec.aura_stacks},
-        {'action': 'wait', 'label': wait_words, 'ms': spec.tick_wait_ms},
-        measurement(after_label, TARGET, 'threat', target=CASTER)]
+    learned, application = threat_tick_application(records, spec)
+    attack = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
+              {'action': 'wait', 'label': 'build threat on the dummy', 'ms': spec.attack_wait_ms},
+              {'action': 'stop_attack', 'actor': CASTER}]
+    before = [measurement(before_label, TARGET, 'threat', target=CASTER)]
+    tick = [{'action': 'wait', 'label': wait_words, 'ms': spec.tick_wait_ms},
+            measurement(after_label, TARGET, 'threat', target=CASTER)]
+    ordered = attack + application + before if spec.cast_target else attack + before + application
+    steps = base_steps(class_file) + learned + ordered + tick
     suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    applied = (f'{spec.aura_spell} is cast by the caster on the {spec.cast_target} (its aura read absent before '
+               f'the cast and present after it) and' if spec.cast_target
+               else f'{spec.aura_spell} is set directly on the caster and')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat tick ratio{suffix}',
         'contract': f'The dummy\'s own threat against the caster is read once after the caster builds it through '
-                    f'real melee attacks, and once more after {spec.aura_spell} is set directly on the caster and '
+                    f'real melee attacks, and once more after {applied} '
                     f'{contract_words} ({spec.tick_wait_ms} ms), isolating the percentage '
                     f'the tick removes as a ratio rather than an absolute value, since the baseline threat a real '
                     f'attack sequence builds is not a deterministic number.',
@@ -2099,6 +2121,9 @@ def threat_tick_ratio_scenario(class_file: dict, spec: ThreatTickRatioSpec) -> t
              'quote': entry.quote}
     if spec.ticks != 1:
         model['ticks'] = spec.ticks
+    if spec.cast_target:
+        model['aura_before_label'] = threat_tick_aura_label(spec, BEFORE)
+        model['aura_after_label'] = threat_tick_aura_label(spec, AFTER)
     expectation = Expectation(label, BEHAVIOUR_METRIC_RATIO_DELTA, spec.spell, spec.aura_spell, None,
                               str(spec.expected_ratio), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -2109,10 +2134,18 @@ def threat_tick_ratio_entry_label(spell: int, suffix: str = '') -> str:
 
 
 def threat_tick_ratio_spec(entry: dict) -> ThreatTickRatioSpec:
+    cast_target = entry.get('cast_target')
+    if cast_target not in (None, CASTER):
+        raise ValueError(f'{entry["spell"]} threat_tick_ratio casts {entry["aura_spell"]} on {cast_target!r}; the '
+                         f'dummy\'s threat is read against the caster, so the cast target must be {CASTER!r}')
+    if cast_target and entry.get('aura_stacks', 1) != 1:
+        raise ValueError(f'{entry["spell"]} threat_tick_ratio casts {entry["aura_spell"]}, which applies one stack, '
+                         f'not aura_stacks {entry["aura_stacks"]}')
     return ThreatTickRatioSpec(entry['spell'], entry['name'], entry['quote'], entry['expected_ratio'],
                                entry['aura_spell'], entry.get('attack_wait_ms', 3000),
                                entry.get('tick_wait_ms', 1200), entry.get('tolerance', 0.005),
-                               entry.get('aura_stacks', 1), entry.get('ticks', 1), entry.get('label_suffix', ''))
+                               entry.get('aura_stacks', 1), entry.get('ticks', 1), entry.get('label_suffix', ''),
+                               cast_target)
 
 
 @dataclass(frozen=True)

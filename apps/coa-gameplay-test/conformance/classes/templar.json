@@ -3589,8 +3589,8 @@
     {
       "spell": 572808, "name": "Righteous Custodian", "kind": "threat_tick_ratio",
       "quote": "reducing their total threat by", "expected_ratio": 0.98,
-      "aura_spell": 572808,
-      "observe_source": "coa-dbc-viewer Spell 572808: Effect[0]=6 SPELL_EFFECT_APPLY_AURA, EffectApplyAuraName[0]=227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude[0]=1000 ms, EffectTriggerSpell[0]=572809, EffectBasePoints[0]=-3/EffectDieSides[0]=1 (CalcValue -2, matching the already-verified $572809s1 token). AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick (SpellAuraEffects.cpp:6547-6568) casts 572809 from the aura holder, passing GetAmount() (-2) as the triggered spell's own SPELLVALUE_BASE_POINT0 override, so 572809's own raw EffectBasePoints is never what actually applies. 572809's Effect[0]=125 SPELL_EFFECT_MODIFY_THREAT_PERCENT, EffectImplicitTargetA[0]=22 TARGET_SRC_CASTER / TargetB[0]=16 TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex[0]=12 (SpellRadius.dbc RadiusMin 100 yards, far more than the fixture's 3-yard distance); Spell::EffectModifyThreatPercent (SpellEffects.cpp:6459-6467) calls 'unitTarget->GetThreatMgr().ModifyThreatByPercent(m_caster, damage)' on every enemy the AoE finds around the aura holder, and ThreatManager::ModifyThreatByPercent (ThreatManager.h:150) does 'ScaleThreat(target, 0.01f * float(100 + percent))', a pure float multiply with no rounding, giving an exact 0.98 ratio regardless of the dummy's actual (RNG-built) threat level. set_aura applies 572808 directly on the caster (recipient defaults to itself, so the periodic trigger's caster context is the caster too, matching normal in-combat application) rather than casting it through its own TARGET_UNIT_TARGET_RAID targeting (a party/raid-member requirement that is a separate, not-yet-tested clause of this same spell), isolating only this clause's own magnitude claim. The caster first attacks the dummy to build a real, non-deterministic threat baseline (ThreatManager has no direct set action), so the check reads a ratio rather than an absolute before/after value."
+      "aura_spell": 572808, "cast_target": "caster",
+      "observe_source": "coa-dbc-viewer Spell 572808: Effect[0]=6 SPELL_EFFECT_APPLY_AURA, EffectApplyAuraName[0]=227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude[0]=1000 ms, EffectTriggerSpell[0]=572809, EffectBasePoints[0]=-3/EffectDieSides[0]=1 (CalcValue -2, matching the already-verified $572809s1 token). AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick (SpellAuraEffects.cpp:6547-6568) casts 572809 from the aura holder, passing GetAmount() (-2) as the triggered spell's own SPELLVALUE_BASE_POINT0 override, so 572809's own raw EffectBasePoints is never what actually applies. 572809's Effect[0]=125 SPELL_EFFECT_MODIFY_THREAT_PERCENT, EffectImplicitTargetA[0]=22 TARGET_SRC_CASTER / TargetB[0]=16 TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex[0]=12 (SpellRadius.dbc RadiusMin 100 yards, far more than the fixture's 3-yard distance); Spell::EffectModifyThreatPercent (SpellEffects.cpp:6459-6467) calls 'unitTarget->GetThreatMgr().ModifyThreatByPercent(m_caster, damage)' on every enemy the AoE finds around the aura holder, and ThreatManager::ModifyThreatByPercent (ThreatManager.h:150) does 'ScaleThreat(target, 0.01f * float(100 + percent))', a pure float multiply with no rounding, giving an exact 0.98 ratio regardless of the dummy's actual (RNG-built) threat level. The caster first attacks the dummy to build a real, non-deterministic threat baseline (ThreatManager has no direct set action), then casts 572808 on itself (TARGET_UNIT_TARGET_RAID 57, the caster is a raid member of itself, as the cast_applies_aura entry), so the aura holder whose threat the ticks scale is the caster; its aura_duration_ms is read 0 before the cast and above 0 after it (rule 4 amendment point 2b, a real application, audit 2026-11-12). The threat baseline is read after the cast, since Spell::HandleThreatSpells (Spell.cpp:5711-5751) forwards the positive cast's SpellLevel 40 threat to the dummy, and the check reads a ratio rather than an absolute before/after value."
     },
     {
       "spell": 524739, "name": "Norgannon's Wrath", "kind": "absorb_pierce_ratio",
@@ -3623,10 +3623,11 @@
       "label_suffix": "before_tick",
       "quote": "every",
       "aura_spell": 572808,
+      "cast_target": "caster",
       "expected_ratio": 1.0,
       "tick_wait_ms": 600,
       "ticks": 0,
-      "observe_source": "Control arm of the period claim. Spell.dbc 572808 EffectAmplitude[0] 1000 ms (aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, trigger 572809 SPELL_EFFECT_MODIFY_THREAT_PERCENT); no SPELL_ATTR5_START_PERIODIC_AT_APPLY in AttributesEx5 (32, SPELL_ATTR5_LIMIT_N only), so no tick lands 600 ms after the aura is set and the dummy's threat is unchanged (ratio 1)."
+      "observe_source": "Control arm of the period claim. Spell.dbc 572808 EffectAmplitude[0] 1000 ms (aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, trigger 572809 SPELL_EFFECT_MODIFY_THREAT_PERCENT); no SPELL_ATTR5_START_PERIODIC_AT_APPLY in AttributesEx5 (32, SPELL_ATTR5_LIMIT_N only), so no tick lands 600 ms after the caster's cast of 572808 on itself and the dummy's threat is unchanged (ratio 1)."
     },
     {
       "spell": 572808,
@@ -3636,10 +3637,11 @@
       "label_suffix": "period",
       "quote": "every",
       "aura_spell": 572808,
+      "cast_target": "caster",
       "expected_ratio": 0.941192,
       "tick_wait_ms": 3200,
       "ticks": 3,
-      "observe_source": "Period claim: with EffectAmplitude[0] 1000 ms, exactly 3 ticks land in 3200 ms after the aura is set (at 1000, 2000 and 3000 ms). Each tick is 572809 at -2% (the existing single-tick entry, 0.98), ScaleThreat multiplies (ThreatManager.h:150), so 3 ticks give 0.98^3 = 0.941192; 2 ticks (0.9604) or 4 (0.922368) fall outside the 0.005 tolerance. With the 0-tick arm at 600 ms and the 1-tick entry at 1200 ms, the first tick lands in (600, 1200] ms and three ticks fit in 3200 ms but not two."
+      "observe_source": "Period claim: with EffectAmplitude[0] 1000 ms, exactly 3 ticks land in 3200 ms after the caster's cast of 572808 on itself (at 1000, 2000 and 3000 ms). Each tick is 572809 at -2% (the existing single-tick entry, 0.98), ScaleThreat multiplies (ThreatManager.h:150), so 3 ticks give 0.98^3 = 0.941192; 2 ticks (0.9604) or 4 (0.922368) fall outside the 0.005 tolerance. With the 0-tick arm at 600 ms and the 1-tick entry at 1200 ms, the first tick lands in (600, 1200] ms and three ticks fit in 3200 ms but not two."
     },
     {
       "spell": 572808,
