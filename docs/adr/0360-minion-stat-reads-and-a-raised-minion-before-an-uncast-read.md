@@ -25,8 +25,8 @@ minion stopped the control arm: no minion was there.
 
 - The harness metrics `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`
   (`school_mask`, default Shadow), `owned_creature_resistance` (`school`), `owned_creature_melee_hit_chance`,
-  `owned_creature_cast_speed` and `owned_creature_threat` (the threat the creature named by `target` holds against
-  it) read the live owned creature that `owned_creature_armor` resolves. They read and record only.
+  `owned_creature_cast_speed`, `owned_creature_power` (`power`, default mana) and `owned_creature_threat` (the threat
+  the creature named by `target` holds against it) read the live owned creature that `owned_creature_armor` resolves. They read and record only.
 - `coverage.py` lists them, with `owned_creature_armor` and the swing interval and crit chance reads taken from side b
   of B1 (023bf68994), as state evidence with their promise words.
 - A `metric_delta` entry with `cast_in_before: false` takes `setup_in_before: true`: the before phase still makes its

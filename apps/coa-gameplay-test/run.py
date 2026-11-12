@@ -113,7 +113,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
-    'owned_creature_threat', 'owned_aura',
+    'owned_creature_threat', 'owned_creature_power', 'owned_aura',
     'unit_scale', 'combat_reach',
     'token_count', 'item_sell_price', 'item_spell_ppm', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is',
@@ -1353,7 +1353,8 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',
-                          'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat'}:
+                          'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat',
+                          'owned_creature_power'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric in {'owned_creature_crit_chance', 'owned_creature_threat'}:
                 require('target' in step, f'{where}: metric needs the victim as target')
@@ -1462,6 +1463,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',
                           'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat',
+                          'owned_creature_power',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',

@@ -5414,7 +5414,7 @@ private:
         if (metric == "owned_creature_run_speed_rate" || metric == "owned_creature_attack_power" ||
             metric == "owned_creature_spell_power" || metric == "owned_creature_resistance" ||
             metric == "owned_creature_melee_hit_chance" || metric == "owned_creature_cast_speed" ||
-            metric == "owned_creature_threat")
+            metric == "owned_creature_threat" || metric == "owned_creature_power")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Owned creature stat observation needs a present owned creature");
@@ -5438,6 +5438,12 @@ private:
                 return creature->m_modMeleeHitChance;
             if (metric == "owned_creature_cast_speed")
                 return creature->GetFloatValue(UNIT_MOD_CAST_SPEED);
+            if (metric == "owned_creature_power")
+            {
+                uint32 const power = step.get<uint32>("power", POWER_MANA);
+                Require(power < MAX_POWERS, "Invalid power type");
+                return creature->GetPower(Powers(power));
+            }
             Creature* enemy = GetUnit(step.get<std::string>("target"))->ToCreature();
             Require(enemy != nullptr, "Owned creature threat needs a creature target");
             return enemy->GetThreatMgr().GetThreat(creature);

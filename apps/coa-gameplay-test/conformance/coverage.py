@@ -407,7 +407,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_attack_time_ms', 'owned_creature_crit_chance', 'owned_creature_armor',
                      'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
                      'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
-                     'owned_creature_threat'), STATE),
+                     'owned_creature_threat', 'owned_creature_power'), STATE),
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -429,6 +429,7 @@ STATE_PROMISES = {
     'owned_creature_attack_power': r'attack power', 'owned_creature_spell_power': r'spell power|spell damage',
     'owned_creature_resistance': r'resistances?', 'owned_creature_melee_hit_chance': r'hit chance|chance to hit',
     'owned_creature_cast_speed': r'haste|cast speed', 'owned_creature_threat': r'threat',
+    'owned_creature_power': r'mana|energy|rage|focus',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
