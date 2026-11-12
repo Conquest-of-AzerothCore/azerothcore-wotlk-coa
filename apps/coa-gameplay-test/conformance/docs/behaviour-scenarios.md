@@ -1452,3 +1452,22 @@ stated, not final", with the hits per arm an interval inside the band would need
 the before read stays exact. Testament of Hope 1397742 `combat`: the copies attack the selected dummy, 0
 `owned_creature_damage_count` before the cast and at least 1 hit 6000 ms after it (6 in the diagnostic).
 
+### Stat-gain scenarios (`behaviour_metric_delta`, `kind: "stat_gain"`, ADR 0213)
+
+A `stat_gain` entry judges what a real cast adds to a stat of its target against the caster's own stats. It names
+`cast_spell`, `cast_target` (`caster` or `ally`; the ally is grouped, ADR 0212, and `target_health_pct` sets its health
+before each cast), the target `metric` and `fields`, `terms` (a `coefficient` times the sum of its `reads`, stat metrics
+read on the caster), `clear_auras` (removed from the target before each cast), `wait_ms` (default 500) and `arms`. Each
+arm learns its `learn` spells, sets its `auras` on the caster, reads the terms and the target metric, casts, waits and
+reads the metric again. An arm with `gain` must gain exactly that; an arm without it must gain the formula on the
+stats it read, inside floor(x) to ceil(x). Improved Benediction 705287: the grouped ally's armor gains 0 without the
+talent, Agility + Stamina with it, and again with Agility 58451 and with Stamina 48101 set; Libram of Fervor 805423:
+Holy spell power +30% of Agility and attack power +30% of Intellect, at the reference stats and with Agility 58451 or
+Intellect 48100 set.
+
+### An enemy player in metric_delta (ADR 0214)
+
+`enemy_player_race` adds `enemy`, a player of that race and the caster's class, at `TAKEN_HIT_PVP_LOCATION`; both
+players are flagged for PvP after the base steps. The entry's `target` and `measure_actor` may then name `enemy`, and
+only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an orc in the circle (read 9800 ms and
+10200 ms after the cast, its first tick at about 2000 ms) and 40000 ms on the dummy.

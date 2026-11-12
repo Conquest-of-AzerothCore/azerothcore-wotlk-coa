@@ -7951,5 +7951,122 @@ class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, entry)
 
 
+def stat_gain_values(model: dict, gains: dict, stats: dict) -> dict:
+    values = {}
+    for arm in model['arms']:
+        values[arm['before']] = 1000.0
+        values[arm['after']] = 1000.0 + gains[arm['name']]
+        for term in arm['terms']:
+            for index, label in enumerate(term):
+                values[label] = stats[arm['name']][index]
+    return values
+
+
+class StatGainTests(unittest.TestCase):
+    def expectation(self, spell: int, suffix: str) -> Expectation:
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(spell, 'stat_gain', suffix))
+        return expectations[0]
+
+    def judged(self, expectation: Expectation, values: dict) -> str:
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_the_scenario_reads_the_stats_and_the_target_around_each_cast(self):
+        from behaviours import stat_gain_scenario, stat_gain_spec
+        spec = stat_gain_spec(r1a_entry(705287, 'stat_gain', 'armor'))
+        scenario, _ = stat_gain_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
+        steps = scenario['steps']
+        casts = cast_indices(steps, 578276)
+        self.assertEqual(len(casts), len(spec.arms))
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['spell'] == 705287)
+        self.assertLess(casts[0], learn)
+        self.assertLess(learn, casts[1])
+        for cast in casts:
+            before = [step for step in steps[:cast] if step.get('metric') == 'armor'][-1]
+            self.assertEqual(before['actor'], ALLY)
+
+    def test_seeded_gain_off_the_stats_alerts(self):
+        armor = self.expectation(705287, 'armor')
+        stats = {'without': (132.0, 79.0), 'with': (132.0, 79.0), 'agility': (162.0, 79.0), 'stamina': (132.0, 142.0)}
+        right = {'without': 0.0, 'with': 211.0, 'agility': 241.0, 'stamina': 274.0}
+        self.assertEqual(self.judged(armor, stat_gain_values(armor.model, right, stats)), 'ok')
+        for arm, wrong in (('without', 211.0), ('with', 132.0), ('agility', 211.0), ('stamina', 211.0)):
+            with self.subTest(arm=arm):
+                self.assertEqual(self.judged(armor, stat_gain_values(armor.model, {**right, arm: wrong}, stats)),
+                                 'alert')
+
+    def test_a_percent_gain_passes_within_its_truncation_only(self):
+        power = self.expectation(805423, 'spell_power')
+        stats = {'reference': (132.0,), 'agility': (162.0,)}
+        for reference, status in ((39.0, 'ok'), (40.0, 'ok'), (33.0, 'alert'), (41.0, 'alert')):
+            with self.subTest(reference=reference):
+                values = stat_gain_values(power.model, {'reference': reference, 'agility': 48.0}, stats)
+                self.assertEqual(self.judged(power, values), status)
+
+    def test_an_entry_without_a_formula_arm_is_refused(self):
+        from behaviours import stat_gain_scenario, stat_gain_spec
+        entry = {**r1a_entry(705287, 'stat_gain', 'armor'),
+                 'arms': [{'name': 'a', 'gain': 0}, {'name': 'b', 'gain': 1}]}
+        with self.assertRaises(ValueError):
+            stat_gain_scenario(CLASS_FILE, stat_gain_spec(entry))
+
+
+class EnemyPlayerMetricDeltaTests(unittest.TestCase):
+    def test_the_enemy_player_is_pvp_flagged_and_measured(self):
+        spec = metric_delta_spec(r1a_entry(801205, 'metric_delta', 'sleep_player'))
+        scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual([(player['id'], player['race']) for player in scenario['players']],
+                         [(CASTER, CLASS_FILE['race']), ('enemy', 2)])
+        self.assertIn('location', scenario)
+        steps = scenario['steps']
+        pvp = [index for index, step in enumerate(steps) if step['action'] == 'pvp']
+        cast = cast_indices(steps, 801205)[0]
+        self.assertEqual([steps[index]['actor'] for index in pvp], [CASTER, 'enemy'])
+        self.assertLess(pvp[-1], cast)
+        self.assertEqual(steps[cast]['target'], 'enemy')
+        self.assertTrue(all(step['actor'] == 'enemy' for step in steps if step.get('metric') == 'aura'))
+
+    def test_an_enemy_target_without_a_race_is_refused(self):
+        entry = {**r1a_entry(801205, 'metric_delta', 'sleep_player')}
+        entry.pop('enemy_player_race')
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+
+    def test_seeded_creature_length_sleep_on_a_player_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(801205, 'metric_delta', 'sleep_player'))
+        expectation = expectations[0]
+        model = expectation.model
+        right = {model['before_label']: 0.0, model['after_label']: 1.0, model['expired_label']: 0.0}
+        wrong = {**right, model['expired_label']: 1.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
+
+
+class BladeOfFaithTickTests(unittest.TestCase):
+    def test_a_periodic_observed_spell_waits_for_its_tick_after_each_cast(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'hit_ratio', 'oath_condemn'))
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 803880)
+        self.assertEqual(len(casts), 2 * 20)
+        for cast in casts:
+            wait = next(step for step in steps[cast + 1:]
+                        if step['action'] == 'wait' and 'hits' in step.get('label', ''))
+            self.assertEqual(wait['ms'], 3100)
+
+    def test_seeded_oath_without_its_damage_from_caster_bonus_alerts(self):
+        _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'hit_ratio', 'oath_condemn'))
+        expectation = expectations[0]
+        self.assertEqual(judge_behaviour(base_verdict(expectation),
+                                         FakeRun(ratio_values(expectation.model, 238.0, 191.0)), expectation).status,
+                         'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation),
+                                         FakeRun(ratio_values(expectation.model, 191.0, 191.0)), expectation).status,
+                         'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

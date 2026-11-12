@@ -79,7 +79,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
-        'source_stack', 'mount_block')
+        'source_stack', 'mount_block', 'stat_gain')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1230,8 +1230,11 @@ class MetricDeltaSpec:
     select_dummy: bool = False
     after_at_least: float | None = None
     cast_power: int | None = None
+    enemy_player_race: int = 0
 
 
+ENEMY_PLAYER = 'enemy'
+ENEMY_PLAYER_SETTLE_MS = 500
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
 
 
@@ -1266,6 +1269,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'attack phases and takes no setup casts, setup aura or after-only trigger')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} has an unknown force_crit {spec.force_crit!r}')
+    if bool(spec.enemy_player_race) != (ENEMY_PLAYER in (spec.target, spec.measure_actor)):
+        raise ValueError(f'{spec.spell} names the enemy player as its target or measured unit only with an '
+                         f'enemy_player_race, and the race only with it')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
     facts = facts_of(records, spec.trigger_spell)
@@ -1390,6 +1396,13 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         'steps': steps}
     if spec.force_crit:
         scenario['players'][0][FORCE_CRIT_RATINGS[spec.force_crit]] = FORCED_CRIT_RATING
+    if spec.enemy_player_race:
+        settled = len(base_steps(class_file))
+        steps[settled:settled] = [{'action': 'pvp', 'actor': CASTER, 'enabled': True},
+                                  {'action': 'pvp', 'actor': ENEMY_PLAYER, 'enabled': True},
+                                  {'action': 'wait', 'label': 'pvp settle', 'ms': ENEMY_PLAYER_SETTLE_MS}]
+        scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race})
+        scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
     if spec.attack_swings:
         timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
     if spec.select_dummy or TARGET in (spec.target, spec.measure_actor) or any(
@@ -1426,7 +1439,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('attack_swings', 0), entry.get('force_crit'), entry.get('setup_wait_ms', 0),
                            tuple(phase_aura(raw) for raw in entry.get('phase_auras', ())),
                            tuple(phase_aura(raw) for raw in entry.get('after_auras', ())),
-                           entry.get('select_dummy', False), entry.get('after_at_least'), entry.get('cast_power'))
+                           entry.get('select_dummy', False), entry.get('after_at_least'), entry.get('cast_power'),
+                           entry.get('enemy_player_race', 0))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -6261,6 +6275,125 @@ def source_stack_spec(entry: dict) -> SourceStackSpec:
                            int(entry.get('wait_ms', SOURCE_STACK_WAIT_MS)))
 
 
+STAT_GAIN_SETTLE_MS = 200
+STAT_GAIN_WAIT_MS = 500
+
+
+@dataclass(frozen=True)
+class StatGainArm:
+    name: str
+    learn: tuple[int, ...] = ()
+    auras: tuple[tuple[int, int], ...] = ()
+    gain: float | None = None
+
+
+@dataclass(frozen=True)
+class StatGainSpec:
+    spell: int
+    name: str
+    quote: str
+    cast_spell: int
+    metric: str
+    arms: tuple[StatGainArm, ...]
+    terms: tuple[AbsorbTerm, ...]
+    cast_target: str = CASTER
+    fields: tuple[tuple[str, int], ...] = ()
+    clear_auras: tuple[int, ...] = ()
+    target_health_pct: int | None = None
+    label_suffix: str = ''
+    wait_ms: int = STAT_GAIN_WAIT_MS
+
+
+def stat_gain_label(spec: StatGainSpec) -> str:
+    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+
+
+def stat_gain_mark(spec: StatGainSpec, arm: str, key: str) -> str:
+    return f'{stat_gain_label(spec)} {arm} {key}'
+
+
+def stat_gain_validate(spec: StatGainSpec):
+    names = [arm.name for arm in spec.arms]
+    if len(names) < 2 or len(set(names)) != len(names):
+        raise ValueError(f'{spec.spell} stat_gain needs at least two distinct arms, here {names}')
+    if spec.cast_target not in (CASTER, ALLY):
+        raise ValueError(f'{spec.spell} stat_gain casts at the caster or the ally, not {spec.cast_target!r}')
+    if not spec.terms and any(arm.gain is None for arm in spec.arms):
+        raise ValueError(f'{spec.spell} stat_gain judges an arm by a formula without terms')
+    if not any(arm.gain is None for arm in spec.arms):
+        raise ValueError(f'{spec.spell} stat_gain needs an arm judged by the formula')
+    if spec.target_health_pct is not None and spec.cast_target != ALLY:
+        raise ValueError(f'{spec.spell} stat_gain sets the health of an ally it does not cast at')
+
+
+def stat_gain_scenario(class_file: dict, spec: StatGainSpec) -> tuple[dict, list[Expectation]]:
+    stat_gain_validate(spec)
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'stat_gain', spec.quote, 0.0)
+    facts = facts_of(records, spec.cast_spell)
+    steps = (base_steps(class_file) + ally_group_steps({spec.cast_target})
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}])
+    arms = []
+    for arm in spec.arms:
+        steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in arm.learn]
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                  for spell, stacks in arm.auras]
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0,
+                   **({'target': spec.cast_target} if spec.cast_target != CASTER else {})}
+                  for spell in spec.clear_auras]
+        steps.append({'action': 'wait', 'label': f'{arm.name} settle', 'ms': STAT_GAIN_SETTLE_MS})
+        terms = []
+        for term_index, term in enumerate(spec.terms):
+            labels = []
+            for read_index, (metric, fields) in enumerate(term.reads):
+                label = stat_gain_mark(spec, arm.name, f'term {term_index} {read_index}')
+                steps.append(measurement(label, CASTER, metric, **dict(fields)))
+                labels.append(label)
+            terms.append(labels)
+        before, after = stat_gain_mark(spec, arm.name, BEFORE), stat_gain_mark(spec, arm.name, AFTER)
+        steps.append(measurement(before, spec.cast_target, spec.metric, **dict(spec.fields)))
+        if spec.target_health_pct is not None:
+            steps.append(fixture_health_step(spec.cast_target, spec.target_health_pct))
+        steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell}]
+                  + cast_gate_power_step(facts) + required_aura_steps(facts)
+                  + [{'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': spec.cast_target},
+                     {'action': 'wait', 'label': f'{arm.name} cast wait', 'ms': facts.cast_time_ms + spec.wait_ms},
+                     measurement(after, spec.cast_target, spec.metric, **dict(spec.fields))])
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+        arms.append({'name': arm.name, 'before': before, 'after': after, 'gain': arm.gain, 'terms': terms})
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour stat gain'
+                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
+        'contract': f'Each arm {[arm.name for arm in spec.arms]} learns its spells, sets its auras on the caster, '
+                    f'reads the caster\'s stats the formula names, then the {spec.metric} of the '
+                    f'{spec.cast_target} right before and right after a real cast of {spec.cast_spell} at it; the '
+                    f'gain is judged exactly against the arm\'s stated gain, or within the truncation of the '
+                    f'formula on the stats read.',
+        'players': [player_fixture(class_file)] + ally_players(class_file, {spec.cast_target}),
+        'steps': steps}
+    model = {'kind': 'stat_gain', 'arms': arms, 'coefficients': [term.coefficient for term in spec.terms],
+             'metric': spec.metric, 'quote': entry.quote}
+    return scenario, [Expectation(stat_gain_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.cast_spell, None,
+                                  '0', prose_rule(entry.quote, spec.spell), model)]
+
+
+def stat_gain_spec(entry: dict) -> StatGainSpec:
+    arms = []
+    for raw in entry['arms']:
+        unknown = set(raw) - {'name', 'learn', 'auras', 'gain'}
+        if unknown:
+            raise ValueError(f'stat_gain arm fields {sorted(unknown)} are not known')
+        arms.append(StatGainArm(raw['name'], tuple(raw.get('learn', ())),
+                                tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ())),
+                                raw.get('gain')))
+    return StatGainSpec(entry['spell'], entry['name'], entry['quote'], entry['cast_spell'], entry['metric'],
+                        tuple(arms), tuple(absorb_term(term) for term in entry.get('terms', ())),
+                        entry.get('cast_target', CASTER), tuple(sorted(entry.get('fields', {}).items())),
+                        tuple(entry.get('clear_auras', ())), entry.get('target_health_pct'),
+                        entry.get('label_suffix', ''), entry.get('wait_ms', STAT_GAIN_WAIT_MS))
+
+
 def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
     if entry['kind'] == 'school_lockout':
         from expiry import school_lockout_scenario
@@ -6279,6 +6412,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return leech_ratio_scenario(class_file, leech_ratio_spec(entry))
     if entry['kind'] == 'cast_leech_ratio':
         return cast_leech_ratio_scenario(class_file, cast_leech_ratio_spec(entry))
+    if entry['kind'] == 'stat_gain':
+        return stat_gain_scenario(class_file, stat_gain_spec(entry))
     if entry['kind'] == 'cast_stat_ratio':
         return cast_stat_ratio_scenario(class_file, cast_stat_ratio_spec(entry))
     if entry['kind'] == 'spread':

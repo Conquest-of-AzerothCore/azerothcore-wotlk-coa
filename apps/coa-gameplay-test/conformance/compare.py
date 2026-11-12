@@ -2815,6 +2815,33 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                    explanation=explanation)
 
 
+def behaviour_stat_gain_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    parts, failed, first = [], False, None
+    for arm in model['arms']:
+        labels = [arm['before'], arm['after'], *(label for term in arm['terms'] for label in term)]
+        missing = next((label for label in labels if run.values.get(label) is None), None)
+        if missing:
+            return replace(base, explanation=missing_measurement(run, missing))
+        gain = run.values[arm['after']] - run.values[arm['before']]
+        if arm['gain'] is not None:
+            low = high = expected = float(arm['gain'])
+            stated = f'{expected:g}'
+        else:
+            expected = sum(coefficient * sum(run.values[label] for label in term)
+                           for coefficient, term in zip(model['coefficients'], arm['terms']))
+            low, high = math.floor(expected + FLOAT_EPSILON), math.ceil(expected - FLOAT_EPSILON)
+            stated = f'{expected:g} from the stats read (truncation window {low:g} to {high:g})'
+        held = low - METRIC_DELTA_FLOAT_TOLERANCE <= gain <= high + METRIC_DELTA_FLOAT_TOLERANCE
+        failed = failed or not held
+        if first is None and arm['gain'] is None:
+            first = (gain, expected, low, high)
+        parts.append(f'{arm["name"]}: {model["metric"]} gained {gain:g}, expected {stated}: '
+                     f'{"held" if held else "missed"}')
+    gain, expected, low, high = first
+    return replace(base, status='alert' if failed else 'ok', measured=gain, expected=expected, low=low, high=high,
+                   explanation='; '.join(parts))
+
+
 def behaviour_heal_block_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
@@ -3675,6 +3702,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
     if expectation.check == BEHAVIOUR_TRIGGER:
         return behaviour_trigger_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_METRIC_DELTA:
+        if model.get('kind') == 'stat_gain':
+            return behaviour_stat_gain_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)
