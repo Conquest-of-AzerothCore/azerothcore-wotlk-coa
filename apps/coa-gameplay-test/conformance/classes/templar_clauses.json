@@ -176,8 +176,15 @@
   {
     "spell": 300513,
     "clause": "preventing them from mounting,",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300513 mount_block 458 blocked",
+      "300513 mount_block 458 unmounted",
+      "300513 mount_block 458 allowed",
+      "300513 mount_block 458 mounted",
+      "300513 mount_block 458 dismounted"
+    ],
+    "kind": "claim",
+    "reason": "mount_block (ADR 0202): with 300513 on the caster, Brown Horse 458 is refused with SPELL_FAILED_CASTER_AURASTATE 22 and leaves no mount (Spell.cpp:6857-6860); without it the same cast mounts (control); the brand set on the mounted caster removes the mount (AscensionTemplarAuras.cpp:107-112); counted 20261112-013915 / -013954"
   },
   {
     "spell": 300513,
@@ -330,9 +337,12 @@
     "spell": 300520,
     "clause": "on enemies below 20% health.",
     "labels": [
-      "300520 e0"
+      "300520 e0",
+      "300520 behaviour_hit_ratio scourgebane",
+      "300520 behaviour_hit_ratio scourgebane_above_20"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Scourgebane 801832 +25% at a dummy held at 10% health, +0% (within -0.006 to +0.007 points) at 30%; counted 20261112-013915 / -013954"
   },
   {
     "spell": 300522,
@@ -352,9 +362,12 @@
       "300524 effect_value e0",
       "300524 e0 spell_modifier 570205",
       "300524 e1 spell_modifier 803154",
-      "300524 e1 spell_modifier 803880"
+      "300524 e1 spell_modifier 803880",
+      "300524 behaviour_hit_ratio righteous_tempest",
+      "300524 behaviour_hit_ratio blade_of_faith"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Righteous Tempest's hit 570205 +25.1% / +25.3%, Blade of Faith 803880's periodic ticks 191 to 239 (+25.13%) against an unlearned control; counted 20261112-013915 / -013954"
   },
   {
     "spell": 300529,
@@ -2223,7 +2236,8 @@
       {
         "claim": "increases your damage dealt by $560834s1%",
         "labels": [
-          "705286 effect_value 560834e0 #0 ok"
+          "705286 behaviour_hit_ratio damage_holy",
+          "705286 behaviour_hit_ratio damage_physical"
         ]
       },
       {
@@ -2233,7 +2247,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "awaiting owner (r2-a question 1): at the cap of 5 stacks of 560834 a Holy Scourgebane hit gains +10.0% (ok), a Physical main-hand swing +0.4% / -0.3% (alert, 99% intervals about -1.3 to +2.6 points); 560834 Effect[0] aura 79 EffectMiscValue 126 leaves out the Physical school, while the tooltip says damage dealt. Movement speed 1.0 to 1.02 (ok). Counted 20261112-013915 / -013954 and 20261112-012437 / -012605"
   },
   {
     "spell": 705286,
@@ -3456,17 +3471,21 @@
     "clause": "making them immune to all movement impairing effects for $d",
     "labels": [
       "801455 aura_duration_ms #0",
-      "801455 hit_mean"
+      "801455 hit_mean",
+      "801455 behaviour_expiry window"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of 801455 on the grouped ally after a cast at it (ADR 0212): present 9750-9825 ms, absent 10250-10375 ms; counted 20261112-013915 / -013954. The immunity itself (aura 147 mask 65: slows and roots; aura 77 freeze) is not read by an applied slow or root"
   },
   {
     "spell": 102208,
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
-      "801455 spell_duration 102208 #1"
+      "801455 spell_duration 102208 #1",
+      "801455 behaviour_expiry sacred_restraint"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of Sacred Restraint 102208 on the grouped ally after a Testament of Will 801455 cast at it: present 58500-58575 ms, absent 61500-61625 ms; counted 20261112-013915 / -013954"
   },
   {
     "spell": 801457,
@@ -3700,9 +3719,11 @@
     "spell": 102208,
     "clause": "Applies Sacred Restraint for $102208d.",
     "labels": [
-      "501606 spell_duration 102208 #1"
+      "501606 spell_duration 102208 #1",
+      "501606 behaviour_expiry sacred_restraint"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the expiry pair of Sacred Restraint 102208 on the grouped ally after a Testament of Faith 501606 cast at it: present 58500-58575 ms, absent 61500-61625 ms; counted 20261112-013915 / -013954"
   },
   {
     "spell": 801480,
@@ -3928,9 +3949,11 @@
     "clause": "Your Testament of Hope now reduces damage taken by an additional 5% per copy.",
     "labels": [
       "803219 behaviour_metric_delta",
-      "803219 behaviour_metric_delta damage_taken"
+      "803219 behaviour_metric_delta damage_taken",
+      "803219 behaviour_hit_ratio copies"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "taken_hit: a Light of the Naaru 41394 strike (1100) reads 794 with two Testament of Hope copies and 803219 held (0.85 x 0.85 = 0.7225), against 890 with the copies and no talent (the 1397742 copies entry, 0.81), same pair 20261112-013915 / -013954"
   },
   {
     "spell": 803842,

@@ -1783,6 +1783,72 @@
   ],
   "behaviours": [
     {
+      "spell": 801455, "name": "Testament of Will (immunity window)", "kind": "cast_applies_aura", "variant": "window",
+      "label_suffix": "window", "quote": "making them immune to all movement impairing effects for", "expected_ms": 10000,
+      "applied_aura": 801455, "target": "ally", "cast_spell": 801455, "cast_target": "ally",
+      "observe_source": "801455 DurationIndex 1 (10000 ms), its effects (aura 147 mask 65, aura 77 MiscValue 13, trigger 102208) at TARGET_UNIT_TARGET_ALLY 21, so it is cast at the grouped ally (ADR 0212) and read there; its expiry pair times the stated duration from the cast."
+    },
+    {
+      "spell": 801455, "name": "Testament of Will (Sacred Restraint)", "kind": "cast_applies_aura",
+      "variant": "sacred_restraint", "label_suffix": "sacred_restraint", "quote": "Applies Sacred Restraint for",
+      "expected_ms": 60000, "applied_aura": 102208, "target": "ally", "cast_spell": 801455, "cast_target": "ally",
+      "observe_source": "AscensionTemplarAbilities.cpp:289-291 (OnSpellCast): a 801455 cast with a unit target casts Sacred Restraint 102208 on that target. 102208 DurationIndex 3 (60000 ms). Cast at the grouped ally (ADR 0212), read on the ally; its expiry pair times the stated duration from the cast."
+    },
+    {
+      "spell": 501606, "name": "Testament of Faith (Sacred Restraint)", "kind": "cast_applies_aura",
+      "variant": "sacred_restraint", "label_suffix": "sacred_restraint", "quote": "Applies Sacred Restraint for",
+      "expected_ms": 60000, "applied_aura": 102208, "target": "ally", "cast_spell": 501606, "cast_target": "ally",
+      "observe_source": "AscensionTemplarAbilities.cpp:289-291 (OnSpellCast): a cast of the Testament of Faith chain (Named 801478) with a unit target casts Sacred Restraint 102208 on that target. 102208 DurationIndex 3 (60000 ms). 501606 is cast at the grouped ally (TARGET_UNIT_TARGET_ALLY, ADR 0212), read on the ally; its expiry pair times the stated duration from the cast."
+    },
+    {
+      "spell": 300520, "name": "Judgement", "kind": "hit_ratio", "variant": "scourgebane_above_20",
+      "label_suffix": "scourgebane_above_20", "quote": "on enemies below 20% health.", "expected": 1.0,
+      "observe_spell": 801832, "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [300520, 1]]},
+      "critical": false, "trials": 40, "target_health_pct": 30, "fixture": {"attack_power": 20000, "spell_power": 20000},
+      "expected_source": "Control of the health condition: AscensionTemplarAbilities.cpp:140-142 multiplies Scourgebane 801832 by 1.25 only when the target is below 20% health; the scourgebane entry holds the dummy at 10% (1.25). Here the dummy is held at 30%, so 300520 adds nothing: 1.0. Both arms set 823764 (beeg spellpen, SpellFamilyName 33, no Templar spell) to remove the dummy's level-based magic resistance. Only non-critical hits are compared."
+    },
+    {
+      "spell": 705286, "name": "Duty Calls (Holy damage)", "kind": "hit_ratio", "variant": "damage_holy",
+      "label_suffix": "damage_holy", "quote": "increases your damage dealt and movement speed by", "expected": 1.1,
+      "observe_spell": 801832, "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [560834, 5]]},
+      "critical": false, "trials": 40, "fixture": {"attack_power": 20000, "spell_power": 20000},
+      "expected_source": "560834 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue 126 (the magic schools), +2% per stack ($560834s1 = 2, EffectBasePoints 1 + 1), at its cap of 5 stacks ($560834u, the stack_cap entry): +10%, 1.10; one stack's 1.02 lies outside the band. Scourgebane 801832 is Holy (SchoolMask 2). Both arms set 823764 (beeg spellpen) to remove the dummy's magic resistance. Only non-critical hits are compared."
+    },
+    {
+      "spell": 705286, "name": "Duty Calls (Physical damage)", "kind": "hit_ratio", "variant": "damage_physical",
+      "label_suffix": "damage_physical", "quote": "increases your damage dealt and movement speed by", "expected": 1.1,
+      "metric": "melee_damage_total", "swing_hand": 0, "refresh": true,
+      "control": {"auras": [[54678, 1]]}, "treatment": {"auras": [[54678, 1], [560834, 5]]},
+      "critical": false, "trials": 30, "fixture": {"attack_power": 20000},
+      "expected_source": "The tooltip says damage dealt, with no school. 560834 Effect[0] aura 79 has EffectMiscValue 126, which leaves out the Physical school (1); a main-hand white swing is Physical, so this arm reads whether a Physical hit gains the 5-stack +10%. Each trial is one main-hand swing interval at the dummy, reading plain (not critical, not glancing) hits; both arms set Brute Force 54678 (physical target resistance -50000) before every swing, so the dummy's armor is 0, and the attack power fixture makes the AP part dominate the weapon roll. 705286 is not learned."
+    },
+    {
+      "spell": 300524, "name": "Focused (Righteous Tempest)", "kind": "hit_ratio", "variant": "righteous_tempest",
+      "label_suffix": "righteous_tempest", "quote": "Increases the damage of Blade of Faith and Righteous Tempest by",
+      "expected": 1.25, "cast_spell": 807274, "observe_spell": 570205, "cast_wait_ms": 5500, "learn": [807274],
+      "control": {}, "treatment": {"auras": [[300524, 1]]}, "critical": false, "trials": 30,
+      "expected_source": "$s1 = 25 (300524 EffectBasePoints[0] 24 + 1): Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE on EffectSpellClassMask word 0 bit 2, the flags of Righteous Tempest's hit 570205. Righteous Tempest 807274 (the level 60 rank, a hit of 570205 at the cast and every 1000 ms for 5000 ms) is cast at the dummy and the non-critical hits of 570205 are read for 5500 ms after each cast, as the Righteous Tempest oaths entries do. Control: no 300524."
+    },
+    {
+      "spell": 300524, "name": "Focused (Blade of Faith)", "kind": "hit_ratio", "variant": "blade_of_faith",
+      "label_suffix": "blade_of_faith", "quote": "Increases the damage of Blade of Faith and Righteous Tempest by",
+      "expected": 1.25, "observe_spell": 803880, "cast_wait_ms": 3500, "control": {"auras": [[823764, 1]]},
+      "treatment": {"auras": [[823764, 1], [300524, 1]]}, "critical": false, "trials": 30,
+      "expected_source": "$s1 = 25 (300524 EffectBasePoints[1] 24 + 1): Effect[1] aura 108 SPELLMOD_DOT (EffectMiscValue 22) on Blade of Faith; its DBC target TARGET_UNIT_NEARBY_ENEMY is moved to the caster by AscensionTemplarContracts.cpp:126-131. Blade of Faith 803880 (rank 9, the level 60 rank) Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE every 3000 ms; each trial casts it at the dummy and reads its ticks for 3500 ms. Its caster aura Oath Chain 704576 is set before each cast. Both arms set 823764 (beeg spellpen) to remove the dummy's magic resistance, whose partial resists spread the Holy ticks. Control: no 300524. Only non-critical ticks are compared."
+    },
+    {
+      "spell": 803219, "name": "Spiritual Abdicator", "kind": "taken_hit", "variant": "copies", "label_suffix": "copies",
+      "judge": "damage_ratio", "expected": 0.7225, "quote": "now reduces damage taken by an additional 5% per copy.",
+      "strike_spell": 41394, "caster_health_pct": 100, "caster_max_health": 100000, "trials": 10, "learn": [803219],
+      "arms": [{"name": "control"}, {"name": "treatment", "opening_casts": [[1397742, "caster"]]}],
+      "observe_source": "AscensionTemplarContracts.cpp:322-326 (ModifySpellEffectBaseValue): while the copies' owner holds 803219, Hope Mitigation 704409 Effect[1] (aura 87 on the owner, applied by each copy 50250) is -15 instead of -10. A real Testament of Hope 1397742 cast opens the treatment arm, as the 1397742 copies entry does (0.81 without the talent): two copies, each -15%, multiply to 0.85 x 0.85 = 0.7225. The striker casts Light of the Naaru 41394 (Holy, fixed 1100) at the caster held at 100000 health; the control arm, without copies, comes first. Non-critical hits."
+    },
+    {
+      "spell": 300513, "name": "Crusader's Brand (mounting)", "kind": "mount_block",
+      "quote": "preventing them from mounting", "mount_spell": 458,
+      "observe_source": "Two server paths: Spell::CheckCast refuses any SPELL_AURA_MOUNTED cast while the caster holds 300513 with SPELL_FAILED_CASTER_AURASTATE 22 (Spell.cpp:6857-6860), and the brand's apply hook removes every SPELL_AURA_MOUNTED aura and Divine Charge's steed 527272 from its target (AscensionTemplarAuras.cpp:107-112, which runs only when the brand's caster is a player). The caster is the branded unit, set by itself, at the open-world outdoor site of the cast_condition kind (Brown Horse 458 is OUTDOORS_ONLY and CANT_USED_IN_COMBAT): the mount cast is refused and leaves no mount, the same cast without the brand mounts (control), and the brand set on the mounted caster dismounts it."
+    },
+    {
       "spell": 560116, "name": "Interdict (silence)", "kind": "cast_applies_aura", "quote": "silencing them for",
       "expected_ms": 6000, "applied_aura": 560116, "target": "dummy", "cast_spell": 560116,
       "observe_source": "560116 DurationIndex 32 (6000 ms); Effect[0] aura 27 SPELL_AURA_MOD_SILENCE at TARGET_UNIT_TARGET_ENEMY 6, so the silence is read on the dummy; its expiry pair times the stated duration from the cast. Patience 712678 is not learned."
