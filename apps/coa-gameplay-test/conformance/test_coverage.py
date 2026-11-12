@@ -526,10 +526,17 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([claim('Reduces the cost of all Raises by 20%', label)], [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Raise a Ghoul', label)], [read])[0], [DATA])
 
+    def test_a_cast_count_proves_only_a_clause_that_states_a_cast(self):
+        label = '1 behaviour_metric_delta'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'spell_go_count', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim('Command: Unleash a powerful attack', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('dealing Weapon Damage plus 100 to all enemies', label)], [read])[0],
+                         [DATA])
+
     def test_minion_casts_and_swings_are_event_reads(self):
         label = '1 behaviour_metric_delta'
         clauses = [claim('your Undead minions are guaranteed to critically strike', label)]
-        for metric in ('spell_go_count', 'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits'):
+        for metric in ('pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits', 'pet_melee_blocked'):
             with self.subTest(metric=metric):
                 self.assertEqual(METRIC_EVIDENCE[metric], EVENT)
                 read = judged(label, BEHAVIOUR_METRIC_DELTA, metric, contrast=LEARNED_CONTRAST)

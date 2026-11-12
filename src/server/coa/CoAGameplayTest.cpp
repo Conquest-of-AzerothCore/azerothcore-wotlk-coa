@@ -999,6 +999,7 @@ struct MeleeOutcomes
     uint32 crits = 0;
     uint32 glancing = 0;
     uint32 plain = 0;
+    uint32 blocked = 0;
     uint64 plainDamage = 0;
     uint64 damage = 0;
     uint32 attackerEntry = 0;
@@ -1609,6 +1610,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             ++outcome.plain;
             outcome.plainDamage += damage;
         }
+        if (damage && (hitInfo & HITINFO_BLOCK))
+            ++outcome.blocked;
     }
 
     ++actor.packetOrdinal;
@@ -4728,7 +4731,7 @@ private:
         }
         if (metric == "pet_melee_swings" || metric == "pet_melee_crits" || metric == "pet_melee_glancing" ||
             metric == "pet_melee_plain_count" || metric == "pet_melee_plain_damage" || metric == "pet_melee_damage" ||
-            metric == "pet_melee_hits")
+            metric == "pet_melee_hits" || metric == "pet_melee_blocked")
         {
             Require(unit->IsPlayer(), "Pet melee query needs a player");
             Actor const& actor = _actors.at(step.get<std::string>("actor"));
@@ -4743,6 +4746,7 @@ private:
                     sum.crits += outcome.crits;
                     sum.glancing += outcome.glancing;
                     sum.plain += outcome.plain;
+                    sum.blocked += outcome.blocked;
                     sum.plainDamage += outcome.plainDamage;
                     sum.damage += outcome.damage;
                 }
@@ -4758,6 +4762,8 @@ private:
                 return double(sum.damage);
             if (metric == "pet_melee_hits")
                 return sum.crits + sum.glancing + sum.plain;
+            if (metric == "pet_melee_blocked")
+                return sum.blocked;
             return double(sum.plainDamage);
         }
         if (metric == "melee_attack_count" || metric == "melee_damage_count" ||

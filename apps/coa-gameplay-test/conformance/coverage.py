@@ -385,7 +385,8 @@ METRIC_EVIDENCE = {
                      'timeline_interval_max_ms', 'timeline_interval_median_ms', 'event_first_ms',
                      'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk',
                      'spell_absorb_total', 'spell_log_count', 'nearby_creature_at_client', 'spell_go_count',
-                     'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits'),
+                     'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits',
+                     'pet_melee_blocked'),
                     EVENT),
     **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks', 'can_detect',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
@@ -418,6 +419,7 @@ STATE_PROMISES = {
     'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
 }
+EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})
 LISTED_OTHER_BUILD = 5
 
@@ -583,6 +585,9 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     if kind == BEHAVIOUR:
         return BEHAVIOUR
     observed = metric_class(verdict)
+    words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
+    if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
+        return DATA
     if observed == EVENT or (observed == STATE and promised_state(verdict, clause)):
         return BEHAVIOUR
     return DATA
