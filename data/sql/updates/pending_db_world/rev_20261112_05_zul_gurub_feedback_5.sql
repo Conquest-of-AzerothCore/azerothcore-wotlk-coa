@@ -1,8 +1,8 @@
 -- Zul'Gurub, tester feedback round 5 (2026-11-12).
 -- Health per player, measured where a live combat log exists, otherwise on the ZG ladder x1.44/x1.88/x2.32:
 -- Heart of Hakkar: Normal CoA 2026-08 kills (211,669 at 10, 285,597 at 15, 413,079 at 21 players: mean 19,959);
---   Mythic = Normal x1.489, the Bronzebeard Mythic/Normal ratio (506,990 at 25 / 149,799 at 11 players);
---   Ascended CoA 2026-08-01 (2,384,889 at 25 players).
+--   Heroic, Mythic and Ascended on Hakkar's ladder (user decision 2026-11-12): the Ascended log's 95,396 per player
+--   came with a Hakkar at about 5x his Normal health, while ours is x2.32.
 -- Arlokk's Zulian Prowlers: Normal CoA 2026-08-02 (36,342 at 11 players).
 -- Bloodseeker Bats (Jeklik's waves and the temple trash) and Frenzied Bloodseeker Bats: CoA and Bronzebeard Mythic and
 --   Ascended logs.
@@ -10,7 +10,7 @@
 --   (4,490 / 1,389), so Ascended stays above Mythic.
 DELETE FROM `coa_boss_flex` WHERE `entry` IN (92005, 15101, 11368, 14965);
 INSERT INTO `coa_boss_flex` (`entry`, `hp_d0`, `hp_d1`, `hp_d2`, `hp_d3`, `comment`) VALUES
-(92005, 19959, 28741, 29722, 95396, 'ZG Heart of Hakkar: Normal/Ascended measured, Mythic by the Bronzebeard ratio'),
+(92005, 19959, 28741, 37523, 46305, 'ZG Heart of Hakkar: Normal measured, then the ladder'),
 (15101, 3304, 4758, 6212, 7665, 'ZG Zulian Prowler (Arlokk): live 36,342 at 11 players (measured), ZG ladder'),
 (11368, 1430, 2059, 3100, 6300, 'ZG Bloodseeker Bat: Normal, Mythic and Ascended measured'),
 (14965, 0, 0, 33403, 69252, 'ZG Frenzied Bloodseeker Bat: Mythic and Ascended measured');

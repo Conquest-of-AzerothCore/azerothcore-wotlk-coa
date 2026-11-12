@@ -6,7 +6,8 @@
  * troll and spider every minute; on Ascension she stays a troll until 50% and
  * a spider after (in the video from 49%, 230s in). The spider form's cycle
  * (Web Spray, Burrow, Poison Shock every 45s) and Fierce Blow follow the CoA
- * combat log of 2026-08-02.
+ * combat log of 2026-08-02; on Mythic and Ascended the cycle is 58s (the CoA
+ * Mythic log of 2026-08-04: 58.5s; Bronzebeard Ascended, 2025-12-21: 56-58s).
  *
  *   Both forms
  *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
@@ -28,21 +29,25 @@
  *
  *   Spider form, when the avatar dies
  *     Acid Spit          first 1s,  every 12s   on the tank, poison and -10% armour
- *     Web Spray          first 15s, every 45s   everyone within 35 yards (the
+ *     Web Spray          first 15s, every cycle everyone within 35 yards (the
  *                                               spell's own 20 widened: tester,
  *                                               2026-11-08) is slowed, then
  *                                               webbed; then she charges a
  *                                               caster, as in stock
- *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable
+ *     Burrow             first 20.5s, every cycle under ground for 3s, untargetable
  *                                               and hidden (the Hide Body display
  *                                               of Burrow's misc value 24417, as
  *                                               Kurinnaxx's Tunneling);
  *                                               she comes up on the player
  *                                               farthest from her and stays on
  *                                               them for 8s, untauntable (tester,
- *                                               live, 2026-11-04)
- *     Poison Shock       first 27s, every 45s   Poison Nova, 20 yards around her,
- *                                               less the farther away
+ *                                               live, 2026-11-04); on Mythic and
+ *                                               Ascended for 21s, through Poison
+ *                                               Shock and about 15s of melee (the
+ *                                               Mythic log: 12-19s on non-tanks)
+ *     Poison Shock       1.8s after she comes up (both logs), Poison Nova,
+ *                                               20 yards around her, less the
+ *                                               farther away
  *     Furious Strikes    passive, her hits speed her up
  *
  * Decided here, not in the data:
@@ -151,11 +156,16 @@ namespace
     constexpr uint32 DISPLAY_HIDE_BODY = 22452;
     constexpr Milliseconds BURROW_LENGTH        = 3s;
     constexpr Milliseconds HUNT_LENGTH          = 8s;
+    constexpr Milliseconds HUNT_LENGTH_MYTHIC   = 21s;
+    constexpr Milliseconds SPIDER_CYCLE         = 45s;
+    constexpr Milliseconds SPIDER_CYCLE_MYTHIC  = 58s;
+    constexpr Milliseconds POISON_SHOCK_AFTER_EMERGE = 1800ms;
     constexpr Milliseconds HATCH_EVERY          = 30s;
     constexpr Milliseconds HATCH_DELAY          = 10s;
     constexpr float EGG_SEARCH_RANGE = 100.0f;
     constexpr float DRAIN_LIFE_RANGE = 100.0f;
     constexpr float DRAIN_LIFE_SPLASH_SHARE = 0.32f;
+    constexpr uint8 MYTHIC_SPAWN_MODE = 2;
     constexpr uint8 INFEST_MIN_SPAWN_MODE = 3;
     constexpr float HUNT_THREAT    = 1000000.0f;
 
@@ -235,7 +245,16 @@ namespace
             events.ScheduleEvent(EVENT_ACID_SPIT, 1s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_WEB_SPRAY, 15s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_BURROW, 20500ms, 0, PHASE_SPIDER);
-            events.ScheduleEvent(EVENT_POISON_SHOCK, 27s, 0, PHASE_SPIDER);
+        }
+
+        bool MythicOrHigher() const
+        {
+            return me->GetMap()->GetSpawnMode() >= MYTHIC_SPAWN_MODE;
+        }
+
+        Milliseconds SpiderCycle() const
+        {
+            return MythicOrHigher() ? SPIDER_CYCLE_MYTHIC : SPIDER_CYCLE;
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -361,7 +380,7 @@ namespace
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             AttackStart(prey);
-            events.ScheduleEvent(EVENT_END_HUNT, HUNT_LENGTH, 0, PHASE_SPIDER);
+            events.ScheduleEvent(EVENT_END_HUNT, MythicOrHigher() ? HUNT_LENGTH_MYTHIC : HUNT_LENGTH, 0, PHASE_SPIDER);
         }
 
         void EndHunt()
@@ -520,7 +539,7 @@ namespace
                     case EVENT_WEB_SPRAY:
                         DoCastVictim(SPELL_WEB_SPRAY);
                         events.ScheduleEvent(EVENT_CHARGE, 5s, 0, PHASE_SPIDER);
-                        events.ScheduleEvent(EVENT_WEB_SPRAY, 45s, 0, PHASE_SPIDER);
+                        events.ScheduleEvent(EVENT_WEB_SPRAY, SpiderCycle(), 0, PHASE_SPIDER);
                         break;
                     case EVENT_CHARGE:
                         // From stock: after the webs she goes for a caster out of reach.
@@ -535,15 +554,15 @@ namespace
                         break;
                     case EVENT_POISON_SHOCK:
                         DoCastSelf(SPELL_POISON_SHOCK);
-                        events.ScheduleEvent(EVENT_POISON_SHOCK, 45s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_BURROW:
                         DoCastSelf(SPELL_BURROW);
-                        events.ScheduleEvent(EVENT_BURROW, 45s, 0, PHASE_SPIDER);
+                        events.ScheduleEvent(EVENT_BURROW, SpiderCycle(), 0, PHASE_SPIDER);
                         break;
                     case EVENT_EMERGE:
                         Emerge();
                         HuntFarthest();
+                        events.ScheduleEvent(EVENT_POISON_SHOCK, POISON_SHOCK_AFTER_EMERGE, 0, PHASE_SPIDER);
                         break;
                     case EVENT_END_HUNT:
                         EndHunt();

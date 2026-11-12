@@ -5,10 +5,12 @@
     "The round-5 testers found the Heart of Hakkar (92005), Arlokk's Zulian Prowlers (15101), Bloodseeker Bats",
     "(11368), Frenzied Bloodseeker Bats (14965) and the Spawn of Mar'li (15041) on the wrong health per tier, and",
     "trash on Heroic and above weaker than on Normal: CoA's raid health x2.2 applies on Normal only. Health per",
-    "player from the live logs: heart 19,959 Normal and 29,722 Mythic; prowler 3,304 and 6,212; bat 1,430 and",
-    "3,100; frenzied bat 33,403 Mythic; Spawn of Mar'li 8,431 Mythic (tester value). Raid flex counts at least",
-    "10 players. A Mythic Gurubashi Headhunter (3,052 level-60 warrior health x 11.2219) gets x1.88 x2.2 =",
-    "141,655 health, where the variant without the raid factor had 64,389. Each hero is alone in an instance."
+    "player from the live logs: heart 19,959 Normal; prowler 3,304 and 6,212; bat 1,430 and 3,100; frenzied bat",
+    "33,403 Mythic; Spawn of Mar'li 8,431 Mythic (tester value). The heart follows Hakkar's ladder (x1.88 Mythic,",
+    "x2.32 Ascended: 37,523 and 46,305; user decision 2026-11-12), not the Ascended log's 95,396, whose Hakkar had",
+    "about 5x his Normal health. Raid flex counts at least 10 players. A Mythic Gurubashi Headhunter (3,052",
+    "level-60 warrior health x 11.2219) gets x1.88 x2.2 = 141,655 health, where the variant without the raid factor",
+    "had 64,389. Each hero is alone in an instance."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -18,6 +20,12 @@
     "z": 80.6
   },
   "players": [
+    {
+      "id": "ascended",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
     {
       "id": "mythic",
       "race": 1,
@@ -38,6 +46,12 @@
     },
     {
       "action": "set_health",
+      "actor": "ascended",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
       "actor": "mythic",
       "value": 10000000,
       "maximum": 10000000
@@ -50,12 +64,27 @@
     },
     {
       "action": "raid_difficulty_packet",
+      "actor": "ascended",
+      "value": 3
+    },
+    {
+      "action": "raid_difficulty_packet",
       "actor": "mythic",
       "value": 2
     },
     {
       "action": "wait",
       "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "ascended",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
     },
     {
       "action": "teleport",
@@ -84,6 +113,13 @@
     },
     {
       "action": "assert",
+      "label": "CONTROL: ascended is in Zul'Gurub on Ascended",
+      "actor": "ascended",
+      "metric": "map_difficulty",
+      "equals": 3
+    },
+    {
+      "action": "assert",
       "label": "CONTROL: mythic is in Zul'Gurub on Mythic",
       "actor": "mythic",
       "metric": "map_difficulty",
@@ -95,6 +131,13 @@
       "actor": "normal",
       "metric": "map_difficulty",
       "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "ascended",
+      "entry": 92005,
+      "as": "heart_ascended",
+      "distance": 4
     },
     {
       "action": "summon",
@@ -173,12 +216,22 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the Mythic heart has 29,722 per player",
+      "label": "DISCRIMINATING: the Ascended heart has 46,305 per player",
+      "actor": "ascended",
+      "metric": "nearby_creature_max_health",
+      "entry": 92005,
+      "min": 460735,
+      "max": 465365,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic heart has 37,523 per player",
       "actor": "mythic",
       "metric": "nearby_creature_max_health",
       "entry": 92005,
-      "min": 295733,
-      "max": 298707,
+      "min": 373354,
+      "max": 377106,
       "within_ms": 2000
     },
     {
@@ -260,6 +313,13 @@
       "min": 140946,
       "max": 142364,
       "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ascended hero survived",
+      "actor": "ascended",
+      "metric": "alive",
+      "equals": 1
     },
     {
       "action": "assert",
