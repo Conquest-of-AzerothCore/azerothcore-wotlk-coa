@@ -569,7 +569,8 @@
       "301310 e0 spell_power 2",
       "301310 e0 spell_power 3"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "read: SpellBaseDamageBonusDone(Holy, Fire and Nature masks), the engine function named by rule 4 amendment point 2 (2d, as the 411 ruling); read on Holy, Fire and Nature (labels spell_power 1, 2, 3); other schools by the aura's school mask in the data"
   },
   {
     "spell": 301310,
@@ -1669,21 +1670,19 @@
     "spell": 572808,
     "clause": "reducing their total threat by $572809s1% every $t1 sec for $d",
     "labels": [
-      "572808 effect_value 572809e0 #0",
-      "572808 behaviour_metric_ratio_delta"
+      "572808 effect_value 572809e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "behaviour arm pending (real cast of 572808), audit 2026-11-12: `572808 behaviour_metric_ratio_delta` left out of the evidence, its arms start from a harness set_aura of 572808 (rule 4 amendment point 2b); data until then"
   },
   {
     "spell": 572808,
     "clause": "every $t1 sec",
     "labels": [
-      "572808 aura_amplitude_ms #1",
-      "572808 behaviour_metric_ratio_delta before_tick",
-      "572808 behaviour_metric_ratio_delta",
-      "572808 behaviour_metric_ratio_delta period"
+      "572808 aura_amplitude_ms #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "behaviour arm pending (real cast of 572808), audit 2026-11-12: `572808 behaviour_metric_ratio_delta before_tick`, `572808 behaviour_metric_ratio_delta`, `572808 behaviour_metric_ratio_delta period` left out of the evidence, its arms start from a harness set_aura of 572808 (rule 4 amendment point 2b); data until then"
   },
   {
     "spell": 572808,
@@ -2170,7 +2169,8 @@
       "705271 effect_value e0 #0",
       "705271 e0 melee_crit_chance_refreshed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 2a)"
   },
   {
     "spell": 705271,
@@ -2260,7 +2260,8 @@
       "705281 effect_value e0 #0",
       "705281 e0 spell_power 1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "read: SpellBaseDamageBonusDone(Holy), the engine function named by rule 4 amendment point 2 (2d, as the 411 ruling); read on Holy; other schools by the aura's school mask in the data; owner rule M-3 (owner-rulings-2026-11-10.md:154): \"spell damage\" in a tooltip names the spell power stat, so the claim is a stat claim"
   },
   {
     "spell": 705281,
@@ -3172,7 +3173,8 @@
       "707851 effect_value e0 #0",
       "707851 e0 melee_crit_chance_refreshed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 2a)"
   },
   {
     "spell": 707851,
@@ -4406,7 +4408,7 @@
       "804906 behaviour_metric_delta oath_crit"
     ],
     "kind": "claim",
-    "reason": "melee crit chance 7.146 before a Condemn cast and 10.146 after it, with Oath: Condemn 804922; the not_measured value label of the other rank was dropped"
+    "reason": "melee crit chance 7.146 before a Condemn cast and 10.146 after it, with Oath: Condemn 804922; the not_measured value label of the other rank was dropped; crit field read after a harness-forced UpdateCritPercentage (recorded limit, audit 2026-11-12, rule 4 amendment point 2a)"
   },
   {
     "spell": 804912,
@@ -4487,7 +4489,8 @@
       "804927 effect_value e2 #1",
       "804927 e2 spell_power 1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "read: SpellBaseDamageBonusDone(Holy), the engine function named by rule 4 amendment point 2 (2d, as the 411 ruling); read on Holy; other schools by the aura's school mask in the data; owner rule M-3 (owner-rulings-2026-11-10.md:154): \"spell damage\" in a tooltip names the spell power stat, so the claim is a stat claim"
   },
   {
     "spell": 804928,
@@ -4903,7 +4906,7 @@
       "805423 behaviour_metric_delta spell_power"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): Holy spell power gains 39 on a real cast of 805423 after the aura is cleared (30% of Agility read, 39.6, truncated) and 48 with Agility 58451 (48.6); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, spell power back to 0 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db); the read is Holy (school 1) spell power: Effect[1] MiscValue 126 covers schools 1-6, and SpellBaseDamageBonusDone adds the amount for any school in that mask (Unit.cpp:10194, GetMiscValue() & schoolMask); no other school was read; read named in the verdict (rule 4 amendment 2d): Unit::SpellBaseDamageBonusDone(Holy), which UpdateSpellDamageAndHealingBonus copies to PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1; judged again with it as x2 on the same pair"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): Holy spell power gains 39 on a real cast of 805423 after the aura is cleared (30% of Agility read, 39.6, truncated) and 48 with Agility 58451 (48.6); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, spell power back to 0 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db); the read is Holy (school 1) spell power: Effect[1] MiscValue 126 covers schools 1-6, and SpellBaseDamageBonusDone adds the amount for any school in that mask (Unit.cpp:10194, GetMiscValue() & schoolMask); no other school was read; read named in the verdict (rule 4 amendment 2d): Unit::SpellBaseDamageBonusDone(Holy), which UpdateSpellDamageAndHealingBonus copies to PLAYER_FIELD_MOD_DAMAGE_DONE_POS + 1; judged again with it as x2 on the same pair; read on Holy; other schools by the aura's school mask in the data (411 ruling, 2026-11-12)"
   },
   {
     "spell": 805423,
