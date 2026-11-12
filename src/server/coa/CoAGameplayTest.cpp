@@ -5397,6 +5397,11 @@ private:
             }
             return 0.0;
         }
+        if (metric == "owned_aura")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned aura spell");
+            return unit->GetOwnedAura(spell) != nullptr;
+        }
         if (metric == "owned_creature_attack_time_ms" || metric == "owned_creature_crit_chance")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));

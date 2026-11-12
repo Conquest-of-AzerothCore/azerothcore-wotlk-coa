@@ -28,8 +28,8 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
                         BEHAVIOUR_FALL_DAMAGE, BEHAVIOUR_SOURCE_STACK, CONDITION_CONTRAST, DISPEL_TYPE_NAMES,
-                        HIT_RATIO_ARMS, LEARNED_CONTRAST, STAT_GAIN_ATTRIBUTION, STAT_GAIN_RETURN,
-                        TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
+                        HIT_RATIO_ARMS, LEARNED_CONTRAST, SPELL_FAILED_NOT_READY, STAT_GAIN_ATTRIBUTION,
+                        STAT_GAIN_RETURN, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
                         strongest_percent)
 from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
                    bonus_status, bonus_text, delta_of, delta_text,
@@ -51,9 +51,9 @@ from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STA
                    TALENT_DELTA, levers, mean_interval, ratio_interval)
 from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
                      Unreadable)
-from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
-                      MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label,
-                      duration_trial_label, minion_cooldown_event_label)
+from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK,
+                      MAGNITUDE_CHECK, MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK,
+                      cooldown_trial_label, duration_trial_label, minion_cooldown_event_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFECTS, FIXED_DIE_SIDES,
                     GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation,
                     calc_amount_hooks_label, dataset, effect_modifier_label, mean_samples, roll_range, sample_labels)
@@ -141,6 +141,7 @@ ADDITIVE_RELATIONS = frozenset({'add', 'share'})
 TRUNCATED_METRICS = frozenset({'stat'})
 CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
                  COOLDOWN_CHECK: ('triggers', 'aura'), DURATION_CHECK: ('triggers', 'aura'),
+                 COOLDOWN_GATE_CHECK: ('triggers', 'aura'),
                  SELF_TRIGGER_CHECK: ('triggers', 'aura'), GATE_ABSENCE_CHECK: ('triggers', 'aura'),
                  TALENT_DELTA: ('talent_modifiers', 'talent')}
 PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
@@ -1531,6 +1532,31 @@ def judge_minion_cooldown(parts: list[ProcPart]) -> Verdict:
                                    f'{model["minimum_trials"]} the check needs ({notes})')
     status = 'ok' if measured[0] <= high + FLOAT_EPSILON and measured[1] >= low - FLOAT_EPSILON else 'alert'
     return replace(judged, status=status, explanation=f'{counts}; {expectation.rule} ({notes})')
+
+
+def judge_cooldown_gate(parts: list[ProcPart]) -> Verdict:
+    first_entry, run, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    names = ('arms', 'events', 'primed')
+    values = {name: {arm: run.values.get(label) for arm, label in model[name].items()} for name in names}
+    aura = run.values.get(model['measurements']['aura'])
+    if aura is None or any(value is None for name in names for value in values[name].values()):
+        return replace(base, explanation=f'no cooldown gate measurement in {unusable_run(run)}')
+    if aura <= 0:
+        return replace(base, status='unmeasured', explanation=f'aura {expectation.spell_id} absent in {run.key}')
+    without, with_ = values['arms']['without'], values['arms']['with']
+    primed = values['primed']
+    readings = (f'without the passive: cast result {without:g} after {values["events"]["without"]:g} minion events '
+                f'(cooldown {primed["without"]:g} ms when primed); with it: cast result {with_:g} after '
+                f'{values["events"]["with"]:g} events (primed {primed["with"]:g} ms)')
+    if min(primed.values()) <= model['gate_wait_ms']:
+        return replace(base, status='unmeasured', explanation=f'{readings}: the priming cast left no cooldown longer '
+                                                             f'than the {model["gate_wait_ms"]:g} ms wait')
+    status = 'ok' if without == SPELL_FAILED_NOT_READY and with_ == 0 else 'alert'
+    return replace(base, status=status, measured=with_, expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{readings}; {expectation.rule}')
 
 
 def judge_trigger_cooldown(parts: list[ProcPart]) -> Verdict:
@@ -4841,7 +4867,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK,
-                                       SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK) and run is not None:
+                                       SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK, COOLDOWN_GATE_CHECK) \
+                    and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in POOLED_CHECKS and (expectation.model or {}).get('parts', 1) > 1:
                 if expectation.label not in hit_slots:
@@ -4885,7 +4912,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                  for parts in delta_parts.values()]
     trigger_judges = {TRIGGER_CHECK: judge_trigger, COOLDOWN_CHECK: judge_trigger_cooldown,
                       DURATION_CHECK: judge_trigger_duration, MAGNITUDE_CHECK: judge_trigger_magnitude,
-                      SELF_TRIGGER_CHECK: judge_self_trigger, GATE_ABSENCE_CHECK: judge_gate_absence}
+                      SELF_TRIGGER_CHECK: judge_self_trigger, GATE_ABSENCE_CHECK: judge_gate_absence,
+                      COOLDOWN_GATE_CHECK: judge_cooldown_gate}
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)

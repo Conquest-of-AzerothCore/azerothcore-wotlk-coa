@@ -33,8 +33,9 @@ from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
 from sheets import write_sheets
 from stack import PASSES, STACK_CHECKS, STACK_DPS, STACK_KIND, stack_scenarios
 from tooltip import read_tooltip
-from triggers import (COOLDOWN_DELTA_KIND, DURATION_DELTA_KIND, GATE_ABSENCE_KIND, MAGNITUDE_RATIO_KIND,
-                      SELF_TRIGGER_KIND, cooldown_trigger_scenario, duration_trigger_scenario, gate_absence_scenario,
+from triggers import (COOLDOWN_DELTA_KIND, COOLDOWN_GATE_KIND, DURATION_DELTA_KIND, GATE_ABSENCE_KIND,
+                      MAGNITUDE_RATIO_KIND, SELF_TRIGGER_KIND, cooldown_gate_scenario, cooldown_trigger_scenario,
+                      duration_trigger_scenario, gate_absence_scenario,
                       magnitude_ratio_scenario, self_trigger_scenario, shares_cooldown_effect, shares_trigger_aura,
                       trigger_entries, trigger_plan, trigger_scenario, trigger_status_expectation,
                       trigger_unmodelled_expectation)
@@ -334,7 +335,8 @@ def add_trigger(writer: ManifestWriter, entry: dict):
     if entry.get('status'):
         writer.add(key, 'trigger', None, aura, [trigger_status_expectation(entry)], name=name)
         return
-    scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario, DURATION_DELTA_KIND: duration_trigger_scenario,
+    scenario_fn = {COOLDOWN_DELTA_KIND: cooldown_trigger_scenario, COOLDOWN_GATE_KIND: cooldown_gate_scenario,
+                   DURATION_DELTA_KIND: duration_trigger_scenario,
                   MAGNITUDE_RATIO_KIND: magnitude_ratio_scenario, SELF_TRIGGER_KIND: self_trigger_scenario,
                   GATE_ABSENCE_KIND: gate_absence_scenario}.get(entry.get('kind'), trigger_scenario)
     try:

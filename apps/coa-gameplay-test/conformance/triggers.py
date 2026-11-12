@@ -14,6 +14,9 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, FORCE_CRIT_RATINGS, 
 TRIGGER_CHECK = 'trigger_count'
 COOLDOWN_DELTA_KIND = 'cooldown_delta'
 COOLDOWN_CHECK = 'trigger_cooldown_delta'
+COOLDOWN_GATE_KIND = 'cooldown_gate'
+COOLDOWN_GATE_CHECK = 'trigger_cooldown_gate'
+COOLDOWN_GATE_ARMS = ('without', 'with')
 DURATION_DELTA_KIND = 'duration_delta'
 DURATION_CHECK = 'trigger_duration_delta'
 MAGNITUDE_RATIO_KIND = 'magnitude_ratio'
@@ -263,6 +266,10 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} is {entry["status"]}: {entry.get("reason", "")}')
     if entry.get('kind') == COOLDOWN_DELTA_KIND:
         return checked_cooldown_entry(entry)
+    if entry.get('kind') == COOLDOWN_GATE_KIND:
+        checked_minion_cooldown_entry({**entry, 'observe_metric': 'cooldown_ms', 'expected_delta_ms': 1,
+                                       'window_ms': entry.get('gate_wait_ms', 0)})
+        return entry
     if entry.get('kind') == DURATION_DELTA_KIND:
         return checked_duration_entry(entry)
     if entry.get('kind') == MAGNITUDE_RATIO_KIND:
@@ -449,6 +456,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
 
 def trigger_plan(class_file: dict, entry: dict) -> TriggerPlan:
     checked_entry(entry)
+    if entry.get('kind') == COOLDOWN_GATE_KIND:
+        return TriggerPlan(scheduled=1, attempt_ms=entry['gate_wait_ms'], part_attempts=(1,))
     scheduled = math.ceil(TRIGGER_TRIALS * EXCLUDED_OUTCOME_MARGIN * entry.get('trial_attempts_factor', 1))
     interval = attempt_interval(class_file, entry)
     first = (PART_BUDGET_MS - DRAIN_MS) // interval - BASELINE_ATTEMPTS
@@ -774,7 +783,8 @@ def gate_absence_label(aura: int, suffix: str = '') -> str:
 def gate_absence_rule(entry: dict) -> str:
     trial = entry['trial_metric'] + f' of {entry["trigger"]["spell"]}'
     if entry['trigger']['action'] == MINION:
-        trial = f'{entry["trial_metric"]} of the creature {entry["trigger"]["entry"]} raised by {entry["trigger"]["spell"]}'
+        trial = (f'{entry["trial_metric"]} of the creature {entry["trigger"]["entry"]} raised by '
+                 f'{entry["trigger"]["spell"]}')
         if entry.get('caster_health_pct') is not None:
             trial += f', the caster held at {entry["caster_health_pct"]}% health'
     on_target = ' on the target' if entry.get('observe_actor') == 'target' else ''
@@ -931,6 +941,66 @@ def minion_cooldown_rule(entry: dict) -> str:
             f'drop less the elapsed time, summed over at least {TRIGGER_TRIALS} windows, per {entry["trial_metric"]} '
             f'event in them, matches {entry["expected_delta_ms"]:g} ms within 5%, and is 0 per event in '
             f'{BASELINE_ATTEMPTS} windows without the passive ("{entry["per_trigger_text"]}"){held}')
+
+
+def cooldown_gate_label(aura: int, arm: str) -> str:
+    return f'{aura} trigger cooldown gate {arm}'
+
+
+def cooldown_gate_arm(class_file: dict, entry: dict, arm: str) -> list[dict]:
+    aura, observe = entry['aura'], entry['observe_spell']
+    facts = facts_of(records_of(class_file), observe)
+    target = TARGET if entry.get('observe_target') == TARGET else None
+    cleared = [{'action': 'set_aura', 'actor': CASTER, 'spell': fixture['spell'], 'stacks': 0}
+               for fixture in entry.get('observe_cleared_auras', [])]
+    seeded = [{'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER, 'spell': fixture['spell'],
+               'stacks': 1} for fixture in entry.get('observe_target_auras', [])]
+    steps = minion_aura_steps(entry) + cast_steps(facts, observe, target, 0, 1, power_steps(entry) + cleared + seeded)
+    steps.append(measurement(f'{cooldown_gate_label(aura, arm)} primed', CASTER, 'cooldown_ms', spell=observe))
+    remaining = entry['gate_wait_ms']
+    refresh = entry.get('minion_aura_refresh_ms') or remaining
+    while remaining > 0:
+        chunk = min(refresh, remaining)
+        steps += minion_aura_steps(entry) + [{'action': 'wait', 'label': f'{arm} gate window', 'ms': chunk}]
+        remaining -= chunk
+    steps += cleared + seeded + power_steps(entry)
+    cast = {'action': 'cast', 'actor': CASTER, 'spell': observe}
+    if target:
+        cast['target'] = target
+    steps += [cast, {'action': 'wait', 'ms': CAST_MARGIN_MS},
+              measurement(cooldown_gate_label(aura, arm), CASTER, 'cast_failure', spell=observe),
+              measurement(f'{cooldown_gate_label(aura, arm)} events', CASTER, entry['trial_metric'],
+                          entry=entry['trigger']['entry'])]
+    return steps
+
+
+def cooldown_gate_scenario(class_file: dict, entry: dict, part: int = 0) -> tuple[dict, list[Expectation]]:
+    if part != 0:
+        raise ValueError(f'Trigger {entry["aura"]} cooldown gate has one part, not {part + 1}')
+    aura, trigger, observe = entry['aura'], entry['trigger'], entry['observe_spell']
+    labels = cooldown_measurement_labels(aura)
+    steps = minion_setup_steps(class_file, trigger) + [{'action': 'learn', 'actor': CASTER, 'spell': observe},
+                                                        {'action': 'attack', 'actor': CASTER, 'target': TARGET}]
+    steps += cooldown_gate_arm(class_file, entry, 'without') + aura_steps(class_file, entry)
+    steps += cooldown_gate_arm(class_file, entry, 'with')
+    steps += [{'action': 'stop_attack', 'actor': CASTER}, aura_measurement(entry, labels['aura'])]
+    name = f'Conformance trigger {class_file["name"]} {entry["name"]} {aura} cooldown gate'
+    contract = (f'{observe} is cast, the raised minion attacks the dummy for {entry["gate_wait_ms"]} ms, and {observe} '
+                f'is attempted again: refused without the passive (its cooldown still runs), cast with it (the '
+                f'minion hits removed the rest).')
+    scenario = scenario_shell(class_file, name, contract, steps)
+    scenario['creatures'] = [creature_fixture(class_file)]
+    model = {'arms': {arm: cooldown_gate_label(aura, arm) for arm in COOLDOWN_GATE_ARMS},
+             'events': {arm: f'{cooldown_gate_label(aura, arm)} events' for arm in COOLDOWN_GATE_ARMS},
+             'primed': {arm: f'{cooldown_gate_label(aura, arm)} primed' for arm in COOLDOWN_GATE_ARMS},
+             'gate_wait_ms': entry['gate_wait_ms'], 'observe_spell': observe, 'trigger': dict(trigger),
+             'measurements': labels}
+    rule = (f'{observe} attempted {entry["gate_wait_ms"]} ms after a priming cast while the creature '
+            f'{trigger["entry"]} raised by {trigger["spell"]} attacks: refused (SPELL_FAILED_NOT_READY) without '
+            f'{aura}, cast with it ("{entry["per_trigger_text"]}")')
+    expectation = Expectation(f'{aura} {COOLDOWN_GATE_CHECK}', COOLDOWN_GATE_CHECK, aura, aura, None,
+                              entry['trigger_text'], rule, model)
+    return timed(scenario, SETTLE_MS + 2 * (entry['gate_wait_ms'] + 2 * CAST_MARGIN_MS) + DRAIN_MS), [expectation]
 
 
 def cooldown_trigger_rule(entry: dict) -> str:

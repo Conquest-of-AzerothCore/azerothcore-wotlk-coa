@@ -659,6 +659,80 @@
         "value": 1373,
         "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the base-mana percentage costs of Virulency 801938 (18%) and Unholy Frenzy 805029 (15%)"
       }
+    },
+    {
+      "aura": 560798,
+      "name": "Pandemic",
+      "aura_on_minion": true,
+      "tooltip": "Damage dealt by your Undead minions now reduces the cooldown of |cffffffffVirulency|r by $/1000;806322s1 sec.",
+      "kind": "cooldown_gate",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by your Undead minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 801938,
+      "observe_target": "dummy",
+      "observe_cleared_auras": [
+        {
+          "spell": 803782,
+          "source": "precondition fixture: a Virulency cast opens Infestation 803782 for 10 s (AscensionNecromancerAbilities.cpp:108), during which the next Virulency infests instead and leaves the cooldown unset (AscensionNecromancerAbilities.cpp:58-80); clearing it lets every trial cast the cooldown-starting Virulency"
+        }
+      ],
+      "observe_target_auras": [
+        {
+          "spell": 570131,
+          "source": "precondition fixture: Virulency refreshes and copies the caster's diseases and is refused (111, SPELL_FAILED_TARGET_AURASTATE) on a target without one; Crypt Plague 570131 is a Necromancer disease (Disease, AscensionNecromancer.cpp:238-242); the claim is Pandemic's cooldown reduction, not the disease"
+        }
+      ],
+      "observe_source": "tooltip token $/1000;806322s1 of 560798: 806322 Effect[0] BasePoints -1001 + 1 = -1000 ms; AscensionNecromancerEvents.cpp:171-172 reduces Virulency 801938 by |Amount(806322)| for each damaging hit of a minion carrying the caster 560798 (Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS). Gate: 801938 (60000 ms cooldown) is primed and attempted again 50000 ms later while the Ghoul attacks: without 560798 its cooldown still runs (refused, SPELL_FAILED_NOT_READY 67); with it the counted minion events have removed the rest (cast)",
+      "per_trigger_text": "reduces the cooldown of Virulency by $/1000;806322s1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the base-mana percentage costs of Virulency 801938 (18%) and Unholy Frenzy 805029 (15%)"
+      },
+      "effect": "gate",
+      "gate_wait_ms": 50000
+    },
+    {
+      "aura": 537208,
+      "name": "Dominion of Frost",
+      "tooltip": "Critical strikes dealt by your Undead minions now reduce the cooldown of |cffffffffUnholy Frenzy|r by $/1000;680553S1 sec. Can only occur once per sec.",
+      "kind": "cooldown_gate",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Critical strikes dealt by your Undead minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "pet_melee_crits",
+      "minion_auras": [
+        {
+          "spell": 280912,
+          "amount": 100,
+          "source": "precondition fixture: Anointed 280912 (aura 290 SPELL_AURA_MOD_CRIT_PCT, 10 s) at amount 100 makes the minion crit (Unit::GetUnitCriticalChance, Unit.cpp:4534-4536); the claim is the cooldown each crit removes, not the crit"
+        }
+      ],
+      "minion_aura_refresh_ms": 8000,
+      "observe_spell": 805029,
+      "observe_source": "tooltip token $/1000;680553S1 of 537208: 680553 Effect[0] BasePoints -3001 + 1 = -3000 ms; AscensionNecromancerEvents.cpp:181-182 reduces Unholy Frenzy 805029 by |Amount(680553)| on a minion crit, Chance(player, 537208, 1, 1000) (ProcChance 100, 1000 ms internal cooldown); a single Ghoul crits every 2000 ms, so the internal cooldown never binds here. Gate: 805029 (180000 ms cooldown) is primed and attempted again 100000 ms later while the Ghoul attacks: without 537208 its cooldown still runs (refused, SPELL_FAILED_NOT_READY 67); with it the counted minion events have removed the rest (cast)",
+      "per_trigger_text": "reduce the cooldown of Unholy Frenzy by $/1000;680553S1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373, at or below the maximum: covers the base-mana percentage costs of Virulency 801938 (18%) and Unholy Frenzy 805029 (15%)"
+      },
+      "effect": "gate",
+      "gate_wait_ms": 100000
     }
   ],
   "talent_modifiers": [],
@@ -1583,6 +1657,42 @@
       "wait_ms": 1500,
       "expire_ms": 1000,
       "observe_source": "AscensionNecromancerAbilities.cpp:346-353: a cast of Unholy Frenzy 805029 with 704721 known summons min(10, Amount(302912)) Greater Zombies through Animate: Greater Zombie 525380 (creature 503032); 302912 Effect[0] BasePoints 4 + DieSides 1 = 5 ($302912s1); 525380 DurationIndex 8 = 15000 ms ($525380d), the summon lifetime (Summon, AscensionNecromancerSummons.cpp:352-355). Unholy Frenzy costs 15% of base mana: cast_power 1373 (player_class_stats class 23 level 60 BaseMana). With 704721 known: 0 before the cast, 5 at 1500 ms and 0 at 16500 ms after it, past the 15000 ms lifetime."
+    },
+    {
+      "spell": 560012,
+      "name": "Death and Ice (owned aura)",
+      "kind": "metric_delta",
+      "variant": "owned",
+      "label_suffix": "owned",
+      "quote": "While a Skeletal Mage is active",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500971,
+      "metric": "owned_aura",
+      "fields": {
+        "spell": 560012
+      },
+      "wait_ms": 2000,
+      "expire_ms": 1000,
+      "observe_source": "Diagnostic for fix note F-b1-2: Unit::GetOwnedAura(560012) on the caster, 0 before the learn and 1 after: the caster owns the summons-only aura."
+    },
+    {
+      "spell": 560012,
+      "name": "Death and Ice (applied aura)",
+      "kind": "metric_delta",
+      "variant": "applied",
+      "label_suffix": "applied",
+      "quote": "While a Skeletal Mage is active",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500971,
+      "metric": "aura",
+      "fields": {
+        "spell": 560012
+      },
+      "wait_ms": 2000,
+      "expire_ms": 1000,
+      "observe_source": "Diagnostic for fix note F-b1-2: Unit::GetAura(560012) on the caster (the harness aura read), 0 before and still 0 after the learn: the 500 ms recalculation's player->GetAura(560012) (AscensionNecromancer.cpp:395-397) finds nothing."
     }
   ],
   "player_observations": [],

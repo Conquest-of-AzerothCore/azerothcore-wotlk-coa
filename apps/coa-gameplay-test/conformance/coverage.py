@@ -27,8 +27,8 @@ from procs import DELTA_CHECK, PROC_CHECK
 from profile import DbcSetMismatch, require_server_sha
 from streamed import same_figures, streamed_texts
 from stack import STACK_DPS, STACK_SOURCE, TALENT_DELTA
-from triggers import (COOLDOWN_CHECK, DURATION_CHECK, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK, SELF_TRIGGER_CHECK,
-                      TRIGGER_CHECK)
+from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
+                      SELF_TRIGGER_CHECK, TRIGGER_CHECK)
 from values import CHECKS as VALUE_CHECKS, GAP_CLOSER_DISTANCE
 
 COVERAGE_FILE = 'coverage.md'
@@ -354,7 +354,8 @@ EVIDENCE = {
     **{check: DATA for check in VALUE_CHECKS},
     'hit_mean': BEHAVIOUR, 'melee_mean': BEHAVIOUR, 'periodic_total': BEHAVIOUR, 'unmodelled': LINKED,
     PASSIVE_DELTA: BY_METRIC, PROC_CHECK: BEHAVIOUR, DELTA_CHECK: BEHAVIOUR,
-    TRIGGER_CHECK: BEHAVIOUR, COOLDOWN_CHECK: DATA, DURATION_CHECK: DATA, MAGNITUDE_CHECK: BEHAVIOUR,
+    TRIGGER_CHECK: BEHAVIOUR, COOLDOWN_GATE_CHECK: BEHAVIOUR,
+    COOLDOWN_CHECK: DATA, DURATION_CHECK: DATA, MAGNITUDE_CHECK: BEHAVIOUR,
     SELF_TRIGGER_CHECK: BEHAVIOUR, GATE_ABSENCE_CHECK: BEHAVIOUR,
     STACK_DPS: BEHAVIOUR, STACK_SOURCE: BEHAVIOUR, TALENT_DELTA: BEHAVIOUR,
     BEHAVIOUR_COUNT: BEHAVIOUR, BEHAVIOUR_RATIO: BY_METRIC, BEHAVIOUR_DURATION: DATA, BEHAVIOUR_DURATION_RATIO: DATA,
@@ -395,7 +396,8 @@ METRIC_EVIDENCE = {
                      'spell_damage_done', 'spell_healing_done', 'spell_healing_taken', 'spell_critical_damage',
                      'spell_done_crit_chance', 'melee_damage_done', 'aoe_damage_taken', 'script_spell_damage_taken',
                      'spell_damage_taken', 'melee_damage_taken',
-                     'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune'),
+                     'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune',
+                     'owned_aura'),
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',

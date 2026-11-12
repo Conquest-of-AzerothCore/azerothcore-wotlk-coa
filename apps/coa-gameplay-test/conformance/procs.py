@@ -296,7 +296,8 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
 def trial_rule(entry: dict) -> str:
     trigger = entry['trigger']
     if trigger['action'] == MINION:
-        fixtures = ''.join(f'; minion aura {aura["spell"]}' + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
+        fixtures = ''.join(f'; minion aura {aura["spell"]}'
+                           + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
                            + f' set every {entry["minion_aura_refresh_ms"]} ms by harness set_aura ({aura["source"]})'
                            for aura in entry.get('minion_auras', []))
         return (f'trials: {entry["trial_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
