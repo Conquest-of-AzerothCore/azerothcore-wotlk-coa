@@ -102,3 +102,7 @@ UPDATE `gameobject` SET `position_x` = -5814.6, `position_y` = -258.2, `position
 -- #12088
 -- pickup 6941321 (Warm Whoolies) moved 3.3 yd across and 0.78 yd up onto the ground, checked in the editor
 UPDATE `gameobject` SET `position_x` = -5746.8358, `position_y` = -371.4732, `position_z` = 366.9209, `orientation` = 5.0409, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.581969, `rotation3` = -0.813211 WHERE `guid` = 6941321 AND `id` = 95679;
+
+-- #12080
+-- pickup 6941197 (Black Powder Sack) moved 17.1 yd across and 20.89 yd up from under the ship into it, at its Ascension position
+UPDATE `gameobject` SET `position_x` = -14928.543, `position_y` = 84.57, `position_z` = 3.46, `orientation` = 1.86, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.801611, `rotation3` = 0.597846 WHERE `guid` = 6941197 AND `id` = 95762;
