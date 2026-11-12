@@ -1323,7 +1323,9 @@
   {
     "spell": 707402,
     "clause": "Call down icy boulders onto a Frozen enemy, dealing ${$m1+0+$spfr*1.405} Frost damage.",
-    "labels": [],
+    "labels": [
+      "707402 effect_value e0 #0"
+    ],
     "kind": "claim"
   },
   {
@@ -1335,7 +1337,9 @@
   {
     "spell": 707402,
     "clause": "@ext:Damage scales with your critical strike rating. :ext@",
-    "labels": [],
+    "labels": [
+      "707402 effect_value #1"
+    ],
     "kind": "claim"
   },
   {
