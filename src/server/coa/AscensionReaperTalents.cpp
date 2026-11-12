@@ -56,6 +56,9 @@ enum ReaperTalentSpells : uint32
     SPELL_ESSENCE_INVIGORATION = 805186,
     SPELL_ESSENCE_INVIGORATION_HEAL = 805187,
     SPELL_WEAKENED_SOULS = 92146,
+    SPELL_TORMENTOR = 92147,
+    SPELL_TORMENTOR_COOLDOWN = 504558,
+    SPELL_TORMENTED_SOULS = 500483,
     SPELL_WEAKENED_SOUL = 803433,
     SPELL_LIFE_TAP = 706788,
     SPELL_DOMINION = 803999,
@@ -678,6 +681,9 @@ void ApplyAscensionReaperSoulInfusionSpent(Player* player)
         return;
 
     CastTalentTrigger(player, SPELL_ESSENCE_INVIGORATION, SPELL_ESSENCE_INVIGORATION_HEAL);
+    if (player->HasAura(SPELL_TORMENTOR))
+        if (SpellInfo const* reduction = sSpellMgr->GetSpellInfo(SPELL_TORMENTOR_COOLDOWN))
+            player->ModifySpellCooldown(SPELL_TORMENTED_SOULS, reduction->Effects[EFFECT_0].CalcValue(player));
 }
 
 void AddSC_AscensionReaperTalents()
