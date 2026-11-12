@@ -10,7 +10,8 @@ from behaviours import STRIKER, behaviour_scenario
 from compare import PER_LEVEL_ROUNDING, Run, Verdict, judge_hit
 from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
-                  casts_needed, dual_target_entry, effect_hit, expected_hit, hit_kind, hit_parts, hit_scenario,
+                  casts_needed, dual_target_entry, effect_hit, expected_hit, floored_casts, hit_kind, hit_parts,
+                  hit_scenario,
                   learned_weapon_part,
                   measured_hit_model, melee_scenario, records_of, periodic_tick_readout, reference_caster,
                   reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
@@ -1123,6 +1124,19 @@ class ScriptHitTest(unittest.TestCase):
         mutant = self.judged(ARMOR_OF_FAITH, -0.06 * hit.model['reference']['mean'], 40000, engine=True)
         self.assertEqual(mutant.status, 'alert')
         self.assertIn('does not explain it either', mutant.explanation)
+
+
+class HitCastsFloorTest(unittest.TestCase):
+    def test_a_floor_raises_the_casts_and_leaves_other_spells_alone(self):
+        class_file = {'hit_casts': [{'spell': 572769, 'casts': 40}]}
+        self.assertEqual(floored_casts(class_file, 572769, 2), 40)
+        self.assertEqual(floored_casts(class_file, 572769, 55), 55)
+        self.assertEqual(floored_casts(class_file, 570233, 2), 2)
+        self.assertEqual(floored_casts({}, 572769, 2), 2)
+
+    def test_a_floor_below_one_cast_is_refused(self):
+        with self.assertRaises(ValueError):
+            floored_casts({'hit_casts': [{'spell': 572769, 'casts': 0}]}, 572769, 2)
 
 
 if __name__ == '__main__':

@@ -423,6 +423,15 @@ def scheduled_casts(needed: int) -> int:
     return math.ceil(needed * EXCLUDED_OUTCOME_MARGIN)
 
 
+def floored_casts(class_file: dict, rank_id: int, casts: int) -> int:
+    entry = next((entry for entry in class_file.get('hit_casts', []) if entry['spell'] == rank_id), None)
+    if entry is None:
+        return casts
+    if int(entry['casts']) < 1:
+        raise ValueError(f'{rank_id} hit_casts floor {entry["casts"]} must be at least one cast')
+    return max(casts, int(entry['casts']))
+
+
 def effect_points(records: Records, spell_id: int, effect: int, level: int) -> int:
     def spell(name: str):
         return records.field('Spell', spell_id, name)

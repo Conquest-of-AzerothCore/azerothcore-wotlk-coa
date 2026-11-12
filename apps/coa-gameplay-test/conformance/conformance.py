@@ -19,8 +19,9 @@ from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
-from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, gate_stacks, hit_parts,
-                  melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model, reference_melee_model)
+from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts, gate_stacks,
+                  hit_parts, melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model,
+                  reference_melee_model)
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
                    proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
 from profile import (DBC_DIR, DbcSetMismatch, ledger_consumption_path, load_class_file, server_dbc_dir,
@@ -133,7 +134,8 @@ def add_hit(writer: ManifestWriter, spell: ClassSpell):
     key = scenario_key(class_file['name'], 'hit', spell.max_rank)
     label = f'{spell.max_rank} hit_mean'
     try:
-        casts = casts_needed(reference_hit_model(class_file, spell.max_rank))
+        casts = floored_casts(class_file, spell.max_rank,
+                              casts_needed(reference_hit_model(class_file, spell.max_rank)))
     except Unmodelled:
         casts = 1
     except ValueError as error:

@@ -226,6 +226,13 @@ at `percent * n / cap` (`conformance.target_gate_arms`; `hit_parts(gate_held=n)`
 X" names), and a lower arm with the cap separates a per-stack bonus from a flat one. Templar's Might (705291) is
 the first entry, with arms 0 and 1 (+0% and +6% against +18% at 3 stacks).
 
+## A floor on a hit's casts (`hit_casts`, ADR 0224)
+
+A class file may list `hit_casts` entries `{"spell": <max rank>, "casts": N, "reason": ...}`: the max-rank hit
+scenario of that rank schedules at least N casts (N x 1.5 scheduled, the usual outcome margin) and its mean needs at
+least N hits, even where the model's own sizing asks for fewer. Ranks without an entry are unchanged. Sacred Swing
+572769: the model's sigma 1.9 on a mean of 472.6 asked for 2 casts; the floor is 40.
+
 ## Learned weapon parts (`learned_hits`, ADR 0172)
 
 A school hit whose weapon percent effect resolves to 0 until another spell is known ("plus an additional
