@@ -256,6 +256,10 @@ class FixedTargetCountSpec:
     pull_reads: bool = False
     settle_ms: int = 0
     layout: str = ''
+    headroom: int | None = None
+    far_dummy: bool = True
+    primary_distance_reads: bool = False
+    label_suffix: str = ''
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -282,7 +286,11 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if spec.layout not in ('', CASTER) or spec.settle_ms < 0:
         raise ValueError(f'{spec.spell} fixed_count layout {spec.layout!r} is not the caster, or its settle is '
                          f'negative')
-    headroom = 0 if spec.uncapped else COUNT_HEADROOM
+    if spec.headroom is not None and (spec.uncapped or spec.headroom < 1):
+        raise ValueError(f'{spec.spell} fixed_count states a headroom of {spec.headroom} for a capped count only')
+    if not spec.far_dummy and spec.pull_reads:
+        raise ValueError(f'{spec.spell} fixed_count reads pulls against a far dummy it does not place')
+    headroom = 0 if spec.uncapped else (COUNT_HEADROOM if spec.headroom is None else spec.headroom)
     dummy_count = spec.expected + 1 + headroom
     if spec.cast_target == CASTER or spec.layout == CASTER:
         distances = [spec.radius * (index + 1) / (dummy_count + 1) for index in range(dummy_count)]
@@ -293,7 +301,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
             primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
         distances.append(primary_distance + spec.radius + FIXED_COUNT_FAR_MARGIN_YD)
     far_index = dummy_count
-    creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(far_index + 1)]
+    placed = far_index + 1 if spec.far_dummy else dummy_count
+    creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(placed)]
+    primary_distances = [f'{spec.spell} {dummy_id(index)} distance_2d primary'
+                         for index in range(1, dummy_count)] if spec.primary_distance_reads else []
 
     facts = facts_of(records, spec.cast_spell)
     wait_ms = facts.cast_time_ms + CAST_MARGIN_MS
@@ -307,6 +318,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
 
     def cast_steps() -> list[dict]:
         steps = per_cast_reads(spec, dummy_count, 0) if per_cast else []
+        steps += [measurement(label, dummy_id(index), 'distance_2d', target=dummy_id(0))
+                  for index, label in enumerate(primary_distances, start=1)]
         steps += distance_reads(BEFORE)
         for cast in range(1, spec.repeats + 1):
             if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
@@ -329,10 +342,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         return steps
 
     def measure() -> list[dict]:
-        return distance_reads(AFTER) + [hit_measurement(spec, index, AFTER) for index in range(far_index + 1)]
+        return distance_reads(AFTER) + [hit_measurement(spec, index, AFTER) for index in range(placed)]
 
     extra_labels = [hit_label(spec, index, AFTER) for index in range(1, dummy_count)]
-    far_label = hit_label(spec, far_index, AFTER)
+    far_label = hit_label(spec, far_index, AFTER) if spec.far_dummy else None
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour fixed count',
@@ -350,13 +363,19 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
                  cast_steps() + measure()}
     if spec.settle_ms:
         timed(scenario, waited_ms(scenario['steps']))
-    label = f'{spec.spell} behaviour_fixed_count'
+    label = f'{spec.spell} behaviour_fixed_count' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    if primary_distances:
+        far_note = '' if spec.far_dummy else ' (no dummy beyond the radius)'
+        scenario['contract'] += (f' Every additional dummy\'s distance to the primary is read before the casts and '
+                                 f'must be under {spec.radius:g} yd{far_note}.')
     model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'far_label': far_label, 'expected': spec.expected,
              'headroom': headroom, 'quote': entry.quote}
     if spec.uncapped:
         model['all_offered'] = True
     if per_cast:
         model['per_cast'] = per_cast
+    if primary_distances:
+        model.update({'primary_distances': primary_distances, 'radius': spec.radius})
     if spec.pull_reads:
         model['pull'] = {'near': [[pull_label(spec, index, BEFORE), pull_label(spec, index, AFTER)]
                                   for index in range(dummy_count)],
@@ -1116,7 +1135,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 entry.get('uncapped', False),
                                 tuple((int(spell), int(stacks)) for spell, stacks in entry.get('auras', ())),
                                 bool(entry.get('pull_reads', False)), int(entry.get('settle_ms', 0)),
-                                entry.get('layout', ''))
+                                entry.get('layout', ''), entry.get('headroom'), bool(entry.get('far_dummy', True)),
+                                bool(entry.get('primary_distance_reads', False)), entry.get('label_suffix', ''))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:

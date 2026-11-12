@@ -577,7 +577,7 @@ def validate(scenario, clock=REAL_CLOCK):
     creatures = scenario.get('creatures', [])
     require(isinstance(players, list) and 1 <= len(players) <= MAX_PLAYERS[schema],
             f'Expected 1..{MAX_PLAYERS[schema]} players')
-    require(isinstance(creatures, list) and len(creatures) <= 8, 'Expected at most eight creatures')
+    require(isinstance(creatures, list) and len(creatures) <= 12, 'Expected at most twelve creatures')
     player_ids = set()
     actor_ids = set()
     for player in players:

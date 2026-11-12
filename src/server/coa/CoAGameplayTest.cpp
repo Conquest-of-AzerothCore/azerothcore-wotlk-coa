@@ -140,7 +140,7 @@ public:
         return !NoRegenerationActors.contains(player->GetGUID());
     }
 };
-constexpr uint32 MaximumCreatures = 8;
+constexpr uint32 MaximumCreatures = 12;
 constexpr uint32 MeleeHitSamples = 2000;
 
 uint32 MaximumPlayers(uint32 schema)

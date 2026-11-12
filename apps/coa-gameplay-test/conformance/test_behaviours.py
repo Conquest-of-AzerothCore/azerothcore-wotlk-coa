@@ -746,7 +746,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 356)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 389)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -8384,6 +8384,70 @@ class ExtensionHitRatioMutantTests(unittest.TestCase):
     def test_unraised_periodic_ticks_alert(self):
         self.assertEqual(self.judged(300524, 'blade_of_faith', 191.0, 191.0), 'alert')
         self.assertEqual(self.judged(300524, 'blade_of_faith', 239.0, 191.2), 'ok')
+
+
+
+class FixedCountCapArmTests(unittest.TestCase):
+    def test_the_cap_arm_places_twelve_dummies_inside_the_radius_and_reads_their_distances(self):
+        spec = fixed_target_count_spec(r1a_entry(524739, 'fixed_count', 'cap'))
+        scenario, [expectation] = fixed_target_count_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(scenario['creatures']), 12)
+        self.assertIsNone(expectation.model['far_label'])
+        reads = [step for step in scenario['steps'] if step.get('label') in expectation.model['primary_distances']]
+        self.assertEqual(len(reads), 11)
+        self.assertTrue(all(step['target'] == dummy_id(0) for step in reads))
+        primary = scenario['creatures'][0]['distance']
+        self.assertTrue(all(creature['distance'] - primary < spec.radius for creature in scenario['creatures']))
+
+    def test_thirteen_creatures_are_refused_by_the_harness_schema(self):
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(r1a_entry(524739, 'fixed_count',
+                                                                                              'cap')))
+        extra = {**scenario['creatures'][0], 'id': 'thirteenth'}
+        with self.assertRaises(Exception):
+            run.validate({**scenario, 'creatures': scenario['creatures'] + [extra]})
+
+    def test_seeded_dummy_beyond_the_radius_or_a_cap_overrun_alerts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(524739, 'fixed_count', 'cap'))
+        model = expectation.model
+        per_cast = model['per_cast']
+
+        def values(hit_per_cast: int, far: float = 1.0) -> dict:
+            found = {label: 0.0 for label in per_cast['start']}
+            for cast, labels in enumerate(per_cast['casts'], start=1):
+                for index, label in enumerate(labels):
+                    found[label] = float(cast) if index == 0 or index <= hit_per_cast else 0.0
+            found.update({label: 1.0 for label in model['dummy_labels']})
+            found.update({label: far for label in model['primary_distances']})
+            return found
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(9)), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(10)), expectation).status,
+                         'alert')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(9, far=5.5)), expectation).status,
+                         'alert')
+
+    def test_a_headroom_on_an_uncapped_count_is_refused(self):
+        entry = {**r1a_entry(524739, 'fixed_count', 'cap_control'), 'headroom': 2}
+        with self.assertRaises(ValueError):
+            fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
+
+
+class BladeOfFaithCritTests(unittest.TestCase):
+    def test_the_crit_arm_forces_melee_crit_and_the_control_forces_zero(self):
+        crit, _ = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'metric_delta', 'crit'))
+        zero, _ = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'metric_delta', 'crit_zero'))
+        self.assertIn('melee_crit_rating', crit['players'][0])
+        self.assertNotIn('melee_crit_rating', zero['players'][0])
+        self.assertTrue([step for step in zero['steps'] if step['action'] == 'set_aura' and step['spell'] == 64481])
+        self.assertEqual(len(cast_indices(crit['steps'], 803880)), 1)
+
+    def test_the_blade_tick_ratios_force_a_zero_crit_chance_in_both_arms(self):
+        for suffix in ('oaths', 'oath_lunge', 'oath_condemn', 'oath_cleave'):
+            entry = r1a_entry(803872, 'hit_ratio', suffix)
+            with self.subTest(suffix=suffix):
+                self.assertIn([64481, 1], entry['control']['auras'])
+                self.assertIn([64481, 1], entry['treatment']['auras'])
 
 
 if __name__ == '__main__':

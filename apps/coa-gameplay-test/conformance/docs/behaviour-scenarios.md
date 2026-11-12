@@ -1513,3 +1513,17 @@ only then. Tranquil Circle 801205's Tranquil State 850010 lasts 8000 ms on an or
   The hit model now reads SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) and SPELL_AURA_MOD_HEALING_PCT (118) modifiers of
   those auras (ADR 0219, ADR 0220). Libram of Grace 801463's Grace 804150 on the Templar under its own +20% healing
   received, Eternal Blessing 705300's 707111 under its own +15% Holy damage, Norgannon's Wrath's 524740 unresisted.
+
+### fixed_count cap arms (ADR 0221)
+
+The harness admits twelve creatures (eight before). `fixed_count` `headroom` sets how many candidates beyond the stated
+count a capped entry offers, `far_dummy: false` places no dummy beyond the radius, and `primary_distance_reads: true`
+reads each additional dummy's `distance_2d` to the primary before the casts, judged under `radius` (a dummy outside
+alerts). Norgannon's Wrath 524739 `cap`: twelve dummies, each cast strikes the primary and exactly 9 others (10 in all);
+`cap_control`: ten dummies, all struck.
+
+### Blade of Faith ticks and crit (ADR 0243)
+
+Blade of Faith's periodic ticks can crit since ADR 0243. Its crit entries force melee crit (it is a melee-class spell),
+and the control forces 0 with Reduce Critical Strike Chance -100% 64481; every scenario that reads a Blade tick value
+sets 64481 in both arms instead of only selecting non-critical ticks.
