@@ -6093,7 +6093,11 @@ public:
 
   bool OwnsVanityItem(Player const* player, uint32 itemId) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
-    return state && state->OwnedVanityItems.contains(itemId);
+    if (!state || !state->OwnedVanityItems.contains(itemId))
+      return false;
+
+    auto vanity = _vanityItems.find(itemId);
+    return vanity == _vanityItems.end() || IsVanityItemForPlayer(player, vanity->second);
   }
 
   bool LoadClientData() {
@@ -7903,6 +7907,7 @@ private:
             AscensionCollectibles::SigilVanityItems.end(), itemId)) &&
         _vanityItems.contains(itemId) &&
         !IsConsumableVanityItem(_vanityItems.at(itemId)) &&
+        IsVanityItemForPlayer(player, _vanityItems.at(itemId)) &&
         state.OwnedVanityItems.insert(itemId).second) {
       CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_ACCOUNT_VANITY_COLLECTION);
       stmt->SetData(0, state.AccountId);
@@ -8221,6 +8226,11 @@ private:
         if ((vanity.Flags & VANITY_FLAG_NOT_OFFERED) || !(vanity.RealmTypeMask & GetRealmTypeMask()))
             return false;
 
+        return IsVanityItemForPlayer(player, vanity);
+    }
+
+    [[nodiscard]] static bool IsVanityItemForPlayer(Player const* player, VanityInfo const& vanity)
+    {
         uint32 const classIndex = player->getClass() - 1;
         if (vanity.ClassMask && (classIndex >= 64 || !(vanity.ClassMask & (uint64(1) << classIndex))))
             return false;
