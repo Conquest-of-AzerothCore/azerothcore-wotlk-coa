@@ -4205,6 +4205,7 @@ class ThreatSlopeSpec:
     quote: str
     hit_spell: int
     expected_slope: float
+    flat_spells: tuple[int, ...] = ()
 
 
 def threat_slope_label(spec: ThreatSlopeSpec, metric: str, moment: str) -> str:
@@ -4229,18 +4230,21 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.hit_spell},
                 measurement(labels['health before'], TARGET, 'health'),
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.hit_spell}]
-             + cast_gate_power_step(facts)
+             + cast_gate_power_step(facts) + required_aura_steps(facts)
              + [{'action': 'cast', 'actor': CASTER, 'spell': spec.hit_spell, 'target': TARGET},
                 {'action': 'wait', 'ms': facts.cast_time_ms + THREAT_SLOPE_WAIT_MS},
                 measurement(labels['cast_failure after'], CASTER, 'cast_failure', spell=spec.hit_spell),
                 measurement(labels['health after'], TARGET, 'health'),
                 measurement(labels['threat after'], TARGET, 'threat', target=CASTER)])
-    flat = flat_threat(records, spec.hit_spell)
+    flat = flat_threat(records, spec.hit_spell) + sum(flat_threat(records, spell) for spell in spec.flat_spells)
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour threat slope',
         'contract': f'{spec.hit_spell} is cast once at a fresh dummy; the dummy\'s threat on the caster less the flat '
-                    f'{flat:g} of its SPELL_EFFECT_THREAT effects, divided by the health it lost, must equal '
+                    f'{flat:g} of its SPELL_EFFECT_THREAT effects'
+                    + (f' and those of {", ".join(str(spell) for spell in spec.flat_spells)}, which it triggers on '
+                       f'the dummy' if spec.flat_spells else '')
+                    + f', divided by the health it lost, must equal '
                     f'{spec.expected_slope:g}, proving the "{spec.quote}" clause.',
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
@@ -4256,7 +4260,7 @@ def threat_slope_scenario(class_file: dict, spec: ThreatSlopeSpec) -> tuple[dict
 
 def threat_slope_spec(entry: dict) -> ThreatSlopeSpec:
     return ThreatSlopeSpec(entry['spell'], entry['name'], entry['quote'], entry['hit_spell'],
-                           float(entry['expected_slope']))
+                           float(entry['expected_slope']), tuple(int(spell) for spell in entry.get('flat_spells', ())))
 
 
 EVENT_DELAY_TRIALS = 3

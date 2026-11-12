@@ -8546,5 +8546,31 @@ class FixedCountBehindTests(unittest.TestCase):
         self.assertEqual(judge(self.readings(expectation, behind=1.0)), 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ThreatSlopeFlatSpellsTests(unittest.TestCase):
+    def entry(self, **changes):
+        return {'spell': 572769, 'name': 'Sacred Swing', 'kind': 'threat_slope',
+                'quote': 'High Threat Weapon Damage', 'hit_spell': 572769, 'expected_slope': 2.25,
+                'flat_spells': [301061], **changes}
+
+    def test_the_triggered_flat_threat_and_the_caster_aura_enter_the_scenario(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        steps = run.validate(scenario)['steps']
+        self.assertEqual(expectation.model['flat'], 50.0)
+        aura = first_index(steps, action='set_aura', spell=681170)
+        self.assertLess(aura, cast_indices(steps, 572769)[0])
+        _, [plain] = behaviour_scenario(CLASS_FILE, self.entry(flat_spells=[]))
+        self.assertEqual(plain.model['flat'], 0.0)
+
+    def test_seeded_slope_off_the_stated_factor_alerts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
+        model = expectation.model
+        values = lambda threat: FakeRun({model['cast_label']: NO_CAST_FAILURE, model['health_before_label']: 10000.0,
+                                         model['health_after_label']: 9600.0, model['threat_label']: threat})
+        judge = lambda threat: judge_behaviour(base_verdict(expectation), values(threat), expectation).status
+        self.assertEqual(judge(950.0), 'ok')
+        self.assertEqual(judge(850.0), 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -710,6 +710,10 @@ dummy and reads the dummy's `health` before and after and its `threat` on the ca
 from the DBC as the flat part and computes `(threat - flat) / health lost`: `ok` within 0.001 of `expected_slope`,
 `alert` outside, `unmeasured` when the cast failed or no health was lost. The verdict states the excluded slopes.
 
+A `threat_slope` entry may name `flat_spells`, spells the hit triggers on the dummy whose `SPELL_EFFECT_THREAT` points
+join the flat part, and the hit spell's `CasterAuraSpell` is set before its cast (ADR 0225). Sacred Swing 572769: the
+slow 301061 it triggers adds a flat 50.
+
 ### Event-delay scenarios (`behaviour_event_delay`, `kind: "event_delay"`)
 
 A spell whose effect casts another spell some time later (`SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED`, ADR 0144)
