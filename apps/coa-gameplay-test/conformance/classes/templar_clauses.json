@@ -3989,7 +3989,10 @@
       "801480 e1 spell_modifier 805423",
       "801480 e1 spell_modifier 801463",
       "801480 e1 spell_modifier 801461",
-      "801480 e1 spell_modifier 801466"
+      "801480 e1 spell_modifier 801466",
+      "801480 behaviour_hit_ratio grace",
+      "801480 behaviour_metric_delta fervor_spell_power",
+      "801480 behaviour_metric_delta zeal_haste"
     ],
     "kind": "claim"
   },
