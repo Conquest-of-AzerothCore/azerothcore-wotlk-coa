@@ -19,11 +19,13 @@ INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_
 (164080, 0, 2, 0, 10, 1, 100, 0, 2, 6, 4000, 4000, 1, 0, 80, 16408000, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Player Within 6 yd - Run Script (Knockback)'),
 (164080, 0, 3, 0, 8, 1, 100, 0, 365038, 0, 0, 0, 0, 0, 80, 16408001, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Spellhit Throw Meat - Run Script (Fly Away)'),
 (164080, 0, 4, 0, 34, 2, 100, 0, 8, 1, 0, 0, 0, 0, 69, 2, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, -7130, 250, 540, 0, 'Daumor Gryphon - On Point 1 Reached - Fly South-East Over The Valley'),
+(164080, 0, 5, 0, 11, 0, 100, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 20, 2300669, 5, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Respawn - Respawn Its Nest'),
 (164188, 0, 0, 1, 25, 0, 100, 0, 0, 0, 0, 0, 0, 0, 22, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Reset - Set Event Phase 1 (roosting)'),
 (164188, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Linked - Set Fly Off'),
 (164188, 0, 2, 0, 10, 1, 100, 0, 2, 6, 4000, 4000, 1, 0, 80, 16408000, 2, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - Player Within 6 yd - Run Script (Knockback)'),
 (164188, 0, 3, 0, 8, 1, 100, 0, 365038, 0, 0, 0, 0, 0, 80, 16408001, 2, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Spellhit Throw Meat - Run Script (Fly Away)'),
-(164188, 0, 4, 0, 34, 2, 100, 0, 8, 1, 0, 0, 0, 0, 69, 2, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, -7130, 250, 540, 0, 'Daumor Gryphon - On Point 1 Reached - Fly South-East Over The Valley');
+(164188, 0, 4, 0, 34, 2, 100, 0, 8, 1, 0, 0, 0, 0, 69, 2, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0, -7130, 250, 540, 0, 'Daumor Gryphon - On Point 1 Reached - Fly South-East Over The Valley'),
+(164188, 0, 5, 0, 11, 0, 100, 0, 0, 0, 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 20, 2300669, 5, 0, 0, 0, 0, 0, 0, 'Daumor Gryphon - On Respawn - Respawn Its Nest');
 
 DELETE FROM `smart_scripts` WHERE `entryorguid` IN (16408000, 16408001) AND `source_type` = 9;
 INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
