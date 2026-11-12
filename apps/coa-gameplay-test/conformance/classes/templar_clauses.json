@@ -1082,7 +1082,9 @@
   {
     "spell": 524620,
     "clause": "to nearby enemies.",
-    "labels": [],
+    "labels": [
+      "524620 behaviour_fixed_count"
+    ],
     "kind": "claim"
   },
   {
@@ -1091,7 +1093,9 @@
     "labels": [
       "524739 effect_value 524740e0 #0",
       "524739 effect_value #1",
-      "524739 effect_radius 524740e0 #2"
+      "524739 effect_radius 524740e0 #2",
+      "524739 script_hit 524740",
+      "524739 behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -2473,7 +2477,10 @@
   {
     "spell": 572769,
     "clause": "Only usable after avoiding an attack.",
-    "labels": [],
+    "labels": [
+      "572769 cast_condition blocked",
+      "572769 cast_condition allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -2595,7 +2602,7 @@
     "spell": 705300,
     "clause": "While active, Oath Breakers deal an additional ${$707111m3+$707111ppl3+$AP*.12} Holy damage to nearby enemies.",
     "labels": [
-      "conformance-templar-value-705300 (effect_value 707111e2 #2, 178 vs 179.06 expected)"
+      "705300 script_hit 707111"
     ],
     "kind": "claim"
   },
@@ -3362,7 +3369,8 @@
     "spell": 803893,
     "clause": "causing damaging abilities to deal an ${$804148m1+$804148ppl1} additional Holy damage to your target",
     "labels": [
-      "803893 effect_value 804148e0 #0"
+      "803893 effect_value 804148e0 #0",
+      "803893 script_hit 804148"
     ],
     "kind": "claim"
   },
@@ -3654,7 +3662,8 @@
     "spell": 801463,
     "clause": "and causing your damaging abilities to restore ${$804150m1+$AP*.1+$SP*.15} health",
     "labels": [
-      "801463 effect_value 804150e0 #1"
+      "801463 effect_value 804150e0 #1",
+      "801463 script_hit 804150"
     ],
     "kind": "claim"
   },
@@ -4218,7 +4227,10 @@
       },
       {
         "claim": "to empower your entire party",
-        "labels": []
+        "labels": [
+          "804784 behaviour_aura_presence party",
+          "804782 behaviour_aura_presence party"
+        ]
       }
     ],
     "kind": "claim"
@@ -4237,9 +4249,11 @@
     "clause": "Your Divine Force will now trigger a $/1000;804918s1 sec reduced cooldown when used on enemies affected by Blade of Faith.",
     "labels": [
       "804897 effect_value 804918e0 #0",
-      "804897 e0 (behaviours entry 'Transcending Strikes', behaviour_metric_delta, status ok)",
-      "804897 e2 (reclassify note: already proven by the class file's own check)",
-      "804897 behaviour_metric_delta target_gate"
+      "804897 behaviour_metric_delta target_gate",
+      "804897 cost_gate 806153 blade without",
+      "804897 cost_gate 806153 blade with",
+      "804897 cost_gate 806153 blade unset",
+      "804897 cost_gate 806153 blade beyond"
     ],
     "kind": "claim"
   },

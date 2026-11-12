@@ -5886,6 +5886,214 @@
         ]
       },
       "expected_source": "Oath: Holy Cleave 804903 Effect[2] aura 107 SPELLMOD_DOT (MiscValue 22) +25 on mask word 1 bit 2048: +25 per tick; the stored 803872 oath_consumption readback reads the +25 (800 to 825). The expected ratio is (191 + 25) / 191 = 1.1309 with 191 the control tick at the reference stats (not derived independently of the run: the tick's own formula is not modelled by the hit model). Each trial casts 803880 at the dummy and reads its tick 3100 ms later; only non-critical ticks (no tick crits, the crit entry). No stat fixture, so a flat term stays visible. beeg spellpen 823764 in both arms."
+    },
+    {
+      "spell": 804784,
+      "name": "Tithe of Might",
+      "kind": "aura_presence",
+      "variant": "party",
+      "label_suffix": "party",
+      "quote": "empowering party and raid members with",
+      "metric": "aura",
+      "fields": {
+        "spell": 804784
+      },
+      "target": "ally",
+      "wait_ms": 4500,
+      "reason": "Tithe 804781 teaches Tithe of Might 804784 at Strahnbrad (the site_purchase entry, AscensionTemplarTithe.cpp). 804784 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID (TARGET_UNIT_CASTER, EffectRadiusIndex 23: 40 yd), aura 290 SPELL_AURA_MOD_CRIT_PCT +3%. A grouped ally standing with the caster has no 804784 before the cast (control) and has it 4500 ms after a real cast (diagnostic 20261112-021147: absent at 1500 ms, present at 4500 ms on the caster and the ally): the party is empowered."
+    },
+    {
+      "spell": 804782,
+      "name": "Tithe of Crusading",
+      "kind": "aura_presence",
+      "variant": "party",
+      "label_suffix": "party",
+      "quote": "empowering party and raid members with",
+      "metric": "aura",
+      "fields": {
+        "spell": 804782
+      },
+      "target": "ally",
+      "wait_ms": 4500,
+      "reason": "Tithe 804781 teaches Tithe of Crusading 804782 at Light's Hope Chapel (the site_purchase entry). 804782 Effect[0] and Effect[1] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID (40 yd): aura 168 damage against Undead and aura 143 Shadow resistance. A grouped ally has no 804782 before the cast (control) and has it 4500 ms after a real cast."
+    },
+    {
+      "spell": 804897,
+      "name": "Transcending Strikes",
+      "kind": "cost_gate",
+      "variant": "blade",
+      "label_suffix": "blade",
+      "quote": "Your Divine Force will now trigger a",
+      "gated_spell": 806153,
+      "resource": "cooldown",
+      "reduction": 30000,
+      "target": "dummy",
+      "setup_casts": [
+        [
+          803880,
+          "dummy"
+        ]
+      ],
+      "unset_arm": true,
+      "observe_source": "AscensionTemplarAbilities.cpp:337-345 (OnSpellCast): a Divine Force 806153 cast at a target carrying the Templar's own Blade of Faith 803872 chain aura, with 804897 known, calls Reduce(player, 806153, |Amount(804918)|), 30000 ms (804918 EffectBasePoints -30001, DieSides 1). Divine Force's CategoryRecoveryTime is 120000 ms. Each arm casts Blade of Faith 803880 at the dummy, then primes Divine Force at it and attempts it again 90500 ms later: without 804897 refused (control), with it through, 89500 ms refused (beyond); unset: 804897 known but no Blade of Faith on the dummy (the previous arm's ran out), refused (ADR 0216)."
+    },
+    {
+      "spell": 524620,
+      "name": "Pulverizing",
+      "kind": "fixed_count",
+      "variant": "nearby",
+      "quote": "to nearby enemies.",
+      "expected": 3,
+      "radius": 5.0,
+      "uncapped": true,
+      "cast_spell": 804906,
+      "target_rank": 524619,
+      "cast_target": "dummy",
+      "layout": "caster",
+      "repeats": 5,
+      "settle_ms": 21500,
+      "learn": [
+        524620
+      ],
+      "radius_reason": "AscensionTemplarEvents.cpp:88 and 174-175: damage dealt by Condemn 804906's periodic ticks rolls Pulverizing's 15% and casts 524619 at the caster's own position (CastSpell(x, y, z)); 524619 EffectRadiusIndex 8 (5 yd) around that point. The four dummies stand 1, 2, 3 and 4 yd from the caster (the primary, Condemn's target, at 1 yd) and the far one at 10 yd (ADR 0217: caster-centred layout, a settle of 21500 ms after each Condemn for its seven ticks). Five Condemns give 35 rolls; every dummy inside 5 yd must be hit, the far one never."
+    },
+    {
+      "spell": 572769,
+      "name": "Sacred Swing",
+      "kind": "cast_condition",
+      "variant": "avoided",
+      "quote": "Only usable after avoiding an attack.",
+      "condition": "avoided",
+      "blocked_result": 22,
+      "learn": [
+        92109
+      ],
+      "observe_source": "572769 CasterAuraSpell 681170 (Recently Parried or Dodged). Keeping the Oath 92109 Effect[2] aura 42 triggers 681170 on a taken dodge or parry (spell_proc HitMask 48, rev_20261001_04_templar_keeping_the_oath_avoid.sql); the Sacred Swing cast removes it (AscensionTemplarAbilities.cpp:263-265). Blocked: before any avoided attack, 22 SPELL_FAILED_CASTER_AURASTATE. Allowed: after the rooted attacker's swings are dodged under Evasion 26669, 0 (ADR 0218; diagnostic 20261112-021058: 3 dodges in 4 swings, 681170 present, cast through, 681170 gone)."
+    },
+    {
+      "spell": 524739,
+      "name": "Norgannon's Wrath",
+      "kind": "fixed_count",
+      "variant": "radius",
+      "quote": "enemies within $524740a1 yds",
+      "expected": 5,
+      "radius": 5.0,
+      "uncapped": true,
+      "cast_spell": 524739,
+      "target_rank": 524740,
+      "cast_target": "dummy",
+      "repeats": 2,
+      "settle_ms": 2500,
+      "radius_reason": "524739 Effect[1] 183 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED) casts 524740 at the target 1500 ms after the cast; 524740 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, TARGET_UNIT_TARGET_ENEMY with TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 8 (5 yd), MaxAffectedTargets 10. The primary dummy at 3 yd and five more within 5 yd of it are all hit (six of the cap of ten), the far one 5 yd beyond the radius never; each cast is followed by 2500 ms for the delay and the missile (Speed 30). The cap of 10 needs twelve creatures, beyond the scenario limit of eight (run.py validate)."
+    },
+    {
+      "spell": 803893,
+      "name": "Libram of Consecration",
+      "kind": "script_hit",
+      "variant": "strike",
+      "quote": "causing damaging abilities to deal an ${$804148m1+$804148ppl1} additional Holy damage to your target",
+      "hit_spell": 804148,
+      "casts": [
+        [
+          803893,
+          "caster"
+        ],
+        [
+          503141,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          503141,
+          "dummy"
+        ]
+      ],
+      "trials": 40,
+      "minimum_hits": 20,
+      "observe_source": "AscensionTemplarEvents.cpp:92-101 (Check, the Libram cases: a damaging, non-periodic Ability hit) and :194-199 (Proc) cast 804148 at the target of the damaging ability while Libram of Consecration 803893 (top rank of 801441) is on the caster. Treatment: the Libram cast, then Chastise 503141 at the dummy; control: Chastise alone, no 804148 (ADR 0206, side a). The dummy's partial resists are in the hit model (its resistances and level are read)."
+    },
+    {
+      "spell": 705300,
+      "name": "Eternal Blessing",
+      "kind": "script_hit",
+      "variant": "breaker",
+      "quote": "Oath Breakers deal an additional ${$707111m3+$707111ppl3+$AP*.12} Holy damage to nearby enemies",
+      "hit_spell": 707111,
+      "casts": [
+        [
+          705300,
+          "caster"
+        ],
+        [
+          572027,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          572027,
+          "dummy"
+        ]
+      ],
+      "model_auras": [
+        705300
+      ],
+      "trials": 40,
+      "minimum_hits": 20,
+      "observe_source": "AscensionTemplarAbilities.cpp:214-215 (Breaker block): an Oath Breaker cast with Eternal Blessing 705300 on the caster casts 707111 on the Templar; 707111 Effect[2] SPELL_EFFECT_SCHOOL_DAMAGE strikes the enemies within 5 yd of the Templar (TARGET_SRC_CASTER, TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 8), the dummy at 3 yd. Treatment: Eternal Blessing, then Righteous Upheaval 572027 (a Breaker) at the dummy; control: Righteous Upheaval alone, no 707111 (ADR 0206). 707111's Effect[2] is the tooltip's m3 (per-level term ppl3, ADR 0147). Eternal Blessing's own +15% Holy damage done (Effect[0] aura 79) is held by the caster when 707111 strikes, so the model reads 705300 (ADR 0220); the dummy's partial resists are in the model."
+    },
+    {
+      "spell": 524739,
+      "name": "Norgannon's Wrath",
+      "kind": "script_hit",
+      "variant": "strike",
+      "quote": "dealing ${$524740m1+$524740ppl1+$sph*1+$AP*1} Holy damage",
+      "hit_spell": 524740,
+      "casts": [
+        [
+          524739,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "settle_ms": 2500,
+      "unresisted": true,
+      "trials": 30,
+      "minimum_hits": 15,
+      "observe_source": "524739 Effect[1] 183 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED, AscensionTemplarContracts.cpp) casts 524740 at the target 1500 ms after the cast; each trial waits 2500 ms for the delay and the missile. Control: no cast, no 524740 (ADR 0206). 524740 ignores absorbs and resistances (the absorb_pierce_ratio entry); the model takes no resistance (ADR 0220, unresisted)."
+    },
+    {
+      "spell": 801463,
+      "name": "Libram of Grace",
+      "kind": "script_hit",
+      "variant": "grace",
+      "quote": "and causing your damaging abilities to restore ${$804150m1+$AP*.1+$SP*.15} health",
+      "hit_spell": 804150,
+      "casts": [
+        [
+          801463,
+          "caster"
+        ],
+        [
+          807268,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          807268,
+          "dummy"
+        ]
+      ],
+      "receiver": "caster",
+      "caster_health_pct": 50,
+      "model_auras": [
+        801463
+      ],
+      "trials": 40,
+      "minimum_hits": 20,
+      "observe_source": "AscensionTemplarEvents.cpp:92-101 (Check, case 801463: a damaging, non-periodic Ability hit) and :200-201 (Proc) cast Grace 804150 (SPELL_EFFECT_HEAL, TARGET_SRC_CASTER / TARGET_UNIT_DEST_AREA_ALLY) on the Templar. Treatment: Libram of Grace, then Argent Blade 807268 at the dummy; control: Argent Blade alone, no 804150 (ADR 0206). The Templar is held at 50% of 10000 health so the heal is effective; the heal it receives is read (ADR 0219). Libram of Grace's own +20% healing received (Effect[1] aura 118) is held by the Templar when 804150 heals it, so the model reads 801463 (ADR 0220)."
     }
   ],
   "player_observations": [
