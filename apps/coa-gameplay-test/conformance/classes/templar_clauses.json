@@ -1429,7 +1429,9 @@
     "clause": "You radiate a harmonic disposition to nearby party and raid members, causing fall damage to be reduced",
     "labels": [
       "560653 effect_value #0",
-      "560653 hit_mean"
+      "560653 hit_mean",
+      "560653 behaviour_fall_damage landing with reduced",
+      "560653 behaviour_fall_damage landing with aura"
     ],
     "kind": "claim"
   },
@@ -2815,7 +2817,9 @@
       "conformance-templar-value-706320",
       "706320 e0 spell_modifier ok across all 13 listed targets",
       "706320 behaviour_hit_ratio oath_lunge",
-      "706320 behaviour_hit_ratio oath_condemn"
+      "706320 behaviour_hit_ratio oath_condemn",
+      "706320 behaviour_hit_ratio oath_vindication",
+      "804903 combat_training behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -3115,7 +3119,8 @@
     "labels": [
       "707663 e0 spell_modifier 578276 ok (-1000, full removal)",
       "707663 cost_gate 578276 cooldown without",
-      "707663 cost_gate 578276 cooldown with"
+      "707663 cost_gate 578276 cooldown with",
+      "707663 behaviour_metric_delta cooldown_read"
     ],
     "kind": "claim"
   },

@@ -6701,8 +6701,8 @@
     {
       "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cooldown",
       "label_suffix": "cooldown", "quote": "Removes the cooldown from Benediction", "gated_spell": 578276,
-      "resource": "cooldown", "reduction": 6000, "target": "ally", "cast_power": 100,
-      "observe_source": "707663 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%: the whole cooldown. Benediction 578276 CategoryRecoveryTime 6000 ms (Category 100), StartRecoveryTime 1250 ms, CasterAuraSpell Oath Chain 704576 (set before each attempt), cast at the grouped ally. Energy is set to 100 before each cast (cast_power): the talent also raises the cost to 30 (claim 262), which the plain 20 would refuse. Arms timed from a priming cast: 2100 ms later (500 ms after the 1600 ms global cooldown wait) without the talent, refused (SPELL_FAILED_NOT_READY 67); with it, through. A removed cooldown has no later wait that is refused, so there is no beyond arm."
+      "resource": "cooldown", "reduction": 6000, "target": "ally", "cast_power": 100, "margin_ms": 100,
+      "observe_source": "707663 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%: the whole cooldown. Benediction 578276 CategoryRecoveryTime 6000 ms (Category 100), StartRecoveryTime 1250 ms, CasterAuraSpell Oath Chain 704576 (set before each attempt), cast at the grouped ally. Energy is set to 100 before each cast (cast_power): the talent also raises the cost to 30 (claim 262), which the plain 20 would refuse. Arms timed from a real priming cast: the second cast 1700 ms later (100 ms after the harness's 1600 ms global cooldown wait, 450 ms after Benediction's 1250 ms StartRecoveryTime) without the talent, refused for its cooldown (SPELL_FAILED_NOT_READY 67); with it, accepted. The global cooldown is the limit: a cooldown left below 1700 ms would read the same. A removed cooldown has no later wait that is refused, so there is no beyond arm."
     },
     {
       "spell": 707663, "name": "Justicar of the Light", "kind": "cost_gate", "variant": "cost",
@@ -6787,6 +6787,33 @@
       "target": "caster", "metric": "stat", "fields": {"stat": 1}, "before_expected": 209, "wait_ms": 1000,
       "expire_ms": 2000,
       "observe_source": "$s2 = 20 (300530 EffectBasePoints[1] 19 + EffectDieSides[1] 1): Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 8 (SPELLMOD_ALL_EFFECTS), mask word 0 bit 268435456 (Gift of Zeal). Gift of Zeal 300923 (level 60 rank, AscensionSpellProgressionData.h:872) Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 76 + 1 = 77; with Martyr int32(77 x 1.2) = 92. The Templar (reference Agility 132) casts 300923 on itself: Agility 209 after the cast without Martyr, then Martyr is learned and the recast replaces the buff: 224."
+    },
+    {
+      "spell": 560653, "name": "Harmonic Disposition", "kind": "fall_damage", "variant": "landing",
+      "label_suffix": "landing", "quote": "causing fall damage to be reduced", "cast_spell": 560653, "height": 30,
+      "receiver": "ally",
+      "observe_source": "560653 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, EffectApplyAuraName[0] 144 SPELL_AURA_SAFE_FALL, EffectBasePoints[0] 9 + EffectDieSides[0] 1 = 10 yd, EffectRadiusIndex[0] 23 (40 yd); ManaCost 10 Energy, self cast. Player::HandleFall (Player.cpp:15046-15089) takes z_diff = m_lastFallZ - the landing z and subtracts GetTotalAuraModifier(SPELL_AURA_SAFE_FALL) before the damage percent (0.018 x (z_diff - safe fall) - 0.2426, times maximum health and Rate.Damage.Fall). The grouped ally lands from 30 yd at 10000 maximum health before the cast and again 1500 ms after it, when the raid aura has reached it (its 560653 aura is read). The landing is harness-simulated (ADR 0237). The tooltip names no amount, so the claim is a reduction: two arms, one height."
+    },
+    {
+      "spell": 706320, "name": "Combat Training", "kind": "hit_ratio", "variant": "oath_vindication",
+      "label_suffix": "oath_vindication", "quote": "Increases the effectiveness of Oaths by", "expected": 1.0462,
+      "observe_spell": 572027, "learn": [572027], "control": {"auras": [[805332, 1]]},
+      "treatment": {"auras": [[706320, 1], [805332, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"attack_power": 20000},
+      "expected_source": "$s1 = 20, SPELLMOD_ALL_EFFECTS on every Oath (mask word 2 bit 2147483648; Oath: Vindication 805332 SpellFamilyFlags [0, 0, 2415919104]). 805332 is a scripted Oath: AscensionTemplarAuras.cpp:78 sums its Effect[2] into Righteous Tempest, AscensionTemplarAbilities.cpp:354 rolls its Effect[0] amount for Zealotry, AscensionTemplarContracts.cpp:79-83 sets its stack amount. Its Effect[2] aura 108 SPELLMOD_DAMAGE +30% on the Oath Breaker mask (word 2 bit 128) reaches Righteous Upheaval 572027; with Combat Training +36%: 1.36 / 1.30 = 1.0462. Its Effect[0] (SPELLMOD 18 on word 2 bit 134217728) and Effect[1] (word 1 bit 2048) do not reach Upheaval. Attack power fixture 20000. Only non-critical hits are compared."
+    },
+    {
+      "spell": 804903, "name": "Oath: Holy Cleave (under Combat Training)", "kind": "fixed_count",
+      "variant": "combat_training", "label_suffix": "combat_training", "quote": "additional enemy", "expected": 2,
+      "radius": 10.0, "cast_spell": 573049, "clear_auras": [804903], "auras": [[706320, 1], [804903, 1]],
+      "radius_reason": "As the 804903 fixed_count entry, with Combat Training 706320 (Effect[0] SPELLMOD_ALL_EFFECTS +20% on mask word 2 bit 2147483648, which Oath: Holy Cleave 804903 SpellFamilyFlags [0, 0, 2147516416] carries) set on the caster before every Holy Cleave 573049, then one stack of the Oath (cleared first: the Oath stacks to 10 under AscensionTemplarContracts.cpp:79-83, and a first run read a third extra target at two stacks), so the Oath's amount is computed under the talent. 804903 is a scripted Oath (granted by AscensionTemplarAbilities.cpp:189, stack amount set by AscensionTemplarContracts.cpp:79-83). Its Effect[0] SPELLMOD_JUMP_TARGETS +1 becomes int32(1 x 1.2) = 1, so every cast still strikes 2 beyond the primary, as without the talent. Melee chains jump 10 yd (Spell.cpp:2210-2213); the far dummy stands 5 yd beyond."
+    },
+    {
+      "spell": 707663, "name": "Justicar of the Light (cooldown readback)", "kind": "metric_delta",
+      "variant": "cooldown_read", "label_suffix": "cooldown_read", "quote": "Removes the cooldown from Benediction",
+      "expected": 0, "trigger_spell": 578276, "target": "caster", "cast_power": 100, "metric": "cooldown_ms",
+      "fields": {"spell": 578276}, "before_expected": 5900, "tolerance": 150, "wait_ms": 100, "expire_ms": 6500,
+      "observe_source": "Supporting data for the cost gate's removal arms (a readback, not the proof): Benediction 578276's remaining cooldown 100 ms after a cast on the Templar, about 5900 of its 6000 ms CategoryRecoveryTime without Justicar of the Light, 0 with it (707663 Effect[0] SPELLMOD_COOLDOWN -100%). Energy is set to 100 before each cast, since the talent raises the cost to 30."
     }
   ],
   "player_observations": [
