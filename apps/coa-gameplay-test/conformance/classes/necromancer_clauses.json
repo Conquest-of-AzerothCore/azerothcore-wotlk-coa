@@ -500,7 +500,6 @@
       {
         "claim": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage",
         "labels": [
-          "500335 effect_value 802353e0 #0",
           "500335 script_hit 802353 cloud"
         ]
       },
