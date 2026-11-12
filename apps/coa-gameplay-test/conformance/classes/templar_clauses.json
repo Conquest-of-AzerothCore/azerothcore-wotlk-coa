@@ -4385,7 +4385,11 @@
           "804228 charm_immunity 37122 without",
           "804228 charm_immunity 37122 cast",
           "804228 charm_immunity 37122 applied",
-          "804228 charm_immunity 37122 with"
+          "804228 charm_immunity 37122 with",
+          "804228 charm_immunity 605 without",
+          "804228 charm_immunity 605 cast",
+          "804228 charm_immunity 605 applied",
+          "804228 charm_immunity 605 with"
         ]
       },
       {
@@ -4407,7 +4411,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Charm claim: Owner ruling 2026-11-12 (Q2): charm means mind control, granted in Templar code (ADR 0297); Domination 37122 and Mind Control 605 land without 804228 and are refused with it, counted 20261112-080508 / -080611."
   },
   {
     "spell": 804228,
