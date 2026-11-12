@@ -183,7 +183,8 @@ def hit_measurement(spec: TargetCountSpec, index: int, moment: str) -> dict:
         raise NotModelled(f'target-count metric {spec.metric!r} is not one of {sorted(HIT_METRICS)}')
     label = hit_label(spec, index, moment)
     if spec.metric == 'spell_damage_count':
-        return measurement(label, CASTER, spec.metric, spell=spec.target_rank, target=dummy_id(index))
+        minion = {'caster_entry': spec.caster_entry} if getattr(spec, 'caster_entry', None) else {}
+        return measurement(label, CASTER, spec.metric, spell=spec.target_rank, target=dummy_id(index), **minion)
     return measurement(label, dummy_id(index), spec.metric, spell=spec.target_rank, caster=CASTER)
 
 
@@ -268,6 +269,8 @@ class FixedTargetCountSpec:
     label_suffix: str = ''
     behind_yd: float | None = None
     cluster_yd: float | None = None
+    caster_entry: int | None = None
+    setup_casts: tuple[tuple[int, str], ...] = ()
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -387,8 +390,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
-                                           for spell in dict.fromkeys((*spec.learn, spec.cast_spell))] +
-                 relocation + cast_steps() + measure()}
+                                           for spell in dict.fromkeys((*spec.learn, spec.cast_spell,
+                                                                       *(spell for spell, _ in spec.setup_casts)))] +
+                 relocation + [step for spell, target in spec.setup_casts
+                               for step in hit_ratio_cast(records, spell, CASTER, target)] + cast_steps() + measure()}
     if spec.settle_ms:
         timed(scenario, waited_ms(scenario['steps']))
     label = f'{count_label_prefix(spec)} behaviour_fixed_count'
@@ -1168,7 +1173,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 entry.get('layout', ''), entry.get('headroom'), bool(entry.get('far_dummy', True)),
                                 bool(entry.get('primary_distance_reads', False)), entry.get('label_suffix', ''),
                                 None if entry.get('behind_yd') is None else float(entry['behind_yd']),
-                                entry.get('cluster_yd'))
+                                entry.get('cluster_yd'), entry.get('caster_entry'),
+                                tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:

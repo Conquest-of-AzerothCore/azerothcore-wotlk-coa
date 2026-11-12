@@ -9650,5 +9650,33 @@ class MetricDeltaGateSettleTests(unittest.TestCase):
             metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
 
 
+
+class MinionFixedCountTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_minion_is_raised_first_and_its_hits_are_read_per_dummy(self):
+        class_file = load_class_file(23)
+        entry = next(entry for entry in class_file['behaviours'] if entry.get('label_suffix') == 'command_targets')
+        scenario, _ = behaviour_scenario(class_file, entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        raise_cast = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == 500971)
+        command = next(index for index, step in enumerate(steps)
+                       if step.get('action') == 'cast' and step.get('spell') == 504868)
+        self.assertLess(raise_cast, command)
+        reads = [step for step in steps if step.get('metric') == 'spell_damage_count' and step.get('spell') == 801514]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['caster_entry'] == 50073 for step in reads))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_player_count_keeps_the_caster_reads(self):
+        class_file = load_class_file(23)
+        entry = next(entry for entry in class_file['behaviours'] if entry.get('label_suffix') == 'command_targets')
+        entry = {key: value for key, value in entry.items() if key not in ('caster_entry', 'setup_casts')}
+        scenario, _ = behaviour_scenario(class_file, entry)
+        reads = [step for step in scenario['steps'] if step.get('spell') == 801514]
+        self.assertTrue(all('caster_entry' not in step for step in reads))
+
+
 if __name__ == '__main__':
     unittest.main()
