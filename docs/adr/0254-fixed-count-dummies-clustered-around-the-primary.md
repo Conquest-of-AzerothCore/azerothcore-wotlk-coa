@@ -24,3 +24,6 @@ exactly 9 others per cast.
   MaxAffectedTargets with Acore::Containers::RandomResize (Spell.cpp:1404-1410); lean/radius.md has the result.
 - Seeded tests: the dummies lie within the cluster, a seeded read outside it alerts, a cluster at the radius is
   refused, and the `cap` arm keeps `radius` as its bound.
+- Its labels follow ADR 0240: `524739 cap_cluster behaviour_fixed_count`, with the suffix after the spell id in every
+  dummy read. The counted pair 20261112-044346 / -044500 ran under the earlier `524739 behaviour_fixed_count
+  cap_cluster` form, so the entry was run again under the merged labels.

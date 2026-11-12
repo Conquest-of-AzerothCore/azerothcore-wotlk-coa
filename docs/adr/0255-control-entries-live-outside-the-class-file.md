@@ -29,8 +29,8 @@ it as a miss. A second class-19 file in `classes/` would be shadowed: `load_clas
 
 ## Consequences
 
-- A full class generate no longer writes the control: 1841 of 1841 scenario files stay byte-identical to the
-  generation at ADR 0253, and the `--controls` output is byte-identical to the control scenario that ran (runs
-  20261112-044346 / -044500).
+- A full class generate no longer writes the control: at 9a6e73942d, 1841 of 1841 scenario files stay
+  byte-identical to the generation at ADR 0253, and the `--controls` output is byte-identical to the control scenario
+  that ran (runs 20261112-044346 / -044500).
 - Seeded tests: the control is read from the control file with its `control_for`, the class file has no 1161 entry,
-  and `generate --controls` writes only the control scenario. The class-file entry count is 400.
+  and `generate --controls` writes only the control scenario. The class-file entry count is 400 at 9a6e73942d.
