@@ -2374,7 +2374,7 @@
       "705287 behaviour_metric_delta armor"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): the grouped ally's armor gains 0 without 705287, 211 with it (Agility + Stamina read), 241 with Agility 58451 and 274 with Stamina 48101, labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): the grouped ally's armor gains 0 without 705287, 211 with it (Agility + Stamina read), 241 with Agility 58451 and 274 with Stamina 48101; withheld-talent contrast: 801409 read absent before every cast, present after it in the with, agility and stamina arms, none applied without 705287, no other aura appeared, armor back to 299 after 801409 is removed, attribution pair 20261112-045107 / -045344 (build dc8da2d960db)"
   },
   {
     "spell": 705287,
@@ -4903,7 +4903,7 @@
       "805423 behaviour_metric_delta spell_power"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): Holy spell power gains 39 on a real cast of 805423 after the aura is cleared (30% of Agility read, 39.6, truncated) and 48 with Agility 58451 (48.6), labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): Holy spell power gains 39 on a real cast of 805423 after the aura is cleared (30% of Agility read, 39.6, truncated) and 48 with Agility 58451 (48.6); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, spell power back to 0 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db)"
   },
   {
     "spell": 805423,
@@ -4914,7 +4914,7 @@
       "805423 behaviour_metric_delta attack_power"
     ],
     "kind": "claim",
-    "reason": "stat_gain (ADR 0213, contrast ADR 0258): attack power gains 9 on a real cast of 805423 after the aura is cleared (30% of Intellect read, 9.6, truncated) and 24 with Intellect 48100 (24.0), labels pair 20261112-043429 / -043850 (build 928222268d2b)"
+    "reason": "stat_gain (ADR 0213, contrast ADR 0258): attack power gains 9 on a real cast of 805423 after the aura is cleared (30% of Intellect read, 9.6, truncated) and 24 with Intellect 48100 (24.0); own-cast contrast: 805423 read absent before each cast and present after it, the only aura applied, attack power back to 313 after its removal, attribution pair 20261112-045107 / -045344 (build dc8da2d960db)"
   },
   {
     "spell": 805423,
