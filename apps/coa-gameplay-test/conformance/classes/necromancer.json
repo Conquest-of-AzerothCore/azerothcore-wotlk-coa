@@ -202,6 +202,72 @@
       "observe_spell": 570050, "observe_metric": "spell_damage_total", "observe_actor": "minion", "expected_ratio": 0.1,
       "per_trigger_text": "deal an additional $800027s1% of the damage dealt as Plague damage",
       "observe_source": "tooltip token $800027s1 of 805044 (800027 EffectBasePoints[0] 9 + 1 = 10). Animate: Tomb King is cast after the Ghoul is raised; its Effect[2] casts Putrid Aura 800027, whose Effect[0] 190 puts it on the Ghoul. AscensionNecromancerEvents.cpp:99-100 has the Ghoul cast Putrid Claws 570050 for damage x 10 / 100 on each of its hits. The Ghoul's melee damage and swings (no misses: its hit and expertise copy the caster's 10000 ratings) against its 570050 hits; the Tomb King is cast again every 14000 ms, inside its 15000 ms lifetime and 800027's 20000 ms."
+    },
+    {
+      "aura": 707283,
+      "name": "Chomp",
+      "tooltip": "Critical strikes dealt by your |cffffffffAbominations|r and |cffffffffDecaying Collosi|r now |cFFFFFFFFChomp|r your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
+      "trigger": {
+        "action": "minion",
+        "spell": 500335,
+        "entry": 50068,
+        "learn": [
+          92123
+        ],
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+      },
+      "trigger_text": "Critical strikes dealt by your Abominations and Decaying Collosi",
+      "trigger_spell_text": "Raise: Abomination",
+      "trial_metric": "pet_melee_crits",
+      "observe_spell": 707284,
+      "observe_source": "tooltip token $707284m1 of 707283",
+      "observe_note": "the passive has no EffectTriggerSpell; AscensionNecromancerEvents.cpp:185-186 casts 707284 from the critting Abomination 50068 or Decaying Colossus 50115 at its target",
+      "observe_metric": "spell_damage_count",
+      "observe_actor": "minion",
+      "per_trigger": 1,
+      "per_trigger_text": "now Chomp your target",
+      "minion_auras": [
+        {
+          "spell": 280912,
+          "amount": 100,
+          "source": "precondition fixture: Anointed 280912 (aura 290 SPELL_AURA_MOD_CRIT_PCT, 10 s) at amount 100 makes the minion crit (Unit::GetUnitCriticalChance, Unit.cpp:4534-4536); the claim is the Chomp each crit casts, not the crit"
+        }
+      ],
+      "minion_aura_refresh_ms": 8000
+    },
+    {
+      "aura": 707283,
+      "name": "Chomp",
+      "tooltip": "Critical strikes dealt by your |cffffffffAbominations|r and |cffffffffDecaying Collosi|r now |cFFFFFFFFChomp|r your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
+      "trigger": {
+        "action": "minion",
+        "spell": 500989,
+        "entry": 50115,
+        "learn": [
+          92123
+        ],
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50115 BaseAttackTime 2000"
+      },
+      "trigger_text": "Critical strikes dealt by your Abominations and Decaying Collosi",
+      "trigger_spell_text": "Raise: Decaying Colossus",
+      "trial_metric": "pet_melee_crits",
+      "observe_spell": 707284,
+      "observe_source": "tooltip token $707284m1 of 707283",
+      "observe_note": "the passive has no EffectTriggerSpell; AscensionNecromancerEvents.cpp:185-186 casts 707284 from the critting Abomination 50068 or Decaying Colossus 50115 at its target",
+      "observe_metric": "spell_damage_count",
+      "observe_actor": "minion",
+      "per_trigger": 1,
+      "per_trigger_text": "now Chomp your target",
+      "minion_auras": [
+        {
+          "spell": 280912,
+          "amount": 100,
+          "source": "precondition fixture: Anointed 280912 (aura 290 SPELL_AURA_MOD_CRIT_PCT, 10 s) at amount 100 makes the minion crit (Unit::GetUnitCriticalChance, Unit.cpp:4534-4536); the claim is the Chomp each crit casts, not the crit"
+        }
+      ],
+      "minion_aura_refresh_ms": 8000
     }
   ],
   "talent_modifiers": [],
