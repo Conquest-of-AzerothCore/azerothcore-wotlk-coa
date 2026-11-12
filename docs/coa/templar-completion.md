@@ -122,7 +122,9 @@ the game disagree, the ruling governs the server data, scripts, conformance clas
   duration.").
 - Owner ruling of 2026-11-11 ([ADR 0130](../adr/0130-a-scourgebane-strike-never-triggers-scourgebane.md)), replacing
   the eight-strike chain cap of 2026-11-10: a Scourgebane strike never triggers Scourgebane again; the chance is 20%
-  per weapon hit, as the isolated Ascension live logs show. Regression `templar-scourgebane-strike-never-retriggers`.
+  per direct-damage event, weapon hits and direct-damage abilities alike, and a strike never chains
+  ([ADR 0301](../adr/0301-scourgebane-rolls-on-every-direct-damage-event.md)). Regression
+  `templar-scourgebane-strike-never-retriggers`.
 - Texts only the client shows that state a losing option are restated through `coa_client_spell_description`
   ([ADR 0105](../adr/0105-templar-client-texts-restated-from-the-server.md),
   `rev_20261110_02_templar_client_texts.sql`, regression `templar-ruling-client-texts`): the tick spells' and

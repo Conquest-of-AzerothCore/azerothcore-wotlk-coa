@@ -1,6 +1,6 @@
 # 0130. A Scourgebane strike never triggers Scourgebane; proc entries can count procs per trigger
 
-- Status: accepted
+- Status: accepted; the "20% per weapon hit" summary of its Context is superseded by ADR 0301
 - Date: 2026-11-11
 
 ## Context
