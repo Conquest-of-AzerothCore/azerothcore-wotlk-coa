@@ -697,6 +697,9 @@ must read 1, the proof that the cast route lands at all (ADR 0134; the shape of 
 the immune window, not before it, because a landed creature fear raises the player's diminishing-returns level and
 would shorten later fears for a reason unrelated to the immunity. A named word without a fixture stays an unproven
 claim of the ledger entry. Judged exactly (`compare.behaviour_immunity_verdict`).
+`target: "ally"` (ADR 0204) makes the grouped ally the subject: the ally player is added and grouped, the fixtures are
+set on and cast at the ally, `spell` is cast at the ally and every reading is the ally's (Testament of Will 801455,
+TARGET_UNIT_TARGET_ALLY: a slow 35317 and a root 47021).
 
 ### Threat-slope scenarios (`behaviour_threat_slope`, `kind: "threat_slope"`)
 
@@ -841,6 +844,9 @@ spell crits, `learn` adds spells to learn, `label_suffix` names the label `<spel
 The trials must fit one scenario (`model.trial_limit`); a larger count is refused when the scenario is generated.
 `cast_wait_ms` without a `cast_spell` (ADR 0203) waits that long after each cast of `observe_spell` itself, for an
 observed spell whose hits are its own periodic ticks (Blade of Faith 803880, every 3000 ms: 3500 ms per trial).
+`ally_distance` (ADR 0207) groups the ally with the caster and moves it that far before the trials, for an aura that
+reaches party members within a radius; the ally must be the caster or the target (Fortified Body 300515: a self heal
+of the ally at 30 yd and at 45 yd).
 
 The judge (`compare.behaviour_hit_ratio_verdict`, rules in `bonus.py`, ADR 0125) computes each arm's mean per hit
 and the variance of that mean from the trials (`bonus.per_event_sample`), the bonus `(treatment / control - 1) x
@@ -913,6 +919,9 @@ The `after_casts` spells are learned with the gated spell (One With The Light 50
 after the priming cast of a Libram, Force of Golganneth, Divine Force or Testament of Will). `talent_aura_each_arm`
 sets the `talent_aura` afresh (stacks 0, then 1) before every talent arm with a setup, for a buff shorter than the
 cooldown wait (Libram of Zeal 801466, 20000 ms, gating Righteous Upheaval's 20000 ms cooldown).
+
+`target_health_pct` (ADR 0205, the dummy only) sets the dummy to that percent of its health once before the arms, for a
+gated spell with a target health aura state (Titanstrike 806521, below 20%, under Testament of Strength 300514).
 
 A cooldown gate may wait up to the accelerated cap (`hits.MAX_ACCELERATED_SCENARIO_MS`, ADR 0152), as expiry
 scenarios may; a power gate keeps the ten-minute budget. Eternally Devoted 573452 gates Libram of Tenacity 801461's
@@ -1225,6 +1234,13 @@ model's 99% interval, the verdict names that known engine rounding and `detail['
 means; a mean neither model explains alerts. Disciplined Blows 680397 (pulse 680398 on Benediction 578276),
 Pulverizing 524620 (524619 on Condemn 804906's damage) and Armor of Faith 804930 (801546 when Staffguard 706583
 breaks under the striker's Light of the Naaru 41394) use it.
+`control_casts` (ADR 0206) replaces the control arm's `casts` (an empty list makes none), and `spell` is then known in
+both arms: for a hit the spell itself sets off, the control is the same trial without that cast (Crusader's Brand
+300513 on the striker, Divine Charge 527023) or with another cast (Argent Blade 807268 against Righteous Lunge 570233).
+A hit of one school damage effect and one weapon percent effect adds the weapon part, read from the tooltip's percent
+of that effect, to the school part (ADR 0208, the Scourgebane strike 801832 from 92111's tooltip); `value_spell` and
+`value_effect` read the hit's value from another spell's effect token onto its school effect (Divine Charge's trample
+527269 from `$527270m3`).
 
 ### Taken-outcome scenarios (`behaviour_taken_outcome`, `kind: "taken_outcome"`)
 

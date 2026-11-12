@@ -633,11 +633,38 @@ def engine_rolls(readout: Readout, indexes: Sequence[int], rolls: Mapping[int, S
     return engine
 
 
+def script_weapon_part(readout: Readout, effects: Sequence[int], caster: CasterStats,
+                       weapon: WeaponProfile | None) -> tuple[Readout, tuple[Distribution, float, list[str]] | None]:
+    weapon_effects = [index for index, effect in enumerate(effects) if effect in WEAPON_EFFECTS]
+    shown = [value for value in readout.values if value.effect_index in weapon_effects]
+    if not shown:
+        return readout, None
+    if ([effects[index] for index in weapon_effects] != [WEAPON_PERCENT_DAMAGE]
+            or SCHOOL_DAMAGE not in effects):
+        raise Unmodelled(f'a script-cast weapon part needs one school damage effect and one weapon percent effect, '
+                         f'not effects {list(effects)}')
+    school = Readout([value for value in readout.values if value.effect_index not in weapon_effects],
+                     readout.unreadable)
+    return school, weapon_hit(Readout(shown, readout.unreadable), effects, caster, weapon)
+
+
+def value_readout(readout: Readout, effects: Sequence[int], value_effect: int) -> Readout:
+    if SCHOOL_DAMAGE not in effects:
+        raise Unmodelled(f'a value read from another spell needs a school damage effect, not effects {list(effects)}')
+    target = list(effects).index(SCHOOL_DAMAGE)
+    return Readout([replace(value, effect_index=target) for value in readout.values
+                    if value.effect_index == value_effect], readout.unreadable)
+
+
 def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caster: CasterStats,
-                     target: TargetProfile, auras: Sequence[int]) -> HitModel:
+                     target: TargetProfile, auras: Sequence[int], value_spell: int | None = None,
+                     value_effect: int = 0) -> HitModel:
     records = records_of(class_file)
     facts = facts_of(records, hit_spell)
-    readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), hit_spell)
+    readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), value_spell or hit_spell)
+    if value_spell is not None:
+        readout = value_readout(readout, facts.effects, value_effect)
+    readout, weapon_part = script_weapon_part(readout, facts.effects, caster, weapon_profile(class_file))
     kind, indexes = hit_kind(facts.effects, facts.aura_names, None, readout)
     if kind not in SCRIPT_HIT_KINDS:
         raise Unmodelled(f'script-cast spell {hit_spell} is a {kind} hit, not one direct damage or heal effect')
@@ -646,22 +673,23 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
     rolls = rolled_values(records, hit_spell, caster, readout, indexes, tooltip_spell=tooltip_spell)
     model = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
-                         modifiers=modifiers, rolls=rolls, records=records, rank_id=hit_spell)
+                         modifiers=modifiers, rolls=rolls, records=records, rank_id=hit_spell, weapon_part=weapon_part)
     losses = {index: loss for index in indexes
               if (loss := per_level_fraction(records, hit_spell, index, caster.level))}
     if not losses:
         return model
     engine = expected_hit(readout, facts.effects, caster, None, mitigation, aura_names=facts.aura_names,
                           modifiers=modifiers, rolls=engine_rolls(readout, indexes, rolls, losses), records=records,
-                          rank_id=hit_spell)
+                          rank_id=hit_spell, weapon_part=weapon_part)
     terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())
     return replace(model, engine=replace(engine, displayed=model.displayed),
                    engine_rule=f'{PER_LEVEL_ENGINE_RULE}: {terms}')
 
 
-def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int) -> HitModel:
+def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, value_spell: int | None = None,
+                               value_effect: int = 0) -> HitModel:
     return script_hit_model(class_file, tooltip_spell, hit_spell, reference_caster(class_file), REFERENCE_TARGET,
-                            class_file.get('known_auras', []))
+                            class_file.get('known_auras', []), value_spell, value_effect)
 
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
@@ -680,7 +708,8 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
         return melee_model(class_file, caster, target, auras)
     if 'tooltip_spell' in expectation.model:
         return script_hit_model(class_file, expectation.model['tooltip_spell'], expectation.model['hit_spell'],
-                                caster, target, auras)
+                                caster, target, auras, expectation.model.get('value_spell'),
+                                expectation.model.get('value_effect', 0))
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \

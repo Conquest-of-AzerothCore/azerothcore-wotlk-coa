@@ -744,7 +744,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 335)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 346)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -8066,6 +8066,141 @@ class BladeOfFaithTickTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation),
                                          FakeRun(ratio_values(expectation.model, 191.0, 191.0)), expectation).status,
                          'alert')
+
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class AllyImmunityTests(unittest.TestCase):
+    TESTAMENT_OF_WILL = 801455
+
+    def setUp(self):
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE,
+                                                              class_entry(self.TESTAMENT_OF_WILL, 'immunity'))
+        self.steps = run.validate(self.scenario)['steps']
+
+    def test_the_effects_land_on_and_are_read_from_the_grouped_ally(self):
+        self.assertEqual([player['id'] for player in self.scenario['players']], [CASTER, 'ally'])
+        group = first_index(self.steps, action='group')
+        self.assertEqual(self.steps[group]['target'], 'ally')
+        cast = first_index(self.steps, action='cast', spell=self.TESTAMENT_OF_WILL)
+        self.assertLess(group, cast)
+        self.assertEqual(self.steps[cast]['target'], 'ally')
+        fixtures = [step for step in self.steps if step['action'] == 'cast' and step['actor'] == 'dummy']
+        self.assertTrue(fixtures)
+        self.assertTrue(all(step['target'] == 'ally' for step in fixtures))
+        reads = [step for step in self.steps if step.get('metric') == 'aura'
+                 and step['spell'] in (self.TESTAMENT_OF_WILL, 35317, 47021)]
+        self.assertEqual(len(reads), 8)
+        self.assertTrue(all(step['actor'] == 'ally' for step in reads))
+
+    def test_a_slow_or_root_landing_inside_the_window_alerts(self):
+        for expectation in self.expectations:
+            if expectation.label.endswith(' with'):
+                with self.subTest(label=expectation.label):
+                    verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: 1.0}),
+                                              expectation)
+                    self.assertEqual(verdict.status, 'alert')
+
+    def test_a_caster_entry_keeps_its_steps(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, class_entry(TESTAMENT_OF_RESOLVE, 'immunity'))
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER])
+        self.assertFalse(any(step['action'] == 'group' for step in scenario['steps']))
+
+    def test_another_target_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**class_entry(self.TESTAMENT_OF_WILL, 'immunity'), 'target': 'dummy'})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class CostGateTargetHealthTests(unittest.TestCase):
+    def entry(self):
+        return variant_entry(TESTAMENT_OF_STRENGTH, 'cost_gate', 'titanstrike')
+
+    def test_the_dummy_is_lowered_once_before_the_first_cast(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.entry())
+        steps = run.validate(scenario)['steps']
+        lowered = [index for index, step in enumerate(steps) if step['action'] == 'set_health_pct']
+        self.assertEqual(len(lowered), 1)
+        self.assertEqual((steps[lowered[0]]['target'], steps[lowered[0]]['pct']), ('dummy', 10))
+        self.assertLess(lowered[0], first_index(steps, action='cast', spell=806521))
+
+    def test_a_target_health_on_another_target_is_refused(self):
+        for bad in ({**self.entry(), 'target': 'caster'}, {**self.entry(), 'target_health_pct': 100}):
+            with self.subTest(bad=bad['target'], pct=bad['target_health_pct']):
+                with self.assertRaises(ValueError):
+                    behaviour_scenario(CLASS_FILE, bad)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ScriptHitControlCastTests(unittest.TestCase):
+    ARGENT_BLADE = 807268
+    RIGHTEOUS_LUNGE = 570233
+
+    def test_the_control_arm_makes_its_own_casts_with_the_spell_known(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, class_entry(self.ARGENT_BLADE, 'script_hit'))
+        steps = run.validate(scenario)['steps']
+        drain = first_index(steps, label='control drain')
+        control = [step['spell'] for step in steps[:drain] if step['action'] == 'cast']
+        treatment = [step['spell'] for step in steps[drain:] if step['action'] == 'cast']
+        self.assertEqual(set(control), {self.RIGHTEOUS_LUNGE})
+        self.assertEqual(set(treatment), {self.ARGENT_BLADE})
+        self.assertLess(first_index(steps, action='learn', spell=self.ARGENT_BLADE), first_index(steps, action='cast'))
+        self.assertIn('instead', expectation.model['control_text'])
+
+    def test_an_empty_control_arm_strikes_without_the_brand(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, class_entry(300513, 'script_hit'))
+        steps = run.validate(scenario)['steps']
+        drain = first_index(steps, label='control drain')
+        self.assertFalse([step for step in steps[:drain] if step['action'] == 'cast' and step['actor'] == CASTER])
+        self.assertTrue([step for step in steps[drain:] if step['action'] == 'cast' and step['spell'] == 300513])
+
+    def test_control_casts_equal_to_the_casts_are_refused(self):
+        entry = class_entry(self.ARGENT_BLADE, 'script_hit')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**entry, 'control_casts': entry['casts']})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioAllyDistanceTests(unittest.TestCase):
+    FORTIFIED_BODY = 300515
+
+    def test_the_ally_is_grouped_and_moved_before_the_first_heal(self):
+        for variant, distance in (('ally_inside', 30), ('ally_outside', 45)):
+            scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(self.FORTIFIED_BODY, 'hit_ratio', variant))
+            steps = run.validate(scenario)['steps']
+            cast = first_index(steps, action='cast', spell=578276)
+            with self.subTest(variant=variant):
+                self.assertLess(first_index(steps, action='group'), cast)
+                self.assertEqual(sum(step['dx'] for step in steps[:cast] if step['action'] == 'relocate'
+                                     and step['actor'] == 'ally'), distance)
+                self.assertEqual(steps[cast]['actor'], 'ally')
+
+    def test_a_distance_without_the_ally_is_refused(self):
+        entry = {**variant_entry(self.FORTIFIED_BODY, 'hit_ratio', 'no_stack'), 'ally_distance': 30}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ScriptHitWeaponAndValueTests(unittest.TestCase):
+    def test_the_scourgebane_strike_adds_its_weapon_part_to_the_school_part(self):
+        from hits import reference_script_hit_model
+        whole = reference_script_hit_model(CLASS_FILE, 92111, 801832)
+        school = reference_script_hit_model(CLASS_FILE, 807268, 801832)
+        self.assertEqual(whole.kind, 'school')
+        self.assertGreater(whole.mean - school.mean, 3 * whole.sigma / 48 ** 0.5)
+        self.assertTrue(any('801832s2' in text for text in whole.displayed))
+
+    def test_a_value_read_from_another_spell_lands_on_the_school_effect(self):
+        from hits import reference_script_hit_model
+        model = reference_script_hit_model(CLASS_FILE, 527023, 527269, 527270, 2)
+        self.assertTrue(any('527270m3' in text for text in model.displayed))
+        self.assertGreater(model.mean, 0)
+
+    def test_a_value_spell_on_a_hit_without_a_school_effect_is_refused(self):
+        from hits import Unmodelled, reference_script_hit_model
+        with self.assertRaises(Unmodelled):
+            reference_script_hit_model(CLASS_FILE, 527023, 527270, 527270, 2)
 
 
 if __name__ == '__main__':

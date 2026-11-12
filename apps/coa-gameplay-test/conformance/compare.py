@@ -865,8 +865,9 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
         if sum(controls) > 0:
             return replace(base, status='alert', measured=mean,
                            explanation=f'the control arm counts {sum(controls):g} hits of {model.get("hit_spell")} '
-                                       f'without the spell known; the hits are not told apart from it{notes}')
-        notes += f'; control arm without the spell known: 0 hits ({control})'
+                                       f'{model.get("control_text", "without the spell known")}; the hits are not '
+                                       f'told apart from it{notes}')
+        notes += f'; control arm {model.get("control_text", "without the spell known")}: 0 hits ({control})'
     models = []
     for run, part, part_count in judged:
         try:
