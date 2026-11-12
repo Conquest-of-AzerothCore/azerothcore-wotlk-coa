@@ -283,7 +283,7 @@ struct Objects
     }
     uint32 GetXPForLevel(uint32)
     {
-        return 1000;
+        return 100000;
     }
 } objects;
 auto* sObjectMgr = &objects;

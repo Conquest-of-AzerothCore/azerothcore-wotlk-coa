@@ -1677,7 +1677,7 @@ namespace
                     return effect->GetId() != 818059 || !recruitAFriend;
                 });
             uint32 const xp = mode < 4 ? uint32(sObjectMgr->GetXPForLevel(player->GetLevel()) *
-                (first ? 0.075f : 0.06f) * xpMultiplier) : 0;
+                (first ? 0.00075f : 0.0006f) * xpMultiplier) : 0;
             uint64 const token = run.token;
             if (xp)
             {
