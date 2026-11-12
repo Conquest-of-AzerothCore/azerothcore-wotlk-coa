@@ -162,7 +162,9 @@
     "labels": [
       "300512 effect_value e0",
       "300512 e0 spell_modifier 570205",
-      "300512 e2 spell_modifier 567539"
+      "300512 e2 spell_modifier 567539",
+      "300512 behaviour_hit_ratio righteous_tempest",
+      "300512 behaviour_hit_ratio condemn"
     ],
     "kind": "claim"
   },
