@@ -2358,14 +2358,9 @@
       "observe_source": "The player half: Courage 707754 (+10%) on the caster in both phases, 1.10; the brand 300513 set on the caster in the second phase (by the caster, so its AscensionTemplarAuras.cpp:107-112 apply hook runs UpdateSpeed; set by the dummy it read 1.10, diagnostic 20261111-225829), then a Libram of Tenacity 801461 cast (no speed effect) as the phase's act: Unit::UpdateSpeed caps MOVE_RUN at 1.0 while 300513 is held (Unit.cpp:12581-12582), the normal player rate."
     },
     {
-      "spell": 300513, "name": "Crusader's Brand (fleeing)", "kind": "metric_delta", "variant": "flee", "label_suffix": "flee",
-      "quote": "fleeing", "expected": 0,
-      "trigger_spell": 801461, "target": "caster", "measure_actor": "caster",
-      "phase_auras": [[12096, 1, "caster", "dummy"]],
-      "after_auras": [[12096, 0, "caster", "dummy"], [300513, 1, "caster", "dummy"]],
-      "metric": "moving", "fields": {},
-      "before_expected": 1, "wait_ms": 1000, "expire_ms": 500,
-      "observe_source": "AscensionTemplarContracts.cpp:98-99 sets 300513 Effect[2] to SPELL_AURA_PREVENTS_FLEEING. The caster holds Fear 12096 (aura 7 SPELL_AURA_MOD_FEAR, applied by the dummy) in both phases, so it flees (moving); in the second phase the fear is removed, the brand is set on the caster by the dummy, and the fear is set again. Each phase then casts Libram of Tenacity 801461 (no movement effect) and reads 1000 ms later; without that wait the first read came right after the fear and read 0 or 1 (diagnostic 20261111-225359, counted 20261111-230015). The tooltip reading 'preventing them from fleeing' expects no movement under the brand."
+      "spell": 300513, "name": "Crusader's Brand (fleeing)", "kind": "flee_block", "quote": "fleeing",
+      "creature_entry": 11360, "flee_health_pct": 10, "reads": 5, "read_interval_ms": 250,
+      "observe_source": "Owner ruling 2026-11-12 (status-5 section): 'fleeing' is low-health creature fleeing, judged with several reads. AscensionTemplarContracts.cpp:98-99 sets 300513 Effect[2] to SPELL_AURA_PREVENTS_FLEEING; Creature::DoFleeToGetAssistance returns when HasPreventsFleeingAura() holds (Creature.cpp:1124), and SmartAI SMART_ACTION_FLEE_FOR_ASSIST calls it (SmartScript.cpp:1101-1107). Zulian Cub 11360 (level 60, rank 0) has a single SmartAI row: event 2 health 0-15%, action 25 flee for assist, no repeat (acore_world.smart_scripts). Both creatures are defensive so they take the caster as victim, which DoFleeToGetAssistance needs, and carry 1,000,000 health so the brand's retaliation cannot kill the branded one during the reads. The brand is cast by the caster (a real application)."
     },
     {
       "spell": 1397742, "name": "Testament of Hope (two copies)", "kind": "taken_hit", "variant": "copies", "label_suffix": "copies",

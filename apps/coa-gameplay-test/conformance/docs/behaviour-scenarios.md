@@ -682,6 +682,18 @@ blocked` must read SPELL_FAILED_CASTER_AURASTATE (22) and `... unmounted` (the m
 mount works at this site. `spell` is then set again on the mounted caster: `... dismounted` must read 0. The five
 readings are judged exactly (`compare.behaviour_cast_gate_verdict`).
 
+### Flee-block scenarios (`behaviour_cast_condition`, `kind: "flee_block"`, ADR 0298)
+
+"preventing them from fleeing" states that a creature holding `spell` does not flee at low health.
+`flee_block_scenario` spawns two defensive (`reaction` 1) creatures of `creature_entry`, which must have a SmartAI
+flee-for-assistance row at low health, with 1,000,000 health each. The caster casts `spell` at the first
+(`<spell> flee_block <entry> cast` reads 0, `... branded` 1), attacks it for 1000 ms so that it takes the caster as its
+victim (`Creature::DoFleeToGetAssistance` needs one), stops and brings it to `flee_health_pct` with `set_health_pct`.
+`moving` is then read `reads` times, `read_interval_ms` apart: `... blocked` is their sum and must be 0, and
+`... held` (the brand, after the reads) 1. The second creature goes through the same steps without the brand:
+`... control` is the sum of its reads and must be at least 1. Sums are judged by
+`compare.behaviour_cast_gate_verdict` (`sum_labels`, exact, or a floor with `at_least`).
+
 ### Immunity scenarios (`behaviour_immunity`, `kind: "immunity"`)
 
 "granting immunity to fear, charm, and horrify effects" states that named effects no longer land. `effects` lists

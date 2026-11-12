@@ -80,7 +80,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
-        'source_stack', 'mount_block', 'stat_gain', 'fall_damage')
+        'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -4240,6 +4240,100 @@ def mount_block_spec(entry: dict) -> MountBlockSpec:
                           int(entry.get('mount_spell', GENERIC_GROUND_MOUNT_SPELL)))
 
 
+FLEE_BLOCK_ENGAGE_MS = 1000
+FLEE_BLOCK_HEALTH = 1000000
+FLEE_BLOCK_REACTION_DEFENSIVE = 1
+FLEE_BLOCK_BRANDED = 'flee_branded'
+FLEE_BLOCK_CONTROL = 'flee_control'
+
+
+@dataclass(frozen=True)
+class FleeBlockSpec:
+    spell: int
+    name: str
+    quote: str
+    creature_entry: int
+    flee_health_pct: int
+    reads: int
+    read_interval_ms: int
+
+
+def flee_block_label(spec: FleeBlockSpec, moment: str) -> str:
+    return f'{spec.spell} flee_block {spec.creature_entry} {moment}'
+
+
+def flee_block_scenario(class_file: dict, spec: FleeBlockSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'flee_block', spec.quote, STATE_ABSENT)
+    if not 1 <= spec.flee_health_pct <= 99 or spec.reads < 1 or spec.read_interval_ms < 1:
+        raise ValueError(f'{spec.spell} flee_block needs flee_health_pct 1..99, reads and read_interval_ms above 0')
+
+    def label(moment: str) -> str:
+        return flee_block_label(spec, moment)
+
+    def provoked(creature: str, arm: str) -> list[dict]:
+        reads = []
+        for read in range(1, spec.reads + 1):
+            reads += [{'action': 'wait', 'ms': spec.read_interval_ms},
+                      measurement(label(f'{arm} read {read}'), creature, 'moving')]
+        return ([{'action': 'attack', 'actor': CASTER, 'target': creature},
+                 {'action': 'wait', 'label': f'{arm} engage', 'ms': FLEE_BLOCK_ENGAGE_MS},
+                 {'action': 'stop_attack', 'actor': CASTER},
+                 {'action': 'set_health_pct', 'actor': CASTER, 'target': creature, 'pct': spec.flee_health_pct}]
+                + reads)
+
+    def read_labels(arm: str) -> list[str]:
+        return [label(f'{arm} read {read}') for read in range(1, spec.reads + 1)]
+
+    brand = facts_of(records, spec.spell)
+    creatures = [{'id': creature, 'owner': CASTER, 'entry': spec.creature_entry, 'level': class_file['level'],
+                  'health': FLEE_BLOCK_HEALTH, 'reaction': FLEE_BLOCK_REACTION_DEFENSIVE}
+                 for creature in (FLEE_BLOCK_BRANDED, FLEE_BLOCK_CONTROL)]
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell},
+                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.spell}]
+             + cast_gate_power_step(brand) + required_aura_steps(brand)
+             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.spell, 'target': FLEE_BLOCK_BRANDED},
+                {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
+                measurement(label('cast'), CASTER, 'cast_failure', spell=spec.spell),
+                measurement(label('branded'), FLEE_BLOCK_BRANDED, 'aura', spell=spec.spell)]
+             + provoked(FLEE_BLOCK_BRANDED, 'branded')
+             + [measurement(label('held'), FLEE_BLOCK_BRANDED, 'aura', spell=spec.spell)]
+             + provoked(FLEE_BLOCK_CONTROL, 'control'))
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour flee block',
+        'contract': f'Two defensive {spec.creature_entry} creatures, whose SmartAI flees for assistance at low '
+                    f'health, stand by the caster. The caster casts {spec.spell} at the first (cast and aura read), '
+                    f'attacks it for {FLEE_BLOCK_ENGAGE_MS} ms so it fights back, stops, and brings it to '
+                    f'{spec.flee_health_pct}% health; its movement is read {spec.reads} times '
+                    f'{spec.read_interval_ms} ms apart and must never read moving, and the brand must still be up '
+                    f'after the reads. The second creature, without the brand, goes through the same steps and must '
+                    f'read moving at least once (the control), proving the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file)],
+        'creatures': creatures,
+        'steps': steps}
+    model = {'kind': 'flee_block', 'quote': entry.quote}
+    rule = prose_rule(entry.quote, spec.spell)
+    expectations = [
+        Expectation(label('cast'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
+                    rule, dict(model)),
+        Expectation(label('branded'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(STATE_PRESENT),
+                    rule, dict(model)),
+        Expectation(label('blocked'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.creature_entry, None,
+                    str(STATE_ABSENT), rule, {**model, 'sum_labels': read_labels('branded')}),
+        Expectation(label('held'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(STATE_PRESENT),
+                    rule, dict(model)),
+        Expectation(label('control'), BEHAVIOUR_CAST_CONDITION, spec.spell, spec.creature_entry, None,
+                    str(STATE_PRESENT), rule, {**model, 'sum_labels': read_labels('control'), 'at_least': True})]
+    return scenario, expectations
+
+
+def flee_block_spec(entry: dict) -> FleeBlockSpec:
+    return FleeBlockSpec(entry['spell'], entry['name'], entry['quote'], int(entry['creature_entry']),
+                         int(entry['flee_health_pct']), int(entry['reads']), int(entry['read_interval_ms']))
+
+
 IMMUNITY_CASTS = 3
 IMMUNITY_CAST_WAIT_MS = CAST_MARGIN_MS
 
@@ -7016,6 +7110,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return cast_state_scenario(class_file, cast_state_spec(entry))
     if entry['kind'] == 'mount_block':
         return mount_block_scenario(class_file, mount_block_spec(entry))
+    if entry['kind'] == 'flee_block':
+        return flee_block_scenario(class_file, flee_block_spec(entry))
     if entry['kind'] == 'immunity':
         return immunity_scenario(class_file, immunity_spec(entry))
     if entry['kind'] == 'threat_slope':

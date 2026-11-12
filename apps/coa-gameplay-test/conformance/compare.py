@@ -3430,7 +3430,13 @@ def behaviour_cast_gate_verdict(base: Verdict, run: Run, expectation: Expectatio
         missing = next((label for label in summed if run.values.get(label) is None), None)
         if missing:
             return replace(base, explanation=missing_measurement(run, missing))
-        return exact(base, sum(float(run.values[label]) for label in summed), float(expectation.displayed),
+        total = sum(float(run.values[label]) for label in summed)
+        if expectation.model.get('at_least'):
+            floor = float(expectation.displayed)
+            return replace(base, status='ok' if total >= floor - FLOAT_EPSILON else 'alert', measured=total,
+                           expected=floor, low=floor, high=float(len(summed)),
+                           explanation=f'the sum of {", ".join(summed)} must be at least {floor:g}')
+        return exact(base, total, float(expectation.displayed),
                      f'the sum of {", ".join(summed)} compared exactly to the expected count')
     measured = run.values.get(expectation.label)
     if measured is None:

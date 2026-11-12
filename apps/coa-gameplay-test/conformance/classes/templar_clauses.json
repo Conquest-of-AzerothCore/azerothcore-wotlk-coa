@@ -209,10 +209,14 @@
     "spell": 300513,
     "clause": "fleeing,",
     "labels": [
-      "300513 behaviour_metric_delta flee"
+      "300513 flee_block 11360 cast",
+      "300513 flee_block 11360 branded",
+      "300513 flee_block 11360 blocked",
+      "300513 flee_block 11360 held",
+      "300513 flee_block 11360 control"
     ],
     "kind": "claim",
-    "reason": "awaiting owner (lean/owner-questions.md): a feared caster still flees with the brand held (moving 1 and 1, counted 20261111-230219 / -230306). AscensionTemplarContracts.cpp:98-99 makes Effect[2] SPELL_AURA_PREVENTS_FLEEING, which since 3.0.2 ignores fear and players (SpellAuraEffects.cpp:3854-3866) and only stops a creature fleeing at low health"
+    "reason": "Owner ruling 2026-11-12 (status-5 section): 'fleeing' is low-health creature fleeing, judged with several reads; the feared-caster check is replaced (ADR 0298). A branded Zulian Cub 11360 brought to 10% health never moves in 5 reads, and the unbranded control moves in all 5; counted 20261112-081541 / -081619."
   },
   {
     "spell": 300513,

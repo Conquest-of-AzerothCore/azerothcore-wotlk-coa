@@ -7465,9 +7465,16 @@ def cast_indices(steps: list[dict], spell: int) -> list[int]:
     return [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == spell]
 
 
+FEARED_CASTER_FLEE = {'spell': 300513, 'name': "Crusader's Brand (fleeing)", 'kind': 'metric_delta', 'variant': 'flee',
+                      'label_suffix': 'flee', 'quote': 'fleeing', 'expected': 0, 'trigger_spell': 801461,
+                      'target': 'caster', 'measure_actor': 'caster', 'phase_auras': [[12096, 1, 'caster', 'dummy']],
+                      'after_auras': [[12096, 0, 'caster', 'dummy'], [300513, 1, 'caster', 'dummy']],
+                      'metric': 'moving', 'fields': {}, 'before_expected': 1, 'wait_ms': 1000, 'expire_ms': 500}
+
+
 class PhaseAuraTests(unittest.TestCase):
     def test_flee_sets_the_fear_in_both_phases_and_the_brand_in_the_after_phase_only(self):
-        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(r1a_entry(300513, 'metric_delta', 'flee')))
+        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(FEARED_CASTER_FLEE))
         run.validate(scenario)
         steps = scenario['steps']
         brand = set_aura_indices(steps, 300513)
@@ -7491,7 +7498,7 @@ class PhaseAuraTests(unittest.TestCase):
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
     def test_phase_aura_refuses_an_unknown_unit(self):
-        entry = {**r1a_entry(300513, 'metric_delta', 'flee'), 'phase_auras': [[12096, 1, 'caster', 'ally']]}
+        entry = {**FEARED_CASTER_FLEE, 'phase_auras': [[12096, 1, 'caster', 'ally']]}
         with self.assertRaises(ValueError):
             metric_delta_spec(entry)
 
@@ -8055,6 +8062,67 @@ class MountBlockScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class FleeBlockScenarioTests(unittest.TestCase):
+    BRAND = 300513
+    CUB = 11360
+
+    def setUp(self):
+        self.entry = r1a_entry(self.BRAND, 'flee_block')
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, self.entry)
+        self.steps = run.validate(self.scenario)['steps']
+
+    def label(self, moment: str) -> str:
+        return f'{self.BRAND} flee_block {self.CUB} {moment}'
+
+    def reads(self, arm: str) -> list[str]:
+        return [self.label(f'{arm} read {read}') for read in range(1, self.entry['reads'] + 1)]
+
+    def test_the_branded_creature_must_never_move_and_the_control_must_move_once(self):
+        self.assertEqual([(e.label, e.check, e.displayed) for e in self.expectations],
+                         [(self.label(moment), BEHAVIOUR_CAST_CONDITION, value)
+                          for moment, value in (('cast', '0'), ('branded', '1'), ('blocked', '0'), ('held', '1'),
+                                                ('control', '1'))])
+        by_moment = {e.label.rsplit(' ', 1)[1]: e for e in self.expectations}
+        self.assertEqual(by_moment['blocked'].model['sum_labels'], self.reads('branded'))
+        self.assertEqual(by_moment['control'].model['sum_labels'], self.reads('control'))
+        self.assertTrue(by_moment['control'].model['at_least'])
+        self.assertNotIn('at_least', by_moment['blocked'].model)
+
+    def test_two_defensive_flee_creatures_and_a_brand_cast_by_the_caster_before_the_branded_arm(self):
+        self.assertEqual([(c['id'], c['entry'], c['reaction']) for c in self.scenario['creatures']],
+                         [('flee_branded', self.CUB, 1), ('flee_control', self.CUB, 1)])
+        brand = cast_indices(self.steps, self.BRAND)
+        self.assertEqual(len(brand), 1)
+        self.assertEqual(self.steps[brand[0]]['target'], 'flee_branded')
+        self.assertEqual(set_aura_indices(self.steps, self.BRAND), [])
+        lowered = [index for index, step in enumerate(self.steps) if step['action'] == 'set_health_pct']
+        self.assertEqual([(self.steps[index]['target'], self.steps[index]['pct']) for index in lowered],
+                         [('flee_branded', 10), ('flee_control', 10)])
+        self.assertLess(brand[0], lowered[0])
+        reads = [index for index, step in enumerate(self.steps) if step.get('metric') == 'moving']
+        self.assertEqual(len(reads), 2 * self.entry['reads'])
+        self.assertTrue(all(lowered[0] < index < lowered[1] for index in reads[:self.entry['reads']]))
+        self.assertTrue(all(index > lowered[1] for index in reads[self.entry['reads']:]))
+
+    def test_a_branded_move_or_a_control_that_never_moves_alerts(self):
+        by_moment = {e.label.rsplit(' ', 1)[1]: e for e in self.expectations}
+        still = dict.fromkeys(self.reads('branded'), 0.0)
+        one_step = {**still, self.reads('branded')[2]: 1.0}
+        fled_once = {**dict.fromkeys(self.reads('control'), 0.0), self.reads('control')[4]: 1.0}
+        stayed = dict.fromkeys(self.reads('control'), 0.0)
+        for moment, values, status in (('blocked', still, 'ok'), ('blocked', one_step, 'alert'),
+                                       ('control', fled_once, 'ok'), ('control', stayed, 'alert')):
+            expectation = by_moment[moment]
+            with self.subTest(moment=moment, values=values):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+                self.assertEqual(verdict.status, status)
+
+    def test_a_flee_health_outside_one_to_ninety_nine_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, {**self.entry, 'flee_health_pct': 0})
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
