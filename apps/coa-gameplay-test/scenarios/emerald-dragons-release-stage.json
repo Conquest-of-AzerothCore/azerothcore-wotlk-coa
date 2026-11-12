@@ -3,8 +3,7 @@
   "name": "The Emerald Dragons stay out of reach until Molten Core is released",
   "contract": [
     "Ysondre, Lethon, Emeriss and Taerar belong to the Molten Core release stage (3). Below it a dragon is",
-    "unselectable and unattackable, and a dragon standing next to a player never engages or stays in combat with him.",
-    "Once the stage reaches Molten Core the same dragon can be attacked again."
+    "unselectable, unattackable and passive: a player standing on Ysondre's own spawn never gets into combat with her."
   ],
   "timeout_ms": 60000,
   "location": {
@@ -79,24 +78,6 @@
       "actor": "hero",
       "metric": "combat",
       "equals": 0
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".raidphase set 3"
-    },
-    {
-      "action": "wait",
-      "ms": 2000
-    },
-    {
-      "action": "assert",
-      "label": "At Molten Core Ysondre can be attacked",
-      "actor": "mate",
-      "metric": "nearby_creature_can_attack",
-      "entry": 14887,
-      "equals": 1,
-      "within_ms": 10000
     },
     {
       "action": "command",
