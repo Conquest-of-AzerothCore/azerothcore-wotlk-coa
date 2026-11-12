@@ -512,6 +512,14 @@
       "observe_source": "707421 Effect[0] 190 puts its aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1) on the summons. A Ghoul is raised, then 707421 is cast: the Ghoul carries it. Control: no cast, no Ghoul with it."
     },
     {
+      "spell": 504861, "name": "Raise: Banshee (Command drain)", "kind": "metric_delta", "variant": "drain",
+      "label_suffix": "drain", "quote": "and deals Frost damage equal to the mana drained", "expected": 280, "before_expected": 0,
+      "trigger_spell": 504868, "target": "enemy", "enemy_player_race": 2, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500,
+      "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "enemy"},
+      "observe_source": "An enemy player (a Necromancer, race 2, 2803 maximum mana, full) is the target: the dummy has no mana. Both phases cast Command: Undead 504868 at it; the treatment raises a Banshee 500650 first. npc_ascension_necromancer::DoAction, case 500650: mana = min(target mana, min(target max / 10, Banshee max / 5)), ModifyPower(-mana), then Copy 505225 (Frost) for that amount. The tooltip's 10% of the target's mana is 280; with the cap read as 20% of the target's own maximum (560) the drain is 280. Control: no Banshee, no hit."
+    },
+    {
       "spell": 805044, "name": "Animate: Tomb King (animated)", "kind": "metric_delta", "variant": "count",
       "label_suffix": "count", "quote": "Animate a", "expected": 1, "before_expected": 0,
       "trigger_spell": 805044, "target": "caster", "cast_in_before": false, "wait_ms": 1000, "expire_ms": 500,

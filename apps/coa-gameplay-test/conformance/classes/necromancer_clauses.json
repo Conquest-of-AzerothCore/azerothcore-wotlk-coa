@@ -953,9 +953,19 @@
   {
     "spell": 504861,
     "clause": "Command: Drains $504862m1% of your target's mana (up to a maximum of ${$504862m1*2}% of their own maximum mana) and deals Frost damage equal to the mana drained.",
-    "labels": [
-      "504861 effect_value 504862e0 #0",
-      "504861 effect_value 504862e0 #1"
+    "claims": [
+      {
+        "claim": "Command: Drains $504862m1% of your target's mana (up to a maximum of ${$504862m1*2}% of their own maximum mana)",
+        "labels": [
+          "504861 behaviour_metric_delta drain"
+        ]
+      },
+      {
+        "claim": "and deals Frost damage equal to the mana drained",
+        "labels": [
+          "504861 behaviour_metric_delta drain"
+        ]
+      }
     ],
     "kind": "claim"
   },
