@@ -3,6 +3,8 @@
 #define ASCENSION_POOLED_VITALITY_H
 
 #include "Define.h"
+#include <cctype>
+#include <string>
 
 namespace AscensionBloodmage
 {
@@ -10,6 +12,9 @@ enum Spells : uint32
 {
     PooledVitalityTalent = 681078,
     PooledVitality = 680687,
+    PooledVitalitySpecialization = 680688,
+    EmpoweredIndicator = 524899,
+    EmpoweredMend = 680033,
     VitalityForLater = 681026,
     VitalityHeal = 681025,
     NightFeast = 563736,
@@ -31,6 +36,29 @@ inline uint32 RuntimeExcludeCasterAuraSpell(uint32 spellFamily, uint32 excludeCa
 {
     return spellFamily == BloodmageSpellFamily && excludeCasterAuraSpell == CursedFormCheck
         ? CursedForm : excludeCasterAuraSpell;
+}
+
+// Sanguine Mend's client description shows its Empowered line only for the
+// specialization spell (680688), while every sibling ability and the server's
+// empowerment check use the Pooled Vitality passive (681078) that players learn.
+inline std::string RuntimeEmpoweredDescription(uint32 spellFamily, std::string text)
+{
+    if (spellFamily != BloodmageSpellFamily)
+        return text;
+    std::string const from = "$?s" + std::to_string(PooledVitalitySpecialization);
+    std::string const to = "$?s" + std::to_string(PooledVitalityTalent);
+    for (std::size_t pos = text.find(from); pos != std::string::npos; pos = text.find(from, pos))
+    {
+        std::size_t const end = pos + from.size();
+        if (end < text.size() && std::isdigit(static_cast<unsigned char>(text[end])))
+        {
+            pos = end;
+            continue;
+        }
+        text.replace(pos, from.size(), to);
+        pos += to.size();
+    }
+    return text;
 }
 
 enum Empowerment : uint32

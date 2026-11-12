@@ -5801,11 +5801,11 @@ private:
       {
         ClientDBC::Record const record = spells.GetRecord(index);
         uint32 const id = record.GetUInt32(0);
+        uint32 const family = record.GetUInt32(SPELL_FAMILY_NAME_FIELD);
         uint32 const excludedAura =
             record.GetUInt32(SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD);
         uint32 const clientExcludedAura =
-            AscensionBloodmage::RuntimeExcludeCasterAuraSpell(
-                record.GetUInt32(SPELL_FAMILY_NAME_FIELD), excludedAura);
+            AscensionBloodmage::RuntimeExcludeCasterAuraSpell(family, excludedAura);
         bool const redirectsExclusion = clientExcludedAura != excludedAura;
         bool const restrictingFormGated =
             clientExcludedAura == AscensionBloodmage::CursedForm;
@@ -5813,12 +5813,20 @@ private:
         bool const raisesRankLevel =
             trainingLevel != rankTrainingLevels.end() &&
             record.GetUInt32(SPELL_LEVEL_FIELD) < trainingLevel->second;
+        bool redirectsEmpoweredGate = false;
+        if (family == AscensionBloodmage::BloodmageSpellFamily)
+          for (std::size_t const text : {SPELL_WIRE_DESCRIPTION, SPELL_WIRE_TOOLTIP})
+          {
+            std::string const raw(record.GetString(SPELL_WIRE_STRING_FIELDS[text]));
+            redirectsEmpoweredGate = redirectsEmpoweredGate ||
+                AscensionBloodmage::RuntimeEmpoweredDescription(family, raw) != raw;
+          }
 
         auto const overlay = overridden.find(id);
         auto const description = descriptions.find(id);
         if (overlay == overridden.end() && description == descriptions.end() &&
             !requested.contains(id) && !redirectsExclusion &&
-            !restrictingFormGated && !raisesRankLevel)
+            !restrictingFormGated && !raisesRankLevel && !redirectsEmpoweredGate)
           continue;
 
         std::size_t const rowIndex = overlay == overridden.end() ? rows.size() : overlay->second;
@@ -5861,6 +5869,8 @@ private:
           row.Values[SPELL_WIRE_SLOT(SPELL_LEVEL_FIELD)] = trainingLevel->second;
           Ascension::ClientSpellPatches::Instance().Register(id);
         }
+        if (redirectsEmpoweredGate)
+          Ascension::ClientSpellPatches::Instance().Register(id);
         requested.erase(id);
       }
     }
@@ -5885,6 +5895,9 @@ private:
     {
       if (auto const tier = blacksmithingTiers.find(row.Values[0]); tier != blacksmithingTiers.end())
         row.Strings[SPELL_WIRE_RANK] = tier->second;
+      uint32 const family = row.Values[SPELL_WIRE_SLOT(SPELL_FAMILY_NAME_FIELD)];
+      for (std::size_t const text : {SPELL_WIRE_DESCRIPTION, SPELL_WIRE_TOOLTIP})
+        row.Strings[text] = AscensionBloodmage::RuntimeEmpoweredDescription(family, row.Strings[text]);
       row.RequiresRegistration = !descriptionIds.contains(row.Values[0]);
     }
     return rows;

@@ -1616,6 +1616,20 @@ public:
 
         ApplyBloodmageConditionalContracts(info);
 
+        if (info->Id == AscensionBloodmage::EmpoweredIndicator && info->Effects[EFFECT_1].IsAura(SPELL_AURA_DUMMY))
+            if (SpellInfo const* mend = sSpellMgr->GetSpellInfo(AscensionBloodmage::EmpoweredMend))
+                if (SpellEffectInfo const& instant = mend->Effects[EFFECT_1];
+                    instant.IsAura(SPELL_AURA_ADD_PCT_MODIFIER) && instant.MiscValue == SPELLMOD_CASTING_TIME)
+                {
+                    SpellEffectInfo& effect = info->Effects[EFFECT_1];
+                    effect.ApplyAuraName = instant.ApplyAuraName;
+                    effect.MiscValue = instant.MiscValue;
+                    effect.BasePoints = instant.BasePoints;
+                    effect.DieSides = instant.DieSides;
+                    effect.RealPointsPerLevel = instant.RealPointsPerLevel;
+                    effect.SpellClassMask = instant.SpellClassMask;
+                }
+
         if (info->Id == SPELL_BLOOD_SCENT &&
             info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ADD_FLAT_MODIFIER &&
             info->Effects[EFFECT_0].MiscValue == SPELLMOD_EFFECT2)
