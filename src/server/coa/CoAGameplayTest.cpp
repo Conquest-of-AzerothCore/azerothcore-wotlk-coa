@@ -6972,6 +6972,11 @@ private:
                 return !creature->IsInWorld() || (action == "attack_nearby") != creature->IsAlive();
             });
             Require(!creatures.empty(), "No matching nearby creature among " + std::to_string(found));
+            if (action == "attack_nearby")
+                creatures.sort([player](Creature* left, Creature* right)
+                {
+                    return player->GetDistance(left) < player->GetDistance(right);
+                });
             if (action == "loot_nearby")
                 creatures.sort([player](Creature* left, Creature* right)
                 {
