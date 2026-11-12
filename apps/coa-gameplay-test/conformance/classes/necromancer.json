@@ -1255,6 +1255,109 @@
       ],
       "wait_ms": 1500,
       "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:109-118): when Fetid Ward 680388, Glacial Ward 681460 or Bone Ward 681529 applies to the caster it removes the other two from the caster and its minions. Each ward is cast in turn, looping back to Fetid Ward."
+    },
+    {
+      "spell": 638403,
+      "name": "Depravity (melee haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Increases the melee haste of your Undead minions by $s1%",
+      "expected": 1904.7619,
+      "before_expected": 2000,
+      "tolerance": 0.01,
+      "trigger_spell": 500971,
+      "metric": "owned_creature_attack_time_ms",
+      "fields": {
+        "entry": 50073
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "638403 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS with aura 138 SPELL_AURA_MOD_MELEE_HASTE, BasePoints 4 + 1 = 5 ($s1), radius 100 yd: the Ghoul 50073 (creature_template BaseAttackTime 2000) swings every 2000 ms without 638403 and 2000 x 100 / 105 = 1904.76 ms with it (Unit::ApplyAttackTimePercentMod, Unit.cpp:14894-14911, stock). Read on the live Ghoul: UNIT_FIELD_BASEATTACKTIME, the interval the swing timer is reset to. Raise: Ghoul 500971 in each phase (capacity 2)."
+    },
+    {
+      "spell": 525600,
+      "name": "Army of the Dead (haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "and haste by $525388s1%.",
+      "expected": 1818.1818,
+      "before_expected": 2000,
+      "tolerance": 0.01,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_attack_time_ms",
+      "fields": {
+        "entry": 50073
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:215-224): while 525600 ticks on the caster and exactly one Abomination 50068 is a minion (Count(player, {50068}) == 1), every Ghoul (holder of 805290, cast on each Ghoul at AscensionNecromancerAuras.cpp:65-66) gets 525388: Effect[0] aura 192 haste, BasePoints 9 + 1 = 10 ($525388s1), Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT 10 ($525388s2). Life Force: base 2 (Capacity, AscensionNecromancer.cpp:103-108) + Summoning Adept 92123 + Scourge Apprentice Training 680283 = 4, an Abomination (3) and a Ghoul (1); a later raise evicts the oldest minion (Evict, AscensionNecromancerSummons.cpp:132-145), so one Abomination stays. Read on the live Ghoul (harness owned_creature_*). Ghoul swing interval 2000 ms without 525600, 2000 x 100 / 110 = 1818.18 ms with it."
+    },
+    {
+      "spell": 525600,
+      "name": "Army of the Dead (crit)",
+      "kind": "metric_delta",
+      "variant": "crit",
+      "label_suffix": "crit",
+      "quote": "the critical strike chance of your Ghouls is increased by $525388s2%",
+      "expected": 15,
+      "before_expected": 5,
+      "tolerance": 0.0001,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:215-224): while 525600 ticks on the caster and exactly one Abomination 50068 is a minion (Count(player, {50068}) == 1), every Ghoul (holder of 805290, cast on each Ghoul at AscensionNecromancerAuras.cpp:65-66) gets 525388: Effect[0] aura 192 haste, BasePoints 9 + 1 = 10 ($525388s1), Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT 10 ($525388s2). Life Force: base 2 (Capacity, AscensionNecromancer.cpp:103-108) + Summoning Adept 92123 + Scourge Apprentice Training 680283 = 4, an Abomination (3) and a Ghoul (1); a later raise evicts the oldest minion (Evict, AscensionNecromancerSummons.cpp:132-145), so one Abomination stays. Read on the live Ghoul (harness owned_creature_*). Ghoul melee crit chance (Unit::GetUnitCriticalChance(BASE_ATTACK), creature base 5, Unit.cpp:4534-4537) 5 without 525600, 15 with it."
+    },
+    {
+      "spell": 525600,
+      "name": "Army of the Dead (one Abomination)",
+      "kind": "metric_delta",
+      "variant": "abomination",
+      "label_suffix": "abomination",
+      "quote": "While only 1 Abomination is active,",
+      "expected": 15,
+      "before_expected": 5,
+      "tolerance": 0.0001,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:215-224): while 525600 ticks on the caster and exactly one Abomination 50068 is a minion (Count(player, {50068}) == 1), every Ghoul (holder of 805290, cast on each Ghoul at AscensionNecromancerAuras.cpp:65-66) gets 525388: Effect[0] aura 192 haste, BasePoints 9 + 1 = 10 ($525388s1), Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT 10 ($525388s2). Life Force: base 2 (Capacity, AscensionNecromancer.cpp:103-108) + Summoning Adept 92123 + Scourge Apprentice Training 680283 = 4, an Abomination (3) and a Ghoul (1); a later raise evicts the oldest minion (Evict, AscensionNecromancerSummons.cpp:132-145), so one Abomination stays. Read on the live Ghoul (harness owned_creature_*). With 525600 known throughout: a Ghoul alone reads 5 (no Abomination), then with one Abomination raised 15."
     }
   ],
   "player_observations": [],

@@ -110,6 +110,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
     'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+    'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'unit_scale', 'combat_reach',
     'token_count', 'item_sell_price', 'item_spell_ppm', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is',
@@ -1345,8 +1346,11 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
                           'owned_creature_virtual_item', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
-                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health'}:
+                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+                          'owned_creature_attack_time_ms', 'owned_creature_crit_chance'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
+            if metric == 'owned_creature_crit_chance':
+                require('target' in step, f'{where}: metric needs the victim as target')
             if metric in {'owned_creature_damage_total', 'owned_creature_damage_count',
                           'owned_creature_attack_count', 'owned_creature_heal_count',
                           'owned_creature_heal_total', 'owned_creature_effective_heal_total'}:
@@ -1446,6 +1450,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
                           'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim', 'owned_creature_virtual_item',
                           'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+                          'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',

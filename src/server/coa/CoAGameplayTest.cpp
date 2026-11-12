@@ -5397,6 +5397,15 @@ private:
             }
             return 0.0;
         }
+        if (metric == "owned_creature_attack_time_ms" || metric == "owned_creature_crit_chance")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Owned creature stat observation needs a present owned creature");
+            if (metric == "owned_creature_attack_time_ms")
+                return creature->GetFloatValue(UNIT_FIELD_BASEATTACKTIME + BASE_ATTACK);
+            Unit* victim = GetUnit(step.get<std::string>("target"));
+            return creature->GetUnitCriticalChance(BASE_ATTACK, victim);
+        }
         if (metric == "owned_creature_armor")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
