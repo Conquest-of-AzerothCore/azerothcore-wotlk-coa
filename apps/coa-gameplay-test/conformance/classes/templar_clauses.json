@@ -1517,7 +1517,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "The count part is judged by a fixed_count entry (Lightbringer 561277 cast at the first of 7 dummies): 5, or 6 when the area cut leaves the target out (TargetA 6 adds the explicit target; TargetB 16's area is capped at MaxAffectedTargets 5, Spell.cpp:1407-1410; pair 20261112-000920, -000949). A reading question for the owner, owner-questions Q-ext2-2. The unmodelled count read never measured it."
+    "reason": "Owner ruling 2026-11-12 (Q-ext2-2): option (a), N in all, and the target counts among the N. The count part is judged by a fixed_count entry (Lightbringer 561277 cast at the first of 7 dummies): before the fix it read 5, or 6 when the area cut left the target out (TargetA 6 adds the explicit target; TargetB 16's area is capped at MaxAffectedTargets 5, Spell.cpp:1407-1410; pair 20261112-000920, -000949). CountPrimary (ADR 0294) takes the target out of the area list before the cap, and 560835 behaviour_fixed_count reads 4 extras, 5 in all, on every cast, counted 20261112-080800 / -081046 and 20261112-081157 / -081241. Owner ruling 2026-11-12 (Q-rad-1): option (a), the engine's effective radius is accepted as known engine behaviour, by mechanism, so the radius part (560835 effect_radius 561277e0 #7) is conformant by the ruling (status 2)."
   },
   {
     "spell": 561346,
