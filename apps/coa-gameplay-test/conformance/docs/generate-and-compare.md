@@ -13,8 +13,8 @@ with/without scenario of each passive (kind `passive`, no `hit` entry), the part
 and, without `--spell`, `--passive`, `--proc` or `--trigger`, the melee scenario, into `DIR/scenarios/`, and
 `DIR/manifest.json`. `--spell` takes a class spell id or a rank id, `--passive` a passive class spell id or rank id
 (its passive scenario only; an active spell is an error), `--proc` the aura of a proc entry, `--trigger` the aura of
-a trigger entry, `--stack` the passes of the talent stack (`--passes`, 5 by default), `--controls` the control entries of
-`controls/<class>.json` (stock spells that check engine behaviour, ADR 0255); each selects only what it
+a trigger entry, `--stack` the passes of the talent stack (`--passes`, 5 by default), `--controls` the control
+entries of `controls/<class>.json` (stock spells that check engine behaviour, ADR 0255); each selects only what it
 names. A passive scenario is named `conformance-<class>-passive-<rank>`, a proc part
 `conformance-<class>-proc-<aura>-part-<n>`, a trigger part `conformance-<class>-trigger-<aura>-part-<n>`, a stack
 pass `conformance-<class>-stack-<config>-pass-<n>`. A hit expectation that is entirely
