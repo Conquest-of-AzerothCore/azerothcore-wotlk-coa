@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "A Hero casts Sweeping Strikes in Cat Form, as its tooltip says (#11978)",
+  "contract": [
+    "Sweeping Strikes 12328 reads \"This ability is usable while shapeshifted.\" An AzerothCore spell correction added",
+    "SPELL_ATTR0_NOT_SHAPESHIFTED to it, and the spell has no spell family, so the Hero's Cat Form ignore-shapeshift",
+    "auras (9726361-9726364) never cover it: a Hero in Cat Form 768 was refused with SPELL_FAILED_NOT_SHAPESHIFT (68).",
+    "Expected: the cast succeeds, the Sweeping Strikes aura is applied and the Hero stays in Cat Form."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 10, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "learn", "actor": "hero", "spell": 768},
+    {"action": "learn", "actor": "hero", "spell": 12328},
+    {"action": "cast", "actor": "hero", "spell": 768},
+    {"action": "assert", "label": "The Hero is in Cat Form", "actor": "hero", "metric": "aura", "spell": 768,
+     "equals": 1, "within_ms": 3000},
+    {"action": "wait", "label": "Clear the global cooldown", "ms": 1600},
+    {"action": "set_power", "actor": "hero", "power": 1, "value": 1000},
+    {"action": "cast", "actor": "hero", "spell": 12328},
+    {"action": "assert", "label": "Sweeping Strikes is not refused in Cat Form", "actor": "hero",
+     "metric": "cast_failure", "spell": 12328, "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "the Sweeping Strikes aura is applied", "actor": "hero", "metric": "aura",
+     "spell": 12328, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "and the Hero stays in Cat Form", "actor": "hero", "metric": "aura", "spell": 768,
+     "equals": 1}
+  ]
+}

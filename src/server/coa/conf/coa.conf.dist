@@ -882,8 +882,8 @@ Ascension.PrestigiousCache.TbcStages = 0
 #                     0 - normal dungeons only
 #                     1 - Heroic Dungeons
 #                     2 - Mythic Dungeons
-#                     3 - Zul'Gurub
-#                     4 - Molten Core
+#                     3 - Zul'Gurub and the world boss Setis (map 880)
+#                     4 - Molten Core and the world boss Korrim Snowgrave (map 889)
 #                     5 - Onyxia's Lair
 #                     6 - Blackwing Lair
 #                     7 - Ruins of Ahn'Qiraj and Temple of Ahn'Qiraj

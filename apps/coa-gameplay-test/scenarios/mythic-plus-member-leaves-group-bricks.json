@@ -10,7 +10,7 @@
   "name": "Mythic+ keystone bricks when any group member leaves",
   "contract": [
     "Any player leaving the keystone owner's group during the run bricks the key, not only the owner: the run stops",
-    "(state 2, no more timer updates), the group is told, and the owner keeps the key at the level it lost at the start."
+    "(state 2, no more timer updates), the group is told, and the owner's key drops one level."
   ],
   "players": [
     {
@@ -151,10 +151,10 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the key lost its level at the start",
+      "label": "CONTROL: the key keeps its level at the start",
       "actor": "hero",
       "metric": "item_count",
-      "item": 1233263,
+      "item": 1233329,
       "equals": 1
     },
     {
@@ -201,11 +201,12 @@
     },
     {
       "action": "assert",
-      "label": "the owner keeps the key one level down",
+      "label": "the brick takes the key one level down",
       "actor": "hero",
       "metric": "item_count",
       "item": 1233263,
-      "equals": 1
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "assert",

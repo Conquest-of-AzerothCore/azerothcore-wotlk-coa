@@ -1,0 +1,18 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor: Dark Idol drops its idol (#11995)",
+  "contract": "Dark Idol 507082 (SPELL_EFFECT_SUMMON creature 50117, SummonProperties 82, display 401712) reads \"Drop a Dark Idol near you\". The reporter saw no totem. Expected: after the cast a Dark Idol 50117 stands near the Witch Doctor.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "wd", "race": 1, "class": 13, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 2000},
+    {"action": "learn", "actor": "wd", "spell": 507082},
+    {"action": "cast", "actor": "wd", "spell": 507082},
+    {"action": "assert", "label": "Dark Idol is cast", "actor": "wd", "metric": "cast_failure", "spell": 507082,
+     "equals": 0, "within_ms": 1000},
+    {"action": "assert", "label": "a Dark Idol stands near the Witch Doctor", "actor": "wd",
+     "metric": "nearby_creature_template", "entry": 50117, "equals": 50117, "within_ms": 2000}
+  ]
+}

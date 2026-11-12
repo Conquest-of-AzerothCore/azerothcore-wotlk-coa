@@ -1277,10 +1277,18 @@ void SpellMgr::LoadSpellInfoCorrections()
         spellInfo->Effects[EFFECT_0].TriggerSpell = 58374;
     });
 
-    // Sweeping Strikes stance change
-    ApplySpellFix({ 12328 }, [](SpellInfo* spellInfo)
+    // CoA tooltips read "This ability is usable while shapeshifted" (#11978): Sweeping Strikes, Bloodthirst,
+    // Hunger For Blood, Strength of Earth Totem, Titanic Bloodthirst, Fel Strike
+    ApplySpellFix({ 12328, 23881, 63848, 65991, 823881, 1568346 }, [](SpellInfo* spellInfo)
     {
-        spellInfo->Attributes |= SPELL_ATTR0_NOT_SHAPESHIFTED;
+        spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFTED;
+    });
+
+    // Mycelial Ring (#11933): its triggered ring spells share spell category 38 with the 45 sec Mycelial Ring 681056
+    // and carry a 2 min category cooldown, which they put on Mycelial Ring itself.
+    ApplySpellFix({ 681291, 681552, 681553, 681554, 681555, 681556 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->CategoryRecoveryTime = 0;
     });
 
     // Damage Shield

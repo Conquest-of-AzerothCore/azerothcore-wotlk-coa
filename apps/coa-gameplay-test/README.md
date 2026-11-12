@@ -431,6 +431,9 @@ setting caps a real client's; it gates maps and profession ranks.
 Optional `ascension_client: true` marks the socketless session as having negotiated Ascension compatibility,
 including its spell modifier packet layout. It defaults to false. This tests server packet construction;
 it does not perform socket authentication or verify delivery to a rendered client.
+Optional `address` sets the IPv4 or IPv6 address the socketless session reports as its remote address, for
+rules keyed by player IP such as Recruit-A-Friend links. Without it the session reports an empty address
+(`bot` for a bot), which is not a valid IP address.
 Characters are created and loaded through the existing character creation, enumeration and login
 handlers with ordinary player security. A player may set `account_of` to an earlier player id to share that
 fixture's disposable account; otherwise each player gets its own account. This supports account-wide state
@@ -478,7 +481,7 @@ assert stable maximums and final levels when testing damage coefficients.
 
 | Action | Fields and behavior |
 | --- | --- |
-| `console` | `command`: execute one console command on the test server; capture its output. |
+| `console` | `command`: execute one console command on the test server; capture its output. Optional `restore`: one console command that undoes it, run when the case ends, whether it passed or failed (the latest step's first); use it for process-global state such as `raidphase set`. |
 | `game_event` | `event`, `active`: start or stop a game event whatever the realm date, so a holiday case passes on any day; `event start`/`event stop` refuse an event already in that state. The case restores each event's original state when it ends and runs exclusively, because events are process-global. |
 | `command` | `actor`, `command` beginning with `.`: execute with the player's normal permissions. Optional `rejected: true` instead requires the command to be refused (unknown, malformed or answered with an error). |
 | `whisper` | Player `actor`, `to`, `text`, optional `language` (Common by default): the client's whisper packet, sent as typed. |
@@ -538,7 +541,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `select_nearby` | `actor`, `entry`, optional `radius` (default 40): native `CMSG_SET_SELECTION` on the nearest living creature of that entry, as the client sends on clicking it. GM commands that read `ChatHandler::getSelectedCreature()` (`.cast target`, `.cast back`, …) need this first; `attack_nearby` only sends `CMSG_ATTACKSWING` and never selects. |
 | `use_gameobject` | `actor`, `entry`: native use request for the actor's single nearby owned gameobject. |
 | `voidportal` | Player `actor`, `op` `force` with `group` and `spawn`, or `op` `roll` with `success`: put the one realm-wide Void Portal on that configured point as a point rotation does, or replace the next proximity roll; the manager is process-global, so the case runs exclusively. |
-| `summon` | Player `actor`, `as`, `entry`, optional `distance` (yards along +x, default 5) and `ai_action` (an integer passed to the creature AI's `DoAction`, for a scripted step such as finishing a boss intro): summon a creature into the actor's map and phase under the id `as`. |
+| `summon` | Player `actor`, `as`, `entry`, optional `distance` (yards along +x, default 5) and `ai_action` (an integer passed to the creature AI's `DoAction`, for a scripted step such as finishing a boss intro) and `unowned` (`true` summons through the map without a summoner, so the creature is not player-created and is treated like a world spawn): summon a creature into the actor's map and phase under the id `as`. |
 | `summon_gameobject` | Player `actor`, `entry`, optional `distance` (yards in front, default 2) and `duration_s` (default 300; 0 keeps it until the actor logs out, and only an untimed summon counts as spawned for scripts that check it): summon a gameobject the actor owns; fails if the actor already owns one of that entry. |
 | `loot_gameobject` | Player `actor`, `entry`: open the loot of the actor's single owned chest as a successful open-lock cast does, so chest loot is generated for that player. Lock, key and skill checks are not exercised. |
 | `mapless_loot_hook` | Player `actor`, `store` (`mail`/`gameobject`): test registered loot hooks without a map. |
@@ -1051,7 +1054,9 @@ It tests dispatch and deferral, not a real socket, packet delivery, or every pos
 `view_level` takes a player `actor` and unit `target` and queries the target-relative combat level.
 `sent_level`, `sent_max_health` and `sent_faction` (the faction template) use the same fields and observe
 values-only object updates emitted to the socketless session. They return zero until the corresponding field has been observed; they do not
-force updates or inspect client rendering. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
+force updates or inspect client rendering. `sent_visible_item` takes a `slot` like `visible_item` and returns the
+item entry the `actor` was last sent for the `target` player's visible item in that slot, or -1 before one is
+observed. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
 `lfg_lock_status` takes a player `actor` and an LFGDungeons.dbc `dungeon` id and returns the lock status the
 server lists for that dungeon in the player's Dungeon Finder info (0 when it is not locked, otherwise the
@@ -1120,6 +1125,9 @@ whose grid is not loaded is not counted.
 below the floor under them, or over no floor at all. The floor is searched downward from the higher of the
 creature's current Z and its spawn Z, so a creature that sank through the ground counts while one that walked
 down a ramp does not. Each one counted is logged with its spawn id, position and floor.
+`nearby_gameobject_flags` takes `entry` and returns the `GameObjectFlags` the client gets for the nearest such
+gameobject within 20 yards (4 is `GO_FLAG_INTERACT_COND`, which keeps the client from using it), and
+`nearby_gameobject_quest` the quest a goober requires (0 for none); both return -1 when there is no such gameobject.
 `nearby_gameobject_state` takes `entry` and returns the state of the nearest such gameobject within 20 yards
 (0 open, 1 closed, 99 none).
 `nearby_gameobject_scale` takes `entry` and returns the object scale of the nearest such gameobject within

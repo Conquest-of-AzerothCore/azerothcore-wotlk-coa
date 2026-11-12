@@ -6,6 +6,7 @@ import configparser
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 import json
 import math
 import os
@@ -76,7 +77,7 @@ METRICS = TIMELINE_METRICS | {
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
-    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'level_scaling_choice',
+    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item', 'level_scaling_choice',
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
     'quest_log_sent_level', 'quest_log_sent_level_count', 'quest_log_sent_xp', 'quest_offer_sent_xp', 'quest_query_scaled', 'quest_query_reward_choice',
@@ -132,6 +133,7 @@ METRICS = TIMELINE_METRICS | {
     'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'carried_item_stat',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_gameobject_scale',
+    'nearby_gameobject_flags', 'nearby_gameobject_quest',
     'nearby_gameobject_display', 'nearby_gameobject_ground_offset', 'nearby_gameobject_orientation',
     'nearby_creature_count', 'nearest_creature_distance', 'nearby_creature_orientation', 'map_creature_count',
     'map_creatures_below_floor',
@@ -238,7 +240,7 @@ ACTIONS = {
     'dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'ascension_dungeon_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'raid_difficulty_packet': ({'actor', 'value'}, {'actor', 'value'}),
-    'console': ({'command'}, {'command'}),
+    'console': ({'command'}, {'command', 'restore'}),
     'game_event': ({'event', 'active'}, {'event', 'active'}),
     'placement_audit': ({'map'}, {'map', 'zone', 'tolerance', 'gameobject_types'}),
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
@@ -303,7 +305,7 @@ ACTIONS = {
     'select': ({'actor', 'target'}, {'actor', 'target'}),
     'select_nearby': ({'actor', 'entry'}, {'actor', 'entry', 'radius'}),
     'minion_kill': ({'actor', 'minion', 'target'}, {'actor', 'minion', 'target'}),
-    'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance', 'ai_action'}),
+    'summon': ({'actor', 'as', 'entry'}, {'actor', 'as', 'entry', 'distance', 'ai_action', 'unowned'}),
     'loot_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'loot_creature': ({'actor', 'target'}, {'actor', 'target'}),
     'loot_slot': ({'actor'}, {'actor', 'slot', 'item'}),
@@ -359,6 +361,14 @@ def keys(value, required, allowed, where):
     require(isinstance(value, dict), f'{where}: expected an object')
     require(required <= value.keys(), f'{where}: missing {sorted(required - value.keys())}')
     require(value.keys() <= allowed, f'{where}: unknown fields {sorted(value.keys() - allowed)}')
+
+
+def valid_address(text):
+    try:
+        ipaddress.ip_address(text)
+    except ValueError:
+        return False
+    return True
 
 
 def number(value, where, minimum=None, maximum=None, integer=False):
@@ -525,7 +535,7 @@ def validate(scenario):
              {'id', 'race', 'class', 'gender', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
               'expertise_rating', 'attack_power', 'ranged_attack_power', 'spell_power',
-              'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of',
+              'allow_regeneration', 'name', 'expansion', 'ascension_client', 'address', 'account_of',
               'role', 'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist', 'security'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
@@ -545,6 +555,9 @@ def validate(scenario):
         number(player.get('expansion', 2), 'expansion', 0, 2, True)
         require(type(player.get('bot', False)) is bool, 'bot must be boolean')
         require(type(player.get('ascension_client', False)) is bool, 'ascension_client must be boolean')
+        if 'address' in player:
+            require(isinstance(player['address'], str) and valid_address(player['address']),
+                    'address must be an IPv4 or IPv6 address')
         number(player.get('spell_hit_rating', 0), 'spell_hit_rating', 0, 100000, True)
         number(player.get('spell_crit_rating', 0), 'spell_crit_rating', 0, 100000, True)
         number(player.get('melee_crit_rating', 0), 'melee_crit_rating', 0, 100000, True)
@@ -595,9 +608,11 @@ def validate(scenario):
         required, allowed = ACTIONS[action]
         keys(step, required | {'action'}, allowed | {'action', 'label'}, where)
         if action in {'console', 'command'}:
-            require(isinstance(step['command'], str) and step['command'].strip()
-                    and '\n' not in step['command'] and '\r' not in step['command'],
-                    f'{where}: expected one command')
+            for field in ('command', 'restore'):
+                if field in step:
+                    require(isinstance(step[field], str) and step[field].strip()
+                            and '\n' not in step[field] and '\r' not in step[field],
+                            f'{where}: expected one {field} command')
             if action == 'command':
                 require(step['command'].startswith('.') and len(step['command']) > 1,
                         f'{where}: player command must start with a dot')
@@ -953,9 +968,11 @@ def validate(scenario):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
-            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction'}:
+            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
+            if metric == 'sent_visible_item':
+                number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'creature_query_rank', 'creature_query_quest_item'}:
                 require(step['actor'] in player_ids, f'{where}: creature query metric needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)

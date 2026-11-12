@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Disenchant: Patrolman's Sword can be disenchanted (#11800)",
+  "contract": "The Worldforged Patrolman's Sword 450659 is an uncommon item level 8 one-hand sword. The live item cache sends RequiredDisenchantSkill 1, but its DisenchantID was 0, so Disenchant failed with 'cannot be disenchanted'. It now uses bracket 21, the uncommon weapon bracket for item level 5-15 (Lesser Magic Essence 10938 or Strange Dust 10940). A character with Enchanting 300 casting Disenchant 13262 on the sword gets a disenchant loot window with exactly one item, a stack of one or two, and closing it consumes the sword.",
+  "players": [
+    { "id": "enchanter", "race": 1, "class": 1, "level": 60 }
+  ],
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "set_skill", "actor": "enchanter", "skill": 333, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "enchanter", "spell": 13262 },
+    { "action": "add_item", "actor": "enchanter", "item": 450659 },
+    { "action": "cast", "label": "Disenchant the Patrolman's Sword", "actor": "enchanter", "spell": 13262, "target_item": 450659 },
+    { "action": "assert", "label": "DISCRIMINATING: the disenchant loot window holds one item",
+      "actor": "enchanter", "metric": "loot_count", "equals": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "the loot is Lesser Magic Essence 10938 or Strange Dust 10940",
+      "actor": "enchanter", "metric": "loot_entry", "min": 10938, "max": 10940 },
+    { "action": "assert", "label": "the loot is not Greater Magic Essence 10939 from a higher bracket",
+      "actor": "enchanter", "metric": "loot_count", "item": 10939, "equals": 0 },
+    { "action": "collect_loot", "actor": "enchanter" },
+    { "action": "assert", "label": "the enchanter receives one or two of the item, as bracket 21 drops",
+      "actor": "enchanter", "metric": "loot_received", "min": 1, "max": 2 },
+    { "action": "close_loot", "actor": "enchanter" },
+    { "action": "assert", "label": "closing the loot window consumes the sword",
+      "actor": "enchanter", "metric": "item_count", "item": 450659, "equals": 0, "within_ms": 2000 }
+  ]
+}

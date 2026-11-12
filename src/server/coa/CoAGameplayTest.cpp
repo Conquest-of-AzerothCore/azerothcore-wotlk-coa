@@ -561,6 +561,48 @@ private:
     std::map<uint16, bool> _original;
 };
 
+bool RunConsoleCommand(std::string const& command, std::string& output)
+{
+    CliHandler handler(&output, [](void* context, std::string_view text)
+    {
+        static_cast<std::string*>(context)->append(text);
+    });
+    return handler.ParseCommands(command) && !handler.HasSentErrorMessage();
+}
+
+class ConsoleRestores
+{
+public:
+    ConsoleRestores() = default;
+    ConsoleRestores(ConsoleRestores const&) = delete;
+    ConsoleRestores& operator=(ConsoleRestores const&) = delete;
+
+    ~ConsoleRestores()
+    {
+        for (auto command = _commands.rbegin(); command != _commands.rend(); ++command)
+        {
+            std::string output;
+            try
+            {
+                if (!RunConsoleCommand(*command, output))
+                    LOG_ERROR("coa.gameplay_test", "Restore command '{}' failed: {}", *command, output);
+            }
+            catch (std::exception const& error)
+            {
+                LOG_ERROR("coa.gameplay_test", "Restore command '{}' failed: {}", *command, error.what());
+            }
+        }
+    }
+
+    void Add(std::string command)
+    {
+        _commands.push_back(std::move(command));
+    }
+
+private:
+    std::vector<std::string> _commands;
+};
+
 class TwoSideConfig
 {
 public:
@@ -2366,9 +2408,9 @@ private:
         return _legacyNames[legacy] = _names->Next();
     }
 
-    std::string CommandText(Tree const& step) const
+    std::string CommandText(Tree const& step, std::string const& field = "command") const
     {
-        std::string const command = step.get<std::string>("command");
+        std::string const command = step.get<std::string>(field);
         return _legacyNames.empty() ? command : CoAGameplay::SubstituteLegacyNames(command, _legacyNames);
     }
 
@@ -2535,7 +2577,14 @@ private:
 
         if (actor.stage == ActorStage::LoggingIn)
         {
-            if (actor.session->PlayerLoading() || !player->IsInWorld())
+            if (actor.session->PlayerLoading())
+                return;
+            if (!player->IsInWorld() && player->IsBeingTeleportedFar())
+            {
+                CompleteTransfer(actor);
+                player = actor.session->GetPlayer();
+            }
+            if (!player || !player->IsInWorld())
                 return;
             player->SetPhaseMask(_phase, true);
             Reach(actor, ActorStage::InWorld);
@@ -2572,6 +2621,8 @@ private:
             AccountTypes(security), uint8(expansion), 0, LOCALE_enUS, 0, false, false, 0,
             actor.definition.get<bool>("bot", false));
         actor.session->SetAscensionCompatEnabled(actor.definition.get<bool>("ascension_client", false));
+        if (auto const address = actor.definition.get_optional<std::string>("address"))
+            actor.session->SetAddress(*address);
         actor.session->SetSocketlessPacketObserver([&actor](WorldPacket const& packet)
         {
             try
@@ -3333,6 +3384,17 @@ private:
                 return 0;
             return itr->second.at(field);
         }
+        if (metric == "sent_visible_item")
+        {
+            uint32 slot = step.get<uint32>("slot");
+            Require(slot < EQUIPMENT_SLOT_END, "Equipment observation needs a slot from 0 through 18");
+            Actor& actor = _actors.at(step.get<std::string>("actor"));
+            auto itr = actor.unitValues.find(GetUnit(step.get<std::string>("target"))->GetGUID().GetRawValue());
+            uint16 const field = PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2;
+            if (itr == actor.unitValues.end() || !itr->second.count(field))
+                return -1;
+            return itr->second.at(field);
+        }
         if (metric == "quest_query_scaled")
         {
             Actor& actor = _actors.at(step.get<std::string>("actor"));
@@ -3957,6 +4019,19 @@ private:
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? uint32(object->GetGoState()) : 99;
+        }
+        if (metric == "nearby_gameobject_flags")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object ? double(object->GetUInt32Value(GAMEOBJECT_FLAGS)) : -1.0;
+        }
+        if (metric == "nearby_gameobject_quest")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            if (!object)
+                return -1.0;
+            GameObjectTemplate const* info = object->GetGOInfo();
+            return info->type == GAMEOBJECT_TYPE_GOOBER ? double(info->goober.questId) : 0.0;
         }
         if (metric == "nearby_gameobject_scale")
         {
@@ -6471,14 +6546,12 @@ private:
         std::string action = step.get<std::string>("action");
         if (action == "console")
         {
+            if (step.count("restore"))
+                _consoleRestores.Add(CommandText(step, "restore"));
             std::string output;
-            CliHandler handler(&output, [](void* context, std::string_view text)
-            {
-                static_cast<std::string*>(context)->append(text);
-            });
-            bool handled = handler.ParseCommands(CommandText(step));
+            bool const handled = RunConsoleCommand(CommandText(step), output);
             record.put("output", output);
-            Require(handled && !handler.HasSentErrorMessage(), "Console command failed: " + output);
+            Require(handled, "Console command failed: " + output);
             return;
         }
         if (action == "game_event")
@@ -7227,7 +7300,9 @@ private:
             Require(!_actors.count(id) && !_targets.count(id), "Duplicate actor id");
             Position position = player->GetPosition();
             position.m_positionX += step.get<float>("distance", 5);
-            TempSummon* creature = player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
+            TempSummon* creature = step.get<bool>("unowned", false)
+                ? player->GetMap()->SummonCreature(step.get<uint32>("entry"), position)
+                : player->SummonCreature(step.get<uint32>("entry"), position, TEMPSUMMON_MANUAL_DESPAWN);
             Require(creature != nullptr, "Could not summon creature: " + id);
             creature->SetPhaseMask(player->GetPhaseMask(), true);
             if (auto aiAction = step.get_optional<int32>("ai_action"))
@@ -7944,6 +8019,7 @@ private:
     std::optional<TwoSideConfig> _twoSide;
     std::optional<QuestLogSizeConfig> _questLogSize;
     GameEventStates _gameEvents;
+    ConsoleRestores _consoleRestores;
     std::optional<PlacementAuditTotals> _placementAudit;
 };
 

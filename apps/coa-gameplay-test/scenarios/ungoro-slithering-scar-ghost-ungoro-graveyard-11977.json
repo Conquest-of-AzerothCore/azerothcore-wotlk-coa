@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Un'Goro: a ghost released in The Slithering Scar reaches an Un'Goro Spirit Healer (#11977)",
+  "contract": "The Slithering Scar is its own CoA zone (10134, WMO 1041, no parent area) with no graveyard_zone row, so a player who died in the Gorishi hive (Gorishi Egg spawn (-8009.21,-1298.49,-321.279)) released at the default Westfall/Barrens graveyard. Expected: the ghost lands at the nearest Un'Goro Crater (490) graveyard, 1277 Central GY (-7351.04,-1315.89,-261.603), where Spirit Healer 6491 stands.",
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -8009.21, "y": -1298.49, "z": -321.279, "o": 0},
+  "players": [
+    {"id": "hero", "race": 1, "class": 27, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "die", "actor": "hero"},
+    {"action": "release_spirit", "actor": "hero"},
+    {"action": "assert", "label": "The released player is a ghost", "actor": "hero", "metric": "alive", "equals": 0},
+    {"action": "assert", "label": "The ghost stays on Kalimdor", "actor": "hero", "metric": "map_id", "equals": 1,
+     "within_ms": 3000},
+    {"action": "assert", "label": "The ghost lands at the Un'Goro Central graveyard", "actor": "hero",
+     "metric": "position_x", "min": -7366.0, "max": -7336.0, "within_ms": 3000},
+    {"action": "assert", "actor": "hero", "metric": "position_y", "min": -1331.0, "max": -1301.0},
+    {"action": "assert", "label": "A Spirit Healer stands at the ghost's graveyard", "actor": "hero",
+     "metric": "nearby_creature_template", "entry": 6491, "equals": 6491}
+  ]
+}
