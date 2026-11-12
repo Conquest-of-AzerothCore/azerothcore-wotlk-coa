@@ -670,6 +670,18 @@ struct CaseOutcome
 class ProcCounter
 {
 public:
+    using Owner = std::tuple<uint32, uint32, ObjectGuid>;
+
+    static Owner OwnerOf(ObjectGuid unit, uint32 map, uint32 instance)
+    {
+        return unit.IsPlayer() ? Owner{ 0, 0, unit } : Owner{ map, instance, unit };
+    }
+
+    static Owner OwnerOf(Unit const* unit)
+    {
+        return OwnerOf(unit->GetGUID(), unit->GetMapId(), unit->GetInstanceId());
+    }
+
     static void Begin()
     {
         _counts.clear();
@@ -677,46 +689,46 @@ public:
         _enabled = true;
     }
 
-    static void Record(ObjectGuid unit, uint32 spell)
+    static void Record(Unit const* unit, uint32 spell)
     {
         if (_enabled)
-            ++_counts[{ unit, spell }];
+            ++_counts[{ OwnerOf(unit), spell }];
     }
 
-    static uint32 Count(ObjectGuid unit, uint32 spell)
+    static uint32 Count(Unit const* unit, uint32 spell)
     {
-        auto itr = _counts.find({ unit, spell });
+        auto itr = _counts.find({ OwnerOf(unit), spell });
         return itr == _counts.end() ? 0 : itr->second;
     }
 
-    static void RecordCast(ObjectGuid unit, uint32 spell)
+    static void RecordCast(Unit const* unit, uint32 spell)
     {
         if (_enabled)
-            ++_casts[{ unit, spell }];
+            ++_casts[{ OwnerOf(unit), spell }];
     }
 
-    static uint32 CastCount(ObjectGuid unit, uint32 spell)
+    static uint32 CastCount(Unit const* unit, uint32 spell)
     {
-        auto itr = _casts.find({ unit, spell });
+        auto itr = _casts.find({ OwnerOf(unit), spell });
         return itr == _casts.end() ? 0 : itr->second;
     }
 
-    static void Forget(std::set<ObjectGuid> const& units)
+    static void Forget(std::set<Owner> const& owners)
     {
-        auto const owned = [&units](auto const& entry) { return units.contains(entry.first.first); };
+        auto const owned = [&owners](auto const& entry) { return owners.contains(entry.first.first); };
         std::erase_if(_counts, owned);
         std::erase_if(_casts, owned);
     }
 
 private:
     static bool _enabled;
-    static std::map<std::pair<ObjectGuid, uint32>, uint32> _counts;
-    static std::map<std::pair<ObjectGuid, uint32>, uint32> _casts;
+    static std::map<std::pair<Owner, uint32>, uint32> _counts;
+    static std::map<std::pair<Owner, uint32>, uint32> _casts;
 };
 
 bool ProcCounter::_enabled = false;
-std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_counts;
-std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_casts;
+std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_counts;
+std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_casts;
 
 constexpr float DefaultEncounterRadius = 100.0f;
 constexpr float MaximumEncounterRadius = 200.0f;
@@ -2272,14 +2284,14 @@ public:
             TimelineRecorder::End();
             _encounterBoss.reset();
         }
-        std::set<ObjectGuid> units;
+        std::set<ProcCounter::Owner> units;
         RemoveFixtureDescendants(units);
         for (auto const& [id, target] : _targets)
         {
             if (Map* map = sMapMgr->FindMap(target.map, target.instance))
                 if (Creature* creature = map->GetCreature(target.guid))
                     creature->DespawnOrUnsummon();
-            units.insert(target.guid);
+            units.insert(ProcCounter::OwnerOf(target.guid, target.map, target.instance));
         }
         bool ungrouped = true;
         for (auto& [id, actor] : _actors)
@@ -2295,7 +2307,7 @@ public:
             if (actor.guid.IsEmpty())
                 continue;
             NoRegenerationActors.erase(actor.guid);
-            units.insert(actor.guid);
+            units.insert(ProcCounter::OwnerOf(actor.guid, 0, 0));
         }
         ProcCounter::Forget(units);
         return ungrouped;
@@ -2336,7 +2348,7 @@ private:
         void Visit(std::unordered_map<ObjectGuid, T*>&) { }
     };
 
-    void RemoveFixtureDescendants(std::set<ObjectGuid>& units)
+    void RemoveFixtureDescendants(std::set<ProcCounter::Owner>& units)
     {
         std::map<Map*, std::set<ObjectGuid>> fixtureRoots;
         for (auto const& [id, target] : _targets)
@@ -2356,7 +2368,7 @@ private:
                     if (parents.count(creature->GetSummonerGUID()) && parents.insert(creature->GetGUID()).second)
                     {
                         descendants.push_back(creature);
-                        units.insert(creature->GetGUID());
+                        units.insert(ProcCounter::OwnerOf(creature));
                         added = true;
                     }
             } while (added);
@@ -3593,22 +3605,24 @@ private:
             return std::count_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
                 [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
         }
+        if (metric == "guid_counter")
+            return unit->GetGUID().GetCounter();
         if (metric == "spell_cast_count")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
-            return ProcCounter::CastCount(unit->GetGUID(), spell);
+            return ProcCounter::CastCount(unit, spell);
         }
         if (metric == "spell_proc_count")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
-            return ProcCounter::Count(unit->GetGUID(), spell);
+            return ProcCounter::Count(unit, spell);
         }
         if (metric == "owned_creature_spell_proc_count")
         {
             Creature* creature = GetOwnedCreature(unit->ToPlayer(), step.get<uint32>("entry"));
             Require(creature != nullptr, "Proc observation needs a present owned creature");
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature proc spell");
-            return ProcCounter::Count(creature->GetGUID(), spell);
+            return ProcCounter::Count(creature, spell);
         }
         if (metric == "combo_points")
             return unit->ToPlayer()->GetComboPoints();
@@ -8770,12 +8784,12 @@ public:
             return;
         if (info)
         {
-            ProcCounter::RecordCast(caster->GetGUID(), info->Id);
+            ProcCounter::RecordCast(caster, info->Id);
             TimelineRecorder::Record(caster, { 0, CoAGameplay::TimelineEventKind::Cast, caster->GetGUID(),
                 spell->m_targets.GetUnitTargetGUID(), CreatureEntry(caster), info->Id, 0 });
         }
         if (SpellInfo const* triggeredBy = spell->GetTriggeredByAuraSpellInfo())
-            ProcCounter::Record(caster->GetGUID(), triggeredBy->Id);
+            ProcCounter::Record(caster, triggeredBy->Id);
     }
 };
 

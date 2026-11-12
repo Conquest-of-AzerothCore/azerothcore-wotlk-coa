@@ -782,6 +782,9 @@ that the false-failure probability is acceptable, and assert a `min` on the coun
 `spell_cast_count` requires `spell` and counts the casts of that exact spell the actor completed since the scenario
 started, triggered casts included. Use it where a script casts the effect directly, so no aura is named as the trigger
 and `spell_proc_count` reads zero.
+Both counts belong to the unit in its own map instance. Creature GUIDs are generated per map, so creatures in
+separate instances can share one; their counts stay separate. `guid_counter` reads the actor's GUID counter:
+snapshot it on one unit and assert another `relative_to` it to show that two units share a counter.
 These two count metrics accept each other's snapshots with `relative_to`. Subtract an engraving aura's proc count
 from its payload's total cast count to isolate a talent that casts the same payload without aura attribution.
 `spell_proc_chance` requires `spell` and reads the loaded `spell_proc` Chance, after a zero is replaced by the DBC

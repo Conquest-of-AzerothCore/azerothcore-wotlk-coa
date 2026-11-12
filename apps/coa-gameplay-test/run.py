@@ -142,7 +142,7 @@ METRICS = TIMELINE_METRICS | {
     'carried_money',
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
-    'spell_hit_bonus_taken', 'rooted', 'stunned', 'spell_cast_count', 'spell_go_count', 'cast_failure',
+    'spell_hit_bonus_taken', 'rooted', 'stunned', 'spell_cast_count', 'spell_go_count', 'cast_failure', 'guid_counter',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
     'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
