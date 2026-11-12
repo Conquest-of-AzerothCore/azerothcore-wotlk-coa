@@ -17,6 +17,7 @@ class Spell;
 
 namespace AscensionNecromancer
 {
+constexpr uint32 SummonShield = 505224;
 struct MinionRecord
 {
     ObjectGuid guid;
@@ -123,6 +124,7 @@ bool IsMinion(Player* player, Unit const* unit, bool raisedOnly = false);
 uint32 Count(Player* player, std::initializer_list<uint32> entries = {});
 void BuffArmy(Player* player, uint32 spell, bool owner = false);
 void Scale(Player* player, Creature* minion, uint8 cost, float& inheritedSpeed);
+bool FollowsOwner(uint32 entry);
 bool Responds(uint32 entry, uint32 command);
 bool Summon(Player* player, uint32 spell, Unit* target, Position const& position, int32 duration = 0);
 void Order(Player* player, Unit* target, uint32 spell);

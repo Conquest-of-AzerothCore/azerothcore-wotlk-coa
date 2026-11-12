@@ -399,6 +399,11 @@ The [Who scenarios](scenarios/who-lists-bots.json) check both sides of `Who.Show
 like players with the shipped `Who.ShowBots=1`, and the [hidden case](scenarios/who-hides-bots.json) requires
 `Who.ShowBots=0` in the source config, where the same roster leaves only the two real players in the response
 and a name search for a bot returns nothing.
+The [guardian travel scenarios](scenarios/guardians-follow-teleport-to-another-map.json) check that summoned
+guardians come along on far travel with the shipped `CoA.Guardians.FollowTravel=1`; the
+[disabled case](scenarios/guardians-lost-on-teleport-when-follow-travel-off.json) requires
+`CoA.Guardians.FollowTravel=0` in the source config, where the same teleport leaves no guardian and frees
+their Life Force.
 The [resource talents scenario](scenarios/resource-talents.json) checks the live-tree 1% resource bonuses.
 Arm of Thorim rolls 133–144 base damage at the fixture level, so two independent rolls need ratio ranges
 of 1.10–1.31 with its 20% bonus and 0.91–1.09 without it (including integer rounding). Charged Conduit

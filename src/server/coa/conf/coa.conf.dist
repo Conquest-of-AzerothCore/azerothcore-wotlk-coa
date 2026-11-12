@@ -17,6 +17,18 @@ CoA.RotationAssist.Enable = 1
 # Shirts, bags/quivers, Arclight Spanner and excluded ambiguous families cannot be upgraded.
 CoA.Crafting.MaxUpgradeSteps = 2
 
+# Summoned guardians and class minions (Necromancer minions, Shaman Feral Spirit wolves and similar) follow the
+# player through far travel, as a hunter or warlock pet does: hearthstones and portals, dungeon and raid entries and
+# exits, and teleports of more than 100 yards on the same map. On the same map and instance the guardians are moved
+# to the player; on another map or instance each one is made again as the same creature with its remaining time and
+# health, without casting the spell again, so no mana, reagent, cooldown or Life Force is charged twice. Taxi
+# flights, battlegrounds and arenas are not affected. Guardians the class placed (totem-like or stationary
+# summons) and ones that have run out stay where they are or are gone.
+# 1 - enabled (default).
+# 0 - guardians are lost on a map change and left behind on a far teleport, as in the stock core.
+# Applies on startup and config reload.
+CoA.Guardians.FollowTravel = 1
+
 # Apply the Ascension protocol settings to remote connections as well as loopback
 # (extension opcodes, ping interval, spell-modifier layout, class-10 mapping).
 # Enable only on realms dedicated to the matching Ascension client build.
