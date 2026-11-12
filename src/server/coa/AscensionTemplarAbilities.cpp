@@ -63,6 +63,7 @@ bool RighteousTempest(SpellInfo const* info)
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_CAST = 4565;
 constexpr uint32 SPELL_VISUAL_KIT_BENEDICTION_IMPACT = 4566;
 constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
+constexpr uint32 SPELL_SACRED_RESTRAINT = 102208;
 constexpr uint32 selected[] = {806354, 807004, 561156, 681136, 712378, 524766, 806523, 524617};
 void ConsumeSelected(Player* player, Spell* spell)
 {
@@ -288,6 +289,11 @@ class templar_casts : public AllSpellScript
         if (Named(info, 801478) || info->Id == 801455 || info->Id == 1397742 || info->Id == 300514)
             if (target || info->Id == 1397742 || info->Id == 300514)
                 Cast(player, target ? target : player, 102208);
+        if (Named(info, 801465) && target && target != player && player->IsFriendlyTo(target))
+        {
+            player->RemoveAurasDueToSpell(SPELL_SACRED_RESTRAINT);
+            target->RemoveAurasDueToSpell(SPELL_SACRED_RESTRAINT);
+        }
     }
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32 healing, bool) override
     {
