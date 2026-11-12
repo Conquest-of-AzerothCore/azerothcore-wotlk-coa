@@ -398,6 +398,9 @@ namespace
     // Meshlok is a native Maraudon rare. Both original Manastorm
     // segments must guarantee his DB spawn inside the disposable
     // private instance, without changing his public-dungeon rarity.
+    constexpr uint32 SEGMENT_LORGUS_JETT_NORMAL = 73;
+    constexpr uint32 SEGMENT_LORGUS_JETT_ENDGAME = 240;
+
     constexpr uint32 MANASTORM_MAP_MARAUDON = 349;
     constexpr uint32 NPC_MARAUDON_MESHLOK = 12237;
     constexpr uint32 SEGMENT_MESHLOK_NORMAL = 684;
@@ -1942,6 +1945,98 @@ namespace
         return true;
     }
 
+    bool BootstrapNativeObjectiveSpawn(Map* map, ManastormRun& run, std::string& error)
+    {
+        error.clear();
+
+        ManastormSegment const& segment = run.GetSegment();
+        if (!map || map->GetId() != segment.MapId || !map->IsScriptedPrivateInstance() ||
+            map->GetInstanceId() != run.GetInstanceId())
+        {
+            error = "Objective spawn bootstrap received a different map or instance.";
+            return false;
+        }
+
+        GameTele const* entrance = sObjectMgr->GetGameTele(segment.StartGameTeleId);
+        if (!entrance || entrance->mapId != segment.MapId)
+        {
+            error = "Objective spawn bootstrap is missing the stage arrival teleport.";
+            return false;
+        }
+
+        QueryResult result = WorldDatabase.Query(
+            "SELECT `guid` FROM `creature` "
+            "WHERE `map` = {} AND `id` = {} AND (`spawnMask` & 1) <> 0 "
+            "ORDER BY POW(`position_x` - {}, 2) + POW(`position_y` - {}, 2), `guid` LIMIT 1",
+            segment.MapId, segment.ObjectiveCreatureEntry, entrance->position_x, entrance->position_y);
+        if (!result)
+        {
+            error = "Objective " + std::to_string(segment.ObjectiveCreatureEntry) +
+                " has no native spawn on map " + std::to_string(segment.MapId) + ".";
+            return false;
+        }
+
+        ObjectGuid::LowType const spawnId = result->Fetch()[0].Get<uint32>();
+        CreatureData const* spawnData = sObjectMgr->GetCreatureData(spawnId);
+        if (!spawnData || spawnData->mapid != segment.MapId || spawnData->id != segment.ObjectiveCreatureEntry)
+        {
+            error = "Objective spawn " + std::to_string(spawnId) + " does not resolve to the stage objective.";
+            return false;
+        }
+
+        map->LoadGrid(spawnData->posX, spawnData->posY);
+
+        for (auto const& spawn : map->GetCreatureBySpawnIdStore())
+        {
+            Creature* existing = spawn.second;
+            if (!existing || !existing->IsInWorld() || !existing->IsAlive() ||
+                existing->GetEntry() != segment.ObjectiveCreatureEntry)
+                continue;
+
+            ManastormMgr::Instance().OnCreatureAddWorld(existing);
+            if (run.GetObjectiveCreatureGuid() != existing->GetGUID())
+            {
+                error = "Loaded objective spawn did not register as the Manastorm objective.";
+                return false;
+            }
+
+            LOG_INFO(LOG_FILTER, "Preloaded native objective: run={} segment={} instance={} spawn={} entry={}.",
+                run.GetRunId(), segment.SegmentId, run.GetInstanceId(), existing->GetSpawnId(),
+                segment.ObjectiveCreatureEntry);
+            return true;
+        }
+
+        map->RemoveCreatureRespawnTime(spawnId);
+
+        Creature* objective = new Creature();
+        if (!objective->LoadCreatureFromDB(spawnId, map, true, true))
+        {
+            delete objective;
+            error = "Could not load objective spawn " + std::to_string(spawnId) + ".";
+            return false;
+        }
+
+        if (!objective->IsInWorld() || !objective->IsAlive() ||
+            objective->GetEntry() != segment.ObjectiveCreatureEntry)
+        {
+            objective->AddObjectToRemoveList();
+            error = "Objective spawn " + std::to_string(spawnId) + " did not create a living objective.";
+            return false;
+        }
+
+        ManastormMgr::Instance().OnCreatureAddWorld(objective);
+        if (run.GetObjectiveCreatureGuid() != objective->GetGUID())
+        {
+            objective->AddObjectToRemoveList();
+            error = "Restored objective spawn did not register as the Manastorm objective.";
+            return false;
+        }
+
+        LOG_INFO(LOG_FILTER, "Restored native objective: run={} segment={} instance={} spawn={} entry={}.",
+            run.GetRunId(), segment.SegmentId, run.GetInstanceId(), spawnId, segment.ObjectiveCreatureEntry);
+        return true;
+    }
+
     bool BootstrapRazorfenDownsRagglesnoutEncounter(
         Map* map,
         ManastormRun& run,
@@ -2673,6 +2768,10 @@ namespace
         case SEGMENT_MESHLOK_ENDGAME:
             return BootstrapMaraudonMeshlokEncounter(
                 map, run, error);
+
+        case SEGMENT_LORGUS_JETT_NORMAL:
+        case SEGMENT_LORGUS_JETT_ENDGAME:
+            return BootstrapNativeObjectiveSpawn(map, run, error);
 
         case SEGMENT_IRONAYA_NORMAL:
         case SEGMENT_IRONAYA_ENDGAME:
@@ -5865,7 +5964,7 @@ ManastormRun* ManastormMgr::StartRun(
 
     //
     // First-time VO uses the existing authoritative progression snapshot.
-    // A character with no completed depth in the selected mode/track has not
+    // A character with no completed depth in the selected track has not
     // yet completed a Manastorm run in that progression lane.
     //
     ManastormVoiceOfMillhouse::RegisterRun(
@@ -10069,7 +10168,7 @@ bool ManastormMgr::LeaveRunMember(ManastormRun& run, Player* player, bool return
 
     ManastormRewards::Instance().SettlePendingCurrency(guid);
     ManastormAffixEngine::Instance().RemoveActivePlayerAffixes(player, run);
-    RemoveBaselineRunItems(player, true);
+    RemoveBaselineRunItems(player, false);
     DespawnCogsleyCompanion(player);
     RestoreOriginalDifficulties(player);
     player->ClearScriptedPrivateInstance();
@@ -10102,6 +10201,8 @@ bool ManastormMgr::LeaveRunMember(ManastormRun& run, Player* player, bool return
         }
     }
 
+    _manastormPotionCharges.erase(guid);
+    ClearRunUtilityAuras(player);
     run.RemoveMember(guid);
     _memberRunIds.erase(guid);
     std::set<ObjectGuid> members;
