@@ -626,4 +626,3 @@ stack grows across repeated casts — the tooltip's own separate "Oath" clause, 
 fixture (`{"spell": 805332, "stacks": 0, ...}`, the existing `set_aura` action with `stacks: 0`, which already
 removes the aura regardless of caster) clears the Oath before every attempt. Two independent runs after that
 fix each measured 273/273, `self_trigger_count` `ok`; the Oath's own chance clause remains separately unproven.
-

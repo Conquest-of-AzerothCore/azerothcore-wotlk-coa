@@ -353,4 +353,3 @@ def prove(spec: ProveSpec, generate: Generate, rows: Rows | None = None, enrich:
                                FAILURE_EXIT: 'a run failed'}[summary['exit']]
     write_json(spec.out / SUMMARY_FILE, summary)
     return summary['exit']
-

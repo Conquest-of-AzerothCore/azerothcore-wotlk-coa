@@ -54,4 +54,3 @@ Not confirmed, left out: Dodge 81, Block 107, Dual Wield 674, Auto Attack 6603, 
 Divine Stand 807729, Detect Evil 562226, Gift of Fervor 572629, Shackle The Unrepentant 560963, Greater Gift of Fervor
 572630 and Greater Gift of Zeal 680306 (no log line), and Throw 2764 (cast only by players who cast no Templar
 active).
-

@@ -54,4 +54,3 @@ Faith; each `note` states which candidate spell power the reading fits, or that 
 Blade/Scourgebane's `scalingbp` reading (report of 280 Holy) is deliberately **not** cited here: evaluated at
 either candidate spell power it comes out 260-330 points higher than reported, so citing it would read as model
 confirmation it is not; it stays an open conformance check instead (`questions-round3.md`).
-

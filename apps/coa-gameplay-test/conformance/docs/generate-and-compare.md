@@ -688,4 +688,3 @@ readings, procs `20261105-201416` the Scourgebane readings, one Light's Echo ent
 Paladin Training and Blade Sermon text questions, the stack `20261105-204050` Paladin Training (20% against 25%,
 measured 20.27%) and Legacy of the Silver Hand, and the value and hit scenarios of `20261105-214020` the six `ppl`
 questions and the Argent Blade data issue.
-

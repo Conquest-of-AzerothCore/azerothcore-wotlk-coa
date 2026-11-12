@@ -330,4 +330,3 @@ The off-hand-swing (92108) and Oath: Vindication (805332) sources named by the s
 measurable by this harness for reasons already on their own entries (92108: no `CanDualWield` path for Templar;
 805332/504107: no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round
 introduces, and out of scope for a `baseline_co_learn` fixture to close.
-

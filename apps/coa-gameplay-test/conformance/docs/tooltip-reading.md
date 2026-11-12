@@ -164,4 +164,3 @@ similarly correct a live `SpellInfo` effect without changing `Spell.dbc` at all:
 `EffectMiscValue[0]` 7 in the client DBC, but `AscensionTemplarContracts.cpp:130` rewrites it to 15 at load time;
 the class file's `effect_overrides` entry (see "Effect overrides" below) makes the reader classify the effective
 op instead of the raw DBC one.
-

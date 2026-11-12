@@ -130,4 +130,3 @@ reading the server applies and the log query in its explanation. It is still `am
 `log_queries` entry only records that a query was made and drew a blank; a query that actually finds a reading in
 the logs is an owner ruling settled in prose (like Light's Echo 520017/520883, "no self-chain, current behaviour"),
 not a `log_queries` entry.
-

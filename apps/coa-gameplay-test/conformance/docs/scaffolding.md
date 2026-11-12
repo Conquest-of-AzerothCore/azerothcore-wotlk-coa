@@ -62,4 +62,3 @@ measured values (the character's race/class/level are the same; only the weapon 
 passive, 33 hit, 1 melee), 102 entries without a scenario — the value/hit/passive/melee categories `scale-out-sweep.md`
 expects from the mandatory fields alone, and none of the proc/trigger/behaviour/stack categories the scaffold
 leaves empty.
-

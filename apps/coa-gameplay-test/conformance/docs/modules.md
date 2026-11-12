@@ -99,4 +99,3 @@
   array (see [Player observations](player-observations.md#player-observations)) and `observations_by_spell` groups them by spell id.
 - `conformance.py`: the command line, `generate`, `compare`, `diff` and `coverage`.
 - `classes/<name>.json`: one class file per class (`classes/templar.json`).
-

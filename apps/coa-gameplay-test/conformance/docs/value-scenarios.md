@@ -100,4 +100,3 @@ parry rating) and -10 - 0.1 × Stamina, while CalcValue gives 305 and -41 at lev
 lists both as `disabled_foreign_effects`, so their reads are not generated; without those rows they would read
 `not_measured` (ADR 0118). The count covers aura scripts bound through `spell_script_names`, not global
 `OnAfterAuraEffectCalculateAmount` hooks.
-

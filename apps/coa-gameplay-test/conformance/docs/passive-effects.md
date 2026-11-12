@@ -392,4 +392,3 @@ both expertise effects (+10), Serendipity's cost (20 → 19 on Crusader's Brand)
 (1500 → 1725: `whole` against `bonus` 1575); alerts for Aggramar's Rage Holy `spell_crit_chance` (2.8592 →
 2.8592, expected +6) and Patience on Interdict (spell modifier 1000 → 1000 for both effects; Sacred Restraint, the
 mask spell, `measured` 0).
-
