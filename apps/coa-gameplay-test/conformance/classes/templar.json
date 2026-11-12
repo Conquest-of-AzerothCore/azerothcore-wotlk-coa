@@ -5376,7 +5376,16 @@
       "metric": "spell_heal_total", "observe_spell": 578276, "caster": "caster", "target": "ally",
       "control": {}, "treatment": {"auras": [[705300, 1]]}, "critical": false, "trials": 40,
       "fixture": {"spell_power": 20000},
-      "expected_source": "$s1 = 15: Effect[2] aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 2, EffectBasePoints 14 + 1. The caster heals the ally with Benediction 578276 (rank 8) at spell power 20000; control: no Eternal Blessing; treatment: 705300 set on the caster before every heal. The tooltip says healing done, so the heal the caster gives is read. Only non-critical heals."
+      "expected_source": "$s1 = 15: Effect[2] EffectBasePoints 14 + 1. The server DBC gives Effect[2] aura 118 SPELL_AURA_MOD_HEALING_PCT (healing taken); the owner ruled for healing done (2026-11-12, Q3), and the Templar contract applies it as aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT (ADR 0286). The caster heals the ally with Benediction 578276 (rank 8) at spell power 20000; control: no Eternal Blessing; treatment: 705300 set on the caster before every heal. The tooltip says healing done, so the heal the caster gives is read. Only non-critical heals."
+    },
+    {
+      "spell": 705300, "name": "Eternal Blessing", "kind": "hit_ratio", "variant": "healing_received",
+      "label_suffix": "healing_received",
+      "quote": "Increases your Holy damage and healing done by", "expected": 1.0,
+      "metric": "spell_heal_total", "observe_spell": 578276, "caster": "ally", "target": "caster",
+      "control": {}, "treatment": {"auras": [[705300, 1]]}, "critical": false, "trials": 40,
+      "fixture": {"spell_power": 20000},
+      "expected_source": "Control of the healing_done arm: the owner ruled that Eternal Blessing no longer raises the healing its holder receives (2026-11-12, Q3; ADR 0286). The ally, without Eternal Blessing, heals the caster with Benediction 578276 (rank 8) at spell power 20000; control: no Eternal Blessing; treatment: 705300 set on the caster before every heal, so only a received-healing effect could enter this arm: x1.00. Only non-critical heals."
     },
     {
       "spell": 705300, "name": "Eternal Blessing", "kind": "cast_applies_aura", "quote": "for $d",

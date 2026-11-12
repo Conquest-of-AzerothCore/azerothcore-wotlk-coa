@@ -2719,6 +2719,7 @@
       "705300 aura_duration_ms #1",
       "705300 behaviour_hit_ratio holy_damage",
       "705300 behaviour_hit_ratio healing_done",
+      "705300 behaviour_hit_ratio healing_received",
       "705300 behaviour_expiry"
     ],
     "kind": "claim"

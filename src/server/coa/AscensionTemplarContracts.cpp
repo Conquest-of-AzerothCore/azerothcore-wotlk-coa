@@ -97,6 +97,8 @@ void ApplyContracts(SpellInfo* info)
             dummy(i);
     if (id == 300513)
         info->Effects[2].ApplyAuraName = SPELL_AURA_PREVENTS_FLEEING;
+    if (id == 705300)
+        info->Effects[2].ApplyAuraName = SPELL_AURA_MOD_HEALING_DONE_PERCENT;
     if (id == 707111)
         info->Effects[0].Effect = info->Effects[1].Effect = 0;
     if (id == 803163)
