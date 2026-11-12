@@ -463,6 +463,7 @@ namespace
     constexpr uint32 NPC_ATAL_ALARION = 8580;
     constexpr uint32 DATA_SUNKEN_TEMPLE_STATUES = 10;
     constexpr uint32 DATA_SUNKEN_TEMPLE_DEFENDER_KILLED = 11;
+    constexpr uint32 DATA_SUNKEN_TEMPLE_SANCTUM_DRAGONS = 14;
     constexpr uint32 SUNKEN_TEMPLE_STATUE_PHASES = 6;
     constexpr uint32 SUNKEN_TEMPLE_DEFENDERS_COUNT = 6;
     constexpr uint32 SEGMENT_ATAL_ALARION_NORMAL = 673;
@@ -1028,6 +1029,39 @@ namespace
 
         eranikus->RemoveUnitFlag(
             UNIT_FLAG_IMMUNE_TO_NPC);
+
+        //
+        // The Sanctum dragons (Weaver, Dreamscythe, Hazzas, Morphaz) stay
+        // hidden and unattackable until the Avatar of Hakkar and Jammal'an
+        // die. This stage skips both kills, yet its Chaotic Link adds are
+        // Sanctum dragons, so release them the way those kills would.
+        //
+        InstanceMap* instanceMap =
+            map->ToInstanceMap();
+
+        InstanceScript* instance =
+            instanceMap ?
+                instanceMap->GetInstanceScript() :
+                nullptr;
+
+        if (!instance)
+        {
+            error =
+                "Sunken Temple Eranikus bootstrap has no instance script.";
+            return false;
+        }
+
+        instance->SetData(
+            DATA_SUNKEN_TEMPLE_SANCTUM_DRAGONS,
+            1);
+
+        if (!instance->GetData(
+            DATA_SUNKEN_TEMPLE_SANCTUM_DRAGONS))
+        {
+            error =
+                "Sunken Temple Sanctum dragons were not released during Eranikus bootstrap.";
+            return false;
+        }
 
         LOG_INFO(
             LOG_FILTER,

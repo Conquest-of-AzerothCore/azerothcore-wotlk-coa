@@ -26,6 +26,7 @@ enum DataTypes
     DATA_DEFENDER_KILLED        = 11,
     DATA_ERANIKUS_FIGHT         = 12,
     DATA_AWAKEN_SOULFLAYER      = 13,
+    DATA_SANCTUM_DRAGONS        = 14,
     MAX_STATUE_PHASE            = 6,
     DEFENDERS_COUNT             = 6,
 
