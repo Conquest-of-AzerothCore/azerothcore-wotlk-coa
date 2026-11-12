@@ -84,3 +84,9 @@ INSERT INTO `gameobject` (`guid`, `id`, `map`, `spawnMask`, `phaseMask`, `positi
 -- #12093
 -- second Ol' Blunderbuss; 6940826 is the one at the LootCollector and Ascension spot
 UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940827) AND `id` IN (95527);
+
+-- #12092
+-- pickup 6940251 (Chok'sul's Basket) moved 4.2 yd across and 86.78 yd down to the lower floor where the LootCollector spot is
+UPDATE `gameobject` SET `position_x` = -4774.7238, `position_y` = -4145.2983, `position_z` = 304.5644, `orientation` = 4.1254, `rotation0` = 0, `rotation1` = 0, `rotation2` = 0.881447, `rotation3` = -0.472283 WHERE `guid` = 6940251 AND `id` = 95529;
+-- duplicate Ogre Loincloth 1 yd from 6940251
+UPDATE `gameobject` SET `spawnMask` = 0 WHERE `guid` IN (6940824) AND `id` IN (95529);
