@@ -7888,7 +7888,7 @@ class MountBlockScenarioTests(unittest.TestCase):
     MOUNT = 458
 
     def setUp(self):
-        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, class_entry(self.BRAND, 'mount_block'))
+        self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, r1a_entry(self.BRAND, 'mount_block'))
         self.steps = run.validate(self.scenario)['steps']
 
     def test_the_mount_is_refused_under_the_brand_allowed_without_it_and_lost_when_it_lands(self):
@@ -7923,7 +7923,7 @@ class MountBlockScenarioTests(unittest.TestCase):
                 self.assertEqual(verdict.status, status)
 
     def test_a_mount_spell_without_a_mounted_aura_is_refused(self):
-        entry = {**class_entry(self.BRAND, 'mount_block'), 'mount_spell': self.BRAND}
+        entry = {**r1a_entry(self.BRAND, 'mount_block'), 'mount_spell': self.BRAND}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
@@ -7935,7 +7935,7 @@ class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
     BLADE_OF_FAITH = 803880
 
     def test_a_periodic_observed_spell_waits_for_its_own_ticks_after_each_cast(self):
-        entry = variant_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith')
+        entry = r1a_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith')
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
         steps = run.validate(scenario)['steps']
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
@@ -8029,7 +8029,8 @@ class EnemyPlayerMetricDeltaTests(unittest.TestCase):
         self.assertEqual([steps[index]['actor'] for index in pvp], [CASTER, 'enemy'])
         self.assertLess(pvp[-1], cast)
         self.assertEqual(steps[cast]['target'], 'enemy')
-        self.assertTrue(all(step['actor'] == 'enemy' for step in steps if step.get('metric') == 'aura'))
+        self.assertTrue(all(step['actor'] == 'enemy' for step in steps
+                            if step.get('label', '').startswith('801205 aura')))
 
     def test_an_enemy_target_without_a_race_is_refused(self):
         entry = {**r1a_entry(801205, 'metric_delta', 'sleep_player')}
