@@ -45,7 +45,7 @@ appendix).
 **G-5. Sentences pulled in from another spell.** 2026-11-10, owner.
 - A sentence that a tooltip pulls in from another spell through an `@s:` reference counts only if that spell is not
   evaluated on its own. It then joins the parent tooltip's clauses.
-- ADR 0116 names the `@s:` sentence lister. No ADR found stating the rule.
+- ADR 0116 names the `@s:` sentence lister. ADR 0304 applies the rule to the first-ledger generator.
 
 **G-6. A tooltip percentage on direct damage is that exact increase.** 2026-11-10, owner.
 - Case: High General, "to deal $s1% increased direct damage", with $s1 = 100.
@@ -440,7 +440,7 @@ Each is binding for the Templar only. "Applies as precedent" marks wording that 
 ## Appendix. Decisions recorded only on this page
 
 No ADR states these decisions; this page is their record:
-- **General rules:** G-3 (the rule; ADR 0118 has only the finding), G-4, G-5 (the rule), G-9, G-10, G-11, G-12, G-13
+- **General rules:** G-3 (the rule; ADR 0118 has only the finding), G-4, G-9, G-10, G-11, G-12, G-13
   (the rule), G-21 (rule 4 and its amendment, applied in ADRs 0258, 0263 and 0287), G-23, G-25, G-30, G-31, G-32 (as a
   whole), G-33, G-37, G-38, G-39, G-40, G-41 and G-42.
 - **Templar rulings:** the live Zealot dual wield (owner, checked on a video), Legacy of the Silver Hand, Argent Blade,

@@ -5,13 +5,18 @@ import unittest
 
 from coverage import clause_coverage, load_clauses
 from ledger import (ACQUISITION_REASON, EMPTY_CLAUSE, EMPTY_REASON, LEVEL_REASON, clause_words, differs_text, ledger,
-                    no_claim_reason, parse_text_bases, raw_clauses, write_ledger)
+                    no_claim_reason, parse_text_bases, pulled_clauses, raw_clauses, write_ledger)
 from profile import DBC_DIR, load_class_file
 from streamed import streamed_texts
+from tooltip import Records
+from values import dataset
 
 TEMPLAR = 19
 NECROMANCER = 23
 DEPRAVITY = 638403
+GHOUL_FRENZY = 503740
+FRENZIED_GHOUL = 707014
+TUNDRA_WARRIORS_TALENT = 92122
 TEMPLAR_LEDGER = Path(__file__).resolve().parent / 'classes' / 'templar_clauses.json'
 OWNER_RULING_NO_CLAIM = 805410
 LEVEL_LINE = '|cFF66DDFFLevel 10 Passive|r\r\n'
@@ -142,6 +147,37 @@ class ClassLedgerTests(unittest.TestCase):
                 self.assertEqual(loaded, entries)
                 result = clause_coverage(loaded, [])
                 self.assertEqual(result.total, sum(entry['kind'] == 'claim' for entry in entries))
+
+    def rows(self, spell: int) -> dict[str, list[str]]:
+        return {entry['clause']: entry['labels'] for entry in self.necromancer.entries if entry['spell'] == spell}
+
+    def test_a_pulled_sentence_joins_the_parent_tooltip_with_its_tokens(self):
+        self.assertEqual(self.rows(GHOUL_FRENZY), {
+            'Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.':
+                ['503740 effect_value #0'],
+            'Transformed into a Frenzied Ghoul, increasing haste by $s2% for $d.':
+                ['503740 effect_value 707014e1 #1', '503740 spell_duration 707014 #2'],
+            'Immune to movement slowing effects.': []})
+
+    def test_a_pulled_text_is_cut_by_the_clause_rules(self):
+        rows = self.rows(TUNDRA_WARRIORS_TALENT)
+        self.assertEqual(rows['Casting any spell now has a $h% chance to grant you Tundra Warriors.'],
+                         ['92122 effect_value #0'])
+        self.assertEqual(rows['For $d,'], ['92122 spell_duration 707421 #1'])
+        self.assertEqual(rows['the critical strike chance of your Undead minions is increased by $s1%,'],
+                         ['92122 effect_value 707421e0 #2'])
+        self.assertEqual(rows['stacking $u times.'], ['92122 max_stacks 707421 #3'])
+
+    def test_a_pulled_spell_evaluated_on_its_own_adds_no_clause(self):
+        records = Records(dataset(DBC_DIR))
+        raws = raw_clauses(records.field('Spell', GHOUL_FRENZY, 'Description[enUS]'))
+        clauses, pieces = pulled_clauses(records, GHOUL_FRENZY, raws, frozenset({FRENZIED_GHOUL}))
+        self.assertEqual([clause.raw for clause in clauses], raws)
+        self.assertEqual([piece.text for piece in pieces], raws)
+        clauses, pieces = pulled_clauses(records, GHOUL_FRENZY, raws, frozenset())
+        self.assertEqual({clause.spell for clause in clauses[1:]}, {FRENZIED_GHOUL})
+        self.assertEqual(''.join(piece.text for piece in pieces if piece.spell == FRENZIED_GHOUL),
+                         records.field('Spell', FRENZIED_GHOUL, 'Description[enUS]'))
 
     def test_the_generation_is_deterministic(self):
         again = ledger(load_class_file(NECROMANCER), DBC_DIR, {DEPRAVITY: 'text_correction'})

@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from itertools import count
 import json
 from pathlib import Path
 import re
@@ -7,7 +8,8 @@ import subprocess
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells
 from coverage import FORMULA_TOKEN, LITERAL_NUMBER, TEXT_BASES, TOOLTIP_TOKEN
 from streamed import SQL_DIRECTORIES, SQL_UPDATES, TABLE, StreamedText, streamed_texts
-from tooltip import COLOR_CODE, EXTENSION_MARKUP, SPELL_MARKUP, Records, Tooltip, conditional_bounds
+from tooltip import (COLOR_CODE, EXTENSION_MARKUP, SPELL_MARKUP, Readout, Records, Tooltip, conditional_bounds,
+                     expansion_refusal, referenced)
 from values import Unmodelled, armed_for, dataset, static_conditional_known, structure_stats, value_scenario
 
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -35,6 +37,20 @@ COMMIT_DIGITS = 10
 class Segment:
     raw: str
     hard_end: bool
+
+
+@dataclass(frozen=True)
+class Clause:
+    raw: str
+    spell: int
+
+
+@dataclass(frozen=True)
+class Piece:
+    clause: int
+    text: str
+    spell: int
+    expanding: tuple[int, ...]
 
 
 @dataclass(frozen=True)
@@ -164,6 +180,55 @@ def raw_clauses(text: str) -> list[str]:
     return found
 
 
+def top_level_markups(text: str) -> list[re.Match]:
+    found, position = [], 0
+    while position < len(text):
+        markup = SPELL_MARKUP.match(text, position)
+        if markup:
+            found.append(markup)
+            position = markup.end()
+            continue
+        end = protected_end(text, position)
+        position = position + 1 if end is None else max(end, position + 1)
+    return found
+
+
+def unfold(records: Records, raws: list[str], spell: int, expanding: tuple[int, ...], evaluated: frozenset[int],
+           clauses: list[Clause], pieces: list[Piece], owner: int | None = None):
+    shared = owner if owner is not None and not any(clause_words(raw) for raw in raws) else None
+    chain = expanding + (spell,)
+    for raw in raws:
+        index = shared
+        if index is None:
+            index = len(clauses)
+            clauses.append(Clause(raw, spell))
+        start = 0
+        for markup in top_level_markups(raw):
+            pulled = int(markup.group('spell'))
+            if pulled in evaluated or expansion_refusal(records, markup, chain) is not None:
+                continue
+            pieces.append(Piece(index, raw[start:markup.start()], spell, expanding))
+            unfold(records, raw_clauses(records.field('Spell', pulled, DESCRIPTION) or ''), pulled, chain, evaluated,
+                   clauses, pieces, index)
+            start = markup.end()
+        pieces.append(Piece(index, raw[start:], spell, expanding))
+
+
+def pulled_clauses(records: Records, rank_id: int, raws: list[str],
+                   evaluated: frozenset[int]) -> tuple[list[Clause], list[Piece]]:
+    clauses: list[Clause] = []
+    pieces: list[Piece] = []
+    unfold(records, raws, rank_id, (), evaluated, clauses, pieces)
+    return clauses, pieces
+
+
+def piece_readout(records: Records, piece: Piece, caster) -> Readout:
+    readout = Tooltip(records, piece.spell, caster, piece.expanding).read(piece.text)
+    if not piece.expanding:
+        return readout
+    return Readout([referenced(value, piece.spell) for value in readout.values], readout.unreadable)
+
+
 def clause_words(raw: str) -> str:
     text = display(raw)
     while True:
@@ -193,25 +258,27 @@ def ordinal_labels(class_file: dict, spell: ClassSpell, rank_id: int) -> dict[in
     return found
 
 
-def clause_label_lists(class_file: dict, records: Records, spell: ClassSpell, rank_id: int,
-                       raws: list[str]) -> list[list[str]]:
+def clause_label_lists(class_file: dict, records: Records, spell: ClassSpell, rank_id: int, description: str,
+                       pieces: list[Piece], clause_count: int) -> list[list[str]]:
     armed_file = armed_for(class_file, records, rank_id)
     caster = structure_stats(armed_file, static_conditional_known(armed_file, rank_id))
-    whole = Tooltip(records, rank_id, caster).read(''.join(raws))
-    parts = [Tooltip(records, rank_id, caster).read(raw) for raw in raws]
+    whole = Tooltip(records, rank_id, caster).read(description)
+    parts = [piece_readout(records, piece, caster) for piece in pieces]
     if [value.text for part in parts for value in part.values] != [value.text for value in whole.values] \
             or [entry for part in parts for entry in part.unreadable] != whole.unreadable:
         raise ValueError(f'Spell {rank_id}: the clauses read differently from the whole tooltip')
     by_ordinal = ordinal_labels(class_file, spell, rank_id)
-    lists, value_ordinal, unreadable_ordinal = [], 0, len(whole.values)
-    for part in parts:
-        ordinals = list(range(value_ordinal, value_ordinal + len(part.values)))
-        ordinals += [unreadable_ordinal + index for index, entry in enumerate(part.unreadable)
-                     if entry.startswith(TOKEN_ENTRY_STARTS)]
+    value_ordinals: list[list[int]] = [[] for _ in range(clause_count)]
+    unreadable_ordinals: list[list[int]] = [[] for _ in range(clause_count)]
+    value_ordinal, unreadable_ordinal = 0, len(whole.values)
+    for piece, part in zip(pieces, parts):
+        value_ordinals[piece.clause] += range(value_ordinal, value_ordinal + len(part.values))
+        unreadable_ordinals[piece.clause] += [unreadable_ordinal + index for index, entry in enumerate(part.unreadable)
+                                              if entry.startswith(TOKEN_ENTRY_STARTS)]
         value_ordinal += len(part.values)
         unreadable_ordinal += len(part.unreadable)
-        lists.append([label for ordinal in ordinals for label in by_ordinal.get(ordinal, [])])
-    return lists
+    return [[label for ordinal in values + unreadable for label in by_ordinal.get(ordinal, [])]
+            for values, unreadable in zip(value_ordinals, unreadable_ordinals)]
 
 
 def first_commit(path: Path) -> tuple[str | None, str | None]:
@@ -257,7 +324,7 @@ def differs_text(fields: list[str]) -> str:
 
 
 def spell_entries(class_file: dict, records: Records, spell: ClassSpell, text_bases: dict[int, str],
-                  updates: Path, unlabelled: dict[int, str]) -> list[dict]:
+                  updates: Path, unlabelled: dict[int, str], evaluated: frozenset[int] = frozenset()) -> list[dict]:
     rank_id = spell.max_rank
     description = records.field('Spell', rank_id, DESCRIPTION) or ''
     row = streamed_texts(updates).get(rank_id)
@@ -276,21 +343,24 @@ def spell_entries(class_file: dict, records: Records, spell: ClassSpell, text_ba
         entries = [{'spell': rank_id, 'clause': EMPTY_CLAUSE, 'labels': [], 'kind': 'no_claim',
                     'reason': EMPTY_REASON}]
     else:
+        clauses, pieces = pulled_clauses(records, rank_id, raws, evaluated)
         try:
-            labels = clause_label_lists(class_file, records, spell, rank_id, raws)
+            labels = clause_label_lists(class_file, records, spell, rank_id, description, pieces, len(clauses))
         except Unmodelled as error:
             unlabelled[rank_id] = error.reason
-            labels = [[] for _ in raws]
+            labels = [[] for _ in clauses]
         entries = []
-        for index, (raw, clause_labels) in enumerate(zip(raws, labels)):
-            words = clause_words(raw)
+        own_positions = count()
+        for clause, clause_labels in zip(clauses, labels):
+            words = clause_words(clause.raw)
             reason = no_claim_reason(words)
             entry = {'spell': rank_id, 'clause': words, 'labels': [] if reason else clause_labels,
                      'kind': 'no_claim' if reason else 'claim'}
             if reason:
                 entry['reason'] = reason
-            if dbc_words is not None:
-                dbc_clause = (dbc_words[index] if len(dbc_words) == len(raws)
+            if dbc_words is not None and clause.spell == rank_id:
+                position = next(own_positions)
+                dbc_clause = (dbc_words[position] if len(dbc_words) == len(raws)
                               else ' '.join(dbc_words))
                 if dbc_clause != words:
                     entry['dbc_clause'] = dbc_clause
@@ -311,8 +381,9 @@ def ledger(class_file: dict, dbc_dir: Path, text_bases: dict[int, str] | None = 
     spells = class_spells(Path(dbc_dir), class_file['class_id'], PROGRESSION_HEADER, class_file['level'],
                           [entry['spell'] for entry in class_file.get('extra_spells', [])])
     unlabelled: dict[int, str] = {}
+    evaluated = frozenset(spell_id for spell in spells for spell_id in (spell.spell_id, spell.max_rank, *spell.ranks))
     entries = [entry for spell in spells
-               for entry in spell_entries(class_file, records, spell, text_bases, updates, unlabelled)]
+               for entry in spell_entries(class_file, records, spell, text_bases, updates, unlabelled, evaluated)]
     return Ledger(entries, unlabelled)
 
 

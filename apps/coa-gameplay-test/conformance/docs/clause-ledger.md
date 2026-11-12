@@ -89,14 +89,21 @@ python3 -B conformance.py ledger --class 23 --out classes/necromancer_clauses.js
   state a value (a `${...}` formula, any `$` token, or a literal number) and the left side does not end with a
   function word (`your`, `of`, `the`, ...). A `${...}` formula, a `$?` conditional, an `@ext:...:ext@` note and a
   texture are never cut inside. A piece without words (an `@s` markup, a blank line) joins the clause before it.
+- **Pulled sentences** (G-5, ADR 0304). An `@s:<id>:<flags>@` markup outside a `$?` conditional pulls in spell
+  `<id>`'s Description. When `<id>` is not in the class spell set (any rank of a class spell), its text is cut by the
+  same rules and each clause becomes an entry of the parent spell, right after the clause that holds the markup, in
+  the pulled spell's exact words; a pulled text with an `@s` markup of its own unfolds the same way. A pulled spell
+  that is in the class spell set is evaluated on its own and adds no entry. A markup the tooltip reader refuses
+  (negative flags, a spell missing from Spell.dbc, a cycle, nesting deeper than three) adds no entry either, and an
+  empty pulled Description adds none.
 - **`no_claim`.** Only three fixed patterns, each with a fixed `reason`: an empty tooltip (one entry, clause
   `(empty tooltip)`), a level label line (`Level 10 Passive`, `Level <n>` and capitalised words), and an `@ext:` note
   that starts with a continent name followed by a colon (a trainer location list such as Tithe 804781). Everything
   else is a `claim`.
 - **Labels.** Each clause gets the labels that `values.value_scenario` gives the `$` tokens it holds, counted by the
   same `#n` ordinals: the clause pieces are read with the same caster as the value scenario, and the command stops
-  if the pieces read differently from the whole tooltip. An `@s` expansion's tokens belong to the clause the markup
-  joined. An unreadable `@ext` note keeps its `effect_value #n` label; a stray `|` escape gets none. Labels of
+  if the pieces read differently from the whole tooltip. A pulled sentence's tokens belong to its own entry; the
+  tokens of an `@s` expansion that adds no entry belong to the clause the markup joined. An unreadable `@ext` note keeps its `effect_value #n` label; a stray `|` escape gets none. Labels of
   behaviour, proc or trigger entries are never added: batch authors add them by fragments.
 - **No `claims`.** No rule derives the words of each stated claim, so the command declares none. A clause that states
   several values keeps the labels of its tokens; its authors declare `claims` when those labels do not cover each
@@ -116,7 +123,8 @@ Templar check (`test_ledger.py`): run on class 19, the command reproduces the 16
 ledger that these rules cover (14 level labels, Shoot 3018, Tithe 804781); the 17th, Righteous Tempest's tick 805410,
 is an owner ruling. It also marks Scourgebane 92111's level label, which the hand ledger has no row for. At a2f6330902
 the run gives 362 entries, of which 187 have the exact `(spell, clause)` of one of the 452 hand-ledger entries: the
-hand ledger cut sentences less regularly and often dropped the final full stop or `and`.
+hand ledger cut sentences less regularly and often dropped the final full stop or `and`. With pulled sentences
+(ADR 0304) the run gives 401 entries and still 187 matches: the hand ledger has no row for a pulled sentence.
 
 ## How a workstream contributes
 
