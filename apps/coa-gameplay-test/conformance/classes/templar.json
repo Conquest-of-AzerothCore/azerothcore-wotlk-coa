@@ -6396,6 +6396,26 @@
       "radius_reason": "Control of the cap entry: ten dummies, the primary at 3 yd and nine more within 5 yd of it (each read before the casts); with no more candidates than the cap of 10, each cast must strike all ten."
     },
     {
+      "spell": 524739,
+      "name": "Norgannon's Wrath",
+      "kind": "fixed_count",
+      "variant": "cap_cluster",
+      "label_suffix": "cap_cluster",
+      "quote": "to up to $524740i enemies",
+      "expected": 9,
+      "headroom": 2,
+      "far_dummy": false,
+      "primary_distance_reads": true,
+      "cluster_yd": 2.5,
+      "radius": 5.0,
+      "cast_spell": 524739,
+      "target_rank": 524740,
+      "cast_target": "dummy",
+      "repeats": 6,
+      "settle_ms": 2500,
+      "radius_reason": "Claim 89 cap, deterministic placement (lean/radius.md, task 3): twelve dummies, the primary (the explicit target of 524739) at 3 yd and eleven more on the summon line within 2.5 yd of it, each read under 2.5 yd from the primary before the casts, half the 5 yd radius (EffectRadiusIndex 8; TARGET_UNIT_DEST_AREA_ENEMY adds the dummy's combat reach and no caster leeway). 524740 strikes its explicit target by TargetA 6 and up to MaxAffectedTargets 10 of the twelve area candidates by TargetB 16 (Spell::SelectImplicitAreaTargets, Acore::Containers::RandomResize). Six casts; by the tooltip each must strike the primary and exactly 9 of the 11 others (10 in all)."
+    },
+    {
       "spell": 803872,
       "name": "Blade of Faith",
       "kind": "metric_delta",
@@ -6823,6 +6843,107 @@
       "target": "caster", "metric": "run_speed_rate", "fields": {}, "before_expected": 1.0, "wait_ms": 1000,
       "expire_ms": 6500,
       "observe_source": "$s2 = 10 (707754 EffectBasePoints[0] 9 + EffectDieSides[0] 1): Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The Templar's run speed rate is read before Courage is learned (the control, 1.0) and after (1.1), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 10% alerts (the passive scenario's run_speed_rate verdict uses a 1-point floor and stays data). A learned contrast of the run speed the clause promises (ADR 0190)."
+    },
+    {
+      "spell": 800424,
+      "name": "Absolution",
+      "kind": "aggro_redirect",
+      "variant": "edge",
+      "label_suffix": "edge",
+      "quote": "Taunt all enemies within 8 yds",
+      "self_cast": true,
+      "rooted": true,
+      "geometry": true,
+      "targets": [
+        {
+          "distance": 11.6,
+          "expected_redirect": false
+        },
+        {
+          "distance": 11.85,
+          "expected_redirect": false
+        },
+        {
+          "distance": 12.1,
+          "expected_redirect": false
+        },
+        {
+          "distance": 12.35,
+          "expected_redirect": false
+        }
+      ],
+      "observe_source": "Claim 279 edge bracket (lean/radius.md). 800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (RadiusMin 8, RadiusMax 8), MaxAffectedTargets 5: four rooted dummies, fewer than the cap, read by distance_2d, height and combat reach right before the self-centred cast, with the caster's combat reach, height and run speed rate. Expected by the tooltip: none taunted beyond 8 yd. The engine's arithmetic: 8 (SpellEffectInfo::CalcRadius) + 2.66 (Spell::SelectImplicitAreaTargets adds WorldObject::GetLeewayBonusRadius for TARGET_UNIT_SRC_AREA_ENEMY) + the dummy's combat reach (WorldObjectSpellAreaTargetCheck for a player-controlled caster and a SRC reference) against the target's exact distance, an edge near 11.935 yd."
+    },
+    {
+      "spell": 800424,
+      "name": "Absolution",
+      "kind": "aggro_redirect",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "Taunt all enemies",
+      "self_cast": true,
+      "rooted": true,
+      "targets": [
+        {
+          "distance": 2.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 3.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 4.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 5.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 6.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 7.0,
+          "expected_redirect": true
+        }
+      ],
+      "observe_source": "Absolution cap (lean/radius.md, task 2): six rooted dummies within 8 yd, each expected taunted by 'all enemies'. 800424 MaxAffectedTargets 5 (Spell.dbc), applied by Spell::SelectImplicitAreaTargets through Acore::Containers::RandomResize: five of the six are taunted, a random one is not."
+    },
+    {
+      "spell": 1161,
+      "name": "Challenging Shout",
+      "kind": "aggro_redirect",
+      "variant": "edge",
+      "label_suffix": "edge",
+      "quote": "Forces all enemies within $a1 yards",
+      "self_cast": true,
+      "rooted": true,
+      "geometry": true,
+      "targets": [
+        {
+          "distance": 9.5,
+          "expected_redirect": true
+        },
+        {
+          "distance": 13.6,
+          "expected_redirect": false
+        },
+        {
+          "distance": 13.85,
+          "expected_redirect": false
+        },
+        {
+          "distance": 14.1,
+          "expected_redirect": false
+        },
+        {
+          "distance": 14.35,
+          "expected_redirect": false
+        }
+      ],
+      "observe_source": "Control for claim 279 (lean/radius.md), not a Templar claim: stock Warrior Challenging Shout 1161, no CoA code names it. Effect[0] aura 11 SPELL_AURA_MOD_TAUNT on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY like Absolution, SpellRadius 13 (RadiusMin 10, RadiusMax 10), MaxAffectedTargets 0. One rooted dummy inside 10 yd guards the cast; four beyond it bracket the engine's edge, predicted at 10 + 2.66 + the dummy's combat reach, near 13.935 yd. The same extension as Absolution's means general engine behaviour."
     }
   ],
   "player_observations": [

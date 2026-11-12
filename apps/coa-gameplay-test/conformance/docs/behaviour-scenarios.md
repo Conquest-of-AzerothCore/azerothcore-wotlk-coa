@@ -1556,6 +1556,10 @@ alerts). Norgannon's Wrath 524739 `cap`: twelve dummies, each cast strikes the p
 `cap_control`: ten dummies, all struck. Their labels take the suffix after the spell id, as every `fixed_count`
 `label_suffix` does (ADR 0240): `524739 cap behaviour_fixed_count`.
 
+`cluster_yd` (ADR 0254), on a target-centred entry with `primary_distance_reads`, places the additional dummies within
+that distance of the primary instead of within `radius`, and judges their reads under it. Norgannon's Wrath 524739
+`cap_cluster`: twelve dummies within 2.5 yd of the primary, six casts.
+
 ### Blade of Faith ticks and crit (ADR 0243)
 
 Blade of Faith's periodic ticks can crit since ADR 0243. Its crit entries force melee crit (it is a melee-class spell),
@@ -1567,6 +1571,11 @@ sets 64481 in both arms instead of only selecting non-critical ticks.
 - `aggro_redirect` `rooted: true` roots every dummy (Self Root Forever 42716) before the engagement and reads its
   `distance_2d` to the caster right before the cast; a read more than 0.25 yd from the placed distance alerts.
   `label_suffix` names a second entry of the same spell. Absolution 800424 `range`: dummies read at 7.5 and 8.5 yd.
+- `aggro_redirect` `geometry: true` (rooted entries only, ADR 0253) also reads, before the cast, every dummy's
+  `combat_reach` and `position_z` and the caster's `combat_reach`, `position_z` and `run_speed_rate`, as information
+  for the edge arithmetic; nothing is judged on them. Absolution 800424 `edge` brackets the engine's edge (11.6-12.35
+  yd), `cap` places six dummies within 8 yd against MaxAffectedTargets 5, and the stock Challenging Shout 1161 `edge`
+  (9.5 yd, then 13.6-14.35 yd) is the control: a class-file entry for a stock spell, no Templar claim.
 - A class-file `cast_auras` entry now also sets its auras before every cast of the rank's hit and periodic-total
   scenarios. Blade of Faith's ranks set Reduce Critical Strike Chance -100% 64481, so their tick reads stay at a 0 crit
   chance.

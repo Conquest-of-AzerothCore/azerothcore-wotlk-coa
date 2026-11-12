@@ -1109,7 +1109,8 @@
       "524739 script_hit 524740",
       "524739 behaviour_fixed_count",
       "524739 cap behaviour_fixed_count",
-      "524739 cap_control behaviour_fixed_count"
+      "524739 cap_control behaviour_fixed_count",
+      "524739 cap_cluster behaviour_fixed_count"
     ],
     "kind": "claim"
   },

@@ -747,7 +747,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 464)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 468)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -8585,6 +8585,44 @@ class FixedCountCapArmTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(9, far=5.5)), expectation).status,
                          'alert')
 
+    def test_the_cluster_arm_places_eleven_dummies_within_its_cluster_of_the_primary(self):
+        spec = fixed_target_count_spec(r1a_entry(524739, 'fixed_count', 'cap_cluster'))
+        scenario, [expectation] = fixed_target_count_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        self.assertEqual(len(scenario['creatures']), 12)
+        primary = scenario['creatures'][0]['distance']
+        offsets = [creature['distance'] - primary for creature in scenario['creatures'][1:]]
+        self.assertTrue(all(0 < offset < spec.cluster_yd for offset in offsets))
+        self.assertEqual(expectation.model['radius'], spec.cluster_yd)
+        self.assertEqual(len(expectation.model['per_cast']['casts']), 6)
+
+    def test_seeded_dummy_outside_the_cluster_alerts(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(524739, 'fixed_count', 'cap_cluster'))
+        model = expectation.model
+        per_cast = model['per_cast']
+
+        def values(spread: float) -> dict:
+            found = {label: 0.0 for label in per_cast['start']}
+            for cast, labels in enumerate(per_cast['casts'], start=1):
+                for index, label in enumerate(labels):
+                    found[label] = float(cast) if index <= 9 else 0.0
+            found.update({label: 1.0 for label in model['dummy_labels']})
+            found.update({label: spread for label in model['primary_distances']})
+            return found
+
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(2.3)), expectation).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values(3.0)), expectation).status,
+                         'alert')
+
+    def test_a_cluster_not_inside_the_radius_is_refused(self):
+        entry = {**r1a_entry(524739, 'fixed_count', 'cap_cluster'), 'cluster_yd': 5.0}
+        with self.assertRaises(ValueError):
+            fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
+
+    def test_the_cap_arm_keeps_the_radius_as_its_placement_bound(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(524739, 'fixed_count', 'cap'))
+        self.assertEqual(expectation.model['radius'], 5.0)
+
     def test_a_headroom_on_an_uncapped_count_is_refused(self):
         entry = {**r1a_entry(524739, 'fixed_count', 'cap_control'), 'headroom': 2}
         with self.assertRaises(ValueError):
@@ -8634,6 +8672,38 @@ class AggroRedirectRangeTests(unittest.TestCase):
         moved = {inside.label: 1.0, inside.model['distance_label']: 9.5}
         self.assertEqual(judge_behaviour(base_verdict(inside), FakeRun(placed), inside).status, 'ok')
         self.assertEqual(judge_behaviour(base_verdict(inside), FakeRun(moved), inside).status, 'alert')
+
+    def test_geometry_reads_every_dummy_and_the_caster_before_the_cast(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'edge'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        cast = cast_indices(steps, 800424)[0]
+        for index in range(4):
+            for metric in ('combat_reach', 'position_z'):
+                read = next(position for position, step in enumerate(steps)
+                            if step.get('label') == aggro_redirect_label(800424, index, metric, 'edge'))
+                self.assertEqual(steps[read]['actor'], dummy_id(index))
+                self.assertLess(read, cast)
+        caster_reads = [step for step in steps[:cast] if step.get('actor') == 'caster'
+                        and step.get('metric') in ('combat_reach', 'position_z', 'run_speed_rate')]
+        self.assertEqual(len(caster_reads), 3)
+        self.assertEqual([expectation.displayed for expectation in expectations], ['0', '0', '0', '0'])
+
+    def test_the_control_is_a_stock_area_taunt_with_a_guard_inside_its_radius(self):
+        scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(1161, 'aggro_redirect', 'edge'))
+        run.validate(scenario)
+        self.assertEqual(len(cast_indices(scenario['steps'], 1161)), 1)
+        self.assertEqual([expectation.displayed for expectation in expectations], ['1', '0', '0', '0', '0'])
+
+    def test_geometry_without_roots_is_refused(self):
+        entry = {**r1a_entry(800424, 'aggro_redirect', 'edge'), 'rooted': False}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+    def test_the_range_entry_reads_no_geometry(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
+        self.assertFalse([step for step in scenario['steps']
+                          if step.get('metric') in ('combat_reach', 'position_z', 'run_speed_rate')])
 
     def test_an_entry_without_roots_keeps_its_labels(self):
         _, expectations = behaviour_scenario(CLASS_FILE, next(

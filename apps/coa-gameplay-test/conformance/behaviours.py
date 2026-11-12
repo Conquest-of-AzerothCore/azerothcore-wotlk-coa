@@ -267,6 +267,7 @@ class FixedTargetCountSpec:
     primary_distance_reads: bool = False
     label_suffix: str = ''
     behind_yd: float | None = None
+    cluster_yd: float | None = None
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -300,6 +301,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if spec.behind_yd is not None and not 0 < spec.behind_yd <= spec.radius:
         raise ValueError(f'{spec.spell} fixed_count behind_yd {spec.behind_yd!r} must lie inside the radius '
                          f'{spec.radius:g} yd, where only the facing keeps it unhit')
+    if spec.cluster_yd is not None and (spec.cast_target == CASTER or spec.layout == CASTER
+                                        or not 0 < spec.cluster_yd < spec.radius or not spec.primary_distance_reads):
+        raise ValueError(f'{spec.spell} fixed_count clusters its dummies within {spec.cluster_yd} yd of the primary '
+                         f'only around a target, inside the radius and with the primary distances read')
     headroom = 0 if spec.uncapped else (COUNT_HEADROOM if spec.headroom is None else spec.headroom)
     dummy_count = spec.expected + 1 + headroom
     if spec.cast_target == CASTER or spec.layout == CASTER:
@@ -307,8 +312,9 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         distances.append(spec.radius + FIXED_COUNT_FAR_MARGIN_YD)
     else:
         primary_distance = 3.0
+        spread = spec.radius if spec.cluster_yd is None else spec.cluster_yd
         distances = [primary_distance] + [
-            primary_distance + spec.radius * (index / dummy_count) for index in range(1, dummy_count)]
+            primary_distance + spread * (index / dummy_count) for index in range(1, dummy_count)]
         distances.append(primary_distance + spec.radius + FIXED_COUNT_FAR_MARGIN_YD)
     far_index = dummy_count
     placed = far_index + 1 if spec.far_dummy else dummy_count
@@ -386,9 +392,10 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if spec.settle_ms:
         timed(scenario, waited_ms(scenario['steps']))
     label = f'{count_label_prefix(spec)} behaviour_fixed_count'
+    within = spec.radius if spec.cluster_yd is None else spec.cluster_yd
     if primary_distances:
         scenario['contract'] += (f' Every additional dummy\'s distance to the primary is read before the casts and '
-                                 f'must be under {spec.radius:g} yd.')
+                                 f'must be under {within:g} yd.')
     model = {'kind': 'fixed_count', 'dummy_labels': extra_labels, 'far_label': far_label, 'expected': spec.expected,
              'headroom': headroom, 'quote': entry.quote}
     if spec.uncapped:
@@ -398,7 +405,7 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if per_cast:
         model['per_cast'] = per_cast
     if primary_distances:
-        model.update({'primary_distances': primary_distances, 'radius': spec.radius})
+        model.update({'primary_distances': primary_distances, 'radius': within})
     if spec.pull_reads:
         model['pull'] = {'near': [[pull_label(spec, index, BEFORE), pull_label(spec, index, AFTER)]
                                   for index in range(dummy_count)],
@@ -1160,7 +1167,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 bool(entry.get('pull_reads', False)), int(entry.get('settle_ms', 0)),
                                 entry.get('layout', ''), entry.get('headroom'), bool(entry.get('far_dummy', True)),
                                 bool(entry.get('primary_distance_reads', False)), entry.get('label_suffix', ''),
-                                None if entry.get('behind_yd') is None else float(entry['behind_yd']))
+                                None if entry.get('behind_yd') is None else float(entry['behind_yd']),
+                                entry.get('cluster_yd'))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
@@ -4539,9 +4547,12 @@ class AggroRedirectSpec:
     self_cast: bool = False
     label_suffix: str = ''
     rooted: bool = False
+    geometry: bool = False
 
 
 AGGRO_REDIRECT_ROOT = 42716
+AGGRO_REDIRECT_DUMMY_GEOMETRY = ('combat_reach', 'position_z')
+AGGRO_REDIRECT_CASTER_GEOMETRY = ('combat_reach', 'position_z', 'run_speed_rate')
 AGGRO_REDIRECT_PLACEMENT_YD = 0.25
 
 
@@ -4549,7 +4560,13 @@ def aggro_redirect_label(spell: int, index: int, moment: str, suffix: str = '') 
     return f'{spell} aggro_redirect {suffix + " " if suffix else ""}{dummy_id(index)} {moment}'
 
 
+def aggro_redirect_caster_label(spell: int, metric: str, suffix: str) -> str:
+    return f'{spell} aggro_redirect {suffix + " " if suffix else ""}{CASTER} {metric}'
+
+
 def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[dict, list[Expectation]]:
+    if spec.geometry and not spec.rooted:
+        raise ValueError(f'{spec.spell} aggro_redirect reads geometry on rooted dummies only')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'aggro_redirect', spec.quote, 1)
     facts = facts_of(records, spec.spell)
@@ -4573,6 +4590,13 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
     distance_reads = [measurement(aggro_redirect_label(spec.spell, index, 'distance', spec.label_suffix),
                                   dummy_id(index), 'distance_2d', target=CASTER)
                       for index in range(len(spec.targets))] if spec.rooted else []
+    if spec.geometry:
+        distance_reads += [measurement(aggro_redirect_label(spec.spell, index, metric, spec.label_suffix),
+                                       dummy_id(index), metric)
+                           for index in range(len(spec.targets)) for metric in AGGRO_REDIRECT_DUMMY_GEOMETRY]
+        distance_reads += [measurement(aggro_redirect_caster_label(spec.spell, metric, spec.label_suffix), CASTER,
+                                       metric)
+                           for metric in AGGRO_REDIRECT_CASTER_GEOMETRY]
     cast_step = {'action': 'cast', 'actor': CASTER, 'spell': spec.spell}
     if not spec.self_cast:
         cast_step['target'] = dummy_id(0)
@@ -4614,6 +4638,9 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
         scenario['contract'] += (f' Every dummy is rooted (Self Root Forever {AGGRO_REDIRECT_ROOT}), and its distance '
                                  f'to the caster is read right before the cast: within {AGGRO_REDIRECT_PLACEMENT_YD:g} '
                                  f'yd of its placed distance.')
+    if spec.geometry:
+        scenario['contract'] += (f' The combat reach and height of every dummy, and the combat reach, height and run '
+                                 f'speed rate of {CASTER}, are read with the distances, as information.')
     model = {'kind': 'aggro_redirect', 'quote': entry.quote}
     expectations = []
     for index, target in enumerate(spec.targets):
@@ -4630,7 +4657,8 @@ def aggro_redirect_scenario(class_file: dict, spec: AggroRedirectSpec) -> tuple[
 def aggro_redirect_spec(entry: dict) -> AggroRedirectSpec:
     targets = tuple(AggroTarget(raw['distance'], raw['expected_redirect']) for raw in entry['targets'])
     return AggroRedirectSpec(entry['spell'], entry['name'], entry['quote'], targets, entry.get('self_cast', False),
-                             entry.get('label_suffix', ''), bool(entry.get('rooted', False)))
+                             entry.get('label_suffix', ''), bool(entry.get('rooted', False)),
+                             bool(entry.get('geometry', False)))
 
 
 @dataclass(frozen=True)
