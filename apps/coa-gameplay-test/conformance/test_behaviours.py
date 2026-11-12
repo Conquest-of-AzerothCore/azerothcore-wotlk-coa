@@ -10044,5 +10044,51 @@ class NecromancerB2FixSegmentTests(unittest.TestCase):
                 {**self.entry(503640, 'metric_delta', 'dispelled_stunned'), 'target_casts': [528]}))
 
 
+class MetricDeltaSetupInBeforeTests(unittest.TestCase):
+    UNHOLY_FRENZY = 805029
+    RAISE_GHOUL = 500971
+
+    def haste_entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == self.UNHOLY_FRENZY and entry.get('label_suffix') == 'haste')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_minion_is_raised_before_the_uncast_read(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.haste_entry()))
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        before = next(index for index, step in enumerate(steps)
+                      if step.get('label') == f'{self.UNHOLY_FRENZY} owned_creature_attack_time_ms before')
+        self.assertEqual([steps[index]['spell'] for index in casts if index < before], [self.RAISE_GHOUL])
+        self.assertEqual([steps[index]['spell'] for index in casts if index > before],
+                         [self.RAISE_GHOUL, self.UNHOLY_FRENZY])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_the_field_the_before_phase_casts_nothing(self):
+        entry = {key: value for key, value in self.haste_entry().items() if key != 'setup_in_before'}
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        steps = scenario['steps']
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        self.assertFalse(any(step.get('action') == 'cast' for step in steps[:before]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_field_needs_an_uncast_before_phase_with_setup_casts(self):
+        for change in ({'cast_in_before': True}, {'setup_casts': []},
+                       {'gate_timing': 'start', 'trigger_only_after': True}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_class_file(23), metric_delta_spec({**self.haste_entry(), **change}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_without_the_haste_alerts(self):
+        _, expectations = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.haste_entry()))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        unhasted = FakeRun(dict(zip(labels, (2000.0, 2000.0))))
+        self.assertEqual(judge_behaviour(base_verdict(expectation), unhasted, expectation).status, 'alert')
+        hasted = FakeRun(dict(zip(labels, (2000.0, 1538.4615478515625))))
+        self.assertEqual(judge_behaviour(base_verdict(expectation), hasted, expectation).status, 'ok')
+
+
 if __name__ == '__main__':
     unittest.main()
