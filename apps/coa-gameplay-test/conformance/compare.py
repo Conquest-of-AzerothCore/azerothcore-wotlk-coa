@@ -1803,7 +1803,7 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     judged = replace(base, measured=ratio, expected=expected, low=low, high=high)
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
     trigger_source = 'main-hand melee attacks' if model['trigger']['action'] == 'attack' \
-        else str(model['trigger']['spell'])
+        else str(model.get('trial_spell') or model['trigger']['spell'])
     resisted = (f' (tooltip {tooltip_ratio:g} x {kept:.4f} kept after the target\'s average partial resist of school '
                 f'mask {model["resisted_school_mask"]})') if model.get('resisted_school_mask') else ''
     excluded, excluded_note = magnitude_excluded(low, high, part_ratios)

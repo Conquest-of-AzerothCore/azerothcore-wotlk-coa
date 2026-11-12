@@ -759,6 +759,32 @@
         "source": "player_class_stats class 23 level 60 BaseMana 1373: covers Glacial Impact 704355's 14% base-mana cost"
       },
       "observe_source": "705745 Effect[0] aura 354 (rewritten to SPELL_AURA_DUMMY, AscensionNecromancerContracts.cpp:57-61), BasePoints 49 + 1 = 50 ($s1); AscensionNecromancerEvents.cpp:158-161 casts 707575 at the primary target with BasePoints0 = damage x 50 / 100 for each Glacial Impact 707592 hit (707575 Effect[0] SCHOOL_DAMAGE in SpellRadius 29 around the target, BonusMultiplier 0 by contract, AscensionNecromancerContracts.cpp:379-381). Glacial Impact 704355 (Effect[0] trigger 707592) needs a frozen target: Frost Nova 122 on the dummy (ADR 0303 fixture, the claim is not a freeze). One dummy: the splash lands on it alone; both hits are Frost and the dummy's partial resist is read."
+    },
+    {
+      "aura": 705745,
+      "name": "Harrowing Winds",
+      "tooltip": "Damage dealt by |cffffffffGlacial Impact|r now deals an additional $s1% of the damage dealt as Frost damage to enemies within $707575a1 yds of the primary target.",
+      "trigger": {
+        "action": "cast",
+        "spell": 704355,
+        "target": "dummy"
+      },
+      "trigger_text": "Damage dealt by Glacial Impact",
+      "trigger_spell_text": "Glacial Impact",
+      "trial_metric": "spell_damage_count",
+      "trial_spell": 707592,
+      "target_state_fixture": true,
+      "observe_spell": 707575,
+      "observe_source": "EffectTriggerSpell[0] of 705745",
+      "observe_note": "705745 Effect[0] aura 354 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61); AscensionNecromancerEvents.cpp:158-161 casts 707575 at the target of each Glacial Impact 707592 hit",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "now deals an additional",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers Glacial Impact 704355's 14% base-mana cost"
+      }
     }
   ],
   "talent_modifiers": [],

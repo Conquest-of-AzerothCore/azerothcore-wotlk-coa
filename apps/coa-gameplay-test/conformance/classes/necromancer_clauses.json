@@ -64,7 +64,7 @@
     "spell": 92123,
     "clause": "Increases your maximum Life Force by $s3.",
     "labels": [
-      "92123 effect_value e2 #0"
+      "92123 behaviour_metric_delta"
     ],
     "kind": "claim"
   },
@@ -1924,9 +1924,20 @@
   {
     "spell": 705745,
     "clause": "Damage dealt by Glacial Impact now deals an additional $s1% of the damage dealt as Frost damage to enemies within $707575a1 yds of the primary target.",
-    "labels": [
-      "705745 effect_value e0 #0",
-      "705745 effect_radius 707575e0 #1"
+    "claims": [
+      {
+        "claim": "Damage dealt by Glacial Impact now deals an additional $s1% of the damage dealt as Frost damage",
+        "labels": [
+          "705745 trigger_count",
+          "705745 trigger_magnitude_ratio"
+        ]
+      },
+      {
+        "claim": "to enemies within $707575a1 yds of the primary target.",
+        "labels": [
+          "705745 effect_radius 707575e0 #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2863,7 +2874,9 @@
   {
     "spell": 806321,
     "clause": "Critical strikes now apply a stack of Crypt Plague.",
-    "labels": [],
+    "labels": [
+      "806321 behaviour_metric_delta"
+    ],
     "kind": "claim"
   },
   {

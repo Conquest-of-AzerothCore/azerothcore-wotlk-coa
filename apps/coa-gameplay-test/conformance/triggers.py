@@ -504,6 +504,8 @@ def attempt_fixtures(entry: dict, facts: RankFacts) -> list[dict]:
     if entry.get('restore_charges'):
         fixtures.append({'action': 'restore_charges', 'actor': CASTER, 'spell': entry['trigger']['spell']})
     fixtures += power_steps(entry)
+    if entry.get('target_state_fixture'):
+        fixtures += required_target_health_steps(facts, TARGET)
     fixtures += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
                 for aura in entry.get('attempt_auras', [])]
     if entry.get('caster_health_pct') is not None:
@@ -1303,6 +1305,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
             'observe_metric': entry['observe_metric'], 'expected_ratio': entry['expected_ratio'],
             'force_crit': force_crit, 'measurements': labels, 'resisted_school_mask': resisted_school,
             'caster_level': class_file['level'], 'target_measurements': target_labels}
+    if entry.get('trial_spell') is not None:
+        model['trial_spell'] = entry['trial_spell']
     expectation = Expectation(magnitude_label(aura), MAGNITUDE_CHECK, aura, aura, None, entry['trigger_text'],
                               magnitude_trigger_rule(entry), model)
     return timed(scenario, SETTLE_MS + attempts * plan.attempt_ms + DRAIN_MS), [expectation]
