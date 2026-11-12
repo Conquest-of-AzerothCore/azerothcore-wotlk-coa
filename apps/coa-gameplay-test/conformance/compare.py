@@ -25,8 +25,9 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_OATH_CONSUMPTION_REMOVAL, BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO,
                         BEHAVIOUR_SINGLE_TARGET, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, BEHAVIOUR_EVENT_DELAY,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                        BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, DISPEL_TYPE_NAMES, strongest_percent)
-from bonus import (Bonus, band_excluded_text, band_status, bonus_detail, bonus_of, bonus_status, bonus_text,
+                        BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, DISPEL_TYPE_NAMES,
+                        strongest_percent)
+from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of, bonus_status, bonus_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
@@ -3643,6 +3644,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         return behaviour_dispel_count_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_TAKEN_OUTCOME:
         return behaviour_taken_outcome_verdict(base, run, model)
+    if expectation.check == BEHAVIOUR_CRIT_RATE:
+        return behaviour_crit_rate_verdict(base, run, model)
     return replace(base, explanation=f'behaviour check {expectation.check!r} has no judge rule')
 
 
@@ -3714,6 +3717,59 @@ def taken_outcome_text(bonus: Bonus) -> str:
             f'{bonus.trials} swings in the smaller arm) against the stated {bonus.expected:+.4g} points, which '
             f'passes inside +-{bonus.band:.3g} points (the larger of 5% of it and 2 points); excludes a difference '
             f'below {low:+.4g} or above {high:+.4g} points')
+
+
+def crit_share_difference(control: tuple[float, float], treatment: tuple[float, float]) -> tuple[float, float, float]:
+    (control_hits, control_crits), (treatment_hits, treatment_crits) = control, treatment
+    first, second = control_crits / control_hits, treatment_crits / treatment_hits
+    first_low, first_high = wilson_interval(control_crits, control_hits)
+    second_low, second_high = wilson_interval(treatment_crits, treatment_hits)
+    difference = second - first
+    low = difference - math.sqrt((second - second_low) ** 2 + (first_high - first) ** 2)
+    high = difference + math.sqrt((second_high - second) ** 2 + (first - first_low) ** 2)
+    return 100 * difference, 100 * low, 100 * high
+
+
+def crit_rate_hits_needed(control: tuple[float, float], treatment: tuple[float, float], band: float) -> int:
+    spread = sum(crits / hits * (1 - crits / hits) for hits, crits in (control, treatment))
+    return math.ceil(Z_99 ** 2 * spread / (band / 100) ** 2)
+
+
+def behaviour_crit_rate_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    counted = {}
+    for arm, marks in model['reads'].items():
+        found = []
+        for read in ('hits', 'crits'):
+            start, end = run.values.get(marks['start'][read]), run.values.get(marks['end'][read])
+            if start is None or end is None:
+                return replace(base, explanation=missing_measurement(
+                    run, marks['start'][read] if start is None else marks['end'][read]))
+            found.append(end - start)
+        if found[0] < model['minimum_hits']:
+            return replace(base, status='insufficient_trials',
+                           explanation=f'{arm}: {found[0]:g} landed hits, fewer than {model["minimum_hits"]}')
+        counted[arm] = (found[0], found[1])
+    control, treatment = counted['control'], counted['treatment']
+    measured, low, high = crit_share_difference(control, treatment)
+    expected = model['expected']
+    band = bonus_band(expected)
+    needed = crit_rate_hits_needed(control, treatment, band)
+    if expected - band <= low and high <= expected + band:
+        status = 'ok'
+    elif high < expected - band or low > expected + band:
+        status = 'alert'
+    else:
+        status = MEASURED
+    text = (f'critical share {control[1]:g} of {control[0]:g} control hits and {treatment[1]:g} of '
+            f'{treatment[0]:g} treatment hits: {measured:+.2f} points, 99% interval {low:+.2f} to {high:+.2f} '
+            f'(Newcombe, Wilson per arm) against the stated {expected:+g} +- {band:g}; a difference below '
+            f'{low:+.2f} or above {high:+.2f} points is excluded')
+    if status == MEASURED:
+        text += (f'; effect present, interval stated, not final: an interval inside the band needs about {needed} '
+                 f'hits per arm at these shares')
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high, explanation=text,
+                   detail={'crit_rate': {'control': list(control), 'treatment': list(treatment), 'band': band,
+                                         'hits_needed_per_arm': needed}})
 
 
 def taken_hit_formula(constant: float, coefficients: list[float], sums: list[float]) -> int:

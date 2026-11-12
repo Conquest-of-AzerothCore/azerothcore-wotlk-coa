@@ -1321,3 +1321,15 @@ Four kinds can set auras around their casts. Without the fields every scenario i
   scenario). Testament of Hope 1397742's copies attack the owner's selected enemy, so selecting a dummy places them:
   within 16.5 yd with `near` (16 yd) selected, beyond 20 yd with `far` (24 yd); the strike hits 890 near and 1100
   far, judged as 1 / 0.81.
+
+### Crit-rate scenarios (`behaviour_crit_rate`, `kind: "crit_rate"`, ADR 0173)
+
+`crit_rate` uses the hit_ratio fields (`observe_spell`, `control` and `treatment` auras or casts, `learn`, `trials`,
+default 300) and refuses a forced crit, a crit filter, another cast spell and swings. Each arm sets its auras before
+every cast and counts the landed hits of `observe_spell` and the critical ones between a start and an end read
+(`spell_damage_count`, then with `critical: true`); the scenario uses the accelerated cap. The judge takes the 99%
+Newcombe interval of the difference of the critical shares (Wilson per arm) against `expected` points with the
+5%-or-2-points band: ok inside the band, alert outside it, `measured` across its edge ("effect present, interval
+stated, not final", with the hits per arm an interval inside the band would need). Scourge-Defense Training 520608:
+300 Argent Blades per arm with Warrior of Dawn 561156, 520608 set first in the treatment.
+

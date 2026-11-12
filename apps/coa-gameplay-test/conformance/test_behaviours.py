@@ -8,6 +8,7 @@ import unittest
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
                         BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
+                        BEHAVIOUR_CRIT_RATE,
                         BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
                         BEHAVIOUR_AURA_GRANT, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_CAST_COMBAT, BEHAVIOUR_HEAL_BLOCK,
                         BEHAVIOUR_CAST_CONDITION,
@@ -740,7 +741,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
             behaviour_entries(CLASS_FILE, [1])
 
     def test_behaviour_entries_everything_by_default(self):
-        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 258)
+        self.assertEqual(len(behaviour_entries(CLASS_FILE, None)), 259)
 
 
 class TargetCountScenarioTests(unittest.TestCase):
@@ -7137,6 +7138,51 @@ class TakenHitSelectionTests(unittest.TestCase):
         spec = taken_hit_spec(same)
         self.assertNotEqual(spec.arms[0].select, spec.arms[1].select)
         taken_hit_scenario(CLASS_FILE, spec)
+
+
+
+class CritRateTests(unittest.TestCase):
+    def built(self):
+        return behaviour_scenario(CLASS_FILE, r1a_entry(520608, 'crit_rate'))
+
+    def judged(self, control: tuple[float, float], treatment: tuple[float, float]) -> Verdict:
+        _, [expectation] = self.built()
+        values = {}
+        for arm, (hits, crits) in (('control', control), ('treatment', treatment)):
+            marks = expectation.model['reads'][arm]
+            values.update({marks['start']['hits']: 10.0, marks['start']['crits']: 4.0,
+                           marks['end']['hits']: 10.0 + hits, marks['end']['crits']: 4.0 + crits})
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_each_arm_casts_its_spell_300_times_with_its_auras_and_counts_hits_and_crits(self):
+        scenario, [expectation] = self.built()
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        self.assertEqual(expectation.check, BEHAVIOUR_CRIT_RATE)
+        steps = scenario['steps']
+        self.assertEqual(len(cast_indices(steps, 807268)), 600)
+        self.assertNotIn('melee_crit_rating', scenario['players'][0])
+        crit_reads = [step for step in steps if step.get('critical') is True]
+        self.assertEqual(len(crit_reads), 4)
+        first = cast_indices(steps, 807268)[0]
+        self.assertEqual([step['spell'] for step in steps[first - 4:first] if step['action'] == 'set_aura'], [561156])
+
+    def test_an_interval_inside_the_band_is_ok_and_one_across_it_is_measured(self):
+        self.assertEqual(self.judged((3000.0, 0.0), (3000.0, 1500.0)).status, 'ok')
+        verdict = self.judged((300.0, 0.0), (300.0, 150.0))
+        self.assertEqual(verdict.status, 'measured')
+        self.assertIn('effect present, interval stated, not final', verdict.explanation)
+        self.assertGreater(verdict.detail['crit_rate']['hits_needed_per_arm'], 300)
+
+    def test_seeded_missing_or_older_crit_bonus_alerts(self):
+        self.assertEqual(self.judged((300.0, 0.0), (300.0, 0.0)).status, 'alert')
+        self.assertEqual(self.judged((300.0, 0.0), (300.0, 60.0)).status, 'alert')
+
+    def test_too_few_landed_hits_are_not_judged(self):
+        self.assertEqual(self.judged((100.0, 0.0), (300.0, 150.0)).status, 'insufficient_trials')
+
+    def test_a_forced_crit_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'no forced crit'):
+            behaviour_scenario(CLASS_FILE, {**r1a_entry(520608, 'crit_rate'), 'force_crit': 'melee'})
 
 
 if __name__ == '__main__':

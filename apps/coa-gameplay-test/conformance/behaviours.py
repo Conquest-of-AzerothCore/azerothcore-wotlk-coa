@@ -54,6 +54,7 @@ BEHAVIOUR_TAKEN_HIT = 'behaviour_taken_hit'
 BEHAVIOUR_THREAT_REDIRECT = 'behaviour_threat_redirect'
 BEHAVIOUR_DISPEL_COUNT = 'behaviour_dispel_count'
 BEHAVIOUR_TAKEN_OUTCOME = 'behaviour_taken_outcome'
+BEHAVIOUR_CRIT_RATE = 'behaviour_crit_rate'
 BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVIOUR_DURATION_RATIO, BEHAVIOUR_TRIGGER,
                     BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_DURATION_REFRESH, BEHAVIOUR_AMOUNT_DELTA,
                     BEHAVIOUR_CRIT_GUARANTEE, BEHAVIOUR_AURA_GRANT, BEHAVIOUR_OATH_CONSUMPTION,
@@ -65,7 +66,7 @@ BEHAVIOUR_CHECKS = (BEHAVIOUR_COUNT, BEHAVIOUR_RATIO, BEHAVIOUR_DURATION, BEHAVI
                     BEHAVIOUR_HEAL_BLOCK, BEHAVIOUR_CAST_APPLIES_AURA, BEHAVIOUR_METRIC_RATIO_DELTA,
                     BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_HIT_RATIO, BEHAVIOUR_IMMUNITY, BEHAVIOUR_THREAT_SLOPE,
                     BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
-                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME)
+                    BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE)
 KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delta', 'duration_refresh',
         'amount_delta', 'crit_guarantee', 'aura_grant', 'oath_consumption', 'oath_consumption_removal',
         'internal_cooldown_gate', 'exclusivity', 'group_stack_cap', 'single_target', 'crit_magnitude',
@@ -74,7 +75,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'aura_metric_delta', 'cast_applies_aura', 'cast_stat_ratio', 'threat_tick_ratio', 'absorb_pierce_ratio',
         'hit_ratio', 'cast_state', 'immunity', 'threat_slope', 'group_target', 'cost_gate', 'site_purchase',
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
-        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout')
+        'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -4754,6 +4755,69 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('swing_hand'), entry.get('cast_spell'), int(entry.get('cast_wait_ms', 0)))
 
 
+CRIT_RATE_TRIALS = 300
+CRIT_RATE_READS = ('hits', 'crits')
+
+
+def crit_rate_reads(spec: HitRatioSpec, arm: str) -> dict[str, dict[str, str]]:
+    base = f'{spec.spell} {BEHAVIOUR_CRIT_RATE}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+    return {mark: {read: f'{base} {arm} {mark} {read}' for read in CRIT_RATE_READS} for mark in ('start', 'end')}
+
+
+def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list[Expectation]]:
+    if spec.trials < 1 or spec.control == spec.treatment:
+        raise ValueError(f'{spec.spell} crit_rate needs trials and two different arms')
+    if spec.force_crit is not None or spec.critical is not None or spec.cast_spell is not None or \
+            spec.swing_hand is not None:
+        raise ValueError(f'{spec.spell} crit_rate counts every landed hit of its own casts, with no forced crit, '
+                         f'crit filter, other cast or swing')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'crit_rate', spec.quote, spec.expected)
+    class_file = armed_for(class_file, records, spec.observe_spell)
+    fields = {'spell': spec.observe_spell, 'target': spec.target}
+    learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts)
+    steps = [{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}]
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
+              if spell != spec.observe_spell or spec.caster != CASTER]
+    reads = {}
+    for name in HIT_RATIO_ARMS:
+        arm = getattr(spec, name)
+        marks = reads[name] = crit_rate_reads(spec, name)
+
+        def read(mark: str) -> list[dict]:
+            return [measurement(marks[mark]['hits'], spec.caster, 'spell_damage_count', **fields),
+                    measurement(marks[mark]['crits'], spec.caster, 'spell_damage_count', **fields, critical=True)]
+
+        steps += read('start')
+        for _ in range(spec.trials):
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                      for spell, stacks in arm.auras]
+            for cast in arm.casts:
+                steps += hit_ratio_cast(records, cast)
+            steps += hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
+        steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
+        steps += read('end')
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
+    player = {**player_fixture(class_file), **dict(spec.fixture)}
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour crit rate{suffix}',
+        'contract': f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target} per arm, control '
+                    f'first, the arm\'s auras {list(spec.control.auras)} / {list(spec.treatment.auras)} set before '
+                    f'every cast; the landed hits and the critical ones are counted at the start and the end of each '
+                    f'arm; the treatment\'s critical share must exceed the control\'s by {spec.expected:g} points',
+        'players': [player],
+        'creatures': [creature_fixture(class_file)],
+        'steps': base_steps(class_file) + steps}
+    model = {'kind': 'crit_rate', 'reads': reads, 'expected': spec.expected, 'trials': spec.trials,
+             'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)), 'quote': entry.quote}
+    expectation = Expectation(f'{spec.spell} {BEHAVIOUR_CRIT_RATE}' + suffix, BEHAVIOUR_CRIT_RATE, spec.spell,
+                              spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
+                              model)
+    return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
+
+
 TAKEN_HIT_TRIALS = 10
 TAKEN_HIT_STRIKE_WAIT_MS = 300
 TAKEN_HIT_SETTLE_MS = 500
@@ -5574,6 +5638,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return absorb_pierce_ratio_scenario(class_file, absorb_pierce_ratio_spec(entry))
     if entry['kind'] == 'hit_ratio':
         return hit_ratio_scenario(class_file, hit_ratio_spec(entry))
+    if entry['kind'] == 'crit_rate':
+        return crit_rate_scenario(class_file, hit_ratio_spec({'trials': CRIT_RATE_TRIALS, **entry}))
     if entry['kind'] == 'taken_hit':
         return taken_hit_scenario(class_file, taken_hit_spec(entry))
     if entry['kind'] == 'threat_redirect':
