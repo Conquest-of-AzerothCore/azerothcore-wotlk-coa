@@ -8319,7 +8319,7 @@ class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ScriptHitStatAuraTests(unittest.TestCase):
     def entry(self):
-        return variant_entry(527023, 'script_hit', 'no_power')
+        return side_a_entry(variant_entry, 527023, 'script_hit', 'no_power')
 
     def test_the_stat_auras_come_before_the_stat_measurements(self):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
@@ -8329,9 +8329,9 @@ class ScriptHitStatAuraTests(unittest.TestCase):
         self.assertEqual(expectation.label, '527023 script_hit 527269 no_power')
 
     def test_an_entry_without_stat_auras_keeps_its_label_and_first_step(self):
-        scenario, [expectation] = behaviour_scenario(CLASS_FILE, next(
-            entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 527023 and entry['kind'] == 'script_hit'
-            and 'variant' not in entry))
+        entry = side_a_entry(lambda: next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 527023
+                                          and entry['kind'] == 'script_hit' and 'variant' not in entry))
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
         self.assertEqual(expectation.label, '527023 script_hit 527269')
         self.assertNotEqual(scenario['steps'][0]['action'], 'set_aura')
 
@@ -8340,7 +8340,7 @@ class ScriptHitStatAuraTests(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CostGateChargeTests(unittest.TestCase):
     def setUp(self):
-        self.entry = variant_entry(TESTAMENT_OF_STRENGTH, 'cost_gate', 'titanstrike')
+        self.entry = side_a_entry(variant_entry, TESTAMENT_OF_STRENGTH, 'cost_gate', 'titanstrike')
         self.scenario, self.expectations = behaviour_scenario(CLASS_FILE, self.entry)
         self.steps = run.validate(self.scenario)['steps']
         self.by_label = {expectation.label: expectation for expectation in self.expectations}
@@ -8372,7 +8372,7 @@ class CostGateChargeTests(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ExtensionHitRatioMutantTests(unittest.TestCase):
     def judged(self, spell: int, variant: str, treatment: float, control: float) -> str:
-        _, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(spell, 'hit_ratio', variant))
+        _, [expectation] = behaviour_scenario(CLASS_FILE, side_a_entry(variant_entry, spell, 'hit_ratio', variant))
         return judge_behaviour(base_verdict(expectation), FakeRun(ratio_values(expectation.model, treatment, control)),
                                expectation).status
 
