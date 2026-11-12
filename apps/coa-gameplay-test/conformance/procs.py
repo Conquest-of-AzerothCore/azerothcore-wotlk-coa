@@ -22,7 +22,8 @@ MINION_PROC_TRIALS = frozenset({'pet_melee_crits', 'owned_creature_damage_count'
 MINION_BASELINE_ATTEMPTS = 20
 CAST_COUNT = 'spell_cast_count'
 MELEE_EVENTS = 'melee_attack_count'
-EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS})
+MINION_PROC_COUNT = 'owned_creature_spell_proc_count'
+EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS, MINION_PROC_COUNT})
 CHARGES = 'spell_charges'
 TRIGGER_TARGETS = frozenset({TARGET, ALLY})
 PERIODIC_DAMAGE_AURA = 3
@@ -266,6 +267,8 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
     if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry):
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
+    if entry['event_metric'] == MINION_PROC_COUNT and entry.get('event_actor') != MINION:
+        raise ValueError(f'Proc {entry["aura"]} counts minion procs without a minion event actor')
     if entry['event_metric'] == MELEE_EVENTS and entry['trigger']['action'] != CAST:
         raise ValueError(f'Proc {entry["aura"]} counts auto attacks as events, which needs a cast trigger')
     per_trigger_limit(entry)
@@ -429,10 +432,12 @@ def event_steps(entry: dict) -> list[dict]:
     if counts_charges(entry):
         return []
     if entry.get('event_actor') == MINION:
-        if entry['event_metric'] != 'spell_damage_count' or minion_entry(entry) is None:
-            raise ValueError(f'Proc {entry["aura"]} reads minion events other than spell_damage_count of a minion')
+        if entry['event_metric'] not in ('spell_damage_count', MINION_PROC_COUNT) or minion_entry(entry) is None:
+            raise ValueError(f'Proc {entry["aura"]} reads minion events other than spell_damage_count or '
+                             f'{MINION_PROC_COUNT} of a minion')
+        on_target = {'target': TARGET} if entry['event_metric'] == 'spell_damage_count' else {}
         return [measurement(label, CASTER, term['metric'], spell=term['spell'], entry=minion_entry(entry),
-                            target=TARGET) for label, term in event_terms(entry)]
+                            **on_target) for label, term in event_terms(entry)]
     return [spell_count_step(label, term['metric'], term['spell']) for label, term in event_terms(entry)]
 
 
