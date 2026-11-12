@@ -226,3 +226,7 @@ class MinionScenarioTest(unittest.TestCase):
         self.assertTrue(set(baseline_labels(OVERWHELMING_FORCE).values()) <= labels)
         self.assertEqual({expectation.check for expectation in expectations}, {PROC_CHECK, PROC_ENERGIZE_CHECK})
         self.assertEqual(expectations[0].model['baseline']['attempts'], baseline_attempts(plan.chance_pct))
+
+
+if __name__ == '__main__':
+    unittest.main()
