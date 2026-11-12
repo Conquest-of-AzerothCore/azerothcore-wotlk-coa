@@ -1,0 +1,149 @@
+{
+  "schema": 1,
+  "name": "Creatures on display ids above 65535 keep their own display",
+  "contract": [
+    "Creature model data was keyed by a 16-bit id, so display 142832 (troglodyte, Grimepit Trogg 164206) read the row",
+    "of 142832 % 65536 = 11760, a troll female paired with troll male 11758. Each spawn then had a 50% chance, rolled",
+    "twice on creation, of switching to a troll display. Expected: every summoned Grimepit Trogg stays on 142832.",
+    "Goldshire Farmer 162824 wears a captured female look; her display must not be one of a male/female pair, so every",
+    "summoned farmer stays on the plain human female display 50. display_id reads the server's display only."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trogg1",
+      "owner": "viewer",
+      "entry": 164206,
+      "level": 20,
+      "health": 100000,
+      "distance": 12
+    },
+    {
+      "id": "trogg2",
+      "owner": "viewer",
+      "entry": 164206,
+      "level": 20,
+      "health": 100000,
+      "distance": 16
+    },
+    {
+      "id": "trogg3",
+      "owner": "viewer",
+      "entry": 164206,
+      "level": 20,
+      "health": 100000,
+      "distance": 20
+    },
+    {
+      "id": "trogg4",
+      "owner": "viewer",
+      "entry": 164206,
+      "level": 20,
+      "health": 100000,
+      "distance": 24
+    },
+    {
+      "id": "trogg5",
+      "owner": "viewer",
+      "entry": 164206,
+      "level": 20,
+      "health": 100000,
+      "distance": 28
+    },
+    {
+      "id": "farmer1",
+      "owner": "viewer",
+      "entry": 162824,
+      "level": 5,
+      "health": 100000,
+      "distance": 40
+    },
+    {
+      "id": "farmer2",
+      "owner": "viewer",
+      "entry": 162824,
+      "level": 5,
+      "health": 100000,
+      "distance": 44
+    },
+    {
+      "id": "farmer3",
+      "owner": "viewer",
+      "entry": 162824,
+      "level": 5,
+      "health": 100000,
+      "distance": 48
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawns settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grimepit Trogg 1 keeps the troglodyte display",
+      "actor": "trogg1",
+      "metric": "display_id",
+      "equals": 142832
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grimepit Trogg 2 keeps the troglodyte display",
+      "actor": "trogg2",
+      "metric": "display_id",
+      "equals": 142832
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grimepit Trogg 3 keeps the troglodyte display",
+      "actor": "trogg3",
+      "metric": "display_id",
+      "equals": 142832
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grimepit Trogg 4 keeps the troglodyte display",
+      "actor": "trogg4",
+      "metric": "display_id",
+      "equals": 142832
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Grimepit Trogg 5 keeps the troglodyte display",
+      "actor": "trogg5",
+      "metric": "display_id",
+      "equals": 142832
+    },
+    {
+      "action": "assert",
+      "label": "Goldshire Farmer 1 keeps the unpaired female display",
+      "actor": "farmer1",
+      "metric": "display_id",
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Goldshire Farmer 2 keeps the unpaired female display",
+      "actor": "farmer2",
+      "metric": "display_id",
+      "equals": 50
+    },
+    {
+      "action": "assert",
+      "label": "Goldshire Farmer 3 keeps the unpaired female display",
+      "actor": "farmer3",
+      "metric": "display_id",
+      "equals": 50
+    }
+  ]
+}
