@@ -116,7 +116,70 @@
   ],
   "cast_auras": [
     {"spell": 562302, "auras": [458],
-     "reason": "Crusader's Presence 562302 can only be used while Mounted (the Templar OnSpellCheckCast hook returns SPELL_FAILED_ONLY_MOUNTED, 91); Brown Horse 458's aura 78 mounts the caster before its cast"}
+     "reason": "Crusader's Presence 562302 can only be used while Mounted (the Templar OnSpellCheckCast hook returns SPELL_FAILED_ONLY_MOUNTED, 91); Brown Horse 458's aura 78 mounts the caster before its cast"},
+    {
+      "spell": 803872,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803872's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803873,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803873's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803874,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803874's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803875,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803875's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803876,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803876's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803877,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803877's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803878,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803878's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803879,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803879's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    },
+    {
+      "spell": 803880,
+      "auras": [
+        64481
+      ],
+      "reason": "Blade of Faith's ticks can crit since ADR 0243; Reduce Critical Strike Chance -100% 64481 (aura 52, -999% weapon crit) is set before every cast of 803880's hit, periodic-total and value scenarios so the tick values read stay deterministic (ADR 0245)."
+    }
   ],
   "conditional_spells": [
     {"spell": 705300, "learn": 573452,
@@ -6299,6 +6362,27 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 800424,
+      "name": "Absolution",
+      "kind": "aggro_redirect",
+      "variant": "range",
+      "label_suffix": "range",
+      "quote": "Taunt all enemies within 8 yds",
+      "self_cast": true,
+      "rooted": true,
+      "targets": [
+        {
+          "distance": 7.5,
+          "expected_redirect": true
+        },
+        {
+          "distance": 8.5,
+          "expected_redirect": false
+        }
+      ],
+      "observe_source": "800424 Effect[0] aura 11 on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, SpellRadius 14 (8 yd; spell_effect_radius reads 8), MaxAffectedTargets 5. Two rooted dummies (Self Root Forever 42716), each read by distance_2d right before the self-centred cast (ADR 0244): 7.5 yd, inside the stated 8 yd, must be taunted; 8.5 yd, outside it, must not. Stock Spell::SelectImplicitAreaTargets adds the caster's GetLeewayBonusRadius (2.66 yd for a player whose run speed exceeds 4.97, Object.cpp:1786-1806, Spell.cpp:1391-1395) and WorldObjectSpellAreaTargetCheck the target's combat reach (1.275 for the dummy, Spell.cpp:9428-9432), so the engine's edge is about 11.9 yd: diagnostics 20261112-033832 to -034042 taunt rooted dummies at 10.5 and 11.5 yd and not at 12.5. FN-r2b-3."
     }
   ],
   "player_observations": [

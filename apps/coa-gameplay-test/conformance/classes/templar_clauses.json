@@ -3217,7 +3217,10 @@
       },
       {
         "claim": "within 8 yds",
-        "labels": []
+        "labels": [
+          "800424 aggro_redirect range primary after",
+          "800424 aggro_redirect range extra1 after"
+        ]
       }
     ],
     "kind": "claim"
