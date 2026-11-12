@@ -67,6 +67,9 @@
 - `packets.py`: `write_packets(dbc_dir, class_file, sample, chunk, bucket_rows, out_dir, class_map)` writes one
   Markdown packet per spell of a sample chunk (`packet`, `render_packet`) (see
   [Per-spell packets](generate-and-compare.md#per-spell-packets)).
+- `class_map.py`: the command line `--worktree W --out OUT [--dbc-dir DIR] [--log-events EVENTS.csv]` maps every
+  spell of the 21 CoA classes to the code that touches it (`risk`, `gap`, `custom_mechanics`, log counts) and writes
+  `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)
