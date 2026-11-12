@@ -52,3 +52,12 @@ DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceGroup` 
 INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
 (17, 0, 365038, 0, 0, 31, 1, 3, 164080, 0, 0, 0, 0, '', 'Throw Meat only at a Daumor Gryphon'),
 (17, 0, 365038, 0, 1, 31, 1, 3, 164188, 0, 0, 0, 0, '', 'Throw Meat only at a Daumor Gryphon');
+
+-- A Nest can be reached from up to 11 yd (its model's box plus Opening's 5 yd), outside the gryphon's push. Within
+-- Daumor Peak (10248), Opening (3365) on a Nest now needs the nest's gryphon gone: no Daumor Gryphon within 3 yd.
+DELETE FROM `conditions` WHERE `SourceTypeOrReferenceId` = 17 AND `SourceGroup` = 0 AND `SourceEntry` = 3365 AND ((`ConditionTypeOrReference` = 23 AND `ConditionValue1` = 10248) OR (`ConditionTypeOrReference` = 31 AND `ConditionValue2` = 2300669) OR (`ConditionTypeOrReference` = 29 AND `ConditionValue1` IN (164080, 164188)));
+INSERT INTO `conditions` (`SourceTypeOrReferenceId`, `SourceGroup`, `SourceEntry`, `SourceId`, `ElseGroup`, `ConditionTypeOrReference`, `ConditionTarget`, `ConditionValue1`, `ConditionValue2`, `ConditionValue3`, `NegativeCondition`, `ErrorType`, `ErrorTextId`, `ScriptName`, `Comment`) VALUES
+(17, 0, 3365, 0, 0, 23, 0, 10248, 0, 0, 1, 173, 0, '', 'Opening outside Daumor Peak is unrestricted'),
+(17, 0, 3365, 0, 1, 31, 1, 5, 2300669, 0, 1, 173, 0, '', 'Opening in Daumor Peak on anything but a Nest is unrestricted'),
+(17, 0, 3365, 0, 2, 29, 1, 164080, 3, 0, 1, 173, 0, '', 'Opening on a Nest needs its Daumor Gryphon gone'),
+(17, 0, 3365, 0, 2, 29, 1, 164188, 3, 0, 1, 173, 0, '', 'Opening on a Nest needs its Daumor Gryphon gone');
