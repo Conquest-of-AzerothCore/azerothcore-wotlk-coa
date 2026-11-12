@@ -73,6 +73,7 @@
 #include "CreatureScript.h"
 #include "GameObject.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
@@ -192,6 +193,7 @@ namespace
             _festering.clear();
             _usedEggs.clear();
             _hatchingEggs.clear();
+            EndDrainLifeSplash();
             EndHunt();
             Emerge();
 
@@ -223,6 +225,7 @@ namespace
 
         void JustDied(Unit* killer) override
         {
+            EndDrainLifeSplash();
             EndHunt();
             BossAI::JustDied(killer);
             _avatar.Release(me);
@@ -276,6 +279,9 @@ namespace
                 case SPELL_POISON_BOLT_VOLLEY:
                     for (Player* p : PlayersWithin(me, VOLLEY_RANGE))
                         me->CastSpell(p, SPELL_POISON_BOLT_HIT, true);
+                    break;
+                case SPELL_DRAIN_LIFE:
+                    DrainLifeSplash();
                     break;
                 case SPELL_HATCH_EGGS:
                     Talk(SAY_SPIDER_SPAWN);
@@ -346,15 +352,38 @@ namespace
                 SPELL_FESTERING_CLOUD, true);
         }
 
-        void DrainLifeSplash(Unit* primary, int32 tick)
+        void OnChannelFinished(SpellInfo const* spell) override
+        {
+            if (spell->Id == SPELL_DRAIN_LIFE)
+                _drainSplashed.clear();
+        }
+
+        void DrainLifeSplash()
         {
             std::vector<Player*> raid = PlayersWithin(me, DRAIN_LIFE_RANGE);
             size_t const count = size_t(std::lround(raid.size() * DRAIN_LIFE_SPLASH_SHARE));
-            std::erase(raid, primary);
+            std::erase_if(raid, [this](Player const* p) { return p->GetGUID() == _drainTarget; });
             Acore::Containers::RandomShuffle(raid);
             raid.resize(std::min(raid.size(), count));
             for (Player* p : raid)
-                me->CastCustomSpell(p, SPELL_DRAIN_LIFE_SPLASH, nullptr, &tick, nullptr, true);
+            {
+                me->CastCustomSpell(p, SPELL_DRAIN_LIFE_SPLASH, nullptr, &_drainTick, nullptr, true);
+                _drainSplashed.push_back(p->GetGUID());
+            }
+        }
+
+        bool DrainingLife() const
+        {
+            Spell const* channel = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
+            return channel && channel->GetSpellInfo()->Id == SPELL_DRAIN_LIFE;
+        }
+
+        void EndDrainLifeSplash()
+        {
+            for (ObjectGuid const& guid : _drainSplashed)
+                if (Player* p = ObjectAccessor::GetPlayer(*me, guid))
+                    p->RemoveAurasDueToSpell(SPELL_DRAIN_LIFE_SPLASH, me->GetGUID());
+            _drainSplashed.clear();
         }
 
         void KilledUnit(Unit* victim) override
@@ -501,6 +530,9 @@ namespace
             if (!UpdateVictim())
                 return;
 
+            if (!_drainSplashed.empty() && !DrainingLife())
+                EndDrainLifeSplash();
+
             if (_avatar.Consumed(me))
                 TakeSpiderForm();
 
@@ -520,9 +552,9 @@ namespace
                     case EVENT_DRAIN_LIFE:
                         if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, DRAIN_LIFE_RANGE, true))
                         {
-                            int32 tick = Info(me, INFO_DRAIN_LIFE);
-                            me->CastCustomSpell(target, SPELL_DRAIN_LIFE, nullptr, &tick, nullptr, false);
-                            DrainLifeSplash(target, tick);
+                            _drainTarget = target->GetGUID();
+                            _drainTick = Info(me, INFO_DRAIN_LIFE);
+                            me->CastCustomSpell(target, SPELL_DRAIN_LIFE, nullptr, &_drainTick, nullptr, false);
                         }
                         events.ScheduleEvent(EVENT_DRAIN_LIFE, 10s, 0, PHASE_TROLL);
                         break;
@@ -596,6 +628,9 @@ namespace
         GuidSet _festering;
         GuidSet _usedEggs;
         GuidVector _hatchingEggs;
+        GuidVector _drainSplashed;
+        ObjectGuid _drainTarget;
+        int32 _drainTick = 0;
         ObjectGuid _hunted;
         float _huntThreat = 0.0f;
     };

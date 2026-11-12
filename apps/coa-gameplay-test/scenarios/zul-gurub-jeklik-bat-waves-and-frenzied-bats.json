@@ -4,12 +4,12 @@
   "contract": [
     "On live Jeklik (14517) brings six Bloodseeker Bats (11368) every 30 s in her troll and her bat form, and in",
     "her bat form on Mythic and Ascended Frenzied Bloodseeker Bats (14965) as well (round-5 tester and live",
-    "logs). Our Jeklik called bats only as a troll, once a minute, and never a frenzied bat. A Mythic and a",
-    "Normal Jeklik are wounded into their bat form after landing; the waves come 52 s into the fight and every",
-    "30 s after, the frenzied bat 30 s into the bat form on Mythic only. Bats fight the heroes, who do not",
-    "strike back, so every wave stays."
+    "logs). Our Jeklik called bats only as a troll, once a minute, and never a frenzied bat. The waves come 52 s",
+    "into the fight and every 30 s after, the frenzied bat 30 s into the bat form on Mythic only. A Mythic Jeklik",
+    "is wounded into her bat form after landing; a Normal Jeklik stays a troll for two waves, then is wounded",
+    "into her bat form for a third. Bats fight the heroes, who do not strike back, so every wave stays."
   ],
-  "timeout_ms": 200000,
+  "timeout_ms": 240000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -166,17 +166,17 @@
       "within_ms": 30000
     },
     {
+      "action": "snapshot",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "save_as": "bats_at_landing"
+    },
+    {
       "action": "set_health_pct",
       "label": "Wound the mythic Jeklik below half health",
       "actor": "mythic",
       "target": "jeklik_mythic",
-      "pct": 45
-    },
-    {
-      "action": "set_health_pct",
-      "label": "Wound the normal Jeklik below half health",
-      "actor": "normal",
-      "target": "jeklik_normal",
       "pct": 45
     },
     {
@@ -187,6 +187,50 @@
       "spell": 2106122,
       "equals": 1,
       "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Jeklik calls a Frenzied Bloodseeker Bat 30 s into her bat form",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 14965,
+      "min": 1,
+      "within_ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: six Bloodseeker Bats come while the Normal Jeklik is a troll",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "relative_to": "bats_at_landing",
+      "min": 6,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: six more come 30 s later",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 11368,
+      "relative_to": "bats_at_landing",
+      "min": 12,
+      "within_ms": 35000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Jeklik is still a troll",
+      "actor": "jeklik_normal",
+      "metric": "aura",
+      "spell": 2106122,
+      "equals": 0
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the normal Jeklik below half health",
+      "actor": "normal",
+      "target": "jeklik_normal",
+      "pct": 45
     },
     {
       "action": "assert",
@@ -205,13 +249,9 @@
       "save_as": "bats_at_bat_form"
     },
     {
-      "action": "assert",
-      "label": "DISCRIMINATING: the Mythic Jeklik calls a Frenzied Bloodseeker Bat 30 s into her bat form",
-      "actor": "mythic",
-      "metric": "nearby_creature_count",
-      "entry": 14965,
-      "min": 1,
-      "within_ms": 35000
+      "action": "wait",
+      "label": "Past the 30 s at which a Mythic Jeklik calls her frenzied bat",
+      "ms": 35000
     },
     {
       "action": "assert",
@@ -222,31 +262,20 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the Normal Jeklik never calls one",
-      "actor": "normal",
-      "metric": "nearby_creature_count",
-      "entry": 14965,
-      "equals": 0
-    },
-    {
-      "action": "assert",
       "label": "DISCRIMINATING: six Bloodseeker Bats come in her bat form",
       "actor": "normal",
       "metric": "nearby_creature_count",
       "entry": 11368,
       "relative_to": "bats_at_bat_form",
-      "min": 6,
-      "within_ms": 60000
+      "min": 6
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: six more come 30 s later",
+      "label": "DISCRIMINATING: the Normal Jeklik never calls a frenzied bat",
       "actor": "normal",
       "metric": "nearby_creature_count",
-      "entry": 11368,
-      "relative_to": "bats_at_bat_form",
-      "min": 12,
-      "within_ms": 35000
+      "entry": 14965,
+      "equals": 0
     },
     {
       "action": "assert",

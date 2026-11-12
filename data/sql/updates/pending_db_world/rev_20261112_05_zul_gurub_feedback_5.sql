@@ -23,7 +23,8 @@ UPDATE `creature_template` SET `DamageModifier` = 4.776 WHERE `entry` = 215041;
 -- CoA creature scaling multiplies raid health by 2.2 on Normal only, so the Heroic, Mythic and Ascended templates
 -- carry it themselves. Creatures with a coa_boss_flex row skip that scaling on every difficulty.
 DROP TEMPORARY TABLE IF EXISTS `zg_base`;
-CREATE TEMPORARY TABLE `zg_base` AS SELECT `entry`, `HealthModifier` FROM `creature_template` WHERE `entry` IN (
+CREATE TEMPORARY TABLE `zg_base` ENGINE=InnoDB
+AS SELECT `entry`, `HealthModifier` FROM `creature_template` WHERE `entry` IN (
     11338, 11339, 11340, 11347, 11348, 11350, 11351, 11352, 11353, 11356, 11357, 11359,
     11360, 11361, 11365, 11368, 11370, 11371, 11372, 11373, 11374, 11380, 11382, 11387,
     11388, 11389, 11390, 11391, 11830, 11831, 14507, 14509, 14510, 14515, 14517, 14532,
