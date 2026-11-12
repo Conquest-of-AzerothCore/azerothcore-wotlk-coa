@@ -664,12 +664,14 @@ class OneWithTheLightCooldownEntryTest(unittest.TestCase):
         for entry in self.effect_0_entries():
             self.assertIs(checked_entry(entry), entry)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cooldown_trigger_scenario_groups_an_ally_for_an_observe_target_ally_entry(self):
         entry = self.entry_for(TESTAMENT_OF_WILL)
         scenario, _ = cooldown_trigger_scenario(CLASS_FILE, entry, 0)
         self.assertTrue(any(step.get('action') == 'group' for step in scenario['steps']))
         self.assertEqual(len(scenario['players']), 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cooldown_trigger_scenario_adds_a_creature_for_an_observe_target_dummy_entry(self):
         entry = self.entry_for(DIVINE_FORCE)
         scenario, _ = cooldown_trigger_scenario(CLASS_FILE, entry, 0)
@@ -775,6 +777,7 @@ class ScarletChampionLegacyEntriesTest(unittest.TestCase):
         self.assertEqual(entry['internal_cooldown_ms'], 1000)
         self.assertEqual(entry['observe_spell'], SCARLET_CHAMPION_STACK)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scarlet_champion_scenario_forces_melee_crit_rating(self):
         scenario, _ = trigger_scenario(CLASS_FILE, templar_trigger(SCARLET_CHAMPION))
         self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
@@ -786,6 +789,7 @@ class ScarletChampionLegacyEntriesTest(unittest.TestCase):
         self.assertEqual(entry['trial_metric'], 'spell_cast_count')
         self.assertEqual(entry['observe_spell'], LEGACY_OF_THE_SILVER_HAND_CHARGES)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_legacy_of_the_silver_hand_scenario_builds_and_validates(self):
         scenario, [expectation] = trigger_scenario(CLASS_FILE, templar_trigger(LEGACY_OF_THE_SILVER_HAND))
         run.validate(scenario)
@@ -1141,6 +1145,7 @@ class MagnitudeTriggerCompareTest(unittest.TestCase):
         self.assertIn('no magnitude measurements', verdict.explanation)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MagnitudeScenarioResistanceTest(unittest.TestCase):
     def test_holy_copy_on_the_dummy_measures_the_dummys_level_and_holy_resistance(self):
         scenario, [expectation] = magnitude_ratio_scenario(CLASS_FILE, templar_magnitude_trigger(RETRIBUTION))
@@ -2525,6 +2530,7 @@ class LibramOfZealCooldownEntryTest(unittest.TestCase):
             checked_cooldown_entry(broken)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CooldownDeltaObserveTargetTest(unittest.TestCase):
     def test_cooldown_trial_steps_casts_the_observed_rank_at_the_named_target(self):
         entry = templar_trigger(LIBRAM_OF_ZEAL)
@@ -2564,6 +2570,7 @@ class CooldownDeltaObserveTargetTest(unittest.TestCase):
         self.assertGreater(steps[before_index + 1]['ms'], 0)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CooldownDeltaForceCritTest(unittest.TestCase):
     def test_cooldown_trigger_scenario_forces_the_trigger_cast_to_crit(self):
         entry = templar_trigger(LIBRAM_OF_ZEAL)

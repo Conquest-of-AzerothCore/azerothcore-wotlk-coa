@@ -38,6 +38,7 @@ CLASS_MAP = {'classes': {str(TEMPLAR_CLASS_ID): {'spells': [
      'log_linked_events': 2}]}}}
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class PacketTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

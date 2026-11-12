@@ -1054,6 +1054,7 @@ def script_hit_entry(class_file, spell):
                 if entry['spell'] == spell and entry['kind'] == 'script_hit')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ScriptHitTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

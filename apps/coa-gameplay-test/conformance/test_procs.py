@@ -315,6 +315,7 @@ class ProcCompareTest(unittest.TestCase):
                 self.assertEqual([reading['name'] for reading in entry['trial_readings']], ['each damage tick'])
                 self.assertNotIn('readings_question', entry)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_lightkeeper_parry_single_reading_holds_the_tooltip_chance(self):
         entry = next(entry for entry in CLASS_FILE['procs']
                     if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_PARRY)
@@ -322,6 +323,7 @@ class ProcCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 695 / 4472)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_lightkeeper_burst_single_reading_holds_the_tooltip_chance(self):
         entry = next(entry for entry in CLASS_FILE['procs']
                     if entry['aura'] == LIGHTKEEPER and entry['proc_spell'] == LIGHTKEEPER_BURST)
@@ -329,6 +331,7 @@ class ProcCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 668 / 4472)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_condemnation_single_reading_holds_the_tooltip_chance(self):
         entry = templar_proc(CONDEMNATION)
         verdict = self.single_reading_verdict(entry, CONDEMNATION, 622, 4134, 15.0)

@@ -77,7 +77,7 @@ import run
 import compare as compare_module
 
 CLASS_FILE = load_class_file(19)
-RECORDS = Records(dataset(DBC_DIR))
+RECORDS = Records(dataset(DBC_DIR)) if DBC_DIR.is_dir() else None
 SCARLET_JUDICATOR = 525024
 JUSTICE = 712437
 FINAL_PRAYER = 705268
@@ -481,6 +481,7 @@ def norgannons_wrath_entry() -> dict:
 
 
 class BehaviourEntryTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scarlet_judicator_entry(self):
         spec = target_count_spec(scarlet_judicator_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'count', spec.quote, spec.expected)
@@ -488,6 +489,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(entry.expected, 2)
         self.assertEqual(spec.target_rank, DIVINE_FORCE_MAX_RANK)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_justice_entry(self):
         spec = target_count_spec(justice_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'count', spec.quote, spec.expected)
@@ -495,6 +497,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(entry.expected, 1)
         self.assertEqual(spec.target_rank, INTERDICT)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_final_prayer_entry(self):
         spec = healing_ratio_spec(final_prayer_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
@@ -504,6 +507,7 @@ class BehaviourEntryTests(unittest.TestCase):
             HealingRatioTarget(TESTAMENT_OF_FAITH, 'Testament of Faith', 'taken'),
             HealingRatioTarget(TESTAMENT_OF_FORTITUDE, 'Testament of Fortitude', 'effect_value', 0)))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_holy_tempest_entry(self):
         spec = aura_spread_spec(holy_tempest_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'count', spec.quote, spec.expected)
@@ -513,6 +517,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.aura_spell, CONDEMN_RANK)
         self.assertEqual(spec.target_rank, RIGHTEOUS_TEMPEST_RANK)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_armor_of_faith_entry(self):
         spec = shield_break_trigger_spec(armor_of_faith_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'trigger', spec.quote, spec.expected)
@@ -521,10 +526,12 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.shield_aura, STAFFGUARD_SHIELD)
         self.assertEqual(spec.trigger_spell, ARMOR_OF_FAITH_DAMAGE)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_quote_must_be_in_tooltip(self):
         with self.assertRaises(ValueError):
             behaviour_entry(RECORDS, SCARLET_JUDICATOR, 'Scarlet Judicator', 'count', 'not in the tooltip at all', 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_shield_break_trigger_spec_rejects_a_quote_not_in_the_tooltip(self):
         with self.assertRaises(ValueError):
             spec = shield_break_trigger_spec(armor_of_faith_entry())
@@ -534,6 +541,7 @@ class BehaviourEntryTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_entry(RECORDS, SCARLET_JUDICATOR, 'Scarlet Judicator', 'ghost', 'strikes', 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_finesse_rank_1_entry(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
@@ -546,6 +554,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.expected_ratio, 0.70)
         self.assertEqual(spec.vehicle_spell, MELT_WEAPON)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_courage_rank_1_entry(self):
         spec = mechanic_duration_spec(courage_rank_1_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected_ratio)
@@ -558,6 +567,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.expected_ratio, 0.80)
         self.assertEqual(spec.vehicle_spell, HAMSTRING)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_tyrs_guard_entry(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -569,6 +579,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.before_expected, 2)
         self.assertEqual(spec.setup_casts, ())
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_transcending_strikes_entry(self):
         spec = metric_delta_spec(transcending_strikes_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -579,6 +590,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.setup_casts, (BLADE_OF_FAITH,))
         self.assertEqual(spec.target, 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_spiritual_abdicator_entry(self):
         spec = metric_delta_spec(spiritual_abdicator_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -589,6 +601,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.fields, {'spell': TESTAMENT_OF_HOPE_AURA, 'effect': 1})
         self.assertEqual(spec.before_expected, -10)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_sacred_resistance_entry(self):
         spec = metric_delta_spec(sacred_resistance_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -600,6 +613,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.before_expected, 0)
         self.assertEqual(spec.target, 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_keeping_the_oath_passive_entry(self):
         spec = metric_delta_spec(keeping_the_oath_passive_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -611,6 +625,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.before_expected, 0)
         self.assertEqual(spec.target, 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_battlepriest_entry(self):
         spec = health_ratio_spec(battlepriest_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.levels[0][1])
@@ -618,12 +633,14 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.probe_spell, FIREBALL)
         self.assertEqual(spec.levels, ((90, 0.8), (50, 1.0), (10, 0.8)))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_battlepriest_quote_matches_dbc(self):
         self.assertEqual(
             behaviour_entry(RECORDS, BATTLEPRIEST, 'Battlepriest', 'ratio',
                             'take 20% reduced Magic damage', 0.8).quote,
             'take 20% reduced Magic damage')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_sacred_oath_entry(self):
         spec = duration_spec(sacred_oath_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'duration', spec.quote, spec.expected_ms)
@@ -633,6 +650,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.debt_aura, KEEPING_THE_OATH)
         self.assertEqual(spec.breaker_spell, SMITE)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_whirling_tempest_entry(self):
         spec = metric_delta_spec(whirling_tempest_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -643,6 +661,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.before_expected, 1.0)
         self.assertIsNone(spec.setup_actor_aura)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_whirling_tempest_stacks_with_courage_entry(self):
         spec = metric_delta_spec(whirling_tempest_stacks_with_courage_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -652,6 +671,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.expected, 1.32)
         self.assertEqual(spec.before_expected, 1.10)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_sacred_resistance_armor_entry(self):
         spec = metric_delta_spec(sacred_resistance_armor_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -665,6 +685,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.gate_timing, 'between')
         self.assertFalse(spec.trigger_only_after)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_argent_knight_while_active_entry(self):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -681,6 +702,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.expiry_wait_ms, 4000)
         self.assertEqual(spec.after_expiry_expected, 0)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_righteous_tempest_requires_argent_knight_entry(self):
         spec = metric_delta_spec(righteous_tempest_requires_argent_knight_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
@@ -695,6 +717,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.gate_timing, 'between')
         self.assertFalse(spec.trigger_only_after)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_binding_scripture_entry(self):
         spec = aura_metric_delta_spec(binding_scripture_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'aura_metric_delta', spec.quote, spec.expected)
@@ -708,6 +731,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.before_expected, 1000)
         self.assertEqual(spec.expected, 950)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_testament_of_strength_entry(self):
         spec = cast_applies_aura_spec(testament_of_strength_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'cast_applies_aura', spec.quote, spec.expected_ms)
@@ -717,6 +741,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.target, 'caster')
         self.assertEqual(spec.expected_ms, 60000)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_argent_blade_entry(self):
         spec = cast_leech_ratio_spec(argent_blade_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'ratio', spec.quote, spec.expected)
@@ -725,6 +750,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.heal_spell, ARGENT_BLADE_HEAL)
         self.assertEqual(spec.expected, 1.0)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_tome_of_light_entry(self):
         spec = cast_stat_ratio_spec(tome_of_light_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'cast_stat_ratio', spec.quote, spec.expected)
@@ -734,6 +760,7 @@ class BehaviourEntryTests(unittest.TestCase):
         self.assertEqual(spec.effect, 1)
         self.assertEqual(spec.expected, 1.0)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_righteous_custodian_entry(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         entry = behaviour_entry(RECORDS, spec.spell, spec.name, 'threat_tick_ratio', spec.quote,
@@ -759,6 +786,7 @@ class BehaviourEntriesLookupTests(unittest.TestCase):
 
 
 class TargetCountScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_validates_and_shapes_fixtures(self):
         spec = target_count_spec(scarlet_judicator_entry())
         scenario, expectations = target_count_scenario(CLASS_FILE, spec)
@@ -771,6 +799,7 @@ class TargetCountScenarioTests(unittest.TestCase):
         self.assertEqual(len(expectation.model['dummy_labels']), 3)
         self.assertEqual(expectation.model['headroom'], 1)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_every_candidate_lies_inside_the_radius_of_the_primary(self):
         spec = target_count_spec(scarlet_judicator_entry())
         scenario, _ = target_count_scenario(CLASS_FILE, spec)
@@ -780,6 +809,7 @@ class TargetCountScenarioTests(unittest.TestCase):
         for creature in creatures.values():
             self.assertLess(creature['distance'] - primary, spec.radius)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_damage_counts_are_read_on_every_dummy_after_every_cast_of_the_judged_phase(self):
         spec = target_count_spec(scarlet_judicator_entry())
         scenario, expectations = target_count_scenario(CLASS_FILE, spec)
@@ -791,11 +821,13 @@ class TargetCountScenarioTests(unittest.TestCase):
         _, justice = target_count_scenario(CLASS_FILE, target_count_spec(justice_entry()))
         self.assertNotIn('per_cast', justice[0].model)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, justice_entry())
         self.assertEqual(len(run.validate(scenario)['creatures']), 3)
         self.assertEqual(expectations[0].check, BEHAVIOUR_COUNT)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_justice_entry_reads_the_silence_aura_not_spell_damage_count(self):
         spec = target_count_spec(justice_entry())
         self.assertEqual(spec.metric, 'aura')
@@ -811,6 +843,7 @@ class TargetCountScenarioTests(unittest.TestCase):
         spec = target_count_spec(scarlet_judicator_entry())
         self.assertEqual(spec.metric, 'spell_damage_count')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_target_rank_is_learned_before_the_first_cast(self):
         for entry in (scarlet_judicator_entry(), justice_entry()):
             spec = target_count_spec(entry)
@@ -825,6 +858,7 @@ class TargetCountScenarioTests(unittest.TestCase):
 
 
 class FixedTargetCountScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_validates_and_shapes_fixtures(self):
         spec = fixed_target_count_spec(holy_cleave_entry())
         scenario, expectations = fixed_target_count_scenario(CLASS_FILE, spec)
@@ -838,6 +872,7 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertEqual(expectation.model['headroom'], 1)
         self.assertIsNotNone(expectation.model['far_label'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_far_dummy_sits_beyond_the_radius(self):
         spec = fixed_target_count_spec(holy_cleave_entry())
         scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
@@ -848,11 +883,13 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         for near in ('extra1', 'extra2'):
             self.assertLess(creatures_by_id[near]['distance'] - creatures_by_id['primary']['distance'], spec.radius)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, holy_cleave_entry())
         self.assertEqual(len(run.validate(scenario)['creatures']), 4)
         self.assertEqual(expectations[0].check, BEHAVIOUR_FIXED_COUNT)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_single_phase_has_no_before_measurement(self):
         spec = fixed_target_count_spec(holy_cleave_entry())
         scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
@@ -863,6 +900,7 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertFalse([step for step in measure_steps if step['label'].endswith(' before')])
         self.assertEqual(len(measure_steps), 4 + 3 * (spec.repeats + 1))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_listed_auras_are_cleared_before_every_cast(self):
         spec = fixed_target_count_spec({**holy_cleave_entry(), 'clear_auras': [804903]})
         scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
@@ -891,6 +929,7 @@ class FixedTargetCountScenarioTests(unittest.TestCase):
         self.assertEqual(spec.target_rank, 2)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class PartyStatRatioScenarioTests(unittest.TestCase):
     def test_raid_wide_scenario_has_one_ally_no_far_ally(self):
         spec = party_stat_ratio_spec(call_of_the_monastery_entry())
@@ -970,6 +1009,7 @@ class PartyStatRatioScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].displayed, str(spec.expected))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AllyHealBreadthScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_fixtures(self):
         spec = ally_heal_breadth_spec(libram_of_grace_entry())
@@ -1053,6 +1093,7 @@ class AllyHealBreadthScenarioTests(unittest.TestCase):
                              for step in scenario['steps']))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AuraSpreadScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_fixtures(self):
         spec = aura_spread_spec(holy_tempest_entry())
@@ -1127,6 +1168,7 @@ class AuraSpreadScenarioTests(unittest.TestCase):
             self.assertEqual(step['caster'], 'caster')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HealingRatioScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = healing_ratio_spec(final_prayer_entry())
@@ -1167,6 +1209,7 @@ class HealingRatioScenarioTests(unittest.TestCase):
         self.assertIn(TESTAMENT_OF_FAITH, cast_targets)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HealthRatioScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = health_ratio_spec(battlepriest_entry())
@@ -1224,6 +1267,7 @@ class HealthRatioScenarioTests(unittest.TestCase):
             self.assertEqual(step['actor'], 'caster')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class LeechRatioScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = leech_ratio_spec(titanfall_entry())
@@ -1339,6 +1383,7 @@ class JudgeLeechRatioTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class DurationScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = duration_spec(sacred_oath_entry())
@@ -1437,6 +1482,7 @@ class DurationScenarioTests(unittest.TestCase):
         self.assertLess(actions.index(debt_assert), before_index)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MechanicDurationScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = mechanic_duration_spec(finesse_rank_1_entry())
@@ -1530,6 +1576,7 @@ class MechanicDurationScenarioTests(unittest.TestCase):
         self.assertGreater(gap(snare_scenario), gap(disarm_scenario))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ShieldBreakTriggerScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = shield_break_trigger_spec(armor_of_faith_entry())
@@ -1583,6 +1630,7 @@ class ShieldBreakTriggerScenarioTests(unittest.TestCase):
 
 
 class MetricDeltaScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_validates_and_shapes_expectations(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -1595,6 +1643,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectation.model['before_expected'], 2)
         self.assertEqual(expectation.model['metric'], 'owned_creature_count')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, spiritual_abdicator_entry())
         run.validate(scenario)
@@ -1602,6 +1651,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], -15)
         self.assertEqual(expectations[0].model['before_expected'], -10)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_learn_comes_between_the_before_and_after_casts(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1614,6 +1664,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertLess(cast_steps[0], learn_steps[0])
         self.assertLess(learn_steps[0], cast_steps[1])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_measures_the_declared_metric_and_fields_before_and_after(self):
         spec = metric_delta_spec(spiritual_abdicator_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1624,6 +1675,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
             self.assertEqual(step['actor'], 'caster')
             self.assertEqual(step['effect'], 1)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_waits_the_expire_ms_between_the_learn_and_the_second_cast(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1633,6 +1685,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expire_wait['action'], 'wait')
         self.assertEqual(expire_wait['ms'], spec.expire_ms)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_learns_the_trigger_spell_once_before_the_first_cast(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1643,6 +1696,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(len(trigger_learn_steps), 1)
         self.assertLess(trigger_learn_steps[0], first_cast_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_default_target_stays_caster_without_a_creature_fixture(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1651,6 +1705,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertTrue(all(step['target'] == 'caster' for step in cast_steps))
         self.assertNotIn('creatures', scenario)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dummy_target_casts_at_the_creature_fixture_and_adds_it(self):
         spec = metric_delta_spec(warrior_of_tyr_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1660,6 +1715,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(len(scenario['creatures']), 1)
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_warrior_of_tyr_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, warrior_of_tyr_entry())
         run.validate(scenario)
@@ -1668,18 +1724,21 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'power')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_disable_regeneration_overrides_the_player_fixture(self):
         spec = metric_delta_spec(warrior_of_tyr_entry())
         self.assertTrue(spec.disable_regeneration)
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
         self.assertEqual(scenario['players'][0]['allow_regeneration'], False)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_regeneration_stays_enabled_by_default(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         self.assertFalse(spec.disable_regeneration)
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
         self.assertNotIn('allow_regeneration', scenario['players'][0])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_sacred_resistance_casts_reckoning_at_the_dummy_fixture(self):
         spec = metric_delta_spec(sacred_resistance_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1690,6 +1749,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertTrue(all(step['target'] == 'dummy' for step in cast_steps))
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_sacred_resistance_measures_the_reckoning_armor_aura(self):
         spec = metric_delta_spec(sacred_resistance_entry())
         scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -1699,6 +1759,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_sacred_resistance_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, sacred_resistance_entry())
         run.validate(scenario)
@@ -1707,6 +1768,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_trigger_only_after_skips_the_trigger_cast_in_the_before_phase(self):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1715,6 +1777,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
                      if step.get('action') == 'cast' and step.get('spell') == RIGHTEOUS_TEMPEST]
         self.assertEqual(len(cast_steps), 1)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_gate_timing_start_learns_the_gate_before_the_before_measurement(self):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1725,6 +1788,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
                             if step.get('metric') == 'aura_amount' and step.get('spell') == RIGHTEOUS_TEMPEST)
         self.assertLess(gate_index, before_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_gate_timing_between_learns_the_gate_after_the_before_measurement(self):
         spec = metric_delta_spec(righteous_tempest_requires_argent_knight_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1735,6 +1799,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
                             if step.get('metric') == 'aura_amount' and step.get('spell') == RIGHTEOUS_TEMPEST)
         self.assertGreater(gate_index, before_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_while_active_shape_catches_a_wrong_after_reading(self):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         _, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -1749,6 +1814,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
         self.assertEqual(verdict.status, 'ok')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_while_active_shape_catches_the_effect_outliving_its_own_aura(self):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         _, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -1764,6 +1830,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), expired_run, expectation)
         self.assertEqual(verdict.status, 'ok')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_expiry_wait_phase_adds_a_third_measurement_past_the_triggering_aura_duration(self):
         spec = metric_delta_spec(argent_knight_while_active_entry())
         scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -1785,6 +1852,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             metric_delta_scenario(CLASS_FILE, spec)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_label_suffix_disambiguates_a_second_metric_delta_check_on_the_same_spell(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         _, plain = metric_delta_scenario(CLASS_FILE, spec)
@@ -1796,6 +1864,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         spec = metric_delta_spec(tyrs_guard_entry())
         self.assertEqual(spec.measure_actor, 'caster')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_measure_actor_reads_the_metric_on_the_named_actor_instead_of_the_caster(self):
         spec = metric_delta_spec(patience_duration_entry())
         self.assertEqual(spec.measure_actor, 'dummy')
@@ -1808,11 +1877,13 @@ class MetricDeltaScenarioTests(unittest.TestCase):
             self.assertEqual(step['actor'], 'dummy')
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_measure_actor_on_a_dummy_adds_the_creature_fixture_even_without_a_dummy_cast_target(self):
         spec = replace(metric_delta_spec(tyrs_guard_entry()), measure_actor='dummy')
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_patience_duration_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, patience_duration_entry())
         run.validate(scenario)
@@ -1821,12 +1892,14 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['tolerance'], 10)
         self.assertEqual(expectations[0].label, f'{PATIENCE} behaviour_metric_delta duration')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_entries_without_an_explicit_tolerance_omit_it_from_the_model(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, tyrs_guard_entry())
         self.assertNotIn('tolerance', expectations[0].model)
         scenario, expectations = behaviour_scenario(CLASS_FILE, patience_cooldown_entry())
         self.assertNotIn('tolerance', expectations[0].model)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_patience_cooldown_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, patience_cooldown_entry())
         run.validate(scenario)
@@ -1834,6 +1907,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
         self.assertEqual(expectations[0].label, f'{PATIENCE} behaviour_metric_delta cooldown')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_chastise_weapon_damage_gate_learns_martial_training_only_between_phases(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, chastise_weapon_damage_gate_entry())
         run.validate(scenario)
@@ -1851,6 +1925,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         learn_index = scenario['steps'].index(learn_steps[0])
         self.assertTrue(before_index < learn_index < after_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_chastise_weapon_damage_gate_judges_a_wrong_after_value_as_alert(self):
         _, expectations = behaviour_scenario(CLASS_FILE, chastise_weapon_damage_gate_entry())
         expectation = expectations[0]
@@ -1860,6 +1935,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
                          'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_libram_of_tenacity_heal_gate_learns_tenacious_defender_only_between_phases(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, libram_of_tenacity_heal_gate_entry())
         run.validate(scenario)
@@ -1877,6 +1953,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         learn_index = scenario['steps'].index(learn_steps[0])
         self.assertTrue(before_index < learn_index < after_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_libram_of_tenacity_heal_gate_judges_a_wrong_after_value_as_alert(self):
         _, expectations = behaviour_scenario(CLASS_FILE, libram_of_tenacity_heal_gate_entry())
         expectation = expectations[0]
@@ -1886,6 +1963,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
                          'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_temple_guardian_charge_recharge_consumes_three_charges_then_brackets_the_recharge_window(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, temple_guardian_charge_recharge_entry())
         run.validate(scenario)
@@ -1906,6 +1984,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         elapsed_before_window_ms = 4 * cast_interval(CLASS_FILE, TEMPLE_GUARDIAN)
         self.assertEqual(sum(recharge_wait_ms), round(35000 * 1.05) - elapsed_before_window_ms)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_temple_guardian_charge_recharge_judges_seeded_wrong_values_as_alert(self):
         _, expectations = behaviour_scenario(CLASS_FILE, temple_guardian_charge_recharge_entry())
         expectation = expectations[0]
@@ -1919,6 +1998,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(seeded_wrong), expectation).status,
                          'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_patience_casts_interdict_at_the_dummy_fixture_for_both_clauses(self):
         for entry in (patience_duration_entry(), patience_cooldown_entry()):
             spec = metric_delta_spec(entry)
@@ -1935,6 +2015,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(with_variant.get('variant'), 'cooldown')
         self.assertNotEqual(plain['metric'], with_variant['metric'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_empty_setup_casts_reproduces_the_scenario_byte_for_byte(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         with_field, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -1942,6 +2023,7 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(with_field, without_field)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AuraMetricDeltaScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = aura_metric_delta_spec(binding_scripture_entry())
@@ -2011,6 +2093,7 @@ class AuraMetricDeltaScenarioTests(unittest.TestCase):
 
 
 class CastAppliesAuraScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_validates_and_shapes_expectations(self):
         spec = cast_applies_aura_spec(testament_of_strength_entry())
         scenario, expectations = cast_applies_aura_scenario(CLASS_FILE, spec)
@@ -2022,12 +2105,14 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectation.model['kind'], 'cast_applies_aura')
         self.assertEqual(expectation.model['expected_ms'], 60000)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, testament_of_strength_entry())
         run.validate(scenario)
         self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_APPLIES_AURA)
         self.assertEqual(expectations[0].model['expected_ms'], 60000)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_learn_then_cast_happens_between_the_before_and_after_measurements(self):
         spec = cast_applies_aura_spec(testament_of_strength_entry())
         scenario, _ = cast_applies_aura_scenario(CLASS_FILE, spec)
@@ -2046,11 +2131,13 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(cast_step['actor'], 'caster')
         self.assertEqual(cast_step['target'], 'caster')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_caster_target_skips_the_creature_fixture(self):
         spec = cast_applies_aura_spec(testament_of_strength_entry())
         scenario, _ = cast_applies_aura_scenario(CLASS_FILE, spec)
         self.assertNotIn('creatures', scenario)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_wrong_after_reading_is_caught(self):
         spec = cast_applies_aura_spec(testament_of_strength_entry())
         _, expectations = cast_applies_aura_scenario(CLASS_FILE, spec)
@@ -2062,6 +2149,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
         self.assertEqual(verdict.status, 'ok')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_aura_present_before_the_cast_is_caught(self):
         spec = cast_applies_aura_spec(testament_of_strength_entry())
         _, expectations = cast_applies_aura_scenario(CLASS_FILE, spec)
@@ -2070,6 +2158,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), wrong_run, expectation)
         self.assertEqual(verdict.status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_setup_casts_cast_blade_of_faith_at_the_dummy_before_each_divine_force_cast(self):
         spec = metric_delta_spec(transcending_strikes_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -2087,6 +2176,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
             self.assertLess(setup_index, trigger_index)
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_setup_casts_learn_blade_of_faith_once_before_the_first_cast(self):
         spec = metric_delta_spec(transcending_strikes_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -2097,6 +2187,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(len(learn_steps), 1)
         self.assertLess(learn_steps[0], first_cast_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_setup_casts_restore_the_trigger_spells_own_power_before_its_cast(self):
         spec = metric_delta_spec(transcending_strikes_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -2106,12 +2197,14 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         preceding_power = steps[divine_force_index - 1]
         self.assertEqual(preceding_power, {'action': 'set_power', 'actor': 'caster', 'power': 3, 'value': 15})
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_transcending_strikes_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, transcending_strikes_entry())
         run.validate(scenario)
         self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_DELTA)
         self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_setup_actor_aura_defaults_to_no_extra_set_aura_steps(self):
         spec = metric_delta_spec(whirling_tempest_entry())
         self.assertIsNone(spec.setup_actor_aura)
@@ -2121,6 +2214,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         set_aura_spells = {step['spell'] for step in with_field['steps'] if step.get('action') == 'set_aura'}
         self.assertNotIn(COURAGE_RANK_1, set_aura_spells)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_setup_actor_aura_applies_courage_before_each_phase_cast(self):
         spec = metric_delta_spec(whirling_tempest_stacks_with_courage_entry())
         self.assertEqual(spec.setup_actor_aura, COURAGE_RANK_1)
@@ -2137,6 +2231,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertLess(set_aura_steps[0], cast_steps[0])
         self.assertLess(set_aura_steps[1], cast_steps[1])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_whirling_tempest_waits_500ms_not_the_default_3000ms(self):
         spec = metric_delta_spec(whirling_tempest_entry())
         self.assertEqual(spec.wait_ms, 500)
@@ -2145,6 +2240,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
                      if step.get('action') == 'wait' and step.get('ms') == 500 and 'label' not in step]
         self.assertTrue(wait_steps)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_whirling_tempest_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, whirling_tempest_entry())
         run.validate(scenario)
@@ -2153,6 +2249,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 1.0)
         self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_whirling_tempest_stacks_with_courage_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, whirling_tempest_stacks_with_courage_entry())
         run.validate(scenario)
@@ -2161,6 +2258,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 1.10)
         self.assertEqual(expectations[0].model['metric'], 'run_speed_rate')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_sanctify_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, sanctify_entry())
         run.validate(scenario)
@@ -2169,6 +2267,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 2500.0)
         self.assertEqual(expectations[0].model['metric'], 'attack_time_ms')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_sanctify_casts_libram_of_tenacity_at_self_in_both_phases(self):
         spec = metric_delta_spec(sanctify_entry())
         self.assertEqual(spec.trigger_spell, LIBRAM_OF_TENACITY)
@@ -2179,6 +2278,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
                      if step.get('action') == 'cast' and step.get('spell') == LIBRAM_OF_TENACITY]
         self.assertEqual(len(cast_steps), 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_transcending_strikes_target_gate_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, transcending_strikes_target_gate_entry())
         run.validate(scenario)
@@ -2188,6 +2288,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['metric'], 'cooldown_ms')
         self.assertTrue(expectations[0].label.endswith('target_gate'))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_transcending_strikes_target_gate_withholds_blade_of_faith_in_the_first_phase_only(self):
         spec = metric_delta_spec(transcending_strikes_target_gate_entry())
         self.assertTrue(spec.setup_only_after)
@@ -2214,6 +2315,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_chakra_of_power_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, chakra_of_power_entry())
         run.validate(scenario)
@@ -2222,6 +2324,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['crit_bonus_expected'], 2.0)
         self.assertEqual(expectations[0].model['metric'], 'spell_energize_total')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_chakra_of_power_forces_melee_crit_and_attacks_the_dummy(self):
         spec = crit_magnitude_spec(chakra_of_power_entry())
         self.assertEqual(spec.observe_spell, CHAKRA_OF_POWER_ENERGIZE)
@@ -2233,6 +2336,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(len(attack_steps), 1)
         self.assertEqual(attack_steps[0]['target'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_chakra_of_power_measures_attempts_crits_and_total_energize(self):
         spec = crit_magnitude_spec(chakra_of_power_entry())
         _, expectations = crit_magnitude_scenario(CLASS_FILE, spec)
@@ -2252,6 +2356,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(plain['spell'], stacking['spell'])
         self.assertNotEqual(plain.get('variant'), stacking.get('variant', ''))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_keeping_the_oath_passive_casts_reckoning_at_the_dummy_fixture(self):
         spec = metric_delta_spec(keeping_the_oath_passive_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -2261,6 +2366,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(len(cast_steps), 2)
         self.assertTrue(all(step['target'] == 'dummy' for step in cast_steps))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_keeping_the_oath_passive_measures_the_oath_chain_aura(self):
         spec = metric_delta_spec(keeping_the_oath_passive_entry())
         scenario, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -2270,6 +2376,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['expected'], 1)
         self.assertEqual(expectations[0].model['before_expected'], 0)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_keeping_the_oath_passive_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, keeping_the_oath_passive_entry())
         run.validate(scenario)
@@ -2278,6 +2385,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 0)
         self.assertEqual(expectations[0].model['metric'], 'aura')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cast_in_before_defaults_to_true_and_casts_the_trigger_in_both_phases(self):
         spec = metric_delta_spec(tyrs_guard_entry())
         self.assertTrue(spec.cast_in_before)
@@ -2286,6 +2394,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
                      if step.get('action') == 'cast' and step.get('spell') == TESTAMENT_OF_HOPE]
         self.assertEqual(len(cast_steps), 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cast_in_before_false_skips_casting_the_trigger_before_the_baseline_measurement(self):
         spec = metric_delta_spec(crusaders_presence_speed_entry())
         self.assertFalse(spec.cast_in_before)
@@ -2303,6 +2412,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         self.assertEqual(expectations[0].model['before_expected'], 1.60)
         self.assertEqual(expectations[0].model['expected'], 2.40)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cast_in_before_false_still_sets_the_setup_actor_aura_in_the_baseline_phase(self):
         spec = metric_delta_spec(crusaders_presence_speed_entry())
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -2313,6 +2423,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
                                     if step.get('action') == 'set_aura' and step.get('spell') == spec.setup_actor_aura]
         self.assertEqual(len(set_aura_before_baseline), 1)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cast_in_before_false_with_a_seeded_wrong_before_expected_alerts(self):
         spec = replace(metric_delta_spec(crusaders_presence_speed_entry()), before_expected=1.0)
         _, expectations = metric_delta_scenario(CLASS_FILE, spec)
@@ -2321,6 +2432,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
         self.assertEqual(verdict.status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_crusaders_presence_speed_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, crusaders_presence_speed_entry())
         run.validate(scenario)
@@ -2331,6 +2443,7 @@ class CastAppliesAuraScenarioTests(unittest.TestCase):
 
 
 class ThreatTickRatioScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_validates_and_shapes_expectations(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         scenario, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2343,12 +2456,14 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         self.assertEqual(expectation.model['expected_ratio'], 0.98)
         self.assertEqual(expectation.model['metric'], 'threat')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, righteous_custodian_entry())
         run.validate(scenario)
         self.assertEqual(expectations[0].check, BEHAVIOUR_METRIC_RATIO_DELTA)
         self.assertEqual(expectations[0].model['expected_ratio'], 0.98)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_attack_builds_threat_before_the_before_measurement(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2362,6 +2477,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         self.assertEqual(steps[attack_index]['actor'], 'caster')
         self.assertEqual(steps[attack_index]['target'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_set_aura_happens_between_the_before_and_after_measurements(self):
         spec = threat_tick_ratio_spec(set_aura_custodian_entry())
         scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2376,11 +2492,13 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
             self.assertEqual(steps[index]['actor'], 'dummy')
             self.assertEqual(steps[index]['target'], 'caster')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_always_has_the_creature_fixture(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         scenario, _ = threat_tick_ratio_scenario(CLASS_FILE, spec)
         self.assertEqual(scenario['creatures'][0]['id'], 'dummy')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_wrong_after_reading_is_caught(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         _, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2395,6 +2513,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), right_run, expectation)
         self.assertEqual(verdict.status, 'ok')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_cast_replaces_set_aura_and_brackets_the_threat_baseline(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         scenario, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2417,12 +2536,14 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
             self.assertEqual(steps[position[label]]['metric'], 'aura_duration_ms')
             self.assertEqual(steps[position[label]]['spell'], RIGHTEOUS_CUSTODIAN)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_set_aura_entry_keeps_no_cast_reads(self):
         spec = threat_tick_ratio_spec(set_aura_custodian_entry())
         scenario, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
         self.assertNotIn('aura_before_label', expectation.model)
         self.assertFalse(any(step['action'] == 'cast' for step in scenario['steps']))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_aura_present_before_or_absent_after_the_cast_is_alert(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         _, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2433,6 +2554,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
             self.assertEqual(verdict.status, status)
             self.assertIn('aura_duration_ms threat_tick_cast before', verdict.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_missing_aura_read_is_not_ok(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         _, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2448,6 +2570,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             threat_tick_ratio_spec({**righteous_custodian_entry(), 'aura_stacks': 2})
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_ally_arm_groups_the_ally_and_reads_its_threat(self):
         scenario, (expectation,) = behaviour_scenario(
             CLASS_FILE, variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', 'ally'))
@@ -2467,6 +2590,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         self.assertEqual(expectation.label, '572808 behaviour_metric_ratio_delta ally')
         self.assertEqual(expectation.model['expected_ratio'], 0.98)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_ally_control_reads_the_casters_threat_and_alerts_on_a_caster_side_tick(self):
         scenario, (expectation,) = behaviour_scenario(
             CLASS_FILE, variant_entry(RIGHTEOUS_CUSTODIAN, 'threat_tick_ratio', 'ally_caster_control'))
@@ -2480,6 +2604,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
             values = FakeRun({model['before_label']: 1000.0, model['after_label']: after, **cast_applied(model)})
             self.assertEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_permanent_aura_after_the_cast_counts_as_applied(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         _, (expectation,) = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2487,6 +2612,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
                           **cast_applied(expectation.model, 0.0, -1.0)})
         self.assertEqual(judge_behaviour(base_verdict(expectation), values, expectation).status, 'ok')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_zero_baseline_is_unmeasured_not_alert(self):
         spec = threat_tick_ratio_spec(righteous_custodian_entry())
         _, expectations = threat_tick_ratio_scenario(CLASS_FILE, spec)
@@ -2496,6 +2622,7 @@ class ThreatTickRatioScenarioTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmeasured')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AbsorbPierceRatioScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = absorb_pierce_ratio_spec(norgannons_wrath_entry())
@@ -2560,6 +2687,7 @@ class AbsorbPierceRatioScenarioTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmeasured')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CastLeechRatioScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = cast_leech_ratio_spec(argent_blade_entry())
@@ -2614,6 +2742,7 @@ class CastLeechRatioScenarioTests(unittest.TestCase):
         self.assertFalse(ignores_caster_heal_modifiers(RECORDS, TITANSTRIKE_MAX_RANK))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CastStatRatioScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = cast_stat_ratio_spec(tome_of_light_entry())
@@ -2688,6 +2817,7 @@ class GenerateBehaviourVariantTest(unittest.TestCase):
                          scenario_key('Templar', 'behaviour', WHIRLING_TEMPEST))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class DurationRefreshScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = duration_refresh_spec(blessing_of_aggramar_entry())
@@ -2744,6 +2874,7 @@ class DurationRefreshScenarioTests(unittest.TestCase):
         self.assertNotEqual(equip_step['item'], CLASS_FILE['weapon']['item'])
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AmountDeltaScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = amount_delta_spec(holy_books_entry())
@@ -2812,6 +2943,7 @@ class AmountDeltaScenarioTests(unittest.TestCase):
         self.assertEqual(striker.get('spell_hit_bonus'), 100)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ExclusivityChainScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectations(self):
         spec = exclusivity_chain_spec(libram_exclusivity_entry())
@@ -2866,6 +2998,7 @@ class ExclusivityChainScenarioTests(unittest.TestCase):
             exclusivity_chain_scenario(CLASS_FILE, exclusivity_chain_spec(entry))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GroupStackCapScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
@@ -2979,6 +3112,7 @@ class StrongestPercentTests(unittest.TestCase):
             strongest_percent(5.0, -4.0)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class SingleTargetScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = single_target_spec(righteous_custodian_single_target_entry())
@@ -3193,6 +3327,7 @@ class JudgePerCastCountTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'unmeasured')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class JudgeAllyHealBreadthTests(unittest.TestCase):
     def expectation(self):
         spec = ally_heal_breadth_spec(libram_of_grace_entry())
@@ -3357,6 +3492,7 @@ def pious_sweep_hit_ratio_entry():
 
 
 class HitRatioScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_pious_sweep_entry_reads_both_arms_after_every_trial(self):
         entry = pious_sweep_hit_ratio_entry()
         scenario, expectations = behaviour_scenario(CLASS_FILE, entry)
@@ -3377,6 +3513,7 @@ class HitRatioScenarioTests(unittest.TestCase):
         self.assertEqual(expectation.model['expected_bonus'], 25.0)
         self.assertLessEqual(entry['trials'], expectation.model['trial_limit'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_more_trials_than_one_scenario_holds_are_refused(self):
         entry = {**pious_sweep_hit_ratio_entry(), 'trials': 10000}
         with self.assertRaises(NotModelled) as raised:
@@ -4127,6 +4264,7 @@ class JudgeExclusivityTests(unittest.TestCase):
         self.assertIn('no scenario', verdict.explanation)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CritGuaranteeScenarioTests(unittest.TestCase):
     def spec(self):
         return CritGuaranteeSpec(SCOURGEBANE, 'Scourgebane',
@@ -4277,6 +4415,7 @@ class OathConsumptionScenarioTests(unittest.TestCase):
         with self.assertRaises(NotModelled):
             oath_consumption_scenario(CLASS_FILE, replace(self.ratio_spec(), relation='nonsense'))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_reads_the_metric_before_and_after_fixturing_the_oath_then_casts_and_confirms_consumption(self):
         scenario, [expectation] = oath_consumption_scenario(CLASS_FILE, self.ratio_spec())
         validated = run.validate(scenario)
@@ -4308,6 +4447,7 @@ class OathConsumptionScenarioTests(unittest.TestCase):
         self.assertLess(after_index, cast_index)
         self.assertLess(cast_index, stacks_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_periodic_flat_spec_reads_the_metric_with_periodic_true(self):
         scenario, [_expectation] = oath_consumption_scenario(CLASS_FILE, self.flat_spec())
         validated = run.validate(scenario)
@@ -4315,6 +4455,7 @@ class OathConsumptionScenarioTests(unittest.TestCase):
                            if step.get('label', '').endswith('oath_consumption_before'))
         self.assertTrue(before_step['periodic'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_second_oath_spec_fixtures_both_oaths_together_and_checks_both_are_consumed(self):
         spec = replace(self.ratio_spec(), other_oath_spell=OATH_CONDEMN)
         scenario, [expectation] = oath_consumption_scenario(CLASS_FILE, spec)
@@ -4341,11 +4482,13 @@ class OathConsumptionScenarioTests(unittest.TestCase):
         self.assertLess(other_alone_index, both_index)
         self.assertLess(both_index, cast_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_no_second_oath_spec_omits_the_additive_measurements(self):
         scenario, [expectation] = oath_consumption_scenario(CLASS_FILE, self.ratio_spec())
         self.assertNotIn('other_oath_spell', expectation.model)
         self.assertNotIn('both_label', expectation.model)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
         entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'oath_consumption']
         self.assertEqual(len(entries), 5)
@@ -4486,6 +4629,7 @@ OATH_RIGHTEOUS_LUNGE = 804904
 OATH_CHAIN = 704576
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AuraGrantScenarioTests(unittest.TestCase):
     def spec(self):
         return AuraGrantSpec(RIGHTEOUS_LUNGE, 'Righteous Lunge', 'and granting an Oath', RIGHTEOUS_LUNGE,
@@ -4578,6 +4722,7 @@ class OathConsumptionRemovalScenarioTests(unittest.TestCase):
         with self.assertRaises(NotModelled):
             oath_consumption_removal_scenario(CLASS_FILE, replace(self.spec(), oath_spells=()))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_fixtures_every_oath_reads_the_bonus_then_proves_removal_timing(self):
         scenario, [expectation] = oath_consumption_removal_scenario(CLASS_FILE, self.spec())
         validated = run.validate(scenario)
@@ -4621,6 +4766,7 @@ class OathConsumptionRemovalScenarioTests(unittest.TestCase):
         for before_label, after_label in zip(model['before_removal_labels'], model['after_removal_labels']):
             self.assertLess(indices[before_label], indices[after_label])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
         entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'oath_consumption_removal']
         self.assertEqual(len(entries), 1)
@@ -4707,6 +4853,7 @@ class IcdGateScenarioTests(unittest.TestCase):
         with self.assertRaises(NotModelled):
             icd_gate_scenario(CLASS_FILE, replace(self.spec(), internal_cooldown_ms=0))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_casts_three_times_with_the_second_gap_inside_the_cooldown(self):
         scenario, [expectation] = icd_gate_scenario(CLASS_FILE, self.spec())
         validated = run.validate(scenario)
@@ -4725,12 +4872,14 @@ class IcdGateScenarioTests(unittest.TestCase):
         health_steps = [step for step in validated['steps'] if step.get('action') == 'set_health']
         self.assertGreaterEqual(len(health_steps), 3)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_force_crit_scenario_sets_the_player_fixture(self):
         spec = IcdGateSpec(SCARLET_CHAMPION, 'Scarlet Champion', 'Can only occur once per sec.', ARGENT_BLADE,
                            SCARLET_CHAMPION_STACK, 1000, target='dummy', force_crit='melee')
         scenario, _ = icd_gate_scenario(CLASS_FILE, spec)
         self.assertEqual(scenario['players'][0]['melee_crit_rating'], FORCED_CRIT_RATING)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_entries_from_the_class_file_round_trip_through_the_spec_parser(self):
         entries = [entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'internal_cooldown_gate']
         self.assertEqual(len(entries), 5)
@@ -4745,6 +4894,7 @@ class IcdGateScenarioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             icd_gate_scenario(CLASS_FILE, spec)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_striker_trigger_casts_the_trigger_spell_from_the_fixtured_creature(self):
         spec = IcdGateSpec(SACRED_DEFENSE, 'Sacred Defense', 'Can only occur once per sec.', KARAZHAN_CHESS_FOOTMAN_MELEE,
                            SACRED_DEFENSE_STRIKE, 1000, target=None, trigger_actor=STRIKER, striker_entry=36)
@@ -4960,6 +5110,7 @@ class JudgeSingleTargetTests(unittest.TestCase):
 
 
 class CastGateScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_scenario_validates_and_shapes_expectations(self):
         spec = cast_gate_spec(titanstrike_cast_gate_entry())
         scenario, expectations = cast_gate_scenario(CLASS_FILE, spec)
@@ -4975,11 +5126,13 @@ class CastGateScenarioTests(unittest.TestCase):
         self.assertEqual(bypassed.rank_id, TITANSTRIKE)
         self.assertEqual(bypassed.displayed, str(NO_CAST_FAILURE))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, titanstrike_cast_gate_entry())
         run.validate(scenario)
         self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_GATE)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_blocked_attempt_precedes_casting_the_bypass_spell(self):
         spec = cast_gate_spec(titanstrike_cast_gate_entry())
         scenario, _ = cast_gate_scenario(CLASS_FILE, spec)
@@ -4989,6 +5142,7 @@ class CastGateScenarioTests(unittest.TestCase):
                            if step.get('action') == 'cast' and step.get('spell') == TESTAMENT_OF_STRENGTH)
         self.assertLess(blocked_cast, bypass_cast)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_bypass_spell_is_unlearned_before_the_health_fixture_attempt(self):
         spec = cast_gate_spec(titanstrike_cast_gate_entry())
         scenario, _ = cast_gate_scenario(CLASS_FILE, spec)
@@ -5001,6 +5155,7 @@ class CastGateScenarioTests(unittest.TestCase):
         self.assertLess(unlearn_index, health_fixture_index)
         self.assertLess(health_fixture_index, final_cast_index)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_every_cast_attempt_resets_its_own_cooldown_first(self):
         spec = cast_gate_spec(titanstrike_cast_gate_entry())
         scenario, _ = cast_gate_scenario(CLASS_FILE, spec)
@@ -5018,6 +5173,7 @@ class CastGateScenarioTests(unittest.TestCase):
         with self.assertRaises(Exception):
             cast_gate_scenario(CLASS_FILE, cast_gate_spec(entry))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_every_expectation_label_has_a_matching_measurement_step(self):
         spec = cast_gate_spec(titanstrike_cast_gate_entry())
         scenario, expectations = cast_gate_scenario(CLASS_FILE, spec)
@@ -5102,6 +5258,7 @@ class JudgeCastGateMissingMeasurementTests(unittest.TestCase):
 
 
 class CastConditionScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_outdoors_scenario_validates_and_shapes_expectations(self):
         spec = cast_condition_spec(divine_charge_cast_condition_entry())
         scenario, expectations = cast_condition_scenario(CLASS_FILE, spec)
@@ -5114,6 +5271,7 @@ class CastConditionScenarioTests(unittest.TestCase):
         self.assertEqual(allowed.spell_id, DIVINE_CHARGE)
         self.assertEqual(allowed.displayed, str(NO_CAST_FAILURE))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_mounted_scenario_validates_and_shapes_expectations(self):
         spec = cast_condition_spec(crusaders_presence_cast_condition_entry())
         scenario, expectations = cast_condition_scenario(CLASS_FILE, spec)
@@ -5123,11 +5281,13 @@ class CastConditionScenarioTests(unittest.TestCase):
         self.assertEqual(blocked.displayed, str(SPELL_FAILED_ONLY_MOUNTED))
         self.assertEqual(allowed.displayed, str(NO_CAST_FAILURE))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_dispatch_through_behaviour_scenario(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, divine_charge_cast_condition_entry())
         run.validate(scenario)
         self.assertEqual(expectations[0].check, BEHAVIOUR_CAST_CONDITION)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_outdoors_blocked_attempt_precedes_the_outdoor_teleport(self):
         spec = cast_condition_spec(divine_charge_cast_condition_entry())
         scenario, _ = cast_condition_scenario(CLASS_FILE, spec)
@@ -5137,6 +5297,7 @@ class CastConditionScenarioTests(unittest.TestCase):
                                 if step.get('action') == 'teleport' and step.get('x') == -9617.06)
         self.assertLess(blocked_cast, outdoor_teleport)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_mounted_blocked_attempt_precedes_mounting(self):
         spec = cast_condition_spec(crusaders_presence_cast_condition_entry())
         scenario, _ = cast_condition_scenario(CLASS_FILE, spec)
@@ -5146,6 +5307,7 @@ class CastConditionScenarioTests(unittest.TestCase):
                           if step.get('action') == 'set_aura' and step.get('stacks') == 1)
         self.assertLess(blocked_cast, mount_step)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_every_cast_attempt_resets_its_own_cooldown_first(self):
         spec = cast_condition_spec(divine_charge_cast_condition_entry())
         scenario, _ = cast_condition_scenario(CLASS_FILE, spec)
@@ -5162,6 +5324,7 @@ class CastConditionScenarioTests(unittest.TestCase):
         with self.assertRaises(Exception):
             cast_condition_scenario(CLASS_FILE, cast_condition_spec(entry))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_every_expectation_label_has_a_matching_measurement_step(self):
         spec = cast_condition_spec(divine_charge_cast_condition_entry())
         scenario, expectations = cast_condition_scenario(CLASS_FILE, spec)
@@ -5208,6 +5371,7 @@ class JudgeCastConditionTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CastCombatScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = cast_combat_spec(spiritual_ascension_cast_combat_entry())
@@ -5307,6 +5471,7 @@ class JudgeCastCombatTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AggroRedirectScenarioTests(unittest.TestCase):
     def test_single_target_scenario_validates_and_shapes_one_expectation(self):
         spec = aggro_redirect_spec(beckon_aggro_redirect_entry())
@@ -5432,6 +5597,7 @@ class JudgeAggroRedirectTests(unittest.TestCase):
         self.assertIn(expectation.label, verdict.explanation)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MountGrantScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_expectations(self):
         spec = mount_grant_spec(divine_charge_mount_grant_entry())
@@ -5541,6 +5707,7 @@ class JudgeMountGrantTests(unittest.TestCase):
         self.assertIn('527023 mount_grant ally granted', verdict.explanation)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class InternalCooldownScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_the_expectation(self):
         spec = internal_cooldown_spec(disciplined_blows_entry())
@@ -5628,6 +5795,7 @@ class JudgeInternalCooldownTests(unittest.TestCase):
         self.assertIn('680397 internal_cooldown allowed', verdict.explanation)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class DispelRemovalScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_one_expectation_per_debuff(self):
         spec = dispel_removal_spec(rebuke_entry())
@@ -5722,6 +5890,7 @@ class JudgeDispelRemovalTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AuraPresenceScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_one_expectation(self):
         spec = aura_presence_spec(harmonic_disposition_entry())
@@ -5789,6 +5958,7 @@ class JudgeAuraPresenceTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HealBlockScenarioTests(unittest.TestCase):
     def test_scenario_validates_and_shapes_one_blocked_expectation_for_undead(self):
         spec = heal_block_spec(interdict_heal_block_entry('undead'))
@@ -6465,6 +6635,7 @@ class AttackMetricDeltaTest(unittest.TestCase):
         self.entry = next(entry for entry in CLASS_FILE['behaviours']
                           if entry['spell'] == PARRY_DANCE and entry['kind'] == 'metric_delta')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_stack_cap_is_read_after_the_same_crit_swings_without_and_with_the_passive(self):
         scenario, [expectation] = metric_delta_scenario(CLASS_FILE, metric_delta_spec(self.entry))
         steps = run.validate(scenario)['steps']
@@ -6591,6 +6762,7 @@ class PooledRateHitRatioTests(unittest.TestCase):
                 found[count] = index * (events[1] if model.get('rate') else 1.0)
         return FakeRun(found)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_pooled_entry_judges_the_trials_of_every_part_together(self):
         _, [expectation] = behaviour_scenario(CLASS_FILE, self.entry())
         self.assertEqual(expectation.model['parts'], 12)
@@ -6606,6 +6778,7 @@ class PooledRateHitRatioTests(unittest.TestCase):
             base, [self.run_of(expectation.model, 2000.0, 2000.0)] * 2, expectation.model)
         self.assertEqual(flat.status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_crit_rate_counts_critical_hits_over_all_hits_in_points(self):
         entry = self.entry(rate='critical', expected_points=50, critical=None, parts=1, label_suffix='crit_rate')
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
@@ -6626,6 +6799,7 @@ class PooledRateHitRatioTests(unittest.TestCase):
                 verdict = compare_module.behaviour_hit_ratio_verdict(base_verdict(expectation), FakeRun(values), model)
                 self.assertEqual(verdict.status, status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_control_arm_that_never_crits_is_judged(self):
         entry = variant_entry(520608, 'hit_ratio', 'argent_blade_crit_rate')
         _, [expectation] = behaviour_scenario(CLASS_FILE, entry)
@@ -6654,6 +6828,7 @@ class PooledRateHitRatioTests(unittest.TestCase):
 
 
 class TakenResistRateTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_each_trial_reads_and_removes_the_strike_aura(self):
         entry = variant_entry(706323, 'taken_hit', 'disease_resist')
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
@@ -6663,6 +6838,7 @@ class TakenResistRateTests(unittest.TestCase):
         self.assertEqual((len(reads), len(removals)), (2 * entry['trials'], 2 * entry['trials']))
         self.assertEqual(expectation.model['kind'], 'taken_rate')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_resist_rates_are_judged_in_points_over_the_pooled_parts(self):
         _, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(706323, 'taken_hit', 'disease_resist'))
         model = expectation.model
@@ -6690,6 +6866,7 @@ class TakenResistRateTests(unittest.TestCase):
 
 
 class DetectionTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_each_hide_aura_is_read_shown_hidden_revealed_and_unrevealed(self):
         entry = variant_entry(300513, 'detection', None)
         scenario, expectations = behaviour_scenario(CLASS_FILE, entry)
@@ -6701,6 +6878,7 @@ class DetectionTests(unittest.TestCase):
         self.assertTrue(all(step['target'] == 'dummy' and step['caster'] == CASTER for step in reveals))
         self.assertEqual([expectation.model['expected'] for expectation in expectations], [0.0, 1.0, 0.0] * 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_brand_that_does_not_reveal_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, variant_entry(300513, 'detection', None))
         revealed = next(expectation for expectation in expectations if expectation.label.endswith('stealth revealed'))
@@ -6709,6 +6887,7 @@ class DetectionTests(unittest.TestCase):
             with self.subTest(after=after):
                 self.assertEqual(judge_behaviour(base_verdict(revealed), FakeRun(values), revealed).status, status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_client_read_steps_the_caster_aside_and_back_before_reading_the_visible_set(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, variant_entry(300513, 'detection', 'client'))
         steps = run.validate(scenario)['steps']
@@ -6726,6 +6905,7 @@ class DetectionTests(unittest.TestCase):
                           for expectation in expectations],
                          [('client', 'nearby_creature_at_client', expected) for expected in (0.0, 1.0, 0.0) * 2])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_brand_that_leaves_the_dummy_out_of_the_visible_set_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, variant_entry(300513, 'detection', 'client'))
         for moment, before, after in (('revealed', 0.0, 0.0), ('hidden', 1.0, 1.0)):
@@ -6741,6 +6921,7 @@ class DetectionTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, {**variant_entry(300513, 'detection', 'client'), 'read': 'packet'})
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class SourceStackTests(unittest.TestCase):
     def values(self, model: dict, readings: dict[str, tuple[float, float, float]], copies: list[float]):
         found = {}
@@ -6779,6 +6960,7 @@ class SourceStackTests(unittest.TestCase):
                 self.assertEqual(verdict.status, 'unmeasured')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MountedCastTests(unittest.TestCase):
     def test_a_mounted_only_cast_sets_its_mount_aura_first_in_value_and_duration_scenarios(self):
         from values import cast_aura_steps
@@ -6810,6 +6992,7 @@ class MountedCastTests(unittest.TestCase):
                 self.assertEqual(judge_behaviour(base_verdict(model_of), FakeRun(values), model_of).status, status)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class OffHandHitRatioTests(unittest.TestCase):
     def test_an_off_hand_hit_ratio_wields_the_off_hand_beside_a_one_hand_main_before_its_casts(self):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, variant_entry(BLADE_SERMON, 'hit_ratio', 'off_hand'))
@@ -7063,6 +7246,7 @@ def taken_hit_values(model: dict, trial_values) -> dict:
 
 
 class TakenHitScenarioTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_debt_entry_also_counts_the_debt_payments_at_each_read(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, route_entry(92109, 'over'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
@@ -7070,6 +7254,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertTrue(counts)
         self.assertTrue(all(step['metric'] == 'spell_damage_count' and step['spell'] == 803237 for step in counts))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_striker_spell_hits_the_caster_in_every_trial_of_every_arm(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
@@ -7082,6 +7267,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         absorbs = [step for step in steps if step.get('metric') == 'spell_absorb_total']
         self.assertTrue(all(step['caster'] == STRIKER and step['target'] == CASTER for step in absorbs))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_absorb_without_the_stamina_term_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         expectation = expectations[0]
@@ -7094,6 +7280,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_absorb_in_the_control_arm_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705295, 'absorb'))
         expectation = expectations[0]
@@ -7109,6 +7296,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                     'paid early': early_paid, 'paid late': 440.0, 'debt early': 1.0, 'debt late': 0.0}
         return taken_hit_values(model, trial)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_debt_paid_before_its_end_alerts_only_where_the_end_is_judged(self):
         _, over = behaviour_scenario(CLASS_FILE, route_entry(92109, 'over'))
         _, delay = behaviour_scenario(CLASS_FILE, route_entry(92109, 'delay'))
@@ -7119,6 +7307,7 @@ class TakenHitScenarioTests(unittest.TestCase):
             with self.subTest(label=expectation.label, early=early):
                 self.assertEqual(verdict.status, status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_debt_not_reduced_by_holy_books_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, route_entry(706468, 'debt'))
         expectation = expectations[0]
@@ -7132,6 +7321,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(right), expectation).status, 'ok')
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_damage_ratio_holds_the_caster_health_and_reads_noncritical_strikes(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(801202, 'taken_10'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
@@ -7166,6 +7356,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                 found[count] = float(index)
         return found
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_player_striker_is_hostile_flagged_and_strikes_beside_the_caster(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(801461, 'players'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
@@ -7185,6 +7376,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(creature[0]), FakeRun(self.ratio_values(
             creature[0].model, 949.0, 806.0)), creature[0]).status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_area_and_periodic_reductions_alert_off_their_amount(self):
         for variant, spell, control, right, wrong in (('area', 301311, 2000.0, 1800.0, 1600.0),
                                                      ('area', 301360, 2000.0, 1600.0, 1800.0),
@@ -7197,6 +7389,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                         expectation.model, control, per_hit)), expectation)
                     self.assertEqual(verdict.status, status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_refreshed_arm_removes_its_auras_before_each_trial_and_waits_its_settle(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, route_entry(300529, 'periodic'))
         steps = run.validate(scenario, run.SIMULATED_CLOCK)['steps']
@@ -7206,6 +7399,7 @@ class TakenHitScenarioTests(unittest.TestCase):
         settles = [step['ms'] for step in steps if step['action'] == 'wait' and ' settle ' in step.get('label', '')]
         self.assertEqual(settles, [2200] * 20)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_strike_back_judges_the_returned_share_with_its_resisted_part(self):
         _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705306, 'strike_back'))
         expectation = expectations[0]
@@ -7224,6 +7418,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                 self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status,
                                  status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_reduction_reads_the_formula_off_the_mitigated_control_strike(self):
         _, expectations = behaviour_scenario(CLASS_FILE, route_entry(705298, 'reduction'))
         expectation = expectations[0]
@@ -7238,6 +7433,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                 self.assertEqual(judge_behaviour(base_verdict(expectation), run_of(treatment), expectation).status,
                                  status)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_reduction_or_returned_share_refuses_an_entry_that_cannot_judge_it(self):
         reduction = route_entry(705298, 'reduction')
         strike_back = route_entry(705306, 'strike_back')
@@ -7249,6 +7445,7 @@ class TakenHitScenarioTests(unittest.TestCase):
                 behaviour_scenario(CLASS_FILE, entry)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ThreatRedirectScenarioTests(unittest.TestCase):
     def test_the_ally_attacks_before_and_after_the_cast_in_a_group(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(805417, 'redirect'))
@@ -7281,6 +7478,7 @@ def dispel_count_entry(spell: int, suffix: str = '') -> dict:
                 and entry.get('label_suffix', '') == suffix)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class DispelCountScenarioTests(unittest.TestCase):
     def test_each_arm_casts_benediction_at_an_ally_carrying_two_of_each_kind(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, dispel_count_entry(681483))
@@ -7335,6 +7533,7 @@ class DispelCountScenarioTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, entry)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class UncappedAreaAndControlledLeechTests(unittest.TestCase):
     def test_an_uncapped_area_around_the_caster_offers_dummies_inside_and_one_beyond(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, route_entry(680397, 'area'))
@@ -7372,6 +7571,7 @@ def taken_outcome_values(model: dict, control: tuple[float, float], treatment: t
     return values
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TakenOutcomeTests(unittest.TestCase):
     def test_the_aura_is_set_only_in_the_treatment_arm_and_parries_are_read_by_victim_state(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, taken_outcome_entry())
@@ -7412,6 +7612,7 @@ class TakenOutcomeTests(unittest.TestCase):
         self.assertIsNotNone(verdict.detail['swings_needed'])
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CharmImmunityTests(unittest.TestCase):
     def test_each_charm_is_read_inside_the_charm_removed_and_its_cleanup_asserted(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, class_entry(TESTAMENT_OF_RESOLVE, 'charm_immunity'))
@@ -7473,6 +7674,7 @@ FEARED_CASTER_FLEE = {'spell': 300513, 'name': "Crusader's Brand (fleeing)", 'ki
 
 
 class PhaseAuraTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_flee_sets_the_fear_in_both_phases_and_the_brand_in_the_after_phase_only(self):
         scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(FEARED_CASTER_FLEE))
         run.validate(scenario)
@@ -7486,6 +7688,7 @@ class PhaseAuraTests(unittest.TestCase):
         self.assertEqual(steps[brand[0]], {'action': 'set_aura', 'actor': CASTER, 'spell': 300513, 'stacks': 1,
                                            'caster': 'dummy'})
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_speed_cap_sets_courage_on_the_dummy_in_both_phases(self):
         scenario, _ = metric_delta_scenario(CLASS_FILE,
                                             metric_delta_spec(r1a_entry(300513, 'metric_delta', 'speed_cap')))
@@ -7502,6 +7705,7 @@ class PhaseAuraTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             metric_delta_spec(entry)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_flee_and_speed_readings_are_judged(self):
         _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(300513, 'metric_delta', 'speed_cap'))
         expectation = expectations[0]
@@ -7512,6 +7716,7 @@ class PhaseAuraTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(uncapped), expectation).status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class DispelArmsTests(unittest.TestCase):
     def entry(self):
         return {'spell': 801465, 'name': 'Silverhand Incantation', 'kind': 'dispel_removal', 'label_suffix': 'arms',
@@ -7581,6 +7786,7 @@ def hit_ratio_readings(expectation, control_mean, treatment_mean, hits_per_trial
     return values
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ExtensionMutantTests(unittest.TestCase):
     def judge(self, expectation, values):
         return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
@@ -7629,6 +7835,7 @@ class ExtensionMutantTests(unittest.TestCase):
         self.assertAlmostEqual(entry['expected'], ratio, places=3)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AmountMatchTests(unittest.TestCase):
     def expectation(self):
         entry = next(entry for entry in CLASS_FILE['behaviours'] if entry['kind'] == 'amount_match')
@@ -7667,6 +7874,7 @@ class AmountMatchTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, bad)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CastPowerTests(unittest.TestCase):
     def test_a_cast_power_replaces_the_cost_before_each_cast_of_the_three_kinds(self):
         suffixes = ('max_health', 'damage_taken', 'tick_1050')
@@ -7687,6 +7895,7 @@ class CastPowerTests(unittest.TestCase):
                 self.assertNotIn(100, [step['value'] for step in plain_steps if step['action'] == 'set_power'])
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class FixedCountPullTests(unittest.TestCase):
     def entry(self):
         return {'spell': 520534, 'name': 'Templar Rituals', 'kind': 'fixed_count',
@@ -7722,6 +7931,7 @@ class FixedCountPullTests(unittest.TestCase):
         self.assertEqual(judge(self.readings(expectation, far_after=10.0)), 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class FixedCountAurasTests(unittest.TestCase):
     def test_libram_is_set_before_every_cast(self):
         scenario, expectations = fixed_target_count_scenario(
@@ -7754,6 +7964,7 @@ class FixedCountAurasTests(unittest.TestCase):
                          'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AbsorbPierceTargetAuraTests(unittest.TestCase):
     def test_crit_guard_is_set_on_the_dummy_before_both_casts(self):
         if not norgannons_wrath_entry().get('dummy_auras') and not norgannons_wrath_entry().get('target_auras'):
@@ -7767,6 +7978,7 @@ class AbsorbPierceTargetAuraTests(unittest.TestCase):
         self.assertEqual(steps[guard[0]]['target'], 'dummy')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GroupStackCapSwingTests(unittest.TestCase):
     def test_each_phase_swings_after_its_marker(self):
         spec = group_stack_cap_spec(r1a_entry(560096, 'group_stack_cap'))
@@ -7800,6 +8012,7 @@ class GroupStackCapSwingTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(ignored), expectation).status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class TakenHitOpeningCastTests(unittest.TestCase):
     def test_copies_are_summoned_once_before_the_treatment_trials(self):
         spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'copies'))
@@ -7820,6 +8033,7 @@ class TakenHitOpeningCastTests(unittest.TestCase):
 
 
 class TakenHitSelectionTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_copies_are_placed_by_selecting_a_dummy_at_each_arm_distance(self):
         spec = taken_hit_spec(r1a_entry(1397742, 'taken_hit', 'radius'))
         scenario, _ = taken_hit_scenario(CLASS_FILE, spec)
@@ -7836,6 +8050,7 @@ class TakenHitSelectionTests(unittest.TestCase):
         self.assertTrue(all(step['actor'] == CASTER and 'equals' in step for step in checks))
         self.assertTrue(all(selections[0] < steps.index(step) for step in checks))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_reduction_beyond_the_radius_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(1397742, 'taken_hit', 'radius'))
         expectation = expectations[0]
@@ -7865,6 +8080,7 @@ class TakenHitSelectionTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'needs a metric and a bound'):
             taken_hit_scenario(CLASS_FILE, taken_hit_spec(unbounded))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_arms_that_differ_only_by_their_selection_are_distinct(self):
         entry = r1a_entry(1397742, 'taken_hit', 'radius')
         same = {**entry, 'arms': [entry['arms'][0], {**entry['arms'][1], 'name': 'treatment', 'checks': []}]}
@@ -7886,6 +8102,7 @@ class CritRateTests(unittest.TestCase):
                            marks['end']['hits']: 10.0 + hits, marks['end']['crits']: 4.0 + crits})
         return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_each_arm_casts_its_spell_300_times_with_its_auras_and_counts_hits_and_crits(self):
         scenario, [expectation] = self.built()
         run.validate(scenario, run.SIMULATED_CLOCK)
@@ -7898,6 +8115,7 @@ class CritRateTests(unittest.TestCase):
         first = cast_indices(steps, 807268)[0]
         self.assertEqual([step['spell'] for step in steps[first - 4:first] if step['action'] == 'set_aura'], [561156])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_an_interval_inside_the_band_is_ok_and_one_across_it_is_measured(self):
         self.assertEqual(self.judged((3000.0, 0.0), (3000.0, 1500.0)).status, 'ok')
         verdict = self.judged((300.0, 0.0), (300.0, 150.0))
@@ -7905,10 +8123,12 @@ class CritRateTests(unittest.TestCase):
         self.assertIn('effect present, interval stated, not final', verdict.explanation)
         self.assertGreater(verdict.detail['crit_rate']['hits_needed_per_arm'], 300)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_missing_or_older_crit_bonus_alerts(self):
         self.assertEqual(self.judged((300.0, 0.0), (300.0, 0.0)).status, 'alert')
         self.assertEqual(self.judged((300.0, 0.0), (300.0, 60.0)).status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_too_few_landed_hits_are_not_judged(self):
         self.assertEqual(self.judged((100.0, 0.0), (300.0, 150.0)).status, 'insufficient_trials')
 
@@ -7918,6 +8138,7 @@ class CritRateTests(unittest.TestCase):
 
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MetricDeltaSelectionTests(unittest.TestCase):
     def built(self):
         return behaviour_scenario(CLASS_FILE, r1a_entry(1397742, 'metric_delta', 'combat'))
@@ -7961,6 +8182,7 @@ def ratio_values(model: dict, treatment_hit: float, control_hit: float = 1100.0)
 
 
 class AllyCastTargetTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_taken_hit_cast_at_the_ally_groups_it_and_sets_its_health_before_each_cast(self):
         spec = taken_hit_spec(binding_scripture_variant('taken_hit', 'stack_cap'))
         scenario, _ = taken_hit_scenario(CLASS_FILE, spec)
@@ -7976,6 +8198,7 @@ class AllyCastTargetTests(unittest.TestCase):
             health = next(step for step in reversed(steps[:index]) if step['action'] == 'set_health')
             self.assertEqual((health['actor'], health['value']), (ALLY, 5000))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_taken_hit_without_an_ally_cast_has_no_ally(self):
         scenario, _ = taken_hit_scenario(CLASS_FILE,
                                          taken_hit_spec(binding_scripture_variant('taken_hit', 'self_heal')))
@@ -7987,6 +8210,7 @@ class AllyCastTargetTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             taken_hit_scenario(CLASS_FILE, taken_hit_spec(entry))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_reduction_missing_or_uncapped_alerts(self):
         for suffix, right, wrongs in (('one_heal', 1045.0, (1100.0,)), ('stack_cap', 935.0, (880.0, 990.0)),
                                       ('self_heal', 1100.0, (1045.0,))):
@@ -8001,6 +8225,7 @@ class AllyCastTargetTests(unittest.TestCase):
                                                      FakeRun(ratio_values(expectation.model, wrong)),
                                                      expectation).status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_cast_applies_aura_at_the_ally_groups_it_in_the_readback_and_the_expiry(self):
         from expiry import cast_applies_aura_expiry
         entry = binding_scripture_variant('cast_applies_aura', 'reduction')
@@ -8177,6 +8402,7 @@ class StatGainTests(unittest.TestCase):
     def judged(self, expectation: Expectation, values: dict) -> str:
         return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_scenario_reads_the_stats_and_the_target_around_each_cast(self):
         from behaviours import stat_gain_scenario, stat_gain_spec
         spec = stat_gain_spec(r1a_entry(705287, 'stat_gain', 'armor'))
@@ -8194,6 +8420,7 @@ class StatGainTests(unittest.TestCase):
             before = [step for step in steps[:cast] if step.get('metric') == 'armor'][-1]
             self.assertEqual(before['actor'], ALLY)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_gain_off_the_stats_alerts(self):
         armor = self.expectation(705287, 'armor')
         stats = {'without': (132.0, 79.0), 'with': (132.0, 79.0), 'agility': (162.0, 79.0), 'stamina': (132.0, 142.0)}
@@ -8204,6 +8431,7 @@ class StatGainTests(unittest.TestCase):
                 self.assertEqual(self.judged(armor, stat_gain_values(armor.model, {**right, arm: wrong}, stats)),
                                  'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_percent_gain_passes_at_its_truncation_only(self):
         power = self.expectation(805423, 'spell_power')
         stats = {'reference': (132.0,), 'agility': (162.0,)}
@@ -8247,6 +8475,7 @@ class StatGainTests(unittest.TestCase):
     def reads(self, expectation: Expectation, arm: str) -> dict:
         return next(item for item in expectation.model['arms'] if item['name'] == arm)['attribution']
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_cast_aura_is_read_cleared_before_and_the_stat_read_back_after_its_removal(self):
         from behaviours import stat_gain_scenario, stat_gain_spec
         scenario, _ = stat_gain_scenario(CLASS_FILE, stat_gain_spec(r1a_entry(705287, 'stat_gain', 'armor')))
@@ -8275,6 +8504,7 @@ class StatGainTests(unittest.TestCase):
             read = steps[casts_before]
             self.assertEqual((read['metric'], read['actor'], read['spell']), ('spell_cast_count', CASTER, 578276))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_withheld_talent_or_the_spells_own_cast_is_a_learned_contrast(self):
         armor = self.armor()
         self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS),
@@ -8285,6 +8515,7 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(power, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
                          'behaviour')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_arms_that_never_withhold_the_spell_stay_data(self):
         entry = r1a_entry(705287, 'stat_gain', 'armor')
         learned_first = self.armor({**entry, 'arms': [{**entry['arms'][1], 'learn': [705287], 'gain': 211},
@@ -8296,6 +8527,7 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(kept_aura, 'granting you spell power', self.POWER_GAINS, self.POWER_STATS),
                          'data')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_verdict_names_the_stat_read(self):
         armor = self.verdict(self.armor(), self.ARMOR_GAINS, self.ARMOR_STATS)
         self.assertIn('UNIT_FIELD_RESISTANCES', armor.detail['read'])
@@ -8303,6 +8535,7 @@ class StatGainTests(unittest.TestCase):
         self.assertIn('SpellBaseDamageBonusDone', power.detail['read'])
         self.assertIn(power.detail['read'], power.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_entries_without_an_attributable_contrast_stay_data(self):
         armor = r1a_entry(705287, 'stat_gain', 'armor')
         unstated_control = self.armor({**armor, 'arms': [{'name': 'without'}, *armor['arms'][1:]]})
@@ -8316,6 +8549,7 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(unnamed_read, 'granting you maximum health', self.POWER_GAINS,
                                        self.POWER_STATS), 'data')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_attribution_failures_keep_the_gain_at_data(self):
         power = self.power()
         reads = self.reads(power, 'reference')
@@ -8332,6 +8566,7 @@ class StatGainTests(unittest.TestCase):
                 self.assertEqual(self.evidence(power, 'granting you spell power', self.POWER_GAINS,
                                                self.POWER_STATS, changed), 'data')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_arm_without_the_talent_need_not_apply_the_aura(self):
         armor = self.armor()
         without, treated = self.reads(armor, 'without'), self.reads(armor, 'with')
@@ -8342,6 +8577,7 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS,
                                        missing), 'data')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_control_arms_cast_must_land(self):
         armor = self.armor()
         without = self.reads(armor, 'without')
@@ -8350,6 +8586,7 @@ class StatGainTests(unittest.TestCase):
         self.assertEqual(self.evidence(armor, 'grants your target armor', self.ARMOR_GAINS, self.ARMOR_STATS, refused),
                          'data')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_another_applied_aura_needs_an_arm_without_the_spell(self):
         def with_extra_aura(expectation: Expectation) -> Expectation:
             model = json.loads(json.dumps(expectation.model))
@@ -8370,6 +8607,7 @@ class StatGainTests(unittest.TestCase):
 
 
 class EnemyPlayerMetricDeltaTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_enemy_player_is_pvp_flagged_and_measured(self):
         spec = metric_delta_spec(r1a_entry(801205, 'metric_delta', 'sleep_player'))
         scenario, _ = metric_delta_scenario(CLASS_FILE, spec)
@@ -8392,6 +8630,7 @@ class EnemyPlayerMetricDeltaTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_creature_length_sleep_on_a_player_alerts(self):
         _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(801205, 'metric_delta', 'sleep_player'))
         expectation = expectations[0]
@@ -8402,6 +8641,7 @@ class EnemyPlayerMetricDeltaTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(wrong), expectation).status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class BladeOfFaithTickTests(unittest.TestCase):
     def test_a_periodic_observed_spell_waits_for_its_tick_after_each_cast(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'hit_ratio', 'oath_condemn'))
@@ -8594,6 +8834,7 @@ class ScriptHitWeaponAndValueTests(unittest.TestCase):
             reference_script_hit_model(CLASS_FILE, 527023, 527270, 527270, 2)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class CostGateUnsetArmTests(unittest.TestCase):
     def test_the_unset_arm_primes_without_its_setup_cast_and_expects_a_refusal(self):
         from behaviours import cost_gate_scenario, cost_gate_spec
@@ -8621,6 +8862,7 @@ class CostGateUnsetArmTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(unset), FakeRun({unset.label: 0.0}), unset).status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class FixedCountSettleLayoutTests(unittest.TestCase):
     def test_every_cast_settles_and_the_dummies_stand_around_the_caster(self):
         spec = fixed_target_count_spec(r1a_entry(524620, 'fixed_count'))
@@ -8643,6 +8885,7 @@ class FixedCountSettleLayoutTests(unittest.TestCase):
             fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AvoidedCastConditionTests(unittest.TestCase):
     def test_the_swing_is_attempted_before_and_after_the_dodged_attacks_with_no_aura_set(self):
         scenario, _ = cast_condition_scenario(CLASS_FILE, cast_condition_spec(r1a_entry(572769, 'cast_condition')))
@@ -8665,6 +8908,7 @@ class AvoidedCastConditionTests(unittest.TestCase):
 
 
 class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_heal_on_the_caster_is_read_on_the_caster_with_the_libram_in_the_model(self):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, r1a_entry(801463, 'script_hit'))
         run.validate(scenario, run.SIMULATED_CLOCK)
@@ -8674,6 +8918,7 @@ class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
         self.assertEqual(expectation.model['model_auras'], [801463])
         self.assertIn(801463, [modifier['spell_id'] for modifier in expectation.model['modifiers']])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_damage_hit_on_the_caster_is_refused(self):
         entry = {**r1a_entry(803893, 'script_hit'), 'receiver': CASTER}
         with self.assertRaises(ValueError):
@@ -8684,6 +8929,7 @@ class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_damage_done_aura_and_the_unresisted_strike_shape_the_model(self):
         _, [breaker] = behaviour_scenario(CLASS_FILE, r1a_entry(705300, 'script_hit'))
         self.assertIn((705300, 79, 15), [(modifier['spell_id'], modifier['aura'], modifier['percent'])
@@ -8764,6 +9010,7 @@ class ExtensionHitRatioMutantTests(unittest.TestCase):
         self.assertEqual(self.judged(300524, 'blade_of_faith', 239.0, 191.2), 'ok')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class FixedCountCapArmTests(unittest.TestCase):
     def test_the_cap_arm_places_twelve_dummies_inside_the_radius_and_reads_their_distances(self):
         spec = fixed_target_count_spec(r1a_entry(524739, 'fixed_count', 'cap'))
@@ -8849,6 +9096,7 @@ class FixedCountCapArmTests(unittest.TestCase):
 
 
 class BladeOfFaithCritTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_crit_arm_forces_melee_crit_and_the_control_forces_zero(self):
         crit, _ = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'metric_delta', 'crit'))
         zero, _ = behaviour_scenario(CLASS_FILE, r1a_entry(803872, 'metric_delta', 'crit_zero'))
@@ -8872,6 +9120,7 @@ class BladeOfFaithCritTests(unittest.TestCase):
 
 
 class AggroRedirectRangeTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_rooted_dummies_are_read_by_distance_right_before_the_cast(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
         run.validate(scenario)
@@ -8884,6 +9133,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         self.assertTrue(all(index < cast for index in reads))
         self.assertEqual([expectation.displayed for expectation in expectations], ['1', '1'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_seeded_misplaced_dummy_alerts_even_when_the_victim_matches(self):
         _, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
         inside = expectations[0]
@@ -8892,6 +9142,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         self.assertEqual(judge_behaviour(base_verdict(inside), FakeRun(placed), inside).status, 'ok')
         self.assertEqual(judge_behaviour(base_verdict(inside), FakeRun(moved), inside).status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_geometry_reads_every_dummy_and_the_caster_before_the_cast(self):
         scenario, expectations = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'edge'))
         run.validate(scenario)
@@ -8908,6 +9159,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         self.assertEqual(len(caster_reads), 3)
         self.assertEqual([expectation.displayed for expectation in expectations], ['1', '1', '0', '0'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_control_is_a_stock_area_taunt_with_a_guard_inside_its_radius(self):
         [control] = control_entries(19)
         self.assertEqual((control['spell'], control['control_for']), (1161, 800424))
@@ -8916,6 +9168,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         self.assertEqual(len(cast_indices(scenario['steps'], 1161)), 1)
         self.assertEqual([expectation.displayed for expectation in expectations], ['1', '0', '0', '0', '0'])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_control_stays_out_of_the_class_file_and_its_full_generation(self):
         self.assertFalse([entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 1161])
         manifest_dir = Path(tempfile.mkdtemp())
@@ -8932,11 +9185,13 @@ class AggroRedirectRangeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_range_entry_reads_no_geometry(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, r1a_entry(800424, 'aggro_redirect', 'range'))
         self.assertFalse([step for step in scenario['steps']
                           if step.get('metric') in ('combat_reach', 'position_z', 'run_speed_rate')])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_an_entry_without_roots_keeps_its_labels(self):
         _, expectations = behaviour_scenario(CLASS_FILE, next(
             entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == 800424
@@ -8945,6 +9200,7 @@ class AggroRedirectRangeTests(unittest.TestCase):
         self.assertNotIn('distance_label', expectations[0].model)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitCastAuraTests(unittest.TestCase):
     def test_blade_hit_and_periodic_total_scenarios_set_the_zero_crit_aura_before_each_cast(self):
         manifest_dir = Path(tempfile.mkdtemp())
@@ -8965,6 +9221,7 @@ class HitCastAuraTests(unittest.TestCase):
             shutil.rmtree(manifest_dir)
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class FixedCountBehindTests(unittest.TestCase):
     def entry(self, **changes):
         return {'spell': 572769, 'name': 'Sacred Swing', 'kind': 'fixed_count',

@@ -758,6 +758,7 @@ class CompareTest(unittest.TestCase):
         verdicts = self.verdicts(constant_reader())
         self.assertEqual(alert_rows(verdicts), ['\t'.join(ALERT_COLUMNS)])
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_unreadable_portion_is_counted_in_the_report(self):
         entries = [expectation('1001 effect_value #0', 'effect_value', '$?s1[a][b]', 'unreadable: $?s1[a][b]')]
         self.workspace.scenario(VALUE_KEY, 'value', entries, [], [])
@@ -809,12 +810,14 @@ class CompareTest(unittest.TestCase):
         self.workspace.scenario(HIT_KEY, 'hit', [entry], [], steps)
         return {verdict.label: verdict for verdict in self.verdicts()}[label]
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_hit_mean_inside_the_99_percent_interval_is_ok(self):
         verdict = self.hit_verdict('2172', '4')
         self.assertEqual(verdict.status, 'ok')
         self.assertEqual(verdict.measured, 543.0)
         self.assertAlmostEqual(verdict.high - verdict.expected, 2.576 * 1.72 / 2)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_hit_mean_outside_the_99_percent_interval_is_an_alert(self):
         verdict = self.hit_verdict('4074', '4')
         self.assertEqual((verdict.status, verdict.measured), ('alert', 1018.5))
@@ -828,14 +831,17 @@ class CompareTest(unittest.TestCase):
         self.workspace.scenario(HIT_KEY, 'periodic_total', [entry], [], steps)
         return {verdict.label: verdict for verdict in self.verdicts(hit_model=periodic_reference_hit)}[label]
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_periodic_total_with_a_zeroed_effect_is_an_alert(self):
         verdict = self.periodic_verdict('0', '40')
         self.assertEqual((verdict.status, verdict.measured), ('alert', 0.0))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_periodic_total_inside_the_99_percent_interval_is_ok(self):
         verdict = self.periodic_verdict('4000', '40')
         self.assertEqual((verdict.status, verdict.measured, verdict.expected), ('ok', 1000.0, 1000.0))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_periodic_total_scales_the_hit_mean_result_by_its_tick_count(self):
         base = self.hit_verdict('2172', '4')
         self.fresh()
@@ -854,24 +860,28 @@ class CompareTest(unittest.TestCase):
         self.workspace.cast_failures[key] = [{'cast_count': str(count), 'spell': str(spell), 'reason': reason,
                                               'actor': 'caster'} for count, reason in enumerate(reasons, start=1)]
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_hit_mean_without_any_usable_hit_after_failed_casts_is_unmeasured(self):
         self.fail_casts(HIT_KEY, RANK, '22', '22')
         verdict = self.hit_verdict('0', '0')
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertEqual(verdict.explanation, 'no usable hit; failed casts: 2 x SPELL_FAILED_CASTER_AURASTATE (22)')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_hit_mean_after_a_failed_cast_is_judged_on_the_usable_hits(self):
         self.fail_casts(HIT_KEY, RANK, '22')
         verdict = self.hit_verdict('4074', '4')
         self.assertEqual((verdict.status, verdict.measured), ('alert', 1018.5))
         self.assertIn('failed casts: 1 x SPELL_FAILED_CASTER_AURASTATE (22)', verdict.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_failed_casts_that_leave_too_few_hits_are_insufficient_trials_naming_them(self):
         self.fail_casts(HIT_KEY, RANK, '22', '22', '22')
         verdict = self.hit_verdict('543', '1')
         self.assertEqual(verdict.status, 'insufficient_trials')
         self.assertIn('failed casts: 3 x SPELL_FAILED_CASTER_AURASTATE (22)', verdict.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_failed_cast_of_another_spell_or_rank_leaves_the_hit_mean_judged(self):
         for other in (9999, RANK + 1):
             self.fresh()
@@ -880,6 +890,7 @@ class CompareTest(unittest.TestCase):
             self.assertEqual(verdict.status, 'ok')
             self.assertNotIn('failed', verdict.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_fewer_usable_hits_than_the_minimum_are_insufficient_trials(self):
         self.assertEqual(self.hit_verdict('543', '1').status, 'insufficient_trials')
 
@@ -894,6 +905,7 @@ class CompareTest(unittest.TestCase):
     def hit_verdicts(self, hit_model=reference_hit):
         return [verdict for verdict in self.verdicts(hit_model=hit_model) if verdict.label == '1001 hit_mean']
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_parts_are_summed(self):
         self.hit_part(0, '1086', '2')
         self.hit_part(1, '1086', '2')
@@ -905,6 +917,7 @@ class CompareTest(unittest.TestCase):
         self.assertIn('4 usable hits', verdict.explanation)
         self.assertIn('2 of 2 parts', verdict.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_parts_pool_the_model_of_each_part(self):
         def by_armor(class_file, entry, measured):
             mean = 543.2 if measured['target armor'] == 528 else 540.0
@@ -918,6 +931,7 @@ class CompareTest(unittest.TestCase):
         self.assertAlmostEqual(verdict.high - verdict.expected, 2.576 * math.sqrt(4 * 1.72 ** 2) / 4)
         self.assertEqual((verdict.status, verdict.measured), ('ok', 541.5))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_part_without_result_leaves_too_few_hits(self):
         self.hit_part(0, '1086', '2')
         self.hit_part(1, '1086', '2', steps=False)
@@ -925,6 +939,7 @@ class CompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'insufficient_trials')
         self.assertIn('1 of 2 parts', verdict.explanation)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_changed_hit_tokens_are_an_alert(self):
         def other_tokens(class_file, entry, measured):
             return HitModel(kind='weapon', mean=543.2, sigma=1.72, tooltip_mean=746.33, displayed=('$s2',))
@@ -1080,6 +1095,7 @@ class CalcAmountAndBuildTest(unittest.TestCase):
             self.evaluated('not-a-build')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GameplayClockGateTest(unittest.TestCase):
     def setUp(self):
         self.workspace = Workspace()
@@ -1552,6 +1568,7 @@ class PassiveDeltaTest(unittest.TestCase):
         verdicts = self.passive_run(SOLEMN_SOLDIER, {entry: (None, None)}, [Displayed('$s1', 10.0, 0, 'percent')])
         self.assertEqual(verdicts[entry.label].status, 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_report_counts_passive_verdicts_per_family(self):
         entry = passive_expectation(SOLEMN_SOLDIER, 0, 'attack_time_ms', 'haste', '$s1', 10.0, fields={'hand': 0})
         unmodelled = Expectation(f'{SOLEMN_SOLDIER} e2', 'unmodelled', SOLEMN_SOLDIER, SOLEMN_SOLDIER, 2, '',
