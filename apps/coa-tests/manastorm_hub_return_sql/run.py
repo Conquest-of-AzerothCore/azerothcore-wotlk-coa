@@ -15,6 +15,7 @@ HUB_UPDATE = re.compile(r'UPDATE\s+`manastorm_hub_return`\s+SET\s+`gameobject_gu
                         r'\s+WHERE\s+`team_id`\s*=\s*(\d+)\s*;', re.I)
 GAMEOBJECT_WRITE = re.compile(r'(INSERT\s+(?:IGNORE\s+)?INTO|DELETE\s+FROM|REPLACE\s+INTO)\s+`gameobject`\s([^;]*);',
                               re.I)
+GUID_RANGE = re.compile(r'`?guid`?\s+BETWEEN\s+(\d+)\s+AND\s+(\d+)', re.I)
 GAMEOBJECT_ROW = re.compile(r'\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,')
 
 
@@ -50,7 +51,14 @@ def apply_hub_statements(state, statements):
 def apply_gameobject_writes(state, text, guids):
     for match in GAMEOBJECT_WRITE.finditer(text):
         if match[1].upper().startswith('DELETE'):
-            deleted = {int(value) for value in re.findall(r'\d+', match[2].split('WHERE', 1)[-1])}
+            predicate = match[2].split('WHERE', 1)[-1]
+            if re.search(r'\bguid\b', predicate, re.I):
+                ranges = [range(int(low), int(high) + 1) for low, high in GUID_RANGE.findall(predicate)]
+                deleted = {int(value) for value in re.findall(r'\d+', GUID_RANGE.sub('', predicate))}
+                deleted |= {guid for guid in guids if any(guid in span for span in ranges)}
+            else:
+                entries = {int(value) for value in re.findall(r'\d+', predicate)}
+                deleted = {guid for guid, (entry, _) in state.items() if entry in entries}
             for guid in deleted & guids:
                 state.pop(guid, None)
             continue
@@ -87,6 +95,17 @@ class FreshImportHubReturnTests(unittest.TestCase):
         state = {0: 6901535, 1: 6901536}
         apply_hub_statements(state, hub_statements(FIX.read_text(encoding='utf-8')))
         self.assertEqual(state, {0: 6901535, 1: 6901539})
+
+    def test_simulator_deletes_pads_inside_guid_ranges(self):
+        state = {6901535: (TELEPORT_PAD, 0), 6901539: (TELEPORT_PAD, 1)}
+        apply_gameobject_writes(state, 'DELETE FROM `gameobject` WHERE `guid` BETWEEN 6901536 AND 6901540;',
+                                set(state))
+        self.assertEqual(state, {6901535: (TELEPORT_PAD, 0)})
+
+    def test_simulator_deletes_pads_by_entry(self):
+        state = {6901539: (TELEPORT_PAD, 1)}
+        apply_gameobject_writes(state, f'DELETE FROM `gameobject` WHERE `id` = {TELEPORT_PAD};', set(state))
+        self.assertEqual(state, {})
 
     def test_rerun_is_idempotent(self):
         statements = hub_statements(FIX.read_text(encoding='utf-8'))
