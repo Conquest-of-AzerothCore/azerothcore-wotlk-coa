@@ -5155,7 +5155,9 @@
       "806525 e0 spell_modifier 503141",
       "806525 e0 spell_effect_value 503141",
       "806525 e1 spell_modifier 807035",
-      "806525 e1 spell_effect_value 807035"
+      "806525 e1 spell_effect_value 807035",
+      "503141 hit_mean weapon_damage",
+      "806525 behaviour_hit_ratio scarlet_hammer"
     ],
     "kind": "claim"
   },
