@@ -250,6 +250,18 @@
       "trial_metric": "owned_creature_damage_count",
       "event_metric": "spell_cast_count",
       "proc_spell": 531129,
+      "energize_amounts": [
+        {
+          "power": 6,
+          "expected": 20,
+          "source": "531129 Effect[1] SPELL_EFFECT_ENERGIZE MiscValue 6 (Runic Power), BasePoints 19 + 1 = 20, shown as $/10;531129s2 = 2"
+        },
+        {
+          "power": 0,
+          "percent_of_max": 2,
+          "source": "531129 Effect[0] SPELL_EFFECT_ENERGIZE_PCT (137) MiscValue 0 (mana), BasePoints 1 + 1 = 2 ($531129s1%), CalculatePct of the caster's maximum mana"
+        }
+      ],
       "proc_spell_source": "tooltip tokens $531129s2 and $531129s1",
       "events_per_proc": 1,
       "handler": "two paths: AscensionNecromancerEvents.cpp:165-170 Chance(player, 531128, minion cost) casts 531129 on the caster; the minion copy of 531128 keeps its native aura 42 to 531131 (AscensionNecromancerContracts.cpp:52-56; spell_proc Chance 5, rev_20261101_30), whose Effect[0] 140 makes the master cast 531129. A Ghoul costs 1 Life Force.",
@@ -385,6 +397,104 @@
         "707882": {}
       },
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 707001,
+      "name": "Putricide's Formula (up to 3 enemies)",
+      "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+      "baseline": true,
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500335,
+        "entry": 50068,
+        "learn": [
+          92123
+        ],
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by Undead minions",
+      "trial_metric": "owned_creature_damage_count",
+      "trial_readings": [
+        {
+          "name": "Abomination damage events less the blasts",
+          "meaning": "the blasts 707002 on every dummy are the Abomination's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
+          "adds": [],
+          "minus_events": true
+        }
+      ],
+      "event_metric": "spell_damage_count",
+      "event_actor": "minion",
+      "proc_spell": 707002,
+      "proc_spell_source": "tooltip tokens $707002i (707002 MaxAffectedTargets 3) and $707002m1",
+      "events_per_proc": 3,
+      "handler": "AscensionNecromancerEvents.cpp:187-197: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 at up to Amount(707001) valid enemies within 8 yd of its target; one dummy here, so one blast per proc. Count variant: an Abomination 50068 (Raise: Abomination 500335, Summoning Adept 92123 for its 3 Life Force) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
+      "dbc": {
+        "707001": {
+          "ProcChance": 10,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "707001": {}
+      },
+      "internal_cooldown_ms": 0,
+      "extra_dummies": [
+        4,
+        5,
+        6
+      ]
+    },
+    {
+      "aura": 707882,
+      "name": "Putricide's Formula (up to 3 enemies)",
+      "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
+      "baseline": true,
+      "chance_token": "$h",
+      "trigger": {
+        "action": "minion",
+        "spell": 500335,
+        "entry": 50068,
+        "learn": [
+          92123
+        ],
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50068 BaseAttackTime 2000"
+      },
+      "trigger_text": "Damage dealt by Undead minions",
+      "trial_metric": "owned_creature_damage_count",
+      "trial_readings": [
+        {
+          "name": "Abomination damage events less the blasts",
+          "meaning": "the blasts 707002 on every dummy are the Abomination's own spell damage events and never trigger (Derived, AscensionNecromancerEvents.cpp:19-36)",
+          "adds": [],
+          "minus_events": true
+        }
+      ],
+      "event_metric": "spell_damage_count",
+      "event_actor": "minion",
+      "proc_spell": 707002,
+      "proc_spell_source": "tooltip tokens $707002i (707002 MaxAffectedTargets 3) and $707002m1",
+      "events_per_proc": 3,
+      "handler": "AscensionNecromancerEvents.cpp:187-197: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll. Count variant: an Abomination 50068 (Raise: Abomination 500335, Summoning Adept 92123 for its 3 Life Force) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
+      "dbc": {
+        "707882": {
+          "ProcChance": 20,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "707882": {}
+      },
+      "internal_cooldown_ms": 0,
+      "extra_dummies": [
+        4,
+        5,
+        6
+      ]
     }
   ],
   "triggers": [

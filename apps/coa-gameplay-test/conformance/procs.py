@@ -10,6 +10,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, READ_STEP_M
                     armed_for, facts_of, is_hostile, targets_ally)
 
 PROC_CHECK = 'proc_rate'
+PROC_ENERGIZE_CHECK = 'proc_energize_amount'
 AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
 ENTRY_STATUSES = {'ambiguous_tooltip': AMBIGUOUS_TOOLTIP, 'unmodelled': UNMODELLED}
 RATE_HALF_WIDTH = 0.025
@@ -122,7 +123,7 @@ def shares_proc_spell(class_file: dict, entry: dict) -> bool:
 
 def trigger_key(entry: dict) -> int | str:
     trigger = entry['trigger']
-    return trigger['spell'] if trigger['action'] == CAST else trigger['action']
+    return trigger['spell'] if trigger['action'] in (CAST, MINION) else trigger['action']
 
 
 def chance_of(values: Sequence, token: str, kind: str = CHANCE_KIND) -> float | None:
@@ -441,7 +442,8 @@ def event_steps(entry: dict) -> list[dict]:
         if entry['event_metric'] not in ('spell_damage_count', MINION_PROC_COUNT) or minion_entry(entry) is None:
             raise ValueError(f'Proc {entry["aura"]} reads minion events other than spell_damage_count or '
                              f'{MINION_PROC_COUNT} of a minion')
-        on_target = {'target': TARGET} if entry['event_metric'] == 'spell_damage_count' else {}
+        on_target = {'target': TARGET} \
+            if entry['event_metric'] == 'spell_damage_count' and not entry.get('extra_dummies') else {}
         return [measurement(label, CASTER, term['metric'], spell=term['spell'], entry=minion_entry(entry),
                             **on_target) for label, term in event_terms(entry)]
     return [spell_count_step(label, term['metric'], term['spell']) for label, term in event_terms(entry)]
@@ -506,7 +508,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     limit = per_trigger_limit(entry)
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
-        steps += added_trial_steps(entry) + event_steps(entry)
+        steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry)
     if entry.get('aura_on_minion'):
         if minion_entry(entry) is None:
             raise ValueError(f'Proc {aura} reads its aura on a minion without a minion trigger')
@@ -520,7 +522,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     if trigger_target(entry) == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     else:
-        scenario['creatures'] = [creature_fixture(class_file)]
+        scenario['creatures'] = [creature_fixture(class_file)] + extra_dummies(class_file, entry)
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
              'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms,
              'trigger': dict(entry['trigger']), 'proc_spell': entry['proc_spell'],
@@ -535,6 +537,9 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     if baseline:
         model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct)}
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
+    if entry.get('extra_dummies'):
+        rule += (f'; {len(entry["extra_dummies"])} more dummies at {entry["extra_dummies"]} yd from the caster, the '
+                 f'events counted on every dummy')
     if entry.get('baseline') and entry['trigger']['action'] in (MINION, CAST):
         rule += (f'; no event in the {baseline_attempts(plan.chance_pct)} baseline attempts before the passive is '
                  f'learned, which a {plan.chance_pct:g}% roll passes with under {BASELINE_MISS_RISK:g} probability')
@@ -547,7 +552,52 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{rule}{handler_note(entry)}', model)
     baseline_ms = baseline_attempts(plan.chance_pct) * plan.attempt_ms + DRAIN_MS if baseline else 0
-    return timed(scenario, SETTLE_MS + baseline_ms + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
+    return (timed(scenario, SETTLE_MS + baseline_ms + plan.per_part * plan.attempt_ms + DRAIN_MS),
+            [expectation] + energize_expectations(entry, part, plan.parts))
+
+
+def energize_labels(aura: int, power: int) -> dict[str, str]:
+    return {part: f'{aura} proc energize {power} {part}' for part in ('total', 'count', 'max_power')}
+
+
+def energize_steps(entry: dict) -> list[dict]:
+    steps = []
+    for amount in entry.get('energize_amounts', []):
+        labels = energize_labels(entry['aura'], amount['power'])
+        steps += [measurement(labels['total'], CASTER, 'spell_energize_total', spell=entry['proc_spell'],
+                              power=amount['power']),
+                  measurement(labels['count'], CASTER, 'spell_energize_count', spell=entry['proc_spell'],
+                              power=amount['power'])]
+        if 'percent_of_max' in amount:
+            steps.append(measurement(labels['max_power'], CASTER, 'max_power', power=amount['power']))
+    return steps
+
+
+def energize_expectations(entry: dict, part: int, parts: int) -> list[Expectation]:
+    expectations = []
+    for amount in entry.get('energize_amounts', []):
+        if set(amount) - {'power', 'expected', 'percent_of_max', 'source'} or ('expected' in amount) == \
+                ('percent_of_max' in amount) or not amount.get('source'):
+            raise ValueError(f'Proc {entry["aura"]} energize amount is {{"power", "expected" or "percent_of_max", '
+                             f'"source"}}')
+        stated = (f'{amount["expected"]:g}' if 'expected' in amount
+                  else f'{amount["percent_of_max"]:g}% of the maximum')
+        rule = (f'every energize of power {amount["power"]} by {entry["proc_spell"]} restores {stated}, summed over '
+                f'the proc parts ({amount["source"]})')
+        model = {'part': part, 'parts': parts, 'power': amount['power'], 'expected': amount.get('expected'),
+                 'percent_of_max': amount.get('percent_of_max'),
+                 'measurements': energize_labels(entry['aura'], amount['power'])}
+        expectations.append(Expectation(f'{entry["aura"]} {PROC_ENERGIZE_CHECK} {amount["power"]}',
+                                        PROC_ENERGIZE_CHECK, entry['aura'], entry['aura'], None, stated, rule, model))
+    return expectations
+
+
+def extra_dummies(class_file: dict, entry: dict) -> list[dict]:
+    extras = entry.get('extra_dummies', [])
+    if extras and minion_entry(entry) is None:
+        raise ValueError(f'Proc {entry["aura"]} places extra dummies without a minion trigger')
+    return [{**creature_fixture(class_file), 'id': f'{TARGET}_{index + 2}', 'distance': distance}
+            for index, distance in enumerate(extras)]
 
 
 def handler_note(entry: dict) -> str:

@@ -42,7 +42,7 @@ from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK,
-                   chance_of, wilson_interval)
+                   PROC_ENERGIZE_CHECK, chance_of, wilson_interval)
 from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
@@ -141,7 +141,7 @@ ADDITIVE_RELATIONS = frozenset({'add', 'share'})
 TRUNCATED_METRICS = frozenset({'stat'})
 CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
                  COOLDOWN_CHECK: ('triggers', 'aura'), DURATION_CHECK: ('triggers', 'aura'),
-                 COOLDOWN_GATE_CHECK: ('triggers', 'aura'),
+                 COOLDOWN_GATE_CHECK: ('triggers', 'aura'), PROC_ENERGIZE_CHECK: ('procs', 'aura'),
                  SELF_TRIGGER_CHECK: ('triggers', 'aura'), GATE_ABSENCE_CHECK: ('triggers', 'aura'),
                  TALENT_DELTA: ('talent_modifiers', 'talent')}
 PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
@@ -1532,6 +1532,38 @@ def judge_minion_cooldown(parts: list[ProcPart]) -> Verdict:
                                    f'{model["minimum_trials"]} the check needs ({notes})')
     status = 'ok' if measured[0] <= high + FLOAT_EPSILON and measured[1] >= low - FLOAT_EPSILON else 'alert'
     return replace(judged, status=status, explanation=f'{counts}; {expectation.rule} ({notes})')
+
+
+def judge_proc_energize(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    labels = model['measurements']
+    total = count = 0.0
+    expected_totals = 0.0
+    unmeasured = []
+    for _, run, _ in parts:
+        values = {name: run.values.get(label) for name, label in labels.items()
+                  if name != 'max_power' or model.get('percent_of_max') is not None}
+        if None in values.values():
+            unmeasured.append(unusable_run(run))
+            continue
+        each = model['expected'] if model.get('expected') is not None \
+            else math.floor(values['max_power'] * model['percent_of_max'] / 100)
+        total += values['total']
+        count += values['count']
+        expected_totals += values['count'] * each
+    notes = f'{len(parts) - len(unmeasured)} of {model["parts"]} parts'
+    if unmeasured:
+        notes += f'; no energize measurements in {", ".join(unmeasured)}'
+    if count <= 0:
+        return replace(base, status='unmeasured', explanation=f'no energize of power {model["power"]} ({notes})')
+    mean, expected = total / count, expected_totals / count
+    status = 'ok' if abs(total - expected_totals) <= FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=mean, expected=expected, low=expected, high=expected,
+                   explanation=f'{total:g} restored over {count:g} energizes, {mean:g} each, against {expected:g} '
+                               f'each; {expectation.rule} ({notes})')
 
 
 def judge_cooldown_gate(parts: list[ProcPart]) -> Verdict:
@@ -4867,8 +4899,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK,
-                                       SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK, COOLDOWN_GATE_CHECK) \
-                    and run is not None:
+                                       SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK, COOLDOWN_GATE_CHECK,
+                                       PROC_ENERGIZE_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in POOLED_CHECKS and (expectation.model or {}).get('parts', 1) > 1:
                 if expectation.label not in hit_slots:
@@ -4913,7 +4945,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
     trigger_judges = {TRIGGER_CHECK: judge_trigger, COOLDOWN_CHECK: judge_trigger_cooldown,
                       DURATION_CHECK: judge_trigger_duration, MAGNITUDE_CHECK: judge_trigger_magnitude,
                       SELF_TRIGGER_CHECK: judge_self_trigger, GATE_ABSENCE_CHECK: judge_gate_absence,
-                      COOLDOWN_GATE_CHECK: judge_cooldown_gate}
+                      COOLDOWN_GATE_CHECK: judge_cooldown_gate, PROC_ENERGIZE_CHECK: judge_proc_energize}
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)

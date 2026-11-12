@@ -1056,7 +1056,7 @@
       {
         "claim": "to restore $/10;531129s2 Runic Power",
         "labels": [
-          "531128 effect_value 531129e1 #1"
+          "531128 proc_energize_amount 6"
         ]
       }
     ],
@@ -1066,7 +1066,7 @@
     "spell": 531128,
     "clause": "and $531129s1% of your maximum mana.",
     "labels": [
-      "531128 effect_value 531129e0 #2"
+      "531128 proc_energize_amount 0"
     ],
     "kind": "claim"
   },
