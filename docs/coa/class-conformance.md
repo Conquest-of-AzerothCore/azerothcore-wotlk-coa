@@ -11,7 +11,8 @@ Short names:
 - `G&C` = `CONF/docs/generate-and-compare.md`;
 - `LEDGER` = `CONF/docs/clause-ledger.md`.
 
-File and line references were read on 2026-11-12 at feat/coa-class-conformance bc391cd7bc.
+File and line references were read on 2026-11-12 at feat/coa-class-conformance bc391cd7bc. The references into the
+conformance README, `G&C`, `LEDGER` and `scaffolding.md` were then updated to the commit that adds this guide.
 
 ---
 
@@ -94,7 +95,7 @@ Templar examples:
 
 ### 3.1 Behaviour against data
 
-The tool computes two proof statuses from closed tables, never by hand (ADR 0120; `LEDGER:159-232`).
+The tool computes two proof statuses from closed tables, never by hand (ADR 0120; `LEDGER:161-234`).
 - **Data conformant**: a readback of a computed value. Examples: a stored modifier, a calculation function called by the
   harness, a spell's computed effect value.
 - **Behaviour proven**: the value is shown to be consumed by the path that acts. Examples: the hit that landed, the
@@ -201,7 +202,7 @@ them").
 
 No step of this guide needs a file that exists only on the owner's machine. The server DBC set must sit where
 `profile.DBC_DIR` points (`/srv/coa/server-data/dbc`, `profile.py:11`): `generate`, `sheets` and `scaffold` refuse a set
-whose Spell.dbc sha256 differs from the one there (`G&C:27-30`). Where a tool the Templar used is not in the repository
+whose Spell.dbc sha256 differs from the one there (`G&C:29-32`). Where a tool the Templar used is not in the repository
 yet, the step says so.
 
 **Handling the Knowledge MCP** (recommended):
@@ -282,7 +283,7 @@ See section 13.
 
 ## 7. Server fixes: what you may fix and what goes to the owner
 
-A conformance alert is a lead, not evidence (`CONF/README.md:44-46`; ADR 0128). Before any fix:
+A conformance alert is a lead, not evidence (`CONF/README.md:46-48`; ADR 0128). Before any fix:
 1. **Reproduce** the alert with a behavioural scenario on the current build (G-3). In round 10, 6 of 8 investigated
    alerts were not server defects: 4 already worked and 2 were wrong tests.
 2. **Classify** the finding, following `.agents/rules/defects.md`: confirmed defect, already works, incorrect test, or
@@ -332,7 +333,7 @@ Each question carries five parts (G-4 sets the content; the recommendation is th
 State also the references searched and what they said, or "nothing found". Order the open list by the number of claims
 each answer unlocks.
 
-question Q-r2a-1 of the Templar's owner questions (pair ids are `verify_all` run stamps, and the build is the
+The Templar's owner question Q-r2a-1 shows the format (pair ids are `verify_all` run stamps, and the build is the
 worldserver binary's sha256 prefix; the runs are not in the repository):
 
 > **Q-r2a-1. Duty Calls [705286], claim 193: does "damage dealt" include Physical damage?** (1 claim part; the
@@ -447,11 +448,11 @@ classes, 6 of them Templar. Four have no class code:
 ### 9.3 Class file and reference character
 
 Create a class file from data. `scaffold` writes a minimal `classes/<name>.json` for a CoA class (12-32) and leaves the
-coverage fields empty (`CONF/docs/scaffolding.md:3-9`):
+coverage fields empty (`CONF/docs/scaffolding.md:3-10`):
 
     conformance.py scaffold --class N --out FILE --config WORLDSERVER_CONF --mysql MYSQL [--dbc-dir DIR] [--level N]
 
-Measure the reference stats with a naked scenario (`CONF/docs/scaffolding.md:42-50`):
+Measure the reference stats with a naked scenario (`CONF/docs/scaffolding.md:43-51`):
 
     python3 -c "import json, scaffold; cf = json.load(open('FILE')); \
       json.dump(scaffold.naked_scenario(cf), open('NAKED.json', 'w'), indent=2)"
@@ -466,9 +467,9 @@ Measure the reference stats with a naked scenario (`CONF/docs/scaffolding.md:42-
 The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, labels, kind}` entries, with optional
 `claims`, `tool_gap`, `text_source`, `no_behaviour_route` and `effectiveness_of` (`LEDGER:7-47`).
 - `kind` is `claim` or `no_claim`. A `no_claim` row comes only from the initial generation or an owner ruling
-  (`LEDGER:86-90`).
+  (`LEDGER:88-92`).
 - Other workstreams never edit the ledger directly. They write a fragment, and the integrator merges it by `(spell,
-  clause)` (`LEDGER:71-90`).
+  clause)` (`LEDGER:73-92`).
 
 **No repository tool builds a class's first ledger.** This is future work.
 - The Templar ledger was added once, in commit e32d5308b5 (2026-11-09), from a round 10 clause audit of 450 rows that
@@ -477,9 +478,11 @@ The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, la
 - In that audit, agents split each tooltip into rows, batch by batch. The script that prepared the batches, the written
   splitting instructions and the merge into one file were never committed.
 - ADR 0052 gives the target shape: one entry per audit row, with `kind` `claim` or `no_claim`, and the audit's own note
-  as `reason`. The document it cites, `docs/ledger-format.md`, does not exist.
-- Since then, rows change only by merged fragments and by owner rulings. On 2026-11-12 the ledger held 452 entries: 435
-  claims and 17 `no_claim`.
+  as `reason`. The document it cites, `docs/ledger-format.md`, was never committed; ADR 0302 points to this section
+  and to `LEDGER` instead.
+- Since then, rows change only by merged fragments and by owner rulings. At b6529634cb and at bc391cd7bc the ledger
+  held 452 entries: 435 claims and 17 `no_claim`. ADR 0052's 450 rows (434 claims, 16 `no_claim`) are the ledger as
+  e32d5308b5 added it.
 
 **Ledger fields** (`LEDGER`, "File format"):
 - `spell`, `clause` (the exact tooltip words) and `kind` (`claim` or `no_claim`);
@@ -541,7 +544,7 @@ The five final statuses of section 2 have no field in the ledger. The Templar tr
 
 ### 9.5 Generate, run, compare
 
-From `CONF` (`CONF/README.md:26-35`):
+From `CONF` (`CONF/README.md:28-37`):
 
     python3 -B conformance.py generate --class 19 --out $W/.cache/conformance/templar
     python3 -B conformance.py generate --class 19 --stack --out $W/.cache/conformance/templar/stack
@@ -554,26 +557,26 @@ From `CONF` (`CONF/README.md:26-35`):
 
 Use your class id in place of 19.
 - These runs end `INCOMPLETE` by design: exploratory scenarios leave the gameplay stage `unavailable` even when every
-  scenario passes (`CONF/README.md:37-38`). Only `PASSED` is a passing `verify_all`, so these runs are verdict evidence,
+  scenario passes (`CONF/README.md:39-40`). Only `PASSED` is a passing `verify_all`, so these runs are verdict evidence,
   not a pass.
-- `generate` refuses a DBC set whose Spell.dbc sha256 differs from the server set's (`G&C:27-30`).
-- `compare --build` refuses runs of another build (`G&C:38-44`).
-- `generate` also takes `--behaviour`, `--target-gate` and `--learned-hit`; the usage line omits them
+- `generate` refuses a DBC set whose Spell.dbc sha256 differs from the server set's (`G&C:29-32`).
+- `compare --build` refuses runs of another build (`G&C:40-46`).
+- `generate` also takes `--behaviour`, `--target-gate` and `--learned-hit` to select class-file entries
   (`conformance.py:662-669`).
 
-Coverage against the ledger (`LEDGER:236-237`):
+Coverage against the ledger (`LEDGER:238-239`):
 
     python conformance.py coverage --before <dir> --after <dir> --clauses classes/templar_clauses.json
 
 ### 9.6 Batches
 
-Sample a batch by script, with no agent judgement. The unit is the spell (`G&C:356-369`):
+Sample a batch by script, with no agent judgement. The unit is the spell (`G&C:364-377`):
 
     python3 -B conformance.py sample --buckets BUCKETS.json --seed SEED --total 40 --bucket U --bucket D --bucket A \
       --minimum A=4 --first-chunk 10 --out SAMPLE.json
 
 Build one packet per spell before the author starts (class-conformance-rulings.md Part 2.4, batch protocol;
-`G&C:374-394`). A packet holds:
+`G&C:382-402`). A packet holds:
 - the tooltip with its token values;
 - the Spell.dbc fields;
 - the script hits;
@@ -656,7 +659,7 @@ When two authors work in parallel:
 
 Each batch sets a stop rule before it starts, in minutes per resolved clause.
 
-To prove chosen entries deterministically and write a ledger fragment (`G&C:255-307`):
+To prove chosen entries deterministically and write a ledger fragment (`G&C:257-315`):
 
     python3 -B conformance.py prove --class 19 [--behaviour SPELL ...] [--proc AURA ...] [--trigger AURA ...] \
         --out DIR --worktree W [--runs 2] [--build] [--timeout-ms 600000] [--clauses LEDGER]
@@ -687,14 +690,15 @@ Integration steps, in order:
 2. Merge: fast-forward the first branch, rebase the second, and resolve conflicts only by the ownership rules.
 3. **Regeneration identity check**: `conformance.py generate --class N` at the merged HEAD. Each side's counted
    scenarios must come out byte-identical; re-run any that differ, twice.
-4. Run `coa-verify --worktree <wt> --ram --stages build`, then `--stages source --base origin/main`, once each.
+4. Run `python -B tools/verify_all.py --stages build`, then `--stages source --base origin/main`, once each. With the
+   optional guide tooling, the Templar ran them as `coa-verify --worktree <wt> --ram --stages ...`.
 5. Recompute coverage on the merged ledger with the stored verdicts.
 6. Compute the clock.
 7. Remove the worktree with `git worktree remove <wt>`, without force, and keep the branches. With the optional guide
    tooling, `coa-worktree-cleanup <wt>` prints its plan first and acts only with `--yes`
    (`references/guide-tooling.md:128`).
 
-Before a PR, `python -B tools/verify_all.py --stages source --base origin/main` (`CONF/README.md:88`). Run the codestyle
+Before a PR, `python -B tools/verify_all.py --stages source --base origin/main` (`CONF/README.md:94`). Run the codestyle
 linters on changed C++ and SQL files. SQL goes only under `data/sql/updates/pending_db_*/`.
 
 ### 9.9 Finishing
@@ -935,8 +939,9 @@ Sources:
   - a command for the aura 354 check (9.2). The query given there is not a repository command.
 - **The final statuses 2, 4 and 5** have no field in the ledger or in `coverage.py`. The Templar recorded them outside
   the repository.
-- **`prove` calls the `coa-verify` wrapper** from the guide tooling by default (`prove.py:57`). Without that tooling it
-  cannot run as documented.
+- **`prove` calls the `coa-verify` wrapper** from the optional guide tooling by default (`prove.py:57`), with no option
+  for another runner. Without that tooling it cannot run as documented; run the scenarios twice through
+  `tools/verify_all.py` and judge each run with `compare` (`G&C`, prove runner).
 - **Open tool defects:**
   - `effectiveness_of` is not cross-checked against the buff's name (ADR 0268, "Not checked");
   - coverage accepts a `learned` stat_gain verdict without its attribution reads;

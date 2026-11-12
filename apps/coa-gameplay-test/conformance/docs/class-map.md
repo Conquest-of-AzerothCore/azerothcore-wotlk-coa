@@ -2,7 +2,7 @@
 
 `class_map.py` maps every spell of all 21 CoA classes (12-32) to the code that touches it, so a class's conformance work
 can start where the risk is. It reads a source tree and the server DBC set and writes only into its output directory. A
-run takes a few seconds. It is the first step of the class workflow ([class conformance
+run took 28 s on the tree that adds it. It is the first step of the class workflow ([class conformance
 guide](../../../../docs/coa/class-conformance.md), 9.1).
 
 ## Run

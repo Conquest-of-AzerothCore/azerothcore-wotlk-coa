@@ -189,8 +189,9 @@ No ADR states rule 4 or its amendment. ADRs 0258 (point 2), 0263 (point 2b) and 
 
 Recorded in ADR 0258.
 
-**G-23. Testing a subset of covered spells.** 2026-11-12, mentor, on Combat Training (2 of 13 Oaths in game). If running
-every spell an effect covers is not cheap, a subset is accepted only when all three hold:
+**G-23. Testing a subset of covered spells.** 2026-11-12, mentor, on Combat Training (the ruling's "2 of 13 Oaths in
+game"; the measured split is 3 of 13 percent Oaths). If running every spell an effect covers is not cheap, a subset is
+accepted only when all three hold:
 - one effect with one class mask covers them all;
 - every scripted one is tested;
 - the tested ones differ in shape.
@@ -396,7 +397,7 @@ Each is binding for the Templar only. "Applies as precedent" marks wording that 
 | 2026-11-10, owner | Sacred Swing "Only usable after avoiding an attack." | Dodge or parry only | not recorded | ADR 0104 |
 | 2026-11-10, owner | Aggramar's Rage "Holy critical strike chance" | Every Holy-school critical strike (literal reading) | "Si les tooltips mentent à quoi servent-elles ?" | ADR 0104 |
 | 2026-11-10, owner | Improved Benediction armour "based on your Agility and Stamina" | Conformant if armour rises with both; the current code (Agility + Stamina) is kept | "Bonus d'armure en pourcentage de l'agilité et l'endurance.. Par exemple 10% ?" ("an armour bonus as a percentage of Agility and Stamina, for example 10%?"), then "keep the current code" | ADR 0104 |
-| 2026-11-11, owner | Scourgebane "Direct damage dealt now has a 20% chance to strike" | Weapon hits and direct-damage abilities roll; a Scourgebane strike never triggers another | not recorded | ADR 0130 (its line 22 still reads "20% per weapon hit"; this ruling supersedes it) |
+| 2026-11-11, owner | Scourgebane "Direct damage dealt now has a 20% chance to strike" | Weapon hits and direct-damage abilities roll; a Scourgebane strike never triggers another | not recorded | ADR 0130; ADR 0301 supersedes its "20% per weapon hit" summary |
 | 2026-11-11, owner | Bursting Impact "Increases your off-hand weapon damage by 25%." on Zealotry | Must raise Zealotry, which deals a share of off-hand weapon damage. The fix stays in Templar code; stacking with Blade Sermon is multiplicative (mentor) | not recorded | ADR 0146 |
 | 2026-11-11, owner | Disciplined Mind rank 2 "causes it to dispel 2 poison and disease effects" | 2 poison and 2 disease; rank 1 stays at 1 of each | not recorded | ADR 0159 |
 | 2026-11-11, owner | Untainted, a DBC formula with m1 = -10 | The intended amount is 10 + 10% of Stamina; the DBC sign is a client-data error | not recorded | No ADR found for this ruling (ADR 0105 covers Untainted's streamed text) |
