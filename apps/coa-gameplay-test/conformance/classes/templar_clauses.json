@@ -1190,7 +1190,7 @@
       "560096 behaviour_party_stat_ratio"
     ],
     "kind": "claim",
-    "reason": "attack_time_ms of a grouped non-caster ally: 3000 before 560096 is learned, 2727.27 after (1/1.10); 567572 is cast by templar_player::OnPlayerUpdate (AscensionTemplar.cpp:299-302), one aura 192 effect for melee and ranged; only the grouped ally's melee attack time is measured: the ranged half and other raid members rest on data, the same 567572 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE (one effect for melee and ranged) that the script casts on each member"
+    "reason": "attack_time_ms of a grouped non-caster ally: 3000 before 560096 is learned, 2727.27 after (1/1.10); 567572 is cast by templar_player::OnPlayerUpdate (AscensionTemplar.cpp:299-302), one aura 192 effect for melee and ranged; only the grouped ally's melee attack time is measured: the ranged half and other raid members rest on data, the same 567572 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE (one effect for melee and ranged) that the script casts on the Templar (AscensionTemplar.cpp:299-300), an SPELL_EFFECT_APPLY_AREA_AURA_RAID effect that reaches the group"
   },
   {
     "spell": 560096,
