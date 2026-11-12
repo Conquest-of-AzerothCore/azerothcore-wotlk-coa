@@ -60,7 +60,7 @@ void ApplyContracts(SpellInfo* info)
             info->Effects[0].TargetA = SpellImplicitTargetInfo(heal ? TARGET_UNIT_TARGET_ALLY : TARGET_UNIT_TARGET_ENEMY);
             info->Effects[0].TargetB = SpellImplicitTargetInfo();
         }
-    if (id == 520307)
+    if (id == 520307 || id == 803212)
         info->AuraInterruptFlags |=
             AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_SPELL_ATTACK | AURA_INTERRUPT_FLAG_MELEE_ATTACK;
     if (id == 504796 || id == 504803)

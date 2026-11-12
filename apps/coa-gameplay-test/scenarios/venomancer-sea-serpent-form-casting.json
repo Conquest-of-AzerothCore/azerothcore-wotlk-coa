@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "name": "Casting or attacking leaves Sea Serpent Form without interrupting the cast",
+  "contract": [
+    "Sea Serpent Form 803212 must end like Venomwing Form 520307 when the Venomancer begins a cast or attacks, and",
+    "the cast goes on. Its Spell.dbc interrupt flags (0x20100) hold no cast or attack flag, so the form stayed while",
+    "casting. Expected: an idle form stays; Venom Bolt 502870 drops the form and still lands; a melee swing drops",
+    "the form; a caster without the form lands the same Venom Bolt."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "melee",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "melee_hit_rating": 10000
+    },
+    {
+      "id": "unformed",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_caster",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    },
+    {
+      "id": "dummy_melee",
+      "owner": "melee",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 2
+    },
+    {
+      "id": "dummy_unformed",
+      "owner": "unformed",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803212
+    },
+    {
+      "action": "learn",
+      "actor": "melee",
+      "spell": 803212
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502870
+    },
+    {
+      "action": "learn",
+      "actor": "unformed",
+      "spell": 502870
+    },
+    {
+      "action": "cast",
+      "label": "Sea Serpent Form",
+      "actor": "caster",
+      "spell": 803212
+    },
+    {
+      "action": "cast",
+      "label": "Sea Serpent Form",
+      "actor": "melee",
+      "spell": 803212
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the caster is in Sea Serpent Form",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803212,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the attacker is in Sea Serpent Form",
+      "actor": "melee",
+      "metric": "aura",
+      "spell": 803212,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let the shapeshift global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: an idle Sea Serpent Form stays",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803212,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Venom Bolt from Sea Serpent Form",
+      "actor": "caster",
+      "spell": 502870,
+      "target": "dummy_caster"
+    },
+    {
+      "action": "cast",
+      "label": "Venom Bolt without the form",
+      "actor": "unformed",
+      "spell": 502870,
+      "target": "dummy_unformed"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: beginning a cast removes Sea Serpent Form",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803212,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The cast that removed the form is still being cast",
+      "actor": "caster",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Venom Bolt lands after the form ends",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the same Venom Bolt lands without the form",
+      "actor": "unformed",
+      "metric": "spell_damage_count",
+      "spell": 502870,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "attack",
+      "label": "Start attacking from Sea Serpent Form",
+      "actor": "melee",
+      "target": "dummy_melee"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a melee swing removes Sea Serpent Form",
+      "actor": "melee",
+      "metric": "aura",
+      "spell": 803212,
+      "equals": 0,
+      "within_ms": 5000
+    }
+  ]
+}

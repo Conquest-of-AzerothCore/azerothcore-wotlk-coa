@@ -3159,6 +3159,11 @@ private:
             return unit->GetCreatureType();
         if (metric == "display_id")
             return unit->GetDisplayId();
+        if (metric == "target_entry")
+        {
+            Unit* target = ObjectAccessor::GetUnit(*unit, unit->GetTarget());
+            return target ? target->GetEntry() : 0;
+        }
         if (metric == "mount_display_id")
             return unit->GetMountID();
         if (metric == "can_fly")
