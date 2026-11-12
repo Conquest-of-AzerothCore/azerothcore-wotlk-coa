@@ -5,16 +5,24 @@
 
 #include <algorithm>
 #include <cmath>
-#include <cstdio>
 #include <cstdlib>
+#include <iostream>
 #include <limits>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#define CHECK(condition) \
-    do { if (!(condition)) { std::printf("FAIL line %d: %s\n", __LINE__, #condition); std::exit(1); } } while (0)
+void Check(bool passed, int line, char const* condition)
+{
+    if (passed)
+        return;
+
+    std::cout << "FAIL line " << line << ": " << condition << std::endl;
+    std::exit(1);
+}
+
+#define CHECK(condition) Check((condition), __LINE__, #condition)
 
 constexpr char const* LOG_FILTER = "module.manastorm.endless";
 constexpr uint32 NPC_MANASTORM_HEART = 900025;
@@ -274,7 +282,8 @@ int main()
     CHECK(RateIs(0.0));
     SetRate(nullptr);
     CHECK(RateIs(0.3));
-    std::printf("PASS: Manastorm.ExperienceRate defaults to 0.3, reloads, and rejects negative or NaN values.\n");
+    std::cout << "PASS: Manastorm.ExperienceRate defaults to 0.3, reloads, and rejects negative or NaN values."
+        << std::endl;
 
     ManastormRun run;
     run.members = { 11, 12 };
@@ -311,7 +320,8 @@ int main()
     SetRate("0");
     CHECK(KillXP(mgr, player, creature, 1000) == 0);
     SetRate(nullptr);
-    std::printf("PASS: stage kill XP is scaled by the rate after the depth and native factors; other XP is untouched.\n");
+    std::cout << "PASS: stage kill XP is scaled by the rate after the depth and native factors; "
+        "other XP is untouched." << std::endl;
 
     Player ally{ { 12 }, 30, 0, run.segment.MapId, run.instanceId };
     connectedPlayers = { &player, &ally };
@@ -330,6 +340,6 @@ int main()
     ally.flags = 0;
     ally.level = 60;
     CHECK(FloorXP(experience, run).empty());
-    std::printf("PASS: floor XP saved per member is the RDF reward times the DB multiplier and the rate.\n");
+    std::cout << "PASS: floor XP saved per member is the RDF reward times the DB multiplier and the rate." << std::endl;
     return 0;
 }
