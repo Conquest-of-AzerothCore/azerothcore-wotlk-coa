@@ -1268,6 +1268,223 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 300580,
+      "name": "Deadly Defense (the Crypt Fiend stays)",
+      "kind": "metric_delta",
+      "variant": "cap_fiend",
+      "label_suffix": "cap_fiend",
+      "quote": "up to a maximum of $q2%.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "gate_spell": 300580,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        704721
+      ],
+      "setup_casts": [
+        504859,
+        805029,
+        805029
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3600,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50323
+      },
+      "observe_source": "Companion of the cap entry: after the same opening (Crypt Fiend 504859, two Unholy Frenzy 805029 with Study of Death 704721) the Crypt Fiend 50323 is still present beside the 10 Greater Zombies of cap_count (no eviction): 11 summons. Before (control): no cast, no Crypt Fiend."
+    },
+    {
+      "spell": 300580,
+      "name": "Deadly Defense (eleven summons present)",
+      "kind": "metric_delta",
+      "variant": "cap_count",
+      "label_suffix": "cap_count",
+      "quote": "up to a maximum of $q2%.",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 805029,
+      "target": "caster",
+      "gate_spell": 300580,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        704721
+      ],
+      "setup_casts": [
+        504859,
+        805029,
+        805029
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3600,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "observe_source": "Companion of the cap entry: the same opening as setup casts (a Crypt Fiend 504859, then two Unholy Frenzy 805029 casts with Study of Death 704721, cooldown reset before each; the phase's trigger Frenzy follows without a reset and is refused, not ready, each animating $302912s1 = 5 Greater Zombies 525380) leaves 10 Greater Zombies 503032 (Animate: Greater Zombie 525380 Effect[0] SUMMON MiscValue 503032) beside the Crypt Fiend: eleven summons, one more than the cap, so the cap entry's 990 is the 10% cap and not ten summons' 10%. Before (control): no cast, no zombie."
+    },
+    {
+      "spell": 300580,
+      "name": "Deadly Defense (cap at eleven summons)",
+      "kind": "taken_hit",
+      "variant": "cap",
+      "cast_power": 1000,
+      "label_suffix": "cap",
+      "judge": "damage_ratio",
+      "expected": 0.9,
+      "quote": "up to a maximum of $q2%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "health_loss": true,
+      "learn": [
+        300580,
+        704721
+      ],
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              504859,
+              "caster"
+            ],
+            [
+              805029,
+              "caster"
+            ],
+            [
+              805029,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Tooltip: \"Each of your summons now reduces your damage taken by $s2%, up to a maximum of $q2%.\" ($s2 = 1, $q2 = 10): with 11 summons the reduction is 10%, not 11%: 1100 -> 990 (0.90; uncapped 979). Eleven living minions: a Crypt Fiend 504859 and two Unholy Frenzy 805029 casts with Study of Death 704721 learned (each animates $302912s1 = 5 Greater Zombies 525380, AscensionNecromancerAbilities.cpp OnSpellCast for 805029; a real cast and learn). Same striker and health_loss read as the one_summon entry (Light of the Naaru 41394, Holy, fixed 1100, the caster held at 100000 of 100000 health before each strike); control: no summon, 1100. Deterministic: the read is judged to the rounding (990 exact), the band does not decide."
+    },
+    {
+      "spell": 805032,
+      "name": "Animate: Bone Wraith (Bonestorm pulses)",
+      "kind": "metric_delta",
+      "variant": "bonestorm_pulses",
+      "label_suffix": "bonestorm_pulses",
+      "quote": "Physical damage every $801412t1 sec for $801412d.",
+      "expected": 11,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        805032
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 6500,
+      "expire_ms": 1000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801411,
+        "target": "dummy",
+        "caster_entry": 50309
+      },
+      "observe_source": "Tooltip: \"every $801412t1 sec for $801412d\" = every 0.5 sec ($801412 EffectAmplitude[0] 500) for 5 sec (DurationIndex 28 = 5000 ms): 5000 / 500 = 10 periodic pulses, plus the one at application that 801412's SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200) adds: 11 Bonestorm 801411 pulses per unleash; one dummy, so 11 hits (the 5-target cap does not bind; pilot r11 read 11). The Command: Undead 504868 at the dummy makes the Bone Wraith 50309 cast Bonestorm 801412 on itself (npc_ascension_necromancer::DoAction case 50309). Control (first phase): the same Command with no Wraith animated: 0 hits; second phase: Animate: Bone Wraith 805032 at the caster first (1600 ms for its global cooldown: at 1000 ms the Command was refused, not ready, pilot r10), then the Command: 801411 hits by the Wraith on the dummy read 6500 ms after the Command."
+    },
+    {
+      "spell": 560848,
+      "name": "Master Lich (Soulfreeze stacks)",
+      "kind": "metric_delta",
+      "variant": "soulfreeze_stacks",
+      "label_suffix": "soulfreeze_stacks",
+      "quote": "stacking $801728u times.",
+      "expected": 3,
+      "before_expected": 0,
+      "trigger_spell": 801724,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        801724
+      ],
+      "setup_wait_ms": 3500,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          22856,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 801728,
+        "caster": "caster"
+      },
+      "observe_source": "Soulfreeze 801724 (Effect[0] aura 23 every 1000 ms for 3000 ms, DurationIndex 27, triggering 801728 on the target) cast twice at the dummy 3500 ms apart (cooldown reset before each): six triggered 801728 ticks, each adding a stack (StackAmount 3, $801728u); read on the dummy, cast by the caster, 3500 ms after the second cast: 3, the cap. Ice Lock 22856 on the dummy (harness set_aura by the caster, precondition fixture, both phases): Frost school (SchoolMask 16) SPELL_AURA_MOD_STUN, so the dummy holds AURA_STATE_FROZEN (SpellInfo.cpp:2342-2346); ProcFlags 0 and AuraInterruptFlags 0, so damage does not break it (Frost Nova 122 carries ProcFlags 0xa22a8 and broke under the 801728 ticks, pair r6), DurationIndex permanent. 801728 needs a Frozen target (TargetAuraState 4; unfrozen, its triggered ticks fail SPELL_FAILED_DONT_REPORT, pair r4). 560848 learned at the start; no cast before (control): 0."
+    },
+    {
+      "spell": 560848,
+      "name": "Master Lich (Soulfreeze Frost damage taken)",
+      "kind": "metric_delta",
+      "variant": "soulfreeze_damage",
+      "label_suffix": "soulfreeze_damage",
+      "quote": "now increases the enemy's Frost damage taken by you by",
+      "expected": 2150,
+      "before_expected": 1000,
+      "expected_ratio": 2.15,
+      "tolerance": 0.02,
+      "trigger_spell": 501997,
+      "target": "dummy",
+      "cast_power": 1000,
+      "setup_casts": [
+        801724
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3500,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          22856,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803779,
+        "target": "dummy"
+      },
+      "observe_source": "Tooltip: \"Soulfreeze now increases the enemy's Frost damage taken by you by $801728s2% per tick ..., stacking $801728u times\" ($801728s2 = 5, $801728u = 3): x1.15 at 3 stacks, judged against the observed first phase of the same scenario. Both phases cast Ice Barrage 501997 at the dummy (its Frost ticks 803779 read with spell_damage_total, cumulative over the scenario); the second phase first casts the Soulfreeze ability 801724, whose three triggered 801728 ticks leave 3 stacks (soulfreeze_stacks entry). The cumulative after reading is the first phase's ticks plus the second's: 1 + 1.15 = 2.15 times the first, judged within 0.02 (the G-19 band of 2 points on +15%; the 1-6 die of each tick moves a phase's total by under 0.5%). Fixtures, all harness set_aura preconditions in both phases: Ice Lock 22856 on the dummy (harness set_aura by the caster, precondition fixture, both phases): Frost school (SchoolMask 16) SPELL_AURA_MOD_STUN, so the dummy holds AURA_STATE_FROZEN (SpellInfo.cpp:2342-2346); ProcFlags 0 and AuraInterruptFlags 0, so damage does not break it (Frost Nova 122 carries ProcFlags 0xa22a8 and broke under the 801728 ticks, pair r6), DurationIndex permanent. 801728 needs a Frozen target (TargetAuraState 4; unfrozen, its triggered ticks fail SPELL_FAILED_DONT_REPORT, pair r4); spell crit -1000 (984954) and 823764 on the caster. Master Lich 560848 learned throughout (a real learn); 1000 Runic Power before each Ice Barrage."
+    },
+    {
       "spell": 705746,
       "name": "Life For Power (shield amount)",
       "kind": "metric_delta",
@@ -1674,7 +1891,7 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Frost damage.",
-      "expected": 1.379141,
+      "expected": 1.361404,
       "observe_spell": 707592,
       "cast_spell": 707402,
       "cast_wait_ms": 1600,
@@ -1717,7 +1934,7 @@
       },
       "critical": false,
       "trials": 12,
-      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$spfr*1.405}: the coefficient row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67) adds 1.405 x 220 = 309.1 to 707592: 855 -> 1164, ratio 1.3614 (the control's 855 holds the +40 per-level points of the tolerated damage entry). Fixtures in both arms as the damage entry. Method sweep (mentor 2026-11-13): the expectation is the tooltip's, (815 + 1.405 x 220) / 815 = 1.3791 at the tooltip base 815.84; the measured 855 base carries the tolerated +40 per-level points (mentor ruling, stock SpellInfo.cpp:482-497), so the read 1164 / 855 = 1.3614 is judged against 1.3791 inside the band."
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$spfr*1.405}: the coefficient row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67) adds 1.405 x 220 = 309.1 to 707592: 855 -> 1164, ratio 1.3614 (the control's 855 holds the +40 per-level points of the tolerated damage entry). Mentor rule 2026-11-13: a ratio claim is judged on the observed control arm of the same build; the base amount is its own claim (the damage entry, tolerated). Fixtures in both arms as the damage entry."
     },
     {
       "spell": 501997,
@@ -1726,7 +1943,7 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Frost damage every",
-      "expected": 1.421222,
+      "expected": 1.417727,
       "observe_spell": 803779,
       "cast_spell": 501997,
       "cast_wait_ms": 3500,
@@ -1761,7 +1978,7 @@
       },
       "critical": false,
       "trials": 12,
-      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$SP*.5971}: the coefficient row {803779, 0, 0.5971, Frost} (AscensionNecromancerData.h:82) adds 0.5971 x 220 = 131.4 per tick: mean 314.5 (311 plus the 1-6 die) -> 445.9, ratio 1.4177. Method sweep (mentor 2026-11-13): the expectation is the tooltip's, (311 + 0.5971 x 220) / 311 = 1.4212 at the tooltip base 311 (the 1-6 die is the tolerated stock per-level/die addition); the read is judged against 1.4212 inside the band."
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$SP*.5971}: the coefficient row {803779, 0, 0.5971, Frost} (AscensionNecromancerData.h:82) adds 0.5971 x 220 = 131.4 per tick: mean 314.5 (311 plus the 1-6 die) -> 445.9, ratio 1.4177. Mentor rule 2026-11-13: a ratio claim is judged on the observed control arm of the same build; the base amount is its own claim (the tick entry, tolerated)."
     },
     {
       "spell": 500329,

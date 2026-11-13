@@ -41,5 +41,5 @@ The rest of OnSpellCast (buff charge consumption, the Command block, Mindless Fu
   control: Vampiric Aura 300241, set on the caster by harness set_aura as a precondition fixture, triggers 560607
   (family 29) every second as a real triggered cast, which still grants no stack; `triggered_ticks` shows those casts
   happened (560607 on the caster).
-- Mutant (design, not run): dropping the IsTriggered() term of the early return would let the 560607 ticks grant
-  stacks, so the `triggered` entry must alert.
+- No tool code changed, so no seeded tool test applies. Mutant (design, not run): dropping the IsTriggered() term of
+  the early return would let the 560607 ticks grant stacks, so the `triggered` entry must alert.

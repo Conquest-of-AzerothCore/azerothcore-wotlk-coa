@@ -23,3 +23,7 @@ class-file expectation had been taken from the code (review B4 side a, I-a). Bot
   point below 547 is the truncation of the two integer steps). Rank 1: 478, then 500 (1.0965 for 1.10).
 - Entries `806149/807925 behaviour_hit_ratio below_35` expect the tooltip's x1.10 / x1.20; `807925 behaviour_hit_ratio
   edge_34` (x1.20) and `edge_36` (x1.10) are the edge arms; every hit_ratio arm pair has the no-talent control.
+- G-27: the reads reproduce the engine's float32 steps exactly (SpellDamageBonusDone returns uint32, Unit.cpp:9917-9929;
+  the ModifySpellDamageTaken hook then truncates int32(501 x 1.0909091) = 546), recorded in the ledger as status 2.
+- No tool code changed, so no seeded tool test applies; the no-talent control and the 36% edge are the alarms: the old
+  1.1 x 1.1 reads 551 at 34% and would alert, and a factor applied at any health would alert the 36% edge.
