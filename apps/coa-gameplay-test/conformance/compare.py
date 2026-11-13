@@ -3191,7 +3191,6 @@ def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Ver
                    high=float(high), explanation=explanation)
 
 
-
 def pushback_end_bracket(run: Run, phase: dict) -> tuple[float, float] | str:
     start = run.values.get(phase['start'])
     if start is None:

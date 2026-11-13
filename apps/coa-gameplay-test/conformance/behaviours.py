@@ -2265,7 +2265,6 @@ def amount_match_spec(entry: dict) -> AmountMatchSpec:
                            bool(entry.get('group', False)), int(entry.get('wait_ms', 1000)))
 
 
-
 MINION_SWING_RATIO_RAISE_WAIT_MS = 3100
 MINION_SWING_RATIO_MINIMUM_TRIALS = 2
 
@@ -2592,6 +2591,7 @@ def summon_lifetime_spec(entry: dict) -> SummonLifetimeSpec:
                               int(entry['expected_ms']), tuple(int(value) for value in entry['spawn_window']),
                               tuple(int(value) for value in entry['end_window']), entry.get('cast_power'),
                               entry.get('label_suffix', ''))
+
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500
 
