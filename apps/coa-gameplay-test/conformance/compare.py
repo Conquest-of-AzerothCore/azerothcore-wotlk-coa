@@ -4297,6 +4297,9 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
         if model.get('kind') == 'cast_period':
             from cast_period import cast_period_verdict
             return cast_period_verdict(base, run, model)
+        if model.get('kind') == 'pulse_targets':
+            from cast_period import pulse_targets_verdict
+            return pulse_targets_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)
