@@ -1791,12 +1791,30 @@
   {
     "spell": 560800,
     "clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
-    "labels": [
-      "560800 aura_amplitude_ms #0",
-      "560800 effect_value 500585e0 #1"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560800.md."
+    "reason": "Claims summon and explosion time: Status 1 (the M side c counted pair PAIR_M_C (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): a full Crypt Swarm 501886 channel (3000 ms) leaves one Rotling 50303 3600 ms after the cast starts with 560800, none without (control); the Rotling's Rotling Explosion 500585 has not hit the dummy 7800 ms after the cast starts and has at 8200 ms: 5 sec after the summon ($807640t2 = 807640 Effect[1] amplitude 5000), bracketed inside the G-19 band on both sides. Claim damage: route pending (M side c): the expected ${$500585m1+$500585ppl1+$SP*0.335} at level 60 depends on the per-level reading of m1 and ppl1 for a creature-cast triggered spell (the Glacial Impact per-level case, SpellInfo.cpp:482-497); not judged here. Not measured: \"run towards the enemy\" (no claim label) and an interrupted-channel arm. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Wormfood\" 0 lines by name, 0 lines by id 560800; ~/CoaServer/reference: bindmysoul \"Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after 5 se\", sidekick coaKits names it (6 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Upon fully channeling Crypt Swarm, you summon a Rotling",
+        "labels": [
+          "560800 behaviour_metric_delta rotling"
+        ]
+      },
+      {
+        "claim": "that will run towards the enemy and explode after $807640t2 sec",
+        "labels": [
+          "560800 aura_amplitude_ms #0",
+          "560800 behaviour_metric_delta explode_before",
+          "560800 behaviour_metric_delta explode_after"
+        ]
+      },
+      {
+        "claim": "for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+        "labels": [
+          "560800 effect_value 500585e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 560848,
