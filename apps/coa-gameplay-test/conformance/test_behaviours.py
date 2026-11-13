@@ -11030,6 +11030,11 @@ class MetricDeltaGameTimeTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**entry, 'game_time': {'after': [4200, 3800]}})
 
 
+def cycle_one_entry(spell: int, suffix: str) -> dict:
+    return next(entry for entry in load_class_file(23)['behaviours']
+                if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+
 class OwnedCreatureStrikeTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_metric_delta_strike_hits_the_owned_creature_in_the_after_phase_only(self):

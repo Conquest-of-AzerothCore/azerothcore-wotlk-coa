@@ -70,8 +70,3 @@ class AuraExpiryPassiveLinkTests(unittest.TestCase):
         entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'aura_expiry')
         _, [expectation] = behaviour_scenario(load_class_file(23), entry)
         self.assertEqual(behaviour_label(entry), [expectation.label])
-
-
-def cycle_one_entry(spell: int, suffix: str) -> dict:
-    return next(entry for entry in load_class_file(23)['behaviours']
-                if entry['spell'] == spell and entry.get('label_suffix') == suffix)
