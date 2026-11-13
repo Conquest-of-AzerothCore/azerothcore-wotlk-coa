@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar drains the Avatar of every living High Priest's loa, one after another",
+  "contract": [
+    "Tester feedback round 6 (2026-11-13): Hakkar (14834) devoured only one loa avatar. He summoned one avatar for",
+    "each living High Priest and cast Drain Power (2118700, a channel) on all of them at once, so each new channel",
+    "interrupted the one before and only the last avatar died; he kept a single Aspect. Drain Power's tooltip",
+    "drains the closest Loa Avatar, and live logs show the drains one at a time (user decision 2026-11-13: drain",
+    "them in turn from the pull, nearest first, the next when the previous avatar dies). In a fresh Normal",
+    "instance all five priests live, so Hakkar must consume all five avatars (666988-666992) and carry all five",
+    "Aspects (2118701-2118705). The hero joins phase 1, where Hakkar's ring of avatars appears."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_phase",
+      "label": "See the avatars Hakkar summons into the instance's own phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with all five High Priests alive Hakkar carries five stacks of Hakkar's Power",
+      "actor": "hakkar",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 5
+    },
+    {
+      "action": "attack",
+      "label": "Pull Hakkar",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar consumes a first avatar and takes its Aspect",
+      "actor": "hakkar",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118701,
+        2118702,
+        2118703,
+        2118704,
+        2118705
+      ],
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: he goes on to the other four and carries all five Aspects",
+      "actor": "hakkar",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118701,
+        2118702,
+        2118703,
+        2118704,
+        2118705
+      ],
+      "equals": 5,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Avatar of Bethekk is consumed",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666988,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Avatar of Shirvallah is consumed",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666989,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Avatar of Shadra is consumed",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666990,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Avatar of Hethiss is consumed",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666991,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Avatar of Hir'eek is consumed",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 666992,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar still fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

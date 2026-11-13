@@ -27,10 +27,11 @@
  *   Sons of Hakkar     first 45s, every 60s   one joins; where it dies its blood
  *                                             pools and poisons those inside
  *   Aspects            one for each High Priest still alive, +25% damage and
- *                      -10% damage taken each: at the pull he drains the Avatar
- *                      of each living priest's loa (Drain Power, -99% damage
- *                      taken while any of them lives) and gains its Aspect when
- *                      it dies
+ *                      -10% damage taken each: from the pull he drains the
+ *                      Avatars of the living priests' loas one at a time, the
+ *                      nearest first (Drain Power, -99% damage taken while it
+ *                      lasts), gains its Aspect when it dies and moves on to
+ *                      the next
  *   Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
  *   Berserk            at 10 minutes
  *
@@ -61,6 +62,7 @@
 #include <algorithm>
 #include <array>
 #include <list>
+#include <vector>
 
 using namespace coa_zg;
 
@@ -189,6 +191,7 @@ namespace
                 loa.avatar.Despawn(me);
                 me->RemoveAurasDueToSpell(loa.aspect);
             }
+            _undrained.clear();
             _siphoning = false;
             _pools.clear();
             _clock.Reset();
@@ -214,6 +217,7 @@ namespace
         // Ascension's aspects: one for each priest still standing, taken from its avatar.
         void DrainLivingPriestsLoas()
         {
+            _undrained.clear();
             float angle = 0.0f;
             for (PriestLoa& loa : _loas)
             {
@@ -221,23 +225,40 @@ namespace
                     continue;
                 loa.avatar.Summon(me, me->GetNearPosition(AVATAR_RING, angle));
                 angle += 2 * float(M_PI) / _loas.size();
-                if (!loa.avatar.Drain(me))
-                    DoCastSelf(loa.aspect, true);
+                _undrained.push_back(&loa);
+            }
+            DrainNearestLoa();
+        }
+
+        float AvatarDistance(PriestLoa const* loa) const
+        {
+            Creature* avatar = loa->avatar.Get(me);
+            return avatar ? me->GetDistance(avatar) : 0.0f;
+        }
+
+        void DrainNearestLoa()
+        {
+            while (!_undrained.empty())
+            {
+                auto nearest = std::min_element(_undrained.begin(), _undrained.end(),
+                    [this](PriestLoa const* a, PriestLoa const* b) { return AvatarDistance(a) < AvatarDistance(b); });
+                PriestLoa* loa = *nearest;
+                _undrained.erase(nearest);
+                if (loa->avatar.Drain(me))
+                    return;
+                DoCastSelf(loa->aspect, true);
             }
         }
 
         void TakeConsumedAspects()
         {
-            bool consumed = false;
             for (PriestLoa& loa : _loas)
             {
-                if (!loa.avatar.Consumed(me, false))
+                if (!loa.avatar.Consumed(me))
                     continue;
-                consumed = true;
                 DoCastSelf(loa.aspect, true);
+                DrainNearestLoa();
             }
-            if (consumed && std::none_of(_loas.begin(), _loas.end(), [](PriestLoa const& loa) { return loa.avatar.Draining(); }))
-                me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_DRAIN_POWER, me));
         }
 
         void EnterEvadeMode(EvadeReason why) override
@@ -481,6 +502,7 @@ namespace
             { DATA_THEKAL, SPELL_ASPECT_OF_SHIRVALLAH, { NPC_AVATAR_OF_SHIRVALLAH, SPELL_DRAIN_POWER } },
             { DATA_ARLOKK, SPELL_ASPECT_OF_BETHEKK, { NPC_AVATAR_OF_BETHEKK, SPELL_DRAIN_POWER } }
         }};
+        std::vector<PriestLoa*> _undrained;
         EventMap _clock;
         bool _siphoning = false;
         ObjectGuid _heart;
