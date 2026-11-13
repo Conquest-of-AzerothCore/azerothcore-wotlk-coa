@@ -280,6 +280,7 @@ class FixedTargetCountSpec:
     select_primary: bool = False
     dummy_entry: int | None = None
     count_primary: bool = False
+    post_cast_auras: tuple[tuple[int, int], ...] = ()
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -306,6 +307,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if spec.layout not in ('', CASTER) or spec.settle_ms < 0:
         raise ValueError(f'{spec.spell} fixed_count layout {spec.layout!r} is not the caster, or its settle is '
                          f'negative')
+    if any(stacks < 1 for _, stacks in spec.post_cast_auras):
+        raise ValueError(f'{spec.spell} fixed_count post_cast_auras set at least one stack')
     if spec.headroom is not None and (spec.uncapped or spec.headroom < 1):
         raise ValueError(f'{spec.spell} fixed_count states a headroom of {spec.headroom} for a capped count only')
     if not spec.far_dummy and spec.pull_reads:
@@ -373,6 +376,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
             if spec.select_primary:
                 steps.append({'action': 'select', 'actor': CASTER, 'target': dummy_id(0)})
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': cast_target})
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                      for aura, stacks in spec.post_cast_auras]
             steps.append({'action': 'wait', 'ms': wait_ms})
             if spec.settle_ms:
                 steps.append({'action': 'wait', 'label': f'cast {cast} settle', 'ms': spec.settle_ms})
@@ -1195,7 +1200,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 entry.get('cluster_yd'), entry.get('caster_entry'),
                                 tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())),
                                 bool(entry.get('select_primary', False)), entry.get('dummy_entry'),
-                                bool(entry.get('count_primary', False)))
+                                bool(entry.get('count_primary', False)),
+                                tuple((int(spell), int(stacks)) for spell, stacks in entry.get('post_cast_auras', ())))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
@@ -1348,6 +1354,7 @@ class MetricDeltaSpec:
     corpse: tuple[int, int, float] | None = None
     game_time: tuple[tuple[int, int], tuple[int, int] | None] | None = None
     dummy_distance: float | None = None
+    enemy_player_class: int | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1596,6 +1603,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'expiry read, and its expected reading is its least before reading times the ratio')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} has an unknown force_crit {spec.force_crit!r}')
+    if spec.enemy_player_class is not None and not spec.enemy_player_race:
+        raise ValueError(f'{spec.spell} metric_delta names an enemy player class without enemy_player_race')
     if bool(spec.enemy_player_race) != (ENEMY_PLAYER in (spec.target, spec.measure_actor, spec.fields.get('target'))):
         raise ValueError(f'{spec.spell} names the enemy player as its target or measured unit only with an '
                          f'enemy_player_race, and the race only with it')
@@ -1825,7 +1834,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps[settled:settled] = [{'action': 'pvp', 'actor': CASTER, 'enabled': True},
                                   {'action': 'pvp', 'actor': ENEMY_PLAYER, 'enabled': True},
                                   {'action': 'wait', 'label': 'pvp settle', 'ms': ENEMY_PLAYER_SETTLE_MS}]
-        scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race})
+        scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race,
+                                    **({'class': spec.enemy_player_class} if spec.enemy_player_class else {})})
         steps[settled:settled] = [{'action': 'learn', 'actor': ENEMY_PLAYER, 'spell': spell}
                                   for spell in dict.fromkeys(spec.enemy_casts)]
         if spec.helper_casts:
@@ -1940,7 +1950,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            forced_chance_of(entry.get('forced_chance')),
                            metric_delta_corpse(entry.get('corpse')),
                            metric_delta_game_time(entry.get('game_time')),
-                           None if entry.get('dummy_distance') is None else float(entry['dummy_distance']))
+                           None if entry.get('dummy_distance') is None else float(entry['dummy_distance']),
+                           enemy_player_class=entry.get('enemy_player_class'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

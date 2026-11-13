@@ -1736,6 +1736,11 @@ the one 3 yd behind never.
   dummies around the caster while the cast still targets the primary dummy. Pulverizing 524620: five Condemns 804906
   at the primary, 21500 ms each; its pulse 524619 at the Templar's position hits the four dummies within 5 yd and never
   the one at 10 yd. Norgannon's Wrath 524739: `settle_ms` 2500 for the delayed strike.
+- `metric_delta` `enemy_player_class` (ADR 0561) sets the enemy player's class (with `enemy_player_race`; omitted, the
+  enemy keeps the class file's class), for controls against another class.
+- `fixed_count` `post_cast_auras` (ADR 0560, `[[spell, stacks]]`) sets precondition auras on the caster right after
+  each cast, before the read wait (Command: Bonefreeze area: Undead: Pacify 500983 keeps the Skeletal Mage from
+  breaking the freezes with its splash; omitted, the generated scenario is unchanged).
 - `cast_condition` `condition: "avoided"` (with `learn`) adds an aggressive, rooted attacker in front of the caster. The
   blocked attempt comes before any attack; the allowed one after Evasion 26669, one engaging swing interval and 6000 ms
   of the attacker's swings (the dodges are read). The attempts set no caster aura. Sacred Swing 572769 with Keeping the

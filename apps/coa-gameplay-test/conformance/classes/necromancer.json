@@ -8871,6 +8871,54 @@
       "observe_source": "Precondition read for drain_share: the maximum mana of Mylentha Riverbend 11795 at level 60 (basemana 2434 x ManaModifier 1 from the world DB rows), before and after the same Command as drain_share."
     },
     {
+      "spell": 504861, "name": "Raise: Banshee (channel damage and mana drain)", "kind": "metric_delta", "variant": "channel",
+      "label_suffix": "channel", "quote": "It will channel on your target, dealing damage and draining their mana over time.", "expected": 3, "after_at_least": 3, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 9000, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 572212, "caster_entry": 500650, "target": "dummy"},
+      "observe_source": "Banshee Drain 572211 (channel, DurationIndex 29 = 12000 ms): Effect[0] aura 227 every 2000 ms triggers 572212 (Effect 62 SPELL_EFFECT_POWER_BURN, the damage equals the mana burned), Effect[1] aura 64 PERIODIC_MANA_LEECH 35 every 2000 ms; the Banshee 500650 casts it at its victim (npc_ascension_necromancer UpdateAI event 2, AttackSpell). Target: Magus Zabraxis 16829 (a mana user, 7302 maximum mana) after the Command. Over 9000 ms: at least 3 572212 hits (trace 20261113-113705: hits at about 2.1, 3.9, 5.7 and 7.8 s, the target's mana falling 70 per tick: 35 leech + 35 burn). Control: no Banshee, no hit. An enemy player target receives the channel aura for its full duration but no tick changes its mana and no 572212 hit lands (defect lead, fix note F1 C2)."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (channel at an enemy Necromancer)", "kind": "metric_delta", "variant": "channel_necromancer",
+      "label_suffix": "channel_necromancer", "quote": "It will channel on your target, dealing damage and draining their mana over time.", "expected": 3, "after_at_least": 3, "before_expected": 0,
+      "trigger_spell": 504868, "target": "enemy", "enemy_player_race": 2, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 9000, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 572212, "caster_entry": 500650, "target": "enemy"},
+      "observe_source": "Regression of ADR 0561 (owner ruling Q-c3-1: every mana drain and burn of every class must work against a Necromancer). The Banshee's channel at an enemy Necromancer (race 2, class 23: Runic Power active, 2803 mana): at least 3 572212 power-burn hits in 9000 ms; before ADR 0561 none (trace 20261113-113837). Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (channel at an enemy Mage)", "kind": "metric_delta", "variant": "channel_mana_class",
+      "label_suffix": "channel_mana_class", "quote": "It will channel on your target, dealing damage and draining their mana over time.", "expected": 3, "after_at_least": 3, "before_expected": 0,
+      "trigger_spell": 504868, "target": "enemy", "enemy_player_race": 2, "enemy_player_class": 8, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 9000, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 572212, "caster_entry": 500650, "target": "enemy"},
+      "observe_source": "Regression of ADR 0561 (owner ruling Q-c3-1: every mana drain and burn of every class must work against a Necromancer). Control: the same channel at an enemy Orc Mage (class 8, mana active): at least 3 hits before and after ADR 0561 (trace 20261113-114046)."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (regression: Mana Burn at an enemy Necromancer)", "kind": "metric_delta", "variant": "mana_burn_necromancer",
+      "label_suffix": "mana_burn_necromancer", "quote": "draining their mana over time", "expected": 1, "before_expected": 0,
+      "trigger_spell": 8129, "target": "enemy", "enemy_player_race": 2, "cast_in_before": false,
+      "wait_ms": 3600, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 8129, "target": "enemy"},
+      "observe_source": "Regression of ADR 0561 (owner ruling Q-c3-1: every mana drain and burn of every class must work against a Necromancer). Another class's burn: Mana Burn 8129 (Effect 62 POWER_BURN, SpellFamily 6) cast by the caster at an enemy Necromancer: one hit; before ADR 0561 Spell::CheckCast refused it (SPELL_FAILED_BAD_TARGETS, Spell.cpp:6389) and EffectPowerBurn skipped the target. Control: no cast, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (regression: Mana Burn at an enemy Mage)", "kind": "metric_delta", "variant": "mana_burn_mana_class",
+      "label_suffix": "mana_burn_mana_class", "quote": "draining their mana over time", "expected": 1, "before_expected": 0,
+      "trigger_spell": 8129, "target": "enemy", "enemy_player_race": 2, "enemy_player_class": 8, "cast_in_before": false,
+      "wait_ms": 3600, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 8129, "target": "enemy"},
+      "observe_source": "Regression of ADR 0561 (owner ruling Q-c3-1: every mana drain and burn of every class must work against a Necromancer). Control: Mana Burn 8129 at an enemy Orc Mage (mana active): one hit, unchanged by ADR 0561."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (regression: Mana Burn at an enemy without mana)", "kind": "metric_delta", "variant": "mana_burn_no_mana",
+      "label_suffix": "mana_burn_no_mana", "quote": "draining their mana over time", "expected": 0, "before_expected": 0,
+      "trigger_spell": 8129, "target": "enemy", "enemy_player_race": 2, "enemy_player_class": 17, "cast_in_before": false,
+      "wait_ms": 3600, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 8129, "target": "enemy"},
+      "observe_source": "Regression of ADR 0561 (owner ruling Q-c3-1: every mana drain and burn of every class must work against a Necromancer). Control: Mana Burn 8129 at an enemy of class 17 (Rage active, no mana pool, run 20261113-120413): still refused, no hit."
+    },
+    {
       "spell": 504861, "name": "Raise: Banshee (drain cap: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_target",
       "label_suffix": "drain_cap_target", "quote": "of your target's mana", "expected": 7302, "before_expected": 7302,
 "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
@@ -11584,6 +11632,7 @@
     {
       "spell": 504489,
       "name": "Command: Bonefreeze (area)",
+      "post_cast_auras": [[500983, 1]],
       "kind": "fixed_count",
       "variant": "area",
       "label_suffix": "area",
@@ -11605,7 +11654,7 @@
       ],
       "repeats": 1,
       "select_primary": true,
-      "observe_source": "One Skeletal Mage is raised, then Command: Bonefreeze at the selected primary dummy (select_primary, ADR 0423); 504845 (cast by the Mage, read on each dummy whatever its caster) on every additional dummy right after the Command, before the Mage's first 801513 splash. Control: before 504489 is learned the Command is refused, no freeze."
+      "observe_source": "Undead: Pacify 500983 set on the caster right after the Command (post_cast_auras, ADR 0560; precondition fixture: the Mage stays passive and its damage is blocked, AscensionNecromancerEvents.cpp:350-355; the claim is the freeze, not the Mage's damage): without it the Skeletal Mage's first splash landed before the 500 ms read in 31 of 60 copies and broke every freeze (504845 ends on damage, F-b3b-1); with it 60 of 60 copies read all four dummies frozen and no Mage damage (diagnostics 20261113-115218 / -115902). One Skeletal Mage is raised, then Command: Bonefreeze at the selected primary dummy (select_primary, ADR 0423); 504845 (cast by the Mage, read on each dummy whatever its caster) on every additional dummy right after the Command, before the Mage's first 801513 splash. Control: before 504489 is learned the Command is refused, no freeze."
     },
     {
       "spell": 504489,
