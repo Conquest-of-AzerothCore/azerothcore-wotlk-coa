@@ -1047,6 +1047,8 @@ reads the last faction template value update that player received for the creatu
 It reads whether that target can attack the summon through the native `IsValidAttackTarget` check.
 `owned_creature_victim` requires the owning player, a present creature `entry` and a `target` unit.
 It returns one while that unit is the summon's current victim.
+`owned_creature_distance_2d` requires the owning player, a present creature `entry` and a `target` unit, and
+reads the exact 2D distance from the summon to that unit.
 `pet_casting` requires the player's present native pet and reads its casting flag and active non-melee spell.
 Use it to observe channel completion before submitting another ordinary pet cast;
 aura expiry is a separate event.
@@ -1205,6 +1207,8 @@ or creature alias), negative when below it.
 60 yards. Optional `min_level` and `max_level` filter their native levels; `min_home_distance` keeps creatures
 at least that many yards from their own home positions (2D), and `spell` those carrying that aura. This can
 observe movement and auras of native summons without creating or controlling them.
+With `dead: true` it counts dead creatures (corpses) of `entry` in the player's phase instead, under the same
+filters.
 `map_creature_count` requires a player and counts living spawned creatures loaded anywhere on the player's map,
 in any phase, of `entry` or of any entry in the list `entries` when given and of every entry otherwise; a spawn
 whose grid is not loaded is not counted.

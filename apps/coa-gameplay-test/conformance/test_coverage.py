@@ -20,8 +20,8 @@ from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EFFEC
                       EvidenceError, acting,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
                       NO_BEHAVIOUR_ROUTE, NO_ROUTE_NOT_DATA, NO_ROUTE_PENDING, NO_ROUTE_TERMINAL,
-                      fragment_entries, load_clauses, read_fragment, require_claims, states_value, write_coverage,
-                      write_fragment)
+                      fragment_entries, load_clauses, metric_evidence, read_fragment, require_claims, states_value,
+                      write_coverage, write_fragment)
 from expiry import BEHAVIOUR_EXPIRY
 from profile import (CLASSES_DIR, DBC_DIR, DbcSetMismatch, class_file_paths, ledger_consumption_path, load_class_file,
                      server_dbc_dir, spell_dbc_sha256)
@@ -739,7 +739,7 @@ class EvidenceTablesTest(unittest.TestCase):
                          for expectations in (behaviour_scenario(class_file, entry)[1],)
                          for expectation in expectations
                          if EVIDENCE[expectation.check] == BY_METRIC
-                         and observed(expectation).get('metric') not in METRIC_EVIDENCE]
+                         and observed(expectation).get('metric') not in metric_evidence()]
             self.assertEqual(unstamped, [], path.name)
 
     def test_every_state_metric_names_its_promise(self):

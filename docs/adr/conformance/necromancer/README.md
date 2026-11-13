@@ -43,3 +43,8 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0030](0030-mana-drains-and-burns-reach-a-necromancers-mana-pool.md) | 0561 | Mana drains and burns reach a Necromancer's mana pool | class half; tool half stays shared as [ADR 0561](../../0561-metric-delta-may-set-the-enemy-player-class.md) |
 | [0031](0031-raising-the-kirin-tor-refunds-a-fixed-10-runic-power.md) | 0562 | Raising the Kirin Tor refunds a fixed 10 Runic Power | moved |
 | [0032](0032-frozen-bodies-ten-stack-crit-has-no-second-multiplier.md) | 0563 | Frozen Bodies' 10-stack Glacial Impact crits without a second 1.5x | moved |
+| [0040](0040-necromancer-area-radii-are-bracketed-at-their-edge.md) | - | Necromancer area radii are bracketed at their edge | new |
+| [0041](0041-march-of-the-dead-slow-is-timed-from-the-last-explosion.md) | - | March of the Dead's slow is timed from the last explosion | new |
+| [0042](0042-transfer-life-range-and-the-bone-construct-speed.md) | - | Transfer Life's range and the Bone Construct's speed | new |
+| [0043](0043-graveyard-leaves-one-corpse-per-raised-undead.md) | - | Graveyard leaves one corpse per raised Undead | new |
+| [0044](0044-the-hook-halt-waits-for-an-enemy-movement-order.md) | - | The Hook's halt waits for an enemy movement order | new |
