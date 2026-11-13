@@ -365,3 +365,13 @@ creator. It needs a cast trigger; `events_per_proc` is the creatures per proc (2
 trigger casts the trigger `max(20, ceil(log 0.01 / log(1 - p)))` times before the passive is learned (part 1 only):
 any summon there is an alert. `trials_per_attempt` divides the scheduled casts when each cast yields several trials
 (Harvest Plague's leech ticks: two per attempt, since aura 53 now counts in the tick spacing like aura 3).
+
+### Chance modifiers learned with the aura (ADR 0586)
+
+`chance_modifiers` lists `[spell, token]` pairs of spells that raise the aura's roll: each spell is learned right
+after the aura (never in the baseline), and the expected chance is the aura's own chance plus the modifier's tooltip
+percent `token`. The token must be a flat `SPELLMOD_CHANCE_OF_SUCCESS` modifier (aura 107, MiscValue 18) in the
+server DBC set, or generation refuses the entry. The label and the scenario keys gain ` with <spell>` per modifier, so
+the plain entry of the same aura keeps its label; `compare` reads the modifier's token again from the tooltip and adds
+it to the chance it judges. Necromancer: Refreshing Chill 300940 ($h = 20) with Frigid Winds 504357 ($s1 = 5),
+judged at 25% in the 23-27% band (claim 83.0, pooled like 92122).

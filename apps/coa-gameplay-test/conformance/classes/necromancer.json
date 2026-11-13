@@ -243,6 +243,40 @@
       "dbc": {"300940": {"ProcChance": 20, "ProcFlags": 0, "ProcCharges": 0}}, "spell_proc": {}, "internal_cooldown_ms": 0
     },
     {
+      "aura": 300940,
+      "name": "Refreshing Chill (with Frigid Winds)",
+      "tooltip": "Casting |cff90ee90Command|r spells now has a $h% chance to reset the cooldown of |cffffffffIce Barrage|r and make your cast next within $800979d instant cast.",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "cast",
+        "spell": 504868
+      },
+      "trial_casts": true,
+      "baseline": true,
+      "trigger_text": "Casting Command spells",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 800979,
+      "proc_spell_source": "EffectTriggerSpell[0] of 300940 (Refreshing Chill 800979)",
+      "events_per_proc": 1,
+      "handler": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp): a non-triggered Command spell rolls Chance(player, 300940) (ProcChance 20) and, on success, resets Ice Barrage 801760 (Reduce INT32_MAX) and casts 800979 on the caster (Ready); Frigid Winds 504357 (learned with the aura): Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, SPELLMOD_CHANCE_OF_SUCCESS (MiscValue 18), BasePoints 4 + 1 = +5 ($504357s1), class mask [2] 0x40000000 = 300940's SpellFamilyFlags[2], which Chance() adds through ApplySpellMod(300940, SPELLMOD_CHANCE_OF_SUCCESS) (AscensionNecromancer.cpp:225-232): 20 + 5 = 25%, band 23-27% (G-19), pooled like the 92122 entry (claim 2.0, G-20 step 2)",
+      "dbc": {
+        "300940": {
+          "ProcChance": 20,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "chance_modifiers": [
+        [
+          504357,
+          "$s1"
+        ]
+      ],
+      "band": true
+    },
+    {
       "aura": 638403,
       "name": "Depravity",
       "tooltip": "Increases the melee haste of your Undead minions by $s1% and gives their critical melee auto attacks an $h% chance to trigger |cFFFFFFFFBone Club|r, dealing $s2% of the damage dealt as Shadow Damage.",

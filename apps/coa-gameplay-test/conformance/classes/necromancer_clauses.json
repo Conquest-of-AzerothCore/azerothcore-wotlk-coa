@@ -1338,7 +1338,8 @@
     "spell": 504357,
     "clause": "Increases the chance to trigger Refreshing Chill by $s1%.",
     "labels": [
-      "504357 effect_value e0 #0"
+      "504357 effect_value e0 #0",
+      "300940 proc_rate with 504357"
     ],
     "kind": "claim",
     "reason": "Not final, tool gap (C4 author m-b, 2026-11-13, no run): the existing proc_rate kind cannot judge +5 points: proc_chance (procs.py:185-191) reads the expected chance only from the entry aura's own tooltip ($h of 300940 = 20), and a proc entry has no field that learns a second spell (504357) beside its aura; baseline_co_learn belongs to proc_rate_delta, whose DELTA_RULE proves a positive difference only; hit_ratio rate proc counts damage/heal/energize/melee events, not the 800979 cast. Gap: a proc_rate option that learns a chance modifier with the aura and adds its stated $s1 = 5 (SPELLMOD 18 flat BP 4 + 1) to the expected chance: 25%, band 23-27%, sized as 2.0 (12443 trials, 18665 attempts, about 77 parts at the 2000 ms Command interval). Route agent c (2026-11-13, second attempt): parked: a chance claim beyond the accelerated cap (G-20): step 1 (about 300 casts per arm) not run tonight; not status 3. Open, route pending: a chance claim (+5 points of a proc chance): G-20 sizing not run tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Winds\",\"Freeze Dry\",\"Necrotic Chains\",\"Ner\\'zhul\\'s Blessing (spec)\",\"Blood and Ice\",\"Death and Ice\",\"Command: Bon'; bindmysoul found: Increases the chance to trigger Refreshing Chill by 5%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."

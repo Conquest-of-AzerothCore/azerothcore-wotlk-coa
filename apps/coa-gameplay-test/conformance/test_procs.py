@@ -1111,3 +1111,58 @@ class ProcBaselineCompareTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ChanceModifierTests(unittest.TestCase):
+    REFRESHING_CHILL = 300940
+    FRIGID_WINDS = 504357
+
+    def entry(self, **changes) -> dict:
+        from profile import load_fixture_class_file
+        entry = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.REFRESHING_CHILL)
+        return {**entry, 'band': True, 'chance_modifiers': [[self.FRIGID_WINDS, '$s1']], **changes}
+
+    def class_file(self) -> dict:
+        from profile import load_fixture_class_file
+        class_file = load_fixture_class_file(23)
+        return {**class_file, 'procs': [*class_file['procs'], self.entry()]}
+
+    def test_the_modifier_adds_its_stated_points_and_is_learned_with_the_aura(self):
+        class_file = self.class_file()
+        plan = proc_plan(class_file, self.entry())
+        self.assertEqual((plan.chance_pct, plan.needed), (25.0, 12443))
+        scenario, [expectation, *_] = proc_scenario(class_file, self.entry())
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertLess(learned.index(self.REFRESHING_CHILL), learned.index(self.FRIGID_WINDS))
+        baseline = next(index for index, step in enumerate(scenario['steps'])
+                        if step.get('label') == f'{self.REFRESHING_CHILL} proc baseline trials')
+        aura = next(index for index, step in enumerate(scenario['steps'])
+                    if step['action'] == 'learn' and step['spell'] == self.REFRESHING_CHILL)
+        self.assertLess(baseline, aura)
+        self.assertEqual(expectation.label, f'{self.REFRESHING_CHILL} proc_rate with {self.FRIGID_WINDS}')
+        self.assertEqual(expectation.model['chance_modifiers'], [[self.FRIGID_WINDS, '$s1']])
+
+    def test_the_entry_without_a_modifier_keeps_its_label_and_chance(self):
+        from profile import load_fixture_class_file
+        plain = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.REFRESHING_CHILL)
+        class_file = self.class_file()
+        _, [expectation, *_] = proc_scenario(class_file, plain)
+        self.assertEqual(expectation.label, f'{self.REFRESHING_CHILL} proc_rate')
+        self.assertEqual(proc_plan(class_file, plain).chance_pct, 20.0)
+        self.assertNotIn('chance_modifiers', expectation.model)
+
+    def test_a_modifier_without_its_chance_token_is_refused(self):
+        for modifiers in ([[self.FRIGID_WINDS, '$s2']], [[self.FRIGID_WINDS]], [['504357', '$s1']]):
+            with self.subTest(modifiers=modifiers), self.assertRaises(ValueError):
+                proc_plan(self.class_file(), self.entry(chance_modifiers=modifiers))
+
+    def test_the_stated_rate_passes_and_a_mutant_at_the_unmodified_chance_alerts(self):
+        from compare import banded_rate, rate_judgement
+        plan = proc_plan(self.class_file(), self.entry())
+        expected = plan.chance_pct / 100
+        for procs, status in ((4666.0, 'ok'), (3733.0, 'alert')):
+            with self.subTest(procs=procs):
+                judged, low, high, why = rate_judgement(procs, 18665.0, plan.needed, expected)
+                judged, *_ = banded_rate(judged, low, high, expected, why)
+                self.assertEqual(judged, status)
