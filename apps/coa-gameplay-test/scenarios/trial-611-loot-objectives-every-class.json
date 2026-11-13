@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Every class and faction can loot the Overcooked Chain Links and the Pet Rock for Oh, the Places You'll Go",
+  "contract": [
+    "Hardcore - Oh, the Places You'll Go (611) requires looting Overcooked Chain Links 421531 before level 15 (LOOT_ITEM_BEFORE_LEVEL 1/421531/15).",
+    "The item had no item_template row and no loot entry, so it could never drop and the objective could not be completed (issue #9053).",
+    "The Armorer's one spawn is Pyrewood Armorer 3528 (faction 123, friendly to the Alliance) and turns into Moonrage Armorer 3529 (faction 24) by SmartAI, so an Alliance character can only kill the worgen form. The Exiles DB mirror of db.exil.es lists the item at 100% from the human form only; by the contributor's decision both forms drop it at 100%.",
+    "Looting it below level 15 completes the objective, which the module reports with SMSG_COA_CHALLENGE_CRITERIA_UPDATED (0x59A): word 1 the challenge, word 5 the objective's item, word 6 its progress.",
+    "A level 1 Alliance character on the trial cannot attack the human form, kills a 1-health Moonrage Armorer with its own faction, loots the item and receives the completed criterion for 611 and 421531. The human form's loot template 3528 is filled 1000 times and must hold the item every time.",
+    "The trial also requires Pet Rock 20030 before level 60, whose only source was pickpocketing Timbermaw Shaman 6188 (2.766%), which only Rogues, Rangers and Reapers can do. By the contributor's decision the Shaman's kill loot drops it at the same 2.766%.",
+    "The kill loot is filled 100000 times: the standard deviation of the rate is about 0.05 percentage points, so the 2.5 to 3.0% window is about five deviations wide on each side (residual failure probability below one in a million), while 0% before the change cannot pass."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 1 }
+  ],
+  "creatures": [
+    { "id": "worgen", "owner": "hero", "entry": 3529, "faction": 24, "level": 14, "health": 1, "distance": 2 },
+    { "id": "villager", "owner": "hero", "entry": 3528, "faction": 123, "level": 14, "health": 1, "distance": 8 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    {
+      "action": "assert", "label": "SETUP: the human Armorer is friendly to the Alliance", "actor": "hero",
+      "metric": "can_attack", "target": "villager", "equals": 0
+    },
+    {
+      "action": "assert", "label": "SETUP: the worgen form can be attacked", "actor": "hero",
+      "metric": "can_attack", "target": "worgen", "equals": 1
+    },
+    { "action": "start_challenge", "label": "Start Oh, the Places You'll Go", "actor": "hero", "challenge": 611, "level": 1 },
+    { "action": "assert", "actor": "hero", "metric": "challenge_start_code", "equals": 0, "within_ms": 2000 },
+    { "action": "attack", "actor": "hero", "target": "worgen" },
+    { "action": "assert", "actor": "worgen", "metric": "alive", "equals": 0, "within_ms": 30000 },
+    { "action": "wait", "ms": 500 },
+    {
+      "action": "snapshot", "label": "Criteria updates before looting", "actor": "hero",
+      "metric": "server_packets", "opcode": 1434, "save_as": "criteria_before"
+    },
+    { "action": "loot_creature", "actor": "hero", "target": "worgen" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Moonrage Armorer's corpse holds the chain links", "actor": "hero",
+      "metric": "loot_count", "item": 421531, "equals": 1
+    },
+    { "action": "loot_slot", "actor": "hero", "item": 421531 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the item reaches the bags", "actor": "hero",
+      "metric": "item_count", "item": 421531, "equals": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Looting sends a criteria update", "actor": "hero",
+      "metric": "server_packets", "opcode": 1434, "relative_to": "criteria_before", "min": 1, "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "It is for Oh, the Places You'll Go", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 1434, "index": 1, "equals": 611
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: for the chain links objective", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 1434, "index": 5, "equals": 421531
+    },
+    {
+      "action": "assert", "label": "And marks it done", "actor": "hero",
+      "metric": "server_packet_u32", "opcode": 1434, "index": 6, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the human form's loot always holds the chain links too",
+      "actor": "hero", "metric": "creature_loot_item_rate", "entry": 3528, "item": 421531, "rolls": 1000, "equals": 100
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: killing a Timbermaw Shaman drops the Pet Rock at its pickpocket rate",
+      "actor": "hero", "metric": "creature_loot_item_rate", "entry": 6188, "item": 20030, "rolls": 100000,
+      "min": 2.5, "max": 3.0
+    }
+  ]
+}
