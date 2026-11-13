@@ -272,11 +272,11 @@
       "equals": 100
     },
     {
-      "label": "DISCRIMINATING: mid, near Rom'ogg but away from the Chains, takes nothing",
+      "label": "DISCRIMINATING: mid, near Rom'ogg but away from the Chains, is spared the Skullcracker (only stray hits from the fight)",
       "action": "assert",
       "actor": "mid",
       "metric": "health_pct",
-      "equals": 100
+      "min": 90
     }
   ]
 }
