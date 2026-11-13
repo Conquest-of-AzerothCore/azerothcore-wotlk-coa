@@ -10,8 +10,8 @@ from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
 from tooltip import COLOR_CODE, SKILL_PER_LEVEL, CasterStats, Records, Tooltip
-from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, FORCE_CRIT_RATINGS, FORCED_CRIT_RATING,
-                    GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
+from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, DUMMY_HEALTH, FORCE_CRIT_RATINGS,
+                    FORCED_CRIT_RATING, GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
                     FIXTURE_MAX_HEALTH, fixture_health_step, required_aura_steps,
                     required_target_health_steps)
 
@@ -5440,6 +5440,7 @@ class HitArm:
     auras: tuple[tuple[int, int], ...] = ()
     casts: tuple[int, ...] = ()
     learn: tuple[int, ...] = ()
+    target_health_pct: int | None = None
 
 
 @dataclass(frozen=True)
@@ -5513,12 +5514,16 @@ def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
 
 
 def hit_arm(raw: dict) -> HitArm:
-    unknown = set(raw) - {'auras', 'casts', 'learn'}
+    unknown = set(raw) - {'auras', 'casts', 'learn', 'target_health_pct'}
     if unknown:
-        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras, casts or learn')
+        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras, casts, learn or target_health_pct')
+    health = raw.get('target_health_pct')
+    if health is not None and not 0 < int(health) < 100:
+        raise ValueError(f'hit_ratio arm target health percent {health} must lie between 0 and 100')
     return HitArm(tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ())),
                   tuple(int(spell) for spell in raw.get('casts', ())),
-                  tuple(int(spell) for spell in raw.get('learn', ())))
+                  tuple(int(spell) for spell in raw.get('learn', ())),
+                  None if health is None else int(health))
 
 
 def hit_ratio_label(spell: int, suffix: str = '') -> str:
@@ -5617,6 +5622,10 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
+            if arm.target_health_pct is not None:
+                steps += [{'action': 'set_health', 'actor': TARGET,
+                           'value': arm.target_health_pct * DUMMY_HEALTH // 100},
+                          {'action': 'wait', 'ms': HIT_RATIO_HEALTH_SETTLE_MS}]
             steps += healed + hit_ratio_cast(records, spec.cast_spell or spec.observe_spell, spec.caster, spec.target,
                                              spec.cast_power)
             if spec.cast_wait_ms:
@@ -5684,6 +5693,10 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if swinging != (spec.metric == SWING_METRIC) or (swinging and spec.swing_hand not in SWING_HANDS):
         raise ValueError(f'{spec.spell} hit_ratio reads {SWING_METRIC} exactly when it sets a swing_hand of '
                          f'{sorted(SWING_HANDS)}, here metric {spec.metric!r} and swing_hand {spec.swing_hand!r}')
+    arm_health = any(getattr(spec, name).target_health_pct is not None for name in HIT_RATIO_ARMS)
+    if arm_health and (swinging or spec.target != TARGET or spec.target_health_pct is not None):
+        raise ValueError(f'{spec.spell} hit_ratio arm target health holds the dummy, without swings or a scenario '
+                         f'target health')
     if swinging and (spec.caster != CASTER or spec.target != TARGET or spec.target_health_pct):
         raise ValueError(f'{spec.spell} hit_ratio swings at the dummy from the caster, with no target health')
     if swinging and spec.swing_hand and spec.off_hand_item is None:

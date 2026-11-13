@@ -10190,5 +10190,28 @@ class CostGateAfterCastGapTests(unittest.TestCase):
         self.assertFalse(any('gap after an after cast' in step.get('label', '') for step in scenario['steps']))
 
 
+
+class HitRatioArmHealthTests(unittest.TestCase):
+    def plague_entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 583256 and entry['kind'] == 'hit_ratio')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_only_the_treatment_trials_set_the_dummy_health(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.plague_entry())
+        run.validate(scenario)
+        sets = [step for step in scenario['steps'] if step.get('action') == 'set_health' and step['actor'] == 'dummy']
+        self.assertEqual(len(sets), self.plague_entry()['trials'])
+        self.assertTrue(all(step['value'] == 25_000_000 for step in sets))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_arm_health_refuses_a_scenario_health(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.plague_entry(), 'target_health_pct': 40})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.plague_entry(),
+                                                     'treatment': {'target_health_pct': 100}})
+
+
 if __name__ == '__main__':
     unittest.main()

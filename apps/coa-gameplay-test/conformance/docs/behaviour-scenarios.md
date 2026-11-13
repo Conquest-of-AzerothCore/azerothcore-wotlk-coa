@@ -247,6 +247,8 @@ death). Setup and trigger casts first get their reagents; a scenario whose waits
 timeout.
 A `cost_gate` entry's `after_cast_gap_ms` (ADR 0361) waits after each of its `after_casts` (Underking 704701: ten Command
 casts 1600 ms apart); the gaps count toward the attempt's wait.
+A `hit_ratio` arm's `target_health_pct` (ADR 0362) sets the dummy to that health percent before every trial's cast, so
+the arms differ by target health (Harvest Plague 583256: the tick at 50% against about 100%).
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).
