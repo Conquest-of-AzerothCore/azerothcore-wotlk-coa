@@ -10718,7 +10718,8 @@ class MetricDeltaLongWaitTests(unittest.TestCase):
     def test_waits_beyond_the_default_timeout_time_the_scenario(self):
         entries = {entry.get('label_suffix'): entry for entry in load_class_file(23)['behaviours']
                    if entry['spell'] == 704681 and entry['kind'] == 'metric_delta'}
-        scenario, _ = behaviour_scenario(load_class_file(23), entries['charges'])
+        long = {**entries['charges'], 'setup_casts': [504868] * 50, 'setup_wait_ms': 1600}
+        scenario, _ = behaviour_scenario(load_class_file(23), long)
         waits = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
         self.assertGreater(waits, 80000)
         self.assertGreater(scenario['timeout_ms'], waits)
