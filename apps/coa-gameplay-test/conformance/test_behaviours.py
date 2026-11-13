@@ -11389,7 +11389,7 @@ class PushbackReductionTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_halved_pushback_is_ok_and_a_full_one_alerts(self):
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739}), 'ok')
-        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2983}), 'alert')
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2790}), 'alert')
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2760}), 'alert')
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

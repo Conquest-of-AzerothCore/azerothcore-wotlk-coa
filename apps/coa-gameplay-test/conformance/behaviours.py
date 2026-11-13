@@ -2452,7 +2452,8 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file), striker],
         'steps': steps}
-    model = {'kind': 'pushback_reduction', 'quote': entry.quote, 'expected_pct': spec.expected_pct,
+    model = {'kind': 'pushback_reduction', 'metric': 'casting', 'quote': entry.quote,
+             'expected_pct': spec.expected_pct,
              'band': bonus_band(spec.expected_pct),
              'phases': {name: {'start': pushback_mark(spec, name, 'start'), 'polls': polls[name],
                                **({'strike': pushback_mark(spec, name, 'strike'),
@@ -2502,8 +2503,8 @@ def summon_lifetime_mark(spec: SummonLifetimeSpec, phase: str, mark: str) -> str
 def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tuple[dict, list[Expectation]]:
     (spawn_low, spawn_high), (end_low, end_high) = spec.spawn_window, spec.end_window
     if not 0 < spawn_low < spawn_high < spec.stop_ms < end_low < end_high:
-        raise ValueError(f'{spec.spell} summon_lifetime polls the spawn, stops the trigger, then polls the end, in that '
-                         f'order after the cast')
+        raise ValueError(f'{spec.spell} summon_lifetime polls the spawn, stops the trigger, then polls the end, in '
+                         f'that order after the cast')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'summon_lifetime', spec.quote, float(spec.expected_ms))
     facts = facts_of(records, spec.trigger_spell)
@@ -2563,7 +2564,8 @@ def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tupl
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
-    model = {'kind': 'summon_lifetime', 'quote': entry.quote, 'expected_ms': spec.expected_ms,
+    model = {'kind': 'summon_lifetime', 'metric': 'owned_creature_count', 'quote': entry.quote,
+             'expected_ms': spec.expected_ms,
              'band': bonus_band(float(spec.expected_ms)), 'polls': polls,
              'starts': {phase: summon_lifetime_mark(spec, phase, 'start') for phase in ('control', 'treatment')},
              'control': summon_lifetime_mark(spec, 'control', 'count'),

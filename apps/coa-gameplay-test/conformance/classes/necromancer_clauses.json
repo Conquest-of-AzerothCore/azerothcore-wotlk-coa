@@ -2939,7 +2939,9 @@
       {
         "claim": "for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
         "labels": [
-          "707001 effect_value 707002e0 #2"
+          "707001 effect_value 707002e0 #2",
+          "707001 script_hit 707002 blast_damage",
+          "707001 script_hit 707002 blast_damage_sp"
         ]
       }
     ],
@@ -3217,7 +3219,9 @@
       {
         "claim": "for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
         "labels": [
-          "707882 effect_value 707002e0 #2"
+          "707882 effect_value 707002e0 #2",
+          "707882 script_hit 707002 blast_damage",
+          "707882 script_hit 707002 blast_damage_sp"
         ]
       }
     ],
