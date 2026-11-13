@@ -76,6 +76,7 @@ namespace CoAEconomyLog
     void FlushQueue(Player* player, CharacterDatabaseTransaction trans);
     void AddTokensEarned(Player* player, int32 tokens, CoATokenSource source);
     void CacheItem(Player* player, uint32 cacheEntry, Item const* item, uint32 count);
+    void Cleanup(uint32 now, bool wait);
 }
 
 void AddSC_CoAEconomyLog();

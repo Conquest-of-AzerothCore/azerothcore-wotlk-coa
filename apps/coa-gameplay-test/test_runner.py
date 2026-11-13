@@ -632,6 +632,22 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(economy_log=value), self.assertRaisesRegex(ValueError, 'economy_log must be boolean'):
                 run.validate(scenario)
 
+    def test_economy_log_cleanup_takes_a_day_count(self):
+        step = {'action': 'economy_log_cleanup', 'actor': 'caster', 'days_ahead': 91}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, step)
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'days_ahead': -1}, 'days_ahead'), ({'days_ahead': 36501}, 'days_ahead'),
+                              ({'days_ahead': '91'}, 'days_ahead')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**step, **change})
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'economy_log_cleanup', 'actor': 'caster'})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
     def test_auction_id_is_a_packet_field_naming_an_item_entry(self):
         packet = {'action': 'client_packet', 'actor': 'caster', 'opcode': 599,
                   'fields': [{'actor_guid': 'target'}, {'auction_id': 765}]}

@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Economy log: the daily cleanup deletes rows older than CoA.EconomyLog.KeepDays and keeps the rest",
+  "contract": [
+    "With CoA.EconomyLog.KeepDays = 90 (the default), the economy log's daily cleanup deletes every coa_economy_log row whose time is more than 90 days before the cleanup and keeps every newer row.",
+    "A level-60 Human destroys Grand Marshal's Longsword (12584, epic), which writes one item_destroy row; a cleanup now and one 89 days later keep it, one 91 days later deletes it."
+  ],
+  "timeout_ms": 60000,
+  "economy_log": true,
+  "players": [
+    {"id": "keeper", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "add_item", "actor": "keeper", "item": 12584},
+    {"action": "destroy_item", "label": "Destroy Grand Marshal's Longsword", "actor": "keeper", "item": 12584},
+    {"action": "assert", "label": "THE LOG: the sword's item_destroy row", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "equals": 1, "within_ms": 2000},
+    {"action": "economy_log_cleanup", "label": "Cleanup today", "actor": "keeper", "days_ahead": 0},
+    {"action": "assert", "label": "THE LOG: a new row is kept", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 1},
+    {"action": "economy_log_cleanup", "label": "Cleanup 89 days later", "actor": "keeper", "days_ahead": 89},
+    {"action": "assert", "label": "THE LOG: an 89-day-old row is kept", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 1},
+    {"action": "economy_log_cleanup", "label": "Cleanup 91 days later", "actor": "keeper", "days_ahead": 91},
+    {"action": "assert", "label": "THE LOG: a 91-day-old row is deleted", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 0}
+  ]
+}

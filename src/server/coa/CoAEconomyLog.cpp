@@ -67,6 +67,7 @@ namespace
         CoAEconomyRow row;
     };
 
+    constexpr uint32 CleanupBatch = 10000;
     std::mutex s_queueLock;
     std::unordered_map<ObjectGuid::LowType, std::vector<PendingRow>> s_queue;
 
@@ -212,6 +213,23 @@ void CoAEconomyLog::AddTokensEarned(Player* player, int32 tokens, CoATokenSource
     pending.row.source = uint32(source);
     pending.row.time = Now();
     rows.push_back(pending);
+}
+
+void CoAEconomyLog::Cleanup(uint32 now, bool wait)
+{
+    uint64 const keep = uint64(s_keepDays.load()) * DAY;
+    if (!keep || now <= keep)
+        return;
+    uint32 const cutoff = uint32(now - keep);
+    QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_economy_log WHERE time < {}", cutoff);
+    uint64 const old = result ? result->Fetch()[0].Get<uint64>() : 0;
+    for (uint64 deleted = 0; deleted < old; deleted += CleanupBatch)
+    {
+        if (wait)
+            CharacterDatabase.DirectExecute("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+        else
+            CharacterDatabase.Execute("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+    }
 }
 
 namespace
@@ -509,13 +527,31 @@ namespace
     class CoAEconomyLogWorld : public WorldScript
     {
     public:
-        CoAEconomyLogWorld() : WorldScript("CoAEconomyLogWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD }) { }
+        CoAEconomyLogWorld() : WorldScript("CoAEconomyLogWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP,
+            WORLDHOOK_ON_UPDATE }) { }
 
         void OnAfterConfigLoad(bool) override
         {
             s_enabled = sConfigMgr->GetOption<bool>("CoA.EconomyLog.Enable", false);
             s_keepDays = sConfigMgr->GetOption<uint32>("CoA.EconomyLog.KeepDays", 90);
         }
+
+        void OnStartup() override
+        {
+            CoAEconomyLog::Cleanup(Now(), false);
+        }
+
+        void OnUpdate(uint32 diff) override
+        {
+            _sinceCleanup += diff;
+            if (_sinceCleanup < DAY * IN_MILLISECONDS)
+                return;
+            _sinceCleanup = 0;
+            CoAEconomyLog::Cleanup(Now(), false);
+        }
+
+    private:
+        uint32 _sinceCleanup = 0;
     };
 }
 
