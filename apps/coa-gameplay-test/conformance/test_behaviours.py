@@ -11159,6 +11159,62 @@ class MetricDeltaDummyDistanceTests(unittest.TestCase):
             behaviour_scenario(load_fixture_class_file(23), {**cycle_one_entry(300240, 'range_extended'), 'dummy_distance': 150})
 
 
+CURSE_OF_THE_LICH_BASE = {
+    'spell': 300240, 'kind': 'metric_delta', 'quote': 'and your summons by $s2%.', 'before_expected': 0,
+    'trigger_spell': 805369, 'target': 'caster', 'cast_in_before': False, 'setup_in_before': True,
+    'setup_casts': [500971], 'setup_wait_ms': 3100, 'expire_ms': 500, 'wait_ms': 2000, 'tolerance': 0.0001,
+    'observe_source': 'seeded'}
+CURSE_OF_THE_LICH_ZERO = {'after_auras': [[300240, 1, 'caster', 'caster']], 'phase_aura_amounts': [[300240, 1, 0]]}
+SCHOOL_PROBE = {'entry': 50073, 'spell': 501978, 'school_mask': 16}
+
+
+def curse_of_the_lich_arm(suffix: str, metric: str, fields: dict, gain: float, alone: bool) -> dict:
+    return {**CURSE_OF_THE_LICH_BASE, **(CURSE_OF_THE_LICH_ZERO if alone else {}), 'name': suffix,
+            'variant': suffix, 'label_suffix': suffix, 'expected': gain, 'expected_gain': gain, 'metric': metric,
+            'fields': fields}
+
+
+class SummonSchoolCritArmTests(unittest.TestCase):
+    ARMS = {'a': ('summon_school_crit', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 3, False),
+            'b': ('summon_school_crit_alone', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 3, True),
+            'c': ('summon_base_alone', 'owned_creature_spell_crit_chance', {'entry': 50073}, 0, True)}
+
+    def built(self, arm: str):
+        entry = curse_of_the_lich_arm(*self.ARMS[arm])
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        return scenario, expectation
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_arms_read_the_probe_and_zero_effect_one_only_in_b_and_c(self):
+        for arm, (suffix, metric, fields, _, alone) in self.ARMS.items():
+            with self.subTest(arm=arm):
+                scenario, expectation = self.built(arm)
+                self.assertEqual(expectation.label, f'300240 behaviour_metric_delta {suffix}')
+                reads = [step for step in scenario['steps'] if step.get('metric') == metric]
+                self.assertEqual(len(reads), 2)
+                for read in reads:
+                    self.assertEqual({key: read[key] for key in fields}, fields)
+                zeroed = [step for step in scenario['steps'] if step.get('action') == 'set_aura'
+                          and step.get('spell') == 300240 and step.get('amount') == 0 and step.get('effect') == 1]
+                self.assertEqual(len(zeroed), int(alone))
+                learn = scenario['steps'].index({'action': 'learn', 'actor': CASTER, 'spell': 300240})
+                self.assertLess(scenario['steps'].index(reads[0]), learn)
+                self.assertLess(learn, scenario['steps'].index(reads[1]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_arm_b_alerts_when_its_read_falls_back_to_the_base_copy(self):
+        _, expectation = self.built('b')
+        model = expectation.model
+
+        def judged(before: float, after: float) -> str:
+            values = {model['before_label']: before, model['after_label']: after}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(4.5, 7.5), 'ok')
+        self.assertEqual(judged(3.0, 3.0), 'alert')
+        self.assertEqual(judged(4.5, 10.5), 'alert')
+
+
 class TakenHitLearnedArmTests(unittest.TestCase):
     def entry(self, suffix: str) -> dict:
         return next(entry for entry in load_fixture_class_file(23)['behaviours']
