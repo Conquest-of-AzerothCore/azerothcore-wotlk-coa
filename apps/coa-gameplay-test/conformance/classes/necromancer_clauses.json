@@ -1770,13 +1770,25 @@
   {
     "spell": 560730,
     "clause": "Damage dealt now has a $h% chance to apply Parasites for $560729d.",
-    "labels": [
-      "560730 effect_value #0",
-      "560730 spell_duration 560729 #1",
-      "560730 effect_value 561319e0 #2"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560730.md."
+    "reason": "Chance: not final, confirmed alert (G-3 lead, fix note FN-mc-3 to the controller): on pair11 20261113-064855 / 20261113-064932 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs) periodic Blight 500237 hits apply Parasites 560729 at 0.0541 / 0.0452 (band 3..7% around $h = 5), direct Plague of Undeath 680928 hits never (0 in 4730 per run, Wilson 99% upper 0.0014); 0 in 90 baseline hits (control). Cause: Chance(player, 560730) sits in the periodic branch (AscensionNecromancerEvents.cpp:118-125). Live: 107 of 119 Parasites applications in the two logs that carry it follow a direct SPELL_DAMAGE of the same player on the same target. Duration $560729d and the leech token: data labels, route pending. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Parasite Plague\" 0 lines by name, 0 lines by id 560730; ~/CoaServer/reference: bindmysoul \"Damage dealt now has a 5% chance to apply Parasites for 8 seconds.ParasitesYour Undead minions feast upon the \", sidekick coaKits names it (1 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Damage dealt now has a $h% chance to apply Parasites",
+        "labels": [
+          "560730 effect_value #0",
+          "560730 proc_rate 560729 500237",
+          "560730 proc_rate 560729 680928"
+        ]
+      },
+      {
+        "claim": "for $560729d.",
+        "labels": [
+          "560730 spell_duration 560729 #1",
+          "560730 effect_value 561319e0 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 560798,
