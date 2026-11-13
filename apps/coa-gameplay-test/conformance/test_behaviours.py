@@ -10875,5 +10875,28 @@ class CorpseFixtureTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 behaviour_scenario(load_class_file(23), {**entry, **change})
 
+
+class CastUnitAuraTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 503738 and entry.get('label_suffix') == 'party')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_unit_aura_lands_on_the_casting_ally_before_every_cast(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry())
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == ALLY]
+        self.assertTrue(casts)
+        for earlier, cast in zip([0] + casts, casts):
+            fixtures = [step for step in steps[earlier:cast] if step['action'] == 'set_aura' and step['spell'] == 823764]
+            self.assertEqual([step.get('target') for step in fixtures], [ALLY])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_unit_aura_is_refused_on_a_swing_entry(self):
+        swing = next(entry for entry in load_class_file(19)['behaviours']
+                     if entry['kind'] == 'hit_ratio' and entry.get('swing_hand') is not None)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(19), {**swing, 'cast_unit_auras': [[823764, 1]]})
+
 if __name__ == '__main__':
     unittest.main()

@@ -20,3 +20,5 @@ an ally's heal), so the spell-penetration fixture 823764 could not reach the cas
 
 - The party entry reads 153 -> 157 on every hit (+2.61%, the integer damage of 153 x 1.03) at the generated trials.
 - Entries without the field are unchanged; Templar `generate --class 19` and `--stack` are byte-identical.
+- Tests: `CastUnitAuraTests` (test_behaviours.py): the fixture lands on the casting ally before every cast; a swing
+  entry refuses it.
