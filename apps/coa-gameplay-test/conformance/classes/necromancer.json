@@ -11121,7 +11121,7 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Disease an enemy, dealing ${$m1+0+$sps*0.11055} Plague damage",
-      "expected": 1.1254,
+      "expected": 1.1263,
       "observe_spell": 501861,
       "cast_wait_ms": 3100,
       "cast_power": 1373,
@@ -11146,7 +11146,7 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, $m1 at level 60 = 105.771 per tick (BasePoints 101 + DieSides 1 + RealPointsPerLevel 0.942857 per level, the packet's resolved value), plus 0.11055 x spell power ($sps*0.11055; AscensionNecromancerData.h:28 coefficient 0.11055 on effect 0). The treatment arm casts a real Inner Fire 48168 on the caster before each Flesh to Worms (+120 spell power on all schools), the control arm does not: (105.771 + 0.11055 x 120) / 105.771 = 1.1254. Both arms set beeg spellpen 823764 (no partial resists), a precondition fixture; the non-critical ticks of 501861 on the dummy are the observed hits (one cast per trial, 3100 ms, Amplitude 3000)."
+      "expected_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, $m1 at level 60 = 105.771 per tick (BasePoints 101 + DieSides 1 + RealPointsPerLevel 0.942857 per level, the packet's resolved value), plus 0.11055 x spell power ($sps*0.11055; AscensionNecromancerData.h:28 coefficient 0.11055 on effect 0). The treatment arm casts a real Inner Fire 48168 on the caster before each Flesh to Worms (+120 spell power on all schools), the control arm does not. Judged on the observed control arm (mentor method rule, 2026-11-13): the control tick on this build is 105 (the tick_damage entry judges that base against the tooltip separately), so the treatment expects (105 + 0.11055 x 120) / 105 = 1.1263. Both arms set beeg spellpen 823764 (no partial resists), a precondition fixture; the non-critical ticks of 501861 on the dummy are the observed hits (one cast per trial, 3100 ms, Amplitude 3000)."
     },
     {
       "spell": 803605,
@@ -12094,7 +12094,7 @@
       "variant": "lichfrost",
       "label_suffix": "lichfrost",
       "quote": "Increases the spell power scaling of Lichfrost and Ice Barrage by $s1%.",
-      "expected": 1.1936,
+      "expected": 1.1935,
       "observe_spell": 501978,
       "cast_power": 1373,
       "fixture": {
@@ -12121,7 +12121,7 @@
       },
       "trials": 20,
       "critical": false,
-      "expected_source": "Lichfrost 501978: ${$m1+0+$spfr*.86989416} ($m1 about 583 at level 60, DBC 569-597). 560620 Effect[0] aura 108 SPELLMOD_BONUS_MULTIPLIER (MiscValue 24) +20 ($s1) on Lichfrost and Ice Barrage. The caster holds 20000 spell power (harness fixture, precondition) in both arms: spell power term 17397.9 without the talent (control), 20877.5 with it learned: (583 + 20877.5) / (583 + 17397.9) = 1.1936 (1.1932 to 1.1940 across the base range). Non-critical Lichfrost hits; 823764 on the caster in both arms."
+      "expected_source": "Lichfrost 501978: ${$m1+0+$spfr*.86989416} ($m1 about 583 at level 60, DBC 569-597). 560620 Effect[0] aura 108 SPELLMOD_BONUS_MULTIPLIER (MiscValue 24) +20 ($s1) on Lichfrost and Ice Barrage. The caster holds 20000 spell power (harness fixture, precondition) in both arms: spell power term 17397.9 without the talent (control), 20877.5 with it learned. Judged on the observed control arm (mentor method rule): the control hit 17979.4 (run 20261113-030836 of these scenarios) leaves a base of 581.5, so the treatment expects (581.5 + 20877.5) / 17979.4 = 1.1935 (1.1932 to 1.1940 for any base of 569 to 597). Non-critical Lichfrost hits; 823764 on the caster in both arms."
     },
     {
       "spell": 301198,
@@ -12218,7 +12218,31 @@
       },
       "critical": false,
       "trials": 12,
-      "expected_source": "Ice Barrage: ${$m1+0+$SP*.5971} Frost damage per tick (803779, the damage the channel 501997 triggers; $m1 about 313 at level 60, rank 501997 BasePoints 310 + 1 + 0.914 per level). 560620 Effect[0] aura 108 SPELLMOD_BONUS_MULTIPLIER +20 ($s1). The caster holds 20000 spell power (harness fixture, precondition) in both arms: spell power term 11942 without the talent (control), 14330.4 with it learned: (313 + 14330.4) / (313 + 11942) = 1.1949 (1.1948 to 1.1950 for a base of 300 to 330). Non-critical 803779 hits; Reg's Test Aura 984954 and 823764 on the caster in both arms (harness set_aura, precondition fixtures, as the Ice Barrage spell_power entry)."
+      "expected_source": "Ice Barrage: ${$m1+0+$SP*.5971} Frost damage per tick (803779, the damage the channel 501997 triggers; $m1 about 313 at level 60, rank 501997 BasePoints 310 + 1 + 0.914 per level). 560620 Effect[0] aura 108 SPELLMOD_BONUS_MULTIPLIER +20 ($s1). The caster holds 20000 spell power (harness fixture, precondition) in both arms: spell power term 11942 without the talent (control), 14330.4 with it learned. Judged on the observed control arm (mentor method rule): the control hit 12255.6 leaves a base of 313.6, so the treatment expects (313.6 + 14330.4) / 12255.6 = 1.1949 (1.1948 to 1.1950 for a base of 300 to 330). Non-critical 803779 hits; Reg's Test Aura 984954 and 823764 on the caster in both arms (harness set_aura, precondition fixtures, as the Ice Barrage spell_power entry)."
+    },
+    {
+      "spell": 301304,
+      "name": "Rotting Flesh (ticks scale with spell haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Increases the damage of Flesh to Worms by $s1% and allows its periodic damage to scale with your spell haste.",
+      "expected": 9,
+      "before_expected": 2,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_power": 1373,
+      "learn": [
+        560616
+      ],
+      "expire_ms": 10000,
+      "wait_ms": 8500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy"
+      },
+      "observe_source": "Flesh to Worms 501861 ticks every 3000 ms ($t1) for 18000 ms. Disciple of Kel'thuzad 560616 (+8% spell haste, its spell_haste entry) is learned throughout. 301304 Effect[1] aura 316 SPELL_AURA_PERIODIC_HASTE lets the ticks scale with spell haste: 3000 / 1.08 = 2778 ms. Without the talent (control) 2 ticks in 8500 ms (3000, 6000); the first cast's other 4 ticks land during the 10000 ms between phases (6); with the talent a fresh cast ticks at 2778, 5556 and 8333 ms: 3 more, 9."
     }
   ],
   "player_observations": [],
