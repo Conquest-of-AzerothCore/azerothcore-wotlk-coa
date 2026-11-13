@@ -2,7 +2,8 @@
 
 This guide is for a developer who takes one CoA class through the conformance method that finished the Templar. It
 assumes you know the repository (`AGENTS.md`, `.agents/rules/`); no history of the Templar work is needed. The rulings
-it cites as G-n, and the Templar precedents, are in [class-conformance-rulings.md](class-conformance-rulings.md).
+it cites as G-n, and the Templar precedents, are in [class-conformance-rulings.md](class-conformance-rulings.md); a
+class's own rulings and ADRs are in its folder under `docs/adr/conformance/` (ADR 0583).
 Figures and examples come from the Templar work; where no ADR records them, their source is the Templar's working
 records, which are not in the repository.
 
@@ -44,7 +45,7 @@ values come from the effective client DBC set, never from server code (`CONF/REA
 parts:
 - the gameplay-test harness in `src/server/coa/CoAGameplayTest.cpp`, which runs the scenarios inside a worldserver;
 - `tools/verify_all.py`, which drives builds and runs;
-- the ADRs in `docs/adr/`.
+- the ADRs in `docs/adr/` (shared) and `docs/adr/conformance/<class>/` (one class's fixes and rulings, ADR 0583).
 
 ## 2. The five final statuses
 
@@ -854,7 +855,8 @@ source is the Templar's working records, which are not in the repository.
    - The integrator redid its cherry-picks twice because of count lines.
 
    Rule: ADR blocks reserved per author before launch; a lock file for shared tool files; each fix branch owns its own
-   C++ file; the entry-count line is checked at every commit.
+   C++ file; the entry-count line is checked at every commit. Since ADR 0583 a class's ADRs are numbered inside its
+   folder, and shared ADRs take the next free numbers just before merge.
 7. **Coin-flip tests.**
    - A High General damage test failed on a correct server: with 8 casts per arm and the dummy's partial resists
      uncontrolled, a correct server misses the band about 31% of the time (ADR 0154, Context).
