@@ -3178,13 +3178,23 @@
   {
     "spell": 802132,
     "clause": "Disease an enemy, dealing ${$m1+0+$SP*0.22} Plague damage every $t1 sec for $d.",
-    "labels": [
-      "802132 effect_value e0 #0",
-      "802132 aura_amount e0 #0",
-      "802132 aura_amplitude_ms #1",
-      "802132 aura_duration_ms #2"
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*0.22} Plague damage",
+        "labels": [
+          "802132 behaviour_hit_ratio spell_power",
+          "802132 behaviour_hit_ratio per_disease"
+        ]
+      },
+      {
+        "claim": "every $t1 sec for $d",
+        "labels": [
+          "802132 behaviour_metric_delta ticks"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '151 + 22% SP every 3 sec for 18 seconds', '4% per disease'; coa-obtainable: in the live capture; logs: 143 ticks of 802132, median 355, about 1.6 s apart (hasted casters). The base and per-level terms read 182 = 175 x 1.04 at spell power 0 (per_disease control); the 0.22 coefficient through +220 spell power."
   },
   {
     "spell": 802132,
