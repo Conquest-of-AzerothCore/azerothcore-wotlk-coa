@@ -651,7 +651,8 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
 
 
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
-                     seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset()) -> str:
+                     seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
+                     row: str = '') -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -670,7 +671,9 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     detail = verdict.detail or {}
     required = contrast_proof().get(detail[PASSIVE_METRIC])
     if required is not None and detail.get(CONTRAST) == required:
-        return BEHAVIOUR
+        words = state_promises().get(detail[PASSIVE_METRIC])
+        if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row}', re.IGNORECASE) is not None:
+            return BEHAVIOUR
     words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
     if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
         return DATA
@@ -680,12 +683,13 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
 
 
 def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
-                   promoted: frozenset[str] = frozenset()) -> str:
+                   promoted: frozenset[str] = frozenset(), row: str = '') -> str:
     labels = claim['labels']
     if not clause_proven(labels, statuses):
         return UNPROVEN
     matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
-    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted) for verdict in matched}
+    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row)
+             for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
 
@@ -697,7 +701,8 @@ def claims_evidence(found: list[str]) -> str:
 
 def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
                     promoted: frozenset[str] = frozenset()) -> str:
-    return claims_evidence([claim_evidence(claim, by_label, statuses, promoted) for claim in clause_claims(clause)])
+    return claims_evidence([claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''))
+                            for claim in clause_claims(clause)])
 
 
 TEXT_SOURCE = 'text_source'
@@ -740,7 +745,8 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     promoted = frozenset(label for label, result in results.items() if result == CONSUMED)
     not_consumed = frozenset(label for label, result in results.items() if result == NOT_CONSUMED)
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
-    per_claim = [[claim_evidence(claim, by_label, statuses, promoted) for claim in subject_claims(clause, clauses)]
+    per_claim = [[claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''))
+                  for claim in subject_claims(clause, clauses)]
                  for clause in claims]
     project_text = [clause for clause in claims if not independent_text(clause)]
     evidence = [(clause, UNPROVEN if any(clause is other for other in project_text) else claims_evidence(found))

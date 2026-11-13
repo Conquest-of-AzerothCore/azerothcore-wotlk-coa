@@ -765,11 +765,24 @@ class ContrastProofTest(unittest.TestCase):
     def evidence(self, text, metric, **detail):
         return evidence_of([claim(text, self.LABEL)], [judged(self.LABEL, BEHAVIOUR_METRIC_DELTA, metric, **detail)])[0]
 
-    def test_a_summon_crit_read_proves_a_claim_without_the_promise_words_only_with_the_learned_contrast(self):
+    ROW = 'Increases the Frost critical strike chance of you and your summons by $s2%.'
+
+    def row_evidence(self, row, metric, **detail):
+        clauses = [declared(row, ('Increases the Frost critical strike chance of you', 'x'),
+                            ('and your summons by $s2%', self.LABEL))]
+        verdicts = [judged(self.LABEL, BEHAVIOUR_METRIC_DELTA, metric, **detail),
+                    judged('x', BEHAVIOUR_METRIC_DELTA, 'armor', contrast=LEARNED_CONTRAST)]
+        return evidence_of(clauses, verdicts)[1].claim_evidence[0][1]
+
+    def test_a_summon_crit_read_proves_a_split_claim_with_its_row_words_only_with_the_learned_contrast(self):
         for metric in ('owned_creature_spell_crit_chance', 'owned_creature_school_spell_crit_chance'):
-            self.assertEqual(self.evidence('and your summons by $s2%', metric, contrast=LEARNED_CONTRAST), [BEHAVIOUR])
-            self.assertEqual(self.evidence('and your summons by $s2%', metric, contrast=CONDITION_CONTRAST), [DATA])
-            self.assertEqual(self.evidence('and your summons by $s2%', metric), [DATA])
+            self.assertEqual(self.row_evidence(self.ROW, metric, contrast=LEARNED_CONTRAST), BEHAVIOUR)
+            self.assertEqual(self.row_evidence(self.ROW, metric, contrast=CONDITION_CONTRAST), DATA)
+            self.assertEqual(self.row_evidence(self.ROW, metric), DATA)
+
+    def test_a_summon_crit_read_does_not_prove_a_row_that_does_not_promise_crit(self):
+        self.assertEqual(self.row_evidence('Increases the range of your Rime spells by $s1 yds',
+                                           'owned_creature_spell_crit_chance', contrast=LEARNED_CONTRAST), DATA)
 
     def test_an_enemy_player_duration_read_proves_its_claim_only_with_the_learned_contrast(self):
         text = '(8 sec vs players).'

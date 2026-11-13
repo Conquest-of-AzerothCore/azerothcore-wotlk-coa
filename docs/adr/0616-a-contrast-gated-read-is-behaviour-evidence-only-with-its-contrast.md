@@ -23,7 +23,9 @@ measurement of the thing the claim states; the bare read is not. Overriding the 
 ## Decision
 
 Option 2. `CONTRAST_PROOF` holds `owned_creature_spell_crit_chance` and `owned_creature_school_spell_crit_chance`
-(`learned`, the summon's crit with and without the talent) and `enemy_player_aura_duration_ms` (`learned`). A
+(`learned`, the summon's crit with and without the talent; the promise words of `STATE_PROMISES` are tested against
+the claim and its row's clause text, so a split claim inherits them and a row that does not promise crit proves
+nothing) and `enemy_player_aura_duration_ms` (`learned`). A
 `metric_delta` entry may carry `evidence_metric`, which its verdict stamps in place of `metric`; the Bonefreeze
 `player_duration` entry names `enemy_player_aura_duration_ms` (registered `readback`). The `cooldown_pick_share` kind
 stamps `cooldown_pick_share` (registered `readback`, gated `learned`) and stamps `contrast: learned` only when its
