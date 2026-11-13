@@ -1262,8 +1262,8 @@
       "variant": "channel",
       "label_suffix": "channel",
       "quote": "to deal $707133s1% increased damage per stack.",
-      "expected": 0,
-      "before_expected": 0,
+      "expected": 1698,
+      "before_expected": 529,
       "trigger_spell": 501886,
       "target": "dummy",
       "setup_only_after": true,
@@ -1300,7 +1300,7 @@
         "spell": 800343,
         "target": "dummy"
       },
-      "observe_source": "probe"
+      "observe_source": "Diabolical 704723 known throughout. Crypt Swarm 501886 (level 54 rank, Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, 3000 ms, a tick every 500 ms) casts its tick 800343 with its own value, 57 + int(0.24 x 6) = 58 at level 60. The damage hook multiplies a tick by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), the crit (forced, precondition) then x1.5, and each tick removes one stack (AscensionNecromancerEvents.cpp:108-117). 823764 on the caster removes partial resists. Control phase: the channel's own cast gives 1 stack: int(int(58 x 1.1) x 1.5) = 94, then five ticks of 87: total 529. After 31000 ms, fourteen Commands and the channel give 15 stacks: ticks at 15, 14, 13, 12, 11, 10 stacks: 217 + 208 + 199 + 190 + 181 + 174 = 1169, total 1698. A bonus of 9% or 11% per stack gives other sums."
     },
     {
       "spell": 804360,
