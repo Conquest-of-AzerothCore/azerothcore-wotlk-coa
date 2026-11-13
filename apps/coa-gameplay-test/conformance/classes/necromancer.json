@@ -1051,6 +1051,34 @@
       "expected_ratio": 0.4,
       "per_trigger_text": "dealing $s2% of the damage dealt as Shadow Damage",
       "observe_source": "638403 Effect[1] (aura 354 rewritten to SPELL_AURA_DUMMY), BasePoints 39 + 1 = 40 ($s2); AscensionNecromancerEvents.cpp:183-184 has the critting minion cast Bone Club 801241 for damage x Amount(638403, 1) / 100 (a derived spell without caster modifiers, AscensionNecromancerContracts.cpp:381-391); with every melee hit forced to crit, the melee damage per crit is the trigger side; Bone Club is Shadow and the dummy's partial resist is read"
+    },
+    {
+      "aura": 704721,
+      "name": "Study of Death (per event)",
+      "tooltip": "When you cast |cFFFFFFFFUnholy Frenzy|r you now animate $302912s1 |cffffffffGreater Zombies|r to aid you in combat for $525380d.\r\n\r\nFrost and Physical damage dealt by your Undead minions now reduces the cooldown of |cffffffffUnholy Frenzy|r by $/1000;302597S1 sec. \r\n\r\nEach |cffffffffAbominations|r or |cffffffffDecaying Collosus|r active causes damage dealt by your Undead minions to reduce the cooldown by an additional 1 sec.",
+      "kind": "cooldown_delta",
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_text": "Frost and Physical damage dealt by your Undead minions",
+      "trigger_spell_text": "Raise: Ghoul",
+      "trial_metric": "owned_creature_damage_count",
+      "observe_spell": 805029,
+      "observe_metric": "cooldown_ms",
+      "expected_delta_ms": 500,
+      "window_ms": 3000,
+      "observe_settle_ms": 17000,
+      "per_trigger_text": "now reduces the cooldown of Unholy Frenzy by $/1000;302597S1 sec",
+      "caster_power": {
+        "power": 0,
+        "value": 1373,
+        "source": "player_class_stats class 23 level 60 BaseMana 1373: covers the base-mana percentage cost of Unholy Frenzy 805029 (15%)"
+      },
+      "observe_source": "AscensionNecromancerEvents.cpp:206-212: with 704721 known, a Frost or Physical damage event of a minion reduces Unholy Frenzy 805029 by |Amount(302597)| (302597 BasePoints -501 + 1 = 500 ms, $/1000;302597S1) plus 1000 ms per Abomination 50068 or Decaying Colossus 50115 minion, at most once per 1000 ms (State cooldown 704721). Each cast of 805029 with 704721 known raises 5 Greater Zombies for 15 s (AscensionNecromancerAbilities.cpp:346-353), whose hits share that 1000 ms gate; each window starts 17000 ms after the cast, once they have expired, so only the Ghoul (Physical melee, one swing per 2000 ms, above the 1000 ms gate) acts in it"
     }
   ],
   "talent_modifiers": [],
@@ -2145,6 +2173,48 @@
       "parts": 7,
       "cast_power": 1373,
       "expected_source": "680388 Effect[1] aura 118 SPELL_AURA_MOD_HEALING_PCT on the caster, BasePoints 9 + 1 = 10 ($s2); Unit::SpellHealingBonusTaken (Unit.cpp:10873-10898, stock) multiplies every heal its holder receives. A heal from another source, Flash Heal 10917 (rank 7, BaseLevel 56) cast by the caster on itself: non-critical heal per hit without the ward (control) and with the ward learned and cast before each heal (treatment). cast_power 1373 (player_class_stats BaseMana) refills mana before each heal, which also covers the next ward cast (20% of base mana)."
+    },
+    {
+      "spell": 680388,
+      "name": "Fetid Ward (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Activate a Fetid Ward on yourself and your Undead minions for $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 680388,
+      "target": "caster",
+      "cast_spell": 680388,
+      "cast_target": "caster",
+      "observe_source": "680388 SpellDuration.dbc 1800000 ms ($d, 30 min), its own aura on the caster (Effect[0] and Effect[1] TARGET_UNIT_CASTER). A real cast of 680388: the remaining aura_duration_ms read on the caster before the cast (absent) and right after it, and its expiry pair around 1800000 ms timed from the cast (simulated clock, within the 3600000 ms accelerated scenario cap; the duration is not shortened)."
+    },
+    {
+      "spell": 704676,
+      "name": "Champion of Kel'thuzad (Lich Form cooldown)",
+      "kind": "cost_gate",
+      "label_suffix": "lich_form",
+      "quote": "While your Lich Form is active, your Champion spells will now cooldown faster.",
+      "gated_spell": 805049,
+      "resource": "cooldown",
+      "reduction": 150000,
+      "margin_ms": 10000,
+      "after_casts": [[500981, "caster"]],
+      "after_wait_ms": 1500,
+      "cast_power": 1373,
+      "observe_source": "AscensionNecromancerAuras.cpp:194-196: each 5000 ms tick of 704676's own Effect[0] (aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 5000) reduces Gravebound 805049, Spellbound 807811 and Icebound Champion 807813 by 5000 ms while Lich Form 500981 is on the caster: twice the normal rate. The tooltip states no figure; 150000 ms is that rate over Gravebound Champion's RecoveryTime 300000 ms. Lich Form (DurationIndex 21, permanent) is cast 1500 ms after the priming cast in every arm, so the control differs in 704676 alone. Arms: 160000 ms after the priming cast without 704676 (refused, SPELL_FAILED_NOT_READY 67), with it (through: ready near 150000 ms), and 140000 ms after it with it (refused: the cut is no faster than 5 s per 5 s). cast_power 1373 (player_class_stats BaseMana) covers the 15% and 10% base-mana costs."
+    },
+    {
+      "spell": 561353,
+      "name": "Unholy Runes (Corpse Explosion reset)",
+      "kind": "cost_gate",
+      "label_suffix": "corpse_explosion",
+      "quote": "and damage dealt by Blight now has a $h% chance to reset the cooldown of Corpse Explosion.",
+      "gated_spell": 533236,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "resets": true,
+      "after_casts": [[500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"]],
+      "after_wait_ms": 1500,
+      "observe_source": "AscensionNecromancerEvents.cpp:130-131: an own Blight 500237 hit (periodic by id, :80-81) with Chance(player, 561353) ($h 5, ProcChance of 561353) removes Corpse Explosion 533236's cooldown (Reduce with INT32_MAX: RemoveSpellCooldown, AscensionNecromancer.cpp:214-220). Corpse Explosion (RecoveryTime 60000 ms) is primed, 300 Blight 500237 hits (cast directly, no global cooldown) land on the dummy 1500 ms later, and Corpse Explosion is attempted 500 ms after them: refused without 561353 (SPELL_FAILED_NOT_READY 67), through with it. At 5% per hit, no reset in 300 hits has probability 0.95^300 = 2.1e-7 per run; the chance itself is a data value (561353 ProcChance), the reset is the behaviour."
     }
   ],
   "player_observations": [],
