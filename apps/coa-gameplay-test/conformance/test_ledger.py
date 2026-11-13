@@ -6,7 +6,7 @@ import unittest
 from coverage import clause_coverage, load_clauses
 from ledger import (ACQUISITION_REASON, EMPTY_CLAUSE, EMPTY_REASON, LEVEL_REASON, clause_words, differs_text, ledger,
                     no_claim_reason, parse_text_bases, pulled_clauses, raw_clauses, write_ledger)
-from profile import DBC_DIR, FIXTURE_CLASSES_DIR, load_class_file, load_fixture_class_file
+from profile import DBC_DIR, FIXTURE_CLASSES_DIR, load_fixture_class_file
 from streamed import streamed_texts
 from tooltip import Records
 from values import dataset
@@ -18,7 +18,7 @@ GHOUL_FRENZY = 503740
 FRENZIED_GHOUL = 707014
 TUNDRA_WARRIORS_TALENT = 92122
 TEMPLAR_LEDGER = FIXTURE_CLASSES_DIR / 'templar_clauses.json'
-NECROMANCER_LEDGER = Path(__file__).resolve().parent / 'classes' / 'necromancer_clauses.json'
+NECROMANCER_LEDGER = FIXTURE_CLASSES_DIR / 'necromancer_clauses.json'
 OWNER_RULING_NO_CLAIM = 805410
 LEVEL_LINE = '|cFF66DDFFLevel 10 Passive|r\r\n'
 
@@ -108,7 +108,7 @@ class ClassLedgerTests(unittest.TestCase):
         cls.hand = json.loads(TEMPLAR_LEDGER.read_text(encoding='utf-8'))
         cls.templar = ledger(load_fixture_class_file(TEMPLAR), DBC_DIR, templar_bases(cls.hand)).entries
         necromancer_hand = json.loads(NECROMANCER_LEDGER.read_text(encoding='utf-8'))
-        cls.necromancer = ledger(load_class_file(NECROMANCER), DBC_DIR, templar_bases(necromancer_hand))
+        cls.necromancer = ledger(load_fixture_class_file(NECROMANCER), DBC_DIR, templar_bases(necromancer_hand))
 
     def test_templar_no_claim_rows_of_the_generation_rules_are_reproduced(self):
         reasons = {LEVEL_REASON: 'level', EMPTY_REASON: 'empty', ACQUISITION_REASON: 'acquisition'}
@@ -138,7 +138,7 @@ class ClassLedgerTests(unittest.TestCase):
 
     def test_a_streamed_spell_without_a_basis_is_refused(self):
         with self.assertRaises(ValueError):
-            ledger(load_class_file(NECROMANCER), DBC_DIR, {})
+            ledger(load_fixture_class_file(NECROMANCER), DBC_DIR, {})
 
     def test_the_written_ledger_loads_and_runs_through_coverage(self):
         for entries in (self.templar, self.necromancer.entries):
@@ -183,7 +183,7 @@ class ClassLedgerTests(unittest.TestCase):
 
     def test_the_generation_is_deterministic(self):
         necromancer_hand = json.loads(NECROMANCER_LEDGER.read_text(encoding='utf-8'))
-        again = ledger(load_class_file(NECROMANCER), DBC_DIR, templar_bases(necromancer_hand))
+        again = ledger(load_fixture_class_file(NECROMANCER), DBC_DIR, templar_bases(necromancer_hand))
         self.assertEqual(again, self.necromancer)
 
 

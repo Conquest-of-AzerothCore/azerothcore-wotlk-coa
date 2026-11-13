@@ -2590,14 +2590,14 @@ class MinionMagnitudeTests(unittest.TestCase):
     TOMB_KING = 805044
 
     def tomb_king_entry(self) -> dict:
-        from profile import load_class_file
-        return next(entry for entry in load_class_file(23)['triggers'] if entry['aura'] == self.TOMB_KING)
+        from profile import load_fixture_class_file
+        return next(entry for entry in load_fixture_class_file(23)['triggers'] if entry['aura'] == self.TOMB_KING)
 
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_melee_hits_and_the_minion_observation_are_read(self):
-        from profile import load_class_file
+        from profile import load_fixture_class_file
         from triggers import magnitude_measurement_labels, magnitude_ratio_scenario
-        scenario, _ = magnitude_ratio_scenario(load_class_file(23), self.tomb_king_entry())
+        scenario, _ = magnitude_ratio_scenario(load_fixture_class_file(23), self.tomb_king_entry())
         labels = magnitude_measurement_labels(self.TOMB_KING)
         reads = {step['label']: step for step in scenario['steps'] if step.get('action') == 'assert'}
         trigger_count = reads[labels['trigger_count']]
@@ -2608,9 +2608,9 @@ class MinionMagnitudeTests(unittest.TestCase):
 
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_the_cast_aura_is_cast_again_with_its_power(self):
-        from profile import load_class_file
+        from profile import load_fixture_class_file
         from triggers import magnitude_ratio_scenario
-        scenario, _ = magnitude_ratio_scenario(load_class_file(23), self.tomb_king_entry())
+        scenario, _ = magnitude_ratio_scenario(load_fixture_class_file(23), self.tomb_king_entry())
         casts = [index for index, step in enumerate(scenario['steps'])
                  if step.get('action') == 'cast' and step.get('spell') == self.TOMB_KING]
         self.assertGreater(len(casts), 2)

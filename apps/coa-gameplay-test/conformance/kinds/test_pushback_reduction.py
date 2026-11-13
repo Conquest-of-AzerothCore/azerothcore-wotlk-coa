@@ -3,16 +3,16 @@ import unittest
 
 from behaviours import STRIKER, behaviour_scenario
 from compare import judge_behaviour
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict, cast_indices, cycle_one_entry
 
 
 class PushbackReductionTests(unittest.TestCase):
     def built(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'pushback_reduction')
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry['kind'] == 'pushback_reduction')
         single = {**entry, 'repeats': 1, 'windows': [[2440, 2560], [2930, 3050], [2680, 2800]]}
-        return behaviour_scenario(load_class_file(23), single)
+        return behaviour_scenario(load_fixture_class_file(23), single)
 
     def values(self, ends: dict, strikes: dict | None = None, step_ms: float = 1.0) -> dict:
         _, [expectation] = self.built()
@@ -63,7 +63,7 @@ class PushbackReductionTests(unittest.TestCase):
     def test_the_reducer_stamps_its_own_cast_or_its_learn_as_the_contrast(self):
         own = cycle_one_entry(807813, 'pushback_game_time')
         learned = cycle_one_entry(802988, 'pushback_game_time')
-        contrast = lambda entry: behaviour_scenario(load_class_file(23), entry)[1][0].model['contrast']
+        contrast = lambda entry: behaviour_scenario(load_fixture_class_file(23), entry)[1][0].model['contrast']
         self.assertEqual(contrast(own), 'own_cast')
         self.assertEqual(contrast(learned), 'learned')
         self.assertEqual(contrast({**own, 'reducer_spell': 802988}), 'condition')
@@ -86,9 +86,9 @@ class PushbackReductionTests(unittest.TestCase):
 class PushbackLearnedReducerTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_learned_reducer_adds_its_own_unhit_cast_after_the_learn(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours']
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'pushback_reduction' and entry.get('reducer_learn'))
-        scenario, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         run.validate(scenario)
         steps = scenario['steps']
         learn = next(index for index, step in enumerate(steps)
@@ -104,10 +104,10 @@ class PushbackLearnedReducerTests(unittest.TestCase):
 
 class PushbackSampledTests(unittest.TestCase):
     def built(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours']
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1
                      and entry.get('reducer_learn'))
-        return entry, behaviour_scenario(load_class_file(23), entry)
+        return entry, behaviour_scenario(load_fixture_class_file(23), entry)
 
     def judged(self, ends: dict) -> str:
         entry, (_, [expectation]) = self.built()

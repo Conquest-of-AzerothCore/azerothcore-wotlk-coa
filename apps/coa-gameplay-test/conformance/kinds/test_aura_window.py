@@ -3,19 +3,19 @@ import unittest
 from behaviours import behaviour_scenario
 from compare import Verdict, judge_behaviour
 from kinds.aura_window import aura_window_spec
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 from test_behaviours import FakeRun
 
 
 def channel_entry() -> dict:
-    return next(entry for entry in load_class_file(23)['behaviours']
+    return next(entry for entry in load_fixture_class_file(23)['behaviours']
                 if entry['kind'] == 'aura_window' and entry['label_suffix'] == 'channel')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class AuraWindowTests(unittest.TestCase):
     def judged(self, control: tuple[float, float], treatment: tuple[float, float]) -> Verdict:
-        _, [expectation] = behaviour_scenario(load_class_file(23), channel_entry())
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), channel_entry())
         values = {}
         for name, (start, end) in (('control', control), ('treatment', treatment)):
             phase = expectation.model['reads'][name]

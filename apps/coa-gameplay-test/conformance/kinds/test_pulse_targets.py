@@ -2,20 +2,20 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import Verdict, judge_behaviour
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun
 
 
 def bonestorm_cap_entry() -> dict:
-    return next(entry for entry in load_class_file(23)['behaviours']
+    return next(entry for entry in load_fixture_class_file(23)['behaviours']
                 if entry['kind'] == 'pulse_targets' and entry['label_suffix'] == 'bonestorm_cap')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class PulseTargetsTests(unittest.TestCase):
     def judged(self, struck_per_pulse: list[int], far_struck: bool = False) -> Verdict:
-        _, [expectation] = behaviour_scenario(load_class_file(23), bonestorm_cap_entry())
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), bonestorm_cap_entry())
         model = expectation.model
         counts = [0] * (model['far_index'] + 1)
         values = {}
@@ -34,7 +34,7 @@ class PulseTargetsTests(unittest.TestCase):
         return judge_behaviour(base, FakeRun(values), expectation)
 
     def test_the_dummies_and_the_polls_are_placed(self):
-        scenario, [expectation] = behaviour_scenario(load_class_file(23), bonestorm_cap_entry())
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), bonestorm_cap_entry())
         run.validate(scenario)
         self.assertEqual(len(scenario['creatures']), 8)
         self.assertEqual(len(expectation.model['reads'][0]), 1 + 8)

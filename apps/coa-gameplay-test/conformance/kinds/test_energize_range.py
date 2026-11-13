@@ -2,15 +2,15 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
 
 
 class EnergizeRangeTests(unittest.TestCase):
     def built(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'energize_range')
-        return behaviour_scenario(load_class_file(23), entry)
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry['kind'] == 'energize_range')
+        return behaviour_scenario(load_fixture_class_file(23), entry)
 
     def judged(self, amounts: list[int]) -> str:
         _, [expectation] = self.built()

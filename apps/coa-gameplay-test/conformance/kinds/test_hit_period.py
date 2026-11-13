@@ -2,20 +2,20 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import Verdict, judge_behaviour
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun
 
 
 def chain_period_entry() -> dict:
-    return next(entry for entry in load_class_file(23)['behaviours']
+    return next(entry for entry in load_fixture_class_file(23)['behaviours']
                 if entry['kind'] == 'hit_period' and entry['label_suffix'] == 'chain_period')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class HitPeriodTests(unittest.TestCase):
     def judged(self, period: float, first: float = 1330.0) -> Verdict:
-        _, [expectation] = behaviour_scenario(load_class_file(23), chain_period_entry())
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), chain_period_entry())
         model = expectation.model
         values = {model['control_label']: 0.0, model['start_label']: 0.0}
         for index, (time_label, hits_label) in enumerate(model['reads']):
@@ -27,7 +27,7 @@ class HitPeriodTests(unittest.TestCase):
         return judge_behaviour(base, FakeRun(values), expectation)
 
     def test_the_fixtures_precede_the_cast_and_the_polls_follow_it(self):
-        scenario, [expectation] = behaviour_scenario(load_class_file(23), chain_period_entry())
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), chain_period_entry())
         steps = run.validate(scenario)['steps']
         cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
         self.assertTrue(any(step['action'] == 'set_aura' and step['spell'] == 22856 for step in steps[:cast]))

@@ -3,18 +3,18 @@ import unittest
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
 from passives import behaviour_label
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
 
 
 class AuraExpiryTests(unittest.TestCase):
     def entry(self) -> dict:
-        return next(entry for entry in load_class_file(23)['behaviours']
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
                     if entry['spell'] == 503740 and entry.get('label_suffix') == 'frenzied_expiry')
 
     def expectation(self):
-        _, [expectation] = behaviour_scenario(load_class_file(23), self.entry())
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.entry())
         return expectation
 
     def judged(self, marks, present, released=0.0, step=100.0):
@@ -29,7 +29,7 @@ class AuraExpiryTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_roll_is_forced_then_stopped_and_the_mutant_removed(self):
-        scenario, [expectation] = behaviour_scenario(load_class_file(23), self.entry())
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.entry())
         run.validate(scenario)
         mutants = [step for step in scenario['steps'] if step['action'] == 'spell_mod_mutant']
         self.assertEqual([(step['spell'], step['op'], step['percent']) for step in mutants],
@@ -67,6 +67,6 @@ class AuraExpiryTests(unittest.TestCase):
 class AuraExpiryPassiveLinkTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_p5_link_names_the_aura_expiry_label(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'aura_expiry')
-        _, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry['kind'] == 'aura_expiry')
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         self.assertEqual(behaviour_label(entry), [expectation.label])

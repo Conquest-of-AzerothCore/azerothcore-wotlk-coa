@@ -30,8 +30,9 @@ Option 2.
 - Every tool test that reads Templar data reads the fixture: the module-level `CLASS_FILE`s, the
   `load_fixture_class_file(...)` calls, and every `generate` or `main(['generate'|'packets', ...])` call, which runs
   under `mock.patch('conformance.load_class_file', load_fixture_class_file)` (`test_compare.fixture_generate`).
-- The Necromancer fixture is frozen only after the ADR citation rewrite (contributor-structure step 2); until then
-  the tests reading class 23 keep the live `necromancer.json`.
+- The Necromancer fixtures (`necromancer.json`, `necromancer_clauses.json`) are byte copies of the live files taken
+  after the ADR citation rewrite (contributor-structure step 2, ADR 0583); every class-23 read in a tool test reads
+  them, `main(['generate', '--class', '23', ...])` under the same patch.
 - Tests that read every live class file on purpose stay live and carry `cross_class_guard` in their name:
   `test_coverage.py` (consumption files are not class files; every metric of every class file has an evidence class;
   every metric-classed expectation carries its metric; every class ledger is well formed), `test_values.py` (every
@@ -41,8 +42,8 @@ Option 2.
 ## Consequences
 
 - A Templar class-file edit no longer changes a tool test outcome, except through a cross-class guard.
-- The copies duplicate about 0.9 MB and do not follow later format changes of the live files; a format change
+- The copies duplicate about 2.6 MB and do not follow later format changes of the live files; a format change
   updates the fixture in the same commit. The schema of the live files is still validated by generation and the
   guards.
 - A new tool test reads `load_fixture_class_file` or a fixture path; `load_class_file(` in a tool test is either a
-  cross-class guard or one of the class-23 reads listed for the switch after step 2.
+  cross-class guard.

@@ -104,4 +104,5 @@ always run.
 Tool tests read frozen class files from `fixtures/classes/` (`profile.load_fixture_class_file`,
 `test_compare.fixture_generate`), not the live files under `classes/`, so a class author's edit does not change a
 tool test (ADR 0580). Only the tests named `test_cross_class_guard_*` read every live class file on purpose. The
-Necromancer fixture follows the ADR citation rewrite; until then class-23 tests read the live `necromancer.json`.
+Necromancer fixtures (`necromancer.json`, `necromancer_clauses.json`) were frozen after the ADR citation rewrite
+(ADR 0583).

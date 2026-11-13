@@ -1020,14 +1020,14 @@ class CastProcBaselineTests(unittest.TestCase):
     TUNDRA_WARRIORS = 92122
 
     def entry(self) -> dict:
-        from profile import load_class_file
-        return next(entry for entry in load_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+        from profile import load_fixture_class_file
+        return next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
 
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_the_baseline_casts_come_before_the_passive_and_count_casts(self):
         from procs import proc_scenario
-        from profile import load_class_file
-        scenario, expectations = proc_scenario(load_class_file(23), self.entry())
+        from profile import load_fixture_class_file
+        scenario, expectations = proc_scenario(load_fixture_class_file(23), self.entry())
         steps = scenario['steps']
         learn = next(index for index, step in enumerate(steps)
                      if step.get('action') == 'learn' and step.get('spell') == self.TUNDRA_WARRIORS)
@@ -1040,9 +1040,9 @@ class CastProcBaselineTests(unittest.TestCase):
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_without_the_fields_the_trials_are_hits_and_no_baseline_runs(self):
         from procs import proc_scenario
-        from profile import load_class_file
+        from profile import load_fixture_class_file
         entry = {key: value for key, value in self.entry().items() if key not in ('baseline', 'trial_casts')}
-        scenario, expectations = proc_scenario(load_class_file(23), entry)
+        scenario, expectations = proc_scenario(load_fixture_class_file(23), entry)
         trials = next(step for step in scenario['steps'] if step.get('label') == f'{self.TUNDRA_WARRIORS} proc trials')
         self.assertEqual(trials['metric'], 'spell_damage_count')
         self.assertNotIn('baseline', expectations[0].model)
@@ -1053,8 +1053,8 @@ class MinionNativeProcTests(unittest.TestCase):
     GHOUL_MASTERY = 503740
 
     def entry(self) -> dict:
-        from profile import load_class_file
-        return next(entry for entry in load_class_file(23)['procs'] if entry['aura'] == self.GHOUL_MASTERY)
+        from profile import load_fixture_class_file
+        return next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.GHOUL_MASTERY)
 
     def test_native_procs_are_read_on_the_minion_without_a_target(self):
         from procs import event_steps
@@ -1067,10 +1067,10 @@ class MinionNativeProcTests(unittest.TestCase):
     @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
     def test_native_procs_need_the_minion_event_actor(self):
         from procs import proc_plan
-        from profile import load_class_file
+        from profile import load_fixture_class_file
         entry = {key: value for key, value in self.entry().items() if key != 'event_actor'}
         with self.assertRaises(ValueError):
-            proc_plan(load_class_file(23), entry)
+            proc_plan(load_fixture_class_file(23), entry)
 
 
 

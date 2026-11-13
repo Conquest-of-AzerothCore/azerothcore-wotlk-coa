@@ -3,20 +3,20 @@ import unittest
 from behaviours import behaviour_scenario
 from compare import Verdict, judge_behaviour
 from kinds.cast_period import cast_period_spec
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun
 
 
 def bone_toss_entry() -> dict:
-    return next(entry for entry in load_class_file(23)['behaviours']
+    return next(entry for entry in load_fixture_class_file(23)['behaviours']
                 if entry['kind'] == 'cast_period' and entry['label_suffix'] == 'bone_toss_period')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class CastPeriodTests(unittest.TestCase):
     def expectation(self):
-        scenario, [expectation] = behaviour_scenario(load_class_file(23), bone_toss_entry())
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), bone_toss_entry())
         return scenario, expectation
 
     def judged(self, period: float, control: float = 0.0, offset: float = 430.0, step: float = 112.0) -> Verdict:

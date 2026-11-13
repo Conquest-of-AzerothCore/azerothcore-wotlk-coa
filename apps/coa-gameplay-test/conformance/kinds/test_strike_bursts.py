@@ -2,20 +2,20 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from profile import CASTER, DBC_DIR, load_class_file
+from profile import CASTER, DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
 
 
 class StrikeBurstsTests(unittest.TestCase):
     def entry(self, spell: int, kind: str, suffix: str | None = None) -> dict:
-        return next(entry for entry in load_class_file(23)['behaviours']
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
                     if entry['spell'] == spell and entry['kind'] == kind
                     and (suffix is None or entry.get('label_suffix') == suffix))
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_strike_bursts_need_the_range_and_both_ends(self):
-        _, expectations = behaviour_scenario(load_class_file(23), self.entry(500969, 'strike_bursts'))
+        _, expectations = behaviour_scenario(load_fixture_class_file(23), self.entry(500969, 'strike_bursts'))
         above = next(expectation for expectation in expectations if expectation.label.endswith('bursts_above'))
 
         def run_of(counts):
@@ -36,7 +36,7 @@ class StrikeBurstsTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_strike_burst_arms_lower_the_health(self):
         entry = self.entry(500969, 'strike_bursts')
-        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
         run.validate(scenario)
         self.assertEqual([step['pct'] for step in scenario['steps'] if step['action'] == 'set_health_pct'], [37, 33])
         self.assertEqual(scenario['creatures'][0]['distance'], 6)
@@ -46,4 +46,4 @@ class StrikeBurstsTests(unittest.TestCase):
                              if step.get('action') == 'cast' and step.get('spell') == 504318)
         self.assertLess(first_command, first_raise)
         with self.assertRaises(ValueError):
-            behaviour_scenario(load_class_file(23), {**entry, 'arms': list(reversed(entry['arms']))})
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'arms': list(reversed(entry['arms']))})

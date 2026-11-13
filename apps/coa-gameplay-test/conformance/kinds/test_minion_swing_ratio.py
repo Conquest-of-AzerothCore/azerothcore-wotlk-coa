@@ -2,15 +2,15 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict, cast_indices, ratio_values
 
 
 class MinionSwingRatioTests(unittest.TestCase):
     def built(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'minion_swing_ratio')
-        return behaviour_scenario(load_class_file(23), entry)
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry['kind'] == 'minion_swing_ratio')
+        return behaviour_scenario(load_fixture_class_file(23), entry)
 
     def judged(self, strike_hit: float) -> str:
         _, [expectation] = self.built()
@@ -33,9 +33,9 @@ class MinionSwingRatioTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_spell_power_arm_sets_the_fixture_and_its_flat_part(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours']
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry.get('label_suffix') == 'weapon_ratio_sp')
-        scenario, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         self.assertEqual(scenario['players'][0]['spell_power'], 1000)
         self.assertEqual(expectation.model['treatment_flat'], 137.5)
         plain, _ = self.built()

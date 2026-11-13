@@ -7,7 +7,7 @@ import unittest
 from compare import compare
 from procs import (PROC_CHECK, PROC_ENERGIZE_CHECK, baseline_attempts, baseline_labels, energize_labels,
                    proc_measurements, proc_plan, proc_scenario)
-from profile import DBC_DIR
+from profile import DBC_DIR, FIXTURE_CLASSES_DIR
 from test_compare import Workspace, assert_step, constant_reader
 from tooltip import Displayed
 from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, MINION_COOLDOWN_BAND, TRIGGER_TRIALS, checked_entry,
@@ -16,8 +16,7 @@ from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, MINION_COOLDOWN_BAND,
                       minion_cooldown_event_label, minion_cooldown_scenario, trigger_scenario)
 from values import Expectation
 
-CLASSES_DIR = Path(__file__).resolve().parent / 'classes'
-NECROMANCER = json.loads((CLASSES_DIR / 'necromancer.json').read_text(encoding='utf-8'))
+NECROMANCER = json.loads((FIXTURE_CLASSES_DIR / 'necromancer.json').read_text(encoding='utf-8'))
 CHOMP = 707283
 TOMB_KING = 805044
 DEPRAVITY = 638403

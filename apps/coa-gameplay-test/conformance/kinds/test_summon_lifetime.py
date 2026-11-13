@@ -3,16 +3,16 @@ import unittest
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict, cast_indices
 
 
 class SummonLifetimeTests(unittest.TestCase):
     def built(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours']
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'summon_lifetime' and entry['spell'] == 705747)
-        return behaviour_scenario(load_class_file(23), entry)
+        return behaviour_scenario(load_fixture_class_file(23), entry)
 
     def judged(self, spawn_ms: float, end_ms: float, control: float = 0.0) -> str:
         _, [expectation] = self.built()
@@ -48,9 +48,9 @@ class SummonLifetimeTests(unittest.TestCase):
 
 class SummonLifetimePooledTests(unittest.TestCase):
     def expectation(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours']
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
-        _, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         return replace(expectation, model={**expectation.model, 'parts': entry['parts']})
 
     def values(self, model: dict, end_ms: float | None) -> dict:
@@ -76,6 +76,6 @@ class SummonLifetimePooledTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_pooled_entry_writes_one_scenario_per_part(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours']
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
         self.assertGreaterEqual(entry['parts'], 40)

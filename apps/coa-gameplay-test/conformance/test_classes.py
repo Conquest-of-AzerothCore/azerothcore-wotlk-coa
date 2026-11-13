@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from classes import ClassSpell, DataSet, advancement_levels, class_skill_lines, class_spells, table_rows
-from profile import load_class_file, load_fixture_class_file
+from profile import load_fixture_class_file
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -233,7 +233,7 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(len(extended), TEMPLAR_SPELL_IDS + len(entries))
 
     def test_necromancer_extra_spells_cite_a_logged_rank_of_their_chain(self):
-        entries = load_class_file(NECROMANCER_CLASS_ID)['extra_spells']
+        entries = load_fixture_class_file(NECROMANCER_CLASS_ID)['extra_spells']
         extended = {spell.spell_id: spell for spell in class_spells(
             DBC_DIR, NECROMANCER_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
         records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell', ['SpellName[enUS]'])}
