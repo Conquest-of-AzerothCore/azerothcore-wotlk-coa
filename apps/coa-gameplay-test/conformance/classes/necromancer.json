@@ -196,6 +196,7 @@
       "tooltip": "Increases the melee haste of your Undead minions by $s1% and gives their critical melee auto attacks an $h% chance to trigger |cFFFFFFFFBone Club|r, dealing $s2% of the damage dealt as Shadow Damage.",
       "aura_on_minion": true,
       "baseline": true,
+      "band": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -238,6 +239,7 @@
       "tooltip": "Damage dealt by your Undead minions now has a $h% chance to restore $/10;531129s2 Runic Power and $531129s1% of your maximum mana.",
       "aura_on_minion": true,
       "baseline": true,
+      "band": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -289,6 +291,7 @@
       "tooltip": "Damage dealt by your Undead minions now has a $h% chance to cast |cFFFFFFFFPlague Horde|r on themselves for $807653d and emit |cffffffffZombie Plague|r, dealing ${$504022m1*$<scalingbp>+$SP*0.1} Plague damage to their target.@s:807653:0@",
       "aura_on_minion": true,
       "baseline": true,
+      "band": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -321,6 +324,7 @@
       "name": "Putricide's Formula",
       "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
       "baseline": true,
+      "band": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -362,6 +366,7 @@
       "name": "Putricide's Formula",
       "tooltip": "Damage dealt by Undead minions has a $h% chance to blast up to $707002i nearby enemies for ${$707002m1*$<scalingbp>+$SP*0.3} Plague damage.",
       "baseline": true,
+      "band": true,
       "chance_token": "$h",
       "trigger": {
         "action": "minion",
@@ -609,7 +614,8 @@
       "trigger_text": "of your damage dealt heals you",
       "observe_spell": 681463,
       "observe_metric": "spell_heal_total",
-      "expected_ratio": 0.3,
+      "expected_ratio": 0.33,
+      "expected_note": "mentor derivation 2026-11-13 (Q-b1-2): the leech heal is $s1 = 30% of the hit times the healing received factor 1.10 the ward's Effect[1] aura 118 gives its holder (Unit::SpellHealingBonusTaken, Unit.cpp:10873-10898), that factor proven on the same build by 680388 behaviour_hit_ratio healing_received",
       "per_trigger_text": "$s1% of your damage dealt heals you",
       "aura_cast": true,
       "caster_power": {
@@ -639,7 +645,7 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "heal you for $560607s2% of their damage dealt",
-      "caster_health_pct": 30,
+      "caster_health_pct": 45,
       "minion_aura_refresh_ms": 4000
     },
     {
@@ -662,7 +668,7 @@
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "heal you for $560607s2% of their damage dealt",
-      "caster_health_pct": 100,
+      "caster_health_pct": 55,
       "minion_aura_refresh_ms": 4000
     },
     {
@@ -685,7 +691,7 @@
       "expected_ratio": 0.1,
       "per_trigger_text": "heal you for $560607s2% of their damage dealt",
       "observe_source": "tooltip token $560607s2 of 300241 (560607 EffectBasePoints[1] 9 + 1 = 10); AscensionNecromancerEvents.cpp:97-98 heals for damage x Amount(560607, 1) / 100",
-      "caster_health_pct": 30,
+      "caster_health_pct": 45,
       "minion_aura_refresh_ms": 4000
     },
     {
@@ -850,7 +856,10 @@
         "target": "dummy"
       },
       "trial_spell": 707592,
-      "target_state_fixture": true,
+      "target_state_fixture": {
+        "spell": 122,
+        "source": "Frost Nova 122, AURA_STATE_FROZEN for Glacial Impact 704355 TargetAuraState 4 (ADR 0303); the claim is not a Necromancer freeze"
+      },
       "trigger_metric": "spell_damage_total",
       "trigger_text": "Damage dealt by Glacial Impact",
       "observe_spell": 707575,
@@ -877,7 +886,10 @@
       "trigger_spell_text": "Glacial Impact",
       "trial_metric": "spell_damage_count",
       "trial_spell": 707592,
-      "target_state_fixture": true,
+      "target_state_fixture": {
+        "spell": 122,
+        "source": "Frost Nova 122, AURA_STATE_FROZEN for Glacial Impact 704355 TargetAuraState 4 (ADR 0303); the claim is not a Necromancer freeze"
+      },
       "observe_spell": 707575,
       "observe_source": "EffectTriggerSpell[0] of 705745",
       "observe_note": "705745 Effect[0] aura 354 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61); AscensionNecromancerEvents.cpp:158-161 casts 707575 at the target of each Glacial Impact 707592 hit",
@@ -997,9 +1009,41 @@
       "trigger_text": "of your damage dealt heals you and your minions",
       "observe_spell": 681463,
       "observe_metric": "spell_heal_total",
-      "expected_ratio": 0.15,
+      "expected_ratio": 0.165,
+      "expected_note": "mentor derivation 2026-11-13 (Q-b1-2): the leech heal is $s1 = 30% of the hit split over the caster and the Ghoul (15% each) times the healing received factor 1.10 the ward's Effect[1] aura 118 gives its holder (Unit::SpellHealingBonusTaken, Unit.cpp:10873-10898), that factor proven on the same build by 680388 behaviour_hit_ratio healing_received",
       "per_trigger_text": "split evenly amongst them",
       "observe_source": "EffectTriggerSpell[0] of 680388; LeechArmy (AscensionNecromancerEvents.cpp:48-54) heals the caster and each minion for damage x 30 / (100 x (minions + 1)): with one Ghoul each heal is 15% of the Ghoul hit; both receivers carry the ward's own +10% healing received (Q-b1-2)"
+    },
+    {
+      "aura": 638403,
+      "name": "Depravity",
+      "tooltip": "Increases the melee haste of your Undead minions by $s1% and gives their critical melee auto attacks an $h% chance to trigger |cFFFFFFFFBone Club|r, dealing $s2% of the damage dealt as Shadow Damage.",
+      "kind": "magnitude_ratio",
+      "effect": 1,
+      "trigger": {
+        "action": "minion",
+        "spell": 500971,
+        "entry": 50073,
+        "swing_ms": 2000,
+        "swing_source": "creature_template 50073 BaseAttackTime 2000"
+      },
+      "trigger_metric": "pet_melee_damage",
+      "trigger_text": "their critical melee auto attacks",
+      "minion_auras": [
+        {
+          "spell": 280912,
+          "amount": 100,
+          "source": "precondition fixture: Anointed 280912 (aura 290 SPELL_AURA_MOD_CRIT_PCT, 10 s) at amount 100 makes the minion crit (Unit::GetUnitCriticalChance, Unit.cpp:4534-4536); the claim is the Bone Club share of each crit, not the crit"
+        }
+      ],
+      "minion_aura_refresh_ms": 8000,
+      "aura_on_minion": true,
+      "observe_spell": 801241,
+      "observe_actor": "minion",
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.4,
+      "per_trigger_text": "dealing $s2% of the damage dealt as Shadow Damage",
+      "observe_source": "638403 Effect[1] (aura 354 rewritten to SPELL_AURA_DUMMY), BasePoints 39 + 1 = 40 ($s2); AscensionNecromancerEvents.cpp:183-184 has the critting minion cast Bone Club 801241 for damage x Amount(638403, 1) / 100 (a derived spell without caster modifiers, AscensionNecromancerContracts.cpp:381-391); with every melee hit forced to crit, the melee damage per crit is the trigger side; Bone Club is Shadow and the dummy's partial resist is read"
     }
   ],
   "talent_modifiers": [],
@@ -2067,6 +2111,32 @@
       "wait_ms": 1700,
       "expire_ms": 12000,
       "observe_source": "Pulled Crypt Plague 570131 tooltip (@s:570131:0@): 'stacking $u times', StackAmount 10. Six Lichfrost 801722 hits 1600 ms apart (2 stacks each with 92121, AscensionNecromancerEvents.cpp:106-107) inside the 10 s Crypt Plague duration (DurationIndex 1; Plague does not refresh it, AscensionNecromancer.cpp:266-270) would give 12: the aura holds 10 (CalcMaxAuraStacks, AscensionNecromancer.cpp:268), 0 without 92121."
+    },
+    {
+      "spell": 680388,
+      "name": "Fetid Ward (healing received)",
+      "kind": "hit_ratio",
+      "variant": "healing_received",
+      "label_suffix": "healing_received",
+      "quote": "and healing received is increased by $s2%.",
+      "expected": 1.1,
+      "metric": "spell_heal_total",
+      "observe_spell": 10917,
+      "caster": "caster",
+      "target": "caster",
+      "control": {},
+      "treatment": {
+        "learn": [
+          680388
+        ],
+        "casts": [
+          680388
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "cast_power": 1373,
+      "expected_source": "680388 Effect[1] aura 118 SPELL_AURA_MOD_HEALING_PCT on the caster, BasePoints 9 + 1 = 10 ($s2); Unit::SpellHealingBonusTaken (Unit.cpp:10873-10898, stock) multiplies every heal its holder receives. A heal from another source, Flash Heal 10917 (rank 7, BaseLevel 56) cast by the caster on itself: non-critical heal per hit without the ward (control) and with the ward learned and cast before each heal (treatment). cast_power 1373 (player_class_stats BaseMana) refills mana before each heal, which also covers the next ward cast (20% of base mana)."
     }
   ],
   "player_observations": [],

@@ -14,6 +14,8 @@ PROC_ENERGIZE_CHECK = 'proc_energize_amount'
 AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
 ENTRY_STATUSES = {'ambiguous_tooltip': AMBIGUOUS_TOOLTIP, 'unmodelled': UNMODELLED}
 RATE_HALF_WIDTH = 0.025
+BAND_RELATIVE = 0.05
+BAND_POINTS = 0.02
 CHANCE_KIND = 'chance_pct'
 PERCENT_KIND = 'percent'
 ATTACK = 'attack'
@@ -53,6 +55,14 @@ class ProcPlan:
     attempt_ms: int
     parts: int
     per_part: int
+
+
+def rate_band(p: float) -> float:
+    return max(BAND_RELATIVE * p, BAND_POINTS)
+
+
+def band_trials_needed(p: float) -> int:
+    return math.ceil(Z_99 ** 2 * p * (1 - p) / (rate_band(p) / 2) ** 2)
 
 
 def trials_needed(p: float) -> int:
@@ -279,7 +289,7 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
         raise ValueError(f'Proc {entry["aura"]} counts auto attacks as events, which needs a cast trigger')
     per_trigger_limit(entry)
     chance = proc_chance(class_file, entry)
-    needed = trials_needed(chance / 100)
+    needed = band_trials_needed(chance / 100) if entry.get('band') else trials_needed(chance / 100)
     scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN) if attempts is None else attempts
     if scheduled < needed:
         raise ValueError(f'{scheduled} attempts are fewer than the {needed} trials a {chance:g}% proc needs')
@@ -536,7 +546,12 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         model['charge_pool'] = charge_pool_label(aura)
     if baseline:
         model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct)}
+    if entry.get('band'):
+        model['band'] = rate_band(plan.chance_pct / 100)
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
+    if entry.get('band'):
+        rule += (f'; the 99% interval inside the band of {rate_band(plan.chance_pct / 100) * 100:g} points around '
+                 f'the chance (G-19, ADR 0346)')
     if entry.get('extra_dummies'):
         rule += (f'; {len(entry["extra_dummies"])} more dummies at {entry["extra_dummies"]} yd from the caster, the '
                  f'events counted on every dummy')

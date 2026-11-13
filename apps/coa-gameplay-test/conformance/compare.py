@@ -42,7 +42,7 @@ from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
 from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK,
-                   PROC_ENERGIZE_CHECK, chance_of, wilson_interval)
+                   PROC_ENERGIZE_CHECK, chance_of, rate_band, wilson_interval)
 from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
@@ -943,6 +943,16 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
 RateJudgement = tuple[str, float | None, float | None, str]
 
 
+def banded_rate(status: str, low: float, high: float, expected: float, why: str) -> RateJudgement:
+    band = rate_band(expected)
+    if status != 'ok':
+        return status, low, high, why
+    if expected - band - FLOAT_EPSILON <= low and high <= expected + band + FLOAT_EPSILON:
+        return 'ok', low, high, f'{why} inside the band [{expected - band:.4f}, {expected + band:.4f}]'
+    return 'measured', low, high, (f'{why} holds the chance but not inside the band [{expected - band:.4f}, '
+                                   f'{expected + band:.4f}]: effect present, interval stated, not final (G-20)')
+
+
 def rate_judgement(procs: float, trials: float, minimum: int, expected: float) -> RateJudgement:
     if procs < 0:
         return 'alert', None, None, 'fewer events than the trigger casts they exclude'
@@ -1125,6 +1135,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         excluded = events if reading.get('minus_events') else 0.0
         reading_trials = sum(totals[label] for label in reading['labels']) - excluded
         status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
+        if model.get('band') and low is not None:
+            status, low, high, why = banded_rate(status, low, high, expected, why)
         judged.append((status, procs / reading_trials if reading_trials > 0 else None, low, high,
                        f'{reading["name"]}: {procs:g} procs in {reading_trials:g} trials, {why}: {status}',
                        reading_trials))

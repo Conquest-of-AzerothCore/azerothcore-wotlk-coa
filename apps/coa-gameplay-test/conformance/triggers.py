@@ -29,8 +29,10 @@ MAGNITUDE_TRIGGER_METRICS_BY_ACTION = {'cast': frozenset({'spell_damage_total'})
                                        'attack': frozenset({'melee_damage_total'}),
                                        'taken_hit': frozenset({'spell_damage_total'}),
                                        'minion': frozenset({'owned_creature_damage_total', 'pet_melee_damage'})}
-MINION_TRIGGER_COUNT_METRICS = {'owned_creature_damage_total': 'owned_creature_damage_count',
-                                'pet_melee_damage': 'pet_melee_hits'}
+MINION_TRIGGER_COUNT_METRICS = {'owned_creature_damage_total': frozenset({'owned_creature_damage_count'}),
+                                'pet_melee_damage': frozenset({'pet_melee_hits', 'pet_melee_crits'})}
+MINION_TRIGGER_DEFAULT_COUNTS = {'owned_creature_damage_total': 'owned_creature_damage_count',
+                                 'pet_melee_damage': 'pet_melee_hits'}
 MAGNITUDE_OBSERVE_METRICS = frozenset({'spell_damage_total', 'spell_heal_total'})
 MISSED_TRIGGER_RATE = 0.025
 FALSE_OK_RISK = 0.01
@@ -171,6 +173,11 @@ def checked_magnitude_entry(entry: dict) -> dict:
         raise ValueError(f'Magnitude-ratio trigger {aura} trigger_metric must be one of '
                          f'{sorted(MAGNITUDE_TRIGGER_METRICS_BY_ACTION[trigger["action"]])} for a '
                          f'{trigger["action"]!r} trigger, not {entry.get("trigger_metric")!r}')
+    if trigger['action'] == MINION and \
+            minion_trigger_count_metric(entry) not in MINION_TRIGGER_COUNT_METRICS[entry['trigger_metric']]:
+        raise ValueError(f'Magnitude-ratio trigger {aura} trigger_count_metric must be one of '
+                         f'{sorted(MINION_TRIGGER_COUNT_METRICS[entry["trigger_metric"]])} for '
+                         f'{entry["trigger_metric"]!r}, not {entry.get("trigger_count_metric")!r}')
     if entry.get('observe_metric') not in MAGNITUDE_OBSERVE_METRICS:
         raise ValueError(f'Magnitude-ratio trigger {aura} observe_metric must be one of '
                          f'{sorted(MAGNITUDE_OBSERVE_METRICS)}, not {entry.get("observe_metric")!r}')
@@ -602,6 +609,7 @@ def trigger_rule(entry: dict) -> str:
         fixtures += f'; before each attempt the charges of {entry["trigger"]["spell"]} are restored'
     if entry.get('periodic_initial_tick'):
         fixtures += '; one extra tick on every learn (SPELL_ATTR5_EXTRA_INITIAL_PERIOD)'
+    fixtures += target_state_note(entry)
     if entry.get('aura_cast'):
         fixtures += f'; {entry["aura"]} is cast once after its learn'
     if entry.get('caster_power'):
@@ -1198,15 +1206,31 @@ def magnitude_measurement_labels(aura: int) -> dict[str, str]:
             'observe_count': f'{aura} magnitude observe count'}
 
 
+def target_state_note(entry: dict) -> str:
+    fixture = entry.get('target_state_fixture')
+    if not isinstance(fixture, dict):
+        return ''
+    return (f'; before each cast the dummy gets {fixture["spell"]} by harness set_aura, a precondition fixture '
+            f'({fixture["source"]})')
+
+
+def minion_trigger_count_metric(entry: dict) -> str:
+    return entry.get('trigger_count_metric', MINION_TRIGGER_DEFAULT_COUNTS[entry['trigger_metric']])
+
+
 def magnitude_trigger_descriptor(entry: dict) -> str:
     trigger = entry['trigger']
     if entry.get('trial_spell') is not None:
-        return f'{entry["trigger_metric"]} of {entry["trial_spell"]}, the hit of {trigger["spell"]}'
+        return (f'{entry["trigger_metric"]} of {entry["trial_spell"]}, the hit of {trigger["spell"]}'
+                f'{target_state_note(entry)}')
     if trigger['action'] == ATTACK:
         return f'{entry["trigger_metric"]} of main-hand melee attacks'
     if trigger['action'] == MINION:
         held = (f', the caster held at {entry["caster_health_pct"]}% health'
                 if entry.get('caster_health_pct') is not None else '')
+        held += ''.join(f'; minion aura {aura["spell"]}' + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
+                        + f' set every {entry["minion_aura_refresh_ms"]} ms by harness set_aura ({aura["source"]})'
+                        for aura in entry.get('minion_auras', []))
         return (f'{entry["trigger_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
                 f'attacking the dummy with the caster{held}')
     return f'{entry["trigger_metric"]} of {trigger["spell"]}'
@@ -1216,7 +1240,7 @@ def magnitude_trigger_rule(entry: dict) -> str:
     return (f'mean {entry["observe_metric"]} of {entry["observe_spell"]} per its own event over '
             f'mean {magnitude_trigger_descriptor(entry)} per its own event, at least {TRIGGER_TRIALS} '
             f'{entry["observe_metric"]} events, matches {entry["expected_ratio"]:.3g} within tolerance '
-            f'("{entry["per_trigger_text"]}")')
+            f'("{entry["per_trigger_text"]}")' + (f'; {entry["expected_note"]}' if entry.get('expected_note') else ''))
 
 
 def magnitude_resisted_school(class_file: dict, entry: dict, cast_target: str | None) -> int:
@@ -1271,7 +1295,7 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
             steps.append(measurement(label, CASTER, metric, spell=trigger['spell'], target=CASTER, caster=STRIKER))
     elif trigger['action'] == MINION:
         for label, metric in ((labels['trigger_total'], entry['trigger_metric']),
-                              (labels['trigger_count'], MINION_TRIGGER_COUNT_METRICS[entry['trigger_metric']])):
+                              (labels['trigger_count'], minion_trigger_count_metric(entry))):
             steps.append(measurement(label, CASTER, metric, entry=trigger['entry']))
     else:
         steps.append(measurement(labels['trigger_total'], CASTER, entry['trigger_metric'], hand=MAIN_HAND))
