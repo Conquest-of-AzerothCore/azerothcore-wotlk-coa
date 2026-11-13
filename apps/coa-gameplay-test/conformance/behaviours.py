@@ -4610,6 +4610,7 @@ class ImmunitySpec:
     effects: tuple[ImmunityEffect, ...]
     target: str = CASTER
     remove_control: bool = False
+    aura: int | None = None
 
 
 def immunity_label(spec: ImmunitySpec, subject: int, moment: str) -> str:
@@ -4646,9 +4647,12 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
         steps += [{'action': 'set_aura', 'actor': subject, 'caster': TARGET, 'spell': effect.spell, 'stacks': 1},
                   measurement(immunity_label(spec, effect.spell, 'without'), subject, 'aura', spell=effect.spell),
                   {'action': 'set_aura', 'actor': subject, 'caster': TARGET, 'spell': effect.spell, 'stacks': 0}]
+    carrier = spec.spell if spec.aura is None else spec.aura
     cast = self_cast_attempt(spec.spell, facts_of(records, spec.spell), immunity_label(spec, spec.spell, 'cast'))
     steps += [{**step, 'target': subject} if step['action'] == 'cast' else step for step in cast]
-    steps.append(measurement(applied_label, subject, 'aura', spell=spec.spell))
+    if spec.aura is not None:
+        steps.append({'action': 'wait', 'label': f'{spec.aura} applied settle', 'ms': CAST_MARGIN_MS})
+    steps.append(measurement(applied_label, subject, 'aura', spell=carrier))
     for effect in spec.effects:
         steps += dummy_casts_at_caster(effect.spell, subject)
         steps.append(measurement(immunity_label(spec, effect.spell, 'with'), subject, 'aura', spell=effect.spell))
@@ -4661,7 +4665,7 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
     end_steps = ([{'action': 'set_aura', 'actor': subject, 'spell': spec.spell, 'stacks': 0},
                   {'action': 'wait', 'ms': CAST_MARGIN_MS}] if spec.remove_control else
                  [{'action': 'wait', 'ms': max(CAST_MARGIN_MS, duration_ms + CAST_MARGIN_MS - with_arm_ms)}])
-    steps += end_steps + [measurement(expired_label, subject, 'aura', spell=spec.spell)]
+    steps += end_steps + [measurement(expired_label, subject, 'aura', spell=carrier)]
     for effect in spec.effects:
         steps += dummy_casts_at_caster(effect.spell, subject)
         steps += [measurement(immunity_label(spec, effect.spell, 'control'), subject, 'aura', spell=effect.spell),
@@ -4699,7 +4703,7 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
 def immunity_spec(entry: dict) -> ImmunitySpec:
     return ImmunitySpec(entry['spell'], entry['name'], entry['quote'],
                         tuple(ImmunityEffect(effect['spell'], effect['words']) for effect in entry['effects']),
-                        entry.get('target', CASTER), entry.get('remove_control', False))
+                        entry.get('target', CASTER), entry.get('remove_control', False), entry.get('aura'))
 
 
 SPELL_EFFECT_THREAT = 63

@@ -10560,5 +10560,25 @@ class MetricDeltaReagentTests(unittest.TestCase):
         self.assertFalse(any(step.get('action') == 'add_item' and step.get('item') == 37201 for step in steps))
 
 
+class ImmunityCarrierAuraTests(unittest.TestCase):
+    def entry(self, spell: int) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry['kind'] == 'immunity')
+
+    def aura_reads(self, spell: int) -> dict:
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry(spell))
+        return {step['label']: step['spell'] for step in scenario['steps']
+                if step.get('action') == 'assert' and step.get('label', '').endswith((' applied', ' expired'))}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_summon_reads_the_aura_that_carries_the_immunity(self):
+        self.assertEqual(self.aura_reads(807813), {'807813 immunity 807813 applied': 807812,
+                                                   '807813 immunity 807813 expired': 807812})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_a_carrier_reads_its_own_spell(self):
+        self.assertEqual(set(self.aura_reads(500981).values()), {500981})
+
+
 if __name__ == '__main__':
     unittest.main()
