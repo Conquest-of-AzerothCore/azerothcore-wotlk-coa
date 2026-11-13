@@ -5533,7 +5533,7 @@
         "spell": 705753,
         "power": 0
       },
-      "wait_ms": 2500,
+      "wait_ms": 3200,
       "expire_ms": 500,
       "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:134-138): an own critical non-periodic hit of a caster with 705752 casts Tears of Lordaeron 705753 on the caster: Effect[1] SPELL_EFFECT_ENERGIZE_PCT mana, BasePoints 2 + 1 = 3 ($705753s2). One forced-crit Lichfrost 501978 (a direct Frost hit) per phase: no 705753 mana without 705752 (control), 3% of the caster's maximum mana with it learned. The reference character's maximum mana lies in [2800, 2849] (2% read 56 per energize, 531128 proc_energize_amount 0, B1 pair prove-23), so 3% is 84 or 85: 84.5 +/- 0.5."
     },
@@ -5554,7 +5554,7 @@
         "spell": 705753,
         "power": 6
       },
-      "wait_ms": 2500,
+      "wait_ms": 3200,
       "expire_ms": 500,
       "observe_source": "The same 705753: Effect[0] SPELL_EFFECT_ENERGIZE_PCT Runic Power (MiscValue 6), BasePoints 8 + 1 = 9 ($705753s1) of the maximum 1000 (Glacial Ward's maximum Runic Power read 1000 before its +10%, B2 side a): 90 with 705752 learned, none without."
     },
@@ -5581,7 +5581,7 @@
       "fields": {
         "spell": 705753
       },
-      "wait_ms": 2500,
+      "wait_ms": 3200,
       "expire_ms": 500,
       "observe_source": "The crit gate: the same Lichfrost with 984954 (spell crit -1000) on the caster lands without a crit, and 705752 restores nothing in either phase."
     },
