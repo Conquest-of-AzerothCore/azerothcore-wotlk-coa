@@ -887,6 +887,14 @@ mutant at +1000%.
 shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
 33% per tick, 40 parts).
 
+### Energize range (`behaviour_metric_delta`, `kind: "energize_range"`, ADR 0549)
+
+`cast_spell` is cast `casts` times at the dummy (`caster_auras` and `target_auras` set before each cast, Runic Power set
+to 0); the cumulative `energize_spell` energize total and count are read every 250 ms (`polls_per_cast` reads per
+cast). An interval whose count rose by exactly one gives that event's amount; at least `minimum_events` such amounts
+must be read, all inside `low`..`high`, with both ends seen. Soulfreeze 801724: 800344 rolls 30..80 per tick, 160 casts,
+384 events.
+
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
 One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once
@@ -917,7 +925,9 @@ reads the non-critical, unblocked `strike_spell` hits of that creature on the du
 strike as the treatment: the per-hit mean of the strike over the per-swing mean must lie within 5% of the stated
 ratio `expected` (`ratio_band`, the G-19 band of a ratio), with the 99% interval rules of the hit ratio judge. The
 creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorded once and not judged. Raise:
-Greater Skeletal Warrior 504901 judges Command: Skeletal Warriors 570042 at 2.1 (mentor ruling Q-b2b-4).
+`strike_flat` takes that flat amount off every strike hit before the ratio (ADR 0547). Greater Skeletal Warrior 504901
+judges Command: Skeletal Warriors 570042 at 2.0 after its flat Effect[1] part of 1 (fix FN-c1t-1, controller cycle 2). `player_spell_power` gives the
+caster the harness spell-power fixture; weapon_ratio_sp holds 1000, a flat part of 137.5.
 
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 

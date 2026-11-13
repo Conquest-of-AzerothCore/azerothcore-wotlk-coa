@@ -441,6 +441,16 @@ class EvidenceStatusTest(unittest.TestCase):
         learned = [replace(verdicts[0], detail={'metric': 'armor', 'contrast': LEARNED_CONTRAST})]
         self.assertEqual(evidence_of(clauses, learned)[0], [BEHAVIOUR])
 
+    def test_a_condition_contrast_proves_a_condition_claim_only(self):
+        verdicts = [judged('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 'owned_creature_crit_chance',
+                           contrast=CONDITION_CONTRAST)]
+        condition = [claim('While a Skeletal Mage is active', '1 behaviour_metric_delta')]
+        self.assertEqual(evidence_of(condition, verdicts)[0], [BEHAVIOUR])
+        effect = [claim('the critical strike chance of your Undead minions is increased', '1 behaviour_metric_delta')]
+        self.assertEqual(evidence_of(effect, verdicts)[0], [DATA])
+        readback = [replace(verdicts[0], detail={'metric': 'aura_amount', 'contrast': CONDITION_CONTRAST})]
+        self.assertEqual(evidence_of(condition, readback)[0], [DATA])
+
     def test_a_modifier_readback_in_a_learned_contrast_stays_data(self):
         verdicts = [judged('1 e0 spell_modifier 2', PASSIVE_DELTA, 'spell_modifier')]
         clauses = [claim('Increases the damage of Reckoning by $s1%.', '1 e0 spell_modifier 2')]

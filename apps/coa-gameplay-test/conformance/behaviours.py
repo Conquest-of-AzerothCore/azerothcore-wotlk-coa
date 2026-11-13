@@ -84,7 +84,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
         'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'cast_period', 'minion_swing_ratio',
-        'pushback_reduction', 'summon_lifetime', 'pulse_targets', 'aura_window', 'hit_period')
+        'pushback_reduction', 'summon_lifetime', 'pulse_targets', 'aura_window', 'hit_period',
+        'energize_range')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2320,6 +2321,8 @@ class MinionSwingRatioSpec:
     wait_ms: int = 3000
     command_power: int | None = None
     label_suffix: str = ''
+    strike_flat: float = 0.0
+    player_spell_power: int | None = None
 
 
 def minion_swing_ratio_label(spec: MinionSwingRatioSpec) -> str:
@@ -2381,6 +2384,13 @@ def minion_swing_ratio_scenario(class_file: dict, spec: MinionSwingRatioSpec) ->
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
              'trial_limit': spec.trials, 'minimum_hits': max(1, spec.trials // 2), 'metric': 'spell_damage_total',
              'ratio_band': True, 'quote': entry.quote}
+    if spec.player_spell_power is not None:
+        scenario['players'][0]['spell_power'] = spec.player_spell_power
+        scenario['contract'] += f' The caster holds {spec.player_spell_power} spell power (harness fixture).'
+    if spec.strike_flat:
+        model['treatment_flat'] = spec.strike_flat
+        scenario['contract'] += (f' The strike\'s flat part, {spec.strike_flat:g} per hit, is taken off the strike '
+                                 f'before the ratio.')
     expectation = Expectation(minion_swing_ratio_label(spec), BEHAVIOUR_HIT_RATIO, spec.spell, spec.strike_spell,
                               None, str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -2391,7 +2401,8 @@ def minion_swing_ratio_spec(entry: dict) -> MinionSwingRatioSpec:
                                 int(entry['command_spell']), int(entry['strike_spell']), int(entry['entry']),
                                 float(entry['expected']), int(entry.get('trials', 20)),
                                 int(entry.get('wait_ms', 3000)), entry.get('command_power'),
-                                entry.get('label_suffix', ''))
+                                entry.get('label_suffix', ''), float(entry.get('strike_flat', 0.0)),
+                                entry.get('player_spell_power'))
 
 
 PUSHBACK_PHASES = ('unhit', 'hit', 'reduced')
@@ -2645,6 +2656,86 @@ def summon_lifetime_spec(entry: dict) -> SummonLifetimeSpec:
                               tuple(int(value) for value in entry['end_window']), entry.get('cast_power'),
                               entry.get('label_suffix', ''))
 
+
+
+ENERGIZE_RANGE_POLL_MS = 250
+ENERGIZE_RANGE_RUNIC_POWER = 6
+
+
+@dataclass(frozen=True)
+class EnergizeRangeSpec:
+    spell: int
+    name: str
+    quote: str
+    cast_spell: int
+    energize_spell: int
+    low: int
+    high: int
+    casts: int
+    minimum_events: int
+    polls_per_cast: int
+    target_auras: tuple[tuple[int, int], ...] = ()
+    caster_auras: tuple[tuple[int, int], ...] = ()
+    label_suffix: str = ''
+
+
+def energize_range_label(spec: EnergizeRangeSpec) -> str:
+    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+
+
+def energize_range_scenario(class_file: dict, spec: EnergizeRangeSpec) -> tuple[dict, list[Expectation]]:
+    if not 0 < spec.low < spec.high or spec.casts < 1 or spec.polls_per_cast < 1 or spec.minimum_events < 1:
+        raise ValueError(f'{spec.spell} energize_range needs 0 < low < high, casts, polls and a minimum event count')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'energize_range', spec.quote, float(spec.low))
+    fields = {'spell': spec.energize_spell}
+    marks = []
+
+    def reads(mark: str) -> list[dict]:
+        total, count = f'{energize_range_label(spec)} {mark} total', f'{energize_range_label(spec)} {mark} count'
+        marks.append([total, count])
+        return [measurement(total, CASTER, 'spell_energize_total', **fields),
+                measurement(count, CASTER, 'spell_energize_count', **fields)]
+
+    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}] + reads('start')
+    for cast in range(1, spec.casts + 1):
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
+                  for spell, stacks in spec.caster_auras]
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks, 'target': TARGET,
+                   'caster': CASTER} for spell, stacks in spec.target_auras]
+        steps += [{'action': 'set_power', 'actor': CASTER, 'power': ENERGIZE_RANGE_RUNIC_POWER, 'value': 0},
+                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell},
+                  {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}]
+        for poll in range(1, spec.polls_per_cast + 1):
+            steps += [{'action': 'wait', 'label': f'cast {cast} poll', 'ms': ENERGIZE_RANGE_POLL_MS}]
+            steps += reads(f'{cast} {poll}')
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour energize range'
+                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
+        'contract': (f'{spec.casts} casts of {spec.cast_spell} at the dummy (fixtures {list(spec.caster_auras)} on the '
+                     f'caster and {list(spec.target_auras)} on the dummy before each cast, Runic Power set to 0); the '
+                     f'cumulative {spec.energize_spell} energize total and count are read every '
+                     f'{ENERGIZE_RANGE_POLL_MS} ms; an interval holding exactly one energize event gives that event\'s '
+                     f'amount. At least {spec.minimum_events} single events must be read, every amount must lie in '
+                     f'{spec.low}..{spec.high}, and both ends must be seen.'),
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'energize_range', 'metric': 'spell_energize_total', 'quote': entry.quote, 'marks': marks,
+             'low': spec.low, 'high': spec.high, 'minimum_events': spec.minimum_events}
+    expectation = Expectation(energize_range_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.energize_spell,
+                              None, f'{spec.low}..{spec.high}', prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def energize_range_spec(entry: dict) -> EnergizeRangeSpec:
+    pairs = lambda raw: tuple((int(spell), int(stacks)) for spell, stacks in raw)
+    return EnergizeRangeSpec(entry['spell'], entry['name'], entry['quote'], int(entry['cast_spell']),
+                             int(entry['energize_spell']), int(entry['low']), int(entry['high']), int(entry['casts']),
+                             int(entry['minimum_events']), int(entry.get('polls_per_cast', 14)),
+                             pairs(entry.get('target_auras', ())), pairs(entry.get('caster_auras', ())),
+                             entry.get('label_suffix', ''))
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500
 
@@ -8173,6 +8264,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':
         return dispel_removal_scenario(class_file, dispel_removal_spec(entry))
+    if entry['kind'] == 'energize_range':
+        return energize_range_scenario(class_file, energize_range_spec(entry))
     if entry['kind'] == 'summon_lifetime':
         return summon_lifetime_scenario(class_file, summon_lifetime_spec(entry))
     if entry['kind'] == 'pushback_reduction':

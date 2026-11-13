@@ -3423,6 +3423,34 @@ def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], mod
                    explanation=f'{summary}, against the stated {first.expected:g} ms, band {first.low:g} to '
                                f'{first.high:g}: every summoned part lies inside the band')
 
+
+def behaviour_energize_range_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    readings = []
+    for total_label, count_label in model['marks']:
+        total, count = run.values.get(total_label), run.values.get(count_label)
+        if total is None or count is None:
+            return replace(base, explanation=missing_measurement(run, total_label if total is None else count_label))
+        readings.append((total, count))
+    amounts = [later[0] - earlier[0] for earlier, later in zip(readings, readings[1:]) if later[1] - earlier[1] == 1]
+    low, high, needed = float(model['low']), float(model['high']), int(model['minimum_events'])
+    if not amounts:
+        return replace(base, status='unmeasured', explanation='no interval held exactly one energize event')
+    lowest, highest = min(amounts), max(amounts)
+    outside = [amount for amount in amounts if not low <= amount <= high]
+    detail = {'events': len(amounts), 'min': lowest, 'max': highest}
+    text = (f'{len(amounts)} single energize events (intervals holding exactly one), amounts {lowest:g} to '
+            f'{highest:g} against the roll {low:g}..{high:g}')
+    if outside:
+        return replace(base, status='alert', measured=lowest, expected=low, low=low, high=high, detail=detail,
+                       explanation=f'{text}; {len(outside)} outside the roll')
+    if len(amounts) < needed:
+        return replace(base, status='unmeasured', measured=lowest, expected=low, low=low, high=high, detail=detail,
+                       explanation=f'{text}; at least {needed} single events are needed')
+    status = 'ok' if lowest == low and highest == high else 'alert'
+    return replace(base, status=status, measured=lowest, expected=low, low=low, high=high, detail=detail,
+                   explanation=f'{text}; both ends must be seen in {needed} or more events: '
+                               + ('both seen' if status == 'ok' else 'an end was not reached'))
+
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4366,7 +4394,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                 found = health_loss_series(part, model['health_reads'][arm], float(model['health_set']), found[1])
                 if isinstance(found, str):
                     return replace(base, explanation=found)
-            totals += [total * scale for total in found[0]]
+            flat = float(model.get('treatment_flat', 0.0)) if arm == 'treatment' else 0.0
+            totals += [(total - flat * count) * scale for total, count in zip(*found)]
             counts += found[1]
         series[arm] = (totals, counts)
     minimum = int(model['minimum_hits']) * len(runs)
@@ -4530,6 +4559,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_pushback_reduction_verdict(base, run, model)
         if model.get('kind') == 'summon_lifetime':
             return behaviour_summon_lifetime_verdict(base, run, model)
+        if model.get('kind') == 'energize_range':
+            return behaviour_energize_range_verdict(base, run, model)
         if model.get('kind') == 'aura_expiry':
             return behaviour_aura_expiry_verdict(base, run, model)
         if model.get('kind') == 'cast_period':
