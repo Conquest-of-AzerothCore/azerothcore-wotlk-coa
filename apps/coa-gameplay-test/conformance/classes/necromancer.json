@@ -520,6 +520,98 @@
         5,
         6
       ]
+    },
+    {
+      "aura": 705747,
+      "name": "Unrelenting Army",
+      "tooltip": "Damage dealt by |cffffffffHarvest Plague|r now has a $h% chance to animate a |cFFFFFFFFLesser Zombie|r to aid you in combat for $525379d.",
+      "baseline": true,
+      "band": true,
+      "chance_token": "$h",
+      "trigger": {
+        "action": "cast",
+        "spell": 501892
+      },
+      "trigger_text": "Damage dealt by Harvest Plague",
+      "event_metric": "owned_creature_summon_count",
+      "event_entry": 503031,
+      "proc_spell": 525379,
+      "proc_spell_source": "tooltip: animate a Lesser Zombie; Summon(player, 525379, ...) spawns creature 503031 (525379 EffectMiscValue[0])",
+      "events_per_proc": 1,
+      "trials_per_attempt": 2,
+      "handler": "AscensionNecromancerEvents.cpp:132-133: an own periodic hit of a Harvest Plague rank (Named 500968) with Chance(player, 705747) or Chance(player, 707880) summons Animate: Zombie 525379 (creature 503031) through Summon (AscensionNecromancerSummons.cpp:334), a direct spawn with no spell event; counted by owned_creature_summon_count. Trigger: Harvest Plague rank 501892 (SpellLevel 40, the highest rank at level 60 below 572842's 68), aura 53 SPELL_AURA_PERIODIC_LEECH every 3000 ms, whose ticks are logged as SMSG_SPELLNONMELEEDAMAGELOG and counted as trials; each attempt spans two ticks (TICKS_PER_ATTEMPT), so the plan schedules half as many casts",
+      "dbc": {
+        "705747": {
+          "ProcChance": 20,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "705747": {}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 707880,
+      "name": "Unrelenting Army",
+      "tooltip": "Damage dealt by |cffffffffHarvest Plague|r now has a $h% chance to animate a |cFFFFFFFFLesser Zombie|r to aid you in combat for $525379d.",
+      "baseline": true,
+      "band": true,
+      "chance_token": "$h",
+      "trigger": {
+        "action": "cast",
+        "spell": 501892
+      },
+      "trigger_text": "Damage dealt by Harvest Plague",
+      "event_metric": "owned_creature_summon_count",
+      "event_entry": 503031,
+      "proc_spell": 525379,
+      "proc_spell_source": "tooltip: animate a Lesser Zombie; Summon(player, 525379, ...) spawns creature 503031 (525379 EffectMiscValue[0])",
+      "events_per_proc": 1,
+      "trials_per_attempt": 2,
+      "handler": "AscensionNecromancerEvents.cpp:132-133: an own periodic hit of a Harvest Plague rank (Named 500968) with Chance(player, 707880) (ProcChance 40) summons Animate: Zombie 525379 (creature 503031) through Summon (AscensionNecromancerSummons.cpp:334), a direct spawn with no spell event; counted by owned_creature_summon_count. Trigger: Harvest Plague rank 501892 (SpellLevel 40, the highest rank at level 60 below 572842's 68), aura 53 SPELL_AURA_PERIODIC_LEECH every 3000 ms, whose ticks are logged as SMSG_SPELLNONMELEEDAMAGELOG and counted as trials; each attempt spans two ticks (TICKS_PER_ATTEMPT), so the plan schedules half as many casts",
+      "dbc": {
+        "707880": {
+          "ProcChance": 40,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "707880": {}
+      },
+      "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 806086,
+      "name": "Muck Summoner",
+      "tooltip": "Periodic damage dealt now has an $h% chance to summon $806087s1 |cffffffffRotlings|r that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+      "baseline": true,
+      "band": true,
+      "chance_token": "$h",
+      "trigger": {
+        "action": "cast",
+        "spell": 500237
+      },
+      "trigger_text": "Periodic damage dealt",
+      "event_metric": "owned_creature_summon_count",
+      "event_entry": 50133,
+      "proc_spell": 806087,
+      "proc_spell_source": "tooltip: summon $806087s1 Rotlings; Summon(player, 806087, ...) spawns creature 50133 (806087 EffectMiscValue[0])",
+      "events_per_proc": 2,
+      "handler": "AscensionNecromancerEvents.cpp:126-127: an own periodic hit with Chance(player, 806086) (ProcChance 5) summons Animate: Muckworm 806087 (creature 50133, $806087s1 = BasePoints 1 + 1 = 2 per proc) through Summon, a direct spawn with no spell event; counted by owned_creature_summon_count. Trigger: Blight 500237, periodic by id (AscensionNecromancerEvents.cpp:80-81), cast directly so each cast is one hit",
+      "dbc": {
+        "806086": {
+          "ProcChance": 5,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "806086": {}
+      },
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
