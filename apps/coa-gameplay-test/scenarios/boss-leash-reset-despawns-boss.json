@@ -3,8 +3,8 @@
   "name": "A boss that leaves its leash on Heroic resets: it announces it, vanishes and returns 10 s later at full health",
   "contract": [
     "Our tester asked for a real reset instead of a walk home. When a leashed boss leaves its area on Heroic or above,",
-    "every player in the instance sees '<boss> has lost interest in fighting with you.' as a raid boss emote, in the",
-    "middle of the screen and in chat. The boss leaves combat, vanishes at once and comes back at its spawn point",
+    "every player in the instance sees '<boss> has lost interest in fighting with you.' near the middle of the screen",
+    "for a few seconds and in chat. The boss leaves combat, vanishes at once and comes back at its spawn point",
     "about 10 s later, at full health and attackable. Here Vosh'gajin (9236) has a 15-yard circle in a Heroic",
     "Lower Blackrock Spire."
   ],
@@ -32,6 +32,7 @@
     { "action": "assert", "label": "CONTROL: the boss is visible before the reset", "actor": "gm",
       "metric": "nearby_creature_at_client", "entry": 9236, "equals": 1 },
     { "action": "snapshot", "actor": "gm", "metric": "monster_chat_count", "save_as": "chats" },
+    { "action": "snapshot", "actor": "gm", "metric": "server_packets", "opcode": 459, "save_as": "notes" },
     { "action": "relocate", "actor": "gm", "dx": 3.8, "dy": -18.0, "dz": 5.5 },
     { "action": "wait", "ms": 1500 },
     { "action": "relocate", "actor": "gm", "dx": 3.7, "dy": -18.4, "dz": 5.4 },
@@ -39,6 +40,8 @@
       "metric": "nearby_creature_at_client", "entry": 9236, "equals": 0, "within_ms": 20000 },
     { "action": "assert", "label": "Her reset is announced to the gm", "actor": "gm", "metric": "monster_chat_count",
       "relative_to": "chats", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "and shown on screen as a notification, which fades after a few seconds", "actor": "gm",
+      "metric": "server_packets", "opcode": 459, "relative_to": "notes", "equals": 1 },
     { "action": "assert", "label": "The gm leaves combat with her", "actor": "gm", "metric": "combat", "equals": 0,
       "within_ms": 3000 },
     { "action": "assert", "label": "She cannot be attacked while gone", "actor": "gm", "metric": "nearby_creature_can_attack",
