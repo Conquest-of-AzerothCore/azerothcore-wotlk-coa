@@ -42,5 +42,8 @@ is not a verdict and asked for a judge of period = (last stamped cast - first st
   overhead is allowed for), without the talent (control) and with it learned; the duration from the first read with
   the aura to the first without is judged against the stated value +- the G-19 band in both phases. Regeneration is
   off, so Runic Power does not decay during the 2000 ms control cast.
-- Tests: `PulseTargetsTests` and `AuraWindowTests` (test_cast_period.py), each with a mutant that must alert. Templar
+- `hit_period`: a cast's hits on the dummy (Soulfreeze 801724's 801728 ticks on an Ice-Locked dummy) are polled with
+  game-time stamps over a game-time window; the `cast_period` judge brackets (last - first hit) / (n - 1). It
+  replaces held / ends count brackets of 10 ms, which moved under load.
+- Tests: `PulseTargetsTests`, `AuraWindowTests` and `HitPeriodTests` (test_cast_period.py), each with a mutant that must alert. Templar
   `generate --class 19` and `--stack` byte-identical.
