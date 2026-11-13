@@ -1767,7 +1767,8 @@ others, for a spell centred on the caster that picks its targets at random.
 
 ### Items before a metric-delta cast (ADR 0405)
 
-`metric_delta` takes `items` (`[item, count]` pairs), added to the caster's bags right before every trigger cast: Create
-Bone Reliquary 803771's reagent 37201. `item_count` is a state read promised by a clause that names a creation.
+Create Bone Reliquary 803771's reagent 37201 reaches the caster's bags right before every trigger cast through the
+cast's own reagents (`reagent_steps`, ADR 0361); the merged branch has no separate `items` field. `item_count` is a
+state read promised by a clause that names a creation.
 `caster_health` (`[value, maximum]`) sets the caster's health at the start of each phase (Bone Reliquary 803767 restores
 30% of the missing health).

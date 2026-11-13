@@ -2911,12 +2911,6 @@
       "trigger_spell": 803771,
       "target": "caster",
       "cast_in_before": false,
-      "items": [
-        [
-          37201,
-          1
-        ]
-      ],
       "wait_ms": 3500,
       "expire_ms": 500,
       "metric": "item_count",

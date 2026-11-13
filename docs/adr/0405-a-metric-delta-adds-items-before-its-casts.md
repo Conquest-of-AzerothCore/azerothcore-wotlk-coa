@@ -13,6 +13,8 @@ evidence class in `coverage.METRIC_EVIDENCE`.
 
 - `metric_delta` takes `items` (`[item, count]` pairs): an `add_item` of each right before every cast of the trigger
   spell, in both phases.
+  On the merged branch the field is dropped: `reagent_steps` (ADR 0361) already adds the cast's `Reagent[i]` before
+  every trigger and setup cast, and both together added 37201 twice. One implementation stays.
 - `item_count` is a state read (the caster's bags), promised by a clause that names a creation (`creat\w*`).
 
 - A `metric_delta` whose waits pass `METRIC_DELTA_UNTIMED_WAIT_MS` (80000 ms) is timed (its waits plus the 60 s

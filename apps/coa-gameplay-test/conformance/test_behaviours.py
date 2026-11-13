@@ -10724,9 +10724,6 @@ class MetricDeltaItemTests(unittest.TestCase):
         casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
         self.assertEqual(len(adds), len(casts))
         self.assertTrue(all(add < cast for add, cast in zip(adds, casts)))
-        plain, _ = behaviour_scenario(load_class_file(23), {key: value for key, value in self.entry().items()
-                                                               if key != 'items'})
-        self.assertFalse(any(step.get('item') == 37201 for step in plain['steps']))
 
 
 class MetricDeltaLongWaitTests(unittest.TestCase):

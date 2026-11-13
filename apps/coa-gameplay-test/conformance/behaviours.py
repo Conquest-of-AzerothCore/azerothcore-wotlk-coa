@@ -1341,7 +1341,6 @@ class MetricDeltaSpec:
     target_health_after: tuple[int, int] | None = None
     trigger_item: int | None = None
     phase_power: tuple[int, int, int] | None = None
-    items: tuple[tuple[int, int], ...] = ()
     caster_health: tuple[int, int] | None = None
 
 
@@ -1523,7 +1522,6 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
-        steps += [{'action': 'add_item', 'actor': CASTER, 'item': item, 'count': count} for item, count in spec.items]
         if spec.phase_power is not None:
             power, before, after_value = spec.phase_power
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': power,
@@ -1777,7 +1775,6 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('trigger_item'),
                            None if entry.get('phase_power') is None
                            else tuple(int(value) for value in entry['phase_power']),
-                           tuple((int(item), int(count)) for item, count in entry.get('items', ())),
                            None if entry.get('caster_health') is None
                            else (int(entry['caster_health'][0]), int(entry['caster_health'][1])))
 
