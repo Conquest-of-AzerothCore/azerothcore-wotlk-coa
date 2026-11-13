@@ -909,7 +909,8 @@ packet payload. It returns -1 when no such word was sent. These observe server s
 byte in `SMSG_FRIEND_STATUS` (104) after a native `CMSG_ADD_FRIEND` (105) request.
 `server_packet_float` uses the same fields to decode a finite IEEE 754 float. With `from_end: true`,
 `index: 0` reads the last float and `index: 1` the preceding float, independent of a packed GUID's size.
-The recorded core packets include duel request (359), countdown (695) and completion (362), and
+The recorded core packets include damage shield hits (`SMSG_SPELLDAMAGESHIELD`, 591: attacker and shield owner
+GUIDs, then the spell at word 4 and the damage at word 5), duel request (359), countdown (695) and completion (362), and
 `SMSG_MOVE_KNOCK_BACK` (239), whose final two floats are horizontal
 speed and the negated vertical speed. These observations do not simulate client movement or keyboard input.
 Besides the Ascension extension opcodes (0x520 and above), the recorded packets include the learned, superseded

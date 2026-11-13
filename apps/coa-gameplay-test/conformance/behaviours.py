@@ -5620,6 +5620,7 @@ class HitRatioSpec:
     ally_distance: float | None = None
     stated: tuple[float, tuple[float, ...]] | None = None
     stated_truncated: bool = False
+    cast_unit_auras: tuple[tuple[int, int], ...] = ()
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -5760,6 +5761,9 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
         for trial in range(1, spec.trials + 1):
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks,
+                       **({'target': spec.caster} if spec.caster != CASTER else {})}
+                      for spell, stacks in spec.cast_unit_auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
             if arm.target_health_pct is not None:
@@ -5845,6 +5849,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
             spec.cast_spell == spec.observe_spell or spec.cast_wait_ms < 0:
         raise ValueError(f'{spec.spell} hit_ratio casts {spec.cast_spell} to read the hits of another spell, with a '
                          f'non-negative cast_wait_ms and no swings')
+    if spec.cast_unit_auras and swinging:
+        raise ValueError(f'{spec.spell} hit_ratio cast_unit_auras hold a fixture on a casting unit, not a swing')
     if spec.ally_distance is not None and (ALLY not in (spec.caster, spec.target) or spec.ally_distance < 0):
         raise ValueError(f'{spec.spell} hit_ratio groups the ally at {spec.ally_distance} yd, which needs the ally as '
                          f'its caster or target and a distance not below 0')
@@ -5971,7 +5977,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('expected_points'), entry.get('ally_distance'),
                         None if entry.get('stated') is None else
                         (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])),
-                        bool((entry.get('stated') or {}).get('truncated', False)))
+                        bool((entry.get('stated') or {}).get('truncated', False)),
+                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('cast_unit_auras', ())))
 
 
 CRIT_RATE_TRIALS = 300

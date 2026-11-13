@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (item_cooldown_gate_spec, AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
+from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
                         BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
                         BEHAVIOUR_CRIT_RATE,
                         BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
@@ -65,6 +65,7 @@ from behaviours import (item_cooldown_gate_spec, AFTER, AGGRO_REDIRECT_REACTION,
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
+from behaviours import item_cooldown_gate_spec
 from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval

@@ -1027,6 +1027,9 @@ harness reads a player's own heals), and `target` (default the dummy). An `ally`
 player. The arms' `auras` are still set on the caster, so a talent set in the treatment arm reaches healing done when
 the caster heals and healing received when the ally heals the caster. The caster is armed for the observed rank
 (`values.armed_for`), so a rank that needs a weapon class can be observed.
+`cast_unit_auras` (`[[spell, stacks], ...]`, ADR 0494) are set on the casting unit before every cast in both arms,
+the ally when it casts: a precondition fixture on the unit whose hits are read (Corpse Wagon 503738 party: 823764 on
+the casting ally removes its partial resists). Swing entries refuse them.
 With a player `target`, `target_health_pct` sets that player to the percent of the fixture maximum before every
 observed and warm-up heal instead of holding the dummy once, for a heal whose script only reacts to a healed amount
 (Light's Guidance 524765 casts nothing after a Benediction on a target at full health).

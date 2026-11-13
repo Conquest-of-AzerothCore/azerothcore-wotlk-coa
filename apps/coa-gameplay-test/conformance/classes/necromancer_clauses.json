@@ -174,13 +174,12 @@
     "spell": 300580,
     "clause": "up to a maximum of $q2%.",
     "labels": [
-      "300580 effect_value #1",
       "300580 behaviour_hit_ratio cap",
       "300580 behaviour_metric_delta cap_count",
       "300580 behaviour_metric_delta cap_fiend"
     ],
     "kind": "claim",
-    "reason": " Route (B3/B4 side a): eleven summons (a Crypt Fiend 504859 and two Unholy Frenzy 805029 with Study of Death 704721, 5 Greater Zombies 503032 each; companions cap_count 10 zombies and cap_fiend 1 Crypt Fiend) leave 1100 -> 990, exactly 10% (uncapped 11% would read 979); deterministic, judged to the rounding (mentor rounding ruling), status 1 on the route final pair."
+    "reason": "Route (B3/B4 side a): eleven summons (a Crypt Fiend 504859 and two Unholy Frenzy 805029 with Study of Death 704721, 5 Greater Zombies 503032 each; companions cap_count 10 zombies and cap_fiend 1 Crypt Fiend) leave 1100 -> 990, exactly 10% (uncapped 11% would read 979); deterministic, judged to the rounding (mentor rounding ruling), status 1 on the route final pair. M side b part 2: the read-back label '300580 effect_value #1' is removed: its verdict is 'unreadable: $q2' in every pair, so the clause never resolved although the three behaviour labels are ok in both merged runs (20261113-043355 / -044317); the cap is proven by them alone. G-11 (M side b): raw combat logs by id and name, positive control 802353 1551 lines in the same search: 300580 0 lines (a passive); MCP not queried (unavailable)."
   },
   {
     "spell": 300748,
@@ -1119,7 +1118,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found. Claim 'by party and raid members': status 1 on the route final pair rfinal3 20261113-033305 / -033426 (build 88cb7675925e, head a11eba28a8; 24 pooled parts, 1,992 trials per arm as the pilot sized): +2.72% [+1.94, +3.50] and +1.95% [+1.18, +2.71] (99% intervals; both exclude 0 and lie inside the G-19 band +1..+5, mentor small-percent rule); also rfinal 20261113-030915 / -031039: +2.44% [+1.67, +3.22], +2.73% [+1.98, +3.49]; earlier 332-trial reads (final2) were measured, not final. Caster part (503738 behaviour_hit_ratio damage), deterministic: Glacial Impact 707592 reads 153 -> 157 (+2.614%); G-27 engine computation: SpellDamageBonusDone multiplies by the aura 79 DoneTotalMod 1.03f and returns uint32 (Unit.cpp:9917-9929): 153 x 1.03f = 157.59 -> 157, reproducing the read exactly: status 2 (G-27). Party part (mentor small-percent rule): both 99% intervals exclude 0 and lie inside the band +1..+5."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found. Claim 'by party and raid members': status 1 on the route final pair rfinal3 20261113-033305 / -033426 (build 88cb7675925e, head a11eba28a8; 24 pooled parts, 1,992 trials per arm as the pilot sized): +2.72% [+1.94, +3.50] and +1.95% [+1.18, +2.71] (99% intervals; both exclude 0 and lie inside the G-19 band +1..+5, mentor small-percent rule); also rfinal 20261113-030915 / -031039: +2.44% [+1.67, +3.22], +2.73% [+1.98, +3.49]; earlier 332-trial reads (final2) were measured, not final. Caster part (503738 behaviour_hit_ratio damage), deterministic: Glacial Impact 707592 reads 153 -> 157 (+2.614%); G-27 engine computation: SpellDamageBonusDone multiplies by the aura 79 DoneTotalMod 1.03f and returns uint32 (Unit.cpp:9917-9929): 153 x 1.03f = 157.59 -> 157, reproducing the read exactly: status 2 (G-27). Party part (mentor small-percent rule): both 99% intervals exclude 0 and lie inside the band +1..+5. M side b part 2: the party entry read insufficient_trials in the merged pair (99% interval +0.98% to +5.21% and -0.20% to +4.38% at 240 trials: partial resists on the ally's hits); the ally now carries 823764 before each cast (cast_unit_auras, ADR 0494, a named precondition fixture), so its Glacial Impact 707592 hits are 153 -> 157 exactly (+2.61%, the integer damage of 153 x 1.03 = 157.6), inside the G-19 band: behaviour on M side b counted pair PAIRID2."
   },
   {
     "spell": 503738,
@@ -1365,7 +1364,7 @@
     "clause": "It will channel on your target, dealing damage and draining their mana over time.",
     "labels": [],
     "kind": "claim",
-    "reason": "Open: channel 572211 on an enemy player left one leech-sized mana drop and no 572212 hit in 9 s; triage pending. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"Drains 20% (up to 40%)\", an older state (G-9); logs: no Banshee events found."
+    "reason": "Not final (M side b part 2): not attempted; the triage of the channel 572211 (one leech-sized mana drop, no 572212 hit in 9 s on an enemy player) is still pending, and it needs a Banshee command route with an enemy mana user, est. 45 agent-min. Open: channel 572211 on an enemy player left one leech-sized mana drop and no 572212 hit in 9 s; triage pending. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"Drains 20% (up to 40%)\", an older state (G-9); logs: no Banshee events found."
   },
   {
     "spell": 504861,
@@ -1620,7 +1619,7 @@
       "560537 behaviour_hit_ratio magic_damage"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. M side b part 2: the merged pair 20261113-043355 / -044317 read insufficient_trials at the generated 20 trials (Lichfrost's base range); the entry now holds a 20000 spell power fixture in both arms (named precondition fixture, as in the Icecrown Scriptures entries), and the generated trials give a 99% interval of about +-0.05 points inside the band: behaviour on M side b counted pair PAIRID2 (pilot7: +3.01% / +3.00%)."
   },
   {
     "spell": 560595,
@@ -1956,10 +1955,11 @@
     "spell": 570046,
     "clause": "Increases the effectiveness of your Wards by $s1%.",
     "labels": [
-      "570046 behaviour_metric_delta glacial_ward"
+      "570046 behaviour_metric_delta glacial_ward",
+      "570046 behaviour_hit_ratio fetid_ward"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): Bone and Fetid Ward not run (G-23 point 2), parked: both are scripted spells; entries not written tonight. Status 1 (counted pair, control arm in each entry). Glacial Ward 681460 tested (maximum Runic Power +10% -> 1110 / 1130, judged to the rounding of the aura amount); Bone and Fetid Ward share the mask but are scripted spells not run (G-23 point 2 not met: partly proven). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Wards by %.'; bindmysoul found: Increases the effectiveness of your Wards by 25%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Not final (two of the three Wards read; Bone Ward open). M side b part 2: Fetid Ward 680388 now read as well: Flash Heal 10917 on the caster with Fetid Ward cast before each heal, with the talent learned against without it (control), spell power 20000, non-critical heals: ratio +0.87% / +0.91% against the stated 15% on the ward's 10% ($s2) read through the int32 aura amount (11.5 -> 11: 1.11/1.10 = 1.0091, the integer-truncation ruling of 2026-11-11, ADR 0239/0241), inside the G-19 band; behaviour on M side b counted pair PAIRID2. Bone Ward 681529 (armor +50%, Stamina +10%) is still not read with the talent (its reads are state reads; route: the stat_gain entries with the talent learned). Glacial Ward read unchanged. Route agent c (2026-11-13, second attempt): Bone and Fetid Ward not run (G-23 point 2), parked: both are scripted spells; entries not written tonight. Status 1 (counted pair, control arm in each entry). Glacial Ward 681460 tested (maximum Runic Power +10% -> 1110 / 1130, judged to the rounding of the aura amount); Bone and Fetid Ward share the mask but are scripted spells not run (G-23 point 2 not met: partly proven). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Wards by %.'; bindmysoul found: Increases the effectiveness of your Wards by 25%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 570136,
@@ -1984,10 +1984,11 @@
     "spell": 570226,
     "clause": "Increases the effectiveness of your Wards by $s1%.",
     "labels": [
-      "570226 behaviour_metric_delta glacial_ward"
+      "570226 behaviour_metric_delta glacial_ward",
+      "570226 behaviour_hit_ratio fetid_ward"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): as 570046, parked. Status 1 (counted pair, control arm in each entry). Glacial Ward 681460 tested (maximum Runic Power +10% -> 1110 / 1130, judged to the rounding of the aura amount); Bone and Fetid Ward share the mask but are scripted spells not run (G-23 point 2 not met: partly proven). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Wards by %.'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Not final (two of the three Wards read; Bone Ward open). M side b part 2: Fetid Ward 680388 now read as well: Flash Heal 10917 on the caster with Fetid Ward cast before each heal, with the talent learned against without it (control), spell power 20000, non-critical heals: ratio +2.76% / +2.75% against the stated 30% on the ward's 10% ($s2) read through the int32 aura amount (13 -> 13: 1.13/1.10 = 1.0273, the integer-truncation ruling of 2026-11-11, ADR 0239/0241), inside the G-19 band; behaviour on M side b counted pair PAIRID2. Bone Ward 681529 (armor +50%, Stamina +10%) is still not read with the talent (its reads are state reads; route: the stat_gain entries with the talent learned). Glacial Ward read unchanged. Route agent c (2026-11-13, second attempt): as 570046, parked. Status 1 (counted pair, control arm in each entry). Glacial Ward 681460 tested (maximum Runic Power +10% -> 1110 / 1130, judged to the rounding of the aura amount); Bone and Fetid Ward share the mask but are scripted spells not run (G-23 point 2 not met: partly proven). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Wards by %.'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 572023,
@@ -2280,7 +2281,7 @@
       "704670 behaviour_hit_ratio frost_damage"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Frost damage by %, max Runic Power; bindmysoul found: +5% Frost damage, +15 max Runic Power; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Frost damage by %, max Runic Power; bindmysoul found: +5% Frost damage, +15 max Runic Power; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183). M side b part 2: the merged pair 20261113-043355 / -044317 read insufficient_trials at the generated 20 trials (Lichfrost's base range); the entry now holds a 20000 spell power fixture in both arms (named precondition fixture, as in the Icecrown Scriptures entries), and the generated trials give a 99% interval of about +-0.05 points inside the band: behaviour on M side b counted pair PAIRID2 (pilot7: +4.98% / +5.00%)."
   },
   {
     "spell": 704670,
@@ -2836,7 +2837,7 @@
       "707006 behaviour_hit_ratio lichfrost"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost damage +10%, its Runic Power +25% (up to 2 ranks); bindmysoul found: same; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost damage +10%, its Runic Power +25% (up to 2 ranks); bindmysoul found: same; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183). M side b part 2: the merged pair 20261113-043355 / -044317 read insufficient_trials at the generated 20 trials (Lichfrost's base range); the entry now holds a 20000 spell power fixture in both arms (named precondition fixture, as in the Icecrown Scriptures entries), and the generated trials give a 99% interval of about +-0.05 points inside the band: behaviour on M side b counted pair PAIRID2 (pilot7: +10.00% / +9.95%)."
   },
   {
     "spell": 707006,
@@ -3046,7 +3047,7 @@
       "707881 behaviour_hit_ratio lichfrost"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 707006; bindmysoul nothing found (only 707006 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 707006; bindmysoul nothing found (only 707006 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183). M side b part 2: the merged pair 20261113-043355 / -044317 read insufficient_trials at the generated 20 trials (Lichfrost's base range); the entry now holds a 20000 spell power fixture in both arms (named precondition fixture, as in the Icecrown Scriptures entries), and the generated trials give a 99% interval of about +-0.05 points inside the band: behaviour on M side b counted pair PAIRID2 (pilot7: +20.01% / +19.98%)."
   },
   {
     "spell": 707881,
@@ -3530,7 +3531,7 @@
       "803850 behaviour_hit_ratio frost_damage"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 704670; bindmysoul nothing found (only 704670 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 704670; bindmysoul nothing found (only 704670 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183). M side b part 2: the merged pair 20261113-043355 / -044317 read insufficient_trials at the generated 20 trials (Lichfrost's base range); the entry now holds a 20000 spell power fixture in both arms (named precondition fixture, as in the Icecrown Scriptures entries), and the generated trials give a 99% interval of about +-0.05 points inside the band: behaviour on M side b counted pair PAIRID2 (pilot7: +10.01% / +10.01%)."
   },
   {
     "spell": 803850,
@@ -3920,10 +3921,11 @@
     "spell": 805429,
     "clause": "and the Frost damage dealt by your Undead minions by $s1%.",
     "labels": [
-      "805429 effect_value e0 #1"
+      "504859 script_hit 822074 frost_minion_805429",
+      "504859 script_hit 822074 command_damage"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: a Frost-dealing minion hit ratio (caster_entry) with and without the talent; not attempted to a run tonight. Open, route pending: Effect[0] 190 aura 79 Frost damage on the minions; route: a Frost-dealing minion hit (script_hit / caster_entry) with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Intellect by % and the Frost damage dealt by your Undead minions by %.'; bindmysoul found: Increases your Intellect by 5% and the Frost damage dealt by your Undead minions by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Status 1 (M side b counted pair PAIRID2; control arm in each entry). A Frost-dealing Undead minion (tool gap closed without a tool change): the Crypt Fiend 50323's Frost-Congealed Barbs 822074 (Frost) after a Command, with 805429 learned first: per-barb mean 369.7 / 369.8 against 337 x 1.10 = 370.7 (tolerated: each barb is an int32 damage, so 336 to 338 x 1.10 truncates to 369 to 371; +9.7%, inside the G-19 band 8%-12%); the command_damage entry on the same build reads 336.5 / 337.5 without the talent (the formula x 1); the control commands without a Crypt Fiend and counts no hit; 984954 no-crit and 823764 spell-penetration fixtures. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 805429 0 lines, \"Crown's Call\" 0 (a passive); 822074 1003 hits of Crypt Fiends (live, talent state unknown, so the logs do not decide the percent); sidekick and bindmysoul as before ('Frost damage dealt by your Undead minions by %'); MCP not queried (unavailable)."
   },
   {
     "spell": 805649,
@@ -4207,10 +4209,11 @@
     "spell": 807924,
     "clause": "and the Frost damage dealt by your Undead minions by $s1%.",
     "labels": [
-      "807924 effect_value e0 #1"
+      "504859 script_hit 822074 frost_minion_807924",
+      "504859 script_hit 822074 command_damage"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: as 805429. Open, route pending: Effect[0] 190 aura 79 Frost damage on the minions; route: a Frost-dealing minion hit (script_hit / caster_entry) with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Intellect by % and the Frost damage dealt by your Undead minions by %.'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Status 1 (M side b counted pair PAIRID2; control arm in each entry). A Frost-dealing Undead minion (tool gap closed without a tool change): the Crypt Fiend 50323's Frost-Congealed Barbs 822074 (Frost) after a Command, with 807924 learned first: per-barb mean 404.5 / 403.7 against 337 x 1.20 = 404.4 (+20.0%); the command_damage entry on the same build reads 336.5 / 337.5 without the talent (the formula x 1); the control commands without a Crypt Fiend and counts no hit; 984954 no-crit and 823764 spell-penetration fixtures. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 807924 0 lines, \"Crown's Call\" 0 (a passive); 822074 1003 hits of Crypt Fiends (live, talent state unknown, so the logs do not decide the percent); sidekick and bindmysoul as before ('Frost damage dealt by your Undead minions by %'); MCP not queried (unavailable)."
   },
   {
     "spell": 807925,
@@ -4389,11 +4392,12 @@
     "spell": 501965,
     "clause": "causing ${$m1+0} Frost damage to attackers when hit.",
     "labels": [
-      "501965 effect_value e0 #1",
-      "501965 aura_amount e0 #1"
+      "501965 behaviour_metric_delta shield_hits",
+      "501965 behaviour_metric_delta shield_damage",
+      "501965 behaviour_metric_delta shield_spell"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: SMSG_SPELLDAMAGESHIELD is not recorded; the attacker health loss needs a landed-hit count (melee_damage_count by the striker) to divide by. Open, route pending: Unit::DealDamageShieldDamage (Unit.cpp:2360-2410) fires on melee hits and melee-class spells (Unit.cpp:1166-1167); SMSG_SPELLDAMAGESHIELD is not recorded by the harness, so the read would be the attacker's health loss (21 per landed hit); a stationary striker's melee-class Strike 11976 can be dodged, parried or missed, so the landed count needs its own read. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: frost damage to attackers when hit (no numbers); bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: DAMAGE_SHIELD 5 hits day 8/30, median 78 (72-79), no crit, aura apply->remove median 606 s (14.1-799.2)."
+    "reason": "Status 1 (M side b counted pair PAIRID2; control arm in each entry). Damage shield packets recorded since ADR 0495 (SMSG_SPELLDAMAGESHIELD, a harness read only): a hostile striker hits the caster with 8 Strikes 11976 (plus its own swings) with and without the shield (a real cast first; control: no shield, no packet): 8 to 10 damage shield hits, the last carrying spell 501965 and 21 damage ($m1 at spell power 0), exact; 823764 on the caster removes partial resists (without it the first pilot read 17 to 21). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 501965 67 lines by id (31 SPELL_AURA_APPLIED, 5 DAMAGE_SHIELD of 72 to 79: live spell power above 0, so the logs do not decide $m1 at 0); MCP not queried (unavailable)."
   },
   {
     "spell": 583256,
@@ -4803,11 +4807,12 @@
     "spell": 572214,
     "clause": "causing ${$m1+0} Frost damage to attackers when hit.",
     "labels": [
-      "572214 effect_value e0 #1",
-      "572214 aura_amount e0 #1"
+      "572214 behaviour_metric_delta shield_hits",
+      "572214 behaviour_metric_delta shield_damage",
+      "572214 behaviour_metric_delta shield_spell"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: as 501965. Open, route pending: as Razorice 501965 (damage shield read on the attacker). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: nearby allies and Raised minions, frost damage to attackers; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: DAMAGE_SHIELD 6304, median 64 (0-327), mean 65.15, no crit; aura common 14/17/18/15 s, median 17.0 s; casts 172."
+    "reason": "Status 1 (M side b counted pair PAIRID2; control arm in each entry). Damage shield packets recorded since ADR 0495 (SMSG_SPELLDAMAGESHIELD, a harness read only): a hostile striker hits the caster with 8 Strikes 11976 (plus its own swings) with and without the shield (a real cast first; control: no shield, no packet): 8 to 10 damage shield hits, the last carrying spell 572214 and 21 damage ($m1 at spell power 0), exact; 823764 on the caster removes partial resists (without it the first pilot read 17 to 21). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 572214 17485 lines by id (4962 SPELL_AURA_APPLIED, 6304 DAMAGE_SHIELD of 0 to 94: 383 fully absorbed or resisted at 0, 13 at exactly 21, most above it with live spell power), consistent with 21 at spell power 0 but not deciding it; MCP not queried (unavailable)."
   },
   {
     "spell": 572789,
@@ -5734,7 +5739,7 @@
       "803771 item_cooldown_gate 11521 shared cast_failure"
     ],
     "kind": "claim",
-    "reason": "Not final: alert reproduced (lead, G-3), cause not established, no fix note. M side b pilot pair pilot5 and counted pair 20261113-064724 / -064835 (server bf83cf15b141, worldserver c12181debbdc; 4 runs, identical): right after the ally's second accepted Bone Reliquary 11521 use, its Frozen Reliquary 555555 (spell 803773) is accepted (cast_failure 0, expected 67 refused). Expectation uncertain: 'similar effects' may mean other Bone Reliquaries only (the same item, refused within the minute, row 396) or the Frozen Reliquary too (both items carry spellcategory 1153 with 60000 ms, and 803767/803773 share Spell Category 520). Code read: Player::AddSpellAndCategoryCooldowns (Player.cpp:11751-11885) takes the item's category 1153 and propagates it to the other spells of that category in sSpellsByCategoryStore within the same SpellFamilyName; why 803773 is not reached is not established (store contents not read). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803767 18 lines, 803773 0, no ally item use in the logs: they do not decide; MCP not queried (unavailable)."
+    "reason": "Not final: alert reproduced (lead, G-3), cause established by a read; fix note candidate sent to the controller, nothing built. M side b pilot pair pilot5 and counted pair 20261113-064724 / -064835 (server bf83cf15b141, worldserver c12181debbdc; 4 runs, identical): right after the ally's second accepted Bone Reliquary 11521 use, its Frozen Reliquary 555555 (spell 803773) is accepted (cast_failure 0, expected 67 refused). Expectation uncertain: 'similar effects' may mean other Bone Reliquaries only (the same item, refused within the minute, row 396) or the Frozen Reliquary too (both items carry spellcategory 1153 with 60000 ms, and 803767/803773 share Spell Category 520). Code read: Player::AddSpellAndCategoryCooldowns (Player.cpp:11751-11885) takes the item's category 1153 and propagates it to the other spells of that category in sSpellsByCategoryStore within the same SpellFamilyName; Cause (read, M side b part 2): ObjectMgr.cpp:4045-4056 registers both item spells under item category 1153 (sSpellsByCategoryStore, item flag true), and Player.cpp:11878-11883 skips a category spell of another SpellFamilyName unless the category is the shared potion pool: 803767 has SpellFamilyName 27, 803773 SpellFamilyName 29 (server DBC), so a Bone Reliquary use never puts 803773 on cooldown (and the reverse). Both spells also carry Spell Category 520 (803767 CategoryRecoveryTime 60000, 803773 120000, set to 60000 by AscensionNecromancerContracts.cpp:259), which the item path replaces with the item's category 1153 (Player.cpp:11767-11776). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803767 18 lines, 803773 0, no ally item use in the logs: they do not decide; MCP not queried (unavailable)."
   },
   {
     "spell": 804360,
