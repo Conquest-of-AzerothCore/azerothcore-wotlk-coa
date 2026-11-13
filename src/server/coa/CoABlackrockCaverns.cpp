@@ -25,6 +25,7 @@
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
+#include <optional>
 #include <algorithm>
 #include <array>
 #include <set>
@@ -267,7 +268,7 @@ constexpr float FireZoneSpread = 3.0f;
 constexpr uint32 FireZoneMs = 2500;
 constexpr uint32 FireZoneCallers = 2;
 constexpr float RazDamageBonus = 1.3f;
-constexpr float SkullcrackerRadius = 12.0f;
+constexpr float SkullcrackerRadius = 3.0f;
 constexpr float SkullcrackerShare = 0.75f;
 
 constexpr float HeatWavePerStack = 57.6f;
@@ -456,6 +457,7 @@ struct boss_coa_brc_romogg : public BossAI
         _Reset();
         me->SetReactState(REACT_AGGRESSIVE);
         _chains.Clear();
+        _chainsSpot.reset();
     }
 
     void JustEngagedWith(Unit* who) override
@@ -492,6 +494,7 @@ struct boss_coa_brc_romogg : public BossAI
                 if (old != summon)
                     old->DespawnOrUnsummon();
             _chains = summon->GetGUID();
+            _chainsSpot = summon->GetPosition();
         }
         else if (summon->GetEntry() == NPC_ANGERED_EARTH)
         {
@@ -519,7 +522,7 @@ struct boss_coa_brc_romogg : public BossAI
                 {
                     if (player->HasAura(SPELL_CHAINS_OF_WOE_ROOT))
                         DealUnmitigatedDamage(me, player, spell->Id, player->GetMaxHealth() * 10);
-                    else if (me->GetExactDist2d(player) <= SkullcrackerRadius)
+                    else if (_chainsSpot && player->GetExactDist2d(*_chainsSpot) <= SkullcrackerRadius)
                         DealUnmitigatedDamage(me, player, spell->Id, uint32(player->GetMaxHealth() * SkullcrackerShare));
                 }
                 if (Creature* chains = ObjectAccessor::GetCreature(*me, _chains))
@@ -601,6 +604,7 @@ struct boss_coa_brc_romogg : public BossAI
 
 private:
     ObjectGuid _chains;
+    std::optional<Position> _chainsSpot;
 };
 
 struct npc_coa_brc_chains_of_woe : public ScriptedAI
