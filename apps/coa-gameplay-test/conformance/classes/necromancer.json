@@ -1766,9 +1766,9 @@
       "expire_ms": 500,
       "phase_auras": [
         [
-          801747,
+          22856,
           1,
-          "caster",
+          "dummy",
           "caster"
         ],
         [
@@ -1790,7 +1790,7 @@
         "target": "dummy",
         "critical": true
       },
-      "observe_source": "712434 cast for real by the caster (the spell 707562 casts on a Frost crit; a Glacial Impact does not consume it, the consumed entry). Glacial Impact 707402 at the dummy; Permafrost 801747 (frozen condition), 984954 (spell crit -1000) and 823764 (unresisted) on the caster in both phases (precondition fixtures). OnSpellCritChance sets 707592's crit chance to 100 while 712434 holds its StackAmount 10 (AscensionNecromancerAbilities.cpp:125-132). Before: one impact without stacks, 0 critical 707592 hits; after: ten 712434 casts then an impact: 1 critical hit (gain 1)."
+      "observe_source": "712434 cast for real by the caster (the spell 707562 casts on a Frost crit; a Glacial Impact does not consume it, the consumed entry). Glacial Impact 707402 at the dummy, which carries Ice Lock 22856 in both phases (frozen fixture: Glacial Impact's server DBC TargetAuraState is 4, AURA_STATE_FROZEN; CoA clears it at load and its OnSpellCheckCast refuses 707402 with SPELL_FAILED_TARGET_AURASTATE 111 unless the target holds AURA_STATE_FROZEN or the caster Permafrost 801747, AscensionNecromancerContracts.cpp:293-294, AscensionNecromancerAbilities.cpp:169-171; 22856 is a Frost-school aura 12 SPELL_AURA_MOD_STUN, so SpellInfo::GetAuraState gives AURA_STATE_FROZEN, with AuraInterruptFlags 0 and DurationIndex 21 = -1, so damage does not break it). Incorrect-test fix (cycle 5): with the earlier setup (Permafrost 801747 set on the caster) the impact was refused 111 in final5 (0 hits in both phases; why the set 801747 did not pass the check was not traced); 984954 (spell crit -1000) and 823764 (unresisted) on the caster in both phases (precondition fixtures). OnSpellCritChance sets 707592's crit chance to 100 while 712434 holds its StackAmount 10 (AscensionNecromancerAbilities.cpp:125-132). Before: one impact without stacks, 0 critical 707592 hits; after: ten 712434 casts then an impact: 1 critical hit (gain 1)."
     },
     {
       "spell": 707562,
@@ -1822,9 +1822,9 @@
       "expire_ms": 500,
       "phase_auras": [
         [
-          801747,
+          22856,
           1,
-          "caster",
+          "dummy",
           "caster"
         ],
         [
@@ -1846,7 +1846,7 @@
         "target": "dummy",
         "critical": true
       },
-      "observe_source": "712434 cast for real by the caster (the spell 707562 casts on a Frost crit; a Glacial Impact does not consume it, the consumed entry). Glacial Impact 707402 at the dummy; Permafrost 801747 (frozen condition), 984954 (spell crit -1000) and 823764 (unresisted) on the caster in both phases (precondition fixtures). OnSpellCritChance sets 707592's crit chance to 100 while 712434 holds its StackAmount 10 (AscensionNecromancerAbilities.cpp:125-132). Contrast: nine 712434 casts then an impact: still no critical hit (gain 0)."
+      "observe_source": "712434 cast for real by the caster (the spell 707562 casts on a Frost crit; a Glacial Impact does not consume it, the consumed entry). Glacial Impact 707402 at the dummy, which carries Ice Lock 22856 in both phases (frozen fixture: Glacial Impact's server DBC TargetAuraState is 4, AURA_STATE_FROZEN; CoA clears it at load and its OnSpellCheckCast refuses 707402 with SPELL_FAILED_TARGET_AURASTATE 111 unless the target holds AURA_STATE_FROZEN or the caster Permafrost 801747, AscensionNecromancerContracts.cpp:293-294, AscensionNecromancerAbilities.cpp:169-171; 22856 is a Frost-school aura 12 SPELL_AURA_MOD_STUN, so SpellInfo::GetAuraState gives AURA_STATE_FROZEN, with AuraInterruptFlags 0 and DurationIndex 21 = -1, so damage does not break it). Incorrect-test fix (cycle 5): with the earlier setup (Permafrost 801747 set on the caster) the impact was refused 111 in final5 (0 hits in both phases; why the set 801747 did not pass the check was not traced); 984954 (spell crit -1000) and 823764 (unresisted) on the caster in both phases (precondition fixtures). OnSpellCritChance sets 707592's crit chance to 100 while 712434 holds its StackAmount 10 (AscensionNecromancerAbilities.cpp:125-132). Contrast: nine 712434 casts then an impact: still no critical hit (gain 0)."
     },
     {
       "spell": 503740,
