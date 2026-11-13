@@ -128,6 +128,7 @@ CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
+STACKED_SAME = 'stacked_same'
 DATA_ONLY = 'data_only'
 EXCLUDED = 'excluded'
 EXCLUDING_STATUSES = frozenset({'ok', 'tolerated', 'alert'})
@@ -3613,6 +3614,7 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     status = 'ok' if own_ok and combined_ok else 'alert'
     return replace(base, status=status, measured=combined, expected=combined_expected,
                    low=combined_expected - combined_margin, high=combined_expected + combined_margin,
+                   detail={**(base.detail or {}), STACKED_SAME: abs(combined - own) <= combined_margin},
                    explanation=f'baseline {baseline:g}; after learning the own passive alone, measured {own:g} '
                                f'against expected {own_expected:g} ({own_pct:+g}%, +/-{own_margin:g}); after also '
                                f'learning the partner ({partner_pct:g}%, {mechanism_phrase}), measured {combined:g} '

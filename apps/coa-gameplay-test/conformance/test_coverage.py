@@ -1143,9 +1143,10 @@ class CastSpeedPromiseTest(unittest.TestCase):
 
 
 class NoStackStatePromiseTest(unittest.TestCase):
-    def capped(self, status: str = 'ok') -> list:
+    def capped(self, status: str = 'ok', stacked_same: bool = True) -> list:
         from behaviours import BEHAVIOUR_GROUP_STACK_CAP
-        return [judged('1 behaviour_group_stack_cap', BEHAVIOUR_GROUP_STACK_CAP, 'spell_crit_chance', status=status)]
+        return [judged('1 behaviour_group_stack_cap', BEHAVIOUR_GROUP_STACK_CAP, 'spell_crit_chance', status=status,
+                       stacked_same=stacked_same)]
 
     def test_a_stack_cap_state_read_proves_a_no_stack_clause(self):
         clause = claim('Does not stack with similar effects.', '1 behaviour_group_stack_cap')
@@ -1159,6 +1160,10 @@ class NoStackStatePromiseTest(unittest.TestCase):
     def test_a_summed_reading_leaves_the_clause_unproven(self):
         clause = claim('Does not stack with similar effects.', '1 behaviour_group_stack_cap')
         self.assertEqual(evidence_of([clause], self.capped('alert'))[0], [UNPROVEN])
+
+    def test_a_second_application_that_changes_the_consumed_value_proves_no_no_stack_clause(self):
+        clause = claim('Does not stack with similar effects.', '1 behaviour_group_stack_cap')
+        self.assertEqual(evidence_of([clause], self.capped(stacked_same=False))[0], [DATA])
 
 
 class OwnedHealthAndItemCountTest(unittest.TestCase):

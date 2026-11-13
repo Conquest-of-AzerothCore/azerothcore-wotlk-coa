@@ -65,7 +65,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
-from compare import Verdict, judge_behaviour
+from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
 from profile import CASTER, DBC_DIR, control_entries, load_class_file
@@ -4989,6 +4989,22 @@ class JudgeGroupStackCapTests(unittest.TestCase):
         run = FakeRun({'baseline': baseline, 'own': baseline * 1.05, 'combined': baseline * 1.05})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'ok')
+
+    def test_an_unchanged_value_after_the_partner_is_marked_stacked_same(self):
+        expectation = self.expectation(own_pct=3.0, partner_pct=3.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.03, 'combined': baseline * 1.03})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIs(verdict.detail[STACKED_SAME], True)
+
+    def test_a_stronger_partner_that_raises_the_value_is_not_stacked_same(self):
+        expectation = self.expectation(own_pct=3.0, partner_pct=5.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.03, 'combined': baseline * 1.05})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIs(verdict.detail[STACKED_SAME], False)
 
     def test_combined_summing_both_percentages_is_an_alert(self):
         expectation = self.expectation(own_pct=5.0, partner_pct=4.0)

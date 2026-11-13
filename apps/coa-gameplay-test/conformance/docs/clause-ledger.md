@@ -278,7 +278,8 @@ not in the table fails the whole run (`EvidenceError`, no default):
   "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating" or a
   `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A `behaviour_group_stack_cap` state read
   is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
-  value after the spell alone and after the similar spell too, so equal readings prove the cap. A stat read as a
+  value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
+  ADR 0446) prove the clause. A stat read as a
   proxy for another effect stays data. A conformant verdict with `detail['data_only']` (a `passive_delta` the integer floor alone accepted, or
   whose integer stat did not move; ADR 0124) is data whatever its metric.
 - linked: a `checked by` label (`unmodelled` check closed by the labels it names) is behaviour when one of the

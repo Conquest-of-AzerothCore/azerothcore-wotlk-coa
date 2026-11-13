@@ -19,7 +19,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         LEARNED_CONTRAST)
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
 from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, NOT_MEASURED, PASSIVE_METRIC,
-                     STATUSES, Verdict, read_verdicts)
+                     STACKED_SAME, STATUSES, Verdict, read_verdicts)
 from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
@@ -594,7 +594,8 @@ NO_STACK_WORDS = r'do(?:es)? not stack'
 def promised_state(verdict: Verdict, clause: str) -> bool:
     detail = verdict.detail or {}
     if verdict.check == BEHAVIOUR_GROUP_STACK_CAP:
-        return re.search(rf'\b(?:{NO_STACK_WORDS})\b', clause, re.IGNORECASE) is not None
+        return (detail.get(STACKED_SAME) is True
+                and re.search(rf'\b(?:{NO_STACK_WORDS})\b', clause, re.IGNORECASE) is not None)
     if verdict.check not in CONTRAST_CHECKS:
         return False
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) != LEARNED_CONTRAST:
