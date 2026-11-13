@@ -92,6 +92,7 @@ BEFORE = 'before'
 AFTER = 'after'
 LEARNED_CONTRAST = 'learned'
 CONDITION_CONTRAST = 'condition'
+OWN_CAST_CONTRAST = 'own_cast'
 HEALING_RATIO_METRICS = {'effect_value': 'spell_effect_value', 'taken': 'spell_healing_taken'}
 LINE_BREAKS = re.compile(r'\s+')
 
@@ -1369,6 +1370,14 @@ class MetricDeltaStrike:
     owned_entry: int | None = None
 
 
+def metric_delta_contrast(spec) -> str:
+    from coverage import METRIC_EVIDENCE, STATE
+    if not spec.setup_only_after:
+        return LEARNED_CONTRAST
+    own = bool(spec.setup_casts) and all(spell == spec.spell for spell in spec.setup_casts)
+    return OWN_CAST_CONTRAST if own and METRIC_EVIDENCE.get(spec.metric) == STATE else CONDITION_CONTRAST
+
+
 def reagent_steps(records: Records, spell: int) -> list[dict]:
     steps = []
     for index in range(8):
@@ -1870,7 +1879,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
-             'contrast': CONDITION_CONTRAST if spec.setup_only_after else LEARNED_CONTRAST, 'quote': entry.quote}
+             'contrast': metric_delta_contrast(spec), 'quote': entry.quote}
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
     if spec.after_at_least is not None:

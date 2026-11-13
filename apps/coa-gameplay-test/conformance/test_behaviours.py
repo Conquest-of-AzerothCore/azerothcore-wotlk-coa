@@ -11387,5 +11387,19 @@ class MetricDeltaDummyDistanceTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**cycle_one_entry(300240, 'range_extended'), 'dummy_distance': 150})
 
 
+class MetricDeltaOwnCastContrastTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_set_by_the_spells_own_cast_is_an_own_cast_contrast(self):
+        own = cycle_one_entry(807813, 'pushback_held')
+        _, [expectation] = behaviour_scenario(load_class_file(23), own)
+        self.assertEqual(expectation.model['contrast'], 'own_cast')
+        foreign = next(entry for entry in load_class_file(23)['behaviours']
+                       if entry['spell'] == 802986 and entry.get('label_suffix') == 'horde_on_ghouls')
+        _, [other] = behaviour_scenario(load_class_file(23), foreign)
+        self.assertEqual(other.model['contrast'], 'condition')
+        _, [learned] = behaviour_scenario(load_class_file(23), {**own, 'setup_only_after': False})
+        self.assertEqual(learned.model['contrast'], 'learned')
+
+
 if __name__ == '__main__':
     unittest.main()

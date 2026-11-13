@@ -8972,6 +8972,7 @@
       "name": "Foul Invocation",
       "kind": "stat_gain",
       "variant": "stamina",
+      "attribute_stat": true,
       "label_suffix": "stamina",
       "quote": "increasing your maximum Stamina by $s2%",
       "cast_spell": 804371,
@@ -8981,7 +8982,8 @@
         "stat": 2
       },
       "clear_auras": [
-        804371
+        804371,
+        504747
       ],
       "wait_ms": 500,
       "terms": [

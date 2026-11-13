@@ -16,7 +16,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT,
                         BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
                         BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH, BEHAVIOUR_SOURCE_STACK, BEHAVIOUR_FALL_DAMAGE,
-                        LEARNED_CONTRAST)
+                        LEARNED_CONTRAST, OWN_CAST_CONTRAST)
 from behaviours import BEHAVIOUR_CHECKS as PROSE_BEHAVIOUR_CHECKS
 from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, NOT_MEASURED, PASSIVE_METRIC,
                      STACKED_SAME, STATUSES, Verdict, read_verdicts)
@@ -602,7 +602,7 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
                 and re.search(rf'\b(?:{NO_STACK_WORDS})\b', clause, re.IGNORECASE) is not None)
     if verdict.check not in CONTRAST_CHECKS:
         return False
-    if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) != LEARNED_CONTRAST:
+    if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST):
         return False
     words = STATE_PROMISES.get(detail[PASSIVE_METRIC])
     return words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is not None

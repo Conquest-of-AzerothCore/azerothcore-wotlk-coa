@@ -272,7 +272,8 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `armor`, ratings, hit, crit, dodge and parry chances, power, speed, attack time) is data, except that a state read
   counts as behaviour when it is the stat the clause promises, read in a learned/unlearned contrast: the check is
   `passive_delta`, `behaviour_party_stat_ratio` (an ally's stat before and after the caster learns the spell), or
-  `behaviour_metric_delta` with `detail.contrast` `learned` (not the `setup_only_after` condition contrast; a
+  `behaviour_metric_delta` with `detail.contrast` `learned` or `own_cast` (a `setup_only_after` state read whose setup casts are
+  only the entry's own spell, ADR 0553; not the other `setup_only_after` condition contrast; a
   `stat_gain` verdict gets it from its judge under attribution reads and names its read, ADR 0258), and the clause
   text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell power" or
   "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating" or a
