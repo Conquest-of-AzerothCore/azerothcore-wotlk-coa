@@ -88,6 +88,7 @@ namespace
         SPELL_GIFT_OF_THE_BLOOD_GOD = 2118324,
         SPELL_RAZOR_CLAWS        = 2118325,
         SPELL_RAZOR_CLAWS_BLEED  = 2118326,
+        SPELL_RAZOR_CLAWS_BLEED_MYTHIC = 2118328,
         SPELL_RAVAGE             = 2118330,
         SPELL_RAVAGE_HIT         = 2118331,
         SPELL_CLAW_STORM         = 2118336,
@@ -135,6 +136,24 @@ namespace
     constexpr int32 CLAW_STORM_BLEED_CHANCE = 8;
 
     Position const PosMoveOnSpawn = { -11561.9f, -1627.868f, 41.29941f, 0.0f };
+
+    void CastRazorClawsBleed(Unit* arlokk, Unit* target, AuraEffect const* triggeredBy = nullptr)
+    {
+        if (!target)
+            return;
+
+        SpellInfo const* normalBleed = sSpellMgr->GetSpellInfo(SPELL_RAZOR_CLAWS_BLEED);
+        if (!normalBleed
+            || sSpellMgr->GetSpellIdForDifficulty(SPELL_RAZOR_CLAWS_BLEED, arlokk) != SPELL_RAZOR_CLAWS_BLEED_MYTHIC)
+        {
+            arlokk->CastSpell(target, SPELL_RAZOR_CLAWS_BLEED, true, nullptr, triggeredBy);
+            return;
+        }
+
+        int32 const normalPerStack = normalBleed->Effects[EFFECT_0].BasePoints + 1;
+        arlokk->CastCustomSpell(target, SPELL_RAZOR_CLAWS_BLEED, &normalPerStack, nullptr, nullptr, true, nullptr,
+            triggeredBy);
+    }
 
     struct boss_arlokk_coa : public BossAI
     {
@@ -320,7 +339,7 @@ namespace
         void SpellHitTarget(Unit* target, SpellInfo const* spell) override
         {
             if (target && spell->Id == SPELL_RAVAGE_HIT)
-                me->CastSpell(target, SPELL_RAZOR_CLAWS_BLEED, true);
+                CastRazorClawsBleed(me, target);
         }
 
         Player* Marked()
@@ -474,9 +493,19 @@ namespace
             return !clawStorm || roll_chance_i(CLAW_STORM_BLEED_CHANCE);
         }
 
+        void HandleProc(AuraEffect const* aurEff, ProcEventInfo& eventInfo)
+        {
+            PreventDefaultAction();
+            Unit* arlokk = GetTarget();
+            Unit* victim = arlokk == eventInfo.GetActor() ? eventInfo.GetActionTarget() : eventInfo.GetActor();
+            CastRazorClawsBleed(arlokk, victim, aurEff);
+        }
+
         void Register() override
         {
             DoCheckProc += AuraCheckProcFn(spell_arlokk_coa_razor_claws::CheckProc);
+            OnEffectProc += AuraEffectProcFn(spell_arlokk_coa_razor_claws::HandleProc, EFFECT_0,
+                SPELL_AURA_PROC_TRIGGER_SPELL);
         }
     };
 
