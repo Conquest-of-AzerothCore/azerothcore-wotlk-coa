@@ -2141,7 +2141,7 @@
       "707402 script_hit 707592 damage"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 1 tolerated (mentor, G-19 band): 707592 reads 855 on every hit (sigma 0, 99% interval 855 to 855) against the 815 the tooltip gives at the measured stats, +4.91%, inside 5% in both runs. Cause: the stock SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE passes 707402's CalcValue (812 + 1.92 x 2 = 815) as BasePoints0 (SpellEffects.cpp:1847-1852), and CalcValue of 707592 adds its own EffectRealPointsPerLevel 2.0 x (38 - 18) = 40 on top of the passed value (SpellInfo.cpp:482-497). Stock path, not CoA code; +40 at every level 58-64 of this rank. No fix."
   },
   {
     "spell": 707402,
@@ -2158,7 +2158,8 @@
     "labels": [
       "707402 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 5: owner question Q-a3-1 (does the note mean ordinary crit chance, or crit chance above the Glacier Lord guarantee turned into crit damage, which Unit::SpellCriticalDamageBonus, Unit.cpp:10570-10612, does not do)."
   },
   {
     "spell": 704528,
@@ -2972,7 +2973,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul and coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 4 803779 hits per cast (1499 of 2226 bursts), Frozen 804328 4 s modal (1325 of 2357)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul and coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 4 803779 hits per cast (1499 of 2226 bursts), Frozen 804328 4 s modal (1325 of 2357). Damage part status 1 tolerated (mentor, G-19 band): 803779 reads 313.6 per hit against 311 (+0.8%); each hit is 311 plus 803779's own DieSides 6 (1 to 6 added, at most 317 = +1.9%), so no hit and no 99% interval reaches 5%. Cause: the stock SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE passes the aura amount as BasePoints0 (SpellAuraEffects.cpp:6563), and CalcValue of 803779 adds its own die on top (SpellInfo.cpp:482-497). Stock path, not CoA code. No fix."
   },
   {
     "spell": 501997,

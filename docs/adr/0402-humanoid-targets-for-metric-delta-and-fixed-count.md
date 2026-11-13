@@ -12,17 +12,18 @@ not hold. Mass Grave's "up to $i nearby enemies" also needs several Humanoids ar
 
 ## Considered options
 
-1. Cherry-pick 30499bac54. Rejected: it depends on three earlier B2 side b tool commits and a harness change.
-2. Write `target_entry` as 30499bac54 writes it, and add `dummy_entry` to `fixed_count`. Chosen.
+1. Cherry-pick 30499bac54 and add `dummy_entry` to `fixed_count`. Chosen (controller, 2026-11-13): 30499bac54 and
+   the B2 side b tool commits it builds on (89d45acae1, ea399d98cd, 9e40786ee1, 4e274eaa55) are cherry-picked, so
+   `metric_delta` has one copy of `target_entry`.
+2. Write `target_entry` again in this branch. Rejected: two copies of the same field for the integrator.
 
 ## Decision
 
-- `metric_delta` takes `target_entry`: the creature entry of its dummy, with the same field, check and error as ADR
-  0381, so the integration of both branches meets the same lines.
+- `metric_delta`'s `target_entry` is ADR 0381's (cherry-picked); Mass Grave's entries use it.
 - `fixed_count` takes `dummy_entry`: the creature entry of every dummy it places, the far one included.
 
 ## Consequences
 
 - Entries without the fields generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
 - Mass Grave reads its targets, durations and creature type on Kobold Vermin 6 (creature type 7 Humanoid).
-- The integrator keeps one copy of the `target_entry` lines when B2 side b and this branch meet.
+- The cherry-picked B2 side b tests that read that branch's class-file entries stay on that branch.
