@@ -1639,12 +1639,21 @@ struct boss_coa_brc_obsidius : public BossAI
         for (ObjectGuid const& guid : summons)
             if (Creature* shadow = ObjectAccessor::GetCreature(*me, guid))
                 SetBound(shadow, false);
+        StopRazHeart(3s);
+    }
+
+    void StopRazHeart(Milliseconds delay)
+    {
         me->m_Events.AddEventAtOffset([this]()
         {
-            if (Creature* raz = instance->GetCreature(DATA_RAZ))
-                if (raz->IsAlive())
-                    DoCast(raz, SPELL_STOP_HEART, true);
-        }, 3s);
+            Creature* raz = instance->GetCreature(DATA_RAZ);
+            if (!raz || !raz->IsAlive())
+                return;
+            if (raz->IsInCombat())
+                StopRazHeart(1s);
+            else
+                DoCast(raz, SPELL_STOP_HEART, true);
+        }, delay);
     }
 
     void JustEngagedWith(Unit* who) override
