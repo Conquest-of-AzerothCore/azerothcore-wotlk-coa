@@ -1608,6 +1608,7 @@
       "trigger_spell": 504868,
       "target": "dummy",
       "setup_casts": [
+        500331,
         500971
       ],
       "setup_target": "caster",
@@ -1623,7 +1624,7 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. 807765 never on the caster, before or after. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped)."
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. 807765 never on the caster, before or after. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (the 388.x setup, mentor ruling 2026-11-13; with two Ghouls one carried the forced aura in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 802986 is learned, and it must carry the forced aura (the every-creature precondition)."
     },
     {
       "spell": 802986,
@@ -1637,6 +1638,7 @@
       "trigger_spell": 504868,
       "target": "dummy",
       "setup_casts": [
+        500331,
         500971
       ],
       "setup_target": "caster",
@@ -1653,7 +1655,7 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The applied 807765 on a Ghoul has its DBC duration, DurationIndex 28 = 5000 ms (a read-only harness read of the aura's maximum duration, ADR 0484; a readback, the condition of the mentor approval, not the duration claim). Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped)."
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The applied 807765 on a Ghoul has its DBC duration, DurationIndex 28 = 5000 ms (a read-only harness read of the aura's maximum duration, ADR 0484; a readback, the condition of the mentor approval, not the duration claim). Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (the 388.x setup, mentor ruling 2026-11-13; with two Ghouls one carried the forced aura in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 802986 is learned, and it must carry the forced aura (the every-creature precondition)."
     },
     {
       "spell": 802986,
@@ -1667,6 +1669,7 @@
       "trigger_spell": 504868,
       "target": "dummy",
       "setup_casts": [
+        500331,
         500971
       ],
       "setup_target": "caster",
@@ -1682,7 +1685,7 @@
         "aura": 802986,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (was the probe of the horde_crit lead, 1 before the fix in pair p6): with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped)."
+      "observe_source": "F-ma-1 regression (was the probe of the horde_crit lead, 1 before the fix in pair p6): with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (the 388.x setup, mentor ruling 2026-11-13; with two Ghouls one carried the forced aura in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 802986 is learned, and it must carry the forced aura (the every-creature precondition)."
     },
     {
       "spell": 707562,
@@ -1902,6 +1905,7 @@
       "trigger_spell": 504868,
       "target": "dummy",
       "setup_casts": [
+        500331,
         500971
       ],
       "setup_target": "caster",
@@ -1918,7 +1922,7 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "Plague Horde 802986 rolls MinionChance(player, actor, 802986) on a minion's damage and casts Plague Horde 807653 on the minion (AscensionNecromancerEvents.cpp:190-193); its 10% roll is proven by 802986 proc_rate. Tooltip: \"Enrage for $d, increasing their critical strike chance by $807765s1%\" ($807765s1 = 10: 807765 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases. Forcing fixture (mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 802986 (10% x 11 > 100%), 807653 on a Ghoul read before the after reading (absent: unmeasured), removed at the end and read gone. The Ghoul's melee crit chance against the dummy: +10 points. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped).",
+      "observe_source": "Plague Horde 802986 rolls MinionChance(player, actor, 802986) on a minion's damage and casts Plague Horde 807653 on the minion (AscensionNecromancerEvents.cpp:190-193); its 10% roll is proven by 802986 proc_rate. Tooltip: \"Enrage for $d, increasing their critical strike chance by $807765s1%\" ($807765s1 = 10: 807765 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases. Forcing fixture (mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 802986 (10% x 11 > 100%), 807653 on a Ghoul read before the after reading (absent: unmeasured), removed at the end and read gone. The Ghoul's melee crit chance against the dummy: +10 points. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (the 388.x setup, mentor ruling 2026-11-13; with two Ghouls one carried the forced aura in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 802986 is learned, and it must carry the forced aura (the every-creature precondition).",
       "expected_gain": 10
     },
     {
