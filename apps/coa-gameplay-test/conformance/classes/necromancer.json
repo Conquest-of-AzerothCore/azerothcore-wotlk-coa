@@ -12173,6 +12173,52 @@
         "entry": 50076
       },
       "observe_source": "Animate: Skeletal Archer 805040 animates ${$500330m1} Skeletal Archers (500330 Effect[0] SUMMON 50076, BasePoints 2 + 1 = 3; DurationIndex 8, 15000 ms). 302921 Effect[0] aura 107 SPELLMOD_EFFECT1 (MiscValue 3) +2 ($s1) on the 500330 mask: 5. Owned living 50076 1500 ms after a real 805040 cast: 3 without the talent (control), 5 with it learned; the first archers expire during the 16000 ms between phases."
+    },
+    {
+      "spell": 560620,
+      "name": "Frigid Power (Ice Barrage spell power scaling)",
+      "kind": "hit_ratio",
+      "variant": "ice_barrage",
+      "label_suffix": "ice_barrage",
+      "quote": "Increases the spell power scaling of Lichfrost and Ice Barrage by $s1%.",
+      "expected": 1.1949,
+      "observe_spell": 803779,
+      "cast_spell": 501997,
+      "cast_wait_ms": 3500,
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          560620
+        ]
+      },
+      "critical": false,
+      "trials": 12,
+      "expected_source": "Ice Barrage: ${$m1+0+$SP*.5971} Frost damage per tick (803779, the damage the channel 501997 triggers; $m1 about 313 at level 60, rank 501997 BasePoints 310 + 1 + 0.914 per level). 560620 Effect[0] aura 108 SPELLMOD_BONUS_MULTIPLIER +20 ($s1). The caster holds 20000 spell power (harness fixture, precondition) in both arms: spell power term 11942 without the talent (control), 14330.4 with it learned: (313 + 14330.4) / (313 + 11942) = 1.1949 (1.1948 to 1.1950 for a base of 300 to 330). Non-critical 803779 hits; Reg's Test Aura 984954 and 823764 on the caster in both arms (harness set_aura, precondition fixtures, as the Ice Barrage spell_power entry)."
     }
   ],
   "player_observations": [],

@@ -676,10 +676,12 @@
     "spell": 501861,
     "clause": "@ext:Periodic damage dealt by this can critically strike.:ext@",
     "labels": [
-      "501861 behaviour_metric_delta periodic_crit"
+      "501861 behaviour_metric_delta periodic_crit",
+      "501861 behaviour_metric_delta periodic_ticks",
+      "501861 behaviour_metric_delta direct_crit_control"
     ],
     "kind": "claim",
-    "reason": "Confirmed defect, fix note FN-c4-1 (awaiting mentor approval): 0 critical ticks of 2 under forced spell crit; AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1180-1209) gives periodic damage a crit chance only with a SPELL_AURA_ABILITY_PERIODIC_CRIT aura; live logs: 31 of 192 ticks critical. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events."
+    "reason": "Status 1 after fix FN-c4-1 (mentor-approved, ADR 0442, 38de9eac06): pre-fix 0 of 12 ticks critical under forced spell crit (run 20261113-030439) while a direct Lichfrost crit under the same forcing; the sentence is in the server DBC Description of every rank (500338, 501855-501861), no project text override; live logs 31 of 192 ticks critical. Post-fix: 12 of 12 critical on the final pair. The natural-chance check (ticks crit at about the spell crit rate) was not run tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events."
   },
   {
     "spell": 500342,
