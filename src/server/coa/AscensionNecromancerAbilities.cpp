@@ -318,7 +318,7 @@ class necromancer_casts : public AllSpellScript
             if (Chance(player, 704724))
                 Ready(player, 572777);
             if (Chance(player, 805649))
-                player->EnergizeBySpell(player, 359505, int32(spell->GetScriptValue(359505)), POWER_RUNIC_POWER);
+                player->EnergizeBySpell(player, 359505, 100, POWER_RUNIC_POWER);
             uint32 count = ++State(player).commands;
             if (count % 3 == 0)
             {
