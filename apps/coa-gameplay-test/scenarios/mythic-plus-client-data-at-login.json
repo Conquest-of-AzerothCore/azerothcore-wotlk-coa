@@ -32,6 +32,15 @@
     },
     {
       "action": "assert",
+      "label": "and it carries the Mythic difficulty name",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 1654,
+      "text": "5 Player (Mythic)",
+      "equals": 1
+    },
+    {
+      "action": "assert",
       "label": "A champion count for every timed dungeon (SMSG_PATCH_TIMED_DUNGEON)",
       "actor": "hero",
       "metric": "server_packets",
