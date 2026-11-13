@@ -29,3 +29,18 @@ is not a verdict and asked for a judge of period = (last stamped cast - first st
 - Tests: `test_cast_period.py` (seeded series; a 1240 ms, 900 ms and 3000 ms period and a control cast must alert),
   registered in the conformance suite. Templar `generate --class 19` and `--stack` unchanged (no Templar entry has the
   kind).
+
+## Addendum (cycle 2, same module): per-pulse targets and stamped aura windows
+
+- `pulse_targets`: a creature's area pulses (Bonestorm 801411 of the Bone Wraith, claim 257.2) are read every
+  `poll_ms` of wait with game-time stamps, as each dummy's hits from that creature; the dummies struck between two
+  reads are one pulse's targets. No pulse may strike more than the stated cap, one must reach it, the far dummy never;
+  a dummy struck twice between reads alerts, fewer than 3 pulses is unmeasured. The union of a whole Command (the
+  fixed_count design) is not a per-pulse cap.
+- `aura_window`: a cast's aura on the dummy (Ice Barrage 501997's channel, Deathly Chill 805424, claim 267.1) is
+  polled with game-time stamps over a start and an end window given in game time (each wait step's measured 9 ms
+  overhead is allowed for), without the talent (control) and with it learned; the duration from the first read with
+  the aura to the first without is judged against the stated value +- the G-19 band in both phases. Regeneration is
+  off, so Runic Power does not decay during the 2000 ms control cast.
+- Tests: `PulseTargetsTests` and `AuraWindowTests` (test_cast_period.py), each with a mutant that must alert. Templar
+  `generate --class 19` and `--stack` byte-identical.
