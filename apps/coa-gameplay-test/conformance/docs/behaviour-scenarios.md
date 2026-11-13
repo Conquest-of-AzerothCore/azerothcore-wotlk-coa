@@ -1935,9 +1935,7 @@ first and the last cast are bracketed between stamped reads, and (last - first) 
 +- the G-19 band (Animate: Plaguefather 805048: Bone Toss 704706 every 1000 ms).
 `kind: "pulse_targets"` (ADR 0550) reads one creature's area pulses per pulse: each dummy's hits are polled with
 game-time stamps, the dummies struck between two reads are one pulse's targets, and none may exceed the stated cap
-(Bonestorm 801411, Animate: Bone Wraith 805032). `kind: "aura_window"` (ADR 0551) polls a cast's aura on the dummy over
-start and end windows given in game time, without and with the talent, and judges each stamped duration (Ice Barrage
-501997's channel, Deathly Chill 805424).
+(Bonestorm 801411, Animate: Bone Wraith 805032).
 
 ## Behaviour kind modules
 
@@ -1957,5 +1955,6 @@ A behaviour kind can live in its own module `kinds/<kind>.py` (ADR 0581), found 
 Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` suite command, which also checks that
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
+- [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped windows (ADR 0551)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
