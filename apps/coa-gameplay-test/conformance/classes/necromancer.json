@@ -5335,6 +5335,35 @@
       "trigger_only_after": true
     },
     {
+      "spell": 704681,
+      "name": "Permafrost (next 2 spells, forced roll)",
+      "kind": "metric_delta",
+      "variant": "next_two",
+      "label_suffix": "next_two",
+      "quote": "which treats your next 2 spells cast as if the target were Frozen.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "setup_casts": [
+        504868,
+        707402,
+        707402
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 707402
+      },
+      "forced_roll": {
+        "talent": 704681,
+        "release_after_setup": 0
+      },
+      "observe_source": "Permafrost 704681 (ProcChance 15, proven by its proc_rate entry): a Necromancer spell (SpellFamilyName 29) rolls Chance(player, 704681) and Ready(player, 801747, 2) gives Permafrost 801747 two charges (AscensionNecromancerAbilities.cpp:270-271); a Glacial Impact 707402 consumes one (consume(801747, ... 707399..707402), :265) and passes the CoA cast check at an unfrozen target only while the caster holds 801747 (:169-171, SPELL_FAILED_TARGET_AURASTATE 111 otherwise; the server clears its DBC TargetAuraState 4 at load, AscensionNecromancerContracts.cpp:293-294). Each phase casts Command: Undead 504868 at the dummy (allowed without a minion), then three Glacial Impacts at the unfrozen dummy; 704681 learned between the phases (the before phase is the no-talent control: every impact refused, 0). Forcing fixture (forced_roll, ADR 0588/0589, effect claims only, mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 704681 (15% x 11 > 100%), so the Command readies 801747; right after the Command the mutant is removed and 704681 unlearned, so the impacts cannot roll it again. Expected: 2 impacts go out (spell_go_count), the third is refused."
+    },
+    {
       "spell": 300580,
       "name": "Deadly Defense (one summon)",
       "kind": "taken_hit",

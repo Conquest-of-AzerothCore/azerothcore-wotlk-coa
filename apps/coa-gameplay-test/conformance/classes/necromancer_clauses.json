@@ -2611,12 +2611,13 @@
       {
         "claim": "your next 2 spells",
         "labels": [
-          "704681 behaviour_metric_delta charges"
+          "704681 behaviour_metric_delta charges",
+          "704681 behaviour_metric_delta next_two"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Claim \"your next 2 spells\" (M side c, state): the charges entry reads 801747 aura_charges 0 then 2 in both runs of the merged pair 20261113-043355 / -044317, a state read (data). Not final: behaviour route pending: three Glacial Impact 707402 casts at an unfrozen dummy after one proc, the first two allowed (treated as frozen) and the third refused, against a no-proc control refused at once; not built in the M window."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Claim \"your next 2 spells\" (M side c, state): the charges entry reads 801747 aura_charges 0 then 2 in both runs of the merged pair 20261113-043355 / -044317, a state read (data). Behaviour route (C5, ADR 0589): the next_two entry casts one Command: Undead 504868 with the roll forced and released right after it, then three Glacial Impact 707402 at an unfrozen dummy: 2 go out after the learn and 0 in the no-talent control in both runs of pilot 20261113-153145 / -153249."
   },
   {
     "spell": 704681,
