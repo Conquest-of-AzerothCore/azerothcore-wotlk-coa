@@ -95,6 +95,8 @@ def checked_minion_cooldown_entry(entry: dict) -> dict:
         raise ValueError(f'Minion cooldown-delta trigger {aura} reads cooldown_ms with a positive expected_delta_ms')
     if not entry.get('window_ms', 0) > 0:
         raise ValueError(f'Minion cooldown-delta trigger {aura} needs a positive window_ms')
+    if not isinstance(entry.get('observe_settle_ms', 0), int) or entry.get('observe_settle_ms', 0) < 0:
+        raise ValueError(f'Minion cooldown-delta trigger {aura} needs a non-negative integer observe_settle_ms')
     if entry.get('observe_target') not in (None, SELF, TARGET):
         raise ValueError(f'Minion cooldown-delta trigger {aura} casts its observed spell at self or the dummy')
     for fixture in entry.get('observe_cleared_auras', []):
@@ -440,7 +442,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
         return trigger['amplitude_ms']
     if trigger['action'] == MINION:
         if entry.get('kind') == COOLDOWN_DELTA_KIND:
-            return 2 * cast_interval(class_file, entry['observe_spell'], 0) + entry['window_ms']
+            return (2 * cast_interval(class_file, entry['observe_spell'], 0) + entry['window_ms']
+                    + entry.get('observe_settle_ms', 0))
         return trigger['swing_ms']
     cooldown = entry.get('internal_cooldown_ms', 0)
     if trigger['action'] == ATTACK:
@@ -929,6 +932,8 @@ def minion_cooldown_trial_steps(class_file: dict, entry: dict, count: int, phase
         held += [{'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER, 'spell': fixture['spell'],
                   'stacks': 1} for fixture in entry.get('observe_target_auras', [])]
         steps += cast_steps(facts, observe, target, 0, 1, power_steps(entry) + held)
+        if entry.get('observe_settle_ms'):
+            steps.append({'action': 'wait', 'label': f'{phase} settle', 'ms': entry['observe_settle_ms']})
         for moment in ('before', 'after'):
             if moment == 'after':
                 steps.append({'action': 'wait', 'label': f'{phase} minion window', 'ms': entry['window_ms']})
@@ -946,6 +951,9 @@ def minion_cooldown_rule(entry: dict) -> str:
                    f'set_aura ({fixture["source"]})' for fixture in entry.get('observe_cleared_auras', []))
     held += ''.join(f'; before each cast of {entry["observe_spell"]} the dummy gets {fixture["spell"]} from the caster '
                     f'by harness set_aura ({fixture["source"]})' for fixture in entry.get('observe_target_auras', []))
+    if entry.get('observe_settle_ms'):
+        held += (f'; each window starts {entry["observe_settle_ms"]} ms after the cast of {entry["observe_spell"]}, '
+                 f'once what that cast raises has expired')
     return (f'cooldown_ms of {entry["observe_spell"]} read before and after a {entry["window_ms"]} ms window in which '
             f'the creature {trigger["entry"]} raised by {trigger["spell"]} attacks the dummy with the caster; the '
             f'drop less the elapsed time, summed over at least {TRIGGER_TRIALS} windows, per {entry["trial_metric"]} '

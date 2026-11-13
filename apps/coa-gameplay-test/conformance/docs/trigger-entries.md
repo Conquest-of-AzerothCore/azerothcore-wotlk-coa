@@ -653,7 +653,10 @@ A `cooldown_delta` entry with the minion action reads, per window, the observed 
 counted events before and after `window_ms`; the judge sums the drop less the elapsed time per counted event against
 `expected_delta_ms` within 5%, and 0 per event over the baseline windows. `observe_target`, `observe_target_auras`
 and `observe_cleared_auras` set the observed cast's target and its precondition auras (Pandemic: Crypt Plague 570131
-on the dummy, Infestation 803782 cleared). A `kind: "cooldown_gate"` entry (`effect` and `label_suffix` to keep it
+on the dummy, Infestation 803782 cleared). `observe_settle_ms` waits that long after each observed cast before the
+window's first read, for what the cast itself raises to expire (Study of Death 704721: the 5 Greater Zombies of each
+Unholy Frenzy last 15 s and share the 1 s gate, so the window opens 17000 ms after the cast; ADR 0349). A
+`kind: "cooldown_gate"` entry (`effect` and `label_suffix` to keep it
 apart) primes the observed spell, lets the minion attack for `gate_wait_ms` and casts it again: refused
 (`SPELL_FAILED_NOT_READY`) without the passive, cast with it (check `trigger_cooldown_gate`, behaviour).
 

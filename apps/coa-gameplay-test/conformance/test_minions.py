@@ -25,6 +25,7 @@ OVERWHELMING_FORCE = 531128
 GHOUL = 50073
 RAISE_GHOUL = 500971
 VIRULENCY = 801938
+STUDY_OF_DEATH = 704721
 WINDOW_MS = 3000
 
 
@@ -265,6 +266,28 @@ class MinionScenarioTest(unittest.TestCase):
         self.assertTrue(set(baseline_labels(OVERWHELMING_FORCE).values()) <= labels)
         self.assertEqual({expectation.check for expectation in expectations}, {PROC_CHECK, PROC_ENERGIZE_CHECK})
         self.assertEqual(expectations[0].model['baseline']['attempts'], baseline_attempts(plan.chance_pct))
+
+    def test_study_of_death_windows_open_after_the_settle(self):
+        entry = necromancer_entry('triggers', STUDY_OF_DEATH, 'cooldown_delta')
+        scenario, expectations = minion_cooldown_scenario(NECROMANCER, entry)
+        steps = scenario['steps']
+        before = [index for index, step in enumerate(steps)
+                  if step.get('label') == cooldown_trial_label(STUDY_OF_DEATH, 'measured', 0, 'before')][0]
+        settle = steps[before - 1]
+        self.assertEqual((settle['action'], settle['label'], settle['ms']), ('wait', 'measured settle', 17000))
+        self.assertEqual(steps[before - 2]['action'], 'cast')
+        self.assertEqual(expectations[0].model['attempt_ms'], 2 * 500 + 3000 + 17000)
+        self.assertIn('17000 ms after the cast', expectations[0].rule)
+
+    def test_a_negative_settle_is_refused(self):
+        entry = {**necromancer_entry('triggers', STUDY_OF_DEATH, 'cooldown_delta'), 'observe_settle_ms': -1}
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
+    def test_pandemic_has_no_settle_step(self):
+        entry = necromancer_entry('triggers', PANDEMIC, 'cooldown_delta')
+        scenario, _ = minion_cooldown_scenario(NECROMANCER, entry)
+        self.assertFalse([step for step in scenario['steps'] if str(step.get('label', '')).endswith(' settle')])
 
 
 if __name__ == '__main__':
