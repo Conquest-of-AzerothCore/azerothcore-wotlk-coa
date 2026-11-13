@@ -268,9 +268,10 @@
     "spell": 300945,
     "clause": "Increases the Armor of your Undead minions by ${$m1+$ppl1}, scaling with your level.",
     "labels": [
-      "300945 effect_value e0 #0"
+      "300945 behaviour_metric_delta minion_armor"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Ghoul 50073 armor 32 -> 1232 (+1200, the tooltip token ${$m1+$ppl1} resolved at the reference level 60). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by 300, scaling with your level (unscaled base); sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 300958,
@@ -424,10 +425,22 @@
   {
     "spell": 301325,
     "clause": "Increases your Shadow and Frost damage dealt against Humanoids and Undead by $s1%.",
-    "labels": [
-      "301325 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases your Frost damage dealt against Undead by $s1%.",
+        "labels": [
+          "301325 behaviour_hit_ratio frost_undead"
+        ]
+      },
+      {
+        "claim": "Increases your Shadow damage dealt against Humanoids by $s1%.",
+        "labels": [
+          "301325 behaviour_hit_ratio shadow_humanoid"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Lichfrost (Frost) on a Mindless Zombie 1501 (Undead): ratio 1.08 (run 1 +8.005%, 99% interval +7.964% to +8.046%; run 2 +7.987%, +7.942% to +8.032%); Plague of Undeath 680928 (SchoolMask 40, Shadow and Nature) on a Kobold Vermin 6 (Humanoid): +7.998% both runs. Not measured: Frost against Humanoids, Shadow against Undead, and a non-matching school or type control (scope arms); the claims name the two pairs proven. G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul nothing found; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False)."
   },
   {
     "spell": 301326,
@@ -2016,9 +2029,10 @@
     "spell": 573426,
     "clause": "Reduces the cooldown of your Unholy Frenzy by $/1000;s1 sec.",
     "labels": [
-      "573426 effect_value e0 #0"
+      "573426 behaviour_metric_delta cooldown"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Unholy Frenzy 805029 remaining cooldown 300 ms after a real cast: 179694 without the talent, 119694 with it (-60000). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by -60 sec; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 574138,
@@ -2420,9 +2434,10 @@
     "spell": 704715,
     "clause": "Reduces the cast time of Sacrifice Undead by $/1000;S1 sec.",
     "labels": [
-      "704715 effect_value e0 #0"
+      "704715 behaviour_metric_delta cast_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Sacrifice Undead 805027 cast time (SpellInfo::CalcCastTime, the value Spell::prepare uses) 1500 -> 1000 ms. G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by -0.5 sec; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 704717,
@@ -2449,9 +2464,10 @@
     "spell": 704718,
     "clause": "Reduces the channel time of your Crypt Swarm by $s1%.",
     "labels": [
-      "704718 effect_value e0 #0"
+      "704718 behaviour_metric_delta channel_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Crypt Swarm 501886 duration (Unit::CalcSpellDuration + SPELLMOD_DURATION) 3000 -> 2250 ms (-25%). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by -25%; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 704721,
@@ -2579,9 +2595,10 @@
     "spell": 704729,
     "clause": "Increases your maximum Runic Power by $s1%.",
     "labels": [
-      "704729 effect_value e0 #0"
+      "704729 behaviour_metric_delta max_runic_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Maximum Runic Power 1000 -> 1200 (+20%). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: Increases your maximum Runic Power by 20%; sidekick found: same text; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 705745,
@@ -2755,10 +2772,22 @@
   {
     "spell": 706953,
     "clause": "Reduces the mana cost and cooldown of Sacrifice Undead by $s1%.",
-    "labels": [
-      "706953 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Reduces the mana cost of Sacrifice Undead by $s1%.",
+        "labels": [
+          "706953 behaviour_metric_delta cost"
+        ]
+      },
+      {
+        "claim": "Reduces the cooldown of Sacrifice Undead by $s1%.",
+        "labels": [
+          "706953 behaviour_metric_delta cooldown"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Sacrifice Undead 805027 mana cost (SpellInfo::CalcPowerCost) 274 -> 219 (x0.8 = 219.2, integer cost); remaining cooldown 2000 ms after a real cast: 29509 -> 23497/23507 (30000 -> 24000, -20%). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by -20%; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 707001,
@@ -2933,9 +2962,10 @@
     "spell": 707588,
     "clause": "Critical strikes with Frost spells now refund $707886s1% of your maximum mana.",
     "labels": [
-      "707588 effect_value 707886e0 #0"
+      "707588 behaviour_metric_delta crit_mana"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). 707886 mana energize after one forced-crit Lichfrost 501978: 0 without the talent, 85 with it (3% of a maximum mana in [2800, 2849]: 84 or 85). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: refund 3% of your maximum mana; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 707627,
@@ -2950,17 +2980,19 @@
     "spell": 707670,
     "clause": "Reduces the cast time of your Raise spells by $s1%.",
     "labels": [
-      "707670 effect_value e0 #0"
+      "707670 behaviour_metric_delta cast_time"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Raise: Ghoul 500971 cast time (SpellInfo::CalcCastTime) 1500 -> 1275 ms (-15%); one Raise spell read (the mask covers the Raise family bit). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by -15%; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 707739,
     "clause": "Reduces the Runic Power cost of Corpse Explosion by $/10;s1.",
     "labels": [
-      "707739 effect_value e0 #0"
+      "707739 behaviour_metric_delta cost"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Corpse Explosion 533236 Runic Power cost (SpellInfo::CalcPowerCost) 400 -> 200 (-20 Runic Power). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: by -20; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 707880,
@@ -3756,9 +3788,10 @@
     "spell": 805369,
     "clause": "Tap into necrotic energies, instantly regenerating $/10;s1 Runic Power.",
     "labels": [
-      "805369 effect_value e0 #0"
+      "805369 behaviour_metric_delta runic_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Energize logged by 805369: 0 without the cast (control), 300 (30 Runic Power) after one cast with Runic Power set to 0 first (the pilot plain power read was full at 1000, incorrect test corrected). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: instantly regenerating 30 Runic Power; sidekick found: same text; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 805424,
@@ -3781,8 +3814,22 @@
   {
     "spell": 805427,
     "clause": "Casting Unholy Frenzy now summons a Rotting Frost Giant to aid you in combat for the duration.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "Casting Unholy Frenzy now summons a Rotting Frost Giant to aid you in combat",
+        "labels": [
+          "805427 behaviour_metric_delta summon"
+        ]
+      },
+      {
+        "claim": "for the duration.",
+        "labels": [
+          "805427 behaviour_metric_delta lifetime"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Owned Rotting Frost Giant 51275 after a real Unholy Frenzy cast: 0 without the talent, 1 with it; present 14500 ms after the cast and gone 1000 ms later (15000 ms, Unholy Frenzy's duration). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: same text; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 805428,
@@ -4160,10 +4207,24 @@
   {
     "spell": 807960,
     "clause": "Increases your critical strike and hit chance by $s1%.",
-    "labels": [
-      "807960 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases your critical strike chance by $s1%",
+        "labels": [
+          "807960 behaviour_metric_delta spell_crit_chance",
+          "807960 behaviour_metric_delta melee_crit_chance"
+        ]
+      },
+      {
+        "claim": "and hit chance by $s1%.",
+        "labels": [
+          "807960 behaviour_metric_delta spell_hit_chance",
+          "807960 behaviour_metric_delta melee_hit_chance"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Frost spell crit 3.2817 -> 6.2817, melee crit against the dummy 7.52594 -> 10.5259 (both +3; trigger Well Fed 57329 so the crit field updates in both phases; pilot pairs read a stale PLAYER_CRIT_PERCENTAGE 0 before, incorrect test corrected), spell hit 1250 -> 1253, melee hit 1000 -> 1003 (+3). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: Increases your critical strike and hit chance by 3%; sidekick found: same text; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
   },
   {
     "spell": 500459,
@@ -4671,12 +4732,23 @@
   {
     "spell": 572177,
     "clause": "Increases the target's party and raid members resistance to Frost spells by $s1 for $d.",
-    "labels": [
-      "572177 effect_value e0 #0",
-      "572177 aura_amount e0 #0",
-      "572177 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Increases the target's party and raid members resistance to Frost spells for $d",
+        "labels": [
+          "572177 behaviour_cast_applies_aura duration",
+          "572177 behaviour_expiry duration"
+        ]
+      },
+      {
+        "claim": "resistance to Frost spells by $s1",
+        "labels": [
+          "572177 behaviour_metric_delta frost_resistance"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Frost resistance 0 -> 60 on the caster (Human, no racial Frost resistance); real cast at the grouped ally player: absent before, 1799997 ms left after, expiry pair at 1800000 ms. G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul nothing found; sidekick found: Chill of the Tomb texts without numbers; coa-obtainable not in the live capture or the calculator (advancement none, live_capture=False): acquisition of this rank is unconfirmed, recorded as an observation."
   },
   {
     "spell": 572214,
@@ -4722,12 +4794,23 @@
   {
     "spell": 572790,
     "clause": "Empowers raid and party members with a dark Mandate, increasing spell power by $s1 for $d.",
-    "labels": [
-      "572790 effect_value e0 #0",
-      "572790 aura_amount e0 #0",
-      "572790 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Empowers raid and party members with a dark Mandate for $d",
+        "labels": [
+          "572790 behaviour_cast_applies_aura duration",
+          "572790 behaviour_expiry duration"
+        ]
+      },
+      {
+        "claim": "increasing spell power by $s1",
+        "labels": [
+          "572790 behaviour_metric_delta spell_power"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Frost spell power 0 -> 62 on the caster; real cast at the grouped ally player: aura absent before, 1799997 ms left right after, present before and absent after its 1800000 ms end (expiry pair). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul nothing found; sidekick found: Grim Mandate texts without numbers; coa-obtainable not in the live capture or the calculator (advancement none, live_capture=False): acquisition of this rank is unconfirmed, recorded as an observation."
   },
   {
     "spell": 680286,
