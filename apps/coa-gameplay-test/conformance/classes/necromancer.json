@@ -16226,8 +16226,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "expected_source": "707006 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +10 ($s1, BasePoints 9 + 1) on the Lichfrost mask (Lichfrost 501978 the level-60 rank it matches). No CoA code names 707006. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned (a real learn); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+      "trials": 62,
+      "expected_source": "707006 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +10 ($s1, BasePoints 9 + 1) on the Lichfrost mask (Lichfrost 501978 the level-60 rank it matches). No CoA code names 707006. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned (a real learn); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast. Trials 62 per arm in the class file (the merged pair runs plain generate; pair f4 at 20 trials read insufficient_trials, its sizing asked for 62)."
     },
     {
       "spell": 707881,
@@ -16259,8 +16259,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "expected_source": "707881 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +20 ($s1, BasePoints 19 + 1) on the Lichfrost mask (Lichfrost 501978). No CoA code names 707881. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+      "trials": 45,
+      "expected_source": "707881 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +20 ($s1, BasePoints 19 + 1) on the Lichfrost mask (Lichfrost 501978). No CoA code names 707881. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast. Trials 45 per arm in the class file (the merged pair runs plain generate; pair f4 at 20 trials read insufficient_trials, its sizing asked for 41)."
     },
     {
       "spell": 704670,
