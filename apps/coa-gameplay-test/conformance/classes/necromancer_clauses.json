@@ -323,7 +323,9 @@
     "spell": 300960,
     "clause": "Increases the critical strike chance of Flesh to Worms by $s1% against enemies below 35% maximum health.",
     "labels": [
-      "300960 effect_value e0 #0"
+      "300960 effect_value e0 #0",
+      "300960 behaviour_hit_ratio low_health_crit_rate",
+      "300960 behaviour_hit_ratio high_health_crit_rate"
     ],
     "kind": "claim",
     "reason": "Route pending (M side c, sized, not built): a crit_rate entry on Flesh to Worms 500338 ticks (periodic crit granted by FN-c4-1, ADR 0442) with the dummy below 35% health (a fixture allowed for a crit claim) against the same without 300960; the band for $s1 = 25 points is 23..27, and at a natural rate near 5% the 99% Newcombe half-width reaches 2 points only at about 4300 ticks per arm (1 tick per 3 s), beyond the accelerated cap of one scenario; a spell crit fixture cannot help (a -1000 fixture would also cancel the +25). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Creeping Crypt\" 0 lines by name, 0 lines by id 300960; ~/CoaServer/reference: bindmysoul \"Increases the critical strike chance of Flesh to Worms by 25% against enemies below 35% maximum health.\", sidekick coaKits names it (3 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23 level 0; sources.md followed; MCP not queried (unavailable)."
@@ -2711,7 +2713,6 @@
           "704724 spell_duration 572777 #1",
           "704724 cost_gate 504868 free_next without",
           "704724 cost_gate 504868 free_next with",
-          "704724 cost_gate 504868 free_next next",
           "704724 cost_gate 504868 free_next released"
         ]
       }
