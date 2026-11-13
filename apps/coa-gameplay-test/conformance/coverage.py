@@ -450,7 +450,7 @@ STATE_PROMISES = {
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
-    'casting': r'\bcast\w*',
+    'casting': r'\bcast\w*|haste',
     'item_count': r'creat\w*',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
