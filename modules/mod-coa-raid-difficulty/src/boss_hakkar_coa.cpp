@@ -38,6 +38,10 @@
  *   Fierce Blow       tank, first 6.7-17.3s, then every 6-10s
  *   Berserk            at 10 minutes
  *
+ * Straight to the Heart: killing him while all five High Priests live credits
+ * the achievement of the difficulty (its criterion is "be the target of"
+ * 2107157-2107160, one spell per difficulty).
+ *
  * Decided here, not in the data:
  *   - the siphon's length and where the heart appears;
  *   - the DBM bar "Pet Wind Serpent" (every 60s) is read as the wave of Sons of
@@ -150,6 +154,7 @@ namespace
     constexpr float HEART_HEIGHT         = 8.0f;
     constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
     constexpr std::array<uint32, 4> CORRUPTED_BLOOD_VARIANTS = { 2118601, 2118602, 2118603, 2118604 };
+    constexpr std::array<uint32, 4> STRAIGHT_TO_THE_HEART = { 2107157, 2107158, 2107159, 2107160 };
 
     // The launch-day Normal kill (youtube c7iqfz04PmI) gives each player 2500 Runes of Ascension in one loot slot,
     // more than a loot row's 8-bit count holds, so they are handed out at his death instead.
@@ -294,6 +299,18 @@ namespace
             BossAI::JustDied(killer);
             CleanseCorruptedBlood();
             GrantRunes();
+            CreditStraightToTheHeart();
+        }
+
+        void CreditStraightToTheHeart()
+        {
+            for (uint32 priest = DATA_JEKLIK; priest < DATA_HAKKAR; ++priest)
+                if (instance->GetBossState(priest) == DONE)
+                    return;
+            uint8 const spawnMode = me->GetMap()->GetSpawnMode();
+            if (spawnMode < STRAIGHT_TO_THE_HEART.size())
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,
+                    STRAIGHT_TO_THE_HEART[spawnMode], 0, me);
         }
 
         void CleanseCorruptedBlood()
