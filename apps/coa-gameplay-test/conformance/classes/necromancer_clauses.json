@@ -1134,10 +1134,11 @@
     "spell": 503738,
     "clause": "In addition, increases the damage of Corpse Explosion by $s2%.",
     "labels": [
-      "503738 effect_value e1 #1"
+      "503738 behaviour_metric_delta corpse_explosion_damage",
+      "533239 behaviour_metric_delta corpse_explodes"
     ],
     "kind": "claim",
-    "reason": " Open, route pending: Corpse Explosion 533236 explodes non-Mechanical, non-Elemental corpses within 15 yd (AscensionNecromancerAbilities.cpp:18-38) and Factor() gives 533240 x1.25 with 503738 (AscensionNecromancerContracts.cpp:420-421); no scenario places a corpse (a creature killed in the scenario); route: kill a Kobold Vermin 6 dummy, then read 533240 on an enemy player near it with and without 503738."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; control: the same cast with no corpse explodes nothing). Corpse fixture (named precondition, ADR 0493): a level-60 creature with 100 health 5 yd from the caster, killed by a real Void Zone 92559 cast, the alive dummy 3 yd away the enemy near it; no-crit 984954 and spell-penetration 823764 fixtures on the caster. With Corpse Wagon known, the Humanoid corpse's explosion deals 678 to the dummy; without it 528 on the same build (corpse_explodes): 678 = 528 x 1.03 (Effect[0] +3% all damage, claim 74.0) x 1.25 with an integer damage between the factors (679.8 before truncation, judged to the rounding); 25% stated, inside the G-19 band. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, creature_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 533240 2677 hits ('Corpse Explosion' 2779 by name, median 730, 1 to 24 targets per cast), 533239 93 lines; the logs carry no corpse type or caster spell power, so they do not decide the amount or the exclusion; MCP not queried (unavailable)."
   },
   {
     "spell": 503740,
@@ -4687,18 +4688,22 @@
     "spell": 533239,
     "clause": "Explode all nearby corpses, each dealing ${$m1+$SP*.55} Plague damage to all enemies within $533240A1 yds.",
     "labels": [
-      "533239 effect_value e0 #0",
-      "533239 effect_radius 533240e0 #1"
+      "533239 behaviour_metric_delta corpse_explodes",
+      "533239 behaviour_metric_delta corpse_explodes_sp"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 533240 2660 hits, median 730, 1 to 24 targets per cast. Open, route pending: no scenario places a corpse (a creature killed in the scenario); CorpseExplosion() explodes non-Mechanical, non-Elemental corpses within 15 yd (AscensionNecromancerAbilities.cpp:18-38)."
+    "reason": "Not final: the amount part is behaviour on M side b counted pair PAIRID (build BUILDID, 2 runs, 0 flips; control: the same cast with no corpse explodes nothing); the radius and several-corpse parts are open (route pending: a second enemy just inside and just outside 10 yd of the corpse needs a second dummy placement in metric_delta). Corpse fixture (named precondition, ADR 0493): a level-60 creature with 100 health 5 yd from the caster, killed by a real Void Zone 92559 cast, the alive dummy 3 yd away the enemy near it; no-crit 984954 and spell-penetration 823764 fixtures on the caster. A Kobold Vermin 6 (Humanoid) corpse explodes for 528 on the dummy at spell power 0 ($m1 at level 60: 513 + 2.536 x 6 = 528) and 1078 at spell power 1000 (528 + 1000 x .55), exact; no corpse (control): 0. Not read: the radius $533240A1 (a second enemy beyond 10 yd of the corpse; CorpseExplosion() uses Nearby(corpse, 10.0f)) and several corpses at once. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, creature_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 533240 2677 hits ('Corpse Explosion' 2779 by name, median 730, 1 to 24 targets per cast), 533239 93 lines; the logs carry no corpse type or caster spell power, so they do not decide the amount or the exclusion; MCP not queried (unavailable)."
   },
   {
     "spell": 533239,
     "clause": "Does not affect mechanical or elemental corpses.",
-    "labels": [],
+    "labels": [
+      "533239 behaviour_metric_delta mechanical_corpse",
+      "533239 behaviour_metric_delta elemental_corpse",
+      "533239 behaviour_metric_delta corpse_explodes"
+    ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: as the previous clause; the contrast would be a Mechanical corpse (Harvest Golem 36) beside a Humanoid one."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; control: the same cast with no corpse explodes nothing). Corpse fixture (named precondition, ADR 0493): a level-60 creature with 100 health 5 yd from the caster, killed by a real Void Zone 92559 cast, the alive dummy 3 yd away the enemy near it; no-crit 984954 and spell-penetration 823764 fixtures on the caster. A Rusty Harvest Golem 480 (Mechanical) corpse and a Timberling 2022 (Elemental) corpse do not explode (0 damage on the dummy); a Kobold Vermin 6 (Humanoid) corpse does (528, corpse_explodes, the control). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, creature_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 533240 2677 hits ('Corpse Explosion' 2779 by name, median 730, 1 to 24 targets per cast), 533239 93 lines; the logs carry no corpse type or caster spell power, so they do not decide the amount or the exclusion; MCP not queried (unavailable)."
   },
   {
     "spell": 562213,

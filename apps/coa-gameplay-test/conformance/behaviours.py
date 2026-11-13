@@ -1342,6 +1342,7 @@ class MetricDeltaSpec:
     trigger_item: int | None = None
     phase_power: tuple[int, int, int] | None = None
     caster_health: tuple[int, int] | None = None
+    corpse: tuple[int, int, float] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1384,6 +1385,17 @@ def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if not 0 < strike.health <= strike.max_health or strike.count < 1:
         raise ValueError('metric_delta strike needs 0 < health <= max_health and at least one strike')
     return strike
+CORPSE = 'corpse'
+
+
+def metric_delta_corpse(raw: dict | None) -> tuple[int, int, float] | None:
+    if raw is None:
+        return None
+    if set(raw) != {'entry', 'health', 'distance'} or int(raw['health']) < 1 or float(raw['distance']) <= 0:
+        raise ValueError(f'metric_delta corpse {raw!r} needs an entry, a positive health and a distance')
+    return int(raw['entry']), int(raw['health']), float(raw['distance'])
+
+
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
 
 
@@ -1465,8 +1477,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'the wait and between 0 and 100 percent')
     if spec.target_casts_before and (spec.target != TARGET or spec.attack_swings):
         raise ValueError(f'{spec.spell} has the dummy cast before the trigger only with the dummy as its target')
+    if spec.setup_target == CORPSE and (spec.corpse is None or not spec.setup_only_after):
+        raise ValueError(f'{spec.spell} kills a corpse fixture only when it declares one, in the treatment phase only')
+    if spec.corpse is not None and spec.setup_target != CORPSE:
+        raise ValueError(f'{spec.spell} declares a corpse fixture that no setup cast kills')
     if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
-                                          or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER)):
+                                          or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER, CORPSE)):
         raise ValueError(f'{spec.spell} names a setup target without setup casts, or one that is not a scenario unit')
     if spec.expected_ratio is not None and (spec.expected_gain is not None or spec.after_at_least is not None
                                             or spec.expiry_wait_ms is not None or spec.tolerance is None
@@ -1709,6 +1725,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             scenario['creatures'][0]['entry'] = spec.target_entry
     elif spec.target_entry is not None:
         raise ValueError(f'{spec.spell} names a target entry without the dummy in its scenario')
+    if spec.corpse is not None:
+        entry_id, health, distance = spec.corpse
+        scenario.setdefault('creatures', []).append(
+            {'id': CORPSE, 'owner': CASTER, 'entry': entry_id, 'level': class_file['level'], 'health': health,
+             'distance': distance, 'stationary': True})
     if spec.player_ratings:
         unknown = {key for key, _ in spec.player_ratings} - set(class_file.get('ratings', {}))
         if unknown:
@@ -1776,7 +1797,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            None if entry.get('phase_power') is None
                            else tuple(int(value) for value in entry['phase_power']),
                            None if entry.get('caster_health') is None
-                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])))
+                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
+                           metric_delta_corpse(entry.get('corpse')))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
