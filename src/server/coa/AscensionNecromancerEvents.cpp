@@ -115,14 +115,15 @@ class aura_ascension_necromancer_event : public AuraScript
                     if (Aura* stacks = player->GetAura(707133))
                         stacks->ModStackAmount(-1);
             }
+            bool const periodicParasites = periodic && Chance(player, 561319);
+            if (periodicParasites || Chance(player, 560730))
+                Cast(player, target, 560729);
             if (periodic)
             {
                 if (Chance(player, 300235))
                     BuffArmy(player, 301334, true);
                 if (player->HasAura(573223))
                     Copy(player, target, 573242, uint64(damage) * 20 / 100);
-                if (Chance(player, 561319) || Chance(player, 560730))
-                    Cast(player, target, 560729);
                 if (Chance(player, 806086))
                     Summon(player, 806087, target, target->GetPosition());
                 if (Chance(player, 807700))

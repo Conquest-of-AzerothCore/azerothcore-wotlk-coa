@@ -761,6 +761,28 @@ class ProcScenarioTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             proc_scenario(CLASS_FILE, entry)
 
+    def test_an_attempt_aura_can_hold_a_dummy_state_before_every_cast(self):
+        entry = {**templar_proc(CONDEMNATION),
+                 'attempt_auras': [{'spell': 22856, 'stacks': 1, 'source': 'seeded', 'target': 'dummy'}]}
+        steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        for earlier, cast in zip([0] + casts, casts):
+            fixtures = [step for step in steps[earlier:cast] if step['action'] == 'set_aura' and step['spell'] == 22856]
+            self.assertEqual([step.get('target') for step in fixtures], ['dummy'])
+
+    def test_an_attempt_aura_on_another_unit_is_refused(self):
+        entry = {**templar_proc(CONDEMNATION),
+                 'attempt_auras': [{'spell': 22856, 'stacks': 1, 'source': 'seeded', 'target': 'ally'}]}
+        with self.assertRaises(ValueError):
+            proc_scenario(CLASS_FILE, entry)
+
+    def test_an_energize_count_is_a_proc_event(self):
+        entry = {**templar_proc(CONDEMNATION), 'event_metric': 'spell_energize_count'}
+        steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
+        reads = [step for step in steps if step.get('metric') == 'spell_energize_count']
+        self.assertTrue(reads)
+        self.assertTrue(all(step['spell'] == entry['proc_spell'] and 'target' not in step for step in reads))
+
     def test_an_applied_by_without_its_source_is_refused(self):
         entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN}}
         with self.assertRaises(ValueError):

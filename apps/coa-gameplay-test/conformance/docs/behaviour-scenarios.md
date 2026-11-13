@@ -1039,6 +1039,9 @@ harness reads a player's own heals), and `target` (default the dummy). An `ally`
 player. The arms' `auras` are still set on the caster, so a talent set in the treatment arm reaches healing done when
 the caster heals and healing received when the ally heals the caster. The caster is armed for the observed rank
 (`values.armed_for`), so a rank that needs a weapon class can be observed.
+`cast_unit_auras` (`[[spell, stacks], ...]`, ADR 0494) are set on the casting unit before every cast in both arms,
+the ally when it casts: a precondition fixture on the unit whose hits are read (Corpse Wagon 503738 party: 823764 on
+the casting ally removes its partial resists). Swing entries refuse them.
 With a player `target`, `target_health_pct` sets that player to the percent of the fixture maximum before every
 observed and warm-up heal instead of holding the dummy once, for a heal whose script only reacts to a healed amount
 (Light's Guidance 524765 casts nothing after a Benediction on a target at full health).
@@ -1774,6 +1777,24 @@ creature `entry` (harness `repair_at`, the real `CMSG_REPAIR_ITEM` handler): bef
 after it for the caster, the ally and the enemy. Each worn and repaired reading of `equipped_durability` (the item's
 entry) is judged exactly: refused requests keep the worn value, granted ones restore `full`. Animate: Skeletal Smith
 804681 repairs the caster and the ally, not the enemy.
+
+### Corpse fixture (`metric_delta` `corpse`, ADR 0493)
+
+`corpse` (`{"entry", "health", "distance"}`) adds a creature `corpse` of that entry, at the class level, with that
+health, `distance` yd from the caster. A `setup_only_after` entry kills it with a real cast (`setup_target:
+"corpse"`, for example Void Zone 92559 for 1000 Physical damage) in the treatment phase only, so the control phase has
+no corpse. Corpse Explosion 533239: a Humanoid corpse explodes on the dummy near it, a Mechanical (480) or an Elemental
+(2022) corpse does not.
+
+### Item cooldown gate (`behaviour_cast_condition`, `kind: "item_cooldown_gate"`, ADR 0492)
+
+A grouped ally holds `item` (a named precondition fixture: the caster creates it and hands it out) and uses it through
+the real item-use handler (harness `use_item`): first with no earlier use (accepted, the control), then
+`cooldown_ms - margin_ms` after the first use (refused, 67 SPELL_FAILED_NOT_READY) and `cooldown_ms + margin_ms`
+after it (accepted). Each attempt reads the ally's `cast_failure` of `item_spell` and its completed `spell_go_count`
+(1, 1, 2), judged exactly. With `shared_item`/`shared_spell`, the ally uses that item right after the second accepted
+use: refused for a shared cooldown. Create Bone Reliquary 803771 and Create Frozen Reliquary 803777: "Allies may only
+use a ... once per minute."
 
 ### Strike bursts (`behaviour_metric_delta`, `kind: "strike_bursts"`, ADR 0383)
 

@@ -1261,5 +1261,38 @@ class OwnedCreatureDisplayPromiseTest(unittest.TestCase):
         self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
         self.assertEqual(METRIC_EVIDENCE['owned_creature_display'], STATE)
 
+
+class RunicPowerPromiseTest(unittest.TestCase):
+    def test_a_learned_power_contrast_proves_a_runic_power_gain_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta runic_power', BEHAVIOUR_METRIC_DELTA, 'power',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Your Glacial Impact now generates $/10;804111s1 Runic Power.',
+                         '1 behaviour_metric_delta runic_power')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your Frost damage by $s1%.', '1 behaviour_metric_delta runic_power')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_the_power_promise_keeps_its_other_resources(self):
+        verdicts = [judged('1 behaviour_metric_delta spent', BEHAVIOUR_METRIC_DELTA, 'power',
+                           contrast=LEARNED_CONTRAST)]
+        for words in ('Reduces the mana cost of Sacrifice Undead by $s1%.', 'restores $s1 Energy',
+                      'Reduces the Runic Power cost of Corpse Explosion by $/10;s1.'):
+            self.assertEqual(evidence_of([claim(words, '1 behaviour_metric_delta spent')], verdicts)[0], [BEHAVIOUR])
+
+
+class ServerPacketEvidenceTest(unittest.TestCase):
+    def test_a_learned_damage_shield_packet_read_is_an_event(self):
+        verdicts = [judged('1 behaviour_metric_delta shield_damage', BEHAVIOUR_METRIC_DELTA, 'server_packet_u32',
+                           contrast=LEARNED_CONTRAST),
+                    judged('1 behaviour_metric_delta shield_hits', BEHAVIOUR_METRIC_DELTA, 'server_packets',
+                           contrast=LEARNED_CONTRAST)]
+        for label in ('1 behaviour_metric_delta shield_damage', '1 behaviour_metric_delta shield_hits'):
+            proved = claim('causing ${$m1+0} Frost damage to attackers when hit.', label)
+            self.assertEqual(evidence_of([proved], verdicts)[0], [BEHAVIOUR])
+
+    def test_server_packet_reads_are_event_reads(self):
+        self.assertEqual({METRIC_EVIDENCE[name] for name in ('server_packets', 'server_packet_u32')}, {EVENT})
+
+
 if __name__ == '__main__':
     unittest.main()

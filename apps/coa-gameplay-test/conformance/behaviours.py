@@ -82,7 +82,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
-        'strike_bursts', 'aura_expiry')
+        'strike_bursts', 'aura_expiry', 'item_cooldown_gate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1343,6 +1343,7 @@ class MetricDeltaSpec:
     phase_power: tuple[int, int, int] | None = None
     caster_health: tuple[int, int] | None = None
     forced_chance: tuple[int, int, int] | None = None
+    corpse: tuple[int, int, float] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1389,6 +1390,17 @@ def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if type(strike.in_before) is not bool or (strike.in_before and strike.after_trigger_ms is not None):
         raise ValueError('metric_delta strike in_before is a boolean, for a strike before the trigger only')
     return strike
+CORPSE = 'corpse'
+
+
+def metric_delta_corpse(raw: dict | None) -> tuple[int, int, float] | None:
+    if raw is None:
+        return None
+    if set(raw) != {'entry', 'health', 'distance'} or int(raw['health']) < 1 or float(raw['distance']) <= 0:
+        raise ValueError(f'metric_delta corpse {raw!r} needs an entry, a positive health and a distance')
+    return int(raw['entry']), int(raw['health']), float(raw['distance'])
+
+
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
 
 
@@ -1514,8 +1526,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'the wait and between 0 and 100 percent')
     if spec.target_casts_before and (spec.target != TARGET or spec.attack_swings):
         raise ValueError(f'{spec.spell} has the dummy cast before the trigger only with the dummy as its target')
+    if spec.setup_target == CORPSE and (spec.corpse is None or not spec.setup_only_after):
+        raise ValueError(f'{spec.spell} kills a corpse fixture only when it declares one, in the treatment phase only')
+    if spec.corpse is not None and spec.setup_target != CORPSE:
+        raise ValueError(f'{spec.spell} declares a corpse fixture that no setup cast kills')
     if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
-                                          or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER)):
+                                          or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER, CORPSE)):
         raise ValueError(f'{spec.spell} names a setup target without setup casts, or one that is not a scenario unit')
     if spec.expected_ratio is not None and (spec.expected_gain is not None or spec.after_at_least is not None
                                             or spec.expiry_wait_ms is not None or spec.tolerance is None
@@ -1768,6 +1784,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             scenario['creatures'][0]['entry'] = spec.target_entry
     elif spec.target_entry is not None:
         raise ValueError(f'{spec.spell} names a target entry without the dummy in its scenario')
+    if spec.corpse is not None:
+        entry_id, health, distance = spec.corpse
+        scenario.setdefault('creatures', []).append(
+            {'id': CORPSE, 'owner': CASTER, 'entry': entry_id, 'level': class_file['level'], 'health': health,
+             'distance': distance, 'stationary': True})
     if spec.player_ratings:
         unknown = {key for key, _ in spec.player_ratings} - set(class_file.get('ratings', {}))
         if unknown:
@@ -1841,7 +1862,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            else tuple(int(value) for value in entry['phase_power']),
                            None if entry.get('caster_health') is None
                            else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
-                           forced_chance_of(entry.get('forced_chance')))
+                           forced_chance_of(entry.get('forced_chance')),
+                           metric_delta_corpse(entry.get('corpse')))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -5663,6 +5685,7 @@ class HitRatioSpec:
     ally_distance: float | None = None
     stated: tuple[float, tuple[float, ...]] | None = None
     stated_truncated: bool = False
+    cast_unit_auras: tuple[tuple[int, int], ...] = ()
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -5806,6 +5829,9 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
         for trial in range(1, spec.trials + 1):
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks,
+                       **({'target': spec.caster} if spec.caster != CASTER else {})}
+                      for spell, stacks in spec.cast_unit_auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
             if arm.target_health_pct is not None:
@@ -5894,6 +5920,8 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
             spec.cast_spell == spec.observe_spell or spec.cast_wait_ms < 0:
         raise ValueError(f'{spec.spell} hit_ratio casts {spec.cast_spell} to read the hits of another spell, with a '
                          f'non-negative cast_wait_ms and no swings')
+    if spec.cast_unit_auras and swinging:
+        raise ValueError(f'{spec.spell} hit_ratio cast_unit_auras hold a fixture on a casting unit, not a swing')
     if spec.ally_distance is not None and (ALLY not in (spec.caster, spec.target) or spec.ally_distance < 0):
         raise ValueError(f'{spec.spell} hit_ratio groups the ally at {spec.ally_distance} yd, which needs the ally as '
                          f'its caster or target and a distance not below 0')
@@ -6020,7 +6048,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         entry.get('expected_points'), entry.get('ally_distance'),
                         None if entry.get('stated') is None else
                         (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])),
-                        bool((entry.get('stated') or {}).get('truncated', False)))
+                        bool((entry.get('stated') or {}).get('truncated', False)),
+                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('cast_unit_auras', ())))
 
 
 CRIT_RATE_TRIALS = 300
@@ -7613,6 +7642,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return heal_block_scenario(class_file, heal_block_spec(entry))
     if entry['kind'] == 'npc_repair':
         return npc_repair_scenario(class_file, npc_repair_spec(entry))
+    if entry['kind'] == 'item_cooldown_gate':
+        return item_cooldown_gate_scenario(class_file, item_cooldown_gate_spec(entry))
     if entry['kind'] == 'strike_bursts':
         return strike_bursts_scenario(class_file, strike_bursts_spec(entry))
     if entry['kind'] == 'aura_expiry':
@@ -7863,6 +7894,86 @@ def npc_repair_scenario(class_file: dict, spec: NpcRepairSpec) -> tuple[dict, li
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY},
                     {**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': 2}],
         'location': dict(TAKEN_HIT_PVP_LOCATION),
+        'steps': steps}
+    return scenario, expectations
+
+
+@dataclass(frozen=True)
+class ItemCooldownGateSpec:
+    spell: int
+    name: str
+    quote: str
+    item: int
+    item_spell: int
+    cooldown_ms: int
+    shared_item: int | None = None
+    shared_spell: int | None = None
+    margin_ms: int = COST_GATE_MARGIN_MS
+    read_ms: int = 500
+
+
+ITEM_COOLDOWN_GATE_ARMS = ('first', 'early', 'ready')
+
+
+def item_cooldown_gate_label(spec: ItemCooldownGateSpec, arm: str, metric: str) -> str:
+    return f'{spec.spell} item_cooldown_gate {spec.item} {arm} {metric}'
+
+
+def item_cooldown_gate_spec(entry: dict) -> ItemCooldownGateSpec:
+    spec = ItemCooldownGateSpec(entry['spell'], entry['name'], entry['quote'], entry['item'], entry['item_spell'],
+                                int(entry['cooldown_ms']), entry.get('shared_item'), entry.get('shared_spell'),
+                                int(entry.get('margin_ms', COST_GATE_MARGIN_MS)))
+    if (spec.shared_item is None) != (spec.shared_spell is None):
+        raise ValueError(f'{spec.spell} item_cooldown_gate names a shared item and its spell together')
+    if not spec.read_ms < spec.cooldown_ms - spec.margin_ms - spec.read_ms:
+        raise ValueError(f'{spec.spell} item_cooldown_gate cooldown {spec.cooldown_ms} ms leaves no early attempt')
+    return spec
+
+
+def item_cooldown_gate_scenario(class_file: dict, spec: ItemCooldownGateSpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'item_cooldown_gate', spec.quote, float(spec.cooldown_ms))
+    rule = prose_rule(entry.quote, spec.spell)
+    model = {'kind': 'item_cooldown_gate', 'quote': entry.quote, 'cooldown_ms': spec.cooldown_ms}
+    steps = base_steps(class_file) + [{'action': 'group', 'actor': CASTER, 'target': ALLY},
+                                      {'action': 'add_item', 'actor': ALLY, 'item': spec.item, 'count': 3}]
+    if spec.shared_item is not None:
+        steps.append({'action': 'add_item', 'actor': ALLY, 'item': spec.shared_item})
+    expectations = []
+
+    def attempt(arm: str, item: int, spell: int, refused: bool, completed: int | None) -> list[dict]:
+        failure = item_cooldown_gate_label(spec, arm, 'cast_failure')
+        expectations.append(Expectation(failure, BEHAVIOUR_CAST_CONDITION, spec.spell, spell, None,
+                                        str(SPELL_FAILED_NOT_READY if refused else NO_CAST_FAILURE), rule,
+                                        {**model, 'arm': arm, 'item': item}))
+        reads = [measurement(failure, ALLY, 'cast_failure', spell=spell)]
+        if completed is not None:
+            casts = item_cooldown_gate_label(spec, arm, 'spell_go_count')
+            expectations.append(Expectation(casts, BEHAVIOUR_CAST_CONDITION, spec.spell, spell, None, str(completed),
+                                            rule, {**model, 'arm': arm, 'item': item}))
+            reads.append(measurement(casts, ALLY, 'spell_go_count', spell=spell))
+        return ([{'action': 'use_item', 'actor': ALLY, 'item': item, 'spell': spell},
+                 {'action': 'wait', 'label': f'{arm} read', 'ms': spec.read_ms}] + reads)
+
+    early_ms = spec.cooldown_ms - spec.margin_ms
+    steps += attempt('first', spec.item, spec.item_spell, False, 1)
+    steps += [{'action': 'wait', 'label': 'until just before the cooldown ends', 'ms': early_ms - spec.read_ms}]
+    steps += attempt('early', spec.item, spec.item_spell, True, 1)
+    steps += [{'action': 'wait', 'label': 'until just after the cooldown ends',
+               'ms': 2 * spec.margin_ms - spec.read_ms}]
+    steps += attempt('ready', spec.item, spec.item_spell, False, 2)
+    if spec.shared_item is not None:
+        steps += attempt('shared', spec.shared_item, spec.shared_spell, True, None)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour item cooldown gate',
+        'contract': f'A grouped ally uses item {spec.item} (its spell {spec.item_spell}) through the real item-use '
+                    f'handler: accepted first, refused {early_ms} ms later, accepted again '
+                    f'{spec.cooldown_ms + spec.margin_ms} ms after the first use'
+                    + (f', and item {spec.shared_item} (spell {spec.shared_spell}) refused right after it'
+                       if spec.shared_item is not None else '')
+                    + f', proving the "{spec.quote}" clause.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
         'steps': steps}
     return scenario, expectations
 

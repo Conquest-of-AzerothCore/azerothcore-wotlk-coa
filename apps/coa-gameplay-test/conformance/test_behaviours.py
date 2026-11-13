@@ -65,6 +65,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
+from behaviours import item_cooldown_gate_spec
 from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
@@ -11061,6 +11062,89 @@ class AuraExpiryTests(unittest.TestCase):
                            released=1.0)
         self.assertEqual(kept.status, 'alert')
 
+
+class ItemCooldownGateTests(unittest.TestCase):
+    def entry(self, spell: int) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry['kind'] == 'item_cooldown_gate')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_ally_uses_the_item_before_and_after_its_cooldown(self):
+        scenario, expectations = behaviour_scenario(load_class_file(23), self.entry(803771))
+        run.validate(scenario)
+        self.assertEqual({player['id'] for player in scenario['players']}, {CASTER, ALLY})
+        uses = [step for step in scenario['steps'] if step['action'] == 'use_item']
+        self.assertEqual([(step['actor'], step['item']) for step in uses],
+                         [(ALLY, 11521), (ALLY, 11521), (ALLY, 11521), (ALLY, 555555)])
+        expected = {expectation.label.split(' 11521 ')[1]: expectation.displayed for expectation in expectations}
+        self.assertEqual(expected, {'first cast_failure': '0', 'first spell_go_count': '1',
+                                    'early cast_failure': '67', 'early spell_go_count': '1',
+                                    'ready cast_failure': '0', 'ready spell_go_count': '2',
+                                    'shared cast_failure': '67'})
+        first = next(index for index, step in enumerate(scenario['steps']) if step['action'] == 'use_item')
+        waits = [step['ms'] for step in scenario['steps'][first:] if step['action'] == 'wait']
+        self.assertEqual(sum(waits[:2]), 59500)
+        self.assertEqual(sum(waits[:4]), 60500)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_early_use_that_goes_through_alerts(self):
+        _, expectations = behaviour_scenario(load_class_file(23), self.entry(803777))
+        early = next(expectation for expectation in expectations if expectation.label.endswith('early cast_failure'))
+        self.assertEqual(judge_behaviour(base_verdict(early), FakeRun({early.label: 0.0}), early).status, 'alert')
+        self.assertEqual(judge_behaviour(base_verdict(early), FakeRun({early.label: 67.0}), early).status, 'ok')
+
+    def test_a_shared_item_needs_its_spell(self):
+        with self.assertRaises(ValueError):
+            item_cooldown_gate_spec({'spell': 1, 'name': 'n', 'quote': 'q', 'item': 2, 'item_spell': 3,
+                                     'cooldown_ms': 60000, 'shared_item': 4})
+
+
+class CorpseFixtureTests(unittest.TestCase):
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_corpse_is_killed_by_a_real_cast_in_the_treatment_phase_only(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry(533239, 'mechanical_corpse'))
+        run.validate(scenario)
+        corpse = next(creature for creature in scenario['creatures'] if creature['id'] == 'corpse')
+        self.assertEqual((corpse['entry'], corpse['health'], corpse['distance']), (480, 100, 5.0))
+        kills = [step for step in scenario['steps'] if step['action'] == 'cast' and step.get('target') == 'corpse']
+        self.assertEqual([step['spell'] for step in kills], [92559])
+        explosions = [index for index, step in enumerate(scenario['steps'])
+                      if step['action'] == 'cast' and step['spell'] == 533239]
+        kill = scenario['steps'].index(kills[0])
+        self.assertTrue(explosions[0] < kill < explosions[1])
+
+    def test_a_corpse_needs_its_killing_cast_and_the_treatment_phase(self):
+        entry = self.entry(533239, 'corpse_explodes')
+        for change in ({'setup_only_after': False}, {'setup_target': 'dummy'}, {'corpse': {'entry': 6}}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                behaviour_scenario(load_class_file(23), {**entry, **change})
+
+
+class CastUnitAuraTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 503738 and entry.get('label_suffix') == 'party')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_unit_aura_lands_on_the_casting_ally_before_every_cast(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry())
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == ALLY]
+        self.assertTrue(casts)
+        for earlier, cast in zip([0] + casts, casts):
+            fixtures = [step for step in steps[earlier:cast] if step['action'] == 'set_aura' and step['spell'] == 823764]
+            self.assertEqual([step.get('target') for step in fixtures], [ALLY])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_unit_aura_is_refused_on_a_swing_entry(self):
+        swing = next(entry for entry in load_class_file(19)['behaviours']
+                     if entry['kind'] == 'hit_ratio' and entry.get('swing_hand') is not None)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(19), {**swing, 'cast_unit_auras': [[823764, 1]]})
 
 if __name__ == '__main__':
     unittest.main()

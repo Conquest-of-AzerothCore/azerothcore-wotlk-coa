@@ -27,7 +27,8 @@ BASELINE_MISS_RISK = 0.01
 CAST_COUNT = 'spell_cast_count'
 MELEE_EVENTS = 'melee_attack_count'
 MINION_PROC_COUNT = 'owned_creature_spell_proc_count'
-EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS, MINION_PROC_COUNT})
+ENERGIZE_EVENTS = 'spell_energize_count'
+EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS, MINION_PROC_COUNT, ENERGIZE_EVENTS})
 SUMMON_EVENTS = 'owned_creature_summon_count'
 CHARGES = 'spell_charges'
 TRIGGER_TARGETS = frozenset({TARGET, ALLY})
@@ -362,9 +363,13 @@ def attempt_auras(entry: dict) -> list[dict]:
     if auras and entry['trigger']['action'] != CAST:
         raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
     for aura in auras:
-        if set(aura) != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) or aura['stacks'] < 0:
+        if set(aura) - {'target'} != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) \
+                or aura['stacks'] < 0:
             raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} must name its spell, stacks and source')
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+        if aura.get('target', TARGET) != TARGET:
+            raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} sets an aura on the caster or the {TARGET}')
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks'],
+             **({'target': TARGET} if 'target' in aura else {})}
             for aura in auras]
 
 
