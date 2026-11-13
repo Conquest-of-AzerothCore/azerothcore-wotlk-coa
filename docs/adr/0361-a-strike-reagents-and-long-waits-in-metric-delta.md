@@ -24,6 +24,9 @@ timeout, which caps every wait.
   adds the passive striker of `taken_hit` (Harvest Golem 36, `spell_hit_bonus` 100), and in each phase, after the
   setup casts and before the trigger cast, moves the caster by `dx`, sets its health and maximum, and has the striker
   cast `spell` at it `count` times, `wait_ms` apart.
+- With `after_trigger_ms` the strike follows the trigger cast after that wait, and an uncast before phase still has
+  it: the control strikes the caster with no Phylactery, and the state reads keep the learned contrast that
+  `coverage.py` asks of a state read.
 - A `metric_delta` setup or trigger cast first adds the spell's reagents (`Reagent[0-7]`, `ReagentCount[0-7]`) to the
   caster.
 - A `metric_delta` scenario whose waits pass 90000 ms takes a timeout of its waits plus the margin, up to the accelerated

@@ -1332,6 +1332,7 @@ class MetricDeltaStrike:
     count: int = 1
     wait_ms: int = 200
     dx: float = 0.0
+    after_trigger_ms: int | None = None
 
 
 def reagent_steps(records: Records, spell: int) -> list[dict]:
@@ -1347,11 +1348,12 @@ def reagent_steps(records: Records, spell: int) -> list[dict]:
 def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if raw is None:
         return None
-    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx'}
+    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms'}
     if unknown:
         raise ValueError(f'metric_delta strike fields {sorted(unknown)} are unknown')
     strike = MetricDeltaStrike(int(raw['spell']), int(raw['health']), int(raw['max_health']),
-                               int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)))
+                               int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)),
+                               None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']))
     if not 0 < strike.health <= strike.max_health or strike.count < 1:
         raise ValueError('metric_delta strike needs 0 < health <= max_health and at least one strike')
     return strike
@@ -1470,7 +1472,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
         steps += [phase_aura_step(aura) for aura in (*(spec.after_auras if after else ()), *spec.phase_auras)]
         if not include_cast:
-            return steps
+            return steps + (strike_steps() if spec.strike and spec.strike.after_trigger_ms is not None else [])
         if spec.cast_power is not None:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': spec.cast_power})
@@ -1481,11 +1483,16 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps += required_aura_steps(facts) + reagent_steps(records, spec.trigger_spell)
         if apply_setup_casts:
             steps += setup_cast_steps()
-        steps += strike_steps()
+        after_trigger = spec.strike is not None and spec.strike.after_trigger_ms is not None
+        if not after_trigger:
+            steps += strike_steps()
         if spec.target_health_pct is not None:
             steps.append({'action': 'set_health_pct', 'actor': CASTER, 'target': spec.target,
                           'pct': spec.target_health_pct})
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
+        if after_trigger:
+            steps += [{'action': 'wait', 'label': 'before the strike', 'ms': spec.strike.after_trigger_ms}]
+            steps += strike_steps()
         steps.append({'action': 'wait', 'ms': spec.wait_ms})
         return steps + enemy_cast_steps() + [step for spell in spec.helper_casts for step in (
             {'action': 'cast', 'actor': ENEMY_HELPER, 'spell': spell, 'target': ENEMY_PLAYER},

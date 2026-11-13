@@ -10234,5 +10234,25 @@ class MetricDeltaPlayerRatingsTests(unittest.TestCase):
             metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
 
 
+
+class MetricDeltaStrikeAfterTriggerTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_strike_follows_the_phylactery_cast_and_still_lands_without_it(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 500933 and entry.get('label_suffix') == 'revive')
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        strikes = [index for index, step in enumerate(steps) if step.get('actor') == 'striker']
+        phylactery = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == 500933)
+        before = next(index for index, step in enumerate(steps) if step.get('label') == '500933 health before')
+        self.assertEqual(len(strikes), 2)
+        self.assertLess(strikes[0], before)
+        self.assertLess(before, phylactery)
+        self.assertLess(phylactery, strikes[1])
+        self.assertEqual(steps[phylactery + 1], {'action': 'wait', 'label': 'before the strike', 'ms': 2600})
+
+
 if __name__ == '__main__':
     unittest.main()
