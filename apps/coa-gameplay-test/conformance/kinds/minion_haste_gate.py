@@ -62,8 +62,7 @@ def clear_ms(cooldown_ms: int, cut_ms: int, interval_ms: int) -> float:
 
 def checked_arm(spec: MinionHasteGateSpec, arm: HasteArm, cooldown_ms: int) -> None:
     where = f'{spec.spell} {KIND} arm {arm.attack_ms} ms'
-    if spec.base_attack_ms * 100 % (100 + haste_amount(spec, arm)) or \
-            spec.base_attack_ms * 100 // (100 + haste_amount(spec, arm)) != arm.attack_ms:
+    if spec.base_attack_ms * 100 // (100 + haste_amount(spec, arm)) != arm.attack_ms:
         raise ValueError(f'{where}: no whole haste percent turns {spec.base_attack_ms} ms into {arm.attack_ms} ms')
     accepted = accepted_interval(spec, arm.attack_ms, spec.gate_ms)
     expected = clear_ms(cooldown_ms, spec.cut_ms, accepted)

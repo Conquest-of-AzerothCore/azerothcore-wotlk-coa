@@ -37,6 +37,15 @@ class MinionHasteGateTests(unittest.TestCase):
         raised = [step for step in scenario['steps'] if step.get('metric') == 'owned_creature_count']
         self.assertEqual([(step['entry'], step['equals']) for step in raised], [(50073, 1)])
 
+    def test_band_arms_swing_at_the_truncated_interval_of_a_whole_haste_percent(self):
+        arms = [{'attack_ms': 1047, 'attempts_ms': [38000, 58000]}, {'attack_ms': 952, 'attempts_ms': [54000, 80000]}]
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'arms': arms})
+        run.validate(scenario)
+        hastes = {step['amount'] for step in scenario['steps']
+                  if step['action'] == 'set_aura' and step['spell'] == 525388 and step['stacks'] == 1}
+        self.assertEqual(hastes, {91, 110})
+        self.assertEqual([arm['accepted_ms'] for arm in expectation.model['arms']], [1047, 1904])
+
     def test_the_frenzy_haste_is_cleared_after_each_priming_cast(self):
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
         cleared = [step for step in scenario['steps'] if step['action'] == 'set_aura' and step['spell'] == 805029]

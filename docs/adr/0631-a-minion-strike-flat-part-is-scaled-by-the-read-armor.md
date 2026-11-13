@@ -37,3 +37,6 @@ part before it takes it off. The kind also takes `learn` (spells learned before 
   Smash 897.5 over 70 non-critical hits, (897.5 - 91.3) / 821.7 = 0.981.
 - Seeded tests: kinds/test_minion_swing_ratio.py `MinionSwingRatioArmorFlatTests`. Templar has no entry with the
   field; Templar `generate --class 19` and `--stack` are byte-identical to 628582dc78.
+- Cycle 10 integration (mentor, 22:02): the 504901 `weapon_ratio_sp` entry now takes `strike_flat_armor` too (claim
+  311.1); its earlier 2.4% offset under 2.0 is re-read in the cycle 10 merged pair. `weapon_ratio` (flat 1) keeps the
+  unmitigated flat.

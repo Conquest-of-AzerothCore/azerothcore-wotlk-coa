@@ -32,3 +32,8 @@ pattern, with a 10% timing margin. The metric is `cast_failure`, an event read.
 - Seeded tests in kinds/test_minion_haste_gate.py: the stated gate passes; an ungated cut, a gate above the slow
   interval and a gate above two fast intervals alert; a minion off its interval or with too few crits is unmeasured;
   attempts that cannot separate the gate are refused.
+- Cycle 10 integration (mentor, 22:03): the 800-1250 ms bracket is wider than the 5% band, so a second 537208 entry,
+  `once_per_sec_band`, swings at 1047 ms (+91% haste) and 952 ms (+110%) and puts the gate in 952..1047 ms. An arm's
+  interval is now the truncated `base x 100 / (100 + haste)`, as the server's int32 swing timer is
+  (`Unit::resetAttackTimer`, `GetAttackTime`), instead of an exact division; seeded test: the band arms set haste 91
+  and 110 and accept every 1047 and 1904 ms.
