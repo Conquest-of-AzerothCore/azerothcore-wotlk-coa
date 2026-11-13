@@ -2071,9 +2071,12 @@
   {
     "spell": 572130,
     "clause": "You may now Infest an additional target after using Virulency.",
-    "labels": [],
+    "labels": [
+      "572130 second_infest behaviour_fixed_count",
+      "572130 second_infest_control behaviour_fixed_count"
+    ],
     "kind": "claim",
-    "reason": ""
+    "reason": "Route (C1 author T, 2026-11-13): fixed_count after a real Virulency 801938 and a first Infest 803781 at extra2: with Creeping Plagues 572130 learned the Infest at the primary also copies Flesh to Worms (3 dummies), without it that second Infest is refused (2); 572130 Effect[0] aura 107 SPELLMOD_CHARGES +1 on Infestation 803782 (family flags[1] 16), and each Infest after the first consumes a charge (AscensionNecromancerAbilities.cpp:74-81); result pending the counted pair. G-11 searched (2026-11-13, C1 author T): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines): 572130 0 lines, \"Creeping Plagues\" 0 lines (a passive talent logs no event), Infest 803781 14 lines by id; ~/CoaServer/reference: bindmysoul the same sentence (Death spec talent), ascension-data advancement.tsv 3 rows (Necromancer Death talent), coabuildhub spells_master_index lists it; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 572638,
