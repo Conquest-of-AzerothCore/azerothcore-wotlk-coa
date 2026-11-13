@@ -3337,94 +3337,6 @@ def behaviour_pushback_reduction_verdict(base: Verdict, run: Run, model: dict) -
                                f'{low:g} to {high:g}: {reason}')
 
 
-def summon_lifetime_edge(run: Run, polls: list, start: float, rising: bool) -> tuple[float, float, float] | str:
-    before, after, most = None, None, 0.0
-    for time_label, count_label in polls:
-        at, count = run.values.get(time_label), run.values.get(count_label)
-        if at is None or count is None:
-            return missing_measurement(run, time_label if at is None else count_label)
-        most = max(most, count)
-        present = count >= 0.5
-        if after is None:
-            if present == rising:
-                after = at - start
-            else:
-                before = at - start
-        elif present != rising:
-            return f'the count turns back at {at - start:g} ms after its edge'
-    if before is None or after is None:
-        return 'the polls do not hold the edge'
-    return before, after, most
-
-
-def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    labels = [model['control'], model['released'], *model['starts'].values()]
-    values = [run.values.get(label) for label in labels]
-    if None in values:
-        return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
-    control, released = values[0], values[1]
-    start = run.values[model['starts']['treatment']]
-    spawn = summon_lifetime_edge(run, model['polls']['spawn'], start, True)
-    end = summon_lifetime_edge(run, model['polls']['end'], start, False)
-    for name, edge in (('spawn', spawn), ('end', end)):
-        if isinstance(edge, str):
-            return replace(base, status='unmeasured', explanation=f'{name}: {edge}')
-    if spawn[2] != 1 or end[2] != 1:
-        return replace(base, status='unmeasured', explanation=f'{spawn[2]:g} and {end[2]:g} creatures at most in the '
-                                                              f'windows, not one')
-    lowest, highest = end[0] - spawn[1], end[1] - spawn[0]
-    measured = (lowest + highest) / 2
-    expected, band = float(model['expected_ms']), float(model['band'])
-    low, high = expected - band, expected + band
-    if control != 0 or released != 0:
-        status, reason = 'alert', f'the control summoned {control:g} and {released:g} forcing modifiers remain'
-    elif low - 1e-9 <= lowest and highest <= high + 1e-9:
-        status, reason = 'ok', 'the whole bracketed lifetime lies inside the band'
-    elif highest < low or lowest > high:
-        status, reason = 'alert', 'the whole bracketed lifetime lies outside the band'
-    else:
-        status, reason = 'measured', 'the bracketed lifetime crosses a band edge: effect present, not final'
-    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   detail={'spawn_ms': spawn[:2], 'end_ms': end[:2], 'lifetime_range': [lowest, highest]},
-                   explanation=f'no creature in the control; in game time after the treatment cast the creature '
-                               f'appears in ({spawn[0]:g}, {spawn[1]:g}] ms and is gone in ({end[0]:g}, {end[1]:g}] '
-                               f'ms: a lifetime of {lowest:g} to {highest:g} ms against the stated {expected:g} ms, '
-                               f'band {low:g} to {high:g}: {reason}')
-
-
-def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
-    judged, empty = [], 0
-    for run in runs:
-        start = run.values.get(model['starts']['treatment'])
-        counts = [run.values.get(count) for _, count in model['polls']['spawn']]
-        if start is not None and None not in counts and not any(count >= 0.5 for count in counts):
-            control, released = run.values.get(model['control']), run.values.get(model['released'])
-            if control != 0 or released != 0:
-                return replace(base, status='alert', explanation=f'{run.key}: the control summoned {control} and '
-                                                                 f'{released} forcing modifiers remain')
-            empty += 1
-            continue
-        judged.append(behaviour_summon_lifetime_verdict(base, run, model))
-    if not judged:
-        return replace(base, status='unmeasured', explanation=f'no part of {len(runs)} summoned the creature')
-    worst = next((verdict for verdict in judged if verdict.status != 'ok'), None)
-    lowest = min(verdict.detail['lifetime_range'][0] for verdict in judged if verdict.detail)\
-        if all(verdict.detail for verdict in judged) else None
-    highest = max(verdict.detail['lifetime_range'][1] for verdict in judged if verdict.detail)\
-        if all(verdict.detail for verdict in judged) else None
-    summary = (f'{len(judged)} of {len(runs)} parts summoned the creature ({empty} rolled no summon on their one '
-               f'tick); lifetimes {lowest:g} to {highest:g} ms' if lowest is not None else
-               f'{len(judged)} of {len(runs)} parts summoned the creature')
-    if worst is not None:
-        return replace(worst, explanation=f'{summary}; a part reads {worst.status}: {worst.explanation}')
-    first = judged[0]
-    return replace(first, low=first.low, high=first.high, measured=(lowest + highest) / 2,
-                   detail={**(first.detail or {}), 'lifetime_range': [lowest, highest], 'parts_summoned': len(judged),
-                           'parts': len(runs)},
-                   explanation=f'{summary}, against the stated {first.expected:g} ms, band {first.low:g} to '
-                               f'{first.high:g}: every summoned part lies inside the band')
-
-
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4558,8 +4470,6 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_strike_bursts_verdict(base, run, model)
         if model.get('kind') == 'pushback_reduction':
             return behaviour_pushback_reduction_verdict(base, run, model)
-        if model.get('kind') == 'summon_lifetime':
-            return behaviour_summon_lifetime_verdict(base, run, model)
         if model.get('kind') == 'aura_expiry':
             return behaviour_aura_expiry_verdict(base, run, model)
         if model.get('kind') == 'cast_period':
@@ -5351,8 +5261,7 @@ POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
 
 def pooled_parts(check: str, model: dict | None) -> bool:
     model = model or {}
-    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or model.get('kind') == 'summon_lifetime'
-                                          or kind_pooled_judge(model.get('kind')) is not None)
+    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or kind_pooled_judge(model.get('kind')) is not None)
 
 
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
@@ -5421,8 +5330,6 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         kind_pooled = kind_pooled_judge((expectation.model or {}).get('kind'))
         pooled_judge = (behaviour_hit_ratio_verdict if expectation.check == BEHAVIOUR_HIT_RATIO
                         else kind_pooled if kind_pooled
-                        else behaviour_summon_lifetime_pooled_verdict
-                        if (expectation.model or {}).get('kind') == 'summon_lifetime'
                         else behaviour_taken_rate_verdict)
         verdict = (pooled_judge(base, present, expectation.model)
                    if len(present) == expectation.model['parts']

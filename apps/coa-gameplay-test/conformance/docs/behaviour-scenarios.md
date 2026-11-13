@@ -870,23 +870,6 @@ when set, replaces `removed` for the caster's reads of that arm only (ADR 0291).
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
 
-### Summon lifetime (`behaviour_metric_delta`, `kind: "summon_lifetime"`, ADR 0544)
-
-A proc that summons a timed creature is read for the creature's lifetime. A forcing fixture (mentor N-a1, as in
-`forced_chance`) raises `talent`'s roll by 1000% for the scenario and is removed and read gone at the end. Control:
-`trigger_spell` cast at the dummy before `talent` is learned, its aura removed `stop_ms` later, then the owned
-`entry` count must read 0. Treatment: the same cast with `talent` learned; the owned `entry` count is polled every
-25 ms with `game_time_ms` stamps in `spawn_window` and `end_window` (ms after the cast, nominal), the trigger aura
-removed at `stop_ms` between them so one creature is summoned. The creature appears between the last empty and the
-first present poll and is gone between the last present and the first empty poll; the bracketed lifetime is judged
-against `expected_ms` in the G-19 band (`ok` inside, `alert` outside, `measured` across an edge); a window without
-its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) use
-Harvest Plague 500968, stopped after its first tick. The talent's ProcChance x 11 must reach 100%: the schema caps the
-mutant at +1000%.
-`parts` (ADR 0546) pools one-tick parts for a talent whose forced roll stays below 100%: a part whose spawn window never
-shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
-33% per tick, 40 parts).
-
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
 One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once
@@ -1956,3 +1939,4 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
 - [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR 0550)
+- [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over parts (ADR 0544, ADR 0546)
