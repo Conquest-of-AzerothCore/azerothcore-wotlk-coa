@@ -1302,7 +1302,8 @@
       {
         "claim": "Command your Abominations to hook an enemy to their location",
         "labels": [
-          "504316 spell_duration 800043 #0"
+          "504316 spell_duration 800043 #0",
+          "504316 behaviour_metric_delta hook_pull"
         ]
       },
       {

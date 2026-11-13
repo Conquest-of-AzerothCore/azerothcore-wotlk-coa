@@ -5673,6 +5673,37 @@
     },
     {
       "spell": 504316,
+      "name": "Command: Hook (pull to the Abomination)",
+      "kind": "metric_delta",
+      "variant": "hook_pull",
+      "label_suffix": "hook_pull",
+      "quote": "Command your Abominations to hook an enemy to their location",
+      "expected": 8,
+      "before_expected": 25,
+      "tolerance": 0.01,
+      "after_at_least": 0,
+      "after_at_most": 8,
+      "trigger_spell": 504316,
+      "target": "dummy",
+      "dummy_distance": 25,
+      "setup_casts": [
+        500335
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "gate_spell": 92123,
+      "setup_wait_ms": 4000,
+      "measure_actor": "dummy",
+      "wait_ms": 2500,
+      "expire_ms": 3000,
+      "metric": "distance_2d",
+      "fields": {
+        "target": "caster"
+      },
+      "observe_source": "Command: Hook 504316 orders the Abominations (Responds(), AscensionNecromancerSummons.cpp:174-175); DoAction for 504316 jumps the target to the Abomination's position (MoveJump, AscensionNecromancerSummons.cpp:660-663). Raise: Abomination 500335 lands within 8 yd of the caster (TARGET_DEST_CASTER_RANDOM, radius 8), cast at the caster (setup_target) in the after phase only. The dummy stands 25 yd from the caster (dummy_distance, ADR 0539), outside the 8 yd landing circle and inside the Command's 30 yd (SpellRange 4). distance_2d dummy to caster 2500 ms after the Command. Control (before): the same Command without an Abomination, the dummy stays at 25 (tolerance 0.01). After: at most 8 yd (the landing radius). The c4 pilot and pair 20261113-135046 / -135159 read 25 -> 3.5; withdrawn then for the missing evidence class of distance_2d, restored with ADR 0584 (a state read; this condition contrast counts as data)."
+    },
+    {
+      "spell": 504316,
       "name": "Command: Hook (duration)",
       "kind": "metric_delta",
       "variant": "duration",

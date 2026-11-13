@@ -556,6 +556,18 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of(clause, [condition])[0], [DATA])
         self.assertEqual(evidence_of([claim('Summon an Icebound Champion', label)], [own])[0], [DATA])
 
+    def test_a_distance_is_a_state_read_where_the_clause_promises_a_pull(self):
+        label = '1 behaviour_metric_delta hook_pull'
+        clause = [claim('Command your Abominations to hook an enemy to their location', label)]
+        self.assertEqual(METRIC_EVIDENCE['distance_2d'], STATE)
+        learned = judged(label, BEHAVIOUR_METRIC_DELTA, 'distance_2d', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of(clause, [learned])[0], [BEHAVIOUR])
+        condition = judged(label, BEHAVIOUR_METRIC_DELTA, 'distance_2d', contrast='condition')
+        self.assertEqual(evidence_of(clause, [condition])[0], [DATA])
+        self.assertEqual(evidence_of([claim('Raise an Abomination', label)], [learned])[0], [DATA])
+        with mock.patch.dict(METRIC_EVIDENCE, {'distance_2d': READBACK}):
+            self.assertEqual(evidence_of(clause, [learned])[0], [DATA])
+
     def test_a_minion_maximum_health_is_a_state_read_where_the_clause_promises_it(self):
         label = '1 behaviour_metric_delta'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'owned_creature_max_health', contrast=LEARNED_CONTRAST)
