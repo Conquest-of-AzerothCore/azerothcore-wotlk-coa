@@ -9,6 +9,7 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
+#include "GameTime.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapCollisionData.h"
@@ -50,7 +51,7 @@ namespace
 
     struct HiddenBoss
     {
-        int32 remaining = 0;
+        Milliseconds until = 0ms;
         ReactStates react = REACT_AGGRESSIVE;
         bool immuneToPC = false;
         bool immuneToNPC = false;
@@ -190,14 +191,16 @@ namespace
     void HideForReset(Creature* creature)
     {
         HiddenBoss boss;
-        boss.remaining = int32(ResetHidden.count());
+        boss.until = GameTime::GetGameTimeMS() + ResetHidden;
         boss.react = creature->GetReactState();
         boss.immuneToPC = creature->IsImmuneToPC();
         boss.immuneToNPC = creature->IsImmuneToNPC();
         boss.selectable = !creature->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
 
-        Position const home = creature->GetHomePosition();
-        creature->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), home.GetOrientation());
+        float x, y, z, o;
+        creature->GetRespawnPosition(x, y, z, &o);
+        creature->SetHomePosition(x, y, z, o);
+        creature->NearTeleportTo(x, y, z, o);
         creature->SetReactState(REACT_PASSIVE);
         creature->SetImmuneToAll(true);
         creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
@@ -220,7 +223,7 @@ namespace
         creature->SetVisible(true);
     }
 
-    bool UpdateHidden(Creature* creature, uint32 diff)
+    bool UpdateHidden(Creature* creature)
     {
         std::optional<HiddenBoss> back;
         {
@@ -228,8 +231,7 @@ namespace
             auto const itr = Hidden.find(KeyOf(creature));
             if (itr == Hidden.end())
                 return false;
-            itr->second.remaining -= int32(diff);
-            if (itr->second.remaining <= 0)
+            if (GameTime::GetGameTimeMS() >= itr->second.until)
             {
                 back = itr->second;
                 Hidden.erase(itr);
@@ -264,9 +266,9 @@ class CoABossLeashCheck final : public AllCreatureScript
 public:
     CoABossLeashCheck() : AllCreatureScript("CoABossLeashCheck") { }
 
-    void OnAllCreatureUpdate(Creature* creature, uint32 diff) override
+    void OnAllCreatureUpdate(Creature* creature, uint32) override
     {
-        if (UpdateHidden(creature, diff))
+        if (UpdateHidden(creature))
             return;
 
         if (!creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive() || !LeashedOnMap(creature->GetMap()))
