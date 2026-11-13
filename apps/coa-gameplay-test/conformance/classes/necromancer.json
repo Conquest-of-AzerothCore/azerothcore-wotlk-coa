@@ -1267,10 +1267,37 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 805032,
+      "name": "Animate: Bone Wraith (Bonestorm targets)",
+      "kind": "fixed_count",
+      "variant": "bonestorm_targets",
+      "label_suffix": "bonestorm_targets",
+      "quote": "striking up to $801411i nearby enemies",
+      "expected": 4,
+      "radius": 3,
+      "layout": "caster",
+      "count_primary": true,
+      "radius_reason": "Bonestorm 801411 TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 8 (5 yd) around the Bone Wraith, MaxAffectedTargets 5 ($801411i); the Wraith stands within about 2 yd of the caster, so dummies within 3 yd of the caster lie within 5 yd of it, the far one at 8 yd beyond",
+      "cast_spell": 504868,
+      "target_rank": 801411,
+      "caster_entry": 50309,
+      "setup_casts": [
+        [
+          805032,
+          "caster"
+        ]
+      ],
+      "repeats": 1,
+      "settle_ms": 5500,
+      "observe_source": "One Bone Wraith 50309 is animated (805032), then Command: Undead 504868 at the nearest dummy: DoAction case 50309 casts Bonestorm 801412 (aura 23 every 500 ms for 5000 ms, triggering 801411). Read per dummy from the Wraith's 801411 hits, the nearest included: all five within 3 yd are hit (the nearest and four more; uncapped: ten pulses would let random picks of five from a larger set cover more than five), the one at 8 yd never. The cap of five is not judged here.",
+      "uncapped": true
+    },
+    {
       "spell": 705746,
       "name": "Life For Power (healing taken)",
       "kind": "hit_ratio",
       "variant": "absorb",
+      "cast_power": 1000,
       "label_suffix": "absorb",
       "quote": "You absorb $s1% of healing taken",
       "expected": 0.8,

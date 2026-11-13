@@ -1608,8 +1608,11 @@
   {
     "spell": 560596,
     "clause": "Your Crypt Swarm now bounces to 2 additional nearby enemies,",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560596 bounces behaviour_fixed_count"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '2 additional nearby enemies, at 30% reduced value'; coa-obtainable: in the live capture; logs: 560596 nothing found, 800343 mostly single-target (other casters)."
   },
   {
     "spell": 560596,
@@ -1884,9 +1887,10 @@
     "spell": 570136,
     "clause": "Increases the damage of Crypt Plague by $s1%",
     "labels": [
-      "570136 effect_value e0 #0"
+      "570136 behaviour_hit_ratio crypt_plague"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '50%' and '4% per disease'; coa-obtainable: in the live capture; logs: nothing found by id."
   },
   {
     "spell": 570136,
@@ -2535,17 +2539,20 @@
     "spell": 705746,
     "clause": "You absorb $s1% of healing taken",
     "labels": [
-      "705746 effect_value e0 #0"
+      "705746 behaviour_hit_ratio absorb"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20% of healing taken', 'shield ... 10 seconds'; coa-obtainable: in the live capture; logs: nothing found by id."
   },
   {
     "spell": 705746,
     "clause": "and gain a shield for the amount absorbed, lasting $707194d.",
     "labels": [
-      "705746 spell_duration 707194 #1"
+      "705746 behaviour_metric_delta shield",
+      "705746 behaviour_metric_delta shield_lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20% of healing taken', 'shield ... 10 seconds'; coa-obtainable: in the live capture; logs: nothing found by id."
   },
   {
     "spell": 705747,
@@ -2648,19 +2655,31 @@
   {
     "spell": 706948,
     "clause": "Dealing Shadow damage now increases the damage the target takes from your Skeletal Warriors by $706949s1% for $706949d,",
-    "labels": [
-      "706948 effect_value 706949e0 #0",
-      "706948 spell_duration 706949 #1"
+    "claims": [
+      {
+        "claim": "Dealing Shadow damage now increases the damage the target takes from your Skeletal Warriors by $706949s1%",
+        "labels": [
+          "706948 effect_value 706949e0 #0"
+        ]
+      },
+      {
+        "claim": "for $706949d",
+        "labels": [
+          "706948 behaviour_metric_delta lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 10 times'; coa-obtainable: in the live capture; logs: 706949 stacks to 10, median 10.9 s."
   },
   {
     "spell": 706948,
     "clause": "stacking $706949u times.",
     "labels": [
-      "706948 max_stacks 706949 #2"
+      "706948 behaviour_metric_delta stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 10 times'; coa-obtainable: in the live capture; logs: 706949 stacks to 10, median 10.9 s."
   },
   {
     "spell": 706953,
@@ -2924,10 +2943,23 @@
   {
     "spell": 801733,
     "clause": "Every 3rd Command spell now freezes the target in place for $704860d.",
-    "labels": [
-      "801733 spell_duration 704860 #0"
+    "claims": [
+      {
+        "claim": "Every 3rd Command spell now freezes the target in place",
+        "labels": [
+          "801733 behaviour_metric_delta third",
+          "801733 behaviour_metric_delta second"
+        ]
+      },
+      {
+        "claim": "for $704860d",
+        "labels": [
+          "801733 behaviour_metric_delta lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'every 3rd Command ... 5 seconds'; coa-obtainable: in the live capture; logs: 704860 median 5.0 s, 164 SPELL_AURA_BROKEN_SPELL (broken by damage)."
   },
   {
     "spell": 801733,
@@ -3149,9 +3181,10 @@
     "spell": 802132,
     "clause": "Damage increased by $704291s1% for each Necromancer disease on the enemy.",
     "labels": [
-      "802132 effect_value 704291e0 #3"
+      "802132 behaviour_hit_ratio per_disease"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '151 + 22% SP every 3 sec for 18 seconds', '4% per disease'; coa-obtainable: in the live capture; logs: 143 ticks of 802132, median 355, about 1.6 s apart (hasted casters). 1 to 2 diseases: +3.78% against 1.08 / 1.04 = +3.85% (Lichplague counts itself)."
   },
   {
     "spell": 802986,
@@ -3441,20 +3474,30 @@
     "spell": 805032,
     "clause": "Animate a Bone Wraith to aid you in combat for $d.",
     "labels": [
-      "805032 aura_duration_ms #0"
+      "805032 behaviour_metric_delta lifetime"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85."
   },
   {
     "spell": 805032,
     "clause": "While active, it will periodically unleash a Bonestorm, striking up to $801411i nearby enemies for ${$801411m1+$801411ppl1+$SP*.4} Physical damage every $801412t1 sec for $801412d.",
-    "labels": [
-      "805032 effect_value #1",
-      "805032 effect_value 801411e0 #2",
-      "805032 aura_amplitude_ms #3",
-      "805032 spell_duration 801412 #4"
+    "claims": [
+      {
+        "claim": "striking ... for ${$801411m1+$801411ppl1+$SP*.4} Physical damage",
+        "labels": [
+          "805032 script_hit 801411 bonestorm"
+        ]
+      },
+      {
+        "claim": "While active, it will periodically unleash a Bonestorm, striking up to $801411i nearby enemies ... every $801412t1 sec for $801412d",
+        "labels": [
+          "805032 effect_value #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85."
   },
   {
     "spell": 805038,
@@ -3681,19 +3724,31 @@
   {
     "spell": 805674,
     "clause": "Casting Animate or Command spells now increases your haste by $805786s1% for $805786d,",
-    "labels": [
-      "805674 effect_value 805786e0 #0",
-      "805674 spell_duration 805786 #1"
+    "claims": [
+      {
+        "claim": "Casting Animate or Command spells now increases your haste by $805786s1%",
+        "labels": [
+          "805674 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "for $805786d",
+        "labels": [
+          "805674 behaviour_metric_delta lasts"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 5 times'; coa-obtainable: in the live capture; logs: 805786 doses to 5 (2:125, 3:121, 4:114, 5:103). Observation: 805786 Effect[1] adds 10% spell haste, which the tooltip does not state."
   },
   {
     "spell": 805674,
     "clause": "stacking $805786u times.",
     "labels": [
-      "805674 max_stacks 805786 #2"
+      "805674 behaviour_metric_delta stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 5 times'; coa-obtainable: in the live capture; logs: 805786 doses to 5 (2:125, 3:121, 4:114, 5:103)."
   },
   {
     "spell": 805675,
@@ -3755,15 +3810,19 @@
     "spell": 806149,
     "clause": "Increases your Shadow damage by $s1%,",
     "labels": [
-      "806149 effect_value e0 #0"
+      "806149 behaviour_hit_ratio shadow"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5%, doubled against enemies below 35% health'; coa-obtainable: in the live capture; logs: nothing found by id. Status 1: +4.82% (456 -> 478, integer truncation of 478.8), inside the band of +5%."
   },
   {
     "spell": 806149,
     "clause": "doubled against enemies below 35% health.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "806149 behaviour_hit_ratio below_35"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5%, doubled against enemies below 35% health'; coa-obtainable: in the live capture; logs: nothing found by id. +9.87% at 30% target health (the aura x1.05 and Factor() x1.05 multiply to 1.1025; 501 for 502.7 truncated) against the doubled 10%."
   },
   {
     "spell": 806321,
@@ -3944,15 +4003,19 @@
     "spell": 807925,
     "clause": "Increases your Shadow damage by $s1%,",
     "labels": [
-      "807925 effect_value e0 #0"
+      "807925 behaviour_hit_ratio shadow"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub (rank 1 text) agree in form; coa-obtainable: in the live capture; logs: nothing found by id. +9.87% against +10%."
   },
   {
     "spell": 807925,
     "clause": "doubled against enemies below 35% health.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "807925 behaviour_hit_ratio below_35"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub (rank 1 text) agree in form; coa-obtainable: in the live capture; logs: nothing found by id. +20.83% (x1.1 x 1.1) against the doubled 20%."
   },
   {
     "spell": 807937,
