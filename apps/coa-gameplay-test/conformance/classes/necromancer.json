@@ -1897,7 +1897,7 @@
       "quote": "Increases the damage of Crypt Plague by $s1%",
       "expected": 1.5,
       "observe_spell": 570131,
-      "cast_wait_ms": 2100,
+      "cast_wait_ms": 2500,
       "fixture": {
         "spell_power": 20000
       },
@@ -1922,7 +1922,7 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "570136 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 22 (SPELLMOD_DOT), BasePoints 49 + 1 = 50 ($s1), on class mask word 1 bit 8388608, Crypt Plague 570131's own flag. Crypt Plague 570131 (aura 3 periodic damage every 2000 ms, BasePoints 1 + 1, coefficient row 0.06 Shadow) is cast at the dummy each trial and its first tick read 2100 ms later, at 20000 spell power so the coefficient term dominates; 823764 in both arms; control without 570136, treatment with it learned. Crypt Plague stacks on each cast (StackAmount, its tick grows with them): twelve warm-up casts at the start of each arm put both arms at the stack cap, so the arms differ in 570136 alone (the first pilot read +59% to +89% with the stacks carried from the control into the treatment).",
+      "expected_source": "570136 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 22 (SPELLMOD_DOT), BasePoints 49 + 1 = 50 ($s1), on class mask word 1 bit 8388608, Crypt Plague 570131's own flag. Crypt Plague 570131 (aura 3 periodic damage every 2000 ms, BasePoints 1 + 1, coefficient row 0.06 Shadow) is cast at the dummy each trial and its first tick read 2500 ms later (one tick per trial; at 2100 ms a trial held one or two ticks, and pair 20261113-023128 / -023238 run 2 read the identical 18270 against 12180 as insufficient_trials from that spread), at 20000 spell power so the coefficient term dominates; 823764 in both arms; control without 570136, treatment with it learned. Crypt Plague stacks on each cast (StackAmount, its tick grows with them): twelve warm-up casts at the start of each arm put both arms at the stack cap, so the arms differ in 570136 alone (the first pilot read +59% to +89% with the stacks carried from the control into the treatment).",
       "warmup": [
         570131,
         570131,
