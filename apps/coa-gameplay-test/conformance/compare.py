@@ -78,6 +78,7 @@ FLOAT_EPSILON = 1e-9
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
 MAGNITUDE_RATIO_POINTS = 0.02
+FORCED_CHANCE = 'forced_chance'
 METRIC_DELTA_FLOAT_TOLERANCE = 1e-5
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
                           'effect_radius', 'aura_amplitude_ms'})
@@ -3006,6 +3007,29 @@ def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    forced = model.get('forced_chance')
+    if forced is None:
+        return judged_metric_delta(base, run, model)
+    absent = run.values.get(forced['absent_label'])
+    present = run.values.get(forced['present_label'])
+    released = run.values.get(forced['released_label'])
+    fixture = (f'forcing fixture: a {forced["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant, '
+               f'{forced["aura"]} read on creature {forced["entry"]} before both readings')
+    if present is None or present < 1:
+        return replace(base, status='unmeasured', explanation=f'{fixture}: the forced aura is absent ({present}), '
+                                                              f'so the effect is not read')
+    verdict = judged_metric_delta(base, run, model)
+    if absent is None or absent != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the aura is on the '
+                                                            f'creature without the passive ({absent})')
+    if released is None or released != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the modifier is '
+                                                            f'still active at the end ({released})')
+    return replace(verdict, explanation=f'{verdict.explanation}; {fixture}: absent without the passive, present '
+                                                    f'({present:g}) with it, released at the end')
+
+
+def judged_metric_delta(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
     if before is None or after is None:
@@ -3923,7 +3947,8 @@ def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) ->
 
 def observed(expectation: Expectation) -> dict:
     model = expectation.model or {}
-    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST)}
+    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST),
+             FORCED_CHANCE: (model.get(FORCED_CHANCE) or {}).get('talent')}
     return {key: value for key, value in found.items() if value is not None}
 
 

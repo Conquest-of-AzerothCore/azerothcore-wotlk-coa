@@ -68,7 +68,8 @@ from bonus import bonus_band
 from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
-from profile import CASTER, DBC_DIR, control_entries, load_class_file
+from behaviours import forced_chance_of
+from profile import CASTER, DBC_DIR, base_steps, control_entries, load_class_file
 from tooltip import Records
 from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
 
@@ -10811,6 +10812,65 @@ class B3ToolMutantTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_permafrost_expired_before_the_read_alerts(self):
         self.assertEqual(self.delta(704681, 'charges', 0.0, 0.0), 'alert')
+
+
+class MetricDeltaForcedChanceTests(unittest.TestCase):
+    GHOUL_MASTERY = 503740
+    FRENZIED_GHOUL = 707014
+
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == self.GHOUL_MASTERY and entry.get('label_suffix') == 'frenzied_haste')
+
+    def judged(self, entry: dict, absent: float | None, present: float | None, released: float | None,
+               after: float = 1428.571) -> str:
+        _, expectations = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        expectation = expectations[0]
+        model = expectation.model
+        forced = model['forced_chance']
+        values = {model['before_label']: 2000.0, model['after_label']: after}
+        for key, value in (('absent_label', absent), ('present_label', present), ('released_label', released)):
+            if value is not None:
+                values[forced[key]] = value
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_modifier_is_set_after_the_base_steps_and_removed_at_the_end(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.entry()))
+        run.validate(scenario)
+        steps = scenario['steps']
+        mutant = [index for index, step in enumerate(steps) if step['action'] == 'spell_mod_mutant']
+        self.assertEqual(len(mutant), 1)
+        self.assertEqual(steps[mutant[0]]['spell'], self.GHOUL_MASTERY)
+        self.assertEqual(steps[mutant[0]]['op'], 18)
+        self.assertEqual(mutant[0], len(base_steps(load_class_file(23))))
+        labels = [step.get('label', '') for step in steps]
+        absent = labels.index(f'{self.GHOUL_MASTERY} forced_chance {self.FRENZIED_GHOUL} absent')
+        present = labels.index(f'{self.GHOUL_MASTERY} forced_chance {self.FRENZIED_GHOUL} present')
+        self.assertEqual(labels[absent + 1], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms before')
+        self.assertEqual(labels[present + 1], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms after')
+        self.assertEqual(steps[-2], {'action': 'set_aura', 'actor': 'caster', 'spell': 100523, 'stacks': 0})
+        self.assertEqual(steps[-1]['metric'], 'spell_mod_mutants')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_forced_effect_is_judged_only_with_the_aura_present(self):
+        entry = self.entry()
+        self.assertEqual(self.judged(entry, 0.0, 2.0, 0.0), 'ok')
+        self.assertEqual(self.judged(entry, 0.0, 0.0, 0.0), 'unmeasured')
+        self.assertEqual(self.judged(entry, 0.0, None, 0.0), 'unmeasured')
+        self.assertEqual(self.judged(entry, 0.0, 2.0, 0.0, after=2000.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_aura_without_the_passive_or_a_modifier_left_active_alerts(self):
+        entry = self.entry()
+        self.assertEqual(self.judged(entry, 1.0, 2.0, 0.0), 'alert')
+        self.assertEqual(self.judged(entry, 0.0, 2.0, 1.0), 'alert')
+        self.assertEqual(self.judged(entry, 0.0, 2.0, None), 'alert')
+
+    def test_the_fixture_names_talent_aura_and_entry(self):
+        with self.assertRaises(ValueError):
+            forced_chance_of({'talent': 1, 'aura': 2})
+        self.assertEqual(forced_chance_of({'talent': 1, 'aura': 2, 'entry': 3}), (1, 2, 3))
 
 
 if __name__ == '__main__':

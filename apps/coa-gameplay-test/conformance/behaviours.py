@@ -1342,6 +1342,7 @@ class MetricDeltaSpec:
     trigger_item: int | None = None
     phase_power: tuple[int, int, int] | None = None
     caster_health: tuple[int, int] | None = None
+    forced_chance: tuple[int, int, int] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1409,6 +1410,44 @@ def gate_cast_steps(records: Records, spell: int) -> list[dict]:
 def attack_setup_cast_steps(records: Records, spell: int, wait_ms: int) -> list[dict]:
     return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + gate_cast_steps(records, spell)
             + ([{'action': 'wait', 'ms': wait_ms}] if wait_ms else []))
+
+
+FORCED_CHANCE_OP = 18
+FORCED_CHANCE_PERCENT = 1000
+FORCED_CHANCE_OWNER_AURA = 100523
+
+
+def forced_chance_of(raw: dict | None) -> tuple[int, int, int] | None:
+    if raw is None:
+        return None
+    unknown = set(raw) - {'talent', 'aura', 'entry'}
+    if unknown or len(raw) != 3:
+        raise ValueError(f'forced_chance needs exactly talent, aura and entry, not {sorted(raw)}')
+    return int(raw['talent']), int(raw['aura']), int(raw['entry'])
+
+
+def forced_chance_labels(spec: MetricDeltaSpec) -> tuple[str, str, str]:
+    return (f'{spec.spell} forced_chance {spec.forced_chance[1]} absent',
+            f'{spec.spell} forced_chance {spec.forced_chance[1]} present',
+            f'{spec.spell} forced_chance released')
+
+
+def with_forced_chance(steps: list[dict], spec: MetricDeltaSpec, settled: int, before_label: str,
+                       after_label: str) -> list[dict]:
+    talent, aura, entry = spec.forced_chance
+    absent, present, released = forced_chance_labels(spec)
+    before = next(index for index, step in enumerate(steps) if step.get('label') == before_label)
+    after = next(index for index, step in enumerate(steps) if step.get('label') == after_label)
+    return (steps[:settled]
+            + [{'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': talent, 'op': FORCED_CHANCE_OP,
+                'percent': FORCED_CHANCE_PERCENT}]
+            + steps[settled:before]
+            + [measurement(absent, CASTER, 'owned_creature_count', entry=entry, spell=aura)]
+            + steps[before:after]
+            + [measurement(present, CASTER, 'owned_creature_count', entry=entry, spell=aura)]
+            + steps[after:]
+            + [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
+               measurement(released, CASTER, 'spell_mod_mutants')])
 
 
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
@@ -1673,6 +1712,13 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
+    if spec.forced_chance is not None:
+        steps = with_forced_chance(steps, spec, len(base_steps(class_file)), before_label, after_label)
+        contract += (f' A forcing fixture raises the roll of {spec.forced_chance[0]} by {FORCED_CHANCE_PERCENT}% '
+                     f'(a SPELLMOD_CHANCE_OF_SUCCESS spell modifier mutant) for the whole scenario, so the aura '
+                     f'{spec.forced_chance[1]} it applies is read at a known time; its presence on creature '
+                     f'{spec.forced_chance[2]} is read before both readings (absent without the passive, present '
+                     f'with it), and the modifier is removed at the end and read gone.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
@@ -1736,6 +1782,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.after_at_least is None or spec.after_at_most < spec.after_at_least:
             raise ValueError(f'{spec.spell} sets after_at_most without an after_at_least at or below it')
         model['after_at_most'] = spec.after_at_most
+    if spec.forced_chance is not None:
+        absent, present, released = forced_chance_labels(spec)
+        model['forced_chance'] = {'talent': spec.forced_chance[0], 'aura': spec.forced_chance[1],
+                                  'entry': spec.forced_chance[2], 'absent_label': absent, 'present_label': present,
+                                  'released_label': released}
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected
@@ -1776,7 +1827,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            None if entry.get('phase_power') is None
                            else tuple(int(value) for value in entry['phase_power']),
                            None if entry.get('caster_health') is None
-                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])))
+                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
+                           forced_chance_of(entry.get('forced_chance')))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
