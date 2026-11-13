@@ -301,7 +301,7 @@ def checked_entry(entry: dict) -> dict:
         raise ValueError(f'Trigger {aura} periodic action needs a positive amplitude_ms')
     if trigger['action'] == MINION:
         checked_minion_trigger(aura, trigger, entry)
-    elif entry.get('minion_auras') or entry.get('observe_actor') == MINION_ACTOR:
+    elif entry.get('minion_auras') or entry.get('target_auras') or entry.get('observe_actor') == MINION_ACTOR:
         raise ValueError(f'Trigger {aura} names a minion without a minion action')
     if entry.get('periodic_initial_tick') and trigger['action'] != PERIODIC:
         raise ValueError(f'Trigger {aura} has an initial tick without a periodic action')
@@ -364,7 +364,10 @@ def checked_minion_trigger(aura: int, trigger: dict, entry: dict) -> None:
                 or not aura_fixture.get('source'):
             raise ValueError(f'Trigger {aura} minion aura is {{"spell": int, "amount": int (optional), '
                              f'"source": text}}')
-    if (entry.get('minion_auras') or entry.get('caster_health_pct') is not None) \
+    for aura_fixture in entry.get('target_auras', []):
+        if set(aura_fixture) != {'spell', 'source'} or not isinstance(aura_fixture['spell'], int):
+            raise ValueError(f'Trigger {aura} dummy aura is {{"spell": int, "source": text}}, set by the caster')
+    if (entry.get('minion_auras') or entry.get('target_auras') or entry.get('caster_health_pct') is not None) \
             and not 0 < entry.get('minion_aura_refresh_ms', 0):
         raise ValueError(f'Trigger {aura} sets minion auras or the caster health without a positive '
                          f'minion_aura_refresh_ms')
@@ -406,10 +409,14 @@ def minion_setup_steps(class_file: dict, trigger: dict) -> list[dict]:
 
 def minion_aura_steps(entry: dict) -> list[dict]:
     owned = {'action': 'set_aura', 'actor': CASTER, 'owned_entry': entry['trigger']['entry']}
-    return [step for fixture in entry.get('minion_auras', [])
-            for step in ({**owned, 'spell': fixture['spell'], 'stacks': 0},
-                         {**owned, 'spell': fixture['spell'], 'stacks': 1,
-                          **({'amount': fixture['amount']} if 'amount' in fixture else {})})]
+    held = {'action': 'set_aura', 'actor': CASTER, 'target': TARGET, 'caster': CASTER}
+    return ([step for fixture in entry.get('minion_auras', [])
+             for step in ({**owned, 'spell': fixture['spell'], 'stacks': 0},
+                          {**owned, 'spell': fixture['spell'], 'stacks': 1,
+                           **({'amount': fixture['amount']} if 'amount' in fixture else {})})]
+            + [step for fixture in entry.get('target_auras', [])
+               for step in ({**held, 'spell': fixture['spell'], 'stacks': 0},
+                            {**held, 'spell': fixture['spell'], 'stacks': 1})])
 
 
 def aura_recast_steps(entry: dict) -> list[dict]:
@@ -419,7 +426,8 @@ def aura_recast_steps(entry: dict) -> list[dict]:
 
 def minion_attempt_steps(entry: dict, wait_ms: int, phase: str) -> list[dict]:
     refresh = entry.get('minion_aura_refresh_ms') \
-        if entry.get('minion_auras') or entry.get('caster_health_pct') is not None else wait_ms
+        if entry.get('minion_auras') or entry.get('target_auras') or entry.get('caster_health_pct') is not None \
+        else wait_ms
     recast = entry.get('aura_recast_ms')
     if recast:
         refresh = min(refresh, recast)
@@ -1239,6 +1247,8 @@ def magnitude_trigger_descriptor(entry: dict) -> str:
         held += ''.join(f'; minion aura {aura["spell"]}' + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
                         + f' set every {entry["minion_aura_refresh_ms"]} ms by harness set_aura ({aura["source"]})'
                         for aura in entry.get('minion_auras', []))
+        held += ''.join(f'; dummy aura {aura["spell"]} from the caster set every {entry["minion_aura_refresh_ms"]} '
+                        f'ms by harness set_aura ({aura["source"]})' for aura in entry.get('target_auras', []))
         return (f'{entry["trigger_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
                 f'attacking the dummy with the caster{held}')
     return f'{entry["trigger_metric"]} of {trigger["spell"]}'

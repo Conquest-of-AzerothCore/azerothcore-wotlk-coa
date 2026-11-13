@@ -214,6 +214,18 @@ class MinionPlanTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             checked_entry(entry)
 
+    def test_a_minion_magnitude_dummy_aura_is_a_caster_fixture_with_a_refresh(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', DEPRAVITY, 'magnitude_ratio'))
+        entry['target_auras'] = [{'spell': 560729, 'source': 'debuff fixture'}]
+        checked_entry(entry)
+        for broken in ({'spell': 560729}, {'spell': 560729, 'source': 'fixture', 'amount': 1}):
+            with self.subTest(broken=broken), self.assertRaises(ValueError):
+                checked_entry({**entry, 'target_auras': [broken]})
+        del entry['minion_auras']
+        del entry['minion_aura_refresh_ms']
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
     def test_a_minion_magnitude_count_is_one_its_trigger_metric_allows(self):
         entry = copy.deepcopy(necromancer_entry('triggers', DEPRAVITY, 'magnitude_ratio'))
         checked_entry(entry)
@@ -230,6 +242,22 @@ class MinionScenarioTest(unittest.TestCase):
             label = magnitude_measurement_labels(aura)['trigger_count']
             step = next(step for step in scenario['steps'] if step.get('label') == label)
             self.assertEqual((step['metric'], step['entry']), (count, GHOUL))
+
+    def test_a_minion_magnitude_refreshes_its_dummy_aura_from_the_caster_each_window(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', DEPRAVITY, 'magnitude_ratio'))
+        entry['target_auras'] = [{'spell': 560729, 'source': 'debuff fixture'}]
+        scenario, [expectation] = magnitude_ratio_scenario(NECROMANCER, entry)
+        held = [step for step in scenario['steps'] if step['action'] == 'set_aura' and step.get('target') == 'dummy']
+        windows = [step for step in scenario['steps'] if step.get('label', '').endswith('minion swings')]
+        self.assertEqual(len(held), 2 * len(windows))
+        self.assertEqual({(step['spell'], step['caster']) for step in held}, {(560729, 'caster')})
+        self.assertEqual([step['stacks'] for step in held[:2]], [0, 1])
+        self.assertIn('dummy aura 560729 from the caster', expectation.rule)
+
+    def test_a_minion_magnitude_without_dummy_auras_sets_none(self):
+        scenario, _ = magnitude_ratio_scenario(NECROMANCER, necromancer_entry('triggers', DEPRAVITY, 'magnitude_ratio'))
+        self.assertFalse([step for step in scenario['steps'] if step.get('target') == 'dummy'
+                          and step['action'] == 'set_aura'])
 
     def test_chomp_raises_its_minion_and_refreshes_the_crit_fixture_by_remove_and_add(self):
         scenario, expectations = trigger_scenario(NECROMANCER, necromancer_entry('triggers', CHOMP))

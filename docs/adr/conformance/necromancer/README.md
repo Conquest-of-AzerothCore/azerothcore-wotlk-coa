@@ -57,6 +57,7 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0052](0052-underking-random-pick-is-attributed-per-cycle.md) | - | The Underking random pick is attributed per cycle | new |
 | [0061](0061-bone-smash-is-read-over-the-colossus-swing-after-its-armored-flat.md) | - | Bone Smash is read over the Colossus swing after its armored flat | new |
 | [0062](0062-rotting-flesh-and-fetid-mark-are-read-on-swing-arms.md) | - | Rotting Flesh and Fetid Mark are read on swing arms | new |
+| [0065](0065-parasites-leech-needs-only-the-players-debuff.md) | - | The Parasites leech needs only the player's debuff | new |
 
 ## Re-auditable verdict set
 
