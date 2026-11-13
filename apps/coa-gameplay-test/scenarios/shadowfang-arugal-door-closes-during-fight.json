@@ -4,7 +4,8 @@
   "contract": [
     "Arugal's Lair (18971, spawn 33241) opens when Wolf Master Nandos (3927) dies. Our tester asked for it to stay shut",
     "while Archmage Arugal (4275) is in combat, so nobody leaves or joins mid-fight. It closes on his pull and opens",
-    "again when he dies or evades."
+    "again when he dies or evades.",
+    "The test pulls a summoned Archmage Arugal next to the door; it runs the same SmartAI as his spawn."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -97,36 +98,34 @@
       "action": "teleport",
       "actor": "p",
       "map": 33,
-      "x": -79.5,
-      "y": 2153.0,
+      "x": -112.0,
+      "y": 2156.0,
       "z": 155.8,
-      "o": 6.2
+      "o": 0.0
     },
     {
       "action": "wait",
       "ms": 500
     },
     {
-      "action": "attack_nearby",
+      "action": "summon",
       "actor": "p",
-      "entry": 4275
+      "as": "arugal",
+      "entry": 4275,
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "arugal"
     },
     {
       "action": "assert",
       "label": "CONTROL: Arugal is in combat",
-      "actor": "p",
+      "actor": "arugal",
       "metric": "combat",
       "equals": 1,
       "within_ms": 5000
-    },
-    {
-      "action": "teleport",
-      "actor": "p",
-      "map": 33,
-      "x": -112.0,
-      "y": 2160.0,
-      "z": 155.8,
-      "o": 0.0
     },
     {
       "action": "assert",
@@ -138,28 +137,10 @@
       "within_ms": 2000
     },
     {
-      "action": "teleport",
-      "actor": "p",
-      "map": 33,
-      "x": -79.5,
-      "y": 2153.0,
-      "z": 155.8,
-      "o": 6.2
-    },
-    {
       "action": "attack_nearby",
       "actor": "p",
       "entry": 4275,
       "kill": true
-    },
-    {
-      "action": "teleport",
-      "actor": "p",
-      "map": 33,
-      "x": -112.0,
-      "y": 2160.0,
-      "z": 155.8,
-      "o": 0.0
     },
     {
       "action": "assert",
