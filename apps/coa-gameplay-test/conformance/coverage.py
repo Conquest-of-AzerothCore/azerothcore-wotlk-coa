@@ -418,6 +418,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_react_state', 'nearest_creature_distance', 'casting',
                      'item_count', 'track_creature_type', 'owned_creature_stat', 'owned_creature_display',
                      'distance_2d'), STATE),
+    'enemy_player_aura_duration_ms': READBACK,
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -471,7 +472,13 @@ def evidence_classes() -> dict[str, str]:
     return {**EVIDENCE, **kind_rows('EVIDENCE')}
 
 
-KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES}
+CONTRAST_PROOF = {
+    'owned_creature_spell_crit_chance': LEARNED_CONTRAST,
+    'owned_creature_school_spell_crit_chance': LEARNED_CONTRAST,
+    'enemy_player_aura_duration_ms': LEARNED_CONTRAST,
+}
+KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES,
+                   'CONTRAST_PROOF': CONTRAST_PROOF}
 KIND_ROW_OVERRIDES = frozenset()
 
 
@@ -483,6 +490,10 @@ def kind_row_overrides(modules=None) -> list[tuple[str, str, str]]:
 
 def metric_evidence() -> dict[str, str]:
     return {**METRIC_EVIDENCE, **kind_rows('METRIC_EVIDENCE')}
+
+
+def contrast_proof() -> dict[str, str]:
+    return {**CONTRAST_PROOF, **kind_rows('CONTRAST_PROOF')}
 
 
 def state_promises() -> dict[str, str]:
@@ -656,6 +667,10 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     if kind == BEHAVIOUR:
         return BEHAVIOUR
     observed = metric_class(verdict)
+    detail = verdict.detail or {}
+    required = contrast_proof().get(detail[PASSIVE_METRIC])
+    if required is not None and detail.get(CONTRAST) == required:
+        return BEHAVIOUR
     words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
     if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
         return DATA

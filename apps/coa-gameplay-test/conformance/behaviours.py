@@ -1359,6 +1359,7 @@ class MetricDeltaSpec:
     dummy_distance: float | None = None
     enemy_player_class: int | None = None
     options: tuple[tuple[str, object], ...] = ()
+    evidence_metric: str | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1881,6 +1882,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
              'contrast': metric_delta_contrast(spec), 'quote': entry.quote}
+    if spec.evidence_metric is not None:
+        model['evidence_metric'] = spec.evidence_metric
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
     if spec.after_at_least is not None:
@@ -1948,7 +1951,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            forced_chance_of(entry.get('forced_chance')),
                            metric_delta_game_time(entry.get('game_time')),
                            None if entry.get('dummy_distance') is None else float(entry['dummy_distance']),
-                           enemy_player_class=entry.get('enemy_player_class'), options=parsed_options(entry))
+                           enemy_player_class=entry.get('enemy_player_class'), options=parsed_options(entry),
+                           evidence_metric=entry.get('evidence_metric'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

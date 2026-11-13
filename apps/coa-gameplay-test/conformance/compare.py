@@ -3970,7 +3970,8 @@ def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) ->
 
 def observed(expectation: Expectation) -> dict:
     model = expectation.model or {}
-    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST),
+    found = {PASSIVE_METRIC: model.get('evidence_metric', model.get('metric', model.get('observe_metric'))),
+             CONTRAST: model.get(CONTRAST),
              FORCED_CHANCE: (model.get(FORCED_CHANCE) or {}).get('talent')}
     return {key: value for key, value in found.items() if value is not None}
 

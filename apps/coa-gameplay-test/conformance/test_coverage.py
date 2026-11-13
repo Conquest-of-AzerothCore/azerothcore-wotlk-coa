@@ -759,6 +759,30 @@ class EvidenceTablesTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
 
 
+class ContrastProofTest(unittest.TestCase):
+    LABEL = '1 behaviour_metric_delta'
+
+    def evidence(self, text, metric, **detail):
+        return evidence_of([claim(text, self.LABEL)], [judged(self.LABEL, BEHAVIOUR_METRIC_DELTA, metric, **detail)])[0]
+
+    def test_a_summon_crit_read_proves_a_claim_without_the_promise_words_only_with_the_learned_contrast(self):
+        for metric in ('owned_creature_spell_crit_chance', 'owned_creature_school_spell_crit_chance'):
+            self.assertEqual(self.evidence('and your summons by $s2%', metric, contrast=LEARNED_CONTRAST), [BEHAVIOUR])
+            self.assertEqual(self.evidence('and your summons by $s2%', metric, contrast=CONDITION_CONTRAST), [DATA])
+            self.assertEqual(self.evidence('and your summons by $s2%', metric), [DATA])
+
+    def test_an_enemy_player_duration_read_proves_its_claim_only_with_the_learned_contrast(self):
+        text = '(8 sec vs players).'
+        self.assertEqual(self.evidence(text, 'enemy_player_aura_duration_ms', contrast=LEARNED_CONTRAST), [BEHAVIOUR])
+        self.assertEqual(self.evidence(text, 'enemy_player_aura_duration_ms', contrast=CONDITION_CONTRAST), [DATA])
+        self.assertEqual(self.evidence(text, 'aura_duration_ms', contrast=LEARNED_CONTRAST), [DATA])
+
+    def test_a_failed_contrast_read_is_not_evidence(self):
+        verdicts = [judged(self.LABEL, BEHAVIOUR_METRIC_DELTA, 'enemy_player_aura_duration_ms', status='alert',
+                           contrast=LEARNED_CONTRAST)]
+        self.assertEqual(evidence_of([claim('(8 sec vs players).', self.LABEL)], verdicts)[0], [UNPROVEN])
+
+
 class KindRowOverrideGuardTest(unittest.TestCase):
     def test_cross_class_guard_no_kind_module_overrides_a_base_row_unless_allowed(self):
         overrides = kind_row_overrides()

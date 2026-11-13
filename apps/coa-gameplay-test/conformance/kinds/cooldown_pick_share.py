@@ -3,7 +3,7 @@ from math import comb
 from pathlib import Path
 from statistics import median
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, hit_ratio_cast, prose_rule, waited_ms
+from behaviours import BEHAVIOUR_METRIC_DELTA, LEARNED_CONTRAST, behaviour_entry, hit_ratio_cast, prose_rule, waited_ms
 from hits import creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -14,6 +14,7 @@ ORDER = 40
 SHARE_ALPHA = 0.001
 CONTROL = 'control'
 TREATMENT = 'treatment'
+PICK_SHARE_METRIC = 'cooldown_pick_share'
 
 
 @dataclass(frozen=True)
@@ -117,7 +118,7 @@ def cooldown_pick_scenario(class_file: dict, spec: CooldownPickSpec) -> tuple[di
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
-    model = {'kind': KIND, 'metric': 'cooldown_ms', 'quote': entry.quote, 'pool': list(spec.pool), 'rows': rows,
+    model = {'kind': KIND, 'metric': PICK_SHARE_METRIC, 'quote': entry.quote, 'pool': list(spec.pool), 'rows': rows,
              'cut_ms': spec.cut_ms, 'tolerance_ms': spec.tolerance_ms, 'expected': float(len(spec.pool))}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.spell, None, f'{len(spec.pool)}',
@@ -194,12 +195,13 @@ def pick_share_verdict(base, runs: list, model: dict):
     if any(not low <= count <= high for count in counts):
         faults.append(f'a count lies outside the uniform band {low}..{high}')
     picked = float(sum(count > 0 for count in counts))
+    controlled = {'contrast': LEARNED_CONTRAST} if control else {}
     explanation = (f'{len(control)} control cycles, {len(treatment)} cycles with the talent; picks {shares} against '
                    f'a uniform band {low}..{high} of {len(treatment)}')
     return replace(base, status='alert' if faults else 'ok', measured=picked, expected=float(len(pool)),
                    low=float(len(pool)), high=float(len(pool)),
                    detail={'counts': dict(zip(map(str, pool), counts)), 'band': [low, high],
-                           'cycles': len(treatment), 'parts': len(runs)},
+                           'cycles': len(treatment), 'parts': len(runs), **controlled},
                    explanation=explanation + (': ' + '; '.join(faults) if faults else ': every cycle cut exactly '
                                               'one cooldown and every spell was picked inside the band'))
 
@@ -220,3 +222,5 @@ JUDGES = {BEHAVIOUR_METRIC_DELTA: pick_share_single_verdict}
 
 
 POOLED_JUDGE = pick_share_verdict
+METRIC_EVIDENCE = {PICK_SHARE_METRIC: 'readback'}
+CONTRAST_PROOF = {PICK_SHARE_METRIC: LEARNED_CONTRAST}
