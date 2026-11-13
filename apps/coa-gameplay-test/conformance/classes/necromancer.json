@@ -374,7 +374,7 @@
       "proc_spell": 707002,
       "proc_spell_source": "tooltip tokens $707002i and $707002m1",
       "events_per_proc": 1,
-      "handler": "AscensionNecromancerEvents.cpp:187-197: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 at up to Amount(707001) valid enemies within 8 yd of its target; one dummy here, so one blast per proc",
+      "handler": "AscensionNecromancerEvents.cpp:189-190: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 once at its target; AscensionNecromancerContracts.cpp:331-332 centres 707002's area on that target (TargetA TARGET_DEST_TARGET_ENEMY), so MaxAffectedTargets 3 picks the enemies (ADR 0350); one dummy here, so one blast per proc",
       "dbc": {
         "707001": {
           "ProcChance": 10,
@@ -416,7 +416,7 @@
       "proc_spell": 707002,
       "proc_spell_source": "tooltip tokens $707002i and $707002m1",
       "events_per_proc": 1,
-      "handler": "AscensionNecromancerEvents.cpp:187-197: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll",
+      "handler": "AscensionNecromancerEvents.cpp:189-190: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll",
       "dbc": {
         "707882": {
           "ProcChance": 20,
@@ -457,7 +457,7 @@
       "proc_spell": 707002,
       "proc_spell_source": "tooltip tokens $707002i (707002 MaxAffectedTargets 3) and $707002m1",
       "events_per_proc": 3,
-      "handler": "AscensionNecromancerEvents.cpp:187-197: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 at up to Amount(707001) valid enemies within 8 yd of its target; one dummy here, so one blast per proc. Count variant: a Lesser Skeletal Warrior 50065 (Raise: Skeletal Warrior 500970, 1 Life Force; it casts no spell of its own, unlike the Abomination's Nature cloud that also hits every dummy) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
+      "handler": "AscensionNecromancerEvents.cpp:189-190: Chance(player, 707001) (ProcChance 10) has the minion cast 707002 once at its target; AscensionNecromancerContracts.cpp:331-332 centres 707002's area on that target (TargetA TARGET_DEST_TARGET_ENEMY), so MaxAffectedTargets 3 picks the enemies (ADR 0350); one dummy here, so one blast per proc. Count variant: a Lesser Skeletal Warrior 50065 (Raise: Skeletal Warrior 500970, 1 Life Force; it casts no spell of its own, unlike the Abomination's Nature cloud that also hits every dummy) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside 707002's area (EffectRadiusIndex 8) around the primary, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
       "dbc": {
         "707001": {
           "ProcChance": 10,
@@ -503,7 +503,7 @@
       "proc_spell": 707002,
       "proc_spell_source": "tooltip tokens $707002i (707002 MaxAffectedTargets 3) and $707002m1",
       "events_per_proc": 3,
-      "handler": "AscensionNecromancerEvents.cpp:187-197: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll. Count variant: a Lesser Skeletal Warrior 50065 (Raise: Skeletal Warrior 500970, 1 Life Force; it casts no spell of its own, unlike the Abomination's Nature cloud that also hits every dummy) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside the 8 yd of AscensionNecromancerEvents.cpp:191, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
+      "handler": "AscensionNecromancerEvents.cpp:189-190: with 707882 known, Chance(player, 707882) (ProcChance 20) replaces the 707001 roll. Count variant: a Lesser Skeletal Warrior 50065 (Raise: Skeletal Warrior 500970, 1 Life Force; it casts no spell of its own, unlike the Abomination's Nature cloud that also hits every dummy) attacks the primary dummy with three more dummies 1 to 3 yd behind it, all inside 707002's area (EffectRadiusIndex 8) around the primary, and every 707002 hit on any dummy counts: 3 per proc as $707002i states",
       "dbc": {
         "707882": {
           "ProcChance": 20,
