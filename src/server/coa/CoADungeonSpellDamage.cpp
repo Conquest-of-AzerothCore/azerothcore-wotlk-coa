@@ -102,7 +102,7 @@ public:
         LOG_INFO("server.loading", ">> Loaded {} CoA dungeon boss entries (trash spell cap exempt)", Bosses.size());
         CreatureMultipliers.clear();
         CreatureSpellMultipliers.clear();
-        if (QueryResult result = WorldDatabase.Query("SELECT entry, spell_id, multiplier FROM coa_dungeon_creature_damage"))
+        if (PreparedQueryResult result = WorldDatabase.Query(WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DUNGEON_CREATURE_DAMAGE)))
         {
             do
             {

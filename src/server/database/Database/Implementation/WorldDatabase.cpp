@@ -152,6 +152,7 @@ void WorldDatabaseConnection::DoPrepareStatements()
 #endif
     PrepareStatement(WORLD_SEL_COA_NAME_FILTER, "SELECT term FROM coa_name_filter", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_COA_DUNGEON_SPELL_REACH, "SELECT spell_id, range_index, line_of_sight FROM coa_dungeon_spell_reach", CONNECTION_SYNCH);
+    PrepareStatement(WORLD_SEL_COA_DUNGEON_CREATURE_DAMAGE, "SELECT entry, spell_id, multiplier FROM coa_dungeon_creature_damage", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_PATCHES, "SELECT * FROM spell_dbc WHERE ID = ?", CONNECTION_SYNCH);
     PrepareStatement(WORLD_SEL_CLIENT_SPELL_DESCRIPTIONS,
         "SELECT ID, Description, ToolTip FROM coa_client_spell_description", CONNECTION_SYNCH);

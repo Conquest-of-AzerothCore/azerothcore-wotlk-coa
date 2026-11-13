@@ -1183,6 +1183,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
                     'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
+                if metric == 'spell_id_for_difficulty':
+                    require('target' in step, f'{where}: spell_id_for_difficulty needs a target')
             if 'victim_state' in step:
                 require(metric == 'melee_attacks_taken', f'{where}: victim_state only filters melee attacks taken')
                 number(step['victim_state'], f'{where}.victim_state', 0, MAX_VICTIM_STATE, True)
