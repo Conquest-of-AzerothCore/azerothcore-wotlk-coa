@@ -37,6 +37,7 @@ from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
+from kinds import kind_judge, kind_pooled_judge
 from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
@@ -3424,33 +3425,6 @@ def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], mod
                                f'{first.high:g}: every summoned part lies inside the band')
 
 
-def behaviour_energize_range_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    readings = []
-    for total_label, count_label in model['marks']:
-        total, count = run.values.get(total_label), run.values.get(count_label)
-        if total is None or count is None:
-            return replace(base, explanation=missing_measurement(run, total_label if total is None else count_label))
-        readings.append((total, count))
-    amounts = [later[0] - earlier[0] for earlier, later in zip(readings, readings[1:]) if later[1] - earlier[1] == 1]
-    low, high, needed = float(model['low']), float(model['high']), int(model['minimum_events'])
-    if not amounts:
-        return replace(base, status='unmeasured', explanation='no interval held exactly one energize event')
-    lowest, highest = min(amounts), max(amounts)
-    outside = [amount for amount in amounts if not low <= amount <= high]
-    detail = {'events': len(amounts), 'min': lowest, 'max': highest}
-    text = (f'{len(amounts)} single energize events (intervals holding exactly one), amounts {lowest:g} to '
-            f'{highest:g} against the roll {low:g}..{high:g}')
-    if outside:
-        return replace(base, status='alert', measured=lowest, expected=low, low=low, high=high, detail=detail,
-                       explanation=f'{text}; {len(outside)} outside the roll')
-    if len(amounts) < needed:
-        return replace(base, status='unmeasured', measured=lowest, expected=low, low=low, high=high, detail=detail,
-                       explanation=f'{text}; at least {needed} single events are needed')
-    status = 'ok' if lowest == low and highest == high else 'alert'
-    return replace(base, status=status, measured=lowest, expected=low, low=low, high=high, detail=detail,
-                   explanation=f'{text}; both ends must be seen in {needed} or more events: '
-                               + ('both seen' if status == 'ok' else 'an end was not reached'))
-
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4540,6 +4514,9 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
     model = expectation.model
+    judge = kind_judge(expectation.check, (model or {}).get('kind'))
+    if judge:
+        return judge(base, run, model)
     if expectation.check == BEHAVIOUR_AMOUNT_MATCH:
         return behaviour_amount_match_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CAST_GATE:
@@ -4583,8 +4560,6 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_pushback_reduction_verdict(base, run, model)
         if model.get('kind') == 'summon_lifetime':
             return behaviour_summon_lifetime_verdict(base, run, model)
-        if model.get('kind') == 'energize_range':
-            return behaviour_energize_range_verdict(base, run, model)
         if model.get('kind') == 'aura_expiry':
             return behaviour_aura_expiry_verdict(base, run, model)
         if model.get('kind') == 'cast_period':
@@ -5382,7 +5357,8 @@ POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
 
 def pooled_parts(check: str, model: dict | None) -> bool:
     model = model or {}
-    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or model.get('kind') == 'summon_lifetime')
+    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or model.get('kind') == 'summon_lifetime'
+                                          or kind_pooled_judge(model.get('kind')) is not None)
 
 
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
@@ -5448,7 +5424,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        ' + '.join(entry['key'] for entry, _, _ in parts), expectation.spell_id, expectation.rank_id,
                        expectation.check)
         present = [run for _, run, _ in parts if run is not None]
+        kind_pooled = kind_pooled_judge((expectation.model or {}).get('kind'))
         pooled_judge = (behaviour_hit_ratio_verdict if expectation.check == BEHAVIOUR_HIT_RATIO
+                        else kind_pooled if kind_pooled
                         else behaviour_summon_lifetime_pooled_verdict
                         if (expectation.model or {}).get('kind') == 'summon_lifetime'
                         else behaviour_taken_rate_verdict)

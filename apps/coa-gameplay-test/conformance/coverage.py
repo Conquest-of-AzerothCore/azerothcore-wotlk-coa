@@ -22,6 +22,7 @@ from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, 
                      STACKED_SAME, STATUSES, Verdict, read_verdicts)
 from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
+from kinds import kind_rows
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK, PROC_ENERGIZE_CHECK
 from profile import DbcSetMismatch, require_server_sha
@@ -462,6 +463,18 @@ class EvidenceError(ValueError):
     pass
 
 
+def evidence_classes() -> dict[str, str]:
+    return {**EVIDENCE, **kind_rows('EVIDENCE')}
+
+
+def metric_evidence() -> dict[str, str]:
+    return {**METRIC_EVIDENCE, **kind_rows('METRIC_EVIDENCE')}
+
+
+def state_promises() -> dict[str, str]:
+    return {**STATE_PROMISES, **kind_rows('STATE_PROMISES')}
+
+
 K3 = 'K3'
 CONSUMED = 'consumed'
 NOT_CONSUMED = 'not_consumed'
@@ -520,7 +533,7 @@ def consumption_results(rows, build: str | None) -> dict[str, str]:
 def acting(verdict: Verdict) -> bool:
     if verdict.status not in CONFORMANT or verdict.status == 'closed' or (verdict.detail or {}).get(DATA_ONLY):
         return False
-    kind = EVIDENCE.get(verdict.check)
+    kind = evidence_classes().get(verdict.check)
     return kind == BEHAVIOUR or (kind == BY_METRIC and metric_class(verdict) == EVENT)
 
 
@@ -578,7 +591,7 @@ def require_build(verdicts: list[Verdict], build: str | None, where: str):
 
 
 def require_known_checks(verdicts: list[Verdict]):
-    unknown = sorted({verdict.check for verdict in verdicts if verdict.check not in EVIDENCE})
+    unknown = sorted({verdict.check for verdict in verdicts if verdict.check not in evidence_classes()})
     if unknown:
         raise EvidenceError(f'checks {unknown} have no evidence class in coverage.EVIDENCE')
 
@@ -587,9 +600,9 @@ def metric_class(verdict: Verdict) -> str:
     metric = (verdict.detail or {}).get(PASSIVE_METRIC)
     if metric is None:
         raise EvidenceError(f'{verdict.label}: check {verdict.check} carries no observed metric in its detail')
-    if metric not in METRIC_EVIDENCE:
+    if metric not in metric_evidence():
         raise EvidenceError(f'{verdict.label}: metric {metric!r} has no evidence class in coverage.METRIC_EVIDENCE')
-    return METRIC_EVIDENCE[metric]
+    return metric_evidence()[metric]
 
 
 NO_STACK_WORDS = r'do(?:es)? not stack'
@@ -608,7 +621,7 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
         return True
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST):
         return False
-    words = STATE_PROMISES.get(detail[PASSIVE_METRIC])
+    words = state_promises().get(detail[PASSIVE_METRIC])
     return words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is not None
 
 
@@ -616,7 +629,7 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset()) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
-    kind = EVIDENCE[verdict.check]
+    kind = evidence_classes()[verdict.check]
     if kind == LINKED:
         referenced = [by_label[label] for label in LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
                       if label in by_label and label not in seen]

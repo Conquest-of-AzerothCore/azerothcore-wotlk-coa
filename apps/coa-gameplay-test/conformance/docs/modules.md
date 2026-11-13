@@ -16,6 +16,8 @@
   `require_server_sha(sha, source)` raise `DbcSetMismatch` for a set other than the server's (`load_class_file`
   applies it to a class file's `dbc_dir`); `load_fixture_class_file` reads the frozen copies of `fixtures/classes/`
   that the tool tests use (ADR 0580). Its name shadows the standard library `profile`: run the package from its own directory.
+- `kinds/`: one module per behaviour kind that is not built into `behaviours.py`, found at run time
+  (`kinds.kind_modules()`); see [Behaviour kind modules](behaviour-scenarios.md#behaviour-kind-modules) (ADR 0581).
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank, its
   `Expectation` list, and the `periodic_totals` of any `OVER_TICKS` token deferred to a companion scenario (below).
 - `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected

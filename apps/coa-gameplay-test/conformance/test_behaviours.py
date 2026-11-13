@@ -11448,7 +11448,6 @@ class TakenHitLearnedArmTests(unittest.TestCase):
             taken_hit_scenario(load_class_file(23), taken_hit_spec({**entry, 'arms': arms}))
 
 
-
 class MinionSwingRatioTests(unittest.TestCase):
     def built(self):
         entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'minion_swing_ratio')
@@ -11493,7 +11492,6 @@ class MinionSwingRatioTests(unittest.TestCase):
         self.assertEqual(self.judged(201.0), 'alert')
 
 
-
 class HitRatioTargetAuraTests(unittest.TestCase):
     def built(self):
         entry = next(entry for entry in load_class_file(23)['behaviours']
@@ -11531,7 +11529,6 @@ class HitRatioTargetAuraTests(unittest.TestCase):
                      if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
         with self.assertRaisesRegex(ValueError, 'target_auras'):
             behaviour_scenario(load_class_file(23), {**entry, 'target': CASTER})
-
 
 
 class PushbackReductionTests(unittest.TestCase):
@@ -11609,7 +11606,6 @@ class PushbackReductionTests(unittest.TestCase):
         self.assertFalse(promised_state(stamped, 'Summon an Icebound Champion'))
 
 
-
 class SummonLifetimeTests(unittest.TestCase):
     def built(self):
         entry = next(entry for entry in load_class_file(23)['behaviours']
@@ -11648,7 +11644,6 @@ class SummonLifetimeTests(unittest.TestCase):
         self.assertEqual(self.judged(3010.0, 18010.0, control=1.0), 'alert')
 
 
-
 class PushbackLearnedReducerTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_learned_reducer_adds_its_own_unhit_cast_after_the_learn(self):
@@ -11666,7 +11661,6 @@ class PushbackLearnedReducerTests(unittest.TestCase):
         self.assertLess(learn, casts[2 * repeats])
         self.assertEqual(list(expectation.model['samples']), ['unhit', 'hit', 'reduced_unhit', 'reduced'])
         self.assertNotIn('strike', expectation.model['samples']['reduced_unhit'][0])
-
 
 
 class CostGateForcedRollTests(unittest.TestCase):
@@ -11699,7 +11693,6 @@ class CostGateForcedRollTests(unittest.TestCase):
         scenario, expectations = behaviour_scenario(load_class_file(23), plain)
         self.assertFalse([step for step in scenario['steps'] if step['action'] == 'spell_mod_mutant'])
         self.assertFalse([expectation for expectation in expectations if expectation.label.endswith(' released')])
-
 
 
 class SummonLifetimePooledTests(unittest.TestCase):
@@ -11735,7 +11728,6 @@ class SummonLifetimePooledTests(unittest.TestCase):
         entry = next(entry for entry in load_class_file(23)['behaviours']
                      if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
         self.assertGreaterEqual(entry['parts'], 40)
-
 
 
 class PushbackSampledTests(unittest.TestCase):
@@ -11832,36 +11824,6 @@ class MetricDeltaOwnCastContrastTests(unittest.TestCase):
         self.assertEqual(other.model['contrast'], 'condition')
         _, [learned] = behaviour_scenario(load_class_file(23), {**own, 'setup_only_after': False})
         self.assertEqual(learned.model['contrast'], 'learned')
-
-
-class EnergizeRangeTests(unittest.TestCase):
-    def built(self):
-        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'energize_range')
-        return behaviour_scenario(load_class_file(23), entry)
-
-    def judged(self, amounts: list[int]) -> str:
-        _, [expectation] = self.built()
-        marks = expectation.model['marks']
-        values, total, count = {}, 0.0, 0.0
-        for index, (total_label, count_label) in enumerate(marks):
-            if 0 < index <= len(amounts):
-                total, count = total + amounts[index - 1], count + 1
-            values[total_label], values[count_label] = total, count
-        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
-
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_every_poll_reads_the_energize_total_and_count(self):
-        scenario, [expectation] = self.built()
-        run.validate(scenario)
-        self.assertEqual(len(expectation.model['marks']), 1 + 160 * 13)
-
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_both_ends_inside_the_roll_are_ok_and_a_missing_end_or_an_outlier_alerts(self):
-        full = [30 + index % 51 for index in range(400)]
-        self.assertEqual(self.judged(full), 'ok')
-        self.assertEqual(self.judged([amount if amount != 80 else 79 for amount in full]), 'alert')
-        self.assertEqual(self.judged(full[:-1] + [81]), 'alert')
-        self.assertEqual(self.judged(full[:100]), 'unmeasured')
 
 
 if __name__ == '__main__':

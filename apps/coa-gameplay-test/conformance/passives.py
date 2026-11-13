@@ -5,6 +5,7 @@ import re
 
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells, progression_chains, table_rows
 from hits import creature_fixture
+from kinds import kind_labels
 from procs import proc_label, shares_aura, shares_proc_spell, trigger_key
 from profile import CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
@@ -91,8 +92,6 @@ BEHAVIOUR_LABELS = {
                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'hit_ratio': lambda entry: [f"{entry['spell']} behaviour_hit_ratio"
                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
-    'energize_range': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
-                                     + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'summon_lifetime': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
                                       + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'pushback_reduction': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
@@ -688,9 +687,10 @@ def effect_unmodelled(class_file: dict, spell_ids: set[int], effect: int) -> str
 
 def behaviour_label(entry: dict) -> list[str]:
     kind = entry['kind']
-    if kind not in BEHAVIOUR_LABELS:
+    labels = {**BEHAVIOUR_LABELS, **kind_labels()}
+    if kind not in labels:
         raise ValueError(f'behaviour kind {kind!r} has no known label format for a P5 link')
-    return BEHAVIOUR_LABELS[kind](entry)
+    return labels[kind](entry)
 
 
 def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> list[tuple[str, dict]] | None:

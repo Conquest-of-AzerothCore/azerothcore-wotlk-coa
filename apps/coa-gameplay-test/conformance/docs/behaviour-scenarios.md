@@ -887,14 +887,6 @@ mutant at +1000%.
 shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
 33% per tick, 40 parts).
 
-### Energize range (`behaviour_metric_delta`, `kind: "energize_range"`, ADR 0549)
-
-`cast_spell` is cast `casts` times at the dummy (`caster_auras` and `target_auras` set before each cast, Runic Power set
-to 0); the cumulative `energize_spell` energize total and count are read every 250 ms (`polls_per_cast` reads per
-cast). An interval whose count rose by exactly one gives that event's amount; at least `minimum_events` such amounts
-must be read, all inside `low`..`high`, with both ends seen. Soulfreeze 801724: 800344 rolls 30..80 per tick, 160 casts,
-384 events.
-
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
 One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once
@@ -1610,7 +1602,6 @@ rank 572741 as `trigger_spell`, which satisfies `Breaker(info)` through its own 
 through `Named(info, 805409)` (Righteous Tempest, which the code exempts from clearing Oaths regardless of 92109),
 so the scenario exercises the 92109 gate itself rather than that unrelated exemption.
 
-
 ### Auras set around behaviour casts (ADR 0170)
 
 Four kinds can set auras around their casts. Without the fields every scenario is unchanged.
@@ -1948,3 +1939,23 @@ game-time stamps, the dummies struck between two reads are one pulse's targets, 
 start and end windows given in game time, without and with the talent, and judges each stamped duration (Ice Barrage
 501997's channel, Deathly Chill 805424). `kind: "hit_period"` (ADR 0552) polls a cast's hits on the dummy and judges
 (last - first) / (n - 1) with the cast_period judge (Soulfreeze 801724's ticks).
+
+## Behaviour kind modules
+
+A behaviour kind can live in its own module `kinds/<kind>.py` (ADR 0581), found at run time by
+`kinds.kind_modules()` (`pkgutil.iter_modules` over the package, on first use). A module states:
+
+- `KIND`, the entry's `kind`, and `ORDER`, its place after the built-in `behaviours.KINDS` in
+  `behaviours.behaviour_kinds()` (the list `packets.py` prints; new kinds take the next number);
+- `scenario(class_file, entry)`, the entry's scenario and expectations, consulted before the
+  `behaviour_scenario` chain;
+- optionally `JUDGES` (`{check: judge(base, run, model)}`, used for a model whose `kind` is `KIND`, before the
+  `compare.judged_behaviour` chain), `POOLED_JUDGE` (`judge(base, runs, model)` for pooled `parts`), `label(entry)`
+  (its P5 link labels, merged into `passives.BEHAVIOUR_LABELS`) and `EVIDENCE`, `METRIC_EVIDENCE`,
+  `STATE_PROMISES` rows (merged into the `coverage` tables, which stay closed: a check or metric without a row still
+  fails, ADR 0120).
+
+Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` suite command, which also checks that
+every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
+
+- [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)

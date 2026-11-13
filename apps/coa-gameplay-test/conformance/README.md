@@ -70,7 +70,8 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   entries.
 - [Behaviour scenarios](docs/behaviour-scenarios.md) — prose-only behaviours: target count, healing ratio, aura
   spread, shield break, metric delta, health-threshold ratio, leech ratio, duration, duration ratio, duration
-  refresh, amount delta, expiry pairs, Templar entries.
+  refresh, amount delta, expiry pairs, Templar entries; the kinds that live in their own `kinds/<kind>.py` module and
+  page (`docs/kinds/<kind>.md`, ADR 0581) are indexed at its end.
 - [Player observations and readings](docs/player-observations.md) — a class file's `player_observations` and
   `player_tooltip_readings` arrays.
 - [Talent stack (lever map)](docs/talent-stack.md) — cumulative talent configurations, DPS levers, the owner
