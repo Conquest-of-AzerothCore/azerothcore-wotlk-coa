@@ -410,6 +410,8 @@ void ApplyContracts(SpellInfo* info)
             effect.BonusMultiplier = 0.0f;
     if (id == 570050)
         info->Effects[0].RealPointsPerLevel = 0.0f;
+    if (id == 712434)
+        info->Effects[1].Effect = 0;
     for (uint32 child : {573242, 801241, 561318, 561095, 570050, 505225, 681463})
         if (id == child)
         {
