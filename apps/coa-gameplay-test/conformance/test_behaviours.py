@@ -6035,7 +6035,6 @@ class JudgeHealBlockTests(unittest.TestCase):
         self.assertEqual(verdict.measured, 1.0)
 
 
-
 def class_entry(spell: int, kind: str) -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind)
 
@@ -6174,7 +6173,6 @@ class ThreatSlopeScenarioTests(unittest.TestCase):
         self.assertEqual(self.judged(self.readings(400.0, 150.0, cast=34.0)).status, 'unmeasured')
 
 
-
 def variant_entry(spell: int, kind: str, variant: str) -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                 if entry['spell'] == spell and entry['kind'] == kind and entry.get('variant') == variant)
@@ -6234,7 +6232,6 @@ class GroupTargetScenarioTests(unittest.TestCase):
             verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: float(value)}),
                                       expectation)
             self.assertEqual(verdict.status, 'alert')
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -6510,7 +6507,6 @@ class CostGateScenarioTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, {**self.after_cast_entry(), 'after_wait_ms': 99500})
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitRatioFixtureTests(unittest.TestCase):
     def test_fixture_stats_reach_the_caster_only(self):
@@ -6661,7 +6657,6 @@ class AttackMetricDeltaTest(unittest.TestCase):
                        {'force_crit': 'ranged'}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 metric_delta_scenario(CLASS_FILE, metric_delta_spec({**self.entry, **change}))
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -8137,7 +8132,6 @@ class CritRateTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, {**r1a_entry(520608, 'crit_rate'), 'force_crit': 'melee'})
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MetricDeltaSelectionTests(unittest.TestCase):
     def built(self):
@@ -8165,7 +8159,6 @@ class MetricDeltaSelectionTests(unittest.TestCase):
         self.assertEqual(self.judged(0.0, 1.0), 'ok')
         self.assertEqual(self.judged(0.0, 0.0), 'alert')
         self.assertEqual(self.judged(1.0, 6.0), 'alert')
-
 
 
 def binding_scripture_variant(kind: str, suffix: str) -> dict:
@@ -8241,7 +8234,6 @@ class AllyCastTargetTests(unittest.TestCase):
             self.assertEqual(steps[cast]['target'], ALLY)
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MountBlockScenarioTests(unittest.TestCase):
     BRAND = 300513
@@ -8286,7 +8278,6 @@ class MountBlockScenarioTests(unittest.TestCase):
         entry = {**r1a_entry(self.BRAND, 'mount_block'), 'mount_spell': self.BRAND}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -8665,7 +8656,6 @@ class BladeOfFaithTickTests(unittest.TestCase):
                          'alert')
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AllyImmunityTests(unittest.TestCase):
     TESTAMENT_OF_WILL = 801455
@@ -8939,7 +8929,6 @@ class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
         self.assertEqual(strike.model['reference']['sigma'], 0.0)
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ScriptHitStatAuraTests(unittest.TestCase):
     def entry(self):
@@ -8958,7 +8947,6 @@ class ScriptHitStatAuraTests(unittest.TestCase):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
         self.assertEqual(expectation.label, '527023 script_hit 527269')
         self.assertNotEqual(scenario['steps'][0]['action'], 'set_aura')
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -9472,7 +9460,6 @@ class CostGateRemovalLimitTests(unittest.TestCase):
         self.assertNotIn('removal', expectations[0].model)
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitRatioStatedBonusTests(unittest.TestCase):
     def runs(self, expectation: Expectation, ratio: float, spread: float = 0.002) -> FakeRun:
@@ -9650,7 +9637,6 @@ class MetricDeltaGateSettleTests(unittest.TestCase):
             metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
 
 
-
 class MinionFixedCountTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_minion_is_raised_first_and_its_hits_are_read_per_dummy(self):
@@ -9676,7 +9662,6 @@ class MinionFixedCountTests(unittest.TestCase):
         scenario, _ = behaviour_scenario(class_file, entry)
         reads = [step for step in scenario['steps'] if step.get('spell') == 801514]
         self.assertTrue(all('caster_entry' not in step for step in reads))
-
 
 
 class MinionModelAuraTests(unittest.TestCase):
@@ -9776,7 +9761,6 @@ class MetricDeltaGainAndGateCastTests(unittest.TestCase):
             metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
 
 
-
 class MetricDeltaRatioAndSetupTargetTests(unittest.TestCase):
     WARRIOR = 504901
     COMMAND = 504905
@@ -9829,7 +9813,6 @@ class MetricDeltaRatioAndSetupTargetTests(unittest.TestCase):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 metric_delta_scenario(load_class_file(23), metric_delta_spec({**self.entry('command_pierced'),
                                                                               **change}))
-
 
 
 class NecromancerB2TargetsAndHealthTests(unittest.TestCase):
@@ -9942,7 +9925,6 @@ class NecromancerB2TargetsAndHealthTests(unittest.TestCase):
                      if value is not None}
             with self.subTest(change=change), self.assertRaises(ValueError):
                 behaviour_scenario(load_class_file(23), entry)
-
 
 
 class NecromancerB2FixSegmentTests(unittest.TestCase):
@@ -10118,7 +10100,6 @@ class MetricDeltaReadTargetTests(unittest.TestCase):
         self.assertEqual([player.get('id', 'caster') for player in scenario['players']], ['caster'])
 
 
-
 class MetricDeltaStrikeTests(unittest.TestCase):
     def phylactery_entry(self, suffix: str) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']
@@ -10162,7 +10143,6 @@ class MetricDeltaStrikeTests(unittest.TestCase):
             metric_delta_spec({**entry, 'strike': {**entry['strike'], 'health': 200000}})
 
 
-
 class CostGateAfterCastGapTests(unittest.TestCase):
     def underking_entry(self) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']
@@ -10190,7 +10170,6 @@ class CostGateAfterCastGapTests(unittest.TestCase):
         self.assertFalse(any('gap after an after cast' in step.get('label', '') for step in scenario['steps']))
 
 
-
 class HitRatioArmHealthTests(unittest.TestCase):
     def plague_entry(self) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']
@@ -10213,7 +10192,6 @@ class HitRatioArmHealthTests(unittest.TestCase):
                                                      'treatment': {'target_health_pct': 100}})
 
 
-
 class MetricDeltaPlayerRatingsTests(unittest.TestCase):
     def necromancy_entry(self, suffix: str) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']
@@ -10234,7 +10212,6 @@ class MetricDeltaPlayerRatingsTests(unittest.TestCase):
             metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
 
 
-
 class MetricDeltaStrikeAfterTriggerTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_strike_follows_the_phylactery_cast_and_still_lands_without_it(self):
@@ -10252,7 +10229,6 @@ class MetricDeltaStrikeAfterTriggerTests(unittest.TestCase):
         self.assertLess(before, phylactery)
         self.assertLess(phylactery, strikes[1])
         self.assertEqual(steps[phylactery + 1], {'action': 'wait', 'label': 'before the strike', 'ms': 2600})
-
 
 
 class MetricDeltaRangeTests(unittest.TestCase):
@@ -10391,7 +10367,6 @@ class PermanentImmunityTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**entry, 'remove_control': True})
 
 
-
 class MinionAuraCountTests(unittest.TestCase):
     def entry(self) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']
@@ -10412,7 +10387,6 @@ class MinionAuraCountTests(unittest.TestCase):
         entry = {key: value for key, value in self.entry().items() if key not in ('caster_entry', 'setup_casts')}
         reads = self.aura_reads(entry)
         self.assertTrue(all(step.get('caster') == 'caster' for step in reads))
-
 
 
 class CasterHealthAndSelectedPrimaryTests(unittest.TestCase):
@@ -10456,7 +10430,6 @@ class CasterHealthAndSelectedPrimaryTests(unittest.TestCase):
         self.assertFalse(any(step.get('action') == 'select' for step in scenario['steps']))
 
 
-
 class TargetCastTests(unittest.TestCase):
     def entry(self) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']
@@ -10482,7 +10455,6 @@ class TargetCastTests(unittest.TestCase):
         scenario, _ = behaviour_scenario(load_class_file(23), entry)
         self.assertFalse(any(step.get('actor') == 'dummy' and step.get('action') == 'cast'
                              for step in scenario['steps']))
-
 
 
 class UncastTargetCastAndTimeoutTests(unittest.TestCase):
@@ -10600,6 +10572,33 @@ class MetricDeltaTriggerItemTests(unittest.TestCase):
     def test_an_item_use_on_the_dummy_is_refused(self):
         with self.assertRaises(ValueError):
             behaviour_scenario(load_class_file(23), {**self.entry('restore'), 'target': 'dummy'})
+
+
+class CastGateAuraStateTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 707402 and entry['kind'] == 'cast_gate')
+
+    def steps_before_allowed(self, entry: dict) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        steps = scenario['steps']
+        unlearn = next(index for index, step in enumerate(steps) if step.get('action') == 'unlearn')
+        allowed = [index for index, step in enumerate(steps)
+                   if step.get('action') == 'cast' and step.get('spell') == entry['spell']][-1]
+        return steps[unlearn:allowed]
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_aura_state_fixture_waits_out_the_global_cooldown(self):
+        between = self.steps_before_allowed(self.entry())
+        fixture = next(index for index, step in enumerate(between) if step.get('spell') == 122)
+        wait = next(index for index, step in enumerate(between) if step.get('label') == 'Global cooldown')
+        self.assertLess(fixture, wait)
+        self.assertEqual(between[wait]['ms'], 1600)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_health_fixture_keeps_its_own_wait(self):
+        between = self.steps_before_allowed(titanstrike_cast_gate_entry())
+        self.assertFalse(any(step.get('label') == 'Global cooldown' for step in between))
 
 
 if __name__ == '__main__':

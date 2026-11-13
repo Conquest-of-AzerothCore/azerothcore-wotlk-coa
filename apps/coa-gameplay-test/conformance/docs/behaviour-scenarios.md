@@ -671,6 +671,8 @@ The judge (`compare.behaviour_cast_gate_verdict`) reads the attempt's own `cast_
 it for exact equality against the `Expectation.displayed` reason code (`exact()`, the same integer-exact helper
 `behaviour_count_verdict` uses): `ok` only when the measured reason matches exactly, `alert` otherwise, including
 a "blocked" attempt that actually went through or an "allowed"/"bypassed" attempt still refused.
+When the target state comes from an aura fixture (`AURA_STATE_FROZEN`, Frost Nova 122), the allowed attempt waits
+`GCD_WAIT_MS` first, since that fixture has no wait of its own (ADR 0400).
 
 ### Cast-condition scenarios (`behaviour_cast_condition`, `kind: "cast_condition"`)
 

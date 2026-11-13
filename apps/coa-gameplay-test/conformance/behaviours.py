@@ -11,7 +11,8 @@ from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement
                      one_hand_main, player_fixture)
 from tooltip import COLOR_CODE, SKILL_PER_LEVEL, CasterStats, Records, Tooltip, Unreadable
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, DUMMY_HEALTH, FORCE_CRIT_RATINGS,
-                    FORCED_CRIT_RATING, GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
+                    FORCED_CRIT_RATING, GCD_WAIT_MS, TARGET_STATE_AURAS, Expectation, TARGET, armed_for, closes_distance,
+                    dataset, facts_of,
                     FIXTURE_MAX_HEALTH, fixture_health_step, required_aura_steps,
                     required_target_health_steps)
 
@@ -4125,6 +4126,8 @@ def cast_gate_scenario(class_file: dict, spec: CastGateSpec) -> tuple[dict, list
             + cast_gate_attempt(spec.spell, gated_facts, 'bypassed', label_spell=spec.bypass_spell)
             + [{'action': 'unlearn', 'actor': CASTER, 'spell': spec.bypass_spell}]
             + required_target_health_steps(gated_facts)
+            + ([{'action': 'wait', 'label': 'Global cooldown', 'ms': GCD_WAIT_MS}]
+               if gated_facts.target_aura_state in TARGET_STATE_AURAS else [])
             + cast_gate_attempt(spec.spell, gated_facts, 'allowed'))
     scenario = {
         'schema': 1,
