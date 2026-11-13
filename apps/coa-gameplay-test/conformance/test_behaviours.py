@@ -10738,6 +10738,54 @@ class ScriptHitCastPowerTests(unittest.TestCase):
         self.assertTrue(all(step['value'] == 300 for step in self.power_steps(entry)))
 
 
+class ScriptHitReceiverAuraTests(unittest.TestCase):
+    IMMUNITY = 7743
+
+    def entry(self, **fields) -> dict:
+        base = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 531130 and entry.get('label_suffix') == 'damage')
+        return {**base, 'receiver_auras': [[self.IMMUNITY, 1]], **fields}
+
+    def held(self, steps: list[dict]) -> list[int]:
+        return [index for index, step in enumerate(steps) if step.get('action') == 'set_aura'
+                and step.get('spell') == self.IMMUNITY and step.get('stacks') == 1]
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_receiver_auras_are_set_on_the_dummy_before_the_casts_of_every_trial(self):
+        entry = self.entry()
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        steps = scenario['steps']
+        held = self.held(steps)
+        self.assertEqual(len(held), 2 * entry['trials'])
+        self.assertTrue(all(steps[index]['target'] == 'dummy' for index in held))
+        self.assertEqual(steps[held[0] + 1:held[0] + 3][-1]['action'], 'reset_cooldown')
+        cleared = [step for step in steps if step.get('spell') == self.IMMUNITY and step.get('stacks') == 0]
+        self.assertEqual(len(cleared), 1)
+        self.assertIn('set on the dummy in every trial of both arms, before the casts', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_receiver_auras_after_the_casts_follow_the_last_cast_of_each_trial(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(receiver_auras_after_casts=True))
+        steps = scenario['steps']
+        for index in self.held(steps):
+            self.assertEqual(steps[index - 1]['action'], 'wait')
+            self.assertEqual(steps[index - 2]['action'], 'cast')
+            self.assertEqual(steps[index + 1]['action'], 'wait')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_receiver_auras_sets_none(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'receiver_auras'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertEqual(self.held(scenario['steps']), [])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_timing_without_auras_or_an_empty_stack_is_refused(self):
+        for fields in ({'receiver_auras': [], 'receiver_auras_after_casts': True},
+                       {'receiver_auras': [[self.IMMUNITY, 0]]}):
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), self.entry(**fields))
+
+
 class HumanoidTargetEntryTests(unittest.TestCase):
     def entry(self, suffix: str) -> dict:
         return next(entry for entry in load_fixture_class_file(23)['behaviours']

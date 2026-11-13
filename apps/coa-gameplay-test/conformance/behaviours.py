@@ -6894,6 +6894,8 @@ class ScriptHitSpec:
     cast_power: int | None = None
     multiplier: float = 1.0
     strike_owned_entry: int | None = None
+    receiver_auras: tuple[tuple[int, int], ...] = ()
+    receiver_auras_after_casts: bool = False
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -6926,6 +6928,10 @@ def script_hit_validate(spec: ScriptHitSpec):
         raise ValueError(f'{spec.spell} script_hit control_casts repeat the casts; the arms would differ in nothing')
     if spec.multiplier <= 0:
         raise ValueError(f'{spec.spell} script_hit multiplier {spec.multiplier} is not a positive factor')
+    if (spec.receiver_auras or spec.receiver_auras_after_casts) and (
+            spec.receiver != TARGET or not spec.receiver_auras or any(stacks < 1 for _, stacks in spec.receiver_auras)):
+        raise ValueError(f'{spec.spell} script_hit receiver_auras hold at least one stack on the dummy receiver, and '
+                         f'their timing needs them')
 
 
 def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
@@ -6934,9 +6940,15 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
     if spec.caster_health_pct is not None:
         steps.append({'action': 'set_health', 'actor': CASTER,
                       'value': spec.caster_health_pct * FIXTURE_MAX_HEALTH // 100, 'maximum': FIXTURE_MAX_HEALTH})
+    held = [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks, 'target': spec.receiver}
+            for spell, stacks in spec.receiver_auras]
+    if not spec.receiver_auras_after_casts:
+        steps += held
     casts = spec.control_casts if arm == 'control' and spec.control_casts is not None else spec.casts
     for spell, target in casts:
         steps += hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
+    if spec.receiver_auras_after_casts:
+        steps += held
     if spec.strike_spell and spec.strike_owned_entry is None:
         steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                   {'action': 'wait', 'label': f'{arm} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
@@ -6996,6 +7008,8 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
     steps.append(measurement(f'{label} critical_hits', CASTER, f'{family}_count', spell=spec.hit_spell, **receiver,
                              critical=True))
     steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in spec.caster_auras]
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0, 'target': spec.receiver}
+              for spell, _ in spec.receiver_auras]
     waited = waited_ms(steps)
     if waited + TIMEOUT_MARGIN_MS > MAX_ACCELERATED_SCENARIO_MS:
         raise NotModelled(f'{spec.spell} script_hit waits {waited} ms, beyond the accelerated cap '
@@ -7025,7 +7039,10 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                     f'non-critical {spec.hit_spell} hit on {spec.receiver} is judged against the {spec.spell} '
                     f'tooltip read with the measured stats, its known modifiers and mitigation.'
                     + (f' {[spell for spell, _ in spec.stat_auras]} are set on the caster before its stats are '
-                       f'measured.' if spec.stat_auras else ''),
+                       f'measured.' if spec.stat_auras else '')
+                    + (f' The auras {list(spec.receiver_auras)} are set on the {spec.receiver} in every trial of both '
+                       f'arms, {"after the casts" if spec.receiver_auras_after_casts else "before the casts"}.'
+                       if spec.receiver_auras else ''),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
@@ -7069,7 +7086,9 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'),
                          tuple(int(spell) for spell in entry.get('minion_model_auras', ())),
                          entry.get('cast_power'), float(entry.get('multiplier', 1.0)),
-                         entry.get('strike_owned_entry'))
+                         entry.get('strike_owned_entry'),
+                         tuple((int(spell), int(stacks)) for spell, stacks in entry.get('receiver_auras', ())),
+                         bool(entry.get('receiver_auras_after_casts', False)))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8
