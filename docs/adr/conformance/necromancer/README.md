@@ -51,3 +51,5 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0045](0045-dominion-of-frost-gate-is-read-with-two-minions.md) | - | The Dominion of Frost gate is read with two minions | new |
 | [0046](0046-study-of-death-cut-is-bracketed-by-repeated-casts.md) | - | The Study of Death cut is bracketed by repeated casts | new |
 | [0050](0050-command-bonefreeze-casts-once-at-its-target.md) | - | Command: Bonefreeze casts once at its target | new |
+| [0051](0051-entomb-physical-immunity-is-measured-on-an-enemy-player.md) | - | Entomb's Physical immunity is measured on an enemy player | new |
+| [0052](0052-underking-random-pick-is-attributed-per-cycle.md) | - | The Underking random pick is attributed per cycle | new |
