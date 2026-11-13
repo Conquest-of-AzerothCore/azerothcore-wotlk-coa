@@ -1268,6 +1268,63 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 802132,
+      "name": "Lichplague (spell power)",
+      "kind": "hit_ratio",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Disease an enemy, dealing ${$m1+0+$SP*0.22} Plague damage every $t1 sec for $d.",
+      "expected": 1.274286,
+      "observe_spell": 802132,
+      "cast_wait_ms": 4800,
+      "cast_power": 1000,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            1140480,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 12,
+      "expected_source": "Lichplague 802132: Effect[0] aura 3 periodic damage every 3000 ms ($t1), BasePoints 150 + 1 and 8 per level from 57 (175 at 60), DurationIndex 85 (18000 ms, $d), coefficient row {802132, 0, 0.22, Shadow} (AscensionNecromancerData.h:80); 1500 ms cast, 300 Runic Power (1000 set before each cast), 30000 ms cooldown (reset). Power of the Ashtongue 1140480 (+220 spell damage, a harness set_aura precondition fixture) in the treatment arm only: 175 -> 175 + int(0.22 x 220) = 223 per tick before the per-disease x1.04 both arms share: ratio 1.2743. The per_disease entry's control reads 182 = 175 x 1.04 at spell power 0 (the base and per-level terms)."
+    },
+    {
+      "spell": 802132,
+      "name": "Lichplague (ticks)",
+      "kind": "metric_delta",
+      "variant": "ticks",
+      "label_suffix": "ticks",
+      "quote": "Disease an enemy, dealing ${$m1+0+$SP*0.22} Plague damage every $t1 sec for $d.",
+      "expected": 6,
+      "before_expected": 0,
+      "trigger_spell": 802132,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1000,
+      "wait_ms": 20000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802132,
+        "target": "dummy"
+      },
+      "observe_source": "Lichplague 802132: Effect[0] aura 3 periodic damage every 3000 ms ($t1), BasePoints 150 + 1 and 8 per level from 57 (175 at 60), DurationIndex 85 (18000 ms, $d), coefficient row {802132, 0, 0.22, Shadow} (AscensionNecromancerData.h:80); 1500 ms cast, 300 Runic Power (1000 set before each cast), 30000 ms cooldown (reset). No cast (control): 0 ticks; one cast, read 20000 ms after it starts (18500 ms after it lands): 18000 / 3000 = 6 ticks."
+    },
+    {
       "spell": 707402,
       "name": "Glacial Impact (spell power)",
       "kind": "hit_ratio",
