@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "name": "Cookie's cauldron stands under him on Normal, Heroic and Mythic",
+  "contract": [
+    "Cookie (645) jumps into his Boiling Cauldron (18342, spawn 8001308) on the pull and fights from it. The cauldron",
+    "only spawned on Normal (spawn mask 1), so on Heroic and Mythic he stood on the floor. Its spawn mask is now 7."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 36,
+      "x": -60.0,
+      "y": -853.7,
+      "z": 17.1,
+      "o": 3.1
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 36,
+      "x": -60.0,
+      "y": -853.7,
+      "z": 17.1,
+      "o": 3.1
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 36,
+      "x": -60.0,
+      "y": -853.7,
+      "z": 17.1,
+      "o": 3.1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in a Normal Deadmines",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: heroic is in a Heroic Deadmines",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Deadmines",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Deadmines are spawned",
+      "actor": "normal",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Deadmines are spawned",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Deadmines are spawned",
+      "actor": "mythic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Cookie is there on Normal",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 645,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cauldron stands on Normal",
+      "actor": "normal",
+      "metric": "nearby_gameobject_count",
+      "entry": 18342,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The cauldron stands on Heroic",
+      "actor": "heroic",
+      "metric": "nearby_gameobject_count",
+      "entry": 18342,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The cauldron stands on Mythic",
+      "actor": "mythic",
+      "metric": "nearby_gameobject_count",
+      "entry": 18342,
+      "equals": 1
+    }
+  ]
+}
