@@ -1874,10 +1874,11 @@
     "spell": 560851,
     "clause": "Increases the damage of Glacial Impact by $s1%.",
     "labels": [
-      "560851 effect_value e0 #0"
+      "560851 effect_value e0 #0",
+      "560851 behaviour_hit_ratio glacial_impact"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: hit_ratio sets fixtures on the caster only; Glacial Impact needs a frozen target (Frost Nova 122 on the dummy, ADR 0303), so a target-side fixture field is the smallest extension. Open, route pending: Glacial Impact 707592 needs a Frozen target (Frost Nova 122 fixture, ADR 0303); a hit ratio on it with and without the talent not built tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Death\",\"pos\":\"r3,c7\",\"kind\":\"T\",\"id\":5605,\"why\":\"Increases the damage of Glacial Impact by 20%.\",\"ae\":0,\"te\":1},'; bindmysoul found: Increases the damage of Glacial Impact by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Cycle 1 F2 (tool gap closed without a tool change): Glacial Impact's frozen condition is checked on the caster, so the hit_ratio arms hold Permafrost 801747 on the caster (as the glacier_lord entry) and no target-side fixture is needed. Working pair prove-10 (2 runs): non-critical 707592 hits 1282 with Frigid Death 560851 learned against 855 without (control), x1.4994 (int32 truncation of 1282.5), +49.94% against $s1 = 50 inside the G-19 band; 984954 keeps the crit factor at 1 (ADR 0533) and 823764 unresisted. Previous record: Route agent c (2026-11-13, second attempt): parked, tool gap: hit_ratio sets fixtures on the caster only; Glacial Impact needs a frozen target (Frost Nova 122 on the dummy, ADR 0303), so a target-side fixture field is the smallest extension. Open, route pending: Glacial Impact 707592 needs a Frozen target (Frost Nova 122 fixture, ADR 0303); a hit ratio on it with and without the talent not built tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Death\",\"pos\":\"r3,c7\",\"kind\":\"T\",\"id\":5605,\"why\":\"Increases the damage of Glacial Impact by 20%.\",\"ae\":0,\"te\":1},'; bindmysoul found: Increases the damage of Glacial Impact by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 560852,
