@@ -2129,25 +2129,22 @@
   {
     "spell": 705747,
     "clause": "Damage dealt by Harvest Plague now has a $h% chance to animate a Lesser Zombie to aid you in combat for $525379d.",
-    "labels": [
-      "705747 effect_value #0",
-      "705747 spell_duration 525379 #1"
+    "claims": [
+      {
+        "claim": "Damage dealt by Harvest Plague now has a $h% chance to animate a Lesser Zombie to aid you in combat",
+        "labels": [
+          "705747 proc_rate"
+        ]
+      },
+      {
+        "claim": "for $525379d.",
+        "labels": [
+          "705747 spell_duration 525379 #1"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: tool gap confirmed: Summon() spawns the Lesser Zombie directly (AscensionNecromancerSummons.cpp:334), so no spell event exists; smallest extension: a per-window increase of owned_creature_count as the proc event in procs.py, not built). Summon events (Lesser Zombie) have no proc event metric. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 3139 Lesser Zombie lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
-    "tool_gap": {
-      "reason": "a proc whose event is a creature summon (Summon, AscensionNecromancerSummons.cpp:334) has no event metric",
-      "attempts": [
-        {
-          "agent": "necro-b1-b author (opus)",
-          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
-        },
-        {
-          "agent": "necro-b1-b route agent (opus)",
-          "report": ".agents/plans/necro-b1/route-progress.md (B1 side b)"
-        }
-      ]
-    }
+    "reason": "Claim 1 status 1 (route agent): 20% stated, rates 0.1956/0.1986 (3148 and 3196 Lesser Zombies 503031 in 16093 Harvest Plague ticks), inside the band of ADR 0346 in both runs, no summon in the baseline casts before the learn; counted pair route-seg3 20261113-020945/-021348, build 2bd110cfadb2 (server 7a832e2ac8d8, tree dirty only in the ledger), ADR 0351: summons counted by owned_creature_summon_count. Claim \"for $525379d\": data conformant (525379 DurationIndex 8, 15000 ms), route pending: a lifetime read of the summoned zombie (an owned_creature_count expiry pair after a proc) is not built. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 3139 Lesser Zombie lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 705750,
@@ -2258,7 +2255,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim 1 status 1 (band, about 9060 trials). Claim \"up to $707002i\": status 1 after fix ADR 0350 (F-route-1, mentor-approved): 707002 cast once at the hit target, centred there (Contracts.cpp TargetA TARGET_DEST_TARGET_ENEMY), MaxAffectedTargets 3 picks the enemies. Counted pair route-seg2 20261113-014247/-014426, build 12febcd5f268 (server 6af95abec057): at 3 blasts per proc on four dummies the rate reads 0.0981/0.0947 (707001) and 0.1983/0.1820 (707882), ok; one-dummy rates 0.1003/0.1007 and 0.2007/0.2014, ok; baselines without the talent in each entry. Diagnostics: before the fix 6-8 blasts per proc (20261113-003226); one cast without the contract 3 or 4 distinct dummies (4 in 4 of 26, 20261113-013620); with both 3 distinct in 23 of 23 and 22 of 22 procs (20261113-013932, -014547). The blast amount path is untouched (same spell and caster); after the fix 61.8 per non-critical blast at spell power 0 (64 blasts, -014547), base 71-73 (BasePoints 70 + DieSides 3) less partial resists; no pre-fix amount was recorded (about 5.6 blasts per expected proc with four dummies; code caps at 2). Claim damage: data only, Status: route pending (route agent 2026-11-13, parked: damage value not attempted in its time cap). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"up to 3 nearby enemies\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Claim 1 status 1 (band, about 9060 trials). Claim \"up to $707002i\": status 1 after fix ADR 0350 (F-route-1, mentor-approved): 707002 cast once at the hit target, centred there (Contracts.cpp TargetA TARGET_DEST_TARGET_ENEMY), MaxAffectedTargets 3 picks the enemies. Counted pair route-seg2 20261113-014247/-014426, build 12febcd5f268 (server 6af95abec057): at 3 blasts per proc on four dummies the rate reads 0.0981/0.0947 (707001) and 0.1983/0.1820 (707882), ok; one-dummy rates 0.1003/0.1007 and 0.2007/0.2014, ok; baselines without the talent in each entry. Diagnostics: before the fix 6-8 blasts per proc (20261113-003226); one cast without the contract 3 or 4 distinct dummies (4 in 4 of 26, 20261113-013620); with both 3 distinct in 23 of 23 and 22 of 22 procs (20261113-013932, -014547). The blast amount path is untouched (same spell and caster); after the fix 61.8 per non-critical blast at spell power 0 (64 blasts, -014547), base 71-73 (BasePoints 70 + DieSides 3) less partial resists; no pre-fix amount was recorded (about 5.6 blasts per expected proc with four dummies; code caps at 2). Claim damage: data only, Status: route pending (route agent 2026-11-13, parked: damage value: data conformant with a live read, not a counted entry: unresisted non-critical blasts read 71.0 each (23 of 91, the spell-damage resisted filter, diagnostic 20261113-015731, server 3952ba146c9e+ with the resisted filter later committed in 009c8a3670) against $707002m1 = BasePoints 70 + 1 = 71 at spell power 0 (the scalingbp factor reads 1 at level 60 in that read); the dummy has 0 Nature and Shadow resistance and 68 of 91 blasts were partially resisted, which is the earlier 64 mean; a counted per-blast amount entry for a minion spell does not exist yet). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"up to 3 nearby enemies\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 707006,
@@ -2389,25 +2386,22 @@
   {
     "spell": 707880,
     "clause": "Damage dealt by Harvest Plague now has a $h% chance to animate a Lesser Zombie to aid you in combat for $525379d.",
-    "labels": [
-      "707880 effect_value #0",
-      "707880 spell_duration 525379 #1"
+    "claims": [
+      {
+        "claim": "Damage dealt by Harvest Plague now has a $h% chance to animate a Lesser Zombie to aid you in combat",
+        "labels": [
+          "707880 proc_rate"
+        ]
+      },
+      {
+        "claim": "for $525379d.",
+        "labels": [
+          "707880 spell_duration 525379 #1"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: tool gap confirmed: Summon() spawns the Lesser Zombie directly (AscensionNecromancerSummons.cpp:334), so no spell event exists; smallest extension: a per-window increase of owned_creature_count as the proc event in procs.py, not built). Summon events (Lesser Zombie) have no proc event metric. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 3139 Lesser Zombie lines, not tallied; ~/CoaServer/reference: bindmysoul nothing found, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
-    "tool_gap": {
-      "reason": "a proc whose event is a creature summon (Summon, AscensionNecromancerSummons.cpp:334) has no event metric",
-      "attempts": [
-        {
-          "agent": "necro-b1-b author (opus)",
-          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
-        },
-        {
-          "agent": "necro-b1-b route agent (opus)",
-          "report": ".agents/plans/necro-b1/route-progress.md (B1 side b)"
-        }
-      ]
-    }
+    "reason": "Claim 1 status 1 (route agent): 40% stated, rates 0.3987/0.4035 (9611 and 9728 in 24108 ticks), inside the band of ADR 0346 in both runs, no summon in the baseline casts before the learn; counted pair route-seg3 20261113-020945/-021348, build 2bd110cfadb2 (server 7a832e2ac8d8, tree dirty only in the ledger), ADR 0351: summons counted by owned_creature_summon_count. Claim \"for $525379d\": data conformant (525379 DurationIndex 8, 15000 ms), route pending: a lifetime read of the summoned zombie (an owned_creature_count expiry pair after a proc) is not built. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 3139 Lesser Zombie lines, not tallied; ~/CoaServer/reference: bindmysoul nothing found, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 707881,
@@ -2449,7 +2443,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim 1 status 1 (band, about 16100 trials). Claim \"up to $707002i\": status 1 after fix ADR 0350 (F-route-1, mentor-approved): 707002 cast once at the hit target, centred there (Contracts.cpp TargetA TARGET_DEST_TARGET_ENEMY), MaxAffectedTargets 3 picks the enemies. Counted pair route-seg2 20261113-014247/-014426, build 12febcd5f268 (server 6af95abec057): at 3 blasts per proc on four dummies the rate reads 0.0981/0.0947 (707001) and 0.1983/0.1820 (707882), ok; one-dummy rates 0.1003/0.1007 and 0.2007/0.2014, ok; baselines without the talent in each entry. Diagnostics: before the fix 6-8 blasts per proc (20261113-003226); one cast without the contract 3 or 4 distinct dummies (4 in 4 of 26, 20261113-013620); with both 3 distinct in 23 of 23 and 22 of 22 procs (20261113-013932, -014547). The blast amount path is untouched (same spell and caster); after the fix 61.8 per non-critical blast at spell power 0 (64 blasts, -014547), base 71-73 (BasePoints 70 + DieSides 3) less partial resists; no pre-fix amount was recorded. Claim damage: data only, Status: route pending (route agent 2026-11-13, parked: damage value not attempted in its time cap). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul nothing found, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Claim 1 status 1 (band, about 16100 trials). Claim \"up to $707002i\": status 1 after fix ADR 0350 (F-route-1, mentor-approved): 707002 cast once at the hit target, centred there (Contracts.cpp TargetA TARGET_DEST_TARGET_ENEMY), MaxAffectedTargets 3 picks the enemies. Counted pair route-seg2 20261113-014247/-014426, build 12febcd5f268 (server 6af95abec057): at 3 blasts per proc on four dummies the rate reads 0.0981/0.0947 (707001) and 0.1983/0.1820 (707882), ok; one-dummy rates 0.1003/0.1007 and 0.2007/0.2014, ok; baselines without the talent in each entry. Diagnostics: before the fix 6-8 blasts per proc (20261113-003226); one cast without the contract 3 or 4 distinct dummies (4 in 4 of 26, 20261113-013620); with both 3 distinct in 23 of 23 and 22 of 22 procs (20261113-013932, -014547). The blast amount path is untouched (same spell and caster); after the fix 61.8 per non-critical blast at spell power 0 (64 blasts, -014547), base 71-73 (BasePoints 70 + DieSides 3) less partial resists; no pre-fix amount was recorded. Claim damage: data only, Status: route pending (route agent 2026-11-13, parked: damage value: data conformant with a live read, not a counted entry: unresisted non-critical blasts read 71.0 each (23 of 91, the spell-damage resisted filter, diagnostic 20261113-015731, server 3952ba146c9e+ with the resisted filter later committed in 009c8a3670) against $707002m1 = BasePoints 70 + 1 = 71 at spell power 0 (the scalingbp factor reads 1 at level 60 in that read); the dummy has 0 Nature and Shadow resistance and 68 of 91 blasts were partially resisted, which is the earlier 64 mean; a counted per-blast amount entry for a minion spell does not exist yet). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul nothing found, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 801733,
@@ -3102,25 +3096,20 @@
   {
     "spell": 806086,
     "clause": "Periodic damage dealt now has an $h% chance to summon $806087s1 Rotlings that will run towards the enemy",
-    "labels": [
-      "806086 effect_value #0",
-      "806086 effect_value #3"
+    "claims": [
+      {
+        "claim": "Periodic damage dealt now has an $h% chance to summon $806087s1 Rotlings",
+        "labels": [
+          "806086 proc_rate"
+        ]
+      },
+      {
+        "claim": "that will run towards the enemy",
+        "labels": []
+      }
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: tool gap confirmed: Summon(player, 806087, ...) at AscensionNecromancerEvents.cpp:124-125 spawns directly, no spell event; same per-window owned_creature_count extension as Harvest Plague, not built). Summon events (Rotlings) have no proc event metric. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
-    "tool_gap": {
-      "reason": "a proc whose event is a creature summon has no event metric",
-      "attempts": [
-        {
-          "agent": "necro-b1-b author (opus)",
-          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
-        },
-        {
-          "agent": "necro-b1-b route agent (opus)",
-          "report": ".agents/plans/necro-b1/route-progress.md (B1 side b)"
-        }
-      ]
-    }
+    "reason": "Claim 1 status 1 (route agent): 5% stated, rates 0.0535/0.0459 (253 and 217 procs of 2 Rotlings 50133 each, 506 and 434 summons, in 4730 Blight 500237 hits), inside the band of ADR 0346 in both runs, no summon in 90 baseline casts; counted pair route-seg3 20261113-020945/-021348, build 2bd110cfadb2 (server 7a832e2ac8d8, tree dirty only in the ledger), ADR 0351: summons counted by owned_creature_summon_count; the rate divides the summons by $806087s1 = 2 (BasePoints 1 + 1) per proc. Claim \"run towards the enemy\": route pending, a movement read of the Rotling is not built. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 806086,
@@ -3130,7 +3119,7 @@
       "806086 effect_value 500585e0 #2"
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: not attempted; depends on the Rotling summon route). A Rotling hit after its fuse; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Status: route pending (route agent 2026-11-13, parked: the summon is now proven (806086 proc_rate, route-seg3). Fuse: the Rotling AI schedules the explosion at 807640 Effects[1].Amplitude = 5000 ms (AscensionNecromancerSummons.cpp:548-549), the tooltip's $807640t2 = 5 sec: data and code conformant; a timed read needs the spawn and the 500585 cast of a creature entry on one event-time stream, which the event-time metrics (scenario units only) cannot select: tool gap, est. 45 min. Damage: diagnostic 20261113-021726 (build 2bd110cfadb2): 98 Rotlings summoned, Rotling damage 71527 over 392 events, of which melee 43479 over 294 swings, leaving about 28048 for 98 explosions (about 286 each, partial resists included; the melee hit count is not split from misses, so not exact). Tooltip ${$500585m1+$500585ppl1+$SP*0.335} reads 200 + 2 = 202 at SP 0; the engine adds the per-level term, 500585 BasePoints 199 + 1 + int32(level x 2.0) (RealPointsPerLevel 2.0), so the hit is far above 202: an uncertain expectation of the same shape as Q-b1-1 (Chomp, per-level scaling the tooltip omits); recommended to fold into Q-b1-1 rather than a fix). A Rotling hit after its fuse; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 806149,
