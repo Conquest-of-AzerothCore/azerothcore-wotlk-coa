@@ -8818,27 +8818,43 @@
     },
     {
       "spell": 504861, "name": "Raise: Banshee (Command drain capped by the player's mana)", "kind": "metric_delta", "variant": "drain_cap",
-      "label_suffix": "drain_cap", "quote": "up to a maximum of", "expected": 569, "before_expected": 0,
+      "label_suffix": "drain_cap", "quote": "up to a maximum of", "expected": 635, "before_expected": 0,
 "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"], [4270, 1, "caster", "caster"]],
+      "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "dummy"},
+      "observe_source": "Cap-binding arm (owner ruling Q-a1-4 (b): the player's maximum mana caps the drain, ADR 0521). Target: the dummy fixture as Magus Zabraxis 16829 (creature_template level 60, unit_class 2, ManaModifier 3, no script; creature_classlevelstats level 60 class 2 basemana 2434: 7302 maximum mana, read by drain_cap_target). Precondition fixtures on the caster: 823764 keeps the Frost copy unresisted; Mental Acuity 4270 (Effect[0] aura 35, +330 mana, permanent) raises the player's maximum mana to 2848 + 330 = 3178 (read by drain_cap_player) and leaves the Banshee's (level x 30 + Intellect x 5 x 2 Life Force, Scale() in AscensionNecromancerSummons.cpp: 2970 read in pilot probe3) unchanged. Expected: 10% of the target is 730, 20% of the player's maximum mana is 635, so the player cap binds: 635. The other readings give 730 (the target's cap, 15% above) and 594 (the Banshee's cap, the code before ADR 0521, 6.5% below), both outside the G-19 band of 635. Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (Command drain: a tenth of the target's mana)", "kind": "metric_delta", "variant": "drain_share",
+      "label_suffix": "drain_share", "quote": "Command: Drains $504862m1% of your target's mana", "expected": 243, "before_expected": 0,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 11795, "setup_casts": [504861], "setup_only_after": true,
       "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
       "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "dummy"},
-      "observe_source": "Cap-binding arm (owner ruling Q-a1-4 (b): the player's maximum mana caps the drain, ADR 0521). Target: the dummy fixture as Magus Zabraxis 16829 (creature_template level 60, unit_class 2, ManaModifier 3, no script; creature_classlevelstats level 60 class 2 basemana 2434: 7302 maximum mana, read by the drain_cap_target arm). 823764 on the caster keeps the Frost copy unresisted. Expected: 10% of the target is 730, 20% of the player's maximum mana (2848, read by the drain_cap_player arm) is 569, so the player cap binds: 569. The other readings give 730 (the target's cap) and 154 (the Banshee's cap, the code before ADR 0521). Control: no Banshee, no hit."
+      "observe_source": "Uncapped arm at a creature: the dummy fixture as Mylentha Riverbend 11795 (creature_template level 60, unit_class 2, ManaModifier 1, no script; creature_classlevelstats level 60 class 2 basemana 2434: 2434 maximum mana, read by drain_share_target). 504862 Effect[0] BasePoints 9 + 1 = 10% ($504862m1): 2434 / 10 = 243, under the player's cap (2848 / 5 = 569), so the hit equals the drain, 243. 823764 keeps the Frost copy unresisted. Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (drain share: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_share_target",
+      "label_suffix": "drain_share_target", "quote": "of your target's mana", "expected": 2434, "before_expected": 2434,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 11795, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "measure_actor": "dummy", "metric": "max_power", "fields": {"power": 0},
+      "observe_source": "Precondition read for drain_share: the maximum mana of Mylentha Riverbend 11795 at level 60 (basemana 2434 x ManaModifier 1 from the world DB rows), before and after the same Command as drain_share."
     },
     {
       "spell": 504861, "name": "Raise: Banshee (drain cap: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_target",
       "label_suffix": "drain_cap_target", "quote": "of your target's mana", "expected": 7302, "before_expected": 7302,
 "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
-      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"], [4270, 1, "caster", "caster"]],
       "measure_actor": "dummy", "metric": "max_power", "fields": {"power": 0},
       "observe_source": "Precondition read for drain_cap: the maximum mana of Magus Zabraxis 16829 at level 60 (2434 x 3 = 7302 from the world DB rows), before and after the same Command as drain_cap."
     },
     {
       "spell": 504861, "name": "Raise: Banshee (drain cap: the player's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_player",
-      "label_suffix": "drain_cap_player", "quote": "of their own maximum mana", "expected": 2848, "before_expected": 2848,
+      "label_suffix": "drain_cap_player", "quote": "of their own maximum mana", "expected": 3178, "before_expected": 3178,
 "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
-      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"], [4270, 1, "caster", "caster"]],
       "measure_actor": "caster", "metric": "max_power", "fields": {"power": 0},
-      "observe_source": "Precondition read for drain_cap: the player's maximum mana (2848 on the reference character, owner-questions Q-a1-4: 2464 + 384), read before the Command without a Banshee and after it with the Banshee raised, as in drain_cap."
+      "observe_source": "Precondition read for drain_cap: the player's maximum mana with Mental Acuity 4270 (+330): 2848 + 330 = 3178 (2848 on the reference character, owner-questions Q-a1-4: 2464 + 384), read before the Command without a Banshee and after it with the Banshee raised, as in drain_cap."
     },
     {
       "spell": 805044, "name": "Animate: Tomb King (animated)", "kind": "metric_delta", "variant": "count",
@@ -12760,10 +12776,10 @@
     },
     {
       "spell": 707007,
-      "name": "March of the Dead (explosion damage with Shadow spell power)",
+      "name": "March of the Dead (explosion damage with spell power of every school)",
       "kind": "script_hit",
-      "variant": "explosion_sp_shadow",
-      "label_suffix": "explosion_sp_shadow",
+      "variant": "explosion_sp_all",
+      "label_suffix": "explosion_sp_all",
       "quote": "Plague damage to nearby enemies",
       "hit_spell": 707010,
       "hit_effect": 0,
@@ -12789,13 +12805,13 @@
       ],
       "stat_auras": [
         [
-          33819,
+          10062,
           1
         ]
       ],
       "unresisted": true,
       "settle_ms": 6000,
-      "observe_source": "Matching school arm (owner ruling Q-b3b-6 (b), ADR 0525): Increase Shadow Dam 78 33819 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, BasePoints 77 + 1 = 78, permanent) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}, mask 40 = Shadow and Nature) adds 0.75 x 78 = 58.5 to each hit, the $SP*.75 term of the tooltip read with the measured stats. Control: the same trials without the cast (control_casts empty) count no 707010 hit."
+      "observe_source": "Matching arm (owner ruling Q-b3b-6 (b), ADR 0525): QA Test +100 SP 10062 (Effect[0] aura 345 MiscValue 127, every school, +100) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}) adds 0.75 x 100 = 75 to each hit, the $SP*.75 term of the tooltip read with the measured stats ($SP is the lowest school spell power, so a one-school fixture cannot raise the expectation; a Shadow-only +78 33819 read 749 per hit in pair1, 691 + 0.75 x 78 = 749.5 truncated). Control: the same trials without the cast (control_casts empty) count no 707010 hit."
     },
     {
       "spell": 301207,
