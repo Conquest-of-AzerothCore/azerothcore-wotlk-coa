@@ -1764,7 +1764,7 @@
     "spell": 560730,
     "clause": "Damage dealt now has a $h% chance to apply Parasites for $560729d.",
     "kind": "claim",
-    "reason": "Claim 'Damage dealt now has a $h% chance': status 5, owner question Q-mb-1 (M side b progress.md; the live split withdrew fix note FN-mb-2: of 177 live Parasites applications 124 follow a periodic-class hit within 50 ms and 1 a direct hit only, 52 no own hit; 95 direct hits in that player's logs). Alert reproduced (G-3; M side b counted pair 20261113-073520 / -073802 (server eeae249d679f, worldserver e490a64afe14) and pilot11, 4 runs): periodic Blight 500237 hits roll Parasites 560729 at 4.90% / 5.31% (pilot11 4.76% / 4.95%) (inside the band 3%-7% of $h = 5), but direct Glacial Impact 707592 hits never do (0 in 4730, both runs) although the tooltip names all damage dealt. Cause (read): the roll sits in the periodic branch of aura_ascension_necromancer_event::Proc (AscensionNecromancerEvents.cpp:117-125). Claim 'to apply Parasites for $560729d.': not final, route pending. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable).",
+    "reason": "Claim 'Damage dealt now has a $h% chance': status 1 after fix FN-mb-2 / FN-mc-3 (mentor-approved; ADR 0496; M side b counted pair PAIRID4): direct Glacial Impact 707592 hits now roll Parasites 560729 (pilot18: 4.42% / 5.37%, 209 and 254 in 4730; before the fix 0 in 4730) and periodic Blight 500237 hits stay at 4.86% / 4.88%, both inside the G-19 band 3%-7% of $h = 5; no Parasites in the no-talent baseline. Live (raw logs): side c counts 107 of 119 player-applied Parasites after a SPELL_DAMAGE of the same player (FN-mc-3); side b's scan of the same logs classes most of those as Blight 500237 and Rot Fetishist 573242 hits (periodic on this server) and finds 1 of 177 after a direct-only hit, so the live sample barely separates the readings (Q-mb-1 withdrawn by the approval). Claim 'to apply Parasites for $560729d.': not final, route pending. G-11 (M side b): raw combat logs by id ',560729,' and name '\"Parasites\"' (296 / 900 lines), positive control 802353 1551 lines; coa-history spell 560729 --by-source: one player; MCP not queried (unavailable).",
     "claims": [
       {
         "claim": "Damage dealt now has a $h% chance",
@@ -2087,12 +2087,25 @@
   {
     "spell": 574138,
     "clause": "Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions, increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.",
-    "labels": [
-      "574138 effect_value 573131e0 #0",
-      "574138 effect_value e0 #1"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/574138.md."
+    "reason": "Claim 'Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions,': status 1 (M side b counted pair PAIRID4; control without the talent): a Lichfrost 501978 with Crypt Plague 92121 learned applies Crypt Plague through Plague() (the CoA apply path; a harness cast of 570131 bypasses it, first pilot 0), and both raised Ghouls 50073 carry 573131 about 1 s after (0 without the talent), still at about 4.4 s and gone by about 5.6 s after the plague. Claim 'increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.': not final, route pending (a minion hit ratio with Rotting Flesh stacks; the 5 sec duration is bracketed only to 4.4 to 5.6 s, wider than the G-19 band). G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 574138 0 lines (a passive); MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions,",
+        "labels": [
+          "574138 behaviour_metric_delta on_minion",
+          "574138 behaviour_metric_delta lasts",
+          "574138 behaviour_metric_delta ends"
+        ]
+      },
+      {
+        "claim": "increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.",
+        "labels": [
+          "574138 effect_value 573131e0 #0",
+          "574138 effect_value e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 638403,
