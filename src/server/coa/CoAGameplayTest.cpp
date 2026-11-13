@@ -1003,6 +1003,7 @@ struct MeleeOutcomes
     uint64 plainDamage = 0;
     uint64 damage = 0;
     uint32 attackerEntry = 0;
+    uint32 avoided = 0;
 };
 
 struct Actor
@@ -1582,24 +1583,26 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
                 actor.meleeHits.push_back({ hand, hitInfo, damage, GameNowMs() });
             }
         }
+        uint32 overkill = 0;
+        uint8 subDamages = 0;
+        response >> overkill >> subDamages;
+        response.read_skip(size_t(subDamages) * (sizeof(uint32) + sizeof(float) + sizeof(uint32)));
+        if (hitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
+            response.read_skip(size_t(subDamages) * sizeof(uint32));
+        if (hitInfo & (HITINFO_FULL_RESIST | HITINFO_PARTIAL_RESIST))
+            response.read_skip(size_t(subDamages) * sizeof(uint32));
+        uint8 victimState = 0;
+        response >> victimState;
         if (victim == actor.guid)
         {
             ++actor.meleeAttacksTakenFrom[attacker];
-            uint32 overkill = 0;
-            uint8 subDamages = 0;
-            response >> overkill >> subDamages;
-            response.read_skip(size_t(subDamages) * (sizeof(uint32) + sizeof(float) + sizeof(uint32)));
-            if (hitInfo & (HITINFO_FULL_ABSORB | HITINFO_PARTIAL_ABSORB))
-                response.read_skip(size_t(subDamages) * sizeof(uint32));
-            if (hitInfo & (HITINFO_FULL_RESIST | HITINFO_PARTIAL_RESIST))
-                response.read_skip(size_t(subDamages) * sizeof(uint32));
-            uint8 victimState = 0;
-            response >> victimState;
             ++actor.meleeVictimStatesTakenFrom[{ attacker, victimState }];
         }
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
         outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
         ++outcome.swings;
+        if (victimState == VICTIMSTATE_DODGE || victimState == VICTIMSTATE_PARRY)
+            ++outcome.avoided;
         outcome.damage += damage;
         if (hitInfo & HITINFO_CRITICALHIT)
             ++outcome.crits;
@@ -4872,6 +4875,15 @@ private:
                     value += metric == "spell_log_count" ? 1 :
                         (metric == "spell_absorb_total" ? event.absorb : event.resist);
             return double(value);
+        }
+        if (metric == "owned_creature_avoided_count")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint32 avoided = 0;
+            for (auto const& [attacker, outcome] : _actors.at(step.get<std::string>("actor")).meleeOutcomesByAttacker)
+                if (outcome.attackerEntry == entry)
+                    avoided += outcome.avoided;
+            return avoided;
         }
         if (metric == "owned_creature_damage_total" || metric == "owned_creature_damage_count" ||
             metric == "owned_creature_attack_count")

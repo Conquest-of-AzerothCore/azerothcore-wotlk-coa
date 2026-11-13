@@ -10213,5 +10213,26 @@ class HitRatioArmHealthTests(unittest.TestCase):
                                                      'treatment': {'target_health_pct': 100}})
 
 
+
+class MetricDeltaPlayerRatingsTests(unittest.TestCase):
+    def necromancy_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 804360 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_override_sets_only_the_named_rating(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23),
+                                            metric_delta_spec(self.necromancy_entry('expertise_control')))
+        run.validate(scenario)
+        player = scenario['players'][0]
+        self.assertEqual((player['melee_hit_rating'], player['spell_hit_rating']), (0, 10000))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unknown_rating_is_refused(self):
+        entry = {**self.necromancy_entry('expertise_control'), 'player_ratings': {'parry_rating': 0}}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+
 if __name__ == '__main__':
     unittest.main()

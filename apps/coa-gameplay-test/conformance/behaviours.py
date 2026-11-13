@@ -1315,6 +1315,7 @@ class MetricDeltaSpec:
     helper_casts: tuple[int, ...] = ()
     target_casts: tuple[int, ...] = ()
     strike: 'MetricDeltaStrike | None' = None
+    player_ratings: tuple[tuple[str, int], ...] = ()
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1635,6 +1636,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             scenario['creatures'][0]['entry'] = spec.target_entry
     elif spec.target_entry is not None:
         raise ValueError(f'{spec.spell} names a target entry without the dummy in its scenario')
+    if spec.player_ratings:
+        unknown = {key for key, _ in spec.player_ratings} - set(class_file.get('ratings', {}))
+        if unknown:
+            raise ValueError(f'{spec.spell} overrides player ratings {sorted(unknown)} the class file does not set')
+        scenario['players'][0].update(dict(spec.player_ratings))
     if spec.strike is not None:
         scenario.setdefault('creatures', []).append(
             {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
@@ -1682,7 +1688,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            tuple(entry.get('enemy_casts', ())), entry.get('enemy_cast_wait_ms', 0),
                            entry.get('target_health_pct'), entry.get('enemy_casts_in_before', False),
                            tuple(entry.get('helper_casts', ())), tuple(entry.get('target_casts', ())),
-                           metric_delta_strike(entry.get('strike')))
+                           metric_delta_strike(entry.get('strike')),
+                           tuple((str(key), int(value)) for key, value in entry.get('player_ratings', {}).items()))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

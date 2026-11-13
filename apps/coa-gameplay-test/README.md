@@ -1058,6 +1058,8 @@ creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 equipped item of the actor by that percent of its maximum (`Player::DurabilityLossAll`), a precondition fixture.
 `equipped_durability` reads the sum of the current durability of the actor's equipped items, or of those of
 entry `item`.
+`owned_creature_avoided_count` counts the swings of creatures of `entry` that their victim dodged or parried, from the
+victim state of every `SMSG_ATTACKERSTATEUPDATE` the actor received.
 `owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
 applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
 `owned_creature_spell_crit_chance` reads the owned creature's base spell crit chance (`m_baseSpellCritChance`).

@@ -189,6 +189,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage', 'pet_melee_hits', 'pet_melee_blocked',
     'owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
+    'owned_creature_avoided_count',
     'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
     'distance', 'spawn_active', 'spawn_display', 'threat', 'threat_per_damage',
@@ -239,6 +240,7 @@ PLAYER_STAT_METRICS = {
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
     'pet_melee_damage', 'pet_melee_hits', 'pet_melee_blocked',
     'owned_creature_damage_total', 'owned_creature_damage_count', 'owned_creature_attack_count',
+    'owned_creature_avoided_count',
     'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
 }
@@ -1371,7 +1373,8 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'owned_creature_resistance':
                 require('school' in step, f'{where}: metric needs the resistance school')
             if metric in {'owned_creature_damage_total', 'owned_creature_damage_count',
-                          'owned_creature_attack_count', 'owned_creature_heal_count',
+                          'owned_creature_attack_count', 'owned_creature_avoided_count',
+                          'owned_creature_heal_count',
                           'owned_creature_heal_total', 'owned_creature_effective_heal_total'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
                 number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
