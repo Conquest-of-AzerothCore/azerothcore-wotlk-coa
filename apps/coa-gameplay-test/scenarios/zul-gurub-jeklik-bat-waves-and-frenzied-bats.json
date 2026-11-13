@@ -10,7 +10,10 @@
     "throws Liquid Fire, until the bat dives 16-56 s after it came and the rider can be struck. A Mythic Jeklik",
     "is wounded into her bat form after landing; a Normal Jeklik stays a troll for two waves, then is wounded",
     "into her bat form for a third, and calls no Crazed Bat Rider. Bats fight the heroes, who do not strike back,",
-    "so every wave stays; liquid fire is read from the heroes' own combat log, and the dive from the bat's Frenzy."
+    "so every wave stays; liquid fire is read from the heroes' own combat log, and the dive from the bat's Frenzy.",
+    "Each hero strikes until the Jeklik ends her Green Channeling (13540), which only her engage does: a swing",
+    "that never lands leaves her channeling and calls no wave. A second rider comes 30 s after the first, so the",
+    "dived rider is read once its bat has reached the hero and is the nearest rider."
   ],
   "timeout_ms": 360000,
   "location": {
@@ -130,6 +133,15 @@
       "within_ms": 10000
     },
     {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Jeklik engages and ends her Green Channeling before the hero stops",
+      "actor": "jeklik_mythic",
+      "metric": "aura",
+      "spell": 13540,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
       "action": "stop_attack",
       "actor": "mythic"
     },
@@ -144,6 +156,15 @@
       "actor": "jeklik_normal",
       "metric": "combat",
       "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Jeklik engages and ends her Green Channeling before the hero stops",
+      "actor": "jeklik_normal",
+      "metric": "aura",
+      "spell": 13540,
+      "equals": 0,
       "within_ms": 10000
     },
     {
@@ -237,11 +258,12 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: after the dive its rider can be struck",
+      "label": "DISCRIMINATING: after the dive its rider, nearest once the bat reaches the hero, can be struck",
       "actor": "mythic",
       "metric": "nearby_creature_can_attack",
       "entry": 14914,
-      "equals": 1
+      "equals": 1,
+      "within_ms": 15000
     },
     {
       "action": "assert",
