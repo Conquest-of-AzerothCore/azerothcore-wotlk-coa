@@ -149,8 +149,6 @@ BEHAVIOUR_LABELS = {
                                          for metric in metrics],
     'cast_period': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
                                   f"{entry.get('label_suffix', 'cast_period')}"],
-    'pulse_targets': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                    f"{entry.get('label_suffix', 'pulse_targets')}"],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
                                                      *(f'after_{tick}'

@@ -1933,9 +1933,6 @@ A real `setup_spell` cast raises creature `entry`; uncommanded for `control_ms` 
 `trigger_spell` at the dummy and, every `poll_ms` over `window_ms`, the game time and the creature's casts are read. The
 first and the last cast are bracketed between stamped reads, and (last - first) / (n - 1) must lie inside `expected_ms`
 +- the G-19 band (Animate: Plaguefather 805048: Bone Toss 704706 every 1000 ms).
-`kind: "pulse_targets"` (ADR 0550) reads one creature's area pulses per pulse: each dummy's hits are polled with
-game-time stamps, the dummies struck between two reads are one pulse's targets, and none may exceed the stated cap
-(Bonestorm 801411, Animate: Bone Wraith 805032).
 
 ## Behaviour kind modules
 
@@ -1958,3 +1955,4 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped windows (ADR 0551)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
+- [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR 0550)

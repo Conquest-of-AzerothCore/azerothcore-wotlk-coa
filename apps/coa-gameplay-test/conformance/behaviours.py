@@ -85,7 +85,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
         'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'cast_period', 'minion_swing_ratio',
-        'pushback_reduction', 'summon_lifetime', 'pulse_targets')
+        'pushback_reduction', 'summon_lifetime')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -8226,9 +8226,6 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
     if entry['kind'] == 'cast_period':
         from cast_period import cast_period_scenario, cast_period_spec
         return cast_period_scenario(class_file, cast_period_spec(entry))
-    if entry['kind'] == 'pulse_targets':
-        from cast_period import pulse_targets_scenario, pulse_targets_spec
-        return pulse_targets_scenario(class_file, pulse_targets_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
     if entry['kind'] == 'group_target':
