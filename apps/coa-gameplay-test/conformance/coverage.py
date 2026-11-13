@@ -434,7 +434,7 @@ STATE_PROMISES = {
     'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
     'owned_creature_attack_time_ms': r'haste|attack speed', 'owned_creature_crit_chance': CRIT_WORDS,
-    'owned_creature_armor': r'armou?r', 'owned_creature_run_speed_rate': r'movement speed|run speed',
+    'owned_creature_armor': r'armou?r', 'owned_creature_run_speed_rate': r'movement speed|run speed|slow\w*',
     'owned_creature_attack_power': r'attack power', 'owned_creature_spell_power': r'spell power|spell damage',
     'owned_creature_resistance': r'resistances?', 'owned_creature_melee_hit_chance': r'hit chance|chance to hit',
     'owned_creature_cast_speed': r'haste|cast speed', 'owned_creature_threat': r'threat',

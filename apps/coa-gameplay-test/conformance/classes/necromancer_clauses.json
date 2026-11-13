@@ -110,7 +110,6 @@
       {
         "claim": "to increase your and your Undead minion's haste by $301334s1% for $301334d.",
         "labels": [
-          "300235 effect_value #0",
           "300235 effect_value 301334e0 #1",
           "300235 spell_duration 301334 #2",
           "300235 behaviour_metric_delta caster_haste",
@@ -1506,7 +1505,6 @@
     "spell": 504866,
     "clause": "When you summon a Raised minion, it now raises with a shield absorbing Magic damage equal to $s1% of their maximum health.",
     "labels": [
-      "504866 effect_value e0 #0",
       "504866 behaviour_metric_delta ghoul_shield",
       "504866 behaviour_metric_delta shield_control"
     ],
@@ -1624,15 +1622,20 @@
         ]
       },
       {
-        "claim": "It moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities",
+        "claim": "It moves at a slow speed",
         "labels": [
-          "531130 effect_value 531132e0 #1",
           "531130 behaviour_metric_delta travel_ratio"
+        ]
+      },
+      {
+        "claim": "piercing all invulnerabilities, resistances, and immunities",
+        "labels": [
+          "531130 effect_value 531132e0 #1"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'It moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities': status 1 by the audit (counted pair 20261113-155556 / -161917, worldserver 3420261adf03, server commit 019887b267f8, 3283 scenarios per run, 0 failed, 0 flips; labels '531130 effect_value 531132e0 #1' and '531130 behaviour_metric_delta travel_ratio'): effect_value read 1577.0 against 1577.0 in both runs; travel_ratio read 0.5005 and 0.5012 against 0.5 +- 0.025 (slowed 3.989 yd/s against control 7.970 and 7.960 yd/s, run speed rates 0.57143 and 1.14286). The immunity probe is not among the labels and stays parked as the earlier state below says. Earlier state: open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura. Spell-power term: Status 1 (morning batch M side a final pair f5 20261113-070528 / -070734, build f427abd30c75; precondition fixture QA Test +100 SP 10062 by harness set_aura before the stats are measured, aura 345 MiscValue 127 every school incl. Physical): Bone Deconstruct 531132 1577 at SP 0 and 1777 at SP 100: +200 = 2 x 100 (the $AP*.5 term at the measured AP in both) . G-11 raw logs: raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 26 by id 531132 and 26 by \"Bone Deconstruct\". Route attempt (B3/B4 side a, pair r13): with Divine Shield 642 (aura 39 SCHOOL_IMMUNITY 127, harness set_aura) on the dummy, the Construct's Bone Deconstruct 531132 (SPELL_ATTR0_NO_IMMUNITIES) never hit it (0), while Plague of Undeath was blocked as expected (control); the Construct's trigger (aura_ascension_necromancer_event on reaching the target) did not fire against the immune target, cause not read: parked (uncertain expectation: whether the Construct engages an immune target at all). 'moves at a slow speed': no route by run speed rate; closed by the owned_creature_distance_2d travel_ratio read above."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'It moves at a slow speed' (split 2026-11-13, mentor): status 1 by the audit (counted pair 20261113-155556 / -161917, worldserver 3420261adf03, server commit 019887b267f8, 3283 scenarios per run, 0 failed, 0 flips; labels '531130 effect_value 531132e0 #1' and '531130 behaviour_metric_delta travel_ratio'): effect_value read 1577.0 against 1577.0 in both runs; travel_ratio read 0.5005 and 0.5012 against 0.5 +- 0.025 (slowed 3.989 yd/s against control 7.970 and 7.960 yd/s, run speed rates 0.57143 and 1.14286). Claim 'piercing all invulnerabilities, resistances, and immunities' (split 2026-11-13, mentor): not final; the slow read does not count it (the effect_value label reads the damage value only); route: the parked immunity probe, as the earlier state below says. Earlier state: open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura. Spell-power term: Status 1 (morning batch M side a final pair f5 20261113-070528 / -070734, build f427abd30c75; precondition fixture QA Test +100 SP 10062 by harness set_aura before the stats are measured, aura 345 MiscValue 127 every school incl. Physical): Bone Deconstruct 531132 1577 at SP 0 and 1777 at SP 100: +200 = 2 x 100 (the $AP*.5 term at the measured AP in both) . G-11 raw logs: raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 26 by id 531132 and 26 by \"Bone Deconstruct\". Route attempt (B3/B4 side a, pair r13): with Divine Shield 642 (aura 39 SCHOOL_IMMUNITY 127, harness set_aura) on the dummy, the Construct's Bone Deconstruct 531132 (SPELL_ATTR0_NO_IMMUNITIES) never hit it (0), while Plague of Undeath was blocked as expected (control); the Construct's trigger (aura_ascension_necromancer_event on reaching the target) did not fire against the immune target, cause not read: parked (uncertain expectation: whether the Construct engages an immune target at all). 'moves at a slow speed': no route by run speed rate; closed by the owned_creature_distance_2d travel_ratio read above."
   },
   {
     "spell": 531135,
@@ -2612,7 +2615,7 @@
         ]
       },
       {
-        "claim": "your next 2 spells",
+        "claim": "your next 2 spells cast",
         "labels": [
           "704681 behaviour_metric_delta charges",
           "704681 behaviour_metric_delta next_two"
@@ -3293,14 +3296,17 @@
         ]
       },
       {
-        "claim": "to make your next Lichfrost or Blight free of cost and instant cast.",
+        "claim": "to make your next Lichfrost or Blight free of cost",
+        "labels": []
+      },
+      {
+        "claim": "to make your next Lichfrost or Blight ... instant cast.",
         "labels": [
-          "707175 effect_value #0",
           "707175 behaviour_metric_delta instant"
         ]
       }
     ],
-    "reason": "Claim 'Casting Command spells now has a $h% chance': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2)): Command: Undead 504868 casts roll 707176 at 14.73% / 14.49% (1871 in 12702, 1840 in 12696; pilot11 15.05% / 15.43%), Wilson 99% inside the G-19 band 13%-17% of $h = 15; no proc in the baseline. Claim 'to make your next Lichfrost or Blight free of cost and instant cast.': not final, route pending (a cost gate and a completion read after a landed proc). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
+    "reason": "Claim 'Casting Command spells now has a $h% chance': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2)): Command: Undead 504868 casts roll 707176 at 14.73% / 14.49% (1871 in 12702, 1840 in 12696; pilot11 15.05% / 15.43%), Wilson 99% inside the G-19 band 13%-17% of $h = 15; no proc in the baseline. Claim 'to make your next Lichfrost or Blight ... instant cast.' (split 2026-11-13, mentor): behaviour read in pair 20261113-155556 / -161917 (label '707175 behaviour_metric_delta instant', spell_go_count 501978 read 300 ms after the cast starts, 0 before the learn and 2 after, forced roll 707175, both runs). Claim 'to make your next Lichfrost or Blight free of cost' (split 2026-11-13, mentor): not final, route: a before/after power read of the player across the Lichfrost cast, or cost 0 in the cast record; the entry reads neither (cast_power 1373 only supplies the power for the cast and proves nothing about cost). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
   },
   {
     "spell": 707283,

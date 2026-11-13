@@ -1316,6 +1316,16 @@ class OwnedCreatureDisplayPromiseTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['owned_creature_display'], STATE)
 
 
+class OwnedCreatureSlowPromiseTest(unittest.TestCase):
+    def test_a_learned_minion_run_speed_contrast_proves_a_movement_slowing_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta snare', BEHAVIOUR_METRIC_DELTA,
+                           'owned_creature_run_speed_rate', contrast=LEARNED_CONTRAST)]
+        promised = claim('Immune to movement slowing effects.', '1 behaviour_metric_delta snare')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your maximum health by $s1%.', '1 behaviour_metric_delta snare')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+
 class RunicPowerPromiseTest(unittest.TestCase):
     def test_a_learned_power_contrast_proves_a_runic_power_gain_clause(self):
         verdicts = [judged('1 behaviour_metric_delta runic_power', BEHAVIOUR_METRIC_DELTA, 'power',
