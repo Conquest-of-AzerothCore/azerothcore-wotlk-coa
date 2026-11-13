@@ -40,6 +40,7 @@ void AddAscensionEquippedGearLootScripts();
 void AddSC_AscensionPvpPower();
 void AddSC_AscensionResilientConstitution();
 void AddSC_AscensionPowerTooltips();
+void AddSC_AscensionTotemTooltipStrings();
 void AddSC_AscensionPvePower();
 void AddSC_AscensionItemPower();
 void AddSC_AscensionMountSpeed();
@@ -850,6 +851,7 @@ void AddCoAScripts()
     AddSC_AscensionPvpPower();
     AddSC_AscensionResilientConstitution();
     AddSC_AscensionPowerTooltips();
+    AddSC_AscensionTotemTooltipStrings();
     AddSC_AscensionPvePower();
     AddSC_AscensionItemPower();
     AddSC_AscensionMountSpeed();
