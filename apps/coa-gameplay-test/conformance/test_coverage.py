@@ -1234,5 +1234,23 @@ class TrackCreaturePromiseTest(unittest.TestCase):
     def test_a_tracking_read_is_a_state_read(self):
         self.assertEqual(METRIC_EVIDENCE['track_creature_type'], STATE)
 
+class RunicPowerPromiseTest(unittest.TestCase):
+    def test_a_learned_power_contrast_proves_a_runic_power_gain_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta runic_power', BEHAVIOUR_METRIC_DELTA, 'power',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Your Glacial Impact now generates $/10;804111s1 Runic Power.',
+                         '1 behaviour_metric_delta runic_power')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your Frost damage by $s1%.', '1 behaviour_metric_delta runic_power')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_the_power_promise_keeps_its_other_resources(self):
+        verdicts = [judged('1 behaviour_metric_delta spent', BEHAVIOUR_METRIC_DELTA, 'power',
+                           contrast=LEARNED_CONTRAST)]
+        for words in ('Reduces the mana cost of Sacrifice Undead by $s1%.', 'restores $s1 Energy',
+                      'Reduces the Runic Power cost of Corpse Explosion by $/10;s1.'):
+            self.assertEqual(evidence_of([claim(words, '1 behaviour_metric_delta spent')], verdicts)[0], [BEHAVIOUR])
+
+
 if __name__ == '__main__':
     unittest.main()
