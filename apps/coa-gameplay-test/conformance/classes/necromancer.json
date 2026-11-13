@@ -1246,7 +1246,7 @@
       "variant": "crypt_swarm_stacked",
       "label_suffix": "crypt_swarm_stacked",
       "quote": "to deal $707133s1% increased damage per stack.",
-      "expected": 3,
+      "expected": 4,
       "before_expected": 1,
       "trigger_spell": 800343,
       "target": "dummy",
@@ -1270,12 +1270,13 @@
       "setup_wait_ms": 1600,
       "expire_ms": 31000,
       "wait_ms": 1500,
+      "force_crit": "spell",
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800343,
         "target": "dummy"
       },
-      "observe_source": "Diabolical 704723 known. Crypt Swarm 800343 (1 damage: BasePoints 0 + DieSides 1, no coefficient row) cast at the dummy: alone its own cast gives 1 stack, int(1 x 1.1) = 1 damage (control, total 1); 31000 ms later fourteen Commands and its cast give 15 stacks, int(1 x (1 + 0.1 x 15)) = 2 damage (total 3). The damage hook is AscensionNecromancerContracts.cpp:416-417. With a base of 1 the reading bounds the bonus per stack to [6.67%, 13.33%) only."
+      "observe_source": "Diabolical 704723 known; spell crits forced on the caster (forced crit rating, precondition, so no crit coin flip). Crypt Swarm 800343 (1 damage: BasePoints 0 + DieSides 1, no coefficient row) cast at the dummy: alone its own cast gives 1 stack and the hit reads 1 (control, total 1); 31000 ms later fourteen Commands and its cast give 15 stacks and the hit reads 3 (total 4). The damage hook is AscensionNecromancerContracts.cpp:416-417 (x (1 + 0.1 x stacks)). With a base of 1 and integer damage the readings show the multiplier but cannot resolve 10% per stack."
     },
     {
       "spell": 704723,
@@ -1419,13 +1420,14 @@
       "target": "dummy",
       "expire_ms": 1600,
       "wait_ms": 1500,
+      "force_crit": "spell",
       "cast_in_before": false,
       "metric": "spell_damage_total",
       "fields": {
         "spell": 800343,
         "target": "dummy"
       },
-      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). Crypt Swarm 800343 cast at the dummy with 704723 known: no hit without the cast, one hit of 1 damage with it (Effect[0] SCHOOL_DAMAGE BasePoints 0 + DieSides 1, no coefficient row in AscensionNecromancerData.h). No Necromancer code casts 800343; live logs show the caster's Crypt Swarm hits of 28 to 35."
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). Crypt Swarm 800343 cast at the dummy with 704723 known: no hit without the cast, one hit of 1 damage with it (spell crits forced) (Effect[0] SCHOOL_DAMAGE BasePoints 0 + DieSides 1, no coefficient row in AscensionNecromancerData.h). No Necromancer code casts 800343; live logs show the caster's Crypt Swarm hits of 28 to 35."
     },
     {
       "spell": 704701,
