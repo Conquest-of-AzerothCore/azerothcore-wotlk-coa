@@ -18,7 +18,8 @@ class.
   scenario is byte-identical (`generate --class 19`, `--stack`).
 - On the merged branch the field is `target_casts_before`: `target_casts` already names the dummy's casts after each
   trigger cast (ADR 0385, Plague of Undeath).
-- `coverage.METRIC_EVIDENCE` lists `casting` (the unit's current spell) as an event read.
+- `coverage.METRIC_EVIDENCE` lists `casting` (the unit's current spell) as an event read. On the merged branch it is a
+  state read promised by a clause that names a cast (ADR 0403, B3 side a); Heartchill's interrupt clause names one.
 
 ## Consequences
 

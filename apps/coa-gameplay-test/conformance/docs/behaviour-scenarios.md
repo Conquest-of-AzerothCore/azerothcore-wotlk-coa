@@ -223,7 +223,7 @@ regression reads ~0.12 off, not ~1e-7).
 
 `target_casts_before` (ADR 0426) has the dummy cast those spells on itself right before each trigger cast (a 300 ms
 settle after each), for an interrupt that needs a target casting: Heartchill 801739 interrupts the dummy's Evocation
-12051 channel (`casting` reads 1 then 0, an event read) and slows it.
+12051 channel (`casting` reads 1 then 0, a state read its clause's cast words promise, ADR 0403) and slows it.
 
 `caster_health_pct` (ADR 0423) holds the caster at that percent of the 10000 health fixture before each trigger
 cast, for a heal the script applies by `ModifyHealth` with no heal event: Flesh Symbiosis 301207 reads 5000 then 5200

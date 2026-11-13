@@ -388,8 +388,7 @@ METRIC_EVIDENCE = {
                      'spell_absorb_total', 'spell_log_count', 'nearby_creature_at_client', 'spell_go_count',
                      'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits',
                      'pet_melee_blocked', 'health', 'owned_creature_avoided_count', 'owned_creature_attack_count',
-                     'owned_creature_health', 'item_count',
-                     'casting'),
+                     'owned_creature_health', 'item_count'),
                     EVENT),
     **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks', 'can_detect',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
@@ -413,7 +412,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_threat_multiplier', 'melee_crit_chance_against', 'threat_multiplier',
                      'cast_speed_multiplier', 'display_id', 'threat_per_damage',
                      'owned_creature_spell_crit_chance', 'owned_creature_spell_hit_chance', 'alive', 'can_attack',
-                     'owned_creature_react_state', 'nearest_creature_distance'), STATE),
+                     'owned_creature_react_state', 'nearest_creature_distance', 'casting'), STATE),
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -446,6 +445,7 @@ STATE_PROMISES = {
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
+    'casting': r'\bcast\w*',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})

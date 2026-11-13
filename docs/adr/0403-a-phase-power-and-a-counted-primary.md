@@ -20,6 +20,9 @@ alert of the judge, not of the server.
 - `fixed_count` takes `count_primary`: the nearest dummy joins the judged dummies, so the count is of every dummy
   inside the radius, for a spell centred on the caster that picks its targets at random.
 
+- The harness's `casting` read (`Unit::IsNonMeleeSpellCast`) is a state read in `coverage.METRIC_EVIDENCE`, promised
+  by a clause that names a cast.
+
 ## Consequences
 
 - Entries without the fields generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
