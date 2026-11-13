@@ -1,9 +1,9 @@
 {
   "schema": 1,
-  "name": "Ragefire Chasm: Taragaman the Hungerer's Fire Nova deals one and a half times, his Massive Fire Nova five times its damage (#11768)",
+  "name": "Ragefire Chasm: Taragaman the Hungerer's Fire Nova and Massive Fire Nova deal ten times their damage (#11768)",
   "contract": [
     "Taragaman the Hungerer 11520's novas hit level 60 players far too softly (Fire Nova 11970 about 2k).",
-    "coa_dungeon_creature_damage rows for Taragaman and one spell each raise Fire Nova x1.5 and Massive Fire Nova 2102516 x5.",
+    "coa_dungeon_creature_damage rows for Taragaman and one spell each raise Fire Nova and Massive Fire Nova 2102516 x10 (on Mythic about 2k and 6k).",
     "Other casters of the same spells keep their damage. The scenario compares Taragaman with Jergosh the Invoker",
     "11518 casting the same spells, on Mythic."
   ],
@@ -79,15 +79,15 @@
       "save_as": "plain_nova"
     },
     {
-      "label": "DISCRIMINATING: Taragaman's Fire Nova goes through the damage hooks one and a half times as high as Jergosh's",
+      "label": "DISCRIMINATING: Taragaman's Fire Nova goes through the damage hooks ten times as high as Jergosh's",
       "action": "assert",
       "actor": "hero",
       "metric": "script_spell_damage_taken",
       "target": "taragaman",
       "spell": 11970,
       "ratio_to": "plain_nova",
-      "min": 1.45,
-      "max": 1.55
+      "min": 9.9,
+      "max": 10.1
     },
     {
       "action": "snapshot",
@@ -98,15 +98,15 @@
       "save_as": "plain_massive"
     },
     {
-      "label": "DISCRIMINATING: his Massive Fire Nova comes out five times as high as Jergosh's",
+      "label": "DISCRIMINATING: his Massive Fire Nova comes out ten times as high as Jergosh's",
       "action": "assert",
       "actor": "hero",
       "metric": "script_spell_damage_taken",
       "target": "taragaman",
       "spell": 2102516,
       "ratio_to": "plain_massive",
-      "min": 4.95,
-      "max": 5.05
+      "min": 9.9,
+      "max": 10.1
     }
   ]
 }

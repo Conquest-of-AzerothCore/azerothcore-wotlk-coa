@@ -11,8 +11,8 @@ EXECUTE `coa_dungeon_creature_damage_spell`;
 DEALLOCATE PREPARE `coa_dungeon_creature_damage_spell`;
 
 -- Ragefire Chasm: Taragaman the Hungerer's novas hit far too softly at level 60 (#11768): Fire Nova about 2k.
--- Fire Nova x1.5 (about 3k), Massive Fire Nova x5, as the tester asked.
+-- On Mythic our tester measured 300 and 3k with x1.5 and x5 and asked for about 2k and 6k: both x10.
 DELETE FROM `coa_dungeon_creature_damage` WHERE `entry` = 11520 AND `spell_id` IN (11970, 2102516);
 INSERT INTO `coa_dungeon_creature_damage` (`entry`, `spell_id`, `multiplier`, `comment`) VALUES
-(11520, 11970, 1.5, 'Taragaman the Hungerer: Fire Nova x1.5'),
-(11520, 2102516, 5, 'Taragaman the Hungerer: Massive Fire Nova x5');
+(11520, 11970, 10, 'Taragaman the Hungerer: Fire Nova x10'),
+(11520, 2102516, 10, 'Taragaman the Hungerer: Massive Fire Nova x10');
