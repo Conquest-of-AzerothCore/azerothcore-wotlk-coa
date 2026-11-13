@@ -1364,6 +1364,7 @@ class MetricDeltaStrike:
     dx: float = 0.0
     after_trigger_ms: int | None = None
     in_before: bool = False
+    owned_entry: int | None = None
 
 
 def reagent_steps(records: Records, spell: int) -> list[dict]:
@@ -1379,13 +1380,18 @@ def reagent_steps(records: Records, spell: int) -> list[dict]:
 def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if raw is None:
         return None
-    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms', 'in_before'}
+    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms', 'in_before',
+                          'owned_entry'}
     if unknown:
         raise ValueError(f'metric_delta strike fields {sorted(unknown)} are unknown')
     strike = MetricDeltaStrike(int(raw['spell']), int(raw['health']), int(raw['max_health']),
                                int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)),
                                None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']),
-                               raw.get('in_before', False))
+                               raw.get('in_before', False),
+                               None if raw.get('owned_entry') is None else int(raw['owned_entry']))
+    if strike.owned_entry is not None and (strike.in_before or strike.owned_entry < 1):
+        raise ValueError('metric_delta strike owned_entry names a positive creature entry, struck in the after phase '
+                         'only')
     if not 0 < strike.health <= strike.max_health or strike.count < 1:
         raise ValueError('metric_delta strike needs 0 < health <= max_health and at least one strike')
     if type(strike.in_before) is not bool or (strike.in_before and strike.after_trigger_ms is not None):
@@ -1624,7 +1630,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'set_health', 'actor': CASTER, 'value': spec.caster_health[0],
                           'maximum': spec.caster_health[1]})
         if not include_cast:
-            return (steps + (strike_steps() if spec.strike and spec.strike.after_trigger_ms is not None else [])
+            return (steps + (strike_steps(after) if spec.strike and spec.strike.after_trigger_ms is not None else [])
                     + target_cast_steps())
         if spec.cast_power is not None:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
@@ -1642,7 +1648,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps += setup_cast_steps()
         after_trigger = spec.strike is not None and spec.strike.after_trigger_ms is not None
         if not after_trigger:
-            steps += strike_steps()
+            steps += strike_steps(after)
         if spec.target_health_pct is not None:
             steps.append({'action': 'set_health_pct', 'actor': CASTER, 'target': spec.target,
                           'pct': spec.target_health_pct})
@@ -1656,7 +1662,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         if after_trigger:
             steps += [{'action': 'wait', 'label': 'before the strike', 'ms': spec.strike.after_trigger_ms}]
-            steps += strike_steps()
+            steps += strike_steps(after)
         if spec.target_health_after is not None:
             delay_ms, pct = spec.target_health_after
             steps += [{'action': 'wait', 'ms': delay_ms},
@@ -1680,14 +1686,16 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                 for step in ({'action': 'cast', 'actor': ENEMY_PLAYER, 'spell': spell, 'target': ENEMY_PLAYER},
                              {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})]
 
-    def strike_steps() -> list[dict]:
+    def strike_steps(after: bool = True) -> list[dict]:
         strike = spec.strike
-        if strike is None:
+        if strike is None or (strike.owned_entry is not None and not after):
             return []
         steps = [{'action': 'relocate', 'actor': CASTER, 'dx': strike.dx}] if strike.dx else []
         steps.append({'action': 'set_health', 'actor': CASTER, 'value': strike.health, 'maximum': strike.max_health})
+        target = ({'target': CASTER} if strike.owned_entry is None
+                  else {'target_owner': CASTER, 'target_owned_entry': strike.owned_entry})
         for _ in range(strike.count):
-            steps += [{'action': 'cast', 'actor': STRIKER, 'spell': strike.spell, 'target': CASTER},
+            steps += [{'action': 'cast', 'actor': STRIKER, 'spell': strike.spell, **target},
                       {'action': 'wait', 'label': 'strike', 'ms': strike.wait_ms}]
         return steps
 
@@ -5704,6 +5712,7 @@ class HitArm:
     casts: tuple[int, ...] = ()
     learn: tuple[int, ...] = ()
     target_health_pct: int | None = None
+    aura_amounts: tuple[tuple[int, int, int], ...] = ()
 
 
 @dataclass(frozen=True)
@@ -5780,16 +5789,20 @@ def hit_ratio_fixture(raw: dict) -> tuple[tuple[str, int], ...]:
 
 
 def hit_arm(raw: dict) -> HitArm:
-    unknown = set(raw) - {'auras', 'casts', 'learn', 'target_health_pct'}
+    unknown = set(raw) - {'auras', 'casts', 'learn', 'target_health_pct', 'aura_amounts'}
     if unknown:
-        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras, casts, learn or target_health_pct')
+        raise ValueError(f'hit_ratio arm fields {sorted(unknown)} are not auras, casts, learn, target_health_pct or '
+                         f'aura_amounts')
     health = raw.get('target_health_pct')
     if health is not None and not 0 < int(health) < 100:
         raise ValueError(f'hit_ratio arm target health percent {health} must lie between 0 and 100')
-    return HitArm(tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ())),
-                  tuple(int(spell) for spell in raw.get('casts', ())),
+    auras = tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ()))
+    amounts = tuple((int(spell), int(effect), int(amount)) for spell, effect, amount in raw.get('aura_amounts', ()))
+    if any(spell not in dict(auras) or not 0 <= effect < 3 for spell, effect, _ in amounts):
+        raise ValueError(f'hit_ratio arm aura_amounts {list(amounts)} set an effect 0-2 of one of the arm\'s auras')
+    return HitArm(auras, tuple(int(spell) for spell in raw.get('casts', ())),
                   tuple(int(spell) for spell in raw.get('learn', ())),
-                  None if health is None else int(health))
+                  None if health is None else int(health), amounts)
 
 
 def hit_ratio_label(spell: int, suffix: str = '') -> str:
@@ -5887,6 +5900,8 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
         for trial in range(1, spec.trials + 1):
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                       for spell, stacks in arm.auras]
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': dict(arm.auras)[spell],
+                       'effect': effect, 'amount': amount} for spell, effect, amount in arm.aura_amounts]
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks,
                        **({'target': spec.caster} if spec.caster != CASTER else {})}
                       for spell, stacks in spec.cast_unit_auras]
@@ -6762,6 +6777,7 @@ class ScriptHitSpec:
     minion_model_auras: tuple[int, ...] = ()
     cast_power: int | None = None
     multiplier: float = 1.0
+    strike_owned_entry: int | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -6787,7 +6803,10 @@ def script_hit_validate(spec: ScriptHitSpec):
     if spec.minion_model_auras and not spec.caster_entry:
         raise ValueError(f'{spec.spell} script_hit models minion auras {list(spec.minion_model_auras)} without a '
                          f'minion caster_entry')
-    if spec.control_casts is not None and tuple(spec.control_casts) == tuple(spec.casts):
+    if spec.strike_owned_entry is not None and (not spec.strike_spell or spec.strike_owned_entry < 1):
+        raise ValueError(f'{spec.spell} script_hit strike_owned_entry needs a strike_spell and a positive entry')
+    if (spec.control_casts is not None and tuple(spec.control_casts) == tuple(spec.casts)
+            and spec.strike_owned_entry is None):
         raise ValueError(f'{spec.spell} script_hit control_casts repeat the casts; the arms would differ in nothing')
     if spec.multiplier <= 0:
         raise ValueError(f'{spec.spell} script_hit multiplier {spec.multiplier} is not a positive factor')
@@ -6802,9 +6821,16 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
     casts = spec.control_casts if arm == 'control' and spec.control_casts is not None else spec.casts
     for spell, target in casts:
         steps += hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
-    if spec.strike_spell:
+    if spec.strike_spell and spec.strike_owned_entry is None:
         steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                   {'action': 'wait', 'label': f'{arm} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
+    elif spec.strike_spell and arm != 'control':
+        steps += [{'action': 'wait', 'label': f'{arm} before strike {trial}', 'ms': spec.settle_ms},
+                  {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target_owner': CASTER,
+                   'target_owned_entry': spec.strike_owned_entry},
+                  {'action': 'wait', 'label': f'{arm} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
+    elif spec.strike_spell:
+        steps.append({'action': 'wait', 'label': f'{arm} before strike {trial}', 'ms': spec.settle_ms})
     return steps + [{'action': 'wait', 'label': f'{arm} settle {trial}', 'ms': spec.settle_ms}]
 
 
@@ -6865,7 +6891,10 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                           'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True})
     setup = ([f'casts {[spell for spell, _ in spec.casts]}'] if spec.casts else []) + \
         ([f'a passive, stationary striker (creature entry {spec.striker_entry}) casts {spec.strike_spell} at the '
-          f'caster'] if spec.strike_spell else [])
+          f'caster'] if spec.strike_spell and spec.strike_owned_entry is None else []) + \
+        ([f'a passive, stationary striker (creature entry {spec.striker_entry}) casts {spec.strike_spell} at the '
+          f'caster\'s creature {spec.strike_owned_entry} in the treatment arm only'] if spec.strike_owned_entry
+         is not None else [])
     if spec.control_casts is None:
         control_text, control_rule = f'without {spec.spell} known', f'without {spec.spell}'
     else:
@@ -6923,7 +6952,8 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          tuple((int(spell), int(stacks)) for spell, stacks in entry.get('stat_auras', ())),
                          entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'),
                          tuple(int(spell) for spell in entry.get('minion_model_auras', ())),
-                         entry.get('cast_power'), float(entry.get('multiplier', 1.0)))
+                         entry.get('cast_power'), float(entry.get('multiplier', 1.0)),
+                         entry.get('strike_owned_entry'))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8
@@ -7968,21 +7998,27 @@ class ItemCooldownGateSpec:
     shared_spell: int | None = None
     margin_ms: int = COST_GATE_MARGIN_MS
     read_ms: int = 500
+    label_suffix: str = ''
+    combat_kill_spell: int | None = None
 
 
 ITEM_COOLDOWN_GATE_ARMS = ('first', 'early', 'ready')
 
 
 def item_cooldown_gate_label(spec: ItemCooldownGateSpec, arm: str, metric: str) -> str:
-    return f'{spec.spell} item_cooldown_gate {spec.item} {arm} {metric}'
+    suffix = f' {spec.label_suffix}' if spec.label_suffix else ''
+    return f'{spec.spell} item_cooldown_gate {spec.item}{suffix} {arm} {metric}'
 
 
 def item_cooldown_gate_spec(entry: dict) -> ItemCooldownGateSpec:
     spec = ItemCooldownGateSpec(entry['spell'], entry['name'], entry['quote'], entry['item'], entry['item_spell'],
                                 int(entry['cooldown_ms']), entry.get('shared_item'), entry.get('shared_spell'),
-                                int(entry.get('margin_ms', COST_GATE_MARGIN_MS)))
+                                int(entry.get('margin_ms', COST_GATE_MARGIN_MS)), 500, entry.get('label_suffix', ''),
+                                entry.get('combat_kill_spell'))
     if (spec.shared_item is None) != (spec.shared_spell is None):
         raise ValueError(f'{spec.spell} item_cooldown_gate names a shared item and its spell together')
+    if spec.combat_kill_spell is not None and (spec.shared_item is None or not spec.label_suffix):
+        raise ValueError(f'{spec.spell} item_cooldown_gate in combat needs a shared item and a label_suffix')
     if not spec.read_ms < spec.cooldown_ms - spec.margin_ms - spec.read_ms:
         raise ValueError(f'{spec.spell} item_cooldown_gate cooldown {spec.cooldown_ms} ms leaves no early attempt')
     return spec
@@ -8014,6 +8050,8 @@ def item_cooldown_gate_scenario(class_file: dict, spec: ItemCooldownGateSpec) ->
                  {'action': 'wait', 'label': f'{arm} read', 'ms': spec.read_ms}] + reads)
 
     early_ms = spec.cooldown_ms - spec.margin_ms
+    if spec.combat_kill_spell is not None:
+        return item_cooldown_gate_combat(class_file, records, spec, steps, attempt, expectations, rule, model)
     steps += attempt('first', spec.item, spec.item_spell, False, 1)
     steps += [{'action': 'wait', 'label': 'until just before the cooldown ends', 'ms': early_ms - spec.read_ms}]
     steps += attempt('early', spec.item, spec.item_spell, True, 1)
@@ -8032,6 +8070,50 @@ def item_cooldown_gate_scenario(class_file: dict, spec: ItemCooldownGateSpec) ->
                        if spec.shared_item is not None else '')
                     + f', proving the "{spec.quote}" clause.',
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'steps': steps}
+    return scenario, expectations
+
+
+def item_cooldown_gate_combat(class_file: dict, records: Records, spec: ItemCooldownGateSpec, steps: list[dict],
+                              attempt, expectations: list[Expectation], rule: str,
+                              model: dict) -> tuple[dict, list[Expectation]]:
+    def combat(moment: str, expected: int) -> dict:
+        label = item_cooldown_gate_label(spec, moment, 'combat')
+        expectations.append(Expectation(label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.item_spell, None,
+                                        str(expected), rule, {**model, 'arm': moment, 'item': spec.item}))
+        return measurement(label, ALLY, 'combat')
+
+    early_ms = spec.cooldown_ms - spec.margin_ms
+    steps += [{'action': 'attack', 'actor': ALLY, 'target': TARGET},
+              {'action': 'wait', 'label': 'enter combat', 'ms': CAST_COMBAT_SETTLE_MS}, combat('combat_start', 1)]
+    steps += attempt('first', spec.item, spec.item_spell, False, 1)
+    steps += [{'action': 'wait', 'label': 'past the cooldown, still in combat',
+               'ms': spec.cooldown_ms + spec.margin_ms - spec.read_ms}]
+    steps += attempt('in_combat', spec.shared_item, spec.shared_spell, True, None)
+    steps += [{'action': 'stop_attack', 'actor': ALLY},
+              {'action': 'set_health', 'actor': TARGET, 'value': 1},
+              {'action': 'learn', 'actor': CASTER, 'spell': spec.combat_kill_spell}]
+    steps += hit_ratio_cast(records, spec.combat_kill_spell)
+    steps += [combat('combat_end', 0)]
+    steps += attempt('after_combat', spec.shared_item, spec.shared_spell, True, None)
+    steps += [{'action': 'wait', 'label': 'until just before the cooldown from the combat end ends',
+               'ms': early_ms - GCD_WAIT_MS - 2 * spec.read_ms}]
+    steps += attempt('after_combat_early', spec.shared_item, spec.shared_spell, True, None)
+    steps += [{'action': 'wait', 'label': 'until just after the cooldown from the combat end ends',
+               'ms': 2 * spec.margin_ms - spec.read_ms + GCD_WAIT_MS}]
+    steps += attempt('after_combat_ready', spec.shared_item, spec.shared_spell, False, None)
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour item cooldown gate in combat',
+        'contract': f'A grouped ally attacks the dummy (in combat) and uses item {spec.item} (its spell '
+                    f'{spec.item_spell}) through the real item-use handler: accepted; {spec.cooldown_ms + spec.margin_ms}'
+                    f' ms later, still in combat, item {spec.shared_item} (spell {spec.shared_spell}) is refused; '
+                    f'then the caster kills the dummy with {spec.combat_kill_spell} (the dummy set to 1 health), the '
+                    f'ally leaves combat and item {spec.shared_item} is refused right after, refused {early_ms} ms '
+                    f'later and accepted {spec.cooldown_ms + spec.margin_ms} ms after the combat ended, proving the '
+                    f'"{spec.quote}" clause under the shared potion rule.',
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'creatures': [creature_fixture(class_file)],
         'steps': steps}
     return scenario, expectations
 
