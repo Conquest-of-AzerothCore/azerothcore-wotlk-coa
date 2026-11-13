@@ -1,16 +1,21 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Mar'li Evolves a spawn on Mythic, never herself (#8075), and not on Normal",
+  "name": "Zul'Gurub: High Priestess Mar'li Evolves an egg on Mythic, never herself (#8075), and not on Normal",
   "contract": [
     "Evolve (2118116) evolves a target spider egg: it heals its target to full health (effect 67) and applies a",
-    "+200% scale aura. Mar'li (14510) casts it 22 s into the troll phase on a Spawn of Mar'li (15041) she hatches",
-    "from the nearest free egg (179985), never on herself, so she neither carries the Evolve aura nor heals to full",
-    "health. Evolve belongs to Mythic and Ascended only (round-5 tester: the Mythic and Ascended mechanics), so a",
-    "Normal Mar'li never casts it. A Normal and a Mythic hero each fight one Mar'li alone. The world's eggs share",
-    "phase 1 and the fixture lives in the lane's own phase, so each hero places eleven untimed eggs right after the",
-    "pull (eggs on a hero before it keep Mar'li from engaging): Hatch Eggs at 17 s claims ten of them and hatches",
-    "them 10 s later, which leaves Evolve one free egg whichever of the two comes first. The Normal hero therefore",
-    "sees ten spawns, the eleventh egg unclaimed."
+    "+200% scale aura (effect 1). The egg is a gameobject (179985, size 1.75) that Evolve cannot target, so 22 s",
+    "into the troll phase Mar'li (14510) swells the nearest free egg by Evolve's +200%, added to its size the way",
+    "the core adds a scale aura (1.75 + 2.0 = 3.75), and that egg hatches 10 s later (live Mythic 2026-08-04: 10.2 s)",
+    "as a Spawn of Mar'li (15041) she Evolves, never herself, so she neither carries the Evolve aura nor heals to",
+    "full health. The evolved spawn never takes Growth (2118117; live: no Growth on it), while the Hatch Eggs spawns",
+    "still do. Evolve belongs to Mythic and Ascended only, so a Normal Mar'li never casts it. A Normal and a Mythic",
+    "hero each fight one Mar'li alone. The world's eggs share phase 1 and the fixture lives in the lane's own phase,",
+    "so each hero places eleven untimed eggs right after the pull (eggs on a hero before it keep Mar'li from",
+    "engaging). The Normal hero stacks all eleven on its spot: Hatch Eggs at 17 s claims the ten nearest and hatches",
+    "them 10 s later, so it sees ten spawns, the eleventh egg unclaimed. The Mythic hero puts its eleventh egg 10 yd",
+    "north and stacks ten on its spot; Hatch Eggs claims those ten, then the hero steps onto the eleventh, the only",
+    "free egg left for Evolve, so the nearest egg it measures is the evolved one. On the old behaviour a spawn",
+    "carrying Evolve appears at once and the egg never swells; with Growth it would make eleven Growth carriers."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -211,13 +216,27 @@
       "command": ".gobject add temp 179985 0"
     },
     {
-      "action": "command",
-      "label": "The Mythic hero places eleven Spider Eggs",
+      "action": "relocate",
+      "label": "The Mythic hero steps 10 yd north (+x)",
       "actor": "mythic",
-      "command": ".gobject add temp 179985 0"
+      "dx": 10
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "The Mythic hero places the eleventh Spider Egg there",
+      "actor": "mythic",
+      "entry": 179985,
+      "distance": 0,
+      "duration_s": 0
+    },
+    {
+      "action": "relocate",
+      "actor": "mythic",
+      "dx": -10
     },
     {
       "action": "command",
+      "label": "The Mythic hero places ten Spider Eggs on its spot",
       "actor": "mythic",
       "command": ".gobject add temp 179985 0"
     },
@@ -299,24 +318,126 @@
       "equals": 1
     },
     {
-      "action": "assert",
-      "label": "DISCRIMINATING: the Mythic Mar'li casts Evolve about 22 s into the troll phase",
+      "action": "relocate",
+      "label": "The Mythic hero steps onto the eleventh egg, the only one Hatch Eggs left free",
       "actor": "mythic",
-      "metric": "spell_go_count",
-      "entry": 14510,
-      "spell": 2118116,
-      "min": 1,
-      "within_ms": 20000
+      "dx": 10
     },
     {
       "action": "assert",
-      "label": "The Spawn of Mar'li hatched from the egg carries Evolve",
+      "label": "DISCRIMINATING: about 22 s into the troll phase Evolve swells that egg to 1.75 + 200% = 3.75",
+      "actor": "mythic",
+      "metric": "nearby_gameobject_scale",
+      "entry": 179985,
+      "min": 3.749,
+      "max": 3.751,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Spawn of Mar'li carrying Evolve appears with the swollen egg",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118116,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Five seconds into the evolved egg's ten",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: still no Spawn of Mar'li carrying Evolve 5 s after the egg swelled",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118116,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The evolved egg is still there and still swollen",
+      "actor": "mythic",
+      "metric": "nearby_gameobject_scale",
+      "entry": 179985,
+      "min": 3.749,
+      "max": 3.751
+    },
+    {
+      "action": "assert",
+      "label": "About 10 s after it swelled, the egg hatches one Spawn of Mar'li carrying Evolve",
       "actor": "mythic",
       "metric": "nearby_creature_count",
       "entry": 15041,
       "spell": 2118116,
       "equals": 1,
-      "within_ms": 5000
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Mar'li casts Evolve",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118116,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Past the evolved spawn's first Growth tick, 4 s after it engages",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: ten Hatch Eggs spawns and the evolved spawn are alive",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: exactly one of them carries Evolve",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118116,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ten Hatch Eggs spawns carry Growth and the evolved spawn does not",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118117,
+      "equals": 10
+    },
+    {
+      "action": "wait",
+      "label": "Two more Growth ticks",
+      "ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the evolved spawn still has no Growth",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118117,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the evolved spawn still carries Evolve",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "spell": 2118116,
+      "equals": 1
     },
     {
       "action": "assert",
