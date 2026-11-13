@@ -1,0 +1,104 @@
+{
+  "schema": 1,
+  "name": "Mekgineer Thermaplugg's Walking Bombs spawn 20 yards away, not under him (#12029)",
+  "contract": [
+    "Issue #12029: Thermaplugg's kit Walking Bombs (9780710) appeared under the boss. The kit summoned each one at",
+    "SMART_TARGET_RANDOM_POINT range 20, whose radius is uniform from 0 to 20 yards. The kit's in-game check places",
+    "them about 20 yards from him, so each Jackhammer (2102788, first cast 9.1-11.1 s into combat) now summons three",
+    "bombs on a 20-yard ring around him. Frostbite 12494 roots Thermaplugg so Knock Away cannot pull him off his spot.",
+    "The observer stands 3 yards from him and stays out of the fight; the nearest ring bomb is then at least 17 yards",
+    "from the observer. With the old uniform radius, the nearest of three bombs lands within 15 yards of the observer",
+    "in about 98% of casts."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "observer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "thermaplugg",
+      "owner": "observer",
+      "entry": 7800,
+      "level": 30,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000
+    },
+    {
+      "action": "wait",
+      "label": "Let the fixtures settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "target": "thermaplugg",
+      "spell": 12494,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thermaplugg is rooted",
+      "actor": "thermaplugg",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: no Walking Bomb before the fight",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 9780710,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "tank",
+      "target": "thermaplugg"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thermaplugg fights the tank",
+      "actor": "thermaplugg",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jackhammer summons three Walking Bombs",
+      "actor": "observer",
+      "metric": "nearby_creature_count",
+      "entry": 9780710,
+      "equals": 3,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "No Walking Bomb spawns at Thermaplugg's feet",
+      "actor": "observer",
+      "metric": "nearest_creature_distance",
+      "entry": 9780710,
+      "min": 15,
+      "max": 24
+    }
+  ]
+}
