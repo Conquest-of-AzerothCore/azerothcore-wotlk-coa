@@ -19,7 +19,9 @@
  *                                             hit ends the siphon).
  *   Corrupted Blood    first 25s, every 30s   everyone: stacking Plague damage
  *                                             that heals him; when it ends, a
- *                                             Pool of Corrupted Blood stays
+ *                                             Pool of Corrupted Blood stays;
+ *                                             it ends on everyone when he dies
+ *                                             or evades (live logs)
  *   Will of Hakkar     first 45s, every 45s   a player feels it for 5s, then is
  *                                             his for 15s; Mythic and Ascended
  *                                             only (tester, live)
@@ -27,12 +29,18 @@
  *   Sons of Hakkar     first 45s, every 60s   one joins; where it dies its blood
  *                                             pools and poisons those inside
  *   Aspects            one for each High Priest still alive, +25% damage and
- *                      -10% damage taken each: at the pull he drains the Avatar
- *                      of each living priest's loa (Drain Power, -99% damage
- *                      taken while any of them lives) and gains its Aspect when
- *                      it dies
- *   Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
+ *                      -10% damage taken each: from the pull he drains the
+ *                      Avatars of the living priests' loas one at a time, the
+ *                      nearest first (Drain Power, -99% damage taken while it
+ *                      lasts), gains its Aspect when it dies and moves on to
+ *                      the next; Bethekk's also brings Arlokk's Razor Claws
+ *                      (live logs: his swings bleed the tank)
+ *   Fierce Blow       tank, first 6.7-17.3s, then every 6-10s
  *   Berserk            at 10 minutes
+ *
+ * Straight to the Heart: killing him while all five High Priests live credits
+ * the achievement of the difficulty (its criterion is "be the target of"
+ * 2107157-2107160, one spell per difficulty).
  *
  * Decided here, not in the data:
  *   - the siphon's length and where the heart appears;
@@ -61,6 +69,7 @@
 #include <algorithm>
 #include <array>
 #include <list>
+#include <vector>
 
 using namespace coa_zg;
 
@@ -89,6 +98,7 @@ namespace
         SPELL_BLOOD_SCYTHE        = 2118630,
         SPELL_BLOOD_SCYTHE_HIT    = 2118631,
         SPELL_BLOOD_SCYTHE_ARMOR  = 2118632,
+        SPELL_RAZOR_CLAWS         = 2118325,
         SPELL_WILL_SLIPPING       = 2118633,
         SPELL_WILL_CONTROL        = 2118634,
         SPELL_WILL_SHIELD         = 2118635,
@@ -143,6 +153,8 @@ namespace
     constexpr float AVATAR_RING          = 10.0f;
     constexpr float HEART_HEIGHT         = 8.0f;
     constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
+    constexpr std::array<uint32, 4> CORRUPTED_BLOOD_VARIANTS = { 2118601, 2118602, 2118603, 2118604 };
+    constexpr std::array<uint32, 4> STRAIGHT_TO_THE_HEART = { 2107157, 2107158, 2107159, 2107160 };
 
     // The launch-day Normal kill (youtube c7iqfz04PmI) gives each player 2500 Runes of Ascension in one loot slot,
     // more than a loot row's 8-bit count holds, so they are handed out at his death instead.
@@ -164,7 +176,7 @@ namespace
         {
             if (me->GetPositionZ() < 52.f || me->GetPositionZ() > 57.28f)
             {
-                BossAI::EnterEvadeMode(EVADE_REASON_BOUNDARY);
+                EnterEvadeMode(EVADE_REASON_BOUNDARY);
                 return false;
             }
             return true;
@@ -189,6 +201,8 @@ namespace
                 loa.avatar.Despawn(me);
                 me->RemoveAurasDueToSpell(loa.aspect);
             }
+            me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
+            _undrained.clear();
             _siphoning = false;
             _pools.clear();
             _clock.Reset();
@@ -214,6 +228,7 @@ namespace
         // Ascension's aspects: one for each priest still standing, taken from its avatar.
         void DrainLivingPriestsLoas()
         {
+            _undrained.clear();
             float angle = 0.0f;
             for (PriestLoa& loa : _loas)
             {
@@ -221,23 +236,47 @@ namespace
                     continue;
                 loa.avatar.Summon(me, me->GetNearPosition(AVATAR_RING, angle));
                 angle += 2 * float(M_PI) / _loas.size();
-                if (!loa.avatar.Drain(me))
-                    DoCastSelf(loa.aspect, true);
+                _undrained.push_back(&loa);
             }
+            DrainNearestLoa();
+        }
+
+        float AvatarDistance(PriestLoa const* loa) const
+        {
+            Creature* avatar = loa->avatar.Get(me);
+            return avatar ? me->GetDistance(avatar) : 0.0f;
+        }
+
+        void DrainNearestLoa()
+        {
+            while (!_undrained.empty())
+            {
+                auto nearest = std::min_element(_undrained.begin(), _undrained.end(),
+                    [this](PriestLoa const* a, PriestLoa const* b) { return AvatarDistance(a) < AvatarDistance(b); });
+                PriestLoa* loa = *nearest;
+                _undrained.erase(nearest);
+                if (loa->avatar.Drain(me))
+                    return;
+                TakeAspect(*loa);
+            }
+        }
+
+        void TakeAspect(PriestLoa const& loa)
+        {
+            DoCastSelf(loa.aspect, true);
+            if (loa.priest == DATA_ARLOKK)
+                DoCastSelf(SPELL_RAZOR_CLAWS, true);
         }
 
         void TakeConsumedAspects()
         {
-            bool consumed = false;
             for (PriestLoa& loa : _loas)
             {
-                if (!loa.avatar.Consumed(me, false))
+                if (!loa.avatar.Consumed(me))
                     continue;
-                consumed = true;
-                DoCastSelf(loa.aspect, true);
+                TakeAspect(loa);
+                DrainNearestLoa();
             }
-            if (consumed && std::none_of(_loas.begin(), _loas.end(), [](PriestLoa const& loa) { return loa.avatar.Draining(); }))
-                me->RemoveAurasDueToSpell(sSpellMgr->GetSpellIdForDifficulty(SPELL_DRAIN_POWER, me));
         }
 
         void EnterEvadeMode(EvadeReason why) override
@@ -247,6 +286,7 @@ namespace
             ClearWill();
             me->RemoveAllDynObjects();
             BossAI::EnterEvadeMode(why);
+            CleanseCorruptedBlood();
             Talk(SAY_EVADE);
         }
 
@@ -257,7 +297,26 @@ namespace
             ClearWill();
             me->RemoveAllDynObjects();
             BossAI::JustDied(killer);
+            CleanseCorruptedBlood();
             GrantRunes();
+            CreditStraightToTheHeart();
+        }
+
+        void CreditStraightToTheHeart()
+        {
+            for (uint32 priest = DATA_JEKLIK; priest < DATA_HAKKAR; ++priest)
+                if (instance->GetBossState(priest) == DONE)
+                    return;
+            uint8 const spawnMode = me->GetMap()->GetSpawnMode();
+            if (spawnMode < STRAIGHT_TO_THE_HEART.size())
+                instance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET,
+                    STRAIGHT_TO_THE_HEART[spawnMode], 0, me);
+        }
+
+        void CleanseCorruptedBlood()
+        {
+            for (uint32 spell : CORRUPTED_BLOOD_VARIANTS)
+                instance->DoRemoveAurasDueToSpellOnPlayers(spell);
         }
 
         void GrantRunes()
@@ -481,6 +540,7 @@ namespace
             { DATA_THEKAL, SPELL_ASPECT_OF_SHIRVALLAH, { NPC_AVATAR_OF_SHIRVALLAH, SPELL_DRAIN_POWER } },
             { DATA_ARLOKK, SPELL_ASPECT_OF_BETHEKK, { NPC_AVATAR_OF_BETHEKK, SPELL_DRAIN_POWER } }
         }};
+        std::vector<PriestLoa*> _undrained;
         EventMap _clock;
         bool _siphoning = false;
         ObjectGuid _heart;

@@ -215,13 +215,13 @@ namespace coa_zg
             _draining = false;
         }
 
-    private:
-        static constexpr float TEMPLE_RANGE = 150.0f;
-
         Creature* Get(Creature* owner) const
         {
             return _guid ? ObjectAccessor::GetCreature(*owner, _guid) : nullptr;
         }
+
+    private:
+        static constexpr float TEMPLE_RANGE = 150.0f;
 
         uint32 _entry;
         uint32 _drain;

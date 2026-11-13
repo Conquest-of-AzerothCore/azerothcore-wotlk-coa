@@ -1,0 +1,393 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Jeklik's Bat-tering Charge skips players within 8 yards",
+  "contract": [
+    "The testers of 2026-11-13 report that her Bat-tering Charge (2106125) hits melee players. Our charge took",
+    "any player out of melee (5 yards in bat form) and within 25 yards; the user decided on 2026-11-13 to take",
+    "stock Jeklik's minimum as well, so she charges only players beyond 8 yards. Her bat form charges 2 s in and",
+    "every 20 s after that, and screeches in place of the charge when nobody is in reach. The close hero stands",
+    "about 8 yards from her, out of melee, and the far hero about 35 yards away: before the fix the close hero was",
+    "the one player in reach 2 s in, so a charge came; now none comes. Then the far hero steps in to about 18",
+    "yards and is the only player in reach at the next charge, which must land on them. Fear Ward keeps the tank",
+    "and the close hero in place through the first Screech.",
+    "Her bat form wipes her threat, and the hero who struck her last would draw her into melee; the tank is a",
+    "raid-bot tank whose threat floor keeps her on the tank, so the close hero stays out of her melee range.",
+    "Until the tank has engaged her, the other heroes wait about 34 yards away, where the far hero backs off to,",
+    "and then come back beside the tank: she aggroes a hero beside her the moment she appears, and a hero she",
+    "chased as they backed away would end up in charge range."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "role": "tank"
+    },
+    {
+      "id": "close",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "far",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "close",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "far",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "group",
+      "label": "The three heroes share one Zul'Gurub instance",
+      "actor": "tank",
+      "target": "close"
+    },
+    {
+      "action": "group",
+      "actor": "tank",
+      "target": "far"
+    },
+    {
+      "action": "teleport",
+      "actor": "tank",
+      "map": 309,
+      "x": -12273.9,
+      "y": -1407.77,
+      "z": 132.223,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "close",
+      "map": 309,
+      "x": -12273.9,
+      "y": -1407.77,
+      "z": 132.223,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "far",
+      "map": 309,
+      "x": -12273.9,
+      "y": -1407.77,
+      "z": 132.223,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the heroes are in Zul'Gurub",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "relocate",
+      "label": "The close hero waits about 34 yards away until the tank has engaged her",
+      "actor": "close",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "close",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "label": "and so does the far hero",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "set_aura",
+      "actor": "tank",
+      "spell": 6346,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "close",
+      "spell": 6346,
+      "stacks": 1
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14517,
+      "as": "jeklik",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "encounter_start",
+      "label": "The tank holds her threat through the bat form's threat wipe",
+      "actor": "tank",
+      "boss_entry": 14517,
+      "radius": 10
+    },
+    {
+      "action": "attack",
+      "label": "The tank engages Jeklik",
+      "actor": "tank",
+      "target": "jeklik"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jeklik fights",
+      "actor": "jeklik",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is her first target",
+      "actor": "jeklik",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "Then both come back beside the tank",
+      "actor": "close",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "close",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "attack",
+      "actor": "close",
+      "target": "jeklik"
+    },
+    {
+      "action": "attack",
+      "actor": "far",
+      "target": "jeklik"
+    },
+    {
+      "action": "wait",
+      "label": "The tank builds threat and keeps attacking, so she stays on the tank",
+      "ms": 2000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "close"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "far"
+    },
+    {
+      "action": "relocate",
+      "label": "The close hero steps 7 yards away from the tank, out of her melee",
+      "actor": "close",
+      "dx": 0.0,
+      "dy": -7.0,
+      "dz": 0.0
+    },
+    {
+      "action": "relocate",
+      "label": "The far hero steps back about 17 yards",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "label": "and about 17 more",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the far hero stands beyond 25 yards",
+      "actor": "far",
+      "metric": "distance",
+      "target": "jeklik",
+      "min": 28
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Jeklik below half health",
+      "actor": "tank",
+      "target": "jeklik",
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jeklik takes her bat form",
+      "actor": "jeklik",
+      "metric": "aura",
+      "spell": 2106122,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the close hero stands beyond her 5-yard melee range and within 8 yards plus both reaches",
+      "actor": "close",
+      "metric": "distance",
+      "target": "jeklik",
+      "min": 6,
+      "max": 9
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank stays in her melee range",
+      "actor": "tank",
+      "metric": "distance",
+      "target": "jeklik",
+      "max": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with nobody in reach 2 s in she screeches in place of the charge",
+      "actor": "close",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106131,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no charge at the close hero within 8 yards",
+      "actor": "close",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106125,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the close hero is still within 8 yards",
+      "actor": "close",
+      "metric": "distance",
+      "target": "jeklik",
+      "min": 6,
+      "max": 9
+    },
+    {
+      "action": "relocate",
+      "label": "The far hero steps in, about 18 yards from her",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the far hero stands beyond 10 and within 25 yards",
+      "actor": "far",
+      "metric": "distance",
+      "target": "jeklik",
+      "min": 12,
+      "max": 24
+    },
+    {
+      "action": "assert",
+      "label": "Her next charge comes 20 s after the first",
+      "actor": "far",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106125,
+      "min": 1,
+      "within_ms": 22000
+    },
+    {
+      "action": "assert",
+      "label": "It lands on the far hero, the only player beyond 8 yards",
+      "actor": "far",
+      "metric": "distance",
+      "target": "jeklik",
+      "max": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she charged once",
+      "actor": "far",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106125,
+      "equals": 1
+    }
+  ]
+}

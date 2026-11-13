@@ -20,7 +20,8 @@
  *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
- *     Evolve             first 22s, every 60s   an egg hatches a colossal spider;
+ *     Evolve             first 22s, every 60s   an egg swells and hatches a
+ *                                               colossal spider 10s later;
  *                                               Mythic and Ascended only (tester,
  *                                               round 5)
  *
@@ -57,9 +58,12 @@
  *     Furious Strikes    passive, her hits speed her up
  *
  * Decided here, not in the data:
- *   - Evolve and Infest act on an egg she hatches for it at once (live, Infest's
- *     egg hatches about 15s later); the spawn of Evolve is twice the size with
- *     twice the health;
+ *   - Infest acts on an egg she hatches for it at once (live, its egg hatches
+ *     about 15s later);
+ *   - Evolve cannot target the egg object, so the egg takes Evolve's scale and
+ *     the spawn it hatches 10s later takes Evolve itself (three times the size,
+ *     twice the health) and never grows (live, 2026-08-04: the egg hatched
+ *     10.2s after Evolve, a spider without Growth);
  *   - the festering spawn is a Spawn of Mar'li (15041), estimated: the live
  *     Festering Spawn of Mar'li has no creature data in any source;
  *   - Drain Life heals her for what each tick deals;
@@ -142,6 +146,7 @@ namespace
         EVENT_HATCH_EGGS,
         EVENT_OPEN_EGGS,
         EVENT_EVOLVE,
+        EVENT_HATCH_EVOLVED_EGG,
         EVENT_INFEST,
         EVENT_ACID_SPIT,
         EVENT_WEB_SPRAY,
@@ -193,6 +198,7 @@ namespace
             _festering.clear();
             _usedEggs.clear();
             _hatchingEggs.clear();
+            ShrinkEvolvedEgg();
             EndDrainLifeSplash();
             EndHunt();
             Emerge();
@@ -225,6 +231,7 @@ namespace
 
         void JustDied(Unit* killer) override
         {
+            ShrinkEvolvedEgg();
             EndDrainLifeSplash();
             EndHunt();
             BossAI::JustDied(killer);
@@ -502,18 +509,52 @@ namespace
             _hatchingEggs.clear();
         }
 
-        // Evolve and Infest hatch the nearest free egg at once.
-        Creature* HatchNearestEgg()
+        GameObject* ClaimNearestEgg()
         {
             GameObject* nearest = nullptr;
             for (GameObject* egg : FreeEggs())
                 if (!nearest || me->GetDistance(egg) < me->GetDistance(nearest))
                     nearest = egg;
-            if (!nearest)
-                return nullptr;
+            if (nearest)
+                _usedEggs.insert(nearest->GetGUID());
+            return nearest;
+        }
 
-            _usedEggs.insert(nearest->GetGUID());
-            return HatchEgg(nearest);
+        Creature* HatchNearestEgg()
+        {
+            GameObject* egg = ClaimNearestEgg();
+            return egg ? HatchEgg(egg) : nullptr;
+        }
+
+        void EvolveNearestEgg()
+        {
+            ShrinkEvolvedEgg();
+            GameObject* egg = ClaimNearestEgg();
+            if (!egg)
+                return;
+
+            _evolvedEgg = egg->GetGUID();
+            _evolvedEggScale = egg->GetObjectScale();
+            egg->SetObjectScale(_evolvedEggScale + CalculatePct(1.0f, Info(me, SPELL_EVOLVE, EFFECT_1)));
+            events.ScheduleEvent(EVENT_HATCH_EVOLVED_EGG, HATCH_DELAY);
+        }
+
+        void HatchEvolvedEgg()
+        {
+            GameObject* egg = ShrinkEvolvedEgg();
+            if (!egg || !egg->isSpawned())
+                return;
+            if (Creature* spawn = HatchEgg(egg))
+                DoCast(spawn, SPELL_EVOLVE, true);
+        }
+
+        GameObject* ShrinkEvolvedEgg()
+        {
+            GameObject* egg = _evolvedEgg ? ObjectAccessor::GetGameObject(*me, _evolvedEgg) : nullptr;
+            if (egg)
+                egg->SetObjectScale(_evolvedEggScale);
+            _evolvedEgg.Clear();
+            return egg;
         }
 
         Creature* HatchEgg(GameObject* egg)
@@ -570,9 +611,11 @@ namespace
                         OpenClaimedEggs();
                         break;
                     case EVENT_EVOLVE:
-                        if (Creature* spawn = HatchNearestEgg())
-                            DoCast(spawn, SPELL_EVOLVE);
+                        EvolveNearestEgg();
                         events.ScheduleEvent(EVENT_EVOLVE, 60s, 0, PHASE_TROLL);
+                        break;
+                    case EVENT_HATCH_EVOLVED_EGG:
+                        HatchEvolvedEgg();
                         break;
                     case EVENT_INFEST:
                         if (Creature* spawn = HatchNearestEgg())
@@ -628,6 +671,8 @@ namespace
         GuidSet _festering;
         GuidSet _usedEggs;
         GuidVector _hatchingEggs;
+        ObjectGuid _evolvedEgg;
+        float _evolvedEggScale = 1.0f;
         GuidVector _drainSplashed;
         ObjectGuid _drainTarget;
         int32 _drainTick = 0;

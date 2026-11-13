@@ -1,14 +1,22 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Jeklik's Bat-tering Charge reaches players out of melee within 25 yards only",
+  "name": "Zul'Gurub: High Priestess Jeklik's Bat-tering Charge reaches players out of melee within 25 yards only and her Screech starts where she lands",
   "contract": [
     "The tester reports (live, 2026-11-04) that ranged players and healers at her maximum range are never charged,",
     "while our Jeklik charged players at 30 yards and more: the DBC gives Bat-tering Charge (2106125) 100 yards.",
     "Stock Jeklik's Charge reaches 8-25 yards. Her bat form charges 2 s in and every 20 s after that. The far",
-    "hero stands about 35 yards away, the only player out of melee, so no charge comes 2 s in. Then the near hero",
-    "steps out to about 15 yards and the next charge reaches them. Fear Ward keeps the tank and the near hero in",
-    "place through her Screech. The tester of 2026-11-08: on live her Terrifying Screech (2106131) comes the moment",
-    "the charge stuns its target (12 of 12 landed charges, 0-9 ms), not on a timer of its own 2 s after the charge."
+    "hero stands about 35 yards away, the only player out of melee, so no charge comes 2 s in and she screeches",
+    "in its place. Then the near hero steps out to about 13 yards from the tank and the next charge reaches them.",
+    "Fear Ward keeps the tank and the near hero in place through the first Screech, and the tank attacks again to",
+    "hold her attention. The testers of 2026-11-08 and 2026-11-13: on live her Terrifying Screech (2106131) starts",
+    "the moment the charge lands (12 of 12 landed charges, 0-9 ms), where she landed; ours moved toward her",
+    "victim, the tank, for a world tick or two before the cast stopped her. She lands 1.5 yards (the target's",
+    "combat reach) short of the near hero, so her distance to the tank is at most 1.5 yards below the tank's",
+    "distance to the near hero; one tick of the old chase at her 15 yards per second adds 0.75 yards or more.",
+    "The screech is counted from a snapshot taken after the first, fallback screech has gone off.",
+    "Until the tank has engaged her, the other heroes wait about 34 yards away, where the far hero backs off to,",
+    "and then come back beside the tank: she aggroes a hero beside her the moment she appears, and a hero she",
+    "chased as they backed away would end up in charge range."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -110,6 +118,36 @@
       "equals": 309
     },
     {
+      "action": "relocate",
+      "label": "The near hero waits about 34 yards away until the tank has engaged her",
+      "actor": "near",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "near",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "label": "and so does the far hero",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
       "action": "set_aura",
       "actor": "tank",
       "spell": 6346,
@@ -139,6 +177,52 @@
       "target": "jeklik"
     },
     {
+      "action": "assert",
+      "label": "CONTROL: Jeklik fights",
+      "actor": "jeklik",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is her first target",
+      "actor": "jeklik",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "Then both come back beside the tank",
+      "actor": "near",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "near",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
       "action": "attack",
       "actor": "near",
       "target": "jeklik"
@@ -147,14 +231,6 @@
       "action": "attack",
       "actor": "far",
       "target": "jeklik"
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: Jeklik fights",
-      "actor": "jeklik",
-      "metric": "combat",
-      "equals": 1,
-      "within_ms": 10000
     },
     {
       "action": "wait",
@@ -214,6 +290,12 @@
       "within_ms": 15000
     },
     {
+      "action": "attack",
+      "label": "The tank attacks again to hold her attention",
+      "actor": "tank",
+      "target": "jeklik"
+    },
+    {
       "action": "wait",
       "label": "Wait past her first charge, 2 s into the bat form",
       "ms": 3000
@@ -236,8 +318,26 @@
       "min": 28
     },
     {
+      "action": "assert",
+      "label": "CONTROL: with nobody in reach she screeches in place of the charge",
+      "actor": "near",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106131,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "near",
+      "metric": "spell_go_count",
+      "entry": 14517,
+      "spell": 2106131,
+      "save_as": "screeches_before_charge"
+    },
+    {
       "action": "relocate",
-      "label": "The near hero steps out of melee, about 15 yards from her",
+      "label": "The near hero steps out of melee, about 13 yards from the tank",
       "actor": "near",
       "dx": -5.0,
       "dy": -12.0,
@@ -254,11 +354,19 @@
     },
     {
       "action": "snapshot",
-      "actor": "near",
-      "metric": "spell_go_count",
-      "entry": 14517,
-      "spell": 2106131,
-      "save_as": "screeches_before_charge"
+      "actor": "tank",
+      "metric": "distance",
+      "target": "near",
+      "save_as": "tank_to_near"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank holds her attention, so her chase would lead to the tank",
+      "actor": "jeklik",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
     },
     {
       "action": "assert",
@@ -281,14 +389,45 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: she screeches the moment the charge stuns them",
+      "label": "She starts Terrifying Screech as she lands",
+      "actor": "jeklik",
+      "metric": "cast_remaining_ms",
+      "spell": 2106131,
+      "min": 1,
+      "within_ms": 300
+    },
+    {
+      "action": "wait",
+      "label": "Give a chase toward the tank time to show",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the screech is still being cast",
+      "actor": "jeklik",
+      "metric": "cast_remaining_ms",
+      "spell": 2106131,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she screeches where she landed, not closer to the tank",
+      "actor": "tank",
+      "metric": "distance",
+      "target": "jeklik",
+      "relative_to": "tank_to_near",
+      "min": -1.85
+    },
+    {
+      "action": "assert",
+      "label": "The screech that follows the charge goes off",
       "actor": "near",
       "metric": "spell_go_count",
       "entry": 14517,
       "spell": 2106131,
       "relative_to": "screeches_before_charge",
       "min": 1,
-      "within_ms": 1000
+      "within_ms": 3500
     },
     {
       "action": "assert",

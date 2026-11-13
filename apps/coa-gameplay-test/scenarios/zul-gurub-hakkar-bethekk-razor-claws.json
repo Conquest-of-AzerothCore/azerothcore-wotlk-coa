@@ -1,0 +1,202 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Hakkar takes Razor Claws from the Avatar of Bethekk and his swings bleed the tank",
+  "contract": [
+    "Tester feedback round 6 (2026-11-13) and the live logs: after Hakkar (14834) consumed the Avatar of Bethekk",
+    "(666988, Arlokk's loa), his melee applied the Razor Claws bleed (2118326) to the tank. Hakkar had only the Aspect",
+    "of Bethekk (2118705), never Arlokk's Razor Claws (2118325, a melee proc that bleeds on every landed swing). In a",
+    "fresh Normal instance every High Priest but Arlokk is set DONE, so Hakkar drains only Bethekk's avatar; he must",
+    "then carry 2118705 and 2118325, and his swings must bleed the hero. The hero cannot dodge or parry, so his",
+    "swings land, and joins phase 1, where Hakkar's avatar appears."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_phase",
+      "label": "See the avatar Hakkar summons into the instance's own phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "encounter_start",
+      "label": "Record the instance's boss states",
+      "actor": "hero",
+      "boss_entry": 14834,
+      "radius": 10
+    },
+    {
+      "action": "command",
+      "label": "The raid has killed Jeklik",
+      "actor": "hero",
+      "command": ".instance setbossstate 0 3"
+    },
+    {
+      "action": "command",
+      "label": "Venoxis",
+      "actor": "hero",
+      "command": ".instance setbossstate 1 3"
+    },
+    {
+      "action": "command",
+      "label": "Mar'li",
+      "actor": "hero",
+      "command": ".instance setbossstate 2 3"
+    },
+    {
+      "action": "command",
+      "label": "and Thekal; only Arlokk lives",
+      "actor": "hero",
+      "command": ".instance setbossstate 4 3"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all four High Priests are DONE before Hakkar comes",
+      "actor": "hero",
+      "metric": "timeline_count",
+      "event": "boss_state",
+      "state": "DONE",
+      "equals": 4,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "label": "Hakkar's swings land on the hero",
+      "actor": "hero",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with only Arlokk alive Hakkar carries one stack of Hakkar's Power",
+      "actor": "hakkar",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 1
+    },
+    {
+      "action": "attack",
+      "label": "Pull Hakkar",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar consumes the Avatar of Bethekk and takes its Aspect",
+      "actor": "hakkar",
+      "metric": "aura",
+      "spell": 2118705,
+      "equals": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and Arlokk's Razor Claws with it",
+      "actor": "hakkar",
+      "metric": "aura",
+      "spell": 2118325,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Razor Claws bleeds on every landed swing",
+      "actor": "hakkar",
+      "metric": "aura_proc_rate",
+      "spell": 2118325,
+      "target": "hero",
+      "type_mask": 4,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: his swings bleed the hero",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118326,
+        2118327,
+        2118328,
+        2118329
+      ],
+      "caster": "hakkar",
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar still fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}
