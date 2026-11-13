@@ -7781,6 +7781,273 @@
       "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:128-129): a periodic hit of a caster with 807700 summons a Lesser Zombie 503030 at the target when Chance(player, 807700) rolls (807700 ProcChance 3; the tooltip states no chance), and the zombie charges its target and hits it (AscensionNecromancerSummons.cpp:711-715), read as the Lesser Zombies' hits in the caster's log (owned_creature_damage_count; the 504022 read of the caster's hits saw none and a diagnostic read 5 zombie hits in 15 channels, pair b4-4). 35 Crypt Swarm channels per phase, 210 periodic 800343 hits: no zombie hit without 807700, at least one with it (at 3% per hit no zombie in 210 hits has chance 0.0017)."
     },
     {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (ends without damage)",
+      "kind": "fixed_count",
+      "variant": "area_ends",
+      "label_suffix": "area_ends",
+      "quote": "for $504845d (8 sec vs players).",
+      "expected": 0,
+      "radius": 15,
+      "headroom": 1,
+      "far_dummy": false,
+      "metric": "aura",
+      "radius_reason": "placement only, as area_held: the candidate dummy stands outside the Mage's 6 yd splash and inside the 8 yd freeze",
+      "cast_spell": 504489,
+      "target_rank": 504845,
+      "caster_entry": 50075,
+      "setup_casts": [
+        [
+          500331,
+          "caster"
+        ]
+      ],
+      "repeats": 1,
+      "select_primary": true,
+      "settle_ms": 41500,
+      "observe_source": "As area_held, read 41500 ms after the Command: the dummy that no damage reaches is free again, so its freeze ends between 38500 and 41500 ms against the stated 40000 ms."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (explosion damage with spell power)",
+      "kind": "script_hit",
+      "variant": "explosion_sp",
+      "label_suffix": "explosion_sp",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 707010,
+      "hit_effect": 0,
+      "caster_entry": 523032,
+      "trials": 3,
+      "minimum_hits": 6,
+      "control_casts": [],
+      "casts": [
+        [
+          707007,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "stat_auras": [
+        [
+          24666,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6000,
+      "observe_source": "As the explosion entry with Increase Frost Dam 132 24666 (+132 Frost) set on the caster before its stats are measured: the walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 16}) adds 0.75 x 132 = 99 to each hit, the $SP*.75 term of the tooltip read with the measured stats."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (armor with a Decaying Colossus)",
+      "kind": "metric_delta",
+      "variant": "armor_colossus",
+      "label_suffix": "armor_colossus",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "expected": 1.3,
+      "expected_ratio": 1.3,
+      "tolerance": 0.005,
+      "before_expected": 1,
+      "trigger_spell": 500989,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "metric": "armor",
+      "fields": {},
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "As the armor entry with a Decaying Colossus 50115 (Raise: Decaying Colossus 500989, 3 Life Force, Summoning Adept 92123 learned) in place of the Abomination: 1.3 times the armor without 301207 (Count(player, {50068, 50115}), AscensionNecromancerAuras.cpp:66-67)."
+    },
+    {
+      "spell": 302888,
+      "name": "Living Dead (no refund when Blight is dispelled)",
+      "kind": "metric_delta",
+      "variant": "blight_dispelled",
+      "label_suffix": "blight_dispelled",
+      "quote": "Blight now refunds 25% of its base mana cost if it lasts the full duration.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "setup_casts": [
+        500459
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2500,
+      "target_casts_before": [
+        528
+      ],
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 500307,
+        "power": 0
+      },
+      "wait_ms": 23500,
+      "expire_ms": 500,
+      "observe_source": "302888 known throughout (setup_only_after): the treatment phase blights the dummy (500459, Dispel 3 disease), the dummy then casts Cure Disease 528 on itself (target_casts, a removal that is not the expiry) and a Lichfrost follows as the timed trigger; no 500307 refund 23500 ms later, where the full-duration entry reads 96. The handler refunds only on AURA_REMOVE_BY_EXPIRE (AscensionNecromancerAuras.cpp:231-238)."
+    },
+    {
+      "spell": 302920,
+      "name": "Living Dead (no refund when Blight is dispelled)",
+      "kind": "metric_delta",
+      "variant": "blight_dispelled",
+      "label_suffix": "blight_dispelled",
+      "quote": "Blight now refunds 50% of its base mana cost if it lasts the full duration.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "setup_casts": [
+        500459
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2500,
+      "target_casts_before": [
+        528
+      ],
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 500307,
+        "power": 0
+      },
+      "wait_ms": 23500,
+      "expire_ms": 500,
+      "observe_source": "As the 302888 entry with 302920: a dispelled Blight refunds nothing (the full-duration entry reads 192)."
+    },
+    {
+      "spell": 302888,
+      "name": "Living Dead (Blight dispelled, control)",
+      "kind": "metric_delta",
+      "variant": "blight_dispel_lands",
+      "label_suffix": "blight_dispel_lands",
+      "quote": "Blight now refunds 25% of its base mana cost if it lasts the full duration.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "setup_casts": [
+        500459
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2500,
+      "target_casts_before": [
+        528
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 500459
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "The removal check of the dispelled arm: Blight 500459 is gone from the dummy 3000 ms after its Cure Disease 528, long before its 20000 ms."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (19% at the end)",
+      "kind": "metric_delta",
+      "variant": "at_nineteen",
+      "label_suffix": "at_nineteen",
+      "quote": "If the target's health is below 20% at the end of duration,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "cast_power": 1000,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 19,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "observe_source": "The edge below 20%: a dummy at 19% takes 808016 at the end of the curse (HealthBelowPct(20), AscensionNecromancerAuras.cpp:202-208)."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (21% at the end)",
+      "kind": "metric_delta",
+      "variant": "at_twentyone",
+      "label_suffix": "at_twentyone",
+      "quote": "If the target's health is below 20% at the end of duration,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "cast_power": 1000,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 21,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "observe_source": "The edge above 20%: a dummy at 21% takes no 808016."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (spell power coefficient)",
+      "kind": "hit_ratio",
+      "variant": "sp_slope",
+      "label_suffix": "sp_slope",
+      "quote": "dealing ${$m1+0+$spfr*.86989416} Frost damage,",
+      "expected": 1.1969,
+      "observe_spell": 501978,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            24666,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "parts": 2,
+      "cast_power": 1373,
+      "expected_source": "Lichfrost 501978 Effect[0] SCHOOL_DAMAGE Frost, 569 to 597 (mean 583) plus Frost spell power x 0.86989416 (NecromancerCoefficients row {501978, 0, 0.86989416, 16}). Control arm at Frost spell power 0, treatment with Increase Frost Dam 132 24666 (+132 Frost) set before each cast: (583 + 132 x 0.86989416) / 583 = 1.1969 on the mean non-critical hit; 823764 in both arms removes partial resists. A coefficient of 0.65 would give 1.147 and 1.08 give 1.245, both outside the band at +19.7%."
+    },
+    {
       "spell": 680388,
       "name": "Fetid Ward (duration)",
       "kind": "cast_applies_aura",
