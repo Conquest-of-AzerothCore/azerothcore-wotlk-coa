@@ -7625,7 +7625,7 @@
       "fields": {},
       "wait_ms": 300,
       "expire_ms": 500,
-      "observe_source": "Heartchill 801739 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST at the target; necromancer_casts::OnSpellSuccessfulInterrupt (AscensionNecromancerAbilities.cpp:239-245) casts 803677 at the interrupted target. The dummy channels Evocation 12051 (the Templar school_lockout channel, ADR 0171) right before the cast (target_casts, ADR 0426). Control (no Heartchill): the dummy is still channelling (1, its channel cast in the uncast phase too, ADR 0427); after Heartchill: not (0)."
+      "observe_source": "Heartchill 801739 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST at the target; necromancer_casts::OnSpellSuccessfulInterrupt (AscensionNecromancerAbilities.cpp:239-245) casts 803677 at the interrupted target. The dummy channels Evocation 12051 (the Templar school_lockout channel, ADR 0171) right before the cast (target_casts_before, ADR 0426). Control (no Heartchill): the dummy is still channelling (1, its channel cast in the uncast phase too, ADR 0427); after Heartchill: not (0)."
     },
     {
       "spell": 801739,
@@ -7649,7 +7649,7 @@
       "fields": {},
       "wait_ms": 300,
       "expire_ms": 500,
-      "observe_source": "Heartchill 801739 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST at the target; necromancer_casts::OnSpellSuccessfulInterrupt (AscensionNecromancerAbilities.cpp:239-245) casts 803677 at the interrupted target. The dummy channels Evocation 12051 (the Templar school_lockout channel, ADR 0171) right before the cast (target_casts, ADR 0426). 803677 Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -81 + 1 = -80 ($803677s1): the dummy's run speed 1.14286 before, 0.2 of it after the interrupt."
+      "observe_source": "Heartchill 801739 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST at the target; necromancer_casts::OnSpellSuccessfulInterrupt (AscensionNecromancerAbilities.cpp:239-245) casts 803677 at the interrupted target. The dummy channels Evocation 12051 (the Templar school_lockout channel, ADR 0171) right before the cast (target_casts_before, ADR 0426). 803677 Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -81 + 1 = -80 ($803677s1): the dummy's run speed 1.14286 before, 0.2 of it after the interrupt."
     },
     {
       "spell": 801739,
@@ -7891,7 +7891,7 @@
       },
       "wait_ms": 23500,
       "expire_ms": 500,
-      "observe_source": "302888 known throughout (setup_only_after): the treatment phase blights the dummy (500459, Dispel 3 disease), the dummy then casts Cure Disease 528 on itself (target_casts, a removal that is not the expiry) and a Lichfrost follows as the timed trigger; no 500307 refund 23500 ms later, where the full-duration entry reads 96. The handler refunds only on AURA_REMOVE_BY_EXPIRE (AscensionNecromancerAuras.cpp:231-238)."
+      "observe_source": "302888 known throughout (setup_only_after): the treatment phase blights the dummy (500459, Dispel 3 disease), the dummy then casts Cure Disease 528 on itself (target_casts_before, a removal that is not the expiry) and a Lichfrost follows as the timed trigger; no 500307 refund 23500 ms later, where the full-duration entry reads 96. The handler refunds only on AURA_REMOVE_BY_EXPIRE (AscensionNecromancerAuras.cpp:231-238)."
     },
     {
       "spell": 302920,
@@ -8066,7 +8066,7 @@
       "fields": {},
       "wait_ms": 300,
       "expire_ms": 500,
-      "observe_source": "Tooltip: 'reduces their movement speed and haste by $803677s1%' ($803677s1 = 80): the same sentence takes 80% off the movement speed (rate x0.2, the slowed entry), so haste, an attack rate, is read as x0.2 too: the dummy's attack time 2000 ms becomes 10000 ms (expected from the tooltip only, mentor method rule 2026-11-13). The server applies 803677 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE -80, which Unit::ApplyAttackTimePercentMod turns into attack time x1.8 (3600 ms, route-1); the earlier x1.8 expectation was the engine's convention (Templar Sacred Swing entry), not the tooltip. The dummy channels Evocation 12051 before Heartchill (target_casts, ADR 0426), the interrupt casts 803677 at it (AscensionNecromancerAbilities.cpp:239-245). Control: the uncast phase, the dummy's base attack time."
+      "observe_source": "Tooltip: 'reduces their movement speed and haste by $803677s1%' ($803677s1 = 80): the same sentence takes 80% off the movement speed (rate x0.2, the slowed entry), so haste, an attack rate, is read as x0.2 too: the dummy's attack time 2000 ms becomes 10000 ms (expected from the tooltip only, mentor method rule 2026-11-13). The server applies 803677 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE -80, which Unit::ApplyAttackTimePercentMod turns into attack time x1.8 (3600 ms, route-1); the earlier x1.8 expectation was the engine's convention (Templar Sacred Swing entry), not the tooltip. The dummy channels Evocation 12051 before Heartchill (target_casts_before, ADR 0426), the interrupt casts 803677 at it (AscensionNecromancerAbilities.cpp:239-245). Control: the uncast phase, the dummy's base attack time."
     },
     {
       "spell": 805049,

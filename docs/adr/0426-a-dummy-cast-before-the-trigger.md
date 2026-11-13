@@ -16,6 +16,8 @@ class.
 - `metric_delta` takes `target_casts_before`: spells the dummy casts on itself, each followed by a 300 ms settle, right
   before every trigger cast. It needs the dummy as the trigger's target and no attack phases. Without the field every
   scenario is byte-identical (`generate --class 19`, `--stack`).
+- On the merged branch the field is `target_casts_before`: `target_casts` already names the dummy's casts after each
+  trigger cast (ADR 0385, Plague of Undeath).
 - `coverage.METRIC_EVIDENCE` lists `casting` (the unit's current spell) as an event read.
 
 ## Consequences
