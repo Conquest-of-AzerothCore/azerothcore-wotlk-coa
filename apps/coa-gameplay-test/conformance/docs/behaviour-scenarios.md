@@ -1937,8 +1937,7 @@ first and the last cast are bracketed between stamped reads, and (last - first) 
 game-time stamps, the dummies struck between two reads are one pulse's targets, and none may exceed the stated cap
 (Bonestorm 801411, Animate: Bone Wraith 805032). `kind: "aura_window"` (ADR 0551) polls a cast's aura on the dummy over
 start and end windows given in game time, without and with the talent, and judges each stamped duration (Ice Barrage
-501997's channel, Deathly Chill 805424). `kind: "hit_period"` (ADR 0552) polls a cast's hits on the dummy and judges
-(last - first) / (n - 1) with the cast_period judge (Soulfreeze 801724's ticks).
+501997's channel, Deathly Chill 805424).
 
 ## Behaviour kind modules
 
@@ -1959,3 +1958,4 @@ Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` 
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
+- [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
