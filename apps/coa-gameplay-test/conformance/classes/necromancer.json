@@ -10809,6 +10809,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "dummy",
@@ -10818,7 +10824,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). 807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
     },
     {
       "spell": 807796,
@@ -10847,6 +10853,7 @@
     {
       "spell": 807796,
       "name": "Death's Due (curse ends)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "curse_ends",
       "label_suffix": "curse_ends",
@@ -10865,7 +10872,7 @@
       },
       "wait_ms": 6500,
       "expire_ms": 500,
-      "observe_source": "As the held entry, 6500 ms after the cast step (5500 ms into the curse): gone, so the curse ends between 2500 and 5500 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). As the held entry, 6500 ms after the cast step (5500 ms into the curse): gone, so the curse ends between 2500 and 5500 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
     },
     {
       "spell": 807796,
@@ -10907,6 +10914,7 @@
     {
       "spell": 807796,
       "name": "Death's Due (not above 20%)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "above_twenty",
       "label_suffix": "above_twenty",
@@ -10925,7 +10933,7 @@
       },
       "wait_ms": 7000,
       "expire_ms": 500,
-      "observe_source": "The health gate's control: the same cast on a dummy at 25% health deals no 808016 at the end of the curse."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). The health gate's control: the same cast on a dummy at 25% health deals no 808016 at the end of the curse."
     },
     {
       "spell": 807796,
@@ -11600,6 +11608,7 @@
     {
       "spell": 531135,
       "name": "Icecrown (one stack)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "stack",
       "label_suffix": "stack",
@@ -11615,7 +11624,7 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:141-144): an own Frost hit of a caster with 531135 casts Icecrown 706732 at the target (Chance(player, 531135), 531135 ProcChance 100): aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126. One Lichfrost 501978 (Frost) per phase: no 706732 without 531135 (control), one stack with it learned."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). necromancer_event (AscensionNecromancerEvents.cpp:141-144): an own Frost hit of a caster with 531135 casts Icecrown 706732 at the target (Chance(player, 531135), 531135 ProcChance 100): aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126. One Lichfrost 501978 (Frost) per phase: no 706732 without 531135 (control), one stack with it learned."
     },
     {
       "spell": 531135,
@@ -11669,6 +11678,7 @@
     {
       "spell": 531135,
       "name": "Icecrown (held)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "held",
       "label_suffix": "held",
@@ -11684,11 +11694,12 @@
       },
       "wait_ms": 12000,
       "expire_ms": 500,
-      "observe_source": "706732 DurationIndex 1 (10000 ms, $706732d), applied at the Lichfrost hit about 2600 ms after the cast step: still on 12000 ms after it (about 9400 ms in)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). 706732 DurationIndex 1 (10000 ms, $706732d), applied at the Lichfrost hit about 2600 ms after the cast step: still on 12000 ms after it (about 9400 ms in)."
     },
     {
       "spell": 531135,
       "name": "Icecrown (ends)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "ends",
       "label_suffix": "ends",
@@ -11704,7 +11715,7 @@
       },
       "wait_ms": 14000,
       "expire_ms": 500,
-      "observe_source": "As the held entry, 14000 ms after the cast step (about 11400 ms in): gone."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). As the held entry, 14000 ms after the cast step (about 11400 ms in): gone."
     },
     {
       "spell": 572638,
@@ -13025,6 +13036,7 @@
     {
       "spell": 807796,
       "name": "Death's Due (21% at the end)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "at_twentyone",
       "label_suffix": "at_twentyone",
@@ -13043,7 +13055,7 @@
       },
       "wait_ms": 7000,
       "expire_ms": 500,
-      "observe_source": "The edge above 20%: a dummy at 21% takes no 808016."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). The edge above 20%: a dummy at 21% takes no 808016."
     },
     {
       "spell": 501978,
@@ -13812,6 +13824,7 @@
     {
       "spell": 531135,
       "name": "Icecrown (no stack from Shadow damage)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "nonfrost",
       "label_suffix": "nonfrost",
@@ -13830,7 +13843,7 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "The school gate (review b4 I-6): AscensionNecromancerEvents.cpp:141 applies 706732 only for a hit with SPELL_SCHOOL_MASK_FROST. Crypt Swarm 501886 hits the dummy with 800343 (SchoolMask 32, Shadow) with 531135 learned in both phases: no 706732, against the stack entry's one stack after a Frost Lichfrost 501978 hit."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). The school gate (review b4 I-6): AscensionNecromancerEvents.cpp:141 applies 706732 only for a hit with SPELL_SCHOOL_MASK_FROST. Crypt Swarm 501886 hits the dummy with 800343 (SchoolMask 32, Shadow) with 531135 learned in both phases: no 706732, against the stack entry's one stack after a Frost Lichfrost 501978 hit."
     },
     {
       "spell": 801530,
@@ -13878,6 +13891,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "dummy",
@@ -13887,7 +13906,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "Diagnostic for the parked dispel claim (route agent): the removes_shield scenario's setup (Divine Shield 642 on the dummy by harness set_aura, 99% health, cast_power 1000), reading Death's Due's own curse 807796 on the dummy 3000 ms after the cast step: if a run keeps the shield while the curse is on, the dispel effect was skipped on a landed spell; if the curse is absent too, the spell did not land."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). Diagnostic for the parked dispel claim (route agent): the removes_shield scenario's setup (Divine Shield 642 on the dummy by harness set_aura, 99% health, cast_power 1000), reading Death's Due's own curse 807796 on the dummy 3000 ms after the cast step: if a run keeps the shield while the curse is on, the dispel effect was skipped on a landed spell; if the curse is absent too, the spell did not land."
     },
     {
       "spell": 807796,
@@ -13909,6 +13928,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "caster",
@@ -13918,7 +13943,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "Diagnostic for the parked dispel claim (route agent): the removes_shield setup, reading the caster's cast failure for Death's Due (0: no failure)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). Diagnostic for the parked dispel claim (route agent): the removes_shield setup, reading the caster's cast failure for Death's Due (0: no failure)."
     },
     {
       "spell": 803777,
