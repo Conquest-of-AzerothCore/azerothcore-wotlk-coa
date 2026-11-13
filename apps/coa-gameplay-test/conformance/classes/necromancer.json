@@ -11582,6 +11582,559 @@
         "entry": 575091
       },
       "observe_source": "Ritual Return 807098: OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) NearTeleportTo the caster's owned living Scourge Transporter 575091 (the harness acknowledges the teleport, CoAGameplayTest.cpp:2900-2902). nearest_creature_distance reads the caster's 2D distance to the nearest living 575091 within 60 yd (-1 when there is none). Before (control): no circle, Ritual Return refused: -1. After: a real Summoning Ritual 805038 places the circle, the caster is moved 15 yd along x (strike fixture: relocate, one Light of the Naaru 41394 from the striker), then Ritual Return brings it back onto the circle: 0 (15 yd without the return)."
+    },
+    {
+      "spell": 805429,
+      "name": "Crown's Call 805429 (Intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases your Intellect by $s2%",
+      "expected": 122,
+      "before_expected": 117,
+      "metric": "stat",
+      "fields": {
+        "stat": 3
+      },
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "805429 Effect[1] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 3 (Intellect), +5 ($s2, BasePoints 4 + 1). No CoA code names 805429. The caster's live Intellect around a Glacial Tap 805369 cast: 117 before the talent (control), 117 x 1.05 = 122.85 after, 122 judged to the rounding (G-26 truncation of the percent stat path)."
+    },
+    {
+      "spell": 807924,
+      "name": "Crown's Call 807924 (Intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases your Intellect by $s2%",
+      "expected": 128,
+      "before_expected": 117,
+      "metric": "stat",
+      "fields": {
+        "stat": 3
+      },
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "807924 Effect[1] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 3 (Intellect), +10 ($s2, BasePoints 9 + 1). No CoA code names 807924. The caster's live Intellect around a Glacial Tap 805369 cast: 117 before the talent (control), 117 x 1.10 = 128.7 after, 128 judged to the rounding (G-26)."
+    },
+    {
+      "spell": 560615,
+      "name": "Disciple of Kelthuzad 560615 (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Increases your spell haste by $s1%.",
+      "expected": 0.961538,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "560615 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS +4 ($s1, BasePoints 3 + 1), TARGET_UNIT_CASTER. No CoA code names 560615. A spell haste of 4% casts 4% faster: the caster's cast speed multiplier reads 1 before the talent (control) and 1 / 1.04 = 0.961538 after, around a Glacial Tap 805369 cast."
+    },
+    {
+      "spell": 560616,
+      "name": "Disciple of Kelthuzad 560616 (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Increases your spell haste by $s1%.",
+      "expected": 0.925926,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "560616 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS +8 ($s1, BasePoints 7 + 1), TARGET_UNIT_CASTER. No CoA code names 560616. A spell haste of 8% casts 8% faster: the caster's cast speed multiplier reads 1 before the talent (control) and 1 / 1.08 = 0.925926 after, around a Glacial Tap 805369 cast."
+    },
+    {
+      "spell": 560727,
+      "name": "Cycle of Death 560727 (spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Increases your spell haste by $s1%.",
+      "expected": 0.952381,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "560727 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS +5 ($s1, BasePoints 4 + 1), TARGET_UNIT_CASTER. No CoA code names 560727. A spell haste of 5% casts 5% faster: the caster's cast speed multiplier reads 1 before the talent (control) and 1 / 1.05 = 0.952381 after, around a Glacial Tap 805369 cast."
+    },
+    {
+      "spell": 560045,
+      "name": "Ice Mastery (spell power from Intellect)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Increases your spell power by $s3% of your Intellect.",
+      "expected": 35,
+      "before_expected": 0,
+      "expected_gain": 35,
+      "tolerance": 1,
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "560045 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 126 (magic schools), MiscValueB 3 (Intellect), +30 ($s3, BasePoints 29 + 1). The reference Intellect is 117: 30% of it is 35.1, a gain of 35 judged to the rounding. The caster's Frost spell power (SpellBaseDamageBonusDone, school 4) around a Glacial Tap 805369 cast, before the passive (control) and after."
+    },
+    {
+      "spell": 560622,
+      "name": "Naxxramas Prodigy (shadow resistance)",
+      "kind": "metric_delta",
+      "variant": "shadow_resistance",
+      "label_suffix": "shadow_resistance",
+      "quote": "Increases your Shadow and Frost resistances by 0.5 per level.",
+      "expected": 30,
+      "before_expected": 0,
+      "expected_gain": 30,
+      "tolerance": 0.0001,
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "The tooltip states 0.5 per level: 30 at level 60. 560622 Effect[0] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 48 (Frost and Shadow), BasePoints -1 + 1 = 0 in the DBC. The caster's shadow resistance (school 5) around a Glacial Tap 805369 cast, before the passive (control) and after: gain 30 per the tooltip."
+    },
+    {
+      "spell": 560622,
+      "name": "Naxxramas Prodigy (frost resistance)",
+      "kind": "metric_delta",
+      "variant": "frost_resistance",
+      "label_suffix": "frost_resistance",
+      "quote": "Increases your Shadow and Frost resistances by 0.5 per level.",
+      "expected": 30,
+      "before_expected": 0,
+      "expected_gain": 30,
+      "tolerance": 0.0001,
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "observe_source": "The tooltip states 0.5 per level: 30 at level 60. 560622 Effect[0] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 48 (Frost and Shadow), BasePoints -1 + 1 = 0 in the DBC. The caster's frost resistance (school 4) around a Glacial Tap 805369 cast, before the passive (control) and after: gain 30 per the tooltip."
+    },
+    {
+      "spell": 570046,
+      "name": "Plague Protection 570046 (Glacial Ward Runic Power)",
+      "kind": "metric_delta",
+      "variant": "glacial_ward",
+      "label_suffix": "glacial_ward",
+      "quote": "Increases the effectiveness of your Wards by $s1%.",
+      "expected": 1115,
+      "before_expected": 1000,
+      "tolerance": 5,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "max_power",
+      "fields": {
+        "power": 6
+      },
+      "observe_source": "570046 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS (MiscValue 8) +15 on the Ward mask (Bone, Fetid and Glacial Ward). Glacial Ward 681460 Effect[0] aura 132 maximum Runic Power +10%: 15% more effective is +11.5%. Before (control): no Ward, maximum Runic Power 1000; after: 570046 learned and a real Glacial Ward cast: 1000 x (1 + 11.5%) = 1115, judged to the rounding of the aura amount (+/- 5). The Glacial Ward runic_power entry is the Ward without the talent (1000 -> 1100)."
+    },
+    {
+      "spell": 570226,
+      "name": "Plague Protection 570226 (Glacial Ward Runic Power)",
+      "kind": "metric_delta",
+      "variant": "glacial_ward",
+      "label_suffix": "glacial_ward",
+      "quote": "Increases the effectiveness of your Wards by $s1%.",
+      "expected": 1130,
+      "before_expected": 1000,
+      "tolerance": 5,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "max_power",
+      "fields": {
+        "power": 6
+      },
+      "observe_source": "570226 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_ALL_EFFECTS (MiscValue 8) +30 on the Ward mask (Bone, Fetid and Glacial Ward). Glacial Ward 681460 Effect[0] aura 132 maximum Runic Power +10%: 30% more effective is +13%. Before (control): no Ward, maximum Runic Power 1000; after: 570226 learned and a real Glacial Ward cast: 1000 x (1 + 13%) = 1130, judged to the rounding of the aura amount (+/- 5). The Glacial Ward runic_power entry is the Ward without the talent (1000 -> 1100)."
+    },
+    {
+      "spell": 300233,
+      "name": "Dead Man Walking (root ends)",
+      "kind": "metric_delta",
+      "variant": "root_ends",
+      "label_suffix": "root_ends",
+      "quote": "Reduces the duration of root and slow effects against you by $s1%.",
+      "expected": 0,
+      "before_expected": 1,
+      "wait_ms": 6400,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "strike": {
+        "spell": 122,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 122,
+        "caster": "striker"
+      },
+      "observe_source": "300233 Effect[0] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, MiscValue 7 (root), -25 ($s1, BasePoints -26 + 1). No CoA code names 300233. A striker casts 122 (Frost Nova, root, 8000 ms) at the caster after a Command: Undead 504868 at the dummy; read 6500 ms after the strike: present without the talent (control, ends at 8000), gone with it (ends at 8000 x 0.75 = 6000). The phases are 21000 ms apart, past diminishing returns."
+    },
+    {
+      "spell": 300233,
+      "name": "Dead Man Walking (root held)",
+      "kind": "metric_delta",
+      "variant": "root_held",
+      "label_suffix": "root_held",
+      "quote": "Reduces the duration of root and slow effects against you by $s1%.",
+      "expected": 1,
+      "before_expected": 1,
+      "wait_ms": 5400,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "strike": {
+        "spell": 122,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 122,
+        "caster": "striker"
+      },
+      "observe_source": "Companion of root_ends: the same strike read 5500 ms after it is still present with the talent (ends at 6000), so the reduced duration lies between 5500 and 6500 ms; control: present without the talent."
+    },
+    {
+      "spell": 300233,
+      "name": "Dead Man Walking (slow ends)",
+      "kind": "metric_delta",
+      "variant": "slow_ends",
+      "label_suffix": "slow_ends",
+      "quote": "Reduces the duration of root and slow effects against you by $s1%.",
+      "expected": 0,
+      "before_expected": 1,
+      "wait_ms": 11650,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "strike": {
+        "spell": 31589,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 31589,
+        "caster": "striker"
+      },
+      "observe_source": "300233 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, MiscValue 11 (slow), -25 ($s1, BasePoints -26 + 1). No CoA code names 300233. A striker casts 31589 (Slow, snare, 15000 ms) at the caster after a Command: Undead 504868 at the dummy; read 11750 ms after the strike: present without the talent (control, ends at 15000), gone with it (ends at 15000 x 0.75 = 11250). The phases are 21000 ms apart, past diminishing returns."
+    },
+    {
+      "spell": 300233,
+      "name": "Dead Man Walking (slow held)",
+      "kind": "metric_delta",
+      "variant": "slow_held",
+      "label_suffix": "slow_held",
+      "quote": "Reduces the duration of root and slow effects against you by $s1%.",
+      "expected": 1,
+      "before_expected": 1,
+      "wait_ms": 10650,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "strike": {
+        "spell": 31589,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 31589,
+        "caster": "striker"
+      },
+      "observe_source": "Companion of slow_ends: the same strike read 10750 ms after it is still present with the talent (ends at 11250), so the reduced duration lies between 10750 and 11750 ms; control: present without the talent."
+    },
+    {
+      "spell": 503757,
+      "name": "Graverobber (Raise cost)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "Reduces the mana cost and cast time of your Raise and Animate spells by $s1%.",
+      "expected": 2196,
+      "before_expected": 2464,
+      "trigger_spell": 500971,
+      "target": "caster",
+      "disable_regeneration": true,
+      "wait_ms": 3100,
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "observe_source": "Raise: Ghoul 500971 costs ManaCostPercentage 28 of the base mana 1373: 384. 503757 Effect[0] aura 108 SPELLMOD_COST (MiscValue 14) -30 ($s1) on the Raise and Animate mask: int(384 x 0.7) = 268. Regeneration is off. Before: one cast without the talent, 2848 - 384 = 2464 (control); after: a second cast with it, 2464 - 268 = 2196."
+    },
+    {
+      "spell": 503757,
+      "name": "Graverobber (Raise cast time, done by 1150 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_by_1150",
+      "label_suffix": "cast_by_1150",
+      "quote": "Reduces the mana cost and cast time of your Raise and Animate spells by $s1%.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 500971,
+      "target": "caster",
+      "expire_ms": 1500,
+      "wait_ms": 1150,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 500971
+      },
+      "observe_source": "Raise: Ghoul 500971 CastingTimeIndex 16 (1500 ms). 503757 Effect[1] aura 108 SPELLMOD_CASTING_TIME (MiscValue 10) -30 ($s1): 1050 ms. spell_go_count counts the caster's 500971 SMSG_SPELL_GO (cumulative): without the talent no cast has completed 1150 ms after it starts (0, control); the first completes between phases (1); with the talent the second has completed by 1150 ms (2)."
+    },
+    {
+      "spell": 503757,
+      "name": "Graverobber (Raise cast time, running at 950 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_by_950",
+      "label_suffix": "cast_by_950",
+      "quote": "Reduces the mana cost and cast time of your Raise and Animate spells by $s1%.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500971,
+      "target": "caster",
+      "expire_ms": 1500,
+      "wait_ms": 950,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 500971
+      },
+      "observe_source": "Raise: Ghoul 500971 1500 ms cast, 1050 ms with 503757's -30%: 950 ms after the cast starts none has completed without the talent (0, control); the first completes between phases (1); with the talent the second is still casting (1): the reduced cast time lies in (950, 1150] ms, a reduction of 23% to 37%."
+    },
+    {
+      "spell": 301333,
+      "name": "Winds of Northrend (Lichfrost slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "Increases the amount slowed by Lichfrost by $s1%.",
+      "expected": 0.57143,
+      "before_expected": 0.742859,
+      "tolerance": 0.0001,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1373,
+      "expire_ms": 7000,
+      "wait_ms": 3000,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "observe_source": "Lichfrost 501978 Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED -35 (BasePoints -36 + 1); 301333 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT3 (MiscValue 23) -15 ($s1) on the Lichfrost mask: -50. The dummy's run speed rate (base 1.14286): 1.14286 x 0.65 = 0.742859 3000 ms after a real Lichfrost without the talent (control), 1.14286 x 0.50 = 0.57143 with it."
+    },
+    {
+      "spell": 500341,
+      "name": "Entomb (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to Physical damage for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500341,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 3500,
+      "metric": "aura",
+      "fields": {
+        "spell": 500341
+      },
+      "observe_source": "Entomb 500341 DurationIndex 35 (4000 ms, $d), instant, Effect[0] aura 12 SPELL_AURA_MOD_STUN on the target. No cast before (control, absent); 3500 ms after a real cast at the dummy the aura is still on it: the entomb lasts between 3500 and 4500 ms."
+    },
+    {
+      "spell": 500341,
+      "name": "Entomb (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to Physical damage for $d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500341,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 4500,
+      "metric": "aura",
+      "fields": {
+        "spell": 500341
+      },
+      "observe_source": "Entomb 500341 DurationIndex 35 (4000 ms, $d), instant, Effect[0] aura 12 SPELL_AURA_MOD_STUN on the target. No cast before (control, absent); 4500 ms after a real cast at the dummy the aura is gone: the entomb lasts between 3500 and 4500 ms."
+    },
+    {
+      "spell": 301304,
+      "name": "Rotting Flesh (Flesh to Worms damage)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Increases the damage of Flesh to Worms by $s1% and allows its periodic damage to scale with your spell haste.",
+      "expected": 1.25,
+      "observe_spell": 501861,
+      "cast_wait_ms": 3100,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          301304
+        ]
+      },
+      "trials": 20,
+      "critical": false,
+      "expected_source": "301304 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DOT (MiscValue 22) +25 ($s1) on Flesh to Worms. Non-critical 501861 ticks on the dummy without the talent (control) and with it learned (one cast per trial, 3100 ms); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists."
+    },
+    {
+      "spell": 524687,
+      "name": "Piercing Icicles (Ice Barrage damage)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Increases the damage of Ice Barrage by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 803779,
+      "cast_spell": 501997,
+      "cast_wait_ms": 3500,
+      "cast_power": 1000,
+      "control": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          524687
+        ]
+      },
+      "trials": 12,
+      "critical": false,
+      "expected_source": "524687 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE +20 ($s1) on the Ice Barrage mask (803779, the damage the Ice Barrage channel 501997 triggers). Non-critical 803779 hits on the dummy, one 501997 cast per trial (3500 ms), without the talent (control) and with it learned; Reg's Test Aura 984954 and 823764 on the caster in both arms (harness set_aura, precondition fixtures, as the Ice Barrage spell_power entry); cast_power 1000 Runic Power."
+    },
+    {
+      "spell": 560620,
+      "name": "Frigid Power (Lichfrost spell power scaling)",
+      "kind": "hit_ratio",
+      "variant": "lichfrost",
+      "label_suffix": "lichfrost",
+      "quote": "Increases the spell power scaling of Lichfrost and Ice Barrage by $s1%.",
+      "expected": 1.1936,
+      "observe_spell": 501978,
+      "cast_power": 1373,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          560620
+        ]
+      },
+      "trials": 20,
+      "critical": false,
+      "expected_source": "Lichfrost 501978: ${$m1+0+$spfr*.86989416} ($m1 about 583 at level 60, DBC 569-597). 560620 Effect[0] aura 108 SPELLMOD_BONUS_MULTIPLIER (MiscValue 24) +20 ($s1) on Lichfrost and Ice Barrage. The caster holds 20000 spell power (harness fixture, precondition) in both arms: spell power term 17397.9 without the talent (control), 20877.5 with it learned: (583 + 20877.5) / (583 + 17397.9) = 1.1936 (1.1932 to 1.1940 across the base range). Non-critical Lichfrost hits; 823764 on the caster in both arms."
+    },
+    {
+      "spell": 301198,
+      "name": "Game of Bones (Champion cooldown)",
+      "kind": "cost_gate",
+      "variant": "gravebound",
+      "label_suffix": "gravebound",
+      "quote": "Reduces the cooldown of your Champion spells by $/1000;s1 sec.",
+      "gated_spell": 805049,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "observe_source": "Gravebound Champion 805049 RecoveryTime 300000. 301198 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_COOLDOWN (MiscValue 11) -60000 ($/1000;s1 = 60, BasePoints -60001 + 1) on the Champion mask (Gravebound, Icebound, Spellbound Champion). Cooldown gate arms: 805049 refused at the reduced cooldown without the talent, through with it, refused just before it."
     }
   ],
   "player_observations": [],
