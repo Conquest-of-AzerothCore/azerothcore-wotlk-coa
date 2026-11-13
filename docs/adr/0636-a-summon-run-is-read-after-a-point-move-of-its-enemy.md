@@ -26,7 +26,9 @@ casts of the trigger at a movable dummy without the talent; no summon may appear
 talent, then the talent is unlearned and the fixture removed (read gone), so no later summon spawns beside the moved
 dummy. The dummy gets a running point move (`move_point`, ADR 0604) of 8 to 20 yd; after a window that ends before the
 fuse, a summon must stand within NOMINAL_MELEE_RANGE (5 yd, ObjectDefines.h:47) of the dummy and have moved away
-from the caster by at least 0.75 of the yards the dummy did. A dummy that moved less than 0.75 of its order leaves the
+from the caster by at least the dummy's yards less the summon's gap to the dummy at the move and that reach (a summon
+that spawned beyond the dummy may end on its near side: pilot 20261113-205615, 8.89 yd followed of 12, 1.28 yd from
+it). A dummy that moved less than 0.75 of its order leaves the
 verdict unmeasured. The metric is `owned_creature_distance_2d`, an event read (as in `follow_bearing`).
 
 ## Consequences

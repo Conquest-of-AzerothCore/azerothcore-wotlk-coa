@@ -15,10 +15,11 @@ START = {'start summon to enemy': 1.5, 'start summon to caster': 4.5, 'start ene
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class SummonChaseTests(unittest.TestCase):
-    def judged(self, end: dict, control: float = 0.0, summons: float = 2.0, released: float = 0.0) -> Verdict:
+    def judged(self, end: dict, control: float = 0.0, summons: float = 2.0, released: float = 0.0,
+               start: dict | None = None) -> Verdict:
         _, [expectation] = behaviour_scenario(load_fixture_class_file(23), ENTRY)
         reads = expectation.model['reads']
-        marks = {**START, **{f'end {read}': value for read, value in end.items()}, 'control summons': control,
+        marks = {**START, **(start or {}), **{f'end {read}': value for read, value in end.items()}, 'control summons': control,
                  'summons': summons, 'released': released}
         values = {reads[mark]: value for mark, value in marks.items()}
         base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
@@ -39,6 +40,11 @@ class SummonChaseTests(unittest.TestCase):
 
     def test_a_summon_that_follows_the_enemy_passes(self):
         self.assertEqual(self.judged(self.chased()).status, 'ok')
+
+    def test_a_summon_that_spawned_beyond_the_enemy_and_ends_on_its_near_side_passes(self):
+        start = {'start summon to enemy': 2.0, 'start summon to caster': 5.0}
+        self.assertEqual(self.judged({'summon to enemy': 1.28, 'summon to caster': 13.89, 'enemy to caster': 15.0},
+                                     start=start).status, 'ok')
 
     def test_a_summon_that_stays_where_it_spawned_alerts(self):
         self.assertEqual(self.judged({'summon to enemy': 10.5, 'summon to caster': 4.5,

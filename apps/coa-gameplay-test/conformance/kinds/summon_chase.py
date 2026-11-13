@@ -15,7 +15,6 @@ ORDER = 41
 DISTANCE = 'owned_creature_distance_2d'
 MOMENTS = ('start', 'end')
 NOMINAL_MELEE_RANGE_YD = 5.0
-FOLLOW_SHARE = 0.75
 ENEMY_MOVE_SHARE = 0.75
 MINIMUM_MOVE_YD = 8.0
 MAXIMUM_MOVE_YD = 20.0
@@ -100,7 +99,8 @@ def summon_chase_scenario(class_file: dict, spec: SummonChaseSpec) -> tuple[dict
                      f'learned (then unlearned, so no later summon appears beside the moved dummy); the dummy gets a '
                      f'running point move {spec.move_yd:g} yd away and {spec.window_ms} ms later a creature '
                      f'{spec.entry} must stand within {NOMINAL_MELEE_RANGE_YD:g} yd (NOMINAL_MELEE_RANGE) of it, '
-                     f'having moved away from the caster by at least {FOLLOW_SHARE:g} of the yards the dummy did.'),
+                     f'having moved away from the caster by at least the yards the dummy did less its gap to the '
+                     f'dummy at the move and that reach.'),
         'players': [player_fixture(class_file)],
         'creatures': [{**creature_fixture(class_file), 'stationary': False}],
         'steps': steps}
@@ -135,17 +135,16 @@ def summon_chase_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                        explanation=f'the enemy moved {enemy_moved:.2f} yd of the {model["move_yd"]:g} ordered: no '
                                    f'run to follow')
     followed = value['end summon to caster'] - value['start summon to caster']
-    share = followed / enemy_moved
     reach = value['end summon to enemy']
     expected = float(model['expected'])
-    status = 'ok' if reach <= expected and share >= FOLLOW_SHARE else 'alert'
+    floor = enemy_moved - value['start summon to enemy'] - expected
+    status = 'ok' if reach <= expected and followed >= floor else 'alert'
     return replace(base, status=status, measured=reach, expected=expected, low=0.0, high=expected,
-                   detail={'enemy_moved_yd': enemy_moved, 'summon_followed_yd': followed, 'share': share},
+                   detail={'enemy_moved_yd': enemy_moved, 'summon_followed_yd': followed, 'followed_floor_yd': floor},
                    explanation=f'no summon in the control; {value["summons"]:g} in the treatment, '
                                f'{value["start summon to enemy"]:.2f} yd from the enemy at the move; the enemy ran '
-                               f'{enemy_moved:.2f} yd and the summon {followed:.2f} yd after it ({share:.2f} of it, at '
-                               f'least {FOLLOW_SHARE:g}), ending {reach:.2f} yd from it against at most '
-                               f'{expected:g}: {status}')
+                               f'{enemy_moved:.2f} yd and the summon {followed:.2f} yd after it (at least '
+                               f'{floor:.2f}), ending {reach:.2f} yd from it against at most {expected:g}: {status}')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
