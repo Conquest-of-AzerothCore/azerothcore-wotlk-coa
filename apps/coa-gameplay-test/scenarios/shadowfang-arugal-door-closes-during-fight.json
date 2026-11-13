@@ -97,10 +97,10 @@
       "action": "teleport",
       "actor": "p",
       "map": 33,
-      "x": -82.0,
+      "x": -79.5,
       "y": 2153.0,
       "z": 155.8,
-      "o": 0.0
+      "o": 6.2
     },
     {
       "action": "wait",
@@ -109,8 +109,7 @@
     {
       "action": "attack_nearby",
       "actor": "p",
-      "entry": 4275,
-      "damage_pct": 5
+      "entry": 4275
     },
     {
       "action": "assert",
@@ -142,10 +141,10 @@
       "action": "teleport",
       "actor": "p",
       "map": 33,
-      "x": -82.0,
+      "x": -79.5,
       "y": 2153.0,
       "z": 155.8,
-      "o": 0.0
+      "o": 6.2
     },
     {
       "action": "attack_nearby",
