@@ -5831,9 +5831,9 @@
       "fields": {
         "spell": 642
       },
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 1500 ms after the cast step (1000 ms cast; a read at 1000 ms raced the cast's completion and flipped, final set final2)."
+      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 3000 ms after the cast step (1000 ms cast; reads at 1000 and 1500 ms found the shield still on in 3 of 20 runs, final2 and final3)."
     },
     {
       "spell": 807796,
@@ -5862,7 +5862,7 @@
       "fields": {
         "spell": 38916
       },
-      "wait_ms": 1500,
+      "wait_ms": 3000,
       "expire_ms": 500,
       "observe_source": "807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
     },
