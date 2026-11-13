@@ -1739,6 +1739,16 @@ after it for the caster, the ally and the enemy. Each worn and repaired reading 
 entry) is judged exactly: refused requests keep the worn value, granted ones restore `full`. Animate: Skeletal Smith
 804681 repairs the caster and the ally, not the enemy.
 
+### Item cooldown gate (`behaviour_cast_condition`, `kind: "item_cooldown_gate"`, ADR 0492)
+
+A grouped ally holds `item` (a named precondition fixture: the caster creates it and hands it out) and uses it through
+the real item-use handler (harness `use_item`): first with no earlier use (accepted, the control), then
+`cooldown_ms - margin_ms` after the first use (refused, 67 SPELL_FAILED_NOT_READY) and `cooldown_ms + margin_ms`
+after it (accepted). Each attempt reads the ally's `cast_failure` of `item_spell` and its completed `spell_go_count`
+(1, 1, 2), judged exactly. With `shared_item`/`shared_spell`, the ally uses that item right after the second accepted
+use: refused for a shared cooldown. Create Bone Reliquary 803771 and Create Frozen Reliquary 803777: "Allies may only
+use a ... once per minute."
+
 ### Strike bursts (`behaviour_metric_delta`, `kind: "strike_bursts"`, ADR 0383)
 
 A minion's scripted strikes after a Command: `command` is cast at the dummy (`distance` yd away) once with no minion

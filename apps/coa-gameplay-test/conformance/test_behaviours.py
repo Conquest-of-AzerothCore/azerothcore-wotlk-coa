@@ -6,7 +6,7 @@ import sys
 import tempfile
 import unittest
 
-from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
+from behaviours import (item_cooldown_gate_spec, AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
                         BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
                         BEHAVIOUR_CRIT_RATE,
                         BEHAVIOUR_AGGRO_REDIRECT, BEHAVIOUR_AMOUNT_DELTA,
@@ -10812,6 +10812,42 @@ class B3ToolMutantTests(unittest.TestCase):
     def test_a_permafrost_expired_before_the_read_alerts(self):
         self.assertEqual(self.delta(704681, 'charges', 0.0, 0.0), 'alert')
 
+
+
+class ItemCooldownGateTests(unittest.TestCase):
+    def entry(self, spell: int) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry['kind'] == 'item_cooldown_gate')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_ally_uses_the_item_before_and_after_its_cooldown(self):
+        scenario, expectations = behaviour_scenario(load_class_file(23), self.entry(803771))
+        run.validate(scenario)
+        self.assertEqual({player['id'] for player in scenario['players']}, {CASTER, ALLY})
+        uses = [step for step in scenario['steps'] if step['action'] == 'use_item']
+        self.assertEqual([(step['actor'], step['item']) for step in uses],
+                         [(ALLY, 11521), (ALLY, 11521), (ALLY, 11521), (ALLY, 555555)])
+        expected = {expectation.label.split(' 11521 ')[1]: expectation.displayed for expectation in expectations}
+        self.assertEqual(expected, {'first cast_failure': '0', 'first spell_go_count': '1',
+                                    'early cast_failure': '67', 'early spell_go_count': '1',
+                                    'ready cast_failure': '0', 'ready spell_go_count': '2',
+                                    'shared cast_failure': '67'})
+        first = next(index for index, step in enumerate(scenario['steps']) if step['action'] == 'use_item')
+        waits = [step['ms'] for step in scenario['steps'][first:] if step['action'] == 'wait']
+        self.assertEqual(sum(waits[:2]), 59500)
+        self.assertEqual(sum(waits[:4]), 60500)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_early_use_that_goes_through_alerts(self):
+        _, expectations = behaviour_scenario(load_class_file(23), self.entry(803777))
+        early = next(expectation for expectation in expectations if expectation.label.endswith('early cast_failure'))
+        self.assertEqual(judge_behaviour(base_verdict(early), FakeRun({early.label: 0.0}), early).status, 'alert')
+        self.assertEqual(judge_behaviour(base_verdict(early), FakeRun({early.label: 67.0}), early).status, 'ok')
+
+    def test_a_shared_item_needs_its_spell(self):
+        with self.assertRaises(ValueError):
+            item_cooldown_gate_spec({'spell': 1, 'name': 'n', 'quote': 'q', 'item': 2, 'item_spell': 3,
+                                     'cooldown_ms': 60000, 'shared_item': 4})
 
 if __name__ == '__main__':
     unittest.main()

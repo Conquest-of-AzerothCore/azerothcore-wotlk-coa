@@ -3503,9 +3503,16 @@
   {
     "spell": 803777,
     "clause": "Allies may only use a Frozen Reliquary once per minute.",
-    "labels": [],
+    "labels": [
+      "803777 item_cooldown_gate 555555 first cast_failure",
+      "803777 item_cooldown_gate 555555 first spell_go_count",
+      "803777 item_cooldown_gate 555555 early cast_failure",
+      "803777 item_cooldown_gate 555555 early spell_go_count",
+      "803777 item_cooldown_gate 555555 ready cast_failure",
+      "803777 item_cooldown_gate 555555 ready spell_go_count"
+    ],
     "kind": "claim",
-    "reason": "Parked (route agent): needs an ally using a Frozen Reliquary twice within a minute (803773 CategoryRecoveryTime 60000 by contract); no kind has an ally item use; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; control: the first use with no earlier one). A grouped ally holding Frozen Reliquaries 555555 (named precondition fixture) uses one through the real item-use handler: accepted and completed (spell_go_count 1), refused 59500 ms later with 67 SPELL_FAILED_NOT_READY (still 1), accepted and completed 60500 ms after the first use (2): the cooldown lies in (59500, 60500] ms, once per minute (item_template spellcategory 1153, 60000 ms; ADR 0492). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803773 0 lines, 'Frozen Reliquary' 0 by name; 803777 8 lines ('Create Frozen Reliquary', 9 by name); the logs show no ally item use, so they do not decide the cooldown; bindmysoul nothing found; sidekick coaKits names it; MCP not queried (unavailable)."
   },
   {
     "spell": 803797,
@@ -5704,16 +5711,25 @@
   {
     "spell": 803771,
     "clause": "Allies may only use a Bone Reliquary once per minute.",
-    "labels": [],
+    "labels": [
+      "803771 item_cooldown_gate 11521 first cast_failure",
+      "803771 item_cooldown_gate 11521 first spell_go_count",
+      "803771 item_cooldown_gate 11521 early cast_failure",
+      "803771 item_cooldown_gate 11521 early spell_go_count",
+      "803771 item_cooldown_gate 11521 ready cast_failure",
+      "803771 item_cooldown_gate 11521 ready spell_go_count"
+    ],
     "kind": "claim",
-    "reason": " Open, route pending: the item spell category 1153 (60 s) of Bone Reliquary 11521 applies to an ally using the item; no scenario uses an item as an ally (use_item by the ally)."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; control: the first use with no earlier one). A grouped ally holding Bone Reliquaries 11521 (named precondition fixture) uses one through the real item-use handler: accepted and completed (spell_go_count 1), refused 59500 ms later with 67 SPELL_FAILED_NOT_READY (still 1), accepted and completed 60500 ms after the first use (2): once per minute (item_template spellcategory 1153, 60000 ms; ADR 0492). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803771 15 lines, 803767 18 lines ('Bone Reliquary' 18 by name: self heals of the Necromancer, no ally use), so the logs do not decide the cooldown; sidekick matches the text; MCP not queried (unavailable)."
   },
   {
     "spell": 803771,
     "clause": "Shares a cooldown with similar effects.",
-    "labels": [],
+    "labels": [
+      "803771 item_cooldown_gate 11521 shared cast_failure"
+    ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Route pending: a harness cast of 803767 put no cooldown on Frozen Reliquary 803773 (spell Category 520, pair p13 20261113-015053 / -015124, copied to .agents/plans/necro-b3/verdicts/p13); the items 11521 and 555555 share item spell category 1153 (60 s), which needs a use_item route."
+    "reason": "Not final: alert reproduced (lead, G-3), cause not established, no fix note. M side b pilot pair pilot5 (build of bf83cf15b1 + class-file entries, 2 runs, identical): right after the ally's second accepted Bone Reliquary 11521 use, its Frozen Reliquary 555555 (spell 803773) is accepted (cast_failure 0, expected 67 refused). Expectation uncertain: 'similar effects' may mean other Bone Reliquaries only (the same item, refused within the minute, row 396) or the Frozen Reliquary too (both items carry spellcategory 1153 with 60000 ms, and 803767/803773 share Spell Category 520). Code read: Player::AddSpellAndCategoryCooldowns (Player.cpp:11751-11885) takes the item's category 1153 and propagates it to the other spells of that category in sSpellsByCategoryStore within the same SpellFamilyName; why 803773 is not reached is not established (store contents not read). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803767 18 lines, 803773 0, no ally item use in the logs: they do not decide; MCP not queried (unavailable)."
   },
   {
     "spell": 804360,

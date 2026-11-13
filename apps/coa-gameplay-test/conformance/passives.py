@@ -123,6 +123,13 @@ BEHAVIOUR_LABELS = {
                                             *(f'cast_{cast}' for cast in range(3, (entry.get('charges') or 0) + 3)),
                                             *(('next',) if entry.get('next_arm') else ()), 'beyond',
                                             *(('held', 'expired') if entry.get('aura_duration_ms') else ()))],
+    'item_cooldown_gate': lambda entry: [f"{entry['spell']} item_cooldown_gate {entry['item']} {arm} {metric}"
+                                         for arm, metrics in (('first', ('cast_failure', 'spell_go_count')),
+                                                              ('early', ('cast_failure', 'spell_go_count')),
+                                                              ('ready', ('cast_failure', 'spell_go_count')),
+                                                              *((('shared', ('cast_failure',)),)
+                                                                if entry.get('shared_item') else ()))
+                                         for metric in metrics],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
                                                      *(f'after_{tick}'
