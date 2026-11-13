@@ -1268,6 +1268,35 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 707445,
+      "name": "Runic Animation (Command: Hook cooldown)",
+      "kind": "metric_delta",
+      "variant": "hook_cooldown",
+      "label_suffix": "hook_cooldown",
+      "quote": "Reduces the cooldown of Animate: Skeletal Archers and Command: Hook by $s2%.",
+      "expected": 23500,
+      "before_expected": 29500,
+      "tolerance": 300,
+      "gate_spell": 707445,
+      "learn": [
+        92123
+      ],
+      "trigger_spell": 504316,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 504316
+      },
+      "observe_source": "Runic Animation 707445 Effect[1] aura 108 SPELLMOD_COOLDOWN (MiscValue 11) -20 ($s2) on mask (1024, 0, 2048); Command: Hook 504316 carries word 0 1024 (SpellFamilyFlags[0]); RecoveryTime 30000, 300 Runic Power (set before each cast). A Command needs a living minion (AscensionNecromancerAbilities.cpp:163): each phase raises an Abomination 500335 first (setup, as the Command: Hook entries, with 92123 learned). 504316 cooldown read 500 ms after the cast: 29500 without Runic Animation (control), 30000 x 0.8 - 500 = 23500 with it learned between the phases."
+    },
+    {
       "spell": 704680,
       "name": "Freeze Dry (Glacial Impact Runic Power)",
       "kind": "metric_delta",

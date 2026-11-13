@@ -2910,10 +2910,12 @@
       },
       {
         "claim": "and Command: Hook by $s2%",
-        "labels": []
+        "labels": [
+          "707445 behaviour_metric_delta hook_cooldown"
+        ]
       }
     ],
-    "reason": "Animate: Skeletal Archers part status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control without the talent): 805040 cooldown 29494 -> 23494 ms 500 ms after the cast (30000 x 0.8). Command: Hook part route pending: 504316 needs a living minion (Command gate AscensionNecromancerAbilities.cpp:163), a setup raise was not built in time; DBC mask word 0 1024 matches 504316. G-11 (2026-11-13, B6 side a): server DBC; combat logs (coa-history spell 707445): nothing found; sidekick data.js talent 'by -20%' (agrees); MCP not queried (unavailable)."
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arms without the talent): Animate: Skeletal Archer 805040 and Command: Hook 504316 cooldowns 29494 -> 23494 ms 500 ms after the cast (30000 x 0.8; $s2 = 20, BasePoints -21 + 1). The Hook arm raises an Abomination 500335 first (a Command needs a living minion, AscensionNecromancerAbilities.cpp:163). G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 707445; combat logs (coa-history spell 707445): nothing found; sidekick data.js talent 'by -20%' (agrees); MCP not queried (unavailable)."
   },
   {
     "spell": 707562,
