@@ -10485,5 +10485,31 @@ class TargetCastTests(unittest.TestCase):
                              for step in scenario['steps']))
 
 
+
+class UncastTargetCastAndTimeoutTests(unittest.TestCase):
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_casts_in_an_uncast_before_phase(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry(801739, 'interrupt'))
+        steps = scenario['steps']
+        before = next(index for index, step in enumerate(steps) if step.get('label') == '801739 casting before')
+        self.assertTrue(any(step == {'action': 'cast', 'actor': 'dummy', 'spell': 12051} for step in steps[:before]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_long_metric_delta_carries_its_own_timeout(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry(807700, 'zombie'))
+        waited = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(waited, 90000)
+        self.assertGreater(scenario['timeout_ms'], waited)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_short_metric_delta_keeps_the_default_timeout(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry(801739, 'held'))
+        self.assertNotIn('timeout_ms', scenario)
+
+
 if __name__ == '__main__':
     unittest.main()

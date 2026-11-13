@@ -1493,7 +1493,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
         steps += [phase_aura_step(aura) for aura in (*(spec.after_auras if after else ()), *spec.phase_auras)]
         if not include_cast:
-            return steps + (strike_steps() if spec.strike and spec.strike.after_trigger_ms is not None else [])
+            return (steps + (strike_steps() if spec.strike and spec.strike.after_trigger_ms is not None else [])
+                    + target_cast_steps())
         if spec.cast_power is not None:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': spec.cast_power})
@@ -1512,9 +1513,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                           'pct': spec.target_health_pct})
         if spec.caster_health_pct is not None:
             steps.append(fixture_health_step(CASTER, spec.caster_health_pct))
-        for spell in spec.target_casts_before:
-            steps += [{'action': 'cast', 'actor': TARGET, 'spell': spell},
-                      {'action': 'wait', 'label': f'{spell} cast settle', 'ms': TARGET_CAST_SETTLE_MS}]
+        steps += target_cast_steps()
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         if after_trigger:
             steps += [{'action': 'wait', 'label': 'before the strike', 'ms': spec.strike.after_trigger_ms}]
@@ -1525,6 +1524,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})] + [step for spell in spec.target_casts for step in (
             {'action': 'cast', 'actor': TARGET, 'spell': spell, 'target': TARGET},
             {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})]
+
+    def target_cast_steps() -> list[dict]:
+        return [step for spell in spec.target_casts_before
+                for step in ({'action': 'cast', 'actor': TARGET, 'spell': spell},
+                             {'action': 'wait', 'label': f'{spell} cast settle', 'ms': TARGET_CAST_SETTLE_MS})]
 
     def enemy_cast_steps() -> list[dict]:
         return [step for spell in spec.enemy_casts
