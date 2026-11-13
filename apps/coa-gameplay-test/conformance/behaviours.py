@@ -6549,6 +6549,7 @@ class ScriptHitSpec:
     hit_effect: int | None = None
     minion_model_auras: tuple[int, ...] = ()
     cast_power: int | None = None
+    multiplier: float = 1.0
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -6576,6 +6577,8 @@ def script_hit_validate(spec: ScriptHitSpec):
                          f'minion caster_entry')
     if spec.control_casts is not None and tuple(spec.control_casts) == tuple(spec.casts):
         raise ValueError(f'{spec.spell} script_hit control_casts repeat the casts; the arms would differ in nothing')
+    if spec.multiplier <= 0:
+        raise ValueError(f'{spec.spell} script_hit multiplier {spec.multiplier} is not a positive factor')
 
 
 def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int) -> list[dict]:
@@ -6672,9 +6675,11 @@ def script_hit_scenario(class_file: dict, spec: ScriptHitSpec) -> tuple[dict, li
                   for spell, stacks in spec.stat_auras] + base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     rule = f'{model.kind} hit of script-cast spell {spec.hit_spell} read from the {spec.spell} tooltip, ' \
-           f'integer steps modelled; control arm {control_rule}; {prose_rule(entry.quote, spec.spell)}'
+           f'integer steps modelled; control arm {control_rule}; {prose_rule(entry.quote, spec.spell)}' + \
+           (f'; the tooltip value times {spec.multiplier:g}' if spec.multiplier != 1.0 else '')
     record = {**model_record(model, school_mask, None, labels, spec.minimum_hits), 'hit_spell': spec.hit_spell,
-              'tooltip_spell': spec.spell, 'control_label': control_label, 'gate_multiplier': 1.0, 'part': 0,
+              'tooltip_spell': spec.spell, 'control_label': control_label, 'gate_multiplier': spec.multiplier,
+              'part': 0,
               'parts': 1, 'part_casts': spec.trials}
     if spec.control_casts is not None:
         record['control_text'] = control_rule
@@ -6706,7 +6711,7 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          tuple((int(spell), int(stacks)) for spell, stacks in entry.get('stat_auras', ())),
                          entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'),
                          tuple(int(spell) for spell in entry.get('minion_model_auras', ())),
-                         entry.get('cast_power'))
+                         entry.get('cast_power'), float(entry.get('multiplier', 1.0)))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8

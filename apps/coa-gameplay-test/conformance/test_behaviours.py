@@ -10675,5 +10675,24 @@ class MassGraveToolTests(unittest.TestCase):
         self.assertTrue(all(power < cast for (power, _), cast in zip(powers, casts)))
 
 
+class ScriptHitMultiplierTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 500329 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_multiplier_scales_the_judged_hit(self):
+        _, [scaled] = behaviour_scenario(load_class_file(23), self.entry('one_disease'))
+        _, [plain] = behaviour_scenario(load_class_file(23), self.entry('command_damage'))
+        self.assertEqual(scaled.model['gate_multiplier'], 1.5)
+        self.assertEqual(plain.model['gate_multiplier'], 1.0)
+        self.assertIn('times 1.5', scaled.rule)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_multiplier_must_be_positive(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.entry('one_disease'), 'multiplier': 0})
+
+
 if __name__ == '__main__':
     unittest.main()

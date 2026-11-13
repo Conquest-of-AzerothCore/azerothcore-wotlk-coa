@@ -723,10 +723,12 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
     if expectation.model['kind'] == 'melee':
         return melee_model(class_file, caster, target, auras)
     if 'tooltip_spell' in expectation.model:
-        return script_hit_model(class_file, expectation.model['tooltip_spell'], expectation.model['hit_spell'],
-                                caster, target, auras, expectation.model.get('value_spell'),
-                                expectation.model.get('value_effect', 0), expectation.model.get('unresisted', False),
-                                expectation.model.get('hit_effect'))
+        scripted = script_hit_model(class_file, expectation.model['tooltip_spell'], expectation.model['hit_spell'],
+                                    caster, target, auras, expectation.model.get('value_spell'),
+                                    expectation.model.get('value_effect', 0),
+                                    expectation.model.get('unresisted', False), expectation.model.get('hit_effect'))
+        factor = expectation.model.get('gate_multiplier', 1.0)
+        return scripted if factor == 1.0 else replace(scripted, mean=scripted.mean * factor)
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned')).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
