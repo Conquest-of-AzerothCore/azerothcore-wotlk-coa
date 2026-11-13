@@ -35,3 +35,27 @@ class EnergizeRangeTests(unittest.TestCase):
         self.assertEqual(self.judged([amount if amount != 80 else 79 for amount in full]), 'alert')
         self.assertEqual(self.judged(full[:-1] + [81]), 'alert')
         self.assertEqual(self.judged(full[:100]), 'unmeasured')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_learned_talent_is_learned_after_the_cast_spell_and_its_shifted_roll_is_judged(self):
+        base = next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry['kind'] == 'energize_range')
+        entry = {**base, 'learn': [704528], 'low': 50, 'high': 100}
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learned[-2:], [801724, 704528])
+        marks = expectation.model['marks']
+
+        def judged(amounts: list[int]) -> str:
+            values, total, count = {}, 0.0, 0.0
+            for index, (total_label, count_label) in enumerate(marks):
+                if 0 < index <= len(amounts):
+                    total, count = total + amounts[index - 1], count + 1
+                values[total_label], values[count_label] = total, count
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+        self.assertEqual(judged([50 + index % 51 for index in range(400)]), 'ok')
+        self.assertEqual(judged([30 + index % 51 for index in range(400)]), 'alert')
+        without = {key: value for key, value in base.items() if key != 'learn'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), without)
+        self.assertNotIn(704528, [step.get('spell') for step in scenario['steps'] if step['action'] == 'learn'])
