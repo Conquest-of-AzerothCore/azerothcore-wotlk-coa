@@ -1126,6 +1126,438 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 804360,
+      "name": "Necromancy (caster hit chance)",
+      "kind": "metric_delta",
+      "variant": "caster_hit_chance",
+      "label_suffix": "caster_hit_chance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 1004,
+      "before_expected": 1000,
+      "trigger_spell": 57360,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.0001,
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "observe_source": "The caster's melee hit chance: 1000 before, 1004 after Well Fed 57360."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (caster spell crit chance)",
+      "kind": "metric_delta",
+      "variant": "caster_crit_chance",
+      "label_suffix": "caster_crit_chance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 6.138842582702637,
+      "before_expected": 3.2816998958587646,
+      "trigger_spell": 57329,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.0001,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 4
+      },
+      "observe_source": "The caster's Frost spell crit chance: 3.2817 before, 6.13884 after Well Fed 57329."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (Life Force)",
+      "kind": "metric_delta",
+      "variant": "life_force",
+      "label_suffix": "life_force",
+      "quote": "Allows you to summon Undead minions using Life Force.",
+      "expected": 1,
+      "before_expected": 2,
+      "trigger_spell": 500971,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        804360
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Life Force 525004 on the caster holds one stack per free Life Force (Sync, AscensionNecromancer.cpp:190-200: Capacity() - Used()); with 804360 learned, 2 free before a raise (control) and 1 after one Raise: Ghoul 500971 (Cost 1): the summon is paid in Life Force."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (attack power)",
+      "kind": "metric_delta",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
+      "expected": 70,
+      "before_expected": 46,
+      "trigger_spell": 10157,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.01,
+      "metric": "owned_creature_attack_power",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Arcane Intellect 10157 (+31 Intellect, +27 spell power via aura 345) cast on the caster in the after phase; the Ghoul (cost 1) reads 46 = (117 + 0) x 0.4 = 46.8 truncated before (control, no buff) and 70 = (148 + 27) x 0.4 after; the caster's Intellect and spell power are read by the caster entries."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (spell power)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
+      "expected": 35,
+      "before_expected": 23,
+      "trigger_spell": 10157,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "owned_creature_spell_power",
+      "fields": {
+        "entry": 50073,
+        "school_mask": 32
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's Shadow spell damage bonus (SpellBaseDamageBonusDone, 805015 Effect[1]): 23 = 117 x 0.2 = 23.4 truncated before, 35 = (148 + 27) x 0.2 after Arcane Intellect 10157."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (caster Intellect)",
+      "kind": "metric_delta",
+      "variant": "caster_intellect",
+      "label_suffix": "caster_intellect",
+      "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
+      "expected": 148,
+      "before_expected": 117,
+      "trigger_spell": 10157,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "stat",
+      "fields": {
+        "stat": 3
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The caster's Intellect: 117 before, 148 after Arcane Intellect 10157 (+31)."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (caster spell power)",
+      "kind": "metric_delta",
+      "variant": "caster_spell_power",
+      "label_suffix": "caster_spell_power",
+      "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
+      "expected": 27,
+      "before_expected": 0,
+      "trigger_spell": 10157,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The caster's Shadow spell power: 0 before, 27 after Arcane Intellect 10157 (aura 345 +27)."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (Abomination attack power)",
+      "kind": "metric_delta",
+      "variant": "abomination_attack_power",
+      "label_suffix": "abomination_attack_power",
+      "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
+      "expected": 210,
+      "before_expected": 140,
+      "trigger_spell": 10157,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "learn": [
+        92123
+      ],
+      "tolerance": 0.01,
+      "metric": "owned_creature_attack_power",
+      "fields": {
+        "entry": 50068
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Summoning Adept 92123 gives the 3 Life Force an Abomination 50068 (cost 3, Raise: Abomination 500335) needs. Its attack power is 140 = 117 x 0.4 x 3 = 140.4 truncated before and 210 = 175 x 0.4 x 3 after Arcane Intellect 10157: three times the Ghoul's, by its Life Force."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (resistance)",
+      "kind": "metric_delta",
+      "variant": "resistance",
+      "label_suffix": "resistance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 12,
+      "before_expected": 0,
+      "trigger_spell": 976,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "owned_creature_resistance",
+      "fields": {
+        "entry": 50073,
+        "school": 5
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Shadow Protection 976 (+30 Shadow resistance) on the caster: the Ghoul's Shadow resistance 0 before, 30 x 0.4 = 12 after."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (caster resistance)",
+      "kind": "metric_delta",
+      "variant": "caster_resistance",
+      "label_suffix": "caster_resistance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 30,
+      "before_expected": 0,
+      "trigger_spell": 976,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The caster's Shadow resistance: 0 before, 30 after Shadow Protection 976."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (armor)",
+      "kind": "metric_delta",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 45,
+      "before_expected": 32,
+      "trigger_spell": 168,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "owned_creature_armor",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Frost Armor 168 on the caster: the Ghoul's armor 32 = 94 x 0.35 = 32.9 truncated before, 45 = 130 x 0.35 = 45.5 truncated after."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (caster armor)",
+      "kind": "metric_delta",
+      "variant": "caster_armor",
+      "label_suffix": "caster_armor",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 130,
+      "before_expected": 94,
+      "trigger_spell": 168,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "armor",
+      "fields": {},
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The caster's armor: 94 before, 130 after Frost Armor 168 (+36)."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (hit chance)",
+      "kind": "metric_delta",
+      "variant": "hit_chance",
+      "label_suffix": "hit_chance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 1004,
+      "before_expected": 1000,
+      "trigger_spell": 57360,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.0001,
+      "metric": "owned_creature_melee_hit_chance",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Well Fed 57360 (+40 melee, ranged and spell hit rating, aura 189 MiscValue 224) on the caster: the Ghoul's melee hit chance copies the caster's, 1000 before (the fixture's 10000 melee hit rating) and 1004 after."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_chance",
+      "label_suffix": "spell_hit_chance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 1255,
+      "before_expected": 1250,
+      "trigger_spell": 57360,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.0001,
+      "metric": "owned_creature_spell_hit_chance",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's spell hit chance copies the caster's: 1250 before (10000 spell hit rating), 1255 after Well Fed 57360."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (crit chance)",
+      "kind": "metric_delta",
+      "variant": "crit_chance",
+      "label_suffix": "crit_chance",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 6,
+      "before_expected": 3,
+      "trigger_spell": 57329,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "owned_creature_spell_crit_chance",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Well Fed 57329 (+40 melee, ranged and spell crit rating, aura 189 MiscValue 1792) on the caster: the Ghoul's base spell crit chance is the caster's Frost spell crit truncated, 3 (3.28) before and 6 (6.14) after."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 1666,
+      "before_expected": 2000,
+      "trigger_spell": 12472,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.01,
+      "metric": "owned_creature_attack_time_ms",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Icy Veins 12472 (+20% cast speed, aura 65) on the caster: cast speed 1 / 1.2; the Ghoul's swing interval 2000 x the caster's cast speed: 2000 before, uint32(2000 x 0.83333) = 1666 after."
+    },
+    {
+      "spell": 804360,
+      "name": "Necromancy (cast speed)",
+      "kind": "metric_delta",
+      "variant": "cast_speed",
+      "label_suffix": "cast_speed",
+      "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
+      "expected": 0.8333333,
+      "before_expected": 1,
+      "trigger_spell": 12472,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "tolerance": 0.0001,
+      "metric": "owned_creature_cast_speed",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's UNIT_MOD_CAST_SPEED follows the caster's (Scale(): x speed / inherited speed): 1 before, 1 / 1.2 = 0.83333 after Icy Veins 12472."
+    },
+    {
       "spell": 500985,
       "name": "Undead: Protect (defensive)",
       "kind": "metric_delta",

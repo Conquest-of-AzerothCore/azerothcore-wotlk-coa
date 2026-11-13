@@ -4158,19 +4158,88 @@
   {
     "spell": 804360,
     "clause": "Allows you to summon Undead minions using Life Force.",
-    "labels": [],
+    "labels": [
+      "804360 behaviour_metric_delta life_force"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804360,
     "clause": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Summoned minions gain Attack Power from your Intellect and Spell Power",
+        "labels": [
+          "804360 behaviour_metric_delta attack_power",
+          "804360 behaviour_metric_delta caster_intellect",
+          "804360 behaviour_metric_delta caster_spell_power"
+        ]
+      },
+      {
+        "claim": "and Spell Power from your Intellect and Spell Power",
+        "labels": [
+          "804360 behaviour_metric_delta spell_power",
+          "804360 behaviour_metric_delta caster_intellect",
+          "804360 behaviour_metric_delta caster_spell_power"
+        ]
+      },
+      {
+        "claim": "gain Attack Power based on their Life Force",
+        "labels": [
+          "804360 behaviour_metric_delta abomination_attack_power",
+          "804360 behaviour_metric_delta attack_power"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 804360,
     "clause": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste and gain expertise from your hit chance.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "They also inherit a portion of your resistances",
+        "labels": [
+          "804360 behaviour_metric_delta resistance",
+          "804360 behaviour_metric_delta caster_resistance"
+        ]
+      },
+      {
+        "claim": "armor",
+        "labels": [
+          "804360 behaviour_metric_delta armor",
+          "804360 behaviour_metric_delta caster_armor"
+        ]
+      },
+      {
+        "claim": "hit chance",
+        "labels": [
+          "804360 behaviour_metric_delta hit_chance",
+          "804360 behaviour_metric_delta spell_hit_chance",
+          "804360 behaviour_metric_delta caster_hit_chance"
+        ]
+      },
+      {
+        "claim": "critical strike chance",
+        "labels": [
+          "804360 behaviour_metric_delta crit_chance",
+          "804360 behaviour_metric_delta caster_crit_chance"
+        ]
+      },
+      {
+        "claim": "haste",
+        "labels": [
+          "804360 behaviour_metric_delta haste",
+          "804360 behaviour_metric_delta cast_speed"
+        ]
+      },
+      {
+        "claim": "and gain expertise from your hit chance",
+        "labels": [
+          "804360 behaviour_metric_delta expertise"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
