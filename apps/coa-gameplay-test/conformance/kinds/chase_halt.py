@@ -130,4 +130,3 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: chase_halt_verdict}
-METRIC_EVIDENCE = {'distance_2d': 'event'}
