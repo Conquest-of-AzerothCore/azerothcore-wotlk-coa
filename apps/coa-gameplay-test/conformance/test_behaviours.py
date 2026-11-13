@@ -10413,5 +10413,47 @@ class MinionAuraCountTests(unittest.TestCase):
         self.assertTrue(all(step.get('caster') == 'caster' for step in reads))
 
 
+
+class CasterHealthAndSelectedPrimaryTests(unittest.TestCase):
+    def necromancer_entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_caster_health_is_held_before_each_trigger_cast(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.necromancer_entry(301207, 'regen_one'))
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == 500981]
+        self.assertEqual(len(casts), 2)
+        for cast in casts:
+            self.assertEqual(steps[cast - 1], {'action': 'set_health', 'actor': 'caster', 'value': 5000,
+                                               'maximum': 10000})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_caster_health_outside_the_range_is_refused(self):
+        for pct in (0, 100):
+            with self.subTest(pct=pct), self.assertRaises(ValueError):
+                behaviour_scenario(load_class_file(23), {**self.necromancer_entry(301207, 'regen_one'),
+                                                         'caster_health_pct': pct})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_selected_primary_is_selected_before_each_cast(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.necromancer_entry(504489, 'area'))
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == 504489]
+        self.assertTrue(casts)
+        for cast in casts:
+            self.assertEqual(steps[cast - 1], {'action': 'select', 'actor': 'caster', 'target': 'primary'})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unselected_count_keeps_its_steps(self):
+        entry = {key: value for key, value in self.necromancer_entry(504489, 'area').items()
+                 if key != 'select_primary'}
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        self.assertFalse(any(step.get('action') == 'select' for step in scenario['steps']))
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -274,6 +274,7 @@ class FixedTargetCountSpec:
     cluster_yd: float | None = None
     caster_entry: int | None = None
     setup_casts: tuple[tuple[int, str], ...] = ()
+    select_primary: bool = False
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -362,6 +363,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
             if spec.cast_target_health_pct is not None:
                 steps.append(fixture_health_step(spec.cast_target, spec.cast_target_health_pct))
             cast_target = dummy_id(0) if spec.cast_target == TARGET else spec.cast_target
+            if spec.select_primary:
+                steps.append({'action': 'select', 'actor': CASTER, 'target': dummy_id(0)})
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': cast_target})
             steps.append({'action': 'wait', 'ms': wait_ms})
             if spec.settle_ms:
@@ -1183,7 +1186,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 bool(entry.get('primary_distance_reads', False)), entry.get('label_suffix', ''),
                                 None if entry.get('behind_yd') is None else float(entry['behind_yd']),
                                 entry.get('cluster_yd'), entry.get('caster_entry'),
-                                tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())))
+                                tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())),
+                                bool(entry.get('select_primary', False)))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
@@ -1326,6 +1330,7 @@ class MetricDeltaSpec:
     player_ratings: tuple[tuple[str, int], ...] = ()
     after_at_most: float | None = None
     player_spell_power: int | None = None
+    caster_health_pct: int | None = None
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1436,6 +1441,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     if spec.target_health_pct is not None and (spec.target not in (TARGET, ENEMY_PLAYER) or spec.attack_swings
                                                or not 0 < spec.target_health_pct < 100):
         raise ValueError(f'{spec.spell} sets the health percent of a cast target that is not the dummy or the enemy')
+    if spec.caster_health_pct is not None and (spec.attack_swings or not 0 < spec.caster_health_pct < 100):
+        raise ValueError(f'{spec.spell} holds the caster at a health percent between 0 and 100, outside attack phases')
     if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
                                           or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER)):
         raise ValueError(f'{spec.spell} names a setup target without setup casts, or one that is not a scenario unit')
@@ -1499,6 +1506,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.target_health_pct is not None:
             steps.append({'action': 'set_health_pct', 'actor': CASTER, 'target': spec.target,
                           'pct': spec.target_health_pct})
+        if spec.caster_health_pct is not None:
+            steps.append(fixture_health_step(CASTER, spec.caster_health_pct))
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         if after_trigger:
             steps += [{'action': 'wait', 'label': 'before the strike', 'ms': spec.strike.after_trigger_ms}]
@@ -1713,7 +1722,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            tuple(entry.get('helper_casts', ())), tuple(entry.get('target_casts', ())),
                            metric_delta_strike(entry.get('strike')),
                            tuple((str(key), int(value)) for key, value in entry.get('player_ratings', {}).items()),
-                           entry.get('after_at_most'), entry.get('player_spell_power'))
+                           entry.get('after_at_most'), entry.get('player_spell_power'),
+                           entry.get('caster_health_pct'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
