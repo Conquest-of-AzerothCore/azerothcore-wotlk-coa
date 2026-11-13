@@ -2831,7 +2831,9 @@
       "quote": "now applies Expunge if they are Diseased.",
       "expected": 1.2,
       "observe_spell": 570131,
-      "cast_wait_ms": 2500,
+      "cast_spell": 504868,
+      "cast_wait_ms": 1800,
+      "clear_observed": true,
       "fixture": {
         "spell_power": 20000
       },
@@ -2843,7 +2845,7 @@
           ]
         ],
         "casts": [
-          504868
+          570131
         ]
       },
       "treatment": {
@@ -2857,28 +2859,17 @@
           705754
         ],
         "casts": [
-          504868
+          570131
         ]
       },
       "critical": false,
       "trials": 20,
       "warmup": [
         570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
-        570131,
         504868,
         504868
       ],
-      "expected_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Crypt Plague 570131 ticks (aura 3, every 2000 ms; the first tick read 2500 ms after each cast, as Waking Crypts 570136) at 20000 spell power; twelve warm-up Crypt Plagues put both arms at its stack cap, then two Commands, and a Command before every trial keeps 2 Expunge stacks in the treatment: 1 + 2 x 10% = 1.20 (G-19 band 18-22%). Control: the same casts without 705754 (no Expunge). 823764 in both arms."
+      "expected_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Crypt Plague 570131 ticks (aura 3, EffectAmplitude[0] 2000 ms, DurationIndex 1 = 10000 ms) at 20000 spell power. Each trial casts a fresh one-stack Crypt Plague, then a Command while the dummy is diseased (which keeps 2 Expunge stacks in the treatment, after a warm-up Crypt Plague and two Commands), waits 1800 ms and removes the caster's Crypt Plague from the dummy before the reads (clear_observed): the c10 pair read one tick between a trial's total and count reads (run 1 control trials 2 / 3: 24360 for 3 hits then 36540 for 2; run 2 trials 17 / 18), since the harness runs one step per world update and the tick period drifts against the trial period; with the disease removed no tick can land between the two reads. Ratio: 1 + 2 x 10% = 1.20 (G-19 band 18-22%). Control: the same casts without 705754 (no Expunge). 823764 in both arms."
     },
     {
       "spell": 504431,
