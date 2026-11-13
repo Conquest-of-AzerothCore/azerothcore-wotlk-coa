@@ -2888,7 +2888,6 @@
       {
         "claim": "to cause their next use ... to be free of cost.",
         "labels": [
-          "704724 effect_value #0",
           "704724 cost_gate 504868 free_next without",
           "704724 cost_gate 504868 free_next with",
           "704724 cost_gate 504868 free_next released"
@@ -2994,7 +2993,6 @@
       {
         "claim": "to increase your haste by $705751s1% for $705751d.",
         "labels": [
-          "705750 effect_value #0",
           "705750 effect_value 705751e0 #1",
           "705750 spell_duration 705751 #2",
           "705750 behaviour_metric_delta cast_haste",
@@ -6677,7 +6675,10 @@
   {
     "spell": 500459,
     "clause": "plus ${$m1+0+$SP*0.169175} Shadow damage when cast.",
-    "labels": [],
+    "labels": [
+      "500459 behaviour_metric_delta initial_hit",
+      "500459 behaviour_metric_delta initial_hit_sp"
+    ],
     "kind": "claim",
     "reason": "Cycle 2 F2: new clause of the streamed text (owner text item 5, Q-b3b-3 (a): keep 6 hits, state the cast hit). Not judged yet: the Blight entries count 6 hits in all (Q-b3b-3), no entry reads the cast hit apart. G-11 as in the spell's other rows; MCP not queried (unavailable).",
     "text_source": {
