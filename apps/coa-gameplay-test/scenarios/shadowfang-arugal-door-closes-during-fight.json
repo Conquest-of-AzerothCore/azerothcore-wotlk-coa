@@ -5,7 +5,8 @@
     "Arugal's Lair (18971, spawn 33241) opens when Wolf Master Nandos (3927) dies. Our tester asked for it to stay shut",
     "while Archmage Arugal (4275) is in combat, so nobody leaves or joins mid-fight. It closes on his pull and opens",
     "again when he dies or evades.",
-    "The test pulls a summoned Archmage Arugal next to the door; it runs the same SmartAI as his spawn."
+    "The test pulls a summoned Archmage Arugal next to the door; it runs the same SmartAI as his spawn.",
+    "The rows have no difficulty mask, so the test runs on Normal."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -30,11 +31,6 @@
       "ms": 1000
     },
     {
-      "action": "ascension_dungeon_difficulty_packet",
-      "actor": "p",
-      "value": 1
-    },
-    {
       "action": "wait",
       "ms": 500
     },
@@ -49,10 +45,10 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: p is in a Heroic Shadowfang Keep",
+      "label": "CONTROL: p is in a Normal Shadowfang Keep",
       "actor": "p",
       "metric": "map_difficulty",
-      "equals": 1,
+      "equals": 0,
       "within_ms": 15000
     },
     {
