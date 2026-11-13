@@ -2022,7 +2022,8 @@
       "704723 behaviour_metric_delta duration_long",
       "704723 behaviour_metric_delta past_stated"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 asked of the mentor (ruling of 2026-11-12: when two of our tooltips disagree, the cast spell's tooltip that the measurement and live logs agree with governs): the stack cast is Diabolical 707133, whose $d is 30000 ms (DurationIndex 9); measured (29500, 30500] ms; live logs 72 natural expiries at 30 s. 704723's text names 706504's $d, 20000 ms."
   },
   {
     "spell": 704723,
@@ -2036,10 +2037,7 @@
       },
       {
         "claim": "to deal $707133s1% increased damage per stack",
-        "labels": [
-          "704723 behaviour_metric_delta crypt_swarm_hit",
-          "704723 behaviour_metric_delta crypt_swarm_stacked"
-        ]
+        "labels": []
       }
     ],
     "kind": "claim"
@@ -3762,7 +3760,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Intellect 117 x 1.10 = 128.7 reads 128: known engine rounding 1, percent-derived stat truncated (G-26)."
   },
   {
     "spell": 681460,
