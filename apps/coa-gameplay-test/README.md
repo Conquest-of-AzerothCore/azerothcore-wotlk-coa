@@ -1056,6 +1056,8 @@ creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 Intellect, Spirit) and requires it to be present (a read only, ADR 0480).
 `owned_creature_aura_max_duration_ms` reads the maximum duration of the aura `spell` on the same creature (0 when
 absent; a read only, ADR 0484).
+`owned_creature_spell_cast_count` counts the casts of `spell` by that owned creature in its map instance (the
+harness cast counter), and `game_time_ms` reads the server's game time in milliseconds (reads only, ADR 0485).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,

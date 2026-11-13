@@ -1268,6 +1268,36 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 503740,
+      "name": "Ghoul Mastery (Frenzied Ghoul duration)",
+      "kind": "aura_expiry",
+      "label_suffix": "frenzied_expiry",
+      "quote": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
+      "aura": 707014,
+      "entry": 50073,
+      "marker_spell": 707014,
+      "expected_ms": 10000,
+      "command": 504868,
+      "raise_spell": 500971,
+      "tail_ms": 13000,
+      "observe_source": "Frenzied Ghoul 707014 \"for $d\" (DurationIndex 1 = 10000 ms). One Ghoul 50073, 503740 known, its roll forced (ADR 0482 mutant) while the Ghoul attacks the dummy, then a -100% mutant so no roll applies 707014 again (the switch); the Ghoul's 707014 casts (owned_creature_spell_cast_count) and the Ghouls carrying 707014 are read every 100 ms with the game time (game_time_ms, ADR 0485): the last cast and the first read without the aura bracket its duration in game time, judged within 5% (500 ms). The no-talent control is the frenzied_display entry's absent read (no 707014 under the same mutant without 503740)."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (Enrage duration)",
+      "kind": "aura_expiry",
+      "label_suffix": "horde_expiry",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "aura": 807653,
+      "entry": 50073,
+      "marker_spell": 807653,
+      "expected_ms": 5000,
+      "command": 504868,
+      "raise_spell": 500971,
+      "tail_ms": 8000,
+      "observe_source": "Plague Horde 807653 \"for $807653d\" / \"Enrage for $d\" (DurationIndex 28 = 5000 ms), cast by the minion on itself since fix F-ma-1 (ADR 0483). One Ghoul 50073, 802986 known, its roll forced (ADR 0482 mutant), then a -100% mutant (the switch); the Ghoul's 807653 casts and the Ghouls carrying it are read every 100 ms with the game time (ADR 0485): the last cast and the first read without the aura bracket its duration, judged within 5% (250 ms). The no-talent control is the horde_no_talent entry (no 807653 without 802986)."
+    },
+    {
       "spell": 802986,
       "name": "Plague Horde (no-talent control)",
       "kind": "metric_delta",

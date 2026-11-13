@@ -287,6 +287,13 @@ a minion: a `spell_mod_mutant` of SPELLMOD_CHANCE_OF_SUCCESS +1000% on `talent` 
 `aura` on the owned creature `entry` just before the before reading (it must be absent) and just before the after
 reading, on every creature of that entry (otherwise the verdict is `unmeasured`, never `ok`), and at the end the mutant owner aura removed and
 `spell_mod_mutants` read 0 (otherwise an alert). It never proves a rate: rate claims stay with their proc entries.
+`kind: "aura_expiry"` (ADR 0485) reads how long a rolled minion aura lasts: the talent's roll is forced (the ADR
+0482 mutant) while one raised minion attacks the dummy, then a -100% mutant stops every roll; every `poll_ms` the game
+time (`game_time_ms`), the minions carrying `aura` and the minion's casts of `marker_spell`
+(`owned_creature_spell_cast_count`) are read. The last cast and the first read without the aura bracket the duration in
+game time; the verdict is `ok` when the bracket lies inside `expected_ms` +- `band_ms` (5% by default). A cast after the
+switch alerts; no cast before it is `unmeasured`. Durations are judged on game-time stamps, never on the nominal waits:
+each wait step costs about 10 to 17 ms of game time beyond its `ms` (ADR 0485).
 `expected_ratio` with a `tolerance` (ADR 0380) judges the after reading over the before reading instead, with
 `before_expected` its least before reading: Pierced 570216 leaves 0.9 of the dummy's armor. `setup_target` sends the
 setup casts to their own unit: Greater Skeletal Warrior 504901's raise goes to the caster and its Command to the dummy.
