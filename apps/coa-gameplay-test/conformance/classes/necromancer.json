@@ -8814,7 +8814,31 @@
       "trigger_spell": 504868, "target": "enemy", "enemy_player_race": 2, "setup_casts": [504861], "setup_only_after": true,
       "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500,
       "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "enemy"},
-      "observe_source": "An enemy player (a Necromancer, race 2, 2803 maximum mana, full) is the target: the dummy has no mana. Both phases cast Command: Undead 504868 at it; the treatment raises a Banshee 500650 first. npc_ascension_necromancer::DoAction, case 500650: mana = min(target mana, min(target max / 10, Banshee max / 5)), ModifyPower(-mana), then Copy 505225 (Frost) for that amount. The tooltip's 10% of the target's mana is 280; with the cap read as 20% of the target's own maximum (560) the drain is 280. Control: no Banshee, no hit."
+      "observe_source": "An enemy player (a Necromancer, race 2, 2803 maximum mana, full) is the target: the dummy has no mana. Both phases cast Command: Undead 504868 at it; the treatment raises a Banshee 500650 first. npc_ascension_necromancer::DoAction, case 500650: mana = min(target mana, min(target max / 10, the player's max / 5)) (owner ruling Q-a1-4 (b), ADR 0521), ModifyPower(-mana), then Copy 505225 (Frost) for that amount. The tooltip's 10% of the target's mana is 280; neither cap binds here (20% of the player's 2848 is 569). Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (Command drain capped by the player's mana)", "kind": "metric_delta", "variant": "drain_cap",
+      "label_suffix": "drain_cap", "quote": "up to a maximum of", "expected": 569, "before_expected": 0,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "dummy"},
+      "observe_source": "Cap-binding arm (owner ruling Q-a1-4 (b): the player's maximum mana caps the drain, ADR 0521). Target: the dummy fixture as Magus Zabraxis 16829 (creature_template level 60, unit_class 2, ManaModifier 3, no script; creature_classlevelstats level 60 class 2 basemana 2434: 7302 maximum mana, read by the drain_cap_target arm). 823764 on the caster keeps the Frost copy unresisted. Expected: 10% of the target is 730, 20% of the player's maximum mana (2848, read by the drain_cap_player arm) is 569, so the player cap binds: 569. The other readings give 730 (the target's cap) and 154 (the Banshee's cap, the code before ADR 0521). Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (drain cap: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_target",
+      "label_suffix": "drain_cap_target", "quote": "of your target's mana", "expected": 7302, "before_expected": 7302,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "measure_actor": "dummy", "metric": "max_power", "fields": {"power": 0},
+      "observe_source": "Precondition read for drain_cap: the maximum mana of Magus Zabraxis 16829 at level 60 (2434 x 3 = 7302 from the world DB rows), before and after the same Command as drain_cap."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (drain cap: the player's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_player",
+      "label_suffix": "drain_cap_player", "quote": "of their own maximum mana", "expected": 2848, "before_expected": 2848,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "measure_actor": "caster", "metric": "max_power", "fields": {"power": 0},
+      "observe_source": "Precondition read for drain_cap: the player's maximum mana (2848 on the reference character, owner-questions Q-a1-4: 2464 + 384), read before the Command without a Banshee and after it with the Banshee raised, as in drain_cap."
     },
     {
       "spell": 805044, "name": "Animate: Tomb King (animated)", "kind": "metric_delta", "variant": "count",
