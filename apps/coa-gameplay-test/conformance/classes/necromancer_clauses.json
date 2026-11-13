@@ -1894,6 +1894,7 @@
         "labels": [
           "560730 effect_value #0",
           "560730 spell_duration 560729 #1",
+          "560730 behaviour_metric_delta parasites_lasts",
           "560730 effect_value 561319e0 #2"
         ]
       }
