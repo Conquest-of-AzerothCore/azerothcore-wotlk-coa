@@ -4016,11 +4016,22 @@
   {
     "spell": 805649,
     "clause": "Your Command spells now have a $h% chance to refund a portion of their Runic Power cost.",
-    "labels": [
-      "805649 effect_value #0"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/805649.md."
+    "reason": "Claim 'Your Command spells now have a $h% chance': status 1 (M side b counted pair PAIRID4; baseline without the talent): Command: Undead 504868 casts energize 359505 at 39.76% / 39.75% (9470 in 23815, 9467 in 23814; pilot19), Wilson 99% inside the G-19 band 38%-42% of $h = 40 (ADR 0497: an energize count is a proc event). Claim 'to refund a portion of their Runic Power cost.': not final, route pending; observation: the handler refunds the whole cost the Command paid (the script value set at AscensionNecromancerAbilities.cpp:204), not a stated portion (amount not judged). G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 805649 0 lines (a passive) and its energize 359505 0 lines, so the logs do not decide; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Your Command spells now have a $h% chance",
+        "labels": [
+          "805649 proc_rate"
+        ]
+      },
+      {
+        "claim": "to refund a portion of their Runic Power cost.",
+        "labels": [
+          "805649 effect_value #0"
+        ]
+      }
+    ]
   },
   {
     "spell": 805674,
