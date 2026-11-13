@@ -182,7 +182,7 @@ class aura_ascension_necromancer_event : public AuraScript
                 Cast(player, player, 712434);
             if (critical && Chance(player, 537208, 1, 1000))
                 Reduce(player, 805029, std::abs(Amount(680553)));
-            if (critical && melee && Chance(player, 638403))
+            if (critical && melee && MinionChance(player, actor, 638403))
                 Copy(actor, target, 801241, uint64(damage) * std::max(0, Amount(638403, 1)) / 100);
             if (critical && (actor->GetEntry() == 50068 || actor->GetEntry() == 50115) && player->HasAura(707283))
                 Cast(actor, target, 707284);
@@ -198,7 +198,7 @@ class aura_ascension_necromancer_event : public AuraScript
                             break;
                     }
             }
-            if (Chance(player, 802986))
+            if (MinionChance(player, actor, 802986))
             {
                 Cast(player, actor, 807653);
                 Cast(actor, actor, 504022);
