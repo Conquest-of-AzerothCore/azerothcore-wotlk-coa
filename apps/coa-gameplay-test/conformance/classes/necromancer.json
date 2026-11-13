@@ -1972,12 +1972,12 @@
     },
     {
       "spell": 707562,
-      "name": "Frozen Bodies (consumed by the next Glacial Impact)",
+      "name": "Frozen Bodies (not consumed by Glacial Impact)",
       "kind": "metric_delta",
       "variant": "consumed",
       "label_suffix": "consumed",
       "quote": "you now gain a stack of Frozen Bodies.",
-      "expected": 0,
+      "expected": 1,
       "before_expected": 1,
       "trigger_spell": 707402,
       "target": "dummy",
@@ -2008,7 +2008,7 @@
       "fields": {
         "spell": 712434
       },
-      "observe_source": "Frozen Bodies 712434 (the stack 707562 grants on a Frost crit, proven by the frost_crit entry): Effect[0] aura 108 SPELLMOD_DAMAGE +3% on the Glacial Impact 707592 mask (EffectSpellClassMask[2] 268435456), Effect[1] aura 108 SPELLMOD_EFFECT1 +3%, StackAmount 10. 712434 is cast for real by the caster (the spell the talent casts, AscensionNecromancerEvents.cpp:146-149), not set by the harness. Glacial Impact 707402 (instant, triggers 707592 with its value) at the dummy; fixtures on the caster in both arms as the Glacial Impact damage entry: Permafrost 801747 (the frozen condition of OnSpellCheckCast, not the claim), 984954 (spell crit -1000) and 823764 (target resistance -9999). \"your next Glacial Impact\": before (no impact): a 712434 cast leaves the stack on the caster (1); after: another 712434 cast then a Glacial Impact: the stack is gone (0) if the impact consumes it. The gate learned between the phases is 707562 (crits removed, so it adds no stack)."
+      "observe_source": "Cycle 2 F2: the client text no longer says 'next' (owner text item 6, Q-ma-1 (a): the stack is not consumed), so a Glacial Impact leaves the stack (1). Frozen Bodies 712434 (the stack 707562 grants on a Frost crit, proven by the frost_crit entry): Effect[0] aura 108 SPELLMOD_DAMAGE +3% on the Glacial Impact 707592 mask (EffectSpellClassMask[2] 268435456), Effect[1] aura 108 SPELLMOD_EFFECT1 +3%, StackAmount 10. 712434 is cast for real by the caster (the spell the talent casts, AscensionNecromancerEvents.cpp:146-149), not set by the harness. Glacial Impact 707402 (instant, triggers 707592 with its value) at the dummy; fixtures on the caster in both arms as the Glacial Impact damage entry: Permafrost 801747 (the frozen condition of OnSpellCheckCast, not the claim), 984954 (spell crit -1000) and 823764 (target resistance -9999). \"your next Glacial Impact\": before (no impact): a 712434 cast leaves the stack on the caster (1); after: another 712434 cast then a Glacial Impact: the stack is gone (0) if the impact consumes it. The gate learned between the phases is 707562 (crits removed, so it adds no stack)."
     },
     {
       "spell": 92122,
