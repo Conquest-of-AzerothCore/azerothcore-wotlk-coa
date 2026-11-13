@@ -666,9 +666,7 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         if (_command == 504489)
         {
-            for (Unit* unit : Nearby(target, 8.0f))
-                if (player->IsValidAttackTarget(unit))
-                    Cast(me, unit, 504845);
+            Cast(me, target, 504845);
             return;
         }
         if (_command == 504050)
