@@ -50,3 +50,12 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0044](0044-the-hook-halt-waits-for-an-enemy-movement-order.md) | - | The Hook's halt waits for an enemy movement order | new, superseded by ADR 0604 |
 | [0045](0045-dominion-of-frost-gate-is-read-with-two-minions.md) | - | The Dominion of Frost gate is read with two minions | new |
 | [0046](0046-study-of-death-cut-is-bracketed-by-repeated-casts.md) | - | The Study of Death cut is bracketed by repeated casts | new |
+
+## Re-auditable verdict set
+
+The final merged pair (guide 9.9, ADR 0590): runs 20261113-181701 and 20261113-184212, 3303 scenarios each, `compare
+--build db3a415afcc22c5768dce347f51fde26e13de0e0103c6c8ca1ebbf643b3dbfbe`, server commit e7fcf49d17c2. The set (both
+`compare` outputs, both audits, the two verify_all `report.json` files and the 28 MB manifest, 35 MB in all) is too
+large for this folder. It is kept outside the repository on the class owner's workstation, in the conformance
+checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final7/`, with a `BUILD.txt` that names
+the build, the commit and the re-audit command.
