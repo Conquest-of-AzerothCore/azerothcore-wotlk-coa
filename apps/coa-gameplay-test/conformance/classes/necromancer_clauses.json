@@ -3364,7 +3364,9 @@
     "clause": "When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies.",
     "labels": [
       "707562 behaviour_metric_delta frost_crit",
-      "707562 behaviour_metric_delta no_crit"
+      "707562 behaviour_metric_delta no_crit",
+      "707562 behaviour_metric_delta kill_stack",
+      "707562 behaviour_metric_delta kill_no_talent"
     ],
     "kind": "claim",
     "reason": "Crit part: status 1 (morning batch M side a final pair f5 20261113-070528 / -070734, build f427abd30c75): a forced-crit Lichfrost 801722 (spell crit rating fixture) gives 1 Frozen Bodies 712434 stack with 707562 learned, 0 without; a non-critical Lichfrost (984954 fixture) gives none even with it. Kill part (\"When you kill an enemy that yields experience or honor\"): not final, tool gap \"corpse fixture (a creature killed in the scenario)\" (side b of batch M), not attempted. G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 712434 \"Frozen Bodies\" 12719 lines by id, 14290 by name (2087 applications, 6411 doses, doses up to 10, 87 at 10, none above; 0 removals within 0.3 s after any of the 1260 Glacial Impact 707592 hits by a holder); 707562 0 by id; ~/CoaServer/reference: bindmysoul \"When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies. ... by 3% for 20 seconds, stacking 10 times. Reaching 10 stacks causes your next Glacial Impact ... to critically strike for 50% increased damage.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
