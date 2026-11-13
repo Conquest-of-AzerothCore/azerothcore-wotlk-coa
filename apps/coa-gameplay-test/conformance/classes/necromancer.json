@@ -9509,12 +9509,26 @@
       "variant": "crypt_swarm",
       "label_suffix": "crypt_swarm",
       "quote": "Increases the damage of Crypt Swarm and Blight by $s1%",
-      "expected": 1.15,
+      "expected": 1.1379310344827587,
       "observe_spell": 800343,
       "cast_spell": 501886,
       "cast_wait_ms": 3600,
-      "control": {},
+      "cast_power": 2848,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
       "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
         "learn": [
           561353
         ]
@@ -9522,7 +9536,7 @@
       "critical": false,
       "trials": 51,
       "parts": 25,
-      "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Crypt Swarm 800343, the damage the Crypt Swarm channel rank 8 501886 (3000 ms, the level-60 rank) triggers every 500 ms; each trial is one channel and its 6 hits (800343 cast directly deals only its 1-point base, the channel sets the amount)."
+      "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. Per-tick rounding from the DBC (mentor condition 2026-11-13): Crypt Swarm 501886 Effect[0] aura 227 passes 800343 its base point BasePoints 56 + DieSides 1 + EffectRealPointsPerLevel 0.24 x (60 - SpellLevel 54) = 58.44, int32 58; the +15% applies to that integer hit and truncates: 58 x 1.15 = 66.7 -> 66; expected ratio 66 / 58 = 1.13793 (+13.79%, not +15%). The tool band stays the larger of 5% of the bonus and 2 points around it (G-19). Precondition fixtures in both arms: beeg spellpen 823764 (Effect[0] aura 123 -9999 target resistance, all schools: no partial resist, which spread the per-hit values 49-54 and the pooled reading +12.7..+14.1%) and the caster's mana set to 2848 before each channel (cast_power: 63-80% of the channels failed with SPELL_FAILED_NO_POWER in pair 20261113-084238 / -085831). The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Crypt Swarm 800343, the damage the Crypt Swarm channel rank 8 501886 (3000 ms, the level-60 rank) triggers every 500 ms; each trial is one channel and its 6 hits (800343 cast directly deals only its 1-point base, the channel sets the amount)."
     },
     {
       "spell": 561353,
