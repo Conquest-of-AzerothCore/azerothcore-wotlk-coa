@@ -1856,6 +1856,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`cooldown_reset_rate`](kinds/cooldown_reset_rate.md): a talent's chance to reset a cooldown, from the
   clear-cooldown packets per trigger hit (ADR 0603)
 - [`corpse_per_raise`](kinds/corpse_per_raise.md): the corpses a periodic raise leaves, against the raises (ADR 0595)
+- [`disease_copy`](kinds/disease_copy.md): a disease copied by a snapshot ability, its amount and duration kept against
+  a fresh cast after a spell power raise (ADR 0622)
 - [`effectiveness_delta`](kinds/effectiveness_delta.md): an effect cast without and with the modifier that raises its
   effectiveness (ADR 0601)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)

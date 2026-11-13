@@ -2,7 +2,7 @@ from behaviours import CORPSE
 from profile import CASTER
 
 NAME = 'extra_corpses'
-ORDER = 2
+ORDER = 6
 
 
 def corpse_id(index: int) -> str:
