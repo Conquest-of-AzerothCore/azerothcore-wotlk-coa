@@ -2984,6 +2984,12 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
     before_expected = float(model['before_expected'])
     expected = float(model['expected'])
     tolerance = float(model.get('tolerance', METRIC_DELTA_FLOAT_TOLERANCE))
+    if 'expected_gain' in model:
+        return metric_gain_verdict(base, model, before, after, before_expected, float(model['expected_gain']),
+                                   tolerance)
+    if 'expected_ratio' in model:
+        return metric_ratio_verdict(base, model, before, after, before_expected, float(model['expected_ratio']),
+                                    tolerance)
     before_ok = abs(before - before_expected) <= tolerance
     at_least = model.get('after_at_least')
     after_ok = after >= float(at_least) if at_least is not None else abs(after - expected) <= tolerance
@@ -3010,6 +3016,27 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
     low, high = (float(at_least), None) if at_least is not None else (expected - tolerance, expected + tolerance)
     return replace(base, status=status, measured=after, expected=expected, low=low, high=high,
                    explanation=explanation)
+
+
+def metric_gain_verdict(base: Verdict, model: dict, before: float, after: float, least_before: float, gain: float,
+                        tolerance: float) -> Verdict:
+    measured = after - before
+    status = 'ok' if before >= least_before - tolerance and abs(measured - gain) <= tolerance else 'alert'
+    explanation = (f'{model["metric"]} measured {before:g} before and {after:g} after, a gain of {measured:g} '
+                   f'(expected {gain:g}, within {tolerance:g}); the before reading must reach {least_before:g} so '
+                   f'that no floor of the metric can hide the stated gain')
+    return replace(base, status=status, measured=measured, expected=gain, low=gain - tolerance,
+                   high=gain + tolerance, explanation=explanation)
+
+
+def metric_ratio_verdict(base: Verdict, model: dict, before: float, after: float, least_before: float, ratio: float,
+                         tolerance: float) -> Verdict:
+    measured = after / before if before else float('nan')
+    status = 'ok' if before >= least_before and abs(measured - ratio) <= tolerance else 'alert'
+    explanation = (f'{model["metric"]} measured {before:g} before and {after:g} after, a ratio of {measured:.6g} '
+                   f'(expected {ratio:g}, within {tolerance:g}); the before reading must reach {least_before:g}')
+    return replace(base, status=status, measured=measured, expected=ratio, low=ratio - tolerance,
+                   high=ratio + tolerance, explanation=explanation)
 
 
 def stat_gain_arm_labels(arm: dict) -> list[str]:

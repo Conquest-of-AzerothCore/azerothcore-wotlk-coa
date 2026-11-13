@@ -252,6 +252,15 @@ the cast with auto attacks at the dummy, for a passive whose trigger is a swing:
 `spell`) sets the forced crit rating on the caster, as the trigger entries do. The scenario's `timeout_ms` is its
 summed waits plus the 60 s margin. Parry Dance 804912 uses it to read the `aura_stacks` of 560651 after ten
 forced-crit swings: 0 without the passive, the cap of 5 with it.
+`gate_cast: true` (ADR 0380) casts the gate at the caster between the attack phases instead of learning it, after
+`setup_casts` made once before the first phase: Undead: Pacify 500983 raises a Ghoul, which joins the caster's
+attacks, then is cast, and the Ghoul adds no hit. `expected_gain` (ADR 0380) judges the after reading less the before
+reading, with `before_expected` the least before reading at which a floor of the metric cannot hide the gain, and
+`expected` their sum: Bone Ward 681529 reads a dummy's attack power, lifted by AP Test 56412, fall by 223 after a
+Bone Toss 707669.
+`expected_ratio` with a `tolerance` (ADR 0380) judges the after reading over the before reading instead, with
+`before_expected` its least before reading: Pierced 570216 leaves 0.9 of the dummy's armor. `setup_target` sends the
+setup casts to their own unit: Greater Skeletal Warrior 504901's raise goes to the caster and its Command to the dummy.
 
 ### Health-threshold ratio scenarios (`behaviour_ratio`, `kind: "health_ratio"`)
 

@@ -9698,5 +9698,138 @@ class MinionModelAuraTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), entry)
 
 
+class MetricDeltaGainAndGateCastTests(unittest.TestCase):
+    BONE_WARD = 681529
+    PACIFY = 500983
+    RAISE_GHOUL = 500971
+
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    def judged(self, entry: dict, before: float, after: float) -> str:
+        _, expectations = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        return judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (before, after)))),
+                               expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_gain_is_judged_on_the_difference(self):
+        entry = self.entry(self.BONE_WARD, 'attack_power')
+        self.assertEqual(self.judged(entry, 841.0, 618.0), 'ok')
+        self.assertEqual(self.judged(entry, 845.0, 622.0), 'ok')
+        self.assertEqual(self.judged(entry, 841.0, 841.0), 'alert')
+        self.assertEqual(self.judged(entry, 841.0, 730.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_floored_reading_cannot_pass_as_the_gain(self):
+        entry = self.entry(self.BONE_WARD, 'attack_power')
+        self.assertEqual(self.judged(entry, 223.0, 0.0), 'alert')
+        self.assertEqual(self.judged(entry, 38.0, 0.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_gain_must_match_the_stated_readings(self):
+        entry = {**self.entry(self.BONE_WARD, 'attack_power'), 'expected': 600}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        entry = {**self.entry(self.BONE_WARD, 'attack_power'), 'after_at_least': 1}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_the_gain_the_absolute_readings_are_judged(self):
+        entry = {key: value for key, value in self.entry(self.BONE_WARD, 'attack_power').items()
+                 if key != 'expected_gain'}
+        self.assertEqual(self.judged(entry, 801.0, 578.0), 'ok')
+        self.assertEqual(self.judged(entry, 841.0, 618.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_gate_is_cast_between_the_attack_phases(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.entry(self.PACIFY,
+                                                                                              'no_attack')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        attacks = [index for index, step in enumerate(steps) if step.get('action') == 'attack']
+        casts = [(index, step['spell']) for index, step in enumerate(steps) if step.get('action') == 'cast']
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        self.assertEqual(len(attacks), 2)
+        self.assertEqual([spell for index, spell in casts if index < attacks[0]], [self.RAISE_GHOUL])
+        self.assertEqual([spell for index, spell in casts if before < index < attacks[1]], [self.PACIFY])
+        self.assertFalse(any(step.get('action') == 'learn' and step.get('spell') == self.PACIFY
+                             for step in steps[before:]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_that_keeps_attacking_alerts(self):
+        entry = self.entry(self.PACIFY, 'no_attack')
+        self.assertEqual(self.judged(entry, 3.0, 3.0), 'ok')
+        self.assertEqual(self.judged(entry, 3.0, 6.0), 'alert')
+        self.assertEqual(self.judged(entry, 0.0, 0.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_gate_cast_needs_the_attack_phases(self):
+        entry = {**self.entry(self.PACIFY, 'no_attack'), 'attack_swings': 0}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        entry = {key: value for key, value in self.entry(self.PACIFY, 'no_attack').items() if key != 'gate_cast'}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+
+
+class MetricDeltaRatioAndSetupTargetTests(unittest.TestCase):
+    WARRIOR = 504901
+    COMMAND = 504905
+
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == self.WARRIOR and entry.get('label_suffix') == suffix)
+
+    def judged(self, entry: dict, before: float, after: float) -> str:
+        _, expectations = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        return judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (before, after)))),
+                               expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_ratio_is_judged_on_the_quotient(self):
+        entry = self.entry('pierced_armor')
+        self.assertEqual(self.judged(entry, 528.0, 475.0), 'ok')
+        self.assertEqual(self.judged(entry, 562.0, 505.0), 'ok')
+        self.assertEqual(self.judged(entry, 562.0, 562.0), 'alert')
+        self.assertEqual(self.judged(entry, 562.0, 449.0), 'alert')
+        self.assertEqual(self.judged(entry, 100.0, 90.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_ratio_needs_its_tolerance_and_matching_readings(self):
+        for change in ({'tolerance': None}, {'expected': 500}, {'expected_gain': -50}):
+            entry = {key: value for key, value in {**self.entry('pierced_armor'), **change}.items()
+                     if value is not None}
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_setup_casts_go_to_their_own_target(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.entry('command_pierced')))
+        run.validate(scenario)
+        casts = [(step['spell'], step['target']) for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertEqual(casts, [(self.WARRIOR, CASTER), (self.WARRIOR, CASTER), (self.COMMAND, 'dummy')])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_the_field_the_setup_casts_follow_the_trigger_target(self):
+        entry = {key: value for key, value in self.entry('command_pierced').items() if key != 'setup_target'}
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        casts = [(step['spell'], step['target']) for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertEqual(casts, [(self.WARRIOR, 'dummy'), (self.WARRIOR, 'dummy'), (self.COMMAND, 'dummy')])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_setup_target_needs_setup_casts_and_a_scenario_unit(self):
+        for change in ({'setup_casts': [], 'setup_in_before': False}, {'setup_target': 'ally'}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_class_file(23), metric_delta_spec({**self.entry('command_pierced'),
+                                                                              **change}))
+
+
 if __name__ == '__main__':
     unittest.main()

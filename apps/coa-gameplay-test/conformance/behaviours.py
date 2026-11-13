@@ -1302,6 +1302,10 @@ class MetricDeltaSpec:
     gate_settle_ms: int = 0
     learn: tuple[int, ...] = ()
     setup_in_before: bool = False
+    expected_gain: float | None = None
+    gate_cast: bool = False
+    setup_target: str | None = None
+    expected_ratio: float | None = None
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1322,6 +1326,17 @@ def phase_aura_step(aura: tuple[int, int, str, str]) -> dict:
             **({'target': on} if on != CASTER else {}), **({'caster': by} if by != on else {})}
 
 
+def gate_cast_steps(records: Records, spell: int) -> list[dict]:
+    facts = facts_of(records, spell)
+    return ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}] + cast_gate_power_step(facts)
+            + required_aura_steps(facts) + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': CASTER}])
+
+
+def attack_setup_cast_steps(records: Records, spell: int, wait_ms: int) -> list[dict]:
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + gate_cast_steps(records, spell)
+            + ([{'action': 'wait', 'ms': wait_ms}] if wait_ms else []))
+
+
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
     return f'{spec.spell} {spec.metric} {moment}'
 
@@ -1337,11 +1352,27 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'default gate timing')
     if spec.expiry_wait_ms is not None and spec.gate_timing != 'start':
         raise ValueError(f'{spec.spell} sets expiry_wait_ms but gate_timing is not "start"')
-    if spec.attack_swings and (spec.gate_timing != 'between' or spec.setup_casts or spec.target != TARGET
+    if spec.expected_gain is not None and (spec.after_at_least is not None or spec.expiry_wait_ms is not None
+                                           or spec.expected - spec.before_expected != spec.expected_gain):
+        raise ValueError(f'{spec.spell} judges a gain without an after floor or expiry read, and its expected '
+                         f'reading is its least before reading plus the gain')
+    if spec.attack_swings and (spec.gate_timing != 'between' or (spec.setup_casts and not spec.gate_cast)
+                               or spec.target != TARGET
                                or spec.setup_actor_aura is not None or spec.trigger_only_after
                                or spec.phase_auras or spec.after_auras):
         raise ValueError(f'{spec.spell} attacks the dummy as its trigger, so it learns the gate between the two '
                          f'attack phases and takes no setup casts, setup aura or after-only trigger')
+    if spec.gate_cast and not spec.attack_swings:
+        raise ValueError(f'{spec.spell} casts its gate between two attack phases only')
+    if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
+                                          or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER)):
+        raise ValueError(f'{spec.spell} names a setup target without setup casts, or one that is not a scenario unit')
+    if spec.expected_ratio is not None and (spec.expected_gain is not None or spec.after_at_least is not None
+                                            or spec.expiry_wait_ms is not None or spec.tolerance is None
+                                            or abs(spec.expected - spec.before_expected * spec.expected_ratio)
+                                            > spec.tolerance * spec.before_expected):
+        raise ValueError(f'{spec.spell} judges a ratio with a stated tolerance, without a gain, an after floor or an '
+                         f'expiry read, and its expected reading is its least before reading times the ratio')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} has an unknown force_crit {spec.force_crit!r}')
     if bool(spec.enemy_player_race) != (ENEMY_PLAYER in (spec.target, spec.measure_actor, spec.fields.get('target'))):
@@ -1364,7 +1395,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                              'value': setup_facts.mana_cost})
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': setup_spell})
             steps += required_aura_steps(setup_facts)
-            steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell, 'target': spec.target})
+            steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell,
+                          'target': spec.setup_target or spec.target})
             if spec.setup_wait_ms:
                 steps.append({'action': 'wait', 'ms': spec.setup_wait_ms})
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
@@ -1451,8 +1483,19 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         contract = (f'With/without check: {spec.metric} {spec.fields} after {spec.attack_swings} auto-attack swing '
                     f'intervals at the dummy, measured before and after {gate_spell} is learned, waiting '
                     f'{spec.expire_ms} ms between phases for the first phase\'s effect to fully expire.')
-        steps = (base_steps(class_file) + swings
-                 + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step]
+        gate_steps = [gate_learn_step]
+        setup_steps = []
+        if spec.gate_cast:
+            contract = (f'With/without check: {spec.metric} {spec.fields} after {spec.attack_swings} auto-attack '
+                        f'swing intervals at the dummy, measured before and after a real cast of {gate_spell} at the '
+                        f'caster, the setup casts {list(spec.setup_casts)} made once before the first phase, '
+                        f'waiting {spec.expire_ms} ms after the cast.')
+            gate_steps = gate_cast_steps(records, gate_spell)
+            setup_steps = [gate_learn_step] + [step for setup_spell in spec.setup_casts
+                                               for step in attack_setup_cast_steps(records, setup_spell,
+                                                                                   spec.setup_wait_ms)]
+        steps = (base_steps(class_file) + setup_steps + swings
+                 + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] + gate_steps
                  + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]
                  + swings + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     else:
@@ -1501,6 +1544,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         model['tolerance'] = spec.tolerance
     if spec.after_at_least is not None:
         model['after_at_least'] = spec.after_at_least
+    if spec.expected_gain is not None:
+        model['expected_gain'] = spec.expected_gain
+    if spec.expected_ratio is not None:
+        model['expected_ratio'] = spec.expected_ratio
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected
@@ -1526,7 +1573,9 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            tuple(phase_aura(raw) for raw in entry.get('after_auras', ())),
                            entry.get('select_dummy', False), entry.get('after_at_least'), entry.get('cast_power'),
                            entry.get('enemy_player_race', 0), entry.get('gate_settle_ms', 0),
-                           tuple(entry.get('learn', ())), entry.get('setup_in_before', False))
+                           tuple(entry.get('learn', ())), entry.get('setup_in_before', False),
+                           entry.get('expected_gain'), entry.get('gate_cast', False), entry.get('setup_target'),
+                           entry.get('expected_ratio'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

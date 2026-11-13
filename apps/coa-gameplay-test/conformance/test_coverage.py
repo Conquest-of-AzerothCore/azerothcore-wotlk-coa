@@ -1100,5 +1100,16 @@ class FragmentTest(unittest.TestCase):
                                    str(ledger)]), DIFF_EXIT)
 
 
+
+class CastSpeedPromiseTest(unittest.TestCase):
+    def test_a_learned_cast_speed_contrast_proves_a_casting_speed_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta poison_speed', BEHAVIOUR_METRIC_DELTA, 'cast_speed_multiplier',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim("reducing the target's casting speed by $805024s1%", '1 behaviour_metric_delta poison_speed')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('reducing their Armor by $570216s1%', '1 behaviour_metric_delta poison_speed')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+
 if __name__ == '__main__':
     unittest.main()
