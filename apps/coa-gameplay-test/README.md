@@ -761,7 +761,8 @@ by creatures of that entry, or sum their healing including or excluding overheal
 damage events, or sum their post-mitigation damage, from the actor's native combat packets. Optional `target`
 filters the victim, `pet: true` selects the actor's current pet as caster, `caster` selects another actor such
 as a creature fixture, and `critical` filters critical or noncritical hits. `blocked` keeps only the direct hits
-whose log reports (true) or lacks (false) a blocked amount; periodic damage is never blocked. Values accumulate
+whose log reports (true) or lacks (false) a blocked amount; periodic damage is never blocked. `resisted` does the same with
+the log's resisted amount; periodic damage always reads unresisted. Values accumulate
 throughout the scenario; use snapshots and `relative_to` around a cast.
 `caster_entry` (in place of `entry`, `pet` and `caster`) keeps the events cast by creatures of that entry, as the
 `owned_creature_*` metrics resolve it, without a live creature: it reads 0 when none has cast, so a control arm
@@ -1012,6 +1013,9 @@ Player commands retain normal permission and gameplay checks; verify their effec
 `owned_creature_count` requires a player and `entry`. It counts living creatures of that entry owned, created or summoned by
 the player, in the same phase and within 100 yards, including summons outside the guardian-pet slot.
 `creator_only: true` restricts that count to creatures whose native creator GUID is the player.
+`owned_creature_summon_count` requires a player and `entry`. It counts every creature of that entry that entered the
+world since the run began with the player as its owner, else its summoner, else its creator, alive or not: a running
+summon count for summons that leave no spell event.
 `controlled_aura_count` requires `spell` and counts the actor's living controlled units (pets, guardians and
 minions of any entry) that carry that aura. `controlled_aura_min_damage` and `controlled_aura_max_damage` return
 the main-hand `UNIT_FIELD_MINDAMAGE`/`UNIT_FIELD_MAXDAMAGE` of the first such unit: the range its melee swing

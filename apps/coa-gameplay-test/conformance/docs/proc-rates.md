@@ -353,3 +353,13 @@ and 2 points) and judges the Wilson interval inside the band: `ok` inside, `aler
 (`event_metric: "spell_go_count"`, `event_actor: "minion"`) when a hit can be fully resisted, and
 `trial_excluded_spells` (with `trial_excluded_reason`) removes the minion's hits of those spells from the trials,
 for hits the event script cannot roll on (Plague Horde's Zombie Plague 504022, cast inside its own handler).
+
+### Summon procs (ADR 0351)
+
+A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck
+Summoner 806086) counts it with `event_metric: "owned_creature_summon_count"` and `event_entry`, the creature entry:
+the harness's running count of creatures of that entry that entered the world with the player as owner, summoner or
+creator. It needs a cast trigger; `events_per_proc` is the creatures per proc (2 Rotlings). `baseline: true` on a cast
+trigger casts the trigger `max(20, ceil(log 0.01 / log(1 - p)))` times before the passive is learned (part 1 only):
+any summon there is an alert. `trials_per_attempt` divides the scheduled casts when each cast yields several trials
+(Harvest Plague's leech ticks: two per attempt, since aura 53 now counts in the tick spacing like aura 3).

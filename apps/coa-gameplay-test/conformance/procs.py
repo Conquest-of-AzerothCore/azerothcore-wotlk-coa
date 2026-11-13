@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Sequence
 
@@ -28,9 +28,11 @@ CAST_COUNT = 'spell_cast_count'
 MELEE_EVENTS = 'melee_attack_count'
 MINION_PROC_COUNT = 'owned_creature_spell_proc_count'
 EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS, MINION_PROC_COUNT})
+SUMMON_EVENTS = 'owned_creature_summon_count'
 CHARGES = 'spell_charges'
 TRIGGER_TARGETS = frozenset({TARGET, ALLY})
 PERIODIC_DAMAGE_AURA = 3
+PERIODIC_LEECH_AURA = 53
 TICKS_PER_ATTEMPT = 2
 TRIGGERING_HITS = 'triggering hits only'
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
@@ -91,6 +93,16 @@ def proc_measurements(aura: int) -> dict[str, str]:
 
 def baseline_attempts(chance_pct: float) -> int:
     return max(MINION_BASELINE_ATTEMPTS, math.ceil(math.log(BASELINE_MISS_RISK) / math.log(1 - chance_pct / 100)))
+
+
+def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    if entry['trigger']['action'] != CAST:
+        raise ValueError(f'Proc {entry["aura"]} has a baseline without a minion or cast trigger')
+    labels = baseline_labels(entry['aura'])
+    held = replace(plan, per_part=baseline_attempts(plan.chance_pct))
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': trigger_spell(entry)}] + cast_attempts(class_file, entry, held)
+            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, trials_step(entry, labels['trials']),
+               {**event_steps(entry)[0], 'label': labels['events']}])
 
 
 def excluded_trial_labels(entry: dict) -> list[str]:
@@ -224,7 +236,7 @@ def charge_pool_label(aura: int) -> str:
 
 def tick_spacing(class_file: dict, facts: RankFacts, spell: int) -> int:
     ticks = [records_of(class_file).field('Spell', spell, f'EffectAmplitude[{effect}]') for effect in EFFECTS
-             if facts.aura_names[effect] == PERIODIC_DAMAGE_AURA]
+             if facts.aura_names[effect] in (PERIODIC_DAMAGE_AURA, PERIODIC_LEECH_AURA)]
     return TICKS_PER_ATTEMPT * max(ticks) + CAST_MARGIN_MS if ticks else 0
 
 
@@ -293,7 +305,9 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     if entry.get('status'):
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
     minion_cast_events = entry.get('event_actor') == MINION and entry['event_metric'] == 'spell_go_count'
-    if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry) and not minion_cast_events:
+    if counts_summons(entry):
+        checked_summon_entry(entry)
+    elif entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry) and not minion_cast_events:
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
     if entry['event_metric'] == MINION_PROC_COUNT and entry.get('event_actor') != MINION:
         raise ValueError(f'Proc {entry["aura"]} counts minion procs without a minion event actor')
@@ -302,8 +316,11 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     per_trigger_limit(entry)
     chance = proc_chance(class_file, entry)
     needed = band_trials_needed(chance / 100) if entry.get('band') else trials_needed(chance / 100)
-    scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN) if attempts is None else attempts
-    if scheduled < needed:
+    per_attempt = entry.get('trials_per_attempt', 1)
+    if not isinstance(per_attempt, int) or per_attempt < 1:
+        raise ValueError(f'Proc {entry["aura"]} needs a positive integer trials_per_attempt')
+    scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN / per_attempt) if attempts is None else attempts
+    if scheduled * per_attempt < needed:
         raise ValueError(f'{scheduled} attempts are fewer than the {needed} trials a {chance:g}% proc needs')
     interval = attempt_interval(class_file, entry)
     held = baseline_attempts(chance) * interval + DRAIN_MS \
@@ -457,9 +474,23 @@ def event_terms(entry: dict) -> list[tuple[str, dict]]:
                                           for term in entry.get('extra_event_terms', [])]
 
 
+def counts_summons(entry: dict) -> bool:
+    return entry['event_metric'] == SUMMON_EVENTS
+
+
+def checked_summon_entry(entry: dict) -> None:
+    if entry['trigger']['action'] != CAST or entry.get('event_actor') or entry.get('extra_event_terms'):
+        raise ValueError(f'Proc {entry["aura"]} counts summons, which needs a cast trigger and no other event terms')
+    if not isinstance(entry.get('event_entry'), int) or entry['event_entry'] <= 0:
+        raise ValueError(f'Proc {entry["aura"]} counts summons of a positive creature event_entry')
+
+
 def event_steps(entry: dict) -> list[dict]:
     if counts_charges(entry):
         return []
+    if counts_summons(entry):
+        return [measurement(proc_measurements(entry['aura'])['events'], CASTER, SUMMON_EVENTS,
+                            entry=entry['event_entry'])]
     if entry.get('event_actor') == MINION:
         if entry['event_metric'] not in ('spell_damage_count', 'spell_go_count', MINION_PROC_COUNT) \
                 or minion_entry(entry) is None:

@@ -1,5 +1,6 @@
 import copy
 import json
+import math
 from pathlib import Path
 import unittest
 
@@ -26,6 +27,10 @@ GHOUL = 50073
 RAISE_GHOUL = 500971
 VIRULENCY = 801938
 STUDY_OF_DEATH = 704721
+UNRELENTING_ARMY = 705747
+MUCK_SUMMONER = 806086
+LESSER_ZOMBIE = 503031
+ROTLING = 50133
 WINDOW_MS = 3000
 
 
@@ -290,6 +295,86 @@ class MinionScenarioTest(unittest.TestCase):
         entry = necromancer_entry('triggers', PANDEMIC, 'cooldown_delta')
         scenario, _ = minion_cooldown_scenario(NECROMANCER, entry)
         self.assertFalse([step for step in scenario['steps'] if str(step.get('label', '')).endswith(' settle')])
+
+
+class SummonProcTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def test_summon_proc_counts_summons_of_its_creature(self):
+        scenario, _ = proc_scenario(NECROMANCER, necromancer_entry('procs', UNRELENTING_ARMY))
+        reads = [step for step in scenario['steps'] if step.get('metric') == 'owned_creature_summon_count']
+        self.assertEqual([read['label'] for read in reads],
+                         [baseline_labels(UNRELENTING_ARMY)['events'], proc_measurements(UNRELENTING_ARMY)['events']])
+        self.assertTrue(all(read['entry'] == LESSER_ZOMBIE for read in reads))
+
+    def test_cast_baseline_runs_before_the_passive_is_learned(self):
+        scenario, expectations = proc_scenario(NECROMANCER, necromancer_entry('procs', UNRELENTING_ARMY))
+        steps = scenario['steps']
+        learned = next(index for index, step in enumerate(steps)
+                       if step['action'] == 'learn' and step['spell'] == UNRELENTING_ARMY)
+        held = next(index for index, step in enumerate(steps)
+                    if step.get('label') == baseline_labels(UNRELENTING_ARMY)['events'])
+        self.assertLess(held, learned)
+        self.assertEqual(expectations[0].model['baseline']['attempts'], baseline_attempts(20.0))
+
+    def test_later_parts_have_no_baseline(self):
+        scenario, expectations = proc_scenario(NECROMANCER, necromancer_entry('procs', UNRELENTING_ARMY), 1)
+        self.assertNotIn('baseline', expectations[0].model)
+
+    def test_trials_per_attempt_divides_the_scheduled_casts(self):
+        entry = necromancer_entry('procs', UNRELENTING_ARMY)
+        single = proc_plan(NECROMANCER, {**entry, 'trials_per_attempt': 1})
+        double = proc_plan(NECROMANCER, entry)
+        self.assertEqual(double.scheduled, math.ceil(single.scheduled / 2))
+        with self.assertRaises(ValueError):
+            proc_plan(NECROMANCER, {**entry, 'trials_per_attempt': 0})
+
+    def test_summon_proc_needs_a_cast_trigger_and_an_entry(self):
+        entry = necromancer_entry('procs', MUCK_SUMMONER)
+        with self.assertRaises(ValueError):
+            proc_plan(NECROMANCER, {**entry, 'event_entry': 0})
+        with self.assertRaises(ValueError):
+            proc_plan(NECROMANCER, {**entry, 'trigger': {'action': 'minion', 'spell': RAISE_GHOUL, 'entry': GHOUL,
+                                                          'swing_ms': 2000, 'swing_source': 'creature_template'}})
+
+    def rotlings(self, baseline_events: int, events: int, per_proc: int = 2):
+        entry = {**necromancer_entry('procs', MUCK_SUMMONER), 'events_per_proc': per_proc}
+        _, expectations = proc_scenario(NECROMANCER, entry)
+        expectation = expectations[0]
+        model = {**expectation.model, 'parts': 1}
+        labels, held = proc_measurements(MUCK_SUMMONER), baseline_labels(MUCK_SUMMONER)
+        steps = [assert_step(held['trials'], '90'), assert_step(held['events'], str(baseline_events)),
+                 assert_step(labels['trials'], '3290'), assert_step(labels['attempts'], '3290'),
+                 assert_step(labels['events'], str(events + baseline_events)), assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-806086-part-1', 'proc',
+                                [replace_model(expectation, model)], steps=steps, spell=MUCK_SUMMONER,
+                                rank=MUCK_SUMMONER)
+        manifest, results = self.workspace.manifest()
+        verdicts = [verdict for verdict in compare(manifest, results,
+                                                   tooltips=constant_reader(Displayed('$h', 5.0, None, 'chance_pct')))
+                    if verdict.check == PROC_CHECK]
+        self.assertEqual(len(verdicts), 1)
+        return verdicts[0]
+
+    def test_rotling_summons_two_per_proc_at_the_chance_is_ok(self):
+        verdict = self.rotlings(0, 320)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 160 / 3200)
+
+    def test_rotling_mutant_counting_each_summon_as_a_proc_alerts(self):
+        self.assertEqual(self.rotlings(0, 320, per_proc=1).status, 'alert')
+
+    def test_rotling_mutant_summoning_without_the_passive_alerts(self):
+        self.assertEqual(self.rotlings(2, 320).status, 'alert')
+
+
+def replace_model(expectation: Expectation, model: dict) -> Expectation:
+    return Expectation(expectation.label, expectation.check, expectation.spell_id, expectation.rank_id,
+                       expectation.effect_index, expectation.displayed, expectation.rule, model)
 
 
 if __name__ == '__main__':

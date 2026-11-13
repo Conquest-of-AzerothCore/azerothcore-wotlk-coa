@@ -755,6 +755,47 @@ private:
 bool AuraApplyCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> AuraApplyCounter::_counts;
 
+class SummonCounter
+{
+public:
+    static void Begin()
+    {
+        _counts.clear();
+        _enabled = true;
+    }
+
+    static void Record(Creature const* creature)
+    {
+        if (!_enabled || !creature)
+            return;
+        ObjectGuid owner = creature->GetOwnerGUID();
+        if (owner.IsEmpty() && creature->IsSummon())
+            owner = creature->ToTempSummon()->GetSummonerGUID();
+        if (owner.IsEmpty())
+            owner = creature->GetCreatorGUID();
+        if (!owner.IsEmpty())
+            ++_counts[{ owner, creature->GetEntry() }];
+    }
+
+    static uint32 Count(ObjectGuid owner, uint32 entry)
+    {
+        auto itr = _counts.find({ owner, entry });
+        return itr == _counts.end() ? 0 : itr->second;
+    }
+
+    static void Forget(std::set<ObjectGuid> const& units)
+    {
+        std::erase_if(_counts, [&units](auto const& entry) { return units.contains(entry.first.first); });
+    }
+
+private:
+    static bool _enabled;
+    static std::map<std::pair<ObjectGuid, uint32>, uint32> _counts;
+};
+
+bool SummonCounter::_enabled = false;
+std::map<std::pair<ObjectGuid, uint32>, uint32> SummonCounter::_counts;
+
 constexpr uint32 SpellModMutantOwnerAura = 100523;
 
 class SpellModMutants
@@ -948,6 +989,7 @@ struct SpellDamageEvent
     uint32 damage = 0;
     bool critical = false;
     bool blocked = false;
+    bool resisted = false;
     uint32 casterEntry = 0;
     uint64 atMs = 0;
 };
@@ -1201,6 +1243,7 @@ void ObserveSpellDamage(Actor& actor, WorldPacket const& packet, Player* player)
         response >> blocked >> hitInfo;
         event.critical = (hitInfo & SPELL_HIT_TYPE_CRIT) != 0;
         event.blocked = blocked != 0;
+        event.resisted = resist != 0;
         actor.spellLogs.push_back(
             {event.caster, event.target, event.spell, event.damage, absorb, resist, event.critical});
     }
@@ -2426,6 +2469,7 @@ public:
         }
         ProcCounter::Forget(units);
         AuraApplyCounter::Forget(units);
+        SummonCounter::Forget(units);
         return ungrouped;
     }
 
@@ -4849,12 +4893,13 @@ private:
             auto casterEntry = step.get_optional<uint32>("caster_entry");
             Require(!casterEntry || !step.get_optional<uint32>("entry"),
                 "Spell damage query selects an owned creature or a caster entry");
+            auto resisted = step.get_optional<bool>("resisted");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
                 if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
                     event.spell == spell &&
                     (!target || event.target == target) && (!critical || event.critical == *critical) &&
-                    (!blocked || event.blocked == *blocked))
+                    (!blocked || event.blocked == *blocked) && (!resisted || event.resisted == *resisted))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);
         }
@@ -5355,6 +5400,8 @@ private:
             Aura* aura = charm ? charm->GetAura(spell, caster) : nullptr;
             return aura ? aura->GetStackAmount() : 0;
         }
+        if (metric == "owned_creature_summon_count")
+            return SummonCounter::Count(player->GetGUID(), step.get<uint32>("entry"));
         if (metric == "owned_creature_count")
         {
             uint32 entry = step.get<uint32>("entry");
@@ -8622,6 +8669,7 @@ public:
         _started = Clock::now();
         ProcCounter::Begin();
         AuraApplyCounter::Begin();
+        SummonCounter::Begin();
         _caseDirectory = sConfigMgr->GetOption<std::string>("CoAGameplayTest.CaseDirectory", "", false);
         if (_caseDirectory.empty())
             StartSingle();
@@ -9370,6 +9418,7 @@ public:
 
     void OnCreatureAddWorld(Creature* creature) override
     {
+        SummonCounter::Record(creature);
         if (creature)
             TimelineRecorder::Record(creature, { 0, CoAGameplay::TimelineEventKind::Spawn, creature->GetGUID(),
                 ObjectGuid::Empty, creature->GetEntry(), 0, 0 });
