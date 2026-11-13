@@ -12,7 +12,8 @@
     "labels": [
       "92121 behaviour_metric_delta crypt_swarm"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 92121,
@@ -20,7 +21,8 @@
     "labels": [
       "92121 behaviour_metric_delta lichfrost"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 92122,
@@ -52,7 +54,8 @@
     "labels": [
       "92123 behaviour_metric_delta"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 300233,
@@ -111,7 +114,8 @@
       "300241 gate_absence_count",
       "300241 trigger_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Threshold bracketed: heals at 45% health (trigger_count), none at 55% (gate_absence). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1919 Vampiric Aura lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 300241,
@@ -120,7 +124,8 @@
       "300241 trigger_count",
       "300241 trigger_magnitude_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1919 Vampiric Aura lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 300580,
@@ -1003,7 +1008,8 @@
         "labels": []
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 (abomination_aura). Claim \"only\": Status: route pending (for the route agent). Two Abominations need Life Force 7; the author rig reached 4 (incorrect test, removed). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found for 525388 (77 lines name other spells \"Army of the Dead\"); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 525600,
@@ -1011,7 +1017,8 @@
     "labels": [
       "525600 behaviour_metric_delta crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Read on the live Ghoul (G-23 subset: Ghoul only, the claim names Ghouls). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found for 525388 (77 lines name other spells \"Army of the Dead\"); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 525600,
@@ -1019,7 +1026,8 @@
     "labels": [
       "525600 behaviour_metric_delta haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found for 525388 (77 lines name other spells \"Army of the Dead\"); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 531126,
@@ -1046,7 +1054,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Chance proven inside the band (ADR 0346, about 4787 trials); 20 Runic Power per proc. Ghoul rig only (G-23 subset). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 15470 Overwhelming Forces 531129 lines, not tallied per hit; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 531128,
@@ -1054,7 +1063,8 @@
     "labels": [
       "531128 proc_energize_amount 0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 15470 Overwhelming Forces 531129 lines, not tallied per hit; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 531130,
@@ -1096,13 +1106,15 @@
       "537208 trigger_cooldown_delta",
       "537208 trigger_cooldown_gate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Cooldown cut per crit (data) and the cast gate (behaviour). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 537208,
     "clause": "Can only occur once per sec.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). A single Ghoul crits every 2 s, so the 1 s internal cooldown never binds; needs two minions with timed swings. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 560012,
@@ -1121,7 +1133,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 (condition): data conformant after fix ADR 0345 (mage raised after the learn: 5 then 15, a condition-contrast state read); Status: route pending (for the route agent). for a behaviour read (a Ghoul crit rate with and without the mage). Claim 2 status 1. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 560045,
@@ -1267,7 +1280,8 @@
       "560798 trigger_cooldown_delta",
       "560798 trigger_cooldown_gate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Fixtures: Crypt Plague 570131 on the dummy and Infestation 803782 cleared before each Virulency (set_aura). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"by -1 sec\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 560800,
@@ -1407,7 +1421,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim \"Crypt Swarm\": alert/ok flip at +12.9%/+13.3% against +15% (band 13-17); per-tick base about 51.7, int32 truncation suspected (G-27) but not modelled: Status: route pending (for the route agent). Claim \"Blight\" status 1 (+14.5%). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"Crypt Swarm by 15%\" only (an older state), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 561353,
@@ -1415,7 +1430,17 @@
     "labels": [
       "561353 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). A cooldown reset on 5% of Blight hits needs a reset-count event; tool gap. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"Crypt Swarm by 15%\" only (an older state), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "tool_gap": {
+      "reason": "a proc event for a cooldown reset (Corpse Explosion 533236) has no event metric",
+      "attempts": [
+        {
+          "agent": "necro-b1-b author (opus)",
+          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
+        }
+      ]
+    }
   },
   {
     "spell": 570046,
@@ -1523,7 +1548,8 @@
       "ruling": null,
       "spell": 638403,
       "dbc_differs": "Description differs from Spell.dbc"
-    }
+    },
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 317 Bone Club 801241 hits by Ghouls (2026-08-11); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 638403,
@@ -1542,13 +1568,14 @@
       "ruling": null,
       "spell": 638403,
       "dbc_differs": "Description differs from Spell.dbc"
-    }
+    },
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). After fix ADR 0344: 50.1%/50.0% of forced Ghoul crits cast Bone Club, inside the band (Anointed 280912 forced-crit fixture). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 317 Bone Club 801241 hits by Ghouls (2026-08-11); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 638403,
     "clause": "dealing $s2% of the damage dealt as Shadow Damage.",
     "labels": [
-      "638403 effect_value e1 #2"
+      "638403 trigger_magnitude_ratio"
     ],
     "kind": "claim",
     "text_source": {
@@ -1560,7 +1587,8 @@
       "ruling": null,
       "spell": 638403,
       "dbc_differs": "Description differs from Spell.dbc"
-    }
+    },
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Bone Club share 0.350/0.346 against 0.40 x 0.88 kept after the partial resist. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 317 Bone Club 801241 hits by Ghouls (2026-08-11); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 680388,
@@ -1585,7 +1613,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims 1-2 status 1. Claim \"for $d\": Status: route pending (for the route agent). 1800000 ms exceeds the 600 s scenario budget; never shortened (mentor). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 16341 Fetid Ward lines, not tallied per ratio; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 680388,
@@ -1605,7 +1634,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Mentor derivation (Q-b1-2 closed): 0.30 x the 1.10 healing-received factor proven by 680388 behaviour_hit_ratio healing_received on the same build; measured 0.328. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 16341 Fetid Ward lines, not tallied per ratio; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 680388,
@@ -1624,7 +1654,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Split 0.159 against 0.15 x 1.10; healing received +10.04%/+10.13% on a Flash Heal 10917 (hit_ratio, pooled 476 trials). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 16341 Fetid Ward lines, not tallied per ratio; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 680388,
@@ -1632,7 +1663,8 @@
     "labels": [
       "680388 behaviour_exclusivity"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 16341 Fetid Ward lines, not tallied per ratio; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 704163,
@@ -1720,7 +1752,8 @@
     "spell": 704676,
     "clause": "While your Lich Form is active, your Champion spells will now cooldown faster.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). \"cooldown faster\" (5 s per 5 s tick, AscensionNecromancerAuras.cpp:194-196) needs a cost_gate with Lich Form; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 704680,
@@ -1847,7 +1880,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 98 bursts of exactly 5 Greater Zombie summons 525380; ~/CoaServer/reference: bindmysoul \"3 Greater Zombies ... 14 seconds ... -0.5 sec\" (an older state, G-9), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 704721,
@@ -1866,7 +1900,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 (cast gate, Ghoul Physical only). Claim \"by 0.5 sec\": data only; Status: route pending (for the route agent). the 5 Greater Zombies each Unholy Frenzy raises share the 1 s internal cooldown (not in the tooltip). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 98 bursts of exactly 5 Greater Zombie summons 525380; ~/CoaServer/reference: bindmysoul \"3 Greater Zombies ... 14 seconds ... -0.5 sec\" (an older state, G-9), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 704721,
@@ -1874,7 +1909,8 @@
     "labels": [
       "704721 trigger_cooldown_gate abomination"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). One-sided gate: at least 1.12 s per event with one Abomination. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 98 bursts of exactly 5 Greater Zombie summons 525380; ~/CoaServer/reference: bindmysoul \"3 Greater Zombies ... 14 seconds ... -0.5 sec\" (an older state, G-9), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 704723,
@@ -1955,7 +1991,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 (fixture Frost Nova 122 named in the verdict). Claim \"within $707575a1 yds\": data only; Status: route pending (for the route agent). bracketed-edge method (G-29). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 5421 Harrowing Winds lines (2514 of 2583 splashes hit the primary, scenario 7197); ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 705746,
@@ -1980,7 +2017,17 @@
       "705747 effect_value #0",
       "705747 spell_duration 525379 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). Summon events (Lesser Zombie) have no proc event metric. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 3139 Lesser Zombie lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "tool_gap": {
+      "reason": "a proc whose event is a creature summon (Summon, AscensionNecromancerSummons.cpp:334) has no event metric",
+      "attempts": [
+        {
+          "agent": "necro-b1-b author (opus)",
+          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
+        }
+      ]
+    }
   },
   {
     "spell": 705750,
@@ -2090,7 +2137,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 (band, about 9060 trials). Claim \"up to $707002i\": alert A-b1-1, cause not established (about 5.6 blasts per expected proc with four dummies; code caps at 2). Claim damage: data only, Status: route pending (for the route agent). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"up to 3 nearby enemies\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 707006,
@@ -2165,7 +2213,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 (Anointed 280912 forced-crit fixture). Claim damage: status 5, Q-b1-1 (approved; logs do not pick a formula). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 42 Chomp 707284 hits by a Decaying Colossus, 833 (1666 crit), 2026-08-31; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 707445,
@@ -2224,7 +2273,17 @@
       "707880 effect_value #0",
       "707880 spell_duration 525379 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). Summon events (Lesser Zombie) have no proc event metric. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 3139 Lesser Zombie lines, not tallied; ~/CoaServer/reference: bindmysoul nothing found, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "tool_gap": {
+      "reason": "a proc whose event is a creature summon (Summon, AscensionNecromancerSummons.cpp:334) has no event metric",
+      "attempts": [
+        {
+          "agent": "necro-b1-b author (opus)",
+          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
+        }
+      ]
+    }
   },
   {
     "spell": 707881,
@@ -2265,7 +2324,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 (band, about 16100 trials). Claim \"up to $707002i\": alert A-b1-1, cause not established. Claim damage: data only, Status: route pending (for the route agent). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul nothing found, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 801733,
@@ -2422,7 +2482,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim 1 status 1 after fix ADR 0344 (9.85%/9.75% inside the band; Zombie Plague hits cast in the handler left out of the trials). Claim \"for $807653d\": data only, Status: route pending (for the route agent). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 802986,
@@ -2430,7 +2491,8 @@
     "labels": [
       "802986 effect_value 504022e0 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). A minion hit with a level-scaled formula; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 802988,
@@ -2546,7 +2608,8 @@
       "804371 behaviour_cast_applies_aura",
       "804371 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9409 Foul Invocation lines (1490 by id); no stat record; ~/CoaServer/reference: bindmysoul \"maximum health by 30%\" (an older state, G-9), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 804371,
@@ -2569,7 +2632,17 @@
         "labels": []
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim Stamina: status 5, Q-b1-3 (approved; aura 80 is base Stamina, no recommendation). Claim \"causing you\": status 1. Claim minions: Status: route pending (for the route agent). metric_delta needs a present minion in its before read. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9409 Foul Invocation lines (1490 by id); no stat record; ~/CoaServer/reference: bindmysoul \"maximum health by 30%\" (an older state, G-9), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "tool_gap": {
+      "reason": "a minion count read in the before phase of a metric_delta that raises the minion only in the cast phase",
+      "attempts": [
+        {
+          "agent": "necro-b1-b author (opus)",
+          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
+        }
+      ]
+    }
   },
   {
     "spell": 804371,
@@ -2618,7 +2691,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9409 Foul Invocation lines (1490 by id); no stat record; ~/CoaServer/reference: bindmysoul \"maximum health by 30%\" (an older state, G-9), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 805032,
@@ -2870,7 +2944,17 @@
       "806086 effect_value #0",
       "806086 effect_value #3"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). Summon events (Rotlings) have no proc event metric. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "tool_gap": {
+      "reason": "a proc whose event is a creature summon has no event metric",
+      "attempts": [
+        {
+          "agent": "necro-b1-b author (opus)",
+          "report": ".agents/plans/necro-b1/author.md (B1 side b)"
+        }
+      ]
+    }
   },
   {
     "spell": 806086,
@@ -2879,7 +2963,8 @@
       "806086 aura_amplitude_ms #1",
       "806086 effect_value 500585e0 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). A Rotling hit after its fuse; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 806149,
@@ -2901,7 +2986,8 @@
     "labels": [
       "806321 behaviour_metric_delta"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). Forced spell crit (spell_crit_rating 100000) on a Lichfrost. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 806324,
@@ -3819,7 +3905,8 @@
       "92121 spell_duration 570131 #1",
       "92121 effect_value #3"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). The tick damage needs a periodic hit model of the minion-free disease and $t/$d a tick and expiry read; values are data only (base pair). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 92121,
@@ -3828,13 +3915,15 @@
       "92121 max_stacks 570131 #2",
       "92121 behaviour_metric_delta cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build b0d0ace11c2b, fix-1..fix-4, control arm in each entry). 92121 behaviour_metric_delta cap: six Lichfrost hits hold 10 stacks, 0 without 92121. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 92121,
     "clause": "Additional applications do not refresh duration.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). Needs an aura_duration_ms read after a second application; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 802986,
@@ -3842,7 +3931,8 @@
     "labels": [
       "802986 spell_duration 807653 #3"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). Pulled sentence (807653); needs a duration read of the aura on the minion. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   },
   {
     "spell": 802986,
@@ -3850,6 +3940,7 @@
     "labels": [
       "802986 effect_value 807765e0 #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status: route pending (for the route agent). Pulled sentence; owned_creature_crit_chance on a minion carrying 807653 would read it. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
   }
 ]
