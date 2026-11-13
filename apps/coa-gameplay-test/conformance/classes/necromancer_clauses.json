@@ -1896,9 +1896,10 @@
     "spell": 570136,
     "clause": "and Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target.",
     "labels": [
-      "570136 effect_value e1 #1"
+      "570136 behaviour_hit_ratio crypt_swarm"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '50%' and '4% per disease'; coa-obtainable: in the live capture; logs: nothing found by id."
   },
   {
     "spell": 570226,
@@ -2964,8 +2965,11 @@
   {
     "spell": 801733,
     "clause": "Damage dealt may end this effect.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "801733 behaviour_metric_delta damage_ends"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'every 3rd Command ... 5 seconds'; coa-obtainable: in the live capture; logs: 704860 median 5.0 s, 164 SPELL_AURA_BROKEN_SPELL (broken by damage). Live logs: 164 SPELL_AURA_BROKEN_SPELL of 704860."
   },
   {
     "spell": 801739,

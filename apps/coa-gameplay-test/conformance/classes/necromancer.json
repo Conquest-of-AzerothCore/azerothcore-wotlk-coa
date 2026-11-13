@@ -1267,6 +1267,85 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 570136,
+      "name": "Waking Crypts (Crypt Swarm per disease)",
+      "kind": "hit_ratio",
+      "variant": "crypt_swarm",
+      "label_suffix": "crypt_swarm",
+      "quote": "and Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target.",
+      "expected": 1.04,
+      "observe_spell": 800343,
+      "cast_spell": 501886,
+      "cast_wait_ms": 3600,
+      "cast_power": 1373,
+      "learn": [
+        570136
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          570131
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Factor() (AscensionNecromancerContracts.cpp:414-415) multiplies Crypt Swarm 800343 by 1 + Diseases(player, target) x 0.04 while the caster knows 570136 ($s2 = 4, Effect[1] aura 107 dummied by contract :157-158). 570136 learned in both arms; each trial channels Crypt Swarm 501886 (3000 ms, 800343 every 500 ms) at the dummy; the treatment casts Crypt Plague 570131 (a Necromancer disease) first: 1 disease, x1.04; the control none. 823764 removes partial resists in both arms; only non-critical hits; 1373 mana set before each channel."
+    },
+    {
+      "spell": 801733,
+      "name": "Necrotic Chain (damage ends it)",
+      "kind": "metric_delta",
+      "variant": "damage_ends",
+      "label_suffix": "damage_ends",
+      "quote": "Damage dealt may end this effect.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "learn": [
+        801733
+      ],
+      "gate_spell": 801722,
+      "phase_auras": [
+        [
+          13055,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 2500,
+      "expire_ms": 6000,
+      "metric": "aura",
+      "fields": {
+        "spell": 704860,
+        "caster": "caster"
+      },
+      "observe_source": "Necrotic Chain 704860 (two roots, rewritten to SPELL_AURA_MOD_ROOT, AscensionNecromancerContracts.cpp:297-301) carries ProcFlags 699048 (damage taken) with ProcChance 100: a breakable crowd control whose damage budget a large hit exceeds. 801733 learned at the start; each phase makes three Command: Undead 504868 casts at the dummy (the third roots it). Before (control): no hit, the root holds (1). After: a Lichfrost 801722 hit (Frost, 1500 ms cast) under QA Test 10000% Increased Frost Damage 13055 (aura 79 +9999% Frost on the caster, a harness set_aura precondition fixture in both phases) ends it (0). Live logs: 164 SPELL_AURA_BROKEN_SPELL of 704860."
+    },
+    {
       "spell": 805032,
       "name": "Animate: Bone Wraith (Bonestorm targets)",
       "kind": "fixed_count",
@@ -1297,6 +1376,7 @@
       "name": "Life For Power (healing taken)",
       "kind": "hit_ratio",
       "variant": "absorb",
+      "parts": 3,
       "cast_power": 1000,
       "label_suffix": "absorb",
       "quote": "You absorb $s1% of healing taken",
