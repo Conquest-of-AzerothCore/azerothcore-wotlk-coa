@@ -5831,9 +5831,9 @@
       "fields": {
         "spell": 642
       },
-      "wait_ms": 1000,
+      "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0)."
+      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 1500 ms after the cast step (1000 ms cast; a read at 1000 ms raced the cast's completion and flipped, final set final2)."
     },
     {
       "spell": 807796,
@@ -5862,7 +5862,7 @@
       "fields": {
         "spell": 38916
       },
-      "wait_ms": 1000,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "observe_source": "807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
     },
@@ -5908,9 +5908,9 @@
       "fields": {
         "spell": 807796
       },
-      "wait_ms": 6000,
+      "wait_ms": 6500,
       "expire_ms": 500,
-      "observe_source": "As the held entry, 6000 ms after the cast step (5000 ms into the curse): gone, so the curse ends between 2500 and 5000 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
+      "observe_source": "As the held entry, 6500 ms after the cast step (5500 ms into the curse): gone, so the curse ends between 2500 and 5500 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
     },
     {
       "spell": 807796,
@@ -5945,9 +5945,9 @@
         "spell": 808016,
         "target": "dummy"
       },
-      "wait_ms": 6000,
+      "wait_ms": 7000,
       "expire_ms": 500,
-      "observe_source": "The contract makes 807796 Effect[1] a 5000 ms periodic dummy (AscensionNecromancerContracts.cpp:240-241); its first tick, at the end of the 5000 ms curse, casts Death's Due 808016 at the target with the effect amount only when GetTarget()->HealthBelowPct(20) (AscensionNecromancerAuras.cpp:202-208). The dummy is set to 15% health (target_health_pct, a precondition fixture) before the cast: no 808016 without a cast, one 6000 ms after it."
+      "observe_source": "The contract makes 807796 Effect[1] a 5000 ms periodic dummy (AscensionNecromancerContracts.cpp:240-241); its first tick, at the end of the 5000 ms curse, casts Death's Due 808016 at the target with the effect amount only when GetTarget()->HealthBelowPct(20) (AscensionNecromancerAuras.cpp:202-208). The dummy is set to 15% health (target_health_pct, a precondition fixture) before the cast: no 808016 without a cast, one 7000 ms after the cast step (1000 ms cast plus the 5000 ms curse; reads at 6000 ms raced the end tick and flipped in the final sets)."
     },
     {
       "spell": 807796,
@@ -5968,7 +5968,7 @@
         "spell": 808016,
         "target": "dummy"
       },
-      "wait_ms": 6000,
+      "wait_ms": 7000,
       "expire_ms": 500,
       "observe_source": "The health gate's control: the same cast on a dummy at 25% health deals no 808016 at the end of the curse."
     },
@@ -6005,7 +6005,7 @@
         "spell": 808016,
         "target": "dummy"
       },
-      "wait_ms": 6000,
+      "wait_ms": 7000,
       "expire_ms": 500,
       "observe_source": "808016 is cast with 807796 Effect[1]'s amount, BasePoints 799 + 1 + RealPointsPerLevel 12 x (60 - BaseLevel 40) = 1040 ($m2 at level 60), plus Shadow/Frost spell power x 2 (NecromancerCoefficients row {808016, 0, 2.0, 48}; the contract sets its SchoolMask to Frost | Shadow, AscensionNecromancerContracts.cpp:242-243). At spell power 0, 984954 and 823764 removing crits and partial resists: 1040."
     },
@@ -6049,7 +6049,7 @@
         "spell": 808016,
         "target": "dummy"
       },
-      "wait_ms": 6000,
+      "wait_ms": 7000,
       "expire_ms": 500,
       "observe_source": "As the damage entry with Increase Shadow Dam 69 23265 (+69 Shadow) on the caster: 1040 + 69 x 2 = 1178."
     },
