@@ -83,14 +83,18 @@
       },
       {
         "claim": "Increases your Shadow damage dealt against Humanoids by $s1%",
-        "labels": []
+        "labels": [
+          "300234 behaviour_hit_ratio shadow_humanoid"
+        ]
       },
       {
         "claim": "against Undead",
-        "labels": []
+        "labels": [
+          "300234 behaviour_hit_ratio frost_undead"
+        ]
       }
     ],
-    "reason": "Frost-on-Humanoid part status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without the talent, same Kobold Vermin 6 target): Ice Barrage 803779 non-critical hits +3.894% and +3.958% (99% intervals +3.606..+4.181 and +3.717..+4.2, inside the 2..6 band, excluding 0) vs $s1 = 4 (aura 168 MiscValue 96 = Undead 32 + Humanoid 64). Fixtures 984954 (spell crit -1000) and 823764 (-9999 target resistance), harness set_aura in both arms. Shadow part and Undead part route pending (a Shadow hit spell on a Humanoid and an Undead target entry were not built in time). G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 300234; combat logs (coa-history spell 300234): nothing found; sidekick data.js talent text 'by 4%' (agrees); MCP not queried (unavailable)."
+    "reason": "Frost-on-Humanoid part status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without the talent, same Kobold Vermin 6 target): Ice Barrage 803779 non-critical hits +3.894% and +3.958% (99% intervals +3.606..+4.181 and +3.717..+4.2, inside the 2..6 band, excluding 0) vs $s1 = 4 (aura 168 MiscValue 96 = Undead 32 + Humanoid 64). Fixtures 984954 (spell crit -1000) and 823764 (-9999 target resistance), harness set_aura in both arms. Claims Shadow-on-Humanoid and against Undead: Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): Plague of Undeath 680928 (Shadow and Nature) on a Kobold Vermin 6 (Humanoid) +3.999% both runs (interval +3.999 to +3.999, deterministic) and Lichfrost 501978 (Frost) on a Mindless Zombie 1501 (Undead) +3.998% / +4.015% (99% intervals +3.955..+4.04 and +3.967..+4.063), inside the 2..6 band, excluding 0, vs $s1 = 4; control without the talent, treatment with it learned; fixtures 20000 spell power and 823764 in both arms (precondition). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Icecrown Scriptures\" 0 lines by name, 0 lines by id 300234; ~/CoaServer/reference: bindmysoul \"Increases your Shadow and Frost damage dealt against Humanoids and Undead by 4%.\", sidekick coaKits names it (6 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 300235,
@@ -118,10 +122,11 @@
     "spell": 300236,
     "clause": "Each stack of Expunge now increases the target's damage taken from your Plague of Undeath by an additional $s1%.",
     "labels": [
-      "300236 effect_value e0 #0"
+      "300236 effect_value e0 #0",
+      "300236 behaviour_hit_ratio two_stacks"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/300236.md."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): Plague of Undeath 503640 ticks on a dummy holding Flesh to Worms 500338 and two Expunge 573233 stacks (real casts of 500443, refreshed before every tick) read 6307 without 300236 (control) and 6937 with it: +9.989% both runs (deterministic), 2 stacks x $s1 = 5% = 10% (band 8..12 points); the increase multiplies with Expunge's own 10% per stack on diseases (1.30 / 1.20 would read +8.3%). 20000 spell power and 823764 in both arms (precondition fixtures). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Expediting Death\" 0 lines by name, 0 lines by id 300236; ~/CoaServer/reference: bindmysoul \"Each stack of Expunge now increases the target's damage taken from your Plague of Undeath by an additional 5%.\", sidekick coaKits names it (4 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23 level 0; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 300240,
@@ -231,7 +236,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Chance proven (pooled 19.96% [19.38, 20.56]); reset part open (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"20% ... next within 15 seconds free of cost\", older than our \"instant cast\" (G-9); logs: 2422 applications of 800979."
+    "reason": "Chance proven (pooled 19.96% [19.38, 20.56]); reset part open (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub \"20% ... next within 15 seconds free of cost\", older than our \"instant cast\" (G-9); logs: 2422 applications of 800979. M side c (reset part): not built: the reset follows a 20% roll; Ice Barrage recovers in 10000 ms, so enough Commands to make a proc near certain (40 casts, 0.8^40 = 1.3e-4) take 64 s and outlast the cooldown; the route needs a forced Refreshing Chill proc (a chance fixture, a tool change) or a cooldown read taken right after the first 800979 application."
   },
   {
     "spell": 300940,
@@ -318,7 +323,7 @@
       "300960 effect_value e0 #0"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/300960.md."
+    "reason": "Route pending (M side c, sized, not built): a crit_rate entry on Flesh to Worms 500338 ticks (periodic crit granted by FN-c4-1, ADR 0442) with the dummy below 35% health (a fixture allowed for a crit claim) against the same without 300960; the band for $s1 = 25 points is 23..27, and at a natural rate near 5% the 99% Newcombe half-width reaches 2 points only at about 4300 ticks per arm (1 tick per 3 s), beyond the accelerated cap of one scenario; a spell crit fixture cannot help (a -1000 fixture would also cancel the +25). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Creeping Crypt\" 0 lines by name, 0 lines by id 300960; ~/CoaServer/reference: bindmysoul \"Increases the critical strike chance of Flesh to Worms by 25% against enemies below 35% maximum health.\", sidekick coaKits names it (3 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23 level 0; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 300965,
@@ -845,9 +850,12 @@
     "spell": 500572,
     "clause": "Casting Command spells on an enemy now applies Crypt Plague to $500573i enemies near the primary target.",
     "labels": [
-      "500572 effect_value #0"
+      "500572 effect_value #0",
+      "500572 spread behaviour_fixed_count",
+      "500572 spread_control behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): one Command: Undead 504868 at the primary dummy with 500572 learned puts Crypt Plague 570131 on 3 enemies (the primary and two of four additional dummies within 5 yd), none without the talent (control). The count includes the primary: $500573i = 3 is Crypt Explosion 500573's MaxAffectedTargets on an area at the primary target (TARGET_UNIT_TARGET_ENEMY + TARGET_UNIT_DEST_AREA_ENEMY, 5 yd). Observation (not a claim): the script picks the first 3 valid enemies within 10 yd by GUID (AscensionNecromancerAbilities.cpp:336-345), not the nearest, so whether the primary is among them depends on the spawn order; with the primary spawned first it always was (pair3 20261113-061257 / -061338 diagnostic read 2 of 4 additional with the primary uncounted). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Crypt Explosion\" 0 lines by name, 0 lines by id 500572; ~/CoaServer/reference: bindmysoul \"Casting Command spells on an enemy now applies Crypt Plague to 3 enemies near the primary target.\", sidekick coaKits names it (10 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500933,
@@ -1191,7 +1199,9 @@
       {
         "claim": "reducing healing received by $801534s2%",
         "labels": [
-          "504050 effect_value 801534e1 #1"
+          "504050 effect_value 801534e1 #1",
+          "504050 behaviour_metric_delta healing",
+          "504050 behaviour_metric_delta enemy_ground"
         ]
       },
       {
@@ -1203,7 +1213,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claims blight, radius and duration: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; a raised Decaying Colossus alone leaves no 801534 on the dummy; its Command puts the blighted ground on the dummies 2 to 8 yd from the caster beside the Colossus and not on one 15 yd away (caster_entry 50115, the Colossus casts it); on the dummy 18500 ms after the Command, gone by 21500 ms against $801534d 20000). Claim healing received: data, parked (route agent): a heal on the enemy inside the ground is needed; the dummy casting Renew 139 on itself before the Command (target_casts_before) gave no heal log in either phase (pair route-8 20261113-030627 / -030656), so the next design is an enemy player healing itself (enemy_casts) inside the area. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Blight\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Decaying Colossus to blight the ground in a 10 yd radius beneath it, reducing\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim healing received (M side c): Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): an enemy player (race 2, PvP) beside the caster, with a Decaying Colossus raised in both phases at the selected dummy, puts Rejuvenation 9840 (78 every 3000 ms, 5 ticks, no crit, no spell power) on itself: 390 without the Command (control), 155 more inside the ground (5 x int(78 x 0.40) = 5 x 31): $801534s2 = 60% reduction judged to the rounding; the enemy_ground entry reads 801534 on the enemy only after the Command. Diagnostics: without a selected dummy the Colossus laid no ground (diag1 20261113-062728 / -062800); a 45-point tick read 17 (45 x 0.4 in float truncates below 18, diag2 20261113-062844 / -062915). Observation for the duration claim (not mine): its reads 18500 / 21500 ms bracket 20000 ms wider than the G-19 band (19000..21000). Claims blight, radius and duration: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; a raised Decaying Colossus alone leaves no 801534 on the dummy; its Command puts the blighted ground on the dummies 2 to 8 yd from the caster beside the Colossus and not on one 15 yd away (caster_entry 50115, the Colossus casts it); on the dummy 18500 ms after the Command, gone by 21500 ms against $801534d 20000). (Superseded earlier state of the healing claim: a heal on the enemy inside the ground is needed; the dummy casting Renew 139 on itself before the Command (target_casts_before) gave no heal log in either phase (pair route-8 20261113-030627 / -030656), so the next design is an enemy player healing itself (enemy_casts) inside the area.) G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Blight\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Decaying Colossus to blight the ground in a 10 yd radius beneath it, reducing\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Command: Blight\" 0 lines by name, 0 lines by id 801534; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it (2 matches), exiles-db tables: nothing found, WDB cachepacks: nothing found; coa-obtainable: live capture False, no advancement row; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504050,
@@ -1238,7 +1248,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'to a halt for 2 seconds' and 'Not usable while in Undead: Pacify'; coa-obtainable: in the live capture; logs: no line for 504316 or 800043. Claim 'hook an enemy to their location': open, route pending: MoveJump to the Abomination (AscensionNecromancerSummons.cpp:659-660) is not read; route: the dummy's distance to the owned Abomination before and after the Command."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'to a halt for 2 seconds' and 'Not usable while in Undead: Pacify'; coa-obtainable: in the live capture; logs: no line for 504316 or 800043. Claim 'hook an enemy to their location': open, route pending: MoveJump to the Abomination (AscensionNecromancerSummons.cpp:659-660) is not read; route: the dummy's distance to the owned Abomination before and after the Command. Claim \"slowing their movement speed to a halt\" (M side c, state): the halt entry reads the dummy's run_speed_rate 1.14286 without an Abomination and 0.0228572 after the Command with one (-98%, 800043 BasePoints -99 + DieSides 1) in both runs of the merged pair 20261113-043355 / -044317; a speed-rate read is a state read, so the coverage counts it as data. Not final: behaviour route pending: a dummy moving toward a point (or a fleeing dummy) and its travelled distance in 1000 ms after the hook against no Abomination; not built (no kind moves a dummy on a path). Claim \"hook an enemy to their location\" (M side c, parked with design): the halt layout puts the dummy 3 yd from the caster and the Abomination lands within 8 yd of the caster (500335 TARGET_DEST_CASTER_RANDOM, radius 8), so a distance_2d read to the caster cannot tell a hook from no movement; the route needs the dummy's distance to the owned Abomination 50068 before and after the Command (a read-only harness metric: distance_2d to an owned creature entry) with a no-Abomination control; a tool change, not made on side c (no tool edits in M)."
   },
   {
     "spell": 504316,
@@ -1460,9 +1470,12 @@
     "spell": 531126,
     "clause": "Each active Skeletal Archer now increases your haste by $805025s3%.",
     "labels": [
-      "531126 effect_value 805025e2 #0"
+      "531126 effect_value 805025e2 #0",
+      "531126 behaviour_metric_delta cast_held",
+      "531126 behaviour_metric_delta cast_done"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): with three Skeletal Archers 50076 raised by a real Animate: Skeletal Archer 805040 in both phases, Ice Barrage 501997 (2000 ms cast) is still casting 1705 ms after its start with and without 531126, and 1775 ms after it only without the talent: the cast with it ends in (1705, 1775] ms, 3 x $805025s3 = 15% haste gives 1739 ms; the G-19 band 13..17% is 1709..1770 ms, so both sides are bracketed (the control shows the longer cast, the held read rules out a refused or shorter cast). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Scourge Disciple\" 0 lines by name, 0 lines by id 531126; ~/CoaServer/reference: bindmysoul \"Each active Skeletal Archer now increases your haste by 5%.\", sidekick coaKits names it (1 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 531128,
@@ -1800,12 +1813,30 @@
   {
     "spell": 560800,
     "clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
-    "labels": [
-      "560800 aura_amplitude_ms #0",
-      "560800 effect_value 500585e0 #1"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560800.md."
+    "reason": "Claims summon and explosion time: Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): a full Crypt Swarm 501886 channel (3000 ms) leaves one Rotling 50303 3600 ms after the cast starts with 560800, none without (control); the Rotling's Rotling Explosion 500585 has not hit the dummy 7800 ms after the cast starts and has at 8200 ms: 5 sec after the summon ($807640t2 = 807640 Effect[1] amplitude 5000), bracketed inside the G-19 band on both sides. Claim damage: route pending (M side c): the expected ${$500585m1+$500585ppl1+$SP*0.335} at level 60 depends on the per-level reading of m1 and ppl1 for a creature-cast triggered spell (the Glacial Impact per-level case, SpellInfo.cpp:482-497); not judged here. Not measured: \"run towards the enemy\" (no claim label) and an interrupted-channel arm. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Wormfood\" 0 lines by name, 0 lines by id 560800; ~/CoaServer/reference: bindmysoul \"Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after 5 se\", sidekick coaKits names it (6 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23 level 0; sources.md followed; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Upon fully channeling Crypt Swarm, you summon a Rotling",
+        "labels": [
+          "560800 behaviour_metric_delta rotling"
+        ]
+      },
+      {
+        "claim": "that will run towards the enemy and explode after $807640t2 sec",
+        "labels": [
+          "560800 aura_amplitude_ms #0",
+          "560800 behaviour_metric_delta explode_before",
+          "560800 behaviour_metric_delta explode_after"
+        ]
+      },
+      {
+        "claim": "for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+        "labels": [
+          "560800 effect_value 500585e0 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 560848,
@@ -1925,10 +1956,12 @@
     "spell": 561164,
     "clause": "Each Skeletal Warrior or Skeletal Rogue now increases the damage of your Ice Barrage by $805016s2%.",
     "labels": [
-      "561164 effect_value 805016e1 #0"
+      "561164 effect_value 805016e1 #0",
+      "561164 behaviour_hit_ratio warriors_two",
+      "561164 behaviour_hit_ratio rogues_two"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/561164.md."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): Ice Barrage 803779 non-critical hits with one raised minion and no talent (control) against two raised minions and 561164 learned (each arm raises one, the control's stays): two Lesser Skeletal Warriors +16.01% / +15.88% (99% intervals +15.8..+16.22 and +15.59..+16.18), two Skeletal Rogues +15.78% / +15.78%, vs 2 x $805016s2 = 2 x 8% = 16% (band 14..18 points), so each Warrior or Rogue adds its 8%; fixtures 984954 and 823764 in both arms (precondition). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Blood and Ice\" 0 lines by name, 0 lines by id 561164; ~/CoaServer/reference: bindmysoul \"Each Skeletal Warrior or Skeletal Rogue now increases the damage of your Ice Barrage by 8%.\", sidekick coaKits names it (1 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 561215,
@@ -2039,7 +2072,8 @@
     "spell": 572130,
     "clause": "You may now Infest an additional target after using Virulency.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": ""
   },
   {
     "spell": 572638,
@@ -2311,7 +2345,7 @@
       "704528 effect_value e0 #0"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/704528.md. Note: Crypt Swarm's energize 800344 Effect[1] is BasePoints 29 DieSides 51 (30..80 per tick, random), so the +20 per tick needs a per-event or mean-difference check, not an exact total."
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry. Next author: read the packet b6-packets-a6/704528.md. Note: Crypt Swarm's energize 800344 Effect[1] is BasePoints 29 DieSides 51 (30..80 per tick, random), so the +20 per tick needs a per-event or mean-difference check, not an exact total. M side c: not built: the energize 800344 rolls 30..80 per tick, so +$/10;s1 per tick needs the mean energize per tick of two arms (no kind judges a mean difference of energize amounts; hit_ratio reads damage, heal or melee totals only). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Swarmer\" 0 lines by name, 0 lines by id 704528; ~/CoaServer/reference: bindmysoul \"Increases the Runic Power generated by Crypt Swarm by 2 per tick.\", sidekick coaKits names it (3 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23 level 0; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 704669,
@@ -2326,7 +2360,8 @@
     "labels": [
       "704669 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": ""
   },
   {
     "spell": 704670,
@@ -2401,7 +2436,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Claim \"your next 2 spells\" (M side c, state): the charges entry reads 801747 aura_charges 0 then 2 in both runs of the merged pair 20261113-043355 / -044317, a state read (data). Not final: behaviour route pending: three Glacial Impact 707402 casts at an unfrozen dummy after one proc, the first two allowed (treated as frozen) and the third refused, against a no-proc control refused at once; not built in the M window."
   },
   {
     "spell": 704681,
@@ -2709,7 +2744,7 @@
       "705746 behaviour_hit_ratio absorb"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20% of healing taken', 'shield ... 10 seconds'; coa-obtainable: in the live capture; logs: nothing found by id."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): a grouped ally's Greater Heal 2054 on the Necromancer reaches 0.80395 / 0.80145 of the control (bonus -19.61% / -19.86%, 99% intervals -20.01..-19.2 and -20.25..-19.46, 602 trials per arm in 7 pooled parts), inside the 18..22 point band around $s1 = 20, excluding 0; control without the talent. The merged pair 043355 / 044317 read -19.91 / -19.82 with half-widths 1.3 / 1.27 points (insufficient_trials); the parts were raised from 3 to 7. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20% of healing taken', 'shield ... 10 seconds'; coa-obtainable: in the live capture; logs: nothing found by id."
   },
   {
     "spell": 705746,
@@ -3083,11 +3118,21 @@
   {
     "spell": 707627,
     "clause": "Increases the damage and critical damage of Lichfrost by $s1% against against Diseased targets.",
-    "labels": [
-      "707627 effect_value e0 #0"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707627.md."
+    "reason": "Claim damage: Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): Lichfrost 501978 non-critical hits on a dummy carrying Flesh to Worms 500338 (a disease, real cast before every Lichfrost in both arms) +30.01% / +29.96% (99% intervals +29.96..+30.05 and +29.9..+30.01) vs $s1 = 30 (BasePoints 29 + 1; band 28..32 points); control without the talent. Claim critical damage: open, route pending (M side c): the contract turns Effect[0] into a masked crit-damage state on the Lichfrost mask (AscensionNecromancerContracts.cpp:191-196); a forced-crit Lichfrost arm with and without the talent would measure it, but the stated meaning (30% more of the crit bonus or of the critical hit) is the uncertain expectation of 29.0 and 161.0; not built. Observation: bindmysoul reads 20% (community snapshot; the installed DBC governs). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Fiend\" 530 lines by name, 0 lines by id 707627; ~/CoaServer/reference: bindmysoul \"Increases the damage and critical damage of Lichfrost by 20% against diseased targets.\", sidekick coaKits names it (18 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23; sources.md followed; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Increases the damage ... of Lichfrost by $s1% against against Diseased targets.",
+        "labels": [
+          "707627 effect_value e0 #0",
+          "707627 behaviour_hit_ratio diseased"
+        ]
+      },
+      {
+        "claim": "and critical damage",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 707670,
@@ -3279,14 +3324,17 @@
     "clause": "Reinvigorate your diseases, refreshing all diseases on the target enemy and copying them, preserving their power and duration.",
     "labels": [],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Part 'refreshing all diseases on the target enemy' measured: Crypt Plague 570131 4997 -> 9893 ms remaining after Virulency (801938 behaviour_metric_delta refresh, pairs b4p2 and final). Open, route pending: 'copying them, preserving their power and duration' (the snapshot in State(player).diseases, AscensionNecromancerAbilities.cpp:53-100) is read only through the Infest cast of the next clause. Route attempt (B3/B4 side a, pair r12): Virulency 801938 on a dummy holding 3 Crypt Plague stacks, then Infest 803781 at an enemy player (enemy_player_race 2) 1600 ms later: the enemy carried no Crypt Plague (control: Infest without a snapshot refused SPELL_FAILED_CASTER_AURASTATE as expected); no cast failure was reported for the second Infest; cause not read within the 25-minute cap: parked, route state written."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Part 'refreshing all diseases on the target enemy' measured: Crypt Plague 570131 4997 -> 9893 ms remaining after Virulency (801938 behaviour_metric_delta refresh, pairs b4p2 and final). Open, route pending: 'copying them, preserving their power and duration' (the snapshot in State(player).diseases, AscensionNecromancerAbilities.cpp:53-100) is read only through the Infest cast of the next clause. Route attempt (B3/B4 side a, pair r12): Virulency 801938 on a dummy holding 3 Crypt Plague stacks, then Infest 803781 at an enemy player (enemy_player_race 2) 1600 ms later: the enemy carried no Crypt Plague (control: Infest without a snapshot refused SPELL_FAILED_CASTER_AURASTATE as expected); no cast failure was reported for the second Infest; cause not read within the 25-minute cap: parked, route state written. M side c: \"copying them\" is now shown by the Infest entries of the next row (M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips): the Infest target receives the copied Flesh to Worms); \"preserving their power and duration\" stays open: the copy keeps the saved stacks, amounts, duration and periodic timers (AscensionNecromancerAbilities.cpp:57-71), a read of the copy's remaining duration and tick amount against the source's would prove it; not built."
   },
   {
     "spell": 801938,
     "clause": "You may use this abilty again within 10 sec to Infest another target, applying the copied diseases.",
-    "labels": [],
+    "labels": [
+      "801938 infest behaviour_fixed_count",
+      "801938 infest_control behaviour_fixed_count"
+    ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: the second cast within 10 s (803782 Infestation charges) applies the snapshot to another target; needs a second dummy in a metric_delta scenario. Route attempt (B3/B4 side a, pair r12): Virulency 801938 on a dummy holding 3 Crypt Plague stacks, then Infest 803781 at an enemy player (enemy_player_race 2) 1600 ms later: the enemy carried no Crypt Plague (control: Infest without a snapshot refused SPELL_FAILED_CASTER_AURASTATE as expected); no cast failure was reported for the second Infest; cause not read within the 25-minute cap: parked, route state written."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): after a real Virulency at a dummy carrying Flesh to Worms 500338, Infest 803781 at another dummy puts Flesh to Worms on it (the source keeps its own, a third dummy gets none: 2 dummies, count_primary); without the Virulency the Infest is refused and only the source carries it (control: 1). The 10 sec window is Infestation 803782 DurationIndex 1 (data label of row 226.0, not judged here). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Virulency\" 9 lines by name, 9 lines by id 801938; ~/CoaServer/reference: bindmysoul \"Reinvigorate your diseases, refreshing all diseases on the target enemy and copying them, preserving their pow\", sidekick coaKits names it (18 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable). Earlier state: G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: the second cast within 10 s (803782 Infestation charges) applies the snapshot to another target; needs a second dummy in a metric_delta scenario. Route attempt (B3/B4 side a, pair r12): Virulency 801938 on a dummy holding 3 Crypt Plague stacks, then Infest 803781 at an enemy player (enemy_player_race 2) 1600 ms later: the enemy carried no Crypt Plague (control: Infest without a snapshot refused SPELL_FAILED_CASTER_AURASTATE as expected); no cast failure was reported for the second Infest; cause not read within the 25-minute cap: parked, route state written."
   },
   {
     "spell": 503640,
@@ -4101,9 +4149,14 @@
   {
     "spell": 805675,
     "clause": "causing you to replicate 20% of your periodic damage dealt as direct damage.",
-    "labels": [],
+    "labels": [
+      "805675 behaviour_metric_delta copy",
+      "805675 behaviour_metric_delta blight",
+      "805675 behaviour_metric_delta ftw",
+      "805675 behaviour_metric_delta copies"
+    ],
     "kind": "claim",
-    "reason": "Open: route pending (periodic magnitude with a Virulency recast). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"for 10 seconds ... 20%\"; logs: 9 applications of 573223, 288 hits of 573242."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): with Rot Fetishist known, a Virulency 801938 at a dummy carrying Flesh to Worms 500338 applies 573223 to the caster; the following periodic hits, a Blight 500237 of 306 and one Flesh to Worms tick of 17, are each copied once as Rot Fetishist 573242 direct damage totalling 64 = int(306 x 0.20) + int(17 x 0.20), judged to the rounding on the observed hits; without the Virulency (control) no copy. Spell crit -1000 984954 and 823764 precondition fixtures. Open: route pending (periodic magnitude with a Virulency recast). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"for 10 seconds ... 20%\"; logs: 9 applications of 573223, 288 hits of 573242. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Rot Fetishist\" 306 lines by name, 0 lines by id 805675; ~/CoaServer/reference: bindmysoul \"Your Virulency now applies Rot Fetishist for 10 seconds, causing you to replicate 20% of your periodic damage \", sidekick coaKits names it (7 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 806086,
@@ -4442,7 +4495,8 @@
       {
         "claim": "banishing them, preventing all actions",
         "labels": [
-          "500341 aura_duration_ms #0"
+          "500341 aura_duration_ms #0",
+          "500341 behaviour_metric_delta no_actions"
         ]
       },
       {
@@ -4453,7 +4507,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): claim \"immune to Physical damage\": open, alert reproduced (lead, G-3), cause not established: on the counted pair route/pair2 (runs 20261113-034216 / -034305, build bafc49e1429b) the physical_immune entry reads 1 Physical Void Zone 92559 damage log without Entomb and a second one after a real Entomb (2, expected 1: no new log); diagnostic run 20261113-034510 shows the Entomb aura on the dummy before and after that hit, caster mana 2618. Expected from the tooltip and the DBC: Effect[2] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 1 (Physical); the stock path (Spell.cpp:2885-2891, Unit::IsImmunedToDamage Unit.cpp:11137-11176) sends no damage log for an immune hit, and Void Zone carries no immunity-piercing attribute (Attributes 0, AttributesEx2 4 = ignore line of sight). Why the immunity does not apply is not proven; no fix note until a root cause and an independent source (G-2) exist. Claim \"preventing all actions\" parked: the route is a stunned/cast_failure read on the entombed dummy; not run tonight. Claim \"for $d\": status 1 (present at 3500 ms, gone at 4500 ms). Claims \"preventing all actions\" (Effect[0] aura 12 stun) and \"immune to Physical damage\" (Effect[2] aura 40, MiscValue 1): open, route pending: a dummy action read and a Physical hit on the entombed dummy. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to damage.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: 8 casts, 4 IMMUNE misses, aura 3.98 s (n=1 valid; other 0.25 s) vs tooltip 4 sec."
+    "reason": "Claim \"banishing them, preventing all actions\" (M side c): Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): the dummy channels Evocation 12051 before each trigger; without Entomb it is still channelling 500 ms later (control), after a real Entomb it is not (the stun stops the action). Incorrect test corrected: a cast started after the Entomb (pair4 20261113-062106 / -062136 diagnostic) reads 1 because the harness cast step starts a creature's cast without the stun check. Claim \"for $d\" (M side c, bracket tightened to the G-19 band per the B6 review rule): the held read moved from 3500 to 3800 ms and the ends read from 4500 to 4200 ms (5% of 4000 ms), both ok in the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips). Route agent c (2026-11-13, second attempt): claim \"immune to Physical damage\": open, alert reproduced (lead, G-3), cause not established: on the counted pair route/pair2 (runs 20261113-034216 / -034305, build bafc49e1429b) the physical_immune entry reads 1 Physical Void Zone 92559 damage log without Entomb and a second one after a real Entomb (2, expected 1: no new log); diagnostic run 20261113-034510 shows the Entomb aura on the dummy before and after that hit, caster mana 2618. Expected from the tooltip and the DBC: Effect[2] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 1 (Physical); the stock path (Spell.cpp:2885-2891, Unit::IsImmunedToDamage Unit.cpp:11137-11176) sends no damage log for an immune hit, and Void Zone carries no immunity-piercing attribute (Attributes 0, AttributesEx2 4 = ignore line of sight). Why the immunity does not apply is not proven; no fix note until a root cause and an independent source (G-2) exist. (Earlier state, superseded above for the action and duration claims: present at 3500 ms, gone at 4500 ms.) G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to damage.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: 8 casts, 4 IMMUNE misses, aura 3.98 s (n=1 valid; other 0.25 s) vs tooltip 4 sec. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Entomb\" 16 lines by name, 16 lines by id 500341; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it (1 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture False, no advancement row; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 501886,
@@ -5482,12 +5536,21 @@
       },
       {
         "claim": "or interrupted",
-        "labels": []
+        "labels": [
+          "807813 behaviour_metric_delta no_interrupt",
+          "807813 behaviour_metric_delta cut_not_refused"
+        ]
       },
       {
         "claim": "and reduces the pushback suffered from damaging attacks while casting by $807812s1%",
         "labels": [
-          "807813 effect_value 807812e0 #0"
+          "807813 effect_value 807812e0 #0",
+          "807813 behaviour_metric_delta unhit_held",
+          "807813 behaviour_metric_delta unhit_done",
+          "807813 behaviour_metric_delta pushback_held",
+          "807813 behaviour_metric_delta pushback_champion_done",
+          "807813 behaviour_metric_delta pushback_control_held",
+          "807813 behaviour_metric_delta pushback_control_done"
         ]
       },
       {
@@ -5499,7 +5562,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claims summon, silence and duration: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; one Champion 500484 and 807812 on the caster after the cast; there at 19000 ms, gone by 21500 ms; Silence 15487 cast by the dummy lands without the Champion, is refused with 807812 up and lands again after it (ADR 0430)). Claims interrupt and pushback: parked (route agent): an interrupt needs the caster casting while the dummy interrupts (no kind orders a dummy cast after the caster's cast start), and the pushback needs a cast-time read after a hit; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 908 \"Icebound Champion\" lines (34 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 50 (AscensionCustomClassData.h 488); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claims interrupt and pushback (M side c): Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)). Interrupt: a striker's Counterspell 2139 (Mechanic 26) 1000 ms into a Lichfrost 501978 cuts it without the Champion (0 hits, cast failure 40 SPELL_FAILED_INTERRUPTED: started and cut, not refused) and does not with a real Icebound Champion up (1 hit, no failure). Pushback: one Light of the Naaru 41394 hit 1000 ms into the 2500 ms Lichfrost; casting reads at 1 ms steps put the unhit end in (2493, 2496] ms, the hit end without the Champion in (2981, 2985] ms and with it in (2731, 2734] ms: pushback 485..492 ms against 235..241 ms, a reduction of 50.3..52.2%, inside the G-19 band 47.5..52.5% around $807812s1 = 50, judged on the observed control. Sensitivity: the brackets are 3-4 ms wide (the Champion end read 1 at 2732 ms in one run of the pair 20261113-072946 / -073148, so its done read moved to 2734 ms); a clock-step change would move them. Observation for the duration claim (not mine): held/ends at 19000 / 21500 ms bracket 20000 ms wider than the G-19 band (19000..21000). Claims summon, silence and duration: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; one Champion 500484 and 807812 on the caster after the cast; there at 19000 ms, gone by 21500 ms; Silence 15487 cast by the dummy lands without the Champion, is refused with 807812 up and lands again after it (ADR 0430)). (Superseded earlier state of the interrupt and pushback claims: an interrupt needs the caster casting while the dummy interrupts (no kind orders a dummy cast after the caster's cast start), and the pushback needs a cast-time read after a hit; not built in the route segment.) G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 908 \"Icebound Champion\" lines (34 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 50 (AscensionCustomClassData.h 488); sources.md followed; MCP not queried (unavailable). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Icebound Champion\" 908 lines by name, 34 lines by id 807813; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it (3 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks: nothing found; coa-obtainable: live capture False, no advancement row; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807813,
@@ -6038,10 +6101,14 @@
     "labels": [
       "92121 effect_value 570131e0 #0",
       "92121 spell_duration 570131 #1",
-      "92121 effect_value #3"
+      "92121 effect_value #3",
+      "570131 behaviour_metric_delta tick_sp0",
+      "570131 behaviour_metric_delta tick_sp",
+      "570131 behaviour_metric_delta ticks",
+      "570131 behaviour_metric_delta lasts"
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: not attempted in its time cap). The tick damage needs a periodic hit model of the minion-free disease and $t/$d a tick and expiry read; values are data only (base pair). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): one application of Crypt Plague 570131 (a real cast at the dummy, one stack; spell crit -1000 984954 and 823764 precondition fixtures) ticks 18 at spell power 0 and 1218 at 20000 ($m1 = BasePoints 1 + 1 + RealPointsPerLevel 0.326 x 50 = 18.3 -> 18; + 20000 x 0.06 = 1200), judged to the unit; 4 ticks by 9500 ms and 5 by 10500 ms after the cast ($t = 2 sec, the fifth tick inside 9.5..10.5 s) and the aura on the dummy at 9700 ms, gone at 10300 ms ($d = 10 sec, both sides inside the G-19 band); control: no cast, nothing. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Crypt Plague\" 578 lines by name, 578 lines by id 570131; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it (35 matches), exiles-db tables: nothing found, WDB cachepacks: nothing found; coa-obtainable: live capture False, no advancement row; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 92121,
@@ -6056,9 +6123,11 @@
   {
     "spell": 92121,
     "clause": "Additional applications do not refresh duration.",
-    "labels": [],
+    "labels": [
+      "570131 behaviour_metric_delta no_refresh"
+    ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: route found, not built: cast_applies_aura with control.extra_cast (a second application after_ms later, the read expects $d less after_ms); Lichfrost 801722 has a cast time (CastingTimeIndex 16) and travel speed 30, so the read needs a wait after each cast, which the kind does not have). Needs an aura_duration_ms read after a second application; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 578 Crypt Plague lines, not tallied; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): on the game path (92121 learned, Lichfrost 501978 hits add 2 stacks through Plague(), which raises the stack of an existing aura without refreshing it), one Lichfrost leaves the plague on the dummy 10000 ms after the cast (control), while a first Lichfrost, 4000 ms, then a second leave none 10000 ms after the second (14000 ms after the first; a refresh would hold it until about 16600 ms). Incorrect test corrected: a direct 570131 recast (pair4 20261113-062106 / -062136 diagnostic) re-applies through the stock aura path and refreshes; it is not the claim path. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Crypt Plague\" 578 lines by name, 578 lines by id 570131; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it (35 matches), exiles-db tables: nothing found, WDB cachepacks: nothing found; coa-obtainable: live capture False, no advancement row; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 802986,
