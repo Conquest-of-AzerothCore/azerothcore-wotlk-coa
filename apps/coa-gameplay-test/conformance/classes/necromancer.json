@@ -5654,7 +5654,7 @@
       "variant": "explode",
       "label_suffix": "explode",
       "quote": "Beckon the restless dead to rise and march forward.",
-      "expected": 6,
+      "expected": 1,
       "before_expected": 0,
       "trigger_spell": 707007,
       "target": "dummy",
@@ -5668,7 +5668,8 @@
       },
       "wait_ms": 6000,
       "expire_ms": 500,
-      "observe_source": "A walker 523032 explodes once an enemy is within 2.5 yd of it or when it reaches its aim point (UpdateAI, AscensionNecromancerSummons.cpp:875-880; MovementInform :591-592): event 3 casts March of the Dead 707010 on itself (:829-835), Effect[0] SCHOOL_DAMAGE around the walker (TARGET_UNIT_SRC_AREA_ENEMY, 5 yd), and despawns. No cast (control): no 707010 hit; one cast: six 707010 hits from walkers 523032 on the dummy, one per risen walker (the six of the data row; they spawn within 2.5 yd of the dummy at 3 yd and explode at once, so an owned_creature_count read 300 ms after the cast already found none, pair prove-6). The same hits carry the claim that they explode when they reach an enemy."
+      "observe_source": "A walker 523032 explodes once an enemy is within 2.5 yd of it or when it reaches its aim point (UpdateAI, AscensionNecromancerSummons.cpp:875-880; MovementInform :591-592): event 3 casts March of the Dead 707010 on itself (:829-835), Effect[0] SCHOOL_DAMAGE around the walker (TARGET_UNIT_SRC_AREA_ENEMY, 5 yd), and despawns. No cast (control): no 707010 hit; one cast: six 707010 hits from walkers 523032 on the dummy, one per risen walker (the six of the data row; they spawn within 2.5 yd of the dummy at 3 yd and explode at once, so an owned_creature_count read 300 ms after the cast already found none, pair prove-6). The same hits carry the claim that they explode when they reach an enemy. Expected from the tooltip only (mentor method rule, 2026-11-13): the tooltip states no walker count, so the claim is judged as presence (at least one explosion hit); the six hits of the code's data row are not the expectation.",
+      "after_at_least": 1
     },
     {
       "spell": 707007,
@@ -6082,10 +6083,8 @@
       "variant": "resistance",
       "label_suffix": "resistance",
       "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
-      "expected": 1.3,
-      "expected_ratio": 1.3,
-      "tolerance": 0.02,
-      "before_expected": 1,
+      "expected": 116,
+      "before_expected": 90,
       "trigger_spell": 500335,
       "target": "caster",
       "learn": [
@@ -6105,7 +6104,7 @@
       },
       "wait_ms": 5000,
       "expire_ms": 500,
-      "observe_source": "As the armor entry, the caster's Frost resistance with Frost Resistance 24448 (aura 22, +90 Frost, a precondition fixture by harness set_aura in both phases, the reference character has none): 90 without 301207, 117 with it; the tolerance covers the integer resistance."
+      "observe_source": "As the armor entry, the caster's Frost resistance with Frost Resistance 24448 (aura 22, +90 Frost, a precondition fixture by harness set_aura in both phases, the reference character has none): 90 without 301207, 116 with it, judged exactly. G-26 emulation: 805017 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +30 sets TOTAL_PCT to GetTotalAuraMultiplierByMiscMask, AddPct(1.0f, 30) = 1.3f (Unit.cpp:7071-7080, Util.h:58-61); Player::UpdateResistances computes value = 90.0f, value *= 1.3f = 116.99999f in float32 and stores int32(value) = 116 (StatSystem.cpp:343-365): 90 x 1.3 = 117 truncated one below by the engine's float, the known engine rounding."
     },
     {
       "spell": 301207,
@@ -6702,14 +6701,14 @@
         501978,
         501978
       ],
-      "setup_wait_ms": 2700,
+      "setup_wait_ms": 3000,
       "metric": "aura_stacks",
       "fields": {
         "spell": 706732
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4."
+      "observe_source": "Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4. Each setup Lichfrost waits 3000 ms (its 2500 ms cast plus margin; 2700 ms left two stacks in one run of pair route-5)."
     },
     {
       "spell": 531135,
@@ -6836,8 +6835,7 @@
       "variant": "ticks",
       "label_suffix": "ticks",
       "quote": "Channel life into your Raised minions within $a1 yds for $d,",
-      "expected": 10,
-      "after_at_least": 10,
+      "expected": 20,
       "before_expected": 0,
       "trigger_spell": 801530,
       "target": "caster",
@@ -6853,7 +6851,7 @@
       },
       "wait_ms": 10500,
       "expire_ms": 500,
-      "observe_source": "801530 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, Amplitude 1000 ($t2), on the raised minions in 20 yd (TARGET_UNIT_SRC_AREA_ALLY), DurationIndex 1 (10000 ms, $d): each tick casts Transfer Life 801545 (HEAL_PCT 5% and HEAL) on the minion. A Ghoul is raised in both phases; no 801545 heal without the cast, at least 10 within 10500 ms of one cast."
+      "observe_source": "801530 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, Amplitude 1000 ($t2), on the raised minions in 20 yd (TARGET_UNIT_SRC_AREA_ALLY), DurationIndex 1 (10000 ms, $d): each tick casts Transfer Life 801545 (HEAL_PCT 5% and HEAL) on the minion. A Ghoul is raised in both phases; no 801545 heal without the cast, at least 10 within 10500 ms of one cast. Exact count (review b4 I-2): the Ghoul raised in the uncast phase stays, so two Ghouls are healed (one 801545 log per Ghoul per tick, its two heal effects summed into one log, entry ghouls); 10 ticks of the 1000 ms period in the 10000 ms channel are exactly 20 heal logs by 10500 ms."
     },
     {
       "spell": 802121,
@@ -7031,7 +7029,7 @@
       "fields": {
         "item": 555555
       },
-      "wait_ms": 2000,
+      "wait_ms": 4000,
       "expire_ms": 500,
       "observe_source": "803777 Effect[0] 24 SPELL_EFFECT_CREATE_ITEM, item 555555, BasePoints 4 + 1 = 5 ($s1). No cast: none in the bags; one cast: 5 (item_count, ADR 0425)."
     },
@@ -7393,7 +7391,6 @@
       "label_suffix": "blasts",
       "quote": "that blasts nearby enemies every 2 sec for $d,",
       "expected": 5,
-      "after_at_least": 4,
       "before_expected": 0,
       "trigger_spell": 805428,
       "target": "dummy",
@@ -7411,7 +7408,7 @@
       },
       "wait_ms": 10500,
       "expire_ms": 500,
-      "observe_source": "The Frost Wyrm 50177 casts Frost Wyrm Breath 807339 at nearby enemies (AscensionNecromancerSummons.cpp:868-873). The Wyrm breathes at the caster's PvE combat enemies (BreathTarget, :621-632), so each phase opens with a Lichfrost 501978 at the dummy (a cast without one blasted nothing, pair b4-1). No cast: none; within 10500 ms of one cast at least 4 blasts on the dummy (every 2 sec gives 5)."
+      "observe_source": "The Frost Wyrm 50177 casts Frost Wyrm Breath 807339 at nearby enemies (AscensionNecromancerSummons.cpp:868-873). The Wyrm breathes at the caster's PvE combat enemies (BreathTarget, :621-632), so each phase opens with a Lichfrost 501978 at the dummy (a cast without one blasted nothing, pair b4-1). No cast: none; within 10500 ms of one cast at least 4 blasts on the dummy (every 2 sec gives 5). Exact count (review b4 I-2/I-3): the 2000 ms period gives 5 blasts in 10500 ms; a 1000 ms period would give about 10."
     },
     {
       "spell": 805428,
@@ -8046,6 +8043,894 @@
       "parts": 2,
       "cast_power": 1373,
       "expected_source": "Lichfrost 501978 Effect[0] SCHOOL_DAMAGE Frost, 569 to 597 (mean 583) plus Frost spell power x 0.86989416 (NecromancerCoefficients row {501978, 0, 0.86989416, 16}). Control arm at Frost spell power 0, treatment with Increase Frost Dam 132 24666 (+132 Frost) set before each cast: (583 + 132 x 0.86989416) / 583 = 1.1969 on the mean non-critical hit; 823764 in both arms removes partial resists. A coefficient of 0.65 would give 1.147 and 1.08 give 1.245, both outside the band at +19.7%."
+    },
+    {
+      "spell": 801739,
+      "name": "Heartchill (haste on a successful interrupt)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
+      "expected": 10000,
+      "expected_ratio": 5.0,
+      "tolerance": 0.001,
+      "before_expected": 2000,
+      "trigger_spell": 801739,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "metric": "attack_time_ms",
+      "fields": {},
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: 'reduces their movement speed and haste by $803677s1%' ($803677s1 = 80): the same sentence takes 80% off the movement speed (rate x0.2, the slowed entry), so haste, an attack rate, is read as x0.2 too: the dummy's attack time 2000 ms becomes 10000 ms (expected from the tooltip only, mentor method rule 2026-11-13). The server applies 803677 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE -80, which Unit::ApplyAttackTimePercentMod turns into attack time x1.8 (3600 ms, route-1); the earlier x1.8 expectation was the engine's convention (Templar Sacred Swing entry), not the tooltip. The dummy channels Evocation 12051 before Heartchill (target_casts, ADR 0426), the interrupt casts 803677 at it (AscensionNecromancerAbilities.cpp:239-245). Control: the uncast phase, the dummy's base attack time."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (shared cooldown 3min, refused at 179000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_3min_before",
+      "label_suffix": "cd_3min_before",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "setup_casts": [
+        805049
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 179000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807811
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805049 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807811, which is not cast before). Without Game of Bones 301198: 180000 ms. Gravebound Champion cast, then 807811 179000 ms later: refused with 67 SPELL_FAILED_NOT_READY (before the cooldown ends). Control: the uncast phase, 807811 alone goes through."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (shared cooldown 3min, ready at 181000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_3min_after",
+      "label_suffix": "cd_3min_after",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "setup_casts": [
+        805049
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 181000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807811
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805049 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807811, which is not cast before). Without Game of Bones 301198: 180000 ms. Gravebound Champion cast, then 807811 181000 ms later: accepted (no failure), the cooldown over. Control: the uncast phase, 807811 alone goes through."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (shared cooldown 2min, refused at 119000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_2min_before",
+      "label_suffix": "cd_2min_before",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "setup_casts": [
+        805049
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 119000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807811
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        301198
+      ],
+      "observe_source": "805049 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807811, which is not cast before). Game of Bones 301198 (learned in both phases) Effect[0] aura 107 SPELLMOD_COOLDOWN -60000 on SpellFamilyFlags[2] 8388608 (the Champions): 120000 ms. Gravebound Champion cast, then 807811 119000 ms later: refused with 67 SPELL_FAILED_NOT_READY (before the cooldown ends). Control: the uncast phase, 807811 alone goes through."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (shared cooldown 2min, ready at 121000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_2min_after",
+      "label_suffix": "cd_2min_after",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "setup_casts": [
+        805049
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 121000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807811
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        301198
+      ],
+      "observe_source": "805049 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807811, which is not cast before). Game of Bones 301198 (learned in both phases) Effect[0] aura 107 SPELLMOD_COOLDOWN -60000 on SpellFamilyFlags[2] 8388608 (the Champions): 120000 ms. Gravebound Champion cast, then 807811 121000 ms later: accepted (no failure), the cooldown over. Control: the uncast phase, 807811 alone goes through."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (shared cooldown 3min, refused at 179000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_3min_before",
+      "label_suffix": "cd_3min_before",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "setup_casts": [
+        807811
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 179000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807813
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807811 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807813, which is not cast before). Without Game of Bones 301198: 180000 ms. Spellbound Champion cast, then 807813 179000 ms later: refused with 67 SPELL_FAILED_NOT_READY (before the cooldown ends). Control: the uncast phase, 807813 alone goes through."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (shared cooldown 3min, ready at 181000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_3min_after",
+      "label_suffix": "cd_3min_after",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "setup_casts": [
+        807811
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 181000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807813
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807811 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807813, which is not cast before). Without Game of Bones 301198: 180000 ms. Spellbound Champion cast, then 807813 181000 ms later: accepted (no failure), the cooldown over. Control: the uncast phase, 807813 alone goes through."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (shared cooldown 2min, refused at 119000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_2min_before",
+      "label_suffix": "cd_2min_before",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "setup_casts": [
+        807811
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 119000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807813
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        301198
+      ],
+      "observe_source": "807811 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807813, which is not cast before). Game of Bones 301198 (learned in both phases) Effect[0] aura 107 SPELLMOD_COOLDOWN -60000 on SpellFamilyFlags[2] 8388608 (the Champions): 120000 ms. Spellbound Champion cast, then 807813 119000 ms later: refused with 67 SPELL_FAILED_NOT_READY (before the cooldown ends). Control: the uncast phase, 807813 alone goes through."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (shared cooldown 2min, ready at 121000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_2min_after",
+      "label_suffix": "cd_2min_after",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "setup_casts": [
+        807811
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 121000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807813
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        301198
+      ],
+      "observe_source": "807811 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 807813, which is not cast before). Game of Bones 301198 (learned in both phases) Effect[0] aura 107 SPELLMOD_COOLDOWN -60000 on SpellFamilyFlags[2] 8388608 (the Champions): 120000 ms. Spellbound Champion cast, then 807813 121000 ms later: accepted (no failure), the cooldown over. Control: the uncast phase, 807813 alone goes through."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (shared cooldown 3min, refused at 179000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_3min_before",
+      "label_suffix": "cd_3min_before",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "setup_casts": [
+        807813
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 179000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 805049
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807813 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 805049, which is not cast before). Without Game of Bones 301198: 180000 ms. Icebound Champion cast, then 805049 179000 ms later: refused with 67 SPELL_FAILED_NOT_READY (before the cooldown ends). Control: the uncast phase, 805049 alone goes through."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (shared cooldown 3min, ready at 181000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_3min_after",
+      "label_suffix": "cd_3min_after",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "setup_casts": [
+        807813
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 181000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 805049
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807813 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 805049, which is not cast before). Without Game of Bones 301198: 180000 ms. Icebound Champion cast, then 805049 181000 ms later: accepted (no failure), the cooldown over. Control: the uncast phase, 805049 alone goes through."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (shared cooldown 2min, refused at 119000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_2min_before",
+      "label_suffix": "cd_2min_before",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "setup_casts": [
+        807813
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 119000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 805049
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        301198
+      ],
+      "observe_source": "807813 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 805049, which is not cast before). Game of Bones 301198 (learned in both phases) Effect[0] aura 107 SPELLMOD_COOLDOWN -60000 on SpellFamilyFlags[2] 8388608 (the Champions): 120000 ms. Icebound Champion cast, then 805049 119000 ms later: refused with 67 SPELL_FAILED_NOT_READY (before the cooldown ends). Control: the uncast phase, 805049 alone goes through."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (shared cooldown 2min, ready at 121000 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_2min_after",
+      "label_suffix": "cd_2min_after",
+      "quote": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "setup_casts": [
+        807813
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 121000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 805049
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "learn": [
+        301198
+      ],
+      "observe_source": "807813 CategoryRecoveryTime 180000 (Category 55, shared by the three Champions; its own RecoveryTime 300000 does not bind 805049, which is not cast before). Game of Bones 301198 (learned in both phases) Effect[0] aura 107 SPELLMOD_COOLDOWN -60000 on SpellFamilyFlags[2] 8388608 (the Champions): 120000 ms. Icebound Champion cast, then 805049 121000 ms later: accepted (no failure), the cooldown over. Control: the uncast phase, 805049 alone goes through."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "nearby",
+      "label_suffix": "nearby",
+      "quote": "Plague damage to nearby enemies",
+      "expected": 3,
+      "radius": 5,
+      "uncapped": true,
+      "cluster_yd": 2.5,
+      "primary_distance_reads": true,
+      "radius_reason": "707010 Effect[0] SCHOOL_DAMAGE, TargetA TARGET_SRC_CASTER, TargetB TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 8 = 5 yd around the exploding walker, MaxAffectedTargets 25; the three additional dummies stand within 2.5 yd of the primary the walkers march to, the far dummy 10 yd beyond it",
+      "cast_spell": 707007,
+      "target_rank": 707010,
+      "caster_entry": 523032,
+      "repeats": 1,
+      "settle_ms": 6000,
+      "observe_source": "March of the Dead at the primary dummy; the walkers 523032 march to it and explode (Summon, AscensionNecromancerSummons.cpp:372-395 aims them at the target; 523032 casts 504022 on reaching it, :708-713), each explosion a 707010 hit read per dummy from the walkers' (entry 523032) hits. Control: before 707007 is learned the cast is refused, no walker, no hit; the far dummy is never hit."
+    },
+    {
+      "spell": 504050,
+      "name": "Command: Blight (radius)",
+      "kind": "fixed_count",
+      "variant": "radius",
+      "label_suffix": "radius",
+      "quote": "in a $801534a1 yd radius beneath it,",
+      "expected": 3,
+      "radius": 10,
+      "uncapped": true,
+      "metric": "aura",
+      "cast_target": "caster",
+      "layout": "caster",
+      "learn": [
+        92123
+      ],
+      "radius_reason": "801534 Effect[1] 27 SPELL_EFFECT_PERSISTENT_AREA_AURA, TargetA TARGET_DEST_CASTER (the Colossus), TargetB TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 13 = 10 yd ($801534a1), MaxAffectedTargets 6; the four dummies stand 2 to 8 yd from the caster beside whom the Colossus stands, the far dummy 15 yd away",
+      "cast_spell": 504050,
+      "target_rank": 801534,
+      "setup_casts": [
+        [
+          500989,
+          "caster"
+        ]
+      ],
+      "repeats": 1,
+      "settle_ms": 3000,
+      "select_primary": true,
+      "caster_entry": 50115,
+      "observe_source": "One Decaying Colossus is raised (500989), then Command: Blight at the caster; the Colossus blights the ground beneath it (801534), read per dummy as the aura whatever its caster. Control: before 504050 is learned the Command is refused, no ground; the dummy 15 yd away, outside 10 yd of the Colossus, never carries it."
+    },
+    {
+      "spell": 504050,
+      "kind": "metric_delta",
+      "trigger_spell": 504050,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500989
+      ],
+      "setup_wait_ms": 5000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 801534
+      },
+      "expire_ms": 500,
+      "quote": "for enemies inside for $801534d.",
+      "name": "Command: Blight (ground held)",
+      "variant": "ground_held",
+      "label_suffix": "ground_held",
+      "expected": 1,
+      "before_expected": 0,
+      "wait_ms": 18500,
+      "observe_source": "As the ground entry: 801534 DurationIndex 18 = 20000 ms ($801534d); the persistent area lasts its duration and the dummy inside keeps the aura while it stands: still on 18500 ms after the Command. Control: the Colossus alone, no Command, no aura."
+    },
+    {
+      "spell": 504050,
+      "kind": "metric_delta",
+      "trigger_spell": 504050,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500989
+      ],
+      "setup_wait_ms": 5000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 801534
+      },
+      "expire_ms": 500,
+      "quote": "for enemies inside for $801534d.",
+      "name": "Command: Blight (ground ends)",
+      "variant": "ground_ends",
+      "label_suffix": "ground_ends",
+      "expected": 0,
+      "before_expected": 0,
+      "wait_ms": 21500,
+      "observe_source": "As the ground entry: 801534 DurationIndex 18 = 20000 ms ($801534d); the persistent area lasts its duration and the dummy inside keeps the aura while it stands: gone 21500 ms after the Command. Control: the Colossus alone, no Command, no aura."
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (one tick's heal)",
+      "kind": "metric_delta",
+      "variant": "tick_amount",
+      "label_suffix": "tick_amount",
+      "quote": "healing them for $801545s1% of their maximum health plus ${$801545m2+$801545ppl2+$SP*.25} every $t2 sec.",
+      "expected": 226,
+      "before_expected": 0,
+      "trigger_spell": 801530,
+      "target": "caster",
+      "setup_casts": [
+        500971,
+        802121
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 801545
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: $801545s1% = 5% of the minion's maximum health plus ${$801545m2+$801545ppl2+$SP*.25} = 44 at the reference stats (spell power 0), per tick. Two raised Ghouls (entry ghouls), maximum health 1380 each (entry ghoul_max), both lowered by Bone Tithe 802121 first so the heal is not capped; one tick within 1500 ms of the cast heals each Ghoul for 0.05 x 1380 + 44 = 113: 226 in all. Control: the uncast phase, no channel, no heal."
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (Ghoul maximum health, diagnostic)",
+      "kind": "metric_delta",
+      "variant": "ghoul_max",
+      "label_suffix": "ghoul_max",
+      "quote": "healing them for $801545s1% of their maximum health",
+      "expected": 1380,
+      "before_expected": 1380,
+      "trigger_spell": 802121,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_max_health",
+      "fields": {
+        "entry": 50073
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "The Ghoul's maximum health read on the live unit (owned_creature_max_health), the base of the 5% term: 1380 in both phases (Bone Tithe changes its health, not its maximum).",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (shield size)",
+      "kind": "taken_hit",
+      "variant": "half",
+      "label_suffix": "half",
+      "judge": "absorb",
+      "quote": "to grant yourself an absorb shield equal to half of the health stolen",
+      "strike_spell": 41394,
+      "strikes": 3,
+      "trials": 1,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "absorb_terms": [
+        {
+          "coefficient": 0.2,
+          "reads": [
+            {
+              "metric": "owned_creature_max_health",
+              "entry": 50073
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "strikes": 1
+        },
+        {
+          "name": "tithe",
+          "opening_casts": [
+            [
+              500971,
+              "caster"
+            ]
+          ],
+          "casts": [
+            [
+              802121,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "pilot"
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (crossing down)",
+      "kind": "metric_delta",
+      "variant": "crossing_down",
+      "label_suffix": "crossing_down",
+      "quote": "If the target's health is below 20% at the end of duration,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "cast_power": 1000,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 25,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "observe_source": "The end-of-duration test (review b4 I-5): the dummy's health is set by the harness (a precondition fixture, set_health_pct) to 25% before Death's Due and to 15% 1500 ms after the cast, inside the 5000 ms curse (target_health_after, ADR 0428); 25% at the cast, lowered to 15% 1500 ms later: one 808016 hit at the end of the curse, so the health is judged when the curse ends (AscensionNecromancerAuras.cpp, 807796 removal), not at the cast. Control: the uncast phase, no curse, no hit.",
+      "target_health_after": [
+        1500,
+        15
+      ]
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (ticks mid)",
+      "kind": "metric_delta",
+      "variant": "ticks_mid",
+      "label_suffix": "ticks_mid",
+      "quote": "Channel life into your Raised minions within $a1 yds for $d,",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 801530,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801545
+      },
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "observe_source": "As the ticks entry (two Ghouls, one 801545 heal log each per 1000 ms tick): 10 heal logs 5500 ms after the cast, 5 ticks: a 2000 ms period would give 4 to 6 logs, a 500 ms period 20 (review b4 I-2, the period)."
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (ticks late)",
+      "kind": "metric_delta",
+      "variant": "ticks_late",
+      "label_suffix": "ticks_late",
+      "quote": "Channel life into your Raised minions within $a1 yds for $d,",
+      "expected": 18,
+      "before_expected": 0,
+      "trigger_spell": 801530,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801545
+      },
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "observe_source": "As the ticks entry (two Ghouls, one 801545 heal log each per 1000 ms tick): 18 heal logs 9500 ms after the cast, 9 ticks: the channel still runs before its 10000 ms end."
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (ticks end)",
+      "kind": "metric_delta",
+      "variant": "ticks_end",
+      "label_suffix": "ticks_end",
+      "quote": "Channel life into your Raised minions within $a1 yds for $d,",
+      "expected": 20,
+      "before_expected": 0,
+      "trigger_spell": 801530,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801545
+      },
+      "wait_ms": 12500,
+      "expire_ms": 500,
+      "observe_source": "As the ticks entry (two Ghouls, one 801545 heal log each per 1000 ms tick): 20 heal logs 12500 ms after the cast, still 20: no tick after the 10000 ms channel ($d) ends, the duration's upper bound."
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (Frost damage with spell power)",
+      "kind": "script_hit",
+      "variant": "breath_sp",
+      "label_suffix": "breath_sp",
+      "quote": "Frost damage.",
+      "hit_spell": 807339,
+      "hit_effect": 0,
+      "caster_entry": 50177,
+      "trials": 2,
+      "minimum_hits": 6,
+      "control_casts": [
+        [
+          501978,
+          "dummy"
+        ]
+      ],
+      "casts": [
+        [
+          501978,
+          "dummy"
+        ],
+        [
+          805428,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 10000,
+      "observe_source": "807339 Effect[0] SCHOOL_DAMAGE, BasePoints 1499 + 1 = 1500 plus (Frost spell power x 0.702 + Intellect x 0.702) x 0.212: the tooltip's ${$807339m1+(($spfr*0.702)+($INT*0.702))*0.212}. Each trial opens with a Lichfrost 501978 at the dummy, so the Wyrm has a combat enemy (BreathTarget, AscensionNecromancerSummons.cpp:621-632). Control: the same trials with the Lichfrost alone (control_casts; 805428 is known in both arms, an unlearned control counted 21 hits in pair b4-2) count no 807339 hit. Spell power arm (review b4 I-1): Increase Frost Dam 132 24666 on the caster (a precondition fixture by harness set_aura, as 707007 explosion_sp), so $spfr is 132 and the model adds 132 x 0.702 x 0.212 = 19.64.",
+      "stat_auras": [
+        [
+          24666,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "nearby",
+      "label_suffix": "nearby",
+      "quote": "that blasts nearby enemies every 2 sec",
+      "expected": 3,
+      "radius": 10,
+      "uncapped": true,
+      "select_primary": true,
+      "radius_reason": "npc_ascension_necromancer event 9 (AscensionNecromancerSummons.cpp:869-873): the Wyrm casts 807339 at every valid enemy within 10 yd (Nearby(enemy, 10.0f)) of its breath target; the three additional dummies stand within 7.5 yd of the primary, the far dummy 15 yd beyond it",
+      "cast_spell": 805428,
+      "target_rank": 807339,
+      "caster_entry": 50177,
+      "setup_casts": [
+        [
+          501978,
+          "primary"
+        ]
+      ],
+      "repeats": 1,
+      "settle_ms": 4500,
+      "observe_source": "Lichfrost 501978 at the selected primary puts the caster in combat (the Wyrm's breath target), then Animate: Frost Wyrm; its blast (45200 projectile, then 807339) lands on the primary and every enemy within 10 yd of it, read per dummy from the Wyrm's (entry 50177) hits. Control: before 805428 is learned the cast is refused, no Wyrm, no hit; the far dummy is never hit."
+    },
+    {
+      "spell": 531135,
+      "name": "Icecrown (no stack from Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "nonfrost",
+      "label_suffix": "nonfrost",
+      "quote": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "learn": [
+        531135
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706732
+      },
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "observe_source": "The school gate (review b4 I-6): AscensionNecromancerEvents.cpp:141 applies 706732 only for a hit with SPELL_SCHOOL_MASK_FROST. Crypt Swarm 501886 hits the dummy with 800343 (SchoolMask 32, Shadow) with 531135 learned in both phases: no 706732, against the stack entry's one stack after a Frost Lichfrost 501978 hit."
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (Ghouls healed)",
+      "kind": "metric_delta",
+      "variant": "ghouls",
+      "label_suffix": "ghouls",
+      "quote": "healing them for $801545s1% of their maximum health plus ${$801545m2+$801545ppl2+$SP*.25} every $t2 sec.",
+      "expected": 2,
+      "before_expected": 1,
+      "trigger_spell": 801530,
+      "target": "caster",
+      "setup_casts": [
+        500971,
+        802121
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The number of raised Ghouls the tick entries heal: the uncast phase's Ghoul (setup_in_before) stays and the cast phase raises a second, so one Ghoul before, two after."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (curse lands through the shield, diagnostic)",
+      "kind": "metric_delta",
+      "variant": "shield_curse",
+      "label_suffix": "shield_curse",
+      "quote": "removing any invulnerability or immunity effects from them",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "cast_power": 1000,
+      "target": "dummy",
+      "target_health_pct": 99,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          642,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807796
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Diagnostic for the parked dispel claim (route agent): the removes_shield scenario's setup (Divine Shield 642 on the dummy by harness set_aura, 99% health, cast_power 1000), reading Death's Due's own curse 807796 on the dummy 3000 ms after the cast step: if a run keeps the shield while the curse is on, the dispel effect was skipped on a landed spell; if the curse is absent too, the spell did not land."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (cast through the shield, diagnostic)",
+      "kind": "metric_delta",
+      "variant": "shield_cast",
+      "label_suffix": "shield_cast",
+      "quote": "removing any invulnerability or immunity effects from them",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "cast_power": 1000,
+      "target": "dummy",
+      "target_health_pct": 99,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          642,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "caster",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807796
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Diagnostic for the parked dispel claim (route agent): the removes_shield setup, reading the caster's cast failure for Death's Due (0: no failure)."
+    },
+    {
+      "spell": 803777,
+      "name": "Create Frozen Reliquary (cast, diagnostic)",
+      "kind": "metric_delta",
+      "variant": "cast",
+      "label_suffix": "cast",
+      "quote": "Create $s1 Frozen Reliquary",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 803777,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 803777
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "Diagnostic: the caster's cast failure for 803777 with its reagent 37201 given (ADR 0429): 0, no failure."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion",
+      "kind": "immunity",
+      "quote": "Summon an Icebound Champion that prevents you from being silenced or interrupted",
+      "aura": 807812,
+      "effects": [
+        {
+          "spell": 15487,
+          "words": "silenced"
+        }
+      ],
+      "observe_source": "The Icebound Champion 500484 carries Icebound Champion 807812 (ChampionAura, AscensionNecromancerSummons.cpp:98-109), Effect[0-2] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER on the caster: Effect[2] aura 77 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 9 (MECHANIC_SILENCE) (Effect[1] MiscValue 26, interrupt). The immunity aura read is 807812 on the caster (aura, ADR 0430), not the summon spell. Fixture cast by the dummy: Silence 15487 (aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9): it lands without the Champion, is refused with 807812 up, and lands again once the 20000 ms Champion ($d) has gone (the control)."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion",
+      "kind": "immunity",
+      "quote": "that deflects spells cast on you, redirecting them to itself",
+      "aura": 808017,
+      "effects": [
+        {
+          "spell": 12096,
+          "words": "spells"
+        }
+      ],
+      "observe_source": "The Spellbound Champion 500483 carries Spellbound Champion 808017 (ChampionAura, AscensionNecromancerSummons.cpp:98-109), Effect[2] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER on the caster, made SPELL_AURA_SPELL_MAGNET with no charges by its contract (AscensionNecromancerContracts.cpp:230-234): a magic spell cast at the caster goes to the aura's caster, the Champion. The read is 808017 on the caster (aura, ADR 0430). Fixture cast by the dummy: Fear 12096 (magic, aura 7): it lands on the caster without the Champion, is not on the caster with 808017 up, and lands again once the 20000 ms Champion ($d) has gone (the control)."
     },
     {
       "spell": 680388,

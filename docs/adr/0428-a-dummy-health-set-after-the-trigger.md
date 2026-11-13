@@ -25,5 +25,5 @@
 - `TargetHealthAfterTests` (test_behaviours.py) checks the step order and both waits, the refusal of a delay outside
   the wait, and the single wait of an entry without the field. Dropping the health step is the mutant that the first
   test catches.
-- Death's Due gains a crossing-down arm (25% at the cast, 15% 1500 ms later: one hit) and a crossing-up arm (15% at
-  the cast, 25% 1500 ms later: no hit).
+- Death's Due gains a crossing-down arm (25% at the cast, 15% 1500 ms later: one hit). A crossing-up arm is not
+  possible: the harness `set_health_pct` cannot raise health (pair route-5).
