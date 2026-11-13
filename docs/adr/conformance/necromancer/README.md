@@ -49,3 +49,4 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0043](0043-graveyard-leaves-one-corpse-per-raised-undead.md) | - | Graveyard leaves one corpse per raised Undead | new |
 | [0044](0044-the-hook-halt-waits-for-an-enemy-movement-order.md) | - | The Hook's halt waits for an enemy movement order | new, superseded by ADR 0604 |
 | [0045](0045-dominion-of-frost-gate-is-read-with-two-minions.md) | - | The Dominion of Frost gate is read with two minions | new |
+| [0046](0046-study-of-death-cut-is-bracketed-by-repeated-casts.md) | - | The Study of Death cut is bracketed by repeated casts | new |
