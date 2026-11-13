@@ -4672,10 +4672,12 @@ private:
             uint32 const maxLevel = step.get<uint32>("max_level", 255);
             float const minHomeDistance = step.get<float>("min_home_distance", 0.0f);
             uint32 const auraSpell = step.get<uint32>("spell", 0);
+            bool const dead = step.get<bool>("dead", false);
             return std::count_if(creatures.begin(), creatures.end(),
-                [minLevel, maxLevel, minHomeDistance, auraSpell](Creature* creature)
+                [player, minLevel, maxLevel, minHomeDistance, auraSpell, dead](Creature* creature)
                 {
-                    return creature->IsInWorld() && creature->IsAlive()
+                    return creature->IsInWorld() && creature->IsAlive() != dead
+                        && (!dead || player->InSamePhase(creature))
                         && creature->GetLevel() >= minLevel && creature->GetLevel() <= maxLevel
                         && (minHomeDistance == 0.0f
                             || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance)
@@ -5710,6 +5712,12 @@ private:
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Victim observation needs a present owned creature");
             return creature->GetVictim() == GetUnit(step.get<std::string>("target"));
+        }
+        if (metric == "owned_creature_distance_2d")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Distance observation needs a present owned creature");
+            return creature->GetExactDist2d(GetUnit(step.get<std::string>("target")));
         }
         if (metric == "owned_creature_weapon_damage_min")
         {
