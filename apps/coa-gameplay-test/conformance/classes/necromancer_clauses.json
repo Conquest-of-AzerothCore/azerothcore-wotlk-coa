@@ -4005,7 +4005,9 @@
       },
       {
         "claim": "and your Undead minions to emit a damaging disease cloud.",
-        "labels": []
+        "labels": [
+          "804371 behaviour_metric_delta minion_cloud"
+        ]
       }
     ],
     "kind": "claim",

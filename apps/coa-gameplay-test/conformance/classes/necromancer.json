@@ -9572,6 +9572,31 @@
       "observe_source": "aura_ascension_necromancer_lifecycle casts the cloud 520891 from the caster when 804371 applies to it (AscensionNecromancerAuras.cpp:209-214): 520891 Effect[0] SCHOOL_DAMAGE, TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY, radius 5 yd (SpellRadius 8). The dummy stands 3 yd away. Before the cast no 520891 hit (control); one real cast of 804371 lands one 520891 hit on the dummy."
     },
     {
+      "spell": 804371,
+      "name": "Foul Invocation (disease cloud of the Undead minions)",
+      "kind": "metric_delta",
+      "variant": "minion_cloud",
+      "label_suffix": "minion_cloud",
+      "quote": "and your Undead minions to emit a damaging disease cloud.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 804371,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "owned_creature_spell_cast_count",
+      "fields": {
+        "spell": 520891,
+        "entry": 50073
+      },
+      "setup_casts": [500971],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_wait_ms": 3100,
+      "wait_ms": 1500,
+      "expire_ms": 21000,
+      "observe_source": "aura_ascension_necromancer_lifecycle: on the caster's own 804371 tick (Tick, AscensionNecromancerAuras.cpp:209-214) the caster casts the cloud 520891 and so does each of its minions (Minions(player), raised Ghoul included): Cast(minion, minion, 520891); 520891 Effect[0] SCHOOL_DAMAGE, TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY, radius 5 yd (SpellRadius 8), the same damaging cloud the caster entry (804371 cloud) lands on the dummy. A Ghoul 50073 is raised by a real Raise: Ghoul 500971 in both phases. Before the cast (control) the Ghoul cast no 520891; after one real cast of 804371 it cast it once, in the same tick as the caster's one cloud (the caster entry reads 1 at the same 1500 ms wait)."
+    },
+    {
       "spell": 680388,
       "name": "Fetid Ward",
       "kind": "exclusivity",
