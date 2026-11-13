@@ -265,6 +265,8 @@ setup casts to their own unit: Greater Skeletal Warrior 504901's raise goes to t
 `enemy_casts` has the enemy player cast learned spells at itself after each trigger cast (Plague of Undeath 503640
 cured by Cure Disease 528); `target_health_pct` sets the trigger target's health percent before each trigger cast
 (the Skeletal Rogue's Command below 35%).
+`target_casts` (ADR 0385) has the dummy cast spells at itself after each trigger cast (Plague of Undeath cured by the
+dummy's own Cure Disease 528), `helper_casts` a second enemy player of the enemy's faction cast them at the enemy.
 
 ### Health-threshold ratio scenarios (`behaviour_ratio`, `kind: "health_ratio"`)
 
@@ -1689,3 +1691,26 @@ the actor owns an aura it may not hold itself (a summons-only aura). The two cre
 haste and crit words, so a learned contrast is behaviour; `owned_aura` is a readback. Army of the Dead 525600 reads the
 Ghoul's swing interval and crit chance with an Abomination raised in both phases, and its condition arm raises the
 Abomination in the second phase only (`setup_only_after`).
+
+### Repair at an owned creature (`behaviour_cast_condition`, `kind: "npc_repair"`, ADR 0384)
+
+The caster, a grouped ally and an enemy-faction player each wear `item` (`full` durability), worn by `loss_percent`
+before each request (harness `durability_loss`, a precondition fixture), and send a repair-all request to the caster's
+creature `entry` (harness `repair_at`, the real `CMSG_REPAIR_ITEM` handler): before `spell` is cast (no creature), then
+after it for the caster, the ally and the enemy. Each worn and repaired reading of `equipped_durability` (the item's
+entry) is judged exactly: refused requests keep the worn value, granted ones restore `full`. Animate: Skeletal Smith
+804681 repairs the caster and the ally, not the enemy.
+
+### Strike bursts (`behaviour_metric_delta`, `kind: "strike_bursts"`, ADR 0383)
+
+A minion's scripted strikes after a Command: `command` is cast at the dummy (`distance` yd away) once with no minion
+(the control: no hit), then `spell` raises a creature `entry`; each cycle casts `command`, reads the minion's hits 25 ms
+before and after the strike tick (`burst_delay_ms`, 500), and casts the two `stances` (Pacify, then another) so the
+minion stops. `arms` (`name`, `health_pct` falling from arm to arm, `cycles`, `low`, `high`) set the dummy's health;
+every per-cycle count must lie in `low`..`high` and both ends must be seen. Raise: Skeletal Rogue 500969: 40
+Commands at 37% read 2 to 5, 10 at 33% read 5.
+
+### Stat attribution for stats (`stat_gain`, `attribute_stat`, ADR 0385)
+
+`attribute_stat: true` on a `stat_gain` of the `stat` metric adds the attribution reads (the auras around each cast,
+the return after their removal) with `Unit::GetStat` as the named read: Bone Ward 681529's Stamina.

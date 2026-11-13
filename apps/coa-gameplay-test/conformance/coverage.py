@@ -409,7 +409,7 @@ METRIC_EVIDENCE = {
                      'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
                      'owned_creature_threat', 'owned_creature_power',
                      'owned_creature_threat_multiplier', 'melee_crit_chance_against', 'threat_multiplier',
-                     'cast_speed_multiplier', 'display_id'), STATE),
+                     'cast_speed_multiplier', 'display_id', 'threat_per_damage'), STATE),
 }
 CRIT_WORDS = r'critical strike chance|chance to critically'
 RATING_WORDS = '|'.join(['rating', *sorted({re.escape(name) for name in RATING_NAMES.values()})])
@@ -435,6 +435,7 @@ STATE_PROMISES = {
     'owned_creature_threat_multiplier': r'threat', 'melee_crit_chance_against': CRIT_WORDS,
     'cast_speed_multiplier': r'casting speed|cast speed',
     'display_id': r'transform\w*',
+    'threat_per_damage': r'threat',
     'threat_multiplier': r'threat',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
