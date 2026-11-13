@@ -58,9 +58,10 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 
 ## Re-auditable verdict set
 
-The final merged pair (guide 9.9, ADR 0590): runs 20261113-181701 and 20261113-184212, 3303 scenarios each, `compare
---build db3a415afcc22c5768dce347f51fde26e13de0e0103c6c8ca1ebbf643b3dbfbe`, server commit e7fcf49d17c2. The set (both
-`compare` outputs, both audits, the two verify_all `report.json` files and the 28 MB manifest, 35 MB in all) is too
-large for this folder. It is kept outside the repository on the class owner's workstation, in the conformance
-checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final7/`, with a `BUILD.txt` that names
-the build, the commit and the re-audit command.
+The latest merged pair (guide 9.9, ADR 0590): runs 20261113-192548 and 20261113-194835 (cycle 8), 3314 scenarios
+each, `compare --build 4a23bf2e486b0bcaf3c116a9b35c00fb83c1e2ac0485b41629603232ab49f558`, server commit 3da340fa0244.
+The set (both `compare` outputs, both audits, the two verify_all `report.json` files and the manifest, 35 MB in all)
+is too large for this folder. It is kept outside the repository on the class owner's workstation, in the conformance
+checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final8/`, with a `BUILD.txt` that names
+the build, the commit and the re-audit command. The previous set (cycle 6, runs 20261113-181701 / -184212, build
+db3a415afcc2, commit e7fcf49d17c2) stays beside it in `archive/necromancer-final7/`.
