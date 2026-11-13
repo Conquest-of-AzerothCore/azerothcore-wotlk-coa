@@ -152,7 +152,7 @@
       "300580 behaviour_hit_ratio two_summons"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1%', 'up to a maximum of 10%'; coa-obtainable: in the live capture; logs: no line for 300580."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1%', 'up to a maximum of 10%'; coa-obtainable: in the live capture; logs: no line for 300580. Status 1 pending mentor (review I-4): the readings are deterministic (1100 -> 1089 with one summon, 1078 with two, sigma 0, -1.000% and -2.000% exactly), but the taken_hit judge applies the 2-point G-19 band, under which 0% and a flat 1% would also pass; a judge to the rounding was tried (the hit_ratio 'stated' parts model, which does not fit an absent-to-present bonus) and dropped."
   },
   {
     "spell": 300580,
@@ -160,7 +160,8 @@
     "labels": [
       "300580 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " Open, route pending: the cap min(10, Count(player)) (AscensionNecromancerEvents.cpp:336-337) needs 11 living minions; Bone Constructs last 20 s and take 3000 ms plus the global cooldown each, so about five live at once with a Crypt Fiend; route: a haste fixture or several minion kinds."
   },
   {
     "spell": 300748,
@@ -549,7 +550,8 @@
     "spell": 500329,
     "clause": "Command: Shoots necrotic bile at an enemy, dealing ${$707598m1+$707598ppl1+$SP*0.65} Plague damage,",
     "labels": [
-      "500329 script_hit 707598 command_damage"
+      "500329 script_hit 707598 command_damage",
+      "500329 script_hit 707598 command_damage_sp"
     ],
     "kind": "claim",
     "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067."
@@ -559,7 +561,8 @@
     "clause": "dealing 50% increased damage for each of your diseases on the target.",
     "labels": [
       "500329 script_hit 707598 one_disease",
-      "500329 script_hit 707598 command_damage"
+      "500329 script_hit 707598 command_damage",
+      "500329 script_hit 707598 two_diseases"
     ],
     "kind": "claim",
     "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067."
@@ -1062,7 +1065,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found. Claim 'by party and raid members': measured, not final (G-20 step 1): +2.01% [+0.11, +3.91] and +0.92% [-0.96, +2.79] at 332 trials per arm (4 pooled parts, final2 20261113-020126 / -020211); Frost partial resists on the ally spread the hits, the pilot asks about 1,166-1,940 per arm; sized only if slack remains (mentor)."
   },
   {
     "spell": 503738,
@@ -1079,7 +1082,8 @@
     "labels": [
       "503738 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " Open, route pending: Corpse Explosion 533236 explodes non-Mechanical, non-Elemental corpses within 15 yd (AscensionNecromancerAbilities.cpp:18-38) and Factor() gives 533240 x1.25 with 503738 (AscensionNecromancerContracts.cpp:420-421); no scenario places a corpse (a creature killed in the scenario); route: kill a Kobold Vermin 6 dummy, then read 533240 on an enemy player near it with and without 503738."
   },
   {
     "spell": 503740,
@@ -1167,7 +1171,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'to a halt for 2 seconds' and 'Not usable while in Undead: Pacify'; coa-obtainable: in the live capture; logs: no line for 504316 or 800043."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'to a halt for 2 seconds' and 'Not usable while in Undead: Pacify'; coa-obtainable: in the live capture; logs: no line for 504316 or 800043. Claim 'hook an enemy to their location': open, route pending: MoveJump to the Abomination (AscensionNecromancerSummons.cpp:659-660) is not read; route: the dummy's distance to the owned Abomination before and after the Command."
   },
   {
     "spell": 504316,
@@ -1435,7 +1439,8 @@
       {
         "claim": "upon reaching an enemy, deals ${$531132m1+$531132ppl1+$SP*2+$AP*.5} Shadow damage",
         "labels": [
-          "531130 script_hit 531132 damage"
+          "531130 script_hit 531132 damage",
+          "531130 script_hit 531132 damage_sp"
         ]
       },
       {
@@ -1446,7 +1451,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities': open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura."
   },
   {
     "spell": 531135,
@@ -2145,7 +2150,8 @@
     "spell": 707402,
     "clause": "Call down icy boulders onto a Frozen enemy, dealing ${$m1+0+$spfr*1.405} Frost damage.",
     "labels": [
-      "707402 script_hit 707592 damage"
+      "707402 script_hit 707592 damage",
+      "707402 script_hit 707592 damage_sp"
     ],
     "kind": "claim",
     "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 1 tolerated (mentor, G-19 band): 707592 reads 855 on every hit (sigma 0, 99% interval 855 to 855) against the 815 the tooltip gives at the measured stats, +4.91%, inside 5% in both runs. Cause: the stock SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE passes 707402's CalcValue (812 + 1.92 x 2 = 815) as BasePoints0 (SpellEffects.cpp:1847-1852), and CalcValue of 707592 adds its own EffectRealPointsPerLevel 2.0 x (38 - 18) = 40 on top of the passed value (SpellInfo.cpp:482-497). Stock path, not CoA code; +40 at every level 58-64 of this rank. No fix."
@@ -2243,7 +2249,7 @@
       "704681 behaviour_metric_delta grave_march"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Grave March 500991 rolls measured separately (grave_march entry, mentor 2026-11-13: 'your spells' covers it)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Grave March 500991 rolls measured separately (grave_march entry, mentor 2026-11-13: 'your spells' covers it). Confirmed deviation, fix note FN-a4-1 (not built): Grave March 500991 rolls no Permafrost because its SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING makes Spell::IsTriggered() true (Spell.cpp:641-642) and necromancer_casts::OnSpellCast returns on it (AscensionNecromancerAbilities.cpp:249-250); the proc rate itself is sized to the band (review I-1)."
   },
   {
     "spell": 704681,
@@ -3015,7 +3021,8 @@
       {
         "claim": "dealing ${$m1+0+$SP*.5971} Frost damage",
         "labels": [
-          "501997 script_hit 803779 tick"
+          "501997 script_hit 803779 tick",
+          "501997 script_hit 803779 tick_sp"
         ]
       },
       {
@@ -4933,7 +4940,8 @@
       {
         "claim": "dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies",
         "labels": [
-          "805197 script_hit 500365 raised"
+          "805197 script_hit 500365 raised",
+          "805197 script_hit 500365 raised_sp"
         ]
       },
       {
@@ -4944,7 +4952,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats). Claim 'periodically raising the Undead from the ground ... and creating a corpse': open, route pending: each 500365 summons a Risen Ghoul 542065 that kills itself after 500 ms (AscensionNecromancerSummons.cpp:561-565, 851-855); owned_creature_count reads living summons only; route: a dead-creature count near the dummy."
   },
   {
     "spell": 805197,
@@ -5394,14 +5402,15 @@
     "spell": 803771,
     "clause": "Allies may only use a Bone Reliquary once per minute.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " Open, route pending: the item spell category 1153 (60 s) of Bone Reliquary 11521 applies to an ally using the item; no scenario uses an item as an ally (use_item by the ally)."
   },
   {
     "spell": 803771,
     "clause": "Shares a cooldown with similar effects.",
     "labels": [],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Route pending: a harness cast of 803767 put no cooldown on Frozen Reliquary 803773 (spell Category 520, pair p13 20261113-01xx); the items 11521 and 555555 share item spell category 1153 (60 s), which needs a use_item route."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Route pending: a harness cast of 803767 put no cooldown on Frozen Reliquary 803773 (spell Category 520, pair p13 20261113-015053 / -015124, copied to .agents/plans/necro-b3/verdicts/p13); the items 11521 and 555555 share item spell category 1153 (60 s), which needs a use_item route."
   },
   {
     "spell": 804360,
