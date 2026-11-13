@@ -10719,6 +10719,651 @@
           "caster"
         ]
       ]
+    },
+    {
+      "spell": 704670,
+      "name": "Runic Reservoir 704670 (maximum Runic Power)",
+      "kind": "metric_delta",
+      "variant": "max_runic_power",
+      "label_suffix": "max_runic_power",
+      "quote": "and your maximum Runic Power by $/10;s1.",
+      "expected": 150,
+      "before_expected": 0,
+      "expected_gain": 150,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "max_power",
+      "fields": {
+        "power": 6
+      },
+      "observe_source": "704670 Effect[0] aura 35 SPELL_AURA_MOD_INCREASE_ENERGY, MiscValue 6 (Runic Power), BasePoints 149 + DieSides 1 = 150 internal units ($/10;s1 = 15 shown). No CoA code names 704670 (stock aura handler). The caster's live maximum Runic Power (STATE read) around a Glacial Tap 805369 cast, before the talent is learned (control) and after; the judged gain is after - before: 150."
+    },
+    {
+      "spell": 803850,
+      "name": "Runic Reservoir 803850 (maximum Runic Power)",
+      "kind": "metric_delta",
+      "variant": "max_runic_power",
+      "label_suffix": "max_runic_power",
+      "quote": "and your maximum Runic Power by $/10;s1.",
+      "expected": 300,
+      "before_expected": 0,
+      "expected_gain": 300,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "max_power",
+      "fields": {
+        "power": 6
+      },
+      "observe_source": "803850 Effect[0] aura 35 SPELL_AURA_MOD_INCREASE_ENERGY, MiscValue 6 (Runic Power), BasePoints 299 + DieSides 1 = 300 internal units ($/10;s1 = 30 shown). No CoA code names 803850 (stock aura handler). The caster's live maximum Runic Power (STATE read) around a Glacial Tap 805369 cast, before the talent is learned (control) and after; the judged gain is after - before: 300."
+    },
+    {
+      "spell": 302519,
+      "name": "Lich's Prodigy (Glacial Tap Runic Power)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "Your Glacial Tap now generates an additional $/10;s1 Runic Power,",
+      "expected": 800,
+      "before_expected": 300,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 805369
+      },
+      "observe_source": "Glacial Tap 805369 Effect[0] 30 SPELL_EFFECT_ENERGIZE Runic Power (MiscValue 6), BasePoints 299 + 1 = 300 units (30 shown). 302519 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT1 (MiscValue 3) +200 ($/10;s1 = 20 shown) on the Glacial Tap mask (EffectSpellClassMask, the only family 29 spell it matches). No CoA code names 302519 or 805369. spell_energize_total sums the caster's 805369 energize log amounts (EVENT, cumulative): one real cast without the talent (control) 300, a second cast after it is learned (cooldown reset) 500 more: 800."
+    },
+    {
+      "spell": 302519,
+      "name": "Lich's Prodigy (Glacial Tap cost)",
+      "kind": "metric_delta",
+      "variant": "cost",
+      "label_suffix": "cost",
+      "quote": "but its cost is increased by $s3%.",
+      "expected": 1613,
+      "before_expected": 2299,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "disable_regeneration": true,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "observe_source": "Glacial Tap 805369 costs ManaCostPercentage 40 of the base mana 1373 (player_class_stats, level 60): int(549.2) = 549 mana. 302519 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_COST (MiscValue 14) +25 ($s3, BasePoints 24 + 1) on the Glacial Tap mask: int(549 x 1.25) = 686. No CoA code names 302519 or 805369. Regeneration is off. The before phase casts it once without 302519: mana 2848 - 549 = 2299 (control); the after phase casts it again with 302519 learned (cooldown reset) and spends 686: 1613."
+    },
+    {
+      "spell": 500342,
+      "name": "Mutation (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "For the next $d your diseases mutate causing them to act with accelerated lethality,",
+      "expected_ms": 15000,
+      "applied_aura": 500342,
+      "target": "caster",
+      "cast_spell": 500342,
+      "cast_target": "caster",
+      "observe_source": "500342 DurationIndex 8 (15000 ms, $d), its own aura on the caster (Effect[0] and Effect[1] TARGET_UNIT_CASTER). No CoA code names 500342. A real cast of 500342, read on the caster before the cast (absent) and right after it, and its expiry pair around 15000 ms."
+    },
+    {
+      "spell": 500342,
+      "name": "Mutation (disease tick rate)",
+      "kind": "metric_delta",
+      "variant": "tick_rate",
+      "label_suffix": "tick_rate",
+      "quote": "allowing your freshly applied diseases to tick $s1% faster.",
+      "expected": 10,
+      "before_expected": 2,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "setup_casts": [
+        500342
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 200,
+      "expire_ms": 12500,
+      "wait_ms": 6200,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy"
+      },
+      "observe_source": "500342 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_ACTIVATION_TIME (MiscValue 19), BasePoints -51 + 1 = -50 ($s1), on the disease mask (Flesh to Worms 501861 among them); AuraEffect::CalculatePeriodic applies SPELLMOD_ACTIVATION_TIME to the amplitude when the aura is created (stock), so a disease applied under Mutation ticks every 1500 ms instead of 3000. Flesh to Worms 501861 (Effect[0] aura 3, Amplitude 3000, DurationIndex 85, 18000 ms) is cast at the dummy: control (no Mutation) 2 ticks in 6200 ms; its remaining 4 ticks land during the 12500 ms between phases (cumulative 6); then Mutation is learned and cast, a fresh Flesh to Worms gets 4 ticks in 6200 ms (1500, 3000, 4500, 6000): 10."
+    },
+    {
+      "spell": 501965,
+      "name": "Razorice (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Frozen spikes erupt from the bodies of an ally and Raised minions for $d,",
+      "expected_ms": 1800000,
+      "applied_aura": 501965,
+      "target": "caster",
+      "cast_spell": 501965,
+      "cast_target": "caster",
+      "observe_source": "501965 DurationIndex 30 (1800000 ms, $d); Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD TARGET_UNIT_TARGET_ALLY. No CoA code names 501965. A real cast of 501965 at the caster (an ally of itself), read before the cast (absent) and right after it, and its expiry pair around 1800000 ms on the accelerated clock."
+    },
+    {
+      "spell": 572214,
+      "name": "Greater Razorice (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Frozen spikes erupt from the bodies of nearby allies and Raised minions for $d,",
+      "expected_ms": 1800000,
+      "applied_aura": 572214,
+      "target": "caster",
+      "cast_spell": 572214,
+      "cast_target": "caster",
+      "observe_source": "572214 DurationIndex 30 (1800000 ms, $d); Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD TARGET_UNIT_CASTER_AREA_RAID. No CoA code names 572214. A real cast of 572214, read on the caster before the cast (absent) and right after it, and its expiry pair around 1800000 ms on the accelerated clock."
+    },
+    {
+      "spell": 803291,
+      "name": "Hoarfrost Hands (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_chance",
+      "label_suffix": "spell_hit_chance",
+      "quote": "and your hit chance by $s2%.",
+      "expected": 4,
+      "before_expected": 0,
+      "expected_gain": 4,
+      "tolerance": 0.0001,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "observe_source": "803291 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT +4 ($s2, BasePoints 3 + 1); Unit::UpdateSpellHitChances-style sums in StatSystem.cpp:1042 (m_modSpellHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT)). The caster's live m_modSpellHitChance (STATE read) around a Glacial Tap 805369 cast, before the talent is learned (control) and after: gain 4."
+    },
+    {
+      "spell": 803291,
+      "name": "Hoarfrost Hands (melee hit chance)",
+      "kind": "metric_delta",
+      "variant": "melee_hit_chance",
+      "label_suffix": "melee_hit_chance",
+      "quote": "and your hit chance by $s2%.",
+      "expected": 4,
+      "before_expected": 0,
+      "expected_gain": 4,
+      "tolerance": 0.0001,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "observe_source": "803291 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT +4 ($s2); StatSystem.cpp:1030 m_modMeleeHitChance = GetTotalAuraModifier(SPELL_AURA_MOD_HIT_CHANCE, SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT). The caster's live m_modMeleeHitChance (STATE read) around a Glacial Tap 805369 cast, before the talent is learned (control) and after: gain 4."
+    },
+    {
+      "spell": 300240,
+      "name": "Curse of the Lich (caster Frost crit chance)",
+      "kind": "metric_delta",
+      "variant": "caster_frost_crit",
+      "label_suffix": "caster_frost_crit",
+      "quote": "and increases the Frost critical strike chance of you and your summons by $s2%.",
+      "expected": 3,
+      "before_expected": 0,
+      "expected_gain": 3,
+      "tolerance": 0.0001,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 4
+      },
+      "observe_source": "300240 Effect[1] aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 16 (Frost), +3 ($s2, BasePoints 2 + 1), TARGET_UNIT_CASTER. No CoA code names 300240. The caster's live Frost spell crit percentage (PLAYER_SPELL_CRIT_PERCENTAGE1 + 4, STATE read) around a Glacial Tap 805369 cast, before the talent is learned (control) and after: gain 3."
+    },
+    {
+      "spell": 300240,
+      "name": "Curse of the Lich (summon Frost crit chance)",
+      "kind": "metric_delta",
+      "variant": "summon_frost_crit",
+      "label_suffix": "summon_frost_crit",
+      "quote": "and increases the Frost critical strike chance of you and your summons by $s2%.",
+      "expected": 3,
+      "before_expected": 0,
+      "expected_gain": 3,
+      "tolerance": 0.0001,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "metric": "owned_creature_spell_crit_chance",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "300240 Effect[2] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, MiscValue 16 (Frost), +3. A Ghoul 50073 is raised (Raise: Ghoul 500971) in each phase; its spell crit chance (STATE read on the live minion) before the talent is learned (control) and after: gain 3 per the tooltip. Scale() (AscensionNecromancerSummons.cpp:279-332) also copies the caster's Frost spell crit to the minion's base, which the talent raises too."
+    },
+    {
+      "spell": 707006,
+      "name": "Bone Legion 707006 (Lichfrost damage)",
+      "kind": "hit_ratio",
+      "variant": "lichfrost",
+      "label_suffix": "lichfrost",
+      "quote": "Increases the damage of Lichfrost by $s1%",
+      "expected": 1.1,
+      "observe_spell": 501978,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707006
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "707006 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +10 ($s1, BasePoints 9 + 1) on the Lichfrost mask (Lichfrost 501978 the level-60 rank it matches). No CoA code names 707006. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned (a real learn); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+    },
+    {
+      "spell": 707881,
+      "name": "Bone Legion 707881 (Lichfrost damage)",
+      "kind": "hit_ratio",
+      "variant": "lichfrost",
+      "label_suffix": "lichfrost",
+      "quote": "Increases the damage of Lichfrost by $s1%",
+      "expected": 1.2,
+      "observe_spell": 501978,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          707881
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "707881 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +20 ($s1, BasePoints 19 + 1) on the Lichfrost mask (Lichfrost 501978). No CoA code names 707881. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+    },
+    {
+      "spell": 704670,
+      "name": "Runic Reservoir 704670 (Frost damage)",
+      "kind": "hit_ratio",
+      "variant": "frost_damage",
+      "label_suffix": "frost_damage",
+      "quote": "Increases your Frost damage by $s2%",
+      "expected": 1.05,
+      "observe_spell": 501978,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          704670
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "704670 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 16 (Frost), +5 ($s2, BasePoints 4 + 1), TARGET_UNIT_CASTER; stock Unit::SpellDamageBonusDone multiplies Frost damage done. No CoA code names 704670. A Frost spell, Lichfrost 501978 (SchoolMask 16): non-critical hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+    },
+    {
+      "spell": 803850,
+      "name": "Runic Reservoir 803850 (Frost damage)",
+      "kind": "hit_ratio",
+      "variant": "frost_damage",
+      "label_suffix": "frost_damage",
+      "quote": "Increases your Frost damage by $s2%",
+      "expected": 1.1,
+      "observe_spell": 501978,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          803850
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "803850 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 16 (Frost), +10 ($s2, BasePoints 9 + 1), TARGET_UNIT_CASTER; stock Unit::SpellDamageBonusDone multiplies Frost damage done. No CoA code names 803850. A Frost spell, Lichfrost 501978 (SchoolMask 16): non-critical hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+    },
+    {
+      "spell": 560537,
+      "name": "Apothecary's Cauldron (Magic damage)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "In addition, increases your Magic damage dealt by $s2%.",
+      "expected": 1.03,
+      "observe_spell": 501978,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          560537
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "560537 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 126 (Holy, Fire, Nature, Frost, Shadow, Arcane: the magic schools), +3 ($s2, BasePoints 2 + 1), TARGET_UNIT_CASTER; stock Unit::SpellDamageBonusDone. No CoA code names 560537. A magic (Frost) spell, Lichfrost 501978: non-critical hits on the dummy without the passive (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (spell power)",
+      "kind": "hit_ratio",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Disease an enemy, dealing ${$m1+0+$sps*0.11055} Plague damage",
+      "expected": 1.1254,
+      "observe_spell": 501861,
+      "cast_wait_ms": 3100,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          48168
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, $m1 at level 60 = 105.771 per tick (BasePoints 101 + DieSides 1 + RealPointsPerLevel 0.942857 per level, the packet's resolved value), plus 0.11055 x spell power ($sps*0.11055; AscensionNecromancerData.h:28 coefficient 0.11055 on effect 0). The treatment arm casts a real Inner Fire 48168 on the caster before each Flesh to Worms (+120 spell power on all schools), the control arm does not: (105.771 + 0.11055 x 120) / 105.771 = 1.1254. Both arms set beeg spellpen 823764 (no partial resists), a precondition fixture; the non-critical ticks of 501861 on the dummy are the observed hits (one cast per trial, 3100 ms, Amplitude 3000)."
+    },
+    {
+      "spell": 803605,
+      "name": "Call of The Scourge (in combat)",
+      "kind": "cast_combat",
+      "quote": "Can be used in combat.",
+      "observe_source": "Call of The Scourge 803605 (rank of 801792, level 56, AscensionSpellProgressionData.h:1458) Attributes 2216755200: NOT_SHAPESHIFTED, NO_ACTIVE_DEFENSE, AURA_IS_DEBUFF, NO_AURA_CANCEL, no SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL, so the stock check that refuses a combat-blocked resurrection with SPELL_FAILED_AFFECTING_COMBAT never applies. Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW. No CoA class code names 803605. The caster attacks the dummy (combat reads 1) and casts 803605 at the dead ally while fighting: cast_failure reads 0."
+    },
+    {
+      "spell": 803605,
+      "name": "Call of The Scourge (revive)",
+      "kind": "cast_combat",
+      "variant": "revive",
+      "label_suffix": "revive",
+      "quote": "Bring a dead ally back to life with $s1 health",
+      "cast_spell": 803605,
+      "resurrect": true,
+      "observe_source": "803605 Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW, EffectBasePoints[0] 582 + 1 = 583 health ($s1), EffectMiscValue[0] 833 mana ($q1), CastingTimeIndex 5, RangeIndex 5. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) that the dead ally takes with CMSG_RESURRECT_RESPONSE 348. Control: the dead ally sends the response before any cast and stays dead; after the cast it sends it again and must be alive. The cast is made in combat."
+    },
+    {
+      "spell": 803291,
+      "name": "Hoarfrost Hands (Lichfrost slow outlasts the base duration)",
+      "kind": "metric_delta",
+      "variant": "slow_longer",
+      "label_suffix": "slow_longer",
+      "quote": "Increases the duration of Lichfrost's movement speed slow by $/1000;s1 sec",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1373,
+      "expire_ms": 1000,
+      "wait_ms": 10800,
+      "metric": "aura",
+      "fields": {
+        "spell": 501978
+      },
+      "observe_source": "Lichfrost 501978 (level-60 rank, CastingTimeIndex 19: 2500 ms, Speed 30) DurationIndex 32 (6000 ms), Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED on the target. 803291 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_DURATION (MiscValue 1) +4000 ($/1000;s1 = 4) on the Lichfrost mask. No CoA code names 803291. A real Lichfrost at the dummy lands about 2.6 s after the cast starts; 10800 ms after the cast the slow is gone without the talent (control, ends near 8.6 s) and still on the dummy with it (ends near 12.6 s)."
+    },
+    {
+      "spell": 803291,
+      "name": "Hoarfrost Hands (Lichfrost slow end)",
+      "kind": "metric_delta",
+      "variant": "slow_end",
+      "label_suffix": "slow_end",
+      "quote": "Increases the duration of Lichfrost's movement speed slow by $/1000;s1 sec",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 1373,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 12100,
+      "expiry_wait_ms": 1500,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 501978
+      },
+      "observe_source": "Lichfrost 501978 (2500 ms cast, Speed 30, DurationIndex 32: 6000 ms) with 803291 learned (+4000 ms SPELLMOD_DURATION on the Lichfrost mask): the slow lands about 2.6 s after the cast starts and should end near 12.6 s. No cast before (control, absent); 12100 ms after the cast it is on the dummy, 13600 ms after it gone: the slow lasts about 9.5 to 11 s, 10 s stated (6 + 4); the slow_longer entry is the without-talent contrast."
+    },
+    {
+      "spell": 802988,
+      "name": "Lich Essence (Lichfrost cast completes by 2250 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_by_2250",
+      "label_suffix": "cast_by_2250",
+      "quote": "Reduces the cast time of Lichfrost by $s2%",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "expire_ms": 1500,
+      "wait_ms": 2250,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 501978
+      },
+      "observe_source": "Lichfrost 501978 CastingTimeIndex 19 (2500 ms). 802988 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_CASTING_TIME (MiscValue 10) -15 ($s2, BasePoints -16 + 1) on the Lichfrost mask: 2125 ms. No CoA code names 802988. spell_go_count counts the caster's 501978 SMSG_SPELL_GO (cumulative). Without the talent (control) no cast has completed 2250 ms after the cast starts (0); the first cast completes during the 1500 ms between phases (1); with the talent learned the second cast has completed 2250 ms after it starts (2). With cast_by_2050 the cast time lies in (2050, 2250] ms, a reduction of 10% to 18%."
+    },
+    {
+      "spell": 802988,
+      "name": "Lich Essence (Lichfrost cast still running at 2050 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_by_2050",
+      "label_suffix": "cast_by_2050",
+      "quote": "Reduces the cast time of Lichfrost by $s2%",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "expire_ms": 1500,
+      "wait_ms": 2050,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 501978
+      },
+      "observe_source": "Lichfrost 501978 CastingTimeIndex 19 (2500 ms); 802988 Effect[1] SPELLMOD_CASTING_TIME -15 ($s2): 2125 ms. 2050 ms after the cast starts no cast has completed without the talent (control, 0); the first completes between phases (1); with the talent the second has not completed 2050 ms after it starts (still 1), so the reduced cast time is above 2050 ms (a reduction below 18%)."
+    },
+    {
+      "spell": 805038,
+      "name": "Summoning Ritual (circle duration)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Summon a ritual circle at your location for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805038,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 60300,
+      "expiry_wait_ms": 1500,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 575091
+      },
+      "observe_source": "Summoning Ritual 805038 Effect[0] 28 SPELL_EFFECT_SUMMON creature 575091 (Scourge Transporter), DurationIndex 3 (60000 ms, $d), CastingTimeIndex 4 (1000 ms). AscensionNecromancerData.h:128 lists the summon; the circle is an owned minion (AscensionNecromancerSummons.cpp:566-575 learns Ritual Return 807098 when it appears). No circle before the cast (control); 60300 ms after the cast starts (about 59.3 s after it lands) one owned 575091, 61800 ms after it none: the circle lasts about 59.3 to 60.8 s, 60 s stated."
+    },
+    {
+      "spell": 805038,
+      "name": "Summoning Ritual (Ritual Return while active)",
+      "kind": "metric_delta",
+      "variant": "ritual_return",
+      "label_suffix": "ritual_return",
+      "quote": "While active, you may cast Ritual Return to return to it.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807098,
+      "target": "caster",
+      "setup_casts": [
+        805038
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2000,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 807098
+      },
+      "observe_source": "Ritual Return 807098 (Effect[0] 77 SCRIPT_EFFECT, Effect[1] trigger 807125, RecoveryTime 25000). necromancer OnSpellCheckCast (AscensionNecromancerAbilities.cpp:176-185) refuses 807098 with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW unless an owned, living 575091 circle is in the caster's map and phase; OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) teleports the caster to it. Without a circle (control) 807098 is refused, no SMSG_SPELL_GO (0); after a real Summoning Ritual 805038 (1000 ms cast, 2000 ms wait) it goes through (1)."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (Runic Power every 3 sec)",
+      "kind": "metric_delta",
+      "variant": "runic_power_period",
+      "label_suffix": "runic_power_period",
+      "quote": "and generating Runic Power every $t1 sec for $d.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "expire_ms": 500,
+      "wait_ms": 8800,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 804272
+      },
+      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000 ($t1), DurationIndex 85 (18000 ms, $d). The class code casts Parasitic Infestation 804272 on the caster at each Effect[0] tick of a Flesh to Worms rank (aura_ascension_necromancer_lifecycle::Tick, AscensionNecromancerAuras.cpp:167-168, Named(500338)); 804272 Effect[1] 30 SPELL_EFFECT_ENERGIZE Runic Power (MiscValue 6). spell_energize_count counts the caster's 804272 energize events. No cast before (control, 0); 8800 ms after a real cast at the dummy two energizes (ticks at 3000 and 6000 ms): a period at or below 2930 ms would give three, at or above 4400 ms one."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (Runic Power for 18 sec)",
+      "kind": "metric_delta",
+      "variant": "runic_power_duration",
+      "label_suffix": "runic_power_duration",
+      "quote": "and generating Runic Power every $t1 sec for $d.",
+      "expected": 6,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "expire_ms": 500,
+      "wait_ms": 20500,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 804272
+      },
+      "observe_source": "501861 Amplitude 3000 ($t1), DurationIndex 85 (18000 ms, $d); each Effect[0] tick casts Parasitic Infestation 804272 (Runic Power energize) on the caster (AscensionNecromancerAuras.cpp:167-168). No cast before (control, 0); 20500 ms after one real cast six energizes (3000 to 18000 ms), none after the end: a duration of 21000 ms or more would give seven, of 17999 ms or less five."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (periodic critical strikes)",
+      "kind": "metric_delta",
+      "variant": "periodic_crit",
+      "label_suffix": "periodic_crit",
+      "quote": "@ext:Periodic damage dealt by this can critically strike.:ext@",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "wait_ms": 6200,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000. The caster's spell crit rating is forced (FORCED_CRIT_RATING, harness fixture). spell_damage_count with critical counts the critical 501861 periodic damage events on the dummy: no cast before (control, 0); 6200 ms after a real cast both ticks (3000, 6000 ms) are critical: 2."
     }
   ],
   "player_observations": [],
