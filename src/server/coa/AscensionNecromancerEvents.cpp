@@ -187,17 +187,7 @@ class aura_ascension_necromancer_event : public AuraScript
             if (critical && (actor->GetEntry() == 50068 || actor->GetEntry() == 50115) && player->HasAura(707283))
                 Cast(actor, target, 707284);
             if (Chance(player, player->HasAura(707882) ? 707882 : 707001))
-            {
-                uint32 count = 0;
-                uint32 cap = std::max(1, Amount(player->HasAura(707882) ? 707882 : 707001));
-                for (Unit* nearby : Nearby(target, 8.0f))
-                    if (player->IsValidAttackTarget(nearby))
-                    {
-                        Cast(actor, nearby, 707002);
-                        if (++count >= cap)
-                            break;
-                    }
-            }
+                Cast(actor, target, 707002);
             if (MinionChance(player, actor, 802986))
             {
                 Cast(player, actor, 807653);

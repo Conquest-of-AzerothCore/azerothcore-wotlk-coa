@@ -328,6 +328,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 500267)
         info->Effects[1].Effect = 0;
+    if (id == 707002)
+        info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_DEST_TARGET_ENEMY);
     if (id == 500307)
         info->Effects[0].Effect = 0;
     if (id == 500365)
