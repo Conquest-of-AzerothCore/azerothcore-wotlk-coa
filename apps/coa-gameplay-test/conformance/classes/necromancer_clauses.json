@@ -1992,21 +1992,9 @@
     "spell": 572023,
     "clause": "All Frost damage you deal to Frozen targets now has a $h% chance to unleash Soulfreeze on them.",
     "labels": [
-      "572023 effect_value #0",
-      "572023 effect_value 801728e0 #1",
-      "572023 spell_duration 801724 #2",
-      "572023 effect_value #3",
-      "572023 effect_value #4"
+      "572023 proc_rate"
     ],
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "All Frost damage you deal to Frozen targets now has a $h% chance to unleash Soulfreeze on them.",
-        "labels": [
-          "572023 proc_rate"
-        ]
-      }
-    ],
     "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; baseline without the talent). Glacial Impact 707592 (Frost) cast at a dummy held Frozen by Ice Lock 22856 (named precondition fixture, ADR 0491: Frost stun, AURA_STATE_FROZEN, not broken by damage; replaces the Frost Nova fixture that broke on the first hit): 6364 Soulfreeze 801724 casts in 25291 Frost hits (707592 hits plus the 801728 ticks, all own Frost damage), rate 25.16%, Wilson 99% [24.47%, 25.87%] inside the G-19 band 23%-27% of the stated $h = 25 (ProcChance 25); no proc in the baseline. Mutant: without the fixture 0 procs in 18666 trials (alert). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 572023 0 lines by id (the talent), 'Soulfreeze' 13165 lines by name (801728 7013 hits, 800344 13996 lines); the logs carry no frozen state of the target, so they do not decide the chance; MCP not queried (unavailable)."
   },
   {
@@ -2320,7 +2308,7 @@
       "704680 behaviour_metric_delta runic_power"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without Freeze Dry). Runic Power 0 -> 200 after one Glacial Impact 707402 ($/10;804111s1 = 20, 804111 BasePoints 199 + 1); 0 without the talent. Fixture: Permafrost 801747 really cast on the caster (Glacial Impact's frozen condition, not the claim). The gain is a direct add (AscensionCustomResourceData.h:477-478), so a first draft reading 804111 energize events saw 0 (incorrect test, corrected). G-11 (2026-11-13, B6 side a): server DBC; code above; combat logs (coa-history spell 704680): nothing found; sidekick data.js same text without the number; MCP not queried (unavailable)."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; the power read is behaviour for a Runic Power clause by ADR 0490; first counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without Freeze Dry). Runic Power 0 -> 200 after one Glacial Impact 707402 ($/10;804111s1 = 20, 804111 BasePoints 199 + 1); 0 without the talent. Fixture: Permafrost 801747 really cast on the caster (Glacial Impact's frozen condition, not the claim). The gain is a direct add (AscensionCustomResourceData.h:477-478), so a first draft reading 804111 energize events saw 0 (incorrect test, corrected). G-11 (2026-11-13, B6 side a): server DBC; code above; combat logs (raw logs by id and name, positive control 802353 1551 lines in the same search): 704680 0 lines, 'Freeze Dry' 0 (a passive; the gain is no logged event); sidekick data.js same text without the number; MCP not queried (unavailable)."
   },
   {
     "spell": 704681,
