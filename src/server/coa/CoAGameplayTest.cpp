@@ -5442,7 +5442,8 @@ private:
             metric == "owned_creature_spell_power" || metric == "owned_creature_resistance" ||
             metric == "owned_creature_melee_hit_chance" || metric == "owned_creature_cast_speed" ||
             metric == "owned_creature_threat" || metric == "owned_creature_power" ||
-            metric == "owned_creature_threat_multiplier" || metric == "owned_creature_spell_crit_chance")
+            metric == "owned_creature_threat_multiplier" || metric == "owned_creature_spell_crit_chance" ||
+            metric == "owned_creature_react_state")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Owned creature stat observation needs a present owned creature");
@@ -5466,6 +5467,8 @@ private:
                 return creature->m_modMeleeHitChance;
             if (metric == "owned_creature_cast_speed")
                 return creature->GetFloatValue(UNIT_MOD_CAST_SPEED);
+            if (metric == "owned_creature_react_state")
+                return creature->GetReactState();
             if (metric == "owned_creature_spell_crit_chance")
                 return creature->m_baseSpellCritChance;
             if (metric == "owned_creature_threat_multiplier")

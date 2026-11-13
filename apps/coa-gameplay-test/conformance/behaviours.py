@@ -1316,6 +1316,8 @@ class MetricDeltaSpec:
     target_casts: tuple[int, ...] = ()
     strike: 'MetricDeltaStrike | None' = None
     player_ratings: tuple[tuple[str, int], ...] = ()
+    after_at_most: float | None = None
+    player_spell_power: int | None = None
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1648,6 +1650,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if unknown:
             raise ValueError(f'{spec.spell} overrides player ratings {sorted(unknown)} the class file does not set')
         scenario['players'][0].update(dict(spec.player_ratings))
+    if spec.player_spell_power is not None:
+        scenario['players'][0]['spell_power'] = spec.player_spell_power
     if spec.strike is not None:
         scenario.setdefault('creatures', []).append(
             {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
@@ -1664,6 +1668,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         model['expected_gain'] = spec.expected_gain
     if spec.expected_ratio is not None:
         model['expected_ratio'] = spec.expected_ratio
+    if spec.after_at_most is not None:
+        if spec.after_at_least is None or spec.after_at_most < spec.after_at_least:
+            raise ValueError(f'{spec.spell} sets after_at_most without an after_at_least at or below it')
+        model['after_at_most'] = spec.after_at_most
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected
@@ -1696,7 +1704,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('target_health_pct'), entry.get('enemy_casts_in_before', False),
                            tuple(entry.get('helper_casts', ())), tuple(entry.get('target_casts', ())),
                            metric_delta_strike(entry.get('strike')),
-                           tuple((str(key), int(value)) for key, value in entry.get('player_ratings', {}).items()))
+                           tuple((str(key), int(value)) for key, value in entry.get('player_ratings', {}).items()),
+                           entry.get('after_at_most'), entry.get('player_spell_power'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

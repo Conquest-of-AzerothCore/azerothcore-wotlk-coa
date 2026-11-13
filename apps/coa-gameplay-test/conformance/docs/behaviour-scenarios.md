@@ -251,6 +251,9 @@ A `hit_ratio` arm's `target_health_pct` (ADR 0362) sets the dummy to that health
 the arms differ by target health (Harvest Plague 583256: the tick at 50% against about 100%).
 A `metric_delta` entry's `player_ratings` (ADR 0363) sets class file ratings to other values for its scenario
 (Necromancy 804360: melee hit rating 0, so the Ghouls' swings are dodged and parried).
+`after_at_most` (with `after_at_least`) and `player_spell_power` (ADR 0364) judge one rolled amount inside its
+stated range at a set spell power (Harvest Plague 583256: the first tick in [172, 210] at 0 and [3172, 3210] at
+20000).
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).

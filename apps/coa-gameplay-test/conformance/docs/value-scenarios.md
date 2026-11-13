@@ -71,7 +71,8 @@ rather than left for the reader to keep re-investigating),
 `unmeasurable: <reason>` for a readable token with no no-combat metric (a periodic total or `mixed` token left to
 the hit scenario, a chance token, an aura of a passive or cast-time spell, a foreign amplitude or an amplitude of a
 passive effect, another spell's effect or radius that `Spell.dbc` does not define or that `disabled_foreign_effects`
-names, which `spell_effect_value`/`spell_effect_radius` refuse). Only `unmeasurable` expectations may lack a
+names, which `spell_effect_value`/`spell_effect_radius` refuse). A class file's `removed_own_effects` (ADR 0364) keeps an effect a class contract removes from being the
+rank's first effect for its unreadable tokens (Runic Harvest 562210-562213, effect 0). Only `unmeasurable` expectations may lack a
 measurement step. The rank's own radius (`$aN`), own period (`$tN`/`$TN` after an instant cast) and own stack count
 (`$u`) are measured, through `spell_effect_radius`, `aura_amplitude_ms` and `spell_max_stacks`; `$i`
 (`MaxAffectedTargets`) still has no no-combat metric.

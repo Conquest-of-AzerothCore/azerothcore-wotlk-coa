@@ -437,7 +437,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     periodic_totals: list[dict] = []
     cast_wanted = False
     needs_ally_target = False
-    first_effect = next((effect for effect in EFFECTS if facts.effects[effect]), None)
+    removed = {(entry['spell'], entry['effect']) for entry in class_file.get('removed_own_effects', [])}
+    first_effect = next((effect for effect in EFFECTS if facts.effects[effect] and (rank_id, effect) not in removed),
+                        None)
     rolled: dict[str, int] = {}
     disabled_effects = disabled_foreign_effects(class_file)
     aura_grants = foreign_aura_grants(class_file)

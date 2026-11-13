@@ -2992,7 +2992,10 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                                     tolerance)
     before_ok = abs(before - before_expected) <= tolerance
     at_least = model.get('after_at_least')
+    at_most = model.get('after_at_most')
     after_ok = after >= float(at_least) if at_least is not None else abs(after - expected) <= tolerance
+    if at_most is not None:
+        after_ok = after_ok and after <= float(at_most)
     expired_label = model.get('expired_label')
     expired, expired_ok, expired_explanation = None, True, ''
     if expired_label is not None:
@@ -3005,6 +3008,8 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                                f'{after_expiry_expected:g}), ruling out the effect outliving its own aura')
     status = 'ok' if before_ok and after_ok and expired_ok else 'alert'
     after_text = f'at least {float(at_least):g}' if at_least is not None else f'{expected:g}'
+    if at_most is not None:
+        after_text += f' and at most {float(at_most):g}'
     explanation = (f'{model["metric"]} measured {before:g} before the learn (expected '
                    f'{before_expected:g}) and {after:g} after (expected {after_text}); match within '
                    f'{tolerance:g} required' + expired_explanation)
@@ -3014,6 +3019,8 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                     ', an explicit per-entry tolerance wide enough to absorb this metric\'s own simulated-clock '
                     'tick jitter but far below the magnitude of any real defect this check would need to catch')
     low, high = (float(at_least), None) if at_least is not None else (expected - tolerance, expected + tolerance)
+    if at_most is not None:
+        high = float(at_most)
     return replace(base, status=status, measured=after, expected=expected, low=low, high=high,
                    explanation=explanation)
 

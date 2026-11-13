@@ -10254,5 +10254,50 @@ class MetricDeltaStrikeAfterTriggerTests(unittest.TestCase):
         self.assertEqual(steps[phylactery + 1], {'action': 'wait', 'label': 'before the strike', 'ms': 2600})
 
 
+
+class MetricDeltaRangeTests(unittest.TestCase):
+    def siphon_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 583256 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_tick_outside_the_stated_range_alerts(self):
+        _, expectations = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.siphon_entry('siphon_base')))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        for after, status in ((172.0, 'ok'), (210.0, 'ok'), (171.0, 'alert'), (211.0, 'alert')):
+            with self.subTest(after=after):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (0.0, after)))),
+                                          expectation)
+                self.assertEqual(verdict.status, status)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_spell_power_fixture_reaches_the_player(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23),
+                                            metric_delta_spec(self.siphon_entry('siphon_power')))
+        run.validate(scenario)
+        self.assertEqual(scenario['players'][0]['spell_power'], 20000)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_upper_bound_needs_a_lower_bound_below_it(self):
+        entry = {key: value for key, value in self.siphon_entry('siphon_base').items() if key != 'after_at_least'}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+
+class RemovedOwnEffectTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_runic_harvest_period_is_read_on_its_live_effect(self):
+        import subprocess
+        with tempfile.TemporaryDirectory() as directory:
+            subprocess.run([sys.executable, '-B', str(Path(__file__).parent / 'conformance.py'), 'generate',
+                            '--class', '23', '--spell', '562213', '--out', directory], check=True,
+                           capture_output=True)
+            scenario = json.loads((Path(directory) / 'scenarios' / 'conformance-necromancer-value-562213.json')
+                                  .read_text())
+        reads = [step for step in scenario['steps'] if step.get('label') == '562213 effect_value #3']
+        self.assertEqual([step['effect'] for step in reads], [1])
+
+
 if __name__ == '__main__':
     unittest.main()
