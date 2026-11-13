@@ -10337,7 +10337,8 @@ class MetricDeltaStrikeInBeforeTests(unittest.TestCase):
                      if entry['spell'] == 805038 and entry.get('label_suffix') == 'return_position')
         cast_contrast = {key: value for key, value in entry.items() if key != 'setup_only_after'}
         return {**cast_contrast, 'before_expected': 15, 'tolerance': 0.5, 'cast_in_before': False,
-                'setup_in_before': True, 'strike': {**entry['strike'], **strike}}
+                'setup_in_before': True,
+                'strike': {**{key: value for key, value in entry['strike'].items() if key != 'in_before'}, **strike}}
 
     def phases(self, entry: dict) -> tuple[list[dict], list[dict]]:
         scenario, [expectation, *_] = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
