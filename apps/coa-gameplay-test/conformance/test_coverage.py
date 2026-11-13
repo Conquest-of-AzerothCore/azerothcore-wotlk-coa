@@ -1148,5 +1148,12 @@ class NoStackStatePromiseTest(unittest.TestCase):
         self.assertEqual(evidence_of([clause], self.capped('alert'))[0], [UNPROVEN])
 
 
+
+class OwnedHealthAndItemCountTest(unittest.TestCase):
+    def test_a_minion_health_and_a_created_item_count_are_events(self):
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_health'], EVENT)
+        self.assertEqual(METRIC_EVIDENCE['item_count'], EVENT)
+
+
 if __name__ == '__main__':
     unittest.main()
