@@ -1172,6 +1172,9 @@ struct Actor
     ActorStage stage = ActorStage::Account;
     std::vector<std::pair<ActorStage, Clock::time_point>> reached;
     bool generatedName = false;
+    char legacyName = 0;
+    std::optional<uint8> charCreateResult;
+    uint32 nameRetries = 0;
     CoAGameplay::RaidRole raidRole = CoAGameplay::RaidRole::None;
     std::vector<uint32> rotation;
     uint32 healSpell = 0;
@@ -1466,6 +1469,8 @@ std::unordered_map<uint32, uint32> const& NativeCustomAttrRowIds()
 void ObservePacket(Actor& actor, WorldPacket const& packet)
 {
     ObserveExtensionPacket(actor, packet);
+    if (packet.GetOpcode() == SMSG_CHAR_CREATE && packet.size() == sizeof(uint8))
+        actor.charCreateResult = packet.read<uint8>(0);
     if (packet.GetOpcode() == SMSG_STABLE_RESULT && packet.size() == sizeof(uint8))
         actor.lastStableResult = packet.read<uint8>(0);
     constexpr std::size_t LfgProposalIdOffset = sizeof(uint32) + sizeof(uint8);
@@ -2137,6 +2142,7 @@ public:
             }
             else
                 actor.account = "CT" + _runId + std::to_string(index);
+            actor.legacyName = char('a' + index);
             actor.name = FixtureName(entry.second, index++);
             actor.generatedName = _names && !entry.second.get_optional<std::string>("name");
             Require(normalizePlayerName(actor.name), "Invalid fixture character name");
@@ -2739,6 +2745,19 @@ private:
         Require(!actor.session->IsKicked(), "Test session was kicked: " + id);
         if (actor.stage == ActorStage::Creating)
         {
+            switch (CoAGameplay::CharacterCreateNext(actor.charCreateResult, actor.generatedName, actor.nameRetries))
+            {
+                case CoAGameplay::CharacterCreateOutcome::RetryWithNextName:
+                    RenameGenerated(id, actor);
+                    SendCharacterCreate(actor);
+                    return;
+                case CoAGameplay::CharacterCreateOutcome::Refused:
+                    Require(false, "Character creation refused for " + actor.name + " with result " +
+                        std::to_string(*actor.charCreateResult));
+                    return;
+                default:
+                    break;
+            }
             actor.guid = sCharacterCache->GetCharacterGuidByName(actor.name);
             if (!actor.guid)
                 return;
@@ -2780,9 +2799,24 @@ private:
         CompleteTransfer(actor);
     }
 
+    void RenameGenerated(std::string const& id, Actor& actor)
+    {
+        ++actor.nameRetries;
+        actor.charCreateResult.reset();
+        actor.name = _legacyNames[actor.legacyName] = _names->Next();
+        Require(normalizePlayerName(actor.name), "Invalid fixture character name");
+        for (auto const& [otherId, other] : _actors)
+            Require(otherId == id || other.name != actor.name, "Duplicate fixture character name");
+    }
+
     static void OpenSession(Actor& actor)
     {
         CreateSession(actor);
+        SendCharacterCreate(actor);
+    }
+
+    static void SendCharacterCreate(Actor& actor)
+    {
         WorldPacket create(CMSG_CHAR_CREATE, 32);
         uint32 race = actor.definition.get<uint32>("race");
         uint32 playerClass = actor.definition.get<uint32>("class");
