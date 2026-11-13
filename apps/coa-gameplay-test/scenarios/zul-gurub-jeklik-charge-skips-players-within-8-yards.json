@@ -11,7 +11,10 @@
     "yards and is the only player in reach at the next charge, which must land on them. Fear Ward keeps the tank",
     "and the close hero in place through the first Screech.",
     "Her bat form wipes her threat, and the hero who struck her last would draw her into melee; the tank is a",
-    "raid-bot tank whose threat floor keeps her on the tank, so the close hero stays out of her melee range."
+    "raid-bot tank whose threat floor keeps her on the tank, so the close hero stays out of her melee range.",
+    "Until the tank has engaged her, the other heroes wait about 34 yards away, where the far hero backs off to,",
+    "and then come back beside the tank: she aggroes a hero beside her the moment she appears, and a hero she",
+    "chased as they backed away would end up in charge range."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -114,6 +117,36 @@
       "equals": 309
     },
     {
+      "action": "relocate",
+      "label": "The close hero waits about 34 yards away until the tank has engaged her",
+      "actor": "close",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "close",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "label": "and so does the far hero",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": -5.0,
+      "dy": -16.0,
+      "dz": -0.75
+    },
+    {
       "action": "set_aura",
       "actor": "tank",
       "spell": 6346,
@@ -150,6 +183,52 @@
       "target": "jeklik"
     },
     {
+      "action": "assert",
+      "label": "CONTROL: Jeklik fights",
+      "actor": "jeklik",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is her first target",
+      "actor": "jeklik",
+      "metric": "victim",
+      "target": "tank",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "relocate",
+      "label": "Then both come back beside the tank",
+      "actor": "close",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "close",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
+      "action": "relocate",
+      "actor": "far",
+      "dx": 5.0,
+      "dy": 16.0,
+      "dz": 0.75
+    },
+    {
       "action": "attack",
       "actor": "close",
       "target": "jeklik"
@@ -158,14 +237,6 @@
       "action": "attack",
       "actor": "far",
       "target": "jeklik"
-    },
-    {
-      "action": "assert",
-      "label": "CONTROL: Jeklik fights",
-      "actor": "jeklik",
-      "metric": "combat",
-      "equals": 1,
-      "within_ms": 10000
     },
     {
       "action": "wait",

@@ -11,9 +11,11 @@
     "is wounded into her bat form after landing; a Normal Jeklik stays a troll for two waves, then is wounded",
     "into her bat form for a third, and calls no Crazed Bat Rider. Bats fight the heroes, who do not strike back,",
     "so every wave stays; liquid fire is read from the heroes' own combat log, and the dive from the bat's Frenzy.",
-    "Each hero strikes until the Jeklik ends her Green Channeling (13540), which only her engage does: a swing",
-    "that never lands leaves her channeling and calls no wave. A second rider comes 30 s after the first, so the",
-    "dived rider is read once its bat has reached the hero and is the nearest rider."
+    "Summoned beside a hero, Jeklik engages in the same tick as her Reset casts Green Channeling (13540). The",
+    "channel never expires and she does nothing while she casts, so her engage interrupts it; before, it lasted",
+    "until a damaging swing landed, and a hero who kept missing faced an idle Jeklik that called no wave. A",
+    "second rider comes 30 s after the first, so the dived rider is read once its bat has reached the hero and is",
+    "the nearest rider."
   ],
   "timeout_ms": 360000,
   "location": {
@@ -118,6 +120,31 @@
     {
       "action": "wait",
       "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Jeklik engages the hero beside her without a swing",
+      "actor": "jeklik_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: her engage ends Green Channeling before any swing",
+      "actor": "jeklik_mythic",
+      "metric": "aura",
+      "spell": 13540,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and she is no longer channeling",
+      "actor": "jeklik_mythic",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 1000
     },
     {
       "action": "attack",

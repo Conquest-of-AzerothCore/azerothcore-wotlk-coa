@@ -204,6 +204,7 @@ namespace
             BossAI::JustEngagedWith(who);
             Talk(SAY_AGGRO);
             DoZoneInCombat();
+            me->InterruptSpell(CURRENT_CHANNELED_SPELL);
             me->RemoveAurasDueToSpell(SPELL_GREEN_CHANNELING);
             StartTrollPhase();
         }
