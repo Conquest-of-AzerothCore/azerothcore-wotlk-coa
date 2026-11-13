@@ -276,6 +276,7 @@ class FixedTargetCountSpec:
     caster_entry: int | None = None
     setup_casts: tuple[tuple[int, str], ...] = ()
     select_primary: bool = False
+    dummy_entry: int | None = None
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -334,6 +335,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
         relocation = [{'action': 'relocate', 'actor': CASTER, 'dx': shift}]
     last_index = len(distances) - 1
     creatures = [dummy_fixture(index, class_file, distances[index]) for index in range(last_index + 1)]
+    if spec.dummy_entry is not None:
+        creatures = [{**creature, 'entry': spec.dummy_entry} for creature in creatures]
     primary_distances = [f'{spec.spell} {dummy_id(index)} distance_2d primary'
                          for index in range(1, dummy_count)] if spec.primary_distance_reads else []
 
@@ -1188,7 +1191,7 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 None if entry.get('behind_yd') is None else float(entry['behind_yd']),
                                 entry.get('cluster_yd'), entry.get('caster_entry'),
                                 tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())),
-                                bool(entry.get('select_primary', False)))
+                                bool(entry.get('select_primary', False)), entry.get('dummy_entry'))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:

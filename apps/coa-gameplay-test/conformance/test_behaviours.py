@@ -10622,5 +10622,33 @@ class ScriptHitCastPowerTests(unittest.TestCase):
         self.assertTrue(all(step['value'] == 300 for step in self.power_steps(entry)))
 
 
+class HumanoidTargetEntryTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 803741 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_metric_delta_target_entry_replaces_the_dummy_entry(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry('creature_lasts'))
+        self.assertEqual([creature['entry'] for creature in scenario['creatures']], [6])
+        plain, _ = behaviour_scenario(load_class_file(23), self.entry('humanoids_only'))
+        self.assertEqual([creature['entry'] for creature in plain['creatures']], [36])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_target_entry_needs_the_dummy(self):
+        entry = {**self.entry('player_lasts'), 'target_entry': 6}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_fixed_count_dummy_entry_replaces_every_dummy(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry('targets'))
+        self.assertEqual({creature['entry'] for creature in scenario['creatures']}, {6})
+        self.assertEqual(len(scenario['creatures']), 7)
+        entry = {key: value for key, value in self.entry('targets').items() if key != 'dummy_entry'}
+        plain, _ = behaviour_scenario(load_class_file(23), entry)
+        self.assertEqual({creature['entry'] for creature in plain['creatures']}, {36})
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1752,3 +1752,9 @@ Commands at 37% read 2 to 5, 10 at 33% read 5.
 
 `attribute_stat: true` on a `stat_gain` of the `stat` metric adds the attribution reads (the auras around each cast,
 the return after their removal) with `Unit::GetStat` as the named read: Bone Ward 681529's Stamina.
+
+### Humanoid targets (ADR 0402)
+
+`metric_delta` takes `target_entry`, the creature entry of its dummy (as ADR 0381), and `fixed_count` takes
+`dummy_entry`, the creature entry of every dummy it places: Mass Grave 803741 affects Humanoids only, read on Kobold
+Vermin 6.
