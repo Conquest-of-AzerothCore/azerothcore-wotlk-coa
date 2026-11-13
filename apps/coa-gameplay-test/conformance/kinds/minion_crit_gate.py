@@ -15,6 +15,8 @@ GATE_RATIO_LOW = 0.4
 GATE_RATIO_HIGH = 0.75
 MINIMUM_CRITS = 6
 MOMENTS = ('before', 'after')
+CAST_MARGIN_MS = 500
+SPELL_FAILED_NOT_READY = 67
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,7 @@ class MinionCritGateSpec:
     windows: int
     window_ms: int
     label_suffix: str = 'once_per_sec'
+    attempts_ms: tuple[int, ...] = ()
 
 
 def minion_crit_gate_spec(entry: dict) -> MinionCritGateSpec:
@@ -40,7 +43,12 @@ def minion_crit_gate_spec(entry: dict) -> MinionCritGateSpec:
                                     in entry['raises']),
                               (int(entry['crit_aura'][0]), int(entry['crit_aura'][1])), int(entry['observe_spell']),
                               int(entry['observe_power']), int(entry['cut_ms']), int(entry['windows']),
-                              int(entry['window_ms']), entry.get('label_suffix', 'once_per_sec'))
+                              int(entry['window_ms']), entry.get('label_suffix', 'once_per_sec'),
+                              tuple(int(moment) for moment in entry.get('attempts_ms', ())))
+    if spec.attempts_ms and (len(spec.attempts_ms) != 2 or not spec.window_ms <= spec.attempts_ms[0]
+                             < spec.attempts_ms[1]):
+        raise ValueError(f'{spec.spell} minion_crit_gate attempts the observed spell at two rising times after '
+                         f'a window')
     if len({creature for _, creature, _ in spec.raises}) != 2 or len(spec.raises) != 2:
         raise ValueError(f'{spec.spell} minion_crit_gate raises two minions of distinct entries')
     if spec.cut_ms <= 0 or spec.windows < 1 or not 2000 <= spec.window_ms <= 8000:
@@ -74,6 +82,8 @@ def minion_crit_gate_scenario(class_file: dict, spec: MinionCritGateSpec) -> tup
         steps.append({'action': 'assert', 'label': f'SETUP: the {creature} minion is raised', 'actor': CASTER,
                       'metric': 'owned_creature_count', 'entry': creature, 'equals': 1})
     steps.append({'action': 'attack', 'actor': CASTER, 'target': TARGET})
+    if spec.attempts_ms:
+        return attempt_scenario(class_file, spec, records, entry, steps)
     windows = []
     for index in range(spec.windows):
         reads = {moment: [gate_label(spec, f'{index} {moment} {read}')
@@ -104,7 +114,7 @@ def minion_crit_gate_scenario(class_file: dict, spec: MinionCritGateSpec) -> tup
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
-    model = {'kind': KIND, 'metric': 'pet_melee_crits', 'quote': entry.quote, 'windows': windows, 'cut_ms': spec.cut_ms,
+    model = {'kind': KIND, 'metric': 'cooldown_ms', 'quote': entry.quote, 'windows': windows, 'cut_ms': spec.cut_ms,
              'expected': GATED_SHARE}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.spell, None, f'{GATED_SHARE:g}', prose_rule(entry.quote, spec.spell),
@@ -112,7 +122,70 @@ def minion_crit_gate_scenario(class_file: dict, spec: MinionCritGateSpec) -> tup
     return timed(scenario, waited_ms(steps)), [expectation]
 
 
+def attempt_label(spec: MinionCritGateSpec, moment_ms: int) -> str:
+    return gate_label(spec, f'attempt {moment_ms}')
+
+
+def attempt_scenario(class_file: dict, spec: MinionCritGateSpec, records: Records, entry, steps: list[dict]
+                     ) -> tuple[dict, list[Expectation]]:
+    creatures = [creature for _, creature, _ in spec.raises]
+    steps = steps + forced_crit_steps(spec)
+    steps += hit_ratio_cast(records, spec.observe_spell, CASTER, CASTER, spec.observe_power)[:-1]
+    steps.append(measurement(gate_label(spec, 'primed'), CASTER, 'cooldown_ms', spell=spec.observe_spell))
+    elapsed = 0
+    for moment_ms in spec.attempts_ms:
+        while elapsed < moment_ms:
+            chunk = min(spec.window_ms, moment_ms - elapsed)
+            steps += forced_crit_steps(spec) + [{'action': 'wait', 'label': 'gate window', 'ms': chunk}]
+            elapsed += chunk
+        steps += [{'action': 'set_power', 'actor': CASTER, 'power': 0, 'value': spec.observe_power},
+                  {'action': 'cast', 'actor': CASTER, 'spell': spec.observe_spell, 'target': CASTER},
+                  {'action': 'wait', 'ms': CAST_MARGIN_MS},
+                  measurement(attempt_label(spec, moment_ms), CASTER, 'cast_failure', spell=spec.observe_spell)]
+        steps += [measurement(gate_label(spec, f'attempt {moment_ms} crits {creature}'), CASTER, 'pet_melee_crits',
+                              entry=creature) for creature in creatures]
+        elapsed += CAST_MARGIN_MS
+    steps.append({'action': 'stop_attack', 'actor': CASTER})
+    early, late = spec.attempts_ms
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour minion crit gate attempts',
+        'contract': (f'With {spec.spell} learned, creatures {creatures[0]} and {creatures[1]} attack the dummy with '
+                     f'the caster, both forced to crit by aura {spec.crit_aura[0]} at amount {spec.crit_aura[1]}. '
+                     f'{spec.observe_spell} is cast, then attempted {early} ms and {late} ms later: refused at '
+                     f'{early} ms (two crits a second, each cutting {spec.cut_ms} ms, would have cleared it), cast at '
+                     f'{late} ms (one cut a second clears it).'),
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': KIND, 'metric': 'cast_failure', 'quote': entry.quote,
+             'attempts': [attempt_label(spec, moment) for moment in spec.attempts_ms],
+             'primed': gate_label(spec, 'primed'), 'attempts_ms': list(spec.attempts_ms)}
+    expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
+                              spec.spell, spec.spell, None, f'refused at {early} ms, cast at {late} ms',
+                              prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def attempt_verdict(base, run, model: dict):
+    from compare import missing_measurement
+    labels = [model['primed'], *model['attempts']]
+    missing = next((label for label in labels if run.values.get(label) is None), None)
+    if missing is not None:
+        return replace(base, explanation=missing_measurement(run, missing))
+    early, late = (run.values[label] for label in model['attempts'])
+    early_ms, late_ms = model['attempts_ms']
+    primed = run.values[model['primed']]
+    status = 'ok' if early == SPELL_FAILED_NOT_READY and late == 0 else 'alert'
+    return replace(base, status=status, measured=float(late), expected=0.0,
+                   explanation=f'primed cooldown {primed:g} ms; attempt at {early_ms} ms: cast result {early:g} '
+                               f'(expected {SPELL_FAILED_NOT_READY}, still cooling down); at {late_ms} ms: {late:g} '
+                               f'(expected 0, cast)')
+
+
 def minion_crit_gate_verdict(base, run, model: dict):
+    if 'attempts' in model:
+        return attempt_verdict(base, run, model)
     from compare import missing_measurement
     labels = [label for window in model['windows'] for row in window.values() for label in row]
     missing = next((label for label in labels if run.values.get(label) is None), None)

@@ -44,3 +44,21 @@ class MinionCritGateTests(unittest.TestCase):
 
     def test_a_cooldown_that_runs_out_is_unmeasured(self):
         self.assertEqual(self.judged(2, ran_out=True).status, 'unmeasured')
+
+    def attempted(self, early: int, late: int) -> Verdict:
+        entry = {**ENTRY, 'variant': 'attempts', 'label_suffix': 'once_per_sec_gate', 'windows': 1,
+                 'attempts_ms': [50000, 100000]}
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        values = {expectation.model['primed']: 179997.0, **dict(zip(expectation.model['attempts'], (early, late)))}
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        return judge_behaviour(base, FakeRun(values), expectation)
+
+    def test_refused_early_and_cast_late_passes(self):
+        self.assertEqual(self.attempted(67, 0).status, 'ok')
+
+    def test_an_ungated_cut_that_clears_early_alerts(self):
+        self.assertEqual(self.attempted(0, 67).status, 'alert')
+
+    def test_a_gate_too_long_to_clear_late_alerts(self):
+        self.assertEqual(self.attempted(67, 67).status, 'alert')

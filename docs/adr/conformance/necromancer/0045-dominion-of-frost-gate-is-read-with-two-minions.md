@@ -20,10 +20,14 @@ owned-entry `set_aura` picks one creature); the mentor asked for the cheap desig
 Kind `minion_crit_gate` (kinds/minion_crit_gate.py) with a Ghoul 50073 and a Lesser Skeletal Warrior 50065 (1 Life
 Force each, both 2000 ms swings, started together by the caster's attack). Accepted cuts (cooldown removed beyond
 elapsed time over 3000 ms) per counted crit must lie in 0.4 to 0.75: about 0.5 when the second crit of each pair falls
-inside the gate, 1.0 with no gate.
+inside the gate, 1.0 with no gate. That ratio rests on `cooldown_ms`, a readback (ADR 0342), so it is data evidence.
+The behaviour read is a cast gate in the same kind (`attempts_ms`): Unholy Frenzy is cast and attempted 50 s and
+100 s later while both minions crit; refused at 50 s, cast at 100 s.
 
 ## Consequences
 
 - Pilot 20261113-174302: 24000 ms removed beyond the elapsed time (8 cuts) for 15 crits, 0.533.
+- Pilot 20261113-174745: primed 179997 ms; refused (67) at 50 s after 56 crits, so fewer than 44 of them cut (all
+  56 would have removed 168 s); cast at 100 s after 106 crits, so at least 27 cut (a gate of at most about 3.7 s).
 - The read brackets the gate between the two minions' swing offset and one swing period (2000 ms); it does not pin
   1000 ms. A gate of 3 s or more, or none, alerts.
