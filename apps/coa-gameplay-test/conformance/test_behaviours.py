@@ -11271,5 +11271,40 @@ class TakenHitLearnedArmTests(unittest.TestCase):
             taken_hit_scenario(load_class_file(23), taken_hit_spec({**entry, 'arms': arms}))
 
 
+
+class MinionSwingRatioTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'minion_swing_ratio')
+        return behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, strike_hit: float) -> str:
+        _, [expectation] = self.built()
+        values = ratio_values(expectation.model, strike_hit, 200.0)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_strike_and_the_swings_of_the_minion_are_read_after_every_command(self):
+        scenario, [expectation] = self.built()
+        run.validate(scenario)
+        reads = [step for step in scenario['steps'] if step['action'] == 'assert']
+        strikes = [step for step in reads if step['metric'] == 'spell_damage_total' and step.get('spell') == 570042]
+        swings = [step for step in reads if step['metric'] == 'pet_melee_plain_damage']
+        self.assertEqual(len(strikes), len(swings))
+        self.assertEqual(len(strikes), expectation.model['trials'] + 1)
+        self.assertTrue(all(step['caster_entry'] == 51065 and step['critical'] is False for step in strikes))
+        self.assertTrue(all(step['entry'] == 51065 for step in swings))
+        commands = cast_indices(scenario['steps'], 504905)
+        self.assertEqual(len(commands), expectation.model['trials'] + 1)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_band_is_five_percent_of_the_stated_ratio(self):
+        self.assertEqual(self.judged(420.0), 'ok')
+        self.assertEqual(self.judged(400.0), 'ok')
+        self.assertEqual(self.judged(440.0), 'ok')
+        self.assertEqual(self.judged(398.0), 'alert')
+        self.assertEqual(self.judged(442.0), 'alert')
+        self.assertEqual(self.judged(200.0), 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

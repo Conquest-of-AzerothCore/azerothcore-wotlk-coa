@@ -870,6 +870,19 @@ when set, replaces `removed` for the caster's reads of that arm only (ADR 0291).
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
 
+### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
+
+A minion's command strike stated as "Weapon Damage" is read against the same minion's own swing. A real
+`raise_spell` raises creature `entry` at the caster; one `command_spell` at the dummy (power set to `command_power`)
+starts its attack, then `trials` more follow, `wait_ms` apart. After the first and each later Command the scenario
+reads the non-critical, unblocked `strike_spell` hits of that creature on the dummy (`spell_damage_total` and
+`spell_damage_count` with `caster_entry`) and its plain melee swings (`pet_melee_plain_damage` and
+`pet_melee_plain_count`, no crit and no glancing). The hit ratio judge takes the swings as the control arm and the
+strike as the treatment: the per-hit mean of the strike over the per-swing mean must lie within 5% of the stated
+ratio `expected` (`ratio_band`, the G-19 band of a ratio), with the 99% interval rules of the hit ratio judge. The
+creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorded once and not judged. Raise:
+Greater Skeletal Warrior 504901 judges Command: Skeletal Warriors 570042 at 2.1 (mentor ruling Q-b2b-4).
+
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 
 "For the same amount" compares two amounts of one cast (ADR 0200). `amount_match_scenario` casts `cast_spell` at

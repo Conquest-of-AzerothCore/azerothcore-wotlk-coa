@@ -31,7 +31,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         HIT_RATIO_ARMS, LEARNED_CONTRAST, SPELL_FAILED_NOT_READY, STAT_GAIN_ATTRIBUTION,
                         STAT_GAIN_RETURN, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
                         strongest_percent)
-from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
+from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
                    bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
@@ -4173,6 +4173,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     else:
         if stated and flat is None:
             bonus = stated_bonus(bonus, stated)
+        if model.get('ratio_band'):
+            bonus = replace(bonus, fixed_band=RELATIVE_BAND * float(model['expected']) * 100)
         status, reason, needed = bonus_status(bonus)
     sized = None if stepped else sized_trials(bonus)
     detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,

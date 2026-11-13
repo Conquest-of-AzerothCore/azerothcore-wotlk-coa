@@ -41,10 +41,11 @@ class Bonus:
     half: float
     expected: float
     trials: int
+    fixed_band: float | None = None
 
     @property
     def band(self) -> float:
-        return bonus_band(self.expected)
+        return bonus_band(self.expected) if self.fixed_band is None else self.fixed_band
 
     @property
     def power_limit(self) -> float:
@@ -143,9 +144,10 @@ def excluded_text(bonus: Bonus) -> str:
 def bonus_text(bonus: Bonus) -> str:
     interval = ('no interval' if not math.isfinite(bonus.half)
                 else f'99% interval {bonus.low:+.4g}% to {bonus.high:+.4g}%')
+    band = (f'the larger of {RELATIVE_BAND:.0%} of it and {POINT_BAND:g} points' if bonus.fixed_band is None
+            else f'{RELATIVE_BAND:.0%} of the stated ratio {1 + bonus.expected / 100:.4g}')
     return (f'bonus {bonus.measured:+.4g}% ({interval}, {bonus.trials} trials per arm) against the stated '
-            f'{bonus.expected:+.4g}%, which passes inside +-{bonus.band:.3g} points (the larger of '
-            f'{RELATIVE_BAND:.0%} of it and {POINT_BAND:g} points); {excluded_text(bonus)}')
+            f'{bonus.expected:+.4g}%, which passes inside +-{bonus.band:.3g} points ({band}); {excluded_text(bonus)}')
 
 
 def bonus_detail(bonus: Bonus) -> dict:
