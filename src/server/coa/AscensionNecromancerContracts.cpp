@@ -430,7 +430,11 @@ float Factor(Player* player, Unit* target, SpellInfo const* info, bool periodic)
         return 1.0f;
     float factor = 1.0f;
     if ((info->SchoolMask & SPELL_SCHOOL_MASK_SHADOW) && target->HealthBelowPct(35))
-        factor *= player->HasAura(807925) ? 1.1f : player->HasAura(806149) ? 1.05f : 1.0f;
+        if (uint32 damnation = player->HasAura(807925) ? 807925 : player->HasAura(806149) ? 806149 : 0)
+        {
+            float const increase = Amount(damnation, 1) / 100.0f;
+            factor *= (1.0f + 2.0f * increase) / (1.0f + increase);
+        }
     if (player->HasAura(704163) && target->HealthBelowPct(20) && (Disease(info) || info->Id == 800343))
         factor *= 2.25f;
     if (Lichfrost(info) && Diseases(player, target) && player->HasAura(707627))
