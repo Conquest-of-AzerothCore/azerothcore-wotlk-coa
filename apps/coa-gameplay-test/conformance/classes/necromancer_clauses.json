@@ -5466,12 +5466,21 @@
       },
       {
         "claim": "or interrupted",
-        "labels": []
+        "labels": [
+          "807813 behaviour_metric_delta no_interrupt",
+          "807813 behaviour_metric_delta cut_not_refused"
+        ]
       },
       {
         "claim": "and reduces the pushback suffered from damaging attacks while casting by $807812s1%",
         "labels": [
-          "807813 effect_value 807812e0 #0"
+          "807813 effect_value 807812e0 #0",
+          "807813 behaviour_metric_delta unhit_held",
+          "807813 behaviour_metric_delta unhit_done",
+          "807813 behaviour_metric_delta pushback_held",
+          "807813 behaviour_metric_delta pushback_champion_done",
+          "807813 behaviour_metric_delta pushback_control_held",
+          "807813 behaviour_metric_delta pushback_control_done"
         ]
       },
       {
@@ -5483,7 +5492,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claims summon, silence and duration: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; one Champion 500484 and 807812 on the caster after the cast; there at 19000 ms, gone by 21500 ms; Silence 15487 cast by the dummy lands without the Champion, is refused with 807812 up and lands again after it (ADR 0430)). Claims interrupt and pushback: parked (route agent): an interrupt needs the caster casting while the dummy interrupts (no kind orders a dummy cast after the caster's cast start), and the pushback needs a cast-time read after a hit; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 908 \"Icebound Champion\" lines (34 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 50 (AscensionCustomClassData.h 488); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claims interrupt and pushback (M side c): Status 1 (the M side c counted pair PAIR_M_C (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)). Interrupt: a striker's Counterspell 2139 (Mechanic 26) 1000 ms into a Lichfrost 501978 cuts it without the Champion (0 hits, cast failure 40 SPELL_FAILED_INTERRUPTED: started and cut, not refused) and does not with a real Icebound Champion up (1 hit, no failure). Pushback: one Light of the Naaru 41394 hit 1000 ms into the 2500 ms Lichfrost; casting reads at 1 ms steps put the unhit end in (2493, 2496] ms, the hit end without the Champion in (2981, 2985] ms and with it in (2731, 2732] ms: pushback 485..492 ms against 235..239 ms, a reduction of 50.7..52.2%, inside the G-19 band 47.5..52.5% around $807812s1 = 50, judged on the observed control. Sensitivity: the brackets are 1-4 ms wide; a clock-step change would move them. Observation for the duration claim (not mine): held/ends at 19000 / 21500 ms bracket 20000 ms wider than the G-19 band (19000..21000). Claims summon, silence and duration: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; one Champion 500484 and 807812 on the caster after the cast; there at 19000 ms, gone by 21500 ms; Silence 15487 cast by the dummy lands without the Champion, is refused with 807812 up and lands again after it (ADR 0430)). Claims interrupt and pushback: parked (route agent): an interrupt needs the caster casting while the dummy interrupts (no kind orders a dummy cast after the caster's cast start), and the pushback needs a cast-time read after a hit; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 908 \"Icebound Champion\" lines (34 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 50 (AscensionCustomClassData.h 488); sources.md followed; MCP not queried (unavailable). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Icebound Champion\" 908 lines by name, 34 lines by id 807813; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it (3 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks: nothing found; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807813,
