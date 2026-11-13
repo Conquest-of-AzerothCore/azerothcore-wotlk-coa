@@ -47,4 +47,6 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0041](0041-march-of-the-dead-slow-is-timed-from-the-last-explosion.md) | - | March of the Dead's slow is timed from the last explosion | new |
 | [0042](0042-transfer-life-range-and-the-bone-construct-speed.md) | - | Transfer Life's range and the Bone Construct's speed | new |
 | [0043](0043-graveyard-leaves-one-corpse-per-raised-undead.md) | - | Graveyard leaves one corpse per raised Undead | new |
-| [0044](0044-the-hook-halt-waits-for-an-enemy-movement-order.md) | - | The Hook's halt waits for an enemy movement order | new |
+| [0044](0044-the-hook-halt-waits-for-an-enemy-movement-order.md) | - | The Hook's halt waits for an enemy movement order | new, superseded by ADR 0604 |
+| [0045](0045-dominion-of-frost-gate-is-read-with-two-minions.md) | - | The Dominion of Frost gate is read with two minions | new |
+| [0046](0046-study-of-death-cut-is-bracketed-by-repeated-casts.md) | - | The Study of Death cut is bracketed by repeated casts | new |

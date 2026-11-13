@@ -1853,7 +1853,11 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
 - [`chase_halt`](kinds/chase_halt.md): a hooked enemy's chase against an unhooked one; unmeasured until enemies can
   be moved (ADR 0596)
+- [`cooldown_reset_rate`](kinds/cooldown_reset_rate.md): a talent's chance to reset a cooldown, from the
+  clear-cooldown packets per trigger hit (ADR 0603)
 - [`corpse_per_raise`](kinds/corpse_per_raise.md): the corpses a periodic raise leaves, against the raises (ADR 0595)
+- [`effectiveness_delta`](kinds/effectiveness_delta.md): an effect cast without and with the modifier that raises its
+  effectiveness (ADR 0601)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
 - [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and
@@ -1874,6 +1878,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   ends (ADR 0543, ADR 0546, ADR 0570)
 - [`radius_edge`](kinds/radius_edge.md): an area radius bracketed by dummies 0.5 yd inside and beyond its edge (ADR
   0592)
+- [`spawn_fuse`](kinds/spawn_fuse.md): the time from a summoned creature's first spawn to its first fuse cast,
+  read on an encounter timeline (ADR 0602)
 - [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
 - [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
   parts (ADR 0544, ADR 0546)

@@ -1,6 +1,6 @@
 # 0596. An enemy chase needs a movement order
 
-- Status: accepted
+- Status: superseded by [0604](0604-a-fixture-creature-moves-on-a-harness-point-order.md)
 - Date: 2026-11-13
 
 ## Context

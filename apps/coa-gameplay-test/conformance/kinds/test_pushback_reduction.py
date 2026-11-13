@@ -82,6 +82,20 @@ class PushbackReductionTests(unittest.TestCase):
         self.assertFalse(promised_state(replace(stamped, detail={**stamped.detail, 'contrast': 'condition'}), clause))
         self.assertFalse(promised_state(stamped, 'Summon an Icebound Champion'))
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_spell_pushback_clause_promises_the_kinds_casting_state(self):
+        from compare import observed
+        from coverage import STATE, metric_evidence, promised_state, state_promises
+        _, [expectation] = self.built()
+        found = judge_behaviour(base_verdict(expectation),
+                                FakeRun(self.values({'unhit': 2495, 'hit': 2983, 'reduced': 2739})), expectation)
+        stamped = replace(found, detail={**found.detail, **observed(expectation)})
+        self.assertEqual(stamped.detail['metric'], 'pushback_casting')
+        self.assertEqual(metric_evidence()['pushback_casting'], STATE)
+        self.assertEqual(state_promises()['casting'], r'\bcast\w*|haste|all actions')
+        self.assertTrue(promised_state(stamped, 'and reduces your spell pushback suffered from taking damage by 50%.'))
+        self.assertFalse(promised_state(stamped, 'Increases your Intellect by 5%'))
+
 
 class PushbackLearnedReducerTests(unittest.TestCase):
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

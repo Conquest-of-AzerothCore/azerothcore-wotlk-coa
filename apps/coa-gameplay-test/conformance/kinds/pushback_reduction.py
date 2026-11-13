@@ -14,6 +14,7 @@ from values import Expectation, GCD_WAIT_MS, TARGET, dataset, facts_of
 
 KIND = 'pushback_reduction'
 ORDER = 7
+PUSHBACK_METRIC = 'pushback_casting'
 
 
 PUSHBACK_PHASES = ('unhit', 'hit', 'reduced')
@@ -133,7 +134,7 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file), striker],
         'steps': steps}
-    model = {'kind': 'pushback_reduction', 'metric': 'casting', 'contrast': pushback_contrast(spec),
+    model = {'kind': 'pushback_reduction', 'metric': PUSHBACK_METRIC, 'contrast': pushback_contrast(spec),
              'quote': entry.quote, 'expected_pct': spec.expected_pct,
              'band': bonus_band(spec.expected_pct),
              'phases': ({name: pushback_phase_model(spec, name, name, polls) for name in phases}
@@ -320,3 +321,5 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: behaviour_pushback_reduction_verdict}
+METRIC_EVIDENCE = {PUSHBACK_METRIC: 'state'}
+STATE_PROMISES = {PUSHBACK_METRIC: r'\bcast\w*|haste|all actions|pushback'}

@@ -10,12 +10,14 @@ ENTRY = {'spell': 504316, 'name': 'Command: Hook (a hooked enemy stops chasing)'
          'label_suffix': 'chase_halt', 'quote': 'slowing their movement speed to a halt', 'learn': [92123],
          'raises': [[500335, 'caster', None, 4000], [531130, 'far', 1000, 4000]], 'chased_entry': 503200,
          'expected_ratio': 0.02, 'far_yd': 25, 'chaser_yd': 8, 'start_ms': 500, 'window_ms': 1000}
+MOVE_ENTRY = {**{key: value for key, value in ENTRY.items() if key != 'chased_entry'},
+              'raises': [[500335, 'caster', None, 4000]], 'order': 'move_point', 'move_yd': 12}
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class ChaseHaltTests(unittest.TestCase):
-    def judged(self, hooked_yd: float, chaser_yd: float) -> Verdict:
-        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+    def judged(self, hooked_yd: float, chaser_yd: float, entry: dict = ENTRY) -> Verdict:
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         start, end = (expectation.model['reads'][moment] for moment in ('start', 'end'))
         values = dict(zip(start, (1000.0, 25.0, 17.0)))
         values.update(zip(end, (2000.0, 25.0 - hooked_yd, 17.0 - chaser_yd)))
@@ -36,3 +38,24 @@ class ChaseHaltTests(unittest.TestCase):
 
     def test_a_control_that_does_not_chase_is_unmeasured(self):
         self.assertEqual(self.judged(0.0, 0.0).status, 'unmeasured')
+
+    def test_the_point_move_follows_the_hook_for_both_movers(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), MOVE_ENTRY)
+        run.validate(scenario)
+        actions = [step['action'] for step in scenario['steps']]
+        self.assertNotIn('attack_owned_creature', actions)
+        moves = [step for step in scenario['steps'] if step['action'] == 'move_point']
+        self.assertEqual([(step['actor'], step['dx']) for step in moves], [('hooked', 12.0), ('chaser', 12.0)])
+        hook = max(index for index, step in enumerate(scenario['steps'])
+                   if step['action'] == 'cast' and step.get('spell') == 504316)
+        self.assertGreater(actions.index('move_point'), hook)
+
+    def test_a_point_moved_halted_dummy_passes(self):
+        self.assertEqual(self.judged(0.16, 8.0, MOVE_ENTRY).status, 'ok')
+
+    def test_a_point_moved_dummy_without_the_slow_alerts(self):
+        self.assertEqual(self.judged(8.0, 8.0, MOVE_ENTRY).status, 'alert')
+
+    def test_a_point_move_past_the_far_dummy_is_rejected(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**MOVE_ENTRY, 'move_yd': 20})
