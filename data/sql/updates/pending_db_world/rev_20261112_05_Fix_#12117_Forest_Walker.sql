@@ -2,25 +2,25 @@
 -- Project changes
 -- Schema: ec4dbf0c7e2ffbe21a91d275b19a344f8bffe1dc476fe49e1502e6e9a75afc22
 -- Generated: 2026-11-12
- 
+
 DELETE FROM `creature` WHERE `guid` IN (12101018, 12101019, 12101020, 12101021);
- 
+
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
 (12101018, 7584, 1, 0, 0, 1, 1, 0, -4318.128521159883, 441.2642836837341, 54.529093776515985, 2.0665924978728163, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101019, 7584, 1, 0, 0, 1, 1, 0, -4236.409979571428, 412.475361500019, 55.621944019597585, 1.019877657877653, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101020, 7584, 1, 0, 0, 1, 1, 0, -4242.297707502, 63.886411524258484, 57.13522093639013, 0.7215630138836048, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101021, 7584, 1, 0, 0, 1, 1, 0, -4431.63825474439, -201.67111010199338, 52.57333086869552, 3.0912139707076007, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view');
- 
+
 DELETE FROM `creature_addon` WHERE `guid` IN (12101018, 12101019, 12101020, 12101021);
- 
+
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (12101018, 121010180, 0, 0, 0, 0, 0, NULL),
 (12101019, 121010190, 0, 0, 0, 0, 0, NULL),
 (12101020, 121010200, 0, 0, 0, 0, 0, NULL),
 (12101021, 121010210, 0, 0, 0, 0, 0, NULL);
- 
+
 DELETE FROM `waypoint_data` WHERE `id` IN (121010180, 121010190, 121010200, 121010210);
- 
+
 INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `position_z`, `orientation`, `velocity`, `delay`, `smoothTransition`, `move_type`, `action`, `action_chance`, `wpguid`) VALUES
 (121010180, 1, -4318.994457449675, 444.315827606658, 53.63116245183915, NULL, 0, 0, 0, 0, 0, 100, 0),
 (121010180, 2, -4317.794917273208, 480.4141964944727, 55.68121281009723, NULL, 0, 0, 0, 0, 0, 100, 0),
@@ -163,5 +163,6 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (121010210, 83, -4421.344391654148, -199.82478496703885, 50.824491322429026, NULL, 0, 0, 0, 0, 0, 100, 0),
 (121010210, 84, -4426.346424177419, -203.25983784699022, 51.61423856623401, NULL, 0, 0, 0, 0, 0, 100, 0),
 (121010210, 85, -4430.112656662523, -203.30637250033203, 53.064337040552076, NULL, 0, 0, 0, 0, 0, 100, 0);
- 
+
 UPDATE `creature` SET `wander_distance` = 0, `MovementType` = 2 WHERE `guid` IN (12101018, 12101019, 12101020, 12101021);
+```
