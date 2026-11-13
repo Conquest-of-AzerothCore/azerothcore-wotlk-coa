@@ -10727,5 +10727,19 @@ class MetricDeltaLongWaitTests(unittest.TestCase):
         self.assertNotIn('timeout_ms', plain)
 
 
+class MetricDeltaCasterHealthTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_caster_health_is_set_in_both_phases_before_the_reads(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 803771 and entry.get('label_suffix') == 'restore')
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        steps = scenario['steps']
+        sets = [index for index, step in enumerate(steps) if step.get('action') == 'set_health']
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'health']
+        self.assertEqual(len(sets), 2)
+        self.assertTrue(all(before < read for before, read in zip(sets, reads)))
+        self.assertEqual(steps[sets[0]]['value'], 5000)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1342,6 +1342,7 @@ class MetricDeltaSpec:
     trigger_item: int | None = None
     phase_power: tuple[int, int, int] | None = None
     items: tuple[tuple[int, int], ...] = ()
+    caster_health: tuple[int, int] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1510,6 +1511,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.setup_actor_aura is not None:
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
         steps += [phase_aura_step(aura) for aura in (*(spec.after_auras if after else ()), *spec.phase_auras)]
+        if spec.caster_health is not None:
+            steps.append({'action': 'set_health', 'actor': CASTER, 'value': spec.caster_health[0],
+                          'maximum': spec.caster_health[1]})
         if not include_cast:
             return (steps + (strike_steps() if spec.strike and spec.strike.after_trigger_ms is not None else [])
                     + target_cast_steps())
@@ -1773,7 +1777,9 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('trigger_item'),
                            None if entry.get('phase_power') is None
                            else tuple(int(value) for value in entry['phase_power']),
-                           tuple((int(item), int(count)) for item, count in entry.get('items', ())))
+                           tuple((int(item), int(count)) for item, count in entry.get('items', ())),
+                           None if entry.get('caster_health') is None
+                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

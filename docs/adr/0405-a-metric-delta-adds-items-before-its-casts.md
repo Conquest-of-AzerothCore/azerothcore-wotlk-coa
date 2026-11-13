@@ -20,6 +20,9 @@ evidence class in `coverage.METRIC_EVIDENCE`.
   timed out at the default. On the merged branch this threshold replaces ADR 0361's 90000 ms in the same rule, which
   keeps its cap at the accelerated scenario limit.
 
+- `metric_delta` takes `caster_health` (`[value, maximum]`): the caster's health is set to it at the start of each
+  phase, before any cast, for a heal of the missing health (Bone Reliquary 803767).
+
 ## Consequences
 
 - Entries without `items` generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
