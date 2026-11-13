@@ -1268,6 +1268,112 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 805044,
+      "name": "Animate: Tomb King (no claws from the player's swings)",
+      "kind": "metric_delta",
+      "variant": "player_swings",
+      "label_suffix": "player_swings",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 570050,
+      "target": "dummy",
+      "attack_swings": 6,
+      "gate_spell": 805044,
+      "gate_cast": true,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 570050,
+        "target": "dummy"
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Scope arm (mentor item, M side c): Putrid Claws 570050 sourced from the player. The caster auto-attacks the dummy for six swing intervals without a Tomb King (control), then casts Animate: Tomb King 805044 (a real cast, gate_cast; its Effect[2] casts Putrid Aura 800027) and attacks six more. Tooltip: all of your Undead minion's attacks, so the player's own swings add no claw: 0 in both phases (live: no player-sourced 570050). Code lead: the (minion || own) gate at AscensionNecromancerEvents.cpp:97 with actor->HasAura(800027) at :99-100. Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 805044,
+      "name": "Animate: Tomb King (no claws from the player's spell)",
+      "kind": "metric_delta",
+      "variant": "player_spell",
+      "label_suffix": "player_spell",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "setup_casts": [
+        805044
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 570050,
+        "target": "dummy"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "Scope arm: a direct Lichfrost 501978 by the player at the dummy without a Tomb King (control) and after a real Animate: Tomb King 805044: player-sourced Putrid Claws 570050 hits 0 in both phases (tooltip: minion attacks only; live: none from players). The player_spell_lands entry shows the Lichfrost hit in both phases. Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 805044,
+      "name": "Animate: Tomb King (the player's spell lands)",
+      "kind": "metric_delta",
+      "variant": "player_spell_lands",
+      "label_suffix": "player_spell_lands",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 2,
+      "before_expected": 1,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "setup_casts": [
+        805044
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501978,
+        "target": "dummy"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "The landing arm of player_spell: the Lichfrost 501978 hits counted cumulatively, 1 after the control cast and 2 after the cast with the Tomb King up. Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 805044,
+      "name": "Animate: Tomb King (no claws from its own swings)",
+      "kind": "metric_delta",
+      "variant": "tomb_king_swings",
+      "label_suffix": "tomb_king_swings",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        805044
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 8000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 570050,
+        "caster_entry": 50320,
+        "target": "dummy"
+      },
+      "observe_source": "Scope arm: the layout of the combat entry (Command: Undead 504868 at the dummy, a real Animate: Tomb King first in the treatment; that entry reads at least 2 Tomb King 50320 hits in 8000 ms): Putrid Claws 570050 sourced from the Tomb King 50320 (caster_entry). Live: the Tomb King's own swings never claw (0 of 2,289); expected 0, and 0 without a Tomb King (control). Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
       "spell": 503740,
       "name": "Ghoul Mastery (Frenzied Ghoul duration)",
       "kind": "aura_expiry",

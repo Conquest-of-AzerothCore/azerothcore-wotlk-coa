@@ -3736,7 +3736,11 @@
         "claim": "While active, all of your Undead minion's attacks deal an additional ... as Plague damage",
         "labels": [
           "805044 behaviour_metric_delta putrid_with",
-          "805044 behaviour_metric_delta putrid_without"
+          "805044 behaviour_metric_delta putrid_without",
+          "805044 behaviour_metric_delta player_swings",
+          "805044 behaviour_metric_delta player_spell",
+          "805044 behaviour_metric_delta player_spell_lands",
+          "805044 behaviour_metric_delta tomb_king_swings"
         ]
       },
       {
@@ -3747,7 +3751,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Magnitude 0.1153-0.1174 against 0.10, inside the G-19 band (8-12%): status 1 tolerated by mentor decision 2026-11-13 (level-60 target); owner observation: the copy reads the proc DamageInfo (AscensionNecromancerEvents.cpp:99-100), so the share would grow with target armor. The tool verdict stays alert (its model applies an average partial resist). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"10%\"; logs: 127 casts, 3037 Putrid Aura applications, 16488 Putrid Claws hits. Status 5 (mentor 2026-11-13 06:10, earlier \"status 1 tolerated\" withdrawn): the counted contract expects 0.088 (tooltip 0.1 x 0.88 kept after partial resists, compare.py:1845-1847) and the merged pair reads 0.1174 / 0.1177 (20261113-043355 / -044317, 276 hits each), outside the G-19 band against it; the baseline (post-mitigation hit, claw mitigated or not) is owner question Q-a1-5."
+    "reason": "Magnitude 0.1153-0.1174 against 0.10, inside the G-19 band (8-12%): status 1 tolerated by mentor decision 2026-11-13 (level-60 target); owner observation: the copy reads the proc DamageInfo (AscensionNecromancerEvents.cpp:99-100), so the share would grow with target armor. The tool verdict stays alert (its model applies an average partial resist). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"10%\"; logs: 127 casts, 3037 Putrid Aura applications, 16488 Putrid Claws hits. Status 5 (mentor 2026-11-13 06:10, earlier \"status 1 tolerated\" withdrawn): the counted contract expects 0.088 (tooltip 0.1 x 0.88 kept after partial resists, compare.py:1845-1847) and the merged pair reads 0.1174 / 0.1177 (20261113-043355 / -044317, 276 hits each), outside the G-19 band against it; the baseline (post-mitigation hit, claw mitigated or not) is owner question Q-a1-5. Fix FN-mc-2 (mentor-approved, ADR 0486, commit 7b45167721): Putrid Claws 570050 is copied only for an owned minion other than the Tomb King 50320; side c's scope entries (player_swings, player_spell, player_spell_lands, tomb_king_swings) are its regression: RESULT_TK"
   },
   {
     "spell": 805048,
