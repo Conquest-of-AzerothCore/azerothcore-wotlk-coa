@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <deque>
 #include <fstream>
 #include <iostream>
 #include <limits>
@@ -30,6 +31,14 @@ std::string Directory;
 namespace ItemScaling
 {
 uint32 BaseEntry(uint32 entry) { return entry; }
+}
+
+namespace AscensionTaming
+{
+constexpr uint64 ClassBit(uint32 classId)
+{
+    return classId >= 1 && classId <= 64 ? uint64(1) << (classId - 1) : 0;
+}
 }
 
 // ACTUAL_CONSTANTS
@@ -77,13 +86,29 @@ struct Player
     WorldSession* GetSession() { return &Session; }
     bool IsInWorld() const { return true; }
     char const* GetName() const { return "Woodworker"; }
+    uint8 getClass() const { return 0; }
+    uint8 getRace() const { return 0; }
 };
 
 struct Item
 {
     uint32 Entry;
     uint32 GetEntry() const { return Entry; }
+    bool IsSoulBound() const { return true; }
 };
+
+struct CreatureDisplayInfoStore
+{
+    void const* LookupEntry(uint32) const { return nullptr; }
+    uint32 GetNumRows() const { return 0; }
+} sCreatureDisplayInfoStore;
+
+namespace AscensionCollectibles
+{
+constexpr std::array<uint32, 0> SigilVanityItems{};
+}
+
+std::map<uint32, VanityPrice> LoadVanityPrices() { return {}; }
 
 struct ItemTemplate
 {
@@ -154,12 +179,31 @@ struct AscensionDisplayPatchService
         return service;
     }
 
+    static inline std::unordered_set<uint32> Owned;
+    static std::unordered_set<uint32> OwnedItemIds(Player*) { return Owned; }
     void SendItemRowOnDemand(Player* player, uint32 entry) { player->ItemPatchRequests.push_back(entry); }
+};
+
+constexpr uint32 CHAR_INS_ACCOUNT_VANITY_COLLECTION = 1;
+
+struct CharacterDatabasePreparedStatement
+{
+    void SetData(std::size_t, uint32) { }
 };
 
 struct Database
 {
     std::vector<std::array<uint32, 3>> Writes;
+    std::deque<CharacterDatabasePreparedStatement> Statements;
+
+    CharacterDatabasePreparedStatement* GetPreparedStatement(uint32)
+    {
+        return &Statements.emplace_back();
+    }
+    void Execute(CharacterDatabasePreparedStatement*)
+    {
+        throw std::runtime_error("Crafting cannot persist vanity items");
+    }
     template<class... Args>
     void Execute(char const*, Args... values)
     {
@@ -214,7 +258,13 @@ public:
     std::vector<uint32> _allAppearanceIds;
     std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
+    std::vector<std::array<uint32, 17>> _serverPetAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
+    std::unordered_map<uint32, IncarnationCategory> _incarnationCategories;
+    std::map<uint32, CosmeticPetCategory> _petCategories;
+    std::unordered_map<uint32, uint32> _petTokens;
+    std::mutex _woodworkingRowMutex;
+    std::unordered_map<uint32, std::unordered_set<uint32>> _sentWoodworkingItems;
     std::unordered_map<uint32, std::shared_ptr<PlayerCollectionState>> _playerStates;
     std::mutex _stateMutex;
     bool _clientDataLoaded = false;
@@ -223,6 +273,8 @@ public:
     static uint32 ResolveShadowhoundDisplay(uint32) { return 0; }
     bool IsBankVanityItem(uint32) const { return false; }
     void LearnOwnedBankSpells(Player*, PlayerCollectionState&, bool) { }
+    void LoadServerPetAppearances() { _serverPetAppearancePatches.clear(); }
+    void SendVanityCollectionAdded(Player*, uint32) { }
     // ACTUAL_INSTANCE
     // ACTUAL_LOAD
     // ACTUAL_LOAD_WOODWORKING
@@ -232,6 +284,10 @@ public:
     // ACTUAL_IS_EQUIPMENT
     // ACTUAL_COLLECT_APPEARANCE
     // ACTUAL_COLLECT_ITEM
+    // ACTUAL_VANITY_FOR_PLAYER
+    // ACTUAL_CONSUMABLE_VANITY
+    // ACTUAL_ITEM_ROW_ON_DEMAND
+    // ACTUAL_ITEM_ROW
     // ACTUAL_SEND_ADDED
 };
 
@@ -306,6 +362,13 @@ int main(int argc, char** argv)
         auto state = std::make_shared<PlayerCollectionState>();
         state->AccountId = 123;
         service._playerStates[42] = state;
+        service.SendWoodworkingAppearanceCatalog(&player);
+        Require(player.Session.Packets.size() == 2 &&
+            player.Session.Packets[0].Opcode == SMSG_PATCH_APPEARANCES &&
+            player.Session.Packets[1].Opcode == SMSG_PATCH_APPEARANCES,
+            "item mapping rows wait until the player owns the crafted item");
+        player.Session.Packets.clear();
+        AscensionDisplayPatchService::Owned.insert(gear.begin(), gear.end());
         service.SendWoodworkingAppearanceCatalog(&player);
         Require(state->CollectedAppearances.empty() && CharacterDatabase.Writes.empty(),
             "catalog publication precedes appearance ownership");
