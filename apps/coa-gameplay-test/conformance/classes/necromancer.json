@@ -2376,11 +2376,17 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Bone Toss 707669 (the spell AscensionNecromancerEvents.cpp:87-92 casts from the caster at the attacker of a ward holder) Effect[0] 64 triggers 704706: Effect[0] aura 344 rewritten to SPELL_AURA_MOD_ATTACK_POWER (AscensionNecromancerContracts.cpp:127-128), BasePoints -24 DieSides 1, RealPointsPerLevel -4 from SpellLevel 10: at caster level 60, -24 - 4 x 50 + 1 = -223 (${-($704706m1+$704706ppl1)} = 223). The dummy (Harvest Golem 36 at level 60) carries AP Test 56412 (aura 99, +801 attack power, a precondition fixture by harness set_aura in both phases, so the reading starts above 223 and the metric's floor of 0 cannot hide the reduction; without it the dummy read 38 / 42 and 0 in pair 20261112-235807 / -235926). Its attack power is read with no cast and after one real 707669 cast by the caster at it: the gain must be -223 (expected_gain, ADR 0380). The trigger from damage taken is proven by the 681529 trigger_count entries."
+      "observe_source": "Bone Toss 707669 (the spell AscensionNecromancerEvents.cpp:87-92 casts from the caster at the attacker of a ward holder) Effect[0] 64 triggers 704706: Effect[0] aura 344 rewritten to SPELL_AURA_MOD_ATTACK_POWER (AscensionNecromancerContracts.cpp:127-128), BasePoints -24 DieSides 1, RealPointsPerLevel -4 from SpellLevel 10: at caster level 60, -24 - 4 x 50 + 1 = -223 (${-($704706m1+$704706ppl1)} = 223). The dummy (Harvest Golem 36 at level 60) carries AP Test 56412 (aura 99, +801 attack power, a precondition fixture by harness set_aura in both phases, so the reading starts above 223 and the metric's floor of 0 cannot hide the reduction; without it the dummy read 38 / 42 and 0 in pair 20261112-235807 / -235926). The caster carries beeg spellpen 823764 (aura 123, -9999 target resistance on the magic schools, a precondition fixture) so the dummy's level-based magic resistance cannot resist the binary Bone Toss (one run of the first final set read 839 and 839, 20261113-004414). Its attack power is read with no cast and after one real 707669 cast by the caster at it: the gain must be -223 (expected_gain, ADR 0380). The trigger from damage taken is proven by the 681529 trigger_count entries."
     },
     {
       "spell": 500983,
@@ -2458,6 +2464,7 @@
       "caster_health_pct": 100,
       "caster_max_health": 100000,
       "trials": 10,
+      "health_loss": true,
       "arms": [
         {
           "name": "control"
@@ -2472,7 +2479,7 @@
           ]
         }
       ],
-      "observe_source": "necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:330-337) takes 10% off the damage the caster takes only while it knows Putrid Summoner 560595 and holds Undead: Pacify 500983. Without 560595 ($?s560595 false, the text shows nothing): a real Pacify cast leaves the damage of Light of the Naaru 41394 (Holy, fixed 1100) unchanged, 1.0 against the control arm without the stance. The caster is held at 100000 health; non-critical hits."
+      "observe_source": "necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:330-337) takes 10% off the damage the caster takes only while it knows Putrid Summoner 560595 and holds Undead: Pacify 500983. Without 560595 ($?s560595 false, the text shows nothing): a real Pacify cast leaves the damage of Light of the Naaru 41394 (Holy, fixed 1100) unchanged, 1.0 against the control arm without the stance. The caster is set to 100000 of 100000 health before every strike and its health is read after it: the damage taken is the health lost (health_loss, ADR 0381), since the hook works on the damage after the spell log is built and the log reads 1100 either way (pair 20261113-000828 / -000904)."
     },
     {
       "spell": 560595,
@@ -2487,6 +2494,7 @@
       "caster_health_pct": 100,
       "caster_max_health": 100000,
       "trials": 10,
+      "health_loss": true,
       "learn": [
         560595
       ],
@@ -2504,7 +2512,7 @@
           ]
         }
       ],
-      "observe_source": "560595 Effect[1] aura 107 (rewritten to SPELL_AURA_DUMMY with every effect of 560595, AscensionNecromancerContracts.cpp:144-146), BasePoints -11 DieSides 1 ($s2 = 10 shown as a reduction). necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:330-337) takes CalculatePct(damage, 10) off the damage the caster takes while it knows 560595 and holds Undead: Pacify 500983. With 560595 learned, a real Pacify cast: Light of the Naaru 41394 (Holy, fixed 1100) deals 990 against 1100 in the control arm without the stance, 0.9. The caster is held at 100000 health; non-critical hits."
+      "observe_source": "560595 Effect[1] aura 107 (rewritten to SPELL_AURA_DUMMY with every effect of 560595, AscensionNecromancerContracts.cpp:144-146), BasePoints -11 DieSides 1 ($s2 = 10 shown as a reduction). necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:330-337) takes CalculatePct(damage, 10) off the damage the caster takes while it knows 560595 and holds Undead: Pacify 500983. With 560595 learned, a real Pacify cast: Light of the Naaru 41394 (Holy, fixed 1100) takes 990 health against 1100 in the control arm without the stance, 0.9. The caster is set to 100000 of 100000 health before every strike and its health is read after it: the damage taken is the health lost (health_loss, ADR 0381); the spell log the hook runs after still reads 1100 (pair 20261113-000828 / -000904)."
     },
     {
       "spell": 804681,
@@ -2889,6 +2897,577 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "observe_source": "Pierced 570216 StackAmount 2 ($570216u). Three real casts of 570216 at the dummy, 1000 ms apart, inside its 15000 ms duration: the aura holds 2 stacks; none before the casts (control)."
+    },
+    {
+      "spell": 560595,
+      "name": "Putrid Summoner (Assault crit)",
+      "kind": "metric_delta",
+      "variant": "assault_crit",
+      "label_suffix": "assault_crit",
+      "quote": "Undead: Assault: Increases your critical strike chance against Humanoids by $s1%.",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        560595
+      ],
+      "enemy_player_race": 2,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "enemy"
+      },
+      "observe_source": "Undead: Assault 500982 Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (the Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190); aura_ascension_necromancer_lifecycle::Calculate sets its amount to 5 ($560595s1, 560595 Effect[0] BasePoints 4 + 1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63); it is added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance). Read with melee_crit_chance_against (ADR 0360, from side a's bcdcb9101e). 560595 learned: the caster's melee crit chance against an enemy player (race 2, a Humanoid) is 0 with no stance (control) and 5 after a real Undead: Assault cast."
+    },
+    {
+      "spell": 560595,
+      "name": "Putrid Summoner (Assault crit without the talent)",
+      "kind": "metric_delta",
+      "variant": "assault_crit_control",
+      "label_suffix": "assault_crit_control",
+      "quote": "Undead: Assault: Increases your critical strike chance against Humanoids by $s1%.",
+      "expected": 0,
+      "before_expected": 0,
+      "gate_spell": 500982,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "enemy_player_race": 2,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "enemy"
+      },
+      "observe_source": "Undead: Assault 500982 Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (the Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190); aura_ascension_necromancer_lifecycle::Calculate sets its amount to 5 ($560595s1, 560595 Effect[0] BasePoints 4 + 1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63); it is added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance). Read with melee_crit_chance_against (ADR 0360, from side a's bcdcb9101e). 560595 never learned (gate_spell is the stance itself, so the between-phase learn adds nothing; prove-6 20261113-003107 / -003139 learned 560595 there and read 5): the stance leaves the crit chance against the enemy player at 0 (the bonus is the talent's)."
+    },
+    {
+      "spell": 560595,
+      "name": "Putrid Summoner (Assault crit against a Mechanical)",
+      "kind": "metric_delta",
+      "variant": "assault_crit_mechanical",
+      "label_suffix": "assault_crit_mechanical",
+      "quote": "Undead: Assault: Increases your critical strike chance against Humanoids by $s1%.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500982,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        560595
+      ],
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "observe_source": "Undead: Assault 500982 Effect[2] aura 112 on the caster, rewritten to ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 64 (the Humanoid creature type mask, AscensionNecromancerContracts.cpp:189-190); aura_ascension_necromancer_lifecycle::Calculate sets its amount to 5 ($560595s1, 560595 Effect[0] BasePoints 4 + 1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:62-63); it is added to the melee crit chance against a victim of that type (Unit::GetUnitCriticalChance). Read with melee_crit_chance_against (ADR 0360, from side a's bcdcb9101e). 560595 learned: against the dummy (Harvest Golem 36, creature type 9 Mechanical) the stance adds nothing (Humanoids only)."
+    },
+    {
+      "spell": 560595,
+      "name": "Putrid Summoner (Protect threat)",
+      "kind": "metric_delta",
+      "variant": "protect_threat",
+      "label_suffix": "protect_threat",
+      "quote": "Undead: Protect: Reduces your threat generated by $s3%.",
+      "expected": 0.25,
+      "before_expected": 1,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        560595
+      ],
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "threat_multiplier",
+      "fields": {},
+      "observe_source": "Undead: Protect 500985 Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195); Calculate sets it to -75 ($560595s3, 560595 Effect[2] BasePoints -76 + 1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). The caster's threat multiplier (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT), the factor ThreatManager applies to every threat it generates; threat_multiplier, ADR 0360). 560595 learned: 1 with no stance (control), 1 - 75% = 0.25 after a real Undead: Protect cast."
+    },
+    {
+      "spell": 560595,
+      "name": "Putrid Summoner (Protect threat without the talent)",
+      "kind": "metric_delta",
+      "variant": "protect_threat_control",
+      "label_suffix": "protect_threat_control",
+      "quote": "Undead: Protect: Reduces your threat generated by $s3%.",
+      "expected": 1,
+      "before_expected": 1,
+      "gate_spell": 500985,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "tolerance": 0.0001,
+      "metric": "threat_multiplier",
+      "fields": {},
+      "observe_source": "Undead: Protect 500985 Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195); Calculate sets it to -75 ($560595s3, 560595 Effect[2] BasePoints -76 + 1) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). The caster's threat multiplier (GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT), the factor ThreatManager applies to every threat it generates; threat_multiplier, ADR 0360). 560595 never learned (gate_spell is the stance itself; prove-6 learned 560595 between the phases and read 0.25): the stance leaves the caster's threat multiplier at 1."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (transform)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Transform an enemy into a ghoul,",
+      "expected": 569,
+      "before_expected": 10913,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "display_id",
+      "fields": {},
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "target_entry": 6,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. A Kobold Vermin 6 (creature type 7 Humanoid, display 10913) at level 60 as the target: display 10913 with no cast (control), 569, the Brain Eater 570 model, after a real Ghoulify."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (creature lasts)",
+      "kind": "metric_delta",
+      "variant": "creature_lasts",
+      "label_suffix": "creature_lasts",
+      "quote": "fearing them for $d",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "target_entry": 6,
+      "expiry_wait_ms": 37500,
+      "after_expiry_expected": 1,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target: the fear aura is absent before (control), present 500 ms after the cast lands and still present 38000 ms after it."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (creature ends)",
+      "kind": "metric_delta",
+      "variant": "creature_ends",
+      "label_suffix": "creature_ends",
+      "quote": "fearing them for $d",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "target_entry": 6,
+      "expiry_wait_ms": 41500,
+      "after_expiry_expected": 0,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target: present 500 ms after the cast lands, gone 42000 ms after it: with the creature_lasts entry the end lies in (38000, 42000] ms."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (player lasts)",
+      "kind": "metric_delta",
+      "variant": "player_lasts",
+      "label_suffix": "player_lasts",
+      "quote": "($?s302923[9][8] sec vs. players)",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "enemy_player_race": 2,
+      "expiry_wait_ms": 7100,
+      "after_expiry_expected": 1,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. An enemy player (race 2) as the target, 302923 not known: present 500 ms after the cast lands and still present 7600 ms after it."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (player ends)",
+      "kind": "metric_delta",
+      "variant": "player_ends",
+      "label_suffix": "player_ends",
+      "quote": "($?s302923[9][8] sec vs. players)",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "enemy_player_race": 2,
+      "expiry_wait_ms": 7900,
+      "after_expiry_expected": 0,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player, 302923 not known: gone 8400 ms after the cast lands; with player_lasts the end lies in (7600, 8400] ms, 8 sec."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (putrifier lasts)",
+      "kind": "metric_delta",
+      "variant": "putrifier_lasts",
+      "label_suffix": "putrifier_lasts",
+      "quote": "($?s302923[9][8] sec vs. players)",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "enemy_player_race": 2,
+      "learn": [
+        302923
+      ],
+      "expiry_wait_ms": 8100,
+      "after_expiry_expected": 1,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with Putrifier 302923 learned: still present 8600 ms after the cast lands (past the 8 sec cap without it)."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (putrifier ends)",
+      "kind": "metric_delta",
+      "variant": "putrifier_ends",
+      "label_suffix": "putrifier_ends",
+      "quote": "($?s302923[9][8] sec vs. players)",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "enemy_player_race": 2,
+      "learn": [
+        302923
+      ],
+      "expiry_wait_ms": 8900,
+      "after_expiry_expected": 0,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with 302923 learned: gone 9400 ms after the cast lands; with putrifier_lasts the end lies in (8600, 9400] ms, 9 sec."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (humanoids only)",
+      "kind": "metric_delta",
+      "variant": "humanoids_only",
+      "label_suffix": "humanoids_only",
+      "quote": "Only usable on Humanoids.",
+      "expected": 12,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 800706,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 800706
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. The dummy (Harvest Golem 36, creature type 9 Mechanical): no failure before the cast (control), SPELL_FAILED_BAD_TARGETS (12, SpellInfo::CheckTarget, SpellInfo.cpp:2116-2121) after a real cast at it; the Humanoid targets of the creature_lasts and transform entries are the castable contrast."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (damage breaks)",
+      "kind": "metric_delta",
+      "variant": "damage_breaks",
+      "label_suffix": "damage_breaks",
+      "quote": "Damage caused may interrupt the effect.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        800706
+      ],
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          13055,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Ghoulify 800706: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5), Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (Brain Eater, display 569), DurationIndex 64 (40000 ms, $d), TargetCreatureType 64 (Humanoid), 1500 ms cast (CastingTimeIndex 16). necromancer OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Ghoulify ProcFlags 1704616 (damage taken), ProcChance 100, AuraInterruptFlags 0x480000. The fear is a breakable crowd control (AuraEffect::CalculateAmount, SpellAuraEffects.cpp:548-562: a damage budget of the level-60 warrior base health / 4.75, read 1048 on the target; HandleBreakableCCAuraProc, :7235-7243, removes the aura once the damage taken reaches it). A Kobold Vermin 6 target, the caster with QA Test 10000% Increased Frost Damage 13055 (aura 79, +9999% Frost, a precondition fixture by harness set_aura in both phases): Ghoulify alone leaves the fear on it (1, control); Ghoulify then a Lichfrost 801722 hit (about 22 x 101, above the budget) removes it (0)."
+    },
+    {
+      "spell": 800706,
+      "name": "Ghoulify (damage below the budget)",
+      "kind": "metric_delta",
+      "variant": "damage_below_budget",
+      "label_suffix": "damage_below_budget",
+      "quote": "Damage caused may interrupt the effect.",
+      "expected": 1,
+      "before_expected": 1,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        800706
+      ],
+      "setup_wait_ms": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 800706,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Ghoulify 800706's fear is a breakable crowd control with a damage budget (AuraEffect::CalculateAmount, SpellAuraEffects.cpp:548-562; HandleBreakableCCAuraProc, :7235-7243): its aura amount read 1048 before and 1026 after one 22-damage Lichfrost 801722 hit (diagnostic 20261113-003440). Without a damage fixture the hit stays below the budget and the fear holds (1 before and after): with the damage_breaks entry, damage interrupts the effect only once it is large enough (\"may\")."
+    },
+    {
+      "spell": 503640,
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "caster",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "name": "Plague of Undeath (dispel damage)",
+      "variant": "dispel_damage",
+      "label_suffix": "dispel_damage",
+      "quote": "If Plague of Undeath is dispelled, the enemy takes ${$680928m1+$680928ppl1+$sps*1.25} Plague damage",
+      "expected": 456,
+      "before_expected": 0,
+      "phase_auras": [
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster",
+        "target": "enemy"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271): when an aura of the Plague of Undeath chain (Named 801945) is dispelled, the caster casts 680928 at its holder; 680928 Effect[0] SCHOOL_DAMAGE BasePoints 79 + 1, RealPointsPerLevel 8 from SpellLevel 13 (80 + 8 x 47 = 456 at level 60, plus 1.25 x SP, 0 at the reference stats: ${$680928m1+$680928ppl1+$sps*1.25} = 456), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms, $680928d). An enemy player (race 2) carries Plague of Undeath 503640 from a real cast (Runic Power 1000) and cures it with a real Cure Disease 528 cast at itself (dispel type disease, Plague's Dispel 3). No 680928 damage before (control); 456 on the enemy after the cure. The caster carries ARoy buff 3 600002 (aura 57, -100% spell crit chance, a precondition fixture by harness set_aura) so the hit cannot crit; the enemy has no resistance."
+    },
+    {
+      "spell": 503640,
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "name": "Plague of Undeath (dispel stun lasts)",
+      "variant": "dispel_stun_lasts",
+      "label_suffix": "dispel_stun_lasts",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "expiry_wait_ms": 4000,
+      "after_expiry_expected": 1,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271): when an aura of the Plague of Undeath chain (Named 801945) is dispelled, the caster casts 680928 at its holder; 680928 Effect[0] SCHOOL_DAMAGE BasePoints 79 + 1, RealPointsPerLevel 8 from SpellLevel 13 (80 + 8 x 47 = 456 at level 60, plus 1.25 x SP, 0 at the reference stats: ${$680928m1+$680928ppl1+$sps*1.25} = 456), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms, $680928d). An enemy player (race 2) carries Plague of Undeath 503640 from a real cast (Runic Power 1000) and cures it with a real Cure Disease 528 cast at itself (dispel type disease, Plague's Dispel 3). The stun aura 680928 is absent before (control), present 500 ms after the cure and still 4500 ms after it."
+    },
+    {
+      "spell": 503640,
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "name": "Plague of Undeath (dispel stun ends)",
+      "variant": "dispel_stun_ends",
+      "label_suffix": "dispel_stun_ends",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "expiry_wait_ms": 5000,
+      "after_expiry_expected": 0,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271): when an aura of the Plague of Undeath chain (Named 801945) is dispelled, the caster casts 680928 at its holder; 680928 Effect[0] SCHOOL_DAMAGE BasePoints 79 + 1, RealPointsPerLevel 8 from SpellLevel 13 (80 + 8 x 47 = 456 at level 60, plus 1.25 x SP, 0 at the reference stats: ${$680928m1+$680928ppl1+$sps*1.25} = 456), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms, $680928d). An enemy player (race 2) carries Plague of Undeath 503640 from a real cast (Runic Power 1000) and cures it with a real Cure Disease 528 cast at itself (dispel type disease, Plague's Dispel 3). Present 500 ms after the cure, gone 5500 ms after it: with dispel_stun_lasts the stun ends in (4500, 5500] ms."
+    },
+    {
+      "spell": 500969,
+      "kind": "metric_delta",
+      "trigger_spell": 504318,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500969
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3100,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50078
+      },
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "name": "Raise: Skeletal Rogue (Command strikes)",
+      "variant": "command_strikes",
+      "label_suffix": "command_strikes",
+      "quote": "Command: Leaps to your target and strikes it $805938s1 times.",
+      "expected": 6,
+      "observe_source": "Command: Skeletal Rogue 504318 (Command family flag; Order, AscensionNecromancerSummons.cpp:453-474; Responds 504318 -> 50078, :148-170): the Rogue jumps to the target (MoveJump) and 500 ms later (event 6, :846-850) strikes it with AttackerStateUpdate twice, or 5 times when the target is below 35% health. The tooltip states $805938s1 (805938 Effect[0] SPELL_EFFECT_ADD_EXTRA_ATTACKS, BasePoints 1, DieSides 4: 2 to 5) strikes. A Rogue is raised at the caster in both phases (setup_in_before); no Command: no Rogue hit on the dummy (control); the Command at the dummy, read 1200 ms later, counts the hits of both Rogues (the second one raised in the after phase). Each Rogue lands its 2 scripted strikes and the first auto attack its AttackStart begins (AscensionNecromancerSummons.cpp:650): 2 x 3 = 6 (pairs 20261113-003823 / -003900 read 6 and 6). The tooltip's $805938s1 reads 2 to 5; the server strikes 2 times, never more (owner question)."
+    },
+    {
+      "spell": 500969,
+      "kind": "metric_delta",
+      "trigger_spell": 504318,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500969
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3100,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50078
+      },
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "name": "Raise: Skeletal Rogue (Command below 35%)",
+      "variant": "command_execute",
+      "label_suffix": "command_execute",
+      "quote": "Always strikes 5 times on enemies below 35% health.",
+      "expected": 12,
+      "target_health_pct": 30,
+      "observe_source": "Command: Skeletal Rogue 504318 (Command family flag; Order, AscensionNecromancerSummons.cpp:453-474; Responds 504318 -> 50078, :148-170): the Rogue jumps to the target (MoveJump) and 500 ms later (event 6, :846-850) strikes it with AttackerStateUpdate twice, or 5 times when the target is below 35% health. The tooltip states $805938s1 (805938 Effect[0] SPELL_EFFECT_ADD_EXTRA_ATTACKS, BasePoints 1, DieSides 4: 2 to 5) strikes. A Rogue is raised at the caster in both phases (setup_in_before); no Command: no Rogue hit on the dummy (control); the Command at the dummy, read 1200 ms later, counts the hits of both Rogues (the second one raised in the after phase). The dummy is set to 30% of its fixture health before each Command: 5 scripted strikes and the first auto attack per Rogue, 2 x 6 = 12, against 6 above 35% (command_strikes)."
+    },
+    {
+      "spell": 503640,
+      "name": "Plague of Undeath (Holy healing received)",
+      "kind": "metric_delta",
+      "variant": "holy_healing",
+      "label_suffix": "holy_healing",
+      "quote": "and reduces the targets Holy healing received by $s3%",
+      "expected": 750,
+      "before_expected": 500,
+      "expected_ratio": 1.5,
+      "tolerance": 0.006,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        25222
+      ],
+      "enemy_cast_wait_ms": 15500,
+      "enemy_casts_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 25222,
+        "target": "enemy"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "503640 Effect[2] aura 118 SPELL_AURA_MOD_HEALING_PCT, BasePoints -51 DieSides 1 (-50, $s3), MiscValue 2 (Holy). An enemy player (race 2) casts Renew 25222 (Holy, aura 8, 105 per 3000 ms tick, 5 ticks, periodic heals do not crit) at itself: 525 without Plague of Undeath (control); then the caster's real 503640 cast lands on it and it casts Renew again: 5 ticks of int32(105 x 0.5) = 52 add 260, so the cumulative heal is 785, 1.5 x 525 within the truncation (tolerance 0.006). The enemy's own heal log (spell_heal_total, raw heal) is read."
     }
   ],
   "player_observations": [],
