@@ -725,11 +725,21 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 1, 11 (Q-a1-2 (b), Q-a1-7 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500335,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500335,
-    "clause": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage to enemies when they deal damage",
+    "clause": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage to nearby enemies when it takes damage.",
     "claims": [
       {
         "claim": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage",
@@ -738,7 +748,7 @@
         ]
       },
       {
-        "claim": "to enemies when they deal damage",
+        "claim": "to nearby enemies when it takes damage",
         "labels": [
           "500335 script_hit 802353 cloud",
           "500335 behaviour_metric_delta cloud_per_strike",
@@ -747,29 +757,18 @@
       }
     ],
     "kind": "claim",
-    "reason": "Amount proven (cloud script_hit). Trigger part: owner ruling Q-a1-7 (a) (rulings Part 3, the expected behaviour, G-37 c3): the cloud fires only when the Abomination is attacked; fixed by ADR 0530 (DamageTaken trigger, the 3000 ms pulse removed). Reads: cloud script_hit, both arms raise and command the Abomination into the dummy, the unattacked control arm counts 0 cloud hits, the struck arm 6 hits at the modelled amount; cloud_unattacked (mentor's control arm): commanded into the dummy and in combat but not attacked for 7000 ms (more than two old pulse periods) it casts 0 clouds; cloud_per_strike: an unattacked Abomination casts 0 clouds (control), struck 4 times at least 4 (6 and 5; an earlier pair 4 and 5: the extra clouds follow further damaging hits on the Abomination, most likely the striker answering a cloud in melee, which no metric reads, not verified). No metric reads damage taken by an owned creature, so clouds are not judged equal to damage-taken events (mentor: >= 4 plus the 0-cast control accepted); reads in working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair. Live logs fit the trigger in 7% of hits only (Q-a1-7); the ruling decides. Earlier: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319. G-11 (cycle 1 F2): the owner-question rounds' searches stand (server DBC set /srv/coa/server-data/dbc, src/server/coa, raw combat logs via coa-history, ~/CoaServer/reference snapshots, sources.md); MCP not queried (unavailable)."
-  },
-  {
-    "spell": 500335,
-    "clause": "and reducing their attack speed by $578319s1% for $578319d.",
-    "claims": [
-      {
-        "claim": "and reducing their attack speed by $578319s1%",
-        "labels": [
-          "500335 effect_value 578319e0 #1",
-          "500335 behaviour_metric_delta slow"
-        ]
-      },
-      {
-        "claim": "for $578319d",
-        "labels": [
-          "500335 spell_duration 578319 #2",
-          "500335 behaviour_metric_delta slow"
-        ]
-      }
-    ],
-    "kind": "claim",
-    "reason": "Status 5 (Q-a1-2). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
+    "reason": "Amount proven (cloud script_hit). Trigger part: owner ruling Q-a1-7 (a) (rulings Part 3, the expected behaviour, G-37 c3): the cloud fires only when the Abomination is attacked; fixed by ADR 0530 (DamageTaken trigger, the 3000 ms pulse removed). Reads: cloud script_hit, both arms raise and command the Abomination into the dummy, the unattacked control arm counts 0 cloud hits, the struck arm 6 hits at the modelled amount; cloud_unattacked (mentor's control arm): commanded into the dummy and in combat but not attacked for 7000 ms (more than two old pulse periods) it casts 0 clouds; cloud_per_strike: an unattacked Abomination casts 0 clouds (control), struck 4 times at least 4 (6 and 5; an earlier pair 4 and 5: the extra clouds follow further damaging hits on the Abomination, most likely the striker answering a cloud in melee, which no metric reads, not verified). No metric reads damage taken by an owned creature, so clouds are not judged equal to damage-taken events (mentor: >= 4 plus the 0-cast control accepted); reads in working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair. Live logs fit the trigger in 7% of hits only (Q-a1-7); the ruling decides. Earlier: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319. G-11 (cycle 1 F2): the owner-question rounds' searches stand (server DBC set /srv/coa/server-data/dbc, src/server/coa, raw combat logs via coa-history, ~/CoaServer/reference snapshots, sources.md); MCP not queried (unavailable).",
+    "dbc_clause": "It is surrounded by a disease cloud, dealing ${$802353m1+$802353ppl1+$SP*0.25} Nature damage to enemies when they deal damage",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 1, 11 (Q-a1-2 (b), Q-a1-7 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500335,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500335,
@@ -778,7 +777,17 @@
       "500335 behaviour_metric_delta command"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"9 + 25% SP ... -20% for 15 seconds\"; logs: 1531 Disease Cloud 802353 hits, no 578319 event, the Abomination applied no aura to enemies (only 805017 to its owner); exiles creature 50068 spells exclude 578319.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 1, 11 (Q-a1-2 (b), Q-a1-7 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500335,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 501861,
@@ -949,17 +958,38 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66. Expected-value sweep B1/B2 (2026-11-13): Expected-value sweep B1/B2 (2026-11-13): combat's after_at_least 3 (the Command hit plus two 2000 ms swings) is a scheduling floor sized from the code's timing, not an expectation; the tooltip states at least one hit (\"to aid you in combat\")."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66. Expected-value sweep B1/B2 (2026-11-13): Expected-value sweep B1/B2 (2026-11-13): combat's after_at_least 3 (the Command hit plus two 2000 ms swings) is a scheduling floor sized from the code's timing, not an expectation; the tooltip states at least one hit (\"to aid you in combat\").",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 8 (Q-a1-6 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500971,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500971,
-    "clause": "Its auto attacks restore ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} health to you.",
+    "clause": "Its auto attacks restore ${($707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07)*0.7} health to you.",
     "labels": [
       "500971 effect_value 707000e0 #0",
       "500971 script_hit 707000 auto_attack_heal"
     ],
     "kind": "claim",
-    "reason": "Status 5 (Q-a1-6, part 2: 805290 -30% healing done). Part 1, the missing Intellect/spell power term, fixed by ADR 0322 (regression arms 17 and 20 against 14 before). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
+    "reason": "Status 5 (Q-a1-6, part 2: 805290 -30% healing done). Part 1, the missing Intellect/spell power term, fixed by ADR 0322 (regression arms 17 and 20 against 14 before). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66.",
+    "dbc_clause": "Its auto attacks restore ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} health to you.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 8 (Q-a1-6 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500971,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500971,
@@ -968,7 +998,17 @@
       "500971 command_targets behaviour_fixed_count"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 8 (Q-a1-6 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500971,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500971,
@@ -978,17 +1018,38 @@
       "500971 script_hit 801514 command_damage"
     ],
     "kind": "claim",
-    "reason": "Status 2, mentor decision 2026-11-12: conformant to the cast spell's tooltip (Command: Ghouls 504021, 88 measured), live logs agree (G-1 + G-11 order); the Raise: Ghoul text (48) is the one to align. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
+    "reason": "Status 2, mentor decision 2026-11-12: conformant to the cast spell's tooltip (Command: Ghouls 504021, 88 measured), live logs agree (G-1 + G-11 order); the Raise: Ghoul text (48) is the one to align. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 8 (Q-a1-6 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500971,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500971,
-    "clause": "and healing you for ${$801514m3+$801514ppl3+$SP*0.22+$INT*.50} for each Ghoul.",
+    "clause": "and healing you for ${($801514m3+$801514ppl3+$SP*0.22+$INT*.50)*0.7} for each Ghoul.",
     "labels": [
       "500971 effect_value 801514e2 #3",
       "500971 script_hit 801514 command_heal"
     ],
     "kind": "claim",
-    "reason": "Status 5 (Q-a1-6: 805290 -30% healing done, 65 against 93). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66."
+    "reason": "Status 5 (Q-a1-6: 805290 -30% healing done, 65 against 93). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same text (heal 21 + 3.53% Int/SP, damage 30 + 15.68%), coabuildhub same; Command: Ghouls 504021 text SP*0.375+Int*.5; logs: 15231 Ghoul Frenzy heals (10-62), 7448 Command hits, 3254 Command heals, damage/heal ratio median 1.66.",
+    "dbc_clause": "and healing you for ${$801514m3+$801514ppl3+$SP*0.22+$INT*.50} for each Ghoul.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 8 (Q-a1-6 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500971,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 500981,
@@ -1916,7 +1977,17 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 14 (Q-c1-1 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 561138,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 561138,
@@ -1925,7 +1996,17 @@
       "561138 behaviour_metric_delta runic_power"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 14 (Q-c1-1 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 561138,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 561138,
@@ -1946,7 +2027,17 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 14 (Q-c1-1 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 561138,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 561138,
@@ -1957,7 +2048,17 @@
       "561138 behaviour_metric_delta crit_control"
     ],
     "kind": "claim",
-    "reason": "Not status 1: one plain (non-critical, non-blocked) Ghoul swing reproduced inside the army (probe 20261112-233646, aura 15.0-30.0 s, read 29.3 s); cause not found (finding C1). Parked (25 agent-min): the aura is on the caster 300 ms after the cast ends (army_applied) and until 17.7-18.3 s after the cast starts, and the Ghoul was raised after it, so the swing fell inside the aura; the harness keeps no time per minion swing, so its roll time is not known. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id. Expected-value sweep B1/B2 (2026-11-13): Expected-value sweep B1/B2 (2026-11-13): crit_control's after_at_least 2 (plain hits of the control arm, from swing time and the base crit) is a scheduling floor sized from the code's timing, not an expectation; the tooltip states no count for the control arm."
+    "reason": "Not status 1: one plain (non-critical, non-blocked) Ghoul swing reproduced inside the army (probe 20261112-233646, aura 15.0-30.0 s, read 29.3 s); cause not found (finding C1). Parked (25 agent-min): the aura is on the caster 300 ms after the cast ends (army_applied) and until 17.7-18.3 s after the cast starts, and the Ghoul was raised after it, so the swing fell inside the aura; the harness keeps no time per minion swing, so its roll time is not known. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul/coabuildhub same text and numbers; logs: nothing found by id. Expected-value sweep B1/B2 (2026-11-13): Expected-value sweep B1/B2 (2026-11-13): crit_control's after_at_least 2 (plain hits of the control arm, from swing time and the base crit) is a scheduling floor sized from the code's timing, not an expectation; the tooltip states no count for the control arm.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 14 (Q-c1-1 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 561138,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 561164,
@@ -2314,7 +2415,17 @@
       "707402 cast_gate allowed"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 12 (Q-a3-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 707402,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707402,
@@ -2324,7 +2435,17 @@
       "707402 behaviour_hit_ratio spell_power"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 1 tolerated (mentor, G-19 band): 707592 reads 855 on every hit (sigma 0, 99% interval 855 to 855) against the 815 the tooltip gives at the measured stats, +4.91%, inside 5% in both runs. Cause: the stock SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE passes 707402's CalcValue (812 + 1.92 x 2 = 815) as BasePoints0 (SpellEffects.cpp:1847-1852), and CalcValue of 707592 adds its own EffectRealPointsPerLevel 2.0 x (38 - 18) = 40 on top of the passed value (SpellInfo.cpp:482-497). Stock path, not CoA code; +40 at every level 58-64 of this rank. No fix."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 1 tolerated (mentor, G-19 band): 707592 reads 855 on every hit (sigma 0, 99% interval 855 to 855) against the 815 the tooltip gives at the measured stats, +4.91%, inside 5% in both runs. Cause: the stock SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE passes 707402's CalcValue (812 + 1.92 x 2 = 815) as BasePoints0 (SpellEffects.cpp:1847-1852), and CalcValue of 707592 adds its own EffectRealPointsPerLevel 2.0 x (38 - 18) = 40 on top of the passed value (SpellInfo.cpp:482-497). Stock path, not CoA code; +40 at every level 58-64 of this rank. No fix.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 12 (Q-a3-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 707402,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707402,
@@ -2333,18 +2454,39 @@
       "707402 behaviour_hit_ratio glacier_lord"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 12 (Q-a3-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 707402,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707402,
-    "clause": "@ext:Damage scales with your critical strike rating. :ext@",
+    "clause": "@ext:Damage increased by your Frost spell critical strike chance. :ext@",
     "labels": [
       "707402 behaviour_hit_ratio crit_factor_5",
       "707402 behaviour_hit_ratio crit_factor_25",
       "707402 behaviour_hit_ratio glacier_lord_factor"
     ],
     "kind": "claim",
-    "reason": "Owner ruling Q-a3-1 with the 09:0x go (G-37 c3): damage x (1 + the caster's Frost spell crit chance), the sheet value floored at 0, no upper cap; the hit still crits, guaranteed under Glacier Lord. Fixed by ADR 0533. Reads (working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair.): control arms at a floored sheet (984954 at -1000), treatment sheet 3.2817 + 2 = 5.2817% gives non-critical hits x1.0526 (stated 1.0528, G-19 band), 3.2817 + 22 = 25.2817% gives x1.2526 (1.2528); under Glacier Lord every hit crits and the crits are x1.2527 at 25.28% (not x2: the guaranteed-crit state does not enter the factor). Previous record: G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 5: owner question Q-a3-1 (does the note mean ordinary crit chance, or crit chance above the Glacier Lord guarantee turned into crit damage, which Unit::SpellCriticalDamageBonus, Unit.cpp:10570-10612, does not do)."
+    "reason": "Owner ruling Q-a3-1 with the 09:0x go (G-37 c3): damage x (1 + the caster's Frost spell crit chance), the sheet value floored at 0, no upper cap; the hit still crits, guaranteed under Glacier Lord. Fixed by ADR 0533. Reads (working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair.): control arms at a floored sheet (984954 at -1000), treatment sheet 3.2817 + 2 = 5.2817% gives non-critical hits x1.0526 (stated 1.0528, G-19 band), 3.2817 + 22 = 25.2817% gives x1.2526 (1.2528); under Glacier Lord every hit crits and the crits are x1.2527 at 25.28% (not x2: the guaranteed-crit state does not enter the factor). Previous record: G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 5: owner question Q-a3-1 (does the note mean ordinary crit chance, or crit chance above the Glacier Lord guarantee turned into crit damage, which Unit::SpellCriticalDamageBonus, Unit.cpp:10570-10612, does not do).",
+    "dbc_clause": "@ext:Damage scales with your critical strike rating. :ext@",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 12 (Q-a3-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 707402,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 704528,
@@ -2787,12 +2929,12 @@
   },
   {
     "spell": 705750,
-    "clause": "Dealing Magic damage now has a $706473h% chance to increase your haste by $705751s1% for $705751d.",
+    "clause": "Dealing Magic damage now has a $h% chance to increase your haste by $705751s1% for $705751d.",
     "kind": "claim",
     "reason": "Claim 'Dealing Magic damage now has a $706473h% chance': status 5, owner question Q-mb-3 (M side b progress.md; live 1426 Frost Runes in 41863 own magic hits, 3.4%; recommendation: keep the server's 5% and align the text). Alert reproduced (G-3; M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2) and pilot11, 4 runs): Glacial Impact 707592 (Frost) hits roll 705751 at 5.43% / 5.09% (690 and 646 in 12701; pilot11 5.19% / 5.02%), Wilson 99% about [4.5%, 5.7%], against the tooltip's $706473h = 15% (Death Runes 706473 ProcChance 15). Cause (read): Chance(player, 705750) uses 705750's own ProcChance 5 (AscensionNecromancerEvents.cpp:156); the tooltip token names another spell. Claim 'to increase your haste by $705751s1% for $705751d.': not final, route pending. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable).",
     "claims": [
       {
-        "claim": "Dealing Magic damage now has a $706473h% chance",
+        "claim": "Dealing Magic damage now has a $h% chance",
         "labels": [
           "705750 proc_rate"
         ]
@@ -2805,7 +2947,18 @@
           "705750 spell_duration 705751 #2"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "Dealing Magic damage now has a $706473h% chance to increase your haste by $705751s1% for $705751d.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 7 (Q-mb-3 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 705750,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 705752,
@@ -2979,11 +3132,21 @@
     "reason": "Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; six March of the Dead 707010 hits from walkers 523032 on the dummy after one cast, none without it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable).",
     "labels": [
       "707007 behaviour_metric_delta explode"
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 9 (Q-b3b-6 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 707007,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707007,
-    "clause": "When they reach an enemy they explode, dealing ${$707010m1*$<scalingbp>+$SP*.75} Plague damage to nearby enemies",
+    "clause": "When they reach an enemy they explode, dealing ${$707010m1*$<scalingbp>+$SP*.75} Plague damage (Nature or Shadow spell power) to nearby enemies",
     "claims": [
       {
         "claim": "When they reach an enemy they explode, dealing ${$707010m1*$<scalingbp>+$SP*.75} Plague damage",
@@ -3006,7 +3169,18 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim damage: status 2, known engine rounding G-27 (the final route pair 20261113-032244 / -032351, build f90703a57ebc): the walkers explode at the dummy (at least one 707010 hit, judged as presence: the tooltip states no walker count, mentor method rule 2026-11-13), 691 per hit at spell power 0 against the tooltip 691.2; control without the cast 0 hits. Claim $SP*.75: status 5, owner question Q-b3b-6 (Frost spell power scales the hit, 790 with +132 Frost). Claim nearby enemies: Status 1 (same pair; the three dummies within 2.5 yd of the primary are hit by 707010 from the walkers, the far dummy 10 yd beyond never). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim damage: status 2, known engine rounding G-27 (the final route pair 20261113-032244 / -032351, build f90703a57ebc): the walkers explode at the dummy (at least one 707010 hit, judged as presence: the tooltip states no walker count, mentor method rule 2026-11-13), 691 per hit at spell power 0 against the tooltip 691.2; control without the cast 0 hits. Claim $SP*.75: status 5, owner question Q-b3b-6 (Frost spell power scales the hit, 790 with +132 Frost). Claim nearby enemies: Status 1 (same pair; the three dummies within 2.5 yd of the primary are hit by 707010 from the walkers, the far dummy 10 yd beyond never). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable).",
+    "dbc_clause": "When they reach an enemy they explode, dealing ${$707010m1*$<scalingbp>+$SP*.75} Plague damage to nearby enemies",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 9 (Q-b3b-6 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 707007,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707007,
@@ -3026,7 +3200,17 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim slow: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; the dummy runs at 0.3 of its 1.14286 after the explosions). Claim duration: data, parked (route agent): the six walkers explode at unknown times, so held at 1500 ms and gone by 8000 ms only bound it; a read of the last application (timeline aura events need an exclusive encounter recording) or a single walker is needed; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim slow: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; the dummy runs at 0.3 of its 1.14286 after the explosions). Claim duration: data, parked (route agent): the six walkers explode at unknown times, so held at 1500 ms and gone by 8000 ms only bound it; a read of the last application (timeline aura events need an exclusive encounter recording) or a single walker is needed; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 9 (Q-b3b-6 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 707007,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707113,
@@ -3059,7 +3243,7 @@
   },
   {
     "spell": 707283,
-    "clause": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
+    "clause": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them, increased with your level.",
     "claims": [
       {
         "claim": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target",
@@ -3076,7 +3260,18 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim 1 status 1 (Anointed 280912 forced-crit fixture). Claim damage: status 5, Q-b1-1 (approved; logs do not pick a formula). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 42 Chomp 707284 hits by a Decaying Colossus, 833 (1666 crit), 2026-08-31; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Claim 1 status 1 (Anointed 280912 forced-crit fixture). Claim damage: status 5, Q-b1-1 (approved; logs do not pick a formula). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 42 Chomp 707284 hits by a Decaying Colossus, 833 (1666 crit), 2026-08-31; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "dbc_clause": "Critical strikes dealt by your Abominations and Decaying Collosi now Chomp your target, dealing ${$707284m1+($SP*2.25)*0.5} damage to them.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 2 (Q-b1-1 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 707283,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 707445,
@@ -3650,11 +3845,21 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim create: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; with its reagent 37201 given (ADR 0429) one cast puts 5 Frozen Reliquaries in the bags, none without the cast; the 3000 ms cast read at 4000 ms). Claim restore: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; one Create Frozen Reliquary spends 823 mana (spent control, regeneration off), and using one Reliquary 555555 (ADR 0431) then returns 30% of that missing mana: the mana ends 576 to 577 below full; the control use with no Reliquary created leaves full mana). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim create: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; with its reagent 37201 given (ADR 0429) one cast puts 5 Frozen Reliquaries in the bags, none without the cast; the 3000 ms cast read at 4000 ms). Claim restore: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; one Create Frozen Reliquary spends 823 mana (spent control, regeneration off), and using one Reliquary 555555 (ADR 0431) then returns 30% of that missing mana: the mana ends 576 to 577 below full; the control use with no Reliquary created leaves full mana). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 10 (Q-mb-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 803777,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 803777,
-    "clause": "Allies may only use a Frozen Reliquary once per minute.",
+    "clause": "Allies may only use a Frozen Reliquary once per minute, and once per combat: the minute starts when combat ends.",
     "labels": [
       "803777 item_cooldown_gate 555555 first cast_failure",
       "803777 item_cooldown_gate 555555 first spell_go_count",
@@ -3664,7 +3869,18 @@
       "803777 item_cooldown_gate 555555 ready spell_go_count"
     ],
     "kind": "claim",
-    "reason": "Status 1 (M side b counted pair 20261113-075721 / -080045, server a1bac36d90c3, worldserver 80400a75efe2, 2 runs, 0 flips; control: the first use with no earlier one). A grouped ally holding Frozen Reliquaries 555555 (named precondition fixture) uses one through the real item-use handler: accepted and completed (spell_go_count 1), refused 59500 ms later with 67 SPELL_FAILED_NOT_READY (still 1), accepted and completed 60500 ms after the first use (2): the cooldown lies in (59500, 60500] ms, once per minute (item_template spellcategory 1153, 60000 ms; ADR 0492). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803773 0 lines, 'Frozen Reliquary' 0 by name; 803777 8 lines ('Create Frozen Reliquary', 9 by name); the logs show no ally item use, so they do not decide the cooldown; bindmysoul nothing found; sidekick coaKits names it; MCP not queried (unavailable). Cycle 1 F2: with category 5004 (ADR 0534) the out-of-combat once-per-minute arms read the same in working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair. In combat the pool holds the cooldown until combat ends (once per combat; pool_combat, row 'Shares a cooldown with similar effects.')."
+    "reason": "Status 1 (M side b counted pair 20261113-075721 / -080045, server a1bac36d90c3, worldserver 80400a75efe2, 2 runs, 0 flips; control: the first use with no earlier one). A grouped ally holding Frozen Reliquaries 555555 (named precondition fixture) uses one through the real item-use handler: accepted and completed (spell_go_count 1), refused 59500 ms later with 67 SPELL_FAILED_NOT_READY (still 1), accepted and completed 60500 ms after the first use (2): the cooldown lies in (59500, 60500] ms, once per minute (item_template spellcategory 1153, 60000 ms; ADR 0492). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803773 0 lines, 'Frozen Reliquary' 0 by name; 803777 8 lines ('Create Frozen Reliquary', 9 by name); the logs show no ally item use, so they do not decide the cooldown; bindmysoul nothing found; sidekick coaKits names it; MCP not queried (unavailable). Cycle 1 F2: with category 5004 (ADR 0534) the out-of-combat once-per-minute arms read the same in working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair. In combat the pool holds the cooldown until combat ends (once per combat; pool_combat, row 'Shares a cooldown with similar effects.').",
+    "dbc_clause": "Allies may only use a Frozen Reliquary once per minute.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 10 (Q-mb-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 803777,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 803797,
@@ -4183,17 +4399,38 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim 1 status 1 (route agent): 5% stated, rates 0.0535/0.0459 (253 and 217 procs of 2 Rotlings 50133 each, 506 and 434 summons, in 4730 Blight 500237 hits), inside the band of ADR 0346 in both runs, no summon in 90 baseline casts; counted pair route-seg3 20261113-020945/-021348, build 2bd110cfadb2 (server 7a832e2ac8d8, tree dirty only in the ledger), ADR 0351: summons counted by owned_creature_summon_count; the rate divides the summons by $806087s1 = 2 (BasePoints 1 + 1) per proc. Claim \"run towards the enemy\": route pending, a movement read of the Rotling is not built. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Claim 1 status 1 (route agent): 5% stated, rates 0.0535/0.0459 (253 and 217 procs of 2 Rotlings 50133 each, 506 and 434 summons, in 4730 Blight 500237 hits), inside the band of ADR 0346 in both runs, no summon in 90 baseline casts; counted pair route-seg3 20261113-020945/-021348, build 2bd110cfadb2 (server 7a832e2ac8d8, tree dirty only in the ledger), ADR 0351: summons counted by owned_creature_summon_count; the rate divides the summons by $806087s1 = 2 (BasePoints 1 + 1) per proc. Claim \"run towards the enemy\": route pending, a movement read of the Rotling is not built. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 3 (Q-b1-1 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 806086,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 806086,
-    "clause": "and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+    "clause": "and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
     "labels": [
       "806086 aura_amplitude_ms #1",
       "806086 effect_value 500585e0 #2"
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: the summon is now proven (806086 proc_rate, route-seg3). Fuse: the Rotling AI schedules the explosion at 807640 Effects[1].Amplitude = 5000 ms (AscensionNecromancerSummons.cpp:548-549), the tooltip's $807640t2 = 5 sec: data and code conformant; a timed read needs the spawn and the 500585 cast of a creature entry on one event-time stream, which the event-time metrics (scenario units only) cannot select: tool gap, est. 45 min. Damage: diagnostic 20261113-021726 (build 2bd110cfadb2): 98 Rotlings summoned, Rotling damage 71527 over 392 events, of which melee 43479 over 294 swings, leaving about 28048 for 98 explosions (about 286 each, partial resists included; the melee hit count is not split from misses, so not exact). Tooltip ${$500585m1+$500585ppl1+$SP*0.335} reads 200 + 2 = 202 at SP 0; the engine adds the per-level term, 500585 BasePoints 199 + 1 + int32(level x 2.0) (RealPointsPerLevel 2.0), so the hit is far above 202: an uncertain expectation of the same shape as Q-b1-1 (Chomp, per-level scaling the tooltip omits); recommended to fold into Q-b1-1 rather than a fix). A Rotling hit after its fuse; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Status: route pending (route agent 2026-11-13, parked: the summon is now proven (806086 proc_rate, route-seg3). Fuse: the Rotling AI schedules the explosion at 807640 Effects[1].Amplitude = 5000 ms (AscensionNecromancerSummons.cpp:548-549), the tooltip's $807640t2 = 5 sec: data and code conformant; a timed read needs the spawn and the 500585 cast of a creature entry on one event-time stream, which the event-time metrics (scenario units only) cannot select: tool gap, est. 45 min. Damage: diagnostic 20261113-021726 (build 2bd110cfadb2): 98 Rotlings summoned, Rotling damage 71527 over 392 events, of which melee 43479 over 294 swings, leaving about 28048 for 98 explosions (about 286 each, partial resists included; the melee hit count is not split from misses, so not exact). Tooltip ${$500585m1+$500585ppl1+$SP*0.335} reads 200 + 2 = 202 at SP 0; the engine adds the per-level term, 500585 BasePoints 199 + 1 + int32(level x 2.0) (RealPointsPerLevel 2.0), so the hit is far above 202: an uncertain expectation of the same shape as Q-b1-1 (Chomp, per-level scaling the tooltip omits); recommended to fold into Q-b1-1 rather than a fix). A Rotling hit after its fuse; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found (no Rotling); ~/CoaServer/reference: bindmysoul \"2 to 3 Rotlings\", sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
+    "dbc_clause": "and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 3 (Q-b1-1 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 806086,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 806149,
@@ -4444,7 +4681,7 @@
   },
   {
     "spell": 500459,
-    "clause": "The target becomes blighted, causing nearby enemies to suffer ${($d*1000/$t1)*($m1+0+$SP*0.169175)} Shadow damage over $d.",
+    "clause": "The target becomes blighted, causing nearby enemies to suffer ${($d*1000/$t1)*($m1+0+$SP*0.169175)} Shadow damage over $d,",
     "claims": [
       {
         "claim": "The target becomes blighted, causing nearby enemies to suffer",
@@ -4460,7 +4697,7 @@
         ]
       },
       {
-        "claim": "over $d.",
+        "claim": "over $d,",
         "labels": [
           "500459 behaviour_metric_delta ticks",
           "500459 behaviour_metric_delta expunge_held",
@@ -4469,7 +4706,18 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; claim \"nearby enemies\": every dummy within 5 yd of the target struck, the far one never). Claims damage and \"over $d\": status 5, owner question Q-b3b-3 (mentor, 2026-11-13: judged against the stated total): 756 (6 hits: 126 at the cast from Effect[2], then 5 ticks) against the stated 630 (5 hits), 822 against 688.4 with +69 Shadow; the initial_hit entry reads the cast hit alone (126). Observation: live does the same, 6 hits of 500237 per full-duration application in 27 of 42 (log 2026-08-16-18.59.34; read as the SPELL_DAMAGE 500237 events of one caster on one target from 0.6 s before SPELL_AURA_APPLIED 500459 to 0.6 s after its SPELL_AURA_REMOVED, applications of at least 19.5 s; the other 15 show 7 to 18 hits, overlapping Blights). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; claim \"nearby enemies\": every dummy within 5 yd of the target struck, the far one never). Claims damage and \"over $d\": status 5, owner question Q-b3b-3 (mentor, 2026-11-13: judged against the stated total): 756 (6 hits: 126 at the cast from Effect[2], then 5 ticks) against the stated 630 (5 hits), 822 against 688.4 with +69 Shadow; the initial_hit entry reads the cast hit alone (126). Observation: live does the same, 6 hits of 500237 per full-duration application in 27 of 42 (log 2026-08-16-18.59.34; read as the SPELL_DAMAGE 500237 events of one caster on one target from 0.6 s before SPELL_AURA_APPLIED 500459 to 0.6 s after its SPELL_AURA_REMOVED, applications of at least 19.5 s; the other 15 show 7 to 18 hits, overlapping Blights). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable).",
+    "dbc_clause": "The target becomes blighted, causing nearby enemies to suffer ${($d*1000/$t1)*($m1+0+$SP*0.169175)} Shadow damage over $d.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 4, 5 (Q-b3b-2 (a), Q-b3b-3 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500459,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 500459,
@@ -4479,16 +4727,37 @@
       "500459 behaviour_metric_delta expunge"
     ],
     "kind": "claim",
-    "reason": "Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; no Expunge Blight 500267 21000 ms after the cast step (2000 ms cast), one by 23500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final route pair 20261113-032244 / -032351, build f90703a57ebc; no Expunge Blight 500267 21000 ms after the cast step (2000 ms cast), one by 23500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 4, 5 (Q-b3b-2 (a), Q-b3b-3 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500459,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 500459,
-    "clause": "the blight expunges from the target dealing $500217s2 Nature damage.",
+    "clause": "the blight expunges from the target dealing $500459s2 Nature damage.",
     "labels": [
       "500459 behaviour_metric_delta expunge_damage"
     ],
     "kind": "claim",
-    "reason": "Status 5, owner question Q-b3b-2 (progress.md): the hit is 670, this rank's own Effect[1], against the tooltip token $500217s2 of rank 1 (128.1). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id), live Expunge Blight 500267 hits 104 to 3759, 1308 non-critical on 2026-08-15; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 5, owner question Q-b3b-2 (progress.md): the hit is 670, this rank's own Effect[1], against the tooltip token $500217s2 of rank 1 (128.1). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id), live Expunge Blight 500267 hits 104 to 3759, 1308 non-critical on 2026-08-15; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable).",
+    "dbc_clause": "the blight expunges from the target dealing $500217s2 Nature damage.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 4, 5 (Q-b3b-2 (a), Q-b3b-3 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500459,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
   },
   {
     "spell": 500341,
@@ -5910,11 +6179,21 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); 803771 entered the ledger from the sidekick kit listing; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Restore part: fixed by ADR 0406 (FN-a3-1, mentor-approved), regression 5000 -> 6500 and 2000 -> 4400."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); 803771 entered the ledger from the sidekick kit listing; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Restore part: fixed by ADR 0406 (FN-a3-1, mentor-approved), regression 5000 -> 6500 and 2000 -> 4400.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 10 (Q-mb-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 803771,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 803771,
-    "clause": "Allies may only use a Bone Reliquary once per minute.",
+    "clause": "Allies may only use a Bone Reliquary once per minute, and once per combat: the minute starts when combat ends.",
     "labels": [
       "803771 item_cooldown_gate 11521 first cast_failure",
       "803771 item_cooldown_gate 11521 first spell_go_count",
@@ -5924,7 +6203,18 @@
       "803771 item_cooldown_gate 11521 ready spell_go_count"
     ],
     "kind": "claim",
-    "reason": "Status 1 (M side b counted pair 20261113-075721 / -080045, server a1bac36d90c3, worldserver 80400a75efe2, 2 runs, 0 flips; control: the first use with no earlier one). A grouped ally holding Bone Reliquaries 11521 (named precondition fixture) uses one through the real item-use handler: accepted and completed (spell_go_count 1), refused 59500 ms later with 67 SPELL_FAILED_NOT_READY (still 1), accepted and completed 60500 ms after the first use (2): once per minute (item_template spellcategory 1153, 60000 ms; ADR 0492). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803771 15 lines, 803767 18 lines ('Bone Reliquary' 18 by name: self heals of the Necromancer, no ally use), so the logs do not decide the cooldown; sidekick matches the text; MCP not queried (unavailable). Cycle 1 F2: with category 5004 (ADR 0534) the out-of-combat once-per-minute arms read the same in working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair. In combat the pool holds the cooldown until combat ends (once per combat; pool_combat, row 'Shares a cooldown with similar effects.')."
+    "reason": "Status 1 (M side b counted pair 20261113-075721 / -080045, server a1bac36d90c3, worldserver 80400a75efe2, 2 runs, 0 flips; control: the first use with no earlier one). A grouped ally holding Bone Reliquaries 11521 (named precondition fixture) uses one through the real item-use handler: accepted and completed (spell_go_count 1), refused 59500 ms later with 67 SPELL_FAILED_NOT_READY (still 1), accepted and completed 60500 ms after the first use (2): once per minute (item_template spellcategory 1153, 60000 ms; ADR 0492). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803771 15 lines, 803767 18 lines ('Bone Reliquary' 18 by name: self heals of the Necromancer, no ally use), so the logs do not decide the cooldown; sidekick matches the text; MCP not queried (unavailable). Cycle 1 F2: with category 5004 (ADR 0534) the out-of-combat once-per-minute arms read the same in working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair. In combat the pool holds the cooldown until combat ends (once per combat; pool_combat, row 'Shares a cooldown with similar effects.').",
+    "dbc_clause": "Allies may only use a Bone Reliquary once per minute.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 10 (Q-mb-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 803771,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 803771,
@@ -5946,7 +6236,17 @@
       "803771 item_cooldown_gate 11521 pool_combat after_combat_ready cast_failure"
     ],
     "kind": "claim",
-    "reason": "Owner ruling Q-mb-1 with the potion rule (09:3x go, SQL authorized; G-37 c3): 'similar effects' are the potion-like consumables; both reliquaries join the shared potion pool, category 5004: one pooled use per combat, then the item's 60 s after the combat ends. Fixed by ADR 0534 (rev_20261113_30_necromancer_reliquaries_potion_cooldown.sql). Reads (working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair.): a Bone Reliquary use refuses (67) a Frozen Reliquary, a Healing Potion 929 and a Mana Potion 3827; a Healing Potion refuses a Bone Reliquary, a Mana Potion a Frozen Reliquary, a Frozen Reliquary a Bone Reliquary; each first use accepted (control). In combat (pool_combat): a Bone Reliquary used in combat, a Frozen Reliquary refused 60500 ms later still in combat, refused right after the combat end and 58.7-58.9 s after it, accepted about 61.3 s after it: the cooldown starts when combat ends. Text item for the owner's go: both reliquaries keep 'Shares a cooldown with similar effects.' (the Frozen Reliquary gains it) and state the once-per-combat behaviour. Previous record: Not final: alert reproduced (lead, G-3), cause established by a read; fix note candidate sent to the controller, nothing built. M side b pilot pair pilot5 and counted pairs 20261113-064724 / -064835, -071222 / -071427, -073520 / -073802 and -075721 / -080045 (10 runs, identical): right after the ally's second accepted Bone Reliquary 11521 use, its Frozen Reliquary 555555 (spell 803773) is accepted (cast_failure 0, expected 67 refused). Expectation uncertain: 'similar effects' may mean other Bone Reliquaries only (the same item, refused within the minute, row 396) or the Frozen Reliquary too (both items carry spellcategory 1153 with 60000 ms, and 803767/803773 share Spell Category 520). Code read: Player::AddSpellAndCategoryCooldowns (Player.cpp:11751-11885) takes the item's category 1153 and propagates it to the other spells of that category in sSpellsByCategoryStore within the same SpellFamilyName; Cause (read, M side b part 2): ObjectMgr.cpp:4045-4056 registers both item spells under item category 1153 (sSpellsByCategoryStore, item flag true), and Player.cpp:11878-11883 skips a category spell of another SpellFamilyName unless the category is the shared potion pool: 803767 has SpellFamilyName 27, 803773 SpellFamilyName 29 (server DBC), so a Bone Reliquary use never puts 803773 on cooldown (and the reverse). Both spells also carry Spell Category 520 (803767 CategoryRecoveryTime 60000, 803773 120000, set to 60000 by AscensionNecromancerContracts.cpp:259), which the item path replaces with the item's category 1153 (Player.cpp:11767-11776). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803767 18 lines, 803773 0, no ally item use in the logs: they do not decide; MCP not queried (unavailable)."
+    "reason": "Owner ruling Q-mb-1 with the potion rule (09:3x go, SQL authorized; G-37 c3): 'similar effects' are the potion-like consumables; both reliquaries join the shared potion pool, category 5004: one pooled use per combat, then the item's 60 s after the combat ends. Fixed by ADR 0534 (rev_20261113_30_necromancer_reliquaries_potion_cooldown.sql). Reads (working pair prove-4 (server 037624a4c8b7, worldserver 88f97119, 2 runs, 0 flips); the count is the controller's merged pair.): a Bone Reliquary use refuses (67) a Frozen Reliquary, a Healing Potion 929 and a Mana Potion 3827; a Healing Potion refuses a Bone Reliquary, a Mana Potion a Frozen Reliquary, a Frozen Reliquary a Bone Reliquary; each first use accepted (control). In combat (pool_combat): a Bone Reliquary used in combat, a Frozen Reliquary refused 60500 ms later still in combat, refused right after the combat end and 58.7-58.9 s after it, accepted about 61.3 s after it: the cooldown starts when combat ends. Text item for the owner's go: both reliquaries keep 'Shares a cooldown with similar effects.' (the Frozen Reliquary gains it) and state the once-per-combat behaviour. Previous record: Not final: alert reproduced (lead, G-3), cause established by a read; fix note candidate sent to the controller, nothing built. M side b pilot pair pilot5 and counted pairs 20261113-064724 / -064835, -071222 / -071427, -073520 / -073802 and -075721 / -080045 (10 runs, identical): right after the ally's second accepted Bone Reliquary 11521 use, its Frozen Reliquary 555555 (spell 803773) is accepted (cast_failure 0, expected 67 refused). Expectation uncertain: 'similar effects' may mean other Bone Reliquaries only (the same item, refused within the minute, row 396) or the Frozen Reliquary too (both items carry spellcategory 1153 with 60000 ms, and 803767/803773 share Spell Category 520). Code read: Player::AddSpellAndCategoryCooldowns (Player.cpp:11751-11885) takes the item's category 1153 and propagates it to the other spells of that category in sSpellsByCategoryStore within the same SpellFamilyName; Cause (read, M side b part 2): ObjectMgr.cpp:4045-4056 registers both item spells under item category 1153 (sSpellsByCategoryStore, item flag true), and Player.cpp:11878-11883 skips a category spell of another SpellFamilyName unless the category is the shared potion pool: 803767 has SpellFamilyName 27, 803773 SpellFamilyName 29 (server DBC), so a Bone Reliquary use never puts 803773 on cooldown (and the reverse). Both spells also carry Spell Category 520 (803767 CategoryRecoveryTime 60000, 803773 120000, set to 60000 by AscensionNecromancerContracts.cpp:259), which the item path replaces with the item's category 1153 (Player.cpp:11767-11776). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc, item_template and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 803767 18 lines, 803773 0, no ally item use in the logs: they do not decide; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 10 (Q-mb-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 803771,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 804360,
@@ -6205,12 +6505,13 @@
   },
   {
     "spell": 572023,
-    "clause": "Each tick generates $/10;800344s2 Runic Power.",
+    "clause": "Each tick generates 3 to 8 Runic Power.",
     "labels": [
       "572023 effect_value #4"
     ],
     "kind": "claim",
-    "reason": "Cycle 1 F2: not final, expectation uncertain (G-1): 800344 Effect[1] ENERGIZE BasePoints 29 DieSides 51 rolls 30 to 80 internal Runic Power (3 to 8 shown) per tick while the tooltip $/10;800344s2 reads 3; live logs agree with the roll: 13996 800344 energize lines, amounts 3: 2677, 4: 2736, 5: 2768, 6: 2758, 7: 2686, 8: 310, 9: 53, 10: 8 (rg by id over ~/Projects/coa-log-history/data/logs; 800344 is also Crypt Swarm's energize). Owner question candidate (keep the roll and align the text, or a flat 3), not asked. Previous record: Not final, route pending (M side b, 2026-11-13): the stable frozen fixture now exists (ADR 0491; the proc lands at 25.16% on an Ice-Locked dummy, row 148). Open: a per-tick read of one chain: each 801728 tick is own Frost damage and re-rolls Soulfreeze on the frozen dummy (25%), and 801728 Effect[1] aura 271 (+5% Frost damage taken, MiscValue 16) raises later ticks, so totals over many procs do not give the per-tick amount, period or count; route: a script_hit of 801728 with the dummy fixture and only the first tick of each chain, or a fixture ending the frozen state after the first proc. Observation: 800344 Effect[1] ENERGIZE BasePoints 29 DieSides 51 rolls 30 to 80 per tick while the token $/10;800344s2 shows 3 (unmeasured lead). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 572023 0 lines by id (the talent), 'Soulfreeze' 13165 lines by name (801728 7013 hits, 800344 13996 lines); the logs carry no frozen state of the target, so they do not decide the chance; MCP not queried (unavailable)."
+    "reason": "Cycle 2 F2: the clause reads the streamed text of the pulled spell (801724, rev_20261113_32_necromancer_owner_text_items.sql, owner text item 13); the DBC words are in dbc_clause. Cycle 1 F2: not final, expectation uncertain (G-1): 800344 Effect[1] ENERGIZE BasePoints 29 DieSides 51 rolls 30 to 80 internal Runic Power (3 to 8 shown) per tick while the tooltip $/10;800344s2 reads 3; live logs agree with the roll: 13996 800344 energize lines, amounts 3: 2677, 4: 2736, 5: 2768, 6: 2758, 7: 2686, 8: 310, 9: 53, 10: 8 (rg by id over ~/Projects/coa-log-history/data/logs; 800344 is also Crypt Swarm's energize). Owner question candidate (keep the roll and align the text, or a flat 3), not asked. Previous record: Not final, route pending (M side b, 2026-11-13): the stable frozen fixture now exists (ADR 0491; the proc lands at 25.16% on an Ice-Locked dummy, row 148). Open: a per-tick read of one chain: each 801728 tick is own Frost damage and re-rolls Soulfreeze on the frozen dummy (25%), and 801728 Effect[1] aura 271 (+5% Frost damage taken, MiscValue 16) raises later ticks, so totals over many procs do not give the per-tick amount, period or count; route: a script_hit of 801728 with the dummy fixture and only the first tick of each chain, or a fixture ending the frozen state after the first proc. Observation: 800344 Effect[1] ENERGIZE BasePoints 29 DieSides 51 rolls 30 to 80 per tick while the token $/10;800344s2 shows 3 (unmeasured lead). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 572023 0 lines by id (the talent), 'Soulfreeze' 13165 lines by name (801728 7013 hits, 800344 13996 lines); the logs carry no frozen state of the target, so they do not decide the chance; MCP not queried (unavailable).",
+    "dbc_clause": "Each tick generates $/10;800344s2 Runic Power."
   },
   {
     "spell": 705754,
@@ -6235,7 +6536,7 @@
   },
   {
     "spell": 707562,
-    "clause": "Increases the damage of your next Glacial Impact by $s1% for $d,",
+    "clause": "Increases the damage of your Glacial Impact by $s1% for $d,",
     "labels": [
       "707562 effect_value 712434e0 #0",
       "707562 spell_duration 712434 #1",
@@ -6245,7 +6546,8 @@
       "707562 behaviour_metric_delta consumed"
     ],
     "kind": "claim",
-    "reason": "Duration $d: status 1 (morning batch M side a final pair f5 20261113-070528 / -070734, build f427abd30c75): after one forced-crit Glacial Impact the stack is on the caster at 19500 ms and gone at 20500 ms (both sides bracketed). Magnitude and \"next\": status 5, owner questions Q-ma-2 and Q-ma-1 (morning batch M side a): one 712434 stack lifts Glacial Impact 707592 from 855 to 905 (+5.85% against $s1 3%; two +3% effects, Effect[0] SPELLMOD_DAMAGE and Effect[1] SPELLMOD_EFFECT1: int(int(812 x 1.03) + 43) x 1.03 = 905, a DBC hypothesis that reproduces the reading; live logs: 1 stack 1.0585 of the 0-stack median, 3 day-player groups), and a Glacial Impact does not consume the stack (still 1 after it; live: 0 removals after 1260 hits by a holder). Both disagree with the tooltip and agree with live; recommendation for both: keep the behaviour, align the text (G-1 makes it the owner's call). G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 712434 \"Frozen Bodies\" 12719 lines by id, 14290 by name (2087 applications, 6411 doses, doses up to 10, 87 at 10, none above; 0 removals within 0.3 s after any of the 1260 Glacial Impact 707592 hits by a holder); 707562 0 by id; ~/CoaServer/reference: bindmysoul \"When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies. ... by 3% for 20 seconds, stacking 10 times. Reaching 10 stacks causes your next Glacial Impact ... to critically strike for 50% increased damage.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Cycle 2 F2: the clause reads the streamed text of the pulled spell (712434, rev_20261113_32_necromancer_owner_text_items.sql, owner text item 6); the DBC words are in dbc_clause. Duration $d: status 1 (morning batch M side a final pair f5 20261113-070528 / -070734, build f427abd30c75): after one forced-crit Glacial Impact the stack is on the caster at 19500 ms and gone at 20500 ms (both sides bracketed). Magnitude and \"next\": status 5, owner questions Q-ma-2 and Q-ma-1 (morning batch M side a): one 712434 stack lifts Glacial Impact 707592 from 855 to 905 (+5.85% against $s1 3%; two +3% effects, Effect[0] SPELLMOD_DAMAGE and Effect[1] SPELLMOD_EFFECT1: int(int(812 x 1.03) + 43) x 1.03 = 905, a DBC hypothesis that reproduces the reading; live logs: 1 stack 1.0585 of the 0-stack median, 3 day-player groups), and a Glacial Impact does not consume the stack (still 1 after it; live: 0 removals after 1260 hits by a holder). Both disagree with the tooltip and agree with live; recommendation for both: keep the behaviour, align the text (G-1 makes it the owner's call). G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 712434 \"Frozen Bodies\" 12719 lines by id, 14290 by name (2087 applications, 6411 doses, doses up to 10, 87 at 10, none above; 0 removals within 0.3 s after any of the 1260 Glacial Impact 707592 hits by a holder); 707562 0 by id; ~/CoaServer/reference: bindmysoul \"When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies. ... by 3% for 20 seconds, stacking 10 times. Reaching 10 stacks causes your next Glacial Impact ... to critically strike for 50% increased damage.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable).",
+    "dbc_clause": "Increases the damage of your next Glacial Impact by $s1% for $d,"
   },
   {
     "spell": 707562,
@@ -6259,14 +6561,15 @@
   },
   {
     "spell": 707562,
-    "clause": "Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.",
+    "clause": "Reaching 10 stacks causes your Glacial Impact to critically strike for 50% increased damage.",
     "labels": [
       "707562 behaviour_metric_delta ten_casts_stacks",
       "707562 behaviour_metric_delta ten_stacks_crit",
       "707562 behaviour_metric_delta nine_stacks_no_crit"
     ],
     "kind": "claim",
-    "reason": "Not final, alert lead, parked (G-25, design 1 of 2 tried; morning batch M side a): ten real 712434 casts reach the 10-stack cap (ten_casts_stacks 1 -> 10), yet the next Glacial Impact 707592 does not crit with the spell crit fixture 984954 (-1000) on the caster (ten_stacks_crit 0 critical hits against 1, nine_stacks_no_crit 0 as expected; pairs p4 and p5, build 0c5a28ea71ab). OnSpellCritChance sets 100 for 707592 at the cap (AscensionNecromancerAbilities.cpp:125-132) and runs after SpellDoneCritChance (Spell.cpp:8653-8654), so the fixture should not mask it; cause not read. Design 2 (not tried): no crit fixture, crit rate at 10 stacks against 9 over trials kept inside the 20 s stack duration. The \"50% increased damage\" part is not judged (Contracts.cpp:498 multiplies the base by 1.5 at the cap; the tooltip does not say whether the crit multiplier comes on top)."
+    "reason": "Cycle 2 F2: the clause reads the streamed text of the pulled spell (712434, rev_20261113_32_necromancer_owner_text_items.sql, owner text item 6); the DBC words are in dbc_clause. Not final, alert lead, parked (G-25, design 1 of 2 tried; morning batch M side a): ten real 712434 casts reach the 10-stack cap (ten_casts_stacks 1 -> 10), yet the next Glacial Impact 707592 does not crit with the spell crit fixture 984954 (-1000) on the caster (ten_stacks_crit 0 critical hits against 1, nine_stacks_no_crit 0 as expected; pairs p4 and p5, build 0c5a28ea71ab). OnSpellCritChance sets 100 for 707592 at the cap (AscensionNecromancerAbilities.cpp:125-132) and runs after SpellDoneCritChance (Spell.cpp:8653-8654), so the fixture should not mask it; cause not read. Design 2 (not tried): no crit fixture, crit rate at 10 stacks against 9 over trials kept inside the 20 s stack duration. The \"50% increased damage\" part is not judged (Contracts.cpp:498 multiplies the base by 1.5 at the cap; the tooltip does not say whether the crit multiplier comes on top).",
+    "dbc_clause": "Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage."
   },
   {
     "spell": 805038,
@@ -6287,5 +6590,59 @@
     ],
     "kind": "claim",
     "reason": "Claim \"return to it\" / \"Teleport back\": Status 1 (final pair f5 20261113-070528 / -070734, build f427abd30c75; ADR 0499 strike.in_before): both phases place the circle with a real Summoning Ritual 805038 and move the caster 15 yd; only the after phase casts Ritual Return 807098: 13.5 yd before (15 within 1.6: the circle stands about 1.5 yd off the cast point, cause not traced), 0 after. Claim \"remove all movement slowing effects\": status 1 (a striker's Slow 31589 stays on the caster when Ritual Return is refused without a circle, gone after it goes through). Claim \"Teleport back\": measured (the caster on the circle at 0 yd after a 15 yd move, ADR 0441) but the contrast is a setup condition, counted as data; route pending as clause 259. Ritual Return's caster aura 807317 is a generator fixture (values.py:190-193). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
+  },
+  {
+    "spell": 500459,
+    "clause": "plus ${$m1+0+$SP*0.169175} Shadow damage when cast.",
+    "labels": [],
+    "kind": "claim",
+    "reason": "Cycle 2 F2: new clause of the streamed text (owner text item 5, Q-b3b-3 (a): keep 6 hits, state the cast hit). Not judged yet: the Blight entries count 6 hits in all (Q-b3b-3), no entry reads the cast hit apart. G-11 as in the spell's other rows; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 4, 5 (Q-b3b-2 (a), Q-b3b-3 (a)), owner go 2026-11-13 (text-items.md)",
+      "spell": 500459,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
+  },
+  {
+    "spell": 561138,
+    "clause": "Blocked, missed, dodged and parried hits do not critically strike.",
+    "labels": [],
+    "kind": "claim",
+    "reason": "Cycle 2 F2: new clause of the streamed text (owner text item 14, Q-c1-1 (b)). Not judged here: no entry of this branch reads the avoided hits under Army of the North. G-11 as in the spell's other rows; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 14 (Q-c1-1 (b)), owner go 2026-11-13 (text-items.md)",
+      "spell": 561138,
+      "dbc_differs": "Description and ToolTip differ from Spell.dbc"
+    }
+  },
+  {
+    "spell": 803777,
+    "clause": "Shares a cooldown with similar effects.",
+    "labels": [
+      "803777 item_cooldown_gate 3827 pool_mana_potion_first shared cast_failure",
+      "803777 item_cooldown_gate 555555 pool_bone shared cast_failure"
+    ],
+    "kind": "claim",
+    "reason": "Cycle 2 F2: new clause of the streamed text (owner text item 10, Q-mb-1, ADR 0534): a Mana Potion refuses a Frozen Reliquary and a Frozen Reliquary refuses a Bone Reliquary (67), first uses accepted (controls); working pair prove-5 / final-2 of cycle 1. G-11 as in the spell's other rows; MCP not queried (unavailable).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261113_32_necromancer_owner_text_items.sql",
+      "commit": "1db8b9c590",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text items 10 (Q-mb-1), owner go 2026-11-13 (text-items.md)",
+      "spell": 803777,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   }
 ]

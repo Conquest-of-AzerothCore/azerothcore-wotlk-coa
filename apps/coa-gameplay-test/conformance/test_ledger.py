@@ -18,6 +18,7 @@ GHOUL_FRENZY = 503740
 FRENZIED_GHOUL = 707014
 TUNDRA_WARRIORS_TALENT = 92122
 TEMPLAR_LEDGER = Path(__file__).resolve().parent / 'classes' / 'templar_clauses.json'
+NECROMANCER_LEDGER = Path(__file__).resolve().parent / 'classes' / 'necromancer_clauses.json'
 OWNER_RULING_NO_CLAIM = 805410
 LEVEL_LINE = '|cFF66DDFFLevel 10 Passive|r\r\n'
 
@@ -106,7 +107,8 @@ class ClassLedgerTests(unittest.TestCase):
     def setUpClass(cls):
         cls.hand = json.loads(TEMPLAR_LEDGER.read_text(encoding='utf-8'))
         cls.templar = ledger(load_class_file(TEMPLAR), DBC_DIR, templar_bases(cls.hand)).entries
-        cls.necromancer = ledger(load_class_file(NECROMANCER), DBC_DIR, {DEPRAVITY: 'text_correction'})
+        necromancer_hand = json.loads(NECROMANCER_LEDGER.read_text(encoding='utf-8'))
+        cls.necromancer = ledger(load_class_file(NECROMANCER), DBC_DIR, templar_bases(necromancer_hand))
 
     def test_templar_no_claim_rows_of_the_generation_rules_are_reproduced(self):
         reasons = {LEVEL_REASON: 'level', EMPTY_REASON: 'empty', ACQUISITION_REASON: 'acquisition'}
@@ -180,7 +182,8 @@ class ClassLedgerTests(unittest.TestCase):
                          records.field('Spell', FRENZIED_GHOUL, 'Description[enUS]'))
 
     def test_the_generation_is_deterministic(self):
-        again = ledger(load_class_file(NECROMANCER), DBC_DIR, {DEPRAVITY: 'text_correction'})
+        necromancer_hand = json.loads(NECROMANCER_LEDGER.read_text(encoding='utf-8'))
+        again = ledger(load_class_file(NECROMANCER), DBC_DIR, templar_bases(necromancer_hand))
         self.assertEqual(again, self.necromancer)
 
 
