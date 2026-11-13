@@ -145,6 +145,10 @@ void Evict(Player* player, int32 needed)
     }
 }
 }
+bool FollowsOwner(uint32 entry)
+{
+    return Follows(entry);
+}
 bool Responds(uint32 entry, uint32 command)
 {
     switch (command)
@@ -522,7 +526,8 @@ class npc_ascension_necromancer : public ScriptedAI
         me->SetHealth(me->GetMaxHealth());
         me->SetPower(POWER_MANA, me->GetMaxPower(POWER_MANA));
         if (_cost && player->HasAura(504866))
-            player->CastCustomSpell(505224, SPELLVALUE_BASE_POINT0, int32(me->CountPctFromMaxHealth(40)), me, true);
+            player->CastCustomSpell(SummonShield, SPELLVALUE_BASE_POINT0, int32(me->CountPctFromMaxHealth(40)), me,
+                                    true);
         if (me->GetEntry() == 50073)
             player->AddAura(805290, me);
         if (uint32 occupancy = OccupancyAura(me->GetEntry()))

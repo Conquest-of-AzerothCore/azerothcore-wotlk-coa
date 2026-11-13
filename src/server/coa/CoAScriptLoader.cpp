@@ -93,6 +93,7 @@ void AddSC_AscensionProfessionSpellAffect();
 void AddSC_AscensionPerforatingShots();
 void AddSC_AscensionSummonedEffects();
 void AddSC_AscensionTaxiGuardians();
+void AddSC_AscensionGuardianTravel();
 void AddSC_AscensionSummonAvoidance();
 void AddSC_AscensionSummonDamage();
 void AddSC_AscensionKeepersScrollZoneBuff();
@@ -904,6 +905,7 @@ void AddCoAScripts()
     AddSC_AscensionPerforatingShots();
     AddSC_AscensionSummonedEffects();
     AddSC_AscensionTaxiGuardians();
+    AddSC_AscensionGuardianTravel();
     AddSC_AscensionSummonAvoidance();
     AddSC_AscensionSummonDamage();
     AddSC_AscensionKeepersScrollZoneBuff();
