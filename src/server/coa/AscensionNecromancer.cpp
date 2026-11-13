@@ -407,7 +407,7 @@ class necromancer_lifecycle : public UnitScript
             {
                 Sync(player);
                 for (uint32 id : {572638, 706472, 531126, 560012, 500982, 500985, 301207})
-                    if (Aura* aura = player->GetAura(id))
+                    if (Aura* aura = player->GetOwnedAura(id))
                         aura->RecalculateAmountOfEffects();
                 state.events.ScheduleEvent(1, 500ms);
             }
