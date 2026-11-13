@@ -5032,6 +5032,8 @@ private:
             Require(rating < MAX_COMBAT_RATING, "Invalid combat rating");
             return player->GetUInt32Value(static_cast<uint16>(PLAYER_FIELD_COMBAT_RATING_1) + rating);
         }
+        if (metric == "spell_id_for_difficulty")
+            return sSpellMgr->GetSpellIdForDifficulty(spell, GetUnit(step.get<std::string>("target")));
         if (metric.rfind("script_", 0) == 0)
         {
             Unit* attacker = GetUnit(step.get<std::string>("target"));

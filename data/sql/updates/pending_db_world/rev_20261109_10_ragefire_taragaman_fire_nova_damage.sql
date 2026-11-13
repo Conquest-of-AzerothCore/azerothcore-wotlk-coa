@@ -10,9 +10,13 @@ PREPARE `coa_dungeon_creature_damage_spell` FROM @coa_dungeon_creature_damage_sp
 EXECUTE `coa_dungeon_creature_damage_spell`;
 DEALLOCATE PREPARE `coa_dungeon_creature_damage_spell`;
 
--- Ragefire Chasm: Taragaman the Hungerer's novas hit far too softly at level 60 (#11768): Fire Nova about 2k.
--- On Mythic our tester measured 300 and 3k with x1.5 and x5 and asked for about 2k and 6k: both x10.
-DELETE FROM `coa_dungeon_creature_damage` WHERE `entry` = 11520 AND `spell_id` IN (11970, 2102516);
+-- Ragefire Chasm: Taragaman the Hungerer's novas hit far too softly at level 60 (#11768).
+-- He casts the SpellDifficulty variants: Fire Nova 154039 (Heroic) and 381390 (Mythic), Massive Fire Nova 2102517 and 2102518.
+-- On Mythic our tester measured about 300 and 3k and asked for about 2k and 6k: Fire Nova x6.667, Massive Fire Nova x2.
+-- Heroic gets the same factors. Normal sets its own damage in CoADungeonNormal.
+DELETE FROM `coa_dungeon_creature_damage` WHERE `entry` = 11520 AND `spell_id` IN (11970, 154039, 381390, 2102516, 2102517, 2102518, 2102519);
 INSERT INTO `coa_dungeon_creature_damage` (`entry`, `spell_id`, `multiplier`, `comment`) VALUES
-(11520, 11970, 10, 'Taragaman the Hungerer: Fire Nova x10'),
-(11520, 2102516, 10, 'Taragaman the Hungerer: Massive Fire Nova x10');
+(11520, 154039, 6.667, 'Taragaman the Hungerer: Fire Nova (Heroic) x6.667'),
+(11520, 381390, 6.667, 'Taragaman the Hungerer: Fire Nova (Mythic) x6.667'),
+(11520, 2102517, 2, 'Taragaman the Hungerer: Massive Fire Nova (Heroic) x2'),
+(11520, 2102518, 2, 'Taragaman the Hungerer: Massive Fire Nova (Mythic) x2');
