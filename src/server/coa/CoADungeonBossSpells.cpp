@@ -17,6 +17,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
 #include "Log.h"
+#include "GameTime.h"
 #include "SpellAuras.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
@@ -24,6 +25,8 @@
 #include "Player.h"
 #include "UnitScript.h"
 #include <memory>
+#include <mutex>
+#include <unordered_map>
 #include <unordered_map>
 
 namespace
@@ -140,6 +143,46 @@ namespace
                 SPELL_AURA_PERIODIC_TRIGGER_SPELL);
             AfterEffectRemove += AuraEffectRemoveFn(spell_coa_torrent_spin::Stop, EFFECT_1,
                 SPELL_AURA_PERIODIC_TRIGGER_SPELL, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    class spell_coa_torrent_knockback : public SpellScript
+    {
+        PrepareSpellScript(spell_coa_torrent_knockback);
+
+        static constexpr float SpeedXY = 10.0f;
+        static constexpr float SpeedZ = 5.0f;
+        static constexpr Milliseconds Shield = 500ms;
+
+        static bool Shielded(ObjectGuid guid)
+        {
+            static std::mutex lock;
+            static std::unordered_map<ObjectGuid, Milliseconds> last;
+            Milliseconds const now = GameTime::GetGameTimeMS();
+            std::lock_guard<std::mutex> guard(lock);
+            auto [it, fresh] = last.try_emplace(guid, now);
+            if (!fresh && now - it->second < Shield)
+                return true;
+            it->second = now;
+            return false;
+        }
+
+        void Knock(SpellEffIndex effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+            Unit* caster = GetCaster();
+            Unit* target = GetHitUnit();
+            if (!caster || !target || target->GetTypeId() != TYPEID_PLAYER || target->HasUnitState(UNIT_STATE_ROOT)
+                || Shielded(target->GetGUID()))
+                return;
+            if (target->IsNonMeleeSpellCast(true))
+                target->InterruptNonMeleeSpells(true);
+            target->KnockbackFrom(caster->GetPositionX(), caster->GetPositionY(), SpeedXY, SpeedZ);
+        }
+
+        void Register() override
+        {
+            OnEffectHitTarget += SpellEffectFn(spell_coa_torrent_knockback::Knock, EFFECT_1, SPELL_EFFECT_KNOCK_BACK);
         }
     };
 
@@ -588,6 +631,7 @@ void AddSC_CoADungeonBossSpells()
     RegisterSpellScript(spell_coa_summon_hearty_heart);
     RegisterSpellScript(spell_coa_massive_fire_nova);
     RegisterSpellScript(spell_coa_torrent_spin);
+    RegisterSpellScript(spell_coa_torrent_knockback);
     RegisterSpellScript(spell_coa_bouncing_saw_blade);
     RegisterSpellScript(spell_coa_skum_overrun);
     RegisterSpellScript(spell_coa_divine_retribution);

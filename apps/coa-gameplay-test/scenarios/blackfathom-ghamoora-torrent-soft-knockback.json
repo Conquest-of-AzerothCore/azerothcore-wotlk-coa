@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Ghamoo-ra's Torrent knocks players back softly and at most once per half second, but every hit still deals damage",
+  "contract": [
+    "Each cone of Torrent (2102688, cast as 2102689 on Heroic) knocks players back with Effect 98 at 15 horizontal and",
+    "10 vertical speed, about 15 yards and high into the air. The channel fires the cone again before a player lands,",
+    "so our tester was knocked up over and over. The script knocks players back at 10 and 5 instead, about 5 yards,",
+    "and a player knocked back less than 0.5 s ago gets the damage but no new knockback."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 500 },
+    { "action": "teleport", "actor": "p", "map": 48, "x": -436.0, "y": 211.8, "z": -53.0, "o": 3.1 },
+    { "action": "assert", "label": "CONTROL: p is in a Heroic Blackfathom Deeps", "actor": "p", "metric": "map_difficulty",
+      "equals": 1, "within_ms": 15000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_health", "actor": "p", "value": 100000000, "maximum": 100000000 },
+    { "action": "summon", "actor": "p", "as": "ghamoora", "entry": 4887, "distance": 3 },
+    { "action": "attack", "actor": "p", "target": "ghamoora" },
+    { "action": "wait", "ms": 500 },
+    { "action": "snapshot", "actor": "p", "metric": "server_packets", "opcode": 239, "save_as": "knockbacks" },
+    { "action": "snapshot", "actor": "p", "metric": "health", "save_as": "health_before" },
+    { "action": "cast", "actor": "ghamoora", "spell": 2102689, "target": "p" },
+    { "action": "assert", "label": "The cone knocks p back once", "actor": "p", "metric": "server_packets", "opcode": 239,
+      "relative_to": "knockbacks", "equals": 1, "within_ms": 500 },
+    { "action": "assert", "label": "The knockback goes 5 high instead of 10", "actor": "p", "metric": "server_packet_float",
+      "opcode": 239, "from_end": true, "index": 0, "min": -5.01, "max": -4.99 },
+    { "action": "assert", "label": "The knockback goes 10 wide instead of 15", "actor": "p", "metric": "server_packet_float",
+      "opcode": 239, "from_end": true, "index": 1, "min": 9.99, "max": 10.01 },
+    { "action": "assert", "label": "The cone hurts p", "actor": "p", "metric": "health", "relative_to": "health_before",
+      "max": -1, "within_ms": 500 },
+    { "action": "snapshot", "actor": "p", "metric": "health", "save_as": "health_first" },
+    { "action": "wait", "ms": 100 },
+    { "action": "cast", "actor": "ghamoora", "spell": 2102689, "target": "p" },
+    { "action": "assert", "label": "A second cone within 0.5 s still hurts p", "actor": "p", "metric": "health",
+      "relative_to": "health_first", "max": -1, "within_ms": 300 },
+    { "action": "assert", "label": "but does not knock p back again", "actor": "p", "metric": "server_packets",
+      "opcode": 239, "relative_to": "knockbacks", "equals": 1 },
+    { "action": "wait", "ms": 600 },
+    { "action": "cast", "actor": "ghamoora", "spell": 2102689, "target": "p" },
+    { "action": "assert", "label": "A cone after the half second knocks p back again", "actor": "p",
+      "metric": "server_packets", "opcode": 239, "relative_to": "knockbacks", "equals": 2, "within_ms": 500 }
+  ]
+}

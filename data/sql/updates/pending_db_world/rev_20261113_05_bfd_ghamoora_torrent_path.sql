@@ -45,3 +45,10 @@ INSERT INTO `coa_dungeon_spell_damage` (`spell_id`, `multiplier`, `comment`) VAL
 (2102689, 1.488, 'Ghamoo-ra: Torrent (Heroic) x0.496, x3 for the rebuilt Torrent'),
 (2102690, 0.417, 'Ghamoo-ra: Torrent (Mythic) x0.139, x3 for the rebuilt Torrent'),
 (2102691, 3, 'Ghamoo-ra: Torrent (Ascended) x3');
+
+DELETE FROM `spell_script_names` WHERE `ScriptName` = 'spell_coa_torrent_knockback';
+INSERT INTO `spell_script_names` (`spell_id`, `ScriptName`) VALUES
+(2102688, 'spell_coa_torrent_knockback'),
+(2102689, 'spell_coa_torrent_knockback'),
+(2102690, 'spell_coa_torrent_knockback'),
+(2102691, 'spell_coa_torrent_knockback');
