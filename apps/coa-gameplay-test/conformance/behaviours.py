@@ -1426,16 +1426,17 @@ def forced_chance_of(raw: dict | None) -> tuple[int, int, int] | None:
     return int(raw['talent']), int(raw['aura']), int(raw['entry'])
 
 
-def forced_chance_labels(spec: MetricDeltaSpec) -> tuple[str, str, str]:
+def forced_chance_labels(spec: MetricDeltaSpec) -> tuple[str, str, str, str]:
     return (f'{spec.spell} forced_chance {spec.forced_chance[1]} absent',
             f'{spec.spell} forced_chance {spec.forced_chance[1]} present',
+            f'{spec.spell} forced_chance {spec.forced_chance[2]} count',
             f'{spec.spell} forced_chance released')
 
 
 def with_forced_chance(steps: list[dict], spec: MetricDeltaSpec, settled: int, before_label: str,
                        after_label: str) -> list[dict]:
     talent, aura, entry = spec.forced_chance
-    absent, present, released = forced_chance_labels(spec)
+    absent, present, count, released = forced_chance_labels(spec)
     before = next(index for index, step in enumerate(steps) if step.get('label') == before_label)
     after = next(index for index, step in enumerate(steps) if step.get('label') == after_label)
     return (steps[:settled]
@@ -1444,7 +1445,8 @@ def with_forced_chance(steps: list[dict], spec: MetricDeltaSpec, settled: int, b
             + steps[settled:before]
             + [measurement(absent, CASTER, 'owned_creature_count', entry=entry, spell=aura)]
             + steps[before:after]
-            + [measurement(present, CASTER, 'owned_creature_count', entry=entry, spell=aura)]
+            + [measurement(present, CASTER, 'owned_creature_count', entry=entry, spell=aura),
+               measurement(count, CASTER, 'owned_creature_count', entry=entry)]
             + steps[after:]
             + [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
                measurement(released, CASTER, 'spell_mod_mutants')])
@@ -1717,8 +1719,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         contract += (f' A forcing fixture raises the roll of {spec.forced_chance[0]} by {FORCED_CHANCE_PERCENT}% '
                      f'(a SPELLMOD_CHANCE_OF_SUCCESS spell modifier mutant) for the whole scenario, so the aura '
                      f'{spec.forced_chance[1]} it applies is read at a known time; its presence on creature '
-                     f'{spec.forced_chance[2]} is read before both readings (absent without the passive, present '
-                     f'with it), and the modifier is removed at the end and read gone.')
+                     f'{spec.forced_chance[2]} is read before both readings (absent without the passive, on every '
+                     f'creature of that entry with it), and the modifier is removed at the end and read gone.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
@@ -1783,10 +1785,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             raise ValueError(f'{spec.spell} sets after_at_most without an after_at_least at or below it')
         model['after_at_most'] = spec.after_at_most
     if spec.forced_chance is not None:
-        absent, present, released = forced_chance_labels(spec)
+        absent, present, count, released = forced_chance_labels(spec)
         model['forced_chance'] = {'talent': spec.forced_chance[0], 'aura': spec.forced_chance[1],
                                   'entry': spec.forced_chance[2], 'absent_label': absent, 'present_label': present,
-                                  'released_label': released}
+                                  'count_label': count, 'released_label': released}
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected

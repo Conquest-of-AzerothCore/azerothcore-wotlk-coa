@@ -10829,6 +10829,7 @@ class MetricDeltaForcedChanceTests(unittest.TestCase):
         model = expectation.model
         forced = model['forced_chance']
         values = {model['before_label']: 2000.0, model['after_label']: after}
+        values[forced['count_label']] = 2.0
         for key, value in (('absent_label', absent), ('present_label', present), ('released_label', released)):
             if value is not None:
                 values[forced[key]] = value
@@ -10848,7 +10849,8 @@ class MetricDeltaForcedChanceTests(unittest.TestCase):
         absent = labels.index(f'{self.GHOUL_MASTERY} forced_chance {self.FRENZIED_GHOUL} absent')
         present = labels.index(f'{self.GHOUL_MASTERY} forced_chance {self.FRENZIED_GHOUL} present')
         self.assertEqual(labels[absent + 1], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms before')
-        self.assertEqual(labels[present + 1], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms after')
+        self.assertEqual(labels[present + 1], f'{self.GHOUL_MASTERY} forced_chance 50073 count')
+        self.assertEqual(labels[present + 2], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms after')
         self.assertEqual(steps[-2], {'action': 'set_aura', 'actor': 'caster', 'spell': 100523, 'stacks': 0})
         self.assertEqual(steps[-1]['metric'], 'spell_mod_mutants')
 
@@ -10858,6 +10860,7 @@ class MetricDeltaForcedChanceTests(unittest.TestCase):
         self.assertEqual(self.judged(entry, 0.0, 2.0, 0.0), 'ok')
         self.assertEqual(self.judged(entry, 0.0, 0.0, 0.0), 'unmeasured')
         self.assertEqual(self.judged(entry, 0.0, None, 0.0), 'unmeasured')
+        self.assertEqual(self.judged(entry, 0.0, 1.0, 0.0), 'unmeasured')
         self.assertEqual(self.judged(entry, 0.0, 2.0, 0.0, after=2000.0), 'alert')
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

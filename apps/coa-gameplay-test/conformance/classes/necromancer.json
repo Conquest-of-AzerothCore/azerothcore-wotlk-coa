@@ -1283,7 +1283,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "owned_creature_count",
       "fields": {
@@ -1313,7 +1313,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "owned_creature_count",
       "fields": {
@@ -1343,7 +1343,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "aura",
       "fields": {
@@ -1372,7 +1372,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "owned_creature_aura_max_duration_ms",
       "fields": {
@@ -1402,7 +1402,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "aura",
       "fields": {
@@ -1576,7 +1576,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "owned_creature_attack_time_ms",
       "fields": {
@@ -1606,7 +1606,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "owned_creature_display",
       "fields": {
@@ -1635,7 +1635,7 @@
       ],
       "setup_target": "caster",
       "setup_wait_ms": 3000,
-      "wait_ms": 5000,
+      "wait_ms": 8000,
       "expire_ms": 500,
       "metric": "owned_creature_crit_chance",
       "fields": {

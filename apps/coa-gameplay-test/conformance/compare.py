@@ -3012,12 +3012,13 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
         return judged_metric_delta(base, run, model)
     absent = run.values.get(forced['absent_label'])
     present = run.values.get(forced['present_label'])
+    count = run.values.get(forced['count_label'])
     released = run.values.get(forced['released_label'])
     fixture = (f'forcing fixture: a {forced["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant, '
                f'{forced["aura"]} read on creature {forced["entry"]} before both readings')
-    if present is None or present < 1:
-        return replace(base, status='unmeasured', explanation=f'{fixture}: the forced aura is absent ({present}), '
-                                                              f'so the effect is not read')
+    if present is None or count is None or present < 1 or present != count:
+        return replace(base, status='unmeasured', explanation=f'{fixture}: the forced aura is on {present} of {count} '
+                                                              f'creatures, so the effect is not read')
     verdict = judged_metric_delta(base, run, model)
     if absent is None or absent != 0:
         return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the aura is on the '

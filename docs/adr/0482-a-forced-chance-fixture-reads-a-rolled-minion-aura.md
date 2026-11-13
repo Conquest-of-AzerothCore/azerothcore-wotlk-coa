@@ -18,7 +18,8 @@ of note N-a1 on 2026-11-13: a SPELLMOD_CHANCE_OF_SUCCESS modifier on the talent,
   rolls (`Chance`/`MinionChance`, AscensionNecromancer.cpp:225-251) and the stock proc chance (`Aura::CalcProcChance`,
   SpellAuras.cpp:2380-2381) apply the caster's modifier to the talent, so a 10% or 15% roll exceeds 100%.
 - The aura is read on the creature before the before reading (must be 0: no aura without the talent) and before the
-  after reading (absent: `unmeasured`). At the end the mutant owner aura 100523 is removed and `spell_mod_mutants` must
+  after reading, on every creature of the entry (otherwise `unmeasured`: one creature read could be one that
+  has not hit yet). At the end the mutant owner aura 100523 is removed and `spell_mod_mutants` must
   read 0. The verdict explanation and its detail (`forced_chance`: the talent) name the fixture.
 - No harness C++ change: the mutant action exists (class conformance server mutants).
 

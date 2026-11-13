@@ -285,7 +285,7 @@ Bone Toss 707669.
 `forced_chance` (`{"talent", "aura", "entry"}`, ADR 0482) is a forcing fixture for the effect of a rolled aura on
 a minion: a `spell_mod_mutant` of SPELLMOD_CHANCE_OF_SUCCESS +1000% on `talent` right after the base steps, a read of
 `aura` on the owned creature `entry` just before the before reading (it must be absent) and just before the after
-reading (absent: the verdict is `unmeasured`, never `ok`), and at the end the mutant owner aura removed and
+reading, on every creature of that entry (otherwise the verdict is `unmeasured`, never `ok`), and at the end the mutant owner aura removed and
 `spell_mod_mutants` read 0 (otherwise an alert). It never proves a rate: rate claims stay with their proc entries.
 `expected_ratio` with a `tolerance` (ADR 0380) judges the after reading over the before reading instead, with
 `before_expected` its least before reading: Pierced 570216 leaves 0.9 of the dummy's armor. `setup_target` sends the

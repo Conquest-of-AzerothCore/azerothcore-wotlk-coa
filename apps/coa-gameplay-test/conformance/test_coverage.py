@@ -1252,5 +1252,14 @@ class OwnedCreatureAuraDurationReadbackTest(unittest.TestCase):
     def test_a_minion_aura_duration_read_is_a_readback(self):
         self.assertEqual(METRIC_EVIDENCE['owned_creature_aura_max_duration_ms'], READBACK)
 
+
+class OwnedCreatureDisplayPromiseTest(unittest.TestCase):
+    def test_a_learned_minion_display_contrast_proves_a_transform_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta frenzied_display', BEHAVIOUR_METRIC_DELTA,
+                           'owned_creature_display', contrast=LEARNED_CONTRAST)]
+        promised = claim('Transformed into a Frenzied Ghoul', '1 behaviour_metric_delta frenzied_display')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_display'], STATE)
+
 if __name__ == '__main__':
     unittest.main()
