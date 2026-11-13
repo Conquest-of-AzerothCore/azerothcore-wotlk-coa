@@ -4669,6 +4669,1455 @@
       "expected_source": "680388 Effect[1] aura 118 SPELL_AURA_MOD_HEALING_PCT on the caster, BasePoints 9 + 1 = 10 ($s2); Unit::SpellHealingBonusTaken (Unit.cpp:10873-10898, stock) multiplies every heal its holder receives. A heal from another source, Flash Heal 10917 (rank 7, BaseLevel 56) cast by the caster on itself: non-critical heal per hit without the ward (control) and with the ward learned and cast before each heal (treatment). cast_power 1373 (player_class_stats BaseMana) refills mana before each heal, which also covers the next ward cast (20% of base mana)."
     },
     {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (raised)",
+      "kind": "metric_delta",
+      "variant": "count",
+      "label_suffix": "count",
+      "quote": "Raise a Skeletal Mage to aid you in combat",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500331,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50075
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "500331 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50075; spell_ascension_necromancer_summon replaces the stock summon with Summon(), one 50075 per NecromancerSummons row {500331, 0, 50075, 1} (AscensionNecromancerData.h:100). No cast before the learn (control): no Skeletal Mage; one Raise: Skeletal Mage (CastingTimeIndex 5) gives one."
+    },
+    {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (Life Force)",
+      "kind": "metric_delta",
+      "variant": "life_force",
+      "label_suffix": "life_force",
+      "quote": "occupying",
+      "expected": 0,
+      "before_expected": 2,
+      "trigger_spell": 500331,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Life Force 525004 on the caster holds one stack per free Life Force: Sync (AscensionNecromancer.cpp) sets it to Capacity() - Used(), Capacity 2 at the reference character. Cost(500331) is 2 without Grave Mages 807937 (AscensionNecromancer.cpp:87-88, the [2] branch of $?s807937[1][2]). Without a Mage (control) 2 stacks; one Raise: Skeletal Mage leaves 0."
+    },
+    {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (Life Force with Grave Mages)",
+      "kind": "metric_delta",
+      "variant": "life_force_grave_mages",
+      "label_suffix": "life_force_grave_mages",
+      "quote": "occupying",
+      "expected": 1,
+      "before_expected": 2,
+      "trigger_spell": 500331,
+      "target": "caster",
+      "cast_in_before": false,
+      "learn": [
+        807937
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "As the Life Force entry with Grave Mages 807937 learned first ('Your Skeletal Mages now only cost 1 Life Force'): Cost(500331) returns 1 while the caster has 807937 (AscensionNecromancer.cpp:88), the [1] branch of $?s807937[1][2]. Without a Mage 2 stacks; one Raise: Skeletal Mage leaves 1."
+    },
+    {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (in combat)",
+      "kind": "metric_delta",
+      "variant": "combat",
+      "label_suffix": "combat",
+      "quote": "to aid you in combat",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500331
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50075
+      },
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count the hits of Skeletal Mage 50075 creatures in the caster's combat log for 5000 ms. The control phase has no Mage: 0. The treatment raises one Mage before the Command: its Command answer 801513 (DoAction default branch, AttackSpell(50075) = 801513, AscensionNecromancerSummons.cpp:120-121, 728-729) lands on the dummy, so at least 1 hit."
+    },
+    {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (Command targets)",
+      "kind": "fixed_count",
+      "variant": "command_targets",
+      "label_suffix": "command_targets",
+      "quote": "Unleashes ice at your target and enemies within",
+      "expected": 3,
+      "radius": 6,
+      "uncapped": true,
+      "radius_reason": "801513 Effect[0] SCHOOL_DAMAGE, TargetA TARGET_UNIT_TARGET_ENEMY, TargetB TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 193 = 6 yd ($801513a1) around the target, no MaxAffectedTargets; the dummies inside 6 yd of the primary must all be struck and the one beyond must not",
+      "cast_spell": 504868,
+      "target_rank": 801513,
+      "caster_entry": 50075,
+      "setup_casts": [
+        [
+          500331,
+          "caster"
+        ]
+      ],
+      "repeats": 3,
+      "settle_ms": 1500,
+      "observe_source": "One Skeletal Mage is raised, then Command: Undead 504868 at the primary dummy three times; the Mage answers with 801513 at the target (DoAction default branch, AttackSpell(50075)), read per dummy from the Mage's (entry 50075) hits. Control: before 500331 is learned the raise is refused, no Mage, no hit."
+    },
+    {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (Command damage)",
+      "kind": "script_hit",
+      "variant": "command_damage",
+      "label_suffix": "command_damage",
+      "quote": "Frost damage.",
+      "hit_spell": 801513,
+      "hit_effect": 0,
+      "caster_entry": 50075,
+      "trials": 6,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          500331,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "Command: Undead 504868 orders every Skeletal Mage in 60 yd; each casts 801513 at the target (DoAction default branch, AttackSpell(50075) = 801513, AscensionNecromancerSummons.cpp:120-121, 728-729): Effect[0] SCHOOL_DAMAGE, Frost, $801513m1 + $801513ppl1 + Frost spell power x 0.8 (NecromancerCoefficients row {801513, 0, 0.8, 16}, AscensionNecromancerData.h:70). The control commands without a raised Mage and must count no 801513 hit; the treatment raises a Mage before each Command. 984954 removes crits (copied to the minion by Scale()), 823764 removes partial resists."
+    },
+    {
+      "spell": 500331,
+      "name": "Raise: Skeletal Mage (Command damage with spell power)",
+      "kind": "script_hit",
+      "variant": "command_damage_sp",
+      "label_suffix": "command_damage_sp",
+      "quote": "Frost damage.",
+      "hit_spell": 801513,
+      "hit_effect": 0,
+      "caster_entry": 50075,
+      "trials": 6,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          500331,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "stat_auras": [
+        [
+          24666,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "As the Command damage entry, with Increase Frost Dam 132 24666 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 16 Frost, BasePoints 132 + 1 = 133) set on the caster before its stats are measured, so the $spfr*.8 term reads 133 x 0.8 = 106.4 on top of the base 51: the Mage's hit follows the owner's Frost spell power with the 0.8 coefficient (NecromancerCoefficients row {801513, 0, 0.8, 16})."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form (transform)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Transform into a Lich, becoming Undead",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 504691
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "aura_ascension_necromancer_lifecycle casts Lich Form 504691 on the caster when 500981 applies (AscensionNecromancerAuras.cpp:124-125) and removes it with 500981 (:250-251): 504691 Effect[2] aura 36 SPELL_AURA_MOD_SHAPESHIFT, MiscValue 50 (the Lich form). No cast (control): no 504691; one real cast of 500981: 504691 on the caster."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form (immunity aura)",
+      "kind": "metric_delta",
+      "variant": "undead_immunities",
+      "label_suffix": "undead_immunities",
+      "quote": "Transform into a Lich, becoming Undead",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 504747
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "The same hook casts Lich Form 504747 (AscensionNecromancerAuras.cpp:122-123): Effect[0..2] aura 77 SPELL_AURA_MECHANIC_IMMUNITY, MiscValue 1 (charm), 5 (fear), 10 (sleep), the Undead immunities of the ext clause. No cast: absent; one 500981 cast: present."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form (Frost damage)",
+      "kind": "hit_ratio",
+      "variant": "frost_damage",
+      "label_suffix": "frost_damage",
+      "quote": "increasing your Frost damage dealt by $s2%",
+      "expected": 1.1,
+      "observe_spell": 501978,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          500981
+        ],
+        "casts": [
+          500981
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "parts": 2,
+      "cast_power": 1373,
+      "expected_source": "500981 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 16 (Frost), BasePoints 9 + 1 = 10 ($s2); Unit::SpellDamagePctDone multiplies the holder's Frost damage. Observed spell: Lichfrost 501978 (Effect[0] SCHOOL_DAMAGE, Frost, 569 to 597), cast at the dummy: non-critical hits without Lich Form (control) and with 500981 learned and cast before each Lichfrost (treatment, a real cast). cast_power 1373 (Necromancer BaseMana at 60) refills mana before each Lichfrost and covers the Lich Form cast (10% of base mana). 823764 (-9999 target resistance on the caster) is set in both arms so no partial resist widens the hits (108 trials per arm left the interval too wide, pair prove-2)."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form (Runic Power over two ticks)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "While active you generate $/10;s1 Runic Power every $t1 sec.",
+      "expected": 60,
+      "before_expected": 0,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 500981,
+        "power": 6
+      },
+      "wait_ms": 10500,
+      "expire_ms": 500,
+      "observe_source": "500981 Effect[0] aura 24 SPELL_AURA_PERIODIC_ENERGIZE, MiscValue 6 (Runic Power), BasePoints 29 + 1 = 30 (3 Runic Power, $/10;s1, the engine counts Runic Power in tenths), Amplitude 5000 ($t1). The caster's energize events from 500981 are summed: none without the cast (control), 2 x 30 = 60 by 10500 ms after one real cast (ticks at 5000 and 10000 ms)."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form (no tick before 5 sec)",
+      "kind": "metric_delta",
+      "variant": "tick_before",
+      "label_suffix": "tick_before",
+      "quote": "While active you generate $/10;s1 Runic Power every $t1 sec.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 500981,
+        "power": 6
+      },
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "As the Runic Power entry, read 4500 ms after the cast: no energize yet, so the first tick lies after 4500 ms."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form (first tick by 5.5 sec)",
+      "kind": "metric_delta",
+      "variant": "first_tick",
+      "label_suffix": "first_tick",
+      "quote": "While active you generate $/10;s1 Runic Power every $t1 sec.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 500981,
+        "power": 6
+      },
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "observe_source": "Read 5500 ms after the cast: exactly one energize, so the first tick lies in (4500, 5500] ms; with two ticks by 10500 ms the period is 5000 ms within the reads' 500 ms steps."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form",
+      "kind": "charm_immunity",
+      "quote": "While Undead, you are immune to fear, sleep, and charm effects.",
+      "words": "charm",
+      "charm_spell": 37122,
+      "observe_source": "Domination 37122: one effect, aura 6 SPELL_AURA_MOD_CHARM, Mechanic 1 (charm), 10 s, cast by the dummy at the caster. Lich Form 504747, cast with 500981 (AscensionNecromancerAuras.cpp:122-123), carries aura 77 SPELL_AURA_MECHANIC_IMMUNITY with MiscValue 1 (MECHANIC_CHARM): the charm must be refused with 500981 up and land without it (the control)."
+    },
+    {
+      "spell": 300958,
+      "name": "Chilling Presence",
+      "kind": "party_stat_ratio",
+      "quote": "Increases critical strike chance of all party and raid members by $s1%.",
+      "expected": 3,
+      "relation": "additive",
+      "metric": "melee_crit_chance_refreshed",
+      "radius_reason": "300958 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 + 1 = 3 ($s1), EffectRadiusIndex 12; no distance token in the tooltip. AuraEffect::HandleModCritPercent adds the amount to the melee, ranged and spell crit percentages of every unit the area aura reaches; the grouped, non-caster ally's melee crit percentage (PLAYER_CRIT_PERCENTAGE after Player::UpdateCritPercentage(BASE_ATTACK), melee_crit_chance_refreshed: the plain field read 0 on the fresh ally before the learn, pair prove-2) is read before and after the caster learns 300958 and must rise by 3 points (relation additive: a crit chance takes percent points, not a factor)."
+    },
+    {
+      "spell": 300958,
+      "name": "Chilling Presence group stack cap",
+      "kind": "group_stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "effect": 0,
+      "partner": 560568,
+      "partner_effect": 0,
+      "relation": "additive",
+      "tolerance": 0.0001,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 4
+      },
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql spell_group 2000181, spell_group_stack_rules (2000181, 3) SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT, lists 300958 (re-inserted by rev_20260909_01_necromancer_completion.sql:615-616) and Electrifying Aura 560568; both are Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 (+3%). SpellMgr::IsEffectInSameEffectStackGroup admits the area-aura effects of the CoA raid groups 2000180-2000184 (SpellMgr.cpp:824-829) and the aura total keeps the highest amount of the group (SpellMgr::AddSameEffectStackRuleSpellGroups, :831-866). The caster's Frost spell crit percentage (PLAYER_SPELL_CRIT_PERCENTAGE1 + 4, a live field) reads the baseline, +3 points with 300958 alone and still +3, not +6, with 560568 learned too (relation additive: percent points). 560568 is learned onto the Necromancer as a fixture only."
+    },
+    {
+      "spell": 500981,
+      "name": "Lich Form",
+      "kind": "immunity",
+      "quote": "While Undead, you are immune to fear, sleep, and charm effects.",
+      "effects": [
+        {
+          "spell": 12096,
+          "words": "fear"
+        },
+        {
+          "spell": 9159,
+          "words": "sleep"
+        }
+      ],
+      "remove_control": true,
+      "observe_source": "aura_ascension_necromancer_lifecycle casts Lich Form 504747 on the caster when 500981 applies (AscensionNecromancerAuras.cpp:122-123) and removes it when neither 500981 nor 804371 remains (:252-253): 504747 carries aura 77 SPELL_AURA_MECHANIC_IMMUNITY with MiscValue 5 (fear) and 10 (sleep). Fixtures cast by the dummy: Fear 12096 (aura 7, Mechanic 5) and Sleep 9159 (aura 12, Mechanic 10). 500981 is permanent (DurationIndex 21), so its control removes 500981 (remove_control) and the same casts must land again."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (Shadow damage over the duration)",
+      "kind": "metric_delta",
+      "variant": "shadow_total",
+      "label_suffix": "shadow_total",
+      "quote": "Shadow damage over",
+      "expected": 756,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500237,
+        "target": "dummy"
+      },
+      "wait_ms": 23000,
+      "expire_ms": 500,
+      "observe_source": "500459 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, BasePoints 125 + 1 = 126 ($m1), Amplitude 4000 ($t1), DurationIndex 18 (20000 ms, $d): every tick casts Blight 500237 with the value at the target, so ($d*1000/$t1) x $m1 = 5 x 126 = 630 at spell power 0 over the duration, plus the Effect[2] 142 hit of 126 at the cast (Blight (initial hit) entry): 756 in all, as live does (6 hits of 500237 per full-duration application on the target in 27 of 42 live applications, 2026-08-16 log). 984954 (spell crit -1000) and 823764 (-9999 target resistance) on the caster remove crits and partial resists. Blight casts in 2000 ms (CastingTimeIndex 5); its Effect[2] 142 hits once at the cast, then the aura ticks until it expires 20000 ms later. No cast (control): 0; one real cast: 630 on the dummy, read 23000 ms after the cast step, past the expiry."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (Shadow damage with spell power)",
+      "kind": "metric_delta",
+      "variant": "shadow_total_sp",
+      "label_suffix": "shadow_total_sp",
+      "quote": "Shadow damage over",
+      "expected": 826.1,
+      "tolerance": 6,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          23265,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500237,
+        "target": "dummy"
+      },
+      "wait_ms": 23000,
+      "expire_ms": 500,
+      "observe_source": "As the Shadow damage entry, with Increase Shadow Dam 69 23265 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, +69) on the caster: the initial hit and the 5 ticks, 6 x (126 + 69 x 0.169175) = 826.1, of which the stated 5 x 137.67 = 688.4 over the duration (NecromancerCoefficients row {500237, 0, 0.169175, 32}); the tolerance 6 covers the engine's truncation of each of the six hits (at most 1 each)."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (five ticks)",
+      "kind": "metric_delta",
+      "variant": "ticks",
+      "label_suffix": "ticks",
+      "quote": "Shadow damage over",
+      "expected": 6,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 500237,
+        "target": "dummy"
+      },
+      "wait_ms": 23000,
+      "expire_ms": 500,
+      "observe_source": "The same cast, counting the 500237 hits on the dummy past the expiry (23000 ms after the cast step): 6, the initial Effect[2] hit and the 5 ticks of ($d*1000/$t1)."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (no expunge before the duration)",
+      "kind": "metric_delta",
+      "variant": "expunge_held",
+      "label_suffix": "expunge_held",
+      "quote": "After $d,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 500267,
+        "target": "dummy"
+      },
+      "wait_ms": 21000,
+      "expire_ms": 500,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Removed casts Expunge Blight 500267 on the target when a Blight rank expires (AURA_REMOVE_BY_EXPIRE, AscensionNecromancerAuras.cpp:232-234). 21000 ms after the cast step (2000 ms cast time, so 19000 ms into the 20000 ms aura) no 500267 hit."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (expunge after the duration)",
+      "kind": "metric_delta",
+      "variant": "expunge",
+      "label_suffix": "expunge",
+      "quote": "After $d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 500267,
+        "target": "dummy"
+      },
+      "wait_ms": 23500,
+      "expire_ms": 500,
+      "observe_source": "As the held entry, read 23500 ms after the cast step (1500 ms past the expiry): one 500267 hit, so the expunge lands at the expiry of the 20000 ms aura. No cast (control): none."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (expunge damage)",
+      "kind": "metric_delta",
+      "variant": "expunge_damage",
+      "label_suffix": "expunge_damage",
+      "quote": "the blight expunges from the target dealing $500217s2 Nature damage.",
+      "expected": 128.1,
+      "tolerance": 1,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500267,
+        "target": "dummy"
+      },
+      "wait_ms": 23500,
+      "expire_ms": 500,
+      "observe_source": "The tooltip's $500217s2 is rank 1's Effect[1]: BasePoints 92 + 1 = 93 plus RealPointsPerLevel 2.19375 x (MaxLevel 30 - BaseLevel 14) = 128.1. The server casts 500267 with Amount(<rank>, 1) (AscensionNecromancerAuras.cpp:233), this rank's own Effect[1] (500459: BasePoints 669 + 1 = 670). Expected the tooltip's 128.1; the measured hit decides between the two."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "nearby",
+      "label_suffix": "nearby",
+      "quote": "causing nearby enemies to suffer",
+      "expected": 3,
+      "radius": 5,
+      "uncapped": true,
+      "radius_reason": "Blight 500237 Effect[0] SCHOOL_DAMAGE, TargetA TARGET_DEST_TARGET_ENEMY, TargetB TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 8 = 5 yd around the blighted target, no MaxAffectedTargets; every dummy inside 5 yd of the primary must be struck and the one beyond must not",
+      "cast_spell": 500459,
+      "target_rank": 500237,
+      "repeats": 1,
+      "settle_ms": 9000,
+      "observe_source": "One real Blight 500459 at the primary dummy; its Effect[0] aura ticks every 4000 ms and casts 500237 around the target. Read per dummy after 9000 ms (two ticks). Control: before 500459 is learned the cast is refused, no hit."
+    },
+    {
+      "spell": 501886,
+      "name": "Crypt Swarm (Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "shadow_total",
+      "label_suffix": "shadow_total",
+      "quote": "Channel a swarm of locusts on an enemy, dealing $o1 Shadow damage",
+      "expected": 350.64,
+      "tolerance": 3,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800343,
+        "target": "dummy"
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "501886 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, BasePoints 56 + 1 = 57 plus RealPointsPerLevel 0.24 x (60 - 54) = 58.44 per tick, Amplitude 500, channel 3000 ms (DurationIndex 27): 6 ticks of Crypt Swarm 800343 with the value, $o1 = 350.64. The engine truncates the per-level term before the sum (SpellInfo.cpp:497, ADR 0147), 58 per tick = 348; the tolerance 3 covers that known engine rounding (G-26). 984954 and 823764 remove crits and partial resists. No cast (control): 0."
+    },
+    {
+      "spell": 501886,
+      "name": "Crypt Swarm (Runic Power over the channel)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "and generating Runic Power over $d.",
+      "expected": 6,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 800344,
+        "power": 6
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "501886 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, Amplitude 500, triggers 800344 every 500 ms of the 3000 ms channel ($d): 800344 Effect[1] SPELL_EFFECT_ENERGIZE Runic Power (MiscValue 6) on the caster. The caster's 800344 Runic Power energize events: none without the cast, 6 over one channel."
+    },
+    {
+      "spell": 501886,
+      "name": "Crypt Swarm (slow with Summoning Adept)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "Channel a swarm of locusts on an enemy, dealing $o1 Shadow damage",
+      "expected": 0.800002,
+      "expected_ratio": 0.7,
+      "tolerance": 0.001,
+      "before_expected": 1.14286,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_spell": 92123,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "wait_ms": 1200,
+      "expire_ms": 3000,
+      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:108-111): a Crypt Swarm 800343 hit of a caster with 92123 casts 803530 at the target: Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -31 + 1 = -30 ($803530s1), the $?s92123[...] branch. The dummy's run speed rate is read 1200 ms into a channel: its own 1.14286 without 92123 (control, pair prove-3) and 0.7 of it with 92123 learned (expected_ratio, ADR 0380)."
+    },
+    {
+      "spell": 501886,
+      "name": "Crypt Swarm (Cryptfury with Summoning Adept)",
+      "kind": "metric_delta",
+      "variant": "cryptfury",
+      "label_suffix": "cryptfury",
+      "quote": "Empowers nearby active Undead minions with Cryptfury.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "gate_spell": 500165,
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 806588
+      },
+      "wait_ms": 1200,
+      "expire_ms": 3000,
+      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:112-113): a Crypt Swarm 800343 hit of a caster with 500165 casts Crypt Fury 806588 on the caster, Effect[0] 190 SPELL_EFFECT_APPLY_AURA_TO_SUMMONS (aura 79 on the minions). Each phase raises a Ghoul, then channels Crypt Swarm at the dummy; the Ghouls carrying 806588 are counted 1200 ms into the channel: none without 500165 (control), both Ghouls with it learned (the first phase's Ghoul stays, Life Force 2)."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (freeze)",
+      "kind": "metric_delta",
+      "variant": "freeze",
+      "label_suffix": "freeze",
+      "quote": "Command your Skeletal Mages to freeze enemies at target location",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504489,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 504845
+      },
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "Order() sends the Command to the caster's selection (the dummy, select_dummy) when the spell has no enemy unit target (AscensionNecromancerSummons.cpp:453-460); a Skeletal Mage (Responds(50075, 504489)) answers in DoAction by casting Bonefreeze 504845 at every valid enemy within 8 yd of that target (:664-669), 504845 a root (contract AscensionNecromancerContracts.cpp:291-297). Both phases raise a Mage; the control phase gives no Command: no 504845 on the dummy; the treatment's Command freezes it, read 300 ms later."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (damage ends it)",
+      "kind": "metric_delta",
+      "variant": "damage_ends",
+      "label_suffix": "damage_ends",
+      "quote": "Damage taken may end the effect.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504489,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 504845
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "As the freeze entry (frozen 300 ms after the Command), read 6000 ms later: the Mage attacks the frozen dummy after the Command (AttackStart in DoAction; its Frost 801513 hits) and the contract adds AURA_INTERRUPT_FLAG_TAKE_DAMAGE to 504845 (AscensionNecromancerContracts.cpp:294), so the freeze is gone long before its 40000 ms. Read with the damage-count entry, which shows the Mage's hits land in that window."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (Mage hits on the frozen dummy)",
+      "kind": "metric_delta",
+      "variant": "damage_lands",
+      "label_suffix": "damage_lands",
+      "quote": "Damage taken may end the effect.",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 504489,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50075
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "The same arms: the Mage's hits on the dummy in the caster's combat log, none before the Command (the Mage follows, no victim), at least one within 6000 ms after it: the damage that ends the freeze."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (not in Pacify)",
+      "kind": "metric_delta",
+      "variant": "pacify",
+      "label_suffix": "pacify",
+      "quote": "Not usable while in Undead: Pacify.",
+      "expected": 173,
+      "before_expected": 0,
+      "trigger_spell": 504489,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "after_auras": [
+        [
+          500983,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504489
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "necromancer_casts::OnSpellCheckCast (AscensionNecromancerAbilities.cpp:162-164) refuses a Command spell with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW (173) while the caster has Undead: Pacify 500983. Both phases raise a Skeletal Mage and cast 504489; the control phase is not Pacified: no failure (0); the treatment has 500983 set on the caster by harness set_aura (precondition fixture; its own clause is proven in B2) and is refused with 173."
+    },
+    {
+      "spell": 705752,
+      "name": "Tears of Lordaeron (direct crit mana)",
+      "kind": "metric_delta",
+      "variant": "direct_mana",
+      "label_suffix": "direct_mana",
+      "quote": "Direct critical strikes regenerate $705753s2% of your maximum mana",
+      "expected": 84.5,
+      "tolerance": 0.5,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "force_crit": "spell",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 705753,
+        "power": 0
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:134-138): an own critical non-periodic hit of a caster with 705752 casts Tears of Lordaeron 705753 on the caster: Effect[1] SPELL_EFFECT_ENERGIZE_PCT mana, BasePoints 2 + 1 = 3 ($705753s2). One forced-crit Lichfrost 501978 (a direct Frost hit) per phase: no 705753 mana without 705752 (control), 3% of the caster's maximum mana with it learned. The reference character's maximum mana lies in [2800, 2849] (2% read 56 per energize, 531128 proc_energize_amount 0, B1 pair prove-23), so 3% is 84 or 85: 84.5 +/- 0.5."
+    },
+    {
+      "spell": 705752,
+      "name": "Tears of Lordaeron (direct crit Runic Power)",
+      "kind": "metric_delta",
+      "variant": "direct_runic_power",
+      "label_suffix": "direct_runic_power",
+      "quote": "and $705753s1% of your maximum runic power.",
+      "expected": 90,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "force_crit": "spell",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 705753,
+        "power": 6
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "The same 705753: Effect[0] SPELL_EFFECT_ENERGIZE_PCT Runic Power (MiscValue 6), BasePoints 8 + 1 = 9 ($705753s1) of the maximum 1000 (Glacial Ward's maximum Runic Power read 1000 before its +10%, B2 side a): 90 with 705752 learned, none without."
+    },
+    {
+      "spell": 705752,
+      "name": "Tears of Lordaeron (no mana without a crit)",
+      "kind": "metric_delta",
+      "variant": "no_crit",
+      "label_suffix": "no_crit",
+      "quote": "Direct critical strikes regenerate $705753s2% of your maximum mana",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 705753
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "The crit gate: the same Lichfrost with 984954 (spell crit -1000) on the caster lands without a crit, and 705752 restores nothing in either phase."
+    },
+    {
+      "spell": 705752,
+      "name": "Tears of Lordaeron (periodic crit mana)",
+      "kind": "metric_delta",
+      "variant": "periodic_mana",
+      "label_suffix": "periodic_mana",
+      "quote": "Periodic critical strikes regenerate $706424s1% of your maximum mana.",
+      "expected": 168,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "force_crit": "spell",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 706424,
+        "power": 0
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:80-81, 134-135): Crypt Swarm 800343 hits count as periodic; a critical one of a caster with 705752 casts Tears of Lordaeron 706424: Effect[0] SPELL_EFFECT_ENERGIZE_PCT mana, BasePoints 0 + 1 = 1 ($706424s1). One forced-crit Crypt Swarm channel (6 hits): none without 705752, 6 x 28 = 168 with it (1% of a maximum mana in [2800, 2849] is 28)."
+    },
+    {
+      "spell": 705752,
+      "name": "Tears of Lordaeron (periodic crit gives no direct reward)",
+      "kind": "metric_delta",
+      "variant": "periodic_not_direct",
+      "label_suffix": "periodic_not_direct",
+      "quote": "Periodic critical strikes regenerate $706424s1% of your maximum mana.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "force_crit": "spell",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 705753
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "The same forced-crit channel: its periodic crits cast 706424 only, never the direct reward 705753 (the else branch at AscensionNecromancerEvents.cpp:137)."
+    },
+    {
+      "spell": 501886,
+      "name": "Crypt Swarm (slow applied with Summoning Adept)",
+      "kind": "metric_delta",
+      "variant": "slow_applied",
+      "label_suffix": "slow_applied",
+      "quote": "Channel a swarm of locusts on an enemy, dealing $o1 Shadow damage",
+      "expected": 6,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_spell": 92123,
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 803530
+      },
+      "wait_ms": 3600,
+      "expire_ms": 3000,
+      "observe_source": "Diagnostic for the slow entry: the applications of 803530 on the dummy over one channel, none without 92123 and one per Crypt Swarm 800343 hit (6) with it, if the event code casts it."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (held near its duration)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "for $504845d (8 sec vs players).",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504489,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 504845
+      },
+      "wait_ms": 38500,
+      "expire_ms": 500,
+      "observe_source": "504845 DurationIndex 9 (40000 ms, $504845d) on a creature. As the freeze entry, read 38500 ms after the Command: still frozen, the Mage's small hits staying below the breakable budget (damage_ends entry). Control: the Mage alone, no freeze."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (ends at its duration)",
+      "kind": "metric_delta",
+      "variant": "duration_ends",
+      "label_suffix": "duration_ends",
+      "quote": "for $504845d (8 sec vs players).",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504489,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 504845
+      },
+      "wait_ms": 41500,
+      "expire_ms": 500,
+      "observe_source": "As the held entry, read 41500 ms after the Command: gone, so with the held read the creature freeze lasts between 38500 and 41500 ms against the stated 40000."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (rise)",
+      "kind": "metric_delta",
+      "variant": "rise",
+      "label_suffix": "rise",
+      "quote": "Beckon the restless dead to rise and march forward.",
+      "expected": 6,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 707007,
+      "target": "dummy",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 523032
+      },
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "707007 Effect[0] 77 SPELL_EFFECT_SCRIPT_EFFECT, MiscValue 523032; spell_ascension_necromancer_summon spawns the NecromancerSummons row {707007, 0, 523032, 6} (AscensionNecromancerData.h:122): six walkers that walk to the selected enemy (Summon(), AscensionNecromancerSummons.cpp:375-392, 437-440). No cast (control): none; one cast: at least one walker 300 ms later (six by the data row, the tooltip states no count)."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (explode on reaching an enemy)",
+      "kind": "metric_delta",
+      "variant": "explode",
+      "label_suffix": "explode",
+      "quote": "When they reach an enemy they explode, dealing",
+      "expected": 6,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 707007,
+      "target": "dummy",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 707010,
+        "caster_entry": 523032,
+        "target": "dummy"
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "A walker 523032 explodes once an enemy is within 2.5 yd of it or when it reaches its aim point (UpdateAI, AscensionNecromancerSummons.cpp:875-880; MovementInform :591-592): event 3 casts March of the Dead 707010 on itself (:829-835), Effect[0] SCHOOL_DAMAGE around the walker (TARGET_UNIT_SRC_AREA_ENEMY, 5 yd), and despawns. No cast (control): no 707010 hit; one cast: the walkers' explosions hit the dummy."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (explosion damage)",
+      "kind": "script_hit",
+      "variant": "explosion",
+      "label_suffix": "explosion",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 707010,
+      "hit_effect": 0,
+      "caster_entry": 523032,
+      "trials": 3,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          707007,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6000,
+      "observe_source": "Each walker's 707010 (Effect[0] SCHOOL_DAMAGE, MiscValue 16; NecromancerCoefficients row {707010, 0, 0.75, 16}, AscensionScalingBaseData {707010, 1}) on the dummy: the tooltip's ${$707010m1*$<scalingbp>+$SP*.75}. Control: the trials without 707007 known make no walker and count no 707010 hit. 984954 and 823764 remove crits and partial resists."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "and slowing their movement speed by $707010s2% for $707010d.",
+      "expected": 0.342858,
+      "expected_ratio": 0.3,
+      "tolerance": 0.001,
+      "before_expected": 1.14286,
+      "trigger_spell": 707007,
+      "target": "dummy",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "run_speed_rate",
+      "fields": {},
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "707010 Effect[1] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -71 + 1 = -70 ($707010s2), on the enemies around the walker, DurationIndex 27 (3000 ms, $707010d). The dummy's run speed rate (its own 1.14286, pair prove-3) is read 1500 ms after the cast: 0.3 of it once the walkers exploded on it. No cast (control): unchanged."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (slow ends)",
+      "kind": "metric_delta",
+      "variant": "slow_ends",
+      "label_suffix": "slow_ends",
+      "quote": "and slowing their movement speed by $707010s2% for $707010d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 707007,
+      "target": "dummy",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 707010
+      },
+      "wait_ms": 8000,
+      "expire_ms": 500,
+      "observe_source": "The 707010 slow aura on the dummy 8000 ms after the cast: gone (the walkers explode within the first seconds and each slow lasts 3000 ms). With the held entry it bounds the slow; the exact 3000 ms rests on the DBC duration (the existing spell_duration label)."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (slow held)",
+      "kind": "metric_delta",
+      "variant": "slow_held",
+      "label_suffix": "slow_held",
+      "quote": "and slowing their movement speed by $707010s2% for $707010d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 707007,
+      "target": "dummy",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 707010
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The 707010 slow aura on the dummy 1500 ms after the cast: present. No cast (control): absent."
+    },
+    {
+      "spell": 500459,
+      "name": "Blight (initial hit)",
+      "kind": "metric_delta",
+      "variant": "initial_hit",
+      "label_suffix": "initial_hit",
+      "quote": "Shadow damage over",
+      "expected": 126,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500237,
+        "target": "dummy"
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "500459 Effect[2] 142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE casts 500237 with 126 at the target when the 2000 ms cast completes; the first periodic tick follows 4000 ms later. Read 3000 ms after the cast step: 126, one hit; with the total of 756 the 20000 ms of the aura carry the stated 630."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (removes an immune shield)",
+      "kind": "metric_delta",
+      "variant": "removes_shield",
+      "label_suffix": "removes_shield",
+      "quote": "removing any invulnerability or immunity effects from them",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          642,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 642
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases: kept without a cast (control, 1), removed by one Death's Due (0)."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (removes an invulnerability)",
+      "kind": "metric_delta",
+      "variant": "removes_invulnerability",
+      "label_suffix": "removes_invulnerability",
+      "quote": "removing any invulnerability or immunity effects from them",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          38916,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 38916
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (curse held)",
+      "kind": "metric_delta",
+      "variant": "curse_held",
+      "label_suffix": "curse_held",
+      "quote": "and cursing them for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807796
+      },
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "observe_source": "807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 4500 ms after one cast: present."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (curse ends)",
+      "kind": "metric_delta",
+      "variant": "curse_ends",
+      "label_suffix": "curse_ends",
+      "quote": "and cursing them for $d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 807796
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "As the held entry, 6000 ms after the cast: gone, so the curse lasts between 4500 and 6000 ms against the stated 5000."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (below 20% at the end)",
+      "kind": "metric_delta",
+      "variant": "below_twenty",
+      "label_suffix": "below_twenty",
+      "quote": "If the target's health is below 20% at the end of duration,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 15,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "The contract makes 807796 Effect[1] a 5000 ms periodic dummy (AscensionNecromancerContracts.cpp:240-241); its first tick, at the end of the 5000 ms curse, casts Death's Due 808016 at the target with the effect amount only when GetTarget()->HealthBelowPct(20) (AscensionNecromancerAuras.cpp:202-208). The dummy is set to 15% health (target_health_pct, a precondition fixture) before the cast: no 808016 without a cast, one 6000 ms after it."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (not above 20%)",
+      "kind": "metric_delta",
+      "variant": "above_twenty",
+      "label_suffix": "above_twenty",
+      "quote": "If the target's health is below 20% at the end of duration,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 25,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "The health gate's control: the same cast on a dummy at 25% health deals no 808016 at the end of the curse."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (Shadowfrost damage)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "they take ${$m2+0+$SP*2} Shadowfrost Damage.",
+      "expected": 800,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 15,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "808016 is cast with 807796 Effect[1]'s amount, BasePoints 799 + 1 = 800 ($m2), plus Shadow/Frost spell power x 2 (NecromancerCoefficients row {808016, 0, 2.0, 48}; the contract sets its SchoolMask to Frost | Shadow, AscensionNecromancerContracts.cpp:242-243). At spell power 0, 984954 and 823764 removing crits and partial resists: 800."
+    },
+    {
+      "spell": 807796,
+      "name": "Death's Due (Shadowfrost damage with spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "they take ${$m2+0+$SP*2} Shadowfrost Damage.",
+      "expected": 938,
+      "tolerance": 1,
+      "before_expected": 0,
+      "trigger_spell": 807796,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_health_pct": 15,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          23265,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 808016,
+        "target": "dummy"
+      },
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "observe_source": "As the damage entry with Increase Shadow Dam 69 23265 (+69 Shadow) on the caster: 800 + 69 x 2 = 938."
+    },
+    {
       "spell": 680388,
       "name": "Fetid Ward (duration)",
       "kind": "cast_applies_aura",
