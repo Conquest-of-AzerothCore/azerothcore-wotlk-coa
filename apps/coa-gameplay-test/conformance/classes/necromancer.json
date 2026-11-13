@@ -178,6 +178,33 @@
   "passive_targets": [],
   "procs": [
     {
+      "aura": 704681,
+      "name": "Permafrost",
+      "tooltip": "|cFF66DDFFLevel 50 Passive|r\nGives your spells a $h% chance to grant you the |cFFFFFFFFPermafrost|r, which treats your next 2 spells cast as if the target were |cff3399ffFrozen|r. Lasts $801747d.",
+      "chance_token": "$h",
+      "trigger": {
+        "action": "cast",
+        "spell": 504868
+      },
+      "trial_casts": true,
+      "baseline": true,
+      "trigger_text": "Gives your spells",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801747,
+      "proc_spell_source": "Ready(player, 801747, 2) casts 801747 on the caster (AscensionNecromancerAbilities.cpp:44-52)",
+      "events_per_proc": 1,
+      "handler": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:265-266): every non-triggered Necromancer (SpellFamilyName 29) spell cast rolls Chance(player, 704681) (ProcChance 15, SPELLMOD_CHANCE_OF_SUCCESS applied) and calls Ready(player, 801747, 2); 704681's own aura 42 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61), so no native proc doubles it. Command: Undead 504868 (family 29, no minion needed) is the cast.",
+      "dbc": {
+        "704681": {
+          "ProcChance": 15,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    },
+    {
       "aura": 503740, "name": "Ghoul Mastery",
       "tooltip": "Damage dealt by your |cffffffffGhouls|r now has a $h% chance to transform them into a |cffffffffFrenzied Ghoul|r.",
       "aura_on_minion": true, "baseline": true, "chance_token": "$h",
@@ -1239,6 +1266,1041 @@
   "rotation": [],
   "stack": [],
   "behaviours": [
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (Command damage, one disease)",
+      "kind": "script_hit",
+      "variant": "one_disease",
+      "label_suffix": "one_disease",
+      "quote": "dealing 50% increased damage for each of your diseases on the target.",
+      "hit_spell": 707598,
+      "hit_effect": 0,
+      "caster_entry": 50067,
+      "trials": 6,
+      "minimum_hits": 6,
+      "learn": [
+        92123
+      ],
+      "multiplier": 1.5,
+      "casts": [
+        [
+          500329,
+          "caster"
+        ],
+        [
+          570131,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          570131,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "Factor() (AscensionNecromancerContracts.cpp:410-411) multiplies Command: Gargoyle 707598 by 1 + 0.5 x Diseases(player, target), the caster's own family-29 disease auras on the target (AscensionNecromancer.cpp:252-265). Each trial casts Crypt Plague 570131 (Dispel 3 disease, instant, 10000 ms) at the dummy before the Command, so the Gargoyle's hit is judged against the tooltip value x 1.5; the command_damage entry (no disease) is the x1 contrast on the same build. The control commands without a Gargoyle and must count no 707598 hit."
+    },
+    {
+      "spell": 504316,
+      "name": "Command: Hook (not while Pacify)",
+      "kind": "metric_delta",
+      "variant": "pacify",
+      "label_suffix": "pacify",
+      "quote": "@ext:Not usable while in Undead: Pacify.:ext@",
+      "expected": 173,
+      "before_expected": 0,
+      "trigger_spell": 504316,
+      "target": "dummy",
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "learn": [
+        92123
+      ],
+      "gate_spell": 500983,
+      "after_auras": [
+        [
+          500983,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 500,
+      "expire_ms": 3000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504316
+      },
+      "observe_source": "necromancer_casts::OnSpellCheckCast (AscensionNecromancerAbilities.cpp:158-160): a Command spell (Command: Hook 504316, SpellFamilyFlags[2] 16777216) is refused with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW (173) while the caster holds Undead: Pacify 500983. Summoning Adept 92123 learned at the start; each phase raises an Abomination 500335 and casts the hook at the dummy: without Pacify (control) it goes through (0); with 500983 on the caster (a harness set_aura precondition fixture of the stance, the claim is the hook's refusal) it is refused with 173."
+    },
+    {
+      "spell": 704681,
+      "name": "Permafrost (lasts)",
+      "kind": "cast_applies_aura",
+      "quote": "Lasts $801747d.",
+      "expected_ms": 12000,
+      "applied_aura": 801747,
+      "target": "caster",
+      "cast_spell": 801747,
+      "cast_target": "caster",
+      "observe_source": "Ready(player, 801747, 2) (AscensionNecromancerAbilities.cpp:44-52) casts Permafrost 801747 on the caster and sets 2 charges; 801747 DurationIndex 29 (12000 ms, $801747d), Effect[0] aura 262 on the caster (rewritten to SPELL_AURA_DUMMY, AscensionNecromancerContracts.cpp:259). A real cast of 801747 on the caster, the cast Ready makes, read before (absent), right after, and its expiry pair around 12000 ms."
+    },
+    {
+      "spell": 803741,
+      "name": "Mass Grave (instant above 50 Runic Power)",
+      "kind": "metric_delta",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "quote": "While above 50 Runic Power this spell is instant cast.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 803741,
+      "target": "caster",
+      "measure_actor": "caster",
+      "wait_ms": 200,
+      "expire_ms": 2500,
+      "phase_power": [
+        6,
+        500,
+        520
+      ],
+      "metric": "casting",
+      "fields": {},
+      "observe_source": "Unit::ModSpellCastTime (Unit.cpp:13029-13034): a Necromancer's Mass Grave 803741 has cast time 0 when its Runic Power is above 500 (50 shown); otherwise its 2000 ms cast (CastingTimeIndex 5) runs. Each phase sets Runic Power right before the cast and reads whether the caster is still casting 200 ms later: at exactly 500 (not above 50, the control) still casting, at 520 not casting (instant)."
+    },
+    {
+      "spell": 805197,
+      "name": "Graveyard (slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing the movement speed of enemies inside by ${-($m2)}%",
+      "expected": 0.685716,
+      "before_expected": 1.14286,
+      "tolerance": 0.0001,
+      "trigger_spell": 805197,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "cast_power": 1373,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "observe_source": "805197 Effect[1] 27 SPELL_EFFECT_PERSISTENT_AREA_AURA, aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -41 + 1 = -40 (${-($m2)} = 40), TARGET_UNIT_DEST_AREA_ENEMY in SpellRadius 13 (10 yd) of the cast location; no Necromancer code names 805197. A real cast at the dummy: its run speed rate reads 1.14286 with no cast (control) and 1.14286 x 0.6 = 0.685716 inside the graveyard 1500 ms later."
+    },
+    {
+      "spell": 805197,
+      "name": "Graveyard (lasts)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Lasts $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805197,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 19500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "cast_power": 1373,
+      "metric": "aura",
+      "fields": {
+        "spell": 805197
+      },
+      "observe_source": "805197 DurationIndex 18 = 20000 ms ($d): the persistent area aura's dynamic object lasts the spell's duration and its slow 805197 is on an enemy inside. Instant cast at the dummy: the aura is on the dummy 19500 ms after the cast and gone 1000 ms later: (19500, 20500] ms. No cast before (control): none."
+    },
+    {
+      "spell": 805197,
+      "name": "Graveyard (raised damage)",
+      "kind": "script_hit",
+      "variant": "raised",
+      "label_suffix": "raised",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 500365,
+      "hit_effect": 1,
+      "trials": 2,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          805197,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "cast_power": 1373,
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6500,
+      "observe_source": "805197 Effect[0] triggers Graveyard Tombstone Layout A 899900, which summons two Tombstones 542064 at the cast location; each Tombstone's event 4 (2 s after it is summoned, then every 3 s, AscensionNecromancerSummons.cpp:838-842) has the player cast Graveyard 500365 at its position: Effect[0] summons a Risen Ghoul 542065, Effect[1] SCHOOL_DAMAGE BasePoints 198 + 1 on enemies within SpellRadius 29 (6 yd). Each trial casts 805197 at the dummy; the control knows 805197 and does not cast it (no 500365 hit). 984954 removes crits, 823764 partial resists."
+    },
+    {
+      "spell": 500991,
+      "name": "Grave March (focus)",
+      "kind": "metric_delta",
+      "variant": "focus",
+      "label_suffix": "focus",
+      "quote": "Command your Undead to focus their attacks on the target enemy.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500991,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "target": "dummy"
+      },
+      "observe_source": "Grave March 500991 Effect[0] DUMMY: aura_ascension_necromancer_dummy calls Order(player, target, 500991) (AscensionNecromancerAbilities.cpp:377-378), and every non-stationary minion answers it (Responds(), AscensionNecromancerSummons.cpp:177-182) with AttackStart(target) and nothing else (:650-652). Read: Ghouls 50073 of the caster whose victim is the dummy, 3000 ms after the cast. Control: no Ghoul raised (the raise only in the after phase): 0; with one Ghoul: 1."
+    },
+    {
+      "spell": 503738,
+      "name": "Corpse Wagon (damage done)",
+      "kind": "hit_ratio",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Increases all damage dealt by party and raid members by $s1%.",
+      "expected": 1.03,
+      "observe_spell": 707592,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          503738
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "expected_source": "503738 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127, BasePoints 2 + 1 = 3 ($s1). The caster, a raid member of its own aura, casts Glacial Impact 707592 (Frost SCHOOL_DAMAGE, fixed BasePoints 112 + 1 and 2 per level, no die) at the dummy: control without 503738, treatment with it learned (a real learn). 823764 removes partial resists in both arms; only non-critical hits are compared."
+    },
+    {
+      "spell": 503738,
+      "name": "Corpse Wagon (does not stack)",
+      "kind": "hit_ratio",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.0,
+      "observe_spell": 707592,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            300963,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            300963,
+            1
+          ]
+        ],
+        "learn": [
+          503738
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "expected_source": "spell_group 2000184 (stack rule 3, the strongest only; data/sql/updates/pending_db_world/rev_20260922_27_raid_damage_percent_group.sql) holds the nine CoA raid damage auras, 503738 among them, each Effect[0] aura 79 +3% MiscValue 127. Both arms carry Hellbringer 300963 (a member whose only effect is that +3% raid aura; a harness set_aura precondition fixture, the claim is 503738's): with 503738 learned the damage of Glacial Impact 707592 stays at the control's (ratio 1.0), against 1.03 x 1.03 if they stacked."
+    },
+    {
+      "spell": 803741,
+      "name": "Mass Grave (targets)",
+      "kind": "fixed_count",
+      "variant": "targets",
+      "label_suffix": "targets",
+      "quote": "Transform up to $i nearby enemies into a ghoul,",
+      "expected": 5,
+      "radius": 8,
+      "radius_reason": "803741 Effects 0 and 1 TARGET_UNIT_SRC_AREA_ENEMY around the caster, SpellRadius 14 = 8 yd, MaxAffectedTargets 5 ($i): five of the seven Humanoids within 8 yd are affected, the one at 13 yd is not",
+      "cast_spell": 803741,
+      "target_rank": 803741,
+      "metric": "aura",
+      "cast_target": "caster",
+      "layout": "caster",
+      "repeats": 1,
+      "settle_ms": 1000,
+      "dummy_entry": 6,
+      "count_primary": true,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Seven Kobold Vermin 6 (creature type 7 Humanoid, level 60) within 8 yd of the caster and one at 13 yd; one real cast centred on the caster; the 803741 aura of the caster is read on each, the nearest included (count_primary): exactly five of the seven are affected, never the one beyond 8 yd."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (creature lasts)",
+      "variant": "creature_lasts",
+      "label_suffix": "creature_lasts",
+      "phase_power": [6, 0, 0],
+      "quote": "fearing them for $d",
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "expiry_wait_ms": 37500,
+      "after_expiry_expected": 1,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target (Humanoid) within 3 yd: the aura is absent before (control), present 500 ms after the cast lands and still present 38000 ms after it."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (creature ends)",
+      "variant": "creature_ends",
+      "label_suffix": "creature_ends",
+      "phase_power": [6, 0, 0],
+      "quote": "fearing them for $d",
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "expiry_wait_ms": 41500,
+      "after_expiry_expected": 0,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target: present 500 ms after the cast lands, gone 42000 ms after it: with the creature_lasts entry the end lies in (38000, 42000] ms."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (player lasts)",
+      "variant": "player_lasts",
+      "label_suffix": "player_lasts",
+      "phase_power": [6, 0, 0],
+      "quote": "fearing them for $d ($?s302923[9][8]).",
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "expiry_wait_ms": 7100,
+      "after_expiry_expected": 1,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. An enemy player (race 2, Humanoid) as the target, 302923 not known: present 500 ms after the cast lands and still present 7600 ms after it."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (player ends)",
+      "variant": "player_ends",
+      "label_suffix": "player_ends",
+      "phase_power": [6, 0, 0],
+      "quote": "fearing them for $d ($?s302923[9][8]).",
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "expiry_wait_ms": 7900,
+      "after_expiry_expected": 0,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player, 302923 not known: gone 8400 ms after the cast lands; with player_lasts the end lies in (7600, 8400] ms, 8 sec."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (putrifier lasts)",
+      "variant": "putrifier_lasts",
+      "label_suffix": "putrifier_lasts",
+      "phase_power": [6, 0, 0],
+      "quote": "fearing them for $d ($?s302923[9][8]).",
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "learn": [
+        302923
+      ],
+      "expiry_wait_ms": 8100,
+      "after_expiry_expected": 1,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with Putrifier 302923 learned: still present 8600 ms after the cast lands (past the 8 sec cap without it)."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (putrifier ends)",
+      "variant": "putrifier_ends",
+      "label_suffix": "putrifier_ends",
+      "phase_power": [6, 0, 0],
+      "quote": "fearing them for $d ($?s302923[9][8]).",
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "learn": [
+        302923
+      ],
+      "expiry_wait_ms": 8900,
+      "after_expiry_expected": 0,
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with 302923 learned: gone 9400 ms after the cast lands; with putrifier_lasts the end lies in (8600, 9400] ms, 9 sec."
+    },
+    {
+      "kind": "metric_delta",
+      "expected": 0,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 803741,
+      "metric": "aura",
+      "fields": {
+        "spell": 803741,
+        "caster": "caster"
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 803741,
+      "name": "Mass Grave (humanoids only)",
+      "variant": "humanoids_only",
+      "label_suffix": "humanoids_only",
+      "quote": "Only affects Humanoids.",
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. The dummy (Harvest Golem 36, creature type 9 Mechanical) within 3 yd: no 803741 aura before (control) and none after a real cast (SpellInfo::CheckTarget refuses a TargetCreatureType mismatch); the Humanoid Kobold Vermin of the creature_lasts and targets entries, at the same distance, are the affected contrast."
+    },
+    {
+      "spell": 504316,
+      "name": "Command: Hook (halt)",
+      "kind": "metric_delta",
+      "variant": "halt",
+      "label_suffix": "halt",
+      "quote": "slowing their movement speed to a halt for $800043d.",
+      "expected": 0.0228572,
+      "before_expected": 1.14286,
+      "tolerance": 0.0001,
+      "trigger_spell": 504316,
+      "target": "dummy",
+      "setup_casts": [
+        500335
+      ],
+      "setup_only_after": true,
+      "gate_spell": 92123,
+      "setup_wait_ms": 4000,
+      "measure_actor": "dummy",
+      "wait_ms": 1000,
+      "expire_ms": 3000,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "observe_source": "Command: Hook 504316 orders the Abominations (Responds(), AscensionNecromancerSummons.cpp:174-175); DoAction for 504316 (:657-662) jumps the target to the Abomination and casts Abomination Hook 800043 on it: Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -99 + DieSides 1 = -98 (Effects 1 and 2 removed by contract, AscensionNecromancerContracts.cpp:301-302). Read: the dummy's run speed rate 1000 ms after the Command. Control: no Abomination raised (Summoning Adept 92123 learned between the phases, the raise only in the after phase), the Command slows nothing: the dummy's own rate 1.14286; with an Abomination 1.14286 x (1 - 0.98) = 0.0228572: -98% (BasePoints -99 + 1), a halt in all but 2%."
+    },
+    {
+      "spell": 504316,
+      "name": "Command: Hook (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "slowing their movement speed to a halt for $800043d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504316,
+      "target": "dummy",
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "gate_spell": 92123,
+      "gate_timing": "start",
+      "gate_settle_ms": 1500,
+      "trigger_only_after": true,
+      "measure_actor": "dummy",
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 800043
+      },
+      "observe_source": "Abomination Hook 800043 DurationIndex 39 = 2000 ms ($800043d), cast by the Abomination on the hooked target (AscensionNecromancerSummons.cpp:661). Summoning Adept 92123 at the start (Capacity 3); before (control) no Command and no 800043 on the dummy; after one Raise: Abomination and Command: Hook, 800043 is on the dummy 1500 ms after the Command and gone 1000 ms later: duration in (1500, 2500] ms."
+    },
+    {
+      "spell": 531130,
+      "name": "Animate: Bone Construct (lifetime)",
+      "kind": "metric_delta",
+      "variant": "lifetime",
+      "cast_power": 1000,
+      "label_suffix": "lifetime",
+      "quote": "Animate a Bone Construct to aid you in combat for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 531130,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 22500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503200
+      },
+      "observe_source": "531130 Effect[0] 28 SPELL_EFFECT_SUMMON of 503200 at the target location (TARGET_DEST_DEST), DurationIndex 18 = 20000 ms ($d); NecromancerSummons row {531130, 0, 503200, 1} (AscensionNecromancerData.h:117). The cast completes 3000 ms after it starts (CastingTimeIndex 14): the Construct is owned 22500 ms after the cast starts (19500 ms into its life) and gone 1000 ms later (20500 ms): lifetime in (19500, 20500] ms. Before (control) no cast: none."
+    },
+    {
+      "spell": 531130,
+      "name": "Animate: Bone Construct (damage)",
+      "kind": "script_hit",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Shadow damage, piercing all invulnerabilities, resistances, and immunities.",
+      "hit_spell": 531132,
+      "cast_power": 1000,
+      "caster_entry": 503200,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          531130,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 4000,
+      "observe_source": "IsSummonedBy casts Bone Construct Hidden 531133 on every 503200 (AscensionNecromancerSummons.cpp:559-560); aura_ascension_necromancer_event casts Bone Deconstruct 531132 from the Construct at its melee target while 531133 is on it (AscensionNecromancerEvents.cpp:179-180): Effect[0] SCHOOL_DAMAGE Shadow, BasePoints 1499 + 1, 20 per level from 57, coefficient row {531132, 0, SP 2.0, AP 0.5} (AscensionNecromancerData.h:50). The Construct is animated at the dummy and Command: Undead 504868 sends it in; the control commands without a Construct and must count no 531132 hit. 984954 removes crits, 823764 partial resists."
+    },
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (raised)",
+      "kind": "metric_delta",
+      "variant": "count",
+      "label_suffix": "count",
+      "quote": "to aid you in combat, occupying 3",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500329,
+      "target": "caster",
+      "cast_in_before": false,
+      "gate_spell": 92123,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50067
+      },
+      "observe_source": "500329 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50067; NecromancerSummons row {500329, 0, 50067, 1} (AscensionNecromancerData.h:98). Cost(500329) = 3 (AscensionNecromancer.cpp:82) exceeds the reference Life Force 2, so the gate learns Summoning Adept 92123 (Capacity 3) between the phases. No cast before (control): no Gargoyle; one Raise: Gargoyle after: one 50067."
+    },
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (Life Force)",
+      "kind": "metric_delta",
+      "variant": "life_force",
+      "label_suffix": "life_force",
+      "quote": "occupying 3",
+      "expected": 0,
+      "before_expected": 3,
+      "trigger_spell": 500329,
+      "target": "caster",
+      "gate_spell": 92123,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_settle_ms": 1500,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "observe_source": "Life Force 525004 holds Capacity() - Used() stacks; Summoning Adept 92123 learned at the start (Capacity 3). Before the raise (control) 3 free Life Force; after one Raise: Gargoyle none: Cost(500329) = 3 (AscensionNecromancer.cpp:82)."
+    },
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (in combat)",
+      "kind": "metric_delta",
+      "variant": "combat",
+      "label_suffix": "combat",
+      "quote": "to aid you in combat, occupying 3",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500329
+      ],
+      "setup_only_after": true,
+      "gate_spell": 92123,
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50067
+      },
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "observe_source": "Both phases cast Command: Undead 504868 at the dummy and count the hits of 50067 creatures in the caster's combat log for 12000 ms. Control: no Gargoyle, 0. The treatment raises one first (Summoning Adept 92123 for Capacity 3): it hits the dummy at least once."
+    },
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (Command damage)",
+      "kind": "script_hit",
+      "variant": "command_damage",
+      "label_suffix": "command_damage",
+      "quote": "Plague damage,",
+      "hit_spell": 707598,
+      "hit_effect": 0,
+      "caster_entry": 50067,
+      "trials": 6,
+      "minimum_hits": 6,
+      "learn": [
+        92123
+      ],
+      "casts": [
+        [
+          500329,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "Command: Undead 504868 orders every non-stationary minion (Responds(), AscensionNecromancerSummons.cpp:177-182); npc_ascension_necromancer::DoAction case 50067 casts Command: Gargoyle 707598 at the target (AscensionNecromancerSummons.cpp:715-716): Effect[0] SCHOOL_DAMAGE, Plague (SchoolMask 40), BasePoints 472 + DieSides 22, coefficient row {707598, 0, 0.65} (AscensionNecromancerData.h:68). Factor() multiplies by 1 + 0.5 per disease of the caster on the target (AscensionNecromancerContracts.cpp:410-411): the dummy carries none (Bone Toss 704706 of Effect[1] has Dispel 0). The control commands without a Gargoyle and must count no 707598 hit. 984954 removes crits, 823764 partial resists (both read through the owner, as the Ghoul Command entry)."
+    },
+    {
+      "spell": 504859,
+      "name": "Raise: Crypt Fiend (raised)",
+      "kind": "metric_delta",
+      "variant": "count",
+      "label_suffix": "count",
+      "quote": "to aid you in combat, occupying 2",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504859,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50323
+      },
+      "observe_source": "504859 Effect[0] 28 SPELL_EFFECT_SUMMON, EffectMiscValue[0] 50323; NecromancerSummons row {504859, 0, 50323, 1} (AscensionNecromancerData.h:111). No cast (control): no Crypt Fiend; one Raise: Crypt Fiend gives one."
+    },
+    {
+      "spell": 504859,
+      "name": "Raise: Crypt Fiend (Life Force)",
+      "kind": "metric_delta",
+      "variant": "life_force",
+      "label_suffix": "life_force",
+      "quote": "occupying 2",
+      "expected": 0,
+      "before_expected": 2,
+      "trigger_spell": 504859,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "observe_source": "Life Force 525004 holds Capacity() - Used() stacks, Capacity 2 at the reference character, Cost(504859) = 2 (AscensionNecromancer.cpp:89-91). Without a Crypt Fiend (control) 2 stacks; one Raise: Crypt Fiend leaves none."
+    },
+    {
+      "spell": 504859,
+      "name": "Raise: Crypt Fiend (Command damage)",
+      "kind": "script_hit",
+      "variant": "command_damage",
+      "label_suffix": "command_damage",
+      "quote": "Frost damage and bounce to a nearby enemy.",
+      "hit_spell": 822074,
+      "caster_entry": 50323,
+      "trials": 6,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          504859,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "npc_ascension_necromancer::DoAction case 50323 casts Frost-Congealed Barbs 822074 at the Command's target (AscensionNecromancerSummons.cpp:725-726): Effect[0] SCHOOL_DAMAGE Frost, BasePoints 340 + DieSides 3, EffectChainTarget 2. One dummy: the primary hit only. The control commands without a Crypt Fiend and must count no 822074 hit. 984954 removes crits, 823764 partial resists."
+    },
+    {
+      "spell": 504859,
+      "name": "Raise: Crypt Fiend (bounce)",
+      "kind": "fixed_count",
+      "variant": "bounce",
+      "label_suffix": "bounce",
+      "quote": "Frost damage and bounce to a nearby enemy.",
+      "expected": 1,
+      "radius": 8,
+      "radius_reason": "822074 Effect[0] EffectChainTarget 2: the primary target and one bounce to a nearby enemy; the dummies stand within 8 yd of the primary, inside the engine's chain jump reach, the far dummy beyond it",
+      "cast_spell": 504868,
+      "target_rank": 822074,
+      "caster_entry": 50323,
+      "setup_casts": [
+        [
+          504859,
+          "caster"
+        ]
+      ],
+      "repeats": 3,
+      "settle_ms": 1500,
+      "observe_source": "One Crypt Fiend is raised, then Command: Undead 504868 at the primary dummy three times; every Command makes the Fiend (entry 50323) cast 822074, read per dummy from the Fiend's hits. Primary plus one bounce: one additional dummy inside the radius is ever hit, the second stays unhit."
+    },
+    {
+      "spell": 501997,
+      "name": "Ice Barrage (tick damage)",
+      "kind": "script_hit",
+      "variant": "tick",
+      "label_suffix": "tick",
+      "quote": "Frost damage every",
+      "hit_spell": 803779,
+      "value_spell": 501997,
+      "cast_power": 1000,
+      "value_effect": 0,
+      "trials": 4,
+      "minimum_hits": 12,
+      "casts": [
+        [
+          501997,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "501997 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, amplitude 250 ms, triggers Ice Barrage 803779 (SCHOOL_DAMAGE Frost) with the aura amount ($m1 = 311, EffectRealPointsPerLevel 0.914 from level 60) on the target; no NecromancerCoefficients row names 803779 or 501997. Each trial casts 501997 at the dummy; the control knows 501997 and does not cast it (no 803779 hit). 984954 removes crits, 823764 partial resists."
+    },
+    {
+      "spell": 501997,
+      "name": "Ice Barrage (ticks)",
+      "kind": "metric_delta",
+      "variant": "ticks",
+      "cast_power": 1000,
+      "label_suffix": "ticks",
+      "quote": "Frost damage every $t1 sec for $d.",
+      "expected": 4,
+      "before_expected": 0,
+      "trigger_spell": 501997,
+      "target": "dummy",
+      "cast_in_before": false,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803779,
+        "target": "dummy"
+      },
+      "observe_source": "501997 DurationIndex 36 (1000 ms, $d), Effect[0] amplitude 250 ms ($t1 0.25 sec): four 803779 hits per cast, as the live logs (4 hits per cast in most bursts). No cast (control): 0 hits; one cast: 4."
+    },
+    {
+      "spell": 501997,
+      "name": "Ice Barrage (entomb)",
+      "kind": "metric_delta",
+      "variant": "entomb",
+      "cast_power": 1000,
+      "label_suffix": "entomb",
+      "quote": "you entomb your target in ice, freezing them for $804328d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501997,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 804328
+      },
+      "observe_source": "501997 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, amplitude 999 ms over the 1000 ms aura, triggers Frozen 804328 (two aura 26 roots, DurationIndex 35 = 4000 ms, $804328d) once at the end of the barrage. The cast completes 2000 ms after it starts (CastingTimeIndex 5), the barrage ends 1000 ms later and the freeze is applied then: present on the dummy 6500 ms after the cast starts (3500 ms into the freeze), gone 1000 ms later (4500 ms). No cast before (control): no 804328."
+    },
+    {
+      "spell": 707402,
+      "name": "Glacial Impact (frozen gate)",
+      "kind": "cast_gate",
+      "quote": "Requires Frozen Target",
+      "bypass_spell": 801747,
+      "bypass_name": "Permafrost",
+      "bypass_quote": "Affected enemy is considered Frozen.",
+      "observe_source": "AscensionNecromancerContracts.cpp:261-262 clears the TargetAuraState of 704355 and 707399-707402; necromancer_casts::OnSpellCheckCast (AscensionNecromancerAbilities.cpp:169-171) refuses 707402 with SPELL_FAILED_TARGET_AURASTATE (111) when the target lacks AURA_STATE_FROZEN and the caster lacks Permafrost 801747. Attempts at the dummy: no frozen state and no 801747 (refused), after a real cast of 801747 on the caster (cast), and with 801747 unlearned (its owned aura removed, Player::removeSpell) and Frost Nova 122 set on the dummy (ADR 0303 fixture: SpellInfo::GetAuraState gives AURA_STATE_FROZEN to a Frost root; the claim is not a Necromancer freeze)."
+    },
+    {
+      "spell": 707402,
+      "name": "Glacial Impact (damage)",
+      "kind": "script_hit",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Frost damage.",
+      "hit_spell": 707592,
+      "value_spell": 707402,
+      "value_effect": 0,
+      "trials": 6,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          707402,
+          "dummy"
+        ]
+      ],
+      "control_casts": [],
+      "caster_auras": [
+        [
+          801747,
+          1
+        ],
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1000,
+      "observe_source": "707402 Effect[0] 142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE casts Glacial Impact 707592 (SCHOOL_DAMAGE, Frost) with BasePoints0 = $m1 = 812; AscensionNecromancerContracts.cpp ModifySpellEffectBaseValue applies the NecromancerCoefficients row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67). Each trial casts 707402 at the dummy; the control arm knows 707402 and does not cast it (no 707592 hit). Fixtures on the caster: Permafrost 801747 (the frozen condition of OnSpellCheckCast, AscensionNecromancerAbilities.cpp:169-171; not the claim), 984954 (spell crit -1000: non-critical hits) and 823764 (-9999 target resistance: unresisted)."
+    },
+    {
+      "spell": 707402,
+      "name": "Glacial Impact (Glacier Lord crit)",
+      "kind": "hit_ratio",
+      "variant": "glacier_lord",
+      "label_suffix": "glacier_lord",
+      "quote": "This spell is guaranteed to critically strike.",
+      "expected": 1.0,
+      "observe_spell": 707592,
+      "cast_spell": 707402,
+      "cast_wait_ms": 1600,
+      "cast_power": 1373,
+      "rate": "critical",
+      "expected_points": 100,
+      "control": {
+        "auras": [
+          [
+            801747,
+            1
+          ],
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            801747,
+            1
+          ],
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          560852
+        ]
+      },
+      "trials": 20,
+      "expected_source": "707402's $?s560852[This spell is guaranteed to critically strike.]: Glacier Lord 560852 Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS is rewritten to ASCENSION_STATE_MASKED_GUARANTEED_CRIT (AscensionNecromancerContracts.cpp:171-174) on the 707592 class mask (EffectSpellClassMask[2] 268435456) with condition MiscValueB 4 (frozen); Unit.cpp:4486-4492 meets it while the caster holds Permafrost 801747, and Unit.cpp:10567-10569 raises the crit chance to 100. Both arms hold the caster's spell crit at -1000 (984954), so the control arm reads 0% critical 707592 hits and the treatment arm (560852 learned, a real learn) 100%: +100 points. Permafrost 801747 is the frozen precondition fixture in both arms."
+    },
     {
       "spell": 500985,
       "name": "Undead: Protect (defensive after Assault)",

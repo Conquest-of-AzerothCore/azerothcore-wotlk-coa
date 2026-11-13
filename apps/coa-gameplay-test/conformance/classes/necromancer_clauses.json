@@ -525,16 +525,32 @@
   {
     "spell": 500329,
     "clause": "Raise a fallen Gargoyle to aid you in combat, occupying 3 Life Force.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "Raise a fallen Gargoyle to aid you in combat",
+        "labels": [
+          "500329 behaviour_metric_delta count",
+          "500329 behaviour_metric_delta combat"
+        ]
+      },
+      {
+        "claim": "occupying 3 Life Force",
+        "labels": [
+          "500329 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067."
   },
   {
     "spell": 500329,
     "clause": "Command: Shoots necrotic bile at an enemy, dealing ${$707598m1+$707598ppl1+$SP*0.65} Plague damage,",
     "labels": [
-      "500329 effect_value 707598e0 #0"
+      "500329 script_hit 707598 command_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067."
   },
   {
     "spell": 500329,
@@ -1025,16 +1041,31 @@
   {
     "spell": 503738,
     "clause": "Increases all damage dealt by party and raid members by $s1%.",
-    "labels": [
-      "503738 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases all damage dealt ... by $s1%",
+        "labels": [
+          "503738 behaviour_hit_ratio damage"
+        ]
+      },
+      {
+        "claim": "by party and raid members",
+        "labels": [
+          "503738 effect_value e0 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found."
   },
   {
     "spell": 503738,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "503738 behaviour_hit_ratio no_stack"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found."
   },
   {
     "spell": 503738,
@@ -1109,18 +1140,37 @@
   {
     "spell": 504316,
     "clause": "Command your Abominations to hook an enemy to their location, slowing their movement speed to a halt for $800043d.",
-    "labels": [
-      "504316 spell_duration 800043 #0"
+    "claims": [
+      {
+        "claim": "Command your Abominations to hook an enemy to their location",
+        "labels": [
+          "504316 spell_duration 800043 #0"
+        ]
+      },
+      {
+        "claim": "slowing their movement speed to a halt",
+        "labels": [
+          "504316 behaviour_metric_delta halt"
+        ]
+      },
+      {
+        "claim": "for $800043d",
+        "labels": [
+          "504316 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'to a halt for 2 seconds' and 'Not usable while in Undead: Pacify'; coa-obtainable: in the live capture; logs: no line for 504316 or 800043."
   },
   {
     "spell": 504316,
     "clause": "@ext:Not usable while in Undead: Pacify.:ext@",
     "labels": [
-      "504316 effect_value #1"
+      "504316 behaviour_metric_delta pacify"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub 'to a halt for 2 seconds' and 'Not usable while in Undead: Pacify'; coa-obtainable: in the live capture; logs: no line for 504316 or 800043."
   },
   {
     "spell": 504357,
@@ -1367,17 +1417,30 @@
     "spell": 531130,
     "clause": "Animate a Bone Construct to aid you in combat for $d.",
     "labels": [
-      "531130 aura_duration_ms #0"
+      "531130 behaviour_metric_delta lifetime"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860."
   },
   {
     "spell": 531130,
     "clause": "It moves at a slow speed, but upon reaching an enemy, deals ${$531132m1+$531132ppl1+$SP*2+$AP*.5} Shadow damage, piercing all invulnerabilities, resistances, and immunities.",
-    "labels": [
-      "531130 effect_value 531132e0 #1"
+    "claims": [
+      {
+        "claim": "upon reaching an enemy, deals ${$531132m1+$531132ppl1+$SP*2+$AP*.5} Shadow damage",
+        "labels": [
+          "531130 script_hit 531132 damage"
+        ]
+      },
+      {
+        "claim": "It moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities",
+        "labels": [
+          "531130 effect_value 531132e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860."
   },
   {
     "spell": 531135,
@@ -2060,22 +2123,30 @@
   {
     "spell": 707402,
     "clause": "Requires Frozen Target",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "707402 cast_gate blocked",
+      "707402 cast_gate allowed"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976."
   },
   {
     "spell": 707402,
     "clause": "Call down icy boulders onto a Frozen enemy, dealing ${$m1+0+$spfr*1.405} Frost damage.",
     "labels": [
-      "707402 effect_value e0 #0"
+      "707402 script_hit 707592 damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976."
   },
   {
     "spell": 707402,
     "clause": "$?s560852[\r\n\r\nThis spell is guaranteed to critically strike.][]",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "707402 behaviour_hit_ratio glacier_lord"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976."
   },
   {
     "spell": 707402,
@@ -2156,9 +2227,10 @@
     "spell": 704681,
     "clause": "Gives your spells a $h% chance to grant you the Permafrost,",
     "labels": [
-      "704681 effect_value #0"
+      "704681 proc_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier)."
   },
   {
     "spell": 704681,
@@ -2170,9 +2242,11 @@
     "spell": 704681,
     "clause": "Lasts $801747d.",
     "labels": [
-      "704681 spell_duration 801747 #1"
+      "704681 behaviour_cast_applies_aura",
+      "704681 behaviour_expiry"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier)."
   },
   {
     "spell": 704682,
@@ -2879,21 +2953,31 @@
   {
     "spell": 501997,
     "clause": "Unleash a relentless volley of glacial shards, dealing ${$m1+0+$SP*.5971} Frost damage every $t1 sec for $d.",
-    "labels": [
-      "501997 effect_value e0 #0",
-      "501997 aura_amount e0 #0",
-      "501997 aura_duration_ms #1",
-      "501997 effect_value #3"
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*.5971} Frost damage",
+        "labels": [
+          "501997 script_hit 803779 tick"
+        ]
+      },
+      {
+        "claim": "every $t1 sec for $d",
+        "labels": [
+          "501997 behaviour_metric_delta ticks"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul and coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 4 803779 hits per cast (1499 of 2226 bursts), Frozen 804328 4 s modal (1325 of 2357)."
   },
   {
     "spell": 501997,
     "clause": "At the end of the duration, you entomb your target in ice, freezing them for $804328d.",
     "labels": [
-      "501997 spell_duration 804328 #2"
+      "501997 behaviour_metric_delta entomb"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul and coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 4 803779 hits per cast (1499 of 2226 bursts), Frozen 804328 4 s modal (1325 of 2357)."
   },
   {
     "spell": 801938,
@@ -3127,29 +3211,58 @@
     "spell": 803741,
     "clause": "Transform up to $i nearby enemies into a ghoul,",
     "labels": [
-      "803741 effect_value #0"
+      "803741 targets behaviour_fixed_count"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5 nearby enemies', '40 seconds (8)', 'Only affects Humanoids', 'above 50 Runic Power ... instant'; coa-obtainable: in the live capture; logs: 5 cast starts only, no aura line."
   },
   {
     "spell": 803741,
     "clause": "fearing them for $d ($?s302923[9][8]).",
-    "labels": [
-      "803741 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "fearing them for $d",
+        "labels": [
+          "803741 behaviour_metric_delta creature_lasts",
+          "803741 behaviour_metric_delta creature_ends"
+        ]
+      },
+      {
+        "claim": "($?s302923[9][8]) [8 sec against players]",
+        "labels": [
+          "803741 behaviour_metric_delta player_lasts",
+          "803741 behaviour_metric_delta player_ends"
+        ]
+      },
+      {
+        "claim": "($?s302923[9][8]) [9 sec with Putrifier 302923]",
+        "labels": [
+          "803741 behaviour_metric_delta putrifier_lasts",
+          "803741 behaviour_metric_delta putrifier_ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5 nearby enemies', '40 seconds (8)', 'Only affects Humanoids', 'above 50 Runic Power ... instant'; coa-obtainable: in the live capture; logs: 5 cast starts only, no aura line."
   },
   {
     "spell": 803741,
     "clause": "Only affects Humanoids.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "803741 behaviour_metric_delta humanoids_only",
+      "803741 targets behaviour_fixed_count"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5 nearby enemies', '40 seconds (8)', 'Only affects Humanoids', 'above 50 Runic Power ... instant'; coa-obtainable: in the live capture; logs: 5 cast starts only, no aura line."
   },
   {
     "spell": 803741,
     "clause": "While above 50 Runic Power this spell is instant cast.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "803741 behaviour_metric_delta instant"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5 nearby enemies', '40 seconds (8)', 'Only affects Humanoids', 'above 50 Runic Power ... instant'; coa-obtainable: in the live capture; logs: 5 cast starts only, no aura line."
   },
   {
     "spell": 803777,
@@ -4218,16 +4331,42 @@
   {
     "spell": 504859,
     "clause": "Raise a Crypt Fiend to aid you in combat, occupying 2 Life Force.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "Raise a Crypt Fiend to aid you in combat",
+        "labels": [
+          "504859 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "occupying 2 Life Force",
+        "labels": [
+          "504859 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; coa-obtainable: not in the live capture; logs: 822074 1003 hits from Crypt Fiends, 1 to 6 targets within 50 ms (several Fiends: logs do not decide the bounce count)."
   },
   {
     "spell": 504859,
     "clause": "Command: Shoots barbs at your target that deal ${$822074m1*$<scalingbp>} Frost damage and bounce to a nearby enemy.",
-    "labels": [
-      "504859 effect_value 822074e0 #0"
+    "claims": [
+      {
+        "claim": "Shoots barbs at your target that deal ${$822074m1*$<scalingbp>} Frost damage",
+        "labels": [
+          "504859 script_hit 822074 command_damage"
+        ]
+      },
+      {
+        "claim": "and bounce to a nearby enemy",
+        "labels": [
+          "504859 bounce behaviour_fixed_count"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; coa-obtainable: not in the live capture; logs: 822074 1003 hits from Crypt Fiends, 1 to 6 targets within 50 ms (several Fiends: logs do not decide the bounce count)."
   },
   {
     "spell": 533239,
@@ -4693,26 +4832,39 @@
     "spell": 805197,
     "clause": "Create a graveyard at target location, slowing the movement speed of enemies inside by ${-($m2)}%",
     "labels": [
-      "805197 effect_value e1 #0",
-      "805197 aura_amount e1 #0"
+      "805197 behaviour_metric_delta slow"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats)."
   },
   {
     "spell": 805197,
     "clause": "and periodically raising the Undead from the ground, dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies and creating a corpse.",
-    "labels": [
-      "805197 effect_value 500365e1 #1"
+    "claims": [
+      {
+        "claim": "dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies",
+        "labels": [
+          "805197 script_hit 500365 raised"
+        ]
+      },
+      {
+        "claim": "and periodically raising the Undead from the ground ... and creating a corpse",
+        "labels": [
+          "805197 effect_value 500365e1 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats)."
   },
   {
     "spell": 805197,
     "clause": "Lasts $d.",
     "labels": [
-      "805197 aura_duration_ms #2"
+      "805197 behaviour_metric_delta lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats)."
   },
   {
     "spell": 807811,
@@ -4919,8 +5071,11 @@
   {
     "spell": 500991,
     "clause": "Command your Undead to focus their attacks on the target enemy.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "500991 behaviour_metric_delta focus"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul and coabuildhub nothing found; coa-obtainable: not in the live capture; logs: nothing found."
   },
   {
     "spell": 500991,
@@ -4931,14 +5086,24 @@
   {
     "spell": 504868,
     "clause": "Command your Undead minions to perform a unique attack on your target.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "500329 script_hit 707598 command_damage",
+      "504859 script_hit 822074 command_damage",
+      "531130 script_hit 531132 damage"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; coa-obtainable: not in the live capture; logs: nothing found by id."
   },
   {
     "spell": 504868,
     "clause": "Refer to individual Raise spells for their Command effect.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "500329 script_hit 707598 command_damage",
+      "504859 script_hit 822074 command_damage",
+      "531130 script_hit 531132 damage"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; coa-obtainable: not in the live capture; logs: nothing found by id."
   },
   {
     "spell": 562028,
