@@ -887,6 +887,14 @@ mutant at +1000%.
 shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
 33% per tick, 40 parts).
 
+### Energize range (`behaviour_metric_delta`, `kind: "energize_range"`, ADR 0549)
+
+`cast_spell` is cast `casts` times at the dummy (`caster_auras` and `target_auras` set before each cast, Runic Power set
+to 0); the cumulative `energize_spell` energize total and count are read every 250 ms (`polls_per_cast` reads per
+cast). An interval whose count rose by exactly one gives that event's amount; at least `minimum_events` such amounts
+must be read, all inside `low`..`high`, with both ends seen. Soulfreeze 801724: 800344 rolls 30..80 per tick, 140 casts,
+384 events.
+
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
 One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once

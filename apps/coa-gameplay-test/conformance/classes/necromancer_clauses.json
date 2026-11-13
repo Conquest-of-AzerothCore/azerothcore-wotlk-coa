@@ -6192,7 +6192,8 @@
     "spell": 572023,
     "clause": "Each tick generates $/10;800344s2 Runic Power.",
     "labels": [
-      "572023 effect_value #4"
+      "572023 effect_value #4",
+      "801724 behaviour_metric_delta energize_range"
     ],
     "kind": "claim",
     "reason": "Not final, route pending (M side b, 2026-11-13): the stable frozen fixture now exists (ADR 0491; the proc lands at 25.16% on an Ice-Locked dummy, row 148). Open: a per-tick read of one chain: each 801728 tick is own Frost damage and re-rolls Soulfreeze on the frozen dummy (25%), and 801728 Effect[1] aura 271 (+5% Frost damage taken, MiscValue 16) raises later ticks, so totals over many procs do not give the per-tick amount, period or count; route: a script_hit of 801728 with the dummy fixture and only the first tick of each chain, or a fixture ending the frozen state after the first proc. Observation: 800344 Effect[1] ENERGIZE BasePoints 29 DieSides 51 rolls 30 to 80 per tick while the token $/10;800344s2 shows 3 (unmeasured lead). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 572023 0 lines by id (the talent), 'Soulfreeze' 13165 lines by name (801728 7013 hits, 800344 13996 lines); the logs carry no frozen state of the target, so they do not decide the chance; MCP not queried (unavailable)."
