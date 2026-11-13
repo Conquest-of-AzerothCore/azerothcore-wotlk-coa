@@ -583,8 +583,13 @@ def metric_class(verdict: Verdict) -> str:
     return METRIC_EVIDENCE[metric]
 
 
+NO_STACK_WORDS = r'do(?:es)? not stack'
+
+
 def promised_state(verdict: Verdict, clause: str) -> bool:
     detail = verdict.detail or {}
+    if verdict.check == BEHAVIOUR_GROUP_STACK_CAP:
+        return re.search(rf'\b(?:{NO_STACK_WORDS})\b', clause, re.IGNORECASE) is not None
     if verdict.check not in CONTRAST_CHECKS:
         return False
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) != LEARNED_CONTRAST:

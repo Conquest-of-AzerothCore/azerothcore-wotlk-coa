@@ -1129,5 +1129,24 @@ class CastSpeedPromiseTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['health'], EVENT)
 
 
+
+class NoStackStatePromiseTest(unittest.TestCase):
+    def capped(self, status: str = 'ok') -> list:
+        from behaviours import BEHAVIOUR_GROUP_STACK_CAP
+        return [judged('1 behaviour_group_stack_cap', BEHAVIOUR_GROUP_STACK_CAP, 'spell_crit_chance', status=status)]
+
+    def test_a_stack_cap_state_read_proves_a_no_stack_clause(self):
+        clause = claim('Does not stack with similar effects.', '1 behaviour_group_stack_cap')
+        self.assertEqual(evidence_of([clause], self.capped())[0], [BEHAVIOUR])
+
+    def test_a_stack_cap_state_read_proves_no_other_clause(self):
+        clause = claim('In addition, increases the critical strike chance of Ice Barrage', '1 behaviour_group_stack_cap')
+        self.assertEqual(evidence_of([clause], self.capped())[0], [DATA])
+
+    def test_a_summed_reading_leaves_the_clause_unproven(self):
+        clause = claim('Does not stack with similar effects.', '1 behaviour_group_stack_cap')
+        self.assertEqual(evidence_of([clause], self.capped('alert'))[0], [UNPROVEN])
+
+
 if __name__ == '__main__':
     unittest.main()
