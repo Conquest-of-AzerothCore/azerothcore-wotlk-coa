@@ -7,35 +7,168 @@
     "again when he dies or evades."
   ],
   "timeout_ms": 120000,
-  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
   "players": [
-    { "id": "p", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000 }
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000
+    }
   ],
   "steps": [
-    { "action": "wait", "ms": 1000 },
-    { "action": "ascension_dungeon_difficulty_packet", "actor": "p", "value": 1 },
-    { "action": "wait", "ms": 500 },
-    { "action": "teleport", "actor": "p", "map": 33, "x": -124.0, "y": 2160.0, "z": 155.8, "o": 0.0 },
-    { "action": "assert", "label": "CONTROL: p is in a Heroic Shadowfang Keep", "actor": "p", "metric": "map_difficulty",
-      "equals": 1, "within_ms": 15000 },
-    { "action": "wait", "ms": 1500 },
-    { "action": "set_health", "actor": "p", "value": 50000000, "maximum": 50000000 },
-    { "action": "assert", "label": "CONTROL: the door is shut while Nandos lives", "actor": "p", "metric": "nearby_gameobject_state",
-      "entry": 18971, "equals": 1 },
-    { "action": "attack_nearby", "actor": "p", "entry": 3927, "kill": true },
-    { "action": "assert", "label": "CONTROL: Nandos's death opens the door", "actor": "p", "metric": "nearby_gameobject_state",
-      "entry": 18971, "equals": 0, "within_ms": 3000 },
-    { "action": "teleport", "actor": "p", "map": 33, "x": -82.0, "y": 2153.0, "z": 155.8, "o": 0.0 },
-    { "action": "wait", "ms": 500 },
-    { "action": "attack_nearby", "actor": "p", "entry": 4275 },
-    { "action": "assert", "label": "CONTROL: Arugal is in combat", "actor": "p", "metric": "combat", "equals": 1, "within_ms": 5000 },
-    { "action": "teleport", "actor": "p", "map": 33, "x": -112.0, "y": 2160.0, "z": 155.8, "o": 0.0 },
-    { "action": "assert", "label": "The door shuts while Arugal fights", "actor": "p", "metric": "nearby_gameobject_state",
-      "entry": 18971, "equals": 1, "within_ms": 2000 },
-    { "action": "teleport", "actor": "p", "map": 33, "x": -82.0, "y": 2153.0, "z": 155.8, "o": 0.0 },
-    { "action": "attack_nearby", "actor": "p", "entry": 4275, "kill": true },
-    { "action": "teleport", "actor": "p", "map": 33, "x": -112.0, "y": 2160.0, "z": 155.8, "o": 0.0 },
-    { "action": "assert", "label": "The door opens when Arugal dies", "actor": "p", "metric": "nearby_gameobject_state",
-      "entry": 18971, "equals": 0, "within_ms": 3000 }
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -124.0,
+      "y": 2160.0,
+      "z": 155.8,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: p is in a Heroic Shadowfang Keep",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Shadowfang Keep is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the door is shut while Nandos lives",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 18971,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 3927,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Nandos's death opens the door",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 18971,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -82.0,
+      "y": 2153.0,
+      "z": 155.8,
+      "o": 0.0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 4275
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arugal is in combat",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -112.0,
+      "y": 2160.0,
+      "z": 155.8,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "The door shuts while Arugal fights",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 18971,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -82.0,
+      "y": 2153.0,
+      "z": 155.8,
+      "o": 0.0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 4275,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 33,
+      "x": -112.0,
+      "y": 2160.0,
+      "z": 155.8,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "The door opens when Arugal dies",
+      "actor": "p",
+      "metric": "nearby_gameobject_state",
+      "entry": 18971,
+      "equals": 0,
+      "within_ms": 3000
+    }
   ]
 }
