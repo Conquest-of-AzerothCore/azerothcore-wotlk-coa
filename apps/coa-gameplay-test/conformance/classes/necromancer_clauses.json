@@ -4139,11 +4139,13 @@
       },
       {
         "claim": "and making them immune to Physical damage",
-        "labels": []
+        "labels": [
+          "500341 behaviour_metric_delta physical_immune"
+        ]
       }
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): claims \"preventing all actions\" and \"immune to Physical damage\" parked: routes are a stunned/cast_failure read on the entombed dummy and a Physical hit taken count; not attempted to a run tonight. Claim \"for $d\": status 1 (present at 3500 ms, gone at 4500 ms). Claims \"preventing all actions\" (Effect[0] aura 12 stun) and \"immune to Physical damage\" (Effect[2] aura 40, MiscValue 1): open, route pending: a dummy action read and a Physical hit on the entombed dummy. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to damage.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: 8 casts, 4 IMMUNE misses, aura 3.98 s (n=1 valid; other 0.25 s) vs tooltip 4 sec."
+    "reason": "Route agent c (2026-11-13, second attempt): claim \"immune to Physical damage\": status 1 on the route pair (physical_immune: a Physical Void Zone 92559 hit by the caster lands on the dummy without Entomb, 1 log, and none after a real Entomb, 0). Claim \"preventing all actions\" parked: the route is a stunned/cast_failure read on the entombed dummy; not run tonight. Claim \"for $d\": status 1 (present at 3500 ms, gone at 4500 ms). Claims \"preventing all actions\" (Effect[0] aura 12 stun) and \"immune to Physical damage\" (Effect[2] aura 40, MiscValue 1): open, route pending: a dummy action read and a Physical hit on the entombed dummy. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to damage.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: 8 casts, 4 IMMUNE misses, aura 3.98 s (n=1 valid; other 0.25 s) vs tooltip 4 sec."
   },
   {
     "spell": 501886,
@@ -5251,9 +5253,7 @@
       {
         "claim": "and increases damage dealt to Undead by $s2% while active",
         "labels": [
-          "562028 behaviour_hit_ratio undead_damage",
-          "562028 effect_value e1 #0",
-          "562028 aura_amount e1 #0"
+          "562028 behaviour_hit_ratio undead_damage"
         ]
       }
     ],
