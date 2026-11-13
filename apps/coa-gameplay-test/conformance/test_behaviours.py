@@ -65,7 +65,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
-from behaviours import item_cooldown_gate_spec
+from behaviours import item_cooldown_gate_spec, hit_arm, metric_delta_strike
 from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
@@ -11210,6 +11210,125 @@ class AuraExpiryPassiveLinkTests(unittest.TestCase):
         entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'aura_expiry')
         _, [expectation] = behaviour_scenario(load_class_file(23), entry)
         self.assertEqual(behaviour_label(entry), [expectation.label])
+
+
+def cycle_one_entry(spell: int, suffix: str) -> dict:
+    return next(entry for entry in load_class_file(23)['behaviours']
+                if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+
+class OwnedCreatureStrikeTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_metric_delta_strike_hits_the_owned_creature_in_the_after_phase_only(self):
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), cycle_one_entry(500335, 'cloud_per_strike'))
+        steps = run.validate(scenario)['steps']
+        before = first_index(steps, label=expectation.model['before_label'])
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == 'striker']
+        self.assertEqual(len(strikes), 4)
+        self.assertTrue(all(index > before for index in strikes))
+        self.assertTrue(all(steps[index]['target_owned_entry'] == 50068 and steps[index]['target_owner'] == CASTER
+                            and 'target' not in steps[index] for index in strikes))
+        self.assertLess(first_index(steps, action='cast', spell=500335), strikes[0])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cloud_cast_per_strike_is_judged_and_a_pulse_alerts(self):
+        _, [expectation] = behaviour_scenario(load_class_file(23), cycle_one_entry(500335, 'cloud_per_strike'))
+        model = expectation.model
+
+        def judged(after: float) -> str:
+            values = {model['before_label']: 0.0, model['after_label']: after}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(4.0), 'ok')
+        self.assertEqual(judged(1.0), 'alert')
+        self.assertEqual(judged(0.0), 'alert')
+
+    def test_an_owned_strike_never_runs_in_the_before_phase(self):
+        with self.assertRaises(ValueError):
+            metric_delta_strike({'spell': 41394, 'health': 1, 'max_health': 1, 'owned_entry': 50068,
+                                 'in_before': True})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_script_hit_strikes_the_owned_creature_in_the_treatment_arm_only(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), cycle_one_entry(500335, 'cloud'))
+        steps = run.validate(scenario)['steps']
+        drain = first_index(steps, label='control drain')
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == 'striker']
+        self.assertTrue(strikes and all(index > drain for index in strikes))
+        self.assertTrue(all(steps[index]['target_owned_entry'] == 50068 for index in strikes))
+        control = sum(step.get('ms', 0) for step in steps[:drain] if step['action'] == 'wait')
+        self.assertEqual({step['spell'] for step in steps[:drain] if step['action'] == 'cast'}, {500335, 504868})
+        self.assertGreater(control, 0)
+
+    def test_an_owned_strike_needs_a_strike_spell(self):
+        entry = {'spell': 500335, 'name': 'n', 'quote': 'q', 'hit_spell': 802353, 'trials': 1, 'minimum_hits': 1,
+                 'casts': [[500335, 'caster']], 'strike_owned_entry': 50068}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**entry, 'kind': 'script_hit'})
+
+
+class HitRatioAuraAmountTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_treatment_arm_sets_its_aura_amount_before_every_trial(self):
+        entry = cycle_one_entry(707402, 'crit_factor_25')
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        steps = run.validate(scenario)['steps']
+        amounts = [step for step in steps if step['action'] == 'set_aura' and 'amount' in step]
+        self.assertEqual(len(amounts), entry['trials'])
+        self.assertTrue(all((step['spell'], step['effect'], step['amount'], step['stacks']) == (984954, 1, 22, 1)
+                            for step in amounts))
+        first_treatment = first_index(steps, label=f'707402 behaviour_hit_ratio crit_factor_25 treatment start total')
+        self.assertTrue(all(steps.index(step) > first_treatment for step in amounts))
+
+    def test_an_amount_names_one_of_the_arm_auras(self):
+        with self.assertRaises(ValueError):
+            hit_arm({'auras': [[801747, 1]], 'aura_amounts': [[984954, 1, 22]]})
+        with self.assertRaises(ValueError):
+            hit_arm({'auras': [[984954, 1]], 'aura_amounts': [[984954, 3, 22]]})
+        self.assertNotEqual(hit_arm({'auras': [[984954, 1]]}),
+                            hit_arm({'auras': [[984954, 1]], 'aura_amounts': [[984954, 1, 2]]}))
+
+
+class ItemCooldownGateCombatTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_suffix_keeps_the_labels_of_one_item_apart(self):
+        labels = set()
+        for suffix in ('pool_healing_potion', 'pool_mana_potion'):
+            _, expectations = behaviour_scenario(load_class_file(23), cycle_one_entry(803771, suffix))
+            labels |= {expectation.label for expectation in expectations}
+        _, plain = behaviour_scenario(load_class_file(23), next(
+            entry for entry in load_class_file(23)['behaviours']
+            if entry['spell'] == 803771 and entry['kind'] == 'item_cooldown_gate'))
+        labels |= {expectation.label for expectation in plain}
+        self.assertEqual(len(labels), 21)
+        self.assertIn('803771 item_cooldown_gate 11521 first cast_failure', labels)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_combat_arm_holds_the_cooldown_until_the_combat_ends(self):
+        scenario, expectations = behaviour_scenario(load_class_file(23), cycle_one_entry(803771, 'pool_combat'))
+        steps = run.validate(scenario)['steps']
+        expected = {expectation.label.split(' pool_combat ')[1]: expectation.displayed for expectation in expectations}
+        self.assertEqual(expected, {'combat_start combat': '1', 'first cast_failure': '0',
+                                    'first spell_go_count': '1', 'in_combat cast_failure': '67',
+                                    'combat_end combat': '0', 'after_combat cast_failure': '67',
+                                    'after_combat_early cast_failure': '67', 'after_combat_ready cast_failure': '0'})
+        attack = first_index(steps, action='attack')
+        kill = first_index(steps, action='cast', spell=501978)
+        self.assertLess(attack, first_index(steps, action='use_item'))
+        self.assertLess(first_index(steps, action='set_health'), kill)
+        uses = [step['item'] for step in steps if step['action'] == 'use_item']
+        self.assertEqual(uses, [11521, 555555, 555555, 555555, 555555])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_pooled_use_accepted_in_combat_alerts(self):
+        _, expectations = behaviour_scenario(load_class_file(23), cycle_one_entry(803771, 'pool_combat'))
+        held = next(expectation for expectation in expectations if expectation.label.endswith('in_combat cast_failure'))
+        self.assertEqual(judge_behaviour(base_verdict(held), FakeRun({held.label: 0.0}), held).status, 'alert')
+        self.assertEqual(judge_behaviour(base_verdict(held), FakeRun({held.label: 67.0}), held).status, 'ok')
+
+    def test_the_combat_arm_needs_a_shared_item_and_a_suffix(self):
+        with self.assertRaises(ValueError):
+            item_cooldown_gate_spec({'spell': 1, 'name': 'n', 'quote': 'q', 'item': 2, 'item_spell': 3,
+                                     'cooldown_ms': 60000, 'combat_kill_spell': 501978})
 
 
 if __name__ == '__main__':

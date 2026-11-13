@@ -300,7 +300,7 @@ ACTIONS = {
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
-                                  'target_gameobject', 'target_owned_entry'}),
+                                  'target_gameobject', 'target_owned_entry', 'target_owner'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
@@ -738,9 +738,15 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(type(step['target_pet']) is bool, f'{where}: target_pet must be boolean')
                 require(step['actor'] in player_ids and 'target' not in step,
                         f'{where}: target_pet casts from a player at their current pet')
+            if action == 'cast' and 'target_owner' in step:
+                require(step['actor'] not in player_ids and 'target_owned_entry' in step and 'target' not in step
+                        and step['target_owner'] in player_ids,
+                        f'{where}: target_owner casts from a creature at a creature that player owns')
             if action == 'cast' and 'target_owned_entry' in step:
-                require(step['actor'] in player_ids and 'target' not in step and 'target_pet' not in step,
-                        f'{where}: target_owned_entry casts from a player at a creature they own')
+                require((step['actor'] in player_ids or 'target_owner' in step) and 'target' not in step
+                        and 'target_pet' not in step,
+                        f'{where}: target_owned_entry casts from a player at a creature they own, or from a creature '
+                        f'at a creature its target_owner owns')
                 number(step['target_owned_entry'], f'{where}.target_owned_entry', 1, 2**32 - 1, True)
         for key in ('target', 'caster'):
             if key in step:
