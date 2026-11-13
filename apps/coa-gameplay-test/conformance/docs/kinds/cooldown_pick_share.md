@@ -10,3 +10,6 @@ pooled: every spell must be picked and each count must lie in the two-sided 99.9
 refused priming cast or a cooldown below the cut is unmeasured.
 
 Necromancer: Underking 704701, pool 805032 / 805044 / 805048, 3 parts of 10 cycles (claim 172.1).
+
+The verdict stamps its own metric `cooldown_pick_share` (readback, gated by `CONTRAST_PROOF`, ADR 0616) and
+`contrast: learned` when the control cycles ran and picked nothing: an ok verdict with its control is behaviour evidence.

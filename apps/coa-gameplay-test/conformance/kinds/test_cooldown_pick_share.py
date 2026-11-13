@@ -60,3 +60,23 @@ class CooldownPickShareTests(unittest.TestCase):
 
     def test_the_uniform_band_of_thirty_cycles_over_three(self):
         self.assertEqual(share_band(30, 3), (2, 19))
+
+    def stamped(self, verdict: Verdict) -> Verdict:
+        from dataclasses import replace
+        from compare import observed
+        return replace(verdict, detail={**(verdict.detail or {}), **observed(self.expectation)})
+
+    def test_a_controlled_pick_share_is_behaviour_evidence(self):
+        from coverage import BEHAVIOUR, verdict_evidence
+        found = self.stamped(self.judged([[0, 1, 2, 0, 1, 2, 0, 1, 2, 0]] * 3))
+        self.assertEqual(found.status, 'ok')
+        self.assertEqual(found.detail['metric'], 'cooldown_pick_share')
+        self.assertEqual(verdict_evidence(found, 'at random', {}), BEHAVIOUR)
+
+    def test_a_pick_share_without_its_control_cycle_stays_data(self):
+        from coverage import DATA, verdict_evidence
+        self.model['rows'] = [row for row in self.model['rows'] if row['phase'] != 'control']
+        found = self.stamped(self.judged([[0, 1, 2, 0, 1, 2, 0, 1, 2, 0]] * 3))
+        self.assertEqual(found.status, 'ok')
+        self.assertNotIn('contrast', found.detail)
+        self.assertEqual(verdict_evidence(found, 'at random', {}), DATA)

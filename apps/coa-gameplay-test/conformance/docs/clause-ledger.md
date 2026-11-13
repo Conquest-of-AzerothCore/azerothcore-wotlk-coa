@@ -277,7 +277,8 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `stat_gain` verdict gets it from its judge under attribution reads and names its read, ADR 0258), and the clause
   text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell power" or
   "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating" or a
-  `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A `behaviour_group_stack_cap` state read
+  `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A metric in `coverage.CONTRAST_PROOF` (kind modules add rows) is behaviour only when `detail.contrast` equals its
+  row's contrast, whatever the claim words say (ADR 0616). A `behaviour_group_stack_cap` state read
   is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
   value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition
