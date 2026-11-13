@@ -19,9 +19,11 @@
 #include "WorldSession.h"
 #include <array>
 #include <cmath>
+#include <map>
 #include <mutex>
 #include <optional>
 #include <shared_mutex>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -55,8 +57,15 @@ namespace
         bool selectable = true;
     };
 
+    using HiddenKey = std::tuple<uint32, uint32, ObjectGuid>;
+
     std::mutex HiddenLock;
-    std::unordered_map<ObjectGuid, HiddenBoss> Hidden;
+    std::map<HiddenKey, HiddenBoss> Hidden;
+
+    HiddenKey KeyOf(Creature const* creature)
+    {
+        return { creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() };
+    }
 
     std::shared_mutex LeashLock;
     std::unordered_map<uint32, Leash> Leashes;
@@ -195,7 +204,7 @@ namespace
         creature->SetVisible(false);
 
         std::lock_guard lock(HiddenLock);
-        Hidden[creature->GetGUID()] = boss;
+        Hidden[KeyOf(creature)] = boss;
     }
 
     void ShowAfterReset(Creature* creature, HiddenBoss const& boss)
@@ -216,7 +225,7 @@ namespace
         std::optional<HiddenBoss> back;
         {
             std::lock_guard lock(HiddenLock);
-            auto const itr = Hidden.find(creature->GetGUID());
+            auto const itr = Hidden.find(KeyOf(creature));
             if (itr == Hidden.end())
                 return false;
             itr->second.remaining -= int32(diff);
@@ -283,7 +292,7 @@ public:
     void OnCreatureRemoveWorld(Creature* creature) override
     {
         std::lock_guard lock(HiddenLock);
-        Hidden.erase(creature->GetGUID());
+        Hidden.erase(KeyOf(creature));
     }
 };
 
