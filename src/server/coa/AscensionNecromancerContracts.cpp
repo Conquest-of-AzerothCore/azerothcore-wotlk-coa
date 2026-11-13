@@ -53,6 +53,11 @@ void ApplyContracts(SpellInfo* info)
             info->Effects[coefficient.effect].BonusMultiplier = 0.0f;
     if (info->Id == 504845)
         info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
+    if (info->Id == 570042)
+    {
+        info->Effects[EFFECT_2].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
+        info->Effects[EFFECT_2].BasePoints = 199;
+    }
     if (info->Id == 803767)
     {
         info->Effects[0].Effect = SPELL_EFFECT_DUMMY;
