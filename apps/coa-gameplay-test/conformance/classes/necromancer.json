@@ -1267,6 +1267,95 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 801938,
+      "name": "Virulency (refresh)",
+      "kind": "metric_delta",
+      "variant": "refresh",
+      "label_suffix": "refresh",
+      "quote": "Reinvigorate your diseases, refreshing all diseases on the target enemy",
+      "expected": 10000,
+      "before_expected": 5000,
+      "tolerance": 300,
+      "trigger_spell": 801938,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        570131
+      ],
+      "setup_wait_ms": 5000,
+      "wait_ms": 100,
+      "expire_ms": 11000,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 570131,
+        "caster": "caster"
+      },
+      "observe_source": "Virulency 801938 (instant, 18% of base mana, 60000 ms cooldown reset before the cast): Virulency() (AscensionNecromancerAbilities.cpp:53-100) refreshes every disease of the caster on the target (RefreshDuration) and snapshots it. Both phases cast Crypt Plague 570131 (10000 ms) at the dummy and wait 5000 ms; the before phase (control) reads its remaining duration then, about 5000 ms; the after phase casts Virulency and reads about 10000 ms. Tolerance 300 ms for the steps' clock."
+    },
+    {
+      "spell": 706948,
+      "name": "Fetid Mark (stacks)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "stacking $706949u times.",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 680928,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        680928,
+        680928,
+        680928,
+        680928,
+        680928,
+        680928,
+        680928,
+        680928,
+        680928,
+        680928
+      ],
+      "setup_wait_ms": 200,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706949,
+        "caster": "caster"
+      },
+      "observe_source": "aura_ascension_necromancer_event (AscensionNecromancerEvents.cpp:154-155): a Shadow-school hit of the caster with 706948 known casts Fetid Mark 706949 on the target (DurationIndex 1 = 10000 ms, $706949d; StackAmount 10, $706949u; Effect[0] dummied, AscensionNecromancerContracts.cpp:131-132; read by Mark() for Skeletal Warriors 50065/51065, :449-455). Plague of Undeath 680928 (Plague = Nature and Shadow, no cost, no cooldown, no global cooldown) is the Shadow hit, cast at the dummy. 706948 learned at the start; no cast before (control): no mark. Eleven hits: 10 stacks, the cap."
+    },
+    {
+      "spell": 706948,
+      "name": "Fetid Mark (lasts)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Dealing Shadow damage now increases the damage the target takes from your Skeletal Warriors by $706949s1% for $706949d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 680928,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 706949,
+        "caster": "caster"
+      },
+      "observe_source": "aura_ascension_necromancer_event (AscensionNecromancerEvents.cpp:154-155): a Shadow-school hit of the caster with 706948 known casts Fetid Mark 706949 on the target (DurationIndex 1 = 10000 ms, $706949d; StackAmount 10, $706949u; Effect[0] dummied, AscensionNecromancerContracts.cpp:131-132; read by Mark() for Skeletal Warriors 50065/51065, :449-455). Plague of Undeath 680928 (Plague = Nature and Shadow, no cost, no cooldown, no global cooldown) is the Shadow hit, cast at the dummy. 706948 learned at the start; no cast before (control): no mark. One hit: the mark is on the dummy 9500 ms later and gone 1000 ms after: (9500, 10500] ms."
+    },
+    {
       "spell": 806149,
       "name": "Damnation rank 1 (Shadow damage)",
       "kind": "hit_ratio",
@@ -1434,7 +1523,21 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "570136 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 22 (SPELLMOD_DOT), BasePoints 49 + 1 = 50 ($s1), on class mask word 1 bit 8388608, Crypt Plague 570131's own flag. Crypt Plague 570131 (aura 3 periodic damage every 2000 ms, BasePoints 1 + 1, coefficient row 0.06 Shadow) is cast at the dummy each trial and its first tick read 2100 ms later, at 20000 spell power so the coefficient term dominates; 823764 in both arms; control without 570136, treatment with it learned."
+      "expected_source": "570136 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 22 (SPELLMOD_DOT), BasePoints 49 + 1 = 50 ($s1), on class mask word 1 bit 8388608, Crypt Plague 570131's own flag. Crypt Plague 570131 (aura 3 periodic damage every 2000 ms, BasePoints 1 + 1, coefficient row 0.06 Shadow) is cast at the dummy each trial and its first tick read 2100 ms later, at 20000 spell power so the coefficient term dominates; 823764 in both arms; control without 570136, treatment with it learned. Crypt Plague stacks on each cast (StackAmount, its tick grows with them): twelve warm-up casts at the start of each arm put both arms at the stack cap, so the arms differ in 570136 alone (the first pilot read +59% to +89% with the stacks carried from the control into the treatment).",
+      "warmup": [
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131
+      ]
     },
     {
       "spell": 802132,
