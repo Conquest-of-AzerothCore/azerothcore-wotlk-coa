@@ -4,7 +4,7 @@
   "contract": [
     "Our tester pulled Rom'ogg Bonecrusher (39665) out of his leash in a Heroic Blackrock Caverns, saw the reset emote twice",
     "in a row, and afterwards Rom'ogg stayed invisible except in GM mode. A reset announces itself once, and the boss",
-    "comes back visible about 10 s later at full health. Here he gets a 15-yard circle."
+    "comes back visible about 10 s later at full health. Here he gets a 15-yard circle, summoned in the corridor east of his room, more than 60 yards from his own spawn."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -42,9 +42,9 @@
       "action": "teleport",
       "actor": "gm",
       "map": 645,
-      "x": 225.0,
-      "y": 949.0,
-      "z": 191.2,
+      "x": 345.4,
+      "y": 948.5,
+      "z": 190.97,
       "o": 3.14,
       "ignore_access": true
     },
@@ -125,46 +125,48 @@
     {
       "action": "relocate",
       "actor": "gm",
-      "dx": -8.0,
-      "dy": -1.5
+      "dx": 10.0,
+      "dy": 0.2
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 1200
     },
     {
       "action": "relocate",
       "actor": "gm",
-      "dx": -8.7,
-      "dy": -1.4
+      "dx": 10.0,
+      "dy": 0.2
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 1200
     },
     {
       "action": "relocate",
       "actor": "gm",
-      "dx": 4.0,
-      "dy": -16.0
+      "dx": 10.3,
+      "dy": 0.1
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 1200
     },
     {
       "action": "relocate",
       "actor": "gm",
-      "dx": 4.3,
-      "dy": -16.8
+      "dx": 11.0,
+      "dy": -1.7
     },
     {
       "action": "wait",
-      "ms": 1500
+      "ms": 1200
     },
     {
-      "action": "wait",
-      "ms": 1500
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 11.3,
+      "dy": -1.7
     },
     {
       "action": "assert",
