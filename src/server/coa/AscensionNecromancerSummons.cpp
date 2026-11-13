@@ -537,6 +537,8 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         _events.ScheduleEvent(1, 1ms);
         _events.ScheduleEvent(2, 2s);
+        if (me->GetEntry() == 50385)
+            _events.ScheduleEvent(10, 1s);
         if (me->GetEntry() == 50133 || me->GetEntry() == 50303)
             _events.ScheduleEvent(3, Milliseconds(sSpellMgr->GetSpellInfo(807640)->Effects[1].Amplitude));
         if (me->GetEntry() == 542064)
@@ -871,6 +873,13 @@ class npc_ascension_necromancer : public ScriptedAI
                     for (Unit* blasted : Nearby(enemy, 10.0f))
                         if (player->IsValidAttackTarget(blasted))
                             Cast(me, blasted, 807339);
+            if (event == 10)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
+                    if (Unit* victim = me->GetVictim(); victim && player->IsValidAttackTarget(victim))
+                        Cast(me, victim, 704706);
+                _events.ScheduleEvent(10, 1s);
+            }
         }
         if (me->GetEntry() == 523032 && !_exploded)
             for (Unit* nearby : Nearby(me, 2.5f))
