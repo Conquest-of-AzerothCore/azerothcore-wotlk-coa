@@ -77,6 +77,7 @@ ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
+ARMOR_PROBE_DAMAGE = 1000.0
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
 MAGNITUDE_RATIO_POINTS = 0.02
@@ -4114,6 +4115,11 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                 if isinstance(found, str):
                     return replace(base, explanation=found)
             flat = float(model.get('treatment_flat', 0.0)) if arm == 'treatment' else 0.0
+            if flat and model.get('treatment_flat_armor'):
+                reduced = part.values.get(model['treatment_flat_armor'])
+                if reduced is None:
+                    return replace(base, explanation=missing_measurement(part, model['treatment_flat_armor']))
+                flat *= reduced / ARMOR_PROBE_DAMAGE
             totals += [(total - flat * count) * scale for total, count in zip(*found)]
             counts += found[1]
         series[arm] = (totals, counts)

@@ -49,3 +49,40 @@ class MinionSwingRatioTests(unittest.TestCase):
         self.assertEqual(self.judged(379.0), 'alert')
         self.assertEqual(self.judged(423.0), 'alert')
         self.assertEqual(self.judged(201.0), 'alert')
+
+
+COLOSSUS = {'spell': 500989, 'name': 'Raise: Decaying Colossus (Bone Smash over swing)', 'kind': 'minion_swing_ratio',
+            'label_suffix': 'weapon_plus', 'quote': 'dealing Weapon Damage plus ${$505229m2+$505229ppl2}',
+            'raise_spell': 500989, 'command_spell': 504868, 'strike_spell': 505229, 'entry': 50115,
+            'expected': 1.0, 'trials': 10, 'wait_ms': 4500, 'strike_flat': 100, 'strike_flat_armor': True,
+            'learn': [92123]}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class MinionSwingRatioArmorFlatTests(unittest.TestCase):
+    def judged(self, strike_hit: float, reduced: float | None, entry=None) -> str:
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry or COLOSSUS)
+        values = ratio_values(expectation.model, strike_hit, 150.0)
+        if reduced is not None and 'treatment_flat_armor' in expectation.model:
+            values[expectation.model['treatment_flat_armor']] = reduced
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_the_gate_is_learned_and_the_armor_probe_is_read_once(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), COLOSSUS)
+        run.validate(scenario)
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual(learned[:3], [92123, 500989, 504868])
+        probes = [step for step in scenario['steps'] if step.get('metric') == 'armor_reduced_damage']
+        self.assertEqual([(step['spell'], step['target']) for step in probes], [(505229, 'dummy')])
+        self.assertEqual(expectation.model['treatment_flat_armor'], probes[0]['label'])
+
+    def test_the_flat_part_is_scaled_by_the_read_armor_before_it_is_taken_off(self):
+        self.assertEqual(self.judged(240.0, 900.0), 'ok')
+        self.assertEqual(self.judged(150.0, 900.0), 'alert')
+        unmitigated = {key: value for key, value in COLOSSUS.items() if key != 'strike_flat_armor'}
+        self.assertEqual(self.judged(240.0, None, unmitigated), 'alert')
+        self.assertNotEqual(self.judged(240.0, None), 'ok')
+
+    def test_an_armor_scaling_without_a_flat_part_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**COLOSSUS, 'strike_flat': 0})
