@@ -277,6 +277,7 @@ class FixedTargetCountSpec:
     setup_casts: tuple[tuple[int, str], ...] = ()
     select_primary: bool = False
     dummy_entry: int | None = None
+    count_primary: bool = False
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -380,7 +381,7 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     def measure() -> list[dict]:
         return distance_reads(AFTER) + [hit_measurement(spec, index, AFTER) for index in range(last_index + 1)]
 
-    extra_labels = [hit_label(spec, index, AFTER) for index in range(1, dummy_count)]
+    extra_labels = [hit_label(spec, index, AFTER) for index in range(0 if spec.count_primary else 1, dummy_count)]
     far_label = hit_label(spec, far_index, AFTER) if spec.far_dummy else None
     scenario = {
         'schema': 1,
@@ -1191,7 +1192,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 None if entry.get('behind_yd') is None else float(entry['behind_yd']),
                                 entry.get('cluster_yd'), entry.get('caster_entry'),
                                 tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())),
-                                bool(entry.get('select_primary', False)), entry.get('dummy_entry'))
+                                bool(entry.get('select_primary', False)), entry.get('dummy_entry'),
+                                bool(entry.get('count_primary', False)))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:
@@ -1338,6 +1340,7 @@ class MetricDeltaSpec:
     target_casts_before: tuple[int, ...] = ()
     target_health_after: tuple[int, int] | None = None
     trigger_item: int | None = None
+    phase_power: tuple[int, int, int] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1515,6 +1518,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         elif facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
+        if spec.phase_power is not None:
+            power, before, after_value = spec.phase_power
+            steps.append({'action': 'set_power', 'actor': CASTER, 'power': power,
+                          'value': after_value if after else before})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
         steps += required_aura_steps(facts) + reagent_steps(records, spec.trigger_spell)
         if apply_setup_casts:
@@ -1761,7 +1768,9 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('after_at_most'), entry.get('player_spell_power'),
                            entry.get('caster_health_pct'), tuple(entry.get('target_casts_before', ())),
                            tuple(entry['target_health_after']) if 'target_health_after' in entry else None,
-                           entry.get('trigger_item'))
+                           entry.get('trigger_item'),
+                           None if entry.get('phase_power') is None
+                           else tuple(int(value) for value in entry['phase_power']))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

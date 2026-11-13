@@ -1758,3 +1758,9 @@ the return after their removal) with `Unit::GetStat` as the named read: Bone War
 `metric_delta` takes `target_entry`, the creature entry of its dummy (as ADR 0381), and `fixed_count` takes
 `dummy_entry`, the creature entry of every dummy it places: Mass Grave 803741 affects Humanoids only, read on Kobold
 Vermin 6.
+
+### Phase power and counted primary (ADR 0403)
+
+`metric_delta` takes `phase_power` `[power, before, after]`, set right before each phase's cast (Mass Grave 803741's
+cast state at 500 and 520 Runic Power). `fixed_count` takes `count_primary`, which judges the nearest dummy with the
+others, for a spell centred on the caster that picks its targets at random.

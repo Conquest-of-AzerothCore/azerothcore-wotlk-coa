@@ -10650,5 +10650,30 @@ class HumanoidTargetEntryTests(unittest.TestCase):
         self.assertEqual({creature['entry'] for creature in plain['creatures']}, {36})
 
 
+class MassGraveToolTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 803741 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_count_primary_judges_every_dummy_inside_the_radius(self):
+        _, [expectation] = behaviour_scenario(load_class_file(23), self.entry('targets'))
+        self.assertEqual(len(expectation.model['dummy_labels']), 7)
+        self.assertIn('dummy', expectation.model['dummy_labels'][0])
+        entry = {key: value for key, value in self.entry('targets').items() if key != 'count_primary'}
+        _, [plain] = behaviour_scenario(load_class_file(23), entry)
+        self.assertEqual(len(plain.model['dummy_labels']), 6)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_phase_power_sets_each_phase_before_its_cast(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry('instant'))
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        powers = [(index, step['value']) for index, step in enumerate(steps)
+                  if step.get('action') == 'set_power' and step.get('power') == 6]
+        self.assertEqual([value for _, value in powers], [500, 520])
+        self.assertTrue(all(power < cast for (power, _), cast in zip(powers, casts)))
+
+
 if __name__ == '__main__':
     unittest.main()
