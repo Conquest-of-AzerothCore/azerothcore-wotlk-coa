@@ -23,7 +23,7 @@ class CooldownResetRateTests(unittest.TestCase):
 
     def test_the_resets_are_clear_cooldown_packets_of_the_reset_spell_after_the_learn(self):
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
-        run.validate(scenario)
+        run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         learn = next(index for index, step in enumerate(steps)
                      if step['action'] == 'learn' and step['spell'] == 561353)

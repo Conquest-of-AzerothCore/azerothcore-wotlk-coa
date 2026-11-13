@@ -29,7 +29,7 @@ class EffectivenessDeltaTests(unittest.TestCase):
 
     def test_the_effect_is_cast_without_and_with_the_learned_modifier(self):
         scenario, [expectation] = self.built()
-        run.validate(scenario)
+        run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 572789]
         learn = next(index for index, step in enumerate(steps) if step['action'] == 'learn' and step['spell'] == 560613)

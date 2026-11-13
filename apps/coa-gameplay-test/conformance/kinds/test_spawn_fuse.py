@@ -22,7 +22,7 @@ class SpawnFuseTests(unittest.TestCase):
 
     def test_the_timeline_starts_before_the_control_and_the_talent_follows_it(self):
         scenario, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
-        run.validate(scenario)
+        run.validate(scenario, run.SIMULATED_CLOCK)
         steps = scenario['steps']
         start = next(index for index, step in enumerate(steps) if step['action'] == 'encounter_start')
         learn = next(index for index, step in enumerate(steps)
