@@ -1567,6 +1567,13 @@ Newcombe interval of the difference of the critical shares (Wilson per arm) agai
 stated, not final", with the hits per arm an interval inside the band would need). Scourge-Defense Training 520608:
 300 Argent Blades per arm with Warrior of Dawn 561156, 520608 set first in the treatment.
 
+An arm may name its own `observe_spell` and a `wait_ms` (0 to 30000) slept after each of its casts (ADR 0498). The arm
+then casts and counts that spell, and `model['observed']` names each arm's spell. A natural-rate check compares the
+periodic ticks of a damage over time with a direct spell of the same caster at `expected` 0 points: Flesh to Worms
+500338 ticks (treatment, `wait_ms` 3000) against Lichfrost 801722 hits (control). A tick share far from the direct
+share alerts, which catches "always crits"; an interval inside the 2-point band needs the pooled hit counts the verdict
+states.
+
 ### Selected dummy and lower bound in metric_delta (ADR 0174)
 
 `metric_delta` `select_dummy` (default `false`) adds the dummy fixture and selects it at the start of both phases;
