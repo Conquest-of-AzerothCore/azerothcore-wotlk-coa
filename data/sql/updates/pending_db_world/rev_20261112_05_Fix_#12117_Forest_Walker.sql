@@ -165,4 +165,3 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (121010210, 85, -4430.112656662523, -203.30637250033203, 53.064337040552076, NULL, 0, 0, 0, 0, 0, 100, 0);
 
 UPDATE `creature` SET `wander_distance` = 0, `MovementType` = 2 WHERE `guid` IN (12101018, 12101019, 12101020, 12101021);
-```
