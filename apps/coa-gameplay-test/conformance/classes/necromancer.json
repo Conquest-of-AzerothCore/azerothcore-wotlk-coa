@@ -11493,6 +11493,40 @@
       "metric": "cast_speed_multiplier",
       "fields": {},
       "observe_source": "560537 Effect[0] 65 APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1); Dark Prophecy 800517 Effect[0] 65 aura 216 +2 (BasePoints 1 + 1), a similar spell-haste raid aura. Both are in spell_group 2000182 (rev_20260909_01_necromancer_completion.sql:613-614, rev_20260908_05_guardian_completion.sql:358), whose stack rule keeps the strongest exclusive amount. 560537 learned up front: the caster's cast speed multiplier reads 1 / 1.03 = 0.970874 around a Glacial Tap 805369 cast (one application); after Dark Prophecy 800517 is also learned (two applications) it still reads 0.970874, not 0.970874 / 1.02 = 0.951837 (stacked). Control: the party_stat_ratio entry reads 1 without 560537."
+    },
+    {
+      "spell": 805038,
+      "name": "Summoning Ritual (Ritual Return returns to the circle)",
+      "kind": "metric_delta",
+      "variant": "return_position",
+      "label_suffix": "return_position",
+      "quote": "While active, you may cast Ritual Return to return to it.",
+      "expected": 0,
+      "before_expected": -1,
+      "tolerance": 0.5,
+      "trigger_spell": 807098,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        805038
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "dx": 15
+      },
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "nearest_creature_distance",
+      "fields": {
+        "entry": 575091
+      },
+      "observe_source": "Ritual Return 807098: OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) NearTeleportTo the caster's owned living Scourge Transporter 575091 (the harness acknowledges the teleport, CoAGameplayTest.cpp:2900-2902). nearest_creature_distance reads the caster's 2D distance to the nearest living 575091 within 60 yd (-1 when there is none). Before (control): no circle, Ritual Return refused: -1. After: a real Summoning Ritual 805038 places the circle, the caster is moved 15 yd along x (strike fixture: relocate, one Light of the Naaru 41394 from the striker), then Ritual Return brings it back onto the circle: 0 (15 yd without the return)."
     }
   ],
   "player_observations": [],

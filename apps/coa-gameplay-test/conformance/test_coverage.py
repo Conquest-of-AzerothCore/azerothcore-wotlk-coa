@@ -1181,5 +1181,19 @@ class SpellHasteAndNoStackPromiseTest(unittest.TestCase):
             self.assertEqual(evidence_of([promised], verdicts)[0], [DATA])
 
 
+class ReturnDistancePromiseTest(unittest.TestCase):
+    def test_a_learned_distance_contrast_proves_a_return_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta ritual_return_position', BEHAVIOUR_METRIC_DELTA,
+                           'nearest_creature_distance',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('to return to it', '1 behaviour_metric_delta ritual_return_position')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('increases your Frost damage by $s1%', '1 behaviour_metric_delta ritual_return_position')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_a_distance_read_is_a_state_read(self):
+        self.assertEqual(METRIC_EVIDENCE['nearest_creature_distance'], STATE)
+
+
 if __name__ == '__main__':
     unittest.main()

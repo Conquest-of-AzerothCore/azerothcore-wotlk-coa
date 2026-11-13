@@ -3008,11 +3008,10 @@
     "spell": 802988,
     "clause": "and reduces your spell pushback suffered from taking damage by $s1%.",
     "labels": [
-      "802988 behaviour_metric_delta pushback_delays",
-      "802988 behaviour_metric_delta pushback_halved"
+      "802988 effect_value e0 #1"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). One Light of the Naaru 41394 hit 1000 ms into the cast: no Lichfrost hit by 2350 ms, one by 2600 ms: pushback between about 125 and 375 ms against the 500 ms base (Spell::Delayed, Spell.cpp:8075-8082). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Open, route pending (re-judged under the mentor method rule of 2026-11-13: expected values from the DBC/tooltip only): the pushback_delays / pushback_halved entries pass (no Lichfrost hit by 2350 ms, one by 2600 ms after one Light of the Naaru 41394 hit 1000 ms into the cast), but their windows rest on the engine base pushback of 500 ms (Spell::Delayed, Spell.cpp:8075), which no tooltip or DBC token states; route: a no-talent control arm with the same strike, judging the with/without pushback ratio 0.5 (cast_remaining_ms read just before and after the strike in each arm). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 802990,
@@ -3261,11 +3260,13 @@
       },
       {
         "claim": "to return to it",
-        "labels": []
+        "labels": [
+          "805038 behaviour_metric_delta return_position"
+        ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim \"you may cast Ritual Return\": status 1 (refused without a circle, through after a real Summoning Ritual). Claim \"to return to it\": open, route pending: NearTeleportTo the circle (AscensionNecromancerAbilities.cpp:421-431); route: move the caster after the summon and read its distance to the circle before and after the cast (distance and position reads are not in the coverage evidence tables). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
+    "reason": "Status 1 (counted pair, control arm in each entry): Ritual Return refused without a circle, through after a real Summoning Ritual; moved 15 yd after the summon, the caster stands on the circle (nearest 575091 at 0 yd, 15 without the return; ADR 0441 nearest_creature_distance state read). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
   },
   {
     "spell": 805040,
