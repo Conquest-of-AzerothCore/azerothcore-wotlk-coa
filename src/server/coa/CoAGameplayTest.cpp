@@ -754,11 +754,8 @@ public:
         return itr == _counts.end() ? 0 : itr->second;
     }
 
-    static void Forget(std::set<ProcCounter::Owner> const& owners)
+    static void Forget(std::set<ObjectGuid> const& units)
     {
-        std::set<ObjectGuid> units;
-        for (ProcCounter::Owner const& owner : owners)
-            units.insert(std::get<ObjectGuid>(owner));
         std::erase_if(_counts, [&units](auto const& entry) { return units.contains(entry.first.first); });
     }
 
