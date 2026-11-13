@@ -1,13 +1,13 @@
 {
-  "schema": 1,
+  "schema": 2,
   "name": "Venomancer Envenomed Weapons launches poison jets at its 5% chance",
   "contract": [
     "Envenomed Weapons 300855 applies aura 42 to the Venomancer and every raid member within 30 yards for 30 minutes; ProcChance 5 triggers Envenomed Weapons 803178, a single-target Nature hit.",
-    "The tooltip promises a 5% chance whenever an envenomed ally deals damage, so every damaging swing gets one 5% roll and a jet only follows from that ally's own damage.",
-    "Five unarmed level 60 fighters swing at one passive enemy for five minutes, about 650 damaging swings; at 5% that is about 33 jets, and 12 to 70 bounds a failure below 0.01%.",
-    "A second 5% roll on top of the first (0.25%) gives about 2 jets, which the lower bound rejects."
+    "The tooltip promises a 5% chance whenever an envenomed ally deals damage, so every damaging swing gets one 5% roll, and the ally whose damage rolled launches the jet itself (#12180).",
+    "Five unarmed level 60 fighters swing at one passive enemy for fifteen minutes, about 300 damaging swings each; at 5% that is about 15 jets per fighter, and 2 to 35 per fighter bounds a failure below 0.01% at 280 swings each.",
+    "A second 5% roll on top of the first (0.25%) gives under one jet per fighter, which the lower bound rejects for all five together."
   ],
-  "timeout_ms": 420000,
+  "timeout_ms": 1000000,
   "players": [
     {
       "id": "venomancer",
@@ -179,8 +179,8 @@
     },
     {
       "action": "wait",
-      "label": "Five unarmed fighters swing for five minutes",
-      "ms": 300000
+      "label": "Five unarmed fighters swing for fifteen minutes",
+      "ms": 900000
     },
     {
       "action": "stop_attack",
@@ -209,38 +209,38 @@
     },
     {
       "action": "assert",
-      "label": "venomancer lands at least one hundred damaging swings",
+      "label": "venomancer lands at least 280 damaging swings",
       "actor": "venomancer",
       "metric": "melee_damage_count",
-      "min": 100
+      "min": 280
     },
     {
       "action": "assert",
-      "label": "ally1 lands at least one hundred damaging swings",
+      "label": "ally1 lands at least 280 damaging swings",
       "actor": "ally1",
       "metric": "melee_damage_count",
-      "min": 100
+      "min": 280
     },
     {
       "action": "assert",
-      "label": "ally2 lands at least one hundred damaging swings",
+      "label": "ally2 lands at least 280 damaging swings",
       "actor": "ally2",
       "metric": "melee_damage_count",
-      "min": 100
+      "min": 280
     },
     {
       "action": "assert",
-      "label": "ally3 lands at least one hundred damaging swings",
+      "label": "ally3 lands at least 280 damaging swings",
       "actor": "ally3",
       "metric": "melee_damage_count",
-      "min": 100
+      "min": 280
     },
     {
       "action": "assert",
-      "label": "ally4 lands at least one hundred damaging swings",
+      "label": "ally4 lands at least 280 damaging swings",
       "actor": "ally4",
       "metric": "melee_damage_count",
-      "min": 100
+      "min": 280
     },
     {
       "action": "snapshot",
@@ -279,22 +279,98 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: poison jets fire at the tooltip's 5% of the damaging swings",
+      "label": "DISCRIMINATING: venomancer launches its own poison jets at the tooltip's 5% of its damaging swings",
       "actor": "venomancer",
       "metric": "spell_damage_count",
       "spell": 803178,
       "target": "enemy",
-      "min": 12,
-      "max": 70
+      "min": 2,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally1 launches its own poison jets at the tooltip's 5% of its damaging swings",
+      "actor": "ally1",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "min": 2,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally2 launches its own poison jets at the tooltip's 5% of its damaging swings",
+      "actor": "ally2",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "min": 2,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally3 launches its own poison jets at the tooltip's 5% of its damaging swings",
+      "actor": "ally3",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "min": 2,
+      "max": 35
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: ally4 launches its own poison jets at the tooltip's 5% of its damaging swings",
+      "actor": "ally4",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "min": 2,
+      "max": 35
     },
     {
       "action": "snapshot",
-      "label": "Poison jets on the enemy",
+      "label": "Poison jets by venomancer",
       "actor": "venomancer",
       "metric": "spell_damage_count",
       "spell": 803178,
       "target": "enemy",
-      "save_as": "jets"
+      "save_as": "venomancer_jets"
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jets by ally1",
+      "actor": "ally1",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "save_as": "ally1_jets"
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jets by ally2",
+      "actor": "ally2",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "save_as": "ally2_jets"
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jets by ally3",
+      "actor": "ally3",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "save_as": "ally3_jets"
+    },
+    {
+      "action": "snapshot",
+      "label": "Poison jets by ally4",
+      "actor": "ally4",
+      "metric": "spell_damage_count",
+      "spell": 803178,
+      "target": "enemy",
+      "save_as": "ally4_jets"
     }
   ]
 }

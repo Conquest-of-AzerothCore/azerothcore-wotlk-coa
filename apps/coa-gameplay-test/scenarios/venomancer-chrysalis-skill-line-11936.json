@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Chrysalis is in the Vizier tab (#11936)",
+  "contract": [
+    "Issue #11936. Chrysalis (808082) is the Vizier talent CharacterAdvancement 6324 in Tab 92 and had no",
+    "SkillLineAbility row, so no spellbook tab listed it. The active Vizier talents, such as Blight Antidote (520153,",
+    "row 23469), are in SkillLine 499. Row 844, a duplicate of row 12780 (Feign Death 5384) that differs only in",
+    "MinSkillLineRank, is repurposed for 808082 at SkillLine 499, and the client patch streams that row after the",
+    "spell is learned. Feign Death keeps SkillLine 50 through its twin rows."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 60}
+  ],
+  "steps": [
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 520153, "equals": 499,
+     "label": "CONTROL: Blight Antidote is in the Vizier line"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 5384, "equals": 50,
+     "label": "CONTROL: row 844's old spell keeps its line through the twin rows"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 808082, "equals": 499,
+     "label": "Chrysalis carries the Vizier line"},
+    {"action": "learn", "actor": "v", "spell": 808082, "label": "learn Chrysalis"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_after_learned", "spell": 808082, "equals": 1,
+     "within_ms": 5000, "label": "the row follows the learn announcement"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_ability", "spell": 808082, "equals": 499,
+     "within_ms": 5000, "label": "the client patch carries SkillLine 499 for Chrysalis"}
+  ]
+}
