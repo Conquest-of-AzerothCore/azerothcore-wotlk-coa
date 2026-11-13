@@ -11212,5 +11212,64 @@ class AuraExpiryPassiveLinkTests(unittest.TestCase):
         self.assertEqual(behaviour_label(entry), [expectation.label])
 
 
+
+class TakenHitLearnedArmTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 552011 and entry.get('label_suffix') == suffix)
+
+    def built(self, suffix: str):
+        return taken_hit_scenario(load_class_file(23), taken_hit_spec(self.entry(suffix)))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_control_arm_unlearns_and_the_treatment_arm_relearns_before_its_strikes(self):
+        scenario, _ = self.built('players')
+        run.validate(scenario)
+        steps = scenario['steps']
+        unlearn = next(index for index, step in enumerate(steps) if step['action'] == 'unlearn')
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['actor'] == CASTER and step['spell'] == 552011)
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(steps[unlearn]['spell'], 552011)
+        self.assertLess(unlearn, strikes[0])
+        self.assertLess(strikes[9], learn)
+        self.assertLess(learn, strikes[10])
+        checks = [step for step in steps if step['action'] == 'assert' and step.get('metric') == 'aura'
+                  and step.get('spell') == 552011]
+        self.assertEqual([step['equals'] for step in checks], [0, 1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_critical_entry_forces_the_player_striker_and_reads_critical_hits_only(self):
+        scenario, [expectation] = self.built('player_crits')
+        striker = next(player for player in scenario['players'] if player['id'] == STRIKER)
+        self.assertEqual(striker['spell_crit_rating'], FORCED_CRIT_RATING)
+        reads = [step for step in scenario['steps'] if step['action'] == 'assert'
+                 and step.get('metric') == 'spell_damage_total' and step.get('caster') == STRIKER]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['critical'] is True for step in reads))
+        plain, _ = self.built('players')
+        self.assertNotIn('spell_crit_rating', next(player for player in plain['players'] if player['id'] == STRIKER))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_halved_player_hit_is_ok_and_an_unreduced_one_alerts(self):
+        _, [expectation] = self.built('players')
+        judged = lambda hit: judge_behaviour(base_verdict(expectation),
+                                             FakeRun(ratio_values(expectation.model, hit)), expectation).status
+        self.assertEqual(judged(550.0), 'ok')
+        self.assertEqual(judged(1100.0), 'alert')
+        self.assertEqual(judged(880.0), 'alert')
+
+    def test_a_forced_striker_crit_without_a_critical_read_is_refused(self):
+        entry = {key: value for key, value in self.entry('player_crits').items() if key != 'critical'}
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(load_class_file(23), taken_hit_spec(entry))
+
+    def test_an_arm_learning_and_unlearning_one_spell_is_refused(self):
+        entry = self.entry('players')
+        arms = [{**entry['arms'][0], 'learn': [552011]}, entry['arms'][1]]
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(load_class_file(23), taken_hit_spec({**entry, 'arms': arms}))
+
+
 if __name__ == '__main__':
     unittest.main()

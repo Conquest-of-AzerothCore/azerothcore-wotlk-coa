@@ -6254,6 +6254,8 @@ class TakenArm:
     reduction: str = 'none'
     returned_pct: int | None = None
     refresh: bool = False
+    learn: tuple[int, ...] = ()
+    unlearn: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -6290,6 +6292,8 @@ class TakenHitSpec:
     expected_points: float | None = None
     ally_health_pct: int | None = None
     health_loss: bool = False
+    critical: bool = False
+    striker_force_crit: str | None = None
 
 
 def ally_cast_targets(spec: TakenHitSpec) -> bool:
@@ -6322,7 +6326,7 @@ def taken_hit_mark(spec: TakenHitSpec, arm: str, mark, key: str) -> str:
 
 def taken_hit_reads(spec: TakenHitSpec, arm: str, mark, debt: bool) -> list[dict]:
     strike = {'spell': spec.strike_spell, 'caster': STRIKER, 'target': CASTER}
-    noncritical = {**strike, 'critical': False} if spec.judge == 'damage_ratio' else strike
+    noncritical = {**strike, 'critical': spec.critical} if spec.judge == 'damage_ratio' else strike
     steps = [measurement(taken_hit_mark(spec, arm, mark, 'damage'), CASTER, 'spell_damage_total', **noncritical),
              measurement(taken_hit_mark(spec, arm, mark, 'count'), CASTER, 'spell_damage_count', **noncritical),
              measurement(taken_hit_mark(spec, arm, mark, 'absorb'), CASTER, 'spell_absorb_total', **strike),
@@ -6384,7 +6388,8 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
         maximum = spec.caster_max_health or FIXTURE_MAX_HEALTH
         health = [{'action': 'set_health', 'actor': CASTER, 'value': spec.caster_health_pct * maximum // 100,
                    'maximum': maximum}]
-    steps = auras + health
+    steps = ([{'action': 'unlearn', 'actor': CASTER, 'spell': spell} for spell in arm.unlearn]
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in arm.learn] + auras + health)
     for spell, target in arm.opening_casts:
         steps += taken_hit_cast(records, spec, spell, target)
     if arm.opening_casts:
@@ -6448,11 +6453,21 @@ def taken_hit_validate(spec: TakenHitSpec):
     names = [arm.name for arm in spec.arms]
     if len(set(names)) != len(names) or len(names) < 2:
         raise ValueError(f'{spec.spell} taken_hit needs at least two distinct arms, here {names}')
-    if len({(arm.auras, arm.opening_casts, arm.casts, arm.after_casts, arm.select)
+    if len({(arm.auras, arm.opening_casts, arm.casts, arm.after_casts, arm.select, arm.learn, arm.unlearn)
             for arm in spec.arms}) != len(spec.arms):
         raise ValueError(f'{spec.spell} taken_hit arms are identical; the contrast would measure nothing')
     if spec.judge == 'damage_ratio' and names != list(HIT_RATIO_ARMS):
         raise ValueError(f'{spec.spell} taken_hit damage_ratio compares exactly the arms {HIT_RATIO_ARMS}')
+    if spec.critical and (spec.judge != 'damage_ratio' or spec.health_loss):
+        raise ValueError(f'{spec.spell} taken_hit reads critical strikes for a damage_ratio judge of the damage logs '
+                         f'only')
+    if spec.striker_force_crit is not None and (spec.striker_force_crit not in FORCE_CRIT_RATINGS
+                                                or not spec.striker_race or not spec.critical):
+        raise ValueError(f'{spec.spell} taken_hit forces the crits of a player striker only, for a critical read')
+    for arm in spec.arms:
+        if set(arm.learn) & set(arm.unlearn) or set(arm.learn + arm.unlearn) & set(spec.learn):
+            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} learns and unlearns distinct spells the entry '
+                             f'does not learn for every arm')
     for arm in spec.arms:
         if arm.absorb not in TAKEN_HIT_ABSORBS:
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} absorb {arm.absorb!r} is not one of '
@@ -6537,7 +6552,9 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
     creatures += [{**creature_fixture(class_file), 'id': name, 'distance': distance} for name, distance in spec.targets]
     players = [player_fixture(class_file)] + ally_players(class_file, targets)
     if spec.striker_race:
-        players.append({**player_fixture(class_file), 'id': STRIKER, 'race': spec.striker_race})
+        players.append({**player_fixture(class_file), 'id': STRIKER, 'race': spec.striker_race,
+                        **({FORCE_CRIT_RATINGS[spec.striker_force_crit]: FORCED_CRIT_RATING}
+                           if spec.striker_force_crit else {})})
     health = (f', the caster held at {spec.caster_health_pct}% of {spec.caster_max_health or FIXTURE_MAX_HEALTH} '
               f'health before every trial' if spec.caster_health_pct is not None else '')
     scenario = {
@@ -6562,6 +6579,15 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     if spec.striker_race:
         scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
+    for arm in spec.arms:
+        changes = ([f'unlearns {list(arm.unlearn)}'] if arm.unlearn else []) + (
+            [f'learns {list(arm.learn)}'] if arm.learn else [])
+        if changes:
+            scenario['contract'] += f'; the {arm.name} arm first {" and ".join(changes)} on the caster'
+    if spec.critical:
+        scenario['contract'] += ('; only the critical strikes are compared' + (
+            f', the striker holding {FORCED_CRIT_RATING} {FORCE_CRIT_RATINGS[spec.striker_force_crit]}'
+            if spec.striker_force_crit else ''))
     label = taken_hit_label(spec)
     if spec.judge == 'resist_rate':
         model = {'kind': 'taken_rate', 'reads': {arm.name: [taken_rate_label(spec, arm.name, trial)
@@ -6621,7 +6647,7 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
 def taken_arm(raw: dict) -> TakenArm:
     unknown = set(raw) - {'name', 'auras', 'casts', 'after_casts', 'absorb', 'share_pct', 'debt_removed_pct',
                           'strikes', 'opening_casts', 'select', 'select_settle_ms', 'checks', 'reduction',
-                          'returned_pct', 'refresh'}
+                          'returned_pct', 'refresh', 'learn', 'unlearn'}
     if unknown:
         raise ValueError(f'taken_hit arm fields {sorted(unknown)} are not known')
     return TakenArm(raw['name'], tuple((int(spell), int(stacks)) for spell, stacks in raw.get('auras', ())),
@@ -6632,7 +6658,9 @@ def taken_arm(raw: dict) -> TakenArm:
                     tuple((int(spell), str(target)) for spell, target in raw.get('opening_casts', ())),
                     raw.get('select'), int(raw.get('select_settle_ms', 0)),
                     tuple(tuple(sorted(check.items())) for check in raw.get('checks', ())),
-                    raw.get('reduction', 'none'), raw.get('returned_pct'), bool(raw.get('refresh', False)))
+                    raw.get('reduction', 'none'), raw.get('returned_pct'), bool(raw.get('refresh', False)),
+                    tuple(int(spell) for spell in raw.get('learn', ())),
+                    tuple(int(spell) for spell in raw.get('unlearn', ())))
 
 
 def absorb_term(raw: dict) -> AbsorbTerm:
@@ -6653,7 +6681,8 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())),
                         entry.get('cast_power'), entry.get('settle_ms', TAKEN_HIT_SETTLE_MS),
                         entry.get('striker_race', 0), entry.get('returned_spell', 0), entry.get('expected_points'),
-                        entry.get('ally_health_pct'), entry.get('health_loss', False))
+                        entry.get('ally_health_pct'), entry.get('health_loss', False),
+                        bool(entry.get('critical', False)), entry.get('striker_force_crit'))
 
 
 THREAT_REDIRECT_SWINGS = 3

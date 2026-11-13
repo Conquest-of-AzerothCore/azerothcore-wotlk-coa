@@ -6257,5 +6257,24 @@
     ],
     "kind": "claim",
     "reason": "Claim \"return to it\" / \"Teleport back\": Status 1 (final pair f5 20261113-070528 / -070734, build f427abd30c75; ADR 0499 strike.in_before): both phases place the circle with a real Summoning Ritual 805038 and move the caster 15 yd; only the after phase casts Ritual Return 807098: 13.5 yd before (15 within 1.6: the circle stands about 1.5 yd off the cast point, cause not traced), 0 after. Claim \"remove all movement slowing effects\": status 1 (a striker's Slow 31589 stays on the caster when Ritual Return is refused without a circle, gone after it goes through). Claim \"Teleport back\": measured (the caster on the circle at 0 yd after a 15 yd move, ADR 0441) but the contrast is a setup condition, counted as data; route pending as clause 259. Ritual Return's caster aura 807317 is a generator fixture (values.py:190-193). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
+  },
+  {
+    "spell": 552011,
+    "clause": "Damage taken from other players is reduced.",
+    "labels": [
+      "552011 behaviour_hit_ratio players",
+      "552011 behaviour_hit_ratio creatures"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched (2026-11-13, C1 author T): server DBC set (/srv/coa/server-data/dbc) Spell 552011 and src/server/coa read (granted at level 1, AscensionCustomClassData.h:457; reduction in AscensionResilientConstitution.h, called from Unit.cpp:16779-16780); raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): 552011 0 lines, \"Resilient Constitution\" 0 lines (a passive with SPELL_ATTR1_NO_AURA_ICON logs no event); ~/CoaServer/reference: exiles-db extracted/spells.json has a different id 979700 \"Resilient Constitution\" reading \"significantly reduced ... by another 25%\" (context, not our spell), nothing for 552011; sidekick coaKits and bindmysoul: nothing found; MCP not queried (unavailable). Entered by owner ruling Q-n1 (2026-11-13: in scope, test it against a player attacker). Route (C1 author T): taken_hit damage_ratio with a player striker (control: 552011 unlearned, treatment: relearned) and the creature-striker scope control; run pending."
+  },
+  {
+    "spell": 552011,
+    "clause": "Critical damage taken from players is reduced by another 20%.",
+    "labels": [
+      "552011 behaviour_hit_ratio player_crits"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched (2026-11-13, C1 author T): server DBC set (/srv/coa/server-data/dbc) Spell 552011 and src/server/coa read (granted at level 1, AscensionCustomClassData.h:457; reduction in AscensionResilientConstitution.h, called from Unit.cpp:16779-16780); raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): 552011 0 lines, \"Resilient Constitution\" 0 lines (a passive with SPELL_ATTR1_NO_AURA_ICON logs no event); ~/CoaServer/reference: exiles-db extracted/spells.json has a different id 979700 \"Resilient Constitution\" reading \"significantly reduced ... by another 25%\" (context, not our spell), nothing for 552011; sidekick coaKits and bindmysoul: nothing found; MCP not queried (unavailable). Entered by owner ruling Q-n1 (2026-11-13: in scope, test it against a player attacker). Route (C1 author T): taken_hit damage_ratio on forced critical strikes of a player striker, judged as 0.8 x the measured non-critical ratio of the players entry on the same build; run pending."
   }
 ]

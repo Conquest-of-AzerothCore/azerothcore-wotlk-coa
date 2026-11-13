@@ -1284,6 +1284,12 @@ a trial with fewer logs than strikes did not land and is left out; each arm need
   catalog PvP scenarios); the striker learns `strike_spell` and casts it through the client cast opcode, so the
   strike needs no cost, cooldown or global cooldown in its trials. Libram of Tenacity 801461 "($s3% against
   players)" uses an orc striker.
+- An arm's `unlearn` and `learn` (spell ids) unlearn and learn those spells on the caster at the arm start, before its
+  `checks` (ADR 0540): a passive the class grants is removed by a real unlearn in the control and applied again by a
+  real learn in the treatment, with no `set_aura`. `critical: true` (`damage_ratio` only) reads the critical strikes
+  instead of the non-critical ones, and `striker_force_crit: "spell"` (or `"melee"`, a player striker and a critical
+  read only) gives the player striker 100000 crit rating of that kind, so every strike crits. Resilient Constitution
+  552011 uses both against an orc striker.
 - An arm's `reduction: "formula"` (absorb judge, a `control` arm and `absorb_terms` required) judges a flat
   damage-taken reduction applied before the strike's mitigation: the control strikes must read one damage `C`, and
   each landed strike of the arm must lie between floor((B - R) x C / B) and ceil((B - R) x (C + 1) / B) - 1, with
