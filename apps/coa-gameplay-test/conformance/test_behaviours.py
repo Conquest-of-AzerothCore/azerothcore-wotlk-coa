@@ -10265,7 +10265,7 @@ class MetricDeltaRangeTests(unittest.TestCase):
         _, expectations = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.siphon_entry('siphon_base')))
         expectation = expectations[0]
         labels = expectation.model['before_label'], expectation.model['after_label']
-        for after, status in ((172.0, 'ok'), (210.0, 'ok'), (171.0, 'alert'), (211.0, 'alert')):
+        for after, status in ((175.0, 'ok'), (212.0, 'ok'), (174.0, 'alert'), (213.0, 'alert')):
             with self.subTest(after=after):
                 verdict = judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (0.0, after)))),
                                           expectation)

@@ -1272,9 +1272,9 @@
       "variant": "siphon_base",
       "label_suffix": "siphon_base",
       "quote": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
-      "expected": 172,
-      "after_at_least": 172,
-      "after_at_most": 210,
+      "expected": 174.96,
+      "after_at_least": 174.96,
+      "after_at_most": 212.96,
       "before_expected": 0,
       "trigger_spell": 583256,
       "target": "dummy",
@@ -1294,7 +1294,7 @@
         "spell": 583256,
         "target": "dummy"
       },
-      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power 0 (the reference character): no hit without the cast (control); the first tick lies in [172, 210]."
+      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 + RealPointsPerLevel 0.74 x (60 - SpellLevel 56) = 2.96 (174.96 to 212.96, $m1 at level 60), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power 0 (the reference character): no hit without the cast (control); the first tick lies in [174.96, 212.96], the tooltip's $m1 (the engine truncates the per-level term to 2, G-28, which this band does not model)."
     },
     {
       "spell": 583256,
@@ -1303,9 +1303,9 @@
       "variant": "siphon_power",
       "label_suffix": "siphon_power",
       "quote": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
-      "expected": 3172,
-      "after_at_least": 3172,
-      "after_at_most": 3210,
+      "expected": 3174.96,
+      "after_at_least": 3174.96,
+      "after_at_most": 3212.96,
       "before_expected": 0,
       "trigger_spell": 583256,
       "target": "dummy",
@@ -1326,7 +1326,7 @@
         "spell": 583256,
         "target": "dummy"
       },
-      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power held at 20000 (player fixture, precondition): no hit without the cast (control); the first tick lies in [172 + 3000, 210 + 3000]."
+      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 + RealPointsPerLevel 0.74 x (60 - SpellLevel 56) = 2.96 (174.96 to 212.96, $m1 at level 60), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power held at 20000 (player fixture, precondition): no hit without the cast (control); the first tick lies in [174.96 + 3000, 212.96 + 3000], the tooltip's $m1 plus $SP*0.15 (the engine truncates the per-level term to 2, G-28, which this band does not model)."
     },
     {
       "spell": 704723,
@@ -1354,8 +1354,8 @@
       "variant": "channel",
       "label_suffix": "channel",
       "quote": "to deal $707133s1% increased damage per stack.",
-      "expected": 1698,
-      "before_expected": 529,
+      "expected": 1702,
+      "before_expected": 530,
       "trigger_spell": 501886,
       "target": "dummy",
       "setup_only_after": true,
@@ -1392,7 +1392,7 @@
         "spell": 800343,
         "target": "dummy"
       },
-      "observe_source": "Diabolical 704723 known throughout. Crypt Swarm 501886 (level 54 rank, Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, 3000 ms, a tick every 500 ms) casts its tick 800343 with its own value, 57 + int(0.24 x 6) = 58 at level 60. The damage hook multiplies a tick by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), the crit (forced, precondition) then x1.5, and each tick removes one stack (AscensionNecromancerEvents.cpp:108-117). 823764 on the caster removes partial resists. Control phase: the channel's own cast gives 1 stack: int(int(58 x 1.1) x 1.5) = 94, then five ticks of 87: total 529. After 31000 ms, fourteen Commands and the channel give 15 stacks: ticks at 15, 14, 13, 12, 11, 10 stacks: 217 + 208 + 199 + 190 + 181 + 174 = 1169, total 1698. A bonus of 9% or 11% per stack gives other sums."
+      "observe_source": "Diabolical 704723 known throughout. Crypt Swarm 501886 (level 54 rank, Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, 3000 ms, a tick every 500 ms) casts its tick 800343 with its own value, 57 + int(0.24 x 6) = 58 at level 60. The damage hook multiplies a tick by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), the crit (forced, precondition) then x1.5, and each tick removes one stack (AscensionNecromancerEvents.cpp:108-117). 823764 on the caster removes partial resists. Expected from the tooltip ($707133s1 = 10% per stack), the forced crit x1.5 and one integer amount per hit: control phase, the channel's own cast gives 1 stack: floor(58 x 1.1 x 1.5) = 95, then five ticks of 87: total 530. After 31000 ms, fourteen Commands and the channel give 15 stacks: ticks at 15, 14, 13, 12, 11, 10 stacks: floor(87 x 2.5, 2.4, 2.3, 2.2, 2.1, 2.0) = 217 + 208 + 200 + 191 + 182 + 174 = 1172, total 1702. A bonus of 9% or 11% per stack gives other sums."
     },
     {
       "spell": 804360,
@@ -1620,12 +1620,12 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "expiry_wait_ms": 1000,
-      "after_expiry_expected": 1,
+      "after_expiry_expected": 0,
       "metric": "aura_stacks",
       "fields": {
         "spell": 707133
       },
-      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: no stack without a Command; one 19500 ms after it, and still one at 20500 ms, past the stated 20000 ms ($706504d): the stack is 707133's own 30000 ms."
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: no stack without a Command; one 19500 ms after it and none at 20500 ms, past the stated 20000 ms ($706504d, the tooltip's duration; 707133's own DurationIndex 9 is 30000 ms, owner question Q-a2-1)."
     },
     {
       "spell": 704723,
@@ -1634,7 +1634,7 @@
       "variant": "duration_long",
       "label_suffix": "duration_long",
       "quote": "for $706504d.",
-      "expected": 1,
+      "expected": 0,
       "before_expected": 0,
       "trigger_spell": 504868,
       "target": "dummy",
@@ -1648,7 +1648,7 @@
       "fields": {
         "spell": 707133
       },
-      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: no stack without a Command; one 29500 ms after it, none at 30500 ms: the stack lasts (29500, 30500] ms, 707133's own DurationIndex 9 (30000 ms). Live logs: 72 natural expiries of the caster's 707133 at 30 s after its last application, none at 20 s."
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: no stack without a Command; none 29500 ms after it and none at 30500 ms: the tooltip's $706504d is 20000 ms (707133's own DurationIndex 9 is 30000 ms, owner question Q-a2-1). Live logs: 72 natural expiries of the caster's 707133 at 30 s after its last application, none at 20 s."
     },
     {
       "spell": 704723,
@@ -2571,8 +2571,9 @@
       "variant": "attack_power",
       "label_suffix": "attack_power",
       "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
-      "expected": 70,
+      "expected": 47,
       "before_expected": 46,
+      "after_at_least": 47,
       "trigger_spell": 10157,
       "target": "caster",
       "cast_in_before": false,
@@ -2588,7 +2589,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Arcane Intellect 10157 (+31 Intellect, +27 spell power via aura 345) cast on the caster in the after phase; the Ghoul (cost 1) reads 46 = (117 + 0) x 0.4 = 46.8 truncated before (control, no buff) and 70 = (148 + 27) x 0.4 after; the caster's Intellect and spell power are read by the caster entries."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Arcane Intellect 10157 (+31 Intellect, +27 spell power via aura 345) cast on the caster in the after phase; the Ghoul (cost 1) reads 46 = (117 + 0) x 0.4 = 46.8 truncated before (control, no buff) and 70 = (148 + 27) x 0.4 after; the caster's Intellect and spell power are read by the caster entries. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 47); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2597,8 +2598,9 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
-      "expected": 35,
+      "expected": 24,
       "before_expected": 23,
+      "after_at_least": 24,
       "trigger_spell": 10157,
       "target": "caster",
       "cast_in_before": false,
@@ -2614,7 +2616,7 @@
         "entry": 50073,
         "school_mask": 32
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's Shadow spell damage bonus (SpellBaseDamageBonusDone, 805015 Effect[1]): 23 = 117 x 0.2 = 23.4 truncated before, 35 = (148 + 27) x 0.2 after Arcane Intellect 10157."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's Shadow spell damage bonus (SpellBaseDamageBonusDone, 805015 Effect[1]): 23 = 117 x 0.2 = 23.4 truncated before, 35 = (148 + 27) x 0.2 after Arcane Intellect 10157. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 24); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2673,8 +2675,9 @@
       "variant": "abomination_attack_power",
       "label_suffix": "abomination_attack_power",
       "quote": "Summoned minions gain Attack Power and Spell Power from your Intellect and Spell Power based on their Life Force.",
-      "expected": 210,
+      "expected": 141,
       "before_expected": 140,
+      "after_at_least": 141,
       "trigger_spell": 10157,
       "target": "caster",
       "cast_in_before": false,
@@ -2693,7 +2696,7 @@
       "fields": {
         "entry": 50068
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Summoning Adept 92123 gives the 3 Life Force an Abomination 50068 (cost 3, Raise: Abomination 500335) needs. Its attack power is 140 = 117 x 0.4 x 3 = 140.4 truncated before and 210 = 175 x 0.4 x 3 after Arcane Intellect 10157: three times the Ghoul's, by its Life Force."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Summoning Adept 92123 gives the 3 Life Force an Abomination 50068 (cost 3, Raise: Abomination 500335) needs. Its attack power is 140 = 117 x 0.4 x 3 = 140.4 truncated before and 210 = 175 x 0.4 x 3 after Arcane Intellect 10157: three times the Ghoul's, by its Life Force. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 141); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2702,8 +2705,9 @@
       "variant": "resistance",
       "label_suffix": "resistance",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 12,
+      "expected": 1,
       "before_expected": 0,
+      "after_at_least": 1,
       "trigger_spell": 976,
       "target": "caster",
       "cast_in_before": false,
@@ -2719,7 +2723,7 @@
         "entry": 50073,
         "school": 5
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Shadow Protection 976 (+30 Shadow resistance) on the caster: the Ghoul's Shadow resistance 0 before, 30 x 0.4 = 12 after."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Shadow Protection 976 (+30 Shadow resistance) on the caster: the Ghoul's Shadow resistance 0 before, 30 x 0.4 = 12 after. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 1); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2753,8 +2757,9 @@
       "variant": "armor",
       "label_suffix": "armor",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 45,
+      "expected": 33,
       "before_expected": 32,
+      "after_at_least": 33,
       "trigger_spell": 168,
       "target": "caster",
       "cast_in_before": false,
@@ -2769,7 +2774,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Frost Armor 168 on the caster: the Ghoul's armor 32 = 94 x 0.35 = 32.9 truncated before, 45 = 130 x 0.35 = 45.5 truncated after."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Frost Armor 168 on the caster: the Ghoul's armor 32 = 94 x 0.35 = 32.9 truncated before, 45 = 130 x 0.35 = 45.5 truncated after. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 33); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2801,8 +2806,9 @@
       "variant": "hit_chance",
       "label_suffix": "hit_chance",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 1004,
+      "expected": 1000.001,
       "before_expected": 1000,
+      "after_at_least": 1000.001,
       "trigger_spell": 57360,
       "target": "caster",
       "cast_in_before": false,
@@ -2818,7 +2824,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Well Fed 57360 (+40 melee, ranged and spell hit rating, aura 189 MiscValue 224) on the caster: the Ghoul's melee hit chance copies the caster's, 1000 before (the fixture's 10000 melee hit rating) and 1004 after."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Well Fed 57360 (+40 melee, ranged and spell hit rating, aura 189 MiscValue 224) on the caster: the Ghoul's melee hit chance copies the caster's, 1000 before (the fixture's 10000 melee hit rating) and 1004 after. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 1000.001); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2827,8 +2833,9 @@
       "variant": "spell_hit_chance",
       "label_suffix": "spell_hit_chance",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 1255,
+      "expected": 1250.001,
       "before_expected": 1250,
+      "after_at_least": 1250.001,
       "trigger_spell": 57360,
       "target": "caster",
       "cast_in_before": false,
@@ -2844,7 +2851,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's spell hit chance copies the caster's: 1250 before (10000 spell hit rating), 1255 after Well Fed 57360."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's spell hit chance copies the caster's: 1250 before (10000 spell hit rating), 1255 after Well Fed 57360. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 1250.001); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2853,8 +2860,9 @@
       "variant": "crit_chance",
       "label_suffix": "crit_chance",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 6,
+      "expected": 4,
       "before_expected": 3,
+      "after_at_least": 4,
       "trigger_spell": 57329,
       "target": "caster",
       "cast_in_before": false,
@@ -2869,7 +2877,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Well Fed 57329 (+40 melee, ranged and spell crit rating, aura 189 MiscValue 1792) on the caster: the Ghoul's base spell crit chance is the caster's Frost spell crit truncated, 3 (3.28) before and 6 (6.14) after."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Well Fed 57329 (+40 melee, ranged and spell crit rating, aura 189 MiscValue 1792) on the caster: the Ghoul's base spell crit chance is the caster's Frost spell crit truncated, 3 (3.28) before and 6 (6.14) after. The tooltip states no figure: the after reading is judged for the direction only (above the before reading, at least 4); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2878,8 +2886,10 @@
       "variant": "haste",
       "label_suffix": "haste",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 1666,
+      "expected": 1999,
       "before_expected": 2000,
+      "after_at_least": 1,
+      "after_at_most": 1999,
       "trigger_spell": 12472,
       "target": "caster",
       "cast_in_before": false,
@@ -2895,7 +2905,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Icy Veins 12472 (+20% cast speed, aura 65) on the caster: cast speed 1 / 1.2; the Ghoul's swing interval 2000 x the caster's cast speed: 2000 before, uint32(2000 x 0.83333) = 1666 after."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. Icy Veins 12472 (+20% cast speed, aura 65) on the caster: cast speed 1 / 1.2; the Ghoul's swing interval 2000 x the caster's cast speed: 2000 before, uint32(2000 x 0.83333) = 1666 after. The tooltip states no figure: the after reading is judged for the direction only (below the before reading, at most 1999); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 804360,
@@ -2904,8 +2914,10 @@
       "variant": "cast_speed",
       "label_suffix": "cast_speed",
       "quote": "They also inherit a portion of your resistances, armor, hit chance, critical strike chance, haste",
-      "expected": 0.8333333,
+      "expected": 0.999,
       "before_expected": 1,
+      "after_at_least": 0.001,
+      "after_at_most": 0.999,
       "trigger_spell": 12472,
       "target": "caster",
       "cast_in_before": false,
@@ -2921,7 +2933,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's UNIT_MOD_CAST_SPEED follows the caster's (Scale(): x speed / inherited speed): 1 before, 1 / 1.2 = 0.83333 after Icy Veins 12472."
+      "observe_source": "Necromancy 804360 (Effect[0] dummied, AscensionNecromancerContracts.cpp:111) describes the minion system. Scale() (AscensionNecromancerSummons.cpp:279-332) runs at the summon and every 1000 ms (UpdateAI event 1): attack power = (caster Intellect + max(Frost, Shadow spell power)) x 0.4 x the minion's Life Force cost; the minion's 805015 Effect[1] magic damage done = (Intellect + spell power) x 0.2 x cost; resistances = the caster's x 0.4 (armor x 0.35); melee, ranged and spell hit chance copied; base spell crit = the caster's Frost spell crit; cast speed and swing interval follow the caster's cast speed. The Ghoul's UNIT_MOD_CAST_SPEED follows the caster's (Scale(): x speed / inherited speed): 1 before, 1 / 1.2 = 0.83333 after Icy Veins 12472. The tooltip states no figure: the after reading is judged for the direction only (below the before reading, at most 0.999); the factors above are the code's and are not expectations, and the before reading is the control state."
     },
     {
       "spell": 500985,
@@ -3129,7 +3141,7 @@
       "variant": "armor",
       "label_suffix": "armor",
       "quote": "increasing threat and Armor.",
-      "expected": 36,
+      "expected": 35,
       "before_expected": 32,
       "trigger_spell": 500985,
       "target": "caster",
@@ -3145,7 +3157,7 @@
       "fields": {
         "entry": 50073
       },
-      "observe_source": "Undead: Protect 500985 (DurationIndex forced to 21): Effect[0] 190 aura 10 SPELL_AURA_MOD_THREAT +1000 on the summons, Effect[2] 190 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +10 armor on the summons; Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), amount -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). The Ghoul's armor is Scale()'s base, the caster's armor x 0.35 (AscensionNecromancerSummons.cpp:316-321): 32 with no stance (control), truncated from 94 x 0.35 = 32.9 (the caster's armor 94, read by the player armor entry); x 1.10 = 36.19, read 36, after the stance (Unit::UpdateArmor TOTAL_PCT, stock; the stat is truncated to an integer at each read)."
+      "observe_source": "Undead: Protect 500985 (DurationIndex forced to 21): Effect[0] 190 aura 10 SPELL_AURA_MOD_THREAT +1000 on the summons, Effect[2] 190 aura 101 SPELL_AURA_MOD_RESISTANCE_PCT +10 armor on the summons; Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), amount -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65). The Ghoul's armor is Scale()'s base, the caster's armor x 0.35 (AscensionNecromancerSummons.cpp:316-321): 32 with no stance (control), truncated from 94 x 0.35 = 32.9 (the caster's armor 94, read by the player armor entry); expected from the tooltip's +10% on the read base: 32 x 1.10 = 35.2, 35, after the stance (the engine applies the 10% to the unrounded 32.9: 36.19, read 36, one above) (Unit::UpdateArmor TOTAL_PCT, stock; the stat is truncated to an integer at each read)."
     },
     {
       "spell": 500985,
@@ -3815,9 +3827,9 @@
     },
     {
       "spell": 300748, "name": "Hulking Hordes 300748 (summon health)", "kind": "metric_delta", "variant": "summon_health",
-      "label_suffix": "summon_health", "quote": "and the maximum health of your summons by", "expected": 1450, "before_expected": 1380,
+      "label_suffix": "summon_health", "quote": "and the maximum health of your summons by", "expected": 1449, "before_expected": 1380,
       "trigger_spell": 500971, "target": "caster", "wait_ms": 3100, "expire_ms": 500, "metric": "owned_creature_max_health", "fields": {"entry": 50073},
-      "observe_source": "300748 Effect[1] 190 puts aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +5 ($s1, Effect[1] points set to Effect[0] by AscensionNecromancerContracts.cpp) on the summons. A Ghoul is raised in each phase; its maximum health is read 3100 ms after the cast, before and after 300748 is learned: 1380 and 1450. The Ghoul's health base is a float (Scale(): NakedHealth x 0.66 + Stamina x 5, AscensionNecromancerSummons.cpp) shown truncated: 1380 x 1.05 = 1449, and 1450 needs a base in [1380.95, 1381), which both ranks (5% and 10%) leave for a base just under 1381: the stated percent of the unrounded base, then the engine truncation (G-26 shape)."
+      "observe_source": "300748 Effect[1] 190 puts aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +5 ($s1, Effect[1] points set to Effect[0] by AscensionNecromancerContracts.cpp) on the summons. A Ghoul is raised in each phase; its maximum health is read 3100 ms after the cast, before and after 300748 is learned: 1380 and, from the tooltip's +5% on the read 1380, 1449 (1380 x 1.05 = 1449.0). The Ghoul's health base is a float (Scale(): NakedHealth x 0.66 + Stamina x 5, AscensionNecromancerSummons.cpp) shown truncated; a read of 1450 needs a base in [1380.95, 1381), one above the tooltip value, which G-26 (one below only) does not cover."
     },
     {
       "spell": 300748, "name": "Hulking Hordes 300748 (your health)", "kind": "metric_delta", "variant": "own_health",
@@ -3827,9 +3839,9 @@
     },
     {
       "spell": 301326, "name": "Hulking Hordes 301326 (summon health)", "kind": "metric_delta", "variant": "summon_health",
-      "label_suffix": "summon_health", "quote": "and the maximum health of your summons by", "expected": 1519, "before_expected": 1380,
+      "label_suffix": "summon_health", "quote": "and the maximum health of your summons by", "expected": 1518, "before_expected": 1380,
       "trigger_spell": 500971, "target": "caster", "wait_ms": 3100, "expire_ms": 500, "metric": "owned_creature_max_health", "fields": {"entry": 50073},
-      "observe_source": "301326 Effect[1] 190 puts aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +10 ($s1, Effect[1] points set to Effect[0] by AscensionNecromancerContracts.cpp) on the summons. A Ghoul is raised in each phase; its maximum health is read 3100 ms after the cast, before and after 301326 is learned: 1380 and 1519. The Ghoul's health base is a float (Scale(): NakedHealth x 0.66 + Stamina x 5, AscensionNecromancerSummons.cpp) shown truncated: 1380 x 1.10 = 1518, and 1519 needs a base in [1380.91, 1381), which both ranks (5% and 10%) leave for a base just under 1381: the stated percent of the unrounded base, then the engine truncation (G-26 shape)."
+      "observe_source": "301326 Effect[1] 190 puts aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT +10 ($s1, Effect[1] points set to Effect[0] by AscensionNecromancerContracts.cpp) on the summons. A Ghoul is raised in each phase; its maximum health is read 3100 ms after the cast, before and after 301326 is learned: 1380 and, from the tooltip's +10% on the read 1380, 1518 (1380 x 1.10 = 1518.0). The Ghoul's health base is a float (Scale(): NakedHealth x 0.66 + Stamina x 5, AscensionNecromancerSummons.cpp) shown truncated; a read of 1519 needs a base in [1380.91, 1381), one above the tooltip value, which G-26 (one below only) does not cover."
     },
     {
       "spell": 301326, "name": "Hulking Hordes 301326 (your health)", "kind": "metric_delta", "variant": "own_health",
@@ -6293,7 +6305,7 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Disease an enemy dealing ${$m1+0+$sps*0.25} Plague damage",
-      "expected": 1.119048,
+      "expected": 1.117084,
       "observe_spell": 503640,
       "cast_wait_ms": 2700,
       "cast_power": 1000,
@@ -6317,7 +6329,7 @@
         ]
       },
       "trials": 20,
-      "expected_source": "503640 Effect[0] aura 3, BasePoints 251 + 1 = 252 per tick ($m1), plus 0.25 x spell power ($sps*0.25; AscensionNecromancerData.h:48 coefficient 0.25 on effect 0). The treatment arm casts a real Inner Fire 48168 on the caster before each Plague (Effect[2] aura 345, +120 spell power on all schools, BasePoints 119 + 1), the control arm does not: (252 + 0.25 x 120) / 252 = 1.119. Both arms set beeg spellpen 823764 (no partial resists), a precondition fixture; the ticks of Plague of Undeath are the observed hits (one cast per trial, 2700 ms)."
+      "expected_source": "503640 Effect[0] aura 3, BasePoints 251 + 1 + RealPointsPerLevel 1.05714 x (60 - SpellLevel 56) = 256.2286 per tick ($m1 at level 60), plus 0.25 x spell power ($sps*0.25; AscensionNecromancerData.h:48 coefficient 0.25 on effect 0). The treatment arm casts a real Inner Fire 48168 on the caster before each Plague (Effect[2] aura 345, +120 spell power on all schools, BasePoints 119 + 1), the control arm does not: (256.2286 + 0.25 x 120) / 256.2286 = 1.117084 (the engine truncates the per-level term, 252 + 4 = 256, ratio 1.117188, G-28). Both arms set beeg spellpen 823764 (no partial resists), a precondition fixture; the ticks of Plague of Undeath are the observed hits (one cast per trial, 2700 ms)."
     },
     {
       "kind": "metric_delta",
