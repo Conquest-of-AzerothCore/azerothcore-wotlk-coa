@@ -87,7 +87,12 @@
   [Writing a first ledger](clause-ledger.md#writing-a-first-ledger)).
 - `class_map.py`: the command line `--worktree W --out OUT [--dbc-dir DIR] [--log-events EVENTS.csv]` maps every
   spell of the 21 CoA classes to the code that touches it (`risk`, `gap`, `custom_mechanics`, log counts) and writes
-  `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)).
+  `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)); it
+  flags spells and class-file spell ids shared between classes (`mark_shared_spells`, `shared_class_file_spells`,
+  ADR 0597).
+- `snapshots.py`: `check --class N` / `write --class N` for the finished classes (`FINISHED_CLASSES`): regenerates
+  each generation of `GENERATIONS` into a temporary directory and compares the SHA-256 of every file with
+  `snapshots/<class>.json`, naming the changed, added and removed files (ADR 0590).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)

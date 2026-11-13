@@ -6,8 +6,9 @@ import unittest
 from unittest import mock
 
 import class_map
-from class_map import (base_candidates, clean, core_reading, family_masks, handler_table, log_events, named_auras,
-                       number_index, source_kind, token_kind)
+from class_map import (base_candidates, class_file_spells, clean, core_reading, family_masks, handler_table,
+                       log_events, mark_shared_spells, named_auras, number_index, shared_class_file_spells,
+                       source_kind, token_kind)
 from profile import DBC_DIR
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -144,6 +145,39 @@ class SourceReadingTest(unittest.TestCase):
             self.assertEqual(log_events(None), ({}, {}))
 
 
+class SharedSpellTest(unittest.TestCase):
+    def test_class_file_spells_read_spell_and_aura_keys_and_pair_heads(self):
+        payload = {'class_id': 19, 'level': 60, 'behaviours': [
+            {'spell': 12096, 'state_aura': 64044, 'trials': 40, 'duration_ms': 3000,
+             'auras': [[823764, 1], [560550, 9]], 'phase_auras': [[984954, 1, 'caster', 'caster']],
+             'clear_auras': [458], 'effects': [{'spell': 1715, 'words': 'fear'}]}]}
+        found = class_file_spells(payload)
+        self.assertEqual(sorted(found), [458, 1715, 12096, 64044, 560550, 823764, 984954])
+        self.assertEqual(found[64044], {'state_aura'})
+        self.assertNotIn(1, found)
+        self.assertNotIn(9, found)
+        self.assertNotIn(60, found)
+
+    def test_shared_class_file_spells_list_ids_of_more_than_one_class_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write(root, 'templar.json', json.dumps({'class_id': 19, 'behaviours': [{'spell': 12096},
+                                                                                  {'spell': 800424}]}))
+            write(root, 'necromancer.json', json.dumps({'class_id': 23, 'behaviours': [{'cast_spell': 12096}]}))
+            write(root, 'necromancer_clauses.json', json.dumps({'class_id': 23, 'spell': 800424}))
+            write(root, 'templar_consumption.json', json.dumps({'class_id': 23, 'spell': 800424}))
+            shared = shared_class_file_spells(root)
+        self.assertEqual(shared, {12096: {'classes': [19, 23], 'keys': ['cast_spell', 'spell']}})
+
+    def test_mark_shared_spells_names_the_other_classes_holding_the_id(self):
+        classes = {19: {'spells': [{'spell': 6603}, {'spell': 800424}]}, 23: {'spells': [{'spell': 6603}]},
+                   24: {'spells': [{'spell': 6603}, {'spell': 81}]}}
+        mark_shared_spells(classes)
+        self.assertEqual([spell['shared_with'] for spell in classes[19]['spells']], [[23, 24], []])
+        self.assertEqual(classes[23]['spells'][0]['shared_with'], [19, 24])
+        self.assertEqual(classes[24]['spells'][1]['shared_with'], [])
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ClassMapRunTest(unittest.TestCase):
     @classmethod
@@ -177,6 +211,14 @@ class ClassMapRunTest(unittest.TestCase):
         self.assertEqual(spells[ABSOLUTION]['source'], 'advancement')
         self.assertEqual(spells[ABSOLUTION]['log_casts'], 4)
         self.assertEqual(spells[SHOOT]['source'], 'base_candidate')
+
+    def test_spells_shared_by_templar_and_necromancer_are_flagged(self):
+        templar = {spell['spell']: spell for spell in self.payload['classes'][str(TEMPLAR_CLASS_ID)]['spells']}
+        for spell in (81, 107, 6603, 552011):
+            with self.subTest(spell=spell):
+                self.assertIn(23, templar[spell]['shared_with'])
+        self.assertEqual(templar[ABSOLUTION]['shared_with'], [])
+        self.assertIsInstance(self.payload['shared_class_file_spells'], dict)
 
     def test_the_payload_records_its_inputs(self):
         self.assertEqual(len(self.payload['spell_dbc_sha256']), 64)
