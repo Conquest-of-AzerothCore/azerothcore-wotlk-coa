@@ -10542,5 +10542,23 @@ class TargetHealthAfterTests(unittest.TestCase):
         self.assertEqual(steps[cast + 1], {'action': 'wait', 'ms': 7000})
 
 
+class MetricDeltaReagentTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_trigger_cast_gets_its_reagent(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 803777 and entry.get('label_suffix') == 'items')
+        steps = behaviour_scenario(load_class_file(23), entry)[0]['steps']
+        cast = next(index for index, step in enumerate(steps)
+                    if step.get('action') == 'cast' and step.get('spell') == 803777)
+        self.assertIn({'action': 'add_item', 'actor': 'caster', 'item': 37201, 'count': 1}, steps[:cast])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_without_reagents_adds_no_item(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 801739 and entry.get('label_suffix') == 'held')
+        steps = behaviour_scenario(load_class_file(23), entry)[0]['steps']
+        self.assertFalse(any(step.get('action') == 'add_item' and step.get('item') == 37201 for step in steps))
+
+
 if __name__ == '__main__':
     unittest.main()
