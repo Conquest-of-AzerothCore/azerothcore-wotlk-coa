@@ -2310,23 +2310,48 @@
     },
     {
       "spell": 681529,
-      "name": "Bone Ward (Stamina)",
-      "kind": "metric_delta",
+      "name": "Bone Ward",
+      "kind": "stat_gain",
       "variant": "stamina",
       "label_suffix": "stamina",
       "quote": "and Stamina by $s3%",
-      "expected": 74,
-      "before_expected": 68,
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "trigger_spell": 681529,
+      "cast_spell": 681529,
+      "cast_target": "caster",
       "metric": "stat",
       "fields": {
         "stat": 2
       },
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "observe_source": "681529 Effect[2] (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS rewritten to SPELL_EFFECT_APPLY_AURA on the caster, AscensionNecromancerContracts.cpp:209-210) aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 2 (Stamina), BasePoints 9 DieSides 1 (10, $s3). The reference Stamina 68 (class file reference_stats) is read with no cast, then after a real cast: Player::UpdateStats stores int32(68 x 1.1f) = int32(74.8) = 74 (the percent-path truncation of G-26 / ADR 0141)."
+      "clear_auras": [
+        681529
+      ],
+      "attribute_stat": true,
+      "wait_ms": 500,
+      "terms": [
+        {
+          "coefficient": 0.1,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "reference"
+        },
+        {
+          "name": "stamina",
+          "auras": [
+            [
+              48101,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "681529 Effect[2] (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS rewritten to SPELL_EFFECT_APPLY_AURA on the caster, AscensionNecromancerContracts.cpp:209-210) aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 2 (Stamina), BasePoints 9 DieSides 1 (10, $s3). The caster's Stamina is read before and after a real cast of 681529 (its aura removed first), at the reference Stamina (68: int32(68 x 1.1f) = 74, a gain of 6 inside floor(6.8)..ceil(6.8), the G-26 percent-path truncation) and with Stamina 48101 set (a precondition fixture), so the gain follows Stamina; around each cast the ward aura reads absent before and present after, and the Stamina returns once it is removed (attribution, ADR 0213, ADR 0385)."
     },
     {
       "spell": 681529,
@@ -3283,163 +3308,6 @@
     },
     {
       "spell": 503640,
-      "kind": "metric_delta",
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "trigger_spell": 503640,
-      "cast_power": 1000,
-      "target": "enemy",
-      "measure_actor": "caster",
-      "enemy_player_race": 2,
-      "enemy_casts": [
-        528
-      ],
-      "enemy_cast_wait_ms": 500,
-      "wait_ms": 2000,
-      "expire_ms": 500,
-      "name": "Plague of Undeath (dispel damage)",
-      "variant": "dispel_damage",
-      "label_suffix": "dispel_damage",
-      "quote": "If Plague of Undeath is dispelled, the enemy takes ${$680928m1+$680928ppl1+$sps*1.25} Plague damage",
-      "expected": 456,
-      "before_expected": 0,
-      "phase_auras": [
-        [
-          600002,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 680928,
-        "caster": "caster",
-        "target": "enemy"
-      },
-      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271): when an aura of the Plague of Undeath chain (Named 801945) is dispelled, the caster casts 680928 at its holder; 680928 Effect[0] SCHOOL_DAMAGE BasePoints 79 + 1, RealPointsPerLevel 8 from SpellLevel 13 (80 + 8 x 47 = 456 at level 60, plus 1.25 x SP, 0 at the reference stats: ${$680928m1+$680928ppl1+$sps*1.25} = 456), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms, $680928d). An enemy player (race 2) carries Plague of Undeath 503640 from a real cast (Runic Power 1000) and cures it with a real Cure Disease 528 cast at itself (dispel type disease, Plague's Dispel 3). No 680928 damage before (control); 456 on the enemy after the cure. The caster carries ARoy buff 3 600002 (aura 57, -100% spell crit chance, a precondition fixture by harness set_aura) so the hit cannot crit; the enemy has no resistance."
-    },
-    {
-      "spell": 503640,
-      "kind": "metric_delta",
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "trigger_spell": 503640,
-      "cast_power": 1000,
-      "target": "enemy",
-      "measure_actor": "enemy",
-      "enemy_player_race": 2,
-      "enemy_casts": [
-        528
-      ],
-      "enemy_cast_wait_ms": 500,
-      "wait_ms": 2000,
-      "expire_ms": 500,
-      "name": "Plague of Undeath (dispel stun lasts)",
-      "variant": "dispel_stun_lasts",
-      "label_suffix": "dispel_stun_lasts",
-      "quote": "and is stunned for $680928d.",
-      "expected": 1,
-      "before_expected": 0,
-      "metric": "aura",
-      "fields": {
-        "spell": 680928,
-        "caster": "caster"
-      },
-      "expiry_wait_ms": 4000,
-      "after_expiry_expected": 1,
-      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271): when an aura of the Plague of Undeath chain (Named 801945) is dispelled, the caster casts 680928 at its holder; 680928 Effect[0] SCHOOL_DAMAGE BasePoints 79 + 1, RealPointsPerLevel 8 from SpellLevel 13 (80 + 8 x 47 = 456 at level 60, plus 1.25 x SP, 0 at the reference stats: ${$680928m1+$680928ppl1+$sps*1.25} = 456), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms, $680928d). An enemy player (race 2) carries Plague of Undeath 503640 from a real cast (Runic Power 1000) and cures it with a real Cure Disease 528 cast at itself (dispel type disease, Plague's Dispel 3). The stun aura 680928 is absent before (control), present 500 ms after the cure and still 4500 ms after it."
-    },
-    {
-      "spell": 503640,
-      "kind": "metric_delta",
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "trigger_spell": 503640,
-      "cast_power": 1000,
-      "target": "enemy",
-      "measure_actor": "enemy",
-      "enemy_player_race": 2,
-      "enemy_casts": [
-        528
-      ],
-      "enemy_cast_wait_ms": 500,
-      "wait_ms": 2000,
-      "expire_ms": 500,
-      "name": "Plague of Undeath (dispel stun ends)",
-      "variant": "dispel_stun_ends",
-      "label_suffix": "dispel_stun_ends",
-      "quote": "and is stunned for $680928d.",
-      "expected": 1,
-      "before_expected": 0,
-      "metric": "aura",
-      "fields": {
-        "spell": 680928,
-        "caster": "caster"
-      },
-      "expiry_wait_ms": 5000,
-      "after_expiry_expected": 0,
-      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271): when an aura of the Plague of Undeath chain (Named 801945) is dispelled, the caster casts 680928 at its holder; 680928 Effect[0] SCHOOL_DAMAGE BasePoints 79 + 1, RealPointsPerLevel 8 from SpellLevel 13 (80 + 8 x 47 = 456 at level 60, plus 1.25 x SP, 0 at the reference stats: ${$680928m1+$680928ppl1+$sps*1.25} = 456), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms, $680928d). An enemy player (race 2) carries Plague of Undeath 503640 from a real cast (Runic Power 1000) and cures it with a real Cure Disease 528 cast at itself (dispel type disease, Plague's Dispel 3). Present 500 ms after the cure, gone 5500 ms after it: with dispel_stun_lasts the stun ends in (4500, 5500] ms."
-    },
-    {
-      "spell": 500969,
-      "kind": "metric_delta",
-      "trigger_spell": 504318,
-      "cast_power": 1000,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "cast_in_before": false,
-      "setup_in_before": true,
-      "setup_casts": [
-        500969
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 3100,
-      "metric": "owned_creature_damage_count",
-      "fields": {
-        "entry": 50078
-      },
-      "wait_ms": 1200,
-      "expire_ms": 500,
-      "before_expected": 0,
-      "name": "Raise: Skeletal Rogue (Command strikes)",
-      "variant": "command_strikes",
-      "label_suffix": "command_strikes",
-      "quote": "Command: Leaps to your target and strikes it $805938s1 times.",
-      "expected": 6,
-      "observe_source": "Command: Skeletal Rogue 504318 (Command family flag; Order, AscensionNecromancerSummons.cpp:453-474; Responds 504318 -> 50078, :148-170): the Rogue jumps to the target (MoveJump) and 500 ms later (event 6, :846-850) strikes it with AttackerStateUpdate twice, or 5 times when the target is below 35% health. The tooltip states $805938s1 (805938 Effect[0] SPELL_EFFECT_ADD_EXTRA_ATTACKS, BasePoints 1, DieSides 4: 2 to 5) strikes. A Rogue is raised at the caster in both phases (setup_in_before); no Command: no Rogue hit on the dummy (control); the Command at the dummy, read 1200 ms later, counts the hits of both Rogues (the second one raised in the after phase). Each Rogue lands its 2 scripted strikes and the first auto attack its AttackStart begins (AscensionNecromancerSummons.cpp:650): 2 x 3 = 6 (pairs 20261113-003823 / -003900 read 6 and 6). The tooltip's $805938s1 reads 2 to 5; the server strikes 2 times, never more (owner question)."
-    },
-    {
-      "spell": 500969,
-      "kind": "metric_delta",
-      "trigger_spell": 504318,
-      "cast_power": 1000,
-      "target": "dummy",
-      "measure_actor": "caster",
-      "cast_in_before": false,
-      "setup_in_before": true,
-      "setup_casts": [
-        500969
-      ],
-      "setup_target": "caster",
-      "setup_wait_ms": 3100,
-      "metric": "owned_creature_damage_count",
-      "fields": {
-        "entry": 50078
-      },
-      "wait_ms": 1200,
-      "expire_ms": 500,
-      "before_expected": 0,
-      "name": "Raise: Skeletal Rogue (Command below 35%)",
-      "variant": "command_execute",
-      "label_suffix": "command_execute",
-      "quote": "Always strikes 5 times on enemies below 35% health.",
-      "expected": 12,
-      "target_health_pct": 30,
-      "observe_source": "Command: Skeletal Rogue 504318 (Command family flag; Order, AscensionNecromancerSummons.cpp:453-474; Responds 504318 -> 50078, :148-170): the Rogue jumps to the target (MoveJump) and 500 ms later (event 6, :846-850) strikes it with AttackerStateUpdate twice, or 5 times when the target is below 35% health. The tooltip states $805938s1 (805938 Effect[0] SPELL_EFFECT_ADD_EXTRA_ATTACKS, BasePoints 1, DieSides 4: 2 to 5) strikes. A Rogue is raised at the caster in both phases (setup_in_before); no Command: no Rogue hit on the dummy (control); the Command at the dummy, read 1200 ms later, counts the hits of both Rogues (the second one raised in the after phase). The dummy is set to 30% of its fixture health before each Command: 5 scripted strikes and the first auto attack per Rogue, 2 x 6 = 12, against 6 above 35% (command_strikes)."
-    },
-    {
-      "spell": 503640,
       "name": "Plague of Undeath (Holy healing received)",
       "kind": "metric_delta",
       "variant": "holy_healing",
@@ -3468,6 +3336,546 @@
       "wait_ms": 2000,
       "expire_ms": 500,
       "observe_source": "503640 Effect[2] aura 118 SPELL_AURA_MOD_HEALING_PCT, BasePoints -51 DieSides 1 (-50, $s3), MiscValue 2 (Holy). An enemy player (race 2) casts Renew 25222 (Holy, aura 8, 105 per 3000 ms tick, 5 ticks, periodic heals do not crit) at itself: 525 without Plague of Undeath (control); then the caster's real 503640 cast lands on it and it casts Renew again: 5 ticks of int32(105 x 0.5) = 52 add 260, so the cumulative heal is 785, 1.5 x 525 within the truncation (tolerance 0.006). The enemy's own heal log (spell_heal_total, raw heal) is read."
+    },
+    {
+      "spell": 804681,
+      "name": "Animate: Skeletal Smith (repair)",
+      "kind": "npc_repair",
+      "quote": "that can repair the equipment of allies",
+      "entry": 50261,
+      "item": 2612,
+      "item_slot": 4,
+      "full": 45,
+      "loss_percent": 50,
+      "observe_source": "Skeletal Smith 50261: npcflag 4224 (vendor 128 + repairer 4096), its faction set to its owner's at its summon (AscensionNecromancerSummons.cpp:515), timed 60 s. The caster, a grouped ally and an orc enemy player wear Plain Robe 2612 (MaxDurability 45) worn before each request by Player::DurabilityLossAll(0.5), uint32(45 x 0.5) = 22 off (a named precondition fixture, harness durability_loss) and send a repair-all request (harness repair_at: CMSG_REPAIR_ITEM through WorldSession::HandleRepairItemOpcode, NPCHandler.cpp:797-835, so GetNPCIfCanInteractWith's NPC-flag, distance and reaction checks run). Controls: before Animate: Skeletal Smith is cast there is no Smith (the caster's 23 stays 23); the enemy player is refused by the Smith (23 stays 23). With the Smith the caster (1, worn twice) and the ally (23) are repaired to 45 (ADR 0384)."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "enemy_helper",
+      "enemy_player_race": 2,
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "helper_casts": [
+        528
+      ],
+      "name": "Plague of Undeath (dispeller not stunned)",
+      "variant": "dispeller_not_stunned",
+      "label_suffix": "dispeller_not_stunned",
+      "quote": "and is stunned for $680928d.",
+      "expected": 0,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), 5000 ms. An enemy player (race 2) carries Plague of Undeath from a real cast (Runic Power 1000); a second enemy player of its faction (the helper) casts a real Cure Disease 528 at it. The dispeller (the helper) holds no 680928 after the cure: the stun is the dispelled unit's (dispel_stun_lasts)."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "helper_casts": [
+        528
+      ],
+      "name": "Plague of Undeath (cured)",
+      "variant": "cured",
+      "label_suffix": "cured",
+      "quote": "If Plague of Undeath is dispelled,",
+      "expected": 0,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 503640,
+        "caster": "caster"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), 5000 ms. An enemy player (race 2) carries Plague of Undeath from a real cast (Runic Power 1000); a second enemy player of its faction (the helper) casts a real Cure Disease 528 at it. The Cure Disease landed: 503640 is gone from the enemy 500 ms after it (the not_cured entry reads it present at the same time without the cure)."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "name": "Plague of Undeath (not cured)",
+      "variant": "not_cured",
+      "label_suffix": "not_cured",
+      "quote": "If Plague of Undeath is dispelled,",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 503640,
+        "caster": "caster"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), 5000 ms. An enemy player (race 2) carries Plague of Undeath from a real cast (Runic Power 1000); a second enemy player of its faction (the helper) casts a real Cure Disease 528 at it. Control of the cured entry: without the cure 503640 is still on the enemy at the same time."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "enemy",
+      "measure_actor": "caster",
+      "enemy_player_race": 2,
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 23500,
+      "expire_ms": 500,
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "name": "Plague of Undeath (no blast without a dispel)",
+      "variant": "expired_no_blast",
+      "label_suffix": "expired_no_blast",
+      "quote": "If Plague of Undeath is dispelled, the enemy takes ${$680928m1+$680928ppl1+$sps*1.25} Plague damage",
+      "expected": 0,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster",
+        "target": "enemy"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), 5000 ms. An enemy player (race 2) carries Plague of Undeath from a real cast (Runic Power 1000); a second enemy player of its faction (the helper) casts a real Cure Disease 528 at it. Control: the disease runs its 20 s on the enemy undispelled; no 680928 damage 23.5 s after the cast."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue (Command strikes)",
+      "kind": "strike_bursts",
+      "quote": "Command: Leaps to your target and strikes it $805938s1 times. Always strikes 5 times on enemies below 35% health.",
+      "command": 504318,
+      "entry": 50078,
+      "stances": [
+        500983,
+        500985
+      ],
+      "distance": 6,
+      "arms": [
+        {
+          "name": "above",
+          "health_pct": 37,
+          "cycles": 40,
+          "low": 2,
+          "high": 5
+        },
+        {
+          "name": "below",
+          "health_pct": 33,
+          "cycles": 10,
+          "low": 5,
+          "high": 5
+        }
+      ],
+      "observe_source": "Command: Skeletal Rogue 504318 (Responds 504318 -> 50078, AscensionNecromancerSummons.cpp:148-170) makes the Rogue jump to the target (MoveJump, :692-695) and 500 ms later strike it (event 6, :846-853): 5 times below 35% health, else 805938 Effect[0] SPELL_EFFECT_ADD_EXTRA_ATTACKS rolled by CalcValue, BasePoints 1 + 1..DieSides 4 = 2..5 ($805938s1; ADR 0383). The dummy stands 6 yd from the caster, so the Rogue must leap to be in melee range at 500 ms. Control: the Command with no Rogue raised lands no Rogue hit. Each cycle reads the Rogue's hits 25 ms before and after the strike tick, then Pacify and Protect stop it until the next Command. Above 35% (37%): 40 Commands, every count in 2..5 and both 2 and 5 seen (a correct server misses 5, or 2, with probability 0.75^40, about 1e-5); below (33%): 10 Commands, 5 each."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 25307,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        500985
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3100,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "tolerance": 0.002,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "spell": 560595,
+      "name": "Putrid Summoner (Protect threat generated)",
+      "variant": "protect_threat_generated",
+      "label_suffix": "protect_threat_generated",
+      "quote": "Undead: Protect: Reduces your threat generated by $s3%.",
+      "expected": 0.25,
+      "observe_source": "Undead: Protect 500985 Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65); ThreatManager::CalculateModifiedThreat applies the cached school modifier to the threat of every damage. A Shadow Bolt 25307 hit (a damage-only spell; Lichfrost's extra effects added about 4% threat the stance did not scale, fix-2 20261113-011757 / -011838) lands on the dummy (Harvest Golem 36), which held no threat and took no damage before (0, the control reading); the dummy's threat on the caster over the health it lost (threat_per_damage) is read after the hit, the Undead: Protect cast first (setup cast at the caster). 560595 known: 0.25 threat per damage."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 25307,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        500985
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3100,
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "tolerance": 0.002,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "before_expected": 0,
+      "spell": 560595,
+      "gate_spell": 500985,
+      "name": "Putrid Summoner (Protect threat generated without the talent)",
+      "variant": "protect_threat_generated_control",
+      "label_suffix": "protect_threat_generated_control",
+      "quote": "Undead: Protect: Reduces your threat generated by $s3%.",
+      "expected": 1.0,
+      "observe_source": "Undead: Protect 500985 Effect[1] rewritten to SPELL_AURA_MOD_THREAT on all schools on the caster (AscensionNecromancerContracts.cpp:191-195), -75 ($560595s3) while 560595 is known, else 0 (AscensionNecromancerAuras.cpp:64-65); ThreatManager::CalculateModifiedThreat applies the cached school modifier to the threat of every damage. A Shadow Bolt 25307 hit (a damage-only spell; Lichfrost's extra effects added about 4% threat the stance did not scale, fix-2 20261113-011757 / -011838) lands on the dummy (Harvest Golem 36), which held no threat and took no damage before (0, the control reading); the dummy's threat on the caster over the health it lost (threat_per_damage) is read after the hit, the Undead: Protect cast first (setup cast at the caster). 560595 never learned (the gate is the stance itself): 1.0 threat per damage."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "target_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "gate_spell": 503640,
+      "name": "Plague of Undeath (dispel damage)",
+      "variant": "dispel_damage",
+      "label_suffix": "dispel_damage",
+      "quote": "If Plague of Undeath is dispelled, the enemy takes ${$680928m1+$680928ppl1+$sps*1.25} Plague damage",
+      "expected": 456,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster",
+        "target": "dummy"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). The dummy (Harvest Golem 36) carries the disease from a real cast (Runic Power 1000) and casts a real Cure Disease 528 at itself (dispel type disease); the caster carries beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit), precondition fixtures. Rank 6 (503640): no 680928 damage before (control); 456 on the cured dummy."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "gate_spell": 503640,
+      "name": "Plague of Undeath (dispel stun lasts)",
+      "variant": "dispel_stun_lasts",
+      "label_suffix": "dispel_stun_lasts",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "expiry_wait_ms": 4250,
+      "after_expiry_expected": 1,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). The dummy (Harvest Golem 36) carries the disease from a real cast (Runic Power 1000) and casts a real Cure Disease 528 at itself (dispel type disease); the caster carries beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit), precondition fixtures. Rank 6: the stun 680928 on the cured dummy, absent before (control), present 500 ms and 4750 ms after the cure."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 503640,
+      "trigger_spell": 503640,
+      "gate_spell": 503640,
+      "name": "Plague of Undeath (dispel stun ends)",
+      "variant": "dispel_stun_ends",
+      "label_suffix": "dispel_stun_ends",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "expiry_wait_ms": 4750,
+      "after_expiry_expected": 0,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). The dummy (Harvest Golem 36) carries the disease from a real cast (Runic Power 1000) and casts a real Cure Disease 528 at itself (dispel type disease); the caster carries beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit), precondition fixtures. Rank 6: present 500 ms after the cure, gone 5250 ms after it: with the lasts entry the stun ends in (4750, 5250] ms."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "target_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 503640,
+      "trigger_spell": 801945,
+      "gate_spell": 801945,
+      "name": "Plague of Undeath rank 1 (dispel damage)",
+      "variant": "rank1_dispel_damage",
+      "label_suffix": "rank1_dispel_damage",
+      "quote": "If Plague of Undeath is dispelled, the enemy takes ${$680928m1+$680928ppl1+$sps*1.25} Plague damage",
+      "expected": 456,
+      "before_expected": 0,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster",
+        "target": "dummy"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). The dummy (Harvest Golem 36) carries the disease from a real cast (Runic Power 1000) and casts a real Cure Disease 528 at itself (dispel type disease); the caster carries beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit), precondition fixtures. Rank 1 (801945): no 680928 damage before (control); 456 on the cured dummy."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 503640,
+      "trigger_spell": 801945,
+      "gate_spell": 801945,
+      "name": "Plague of Undeath rank 1 (dispel stun lasts)",
+      "variant": "rank1_dispel_stun_lasts",
+      "label_suffix": "rank1_dispel_stun_lasts",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "expiry_wait_ms": 4250,
+      "after_expiry_expected": 1,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). The dummy (Harvest Golem 36) carries the disease from a real cast (Runic Power 1000) and casts a real Cure Disease 528 at itself (dispel type disease); the caster carries beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit), precondition fixtures. Rank 1: the stun 680928 on the cured dummy, absent before (control), present 500 ms and 4750 ms after the cure."
+    },
+    {
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "target_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "spell": 503640,
+      "trigger_spell": 801945,
+      "gate_spell": 801945,
+      "name": "Plague of Undeath rank 1 (dispel stun ends)",
+      "variant": "rank1_dispel_stun_ends",
+      "label_suffix": "rank1_dispel_stun_ends",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "expiry_wait_ms": 4750,
+      "after_expiry_expected": 0,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). The dummy (Harvest Golem 36) carries the disease from a real cast (Runic Power 1000) and casts a real Cure Disease 528 at itself (dispel type disease); the caster carries beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit), precondition fixtures. Rank 1: present 500 ms after the cure, gone 5250 ms after it: with the lasts entry the stun ends in (4750, 5250] ms."
+    },
+    {
+      "spell": 503640,
+      "kind": "metric_delta",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "trigger_spell": 503640,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "helper_casts": [
+        528
+      ],
+      "enemy_cast_wait_ms": 500,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "name": "Plague of Undeath (dispelled player stunned)",
+      "variant": "dispelled_stunned",
+      "label_suffix": "dispelled_stunned",
+      "quote": "and is stunned for $680928d.",
+      "expected": 1,
+      "before_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 680928,
+        "caster": "caster"
+      },
+      "observe_source": "aura_ascension_necromancer_lifecycle::Dispel (AscensionNecromancerAuras.cpp:266-271, AfterDispel, registered for every rank of the 801945 chain): the caster casts 680928 at the dispelled unit (GetUnitOwner, ADR 0382); 680928 Effect[0] 80 + 8 x 47 = 456 at level 60 (+1.25 x SP, 0 at the reference stats), Effect[1] rewritten to aura 12 SPELL_AURA_MOD_STUN (AscensionNecromancerContracts.cpp:244-248), DurationIndex 28 (5000 ms). An enemy player (race 2) carries the disease; a second enemy player of its faction (the helper) cures it with a real Cure Disease 528: the cured enemy holds the stun 500 ms later (the helper does not, dispeller_not_stunned)."
+    },
+    {
+      "spell": 503640,
+      "name": "Plague of Undeath (spell power)",
+      "kind": "hit_ratio",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Disease an enemy dealing ${$m1+0+$sps*0.25} Plague damage",
+      "expected": 1.119048,
+      "observe_spell": 503640,
+      "cast_wait_ms": 2700,
+      "cast_power": 1000,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          48168
+        ]
+      },
+      "trials": 20,
+      "expected_source": "503640 Effect[0] aura 3, BasePoints 251 + 1 = 252 per tick ($m1), plus 0.25 x spell power ($sps*0.25; AscensionNecromancerData.h:48 coefficient 0.25 on effect 0). The treatment arm casts a real Inner Fire 48168 on the caster before each Plague (Effect[2] aura 345, +120 spell power on all schools, BasePoints 119 + 1), the control arm does not: (252 + 0.25 x 120) / 252 = 1.119. Both arms set beeg spellpen 823764 (no partial resists), a precondition fixture; the ticks of Plague of Undeath are the observed hits (one cast per trial, 2700 ms)."
     }
   ],
   "player_observations": [],
