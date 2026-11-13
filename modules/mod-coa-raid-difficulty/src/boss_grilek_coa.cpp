@@ -13,6 +13,9 @@
  *                       meant to be kited
  *   Rising damage       from the pull, +5% damage done every 20s, uncapped
  *                       (Trauma ticks of the live logs, decided 2026-11-13)
+ *   Rising speed        with each damage step, +5% run speed, uncapped: slow
+ *                       at first, he outruns players later (testers,
+ *                       2026-11-13)
  *   Ground Slam         first 24s, every 25s   everyone: Physical damage and
  *                                              an 8s bleed (Trauma); those within
  *                                              20 yards are stunned 2s (Ground
@@ -41,6 +44,7 @@ namespace
         SPELL_GROUND_TREMOR      = 6524,
         SPELL_PURSUIT            = 2118801,
         SPELL_ENRAGE_TIMER       = 92432,
+        SPELL_RISING_SPEED       = 1002357,
         SPELL_TRAUMA             = 2118802,
         SPELL_GROUND_SLAM        = 2118806,
         SPELL_GROUND_SLAM_HIT    = 2118807,
@@ -55,6 +59,7 @@ namespace
 
     constexpr float PURSUIT_THREAT = 1000000.0f;
     constexpr int32 RISING_DAMAGE_PER_STACK = 5;
+    constexpr int32 RISING_SPEED_PER_STACK = 5;
 
     struct boss_grilek_coa : public BossAI
     {
@@ -117,14 +122,14 @@ namespace
             me->TextEmote("Gri'lek sets his sights on " + target->GetName() + "!", nullptr, true);
         }
 
-        void RaiseDamage()
+        void AddRisingStack(uint32 spellId, int32 const& perStack)
         {
-            if (Aura* aura = me->GetAura(SPELL_ENRAGE_TIMER))
+            if (Aura* aura = me->GetAura(spellId))
             {
                 aura->ModStackAmount(1);
                 return;
             }
-            me->CastCustomSpell(me, SPELL_ENRAGE_TIMER, &RISING_DAMAGE_PER_STACK, nullptr, nullptr, true);
+            me->CastCustomSpell(me, spellId, &perStack, nullptr, nullptr, true);
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -161,7 +166,8 @@ namespace
                         events.ScheduleEvent(EVENT_GROUND_SLAM, 25s);
                         break;
                     case EVENT_RISING_DAMAGE:
-                        RaiseDamage();
+                        AddRisingStack(SPELL_ENRAGE_TIMER, RISING_DAMAGE_PER_STACK);
+                        AddRisingStack(SPELL_RISING_SPEED, RISING_SPEED_PER_STACK);
                         events.ScheduleEvent(EVENT_RISING_DAMAGE, 20s);
                         break;
                     default:

@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Gri'lek's run speed rises by 5% every 20 seconds",
+  "contract": [
+    "The testers of 2026-11-13 report that on live Gri'lek (15082) started slow and easy to kite, then grew faster",
+    "for as long as the fight lasted, by the same amount as his damage, until he outran players even with their",
+    "movement abilities. His damage rises by one hidden +5% stack 1 s into the fight and every 20 s after; each step",
+    "now also adds one stack of a hidden run-speed aura (1002357, custom 5 per stack). Avatar (83068) keeps its -50%",
+    "for the whole fight, so his speed is (1 + 0.05 x stacks) x 0.5 of his base. Two grouped heroes fight the Mythic",
+    "Gri'lek: with one stack and with three the ratio of his run speed is 1.15 / 1.05 = 1.095; the old script, with",
+    "no speed stacks, gave exactly 1.00."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "lead",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "lead",
+      "target": "mate"
+    },
+    {
+      "action": "teleport",
+      "actor": "lead",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the leader's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "mate",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the mate's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader is in Zul'Gurub on Mythic",
+      "actor": "lead",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mate is in the same Mythic Zul'Gurub",
+      "actor": "mate",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "lead",
+      "entry": 15082,
+      "as": "grilek",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "actor": "lead",
+      "target": "grilek"
+    },
+    {
+      "action": "attack",
+      "actor": "mate",
+      "target": "grilek"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek fights",
+      "actor": "grilek",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "lead"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mate"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first rising-speed stack comes 1 s into the fight",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 1002357,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one stack is +5% run speed, not the spell's own 3%",
+      "actor": "grilek",
+      "metric": "aura_amount",
+      "spell": 1002357,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Avatar slows him for the whole fight",
+      "actor": "grilek",
+      "metric": "aura",
+      "spell": 83068,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "His run speed with one stack",
+      "actor": "grilek",
+      "metric": "run_speed_rate",
+      "save_as": "one_stack_speed"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: three stacks after the 41 s step",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 1002357,
+      "equals": 3,
+      "within_ms": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: his run speed is 1.15 / 1.05 of the first (old script: 1.00)",
+      "actor": "grilek",
+      "metric": "run_speed_rate",
+      "ratio_to": "one_stack_speed",
+      "min": 1.09,
+      "max": 1.1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Avatar still slows him",
+      "actor": "grilek",
+      "metric": "aura",
+      "spell": 83068,
+      "equals": 1
+    }
+  ]
+}
