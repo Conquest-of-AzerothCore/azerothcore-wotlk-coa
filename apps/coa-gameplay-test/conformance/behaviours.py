@@ -3,7 +3,6 @@ import math
 from pathlib import Path
 import re
 
-from bonus import bonus_band
 from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, MAX_SCENARIO_MS,
                   TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
@@ -84,8 +83,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
-        'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'cast_period', 'minion_swing_ratio',
-        'pushback_reduction')
+        'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'cast_period', 'minion_swing_ratio')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2407,155 +2405,6 @@ def minion_swing_ratio_spec(entry: dict) -> MinionSwingRatioSpec:
                                 int(entry.get('wait_ms', 3000)), entry.get('command_power'),
                                 entry.get('label_suffix', ''), float(entry.get('strike_flat', 0.0)),
                                 entry.get('player_spell_power'))
-
-
-PUSHBACK_PHASES = ('unhit', 'hit', 'reduced')
-PUSHBACK_LEARNED_PHASES = ('unhit', 'hit', 'reduced_unhit', 'reduced')
-PUSHBACK_POLL_MS = 1
-PUSHBACK_CASTER_HEALTH = 100000
-
-
-@dataclass(frozen=True)
-class PushbackReductionSpec:
-    spell: int
-    name: str
-    quote: str
-    cast_spell: int
-    cast_power: int
-    reducer_spell: int
-    reducer_wait_ms: int
-    strike_spell: int
-    strike_at_ms: int
-    windows: tuple[tuple[int, int], ...]
-    expected_pct: float
-    label_suffix: str = ''
-    reducer_learn: bool = False
-    repeats: int = 1
-
-
-def pushback_phases(spec: PushbackReductionSpec) -> tuple[str, ...]:
-    return PUSHBACK_LEARNED_PHASES if spec.reducer_learn else PUSHBACK_PHASES
-
-
-def pushback_contrast(spec: PushbackReductionSpec) -> str:
-    if spec.reducer_learn:
-        return LEARNED_CONTRAST
-    return OWN_CAST_CONTRAST if spec.reducer_spell == spec.spell else CONDITION_CONTRAST
-
-
-def pushback_label(spec: PushbackReductionSpec) -> str:
-    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
-
-
-def pushback_mark(spec: PushbackReductionSpec, phase: str, mark: str) -> str:
-    return f'{pushback_label(spec)} {phase} {mark}'
-
-
-def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -> tuple[dict, list[Expectation]]:
-    phases = pushback_phases(spec)
-    if len(spec.windows) != len(phases) or any(not 0 < low < high for low, high in spec.windows):
-        raise ValueError(f'{spec.spell} pushback_reduction polls one window (start, end) after the cast start per '
-                         f'phase {phases}')
-    if not 0 < spec.strike_at_ms < min(low for low, _ in spec.windows):
-        raise ValueError(f'{spec.spell} pushback_reduction strikes inside the cast, before every polled window')
-    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
-    entry = behaviour_entry(records, spec.spell, spec.name, 'pushback_reduction', spec.quote, spec.expected_pct)
-    facts = facts_of(records, spec.cast_spell)
-    windows = dict(zip(phases, spec.windows))
-    polls = {}
-
-    def phase(kind: str, sample: int = 0) -> list[dict]:
-        name = f'{kind} {sample}' if sample else kind
-        low, high = windows[kind]
-        steps = [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': spec.cast_power},
-                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell},
-                 {'action': 'set_health', 'actor': CASTER, 'value': PUSHBACK_CASTER_HEALTH,
-                  'maximum': PUSHBACK_CASTER_HEALTH},
-                 measurement(pushback_mark(spec, name, 'start'), CASTER, 'game_time_ms'),
-                 {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}]
-        waited = 0
-        if kind in ('hit', 'reduced'):
-            steps += [{'action': 'wait', 'label': f'{name} before the strike', 'ms': spec.strike_at_ms},
-                      measurement(pushback_mark(spec, name, 'strikes'), CASTER, 'spell_damage_count',
-                                  spell=spec.strike_spell, caster=STRIKER, target=CASTER),
-                      measurement(pushback_mark(spec, name, 'strike'), CASTER, 'game_time_ms'),
-                      {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
-                      measurement(pushback_mark(spec, name, 'struck'), CASTER, 'game_time_ms')]
-            waited = spec.strike_at_ms
-        steps.append({'action': 'wait', 'label': f'{name} to the window', 'ms': low - waited})
-        marks = []
-        for index in range((high - low) // PUSHBACK_POLL_MS + 1):
-            casting, time = pushback_mark(spec, name, f'{index} casting'), pushback_mark(spec, name, f'{index} at')
-            steps += [measurement(time, CASTER, 'game_time_ms'), measurement(casting, CASTER, 'casting'),
-                      {'action': 'wait', 'label': f'{name} poll', 'ms': PUSHBACK_POLL_MS}]
-            marks.append([time, casting])
-        polls[name] = marks
-        return steps + [{'action': 'wait', 'label': f'{name} settle', 'ms': GCD_WAIT_MS},
-                        measurement(pushback_mark(spec, name, 'after strikes'), CASTER, 'spell_damage_count',
-                                    spell=spec.strike_spell, caster=STRIKER, target=CASTER)]
-
-    def repeated(kind: str) -> list[dict]:
-        if spec.repeats == 1:
-            return phase(kind)
-        return [step for sample in range(1, spec.repeats + 1) for step in phase(kind, sample)]
-
-    if spec.repeats < 1:
-        raise ValueError(f'{spec.spell} pushback_reduction repeats each cast at least once')
-    learned = (spec.cast_spell,) if spec.reducer_learn else (spec.cast_spell, spec.reducer_spell)
-    reducer = ([{'action': 'learn', 'actor': CASTER, 'spell': spec.reducer_spell}] if spec.reducer_learn
-               else hit_ratio_cast(records, spec.reducer_spell, CASTER, CASTER))
-    steps = (base_steps(class_file)
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
-             + repeated('unhit') + repeated('hit') + reducer
-             + [{'action': 'wait', 'label': 'reducer', 'ms': spec.reducer_wait_ms}]
-             + (repeated('reduced_unhit') if spec.reducer_learn else []) + repeated('reduced'))
-    striker = {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
-               'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True}
-    scenario = {
-        'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour pushback reduction'
-                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
-        'contract': (f'Three casts of {spec.cast_spell} at the dummy in one scenario: unhit; hit once by the '
-                     f'striker\'s {spec.strike_spell} {spec.strike_at_ms} ms into the cast; and the same after a real '
-                     f'{spec.reducer_spell}. Each cast start, each strike and every poll of the caster\'s casting '
-                     f'state are stamped in game time; a cast ends between its last casting and its first idle poll. '
-                     f'The reduction (reduced end - unhit end) / (hit end - unhit end), bracketed by the polls, must '
-                     f'remove {spec.expected_pct:g}% of the pushback within the G-19 band; the two strikes must land '
-                     f'at the same game-time offset into their casts within the poll brackets, else the reading is '
-                     f'invalid.'),
-        'players': [player_fixture(class_file)],
-        'creatures': [creature_fixture(class_file), striker],
-        'steps': steps}
-    model = {'kind': 'pushback_reduction', 'metric': 'casting', 'contrast': pushback_contrast(spec),
-             'quote': entry.quote, 'expected_pct': spec.expected_pct,
-             'band': bonus_band(spec.expected_pct),
-             'phases': ({name: pushback_phase_model(spec, name, name, polls) for name in phases}
-                        if spec.repeats == 1 else {})}
-    if spec.repeats > 1:
-        model['samples'] = {kind: [pushback_phase_model(spec, kind, f'{kind} {sample}', polls)
-                                   for sample in range(1, spec.repeats + 1)] for kind in phases}
-        scenario['contract'] += (f' Each of the casts is repeated {spec.repeats} times; the judge takes the mean '
-                                 f'bracket middle of each kind of cast and its 99% interval.')
-    expectation = Expectation(pushback_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.cast_spell, None,
-                              str(spec.expected_pct), prose_rule(entry.quote, spec.spell), model)
-    return timed(scenario, waited_ms(steps)), [expectation]
-
-
-def pushback_phase_model(spec: PushbackReductionSpec, kind: str, name: str, polls: dict) -> dict:
-    return {'start': pushback_mark(spec, name, 'start'), 'polls': polls[name],
-            **({'strike': pushback_mark(spec, name, 'strike'), 'struck': pushback_mark(spec, name, 'struck'),
-                'strikes': [pushback_mark(spec, name, 'strikes'), pushback_mark(spec, name, 'after strikes')]}
-               if kind in ('hit', 'reduced') else {})}
-
-
-def pushback_reduction_spec(entry: dict) -> PushbackReductionSpec:
-    return PushbackReductionSpec(entry['spell'], entry['name'], entry['quote'], int(entry['cast_spell']),
-                                 int(entry['cast_power']), int(entry['reducer_spell']),
-                                 int(entry.get('reducer_wait_ms', 1600)), int(entry['strike_spell']),
-                                 int(entry['strike_at_ms']),
-                                 tuple((int(low), int(high)) for low, high in entry['windows']),
-                                 float(entry['expected_pct']), entry.get('label_suffix', ''),
-                                 bool(entry.get('reducer_learn', False)), int(entry.get('repeats', 1)))
 
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500
@@ -8094,8 +7943,6 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':
         return dispel_removal_scenario(class_file, dispel_removal_spec(entry))
-    if entry['kind'] == 'pushback_reduction':
-        return pushback_reduction_scenario(class_file, pushback_reduction_spec(entry))
     if entry['kind'] == 'minion_swing_ratio':
         return minion_swing_ratio_scenario(class_file, minion_swing_ratio_spec(entry))
     if entry['kind'] == 'amount_match':
