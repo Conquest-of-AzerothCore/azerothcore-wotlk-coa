@@ -1126,6 +1126,40 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 583256,
+      "name": "Harvest Plague (close to death)",
+      "kind": "hit_ratio",
+      "variant": "close_to_death",
+      "label_suffix": "close_to_death",
+      "quote": "The plague intensifies and siphons increased health based on how close to death your target is.",
+      "expected": 1.5,
+      "observe_spell": 583256,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "target_health_pct": 50
+      },
+      "critical": false,
+      "trials": 20,
+      "cast_wait_ms": 3100,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "expected_source": "The tooltip states the direction, not a factor. The damage hook multiplies a periodic tick of the Harvest Plague family 500968 by 2 - target health percent / 100 (AscensionNecromancerContracts.cpp:418-419): the control dummy (50000000 health, about 100%) takes the tick x 1.0, the treatment dummy held at 50% before every cast (harness set_health_pct, precondition fixture) x 1.5. Each trial casts 583256 and waits 3100 ms for one tick (Amplitude 3000); each cast rolls a new amount (172 to 210) plus 0.15 x spell power; the caster's spell power is held at 20000 (harness fixture, precondition) so that the roll's spread is small against the 3000 bonus. 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms."
+    },
+    {
       "spell": 704723,
       "name": "Diabolical (Crypt Swarm with 15 stacks)",
       "kind": "metric_delta",

@@ -1895,9 +1895,7 @@
       },
       {
         "claim": "at random",
-        "labels": [
-          "704701 behaviour_metric_delta random"
-        ]
+        "labels": []
       }
     ],
     "kind": "claim"
@@ -3350,18 +3348,39 @@
   {
     "spell": 583256,
     "clause": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health every $t sec for $d, healing you for a portion of the damage dealt.",
-    "labels": [
-      "583256 effect_value e0 #0",
-      "583256 aura_amount e0 #0",
-      "583256 aura_duration_ms #1",
-      "583256 effect_value #2"
+    "claims": [
+      {
+        "claim": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
+        "labels": []
+      },
+      {
+        "claim": "every $t sec",
+        "labels": [
+          "583256 behaviour_metric_delta ticks",
+          "583256 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "583256 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "healing you for a portion of the damage dealt",
+        "labels": [
+          "583256 behaviour_metric_delta heal"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 583256,
     "clause": "The plague intensifies and siphons increased health based on how close to death your target is.",
-    "labels": [],
+    "labels": [
+      "583256 behaviour_hit_ratio close_to_death"
+    ],
     "kind": "claim"
   },
   {
