@@ -5135,7 +5135,7 @@ private:
             return player->MeleeDamageBonusDone(target, 1000, BASE_ATTACK, info, info->GetSchoolMask());
         }
         if (metric == "spell_modifier" || metric == "spell_cast_time_ms" || metric == "spell_max_range"
-            || metric == "spell_max_stacks" || metric == "spell_duration_ms" || metric == "spell_healing_done"
+            || metric == "spell_ignores_los" || metric == "spell_max_stacks" || metric == "spell_duration_ms" || metric == "spell_healing_done"
             || metric == "spell_effect_value" || metric == "spell_effect_radius"
             || metric == "spell_family_flags" || metric == "spell_calc_amount_hooks")
         {
@@ -5208,6 +5208,8 @@ private:
                 return info->CalcCastTime(player);
             if (metric == "spell_max_range")
                 return info->GetMaxRange(info->IsPositive(), player);
+            if (metric == "spell_ignores_los")
+                return info->HasAttribute(SPELL_ATTR2_IGNORE_LINE_OF_SIGHT) ? 1 : 0;
             if (metric == "spell_max_stacks")
                 return info->CalcMaxAuraStacks(player);
             if (metric == "spell_duration_ms")
