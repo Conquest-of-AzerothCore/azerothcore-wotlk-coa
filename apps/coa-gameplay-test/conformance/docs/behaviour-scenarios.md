@@ -888,6 +888,9 @@ the two percentages (`effect` of `spell`, `partner_effect` of `partner`, read fr
 absolute amount of an exclusive spell group (`Unit::GetHighestExclusiveSameEffectSpellGroupValue`,
 Unit.cpp:5312-5314) and the most negative amount of a capped negative aura type (`Unit::GetMaxNegativeAuraModifier`,
 Unit.cpp:7107-7121). Two percentages of opposite signs are refused when the scenario is generated.
+`relation: "additive"` (ADR 0420), on `group_stack_cap` and `party_stat_ratio`, adds the percent as points instead of
+multiplying: a crit chance of 5.25 reads 8.25 under +3%. Chilling Presence 300958: the grouped ally's melee crit
+chance gains 3 points, and the caster's Frost spell crit chance gains 3 with Electrifying Aura 560568 as well, not 6.
 
 ### Hit-ratio scenarios (`behaviour_hit_ratio`, `kind: "hit_ratio"`)
 
@@ -1343,6 +1346,9 @@ carry Self Root Forever (No Visual) 42716, because `stationary` did not keep the
 of eight behind the caster, where no swing is parried), and Molten 62531 and Enrage 2116852 to swing four times as
 often. `state_metric` (here `parry_chance`) is read
 once per arm, after the first refresh, and reported, not judged.
+
+`remove_control: true` (ADR 0420) ends a permanent aura (no finite duration) by removing it with `set_aura` before
+the control casts, in place of waiting for its expiry: Lich Form 500981's fear and sleep immunities.
 
 ### Charm-immunity scenarios (`behaviour_immunity`, `kind: "charm_immunity"`)
 

@@ -2829,6 +2829,8 @@ def behaviour_party_stat_ratio_verdict(base: Verdict, run: Run, model: dict) -> 
     if near_before is None or near_after is None:
         return replace(base, explanation=missing_measurement(
             run, model['near_before_label'] if near_before is None else model['near_after_label']))
+    if model.get('relation') == ADDITIVE_RELATION:
+        return party_stat_gain_verdict(base, run, model, near_before, near_after)
     if near_before <= 0:
         return replace(base, status='unmeasured', measured=near_after,
                        explanation=f'{model["near_before_label"]} measured {near_before:g}; a party stat ratio '
@@ -2857,6 +2859,31 @@ def behaviour_party_stat_ratio_verdict(base: Verdict, run: Run, model: dict) -> 
                    low=expected - PARTY_STAT_RATIO_TOLERANCE, high=expected + PARTY_STAT_RATIO_TOLERANCE,
                    explanation=f'{model["metric"]} on the grouped, non-caster ally measured {near_before:g} before '
                                f'the caster learned the passive and {near_after:g} after, ratio {near_ratio:g} '
+                               f'against expected {expected:g}{far_detail}')
+
+
+ADDITIVE_RELATION = 'additive'
+
+
+def party_stat_gain_verdict(base: Verdict, run: Run, model: dict, near_before: float, near_after: float) -> Verdict:
+    expected = float(model['expected'])
+    gain = near_after - near_before
+    near_ok = abs(gain - expected) <= PARTY_STAT_RATIO_TOLERANCE
+    far_detail = ''
+    far_ok = True
+    far_before_label, far_after_label = model.get('far_before_label'), model.get('far_after_label')
+    if far_before_label is not None:
+        far_before = run.values.get(far_before_label)
+        far_after = run.values.get(far_after_label)
+        if far_before is None or far_after is None:
+            return replace(base, explanation=missing_measurement(
+                run, far_before_label if far_before is None else far_after_label))
+        far_ok = abs(far_after - far_before) <= PARTY_STAT_RATIO_TOLERANCE
+        far_detail = f'; out-of-radius ally gain {far_after - far_before:g} (must stay at 0)'
+    return replace(base, status='ok' if near_ok and far_ok else 'alert', measured=gain, expected=expected,
+                   low=expected - PARTY_STAT_RATIO_TOLERANCE, high=expected + PARTY_STAT_RATIO_TOLERANCE,
+                   explanation=f'{model["metric"]} on the grouped, non-caster ally measured {near_before:g} before '
+                               f'the caster learned the passive and {near_after:g} after, a gain of {gain:g} points '
                                f'against expected {expected:g}{far_detail}')
 
 
@@ -3571,8 +3598,12 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     own_factor = (1 + own_pct / 100) * (1 + personal_pct / 100)
     combined_factor = (1 + cap_pct / 100) * (1 + personal_pct / 100)
     inverse = model.get('relation') == INVERSE_RELATION
+    additive = model.get('relation') == ADDITIVE_RELATION
     own_expected = baseline / own_factor if inverse else baseline * own_factor
     combined_expected = baseline / combined_factor if inverse else baseline * combined_factor
+    if additive:
+        own_expected = baseline + own_pct + personal_pct
+        combined_expected = baseline + cap_pct + personal_pct
     tolerance = model.get('tolerance')
     own_margin = tolerance if tolerance is not None else delta_margin(model.get('metric', ''), own_expected)
     combined_margin = tolerance if tolerance is not None else delta_margin(model.get('metric', ''),
@@ -3589,7 +3620,9 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
                                f'+/-{combined_margin:g}); a combined reading that reflects the sum of both '
                                f'percentages instead of their cap is always an alert'
                                + (f'; the metric is a time between events, so each percent divides it'
-                                  if inverse else ''))
+                                  if inverse else '')
+                               + ('; the metric is a percent chance, so each percent adds its points' if additive
+                                  else ''))
 
 
 def behaviour_crit_magnitude_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

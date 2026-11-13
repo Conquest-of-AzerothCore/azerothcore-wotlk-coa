@@ -9,7 +9,7 @@ from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
-from tooltip import COLOR_CODE, SKILL_PER_LEVEL, CasterStats, Records, Tooltip
+from tooltip import COLOR_CODE, SKILL_PER_LEVEL, CasterStats, Records, Tooltip, Unreadable
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_ENTRY, DUMMY_HEALTH, FORCE_CRIT_RATINGS,
                     FORCED_CRIT_RATING, GCD_WAIT_MS, Expectation, TARGET, armed_for, closes_distance, dataset, facts_of,
                     FIXTURE_MAX_HEALTH, fixture_health_step, required_aura_steps,
@@ -441,8 +441,10 @@ class PartyStatRatioSpec:
     far_margin: float = PARTY_ALLY_FAR_MARGIN_YD
     needs_dummy_target: bool = False
     settle_ms: int = PARTY_STAT_RATIO_SETTLE_MS
+    relation: str | None = None
 
 
+ADDITIVE_RELATION = 'additive'
 RELOCATE_STEP_LIMIT_YD = 20.0
 
 
@@ -520,6 +522,10 @@ def party_stat_ratio_scenario(class_file: dict, spec: PartyStatRatioSpec) -> tup
              'near_after_label': near_after_label, 'far_before_label': far_before_label,
              'far_after_label': far_after_label, 'expected': spec.expected, 'metric': spec.metric,
              'quote': entry.quote}
+    if spec.relation is not None:
+        if spec.relation != ADDITIVE_RELATION:
+            raise ValueError(f'{spec.spell} party_stat_ratio relation {spec.relation!r} is not {ADDITIVE_RELATION!r}')
+        model['relation'] = spec.relation
     label = f'{spec.spell} behaviour_party_stat_ratio'
     expectation = Expectation(label, BEHAVIOUR_PARTY_STAT_RATIO, spec.spell, spec.spell, None, str(spec.expected),
                               prose_rule(entry.quote, spec.spell), model)
@@ -533,7 +539,7 @@ def party_stat_ratio_spec(entry: dict) -> PartyStatRatioSpec:
                               entry.get('near_distance', PARTY_ALLY_NEAR_DISTANCE_YD),
                               entry.get('far_margin', PARTY_ALLY_FAR_MARGIN_YD),
                               entry.get('needs_dummy_target', False),
-                              entry.get('settle_ms', PARTY_STAT_RATIO_SETTLE_MS))
+                              entry.get('settle_ms', PARTY_STAT_RATIO_SETTLE_MS), entry.get('relation'))
 
 
 NEARBY_ALLY_DISTANCE_YD = 3.0
@@ -3294,6 +3300,7 @@ class GroupStackCapSpec:
     swing_ms: int = 0
     marker_spell: int | None = None
     tolerance: float | None = None
+    relation: str | None = None
 
 
 def strongest_percent(*percents: float) -> float:
@@ -3373,6 +3380,11 @@ def group_stack_cap_scenario(class_file: dict, spec: GroupStackCapSpec) -> tuple
              'personal_pct': personal_pct, 'quote': entry.quote}
     if spec.swing_ms:
         model['relation'] = 'inverse'
+    if spec.relation is not None:
+        if spec.relation != ADDITIVE_RELATION or spec.swing_ms:
+            raise ValueError(f'{spec.spell} group_stack_cap relation {spec.relation!r} is not {ADDITIVE_RELATION!r} '
+                             f'on a read without swings')
+        model['relation'] = spec.relation
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
     expectation = Expectation(label, BEHAVIOUR_GROUP_STACK_CAP, spec.spell, spec.partner, None,
@@ -3386,7 +3398,8 @@ def group_stack_cap_spec(entry: dict) -> GroupStackCapSpec:
                              entry['partner_effect'], entry['metric'], entry.get('fields', {}),
                              entry.get('personal_effect'), entry.get('wait_ms', GROUP_STACK_CAP_LEARN_WAIT_MS),
                              entry.get('mechanism', 'spell_group'), entry.get('value_spell'),
-                             entry.get('swing_ms', 0), entry.get('marker_spell'), entry.get('tolerance'))
+                             entry.get('swing_ms', 0), entry.get('marker_spell'), entry.get('tolerance'),
+                             entry.get('relation'))
 
 
 SINGLE_TARGET_CAST_WAIT_MS = 300
@@ -4560,6 +4573,7 @@ class ImmunitySpec:
     quote: str
     effects: tuple[ImmunityEffect, ...]
     target: str = CASTER
+    remove_control: bool = False
 
 
 def immunity_label(spec: ImmunitySpec, subject: int, moment: str) -> str:
@@ -4570,6 +4584,13 @@ def dummy_casts_at_caster(spell: int, subject: str = CASTER) -> list[dict]:
     return [step for _ in range(IMMUNITY_CASTS)
             for step in ({'action': 'cast', 'actor': TARGET, 'spell': spell, 'target': subject},
                          {'action': 'wait', 'ms': IMMUNITY_CAST_WAIT_MS})]
+
+
+def immunity_duration_ms(records: Records, spell: int) -> int:
+    try:
+        return int(records.duration_ms(spell))
+    except Unreadable:
+        return 0
 
 
 def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[Expectation]]:
@@ -4595,13 +4616,16 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
     for effect in spec.effects:
         steps += dummy_casts_at_caster(effect.spell, subject)
         steps.append(measurement(immunity_label(spec, effect.spell, 'with'), subject, 'aura', spell=effect.spell))
-    duration_ms = int(records.duration_ms(spec.spell))
-    if duration_ms <= 0:
-        raise ValueError(f'{spec.spell} immunity needs a finite aura duration for its control, not {duration_ms}')
+    duration_ms = immunity_duration_ms(records, spec.spell)
+    if (duration_ms > 0) == spec.remove_control:
+        raise ValueError(f'{spec.spell} immunity ends its aura by expiry only with a finite duration and by removal '
+                         f'only with a permanent one, not {duration_ms} ms with remove_control {spec.remove_control}')
     with_arm_ms = len(spec.effects) * IMMUNITY_CASTS * IMMUNITY_CAST_WAIT_MS
     expired_label = immunity_label(spec, spec.spell, 'expired')
-    steps += [{'action': 'wait', 'ms': max(CAST_MARGIN_MS, duration_ms + CAST_MARGIN_MS - with_arm_ms)},
-              measurement(expired_label, subject, 'aura', spell=spec.spell)]
+    end_steps = ([{'action': 'set_aura', 'actor': subject, 'spell': spec.spell, 'stacks': 0},
+                  {'action': 'wait', 'ms': CAST_MARGIN_MS}] if spec.remove_control else
+                 [{'action': 'wait', 'ms': max(CAST_MARGIN_MS, duration_ms + CAST_MARGIN_MS - with_arm_ms)}])
+    steps += end_steps + [measurement(expired_label, subject, 'aura', spell=spec.spell)]
     for effect in spec.effects:
         steps += dummy_casts_at_caster(effect.spell, subject)
         steps += [measurement(immunity_label(spec, effect.spell, 'control'), subject, 'aura', spell=effect.spell),
@@ -4639,7 +4663,7 @@ def immunity_scenario(class_file: dict, spec: ImmunitySpec) -> tuple[dict, list[
 def immunity_spec(entry: dict) -> ImmunitySpec:
     return ImmunitySpec(entry['spell'], entry['name'], entry['quote'],
                         tuple(ImmunityEffect(effect['spell'], effect['words']) for effect in entry['effects']),
-                        entry.get('target', CASTER))
+                        entry.get('target', CASTER), entry.get('remove_control', False))
 
 
 SPELL_EFFECT_THREAT = 63

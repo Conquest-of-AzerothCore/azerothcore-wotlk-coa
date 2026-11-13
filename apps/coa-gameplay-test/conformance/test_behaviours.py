@@ -10299,5 +10299,96 @@ class RemovedOwnEffectTests(unittest.TestCase):
         self.assertEqual([step['effect'] for step in reads], [1])
 
 
+
+def chilling_presence_entry(kind: str) -> dict:
+    return next(entry for entry in load_class_file(23)['behaviours']
+                if entry['spell'] == 300958 and entry['kind'] == kind)
+
+
+class AdditiveRelationTests(unittest.TestCase):
+    def party_expectation(self) -> Expectation:
+        _, expectations = party_stat_ratio_scenario(load_class_file(23),
+                                                    party_stat_ratio_spec(chilling_presence_entry('party_stat_ratio')))
+        return expectations[0]
+
+    def cap_expectation(self) -> Expectation:
+        _, expectations = group_stack_cap_scenario(load_class_file(23),
+                                                   group_stack_cap_spec(chilling_presence_entry('group_stack_cap')))
+        return expectations[0]
+
+    def party_status(self, before: float, after: float) -> str:
+        expectation = self.party_expectation()
+        values = {expectation.model['near_before_label']: before, expectation.model['near_after_label']: after}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def cap_status(self, baseline: float, own: float, combined: float) -> str:
+        expectation = self.cap_expectation()
+        model = expectation.model
+        values = {model['baseline_label']: baseline, model['own_label']: own, model['combined_label']: combined}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_party_crit_chance_gains_its_points(self):
+        self.assertEqual(self.party_expectation().model['relation'], 'additive')
+        self.assertEqual(self.party_status(5.25, 8.25), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_party_crit_chance_multiplied_instead_alerts(self):
+        self.assertEqual(self.party_status(5.0, 5.15), 'alert')
+        self.assertEqual(self.party_status(5.0, 5.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_capped_crit_chance_adds_the_strongest_points_once(self):
+        self.assertEqual(self.cap_status(4.5, 7.5, 7.5), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_summed_crit_chances_alert(self):
+        self.assertEqual(self.cap_status(4.5, 7.5, 10.5), 'alert')
+        self.assertEqual(self.cap_status(4.5, 4.635, 4.635), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unknown_relation_is_refused(self):
+        entry = {**chilling_presence_entry('party_stat_ratio'), 'relation': 'inverse'}
+        with self.assertRaises(ValueError):
+            party_stat_ratio_scenario(load_class_file(23), party_stat_ratio_spec(entry))
+        entry = {**chilling_presence_entry('group_stack_cap'), 'relation': 'factor'}
+        with self.assertRaises(ValueError):
+            group_stack_cap_scenario(load_class_file(23), group_stack_cap_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_multiplied_entry_regenerates_without_a_relation(self):
+        _, expectations = group_stack_cap_scenario(CLASS_FILE, group_stack_cap_spec(serendipity_group_stack_cap_entry()))
+        self.assertNotIn('relation', expectations[0].model)
+
+
+class PermanentImmunityTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 500981 and entry['kind'] == 'immunity')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_permanent_aura_is_removed_before_its_control(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry())
+        steps = scenario['steps']
+        removal = next(index for index, step in enumerate(steps)
+                       if step.get('action') == 'set_aura' and step.get('spell') == 500981 and step['stacks'] == 0)
+        expired = next(index for index, step in enumerate(steps) if step.get('label') == '500981 immunity 500981 expired')
+        control = next(index for index, step in enumerate(steps) if step.get('label') == '500981 immunity 12096 control')
+        self.assertLess(removal, expired)
+        self.assertLess(expired, control)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_permanent_aura_without_removal_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.entry(), 'remove_control': False})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_timed_aura_with_removal_is_refused(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 804371 and entry['kind'] == 'immunity')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**entry, 'remove_control': True})
+
+
 if __name__ == '__main__':
     unittest.main()
