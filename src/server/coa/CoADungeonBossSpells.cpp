@@ -450,7 +450,7 @@ private:
     void Load()
     {
         _loaded = true;
-        if (QueryResult result = WorldDatabase.Query("SELECT `spell_id`, `range_index`, `line_of_sight` FROM `coa_dungeon_spell_reach`"))
+        if (PreparedQueryResult result = WorldDatabase.Query(WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DUNGEON_SPELL_REACH)))
         {
             do
             {
