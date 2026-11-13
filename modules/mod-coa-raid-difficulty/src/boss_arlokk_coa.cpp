@@ -485,6 +485,19 @@ namespace
                 info->AttributesEx3 &= ~SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD;
         }
     };
+
+    class ArlokkVanishSurvivesSpellHits final : public GlobalScript
+    {
+    public:
+        ArlokkVanishSurvivesSpellHits()
+            : GlobalScript("ArlokkVanishSurvivesSpellHits", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (info->Id == SPELL_VANISH)
+                info->StealthSurvivesSpellHits = true;
+        }
+    };
 }
 
 void AddCoaArlokkScripts()
@@ -492,4 +505,5 @@ void AddCoaArlokkScripts()
     RegisterZulGurubCreatureAI(boss_arlokk_coa);
     RegisterSpellScript(spell_arlokk_coa_razor_claws);
     new ArlokkRazorClawsBleedsEndOnDeath();
+    new ArlokkVanishSurvivesSpellHits();
 }
