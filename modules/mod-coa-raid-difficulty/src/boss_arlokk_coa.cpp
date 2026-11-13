@@ -121,6 +121,7 @@ namespace
     constexpr uint8 MAX_PROWLERS_PER_SIDE = 15;
     constexpr float MARK_PULL_RANGE      = 40.0f;
     constexpr float SHADOWSTEP_RANGE     = 40.0f;
+    constexpr float PROWLER_DESPAWN_RANGE = 200.0f;
 
     constexpr Milliseconds VANISH_STEALTH          = 10s;
     constexpr Milliseconds FIRST_PANTHER_STEP      = 11s;
@@ -165,6 +166,7 @@ namespace
             _avatar.Release(me);
             Talk(SAY_DEATH);
             ClearMarks();
+            DespawnProwlers();
             me->GetMap()->DoForAllPlayers([](Player* p)
             {
                 for (uint32 bleed : RAZOR_CLAWS_BLEEDS)
@@ -213,10 +215,15 @@ namespace
             BossAI::EnterEvadeMode(why);
             _avatar.Release(me);
             ClearMarks();
-            std::list<Creature*> panthers;
-            GetCreatureListWithEntryInGrid(panthers, me, NPC_ZULIAN_PROWLER, 200.0f);
-            for (Creature* panther : panthers)
-                panther->DespawnOrUnsummon();
+            DespawnProwlers();
+        }
+
+        void DespawnProwlers()
+        {
+            std::list<Creature*> prowlers;
+            GetCreatureListWithEntryInGrid(prowlers, me, NPC_ZULIAN_PROWLER, PROWLER_DESPAWN_RANGE);
+            for (Creature* prowler : prowlers)
+                prowler->DespawnOrUnsummon();
         }
 
         void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType type, SpellSchoolMask school) override
