@@ -388,7 +388,8 @@ METRIC_EVIDENCE = {
                      'spell_absorb_total', 'spell_log_count', 'nearby_creature_at_client', 'spell_go_count',
                      'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits',
                      'pet_melee_blocked', 'health', 'owned_creature_avoided_count', 'owned_creature_attack_count',
-                     'owned_creature_health', 'server_packets', 'server_packet_u32'),
+                     'owned_creature_health', 'server_packets', 'server_packet_u32',
+                     'owned_creature_spell_cast_count'),
                     EVENT),
     **dict.fromkeys(('spell_modifier', 'spell_power_cost', 'spell_effect_value', 'spell_max_stacks', 'can_detect',
                      'spell_cast_time_ms', 'spell_duration_ms', 'spell_effect_radius', 'spell_max_range',
@@ -449,7 +450,7 @@ STATE_PROMISES = {
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
-    'casting': r'\bcast\w*',
+    'casting': r'\bcast\w*|haste|all actions',
     'item_count': r'creat\w*',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}

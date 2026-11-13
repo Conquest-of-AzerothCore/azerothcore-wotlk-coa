@@ -7223,6 +7223,11 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell: " + std::to_string(spell));
             Unit* target = step.get_optional<std::string>("target")
                 ? GetUnit(step.get<std::string>("target")) : creature;
+            if (auto ownedEntry = step.get_optional<uint32>("target_owned_entry"))
+            {
+                target = GetOwnedCreature(GetPlayer(step.get<std::string>("target_owner")), *ownedEntry);
+                Require(target != nullptr, "Creature cast at an owned creature needs a living creature of that entry");
+            }
             SpellCastResult result = creature->CastSpell(target, spell, TRIGGERED_FULL_MASK);
             record.put("cast_result", uint32(result));
             Require(result == SPELL_CAST_OK, "Creature cast failed: " + std::to_string(result));

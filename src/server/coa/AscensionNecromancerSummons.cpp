@@ -44,14 +44,6 @@ bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
 }
-bool PlayerInCloud(Creature* minion, uint32 spell)
-{
-    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
-    for (Unit* unit : Nearby(minion, info->Effects[EFFECT_0].CalcRadius(minion)))
-        if (unit->GetCharmerOrOwnerPlayerOrPlayerItself() && minion->_IsValidAttackTarget(unit, info))
-            return true;
-    return false;
-}
 bool Travelling(Player const* player)
 {
     return player->IsMounted() || player->IsInFlight();
@@ -547,6 +539,8 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         _events.ScheduleEvent(1, 1ms);
         _events.ScheduleEvent(2, 2s);
+        if (me->GetEntry() == 50385)
+            _events.ScheduleEvent(10, 1s);
         if (me->GetEntry() == 50133 || me->GetEntry() == 50303)
             _events.ScheduleEvent(3, Milliseconds(sSpellMgr->GetSpellInfo(807640)->Effects[1].Amplitude));
         if (me->GetEntry() == 542064)
@@ -582,6 +576,13 @@ class npc_ascension_necromancer : public ScriptedAI
     {
         if (key == 1)
             _target = guid;
+    }
+    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        Player* player = Owner(me);
+        if (me->GetEntry() == 50068 && damage && attacker && player && !Pacified(player) &&
+            !me->HasUnitState(UNIT_STATE_CONTROLLED) && player->IsValidAttackTarget(attacker))
+            Cast(me, me, 802353);
     }
     void JustDied(Unit*) override
     {
@@ -819,8 +820,6 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 {
-                    if (me->GetEntry() == 50068 && (me->IsInCombat() || PlayerInCloud(me, 802353)))
-                        Cast(me, me, 802353);
                     if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))
                             if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
@@ -876,6 +875,13 @@ class npc_ascension_necromancer : public ScriptedAI
                     for (Unit* blasted : Nearby(enemy, 10.0f))
                         if (player->IsValidAttackTarget(blasted))
                             Cast(me, blasted, 807339);
+            if (event == 10)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
+                    if (Unit* victim = me->GetVictim(); victim && player->IsValidAttackTarget(victim))
+                        Cast(me, victim, 704706);
+                _events.ScheduleEvent(10, 1s);
+            }
         }
         if (me->GetEntry() == 523032 && !_exploded)
             for (Unit* nearby : Nearby(me, 2.5f))

@@ -591,7 +591,8 @@ a previously named snapshot of the same metric; it is available on snapshots and
 `ratio_to` then divides by a nonzero snapshot, including a different numeric metric such as healing/damage.
 `cast` accepts an optional `destination` with `x`, `y`, `z` to send an explicit ground target.
 `target_pet: true` in place of `target` sends a player's cast at their current pet.
-`target_owned_entry` in place of `target` sends it at the player's living creature of that entry.
+`target_owned_entry` in place of `target` sends it at the player's living creature of that entry; a creature actor's
+cast names the owning player as `target_owner` with it (test-only, ADR 0530).
 
 Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`, `map_id`, `combat`, `casting`,
 `level`, `quest_objective_count` (needs `quest`, optional `index`), `knows_spell`, `spell_rank` (the spell's rank in its chain, 1 when unranked), `first_rank_spell` (the first rank of its chain, itself when unranked), `has_talent`, `talent_points`, `active_talent_spec`,

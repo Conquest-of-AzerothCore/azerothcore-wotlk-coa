@@ -398,6 +398,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 801545)
         info->TargetAuraSpell = 0;
+    if (id == 803530)
+        info->DurationEntry = sSpellDurationStore.LookupEntry(27);
     if (id == 531132)
         info->AttributesEx4 |= SPELL_ATTR4_NO_CAST_LOG;
     if (id == 801514)
@@ -453,6 +455,11 @@ float Factor(Player* player, Unit* target, SpellInfo const* info, bool periodic)
         factor *= 1.0f + Diseases(player, target) * 0.04f;
     if (info->Id == 800343 && player->HasAura(704723))
         factor *= 1.0f + player->GetAuraCount(707133) * 0.1f;
+    if (info->Id == 707592)
+    {
+        float const frostCrit = player->GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + SPELL_SCHOOL_FROST);
+        factor *= 1.0f + std::max(0.0f, frostCrit) / 100.0f;
+    }
     if (periodic && Named(info, 500968))
         factor *= 2.0f - target->GetHealthPct() / 100.0f;
     if (info->Id == 533240 && player->HasAura(503738))

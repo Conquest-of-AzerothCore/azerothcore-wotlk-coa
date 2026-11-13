@@ -1834,3 +1834,25 @@ cast's own reagents (`reagent_steps`, ADR 0361); the merged branch has no separa
 state read promised by a clause that names a creation.
 `caster_health` (`[value, maximum]`) sets the caster's health at the start of each phase (Bone Reliquary 803767 restores
 30% of the missing health).
+
+### Strikes at an owned creature, aura amounts, pooled item cooldowns in combat (ADRs 0530, 0533, 0534)
+
+A `metric_delta` `strike` may name `owned_entry` (ADR 0530): the striker casts its spell at the caster's owned creature
+of that entry (the harness creature cast's test-only `target_owner` / `target_owned_entry`), in the after phase only.
+A `script_hit` entry may name `strike_owned_entry`: the striker casts `strike_spell` at that owned creature in the
+treatment arm only, after the arm's casts and one `settle_ms`, while the control arm waits the same time unstruck, so
+`control_casts` may repeat the casts (Raise: Abomination 500335: the cloud fires when the Abomination is attacked).
+A `hit_ratio` arm's `aura_amounts` (ADR 0533) sets an effect of one of the arm's auras to an amount before every trial
+(Glacial Impact 707402: 984954's aura 57 at +2 or +22 holds the Frost spell crit sheet at 5.28% or 25.28%).
+An `item_cooldown_gate` entry's `label_suffix` (ADR 0534) keeps several entries of one item apart, and
+`combat_kill_spell` reads the shared potion rule in combat: the ally attacks the dummy, uses `item`, is refused
+`shared_item` past the cooldown while still in combat, the caster kills the dummy (set to 1 health) with that spell,
+and `shared_item` is refused right after the combat end, still refused just before the cooldown from the combat end
+and accepted just after it.
+
+### Cast periods (`behaviour_metric_delta`, `kind: "cast_period"`, ADR 0535)
+
+A real `setup_spell` cast raises creature `entry`; uncommanded for `control_ms` it must cast no `cast_spell`. Then
+`trigger_spell` at the dummy and, every `poll_ms` over `window_ms`, the game time and the creature's casts are read. The
+first and the last cast are bracketed between stamped reads, and (last - first) / (n - 1) must lie inside `expected_ms`
++- the G-19 band (Animate: Plaguefather 805048: Bone Toss 704706 every 1000 ms).

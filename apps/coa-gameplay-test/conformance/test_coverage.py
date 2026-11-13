@@ -526,6 +526,17 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(evidence_of([claim('this spell is instant cast.', label)], [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Only affects Humanoids.', label)], [read])[0], [DATA])
 
+    def test_a_cast_state_is_a_state_read_where_the_clause_promises_haste(self):
+        label = '1 behaviour_metric_delta cast_done'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim('increases your haste by 5%.', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('increases your armor by 5%.', label)], [read])[0], [DATA])
+        unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting')
+        self.assertEqual(evidence_of([claim('increases your haste by 5%.', label)], [unlearned])[0], [DATA])
+        with mock.patch.dict(METRIC_EVIDENCE, {'casting': READBACK}):
+            self.assertEqual(evidence_of([claim('increases your haste by 5%.', label)], [read])[0], [DATA])
+        self.assertEqual(evidence_of([claim('banishing them, preventing all actions', label)], [read])[0], [BEHAVIOUR])
+
     def test_a_minion_maximum_health_is_a_state_read_where_the_clause_promises_it(self):
         label = '1 behaviour_metric_delta'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'owned_creature_max_health', contrast=LEARNED_CONTRAST)
