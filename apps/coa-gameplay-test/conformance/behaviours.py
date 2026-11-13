@@ -278,6 +278,7 @@ class FixedTargetCountSpec:
     select_primary: bool = False
     dummy_entry: int | None = None
     count_primary: bool = False
+    post_cast_auras: tuple[tuple[int, int], ...] = ()
 
     def __post_init__(self):
         if not self.cast_spell:
@@ -304,6 +305,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
     if spec.layout not in ('', CASTER) or spec.settle_ms < 0:
         raise ValueError(f'{spec.spell} fixed_count layout {spec.layout!r} is not the caster, or its settle is '
                          f'negative')
+    if any(stacks < 1 for _, stacks in spec.post_cast_auras):
+        raise ValueError(f'{spec.spell} fixed_count post_cast_auras set at least one stack')
     if spec.headroom is not None and (spec.uncapped or spec.headroom < 1):
         raise ValueError(f'{spec.spell} fixed_count states a headroom of {spec.headroom} for a capped count only')
     if not spec.far_dummy and spec.pull_reads:
@@ -371,6 +374,8 @@ def fixed_target_count_scenario(class_file: dict, spec: FixedTargetCountSpec) ->
             if spec.select_primary:
                 steps.append({'action': 'select', 'actor': CASTER, 'target': dummy_id(0)})
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': cast_target})
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                      for aura, stacks in spec.post_cast_auras]
             steps.append({'action': 'wait', 'ms': wait_ms})
             if spec.settle_ms:
                 steps.append({'action': 'wait', 'label': f'cast {cast} settle', 'ms': spec.settle_ms})
@@ -1193,7 +1198,8 @@ def fixed_target_count_spec(entry: dict) -> FixedTargetCountSpec:
                                 entry.get('cluster_yd'), entry.get('caster_entry'),
                                 tuple((int(spell), str(target)) for spell, target in entry.get('setup_casts', ())),
                                 bool(entry.get('select_primary', False)), entry.get('dummy_entry'),
-                                bool(entry.get('count_primary', False)))
+                                bool(entry.get('count_primary', False)),
+                                tuple((int(spell), int(stacks)) for spell, stacks in entry.get('post_cast_auras', ())))
 
 
 def healing_ratio_spec(entry: dict) -> HealingRatioSpec:

@@ -11212,5 +11212,31 @@ class AuraExpiryPassiveLinkTests(unittest.TestCase):
         self.assertEqual(behaviour_label(entry), [expectation.label])
 
 
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class FixedCountPostCastAuraTests(unittest.TestCase):
+    def test_a_post_cast_aura_is_set_right_after_every_cast(self):
+        entry = r1a_entry(524620, 'fixed_count')
+        spec = fixed_target_count_spec({**entry, 'post_cast_auras': [[500983, 1]]})
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, spec.cast_spell)
+        self.assertTrue(casts)
+        for index in casts:
+            self.assertEqual(steps[index + 1], {'action': 'set_aura', 'actor': 'caster', 'spell': 500983, 'stacks': 1})
+            self.assertEqual(steps[index + 2]['action'], 'wait')
+
+    def test_without_post_cast_auras_the_cast_is_followed_by_its_wait(self):
+        spec = fixed_target_count_spec(r1a_entry(524620, 'fixed_count'))
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        self.assertTrue(all(steps[index + 1]['action'] == 'wait' for index in cast_indices(steps, spec.cast_spell)))
+
+    def test_a_post_cast_aura_without_a_stack_is_refused(self):
+        entry = {**r1a_entry(524620, 'fixed_count'), 'post_cast_auras': [[500983, 0]]}
+        with self.assertRaises(ValueError):
+            fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
+
 if __name__ == '__main__':
     unittest.main()

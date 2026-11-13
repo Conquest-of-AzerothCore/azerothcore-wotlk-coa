@@ -11563,6 +11563,7 @@
     {
       "spell": 504489,
       "name": "Command: Bonefreeze (area)",
+      "post_cast_auras": [[500983, 1]],
       "kind": "fixed_count",
       "variant": "area",
       "label_suffix": "area",
@@ -11584,7 +11585,7 @@
       ],
       "repeats": 1,
       "select_primary": true,
-      "observe_source": "One Skeletal Mage is raised, then Command: Bonefreeze at the selected primary dummy (select_primary, ADR 0423); 504845 (cast by the Mage, read on each dummy whatever its caster) on every additional dummy right after the Command, before the Mage's first 801513 splash. Control: before 504489 is learned the Command is refused, no freeze."
+      "observe_source": "Undead: Pacify 500983 set on the caster right after the Command (post_cast_auras, ADR 0560; precondition fixture: the Mage stays passive and its damage is blocked, AscensionNecromancerEvents.cpp:350-355; the claim is the freeze, not the Mage's damage): without it the Skeletal Mage's first splash landed before the 500 ms read in 31 of 60 copies and broke every freeze (504845 ends on damage, F-b3b-1); with it 60 of 60 copies read all four dummies frozen and no Mage damage (diagnostics 20261113-115218 / -115902). One Skeletal Mage is raised, then Command: Bonefreeze at the selected primary dummy (select_primary, ADR 0423); 504845 (cast by the Mage, read on each dummy whatever its caster) on every additional dummy right after the Command, before the Mage's first 801513 splash. Control: before 504489 is learned the Command is refused, no freeze."
     },
     {
       "spell": 504489,
