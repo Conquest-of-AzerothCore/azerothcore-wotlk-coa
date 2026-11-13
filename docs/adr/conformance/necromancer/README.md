@@ -55,6 +55,7 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0050](0050-command-bonefreeze-casts-once-at-its-target.md) | - | Command: Bonefreeze casts once at its target | new |
 | [0051](0051-entomb-physical-immunity-is-measured-on-an-enemy-player.md) | - | Entomb's Physical immunity is measured on an enemy player | new |
 | [0052](0052-underking-random-pick-is-attributed-per-cycle.md) | - | The Underking random pick is attributed per cycle | new |
+| [0065](0065-parasites-leech-needs-only-the-players-debuff.md) | - | The Parasites leech needs only the player's debuff | new |
 
 ## Re-auditable verdict set
 

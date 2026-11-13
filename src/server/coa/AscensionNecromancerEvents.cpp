@@ -195,7 +195,7 @@ class aura_ascension_necromancer_event : public AuraScript
                 Cast(actor, actor, 807765);
                 Cast(actor, actor, 504022);
             }
-            if (target->HasAura(560729, player->GetGUID()) && player->HasAura(561319))
+            if (target->HasAura(560729, player->GetGUID()))
                 Copy(actor, target, 561318, uint64(damage) * std::max(0, Amount(561319)) / 100);
             if (player->HasAura(704721) &&
                 (!info || (info->SchoolMask & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_FROST))) &&
