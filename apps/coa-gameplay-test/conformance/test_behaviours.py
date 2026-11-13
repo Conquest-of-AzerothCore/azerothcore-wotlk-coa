@@ -10510,5 +10510,37 @@ class UncastTargetCastAndTimeoutTests(unittest.TestCase):
         self.assertNotIn('timeout_ms', scenario)
 
 
+class TargetHealthAfterTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 807796 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_health_is_set_inside_the_wait_after_the_trigger(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry('crossing_down'))
+        steps = scenario['steps']
+        cast = max(index for index, step in enumerate(steps)
+                   if step.get('action') == 'cast' and step.get('spell') == 807796)
+        self.assertEqual(steps[cast + 1:cast + 4],
+                         [{'action': 'wait', 'ms': 1500},
+                          {'action': 'set_health_pct', 'actor': 'caster', 'target': 'dummy', 'pct': 15},
+                          {'action': 'wait', 'ms': 5500}])
+        self.assertEqual(steps[cast - 1], {'action': 'set_health_pct', 'actor': 'caster', 'target': 'dummy',
+                                           'pct': 25})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_delay_outside_the_wait_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.entry('crossing_down'), 'target_health_after': [7000, 15]})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_it_keeps_one_wait(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry('below_twenty'))
+        steps = scenario['steps']
+        cast = max(index for index, step in enumerate(steps)
+                   if step.get('action') == 'cast' and step.get('spell') == 807796)
+        self.assertEqual(steps[cast + 1], {'action': 'wait', 'ms': 7000})
+
+
 if __name__ == '__main__':
     unittest.main()

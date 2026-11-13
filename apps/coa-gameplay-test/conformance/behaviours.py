@@ -1332,6 +1332,7 @@ class MetricDeltaSpec:
     player_spell_power: int | None = None
     caster_health_pct: int | None = None
     target_casts_before: tuple[int, ...] = ()
+    target_health_after: tuple[int, int] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1445,6 +1446,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         raise ValueError(f'{spec.spell} sets the health percent of a cast target that is not the dummy or the enemy')
     if spec.caster_health_pct is not None and (spec.attack_swings or not 0 < spec.caster_health_pct < 100):
         raise ValueError(f'{spec.spell} holds the caster at a health percent between 0 and 100, outside attack phases')
+    if spec.target_health_after is not None and (
+            spec.target != TARGET or spec.attack_swings or not 0 < spec.target_health_after[0] < spec.wait_ms
+            or not 0 < spec.target_health_after[1] < 100):
+        raise ValueError(f'{spec.spell} sets the dummy\'s health after the trigger only for a dummy target, inside '
+                         f'the wait and between 0 and 100 percent')
     if spec.target_casts_before and (spec.target != TARGET or spec.attack_swings):
         raise ValueError(f'{spec.spell} has the dummy cast before the trigger only with the dummy as its target')
     if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
@@ -1518,7 +1524,13 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if after_trigger:
             steps += [{'action': 'wait', 'label': 'before the strike', 'ms': spec.strike.after_trigger_ms}]
             steps += strike_steps()
-        steps.append({'action': 'wait', 'ms': spec.wait_ms})
+        if spec.target_health_after is not None:
+            delay_ms, pct = spec.target_health_after
+            steps += [{'action': 'wait', 'ms': delay_ms},
+                      {'action': 'set_health_pct', 'actor': CASTER, 'target': spec.target, 'pct': pct},
+                      {'action': 'wait', 'ms': spec.wait_ms - delay_ms}]
+        else:
+            steps.append({'action': 'wait', 'ms': spec.wait_ms})
         return steps + enemy_cast_steps() + [step for spell in spec.helper_casts for step in (
             {'action': 'cast', 'actor': ENEMY_HELPER, 'spell': spell, 'target': ENEMY_PLAYER},
             {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})] + [step for spell in spec.target_casts for step in (
@@ -1734,7 +1746,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            metric_delta_strike(entry.get('strike')),
                            tuple((str(key), int(value)) for key, value in entry.get('player_ratings', {}).items()),
                            entry.get('after_at_most'), entry.get('player_spell_power'),
-                           entry.get('caster_health_pct'), tuple(entry.get('target_casts_before', ())))
+                           entry.get('caster_health_pct'), tuple(entry.get('target_casts_before', ())),
+                           tuple(entry['target_health_after']) if 'target_health_after' in entry else None)
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
