@@ -432,7 +432,7 @@ class NoLivePlayerWordingTest(unittest.TestCase):
     def test_compare_module_settles_from_logs_not_a_live_player(self):
         self.check('compare.py')
 
-    def test_templar_class_file_settles_from_logs_not_a_live_player(self):
+    def test_cross_class_guard_templar_class_file_settles_from_logs_not_a_live_player(self):
         self.check('classes/templar.json')
 
     def test_readme_open_conformance_checks_section_settles_from_logs_not_a_live_player(self):

@@ -2414,10 +2414,10 @@ class TakenHitMutantTests(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateTriggerTest(unittest.TestCase):
     def test_generate_writes_every_part(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-triggers-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[STAFFGUARD, CHAKRA_OF_POWER])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[STAFFGUARD, CHAKRA_OF_POWER])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             self.assertEqual({entry['kind'] for entry in manifest['scenarios']}, {'trigger'})
             parts = len(trigger_plan(CLASS_FILE, templar_trigger(CHAKRA_OF_POWER)).part_attempts)
@@ -2433,10 +2433,10 @@ class GenerateTriggerTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_fervent_castigation_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-fervent-castigation-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[FERVENT_CASTIGATION])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[FERVENT_CASTIGATION])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -2446,10 +2446,10 @@ class GenerateTriggerTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_blessing_of_eonar_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-blessing-of-eonar-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[BLESSING_OF_EONAR])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[BLESSING_OF_EONAR])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -2459,10 +2459,10 @@ class GenerateTriggerTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_one_with_the_light_cooldown_scenario_keys_do_not_collide_across_three_shared_effect_entries(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-one-with-the-light-cooldown-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[ONE_WITH_THE_LIGHT])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[ONE_WITH_THE_LIGHT])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))

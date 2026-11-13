@@ -7,6 +7,7 @@ from typing import Mapping
 from tooltip import SKILL_PER_LEVEL, CasterStats
 
 CLASSES_DIR = Path(__file__).resolve().parent / 'classes'
+FIXTURE_CLASSES_DIR = Path(__file__).resolve().parent / 'fixtures' / 'classes'
 CONTROLS_DIR = Path(__file__).resolve().parent / 'controls'
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 SETTLE_MS = 5000
@@ -103,14 +104,23 @@ def ledger_consumption_path(ledger: Path) -> Path:
     return ledger.with_name(f'{stem}{CONSUMPTION_SUFFIX}.json')
 
 
-def load_class_file(class_id: int) -> dict:
-    for path in class_file_paths():
+def class_file_among(paths: list[Path], class_id: int) -> dict:
+    for path in paths:
         class_file = json.loads(path.read_text(encoding='utf-8'))
         if class_file['class_id'] == class_id:
             if 'dbc_dir' in class_file:
                 server_dbc_dir(class_file['dbc_dir'])
             return class_file
     raise ValueError(f'No class file for class {class_id}')
+
+
+def load_class_file(class_id: int) -> dict:
+    return class_file_among(class_file_paths(), class_id)
+
+
+def load_fixture_class_file(class_id: int) -> dict:
+    return class_file_among(sorted(path for path in FIXTURE_CLASSES_DIR.glob('*.json')
+                                   if not path.stem.endswith((CLAUSE_LEDGER_SUFFIX, CONSUMPTION_SUFFIX))), class_id)
 
 
 def control_entries(class_id: int) -> list[dict]:

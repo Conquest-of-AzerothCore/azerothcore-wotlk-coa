@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 from classes import ClassSpell, DataSet, advancement_levels, class_skill_lines, class_spells, table_rows
-from profile import load_class_file
+from profile import load_class_file, load_fixture_class_file
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
@@ -194,7 +194,7 @@ class ClientDbcClassSpellTest(unittest.TestCase):
     def test_skill_lines_are_the_ability_lines_of_the_class_spells_and_the_weapon(self):
         self.assertEqual(class_skill_lines(DBC_DIR, self.templar, STAFF_SUBCLASS), TEMPLAR_SKILL_LINES)
         self.assertEqual(class_skill_lines(DBC_DIR, self.templar, None), TEMPLAR_SKILL_LINES[:3])
-        self.assertEqual(load_class_file(TEMPLAR_CLASS_ID)['skill_lines'], TEMPLAR_SKILL_LINES)
+        self.assertEqual(load_fixture_class_file(TEMPLAR_CLASS_ID)['skill_lines'], TEMPLAR_SKILL_LINES)
 
     def test_extra_spells_join_the_set(self):
         extended = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER,
@@ -214,7 +214,7 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(len(extended[RIGHTEOUS_TEMPEST].ranks), 7)
 
     def test_templar_extra_spells_cite_a_logged_rank_of_their_chain(self):
-        entries = load_class_file(TEMPLAR_CLASS_ID)['extra_spells']
+        entries = load_fixture_class_file(TEMPLAR_CLASS_ID)['extra_spells']
         extended = {spell.spell_id: spell for spell in class_spells(
             DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
         records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell',

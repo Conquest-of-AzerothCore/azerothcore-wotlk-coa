@@ -186,8 +186,8 @@ class BuildClassFileTest(unittest.TestCase):
 
     def test_a_schema_field_is_never_missing(self):
         class_file = scaffold.build_class_file(19, 'Templar', 1, (43, 201, 7), MAIN_ITEM_ROW, [70])
-        from profile import CLASSES_DIR
-        templar = json.loads((CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
+        from profile import FIXTURE_CLASSES_DIR
+        templar = json.loads((FIXTURE_CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
         self.assertEqual(set(class_file), set(templar))
 
 

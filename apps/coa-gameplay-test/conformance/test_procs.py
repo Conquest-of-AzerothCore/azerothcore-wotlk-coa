@@ -922,10 +922,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
         self.assertEqual(equips[0]['item'], CLASS_FILE['alternate_weapons'][0]['item'])
 
     def test_might_of_aggramar_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-might-of-aggramar-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[MIGHT_OF_AGGRAMAR])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[MIGHT_OF_AGGRAMAR])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -935,10 +935,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_lightkeeper_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-lightkeeper-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[LIGHTKEEPER])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[LIGHTKEEPER])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -969,10 +969,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
                                   proc_label(CONDEMNATION, ZEALOTRY_STRIKE, BLADE_OF_FAITH)])
 
     def test_condemnation_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-condemnation-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[CONDEMNATION])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[CONDEMNATION])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -986,10 +986,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateProcTest(unittest.TestCase):
     def test_generate_writes_every_part(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-procs-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[SCOURGEBANE])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[SCOURGEBANE])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             self.assertEqual({entry['kind'] for entry in manifest['scenarios']}, {'proc'})
             parts = [entry for entry in manifest['scenarios'] if entry['file']]
@@ -1006,11 +1006,11 @@ class GenerateProcTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_unknown_proc_aura_is_refused(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-procs-'))
         try:
             with self.assertRaises(ValueError):
-                generate(CLASS_FILE['class_id'], out, procs=[1])
+                fixture_generate(CLASS_FILE['class_id'], out, procs=[1])
         finally:
             shutil.rmtree(out)
 

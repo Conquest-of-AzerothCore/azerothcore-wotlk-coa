@@ -5,6 +5,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
                         BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
@@ -71,7 +72,7 @@ from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
 from behaviours import forced_chance_of
 from passives import behaviour_label
-from profile import CASTER, DBC_DIR, base_steps, control_entries, load_class_file
+from profile import CASTER, DBC_DIR, base_steps, control_entries, load_class_file, load_fixture_class_file
 from tooltip import Records
 from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
 
@@ -79,7 +80,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
 import compare as compare_module
 
-CLASS_FILE = load_class_file(19)
+CLASS_FILE = load_fixture_class_file(19)
 LICHFROST = 801722
 RECORDS = Records(dataset(DBC_DIR)) if DBC_DIR.is_dir() else None
 SCARLET_JUDICATOR = 525024
@@ -2808,9 +2809,9 @@ class GenerateBehaviourVariantTest(unittest.TestCase):
         shutil.rmtree(self.out)
 
     def test_two_behaviour_entries_sharing_a_spell_id_get_distinct_manifest_keys(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         manifest = json.loads(
-            generate(TEMPLAR_CLASS_ID, self.out, behaviours=[WHIRLING_TEMPEST]).read_text(encoding='utf-8'))
+            fixture_generate(TEMPLAR_CLASS_ID, self.out, behaviours=[WHIRLING_TEMPEST]).read_text(encoding='utf-8'))
         entries = [entry for entry in manifest['scenarios'] if entry['spell_id'] == WHIRLING_TEMPEST]
         self.assertEqual(len(entries), 2)
         self.assertEqual(len({entry['key'] for entry in entries}), 2)
@@ -9264,7 +9265,8 @@ class AggroRedirectRangeTests(unittest.TestCase):
         manifest_dir = Path(tempfile.mkdtemp())
         try:
             import conformance
-            conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--controls'])
+            with mock.patch('conformance.load_class_file', load_fixture_class_file):
+                conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--controls'])
             files = sorted(path.name for path in (manifest_dir / 'scenarios').glob('*.json'))
             self.assertEqual(files, ['conformance-templar-behaviour-1161-aggro-redirect-edge.json'])
         finally:
@@ -9296,7 +9298,8 @@ class HitCastAuraTests(unittest.TestCase):
         manifest_dir = Path(tempfile.mkdtemp())
         try:
             import conformance
-            conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--spell', '803880'])
+            with mock.patch('conformance.load_class_file', load_fixture_class_file):
+                conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--spell', '803880'])
             files = sorted((manifest_dir / 'scenarios').glob('conformance-templar-*-803880-part-*.json'))
             self.assertTrue(files)
             for path in files:
@@ -11144,10 +11147,10 @@ class CastUnitAuraTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_cast_unit_aura_is_refused_on_a_swing_entry(self):
-        swing = next(entry for entry in load_class_file(19)['behaviours']
+        swing = next(entry for entry in load_fixture_class_file(19)['behaviours']
                      if entry['kind'] == 'hit_ratio' and entry.get('swing_hand') is not None)
         with self.assertRaises(ValueError):
-            behaviour_scenario(load_class_file(19), {**swing, 'cast_unit_auras': [[823764, 1]]})
+            behaviour_scenario(load_fixture_class_file(19), {**swing, 'cast_unit_auras': [[823764, 1]]})
 
 
 class MetricDeltaGameTimeTests(unittest.TestCase):

@@ -14,7 +14,8 @@
 - `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
   with; `spell_dbc_sha256(dbc_dir)` hashes a set's `Spell.dbc` and `server_dbc_dir(dbc_dir)` /
   `require_server_sha(sha, source)` raise `DbcSetMismatch` for a set other than the server's (`load_class_file`
-  applies it to a class file's `dbc_dir`). Its name shadows the standard library `profile`: run the package from its own directory.
+  applies it to a class file's `dbc_dir`); `load_fixture_class_file` reads the frozen copies of `fixtures/classes/`
+  that the tool tests use (ADR 0580). Its name shadows the standard library `profile`: run the package from its own directory.
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank, its
   `Expectation` list, and the `periodic_totals` of any `OVER_TICKS` token deferred to a companion scenario (below).
 - `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected

@@ -682,7 +682,7 @@ class ConsumptionTest(unittest.TestCase):
         self.assertFalse(acting(judged('300513 behaviour_detection stealth revealed', BEHAVIOUR_METRIC_DELTA,
                                        'can_detect')))
 
-    def test_consumption_files_are_not_class_files(self):
+    def test_cross_class_guard_consumption_files_are_not_class_files(self):
         self.assertEqual(ledger_consumption_path(CLASSES_DIR / 'templar_clauses.json'),
                          CLASSES_DIR / 'templar_consumption.json')
         self.assertNotIn(CLASSES_DIR / 'templar_consumption.json', class_file_paths())
@@ -709,7 +709,7 @@ class EvidenceTablesTest(unittest.TestCase):
         self.assertGreater(len(checks), 40)
         self.assertEqual(sorted(checks - EVIDENCE.keys()), [])
 
-    def test_every_metric_of_the_class_checks_has_an_evidence_class(self):
+    def test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class(self):
         for path in class_file_paths():
             class_file = load_class_file(json.loads(path.read_text(encoding='utf-8'))['class_id'])
             metrics = {entry.get('metric') or entry.get('observe', {}).get('metric')
@@ -719,7 +719,7 @@ class EvidenceTablesTest(unittest.TestCase):
             self.assertEqual(sorted(metrics - METRIC_EVIDENCE.keys()), [], path.name)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
-    def test_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):
+    def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):
         from behaviours import behaviour_scenario
         for path in class_file_paths():
             class_file = load_class_file(json.loads(path.read_text(encoding='utf-8'))['class_id'])
@@ -926,7 +926,7 @@ class DeclaredClaimsTest(unittest.TestCase):
         self.assertIn("    claim 'damage dealt': data (labels ['807268 effect_value #0'])", lines)
         self.assertIn("    claim 'movement speed': unproven (labels [])", lines)
 
-    def test_every_declared_clause_of_the_class_ledgers_is_well_formed(self):
+    def test_cross_class_guard_every_declared_clause_of_the_class_ledgers_is_well_formed(self):
         for path in sorted(Path(__file__).parent.joinpath('classes').glob('*_clauses.json')):
             with self.subTest(ledger=path.name):
                 require_claims(load_clauses(path))
