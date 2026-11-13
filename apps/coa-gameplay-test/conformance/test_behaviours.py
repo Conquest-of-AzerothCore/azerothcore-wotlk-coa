@@ -10357,7 +10357,8 @@ class AdditiveRelationTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_multiplied_entry_regenerates_without_a_relation(self):
-        _, expectations = group_stack_cap_scenario(CLASS_FILE, group_stack_cap_spec(serendipity_group_stack_cap_entry()))
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        _, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
         self.assertNotIn('relation', expectations[0].model)
 
 
@@ -10372,8 +10373,9 @@ class PermanentImmunityTests(unittest.TestCase):
         steps = scenario['steps']
         removal = next(index for index, step in enumerate(steps)
                        if step.get('action') == 'set_aura' and step.get('spell') == 500981 and step['stacks'] == 0)
-        expired = next(index for index, step in enumerate(steps) if step.get('label') == '500981 immunity 500981 expired')
-        control = next(index for index, step in enumerate(steps) if step.get('label') == '500981 immunity 12096 control')
+        labels = [step.get('label') for step in steps]
+        expired = labels.index('500981 immunity 500981 expired')
+        control = labels.index('500981 immunity 12096 control')
         self.assertLess(removal, expired)
         self.assertLess(expired, control)
 
