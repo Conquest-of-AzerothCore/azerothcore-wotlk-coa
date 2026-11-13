@@ -5439,7 +5439,8 @@
       {
         "claim": "dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies",
         "labels": [
-          "805197 script_hit 500365 raised"
+          "805197 script_hit 500365 raised",
+          "805197 script_hit 500365 raised_sp"
         ]
       },
       {
