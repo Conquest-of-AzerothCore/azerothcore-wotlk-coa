@@ -28,6 +28,7 @@
 #include "EtherealBazaar.h"
 
 #include "AscensionBazaarTokenCap.h"
+#include "CoAEconomyLog.h"
 #include "CoATestZoneBonus.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
@@ -128,7 +129,7 @@ namespace
         return TestZoneBonus::Apply(player, TestZoneBonus::Reward::BazaarTokens, amount);
     }
 
-    void Deliver(Player* player, uint32 amount, bool announce)
+    void Deliver(Player* player, uint32 amount, bool announce, CoATokenSource source)
     {
         if (!amount)
             return;
@@ -139,6 +140,7 @@ namespace
         amount = AscensionBazaarTokenCap::Claim(player, amount);
         if (!amount)
             return;
+        CoAEconomyLog::AddTokensEarned(player, int32(amount), source);
 
         uint32 remaining = amount;
         ItemPosCountVec dest;
@@ -167,7 +169,7 @@ namespace
     void FlushPending(Player* player)
     {
         if (PendingTokens* pending = player->CustomData.Get<PendingTokens>(PendingTokensKey))
-            Deliver(player, std::exchange(pending->Amount, 0), Settings.load()->Announce);
+            Deliver(player, std::exchange(pending->Amount, 0), Settings.load()->Announce, CoATokenSource::Kill);
     }
 
     void QueueKillReward(Player* player, uint32 amount)
@@ -240,7 +242,8 @@ public:
             return;
 
         FlushPending(player);
-        Deliver(player, CalculateReward(player, settings->Quest.Roll(), *settings), settings->Announce);
+        Deliver(player, CalculateReward(player, settings->Quest.Roll(), *settings), settings->Announce,
+            CoATokenSource::Quest);
     }
 
     void OnPlayerRewardKillRewarder(Player* player, KillRewarder* rewarder, bool, float&) override
@@ -273,7 +276,8 @@ public:
         if (boss)
         {
             FlushPending(player);
-            Deliver(player, amount, settings->Announce);
+            Deliver(player, amount, settings->Announce,
+                map && map->IsRaid() ? CoATokenSource::RaidBoss : CoATokenSource::DungeonBoss);
             return;
         }
 

@@ -72,13 +72,13 @@
     {"action": "assert", "label": "The second potion is bought", "actor": "buyer", "metric": "item_count", "item": 818046, "equals": 2, "within_ms": 2000},
     {"action": "assert", "label": "for the 100 Bazaar Tokens", "actor": "buyer", "metric": "item_count", "item": 975001, "equals": 0},
 
-    {"action": "assert", "label": "THE LOG: one water purchase of five for 25 copper (the refused one wrote nothing)", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 159, "economy_count": 5, "economy_gold": -25, "economy_tokens": 0, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the sale of five for 5 copper", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_sell", "item": 159, "economy_count": 5, "economy_gold": 5, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the buyback of five for 5 copper", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buyback", "item": 159, "economy_count": 5, "economy_gold": -5, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the potion for 300 Bazaar Tokens and no gold", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 818046, "economy_count": 1, "economy_gold": 0, "economy_tokens": -300, "economy_cost_item": 0, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the whistle for 500 Bedlam", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 532578, "economy_tokens": 0, "economy_cost_item": 1297307, "economy_cost_count": 500, "equals": 1},
-    {"action": "assert", "label": "THE LOG: a vendor's own list is logged with the vendor's entry", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 159, "economy_source": 152, "equals": 1},
-    {"action": "assert", "label": "THE LOG: Tiraxis' Convenience potion for 100 tokens, logged with the list it came from", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 818046, "economy_tokens": -100, "economy_source": 900008, "equals": 1},
-    {"action": "assert", "label": "Four purchases in all", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "equals": 4}
+    {"action": "assert", "label": "THE LOG: one water purchase of five for 25 copper (the refused one wrote nothing)", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 159, "economy_count": 5, "economy_gold": -25, "economy_tokens": 0, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the sale of five for 5 copper", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_sell", "item": 159, "economy_count": 5, "economy_gold": 5, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the buyback of five for 5 copper", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buyback", "item": 159, "economy_count": 5, "economy_gold": -5, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the potion for 300 Bazaar Tokens and no gold", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 818046, "economy_count": 1, "economy_gold": 0, "economy_tokens": -300, "economy_cost_item": 0, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the whistle for 500 Bedlam", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 532578, "economy_tokens": 0, "economy_cost_item": 1297307, "economy_cost_count": 500, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: a vendor's own list is logged with the vendor's entry", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 159, "economy_source": 152, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: Tiraxis' Convenience potion for 100 tokens, logged with the list it came from", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 818046, "economy_tokens": -100, "economy_source": 900008, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Four purchases in all", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "equals": 4, "within_ms": 2000}
   ]
 }

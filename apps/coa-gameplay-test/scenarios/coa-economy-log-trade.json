@@ -37,9 +37,9 @@
     {"action": "assert", "label": "The giver has the Silverleaf", "actor": "giver", "metric": "item_count", "item": 765, "equals": 1},
 
     {"action": "assert", "label": "THE LOG: the taker received the Peacebloom", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "item": 2447, "economy_count": 1, "economy_gold": 0, "equals": 1, "within_ms": 2000},
-    {"action": "assert", "label": "THE LOG: and 100 copper", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "economy_gold": 100, "equals": 1},
-    {"action": "assert", "label": "THE LOG: two rows for the taker", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "equals": 2},
+    {"action": "assert", "label": "THE LOG: and 100 copper", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "economy_gold": 100, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: two rows for the taker", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "equals": 2, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: the giver received the Silverleaf", "actor": "giver", "metric": "economy_log_rows", "economy_event": "trade", "item": 765, "economy_count": 1, "equals": 1, "within_ms": 2000},
-    {"action": "assert", "label": "THE LOG: and nothing else", "actor": "giver", "metric": "economy_log_rows", "economy_event": "trade", "equals": 1}
+    {"action": "assert", "label": "THE LOG: and nothing else", "actor": "giver", "metric": "economy_log_rows", "economy_event": "trade", "equals": 1, "within_ms": 2000}
   ]
 }

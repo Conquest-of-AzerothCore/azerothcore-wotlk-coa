@@ -48,13 +48,13 @@
     {"action": "snapshot", "label": "MEASURE: tokens left after the contract", "actor": "shopper", "metric": "item_count", "item": 975001, "save_as": "tokens_after"},
     {"action": "assert", "label": "The contract took Bazaar Tokens", "actor": "shopper", "metric": "item_count", "item": 975001, "relative_to": "tokens", "max": -1},
 
-    {"action": "assert", "label": "THE LOG: the deck for 500 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "item": 777910, "economy_count": 1, "economy_tokens": -500, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the scroll for 60 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "item": 696661, "economy_count": 1, "economy_tokens": -60, "equals": 1},
-    {"action": "assert", "label": "THE LOG: two Vanity Store purchases", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "equals": 2},
+    {"action": "assert", "label": "THE LOG: the deck for 500 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "item": 777910, "economy_count": 1, "economy_tokens": -500, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the scroll for 60 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "item": 696661, "economy_count": 1, "economy_tokens": -60, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: two Vanity Store purchases", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "equals": 2, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: the bought deck is not also a vanity_collect", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_collect", "item": 777910, "equals": 0},
-    {"action": "assert", "label": "THE LOG: the obtained feather is a vanity_collect", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_collect", "item": 134989, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the weapon for one Heirloom Weapon Token", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "heirloom_token_buy", "item": 1642943, "economy_count": 1, "economy_cost_item": 414010, "economy_cost_count": 1, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the contract's price of 80 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "tokens_spent", "economy_tokens": -80, "equals": 1},
-    {"action": "assert", "label": "THE LOG: one token spend", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "tokens_spent", "equals": 1}
+    {"action": "assert", "label": "THE LOG: the obtained feather is a vanity_collect", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_collect", "item": 134989, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the weapon for one Heirloom Weapon Token", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "heirloom_token_buy", "item": 1642943, "economy_count": 1, "economy_cost_item": 414010, "economy_cost_count": 1, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the contract's price of 80 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "tokens_spent", "economy_tokens": -80, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: one token spend", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "tokens_spent", "equals": 1, "within_ms": 2000}
   ]
 }

@@ -187,10 +187,31 @@ void CoAEconomyLog::CacheItem(Player* player, uint32 cacheEntry, Item const* ite
     row.itemCount = count;
     row.source = cacheEntry;
     Queue(player, row);
+    if (row.itemEntry == AscensionBazaarTokenReserve::TOKEN_ITEM)
+        AddTokensEarned(player, int32(count), CoATokenSource::Cache);
 }
 
-void CoAEconomyLog::AddTokensEarned(Player*, int32, CoATokenSource)
+void CoAEconomyLog::AddTokensEarned(Player* player, int32 tokens, CoATokenSource source)
 {
+    if (!tokens || !Logs(player))
+        return;
+    std::lock_guard<std::mutex> guard(s_queueLock);
+    std::vector<PendingRow>& rows = s_queue[player->GetGUID().GetCounter()];
+    for (PendingRow& pending : rows)
+        if (pending.row.event == CoAEconomyEvent::TokensEarned && pending.row.source == uint32(source))
+        {
+            pending.row.tokens += tokens;
+            return;
+        }
+    PendingRow pending;
+    pending.account = player->GetSession()->GetAccountId();
+    pending.map = uint16(player->GetMapId());
+    pending.zone = uint16(player->GetZoneId());
+    pending.row.event = CoAEconomyEvent::TokensEarned;
+    pending.row.tokens = tokens;
+    pending.row.source = uint32(source);
+    pending.row.time = Now();
+    rows.push_back(pending);
 }
 
 namespace
@@ -202,7 +223,7 @@ namespace
             PLAYERHOOK_ON_AFTER_DESTROY_ITEM, PLAYERHOOK_ON_AFTER_STORE_OR_EQUIP_NEW_ITEM, PLAYERHOOK_ON_AFTER_SELL_ITEM,
             PLAYERHOOK_ON_AFTER_BUY_BACK_ITEM, PLAYERHOOK_ON_AFTER_TAKE_MAIL_ITEM, PLAYERHOOK_ON_AFTER_TAKE_MAIL_MONEY,
             PLAYERHOOK_ON_AFTER_TRADE_ITEM, PLAYERHOOK_ON_AFTER_TRADE_MONEY, PLAYERHOOK_ON_AFTER_PLACE_AUCTION_BID,
-            PLAYERHOOK_ON_LOOT_ITEM }) { }
+            PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM }) { }
 
         void OnPlayerAfterPlaceAuctionBid(Player* player, AuctionEntry const* auction, uint32 paid, bool buyout,
             CharacterDatabaseTransaction trans) override
@@ -261,14 +282,30 @@ namespace
             WriteFor(trans, player->GetGUID().GetCounter(), row);
         }
 
+        void OnPlayerQuestRewardItem(Player* player, Item* item, uint32 count) override
+        {
+            if (item && item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+                CoAEconomyLog::AddTokensEarned(player, int32(count), CoATokenSource::Quest);
+        }
+
         void OnPlayerLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
         {
-            if (!item || !lootguid.IsItem())
+            if (!item)
                 return;
-            Item const* container = player->GetItemByGuid(lootguid);
-            if (!container || !container->GetTemplate()->HasFlag(ITEM_FLAG_HAS_LOOT))
+            if (lootguid.IsItem())
+            {
+                Item const* container = player->GetItemByGuid(lootguid);
+                if (container && container->GetTemplate()->HasFlag(ITEM_FLAG_HAS_LOOT))
+                    CoAEconomyLog::CacheItem(player, container->GetEntry(), item, count);
                 return;
-            CoAEconomyLog::CacheItem(player, container->GetEntry(), item, count);
+            }
+            if (item->GetEntry() != AscensionBazaarTokenReserve::TOKEN_ITEM || !lootguid.IsCreatureOrVehicle())
+                return;
+            CoATokenSource source = CoATokenSource::Kill;
+            if (Creature const* creature = ObjectAccessor::GetCreature(*player, lootguid))
+                if (creature->IsDungeonBoss())
+                    source = creature->GetMap()->IsRaid() ? CoATokenSource::RaidBoss : CoATokenSource::DungeonBoss;
+            CoAEconomyLog::AddTokensEarned(player, int32(count), source);
         }
 
         void OnPlayerAfterStoreOrEquipNewItem(Player* player, uint32, Item* item, uint8 count, uint8, uint8,

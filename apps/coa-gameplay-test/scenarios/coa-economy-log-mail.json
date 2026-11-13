@@ -40,15 +40,15 @@
      "fields": [{"gameobject_guid": 142119}, {"mail_id": 765}, {"mail_item_guid": 765}]},
     {"action": "assert", "label": "The Silverleaf is taken", "actor": "alt", "metric": "item_count", "item": 765, "equals": 1, "within_ms": 1000},
 
-    {"action": "assert", "label": "THE LOG: the sender mailed the Peacebloom", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "item": 2447, "economy_count": 1, "economy_gold": 0, "equals": 1},
-    {"action": "assert", "label": "THE LOG: and 100 copper", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "economy_gold": -100, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the refused mail wrote nothing", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "equals": 2},
-    {"action": "assert", "label": "THE LOG: the Postmaster mail is a system mail", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 765, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the sender mailed the Peacebloom", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "item": 2447, "economy_count": 1, "economy_gold": 0, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: and 100 copper", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "economy_gold": -100, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the refused mail wrote nothing", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the Postmaster mail is a system mail", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 765, "economy_count": 1, "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: the player mail's Peacebloom is not a system mail", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 2447, "equals": 0},
     {"action": "assert", "label": "THE LOG: nor is its money", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 100, "equals": 0},
-    {"action": "assert", "label": "THE LOG: the receiver took 100 copper", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "economy_gold": 100, "equals": 1},
-    {"action": "assert", "label": "THE LOG: and the Peacebloom", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "item": 2447, "economy_count": 1, "equals": 1},
-    {"action": "assert", "label": "THE LOG: and the Silverleaf", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "item": 765, "economy_count": 1, "equals": 1},
-    {"action": "assert", "label": "THE LOG: nothing else was taken", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "equals": 3}
+    {"action": "assert", "label": "THE LOG: the receiver took 100 copper", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "economy_gold": 100, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: and the Peacebloom", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "item": 2447, "economy_count": 1, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: and the Silverleaf", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "item": 765, "economy_count": 1, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: nothing else was taken", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "equals": 3, "within_ms": 2000}
   ]
 }

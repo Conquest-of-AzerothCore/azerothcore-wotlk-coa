@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Economy log: Bazaar Tokens earned are summed into one tokens_earned row per source at each save",
+  "contract": [
+    "With the economy log on, every Bazaar Token (975001) a character earns adds to the one waiting tokens_earned row of its source (1 kill, 2 quest, 3 dungeon boss, 4 raid boss, 5 cache, 6 exchange, 7 other); the row is written at the character's next save.",
+    "A quest turn-in stores its reward items, saves the character and then pays the Ethereal Bazaar's random quest bonus (Player::RewardQuest: reward items, SaveToDB, OnPlayerCompleteQuest), so the reward tokens are written by the turn-in's own save and the bonus waits for the next one.",
+    "A level-60 Human turns in Scarlet Sweep: Magic and Might (18034, 50 tokens) and then Duel! (80651, 40 tokens): the turn-in's own save writes exactly 50 quest tokens and each bonus is written by a later save when it is not zero, so the 50 is one row of its own; with Duel!'s 40 that makes two to four quest rows, and no row for any other source."
+  ],
+  "timeout_ms": 60000,
+  "economy_log": true,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 975001, "save_as": "tokens"},
+    {"action": "prepare_quest", "actor": "hero", "quest": 18034},
+    {"action": "reward_quest", "label": "Turn in Scarlet Sweep: Magic and Might", "actor": "hero", "quest": 18034},
+    {"action": "assert", "label": "THE LOG: the turn-in's own save wrote its 50 quest tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 2, "economy_tokens": 50, "equals": 1, "within_ms": 2000},
+    {"action": "prepare_quest", "actor": "hero", "quest": 80651},
+    {"action": "reward_quest", "label": "Turn in Duel!", "actor": "hero", "quest": 80651},
+    {"action": "assert", "label": "Both quests paid their tokens", "actor": "hero", "metric": "item_count", "item": 975001, "relative_to": "tokens", "min": 90},
+
+    {"action": "assert", "label": "THE LOG: two to four quest-token rows", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 2, "min": 2, "max": 4, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: no kill tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 1, "equals": 0},
+    {"action": "assert", "label": "THE LOG: no boss tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 3, "equals": 0},
+    {"action": "assert", "label": "THE LOG: no raid boss tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 4, "equals": 0},
+    {"action": "assert", "label": "THE LOG: no cache tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 5, "equals": 0},
+    {"action": "assert", "label": "THE LOG: no exchange tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 6, "equals": 0},
+    {"action": "assert", "label": "THE LOG: no other tokens", "actor": "hero", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 7, "equals": 0}
+  ]
+}

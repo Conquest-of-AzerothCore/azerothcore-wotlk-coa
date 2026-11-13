@@ -27,6 +27,7 @@ def main():
 #include <string>
 #include <utility>
 using uint32 = std::uint32_t;
+enum class CoATokenSource : uint32 { Kill = 1, Quest, DungeonBoss, RaidBoss, Cache, Exchange, Other };
 struct Map { bool raid = false; bool IsRaid() const { return raid; } };
 struct Creature
 {
@@ -75,6 +76,7 @@ struct Player
 {
     uint32 tokens = 0;
     uint32 payouts = 0;
+    CoATokenSource source{};
     uint32 counter = 0;
     PlayerData CustomData;
     Events m_Events;
@@ -95,10 +97,11 @@ bool KillPays(Player*, Creature const* creature, TokenSettings const&)
     return creature->pays;
 }
 uint32 CalculateReward(Player*, uint32 amount, TokenSettings const&) { return amount; }
-void Deliver(Player* player, uint32 amount, bool)
+void Deliver(Player* player, uint32 amount, bool, CoATokenSource source)
 {
     if (amount)
     {
+        player->source = source;
         player->tokens += amount;
         ++player->payouts;
     }
@@ -118,15 +121,15 @@ int main()
     assert(killer.tokens == 0 && healer.tokens == 0 && rate == 1.0f);
     assert(killer.m_Events.delay == 1000 && healer.m_Events.delay == 1500);
     killer.m_Events.Run();
-    assert(killer.tokens == 4 && killer.payouts == 1);
+    assert(killer.tokens == 4 && killer.payouts == 1 && killer.source == CoATokenSource::Kill);
     creature.boss = true;
     OnPlayerRewardKillRewarder(&healer, &rewarder, true, rate);
-    assert(healer.tokens == 8 && healer.payouts == 2);
+    assert(healer.tokens == 8 && healer.payouts == 2 && healer.source == CoATokenSource::DungeonBoss);
     healer.m_Events.Run();
     assert(healer.tokens == 8 && healer.payouts == 2);
     creature.map.raid = true;
     OnPlayerRewardKillRewarder(&healer, &rewarder, true, rate);
-    assert(healer.tokens == 38);
+    assert(healer.tokens == 38 && healer.source == CoATokenSource::RaidBoss);
     for (bool Creature::* flag : {&Creature::summon, &Creature::critter, &Creature::totem})
     {
         creature.*flag = true;

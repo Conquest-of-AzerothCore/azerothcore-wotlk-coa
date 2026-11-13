@@ -45,13 +45,13 @@
     {"action": "collect_loot", "label": "Take the rations", "actor": "roomy"},
     {"action": "assert", "label": "Twenty rations", "actor": "roomy", "metric": "item_count", "item": 19062, "equals": 20},
 
-    {"action": "assert", "label": "THE LOG: three weapon tokens from the set cache", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 414010, "economy_count": 1, "economy_source": 1339054, "equals": 3},
-    {"action": "assert", "label": "THE LOG: the breastplate from the set cache", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 1648677, "economy_source": 1339054, "equals": 1},
-    {"action": "assert", "label": "THE LOG: seven pieces in all", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 1339054, "equals": 7},
-    {"action": "assert", "label": "THE LOG: the mailed shoulder still counts", "actor": "cramped", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 1642950, "economy_source": 1339054, "equals": 1},
-    {"action": "assert", "label": "THE LOG: seven pieces for the cramped opener too", "actor": "cramped", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 1339054, "equals": 7},
-    {"action": "assert", "label": "THE LOG: the crate's dispenser", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 8263501, "economy_count": 1, "economy_source": 8263511, "equals": 1},
-    {"action": "assert", "label": "THE LOG: the looted rations, with the package as source", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 19062, "economy_count": 20, "economy_source": 19150, "equals": 1},
-    {"action": "assert", "label": "THE LOG: nine cache rows for the roomy opener", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "equals": 9}
+    {"action": "assert", "label": "THE LOG: three weapon tokens from the set cache", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 414010, "economy_count": 1, "economy_source": 1339054, "equals": 3, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the breastplate from the set cache", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 1648677, "economy_source": 1339054, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: seven pieces in all", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 1339054, "equals": 7, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the mailed shoulder still counts", "actor": "cramped", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 1642950, "economy_source": 1339054, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: seven pieces for the cramped opener too", "actor": "cramped", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 1339054, "equals": 7, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the crate's dispenser", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 8263501, "economy_count": 1, "economy_source": 8263511, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the looted rations, with the package as source", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 19062, "economy_count": 20, "economy_source": 19150, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: nine cache rows for the roomy opener", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "equals": 9, "within_ms": 2000}
   ]
 }

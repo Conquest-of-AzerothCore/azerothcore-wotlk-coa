@@ -26,6 +26,7 @@
 #include "GrootCoinInternal.h"
 
 #include "Bag.h"
+#include "CoAEconomyLog.h"
 #include "Creature.h"
 #include "CryptoRandom.h"
 #include "DatabaseEnv.h"
@@ -131,6 +132,7 @@ namespace GrootCoin
 
             for (auto& [item, take] : debits)
                 player->DestroyItemCount(item, take, true);
+            CoAEconomyLog::AddTokensEarned(player, int32(tokens), CoATokenSource::Exchange);
 
             std::string const id = NewOperationId();
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
