@@ -19,3 +19,6 @@ bracket cannot be narrower (Lich Essence: 10 repeats, 21-poll windows).
 The model stamps its contrast (ADR 0570): `own_cast` when `reducer_spell` is the entry's own spell and is cast,
 `learned` with `reducer_learn`, otherwise `condition`; coverage counts the `casting` read as behaviour for the first
 two where the clause promises it (`coverage.promised_state`, as ADR 0553 for `metric_delta`).
+The verdict names the kind's own state metric `pushback_casting` (ADR 0600), declared in the module with the
+`casting` promise words plus `pushback`, so a clause that names only the spell pushback ("reduces your spell
+pushback suffered from taking damage") is promised the casting state the kind reads.
