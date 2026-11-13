@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "Economy log: mail sent and taken, and mail from the server, are logged",
+  "contract": [
+    "With the economy log on, a player mail writes mail_send rows for the sender, one per item and one for the money; the receiver writes mail_take rows when they take the money and the items. A mail the sender cannot pay for writes nothing.",
+    "A mail that no player sent (the Postmaster returning an item) writes a system_mail row for its receiver when it is sent and a mail_take row when the item is taken; a player's mail is never a system_mail.",
+    "The sender mails a Peacebloom (2447) and 100 copper to a character on its own account (no delivery delay); the Postmaster mails that character a Silverleaf (765). Both characters start at level 20, so each also gets the level mail with a Riding Training Pamphlet (46875, Randal Hunter 4732), another system_mail row."
+  ],
+  "timeout_ms": 90000,
+  "economy_log": true,
+  "players": [
+    {"id": "sender", "name": "Coaelmails", "race": 1, "class": 1, "level": 20},
+    {"id": "alt", "name": "Coaelmailr", "race": 1, "class": 1, "level": 20, "account_of": "sender"}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "summon_gameobject", "actor": "sender", "entry": 142119},
+    {"action": "money", "label": "fixture: the money to mail", "actor": "sender", "copper": 200},
+    {"action": "add_item", "label": "fixture: the Peacebloom to mail", "actor": "sender", "item": 2447},
+    {"action": "client_packet", "label": "Mail the Peacebloom and 100 copper", "actor": "sender", "opcode": 568, "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"string": "Coaelmailr"}, {"string": "Economy log"}, {"string": "Item and money"}, {"u32": 41}, {"u32": 0}, {"u8": 1}, {"u8": 0}, {"item_guid": 2447}, {"u32": 100}, {"u32": 0}, {"u64": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "The mail is sent", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 0},
+    {"action": "client_packet", "label": "Try to mail more money than the sender has", "actor": "sender", "opcode": 568, "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"string": "Coaelmailr"}, {"string": "Economy log"}, {"string": "Too much money"}, {"u32": 41}, {"u32": 0}, {"u8": 0}, {"u32": 100000}, {"u32": 0}, {"u64": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "That mail is refused", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 3},
+    {"action": "system_mail", "label": "The Postmaster mails a Silverleaf", "actor": "alt", "item": 765, "kind": "postmaster"},
+
+    {"action": "relog", "actor": "alt"},
+    {"action": "assert", "label": "The player mail arrived", "actor": "alt", "metric": "mail_has_item", "item": 2447, "equals": 1, "within_ms": 1000},
+    {"action": "assert", "label": "The Postmaster mail arrived", "actor": "alt", "metric": "mail_has_item", "item": 765, "equals": 1, "within_ms": 1000},
+    {"action": "summon_gameobject", "actor": "alt", "entry": 142119},
+    {"action": "snapshot", "actor": "alt", "metric": "carried_money", "save_as": "alt_purse"},
+    {"action": "client_packet", "label": "Take the 100 copper", "actor": "alt", "opcode": 581, "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"mail_id": 2447}]},
+    {"action": "assert", "label": "The money is taken", "actor": "alt", "metric": "carried_money", "relative_to": "alt_purse", "equals": 100, "within_ms": 1000},
+    {"action": "client_packet", "label": "Take the Peacebloom", "actor": "alt", "opcode": 582, "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"mail_id": 2447}, {"mail_item_guid": 2447}]},
+    {"action": "assert", "label": "The Peacebloom is taken", "actor": "alt", "metric": "item_count", "item": 2447, "equals": 1, "within_ms": 1000},
+    {"action": "client_packet", "label": "Take the Silverleaf", "actor": "alt", "opcode": 582, "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"mail_id": 765}, {"mail_item_guid": 765}]},
+    {"action": "assert", "label": "The Silverleaf is taken", "actor": "alt", "metric": "item_count", "item": 765, "equals": 1, "within_ms": 1000},
+
+    {"action": "assert", "label": "THE LOG: the sender mailed the Peacebloom", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "item": 2447, "economy_count": 1, "economy_gold": 0, "equals": 1},
+    {"action": "assert", "label": "THE LOG: and 100 copper", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "economy_gold": -100, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the refused mail wrote nothing", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "equals": 2},
+    {"action": "assert", "label": "THE LOG: the Postmaster mail is a system mail", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 765, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the player mail's Peacebloom is not a system mail", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 2447, "equals": 0},
+    {"action": "assert", "label": "THE LOG: nor is its money", "actor": "alt", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 100, "equals": 0},
+    {"action": "assert", "label": "THE LOG: the receiver took 100 copper", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "economy_gold": 100, "equals": 1},
+    {"action": "assert", "label": "THE LOG: and the Peacebloom", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "item": 2447, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: and the Silverleaf", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "item": 765, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: nothing else was taken", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_take", "equals": 3}
+  ]
+}

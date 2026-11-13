@@ -1,0 +1,45 @@
+{
+  "schema": 1,
+  "name": "Economy log writes nothing while it is off",
+  "contract": "CoA.EconomyLog.Enable is off by default. Destroying an item of epic quality then writes no row to coa_economy_log, also after the character is saved.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "keeper",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "keeper",
+      "item": 12584
+    },
+    {
+      "action": "destroy_item",
+      "label": "keeper destroys Grand Marshal's Longsword (epic)",
+      "actor": "keeper",
+      "item": 12584
+    },
+    {
+      "action": "assert",
+      "label": "no row while the log is off",
+      "actor": "keeper",
+      "metric": "economy_log_rows",
+      "economy_event": "item_destroy",
+      "equals": 0
+    }
+  ]
+}

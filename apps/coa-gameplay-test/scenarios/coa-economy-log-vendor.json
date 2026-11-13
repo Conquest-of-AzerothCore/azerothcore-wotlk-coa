@@ -1,0 +1,84 @@
+{
+  "schema": 1,
+  "name": "Economy log: vendor purchases, sales and buybacks are logged with what they cost",
+  "contract": [
+    "With the economy log on, a vendor purchase writes one vendor_buy row, a sale one vendor_sell row and a buyback one vendor_buyback row, each with the item, the number of items and the currency it cost or paid: gold as copper (paid negative, received positive), Bazaar Tokens (975001) in the tokens column, any other cost item in cost_item and cost_count.",
+    "Brother Danil (152) sells five Refreshing Spring Water (159) for 25 copper and buys them back for 1 copper each; buying them back costs those 5 copper. A purchase the character cannot pay for writes nothing.",
+    "Chromie (990782) sells a Potion of Experience (818046) for 300 Bazaar Tokens and no gold; Millhouse Manastorm (179538) sells the Doberman MK III whistle (532578) for 500 Bedlam (1297307).",
+    "Each purchase row's source is the vendor list it was bought from: the vendor's own entry, or the list a gossip option opened. Tiraxis (900007) opens his fixed Convenience Items list 900008, where a Potion of Experience costs 100 Bazaar Tokens (ExtendedCost 2983); his rotating stock is his own entry.",
+    "Rows wait in memory until the character's inventory is saved: right after the first purchase the table has none. Selling to a vendor saves the inventory at once (item recovery), which writes the waiting rows."
+  ],
+  "timeout_ms": 90000,
+  "economy_log": true,
+  "players": [
+    {"id": "buyer", "race": 1, "class": 1, "level": 20}
+  ],
+  "creatures": [
+    {"id": "danil", "owner": "buyer", "entry": 152, "faction": 35, "distance": 2},
+    {"id": "chromie", "owner": "buyer", "entry": 990782, "faction": 35, "distance": 2},
+    {"id": "millhouse", "owner": "buyer", "entry": 179538, "faction": 35, "level": 30, "distance": 2},
+    {"id": "tiraxis", "owner": "buyer", "entry": 900007, "faction": 35, "distance": 2}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 500},
+    {"action": "set_money", "label": "fixture: a known purse", "actor": "buyer", "value": 10000},
+    {"action": "snapshot", "label": "Money before the purchase", "actor": "buyer", "metric": "carried_money", "save_as": "purse"},
+
+    {"action": "client_packet", "label": "Ask Brother Danil for his goods", "actor": "buyer", "opcode": 414, "fields": [{"actor_guid": "danil"}], "consumed": false},
+    {"action": "assert", "label": "Brother Danil opens his goods", "actor": "buyer", "metric": "vendor_list_packets", "min": 1, "within_ms": 2000},
+    {"action": "client_packet", "label": "Buy the water", "actor": "buyer", "opcode": 418, "consumed": false,
+     "fields": [{"actor_guid": "danil"}, {"u32": 159}, {"vendor_slot": 159}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "Five waters are bought", "actor": "buyer", "metric": "item_count", "item": 159, "equals": 5, "within_ms": 2000},
+    {"action": "assert", "label": "for 25 copper", "actor": "buyer", "metric": "carried_money", "relative_to": "purse", "equals": -25},
+    {"action": "assert", "label": "Before a save the purchase row waits in memory", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "economy_save": false, "equals": 0},
+
+    {"action": "sell_item", "label": "Sell the five waters back", "actor": "buyer", "entry": 152, "item": 159},
+    {"action": "assert", "label": "The water is sold", "actor": "buyer", "metric": "item_count", "item": 159, "equals": 0},
+    {"action": "assert", "label": "for 5 copper", "actor": "buyer", "metric": "carried_money", "relative_to": "purse", "equals": -20},
+
+    {"action": "client_packet", "label": "Buy the water back from the first buyback slot", "actor": "buyer", "opcode": 656, "consumed": false,
+     "fields": [{"actor_guid": "danil"}, {"u32": 74}]},
+    {"action": "assert", "label": "The water is back", "actor": "buyer", "metric": "item_count", "item": 159, "equals": 5, "within_ms": 2000},
+    {"action": "assert", "label": "for the 5 copper the vendor paid", "actor": "buyer", "metric": "carried_money", "relative_to": "purse", "equals": -25},
+
+    {"action": "set_money", "label": "fixture: an empty purse", "actor": "buyer", "value": 0},
+    {"action": "client_packet", "label": "Try to buy more water without money", "actor": "buyer", "opcode": 418, "consumed": false,
+     "fields": [{"actor_guid": "danil"}, {"u32": 159}, {"vendor_slot": 159}, {"u32": 1}, {"u8": 0}]},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "The purchase is refused", "actor": "buyer", "metric": "item_count", "item": 159, "equals": 5},
+
+    {"action": "add_item", "label": "fixture: 300 Bazaar Tokens", "actor": "buyer", "item": 975001, "count": 300},
+    {"action": "client_packet", "label": "Ask Chromie for her goods", "actor": "buyer", "opcode": 414, "fields": [{"actor_guid": "chromie"}], "consumed": false},
+    {"action": "assert", "label": "Chromie opens her goods", "actor": "buyer", "metric": "vendor_list_packets", "min": 2, "within_ms": 2000},
+    {"action": "client_packet", "label": "Buy a Potion of Experience", "actor": "buyer", "opcode": 418, "consumed": false,
+     "fields": [{"actor_guid": "chromie"}, {"u32": 818046}, {"vendor_slot": 818046}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "The potion is bought", "actor": "buyer", "metric": "item_count", "item": 818046, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "for the 300 Bazaar Tokens", "actor": "buyer", "metric": "item_count", "item": 975001, "equals": 0},
+
+    {"action": "add_item", "label": "fixture: 500 Bedlam", "actor": "buyer", "item": 1297307, "count": 500},
+    {"action": "client_packet", "label": "Ask Millhouse for his goods", "actor": "buyer", "opcode": 414, "fields": [{"actor_guid": "millhouse"}], "consumed": false},
+    {"action": "assert", "label": "Millhouse opens his goods", "actor": "buyer", "metric": "vendor_list_packets", "min": 3, "within_ms": 2000},
+    {"action": "client_packet", "label": "Buy the Doberman MK III whistle", "actor": "buyer", "opcode": 418, "consumed": false,
+     "fields": [{"actor_guid": "millhouse"}, {"u32": 532578}, {"vendor_slot": 532578}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "The whistle is bought", "actor": "buyer", "metric": "item_count", "item": 532578, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "for the 500 Bedlam", "actor": "buyer", "metric": "item_count", "item": 1297307, "equals": 0},
+
+    {"action": "add_item", "label": "fixture: 100 Bazaar Tokens", "actor": "buyer", "item": 975001, "count": 100},
+    {"action": "gossip_hello", "label": "Speak to Tiraxis", "actor": "buyer", "target": "tiraxis"},
+    {"action": "gossip_select", "label": "Convenience Items: his fixed list 900008", "actor": "buyer", "option": 2},
+    {"action": "assert", "label": "The Convenience Items open", "actor": "buyer", "metric": "vendor_list_packets", "min": 4, "within_ms": 2000},
+    {"action": "client_packet", "label": "Buy a Potion of Experience from Convenience Items", "actor": "buyer", "opcode": 418, "consumed": false,
+     "fields": [{"actor_guid": "tiraxis"}, {"u32": 818046}, {"vendor_slot": 818046}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "The second potion is bought", "actor": "buyer", "metric": "item_count", "item": 818046, "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "for the 100 Bazaar Tokens", "actor": "buyer", "metric": "item_count", "item": 975001, "equals": 0},
+
+    {"action": "assert", "label": "THE LOG: one water purchase of five for 25 copper (the refused one wrote nothing)", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 159, "economy_count": 5, "economy_gold": -25, "economy_tokens": 0, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the sale of five for 5 copper", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_sell", "item": 159, "economy_count": 5, "economy_gold": 5, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the buyback of five for 5 copper", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buyback", "item": 159, "economy_count": 5, "economy_gold": -5, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the potion for 300 Bazaar Tokens and no gold", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 818046, "economy_count": 1, "economy_gold": 0, "economy_tokens": -300, "economy_cost_item": 0, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the whistle for 500 Bedlam", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 532578, "economy_tokens": 0, "economy_cost_item": 1297307, "economy_cost_count": 500, "equals": 1},
+    {"action": "assert", "label": "THE LOG: a vendor's own list is logged with the vendor's entry", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 159, "economy_source": 152, "equals": 1},
+    {"action": "assert", "label": "THE LOG: Tiraxis' Convenience potion for 100 tokens, logged with the list it came from", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "item": 818046, "economy_tokens": -100, "economy_source": 900008, "equals": 1},
+    {"action": "assert", "label": "Four purchases in all", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "vendor_buy", "equals": 4}
+  ]
+}

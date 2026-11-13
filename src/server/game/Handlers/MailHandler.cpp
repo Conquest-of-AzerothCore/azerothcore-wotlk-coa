@@ -637,6 +637,7 @@ void WorldSession::HandleMailTakeItem(WorldPacket& recvData)
                 player->GetName(), GetAccountId(), it->GetTemplate()->Name1, it->GetEntry(), count);
         }
 
+        sScriptMgr->OnPlayerAfterTakeMailItem(player, m, itemEntry, itemLowGuid, count, trans);
         player->SaveInventoryAndGoldToDB(trans);
         player->_SaveMail(trans);
         CharacterDatabase.CommitTransaction(trans);
@@ -679,6 +680,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
             player->GetName(), GetAccountId(), m->money);
     }
 
+    uint32 const takenMoney = m->money;
     m->money = 0;
     m->state = MAIL_STATE_CHANGED;
     player->m_mailsUpdated = true;
@@ -689,6 +691,7 @@ void WorldSession::HandleMailTakeMoney(WorldPacket& recvData)
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
     player->SaveGoldToDB(trans);
     player->_SaveMail(trans);
+    sScriptMgr->OnPlayerAfterTakeMailMoney(player, m, takenMoney, trans);
     CharacterDatabase.CommitTransaction(trans);
 }
 

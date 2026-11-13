@@ -146,6 +146,7 @@ public:                                                 // Accessors
     [[nodiscard]] uint32 GetMoney() const { return m_money; }
     [[nodiscard]] uint32 GetCOD() const { return m_COD; }
     [[nodiscard]] std::string const& GetBody() const { return m_body; }
+    [[nodiscard]] MailItemMap const& GetItems() const { return m_items; }
 
 public:                                                 // modifiers
     MailDraft& AddItem(Item* item);

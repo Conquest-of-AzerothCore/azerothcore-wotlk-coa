@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Economy log records a destroyed rare item once the character saves",
+  "contract": "With the economy log on, a player who destroys an item of rare quality or better gets one item_destroy row in coa_economy_log with that item, written when the character is saved. Destroying a common item writes nothing.",
+  "economy_log": true,
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "keeper",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "keeper",
+      "item": 12584
+    },
+    {
+      "action": "destroy_item",
+      "label": "keeper destroys Grand Marshal's Longsword (epic)",
+      "actor": "keeper",
+      "item": 12584
+    },
+    {
+      "action": "assert",
+      "label": "one item_destroy row for the sword",
+      "actor": "keeper",
+      "metric": "economy_log_rows",
+      "economy_event": "item_destroy",
+      "item": 12584,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "keeper",
+      "item": 2589
+    },
+    {
+      "action": "destroy_item",
+      "label": "keeper destroys Linen Cloth (common)",
+      "actor": "keeper",
+      "item": 2589
+    },
+    {
+      "action": "assert",
+      "label": "no row for the common cloth",
+      "actor": "keeper",
+      "metric": "economy_log_rows",
+      "economy_event": "item_destroy",
+      "item": 2589,
+      "equals": 0
+    }
+  ]
+}

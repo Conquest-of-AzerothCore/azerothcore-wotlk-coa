@@ -18,6 +18,7 @@
 #include "AscensionWildcard.h"
 #include "AscensionWildcardStarterData.h"
 #include "AsyncCallbackProcessor.h"
+#include "AuctionHouseMgr.h"
 #include "Bag.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
@@ -26,6 +27,7 @@
 #include "Chat.h"
 #include "ClientDBC.h"
 #include "CoACreatureScaling.h"
+#include "CoAEconomyLog.h"
 #include "CoAPtrCharacterCopy.h"
 #include "Config.h"
 #include "Creature.h"
@@ -615,6 +617,8 @@ public:
         Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, settings.get<bool>("mail", false));
         if (auto group = settings.get_optional<bool>("group"))
             Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP, *group);
+        if (auto auction = settings.get_optional<bool>("auction"))
+            Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION, *auction);
     }
 
     TwoSideConfig(TwoSideConfig const&) = delete;
@@ -634,6 +638,23 @@ private:
     }
 
     std::map<ServerConfigs, bool> _original;
+};
+
+class EconomyLogConfig
+{
+public:
+    EconomyLogConfig() : _original(CoAEconomyLog::SetEnabled(true)) { }
+
+    EconomyLogConfig(EconomyLogConfig const&) = delete;
+    EconomyLogConfig& operator=(EconomyLogConfig const&) = delete;
+
+    ~EconomyLogConfig()
+    {
+        CoAEconomyLog::SetEnabled(_original);
+    }
+
+private:
+    bool _original;
 };
 
 class QuestLogSizeConfig
@@ -2101,6 +2122,8 @@ public:
         }
         if (auto twoSide = _scenario.get_child_optional("two_side"))
             _twoSide.emplace(*twoSide);
+        if (_scenario.get<bool>("economy_log", false))
+            _economyLog.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
         {
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
@@ -6308,6 +6331,29 @@ private:
                 player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), foreignOnly);
             return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
         }
+        if (metric == "economy_log_rows")
+        {
+            std::optional<CoAEconomyEvent> const event = CoAEconomyLog::EventByName(step.get<std::string>("economy_event"));
+            Require(event.has_value(), "Unknown economy_log_rows event");
+            if (step.get<bool>("economy_save", true))
+            {
+                CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+                player->SaveToDB(trans, false, false);
+                TransactionCallback saved = CharacterDatabase.AsyncCommitTransaction(trans);
+                Require(saved.m_future.get(), "economy_log_rows save transaction failed");
+            }
+            std::string filter;
+            if (uint32 const item = step.get<uint32>("item", 0))
+                filter += Acore::StringFormat(" AND item_entry = {}", item);
+            for (auto const& [field, column] : {std::pair{"economy_count", "item_count"}, std::pair{"economy_gold", "gold"},
+                     std::pair{"economy_tokens", "tokens"}, std::pair{"economy_cost_item", "cost_item"},
+                     std::pair{"economy_cost_count", "cost_count"}, std::pair{"economy_source", "source"}})
+                if (auto const value = step.get_optional<int64>(field))
+                    filter += Acore::StringFormat(" AND {} = {}", column, *value);
+            QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_economy_log WHERE guid = {} AND event = {}{}",
+                player->GetGUID().GetCounter(), uint32(*event), filter);
+            return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
+        }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {
             uint32 mails = 0, items = 0;
@@ -6846,6 +6892,17 @@ private:
                                     }
                             Require(found != nullptr, "Packet mail field requires a mail carrying the item");
                             request << (kind == "mail_id" ? found->messageID : uint32(foundItem->item_guid));
+                        }
+                        else if (kind == "auction_id")
+                        {
+                            uint32 const wanted = value.get_value<uint32>();
+                            uint32 newest = 0;
+                            for (AuctionHouseId const house : {AuctionHouseId::Alliance, AuctionHouseId::Horde, AuctionHouseId::Neutral})
+                                for (auto const& [id, auction] : sAuctionMgr->GetAuctionsMapByHouseId(house)->GetAuctions())
+                                    if (auction->item_template == wanted)
+                                        newest = std::max(newest, id);
+                            Require(newest != 0, "Packet auction id requires an auction carrying the item");
+                            request << newest;
                         }
                         else if (kind == "gameobject_guid")
                         {
@@ -8888,6 +8945,7 @@ private:
     std::optional<AscensionVanityOwnership::TestOverride> _vanityOwnership;
     std::optional<TwoSideConfig> _twoSide;
     std::optional<QuestLogSizeConfig> _questLogSize;
+    std::optional<EconomyLogConfig> _economyLog;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;
     std::optional<PlacementAuditTotals> _placementAudit;

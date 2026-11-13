@@ -592,17 +592,56 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
-    def test_two_side_accepts_boolean_trade_and_mail(self):
-        for value in ({}, {'trade': True}, {'trade': False, 'mail': True}):
+    def test_two_side_accepts_boolean_trade_mail_and_auction(self):
+        for value in ({}, {'trade': True}, {'trade': False, 'mail': True}, {'auction': True}):
             scenario = copy.deepcopy(self.scenario)
             scenario['two_side'] = value
             self.assertIs(run.validate(scenario), scenario)
         for value, error in ((True, 'two_side: expected an object'), ({'trade': 1}, 'two_side.trade must be boolean'),
-                             ({'mail': 'true'}, 'two_side.mail must be boolean'), ({'auction': True}, 'two_side')):
+                             ({'mail': 'true'}, 'two_side.mail must be boolean'),
+                             ({'auction': 1}, 'two_side.auction must be boolean'), ({'bank': True}, 'two_side')):
             scenario = copy.deepcopy(self.scenario)
             scenario['two_side'] = value
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
+
+    def test_economy_log_rows_takes_an_event_and_typed_filters(self):
+        rows = {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_rows', 'economy_event': 'vendor_buy',
+                'item': 159, 'economy_count': 5, 'economy_gold': -25, 'economy_tokens': -300, 'economy_cost_item': 1297307,
+                'economy_cost_count': 500, 'economy_source': 900008, 'economy_save': False, 'equals': 1}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['economy_log'] = True
+        scenario['steps'].insert(0, rows)
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'economy_event': 'gold_farm'}, 'unknown economy_event'),
+                              ({'economy_event': None}, 'economy_event belongs to economy_log_rows'),
+                              ({'metric': 'item_count'}, 'economy_event belongs to economy_log_rows'),
+                              ({'economy_save': 1}, 'economy_save must be boolean'),
+                              ({'economy_count': -1}, 'economy_count'),
+                              ({'economy_source': 2**32}, 'economy_source'),
+                              ({'economy_gold': 2**63}, 'economy_gold'),
+                              ({'actor': 'target'}, 'economy_log_rows needs a player')):
+            step = {key: value for key, value in {**rows, **change}.items() if value is not None}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+        for value in ('yes', 1):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['economy_log'] = value
+            with self.subTest(economy_log=value), self.assertRaisesRegex(ValueError, 'economy_log must be boolean'):
+                run.validate(scenario)
+
+    def test_auction_id_is_a_packet_field_naming_an_item_entry(self):
+        packet = {'action': 'client_packet', 'actor': 'caster', 'opcode': 599,
+                  'fields': [{'actor_guid': 'target'}, {'auction_id': 765}]}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, packet)
+        self.assertIs(run.validate(scenario), scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {**packet, 'fields': [{'auction_id': 2**32}]})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
 
     def test_quest_log_size_accepts_the_native_and_extended_range(self):
         for value in (25, 40, 64):

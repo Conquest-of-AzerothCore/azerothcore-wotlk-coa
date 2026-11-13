@@ -527,6 +527,14 @@ public: /* PlayerScript */
     void OnPlayerLearnPetTalent(Player* player, Pet* pet, uint32 spellId);
     void OnPlayerLearnTrainerSpell(Player* player, Creature* trainer, uint32 spellId);
     void OnPlayerTakeMailItem(Player* player, Mail const* mail, uint32 itemEntry);
+    void OnPlayerAfterDestroyItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count);
+    void OnPlayerAfterSellItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, uint32 money, Creature* vendor);
+    void OnPlayerAfterBuyBackItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, uint32 price, Creature* vendor);
+    void OnPlayerAfterPlaceAuctionBid(Player* player, AuctionEntry const* auction, uint32 paid, bool buyout, CharacterDatabaseTransaction trans);
+    void OnPlayerAfterTakeMailItem(Player* player, Mail const* mail, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, CharacterDatabaseTransaction trans);
+    void OnPlayerAfterTakeMailMoney(Player* player, Mail const* mail, uint32 money, CharacterDatabaseTransaction trans);
+    void OnPlayerAfterTradeItem(Player* receiver, Player* giver, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count);
+    void OnPlayerAfterTradeMoney(Player* receiver, Player* giver, uint32 money);
     bool OnPlayerCanTakeQuest(Player const* player, Quest const* quest);
     bool OnPlayerCanRewardQuest(Player const* player, Quest const* quest);
     bool OnPlayerQuestGiverChooseReward(Player* player, Object* questGiver, Quest const* quest, uint32 reward);
@@ -742,6 +750,7 @@ public: /* GameEventScript */
 
 public: /* MailScript */
     void OnBeforeMailDraftSendMailTo(MailDraft* mailDraft, MailReceiver const& receiver, MailSender const& sender, MailCheckMask& checked, uint32& deliver_delay, uint32& custom_expiration, bool& deleteMailItemsFromDB, bool& sendMail);
+    void OnAfterMailDraftAppendRows(MailDraft const* mailDraft, StagedMail const& staged, CharacterDatabaseTransaction trans);
 
 public: /* AchievementScript */
 

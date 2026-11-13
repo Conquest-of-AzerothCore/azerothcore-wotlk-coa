@@ -59,6 +59,12 @@ MAX_GAMEOBJECT_TYPE = 35
 MAX_SPELL_MOD_OP = 31
 MIN_MUTANT_PERCENT = -100
 MAX_MUTANT_PERCENT = 1000
+ECONOMY_EVENTS = {
+    'vanity_store_buy', 'vanity_collect', 'vendor_buy', 'vendor_sell', 'vendor_buyback', 'bazaar_rotation_buy',
+    'heirloom_token_buy', 'cache_open', 'ah_list', 'ah_cancel', 'ah_bid', 'ah_buyout', 'ah_sold', 'ah_expired', 'trade',
+    'mail_send', 'mail_take', 'system_mail', 'tokens_earned', 'tokens_spent', 'item_destroy', 'highrisk_drop',
+    'highrisk_claim', 'reward',
+}
 METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
@@ -102,7 +108,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
-    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
+    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'economy_log_rows',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
     'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
@@ -264,7 +270,9 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality', 'heroic',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
-                 'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius',
+                 'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius', 'economy_event',
+                 'economy_save', 'economy_count', 'economy_gold', 'economy_tokens', 'economy_cost_item',
+                 'economy_cost_count', 'economy_source',
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
                   'school_mask', 'rolls', 'stacks', 'target_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
@@ -584,7 +592,7 @@ def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
-          'two_side', 'quest_log_size'},
+          'two_side', 'quest_log_size', 'economy_log'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -593,6 +601,7 @@ def validate(scenario, clock=REAL_CLOCK):
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
+    require(type(scenario.get('economy_log', False)) is bool, 'economy_log must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'ptr_character_copy_interruption' in scenario:
         require(scenario.get('ptr_character_copy') is True,
@@ -609,7 +618,7 @@ def validate(scenario, clock=REAL_CLOCK):
             number(item, 'vanity_ownership.starter_items', 1, 2**32 - 1, True)
     if 'two_side' in scenario:
         two_side = scenario['two_side']
-        keys(two_side, set(), {'trade', 'mail', 'group'}, 'two_side')
+        keys(two_side, set(), {'trade', 'mail', 'group', 'auction'}, 'two_side')
         for name, value in two_side.items():
             require(type(value) is bool, f'two_side.{name} must be boolean')
     if 'quest_log_size' in scenario:
@@ -1012,7 +1021,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
                 require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'item_guid', 'item_bag', 'item_slot', 'gameobject_guid',
-                                 'vendor_slot', 'mail_id', 'mail_item_guid', 'equipment_set_guid',
+                                 'vendor_slot', 'mail_id', 'mail_item_guid', 'auction_id', 'equipment_set_guid',
                                  'packed_equipment_set_guid',
                                  'actor_guid', 'packed_actor_guid', 'nearest_creature_guid',
                                  'pet_guid', 'stabled_pet', 'duel_arbiter', 'invited_battleground_type',
@@ -1027,7 +1036,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
                                'item_guid': 2**32 - 1, 'item_bag': 2**32 - 1, 'item_slot': 2**32 - 1, 'gameobject_guid': 2**32 - 1,
-                               'vendor_slot': 2**32 - 1, 'mail_id': 2**32 - 1, 'mail_item_guid': 2**32 - 1, 'nearest_creature_guid': 2**32 - 1,
+                               'vendor_slot': 2**32 - 1, 'mail_id': 2**32 - 1, 'mail_item_guid': 2**32 - 1,
+                               'auction_id': 2**32 - 1, 'nearest_creature_guid': 2**32 - 1,
                                'equipment_set_guid': 9, 'packed_equipment_set_guid': 9,
                                'stabled_pet': 3, 'wildcard_entry': 255, 'wildcard_pending_cards': 1000,
                                'wildcard_lowest_card': 7}[kind]
@@ -1058,6 +1068,22 @@ def validate(scenario, clock=REAL_CLOCK):
             else:
                 require(not EVENT_TIME_FIELDS & step.keys(),
                         f'{where}: stream and since_spell only apply to event time metrics')
+            require(('economy_event' in step) == (metric == 'economy_log_rows'), f'{where}: economy_event belongs to economy_log_rows')
+            require(metric == 'economy_log_rows' or not {f for f in step if f.startswith('economy_')},
+                    f'{where}: economy fields belong to economy_log_rows')
+            if metric == 'economy_log_rows':
+                require(step['actor'] in player_ids, f'{where}: economy_log_rows needs a player')
+                require(step['economy_event'] in ECONOMY_EVENTS, f'{where}: unknown economy_event')
+                if 'item' in step:
+                    number(step['item'], f'{where}.item', 1, 2**31 - 1, True)
+                if 'economy_save' in step:
+                    require(type(step['economy_save']) is bool, f'{where}: economy_save must be boolean')
+                for field in ('economy_count', 'economy_cost_item', 'economy_cost_count', 'economy_source'):
+                    if field in step:
+                        number(step[field], f'{where}.{field}', 0, 2**32 - 1, True)
+                for field in ('economy_gold', 'economy_tokens'):
+                    if field in step:
+                        number(step[field], f'{where}.{field}', -2**62, 2**62, True)
             if 'creator_only' in step:
                 require(metric == 'owned_creature_count', f'{where}: creator_only needs owned_creature_count')
                 require(type(step['creator_only']) is bool, f'{where}: creator_only must be boolean')

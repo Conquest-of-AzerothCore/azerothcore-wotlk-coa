@@ -18,12 +18,14 @@
 #ifndef SCRIPT_OBJECT_MAIL_SCRIPT_H_
 #define SCRIPT_OBJECT_MAIL_SCRIPT_H_
 
+#include "DatabaseEnvFwd.h"
 #include "ScriptObject.h"
 #include <vector>
 
 enum MailHook
 {
     MAILHOOK_ON_BEFORE_MAIL_DRAFT_SEND_MAIL_TO,
+    MAILHOOK_ON_AFTER_MAIL_DRAFT_APPEND_ROWS,
     MAILHOOK_END
 };
 
@@ -35,6 +37,8 @@ protected:
 public:
     // Called before mail is sent
     virtual void OnBeforeMailDraftSendMailTo(MailDraft* /*mailDraft*/, MailReceiver const& /*receiver*/, MailSender const& /*sender*/, MailCheckMask& /*checked*/, uint32& /*deliver_delay*/, uint32& /*custom_expiration*/, bool& /*deleteMailItemsFromDB*/, bool& /*sendMail*/) { }
+
+    virtual void OnAfterMailDraftAppendRows(MailDraft const* /*mailDraft*/, StagedMail const& /*staged*/, CharacterDatabaseTransaction /*trans*/) { }
 };
 
 #endif

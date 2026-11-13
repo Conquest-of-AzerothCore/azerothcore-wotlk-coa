@@ -271,7 +271,9 @@ StagedMail MailDraft::AppendMailRows(CharacterDatabaseTransaction trans, ObjectG
         trans->Append(stmt);
     }
 
-    return StagedMail{ mailId, receiverGuidLow, sender, checked, deliver_time, expire_time };
+    StagedMail const staged{ mailId, receiverGuidLow, sender, checked, deliver_time, expire_time };
+    sScriptMgr->OnAfterMailDraftAppendRows(this, staged, trans);
+    return staged;
 }
 
 void MailDraft::PublishStagedMail(StagedMail const& staged, Player* pReceiver)

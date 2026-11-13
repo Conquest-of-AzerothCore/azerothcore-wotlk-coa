@@ -1131,6 +1131,46 @@ void ScriptMgr::OnPlayerTakeMailItem(Player* player, Mail const* mail, uint32 it
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_TAKE_MAIL_ITEM, script->OnPlayerTakeMailItem(player, mail, itemEntry));
 }
 
+void ScriptMgr::OnPlayerAfterDestroyItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_DESTROY_ITEM, script->OnPlayerAfterDestroyItem(player, itemEntry, itemGuid, count));
+}
+
+void ScriptMgr::OnPlayerAfterSellItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, uint32 money, Creature* vendor)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_SELL_ITEM, script->OnPlayerAfterSellItem(player, itemEntry, itemGuid, count, money, vendor));
+}
+
+void ScriptMgr::OnPlayerAfterBuyBackItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, uint32 price, Creature* vendor)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_BUY_BACK_ITEM, script->OnPlayerAfterBuyBackItem(player, itemEntry, itemGuid, count, price, vendor));
+}
+
+void ScriptMgr::OnPlayerAfterPlaceAuctionBid(Player* player, AuctionEntry const* auction, uint32 paid, bool buyout, CharacterDatabaseTransaction trans)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_PLACE_AUCTION_BID, script->OnPlayerAfterPlaceAuctionBid(player, auction, paid, buyout, trans));
+}
+
+void ScriptMgr::OnPlayerAfterTakeMailItem(Player* player, Mail const* mail, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, CharacterDatabaseTransaction trans)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_TAKE_MAIL_ITEM, script->OnPlayerAfterTakeMailItem(player, mail, itemEntry, itemGuid, count, trans));
+}
+
+void ScriptMgr::OnPlayerAfterTakeMailMoney(Player* player, Mail const* mail, uint32 money, CharacterDatabaseTransaction trans)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_TAKE_MAIL_MONEY, script->OnPlayerAfterTakeMailMoney(player, mail, money, trans));
+}
+
+void ScriptMgr::OnPlayerAfterTradeItem(Player* receiver, Player* giver, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_TRADE_ITEM, script->OnPlayerAfterTradeItem(receiver, giver, itemEntry, itemGuid, count));
+}
+
+void ScriptMgr::OnPlayerAfterTradeMoney(Player* receiver, Player* giver, uint32 money)
+{
+    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_AFTER_TRADE_MONEY, script->OnPlayerAfterTradeMoney(receiver, giver, money));
+}
+
 bool ScriptMgr::OnPlayerCanTakeQuest(Player const* player, Quest const* quest)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_TAKE_QUEST, !script->OnPlayerCanTakeQuest(player, quest));

@@ -389,7 +389,9 @@ runs such a case exclusively because the setting is process-global. Optional
 `CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
 `two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
-`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional
+`AllowTwoSide.Interaction.Group` and `auction` sets `AllowTwoSide.Interaction.Auction`; each keeps the configured
+value when omitted. A summoned auctioneer has no spawn row, so an auction listing at one needs `auction: true`.
+Optional `economy_log: true` turns on `CoA.EconomyLog.Enable` for that case and is likewise run exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
 the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
@@ -454,7 +456,8 @@ checks through separate socketless character sessions and does not test simultan
 item entry (its u8 bag and slot), or `gameobject_guid` with an entry of
 exactly one owned fixture gameobject. Both write the native raw GUID and require the referenced object to exist.
 `mail_id` and `mail_item_guid` take an item entry and write the u32 id of the first held mail carrying it and that
-item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them.
+item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them. `auction_id` takes an item entry and writes the u32 id of the
+newest auction in any auction house carrying it, as `CMSG_AUCTION_PLACE_BID` and `CMSG_AUCTION_REMOVE_ITEM` send it.
 Optional `location` supplies `map`, `x`, `y`, `z`, `o` for a fixture
 teleport. `location.ignore_access` optionally bypasses entry requirements for a fixture (for example a solo
 raid test), without enabling GM mode during combat. Actors share their lane's phase (`1 << 30` with one lane) to
@@ -627,7 +630,11 @@ effect that picks one of several auras at random),
 number of mails the player holds and `mail_item_count` the items inside them, which is how a reward
 that the bags could not take proves it was posted rather than lost; `mail_has_item` takes `item` and
 returns whether any mail carries it, and `mail_pool_item_count` takes `cache` (optional `table`) and
-counts only the mail items that are in that cache's own pool. `account_character_count` counts the stored
+counts only the mail items that are in that cache's own pool. `economy_log_rows` takes `economy_event` (an event
+name such as `vendor_buy`, `mail_send` or `ah_sold`) and counts the actor's `coa_economy_log` rows of that event,
+narrowed by the optional `item` and `economy_count`, `economy_gold`, `economy_tokens`, `economy_cost_item`,
+`economy_cost_count` and `economy_source`; it saves the actor first so queued rows are written, and `economy_save: false` counts
+without that save. `account_character_count` counts the stored
 characters on the player's account, and `account_other_item_count` takes `item` and counts that item on the
 account's other characters, which is how a character copy proves it carried the inventory.
 `account_other_bank_item_count` (needs `item`) counts that item in those characters' own Personal Banks,
