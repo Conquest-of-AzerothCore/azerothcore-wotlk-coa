@@ -1,15 +1,18 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Jeklik calls six bats every 30 s in both forms, and Frenzied Bloodseeker Bats on Mythic",
+  "name": "Zul'Gurub: Jeklik calls six bats every 30 s in both forms, and Crazed Bat Riders on Mythic",
   "contract": [
     "On live Jeklik (14517) brings six Bloodseeker Bats (11368) every 30 s in her troll and her bat form, and in",
-    "her bat form on Mythic and Ascended Frenzied Bloodseeker Bats (14965) as well (round-5 tester and live",
-    "logs). Our Jeklik called bats only as a troll, once a minute, and never a frenzied bat. The waves come 52 s",
-    "into the fight and every 30 s after, the frenzied bat 30 s into the bat form on Mythic only. A Mythic Jeklik",
+    "her bat form on Mythic and Ascended a Crazed Bat Rider (14914) on a Frenzied Bloodseeker Bat (14965) every",
+    "30 s, the first 6 s in, in place of stock's two Gurubashi Bat Riders (14750) (round-5 tester and live logs).",
+    "Our Jeklik called bats only as a troll, once a minute, and on Mythic a lone frenzied bat without its rider.",
+    "The waves come 52 s into the fight and every 30 s after. The pair circles out of reach while the rider",
+    "throws Liquid Fire, until the bat dives 16-56 s after it came and the rider can be struck. A Mythic Jeklik",
     "is wounded into her bat form after landing; a Normal Jeklik stays a troll for two waves, then is wounded",
-    "into her bat form for a third. Bats fight the heroes, who do not strike back, so every wave stays."
+    "into her bat form for a third, and calls no Crazed Bat Rider. Bats fight the heroes, who do not strike back,",
+    "so every wave stays; liquid fire is read from the heroes' own combat log, and the dive from the bat's Frenzy."
   ],
-  "timeout_ms": 240000,
+  "timeout_ms": 360000,
   "location": {
     "map": 0,
     "x": -8914.0,
@@ -190,12 +193,55 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the Mythic Jeklik calls a Frenzied Bloodseeker Bat 30 s into her bat form",
+      "label": "DISCRIMINATING: the Mythic Jeklik calls a Crazed Bat Rider 6 s into her bat form",
+      "actor": "mythic",
+      "metric": "nearby_creature_count",
+      "entry": 14914,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider rides a Frenzied Bloodseeker Bat",
       "actor": "mythic",
       "metric": "nearby_creature_count",
       "entry": 14965,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider is out of reach before the dive",
+      "actor": "mythic",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14914,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the rider's Liquid Fire burns the hero",
+      "actor": "mythic",
+      "metric": "owned_creature_damage_count",
+      "entry": 14914,
       "min": 1,
-      "within_ms": 35000
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the bat dives within 56 s, frenzied, at the hero",
+      "actor": "mythic",
+      "metric": "nearby_creature_aura_count",
+      "entry": 14965,
+      "spell": 2106160,
+      "min": 1,
+      "within_ms": 60000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: after the dive its rider can be struck",
+      "actor": "mythic",
+      "metric": "nearby_creature_can_attack",
+      "entry": 14914,
+      "equals": 1
     },
     {
       "action": "assert",
@@ -275,6 +321,22 @@
       "actor": "normal",
       "metric": "nearby_creature_count",
       "entry": 14965,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Jeklik never calls a Crazed Bat Rider",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 14914,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Crazed Bat Rider's Liquid Fire reached the Normal hero",
+      "actor": "normal",
+      "metric": "owned_creature_damage_count",
+      "entry": 14914,
       "equals": 0
     },
     {

@@ -754,8 +754,11 @@ public:
         return itr == _counts.end() ? 0 : itr->second;
     }
 
-    static void Forget(std::set<ObjectGuid> const& units)
+    static void Forget(std::set<ProcCounter::Owner> const& owners)
     {
+        std::set<ObjectGuid> units;
+        for (ProcCounter::Owner const& owner : owners)
+            units.insert(std::get<ObjectGuid>(owner));
         std::erase_if(_counts, [&units](auto const& entry) { return units.contains(entry.first.first); });
     }
 
@@ -4502,6 +4505,25 @@ private:
                 {
                     ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(item.itemid);
                     return itemTemplate && itemTemplate->Quality >= quality;
+                });
+            }
+            return 100.0 * hits / rolls;
+        }
+        if (metric == "creature_loot_item_rate")
+        {
+            uint32 const lootId = step.get<uint32>("entry");
+            uint32 const wanted = step.get<uint32>("item");
+            uint32 const rolls = step.get<uint32>("rolls", 10000);
+            Require(LootTemplates_Creature.HaveLootFor(lootId), "Unknown creature loot template");
+            Require(rolls != 0, "creature_loot_item_rate needs rolls");
+            uint32 hits = 0;
+            for (uint32 roll = 0; roll < rolls; ++roll)
+            {
+                Loot loot;
+                loot.FillLoot(lootId, LootTemplates_Creature, player, true, true);
+                hits += std::any_of(loot.items.begin(), loot.items.end(), [wanted](LootItem const& item)
+                {
+                    return item.itemid == wanted;
                 });
             }
             return 100.0 * hits / rolls;
