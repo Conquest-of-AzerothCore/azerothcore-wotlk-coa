@@ -1322,6 +1322,24 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(invalid)
 
+    def test_target_entry_filters_spell_damage_by_the_struck_creature(self):
+        for metric in ('spell_damage_count', 'spell_damage_total'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                      'target_entry': 500483, 'min': 0})
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            for change in ({'target_entry': 0}, {'target_entry': '500483'}, {'target': 'caster'}):
+                invalid = copy.deepcopy(scenario)
+                invalid['steps'][-1].update(change)
+                with self.subTest(metric=metric, change=change), self.assertRaises(ValueError):
+                    run.validate(invalid)
+        invalid = copy.deepcopy(self.scenario)
+        invalid['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_heal_count', 'spell': 116,
+                                 'target_entry': 500483, 'min': 0})
+        with self.assertRaises(ValueError):
+            run.validate(invalid)
+
     def test_spell_damage_blocked_filter(self):
         for metric in ('spell_damage_count', 'spell_damage_total'):
             scenario = copy.deepcopy(self.scenario)

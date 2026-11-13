@@ -1858,6 +1858,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`cooldown_reset_rate`](kinds/cooldown_reset_rate.md): a talent's chance to reset a cooldown, from the
   clear-cooldown packets per trigger hit (ADR 0603)
 - [`corpse_per_raise`](kinds/corpse_per_raise.md): the corpses a periodic raise leaves, against the raises (ADR 0595)
+- [`disease_copy`](kinds/disease_copy.md): a disease copied by a snapshot ability, its amount and duration kept against
+  a fresh cast after a spell power raise (ADR 0622)
 - [`effectiveness_delta`](kinds/effectiveness_delta.md): an effect cast without and with the modifier that raises its
   effectiveness (ADR 0601)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
@@ -1905,5 +1907,7 @@ Options with a module:
   read, the named point `model` (ADR 0588)
 - [`phase_aura_amounts`](metric_delta_options/phase_aura_amounts.md): an effect amount on a phase or after aura
   fixture, the second named point `phase_steps` (ADR 0585)
+- [`extra_corpses`](metric_delta_options/extra_corpses.md): more corpse fixtures, each killed by its own setup cast
+  in the treatment phase (ADR 0620)
 - [`after_trigger_strike`](metric_delta_options/after_trigger_strike.md): a strike at the caster after the treatment
   cast only, the fourth named point `after_trigger_steps` (ADR 0606)
