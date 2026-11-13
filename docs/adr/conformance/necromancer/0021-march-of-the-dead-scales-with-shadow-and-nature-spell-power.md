@@ -1,4 +1,4 @@
-# 0021. March of the Dead scales with Plague spell power
+# 0021. March of the Dead scales with Shadow and Nature spell power
 
 - Status: accepted
 - Date: 2026-11-13

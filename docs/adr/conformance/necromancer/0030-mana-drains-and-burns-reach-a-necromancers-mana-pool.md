@@ -4,7 +4,7 @@
 - Date: 2026-11-13
 - Split from ADR 0561 before publication (mentor ruling, 2026-11-13, local 14:26): this ADR keeps the drain ruling
   and its engine fix; the `metric_delta` field `enemy_player_class` its regression uses is
-  [ADR 0561](../../0561-a-metric-delta-may-set-the-enemy-player-class.md) (shared).
+  [ADR 0561](../../0561-metric-delta-may-set-the-enemy-player-class.md) (shared).
 
 ## Context
 
@@ -35,6 +35,8 @@ a mana pool with a non-mana active power; the other mana classes have mana activ
   Mana Burn at an enemy of class 17 (no mana pool) still refused. The controls set the enemy's class through
   `enemy_player_class` (ADR 0561).
 - No Templar entry crosses the six gates (no Templar spell has Effect 8 / 62 or aura 62 / 64); the restoration
-  predicate is unchanged in behaviour.
+  predicate's behaviour is unchanged: the Templar restoration scenarios (energize, mana leech received, regen
+  auras) passed 30/30 on the integrated build (run 20261113-125332; `c3-templar-restore-verdicts.txt` in the
+  Necromancer conformance plan folder).
 - A change to one of the shared engine files above reruns the gameplay selection of every finished class, not only
   the Necromancer's.
