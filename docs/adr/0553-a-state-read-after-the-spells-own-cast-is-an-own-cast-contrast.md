@@ -39,8 +39,9 @@ data or unproven:
   same stamp: `own_cast` when the reducer is a real cast of the entry's own spell, `learned` with `reducer_learn`
   (integration note).
 - 804371: attribution now holds in both arms (pair c3-2: applied [804371, 504747], stat back after the clear). On this
-  branch the Stamina arm still misses (gain 27, expected 52), because F1's total-Stamina fix (ADR 0524) is on F1's
-  branch; with it merged, the entry stamps `learned`.
+  branch the Stamina arm still misses (gain 27, expected 52), because F1's total-Stamina fix ([Necromancer ADR
+  0020](conformance/necromancer/0020-foul-invocation-raises-total-stamina.md)) is on F1's branch; with it merged, the
+  entry stamps `learned`.
 - Tests: `MetricDeltaOwnCastContrastTests` (test_behaviours.py) and
   `test_a_state_read_after_the_spells_own_cast_counts_where_the_clause_promises_it` (test_coverage.py), whose
   condition contrast and claim without the promise word are the mutants. Templar `generate --class 19` and `--stack`

@@ -5,11 +5,12 @@
 
 ## Context
 
-Fix FN-c4-1 (ADR 0442) lets Flesh to Worms ticks critically strike. Its regression forces the spell crit chance to
-100%, so it cannot tell "ticks crit at the caster's spell crit chance" from "ticks always crit". `crit_rate` (ADR 0173)
-counts the landed hits of one `observe_spell` in both arms and judges the difference of their critical shares, so it
-cannot compare a damage over time with a direct spell. `spell_damage_count` already counts periodic damage ticks
-(SMSG_PERIODICAURALOG) with their critical flag.
+Fix FN-c4-1 ([Necromancer ADR 0012](conformance/necromancer/0012-flesh-to-worms-ticks-can-critically-strike.md)) lets
+Flesh to Worms ticks critically strike. Its regression forces the spell crit chance to 100%, so it cannot tell "ticks
+crit at the caster's spell crit chance" from "ticks always crit". `crit_rate` (ADR 0173) counts the landed hits of one
+`observe_spell` in both arms and judges the difference of their critical shares, so it cannot compare a damage over time
+with a direct spell. `spell_damage_count` already counts periodic damage ticks (SMSG_PERIODICAURALOG) with their
+critical flag.
 
 ## Options
 

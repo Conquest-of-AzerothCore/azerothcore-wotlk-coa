@@ -6,10 +6,11 @@
 ## Context
 
 Animate: Plaguefather 805048, owner ruling Q-a1-8: the Plaguefather casts Bone Toss 704706 on its target every 1 s
-(ADR 0531). A count of casts in one game-time window bounded the period only to 923-1105 ms, because the first cast's
-phase was not stamped, and the Plaguefather lives 15 s, so the window cannot grow. The mentor ruled that such a bracket
-is not a verdict and asked for a judge of period = (last stamped cast - first stamped cast) / (n - 1) in game time
-(Python only, G-39).
+([Necromancer ADR 0024](conformance/necromancer/0024-the-plaguefather-casts-bone-toss-on-its-target-every-second.md)). A
+count of casts in one game-time window bounded the period only to 923-1105 ms, because the first cast's phase was not
+stamped, and the Plaguefather lives 15 s, so the window cannot grow. The mentor ruled that such a bracket is not a
+verdict and asked for a judge of period = (last stamped cast - first stamped cast) / (n - 1) in game time (Python only,
+G-39).
 
 ## Decision
 

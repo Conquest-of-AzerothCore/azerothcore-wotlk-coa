@@ -6,8 +6,9 @@
 ## Context
 
 Soulfreeze 801724: "dealing ... Frost Damage every $t1 sec for $d" (claim 397.0, one chain read alone on an Ice-Locked
-dummy, ADR 0538). Four held / ends hit-count reads in 10 ms windows bracketed the first and second hits; one of them
-moved under load in pair c2-final-3. ADR 0535 already judges a cast period from stamped first and last events.
+dummy, [Necromancer ADR 0028](conformance/necromancer/0028-a-soulfreeze-chain-is-read-alone-on-a-frozen-dummy.md)). Four
+held / ends hit-count reads in 10 ms windows bracketed the first and second hits; one of them moved under load in pair
+c2-final-3. ADR 0535 already judges a cast period from stamped first and last events.
 
 ## Decision
 

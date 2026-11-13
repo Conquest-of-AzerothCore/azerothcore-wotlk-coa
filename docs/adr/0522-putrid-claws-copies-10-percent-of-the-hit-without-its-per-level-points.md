@@ -10,8 +10,9 @@ Plague damage." The owner ruled (Q-a1-5, option (b)) that the claw is 10% of the
 resisted as a Plague hit (0.088 of the hit on the dummy). The server gave 0.1174 of the hit. The proc's damage is
 already post-mitigation (fix note FN-own-3). The extra comes from the cast: `Copy` passes 10% of the hit as
 SPELLVALUE_BASE_POINT0 and `SpellEffectInfo::CalcValue` still adds 570050's per-level part to a custom base point
-(SpellInfo.cpp:479-498): Spell.dbc 570050 EffectRealPointsPerLevel[0] 0.15, SpellLevel 25, so about +5 per claw at
-level 60. The mentor approved FN-own-3 with FN-mc-2 (ADR 0486).
+(SpellInfo.cpp:479-498): Spell.dbc 570050 EffectRealPointsPerLevel[0] 0.15, SpellLevel 25, so about +5 per claw at level
+60. The mentor approved FN-own-3 with FN-mc-2 ([Necromancer ADR
+0014](0014-tomb-king-claws-copy-only-other-minions-hits.md)).
 
 ## Decision
 

@@ -5,8 +5,10 @@
 
 ## Context
 
-The mentor's approval of fix note F-ma-1 (ADR 0483) asks for Plague Horde 807765's duration on the minion to be read
-against its DBC value. The harness read a player's or a pet's aura duration, not an owned creature's.
+The mentor's approval of fix note F-ma-1 ([Necromancer ADR
+0013](conformance/necromancer/0013-plague-horde-is-cast-by-the-minion-on-itself.md)) asks for Plague Horde 807765's
+duration on the minion to be read against its DBC value. The harness read a player's or a pet's aura duration, not an
+owned creature's.
 
 ## Decision
 

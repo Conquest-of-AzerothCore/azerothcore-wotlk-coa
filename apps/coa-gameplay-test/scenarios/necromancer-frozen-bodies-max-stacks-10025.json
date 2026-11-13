@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Frozen Bodies at 10 stacks guarantees a crit without a second 1.5x on Glacial Impact damage (#10025)",
-  "contract": "Frozen Bodies712434 reads 'Increases the damage of your next Glacial Impact by $s1% for $d, stacking $u times. Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.' The crit is the 50% increased damage (spell crit multiplier), not a second multiplier: live Glacial Impact707592 hits at 10 stacks are about 1.031 times the 9-stack crit (14 pairs), all crit. The server forces a 100% crit chance at the DBC-defined StackAmount cap of 10 and leaves base damage alone (ADR 0563, reversing the x1.5 of #10025/#10573). The control cast is forced to crit the same way via spell_crit_rating, so the 10-stack cast must deal the control crit times the stack spellmod only (about 1.03), far from 1.5.",
+  "contract": "Frozen Bodies712434 reads 'Increases the damage of your next Glacial Impact by $s1% for $d, stacking $u times. Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.' The crit is the 50% increased damage (spell crit multiplier), not a second multiplier: live Glacial Impact707592 hits at 10 stacks are about 1.031 times the 9-stack crit (14 pairs), all crit. The server forces a 100% crit chance at the DBC-defined StackAmount cap of 10 and leaves base damage alone (Necromancer ADR 0032, reversing the x1.5 of #10025/#10573). The control cast is forced to crit the same way via spell_crit_rating, so the 10-stack cast must deal the control crit times the stack spellmod only (about 1.03), far from 1.5.",
   "timeout_ms": 90000,
   "players": [
     {
