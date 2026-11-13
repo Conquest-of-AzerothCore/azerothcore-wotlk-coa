@@ -4286,6 +4286,11 @@ private:
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
             return object ? uint32(object->GetGoState()) : 99;
         }
+        if (metric == "nearby_gameobject_lock")
+        {
+            GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);
+            return object ? double(object->GetGOInfo()->GetLockId()) : -1.0;
+        }
         if (metric == "nearby_gameobject_flags")
         {
             GameObject* object = player->FindNearestGameObject(step.get<uint32>("entry"), 20.0f);

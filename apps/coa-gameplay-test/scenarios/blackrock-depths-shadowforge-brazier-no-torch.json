@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "The Shadowforge Braziers in Blackrock Depths can be lit without a Shadowforge Torch",
+  "contract": [
+    "Both Shadowforge Braziers (174744 south, 174745 north) carried lock 799, so the client only let players with a",
+    "Shadowforge Torch light them. On Ascension anybody can click them. The lock is gone, and lighting both still",
+    "finishes the Lyceum and opens its gates through the stock brazier script."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "teleport", "actor": "p", "map": 230, "x": 1333.0, "y": -508.9, "z": -88.9, "o": 3.1 },
+    { "action": "assert", "label": "CONTROL: p is in Blackrock Depths", "actor": "p", "metric": "map_id", "equals": 230,
+      "within_ms": 15000 },
+    { "action": "set_phase", "label": "Join world phase 1, where Blackrock Depths is spawned", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 2500 },
+    { "action": "assert", "label": "The south brazier has no lock", "actor": "p", "metric": "nearby_gameobject_lock",
+      "entry": 174744, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: the south brazier is unlit", "actor": "p", "metric": "nearby_gameobject_state",
+      "entry": 174744, "equals": 1 },
+    { "action": "use_nearby_gameobject", "actor": "p", "entry": 174744 },
+    { "action": "assert", "label": "The south brazier lights", "actor": "p", "metric": "nearby_gameobject_state",
+      "entry": 174744, "equals": 0, "within_ms": 2000 },
+    { "action": "teleport", "actor": "p", "map": 230, "x": 1428.0, "y": -508.9, "z": -88.9, "o": 0.0 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "The north brazier has no lock", "actor": "p", "metric": "nearby_gameobject_lock",
+      "entry": 174745, "equals": 0 },
+    { "action": "use_nearby_gameobject", "actor": "p", "entry": 174745 },
+    { "action": "assert", "label": "The north brazier lights", "actor": "p", "metric": "nearby_gameobject_state",
+      "entry": 174745, "equals": 0, "within_ms": 2000 }
+  ]
+}
