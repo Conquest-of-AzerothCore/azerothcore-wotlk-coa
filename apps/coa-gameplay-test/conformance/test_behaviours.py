@@ -11238,5 +11238,29 @@ class FixedCountPostCastAuraTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
 
+
+class EnemyPlayerClassTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_enemy_player_class_replaces_the_class_file_class(self):
+        entry = {**r1a_entry(801205, 'metric_delta', 'sleep_player'), 'enemy_player_class': 8}
+        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+        run.validate(scenario)
+        enemy = next(player for player in scenario['players'] if player['id'] == 'enemy')
+        self.assertEqual((enemy['race'], enemy['class']), (2, 8))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_a_class_the_enemy_keeps_the_class_file_class(self):
+        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(r1a_entry(801205, 'metric_delta',
+                                                                                    'sleep_player')))
+        enemy = next(player for player in scenario['players'] if player['id'] == 'enemy')
+        self.assertEqual(enemy['class'], CLASS_FILE['class_id'])
+
+    def test_an_enemy_class_without_an_enemy_race_is_refused(self):
+        entry = {**r1a_entry(801205, 'metric_delta', 'sleep_player'), 'enemy_player_class': 8}
+        entry.pop('enemy_player_race')
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+
+
 if __name__ == '__main__':
     unittest.main()

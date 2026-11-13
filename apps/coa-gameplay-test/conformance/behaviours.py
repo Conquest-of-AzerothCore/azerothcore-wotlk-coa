@@ -1351,6 +1351,7 @@ class MetricDeltaSpec:
     forced_chance: tuple[int, int, int] | None = None
     corpse: tuple[int, int, float] | None = None
     game_time: tuple[tuple[int, int], tuple[int, int] | None] | None = None
+    enemy_player_class: int | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1592,6 +1593,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'expiry read, and its expected reading is its least before reading times the ratio')
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} has an unknown force_crit {spec.force_crit!r}')
+    if spec.enemy_player_class is not None and not spec.enemy_player_race:
+        raise ValueError(f'{spec.spell} metric_delta names an enemy player class without enemy_player_race')
     if bool(spec.enemy_player_race) != (ENEMY_PLAYER in (spec.target, spec.measure_actor, spec.fields.get('target'))):
         raise ValueError(f'{spec.spell} names the enemy player as its target or measured unit only with an '
                          f'enemy_player_race, and the race only with it')
@@ -1819,7 +1822,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps[settled:settled] = [{'action': 'pvp', 'actor': CASTER, 'enabled': True},
                                   {'action': 'pvp', 'actor': ENEMY_PLAYER, 'enabled': True},
                                   {'action': 'wait', 'label': 'pvp settle', 'ms': ENEMY_PLAYER_SETTLE_MS}]
-        scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race})
+        scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race,
+                                    **({'class': spec.enemy_player_class} if spec.enemy_player_class else {})})
         steps[settled:settled] = [{'action': 'learn', 'actor': ENEMY_PLAYER, 'spell': spell}
                                   for spell in dict.fromkeys(spec.enemy_casts)]
         if spec.helper_casts:
@@ -1927,7 +1931,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
                            forced_chance_of(entry.get('forced_chance')),
                            metric_delta_corpse(entry.get('corpse')),
-                           metric_delta_game_time(entry.get('game_time')))
+                           metric_delta_game_time(entry.get('game_time')),
+                           enemy_player_class=entry.get('enemy_player_class'))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
