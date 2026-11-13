@@ -246,7 +246,10 @@ class necromancer_casts : public AllSpellScript
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
         Player* player = Owner(caster);
-        if (!player || player != caster || spell->IsTriggered())
+        constexpr uint32 castWhileCastingFlags = TRIGGERED_IGNORE_CAST_IN_PROGRESS | TRIGGERED_CAST_DIRECTLY;
+        bool const castWhileCasting = info->HasAttribute(SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING) &&
+            !(uint32(spell->GetTriggeredCastFlags()) & TRIGGERED_FULL_MASK & ~castWhileCastingFlags);
+        if (!player || player != caster || (spell->IsTriggered() && !castWhileCasting))
             return;
         uint32 id = info->Id;
         Unit* target = spell->m_targets.GetUnitTarget();
@@ -257,17 +260,22 @@ class necromancer_casts : public AllSpellScript
                     aura && aura->GetScriptValue(805011) == spell->GetScriptValue(buff))
                     aura->DropCharge();
         };
-        consume(801747, Lichfrost(info) || Named(info, 801760) || id == 704355 || (id >= 707399 && id <= 707402));
-        consume(800979, Named(info, 801760));
-        consume(707176, Lichfrost(info) || Family(info, 2, 8192));
-        consume(807856, Lichfrost(info));
-        consume(572777, Command(info));
+        if (!castWhileCasting)
+        {
+            consume(801747, Lichfrost(info) || Named(info, 801760) || id == 704355 || (id >= 707399 && id <= 707402));
+            consume(800979, Named(info, 801760));
+            consume(707176, Lichfrost(info) || Family(info, 2, 8192));
+            consume(807856, Lichfrost(info));
+            consume(572777, Command(info));
+        }
         if (info->SpellFamilyName == 29 && Chance(player, 704681))
             Ready(player, 801747, 2);
         if (Chance(player, 92122))
             Cast(player, player, 707421);
         if (info->SpellFamilyName == 29 && player->HasAura(704723))
             Cast(player, player, 707133);
+        if (castWhileCasting)
+            return;
         if (Command(info))
         {
             if (Chance(player, 300940))
