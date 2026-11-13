@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 from typing import Iterable, Mapping, Sequence
 
-from behaviours import KINDS
+from behaviours import behaviour_kinds
 from hits import reference_caster
 from tooltip import Readout, Records, Unreadable, read_tooltip
 from values import EFFECTS, dataset
@@ -131,7 +131,7 @@ def label_kinds(labels: Iterable[str]) -> list[tuple[str, str | None]]:
     kinds = []
     for label in labels:
         for word in label.split():
-            if word.startswith(BEHAVIOUR_LABEL) and word[len(BEHAVIOUR_LABEL):] in KINDS:
+            if word.startswith(BEHAVIOUR_LABEL) and word[len(BEHAVIOUR_LABEL):] in behaviour_kinds():
                 kinds.append(('behaviours', word[len(BEHAVIOUR_LABEL):]))
             for prefix, section in LABEL_SECTIONS:
                 if word.startswith(prefix):
@@ -229,7 +229,7 @@ def packet(dbc, class_file: dict, spell_id: int, bucket_rows: Sequence[dict], ch
         'check_kinds': [{'section': section, 'kind': kind} for section, kind in kinds],
         'nearest_entries': nearest,
         'fixtures': fixtures,
-        'available_behaviour_kinds': list(KINDS),
+        'available_behaviour_kinds': list(behaviour_kinds()),
         'class_map': {'how': match.how, 'fields': match.fields},
     }
 

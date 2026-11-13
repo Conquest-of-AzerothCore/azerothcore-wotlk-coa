@@ -261,9 +261,9 @@ A `hit_ratio` arm's `target_health_pct` (ADR 0362) sets the dummy to that health
 the arms differ by target health (Harvest Plague 583256: the tick at 50% against about 100%).
 A `metric_delta` entry's `player_ratings` (ADR 0363) sets class file ratings to other values for its scenario
 (Necromancy 804360: melee hit rating 0, so the Ghouls' swings are dodged and parried).
-`after_at_most` (with `after_at_least`) and `player_spell_power` (ADR 0364) judge one rolled amount inside its
-stated range at a set spell power (Harvest Plague 583256: the first tick in [172, 210] at 0 and [3172, 3210] at
-20000).
+`after_at_most` (with `after_at_least`) and [`player_spell_power`](metric_delta_options/player_spell_power.md)
+(ADR 0364) judge one rolled amount inside its stated range at a set spell power (Harvest Plague 583256: the first
+tick in [172, 210] at 0 and [3172, 3210] at 20000).
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).
@@ -287,13 +287,7 @@ a minion: a `spell_mod_mutant` of SPELLMOD_CHANCE_OF_SUCCESS +1000% on `talent` 
 `aura` on the owned creature `entry` just before the before reading (it must be absent) and just before the after
 reading, on every creature of that entry (otherwise the verdict is `unmeasured`, never `ok`), and at the end the mutant owner aura removed and
 `spell_mod_mutants` read 0 (otherwise an alert). It never proves a rate: rate claims stay with their proc entries.
-`kind: "aura_expiry"` (ADR 0485) reads how long a rolled minion aura lasts: the talent's roll is forced (the ADR
-0482 mutant) while one raised minion attacks the dummy, then a -100% mutant stops every roll; every `poll_ms` the game
-time (`game_time_ms`), the minions carrying `aura` and the minion's casts of `marker_spell`
-(`owned_creature_spell_cast_count`) are read. The last cast and the first read without the aura bracket the duration in
-game time; the verdict is `ok` when the bracket lies inside `expected_ms` +- `band_ms` (5% by default). A cast after the
-switch alerts; no cast before it is `unmeasured`. Durations are judged on game-time stamps, never on the nominal waits:
-each wait step costs about 10 to 17 ms of game time beyond its `ms` (ADR 0485).
+`kind: "aura_expiry"` (ADR 0485) has [its own page](kinds/aura_expiry.md).
 `game_time` (ADR 0501) stamps a metric_delta reading in game time: `{"after": [low, high]}` reads `game_time_ms` right
 before the treatment phase's trigger cast and right before the after reading, and `"expired": [low, high]` (with
 `expiry_wait_ms`) also before the expiry reading. Each reading's game time after the cast must lie in its window (the
@@ -869,68 +863,6 @@ default 0) and the debuffs again (0 when `removed`, else 1), and steps forward a
 when set, replaces `removed` for the caster's reads of that arm only (ADR 0291). Silverhand Incantation 801465 clears
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
-
-### Summon lifetime (`behaviour_metric_delta`, `kind: "summon_lifetime"`, ADR 0544)
-
-A proc that summons a timed creature is read for the creature's lifetime. A forcing fixture (mentor N-a1, as in
-`forced_chance`) raises `talent`'s roll by 1000% for the scenario and is removed and read gone at the end. Control:
-`trigger_spell` cast at the dummy before `talent` is learned, its aura removed `stop_ms` later, then the owned
-`entry` count must read 0. Treatment: the same cast with `talent` learned; the owned `entry` count is polled every
-25 ms with `game_time_ms` stamps in `spawn_window` and `end_window` (ms after the cast, nominal), the trigger aura
-removed at `stop_ms` between them so one creature is summoned. The creature appears between the last empty and the
-first present poll and is gone between the last present and the first empty poll; the bracketed lifetime is judged
-against `expected_ms` in the G-19 band (`ok` inside, `alert` outside, `measured` across an edge); a window without
-its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) use
-Harvest Plague 500968, stopped after its first tick. The talent's ProcChance x 11 must reach 100%: the schema caps the
-mutant at +1000%.
-`parts` (ADR 0546) pools one-tick parts for a talent whose forced roll stays below 100%: a part whose spawn window never
-shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
-33% per tick, 40 parts).
-
-### Energize range (`behaviour_metric_delta`, `kind: "energize_range"`, ADR 0549)
-
-`cast_spell` is cast `casts` times at the dummy (`caster_auras` and `target_auras` set before each cast, Runic Power set
-to 0); the cumulative `energize_spell` energize total and count are read every 250 ms (`polls_per_cast` reads per
-cast). An interval whose count rose by exactly one gives that event's amount; at least `minimum_events` such amounts
-must be read, all inside `low`..`high`, with both ends seen. Soulfreeze 801724: 800344 rolls 30..80 per tick, 160 casts,
-384 events.
-
-### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
-
-One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once
-by the passive striker's `strike_spell` `strike_at_ms` into the cast; and the same after a real cast of
-`reducer_spell` (`reducer_wait_ms` later). The cast start, the moments just before and just after the strike step
-and every poll of the caster's `casting` state inside the phase's window (`windows`, `[start, end]` ms after the cast
-start, one poll per 1 ms wait step) are read with `game_time_ms`, so each cast end lies between the last casting and
-the first idle poll in game time. The judge brackets the reduction 1 - (reduced end - unhit end) / (hit end - unhit
-end) from those ends and judges it against `expected_pct` in the G-19 band: `ok` when the whole bracket lies inside,
-`alert` when it lies outside, `measured` when it crosses an edge. A hit cast that takes other than one strike, or two
-strikes at game-time offsets further apart than the poll bracket, leave the reading `unmeasured` (invalid, not
-failed). Icebound Champion 807813: Lichfrost 501978, Light of the Naaru 41394 at 1000 ms, expected 50.
-`reducer_learn: true` learns `reducer_spell` between the phases instead of casting it and adds a fourth window, an unhit
-cast after the learn (`reduced_unhit`); each pushback is then taken within its own talent state, for a talent that also
-changes the cast time (Lich Essence 802988, which shortens Lichfrost by 15%).
-`repeats` (ADR 0546) repeats every cast; the judge then takes the mean bracket middle of each kind of cast and a 99%
-interval of the reduction from the repeats, since one poll is one world tick (8-10 ms of game time) and a single
-bracket cannot be narrower (Lich Essence: 10 repeats, 21-poll windows).
-The model stamps its contrast (ADR 0570): `own_cast` when `reducer_spell` is the entry's own spell and is cast,
-`learned` with `reducer_learn`, otherwise `condition`; coverage counts the `casting` read as behaviour for the first
-two where the clause promises it (`coverage.promised_state`, as ADR 0553 for `metric_delta`).
-
-### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
-
-A minion's command strike stated as "Weapon Damage" is read against the same minion's own swing. A real
-`raise_spell` raises creature `entry` at the caster; one `command_spell` at the dummy (power set to `command_power`)
-starts its attack, then `trials` more follow, `wait_ms` apart. After the first and each later Command the scenario
-reads the non-critical, unblocked `strike_spell` hits of that creature on the dummy (`spell_damage_total` and
-`spell_damage_count` with `caster_entry`) and its plain melee swings (`pet_melee_plain_damage` and
-`pet_melee_plain_count`, no crit and no glancing). The hit ratio judge takes the swings as the control arm and the
-strike as the treatment: the per-hit mean of the strike over the per-swing mean must lie within 5% of the stated
-ratio `expected` (`ratio_band`, the G-19 band of a ratio), with the 99% interval rules of the hit ratio judge. The
-creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorded once and not judged. Raise:
-`strike_flat` takes that flat amount off every strike hit before the ratio (ADR 0547). Greater Skeletal Warrior 504901
-judges Command: Skeletal Warriors 570042 at 2.0 after its flat Effect[1] part of 1 (fix FN-c1t-1, controller cycle 2). `player_spell_power` gives the
-caster the harness spell-power fixture; weapon_ratio_sp holds 1000, a flat part of 137.5.
 
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 
@@ -1610,7 +1542,6 @@ rank 572741 as `trigger_spell`, which satisfies `Breaker(info)` through its own 
 through `Named(info, 805409)` (Righteous Tempest, which the code exempts from clearing Oaths regardless of 92109),
 so the scenario exercises the 92109 gate itself rather than that unrelated exemption.
 
-
 ### Auras set around behaviour casts (ADR 0170)
 
 Four kinds can set auras around their casts. Without the fields every scenario is unchanged.
@@ -1860,42 +1791,6 @@ haste and crit words, so a learned contrast is behaviour; `owned_aura` is a read
 Ghoul's swing interval and crit chance with an Abomination raised in both phases, and its condition arm raises the
 Abomination in the second phase only (`setup_only_after`).
 
-### Repair at an owned creature (`behaviour_cast_condition`, `kind: "npc_repair"`, ADR 0384)
-
-The caster, a grouped ally and an enemy-faction player each wear `item` (`full` durability), worn by `loss_percent`
-before each request (harness `durability_loss`, a precondition fixture), and send a repair-all request to the caster's
-creature `entry` (harness `repair_at`, the real `CMSG_REPAIR_ITEM` handler): before `spell` is cast (no creature), then
-after it for the caster, the ally and the enemy. Each worn and repaired reading of `equipped_durability` (the item's
-entry) is judged exactly: refused requests keep the worn value, granted ones restore `full`. Animate: Skeletal Smith
-804681 repairs the caster and the ally, not the enemy.
-
-### Corpse fixture (`metric_delta` `corpse`, ADR 0493)
-
-`corpse` (`{"entry", "health", "distance"}`) adds a creature `corpse` of that entry, at the class level, with that
-health, `distance` yd from the caster. A `setup_only_after` entry kills it with a real cast (`setup_target:
-"corpse"`, for example Void Zone 92559 for 1000 Physical damage) in the treatment phase only, so the control phase has
-no corpse. Corpse Explosion 533239: a Humanoid corpse explodes on the dummy near it, a Mechanical (480) or an Elemental
-(2022) corpse does not.
-
-### Item cooldown gate (`behaviour_cast_condition`, `kind: "item_cooldown_gate"`, ADR 0492)
-
-A grouped ally holds `item` (a named precondition fixture: the caster creates it and hands it out) and uses it through
-the real item-use handler (harness `use_item`): first with no earlier use (accepted, the control), then
-`cooldown_ms - margin_ms` after the first use (refused, 67 SPELL_FAILED_NOT_READY) and `cooldown_ms + margin_ms`
-after it (accepted). Each attempt reads the ally's `cast_failure` of `item_spell` and its completed `spell_go_count`
-(1, 1, 2), judged exactly. With `shared_item`/`shared_spell`, the ally uses that item right after the second accepted
-use: refused for a shared cooldown. Create Bone Reliquary 803771 and Create Frozen Reliquary 803777: "Allies may only
-use a ... once per minute."
-
-### Strike bursts (`behaviour_metric_delta`, `kind: "strike_bursts"`, ADR 0383)
-
-A minion's scripted strikes after a Command: `command` is cast at the dummy (`distance` yd away) once with no minion
-(the control: no hit), then `spell` raises a creature `entry`; each cycle casts `command`, reads the minion's hits 25 ms
-before and after the strike tick (`burst_delay_ms`, 500), and casts the two `stances` (Pacify, then another) so the
-minion stops. `arms` (`name`, `health_pct` falling from arm to arm, `cycles`, `low`, `high`) set the dummy's health;
-every per-cycle count must lie in `low`..`high` and both ends must be seen. Raise: Skeletal Rogue 500969: 40
-Commands at 37% read 2 to 5, 10 at 33% read 5.
-
 ### Stat attribution for stats (`stat_gain`, `attribute_stat`, ADR 0385)
 
 `attribute_stat: true` on a `stat_gain` of the `stat` metric adds the attribution reads (the auras around each cast,
@@ -1930,21 +1825,58 @@ treatment arm only, after the arm's casts and one `settle_ms`, while the control
 `control_casts` may repeat the casts (Raise: Abomination 500335: the cloud fires when the Abomination is attacked).
 A `hit_ratio` arm's `aura_amounts` (ADR 0533) sets an effect of one of the arm's auras to an amount before every trial
 (Glacial Impact 707402: 984954's aura 57 at +2 or +22 holds the Frost spell crit sheet at 5.28% or 25.28%).
-An `item_cooldown_gate` entry's `label_suffix` (ADR 0534) keeps several entries of one item apart, and
-`combat_kill_spell` reads the shared potion rule in combat: the ally attacks the dummy, uses `item`, is refused
-`shared_item` past the cooldown while still in combat, the caster kills the dummy (set to 1 health) with that spell,
-and `shared_item` is refused right after the combat end, still refused just before the cooldown from the combat end
-and accepted just after it.
+The `item_cooldown_gate` part of ADR 0534 is on [its kind page](kinds/item_cooldown_gate.md).
 
-### Cast periods (`behaviour_metric_delta`, `kind: "cast_period"`, ADR 0535)
+## Behaviour kind modules
 
-A real `setup_spell` cast raises creature `entry`; uncommanded for `control_ms` it must cast no `cast_spell`. Then
-`trigger_spell` at the dummy and, every `poll_ms` over `window_ms`, the game time and the creature's casts are read. The
-first and the last cast are bracketed between stamped reads, and (last - first) / (n - 1) must lie inside `expected_ms`
-+- the G-19 band (Animate: Plaguefather 805048: Bone Toss 704706 every 1000 ms).
-`kind: "pulse_targets"` (ADR 0550) reads one creature's area pulses per pulse: each dummy's hits are polled with
-game-time stamps, the dummies struck between two reads are one pulse's targets, and none may exceed the stated cap
-(Bonestorm 801411, Animate: Bone Wraith 805032). `kind: "aura_window"` (ADR 0551) polls a cast's aura on the dummy over
-start and end windows given in game time, without and with the talent, and judges each stamped duration (Ice Barrage
-501997's channel, Deathly Chill 805424). `kind: "hit_period"` (ADR 0552) polls a cast's hits on the dummy and judges
-(last - first) / (n - 1) with the cast_period judge (Soulfreeze 801724's ticks).
+A behaviour kind can live in its own module `kinds/<kind>.py` (ADR 0581), found at run time by
+`kinds.kind_modules()` (`pkgutil.iter_modules` over the package, on first use). A module states:
+
+- `KIND`, the entry's `kind`, and `ORDER`, its place after the built-in `behaviours.KINDS` in
+  `behaviours.behaviour_kinds()` (the list `packets.py` prints; new kinds take the next number);
+- `scenario(class_file, entry)`, the entry's scenario and expectations, consulted before the
+  `behaviour_scenario` chain;
+- optionally `JUDGES` (`{check: judge(base, run, model)}`, used for a model whose `kind` is `KIND`, before the
+  `compare.judged_behaviour` chain), `POOLED_JUDGE` (`judge(base, runs, model)` for pooled `parts`), `label(entry)`
+  (its P5 link labels, merged into `passives.BEHAVIOUR_LABELS`) and `EVIDENCE`, `METRIC_EVIDENCE`,
+  `STATE_PROMISES` rows (merged into the `coverage` tables, which stay closed: a check or metric without a row still
+  fails, ADR 0120).
+
+Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` suite command, which also checks that
+every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
+
+- [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
+- [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped
+  windows (ADR 0551)
+- [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
+- [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
+- [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
+- [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and
+  in combat (ADR 0492, ADR 0534)
+- [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit
+  ratio (ADR 0541, ADR 0547)
+- [`npc_repair`](kinds/npc_repair.md): repair at an owned creature through the real repair handler, per requester (ADR
+  0384)
+- [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR
+  0550)
+- [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast
+  ends (ADR 0543, ADR 0546, ADR 0570)
+- [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
+- [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
+  parts (ADR 0544, ADR 0546)
+
+## Metric-delta option modules
+
+A `metric_delta` option can live in its own module `metric_delta_options/<field>.py` (ADR 0582) instead of a
+`MetricDeltaSpec` field, found at run time by `metric_delta_options.option_modules()`. A module states `NAME` (the
+entry field), `ORDER` (the order in which options of one entry apply), `parse(raw)` (its parsed value, stored in
+`MetricDeltaSpec.options`) and, when it has them, `check(spec, value)` (called for every entry after the built-in
+checks, `value` `None` when the field is absent) and `fixtures(class_file, spec, value, scenario)` (called after the
+player ratings, before the striker creature is added). An option that needs another point of
+`metric_delta_scenario` (a step inside a phase, a model field) adds that named point in its own ADR. Its tests are
+`metric_delta_options/test_<field>.py` (run by `test_kinds.py`), its page `docs/metric_delta_options/<field>.md`.
+Options with a module:
+
+- [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
+  0493)
+- [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)

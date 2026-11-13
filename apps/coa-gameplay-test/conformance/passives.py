@@ -5,6 +5,7 @@ import re
 
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells, progression_chains, table_rows
 from hits import creature_fixture
+from kinds import kind_labels
 from procs import proc_label, shares_aura, shares_proc_spell, trigger_key
 from profile import CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
@@ -67,14 +68,6 @@ OUT_OF_SCOPE = {
     110: 'no energy regeneration metric',
 }
 LINKED_FAMILY = 'P5'
-GATE_USE = ('cast_failure', 'spell_go_count')
-ITEM_COOLDOWN_GATE_ARMS = {
-    'plain': (('first', GATE_USE), ('early', GATE_USE), ('ready', GATE_USE)),
-    'shared': (('first', GATE_USE), ('early', GATE_USE), ('ready', GATE_USE), ('shared', ('cast_failure',))),
-    'combat': (('combat_start', ('combat',)), ('first', GATE_USE), ('in_combat', ('cast_failure',)),
-               ('combat_end', ('combat',)), ('after_combat', ('cast_failure',)),
-               ('after_combat_early', ('cast_failure',)), ('after_combat_ready', ('cast_failure',))),
-}
 BEHAVIOUR_LABELS = {
     'count': lambda entry: [f"{entry['spell']} behaviour_count"],
     'ally_heal_breadth': lambda entry: [f"{entry['spell']} behaviour_count"],
@@ -82,8 +75,6 @@ BEHAVIOUR_LABELS = {
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
-    'aura_expiry': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                  f"{entry.get('label_suffix', 'aura_expiry')}"],
     'threat_tick_ratio': lambda entry: [f"{entry['spell']} behaviour_metric_ratio_delta"
                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'absorb_pierce_ratio': lambda entry: [f"{entry['spell']} behaviour_absorb_pierce_ratio"],
@@ -91,14 +82,6 @@ BEHAVIOUR_LABELS = {
                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'hit_ratio': lambda entry: [f"{entry['spell']} behaviour_hit_ratio"
                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
-    'energize_range': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
-                                     + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
-    'summon_lifetime': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
-                                      + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
-    'pushback_reduction': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
-                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
-    'minion_swing_ratio': lambda entry: [f"{entry['spell']} behaviour_hit_ratio"
-                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'cast_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_ratio"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
@@ -141,21 +124,6 @@ BEHAVIOUR_LABELS = {
                                             *(f'cast_{cast}' for cast in range(3, (entry.get('charges') or 0) + 3)),
                                             *(('next',) if entry.get('next_arm') else ()), 'beyond',
                                             *(('held', 'expired') if entry.get('aura_duration_ms') else ()))],
-    'item_cooldown_gate': lambda entry: [f"{entry['spell']} item_cooldown_gate {entry['item']}"
-                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')
-                                         + f" {arm} {metric}"
-                                         for arm, metrics in ITEM_COOLDOWN_GATE_ARMS[
-                                             'combat' if entry.get('combat_kill_spell') else
-                                             'shared' if entry.get('shared_item') else 'plain']
-                                         for metric in metrics],
-    'cast_period': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                  f"{entry.get('label_suffix', 'cast_period')}"],
-    'pulse_targets': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                    f"{entry.get('label_suffix', 'pulse_targets')}"],
-    'aura_window': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                  f"{entry.get('label_suffix', 'aura_window')}"],
-    'hit_period': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                 f"{entry.get('label_suffix', 'hit_period')}"],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
                                                      *(f'after_{tick}'
@@ -688,9 +656,10 @@ def effect_unmodelled(class_file: dict, spell_ids: set[int], effect: int) -> str
 
 def behaviour_label(entry: dict) -> list[str]:
     kind = entry['kind']
-    if kind not in BEHAVIOUR_LABELS:
+    labels = {**BEHAVIOUR_LABELS, **kind_labels()}
+    if kind not in labels:
         raise ValueError(f'behaviour kind {kind!r} has no known label format for a P5 link')
-    return BEHAVIOUR_LABELS[kind](entry)
+    return labels[kind](entry)
 
 
 def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> list[tuple[str, dict]] | None:

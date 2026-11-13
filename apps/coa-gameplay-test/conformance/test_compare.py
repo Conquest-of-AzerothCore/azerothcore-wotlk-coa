@@ -8,6 +8,7 @@ from statistics import fmean, pstdev
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, ENGINE_ROUNDING, NOT_MEASURED,
                      PER_LEVEL_ROUNDING, PER_LEVEL_UNMODELLED, per_level_loss, per_level_unmodelled,
@@ -19,7 +20,7 @@ from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, E
                      write_outputs)
 from behaviours import BEHAVIOUR_METRIC_DELTA
 from hits import HitModel, Modifier
-from profile import CLASSES_DIR, DBC_DIR
+from profile import DBC_DIR, FIXTURE_CLASSES_DIR, load_fixture_class_file
 from classes import class_spells
 from tooltip import CasterStats, Displayed, Readout, Unreadable, read_tooltip
 from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RANGE_YD, Expectation,
@@ -29,7 +30,7 @@ from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RAN
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
 
-CLASS_FILE = json.loads((CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
+CLASS_FILE = json.loads((FIXTURE_CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
 RANK = 1001
 FIXED_POINTS = (0, 1)
 ROLLS = range(100, 110)
@@ -1755,13 +1756,18 @@ class GeneratedTokenTest(unittest.TestCase):
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
 
 
+def fixture_generate(class_id: int, out: Path, **options) -> Path:
+    from conformance import generate
+    with mock.patch('conformance.load_class_file', load_fixture_class_file):
+        return generate(class_id, out, **options)
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateTest(unittest.TestCase):
     def test_manifest_hashes_and_keys_match_what_the_runner_records(self):
-        from conformance import generate
         out = Path(tempfile.mkdtemp(prefix='conformance-generate-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, spells=[804929])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, spells=[804929])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             written = [entry for entry in manifest['scenarios'] if entry['file']]
             self.assertTrue(written)
@@ -1779,10 +1785,9 @@ class GenerateTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_long_hit_is_written_in_parts_that_share_its_label(self):
-        from conformance import generate
         out = Path(tempfile.mkdtemp(prefix='conformance-generate-'))
         try:
-            manifest = json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
+            manifest = json.loads(fixture_generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
                 encoding='utf-8'))
             hits = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
             self.assertEqual([entry['key'] for entry in hits],

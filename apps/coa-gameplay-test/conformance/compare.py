@@ -37,6 +37,7 @@ from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
+from kinds import kind_judge, kind_pooled_judge
 from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
@@ -3126,331 +3127,6 @@ def metric_ratio_verdict(base: Verdict, model: dict, before: float, after: float
                    high=ratio + tolerance, explanation=explanation)
 
 
-def behaviour_aura_expiry_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    series = [[run.values.get(label) for label in labels] for labels in model['reads']]
-    missing = [labels[0] for labels, values in zip(model['reads'], series) if any(value is None for value in values)]
-    if missing:
-        return replace(base, explanation=missing_measurement(run, missing[0]))
-    times = [values[0] for values in series]
-    present = [values[1] > 0 for values in series]
-    marks = [values[2] for values in series]
-    switch = model['switch_index']
-    expected, band = float(model['expected_ms']), float(model['band_ms'])
-    rises = [index for index in range(1, len(marks)) if marks[index] > marks[index - 1]]
-    onset = [index for index in rises if index < switch]
-    if not onset:
-        return replace(base, status='unmeasured', explanation='no cast of the marker spell before the switch, so the '
-                                                              'forced aura has no stamp')
-    if any(index >= switch for index in rises):
-        return replace(base, status='alert', explanation=f'the marker spell was cast again after the switch at read '
-                                                         f'{min(index for index in rises if index >= switch)}: the '
-                                                         f'roll was not stopped')
-    last = onset[-1]
-    if not present[last]:
-        return replace(base, status='unmeasured', explanation=f'the aura is absent at the last cast\'s read {last}')
-    gone = next((index for index in range(last + 1, len(present)) if not present[index]), None)
-    if gone is None:
-        return replace(base, status='alert', measured=times[-1] - times[last], expected=expected,
-                       explanation=f'the aura outlasts the reads: still present {times[-1] - times[last]:g} ms after '
-                                   f'the last cast')
-    if not all(present[last:gone]):
-        return replace(base, status='alert', explanation='the aura is absent between the last cast and its expiry')
-    low, high = times[gone - 1] - times[last], times[gone] - times[last - 1]
-    start = times[0]
-    released = run.values.get(model['released_label'])
-    status = 'ok' if expected - band <= low and high <= expected + band and released == 0 else 'alert'
-    return replace(base, status=status, measured=(low + high) / 2, expected=expected, low=expected - band,
-                   high=expected + band,
-                   explanation=f'last cast of the marker in ({times[last - 1] - start:g}, {times[last] - start:g}] '
-                               f'ms of game time after the command, the aura gone in ({times[gone - 1] - start:g}, '
-                               f'{times[gone] - start:g}]: it lasted between {low:g} and '
-                               f'{high:g} ms, against {expected:g} +- {band:g} (5%); the forcing mutant removed '
-                               f'({released})')
-
-
-def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    if model['mode'] == 'absent':
-        value = run.values.get(model['label'])
-        if value is None:
-            return replace(base, explanation=missing_measurement(run, model['label']))
-        return exact(base, float(value), 0.0, 'the minion hits read after the command with no minion raised')
-    counts = []
-    for before, after in model['reads']:
-        if run.values.get(before) is None or run.values.get(after) is None:
-            return replace(base, explanation=missing_measurement(run, before if run.values.get(before) is None
-                                                                 else after))
-        counts.append(int(round(run.values[after] - run.values[before])))
-    low, high = int(model['low']), int(model['high'])
-    inside = all(low <= count <= high for count in counts)
-    ends = low in counts and high in counts
-    status = 'ok' if inside and ends else 'alert'
-    seen = {count: counts.count(count) for count in sorted(set(counts))}
-    explanation = (f'{len(counts)} commands at {model["health_pct"]}% target health struck {seen} times each '
-                   f'(count: commands); every count must lie in {low}..{high} and both {low} and {high} be seen')
-    return replace(base, status=status, measured=float(min(counts)), expected=float(low), low=float(low),
-                   high=float(high), explanation=explanation)
-
-
-def pushback_end_bracket(run: Run, phase: dict) -> tuple[float, float] | str:
-    start = run.values.get(phase['start'])
-    if start is None:
-        return missing_measurement(run, phase['start'])
-    last_casting, first_idle = None, None
-    for time_label, casting_label in phase['polls']:
-        at, casting = run.values.get(time_label), run.values.get(casting_label)
-        if at is None or casting is None:
-            return missing_measurement(run, time_label if at is None else casting_label)
-        if casting >= 0.5:
-            if first_idle is not None:
-                return f'the caster casts again at {at - start:g} ms after an idle poll'
-            last_casting = at
-        elif first_idle is None:
-            first_idle = at
-    if last_casting is None or first_idle is None:
-        return 'the polls do not hold both the cast and its end'
-    return last_casting - start, first_idle - start
-
-
-def pushback_strike_offsets(run: Run, phase: dict) -> tuple[float, float] | str:
-    labels = [phase['start'], phase['strike'], phase['struck'], *phase['strikes']]
-    values = [run.values.get(label) for label in labels]
-    if None in values:
-        return missing_measurement(run, labels[values.index(None)])
-    start, strike, struck, before, after = values
-    if after - before != 1:
-        return f'{after - before:g} strikes landed during the cast, not 1'
-    return strike - start, struck - start
-
-
-def behaviour_pushback_samples_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    means, spreads, offsets, widths, skipped = {}, {}, [], [], []
-    for kind, samples in model['samples'].items():
-        middles = []
-        for index, phase in enumerate(samples, 1):
-            if 'strike' in phase:
-                found = pushback_strike_offsets(run, phase)
-                if isinstance(found, str):
-                    skipped.append(f'{kind} {index}: {found}')
-                    continue
-            bracket = pushback_end_bracket(run, phase)
-            if isinstance(bracket, str):
-                return replace(base, status='unmeasured', explanation=f'{kind} {index}: {bracket}')
-            middles.append((bracket[0] + bracket[1]) / 2)
-            widths.append(bracket[1] - bracket[0])
-            if 'strike' in phase:
-                offsets += list(found)
-        if len(middles) < max(2, len(samples) // 2):
-            return replace(base, status='unmeasured', explanation=f'{kind}: {len(middles)} of {len(samples)} casts '
-                                                                  f'valid ({"; ".join(skipped)})')
-        means[kind] = sum(middles) / len(middles)
-        spreads[kind] = (sum((middle - means[kind]) ** 2 for middle in middles) / (len(middles) - 1)
-                         / len(middles))
-    if max(offsets) - min(offsets) > max(widths):
-        return replace(base, status='unmeasured', explanation=f'invalid: the strikes land {min(offsets):g} to '
-                                                              f'{max(offsets):g} ms into their casts, more than the '
-                                                              f'poll bracket {max(widths):g} ms apart')
-    base_kind = 'reduced_unhit' if 'reduced_unhit' in means else 'unhit'
-    full = means['hit'] - means['unhit']
-    if full <= 0:
-        return replace(base, status='alert', explanation=f'the mean hit cast ends {means["hit"]:g} ms, no later '
-                                                         f'than the unhit cast {means["unhit"]:g} ms')
-    kept = means['reduced'] - means[base_kind]
-    measured = (1 - kept / full) * 100
-    variance = (spreads['reduced'] + spreads[base_kind]) / full ** 2 + \
-        (kept / full ** 2) ** 2 * (spreads['hit'] + spreads['unhit'])
-    half = 2.576 * math.sqrt(variance) * 100
-    expected, band = float(model['expected_pct']), float(model['band'])
-    low, high = expected - band, expected + band
-    if low - 1e-9 <= measured - half and measured + half <= high + 1e-9:
-        status, reason = 'ok', 'the 99% interval lies inside the band'
-    elif measured + half < low or measured - half > high:
-        status, reason = 'alert', 'the 99% interval lies outside the band'
-    else:
-        status, reason = 'measured', 'the 99% interval crosses a band edge: effect present, not final'
-    count = len(next(iter(model['samples'].values())))
-    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   detail={'mean_ends_ms': means, 'interval': [measured - half, measured + half]},
-                   explanation=f'{count} casts of each kind; mean cast ends (bracket middles) after the start in '
-                               f'game time: {", ".join(f"{kind} {value:.2f}" for kind, value in means.items())} ms; '
-                               f'strikes {min(offsets):g} to {max(offsets):g} ms into their casts; the pushback falls '
-                               f'by {measured:.4g}% (99% interval {measured - half:.4g} to {measured + half:.4g}) '
-                               f'against the stated {expected:g}%, band {low:g} to {high:g}: {reason}'
-                               + (f'; invalid hit casts left out: {"; ".join(skipped)}' if skipped else ''))
-
-
-def behaviour_pushback_reduction_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    if model.get('samples'):
-        return behaviour_pushback_samples_verdict(base, run, model)
-    ends, strikes = {}, {}
-    for name, phase in model['phases'].items():
-        bracket = pushback_end_bracket(run, phase)
-        if isinstance(bracket, str):
-            return replace(base, status='unmeasured', explanation=f'{name}: {bracket}')
-        ends[name] = bracket
-        if 'strike' in phase:
-            labels = [phase['start'], phase['strike'], phase['struck'], *phase['strikes']]
-            values = [run.values.get(label) for label in labels]
-            if None in values:
-                return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
-            start, strike, struck, before, after = values
-            if after - before != 1:
-                return replace(base, status='unmeasured',
-                               explanation=f'{name}: {after - before:g} strikes landed during the cast, not 1')
-            strikes[name] = (strike - start, struck - start)
-    width = max(high - low for low, high in ends.values())
-    offsets = [offset for pair in strikes.values() for offset in pair]
-    if max(offsets) - min(offsets) > width:
-        return replace(base, status='unmeasured',
-                       explanation=f'invalid: the strikes land {strikes} ms into their casts, more than the poll '
-                                   f'bracket {width:g} ms apart')
-    (unhit_low, unhit_high), (hit_low, hit_high), (reduced_low, reduced_high) = (
-        ends['unhit'], ends['hit'], ends['reduced'])
-    base_low, base_high = ends.get('reduced_unhit', ends['unhit'])
-    middle = lambda bracket: (bracket[0] + bracket[1]) / 2
-    if hit_low <= unhit_high:
-        return replace(base, status='alert', explanation=f'the hit cast ends {ends["hit"]} ms, no later than the '
-                                                         f'unhit cast {ends["unhit"]} ms: no pushback to reduce')
-    reduction = lambda reduced, reduced_base, unhit, hit: (1 - (reduced - reduced_base) / (hit - unhit)) * 100
-    if 'reduced_unhit' in ends:
-        lowest = reduction(reduced_high, base_low, unhit_high, hit_low)
-        highest = reduction(reduced_low, base_high, unhit_low, hit_high)
-    else:
-        lowest = reduction(reduced_high, unhit_low, unhit_low, hit_low)
-        highest = reduction(reduced_low, unhit_high, unhit_high, hit_high)
-    measured = reduction(middle(ends['reduced']), middle(ends.get('reduced_unhit', ends['unhit'])),
-                         middle(ends['unhit']), middle(ends['hit']))
-    expected, band = float(model['expected_pct']), float(model['band'])
-    low, high = expected - band, expected + band
-    if low - 1e-9 <= lowest and highest <= high + 1e-9:
-        status, reason = 'ok', 'the whole bracketed reduction lies inside the band'
-    elif highest < low or lowest > high:
-        status, reason = 'alert', 'the whole bracketed reduction lies outside the band'
-    else:
-        status, reason = 'measured', 'the bracketed reduction crosses a band edge: effect present, not final'
-    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   detail={'ends_ms': ends, 'strikes_ms': strikes, 'reduction_range': [lowest, highest]},
-                   explanation=f'cast ends after the start in game time: unhit {ends["unhit"]}, hit {ends["hit"]}, '
-                               f'reduced {ends["reduced"]} ms (last casting, first idle poll); strikes at '
-                               f'{strikes} ms; the pushback falls by {lowest:.4g}% to {highest:.4g}% '
-                               f'({measured:.4g}% at the bracket middles) against the stated {expected:g}%, band '
-                               f'{low:g} to {high:g}: {reason}')
-
-
-def summon_lifetime_edge(run: Run, polls: list, start: float, rising: bool) -> tuple[float, float, float] | str:
-    before, after, most = None, None, 0.0
-    for time_label, count_label in polls:
-        at, count = run.values.get(time_label), run.values.get(count_label)
-        if at is None or count is None:
-            return missing_measurement(run, time_label if at is None else count_label)
-        most = max(most, count)
-        present = count >= 0.5
-        if after is None:
-            if present == rising:
-                after = at - start
-            else:
-                before = at - start
-        elif present != rising:
-            return f'the count turns back at {at - start:g} ms after its edge'
-    if before is None or after is None:
-        return 'the polls do not hold the edge'
-    return before, after, most
-
-
-def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    labels = [model['control'], model['released'], *model['starts'].values()]
-    values = [run.values.get(label) for label in labels]
-    if None in values:
-        return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
-    control, released = values[0], values[1]
-    start = run.values[model['starts']['treatment']]
-    spawn = summon_lifetime_edge(run, model['polls']['spawn'], start, True)
-    end = summon_lifetime_edge(run, model['polls']['end'], start, False)
-    for name, edge in (('spawn', spawn), ('end', end)):
-        if isinstance(edge, str):
-            return replace(base, status='unmeasured', explanation=f'{name}: {edge}')
-    if spawn[2] != 1 or end[2] != 1:
-        return replace(base, status='unmeasured', explanation=f'{spawn[2]:g} and {end[2]:g} creatures at most in the '
-                                                              f'windows, not one')
-    lowest, highest = end[0] - spawn[1], end[1] - spawn[0]
-    measured = (lowest + highest) / 2
-    expected, band = float(model['expected_ms']), float(model['band'])
-    low, high = expected - band, expected + band
-    if control != 0 or released != 0:
-        status, reason = 'alert', f'the control summoned {control:g} and {released:g} forcing modifiers remain'
-    elif low - 1e-9 <= lowest and highest <= high + 1e-9:
-        status, reason = 'ok', 'the whole bracketed lifetime lies inside the band'
-    elif highest < low or lowest > high:
-        status, reason = 'alert', 'the whole bracketed lifetime lies outside the band'
-    else:
-        status, reason = 'measured', 'the bracketed lifetime crosses a band edge: effect present, not final'
-    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
-                   detail={'spawn_ms': spawn[:2], 'end_ms': end[:2], 'lifetime_range': [lowest, highest]},
-                   explanation=f'no creature in the control; in game time after the treatment cast the creature '
-                               f'appears in ({spawn[0]:g}, {spawn[1]:g}] ms and is gone in ({end[0]:g}, {end[1]:g}] '
-                               f'ms: a lifetime of {lowest:g} to {highest:g} ms against the stated {expected:g} ms, '
-                               f'band {low:g} to {high:g}: {reason}')
-
-
-def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
-    judged, empty = [], 0
-    for run in runs:
-        start = run.values.get(model['starts']['treatment'])
-        counts = [run.values.get(count) for _, count in model['polls']['spawn']]
-        if start is not None and None not in counts and not any(count >= 0.5 for count in counts):
-            control, released = run.values.get(model['control']), run.values.get(model['released'])
-            if control != 0 or released != 0:
-                return replace(base, status='alert', explanation=f'{run.key}: the control summoned {control} and '
-                                                                 f'{released} forcing modifiers remain')
-            empty += 1
-            continue
-        judged.append(behaviour_summon_lifetime_verdict(base, run, model))
-    if not judged:
-        return replace(base, status='unmeasured', explanation=f'no part of {len(runs)} summoned the creature')
-    worst = next((verdict for verdict in judged if verdict.status != 'ok'), None)
-    lowest = min(verdict.detail['lifetime_range'][0] for verdict in judged if verdict.detail)\
-        if all(verdict.detail for verdict in judged) else None
-    highest = max(verdict.detail['lifetime_range'][1] for verdict in judged if verdict.detail)\
-        if all(verdict.detail for verdict in judged) else None
-    summary = (f'{len(judged)} of {len(runs)} parts summoned the creature ({empty} rolled no summon on their one '
-               f'tick); lifetimes {lowest:g} to {highest:g} ms' if lowest is not None else
-               f'{len(judged)} of {len(runs)} parts summoned the creature')
-    if worst is not None:
-        return replace(worst, explanation=f'{summary}; a part reads {worst.status}: {worst.explanation}')
-    first = judged[0]
-    return replace(first, low=first.low, high=first.high, measured=(lowest + highest) / 2,
-                   detail={**(first.detail or {}), 'lifetime_range': [lowest, highest], 'parts_summoned': len(judged),
-                           'parts': len(runs)},
-                   explanation=f'{summary}, against the stated {first.expected:g} ms, band {first.low:g} to '
-                               f'{first.high:g}: every summoned part lies inside the band')
-
-
-def behaviour_energize_range_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    readings = []
-    for total_label, count_label in model['marks']:
-        total, count = run.values.get(total_label), run.values.get(count_label)
-        if total is None or count is None:
-            return replace(base, explanation=missing_measurement(run, total_label if total is None else count_label))
-        readings.append((total, count))
-    amounts = [later[0] - earlier[0] for earlier, later in zip(readings, readings[1:]) if later[1] - earlier[1] == 1]
-    low, high, needed = float(model['low']), float(model['high']), int(model['minimum_events'])
-    if not amounts:
-        return replace(base, status='unmeasured', explanation='no interval held exactly one energize event')
-    lowest, highest = min(amounts), max(amounts)
-    outside = [amount for amount in amounts if not low <= amount <= high]
-    detail = {'events': len(amounts), 'min': lowest, 'max': highest}
-    text = (f'{len(amounts)} single energize events (intervals holding exactly one), amounts {lowest:g} to '
-            f'{highest:g} against the roll {low:g}..{high:g}')
-    if outside:
-        return replace(base, status='alert', measured=lowest, expected=low, low=low, high=high, detail=detail,
-                       explanation=f'{text}; {len(outside)} outside the roll')
-    if len(amounts) < needed:
-        return replace(base, status='unmeasured', measured=lowest, expected=low, low=low, high=high, detail=detail,
-                       explanation=f'{text}; at least {needed} single events are needed')
-    status = 'ok' if lowest == low and highest == high else 'alert'
-    return replace(base, status=status, measured=lowest, expected=low, low=low, high=high, detail=detail,
-                   explanation=f'{text}; both ends must be seen in {needed} or more events: '
-                               + ('both seen' if status == 'ok' else 'an end was not reached'))
-
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4540,6 +4216,9 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
     model = expectation.model
+    judge = kind_judge(expectation.check, (model or {}).get('kind'))
+    if judge:
+        return judge(base, run, model)
     if expectation.check == BEHAVIOUR_AMOUNT_MATCH:
         return behaviour_amount_match_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CAST_GATE:
@@ -4577,25 +4256,6 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
     if expectation.check == BEHAVIOUR_METRIC_DELTA:
         if model.get('kind') == 'stat_gain':
             return behaviour_stat_gain_verdict(base, run, model)
-        if model.get('kind') == 'strike_bursts':
-            return behaviour_strike_bursts_verdict(base, run, model)
-        if model.get('kind') == 'pushback_reduction':
-            return behaviour_pushback_reduction_verdict(base, run, model)
-        if model.get('kind') == 'summon_lifetime':
-            return behaviour_summon_lifetime_verdict(base, run, model)
-        if model.get('kind') == 'energize_range':
-            return behaviour_energize_range_verdict(base, run, model)
-        if model.get('kind') == 'aura_expiry':
-            return behaviour_aura_expiry_verdict(base, run, model)
-        if model.get('kind') == 'cast_period':
-            from cast_period import cast_period_verdict
-            return cast_period_verdict(base, run, model)
-        if model.get('kind') == 'pulse_targets':
-            from cast_period import pulse_targets_verdict
-            return pulse_targets_verdict(base, run, model)
-        if model.get('kind') == 'aura_window':
-            from cast_period import aura_window_verdict
-            return aura_window_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)
@@ -5382,7 +5042,7 @@ POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
 
 def pooled_parts(check: str, model: dict | None) -> bool:
     model = model or {}
-    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or model.get('kind') == 'summon_lifetime')
+    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or kind_pooled_judge(model.get('kind')) is not None)
 
 
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
@@ -5448,9 +5108,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        ' + '.join(entry['key'] for entry, _, _ in parts), expectation.spell_id, expectation.rank_id,
                        expectation.check)
         present = [run for _, run, _ in parts if run is not None]
+        kind_pooled = kind_pooled_judge((expectation.model or {}).get('kind'))
         pooled_judge = (behaviour_hit_ratio_verdict if expectation.check == BEHAVIOUR_HIT_RATIO
-                        else behaviour_summon_lifetime_pooled_verdict
-                        if (expectation.model or {}).get('kind') == 'summon_lifetime'
+                        else kind_pooled if kind_pooled
                         else behaviour_taken_rate_verdict)
         verdict = (pooled_judge(base, present, expectation.model)
                    if len(present) == expectation.model['parts']

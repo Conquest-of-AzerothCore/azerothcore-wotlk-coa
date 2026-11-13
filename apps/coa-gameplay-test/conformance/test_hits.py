@@ -17,7 +17,7 @@ from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Mod
                   reference_hit_model, reference_melee_model, rolled_values, scheduled_casts,
                   self_stack_multiplier, weapon_profile)
 from mitigation import REFERENCE_TARGET, MitigationModel, TargetProfile, expected_mitigation
-from profile import CLASSES_DIR, load_class_file
+from profile import load_fixture_class_file
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
 from values import (ALLY, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD, TARGET,
                     UNREADABLE)
@@ -122,7 +122,7 @@ def argent_blade_readout():
 
 
 def walking_stick():
-    return weapon_profile(load_class_file(TEMPLAR_CLASS_ID))
+    return weapon_profile(load_fixture_class_file(TEMPLAR_CLASS_ID))
 
 
 def tuning(applies_to='damage', aura=PVE_DAMAGE_DONE_PCT):
@@ -166,7 +166,7 @@ class WeaponProfileTest(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_templar_one_hand_weapon_is_a_one_handed_mace_on_the_maces_skill_line(self):
-        templar = load_class_file(TEMPLAR_CLASS_ID)
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
         self.assertEqual([weapon['item'] for weapon in templar['alternate_weapons']], [FROSTMANE_CLUB])
         club = templar['alternate_weapons'][0]
         self.assertEqual((club['subclass'], club['skill_line'], club['normalized_speed']),
@@ -389,7 +389,7 @@ class SelfStackMultiplierTest(unittest.TestCase):
 class HitScenarioTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.templar = load_class_file(TEMPLAR_CLASS_ID)
+        cls.templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
         cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}
         cls.argent_blade = cls.spells[ARGENT_BLADE]
 
@@ -1058,7 +1058,7 @@ def script_hit_entry(class_file, spell):
 class ScriptHitTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.templar = load_class_file(TEMPLAR_CLASS_ID)
+        cls.templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
 
     def scripted(self, spell):
         scenario, expectations = behaviour_scenario(self.templar, script_hit_entry(self.templar, spell))
@@ -1137,7 +1137,7 @@ class HitCastsFloorTest(unittest.TestCase):
         self.assertEqual(floored_casts({}, 572769, 2), 2)
 
     def test_a_floored_sacred_swing_mean_needs_forty_hits(self):
-        templar = load_class_file(TEMPLAR_CLASS_ID)
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
         spell = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}[SACRED_SWING]
         casts = floored_casts(templar, SACRED_SWING_MAX_RANK,
                               casts_needed(reference_hit_model(templar, SACRED_SWING_MAX_RANK)))
