@@ -33,6 +33,8 @@ void ApplyContracts(SpellInfo* info)
     for (auto const& coefficient : NecromancerCoefficients)
         if (coefficient.id == info->Id)
             info->Effects[coefficient.effect].BonusMultiplier = 0.0f;
+    if (info->Id == 504845)
+        info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_TAKE_DAMAGE;
     if (info->SpellFamilyName != 29)
         return;
     uint32 id = info->Id;
