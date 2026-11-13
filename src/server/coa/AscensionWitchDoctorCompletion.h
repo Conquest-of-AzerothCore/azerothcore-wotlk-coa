@@ -95,6 +95,8 @@ enum DoctorSpells : uint32
     TrueSpiritReady = 681233,
     SpiritHunting = 707504,
     Traditionalist = 503707,
+    JujuInjection = 503608,
+    JujuInjectionTwo = 503609,
     SpiritWarden = 503774,
     SpiritWardenBuff = 503775,
     Hexplosion = 704495,
