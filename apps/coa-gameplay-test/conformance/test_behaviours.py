@@ -10644,7 +10644,7 @@ class HumanoidTargetEntryTests(unittest.TestCase):
     def test_a_fixed_count_dummy_entry_replaces_every_dummy(self):
         scenario, _ = behaviour_scenario(load_class_file(23), self.entry('targets'))
         self.assertEqual({creature['entry'] for creature in scenario['creatures']}, {6})
-        self.assertEqual(len(scenario['creatures']), 7)
+        self.assertEqual(len(scenario['creatures']), 8)
         entry = {key: value for key, value in self.entry('targets').items() if key != 'dummy_entry'}
         plain, _ = behaviour_scenario(load_class_file(23), entry)
         self.assertEqual({creature['entry'] for creature in plain['creatures']}, {36})
@@ -10659,7 +10659,7 @@ class MassGraveToolTests(unittest.TestCase):
     def test_count_primary_judges_every_dummy_inside_the_radius(self):
         _, [expectation] = behaviour_scenario(load_class_file(23), self.entry('targets'))
         self.assertEqual(len(expectation.model['dummy_labels']), 7)
-        self.assertIn('dummy', expectation.model['dummy_labels'][0])
+        self.assertIn('primary', expectation.model['dummy_labels'][0])
         entry = {key: value for key, value in self.entry('targets').items() if key != 'count_primary'}
         _, [plain] = behaviour_scenario(load_class_file(23), entry)
         self.assertEqual(len(plain.model['dummy_labels']), 6)
