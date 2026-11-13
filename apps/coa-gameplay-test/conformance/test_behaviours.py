@@ -10457,5 +10457,33 @@ class CasterHealthAndSelectedPrimaryTests(unittest.TestCase):
         self.assertFalse(any(step.get('action') == 'select' for step in scenario['steps']))
 
 
+
+class TargetCastTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 801739 and entry.get('label_suffix') == 'interrupt')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_casts_right_before_the_trigger(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry())
+        steps = scenario['steps']
+        trigger = next(index for index, step in enumerate(steps)
+                       if step.get('action') == 'cast' and step.get('spell') == 801739)
+        self.assertEqual(steps[trigger - 2], {'action': 'cast', 'actor': 'dummy', 'spell': 12051})
+        self.assertEqual(steps[trigger - 1]['action'], 'wait')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_dummy_cast_needs_the_dummy_as_target(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.entry(), 'target': 'caster'})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_dummy_casts_keeps_its_steps(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'target_casts_before'}
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        self.assertFalse(any(step.get('actor') == 'dummy' and step.get('action') == 'cast'
+                             for step in scenario['steps']))
+
+
 if __name__ == '__main__':
     unittest.main()
