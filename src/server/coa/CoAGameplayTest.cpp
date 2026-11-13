@@ -3377,6 +3377,11 @@ private:
             Require(unit->IsPlayer(), "Resting state needs a player");
             return unit->ToPlayer()->HasPlayerFlag(PLAYER_FLAGS_RESTING);
         }
+        if (metric == "free_for_all_pvp")
+        {
+            Require(unit->IsPlayer(), "Free-for-all PvP state needs a player");
+            return unit->IsFFAPvP();
+        }
         if (metric == "creature_type")
             return unit->GetCreatureType();
         if (metric == "display_id")

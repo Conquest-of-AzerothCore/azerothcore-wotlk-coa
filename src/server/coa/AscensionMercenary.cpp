@@ -181,6 +181,17 @@ void RecheckAfterTeamBattleChange(Player* player)
     }, TEAM_BATTLE_RECHECK_DELAY);
 }
 
+void RestoreFreeForAllOnceAreaSettles(Player* player)
+{
+    ObjectGuid const guid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([guid]()
+    {
+        Player* player = ObjectAccessor::FindPlayer(guid);
+        if (player && player->IsInWorld() && ActiveMercenary(player))
+            SetMercenaryFreeForAll(player);
+    }, 0ms);
+}
+
 class spell_ascension_mercenary_aura : public AuraScript
 {
     PrepareAuraScript(spell_ascension_mercenary_aura);
@@ -299,8 +310,14 @@ public:
     ascension_mercenary_player()
         : PlayerScript("ascension_mercenary_player", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEVEL_CHANGED,
                                                       PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_FFA_PVP_STATE_UPDATE,
-                                                      PLAYERHOOK_ON_MAP_CHANGED})
+                                                      PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_UPDATE_AREA})
     {
+    }
+
+    void OnPlayerUpdateArea(Player* player, uint32, uint32) override
+    {
+        if (player->HasAura(SPELL_MERCENARY))
+            RestoreFreeForAllOnceAreaSettles(player);
     }
 
     void OnPlayerLogin(Player* player) override { LearnSpells(player); }
