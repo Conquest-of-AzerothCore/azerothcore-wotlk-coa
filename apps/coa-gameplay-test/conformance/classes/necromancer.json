@@ -2171,7 +2171,15 @@
         "spell": 573233,
         "caster": "caster"
       },
-      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Crypt Plague first: 573233 on the dummy 1000 ms after the Command with 705754 learned, none without."
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Crypt Plague first: 573233 on the dummy 1000 ms after the Command with 705754 learned, none without. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 705754,
@@ -2192,7 +2200,15 @@
         "spell": 573233,
         "caster": "caster"
       },
-      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Contrast: the same Command at the dummy without a disease applies no 573233, with or without 705754."
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Contrast: the same Command at the dummy without a disease applies no 573233, with or without 705754. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 705754,
@@ -2217,7 +2233,15 @@
         "spell": 573233,
         "caster": "caster"
       },
-      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. One Command after Crypt Plague: 1 stack."
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. One Command after Crypt Plague: 1 stack. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 705754,
@@ -2244,7 +2268,15 @@
         "spell": 573233,
         "caster": "caster"
       },
-      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Three Commands after Crypt Plague: 2 stacks, the cap (3 if uncapped)."
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Three Commands after Crypt Plague: 2 stacks, the cap (3 if uncapped). 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 705754,
@@ -2269,7 +2301,15 @@
         "spell": 573233,
         "caster": "caster"
       },
-      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. 573233 still on the dummy 9500 ms after the Command (a shorter duration would read 0)."
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. 573233 still on the dummy 9500 ms after the Command (a shorter duration would read 0). 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 705754,
@@ -2294,7 +2334,15 @@
         "spell": 573233,
         "caster": "caster"
       },
-      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. 573233 gone 10500 ms after the Command (a longer duration would read 1); the held entry is the other bracket."
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. 573233 gone 10500 ms after the Command (a longer duration would read 1); the held entry is the other bracket. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
     },
     {
       "spell": 705754,
