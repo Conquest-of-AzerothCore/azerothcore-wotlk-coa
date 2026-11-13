@@ -108,7 +108,8 @@
     "labels": [
       "300236 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/300236.md."
   },
   {
     "spell": 300240,
@@ -304,7 +305,8 @@
     "labels": [
       "300960 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/300960.md."
   },
   {
     "spell": 300965,
@@ -1367,7 +1369,8 @@
     "labels": [
       "504866 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/504866.md."
   },
   {
     "spell": 524687,
@@ -1730,7 +1733,8 @@
       "560730 spell_duration 560729 #1",
       "560730 effect_value 561319e0 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560730.md."
   },
   {
     "spell": 560798,
@@ -1749,7 +1753,8 @@
       "560800 aura_amplitude_ms #0",
       "560800 effect_value 500585e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560800.md."
   },
   {
     "spell": 560848,
@@ -1865,7 +1870,8 @@
     "labels": [
       "561164 effect_value 805016e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/561164.md."
   },
   {
     "spell": 561215,
@@ -2028,7 +2034,8 @@
       "574138 effect_value 573131e0 #0",
       "574138 effect_value e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/574138.md."
   },
   {
     "spell": 638403,
@@ -2224,7 +2231,8 @@
     "labels": [
       "704528 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/704528.md. Note: Crypt Swarm's energize 800344 Effect[1] is BasePoints 29 DieSides 51 (30..80 per tick, random), so the +20 per tick needs a per-event or mean-difference check, not an exact total."
   },
   {
     "spell": 704669,
@@ -2564,7 +2572,8 @@
       "704724 effect_value #0",
       "704724 spell_duration 572777 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/704724.md."
   },
   {
     "spell": 704729,
@@ -2643,7 +2652,8 @@
       "705750 effect_value 705751e0 #1",
       "705750 spell_duration 705751 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/705750.md."
   },
   {
     "spell": 705752,
@@ -2856,7 +2866,8 @@
     "labels": [
       "707113 effect_value e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707113.md."
   },
   {
     "spell": 707175,
@@ -2915,7 +2926,8 @@
       "707562 spell_duration 712434 #1",
       "707562 max_stacks 712434 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
   },
   {
     "spell": 707588,
@@ -2931,7 +2943,8 @@
     "labels": [
       "707627 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707627.md."
   },
   {
     "spell": 707670,
@@ -3327,9 +3340,10 @@
     "spell": 802990,
     "clause": "Increases the duration of your diseases by $s1%.",
     "labels": [
-      "802990 effect_value e0 #0"
+      "802990 behaviour_metric_delta crypt_plague"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without Necrosis): Crypt Plague 570131 9888 ms left 100 ms after the cast without, 12391 with (10000 x 1.25 = 12500, both read about 110 ms after the cast; difference 2503). One disease sampled (mask word 1 0x800000); word 2 0x420 names other diseases, not read here. G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 802990; combat logs: passive, nothing to see; MCP not queried (unavailable)."
   },
   {
     "spell": 803291,
@@ -3836,7 +3850,8 @@
     "labels": [
       "805649 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/805649.md."
   },
   {
     "spell": 805674,
@@ -5687,7 +5702,8 @@
     "labels": [
       "807941 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/807941.md."
   },
   {
     "spell": 503740,
@@ -5800,7 +5816,8 @@
     "labels": [
       "560730 effect_value 561319e0 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560730.md."
   },
   {
     "spell": 572023,
@@ -5844,7 +5861,8 @@
       "707562 effect_value 712434e0 #0",
       "707562 spell_duration 712434 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
   },
   {
     "spell": 707562,
@@ -5852,13 +5870,15 @@
     "labels": [
       "707562 max_stacks 712434 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
   },
   {
     "spell": 707562,
     "clause": "Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
   },
   {
     "spell": 805038,

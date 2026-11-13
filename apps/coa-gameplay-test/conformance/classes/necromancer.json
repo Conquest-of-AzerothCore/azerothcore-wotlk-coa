@@ -1268,6 +1268,29 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 802990,
+      "name": "Necrosis (Crypt Plague duration)",
+      "kind": "metric_delta",
+      "variant": "crypt_plague",
+      "label_suffix": "crypt_plague",
+      "quote": "Increases the duration of your diseases by $s1%.",
+      "expected": 12500,
+      "before_expected": 10000,
+      "tolerance": 300,
+      "gate_spell": 802990,
+      "trigger_spell": 570131,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "wait_ms": 100,
+      "expire_ms": 11000,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 570131,
+        "caster": "caster"
+      },
+      "observe_source": "Necrosis 802990 Effect[0] aura 108 SPELLMOD_DURATION (MiscValue 1) +25 ($s1, BasePoints 24 + 1) on mask (0, 0x800000, 0x420); Crypt Plague 570131 (instant, DurationIndex 1, 10000 ms) carries word 1 0x800000. Crypt Plague cast at the dummy, its remaining duration read 100 ms after: about 10000 without Necrosis (control), 10000 x 1.25 = 12500 with it learned between the phases; the first plague expires in the 11000 ms gap."
+    },
+    {
       "spell": 707445,
       "name": "Runic Animation (Command: Hook cooldown)",
       "kind": "metric_delta",
