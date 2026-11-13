@@ -144,7 +144,10 @@ void ApplyContracts(SpellInfo* info)
         dummy(1);
     }
     if (id == 706032)
-        info->Effects[1].Effect = 0;
+    {
+        aura(1, SPELL_AURA_ADD_PCT_MODIFIER, -100, SPELLMOD_COST);
+        info->Effects[1].SpellClassMask = info->Effects[0].SpellClassMask;
+    }
     if (id == 681321)
         info->Effects[0].Effect = 0;
     if (id == 706038 || id == 804984 || id == 503852 || id == 504704 || id == 574353 || id == 706015)
