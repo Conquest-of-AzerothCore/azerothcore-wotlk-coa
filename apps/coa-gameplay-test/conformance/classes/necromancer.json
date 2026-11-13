@@ -8843,6 +8843,14 @@
       "observe_source": "Precondition read for drain_share: the maximum mana of Mylentha Riverbend 11795 at level 60 (basemana 2434 x ManaModifier 1 from the world DB rows), before and after the same Command as drain_share."
     },
     {
+      "spell": 504861, "name": "Raise: Banshee (channel damage and mana drain)", "kind": "metric_delta", "variant": "channel",
+      "label_suffix": "channel", "quote": "It will channel on your target, dealing damage and draining their mana over time.", "expected": 3, "after_at_least": 3, "before_expected": 0,
+      "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 9000, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_count", "fields": {"spell": 572212, "caster_entry": 500650, "target": "dummy"},
+      "observe_source": "Banshee Drain 572211 (channel, DurationIndex 29 = 12000 ms): Effect[0] aura 227 every 2000 ms triggers 572212 (Effect 62 SPELL_EFFECT_POWER_BURN, the damage equals the mana burned), Effect[1] aura 64 PERIODIC_MANA_LEECH 35 every 2000 ms; the Banshee 500650 casts it at its victim (npc_ascension_necromancer UpdateAI event 2, AttackSpell). Target: Magus Zabraxis 16829 (a mana user, 7302 maximum mana) after the Command. Over 9000 ms: at least 3 572212 hits (trace 20261113-113705: hits at about 2.1, 3.9, 5.7 and 7.8 s, the target's mana falling 70 per tick: 35 leech + 35 burn). Control: no Banshee, no hit. An enemy player target receives the channel aura for its full duration but no tick changes its mana and no 572212 hit lands (defect lead, fix note F1 C2)."
+    },
+    {
       "spell": 504861, "name": "Raise: Banshee (drain cap: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_target",
       "label_suffix": "drain_cap_target", "quote": "of your target's mana", "expected": 7302, "before_expected": 7302,
 "trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
