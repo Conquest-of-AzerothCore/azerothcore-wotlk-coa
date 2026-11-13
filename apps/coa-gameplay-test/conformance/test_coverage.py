@@ -512,6 +512,13 @@ class EvidenceStatusTest(unittest.TestCase):
                 with mock.patch.dict(METRIC_EVIDENCE, {metric: READBACK}):
                     self.assertEqual(evidence_of(clauses, [read])[0], [DATA])
 
+    def test_an_item_count_is_a_state_read_where_the_clause_promises_a_creation(self):
+        label = '1 behaviour_metric_delta count'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'item_count', contrast=LEARNED_CONTRAST)
+        self.assertEqual(METRIC_EVIDENCE['item_count'], STATE)
+        self.assertEqual(evidence_of([claim('Create $s1 Bone Reliquaries', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Shares a cooldown with similar effects.', label)], [read])[0], [DATA])
+
     def test_a_cast_state_is_a_state_read_where_the_clause_promises_a_cast(self):
         label = '1 behaviour_metric_delta instant'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
@@ -1154,9 +1161,9 @@ class NoStackStatePromiseTest(unittest.TestCase):
 
 
 class OwnedHealthAndItemCountTest(unittest.TestCase):
-    def test_a_minion_health_and_a_created_item_count_are_events(self):
+    def test_a_minion_health_is_an_event_and_a_created_item_count_a_promised_state(self):
         self.assertEqual(METRIC_EVIDENCE['owned_creature_health'], EVENT)
-        self.assertEqual(METRIC_EVIDENCE['item_count'], EVENT)
+        self.assertEqual(METRIC_EVIDENCE['item_count'], STATE)
 
 
 class SpellHasteAndNoStackPromiseTest(unittest.TestCase):

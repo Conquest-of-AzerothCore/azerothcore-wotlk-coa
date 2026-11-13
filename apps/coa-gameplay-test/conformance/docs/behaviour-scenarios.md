@@ -1764,3 +1764,8 @@ Vermin 6.
 `metric_delta` takes `phase_power` `[power, before, after]`, set right before each phase's cast (Mass Grave 803741's
 cast state at 500 and 520 Runic Power). `fixed_count` takes `count_primary`, which judges the nearest dummy with the
 others, for a spell centred on the caster that picks its targets at random.
+
+### Items before a metric-delta cast (ADR 0405)
+
+`metric_delta` takes `items` (`[item, count]` pairs), added to the caster's bags right before every trigger cast: Create
+Bone Reliquary 803771's reagent 37201. `item_count` is a state read promised by a clause that names a creation.

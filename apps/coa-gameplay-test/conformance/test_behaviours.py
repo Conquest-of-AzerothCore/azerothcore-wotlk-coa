@@ -10694,5 +10694,24 @@ class ScriptHitMultiplierTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**self.entry('one_disease'), 'multiplier': 0})
 
 
+class MetricDeltaItemTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 803771 and entry.get('label_suffix') == 'count')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_items_are_added_before_each_cast(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), self.entry())
+        steps = scenario['steps']
+        adds = [index for index, step in enumerate(steps) if step.get('action') == 'add_item'
+                and step.get('item') == 37201]
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        self.assertEqual(len(adds), len(casts))
+        self.assertTrue(all(add < cast for add, cast in zip(adds, casts)))
+        plain, _ = behaviour_scenario(load_class_file(23), {key: value for key, value in self.entry().items()
+                                                               if key != 'items'})
+        self.assertFalse(any(step.get('item') == 37201 for step in plain['steps']))
+
+
 if __name__ == '__main__':
     unittest.main()

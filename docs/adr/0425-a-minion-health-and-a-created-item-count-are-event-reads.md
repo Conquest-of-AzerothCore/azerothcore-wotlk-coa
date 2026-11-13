@@ -14,6 +14,9 @@ them, so any verdict on them stopped coverage with an EvidenceError.
 Both are event reads, as `health` (ADR 0381) is: the value an action leaves on a unit or in the bags, read after the
 action against a control without it.
 
+On the merged branch `item_count` is a state read promised by a clause that names a creation (ADR 0405,
+B3 side a); Create Frozen Reliquary 803777's clause names one. `owned_creature_health` stays an event read.
+
 ## Consequences
 
 `OwnedHealthAndItemCountTest` (test_coverage.py) holds the two rows.
