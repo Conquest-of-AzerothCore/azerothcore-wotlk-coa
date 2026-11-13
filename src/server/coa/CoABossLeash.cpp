@@ -37,7 +37,6 @@ namespace
     constexpr std::array<float, 2> RoomRayHeights = { 2.0f, 5.0f };
     constexpr Milliseconds ResetHidden = 10s;
     constexpr char const* ResetText = "%s has lost interest in fighting with you.";
-    constexpr char const* ResetNotice = "{} has lost interest in fighting with you.";
 
     struct Leash
     {
@@ -159,10 +158,9 @@ namespace
         creature->GetMap()->DoForAllPlayers([creature](Player* player)
         {
             WorldPacket data;
-            ChatHandler::BuildChatPacket(data, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, creature, player, ResetText, 0, "",
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, creature, player, ResetText, 0, "",
                 player->GetSession()->GetSessionDbLocaleIndex());
             player->SendDirectMessage(&data);
-            ChatHandler(player->GetSession()).SendNotification(Acore::StringFormat(ResetNotice, creature->GetName()));
         });
     }
 
