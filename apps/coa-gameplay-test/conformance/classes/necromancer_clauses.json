@@ -1623,7 +1623,8 @@
     "labels": [
       "560596 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: the bounce's reduced value needs the secondary dummy's hit amount against the primary's; fixed_count reads counts only."
   },
   {
     "spell": 560613,
@@ -1727,7 +1728,8 @@
       "560848 effect_value 801728e1 #0",
       "560848 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 801728 6629 hits, stacks to 3, 801724 median 2.3 s. Open, route pending: Factor() multiplies the caster's Frost damage by 1 + 0.05 x min(3, stacks of 801728) on a target carrying it with 560848 known (AscensionNecromancerContracts.cpp:432-434); a hit_ratio with Soulfreeze 801728 cast before each Frost hit would read it; not built tonight."
   },
   {
     "spell": 560848,
@@ -1735,7 +1737,8 @@
     "labels": [
       "560848 max_stacks 801728 #2"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 801728 6629 hits, stacks to 3, 801724 median 2.3 s. Open, route pending: Factor() multiplies the caster's Frost damage by 1 + 0.05 x min(3, stacks of 801728) on a target carrying it with 560848 known (AscensionNecromancerContracts.cpp:432-434); a hit_ratio with Soulfreeze 801728 cast before each Frost hit would read it; not built tonight."
   },
   {
     "spell": 560851,
@@ -2675,7 +2678,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 10 times'; coa-obtainable: in the live capture; logs: 706949 stacks to 10, median 10.9 s."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 10 times'; coa-obtainable: in the live capture; logs: 706949 stacks to 10, median 10.9 s. Part 'increases the damage the target takes from your Skeletal Warriors by $706949s1%': open, route pending: Mark() scales a Skeletal Warrior 50065/51065 melee hit (AscensionNecromancerContracts.cpp:449-455); a minion magnitude entry with and without the mark would read it."
   },
   {
     "spell": 706948,
@@ -3046,13 +3049,15 @@
     "spell": 801938,
     "clause": "Reinvigorate your diseases, refreshing all diseases on the target enemy and copying them, preserving their power and duration.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Part 'refreshing all diseases on the target enemy' measured: Crypt Plague 570131 4997 -> 9893 ms remaining after Virulency (801938 behaviour_metric_delta refresh, pairs b4p2 and final). Open, route pending: 'copying them, preserving their power and duration' (the snapshot in State(player).diseases, AscensionNecromancerAbilities.cpp:53-100) is read only through the Infest cast of the next clause."
   },
   {
     "spell": 801938,
     "clause": "You may use this abilty again within 10 sec to Infest another target, applying the copied diseases.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: the second cast within 10 s (803782 Infestation charges) applies the snapshot to another target; needs a second dummy in a metric_delta scenario."
   },
   {
     "spell": 503640,
@@ -3516,7 +3521,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85. Part 'striking up to $801411i nearby enemies': five of five dummies within 3 yd struck, the one at 8 yd not (805032 bonestorm_targets behaviour_fixed_count, uncapped); the cap of five and 'every $801412t1 sec for $801412d' are not judged (data labels only)."
   },
   {
     "spell": 805038,
@@ -4479,13 +4484,15 @@
       "533239 effect_value e0 #0",
       "533239 effect_radius 533240e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 533240 2660 hits, median 730, 1 to 24 targets per cast. Open, route pending: no scenario places a corpse (a creature killed in the scenario); CorpseExplosion() explodes non-Mechanical, non-Elemental corpses within 15 yd (AscensionNecromancerAbilities.cpp:18-38)."
   },
   {
     "spell": 533239,
     "clause": "Does not affect mechanical or elemental corpses.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: as the previous clause; the contrast would be a Mechanical corpse (Harvest Golem 36) beside a Humanoid one."
   },
   {
     "spell": 562213,
