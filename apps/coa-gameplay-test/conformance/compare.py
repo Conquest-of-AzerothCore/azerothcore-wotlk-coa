@@ -31,7 +31,7 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         HIT_RATIO_ARMS, LEARNED_CONTRAST, SPELL_FAILED_NOT_READY, STAT_GAIN_ATTRIBUTION,
                         STAT_GAIN_RETURN, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
                         strongest_percent)
-from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
+from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
                    bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
@@ -3191,6 +3191,238 @@ def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Ver
                    high=float(high), explanation=explanation)
 
 
+def pushback_end_bracket(run: Run, phase: dict) -> tuple[float, float] | str:
+    start = run.values.get(phase['start'])
+    if start is None:
+        return missing_measurement(run, phase['start'])
+    last_casting, first_idle = None, None
+    for time_label, casting_label in phase['polls']:
+        at, casting = run.values.get(time_label), run.values.get(casting_label)
+        if at is None or casting is None:
+            return missing_measurement(run, time_label if at is None else casting_label)
+        if casting >= 0.5:
+            if first_idle is not None:
+                return f'the caster casts again at {at - start:g} ms after an idle poll'
+            last_casting = at
+        elif first_idle is None:
+            first_idle = at
+    if last_casting is None or first_idle is None:
+        return 'the polls do not hold both the cast and its end'
+    return last_casting - start, first_idle - start
+
+
+def pushback_strike_offsets(run: Run, phase: dict) -> tuple[float, float] | str:
+    labels = [phase['start'], phase['strike'], phase['struck'], *phase['strikes']]
+    values = [run.values.get(label) for label in labels]
+    if None in values:
+        return missing_measurement(run, labels[values.index(None)])
+    start, strike, struck, before, after = values
+    if after - before != 1:
+        return f'{after - before:g} strikes landed during the cast, not 1'
+    return strike - start, struck - start
+
+
+def behaviour_pushback_samples_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    means, spreads, offsets, widths, skipped = {}, {}, [], [], []
+    for kind, samples in model['samples'].items():
+        middles = []
+        for index, phase in enumerate(samples, 1):
+            if 'strike' in phase:
+                found = pushback_strike_offsets(run, phase)
+                if isinstance(found, str):
+                    skipped.append(f'{kind} {index}: {found}')
+                    continue
+            bracket = pushback_end_bracket(run, phase)
+            if isinstance(bracket, str):
+                return replace(base, status='unmeasured', explanation=f'{kind} {index}: {bracket}')
+            middles.append((bracket[0] + bracket[1]) / 2)
+            widths.append(bracket[1] - bracket[0])
+            if 'strike' in phase:
+                offsets += list(found)
+        if len(middles) < max(2, len(samples) // 2):
+            return replace(base, status='unmeasured', explanation=f'{kind}: {len(middles)} of {len(samples)} casts '
+                                                                  f'valid ({"; ".join(skipped)})')
+        means[kind] = sum(middles) / len(middles)
+        spreads[kind] = (sum((middle - means[kind]) ** 2 for middle in middles) / (len(middles) - 1)
+                         / len(middles))
+    if max(offsets) - min(offsets) > max(widths):
+        return replace(base, status='unmeasured', explanation=f'invalid: the strikes land {min(offsets):g} to '
+                                                              f'{max(offsets):g} ms into their casts, more than the '
+                                                              f'poll bracket {max(widths):g} ms apart')
+    base_kind = 'reduced_unhit' if 'reduced_unhit' in means else 'unhit'
+    full = means['hit'] - means['unhit']
+    if full <= 0:
+        return replace(base, status='alert', explanation=f'the mean hit cast ends {means["hit"]:g} ms, no later '
+                                                         f'than the unhit cast {means["unhit"]:g} ms')
+    kept = means['reduced'] - means[base_kind]
+    measured = (1 - kept / full) * 100
+    variance = (spreads['reduced'] + spreads[base_kind]) / full ** 2 + \
+        (kept / full ** 2) ** 2 * (spreads['hit'] + spreads['unhit'])
+    half = 2.576 * math.sqrt(variance) * 100
+    expected, band = float(model['expected_pct']), float(model['band'])
+    low, high = expected - band, expected + band
+    if low - 1e-9 <= measured - half and measured + half <= high + 1e-9:
+        status, reason = 'ok', 'the 99% interval lies inside the band'
+    elif measured + half < low or measured - half > high:
+        status, reason = 'alert', 'the 99% interval lies outside the band'
+    else:
+        status, reason = 'measured', 'the 99% interval crosses a band edge: effect present, not final'
+    count = len(next(iter(model['samples'].values())))
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   detail={'mean_ends_ms': means, 'interval': [measured - half, measured + half]},
+                   explanation=f'{count} casts of each kind; mean cast ends (bracket middles) after the start in '
+                               f'game time: {", ".join(f"{kind} {value:.2f}" for kind, value in means.items())} ms; '
+                               f'strikes {min(offsets):g} to {max(offsets):g} ms into their casts; the pushback falls '
+                               f'by {measured:.4g}% (99% interval {measured - half:.4g} to {measured + half:.4g}) '
+                               f'against the stated {expected:g}%, band {low:g} to {high:g}: {reason}'
+                               + (f'; invalid hit casts left out: {"; ".join(skipped)}' if skipped else ''))
+
+
+def behaviour_pushback_reduction_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    if model.get('samples'):
+        return behaviour_pushback_samples_verdict(base, run, model)
+    ends, strikes = {}, {}
+    for name, phase in model['phases'].items():
+        bracket = pushback_end_bracket(run, phase)
+        if isinstance(bracket, str):
+            return replace(base, status='unmeasured', explanation=f'{name}: {bracket}')
+        ends[name] = bracket
+        if 'strike' in phase:
+            labels = [phase['start'], phase['strike'], phase['struck'], *phase['strikes']]
+            values = [run.values.get(label) for label in labels]
+            if None in values:
+                return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
+            start, strike, struck, before, after = values
+            if after - before != 1:
+                return replace(base, status='unmeasured',
+                               explanation=f'{name}: {after - before:g} strikes landed during the cast, not 1')
+            strikes[name] = (strike - start, struck - start)
+    width = max(high - low for low, high in ends.values())
+    offsets = [offset for pair in strikes.values() for offset in pair]
+    if max(offsets) - min(offsets) > width:
+        return replace(base, status='unmeasured',
+                       explanation=f'invalid: the strikes land {strikes} ms into their casts, more than the poll '
+                                   f'bracket {width:g} ms apart')
+    (unhit_low, unhit_high), (hit_low, hit_high), (reduced_low, reduced_high) = (
+        ends['unhit'], ends['hit'], ends['reduced'])
+    base_low, base_high = ends.get('reduced_unhit', ends['unhit'])
+    middle = lambda bracket: (bracket[0] + bracket[1]) / 2
+    if hit_low <= unhit_high:
+        return replace(base, status='alert', explanation=f'the hit cast ends {ends["hit"]} ms, no later than the '
+                                                         f'unhit cast {ends["unhit"]} ms: no pushback to reduce')
+    reduction = lambda reduced, reduced_base, unhit, hit: (1 - (reduced - reduced_base) / (hit - unhit)) * 100
+    if 'reduced_unhit' in ends:
+        lowest = reduction(reduced_high, base_low, unhit_high, hit_low)
+        highest = reduction(reduced_low, base_high, unhit_low, hit_high)
+    else:
+        lowest = reduction(reduced_high, unhit_low, unhit_low, hit_low)
+        highest = reduction(reduced_low, unhit_high, unhit_high, hit_high)
+    measured = reduction(middle(ends['reduced']), middle(ends.get('reduced_unhit', ends['unhit'])),
+                         middle(ends['unhit']), middle(ends['hit']))
+    expected, band = float(model['expected_pct']), float(model['band'])
+    low, high = expected - band, expected + band
+    if low - 1e-9 <= lowest and highest <= high + 1e-9:
+        status, reason = 'ok', 'the whole bracketed reduction lies inside the band'
+    elif highest < low or lowest > high:
+        status, reason = 'alert', 'the whole bracketed reduction lies outside the band'
+    else:
+        status, reason = 'measured', 'the bracketed reduction crosses a band edge: effect present, not final'
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   detail={'ends_ms': ends, 'strikes_ms': strikes, 'reduction_range': [lowest, highest]},
+                   explanation=f'cast ends after the start in game time: unhit {ends["unhit"]}, hit {ends["hit"]}, '
+                               f'reduced {ends["reduced"]} ms (last casting, first idle poll); strikes at '
+                               f'{strikes} ms; the pushback falls by {lowest:.4g}% to {highest:.4g}% '
+                               f'({measured:.4g}% at the bracket middles) against the stated {expected:g}%, band '
+                               f'{low:g} to {high:g}: {reason}')
+
+
+def summon_lifetime_edge(run: Run, polls: list, start: float, rising: bool) -> tuple[float, float, float] | str:
+    before, after, most = None, None, 0.0
+    for time_label, count_label in polls:
+        at, count = run.values.get(time_label), run.values.get(count_label)
+        if at is None or count is None:
+            return missing_measurement(run, time_label if at is None else count_label)
+        most = max(most, count)
+        present = count >= 0.5
+        if after is None:
+            if present == rising:
+                after = at - start
+            else:
+                before = at - start
+        elif present != rising:
+            return f'the count turns back at {at - start:g} ms after its edge'
+    if before is None or after is None:
+        return 'the polls do not hold the edge'
+    return before, after, most
+
+
+def behaviour_summon_lifetime_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    labels = [model['control'], model['released'], *model['starts'].values()]
+    values = [run.values.get(label) for label in labels]
+    if None in values:
+        return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
+    control, released = values[0], values[1]
+    start = run.values[model['starts']['treatment']]
+    spawn = summon_lifetime_edge(run, model['polls']['spawn'], start, True)
+    end = summon_lifetime_edge(run, model['polls']['end'], start, False)
+    for name, edge in (('spawn', spawn), ('end', end)):
+        if isinstance(edge, str):
+            return replace(base, status='unmeasured', explanation=f'{name}: {edge}')
+    if spawn[2] != 1 or end[2] != 1:
+        return replace(base, status='unmeasured', explanation=f'{spawn[2]:g} and {end[2]:g} creatures at most in the '
+                                                              f'windows, not one')
+    lowest, highest = end[0] - spawn[1], end[1] - spawn[0]
+    measured = (lowest + highest) / 2
+    expected, band = float(model['expected_ms']), float(model['band'])
+    low, high = expected - band, expected + band
+    if control != 0 or released != 0:
+        status, reason = 'alert', f'the control summoned {control:g} and {released:g} forcing modifiers remain'
+    elif low - 1e-9 <= lowest and highest <= high + 1e-9:
+        status, reason = 'ok', 'the whole bracketed lifetime lies inside the band'
+    elif highest < low or lowest > high:
+        status, reason = 'alert', 'the whole bracketed lifetime lies outside the band'
+    else:
+        status, reason = 'measured', 'the bracketed lifetime crosses a band edge: effect present, not final'
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   detail={'spawn_ms': spawn[:2], 'end_ms': end[:2], 'lifetime_range': [lowest, highest]},
+                   explanation=f'no creature in the control; in game time after the treatment cast the creature '
+                               f'appears in ({spawn[0]:g}, {spawn[1]:g}] ms and is gone in ({end[0]:g}, {end[1]:g}] '
+                               f'ms: a lifetime of {lowest:g} to {highest:g} ms against the stated {expected:g} ms, '
+                               f'band {low:g} to {high:g}: {reason}')
+
+
+def behaviour_summon_lifetime_pooled_verdict(base: Verdict, runs: list[Run], model: dict) -> Verdict:
+    judged, empty = [], 0
+    for run in runs:
+        start = run.values.get(model['starts']['treatment'])
+        counts = [run.values.get(count) for _, count in model['polls']['spawn']]
+        if start is not None and None not in counts and not any(count >= 0.5 for count in counts):
+            control, released = run.values.get(model['control']), run.values.get(model['released'])
+            if control != 0 or released != 0:
+                return replace(base, status='alert', explanation=f'{run.key}: the control summoned {control} and '
+                                                                 f'{released} forcing modifiers remain')
+            empty += 1
+            continue
+        judged.append(behaviour_summon_lifetime_verdict(base, run, model))
+    if not judged:
+        return replace(base, status='unmeasured', explanation=f'no part of {len(runs)} summoned the creature')
+    worst = next((verdict for verdict in judged if verdict.status != 'ok'), None)
+    lowest = min(verdict.detail['lifetime_range'][0] for verdict in judged if verdict.detail)\
+        if all(verdict.detail for verdict in judged) else None
+    highest = max(verdict.detail['lifetime_range'][1] for verdict in judged if verdict.detail)\
+        if all(verdict.detail for verdict in judged) else None
+    summary = (f'{len(judged)} of {len(runs)} parts summoned the creature ({empty} rolled no summon on their one '
+               f'tick); lifetimes {lowest:g} to {highest:g} ms' if lowest is not None else
+               f'{len(judged)} of {len(runs)} parts summoned the creature')
+    if worst is not None:
+        return replace(worst, explanation=f'{summary}; a part reads {worst.status}: {worst.explanation}')
+    first = judged[0]
+    return replace(first, low=first.low, high=first.high, measured=(lowest + highest) / 2,
+                   detail={**(first.detail or {}), 'lifetime_range': [lowest, highest], 'parts_summoned': len(judged),
+                           'parts': len(runs)},
+                   explanation=f'{summary}, against the stated {first.expected:g} ms, band {first.low:g} to '
+                               f'{first.high:g}: every summoned part lies inside the band')
+
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4173,6 +4405,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     else:
         if stated and flat is None:
             bonus = stated_bonus(bonus, stated)
+        if model.get('ratio_band'):
+            bonus = replace(bonus, fixed_band=RELATIVE_BAND * float(model['expected']) * 100)
         status, reason, needed = bonus_status(bonus)
     sized = None if stepped else sized_trials(bonus)
     detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,
@@ -4292,6 +4526,10 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_stat_gain_verdict(base, run, model)
         if model.get('kind') == 'strike_bursts':
             return behaviour_strike_bursts_verdict(base, run, model)
+        if model.get('kind') == 'pushback_reduction':
+            return behaviour_pushback_reduction_verdict(base, run, model)
+        if model.get('kind') == 'summon_lifetime':
+            return behaviour_summon_lifetime_verdict(base, run, model)
         if model.get('kind') == 'aura_expiry':
             return behaviour_aura_expiry_verdict(base, run, model)
         if model.get('kind') == 'cast_period':
@@ -5081,6 +5319,11 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
 POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
 
 
+def pooled_parts(check: str, model: dict | None) -> bool:
+    model = model or {}
+    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or model.get('kind') == 'summon_lifetime')
+
+
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
              hit_model: HitModelSource | None = None, build: str | None = None) -> Comparison:
     manifest = json.loads(Path(manifest_path).read_text(encoding='utf-8'))
@@ -5104,7 +5347,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
             for data in entry['expectations']:
-                if (data.get('model') or {}).get('parts', 1) > 1 and data['check'] in POOLED_CHECKS:
+                if pooled_parts(data['check'], data.get('model')):
                     pooled.setdefault(data['label'], []).append((entry, None, Expectation(**data)))
             continue
         tokens = read_tokens(manifest['class_file'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
@@ -5122,7 +5365,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                                        SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK, COOLDOWN_GATE_CHECK,
                                        PROC_ENERGIZE_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
-            elif expectation.check in POOLED_CHECKS and (expectation.model or {}).get('parts', 1) > 1:
+            elif pooled_parts(expectation.check, expectation.model):
                 if expectation.label not in hit_slots:
                     hit_slots[expectation.label] = len(verdicts)
                     verdicts.append(None)
@@ -5145,6 +5388,8 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        expectation.check)
         present = [run for _, run, _ in parts if run is not None]
         pooled_judge = (behaviour_hit_ratio_verdict if expectation.check == BEHAVIOUR_HIT_RATIO
+                        else behaviour_summon_lifetime_pooled_verdict
+                        if (expectation.model or {}).get('kind') == 'summon_lifetime'
                         else behaviour_taken_rate_verdict)
         verdict = (pooled_judge(base, present, expectation.model)
                    if len(present) == expectation.model['parts']

@@ -55,8 +55,10 @@ ascensionsidekick `coaKits` Necromancer kit (data.js fetched 2026-09-18): Raise:
 Undead, Sense Undead, Scourge Apprentice Training, Ghoulify, Transfer Life, Call of The Scourge, Create Bone Reliquary,
 Necromancy and Sacrifice Undead. They are listed with a kit citation,
 `ascensionsidekick data.js coaKits Necromancer <spec> kit, fetched <date>`. Create Frozen Reliquary 803772 is a
-`CharacterAdvancement` spell whose rows sit under rank 803777. Left out: Resilient Constitution 552011 (in no kit,
-no log event, no live capture) and the stock skills Dodge, Block, Wand and Auto Attack (no class tooltip claim).
+`CharacterAdvancement` spell whose rows sit under rank 803777. Resilient Constitution 552011 (in no kit, no log
+event, no live capture) is listed by owner ruling Q-n1 of 2026-11-13 (in scope, tested against a player attacker),
+with the citation `owner ruling <question>, <date>` (ADR 0540). Left out: the stock skills Dodge, Block, Wand and
+Auto Attack (no class tooltip claim).
 
 Righteous Tempest 805410 (`AscensionTemplarAbilities.cpp`'s `RighteousTempest()`, ranks 805410/570200-570205) is a
 23rd `extra_spells` entry, logged at Rank 7 570205 (level 60); it is not one of the 34 `ClassSpells` candidates above

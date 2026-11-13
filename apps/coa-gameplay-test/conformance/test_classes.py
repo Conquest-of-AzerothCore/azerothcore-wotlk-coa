@@ -15,6 +15,7 @@ TEMPLAR_CLASS_ID = 19
 NECROMANCER_CLASS_ID = 23
 KIT_CITATION = re.compile(
     r'^ascensionsidekick data\.js coaKits Necromancer (Death|Rime|Animation) kit, fetched \d{4}-\d\d-\d\d$')
+OWNER_RULING_CITATION = re.compile(r'^owner ruling Q-[a-z0-9-]+, \d{4}-\d\d-\d\d$')
 NECROMANCER_LOGGED_UNDER_ANOTHER_NAME = {500970: 'Raise: Greater Skeletal Warrior', 562210: 'Siphon Mana'}
 TEMPLAR_SPELL_IDS = 172
 TEMPLAR_SPELL_IDS_WITH_RANKS = 221
@@ -236,11 +237,14 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         extended = {spell.spell_id: spell for spell in class_spells(
             DBC_DIR, NECROMANCER_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
         records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell', ['SpellName[enUS]'])}
-        renamed, kits = {}, []
+        renamed, kits, rulings = {}, [], []
         for entry in entries:
             self.assertEqual(records[entry['spell']]['SpellName[enUS]'], entry['name'], entry['spell'])
             if KIT_CITATION.match(entry['citation']):
                 kits.append(entry['spell'])
+                continue
+            if OWNER_RULING_CITATION.match(entry['citation']):
+                rulings.append(entry['spell'])
                 continue
             citation = CITATION.match(entry['citation'])
             self.assertIsNotNone(citation, entry['spell'])
@@ -249,7 +253,7 @@ class ClientDbcClassSpellTest(unittest.TestCase):
             if logged_name != entry['name']:
                 renamed[entry['spell']] = logged_name
         self.assertEqual(renamed, NECROMANCER_LOGGED_UNDER_ANOTHER_NAME)
-        self.assertEqual((len(entries) - len(kits), len(kits)), (29, 11))
+        self.assertEqual((len(entries) - len(kits) - len(rulings), len(kits), len(rulings)), (29, 11, 1))
 
     def test_passive_flag_is_present_for_some_but_not_all_spells(self):
         passives = [spell for spell in self.templar if spell.passive]

@@ -870,6 +870,55 @@ when set, replaces `removed` for the caster's reads of that arm only (ADR 0291).
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
 
+### Summon lifetime (`behaviour_metric_delta`, `kind: "summon_lifetime"`, ADR 0544)
+
+A proc that summons a timed creature is read for the creature's lifetime. A forcing fixture (mentor N-a1, as in
+`forced_chance`) raises `talent`'s roll by 1000% for the scenario and is removed and read gone at the end. Control:
+`trigger_spell` cast at the dummy before `talent` is learned, its aura removed `stop_ms` later, then the owned
+`entry` count must read 0. Treatment: the same cast with `talent` learned; the owned `entry` count is polled every
+25 ms with `game_time_ms` stamps in `spawn_window` and `end_window` (ms after the cast, nominal), the trigger aura
+removed at `stop_ms` between them so one creature is summoned. The creature appears between the last empty and the
+first present poll and is gone between the last present and the first empty poll; the bracketed lifetime is judged
+against `expected_ms` in the G-19 band (`ok` inside, `alert` outside, `measured` across an edge); a window without
+its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) use
+Harvest Plague 500968, stopped after its first tick. The talent's ProcChance x 11 must reach 100%: the schema caps the
+mutant at +1000%.
+`parts` (ADR 0546) pools one-tick parts for a talent whose forced roll stays below 100%: a part whose spawn window never
+shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
+33% per tick, 40 parts).
+
+### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
+
+One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once
+by the passive striker's `strike_spell` `strike_at_ms` into the cast; and the same after a real cast of
+`reducer_spell` (`reducer_wait_ms` later). The cast start, the moments just before and just after the strike step
+and every poll of the caster's `casting` state inside the phase's window (`windows`, `[start, end]` ms after the cast
+start, one poll per 1 ms wait step) are read with `game_time_ms`, so each cast end lies between the last casting and
+the first idle poll in game time. The judge brackets the reduction 1 - (reduced end - unhit end) / (hit end - unhit
+end) from those ends and judges it against `expected_pct` in the G-19 band: `ok` when the whole bracket lies inside,
+`alert` when it lies outside, `measured` when it crosses an edge. A hit cast that takes other than one strike, or two
+strikes at game-time offsets further apart than the poll bracket, leave the reading `unmeasured` (invalid, not
+failed). Icebound Champion 807813: Lichfrost 501978, Light of the Naaru 41394 at 1000 ms, expected 50.
+`reducer_learn: true` learns `reducer_spell` between the phases instead of casting it and adds a fourth window, an unhit
+cast after the learn (`reduced_unhit`); each pushback is then taken within its own talent state, for a talent that also
+changes the cast time (Lich Essence 802988, which shortens Lichfrost by 15%).
+`repeats` (ADR 0546) repeats every cast; the judge then takes the mean bracket middle of each kind of cast and a 99%
+interval of the reduction from the repeats, since one poll is one world tick (8-10 ms of game time) and a single
+bracket cannot be narrower (Lich Essence: 10 repeats, 21-poll windows).
+
+### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
+
+A minion's command strike stated as "Weapon Damage" is read against the same minion's own swing. A real
+`raise_spell` raises creature `entry` at the caster; one `command_spell` at the dummy (power set to `command_power`)
+starts its attack, then `trials` more follow, `wait_ms` apart. After the first and each later Command the scenario
+reads the non-critical, unblocked `strike_spell` hits of that creature on the dummy (`spell_damage_total` and
+`spell_damage_count` with `caster_entry`) and its plain melee swings (`pet_melee_plain_damage` and
+`pet_melee_plain_count`, no crit and no glancing). The hit ratio judge takes the swings as the control arm and the
+strike as the treatment: the per-hit mean of the strike over the per-swing mean must lie within 5% of the stated
+ratio `expected` (`ratio_band`, the G-19 band of a ratio), with the 99% interval rules of the hit ratio judge. The
+creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorded once and not judged. Raise:
+Greater Skeletal Warrior 504901 judges Command: Skeletal Warriors 570042 at 2.1 (mentor ruling Q-b2b-4).
+
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 
 "For the same amount" compares two amounts of one cast (ADR 0200). `amount_match_scenario` casts `cast_spell` at
@@ -1036,6 +1085,12 @@ the gated spell `margin_ms` after the after casts, `without` refused (the contro
 `beyond` arm, since any later attempt goes through. Tome of Light 805422 resets Barrier of Light 805417
 (`AscensionTemplarAuras.cpp:122-128`): Barrier is primed, Tome is cast 2000 ms later, Barrier is attempted at 2500 ms.
 
+`forced_roll` (a talent id, ADR 0545) adds the forcing fixture of mentor ruling N-a1 to a cost gate whose opening
+needs a proc: a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant on that talent right after the learns, so its
+roll lands on every setup or after cast, removed at the end and read gone (the `released` label, 0). It is for effect
+claims only; the talent's chance stays with its proc entry. Refreshing Chill 300940 (`resets`, Command: Undead after
+Ice Barrage) and Deadly Bond 704724 (a free next Command) use it.
+
 ### Hit-ratio heals and actors
 
 A `hit_ratio` entry may set `metric: "heal"` to read `spell_heal_total` and `spell_heal_count` instead of the damage
@@ -1047,6 +1102,10 @@ the caster heals and healing received when the ally heals the caster. The caster
 `cast_unit_auras` (`[[spell, stacks], ...]`, ADR 0494) are set on the casting unit before every cast in both arms,
 the ally when it casts: a precondition fixture on the unit whose hits are read (Corpse Wagon 503738 party: 823764 on
 the casting ally removes its partial resists). Swing entries refuse them.
+`target_auras` (`[[spell, stacks], ...]`, ADR 0542) are set on the cast target by the caster before every observed
+cast in both arms: a precondition fixture on the unit that is hit, such as a frozen state for a crit claim "against
+Frozen targets" (Chilling Presence 300958: Ice Lock 22856 on the dummy before every Ice Barrage). Swing entries and a
+caster target refuse them.
 With a player `target`, `target_health_pct` sets that player to the percent of the fixture maximum before every
 observed and warm-up heal instead of holding the dummy once, for a heal whose script only reacts to a healed amount
 (Light's Guidance 524765 casts nothing after a Benediction on a target at full health).
@@ -1284,6 +1343,12 @@ a trial with fewer logs than strikes did not land and is left out; each arm need
   catalog PvP scenarios); the striker learns `strike_spell` and casts it through the client cast opcode, so the
   strike needs no cost, cooldown or global cooldown in its trials. Libram of Tenacity 801461 "($s3% against
   players)" uses an orc striker.
+- An arm's `unlearn` and `learn` (spell ids) unlearn and learn those spells on the caster at the arm start, before its
+  `checks` (ADR 0540): a passive the class grants is removed by a real unlearn in the control and applied again by a
+  real learn in the treatment, with no `set_aura`. `critical: true` (`damage_ratio` only) reads the critical strikes
+  instead of the non-critical ones, and `striker_force_crit: "spell"` (or `"melee"`, a player striker and a critical
+  read only) gives the player striker 100000 crit rating of that kind, so every strike crits. Resilient Constitution
+  552011 uses both against an orc striker.
 - An arm's `reduction: "formula"` (absorb judge, a `control` arm and `absorb_terms` required) judges a flat
   damage-taken reduction applied before the strike's mitigation: the control strikes must read one damage `C`, and
   each landed strike of the arm must lie between floor((B - R) x C / B) and ceil((B - R) x (C + 1) / B) - 1, with

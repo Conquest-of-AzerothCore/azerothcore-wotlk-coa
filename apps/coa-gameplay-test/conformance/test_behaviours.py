@@ -11385,5 +11385,353 @@ class MetricDeltaDummyDistanceTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**cycle_one_entry(300240, 'range_extended'), 'dummy_distance': 150})
 
 
+class TakenHitLearnedArmTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 552011 and entry.get('label_suffix') == suffix)
+
+    def built(self, suffix: str):
+        return taken_hit_scenario(load_class_file(23), taken_hit_spec(self.entry(suffix)))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_control_arm_unlearns_and_the_treatment_arm_relearns_before_its_strikes(self):
+        scenario, _ = self.built('players')
+        run.validate(scenario)
+        steps = scenario['steps']
+        unlearn = next(index for index, step in enumerate(steps) if step['action'] == 'unlearn')
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['actor'] == CASTER and step['spell'] == 552011)
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(steps[unlearn]['spell'], 552011)
+        self.assertLess(unlearn, strikes[0])
+        self.assertLess(strikes[9], learn)
+        self.assertLess(learn, strikes[10])
+        checks = [step for step in steps if step['action'] == 'assert' and step.get('metric') == 'aura'
+                  and step.get('spell') == 552011]
+        self.assertEqual([step['equals'] for step in checks], [0, 1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_critical_entry_forces_the_player_striker_and_reads_critical_hits_only(self):
+        scenario, [expectation] = self.built('player_crits')
+        striker = next(player for player in scenario['players'] if player['id'] == STRIKER)
+        self.assertEqual(striker['spell_crit_rating'], FORCED_CRIT_RATING)
+        reads = [step for step in scenario['steps'] if step['action'] == 'assert'
+                 and step.get('metric') == 'spell_damage_total' and step.get('caster') == STRIKER]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['critical'] is True for step in reads))
+        plain, _ = self.built('players')
+        self.assertNotIn('spell_crit_rating', next(player for player in plain['players'] if player['id'] == STRIKER))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_halved_player_hit_is_ok_and_an_unreduced_one_alerts(self):
+        _, [expectation] = self.built('players')
+        judged = lambda hit: judge_behaviour(base_verdict(expectation),
+                                             FakeRun(ratio_values(expectation.model, hit)), expectation).status
+        self.assertEqual(judged(550.0), 'ok')
+        self.assertEqual(judged(1100.0), 'alert')
+        self.assertEqual(judged(880.0), 'alert')
+
+    def test_a_forced_striker_crit_without_a_critical_read_is_refused(self):
+        entry = {key: value for key, value in self.entry('player_crits').items() if key != 'critical'}
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(load_class_file(23), taken_hit_spec(entry))
+
+    def test_an_arm_learning_and_unlearning_one_spell_is_refused(self):
+        entry = self.entry('players')
+        arms = [{**entry['arms'][0], 'learn': [552011]}, entry['arms'][1]]
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(load_class_file(23), taken_hit_spec({**entry, 'arms': arms}))
+
+
+
+class MinionSwingRatioTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'minion_swing_ratio')
+        return behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, strike_hit: float) -> str:
+        _, [expectation] = self.built()
+        values = ratio_values(expectation.model, strike_hit, 200.0)
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_strike_and_the_swings_of_the_minion_are_read_after_every_command(self):
+        scenario, [expectation] = self.built()
+        run.validate(scenario)
+        reads = [step for step in scenario['steps'] if step['action'] == 'assert']
+        strikes = [step for step in reads if step['metric'] == 'spell_damage_total' and step.get('spell') == 570042]
+        swings = [step for step in reads if step['metric'] == 'pet_melee_plain_damage']
+        self.assertEqual(len(strikes), len(swings))
+        self.assertEqual(len(strikes), expectation.model['trials'] + 1)
+        self.assertTrue(all(step['caster_entry'] == 51065 and step['critical'] is False for step in strikes))
+        self.assertTrue(all(step['entry'] == 51065 for step in swings))
+        commands = cast_indices(scenario['steps'], 504905)
+        self.assertEqual(len(commands), expectation.model['trials'] + 1)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_band_is_five_percent_of_the_stated_ratio(self):
+        self.assertEqual(self.judged(420.0), 'ok')
+        self.assertEqual(self.judged(400.0), 'ok')
+        self.assertEqual(self.judged(440.0), 'ok')
+        self.assertEqual(self.judged(398.0), 'alert')
+        self.assertEqual(self.judged(442.0), 'alert')
+        self.assertEqual(self.judged(200.0), 'alert')
+
+
+
+class HitRatioTargetAuraTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
+        return behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, control_crits: float, treatment_crits: float) -> str:
+        _, [expectation] = self.built()
+        values = {}
+        for arm, marks in expectation.model['reads'].items():
+            crits = control_crits if arm == 'control' else treatment_crits
+            for index, (total, count) in enumerate(marks):
+                values[total], values[count] = index * crits, index * 4.0
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_fixture_is_set_on_the_dummy_before_every_observed_cast(self):
+        scenario, _ = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 501997)
+        self.assertTrue(casts)
+        for index in casts:
+            fixture = next(step for step in reversed(steps[:index])
+                           if step['action'] == 'set_aura' and step['spell'] == 22856)
+            self.assertEqual((fixture['target'], fixture['caster']), ('dummy', CASTER))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_stated_rise_is_ok_and_the_party_share_alone_alerts(self):
+        self.assertEqual(self.judged(0.4, 1.32), 'ok')
+        self.assertEqual(self.judged(0.4, 0.52), 'alert')
+
+    def test_a_target_aura_on_a_caster_target_is_refused(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
+        with self.assertRaisesRegex(ValueError, 'target_auras'):
+            behaviour_scenario(load_class_file(23), {**entry, 'target': CASTER})
+
+
+
+class PushbackReductionTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'pushback_reduction')
+        single = {**entry, 'repeats': 1, 'windows': [[2440, 2560], [2930, 3050], [2680, 2800]]}
+        return behaviour_scenario(load_class_file(23), single)
+
+    def values(self, ends: dict, strikes: dict | None = None, step_ms: float = 1.0) -> dict:
+        _, [expectation] = self.built()
+        found = {}
+        for index, (name, phase) in enumerate(expectation.model['phases'].items()):
+            start = 10000.0 * (index + 1)
+            found[phase['start']] = start
+            low = {'unhit': 2440, 'hit': 2930, 'reduced': 2680}[name]
+            for poll, (time_label, casting_label) in enumerate(phase['polls']):
+                at = start + low + poll * step_ms
+                found[time_label], found[casting_label] = at, 1.0 if at - start < ends[name] else 0.0
+            if 'strike' in phase:
+                offset = (strikes or {}).get(name, 1000.0)
+                found[phase['strike']], found[phase['struck']] = start + offset, start + offset
+                found[phase['strikes'][0]], found[phase['strikes'][1]] = 0.0, 1.0
+        return found
+
+    def judged(self, ends: dict, strikes: dict | None = None) -> str:
+        _, [expectation] = self.built()
+        return judge_behaviour(base_verdict(expectation), FakeRun(self.values(ends, strikes)), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_every_poll_and_strike_is_stamped_in_game_time(self):
+        scenario, [expectation] = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(len(strikes), 2)
+        for index in strikes:
+            self.assertEqual((steps[index - 1]['metric'], steps[index + 1]['metric']), ('game_time_ms', 'game_time_ms'))
+        reducer = cast_indices(steps, 807813)
+        self.assertEqual(len(reducer), 1)
+        self.assertLess(strikes[0], reducer[0])
+        self.assertLess(reducer[0], strikes[1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_halved_pushback_is_ok_and_a_full_one_alerts(self):
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739}), 'ok')
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2790}), 'alert')
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2760}), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_strikes_at_different_offsets_are_invalid(self):
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739},
+                                     {'hit': 1000.0, 'reduced': 1012.0}), 'unmeasured')
+
+
+
+class SummonLifetimeTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'summon_lifetime' and entry['spell'] == 705747)
+        return behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, spawn_ms: float, end_ms: float, control: float = 0.0) -> str:
+        _, [expectation] = self.built()
+        model = expectation.model
+        values = {model['control']: control, model['released']: 0.0, model['starts']['control']: 0.0,
+                  model['starts']['treatment']: 100000.0}
+        for window, low in (('spawn', 2500), ('end', 16500)):
+            for index, (at, count) in enumerate(model['polls'][window]):
+                offset = low + index * 25.0
+                values[at], values[count] = 100000.0 + offset, 1.0 if spawn_ms <= offset < end_ms else 0.0
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_talent_is_forced_and_learned_after_the_control_cast(self):
+        scenario, _ = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        mutant = next(index for index, step in enumerate(steps) if step['action'] == 'spell_mod_mutant')
+        learn = next(index for index, step in enumerate(steps) if step['action'] == 'learn' and step['spell'] == 705747)
+        casts = cast_indices(steps, 500968)
+        self.assertEqual(len(casts), 2)
+        self.assertLess(mutant, casts[0])
+        self.assertLess(casts[0], learn)
+        self.assertLess(learn, casts[1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_stated_lifetime_is_ok_and_a_short_or_control_summon_alerts(self):
+        self.assertEqual(self.judged(3010.0, 18010.0), 'ok')
+        self.assertEqual(self.judged(3010.0, 16010.0), 'unmeasured')
+        self.assertEqual(self.judged(3010.0, 17010.0), 'alert')
+        self.assertEqual(self.judged(3010.0, 18010.0, control=1.0), 'alert')
+
+
+
+class PushbackLearnedReducerTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_learned_reducer_adds_its_own_unhit_cast_after_the_learn(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'pushback_reduction' and entry.get('reducer_learn'))
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['spell'] == entry['reducer_spell'])
+        casts = cast_indices(steps, entry['cast_spell'])
+        repeats = entry.get('repeats', 1)
+        self.assertEqual(len(casts), 4 * repeats)
+        self.assertLess(casts[2 * repeats - 1], learn)
+        self.assertLess(learn, casts[2 * repeats])
+        self.assertEqual(list(expectation.model['samples']), ['unhit', 'hit', 'reduced_unhit', 'reduced'])
+        self.assertNotIn('strike', expectation.model['samples']['reduced_unhit'][0])
+
+
+
+class CostGateForcedRollTests(unittest.TestCase):
+    def built(self, spell: int):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'cost_gate' and entry.get('forced_roll') == spell)
+        return behaviour_scenario(load_class_file(23), entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_roll_is_forced_before_the_first_arm_and_released_at_the_end(self):
+        scenario, expectations = self.built(300940)
+        run.validate(scenario)
+        steps = scenario['steps']
+        mutant = next(index for index, step in enumerate(steps) if step['action'] == 'spell_mod_mutant')
+        self.assertEqual(steps[mutant]['spell'], 300940)
+        self.assertLess(mutant, cast_indices(steps, 801760)[0])
+        self.assertEqual(steps[-1]['metric'], 'spell_mod_mutants')
+        released = next(expectation for expectation in expectations if expectation.label.endswith(' released'))
+        self.assertEqual(released.displayed, '0')
+        values = {expectation.label: 0.0 for expectation in expectations}
+        self.assertEqual(judge_behaviour(base_verdict(released), FakeRun(values), released).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(released), FakeRun({**values, released.label: 1.0}),
+                                         released).status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_a_forced_roll_has_no_mutant(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'cost_gate' and entry.get('forced_roll') == 704724)
+        plain = {key: value for key, value in entry.items() if key != 'forced_roll'}
+        scenario, expectations = behaviour_scenario(load_class_file(23), plain)
+        self.assertFalse([step for step in scenario['steps'] if step['action'] == 'spell_mod_mutant'])
+        self.assertFalse([expectation for expectation in expectations if expectation.label.endswith(' released')])
+
+
+
+class SummonLifetimePooledTests(unittest.TestCase):
+    def expectation(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
+        _, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        return replace(expectation, model={**expectation.model, 'parts': entry['parts']})
+
+    def values(self, model: dict, end_ms: float | None) -> dict:
+        found = {model['control']: 0.0, model['released']: 0.0, model['starts']['control']: 0.0,
+                 model['starts']['treatment']: 100000.0}
+        for window, low in (('spawn', 2500), ('end', 11500)):
+            for index, (at, count) in enumerate(model['polls'][window]):
+                offset = low + index * 25.0
+                present = end_ms is not None and 3010.0 <= offset < end_ms
+                found[at], found[count] = 100000.0 + offset, 1.0 if present else 0.0
+        return found
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_parts_without_a_summon_are_left_out_and_a_summoned_part_is_judged(self):
+        from compare import behaviour_summon_lifetime_pooled_verdict
+        expectation = self.expectation()
+        model = expectation.model
+        judged = lambda ends: behaviour_summon_lifetime_pooled_verdict(
+            base_verdict(expectation), [FakeRun(self.values(model, end)) for end in ends], model).status
+        self.assertEqual(judged([None, 13010.0, None]), 'ok')
+        self.assertEqual(judged([None, None]), 'unmeasured')
+        self.assertEqual(judged([13010.0, 12010.0]), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_pooled_entry_writes_one_scenario_per_part(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
+        self.assertGreaterEqual(entry['parts'], 40)
+
+
+
+class PushbackSampledTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1
+                     and entry.get('reducer_learn'))
+        return entry, behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, ends: dict) -> str:
+        entry, (_, [expectation]) = self.built()
+        lows = dict(zip(('unhit', 'hit', 'reduced_unhit', 'reduced'), (low for low, _ in entry['windows'])))
+        values = {}
+        for kind, samples in expectation.model['samples'].items():
+            for index, phase in enumerate(samples):
+                start = 100000.0 * (len(values) + 1)
+                values[phase['start']] = start
+                end = ends[kind] + (index % 3) * 3.0
+                for poll, (at, casting) in enumerate(phase['polls']):
+                    offset = lows[kind] + poll * 9.0
+                    values[at], values[casting] = start + offset, 1.0 if offset < end else 0.0
+                if 'strike' in phase:
+                    values[phase['strike']], values[phase['struck']] = start + 1012.0, start + 1016.0
+                    values[phase['strikes'][0]], values[phase['strikes'][1]] = 0.0, 1.0
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_mean_of_repeated_casts_is_judged_with_its_interval(self):
+        entry, (scenario, [expectation]) = self.built()
+        run.validate(scenario)
+        self.assertEqual(len(expectation.model['samples']['hit']), entry['repeats'])
+        self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2375}), 'ok')
+        self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2475}), 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

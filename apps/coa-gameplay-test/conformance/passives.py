@@ -91,6 +91,12 @@ BEHAVIOUR_LABELS = {
                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'hit_ratio': lambda entry: [f"{entry['spell']} behaviour_hit_ratio"
                                 + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
+    'summon_lifetime': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
+                                      + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
+    'pushback_reduction': lambda entry: [f"{entry['spell']} behaviour_metric_delta"
+                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
+    'minion_swing_ratio': lambda entry: [f"{entry['spell']} behaviour_hit_ratio"
+                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'cast_stat_ratio': lambda entry: [f"{entry['spell']} behaviour_ratio"],
     'duration_refresh': lambda entry: [f"{entry['spell']} behaviour_duration_refresh"],
     'amount_delta': lambda entry: [f"{entry['spell']} behaviour_amount_delta"],
