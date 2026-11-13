@@ -245,6 +245,8 @@ before the trigger cast: the caster moves by `dx`, its health is set to `health`
 casts `spell` at it `count` times, `wait_ms` apart (Phylactery 500933: the Shade, its immunity, its revive and its
 death). Setup and trigger casts first get their reagents; a scenario whose waits pass 90000 ms takes a matching
 timeout.
+A `cost_gate` entry's `after_cast_gap_ms` (ADR 0361) waits after each of its `after_casts` (Underking 704701: ten Command
+casts 1600 ms apart); the gaps count toward the attempt's wait.
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).

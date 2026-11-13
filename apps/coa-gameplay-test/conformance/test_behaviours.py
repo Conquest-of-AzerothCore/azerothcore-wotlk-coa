@@ -10162,5 +10162,33 @@ class MetricDeltaStrikeTests(unittest.TestCase):
             metric_delta_spec({**entry, 'strike': {**entry['strike'], 'health': 200000}})
 
 
+
+class CostGateAfterCastGapTests(unittest.TestCase):
+    def underking_entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 704701 and entry['kind'] == 'cost_gate')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_after_casts_wait_out_the_global_cooldown_and_the_attempt_keeps_its_time(self):
+        entry = self.underking_entry()
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        gaps = [index for index, step in enumerate(steps) if step.get('label') == 'with gap after an after cast']
+        self.assertEqual(len(gaps), 10)
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == 805044]
+        prime = max(index for index in casts if index < gaps[0])
+        attempt = min(index for index in casts if index > gaps[-1])
+        waited = sum(step['ms'] for step in steps[prime + 1:attempt] if step['action'] == 'wait')
+        self.assertEqual(waited, 60000 - 15000 + 500)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_no_gap_without_the_field(self):
+        entry = {key: value for key, value in self.underking_entry().items() if key != 'after_cast_gap_ms'}
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        self.assertFalse(any('gap after an after cast' in step.get('label', '') for step in scenario['steps']))
+
+
 if __name__ == '__main__':
     unittest.main()

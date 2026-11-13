@@ -1624,8 +1624,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                          for spell in dict.fromkeys(spec.helper_casts)])
         scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
     waited = sum(step['ms'] for step in steps if step['action'] == 'wait')
-    if spec.attack_swings or waited > METRIC_DELTA_DEFAULT_TIMEOUT_MS:
+    if spec.attack_swings:
         timed(scenario, waited)
+    elif waited > METRIC_DELTA_DEFAULT_TIMEOUT_MS:
+        timed(scenario, waited, MAX_ACCELERATED_SCENARIO_MS)
     if spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target')) or any(
             TARGET in aura[2:] for aura in (*spec.phase_auras, *spec.after_auras)):
         scenario['creatures'] = [creature_fixture(class_file)]
@@ -3537,6 +3539,7 @@ class CostGateSpec:
     arm_wait_ms: int = 0
     cast_power: int | None = None
     removal_wait_ms: int | None = None
+    after_cast_gap_ms: int = 0
 
 
 @dataclass(frozen=True)
@@ -3703,10 +3706,14 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
             steps += ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}]
                       + cast_gate_power_step(after_facts) + required_aura_steps(after_facts)
                       + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target}])
+            if spec.after_cast_gap_ms:
+                steps.append({'action': 'wait', 'label': f'{arm.name} gap after an after cast',
+                              'ms': spec.after_cast_gap_ms})
         return steps
 
     def cooldown_wait(arm: CostGateArm) -> int:
-        return int(arm.level) - (spec.after_wait_ms if after_casts(arm) else 0)
+        return int(arm.level) - (spec.after_wait_ms + spec.after_cast_gap_ms * len(after_casts(arm))
+                                 if after_casts(arm) else 0)
 
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gated_spell}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
@@ -3824,7 +3831,8 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         entry.get('after_wait_ms', 0), entry.get('resets', False),
                         bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)),
                         entry.get('target_health_pct'), bool(entry.get('unset_arm', False)), entry.get('charges'),
-                        int(entry.get('arm_wait_ms', 0)), entry.get('cast_power'), entry.get('removal_wait_ms'))
+                        int(entry.get('arm_wait_ms', 0)), entry.get('cast_power'), entry.get('removal_wait_ms'),
+                        int(entry.get('after_cast_gap_ms', 0)))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000
