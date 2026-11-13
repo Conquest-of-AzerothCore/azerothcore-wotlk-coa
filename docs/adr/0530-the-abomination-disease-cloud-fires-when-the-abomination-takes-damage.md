@@ -34,6 +34,9 @@ test-only (G-39).
   a raised Abomination not attacked casts no 802353 (control); commanded into the dummy and struck 4 times it casts at
   least 4 (owned_creature_spell_cast_count). Runs read 4 to 6: further damaging hits on the Abomination, most likely
   the striker's melee answer to a cloud, which no metric reads (not verified).
+  `cloud_unattacked` (the mentor's control arm): commanded into the dummy, in combat but not attacked for 7000 ms
+  (more than two old pulse periods), the Abomination casts no cloud. No metric reads damage taken by an owned
+  creature, so the casts are not judged equal to damage-taken events.
 - Cloud hits feed the minion proc branch and the Chomp trigger (707283 trigger_count 500335): their rates fall when
   the Abomination is not attacked. The out-of-combat PvP pulse is gone. Under heavy attack (several attackers, ticks)
   the cloud can fire more often than the old pulse.

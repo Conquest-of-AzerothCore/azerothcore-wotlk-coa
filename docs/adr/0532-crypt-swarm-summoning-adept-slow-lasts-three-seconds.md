@@ -17,11 +17,13 @@ never slowed. The owner ruled (Q-b3b-1, option a) that the slow is meant. Fix no
 
 ## Consequences
 
-- The slow lingers up to 3000 ms after the channel's last hit. 803530 carries SPELL_ATTR5_DO_NOT_DISPLAY_DURATION, so
-  the client shows no timer. Live logs hold no 803530 event over 1325 casts; the ruling departs from live.
-- Regression (class file 501886): `slow` (0.7 of the dummy's run speed 1200 ms into the channel, its own rate without
-  92123), `slow_applied` (6 applications), and a held / ends pair stamped in game time (ADR 0501): `slow_held` slowed
-  6270 ms after the cast, `slow_ends` back to its own rate at 6550 ms. The last hit is not stamped: each 800343 bolt
-  flies about 231 ms (Speed 13 yd/s, 3 yd), and `slow_remaining` (a readback, context only) reads 803530's remaining
-  duration 2389 / 2407 ms at 4009 ms, which places the last refresh at 3398 / 3416 ms. On that basis the slow ends
-  between about 2854 and 3168 ms after the last hit.
+- The slow lingers up to 3000 ms after the channel's last hit: an implementation choice of this ADR (the tooltip states
+  no slow duration), not a claim; the reads below about the linger are context (mentor ruling). 803530 carries
+  SPELL_ATTR5_DO_NOT_DISPLAY_DURATION, so the client shows no timer. Live logs hold no 803530 event over 1325
+  casts; the ruling departs from live.
+- Regression (class file 501886): the claim, slowed while channeling, is `slow` (0.7 of the dummy's run speed 1200 ms
+  into the channel, its own rate without 92123), `slow_applied` (6 applications) and `slow_ends` (back to its own rate
+  6550 ms of game time after the cast, ADR 0501). Context only: `slow_held` (slowed at 6270 ms) and `slow_remaining`
+  (a readback: 803530's remaining duration 2389 / 2407 ms at 4009 ms, so the last refresh came at 3398 / 3416 ms, each
+  800343 bolt flying about 231 ms over 3 yd at 13 yd/s); on that basis the slow ends about 2854 to 3168 ms after the
+  last hit.
