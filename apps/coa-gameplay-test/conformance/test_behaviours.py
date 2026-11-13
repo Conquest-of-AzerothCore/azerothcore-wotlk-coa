@@ -10601,5 +10601,26 @@ class CastGateAuraStateTests(unittest.TestCase):
         self.assertFalse(any(step.get('label') == 'Global cooldown' for step in between))
 
 
+class ScriptHitCastPowerTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 501997 and entry['kind'] == 'script_hit')
+
+    def power_steps(self, entry: dict) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        return [step for step in scenario['steps'] if step.get('action') == 'set_power']
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cast_power_fills_the_power_before_every_cast(self):
+        steps = self.power_steps(self.entry())
+        self.assertEqual(len(steps), self.entry()['trials'])
+        self.assertTrue(all(step['value'] == 1000 and step['power'] == 6 for step in steps))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_cast_power_the_cost_is_set(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'cast_power'}
+        self.assertTrue(all(step['value'] == 300 for step in self.power_steps(entry)))
+
+
 if __name__ == '__main__':
     unittest.main()

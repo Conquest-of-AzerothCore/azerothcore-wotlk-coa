@@ -6536,6 +6536,7 @@ class ScriptHitSpec:
     caster_entry: int | None = None
     hit_effect: int | None = None
     minion_model_auras: tuple[int, ...] = ()
+    cast_power: int | None = None
 
 
 def script_hit_label(spec: ScriptHitSpec) -> str:
@@ -6573,7 +6574,7 @@ def script_hit_trial(records: Records, spec: ScriptHitSpec, arm: str, trial: int
                       'value': spec.caster_health_pct * FIXTURE_MAX_HEALTH // 100, 'maximum': FIXTURE_MAX_HEALTH})
     casts = spec.control_casts if arm == 'control' and spec.control_casts is not None else spec.casts
     for spell, target in casts:
-        steps += hit_ratio_cast(records, spell, CASTER, target)
+        steps += hit_ratio_cast(records, spell, CASTER, target, spec.cast_power)
     if spec.strike_spell:
         steps += [{'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
                   {'action': 'wait', 'label': f'{arm} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
@@ -6692,7 +6693,8 @@ def script_hit_spec(entry: dict) -> ScriptHitSpec:
                          bool(entry.get('unresisted', False)),
                          tuple((int(spell), int(stacks)) for spell, stacks in entry.get('stat_auras', ())),
                          entry.get('label_suffix', ''), entry.get('caster_entry'), entry.get('hit_effect'),
-                         tuple(int(spell) for spell in entry.get('minion_model_auras', ())))
+                         tuple(int(spell) for spell in entry.get('minion_model_auras', ())),
+                         entry.get('cast_power'))
 
 
 TAKEN_OUTCOME_ATTACKERS = 8

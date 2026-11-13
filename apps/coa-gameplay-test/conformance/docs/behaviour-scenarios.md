@@ -1337,6 +1337,8 @@ attack power at 0, so only the trample's base term is read).
 harness filter of the same name, so a control arm without the minion reads 0; `hit_effect` models one effect of a hit
 spell with a damage and a heal effect (Raise: Ghoul 500971: Command: Ghouls 801514's damage, effect 0, and its heal on
 the owner, effect 2).
+`cast_power` (ADR 0401) sets that power, in each cast's own power type, before every cast of a trial, for a cast whose
+cost is paid after a cast time while the power decays (Ice Barrage 501997, 1000 Runic Power).
 
 ### Taken-outcome scenarios (`behaviour_taken_outcome`, `kind: "taken_outcome"`)
 
