@@ -115,7 +115,8 @@
           "300235 spell_duration 301334 #2",
           "300235 behaviour_metric_delta caster_haste",
           "300235 behaviour_metric_delta caster_proc_haste",
-          "300235 behaviour_metric_delta minion_haste"
+          "300235 behaviour_metric_delta minion_haste",
+          "300235 behaviour_metric_delta lasts"
         ]
       }
     ],
@@ -2892,7 +2893,12 @@
       {
         "claim": "within $572777d",
         "labels": [
-          "704724 spell_duration 572777 #1"
+          "704724 spell_duration 572777 #1",
+          "704724 cost_gate 504868 free_within without",
+          "704724 cost_gate 504868 free_within with",
+          "704724 cost_gate 504868 free_within held",
+          "704724 cost_gate 504868 free_within expired",
+          "704724 cost_gate 504868 free_within released"
         ]
       }
     ]
@@ -2985,7 +2991,10 @@
         "labels": [
           "705750 effect_value #0",
           "705750 effect_value 705751e0 #1",
-          "705750 spell_duration 705751 #2"
+          "705750 spell_duration 705751 #2",
+          "705750 behaviour_metric_delta cast_haste",
+          "705750 behaviour_metric_delta melee_haste",
+          "705750 behaviour_metric_delta lasts"
         ]
       }
     ],
