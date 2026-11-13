@@ -5,7 +5,7 @@
     "all": {
       "arguments": [],
       "files": {
-        "manifest.json": "ace4ac1408ff8a3da0acc2c9a4b2fbc0177d72def0d4e8660edce8434c137ce0",
+        "manifest.json": "d64bad55001b6d3d531b0a3694eff71175809ded0644d8b63bb567173e311749",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-root-ends.json": "282773a8fa9eb67e9b45500b2e36834b764356ed9bc606d72dedbfb0e01fa875",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-root-held.json": "1a635628d443863d266fda0231995a9d5024b6c118e22a9fed8b0ca5901c3be4",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-slow-ends.json": "21fb66cb57dcc36799a9f043eeccb1dbb818481d28fe79907662a5e077795bcc",
@@ -770,6 +770,8 @@
         "scenarios/conformance-necromancer-behaviour-500989-metric-delta-command.json": "c7158c4627dcbc36124aa7749ebe1161731eecb2d4a66bc5ba9b1f93637cda99",
         "scenarios/conformance-necromancer-behaviour-500989-metric-delta-count.json": "b971025f581e0c682de1f235c0f51809513e1f305cbdb0e2714908c4617e5d51",
         "scenarios/conformance-necromancer-behaviour-500989-metric-delta-life-force.json": "46813cfe0dd214f15a0543ea02ded6e163734c0dc87fc7257ce831a690612ca6",
+        "scenarios/conformance-necromancer-behaviour-500989-minion-swing-ratio-weapon-plus-part-1.json": "f86c3fe8d7c29d3c86ad00bbb837b3c77bec902076f8b32ee86a80d04d8f3261",
+        "scenarios/conformance-necromancer-behaviour-500989-minion-swing-ratio-weapon-plus-part-2.json": "54683e3e67f0f3035fb9fd812c82066caf2b35b4e6188df7cd129bf880e1124d",
         "scenarios/conformance-necromancer-behaviour-500989-taken-hit-split.json": "f90794e6ccaa4aef5809f8329d4f2f8258776ead29debde64ee0baccdce48ca9",
         "scenarios/conformance-necromancer-behaviour-500991-metric-delta-cast-survives.json": "a66fc64f1e0898924d234363ed3c9dad6c35092aafb6b109a248971d1ef814ee",
         "scenarios/conformance-necromancer-behaviour-500991-metric-delta-focus.json": "9e51bcb62cac3c6970128d7f4a7e7208777de78003104121e235f77e00299b28",
@@ -1099,6 +1101,7 @@
         "scenarios/conformance-necromancer-behaviour-574138-metric-delta-ends.json": "1276e8c02c652b5b29e4b93334f7da41894cc57f1b79fee6db69c2b7e4b84a51",
         "scenarios/conformance-necromancer-behaviour-574138-metric-delta-lasts.json": "735856c849b24bb0102dcb04273f0112785a50bb74b3e05c3d241f0f2fed4175",
         "scenarios/conformance-necromancer-behaviour-574138-metric-delta-on-minion.json": "9c806afb71897d339ddd516b04b98960a6db03098699c1f4fa345caeb8f7c172",
+        "scenarios/conformance-necromancer-behaviour-574138-minion-swing-arms-swing-arms.json": "556c1d1b78c71e7cfbdc0042060ad605d352f1db9f9bcebf16bb4230ebfd1aa1",
         "scenarios/conformance-necromancer-behaviour-583256-hit-ratio-close-to-death.json": "d8c6f13b1328ec844f025538e5938878b352c3055bb8294f5a3c481dbd7401cd",
         "scenarios/conformance-necromancer-behaviour-583256-metric-delta-duration.json": "2169abeae4d8c73b500f97dc5166115588cbe2efb761ff1af9de913b8f67b506",
         "scenarios/conformance-necromancer-behaviour-583256-metric-delta-heal.json": "64ca8e0fe2f19647b24064b22d5b0d7fdb9949067f346f8d9a08a24ac0f1405a",
@@ -1222,6 +1225,7 @@
         "scenarios/conformance-necromancer-behaviour-706472-metric-delta-stamina.json": "3e867c74190e5942c438284a5129fb36c657f4a4bfd22019a3f59d3b12ef5e63",
         "scenarios/conformance-necromancer-behaviour-706948-metric-delta-lasts.json": "880093863272212a655daa4441b80df5c7dea98f1b572b5fc6c630c524afd068",
         "scenarios/conformance-necromancer-behaviour-706948-metric-delta-stacks.json": "18f519a2141230b92a2da10ebef8902cc6b4f36d682cab2b111eb0c335934a2a",
+        "scenarios/conformance-necromancer-behaviour-706948-minion-swing-arms-swing-arms.json": "a02093985718da674f1adad5d95df685cb6a42f8231af81a9d13d4be5d679a31",
         "scenarios/conformance-necromancer-behaviour-706953-metric-delta-cooldown-ready.json": "429764556228cf062af858e49a633767f09dcaddb9623796e74dc5dfbac1a768",
         "scenarios/conformance-necromancer-behaviour-706953-metric-delta-cooldown-refused.json": "cce95679c82101846bc90c069f9bf54d9786f9cf6e68441a0745a69fdb96223c",
         "scenarios/conformance-necromancer-behaviour-706953-metric-delta-mana-spent.json": "8cabcace126a981c6e7e6faa00cb6e64cd5146a8f85d0d0dd8e9c57f4078cc45",
