@@ -1462,7 +1462,7 @@ constexpr std::array<uint32, 13> MYTHICAL_BOON_ITEMS = { 2104920, 2104921, 21049
 void RemoveBoonsOutsideDungeon(Player* player)
 {
     Map* map = player->FindMap();
-    if (!map || map->IsDungeon())
+    if (!map || map->IsDungeon() || !player->IsAlive())
         return;
     for (uint32 item : MYTHICAL_BOON_ITEMS)
         if (uint32 const count = player->GetItemCount(item, true))
@@ -1529,6 +1529,7 @@ public:
 
     void OnPlayerResurrect(Player* player, float /*restorePercent*/, bool& /*applySickness*/) override
     {
+        RemoveBoonsOutsideDungeon(player);
         Map* map = player->FindMap();
         if (!map || !map->IsDungeon())
             return;
