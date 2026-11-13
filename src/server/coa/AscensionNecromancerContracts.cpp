@@ -10,6 +10,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include <algorithm>
+#include <array>
 
 namespace AscensionNecromancer
 {
@@ -19,6 +20,23 @@ enum RangeIndex : uint32
 {
     SPELL_RANGE_THIRTY_YARDS = 4
 };
+constexpr std::array<uint32, 8> FLESH_TO_WORMS_RANKS = {500338, 501855, 501856, 501857,
+                                                       501858, 501859, 501860, 501861};
+void GrantFleshToWormsPeriodicCrit(Unit* target, Aura* aura)
+{
+    if (std::find(FLESH_TO_WORMS_RANKS.begin(), FLESH_TO_WORMS_RANKS.end(), aura->GetId()) ==
+        FLESH_TO_WORMS_RANKS.end())
+        return;
+    Unit* caster = aura->GetCaster();
+    AuraEffect* effect = aura->GetEffect(EFFECT_0);
+    if (!caster || !effect || effect->GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE)
+        return;
+    SpellInfo const* info = aura->GetSpellInfo();
+    float chance = caster->SpellDoneCritChance(nullptr, info, info->GetSchoolMask(), BASE_ATTACK, true);
+    if (chance > 0.0f)
+        chance = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), chance, BASE_ATTACK, true);
+    effect->SetCritChance(std::max(0.0f, chance));
+}
 }
 
 void ApplyContracts(SpellInfo* info)
@@ -440,8 +458,13 @@ class necromancer_scaling : public UnitScript
         : UnitScript("necromancer_scaling", true,
                      {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
                       UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_ON_BEFORE_ROLL_MELEE_OUTCOME_AGAINST,
-                      UNITHOOK_MODIFY_MELEE_DAMAGE})
+                      UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_ON_AURA_APPLY})
     {
+    }
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (unit && aura)
+            GrantFleshToWormsPeriodicCrit(unit, aura);
     }
     float Mark(Unit* target, Unit* attacker)
     {
