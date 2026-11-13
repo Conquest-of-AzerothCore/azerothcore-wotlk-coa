@@ -8114,7 +8114,8 @@ def item_cooldown_gate_combat(class_file: dict, records: Records, spec: ItemCool
                     f'"{spec.quote}" clause under the shared potion rule.',
         'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
         'creatures': [creature_fixture(class_file)],
-        'steps': steps}
+        'steps': steps,
+        'timeout_ms': waited_ms(steps) + TIMEOUT_MARGIN_MS}
     return scenario, expectations
 
 
