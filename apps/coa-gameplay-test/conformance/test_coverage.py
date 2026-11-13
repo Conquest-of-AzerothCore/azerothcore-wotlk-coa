@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -17,7 +18,7 @@ from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour,
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
                       METRIC_EVIDENCE, NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption,
-                      EvidenceError, acting,
+                      KIND_ROW_OVERRIDES, EvidenceError, acting, kind_row_overrides,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
                       NO_BEHAVIOUR_ROUTE, NO_ROUTE_NOT_DATA, NO_ROUTE_PENDING, NO_ROUTE_TERMINAL,
                       fragment_entries, load_clauses, metric_evidence, read_fragment, require_claims, states_value,
@@ -748,6 +749,17 @@ class EvidenceTablesTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
 
 
+class KindRowOverrideGuardTest(unittest.TestCase):
+    def test_cross_class_guard_no_kind_module_overrides_a_base_row_unless_allowed(self):
+        overrides = kind_row_overrides()
+        self.assertEqual(sorted({(table, key) for table, key, _ in overrides} - KIND_ROW_OVERRIDES), [])
+
+    def test_cross_class_guard_a_seeded_override_of_a_base_row_is_found(self):
+        seeded = SimpleNamespace(KIND='seeded', METRIC_EVIDENCE={'distance_2d': EVENT, 'a_new_metric': EVENT})
+        self.assertEqual(kind_row_overrides([seeded]), [('METRIC_EVIDENCE', 'distance_2d', 'seeded')])
+        self.assertNotIn(('METRIC_EVIDENCE', 'distance_2d'), KIND_ROW_OVERRIDES)
+
+
 class StampTest(unittest.TestCase):
     def test_observed_reads_the_model(self):
         expectation = Expectation('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 1, 1, None, '1', 'r',
@@ -1302,6 +1314,16 @@ class OwnedCreatureDisplayPromiseTest(unittest.TestCase):
         promised = claim('Transformed into a Frenzied Ghoul', '1 behaviour_metric_delta frenzied_display')
         self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
         self.assertEqual(METRIC_EVIDENCE['owned_creature_display'], STATE)
+
+
+class OwnedCreatureSlowPromiseTest(unittest.TestCase):
+    def test_a_learned_minion_run_speed_contrast_proves_a_movement_slowing_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta snare', BEHAVIOUR_METRIC_DELTA,
+                           'owned_creature_run_speed_rate', contrast=LEARNED_CONTRAST)]
+        promised = claim('Immune to movement slowing effects.', '1 behaviour_metric_delta snare')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your maximum health by $s1%.', '1 behaviour_metric_delta snare')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
 
 
 class RunicPowerPromiseTest(unittest.TestCase):
