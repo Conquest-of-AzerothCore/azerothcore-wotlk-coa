@@ -11176,7 +11176,7 @@ def curse_of_the_lich_arm(suffix: str, metric: str, fields: dict, gain: float, a
 
 class SummonSchoolCritArmTests(unittest.TestCase):
     ARMS = {'a': ('summon_school_crit', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 3, False),
-            'b': ('summon_school_crit_alone', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 3, True),
+            'b': ('summon_school_crit_alone', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 0, True),
             'c': ('summon_base_alone', 'owned_creature_spell_crit_chance', {'entry': 50073}, 0, True)}
 
     def built(self, arm: str):
@@ -11203,16 +11203,30 @@ class SummonSchoolCritArmTests(unittest.TestCase):
                 self.assertLess(learn, scenario['steps'].index(reads[1]))
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_arm_b_alerts_when_its_read_falls_back_to_the_base_copy(self):
+    def test_arm_b_alerts_when_a_separate_summon_grant_returns(self):
         _, expectation = self.built('b')
         model = expectation.model
 
         def judged(before: float, after: float) -> str:
             values = {model['before_label']: before, model['after_label']: after}
             return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
-        self.assertEqual(judged(4.5, 7.5), 'ok')
-        self.assertEqual(judged(3.0, 3.0), 'alert')
-        self.assertEqual(judged(4.5, 10.5), 'alert')
+        self.assertEqual(judged(3.0, 3.0), 'ok')
+        self.assertEqual(judged(4.5, 7.5), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_other_source_arm_learns_its_gate_between_the_reads_and_never_the_talent(self):
+        entry = {**curse_of_the_lich_arm('summon_other_source', 'owned_creature_school_spell_crit_chance',
+                                         SCHOOL_PROBE, 3, False), 'gate_spell': 26127}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        reads = [index for index, step in enumerate(steps)
+                 if step.get('metric') == 'owned_creature_school_spell_crit_chance']
+        gate = steps.index({'action': 'learn', 'actor': CASTER, 'spell': 26127})
+        self.assertEqual(len(reads), 2)
+        self.assertLess(reads[0], gate)
+        self.assertLess(gate, reads[1])
+        self.assertNotIn({'action': 'learn', 'actor': CASTER, 'spell': 300240}, steps)
 
 
 class TakenHitLearnedArmTests(unittest.TestCase):
