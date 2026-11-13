@@ -362,9 +362,13 @@ def attempt_auras(entry: dict) -> list[dict]:
     if auras and entry['trigger']['action'] != CAST:
         raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
     for aura in auras:
-        if set(aura) != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) or aura['stacks'] < 0:
+        if set(aura) - {'target'} != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) \
+                or aura['stacks'] < 0:
             raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} must name its spell, stacks and source')
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+        if aura.get('target', TARGET) != TARGET:
+            raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} sets an aura on the caster or the {TARGET}')
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks'],
+             **({'target': TARGET} if 'target' in aura else {})}
             for aura in auras]
 
 

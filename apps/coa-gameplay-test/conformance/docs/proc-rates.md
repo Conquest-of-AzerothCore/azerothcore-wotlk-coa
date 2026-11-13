@@ -27,6 +27,8 @@ A `procs` entry of the class file describes one proc aura:
 | `status`, `reason` | `ambiguous_tooltip` or `unmodelled` for an entry without a scenario, and why |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast of a `cast` trigger, for a fixture that keeps another |
 | | roll out of the trials (Blade Sermon 572548: Oath Chain at its cap, so Vindication grants no Oath: Vindication) |
+| | or, with `"target": "dummy"`, a state the trigger needs on the dummy (Soulfreeze 572023: Ice Lock 22856, a |
+| | Frost stun without interrupt flags, keeps the dummy Frozen through the damage, ADR 0491) |
 | `applied_by` | `{"spell", "source"}`: the aura is not learned but granted by a cast of `spell` (an Oath), so the |
 | | scenario sets it (`set_aura`, 1 stack) instead of learning it, and the chance is the aura's own `$<aura>s1` |
 | | percent token in the tooltip of `spell`, which `tooltip` then copies (ADR 0151) |

@@ -640,7 +640,8 @@
         "806086": {}
       },
       "internal_cooldown_ms": 0
-    }
+    },
+    {"aura": 572023, "name": "Soulfreeze", "tooltip": "All Frost damage you deal to Frozen targets now has a $h% chance to unleash Soulfreeze on them.", "chance_token": "$h", "band": true, "baseline": true, "trigger": {"action": "cast", "spell": 707592}, "trigger_text": "All Frost damage you deal to Frozen targets", "attempt_auras": [{"spell": 22856, "stacks": 1, "target": "dummy", "source": "named precondition fixture (mentor 04:1x, ADR 0491): Ice Lock 22856, Frost school stun (Effect[0] aura 12 SPELL_AURA_MOD_STUN, SchoolMask 16, no AuraInterruptFlags, DurationIndex 21), gives the dummy AURA_STATE_FROZEN (SpellInfo.cpp:2342-2346) and is not broken by damage; the claim's subject is the Soulfreeze proc, not a Necromancer freeze"}], "trial_readings": [{"name": "every Frost hit on the frozen dummy", "meaning": "All Frost damage you deal: the Glacial Impact 707592 hits plus the Soulfreeze 801728 ticks, which are own Frost damage and roll the chance again (not Derived, AscensionNecromancerEvents.cpp:18-36)", "adds": [{"metric": "spell_damage_count", "spell": 801728}], "minus_events": false}], "event_metric": "spell_cast_count", "proc_spell": 801724, "proc_spell_source": "Soulfreeze() casts 801724 at the target (AscensionNecromancerEvents.cpp:39-46)", "events_per_proc": 1, "handler": "aura_ascension_necromancer_event::Proc (AscensionNecromancerEvents.cpp:141-145): an own Frost-school hit calls Soulfreeze(), which rolls Chance(player, 572023) (ProcChance 25) when the target HasAuraState(AURA_STATE_FROZEN) (or Permafrost 801747 is on the caster, not used here) and casts 801724. Glacial Impact 707592 (Frost, instant, no cost, no global cooldown) is the Frost hit.", "dbc": {"572023": {"ProcChance": 25, "ProcFlags": 0, "ProcCharges": 0}}, "spell_proc": {}, "internal_cooldown_ms": 0}
   ],
   "triggers": [
     {
