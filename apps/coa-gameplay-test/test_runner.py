@@ -1131,6 +1131,14 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'metric needs the health modifier part'):
             run.validate(self.scenario)
 
+    def test_active_power_needs_a_power(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'active_power', 'power': 0,
+                                       'min': 0, 'max': 1})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        del self.scenario['steps'][-1]['power']
+        with self.assertRaisesRegex(ValueError, 'metric needs the power type'):
+            run.validate(self.scenario)
+
     def test_pet_aura_amount_needs_spell(self):
         self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'pet_aura_amount',
                                        'spell': 500939, 'effect': 1, 'equals': 5})

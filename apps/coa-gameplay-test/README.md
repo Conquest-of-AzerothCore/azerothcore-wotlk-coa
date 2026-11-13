@@ -1055,6 +1055,8 @@ native `GetArmor()`, zero when absent. `owned_creature_max_health` and `owned_cr
 creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 `owned_creature_health_modifier` reads the same creature's unrounded `UNIT_MOD_HEALTH` parts as floats: `part` 0
 the base value, 1 the base percent, 2 the total value, 3 the total percent (a read only, ADR 0528).
+`power_type` reads a player's display power type (`getPowerType()`), `active_power` whether `HasActivePowerType(power)`
+holds for `power` 0..6, scripts included (reads only, ADR 0529).
 `owned_creature_stat` reads the same creature's `GetStat(stat)` for `stat` 0 to 4 (Strength, Agility, Stamina,
 Intellect, Spirit) and requires it to be present (a read only, ADR 0480).
 `owned_creature_aura_max_duration_ms` reads the maximum duration of the aura `spell` on the same creature (0 when

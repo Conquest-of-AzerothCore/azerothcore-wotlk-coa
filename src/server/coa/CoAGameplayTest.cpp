@@ -5115,6 +5115,14 @@ private:
             Require(effect < MAX_SPELL_EFFECTS && info->Effects[effect].IsEffect(), "Invalid immunity probe effect");
             return player->IsImmunedToSpellEffect(info, effect, caster);
         }
+        if (metric == "power_type")
+            return player->getPowerType();
+        if (metric == "active_power")
+        {
+            uint32 const power = step.get<uint32>("power");
+            Require(power < MAX_POWERS, "Invalid power type");
+            return player->HasActivePowerType(Powers(power));
+        }
         if (metric == "expertise")
             return player->GetUInt32Value(PLAYER_EXPERTISE);
         if (metric == "spell_uses_armor")
