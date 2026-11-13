@@ -2711,11 +2711,11 @@
     "spell": 705754,
     "clause": "Casting Command spells on an enemy now applies Expunge if they are Diseased.",
     "labels": [
-      "705754 effect_value 573233e0 #0",
-      "705754 spell_duration 573233 #1",
-      "705754 max_stacks 573233 #2"
+      "705754 behaviour_metric_delta expunge_applied",
+      "705754 behaviour_metric_delta expunge_not_diseased"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (PAIR2; behaviour reads, no fixture): a Command: Undead 504868 at a dummy carrying Crypt Plague 570131 puts Expunge 573233 on it with 705754 learned (1), none without (0, control); the same Command at a dummy without a disease puts none with or without it (contrast for \"if they are Diseased\"). G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 573233 \"Expunge\" 64 lines by id and by name (13 applications, 12 doses, 26 refreshes, 13 removals; applied-to-removed about 10 s when not refreshed; doses reach 3 in 11 of 12, against $573233u = 2 here: observation, the tooltip governs, G-1); 705754 and 500443 0 by id; ~/CoaServer/reference: bindmysoul \"Casting Command spells on an enemy now applies Expunge if they are Diseased. ... by 10% for 10 seconds, stacking 2 times.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 706472,
@@ -2959,12 +2959,11 @@
     "spell": 707562,
     "clause": "When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies.",
     "labels": [
-      "707562 effect_value 712434e0 #0",
-      "707562 spell_duration 712434 #1",
-      "707562 max_stacks 712434 #2"
+      "707562 behaviour_metric_delta frost_crit",
+      "707562 behaviour_metric_delta no_crit"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
+    "reason": "Crit part: status 1 (PAIR3): a forced-crit Lichfrost 801722 (spell crit rating fixture) gives 1 Frozen Bodies 712434 stack with 707562 learned, 0 without; a non-critical Lichfrost (984954 fixture) gives none even with it. Kill part (\"When you kill an enemy that yields experience or honor\"): not final, tool gap \"corpse fixture (a creature killed in the scenario)\" (side b of batch M), not attempted. G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 712434 \"Frozen Bodies\" 12719 lines by id, 14290 by name (2087 applications, 6411 doses, doses up to 10, 87 at 10, none above; 0 removals within 0.3 s after any of the 1260 Glacial Impact 707592 hits by a holder); 707562 0 by id; ~/CoaServer/reference: bindmysoul \"When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies. ... by 3% for 20 seconds, stacking 10 times. Reaching 10 stacks causes your next Glacial Impact ... to critically strike for 50% increased damage.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707588,
@@ -3346,7 +3345,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim 1 status 1 after fix ADR 0344 (9.85%/9.75% inside the band; Zombie Plague hits cast in the handler left out of the trials). Claim \"for $807653d\": data only, Status: route pending (route agent 2026-11-13, parked: not built; the 807653 aura on the minion comes from a 10% proc, a timed read needs per-window aura_duration_ms reads after the proc). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Claim 1 status 1 after fix ADR 0344 (9.85%/9.75% inside the band; Zombie Plague hits cast in the handler left out of the trials). Claim \"for $807653d\": Not final, fix note F-ma-1 (morning batch M side a, sent to the controller): with the forced roll (ADR 0482) Plague Horde 807653 lands on the caster, not on the minion (pair PAIR6: horde_on_caster 1 against 0, the Ghoul never carries it), and the crit aura 807765 is cast nowhere: AscensionNecromancerEvents.cpp:192 Cast(player, actor, 807653) with every 807653 effect TARGET_UNIT_CASTER. Live logs agree with the tooltip (minion self-cast, 807765 with every 807653). G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 807653 15562 lines by id, \"Plague Horde\" 31124 by name; 6089 applications of 807653, all self-cast by a minion, each with 807765 on the same minion within 0.2 s; ~/CoaServer/reference: bindmysoul \"Damage dealt by your Undead minions now has a 10% chance to cast Plague Horde on themselves\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 802986,
@@ -3355,7 +3354,7 @@
       "802986 effect_value 504022e0 #2"
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: not attempted in its time cap). A minion hit with a level-scaled formula; no entry yet. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Not final, route pending (morning batch M side a): with the forced roll of ADR 0482 the Zombie Plague 504022 hit is at a known time, but forced_chance exists for metric_delta only; the route is a script_hit 504022 (caster_entry of the minion) with the same fixture, or a metric_delta gain of spell_damage_total of 504022 at the dummy. Not built. G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 807653 15562 lines by id, \"Plague Horde\" 31124 by name; 6089 applications of 807653, all self-cast by a minion, each with 807765 on the same minion within 0.2 s; ~/CoaServer/reference: bindmysoul \"Damage dealt by your Undead minions now has a 10% chance to cast Plague Horde on themselves\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 802988,
@@ -5812,13 +5811,14 @@
       {
         "claim": "Transformed into a Frenzied Ghoul",
         "labels": [
-          "503740 behaviour_metric_delta frenzied"
+          "503740 behaviour_metric_delta frenzied_display"
         ]
       },
       {
         "claim": "increasing haste by $s2%",
         "labels": [
-          "503740 effect_value 707014e1 #1"
+          "503740 effect_value 707014e1 #1",
+          "503740 behaviour_metric_delta frenzied_haste"
         ]
       },
       {
@@ -5829,14 +5829,14 @@
       }
     ],
     "kind": "claim",
-    "reason": "Pulled sentence (@s:) of 707014, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"15% ... haste by 40% for 10 seconds\"; logs: 2018 Frenzied Ghoul applications or refreshes, self-cast by Ghouls, over 14482 Ghoul melee hits (13.9%)."
+    "reason": "Pulled sentence (@s:) of 707014, joins the parent tooltip (G-5). Claims \"Transformed\" and \"haste by $s2%\": status 1 (PAIR4; forcing fixture ADR 0482, mentor N-a1: 503740 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 707014 read absent on the Ghoul without the talent and present with it, the modifier removed at the end; the 15% roll itself is 503740 proc_rate): the Ghoul 50073 sent at the dummy shows display 10626 without 503740 and 14708 (the model of Frenzied Ghoul 50173, the transform's MiscValue) with it, and its swing interval 2000 -> 1428.571 ms = 2000 / 1.40. Claim \"for $d\": not final, tool gap \"expiry of a re-rolled minion aura\": every forced hit refreshes 707014, so the 10 s expiry cannot be bracketed to 500 ms (unforced, the roll repeats 15% per hit). G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 707014 2572 lines by id, \"Frenzied Ghoul\" 4779 by name, every application self-cast by a Ghoul; ~/CoaServer/reference: bindmysoul \"15% ... haste by 40% for 10 seconds\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 503740,
     "clause": "Immune to movement slowing effects.",
     "labels": [],
     "kind": "claim",
-    "reason": "Pulled sentence (@s:) of 707014, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"15% ... haste by 40% for 10 seconds\"; logs: 2018 Frenzied Ghoul applications or refreshes, self-cast by Ghouls, over 14482 Ghoul melee hits (13.9%)."
+    "reason": "Pulled sentence (@s:) of 707014 (Effect[2] aura 77 mechanic immunity 11, snare). Not final, tool gap \"enemy slow cast at an owned minion\": no metric_delta step has an enemy cast a slow at the Ghoul (enemy_casts and target_casts cast at the enemy itself); with the forcing fixture of ADR 0482 the Frenzied Ghoul is ready at a known time, so the route is an enemy Hamstring 1715 or Frost Nova at it and owned_creature_run_speed_rate against a no-talent control. Not attempted. G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 707014 2572 lines by id, \"Frenzied Ghoul\" 4779 by name, every application self-cast by a Ghoul; ~/CoaServer/reference: bindmysoul \"15% ... haste by 40% for 10 seconds\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 92122,
@@ -5845,24 +5845,29 @@
       {
         "claim": "For $d",
         "labels": [
-          "92122 spell_duration 707421 #1"
+          "92122 spell_duration 707421 #1",
+          "92122 behaviour_metric_delta minion_buff_held",
+          "92122 behaviour_metric_delta minion_buff_ends"
         ]
       },
       {
         "claim": "the critical strike chance of your Undead minions is increased by $s1%",
         "labels": [
-          "92122 effect_value 707421e0 #2"
+          "92122 effect_value 707421e0 #2",
+          "92122 behaviour_metric_delta minion_crit"
         ]
       },
       {
         "claim": "stacking $u times",
         "labels": [
-          "92122 max_stacks 707421 #3"
+          "92122 max_stacks 707421 #3",
+          "92122 behaviour_metric_delta minion_crit_third",
+          "92122 behaviour_metric_delta minion_crit_cap"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Pulled sentence (@s:) of 707421, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"25% ... +4%, stacking 3 times, 10 seconds\"; logs: 1880 applications, 1053 doses, 86039 refreshes of 707421."
+    "reason": "Pulled sentence (@s:) of 707421, joins the parent tooltip (G-5). Status 1 (PAIR2): 707421 cast for real by the caster (the spell the 25% roll casts; the roll itself is 92122 proc_rate), 92122 unlearned so no roll adds a stack; a Ghoul 50073 raised in each phase. Crit: the Ghoul's melee crit chance against the dummy 5 -> 9 after one cast (+4, $s1); stacks: 9 -> 17 (1 -> 3 stacks, +8) and 13 -> 17 (2 -> 3, +4; +12 if uncapped): the cap is 3 ($u). Duration: both Ghouls carry 707421 9500 ms after the cast and none at 10500 ms ($d 10000, both sides bracketed). G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 707421 \"Tundra Warriors\" 90842 lines by id and by name; ~/CoaServer/reference: bindmysoul \"For 10 seconds, the critical strike chance of your Undead minions is increased by 4%, stacking 3 times.\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 92121,
@@ -5896,10 +5901,11 @@
     "spell": 802986,
     "clause": "Enrage for $d,",
     "labels": [
-      "802986 spell_duration 807653 #3"
+      "802986 spell_duration 807653 #3",
+      "802986 behaviour_metric_delta horde_on_caster"
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: not built; the aura comes from a 10% minion proc, so a timed read of 807653 on the minion needs per-window aura_duration_ms reads after the proc). Pulled sentence (807653); needs a duration read of the aura on the minion. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Not final, fix note F-ma-1 (morning batch M side a, sent to the controller): with the forced roll (ADR 0482) Plague Horde 807653 lands on the caster, not on the minion (pair PAIR6: horde_on_caster 1 against 0, the Ghoul never carries it), and the crit aura 807765 is cast nowhere: AscensionNecromancerEvents.cpp:192 Cast(player, actor, 807653) with every 807653 effect TARGET_UNIT_CASTER. Live logs agree with the tooltip (minion self-cast, 807765 with every 807653). G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 807653 15562 lines by id, \"Plague Horde\" 31124 by name; 6089 applications of 807653, all self-cast by a minion, each with 807765 on the same minion within 0.2 s; ~/CoaServer/reference: bindmysoul \"Damage dealt by your Undead minions now has a 10% chance to cast Plague Horde on themselves\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 802986,
@@ -5908,7 +5914,7 @@
       "802986 effect_value 807765e0 #4"
     ],
     "kind": "claim",
-    "reason": "Status: route pending (route agent 2026-11-13, parked: not built; owned_creature_crit_chance on a minion carrying 807653 needs the proc-gated aura first (harness set_aura would make the subject a fixture)). Pulled sentence; owned_creature_crit_chance on a minion carrying 807653 would read it. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+    "reason": "Not final, fix note F-ma-1 (morning batch M side a, sent to the controller): with the forced roll (ADR 0482) Plague Horde 807653 lands on the caster, not on the minion (pair PAIR6: horde_on_caster 1 against 0, the Ghoul never carries it), and the crit aura 807765 is cast nowhere: AscensionNecromancerEvents.cpp:192 Cast(player, actor, 807653) with every 807653 effect TARGET_UNIT_CASTER. Live logs agree with the tooltip (minion self-cast, 807765 with every 807653). G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 807653 15562 lines by id, \"Plague Horde\" 31124 by name; 6089 applications of 807653, all self-cast by a minion, each with 807765 on the same minion within 0.2 s; ~/CoaServer/reference: bindmysoul \"Damage dealt by your Undead minions now has a 10% chance to cast Plague Horde on themselves\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 560730,
@@ -5941,44 +5947,57 @@
     "spell": 705754,
     "clause": "Increases the target's damage taken from your Necromancer diseases by $573233s1% for $573233d,",
     "labels": [
-      "705754 effect_value 573233e0 #0",
-      "705754 spell_duration 573233 #1"
+      "705754 behaviour_hit_ratio disease_damage_two",
+      "705754 behaviour_metric_delta expunge_held",
+      "705754 behaviour_metric_delta expunge_ends"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (PAIR2): damage: Crypt Plague 570131 ticks (20000 spell power, 823764 in both arms, non-critical) 12180 without 705754 and 14616 with it at the 2-stack cap held by a Command before every trial: ratio 1.200 on the observed control, = 1 + 2 x $573233s1 10% (aura 271 amount x stack count; the stack entries read 1 per Command, cap 2), inside the G-19 band 18-22%; a single-stack ratio is not read (the pilot-sized trials outlast the 10 s debuff, pilot p2 read 1.0032 over 60 trials: an incorrect test, dropped). Duration $573233d: 573233 on the dummy 9500 ms after the Command (1) and gone at 10500 ms (0), both sides bracketed. G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 573233 \"Expunge\" 64 lines by id and by name (13 applications, 12 doses, 26 refreshes, 13 removals; applied-to-removed about 10 s when not refreshed; doses reach 3 in 11 of 12, against $573233u = 2 here: observation, the tooltip governs, G-1); 705754 and 500443 0 by id; ~/CoaServer/reference: bindmysoul \"Casting Command spells on an enemy now applies Expunge if they are Diseased. ... by 10% for 10 seconds, stacking 2 times.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 705754,
     "clause": "stacking $573233u times.",
     "labels": [
-      "705754 max_stacks 573233 #2"
+      "705754 behaviour_metric_delta expunge_one_stack",
+      "705754 behaviour_metric_delta expunge_stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (PAIR2; aura_stacks on the dummy): one Command on a diseased dummy 1 stack, three Commands 2 stacks ($573233u = 2; 3 if uncapped); 0 without 705754. G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 573233 \"Expunge\" 64 lines by id and by name (13 applications, 12 doses, 26 refreshes, 13 removals; applied-to-removed about 10 s when not refreshed; doses reach 3 in 11 of 12, against $573233u = 2 here: observation, the tooltip governs, G-1); 705754 and 500443 0 by id; ~/CoaServer/reference: bindmysoul \"Casting Command spells on an enemy now applies Expunge if they are Diseased. ... by 10% for 10 seconds, stacking 2 times.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707562,
     "clause": "Increases the damage of your next Glacial Impact by $s1% for $d,",
     "labels": [
       "707562 effect_value 712434e0 #0",
-      "707562 spell_duration 712434 #1"
+      "707562 spell_duration 712434 #1",
+      "707562 behaviour_metric_delta stack_held",
+      "707562 behaviour_metric_delta stack_ends",
+      "707562 behaviour_metric_delta one_stack_damage",
+      "707562 behaviour_metric_delta consumed"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
+    "reason": "Duration $d: status 1 (PAIR3): after one forced-crit Glacial Impact the stack is on the caster at 19500 ms and gone at 20500 ms (both sides bracketed). Magnitude and \"next\": status 5, owner questions Q-ma-2 and Q-ma-1 (morning batch M side a): one 712434 stack lifts Glacial Impact 707592 from 855 to 905 (+5.85% against $s1 3%; two +3% effects, Effect[0] SPELLMOD_DAMAGE and Effect[1] SPELLMOD_EFFECT1: int(int(812 x 1.03) + 43) x 1.03 = 905, a DBC hypothesis that reproduces the reading; live logs: 1 stack 1.0585 of the 0-stack median, 3 day-player groups), and a Glacial Impact does not consume the stack (still 1 after it; live: 0 removals after 1260 hits by a holder). Both disagree with the tooltip and agree with live; recommendation for both: keep the behaviour, align the text (G-1 makes it the owner's call). G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 712434 \"Frozen Bodies\" 12719 lines by id, 14290 by name (2087 applications, 6411 doses, doses up to 10, 87 at 10, none above; 0 removals within 0.3 s after any of the 1260 Glacial Impact 707592 hits by a holder); 707562 0 by id; ~/CoaServer/reference: bindmysoul \"When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies. ... by 3% for 20 seconds, stacking 10 times. Reaching 10 stacks causes your next Glacial Impact ... to critically strike for 50% increased damage.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707562,
     "clause": "stacking $u times.",
     "labels": [
-      "707562 max_stacks 712434 #2"
+      "707562 max_stacks 712434 #2",
+      "707562 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
+    "reason": "Status 1 (PAIR3): eleven forced-crit Lichfrosts give 10 stacks ($u; 11 if uncapped), 0 without 707562. G-11: server DBC set (/srv/coa/server-data/dbc) and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 712434 \"Frozen Bodies\" 12719 lines by id, 14290 by name (2087 applications, 6411 doses, doses up to 10, 87 at 10, none above; 0 removals within 0.3 s after any of the 1260 Glacial Impact 707592 hits by a holder); 707562 0 by id; ~/CoaServer/reference: bindmysoul \"When you kill an enemy that yields experience or honor or critically strike with Frost damage you now gain a stack of Frozen Bodies. ... by 3% for 20 seconds, stacking 10 times. Reaching 10 stacks causes your next Glacial Impact ... to critically strike for 50% increased damage.\", sidekick data.js, mind_of_ascension_talent.csv and advancement.tsv list it; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707562,
     "clause": "Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.",
-    "labels": [],
+    "labels": [
+      "707562 behaviour_metric_delta ten_casts_stacks",
+      "707562 behaviour_metric_delta ten_stacks_crit",
+      "707562 behaviour_metric_delta nine_stacks_no_crit"
+    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707562.md."
+    "reason": "Not final, alert lead, parked (G-25, design 1 of 2 tried; morning batch M side a): ten real 712434 casts reach the 10-stack cap (ten_casts_stacks 1 -> 10), yet the next Glacial Impact 707592 does not crit with the spell crit fixture 984954 (-1000) on the caster (ten_stacks_crit 0 critical hits against 1, nine_stacks_no_crit 0 as expected; pairs p4 and p5, build 0c5a28ea71ab). OnSpellCritChance sets 100 for 707592 at the cap (AscensionNecromancerAbilities.cpp:125-132) and runs after SpellDoneCritChance (Spell.cpp:8653-8654), so the fixture should not mask it; cause not read. Design 2 (not tried): no crit fixture, crit rate at 10 stacks against 9 over trials kept inside the 20 s stack duration. The \"50% increased damage\" part is not judged (Contracts.cpp:498 multiplies the base by 1.5 at the cap; the tooltip does not say whether the crit multiplier comes on top)."
   },
   {
     "spell": 805038,
