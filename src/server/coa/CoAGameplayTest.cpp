@@ -4979,14 +4979,17 @@ private:
             ObjectGuid target;
             if (auto id = step.get_optional<std::string>("target"))
                 target = GetUnit(*id)->GetGUID();
+            auto const targetEntry = step.get_optional<uint32>("target_entry");
+            Require(!targetEntry || !target, "Spell damage query selects a target or a target entry");
             auto critical = step.get_optional<bool>("critical");
             auto blocked = step.get_optional<bool>("blocked");
             auto resisted = step.get_optional<bool>("resisted");
             uint64 value = 0;
             for (SpellDamageEvent const& event : _actors.at(step.get<std::string>("actor")).spellDamage)
                 if ((casterEntry ? event.casterEntry == *casterEntry : caster && event.caster == caster) &&
-                    event.spell == spell &&
-                    (!target || event.target == target) && (!critical || event.critical == *critical) &&
+                    event.spell == spell && (!target || event.target == target) &&
+                    (!targetEntry || (event.target.IsCreature() && event.target.GetEntry() == *targetEntry)) &&
+                    (!critical || event.critical == *critical) &&
                     (!blocked || event.blocked == *blocked) && (!resisted || event.resisted == *resisted))
                     value += metric == "spell_damage_count" ? 1 : event.damage;
             return double(value);

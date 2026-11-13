@@ -770,6 +770,9 @@ throughout the scenario; use snapshots and `relative_to` around a cast.
 events, as the `owned_creature_*` metrics resolve it, without a live creature (a creature another unit summoned, alive
 or not): it reads 0 when none has cast, so a control arm without the summon is observable. The `spell_heal_*` metrics
 take it too.
+`target_entry` (in place of `target`, spell damage only) counts the hits whose target is a creature of that entry,
+from the recorded target guid, without a live creature: it reads 0 when no such creature was struck, so a phase
+without the creature is observable (a hit a spell magnet redirected to a summon).
 They exclude zero damage, melee swing packets, and healing, and do not test network delivery.
 `spell_log_count`, `spell_absorb_total` and `spell_resist_total` read the same native direct spell damage logs,
 including a hit that an absorb took whole: they count the logs of `spell`, or sum the absorbed or the resisted amount
