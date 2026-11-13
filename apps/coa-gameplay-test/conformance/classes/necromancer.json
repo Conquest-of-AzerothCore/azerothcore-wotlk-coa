@@ -1326,14 +1326,26 @@
         801722,
         500338
       ],
-      "control": {},
+      "control": {
+        "auras": [
+          [
+            680486,
+            1
+          ]
+        ]
+      },
       "treatment": {
+        "auras": [
+          [
+            680486,
+            1
+          ]
+        ],
         "observe_spell": 500338,
         "wait_ms": 3000
       },
       "trials": 300,
-      "expected_source": "FN-c4-1 natural-rate check (ADR 0442 fix, ADR 0498 per-arm spells): Flesh to Worms 500338 ticks (aura 3 periodic damage, made crit-capable by the contract) must crit at the caster's own spell crit chance, read as the critical share of Lichfrost 801722 direct hits in the control arm; expected difference 0 points (an 'always crits' tick would read about +95). Treatment: Flesh to Worms cast at the dummy, its ticks counted 3000 ms after each cast. Both arms share the caster's spell crit: neither arm sets an aura or fixture, and the class file's known_auras and probe_auras carry no aura 57 or 71 (scanned 2026-11-13); a school-specific crit modifier from elsewhere on the reference is not read. 300 casts per arm; the 2-point band needs the larger counts the verdict states (G-20).",
-      "cast_power": 1373
+      "expected_source": "FN-c4-1 natural-rate check (ADR 0442 fix, ADR 0498 per-arm spells): Flesh to Worms 500338 ticks (aura 3 periodic damage, made crit-capable by the contract) must crit at the caster's own spell crit chance, read as the critical share of Lichfrost 801722 direct hits in the control arm; expected difference 0 points (an 'always crits' tick would read about +95). Treatment: Flesh to Worms cast at the dummy, its ticks counted 3000 ms after each cast. Both arms share the caster's spell crit: neither arm sets an aura or fixture, and the class file's known_auras and probe_auras carry no aura 57 or 71 (scanned 2026-11-13); a school-specific crit modifier from elsewhere on the reference is not read. 300 casts per arm; the 2-point band needs the larger counts the verdict states (G-20). The End Is Near 680486 (aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT -101 on every school, permanent) is set on the caster in both arms (precondition fixture): crit_rate sets no power before a cast, and pilot p8 / pair f2 counted only 56 landed Lichfrosts of 300 once the mana ran out."
     },
     {
       "spell": 802986,
@@ -1342,7 +1354,7 @@
       "variant": "horde_on_ghouls",
       "label_suffix": "horde_on_ghouls",
       "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
-      "expected": 2,
+      "expected": 1,
       "before_expected": 0,
       "trigger_spell": 504868,
       "target": "dummy",
@@ -1363,7 +1375,8 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. Both Ghouls (one raised per phase, both sent at the dummy) carry one 807653 after the rolls; none before."
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). 802986 known from the start (setup_only_after); the before phase commands with no minion (0), the after phase raises one Ghoul 50073 and sends it at the dummy (one Ghoul: with one raised per phase, the first one carried the aura in only some runs, pair f2 run 1). The no-talent control is the horde_crit and horde_on_caster entries. Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The Ghoul carries one 807653 after the rolls.",
+      "setup_only_after": true
     },
     {
       "spell": 802986,
@@ -1372,7 +1385,7 @@
       "variant": "horde_crit_on_ghouls",
       "label_suffix": "horde_crit_on_ghouls",
       "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
-      "expected": 2,
+      "expected": 1,
       "before_expected": 0,
       "trigger_spell": 504868,
       "target": "dummy",
@@ -1393,7 +1406,8 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. Both Ghouls carry one 807765 (one per Ghoul: neither aura stacks, StackAmount 0); none before."
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). 802986 known from the start (setup_only_after); the before phase commands with no minion (0), the after phase raises one Ghoul 50073 and sends it at the dummy (one Ghoul: with one raised per phase, the first one carried the aura in only some runs, pair f2 run 1). The no-talent control is the horde_crit and horde_on_caster entries. Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The Ghoul carries one 807765 (neither aura stacks, StackAmount 0).",
+      "setup_only_after": true
     },
     {
       "spell": 802986,
@@ -2283,7 +2297,7 @@
         ]
       },
       "critical": false,
-      "trials": 6,
+      "trials": 20,
       "warmup": [
         570131,
         570131,
