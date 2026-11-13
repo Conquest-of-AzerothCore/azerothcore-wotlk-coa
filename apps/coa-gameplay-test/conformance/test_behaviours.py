@@ -11297,13 +11297,13 @@ class MinionSwingRatioTests(unittest.TestCase):
         self.assertEqual(len(commands), expectation.model['trials'] + 1)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_the_band_is_five_percent_of_the_stated_ratio(self):
-        self.assertEqual(self.judged(420.0), 'ok')
-        self.assertEqual(self.judged(400.0), 'ok')
-        self.assertEqual(self.judged(440.0), 'ok')
-        self.assertEqual(self.judged(398.0), 'alert')
-        self.assertEqual(self.judged(442.0), 'alert')
-        self.assertEqual(self.judged(200.0), 'alert')
+    def test_the_band_is_five_percent_of_the_stated_ratio_after_the_flat_part(self):
+        self.assertEqual(self.judged(401.0), 'ok')
+        self.assertEqual(self.judged(381.0), 'ok')
+        self.assertEqual(self.judged(421.0), 'ok')
+        self.assertEqual(self.judged(379.0), 'alert')
+        self.assertEqual(self.judged(423.0), 'alert')
+        self.assertEqual(self.judged(201.0), 'alert')
 
 
 

@@ -2283,6 +2283,7 @@ class MinionSwingRatioSpec:
     wait_ms: int = 3000
     command_power: int | None = None
     label_suffix: str = ''
+    strike_flat: float = 0.0
 
 
 def minion_swing_ratio_label(spec: MinionSwingRatioSpec) -> str:
@@ -2344,6 +2345,10 @@ def minion_swing_ratio_scenario(class_file: dict, spec: MinionSwingRatioSpec) ->
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
              'trial_limit': spec.trials, 'minimum_hits': max(1, spec.trials // 2), 'metric': 'spell_damage_total',
              'ratio_band': True, 'quote': entry.quote}
+    if spec.strike_flat:
+        model['treatment_flat'] = spec.strike_flat
+        scenario['contract'] += (f' The strike\'s flat part, {spec.strike_flat:g} per hit, is taken off the strike '
+                                 f'before the ratio.')
     expectation = Expectation(minion_swing_ratio_label(spec), BEHAVIOUR_HIT_RATIO, spec.spell, spec.strike_spell,
                               None, str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -2354,7 +2359,7 @@ def minion_swing_ratio_spec(entry: dict) -> MinionSwingRatioSpec:
                                 int(entry['command_spell']), int(entry['strike_spell']), int(entry['entry']),
                                 float(entry['expected']), int(entry.get('trials', 20)),
                                 int(entry.get('wait_ms', 3000)), entry.get('command_power'),
-                                entry.get('label_suffix', ''))
+                                entry.get('label_suffix', ''), float(entry.get('strike_flat', 0.0)))
 
 
 PUSHBACK_PHASES = ('unhit', 'hit', 'reduced')

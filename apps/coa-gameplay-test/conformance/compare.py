@@ -4366,7 +4366,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                 found = health_loss_series(part, model['health_reads'][arm], float(model['health_set']), found[1])
                 if isinstance(found, str):
                     return replace(base, explanation=found)
-            totals += [total * scale for total in found[0]]
+            flat = float(model.get('treatment_flat', 0.0)) if arm == 'treatment' else 0.0
+            totals += [(total - flat * count) * scale for total, count in zip(*found)]
             counts += found[1]
         series[arm] = (totals, counts)
     minimum = int(model['minimum_hits']) * len(runs)
