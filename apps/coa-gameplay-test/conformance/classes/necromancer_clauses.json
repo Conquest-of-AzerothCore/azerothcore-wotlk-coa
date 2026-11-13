@@ -607,28 +607,57 @@
     "spell": 500933,
     "clause": "Create a Phylactery near you for $d.",
     "labels": [
-      "500933 aura_duration_ms #0"
+      "500933 behaviour_metric_delta lifetime"
     ],
     "kind": "claim"
   },
   {
     "spell": 500933,
     "clause": "Upon taking damage which would bring you below 10% health, become a Shade, protecting you from all physical attacks and spells, but during that time you cannot attack or cast spells.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Upon taking damage which would bring you below 10% health, become a Shade",
+        "labels": [
+          "500933 behaviour_metric_delta shade",
+          "500933 behaviour_metric_delta above_ten"
+        ]
+      },
+      {
+        "claim": "protecting you from all physical attacks and spells",
+        "labels": [
+          "500933 behaviour_metric_delta physical",
+          "500933 behaviour_metric_delta spells"
+        ]
+      },
+      {
+        "claim": "but during that time you cannot attack",
+        "labels": [
+          "500933 behaviour_metric_delta no_attack"
+        ]
+      },
+      {
+        "claim": "or cast spells",
+        "labels": [
+          "500933 behaviour_metric_delta no_cast"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 500933,
     "clause": "Reaching your Phylactery in this state revives you with $500802s2% of your maximum health.",
     "labels": [
-      "500933 effect_value 500802e1 #1"
+      "500933 behaviour_metric_delta revive"
     ],
     "kind": "claim"
   },
   {
     "spell": 500933,
     "clause": "If you do not reach it in time you will die.",
-    "labels": [],
+    "labels": [
+      "500933 behaviour_metric_delta death"
+    ],
     "kind": "claim"
   },
   {
@@ -1825,22 +1854,51 @@
   {
     "spell": 704701,
     "clause": "Casting Command spells now grants you a stack of Underking for $302516d.",
-    "labels": [
-      "704701 spell_duration 302516 #0"
+    "claims": [
+      {
+        "claim": "Casting Command spells now grants you a stack of Underking",
+        "labels": [
+          "704701 behaviour_metric_delta stack"
+        ]
+      },
+      {
+        "claim": "for $302516d",
+        "labels": [
+          "704701 behaviour_metric_delta stack_duration"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 704701,
     "clause": "At 10 stacks,",
-    "labels": [],
+    "labels": [
+      "704701 behaviour_metric_delta nine",
+      "704701 behaviour_metric_delta nine_no_zombie",
+      "704701 behaviour_metric_delta ten",
+      "704701 behaviour_metric_delta zombie"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704701,
     "clause": "the cooldown of$?s805032[][ Animate: Tomb King,]$?s805044[][ Animate: Bone Wraith] or Animate: Plaguefather is reduced by $/1000;302517s1 sec at random",
-    "labels": [
-      "704701 effect_value 302517e0 #1"
+    "claims": [
+      {
+        "claim": "the cooldown of an Animate is reduced by $/1000;302517s1 sec",
+        "labels": [
+          "704701 cost_gate 805044 animate without",
+          "704701 cost_gate 805044 animate with",
+          "704701 cost_gate 805044 animate beyond"
+        ]
+      },
+      {
+        "claim": "at random",
+        "labels": [
+          "704701 behaviour_metric_delta random"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1848,7 +1906,8 @@
     "spell": 704701,
     "clause": "and you animate a Greater Zombie for $525380d.",
     "labels": [
-      "704701 spell_duration 525380 #2"
+      "704701 behaviour_metric_delta zombie",
+      "704701 behaviour_metric_delta zombie_lifetime"
     ],
     "kind": "claim"
   },
@@ -1945,14 +2004,16 @@
   {
     "spell": 704723,
     "clause": "Casting spells now grants you 1 stack of Diabolical,",
-    "labels": [],
+    "labels": [
+      "704723 behaviour_metric_delta stack"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704723,
     "clause": "stacking up to $706504u times,",
     "labels": [
-      "704723 max_stacks 706504 #0"
+      "704723 behaviour_metric_delta cap"
     ],
     "kind": "claim"
   },
@@ -1960,15 +2021,28 @@
     "spell": 704723,
     "clause": "for $706504d.",
     "labels": [
-      "704723 spell_duration 706504 #1"
+      "704723 behaviour_metric_delta duration_long",
+      "704723 behaviour_metric_delta past_stated"
     ],
     "kind": "claim"
   },
   {
     "spell": 704723,
     "clause": "Damage dealt by your Crypt Swarm will consume a stack to deal $707133s1% increased damage per stack.",
-    "labels": [
-      "704723 effect_value 707133e0 #2"
+    "claims": [
+      {
+        "claim": "Damage dealt by your Crypt Swarm will consume a stack",
+        "labels": [
+          "704723 behaviour_metric_delta consumed"
+        ]
+      },
+      {
+        "claim": "to deal $707133s1% increased damage per stack",
+        "labels": [
+          "704723 behaviour_metric_delta crypt_swarm_hit",
+          "704723 behaviour_metric_delta crypt_swarm_stacked"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3629,17 +3703,45 @@
   {
     "spell": 681460,
     "clause": "Activate a Glacial Ward on yourself and your Undead minions for $d.",
-    "labels": [
-      "681460 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Activate a Glacial Ward on yourself",
+        "labels": [
+          "681460 behaviour_metric_delta on_you"
+        ]
+      },
+      {
+        "claim": "and your Undead minions",
+        "labels": [
+          "681460 behaviour_metric_delta on_minions"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "681460 behaviour_metric_delta duration",
+          "681460 behaviour_metric_delta minion_duration"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 681460,
     "clause": "While active, maximum Runic Power and Intellect is increased by $s1%",
-    "labels": [
-      "681460 effect_value e0 #1",
-      "681460 aura_amount e0 #1"
+    "claims": [
+      {
+        "claim": "maximum Runic Power is increased by $s1%",
+        "labels": [
+          "681460 behaviour_metric_delta runic_power"
+        ]
+      },
+      {
+        "claim": "Intellect is increased by $s1%",
+        "labels": [
+          "681460 behaviour_metric_delta intellect"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3647,8 +3749,9 @@
     "spell": 681460,
     "clause": "and the duration of stun effects on you is reduced by $s2%.",
     "labels": [
-      "681460 effect_value e1 #2",
-      "681460 aura_amount e1 #2"
+      "681460 behaviour_metric_delta stun_ends",
+      "681460 behaviour_metric_delta stun_held",
+      "681460 behaviour_metric_delta stun"
     ],
     "kind": "claim"
   },
@@ -3656,7 +3759,7 @@
     "spell": 681460,
     "clause": "@ext:Only 1 Ward can be active at a time.:ext@",
     "labels": [
-      "681460 effect_value #3"
+      "681460 behaviour_metric_delta one_ward"
     ],
     "kind": "claim"
   },

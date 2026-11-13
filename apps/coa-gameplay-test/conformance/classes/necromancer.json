@@ -1126,6 +1126,996 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 704723,
+      "name": "Diabolical (Crypt Swarm with 15 stacks)",
+      "kind": "metric_delta",
+      "variant": "crypt_swarm_stacked",
+      "label_suffix": "crypt_swarm_stacked",
+      "quote": "to deal $707133s1% increased damage per stack.",
+      "expected": 3,
+      "before_expected": 1,
+      "trigger_spell": 800343,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "expire_ms": 31000,
+      "wait_ms": 1500,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800343,
+        "target": "dummy"
+      },
+      "observe_source": "Diabolical 704723 known. Crypt Swarm 800343 (1 damage: BasePoints 0 + DieSides 1, no coefficient row) cast at the dummy: alone its own cast gives 1 stack, int(1 x 1.1) = 1 damage (control, total 1); 31000 ms later fourteen Commands and its cast give 15 stacks, int(1 x (1 + 0.1 x 15)) = 2 damage (total 3). The damage hook is AscensionNecromancerContracts.cpp:416-417. With a base of 1 the reading bounds the bonus per stack to [6.67%, 13.33%) only."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (stack)",
+      "kind": "metric_delta",
+      "variant": "stack",
+      "label_suffix": "stack",
+      "quote": "Casting spells now grants you 1 stack of Diabolical,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 1600,
+      "wait_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707133
+      },
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). One Command: Undead 504868 (family 29): no Diabolical stack without 704723 (control), one with it."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (stack cap)",
+      "kind": "metric_delta",
+      "variant": "cap",
+      "label_suffix": "cap",
+      "quote": "stacking up to $706504u times,",
+      "expected": 15,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 31000,
+      "wait_ms": 500,
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707133
+      },
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: one Command gives 1 stack; 31000 ms later (gone) sixteen Commands 1600 ms apart give 15, the cap."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (past the stated duration)",
+      "kind": "metric_delta",
+      "variant": "past_stated",
+      "label_suffix": "past_stated",
+      "quote": "for $706504d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 1600,
+      "wait_ms": 19500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 1,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707133
+      },
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: no stack without a Command; one 19500 ms after it, and still one at 20500 ms, past the stated 20000 ms ($706504d): the stack is 707133's own 30000 ms."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (stack duration long)",
+      "kind": "metric_delta",
+      "variant": "duration_long",
+      "label_suffix": "duration_long",
+      "quote": "for $706504d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 1600,
+      "wait_ms": 29500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707133
+      },
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known: no stack without a Command; one 29500 ms after it, none at 30500 ms: the stack lasts (29500, 30500] ms, 707133's own DurationIndex 9 (30000 ms). Live logs: 72 natural expiries of the caster's 707133 at 30 s after its last application, none at 20 s."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Damage dealt by your Crypt Swarm will consume a stack",
+      "expected": 3,
+      "before_expected": 0,
+      "trigger_spell": 800343,
+      "target": "dummy",
+      "expire_ms": 31000,
+      "wait_ms": 1500,
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707133
+      },
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). 704723 known. Crypt Swarm 800343 cast at the dummy (harness learn and cast) adds a stack on its cast and its hit removes one: alone it leaves 0 (control); after three Commands it leaves 3, not 4."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (Crypt Swarm hit)",
+      "kind": "metric_delta",
+      "variant": "crypt_swarm_hit",
+      "label_suffix": "crypt_swarm_hit",
+      "quote": "to deal $707133s1% increased damage per stack.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 800343,
+      "target": "dummy",
+      "expire_ms": 1600,
+      "wait_ms": 1500,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800343,
+        "target": "dummy"
+      },
+      "observe_source": "Diabolical 704723 (Level 40 passive; its aura 42 proc on 707133 is dummied, AscensionNecromancerContracts.cpp:57-61): necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts Diabolical 707133 on the caster for every cast of a Necromancer (family 29) spell; 707133 StackAmount 15, DurationIndex 9 (30000 ms), Effect[0] aura 108 +10 ($707133s1, dummied by AscensionNecromancerContracts.cpp:416-420). The damage hook multiplies a Crypt Swarm 800343 hit by 1 + 0.1 x the 707133 stacks (AscensionNecromancerContracts.cpp:416-417), and each Crypt Swarm damage event removes one stack (AscensionNecromancerEvents.cpp:108-117). The tooltip names 706504's stack cap ($706504u = 15) and duration ($706504d = 20000 ms). Crypt Swarm 800343 cast at the dummy with 704723 known: no hit without the cast, one hit of 1 damage with it (Effect[0] SCHOOL_DAMAGE BasePoints 0 + DieSides 1, no coefficient row in AscensionNecromancerData.h). No Necromancer code casts 800343; live logs show the caster's Crypt Swarm hits of 28 to 35."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (stack)",
+      "kind": "metric_delta",
+      "variant": "stack",
+      "label_suffix": "stack",
+      "quote": "Casting Command spells now grants you a stack of Underking for $302516d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 1600,
+      "wait_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 302516
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. One Command: Undead: no Underking stack without 704701 (control), one with it."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (stack duration)",
+      "kind": "metric_delta",
+      "variant": "stack_duration",
+      "label_suffix": "stack_duration",
+      "quote": "Casting Command spells now grants you a stack of Underking for $302516d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 500,
+      "wait_ms": 19500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 302516
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. 704701 known: no stack without a Command, one 19500 ms after it, none at 20500 ms: the stack lasts (19500, 20500] ms against the stated 20000."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (nine stacks)",
+      "kind": "metric_delta",
+      "variant": "nine",
+      "label_suffix": "nine",
+      "quote": "At 10 stacks,",
+      "expected": 9,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "wait_ms": 500,
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 302516
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. 704701 known: one Command gives 1 stack; 21000 ms later (the stack gone) nine Commands 1600 ms apart give 9: no reset below 10."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (no zombie at nine)",
+      "kind": "metric_delta",
+      "variant": "nine_no_zombie",
+      "label_suffix": "nine_no_zombie",
+      "quote": "At 10 stacks,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "wait_ms": 500,
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. The nine-stack layout: no Greater Zombie 503032 after one Command nor after nine."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (tenth stack)",
+      "kind": "metric_delta",
+      "variant": "ten",
+      "label_suffix": "ten",
+      "quote": "At 10 stacks,",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "wait_ms": 500,
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 302516
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. 704701 known: one Command gives 1 stack; 21000 ms later the tenth of ten Commands removes the stacks (0)."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (Greater Zombie)",
+      "kind": "metric_delta",
+      "variant": "zombie",
+      "label_suffix": "zombie",
+      "quote": "and you animate a Greater Zombie for $525380d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 21000,
+      "wait_ms": 500,
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. 704701 known: no Greater Zombie 503032 after one Command (control), one after ten Commands."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (Greater Zombie lifetime)",
+      "kind": "metric_delta",
+      "variant": "zombie_lifetime",
+      "label_suffix": "zombie_lifetime",
+      "quote": "and you animate a Greater Zombie for $525380d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "expire_ms": 500,
+      "wait_ms": 14500,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 503032
+      },
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. 704701 known: no Command, no Greater Zombie; ten Commands, the Zombie present 14500 ms after the tenth and gone at 15500 ms: it lasts (14500, 15500] ms against the stated 15000."
+    },
+    {
+      "spell": 704701,
+      "name": "Underking (Animate cooldown)",
+      "kind": "cost_gate",
+      "variant": "animate",
+      "label_suffix": "animate",
+      "quote": "is reduced by $/1000;302517s1 sec at random",
+      "gated_spell": 805044,
+      "resource": "cooldown",
+      "reduction": 15000,
+      "target": "caster",
+      "after_casts": [
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 1600,
+      "after_cast_gap_ms": 1600,
+      "observe_source": "Underking 704701 (passive; its aura 42 proc on 302516 is dummied by AscensionNecromancerContracts.cpp:57-61). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:293-306): a non-triggered Command spell with 704701 known casts Underking 302516 (DurationIndex 18, 20000 ms, $302516d; StackAmount 10); at 10 stacks it removes them, cuts the cooldown of one known Animate among 805032, 805044, 805048 at random by |Amount(302517)| = 15000 ms ($/1000;302517s1 = 15) and summons Animate: Greater Zombie 525380 (creature 503032, DurationIndex 8, 15000 ms, $525380d). Command: Undead 504868 (usable without minions) is the Command spell cast at the dummy. Only Animate: Tomb King 805044 (RecoveryTime 60000) is known, so the random pick is 805044. Ten Command: Undead casts, 1600 ms apart (global cooldown), follow the priming Tomb King in every arm; the talent decides whether Tomb King is ready again 15000 ms early."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (stun ends)",
+      "kind": "metric_delta",
+      "variant": "stun_ends",
+      "label_suffix": "stun_ends",
+      "quote": "and the duration of stun effects on you is reduced by $s2%.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        681460
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expire_ms": 21000,
+      "wait_ms": 2490,
+      "strike": {
+        "spell": 853,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 853,
+        "caster": "striker"
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). Hammer of Justice 853 (stun, 3000 ms) from the striker; the stun read about 2600 ms after it lands: still on the caster without the Ward (control), gone with it (2400 ms)."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (stun held)",
+      "kind": "metric_delta",
+      "variant": "stun_held",
+      "label_suffix": "stun_held",
+      "quote": "and the duration of stun effects on you is reduced by $s2%.",
+      "expected": 1,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        681460
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expire_ms": 21000,
+      "wait_ms": 2090,
+      "strike": {
+        "spell": 853,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 853,
+        "caster": "striker"
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). Hammer of Justice 853 (stun, 3000 ms) from the striker; the stun read about 2200 ms after it lands: on the caster with and without the Ward, so with the end entry the shortened stun lasts between 2200 and 2600 ms."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (on you)",
+      "kind": "metric_delta",
+      "variant": "on_you",
+      "label_suffix": "on_you",
+      "quote": "Activate a Glacial Ward on yourself and your Undead minions for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 681460,
+        "caster": "caster"
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). The caster's own Ward: absent without the cast (control), present after it."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (on minions)",
+      "kind": "metric_delta",
+      "variant": "on_minions",
+      "label_suffix": "on_minions",
+      "quote": "Activate a Glacial Ward on yourself and your Undead minions for $d.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 681460
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). A Ghoul 50073 is raised in each phase: no Ghoul with the Ward without the cast (control), both after it."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Activate a Glacial Ward on yourself and your Undead minions for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 1795000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 10000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 681460,
+        "caster": "caster"
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). The caster's Ward: absent without the cast, present 1795000 ms after it, gone at 1805000 ms: the duration lies in (1795000, 1805000] ms against the stated 1800000."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (minion duration)",
+      "kind": "metric_delta",
+      "variant": "minion_duration",
+      "label_suffix": "minion_duration",
+      "quote": "Activate a Glacial Ward on yourself and your Undead minions for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "expire_ms": 500,
+      "wait_ms": 1795000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expiry_wait_ms": 10000,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 681460
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). The Ghoul's copy of the Ward: present 1795000 ms after the cast, gone at 1805000 ms (no Ghoul and no cast before)."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (maximum Runic Power)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "While active, maximum Runic Power and Intellect is increased by $s1%",
+      "expected": 1100,
+      "before_expected": 1000,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "max_power",
+      "fields": {
+        "power": 6
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). The caster's maximum Runic Power: 1000 without the Ward (control), 1100 with it."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (Intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "While active, maximum Runic Power and Intellect is increased by $s1%",
+      "expected": 128,
+      "before_expected": 117,
+      "trigger_spell": 681460,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "stat",
+      "fields": {
+        "stat": 3
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). The caster's Intellect: 117 without the Ward (control), 117 x 1.10 = 128.7 with it, truncated to 128 (Rounding 1, G-26)."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (stun duration)",
+      "kind": "metric_delta",
+      "variant": "stun",
+      "label_suffix": "stun",
+      "quote": "and the duration of stun effects on you is reduced by $s2%.",
+      "expected": 2188,
+      "before_expected": 2788,
+      "tolerance": 30,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        681460
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "expire_ms": 21000,
+      "wait_ms": 100,
+      "strike": {
+        "spell": 853,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 853,
+        "caster": "striker"
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). Hammer of Justice 853 (stun, 3000 ms) cast at the caster by the striker; its remaining duration 212 ms after it lands: 2788 without the Ward (control, 3000) and 2188 with it (2400 = 3000 x 0.8). The phases are 21000 ms apart, past the stun's diminishing-returns window."
+    },
+    {
+      "spell": 681460,
+      "name": "Glacial Ward (one Ward)",
+      "kind": "metric_delta",
+      "variant": "one_ward",
+      "label_suffix": "one_ward",
+      "quote": "Only 1 Ward can be active at a time.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 680388,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "setup_in_before": true,
+      "setup_casts": [
+        681460
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura",
+      "fields": {
+        "spell": 681460,
+        "caster": "caster"
+      },
+      "observe_source": "Glacial Ward 681460 (DurationIndex 30, 1800000 ms, $d): Effect[0] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT Runic Power (MiscValue 6) +10 ($s1), Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD stun (MiscValue 12) -20 ($s2), Effect[2] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE Intellect (MiscValue 3) +10. aura_ascension_necromancer_lifecycle::Apply (AscensionNecromancerAuras.cpp:107-120) removes the other Wards (Fetid Ward 680388, Bone Ward 681529) from the caster and its minions and copies the Ward to every minion with the caster's remaining duration; a minion raised later gets it too (AscensionNecromancerSummons.cpp:532-538). Glacial Ward is cast in both phases; the caster keeps it without a second Ward (control) and loses it when Fetid Ward 680388 is cast after it."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (lifetime)",
+      "kind": "metric_delta",
+      "variant": "lifetime",
+      "label_suffix": "lifetime",
+      "quote": "Create a Phylactery near you for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 500933,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 121000,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50132
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster's Phylactery 50132: none without the cast, one 121000 ms after the cast starts (2000 ms cast, so 119000 ms after the summon), none at 123000 ms: the lifetime lies in (119000, 121000] ms against the stated 120000."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (Shade)",
+      "kind": "metric_delta",
+      "variant": "shade",
+      "label_suffix": "shade",
+      "quote": "Upon taking damage which would bring you below 10% health, become a Shade,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "strike": {
+        "spell": 92559,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 500730,
+        "caster": "caster"
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. One 1000 Physical Void Zone 92559 strike at 10500 of 100000 health (below 10% after it): no Shade without a Phylactery (control), Shade 500730 with one. The caster stands 10 yd off first, out of the Phylactery's 3 yd."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (no Shade above 10%)",
+      "kind": "metric_delta",
+      "variant": "above_ten",
+      "label_suffix": "above_ten",
+      "quote": "Upon taking damage which would bring you below 10% health, become a Shade,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "strike": {
+        "spell": 92559,
+        "health": 20000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 500730,
+        "caster": "caster"
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The same strike at 20000 of 100000 health, which leaves the caster above 10%: no Shade in either phase."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (physical protection)",
+      "kind": "metric_delta",
+      "variant": "physical",
+      "label_suffix": "physical",
+      "quote": "protecting you from all physical attacks and spells,",
+      "expected": 4,
+      "before_expected": 3,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "strike": {
+        "spell": 92559,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. Three Physical Void Zone 92559 strikes from 10500 of 100000 health: all three hit without a Phylactery (control, 3 hit logs); with one the first makes the Shade and the next two deal no damage (one more hit log, 4 counted from the start)."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (spell protection)",
+      "kind": "metric_delta",
+      "variant": "spells",
+      "label_suffix": "spells",
+      "quote": "protecting you from all physical attacks and spells,",
+      "expected": 4,
+      "before_expected": 3,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "strike": {
+        "spell": 41394,
+        "health": 10600,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. Three Holy Light of the Naaru 41394 strikes (1100) from 10600 of 100000 health: all three hit without a Phylactery (control, 3 hit logs); with one the first makes the Shade and the next two deal no damage (one more hit log, 4 counted from the start)."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (no casting)",
+      "kind": "metric_delta",
+      "variant": "no_cast",
+      "label_suffix": "no_cast",
+      "quote": "but during that time you cannot attack or cast spells.",
+      "expected": 22,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "strike": {
+        "spell": 92559,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504868
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. After the Shade strike the caster casts Command: Undead 504868 at the dummy: it casts without a Phylactery (control, no failure) and fails with SPELL_FAILED_CASTER_AURASTATE (22, SharedDefines.h) as a Shade."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (no attacking)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "but during that time you cannot attack or cast spells.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "strike": {
+        "spell": 92559,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "can_attack",
+      "fields": {
+        "target": "dummy"
+      },
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. After the Shade strike: the caster may attack the dummy without a Phylactery (control, Unit::IsValidAttackTarget 1) and may not as a Shade (0, through the CanUnitAttack hook, Unit.cpp:12016)."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (revive)",
+      "kind": "metric_delta",
+      "variant": "revive",
+      "label_suffix": "revive",
+      "quote": "Reaching your Phylactery in this state revives you with $500802s2% of your maximum health.",
+      "expected": 40000,
+      "before_expected": 9516,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "health",
+      "fields": {},
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster stays beside its Phylactery (summoned 2 yd in front, TARGET_DEST_CASTER_FRONT) and becomes a Shade from 10500 of 100000 health: without a Phylactery (control) the strike leaves 9516 health (1000 less the caster's 94 armor); with it the next Phylactery update revives it at 40% of 100000 = 40000 ($500802s2 = 40)."
+    },
+    {
+      "spell": 500933,
+      "name": "Phylactery (death)",
+      "kind": "metric_delta",
+      "variant": "death",
+      "label_suffix": "death",
+      "quote": "If you do not reach it in time you will die.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500933
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2600,
+      "expire_ms": 500,
+      "wait_ms": 9000,
+      "strike": {
+        "spell": 92559,
+        "health": 10500,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "dx": 10
+      },
+      "metric": "alive",
+      "fields": {},
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster stands 10 yd off its Phylactery as a Shade: without a Phylactery (control) the strike leaves it alive; with one, 9000 ms later (past the Shade's 8000 ms) it is dead."
+    },
+    {
       "spell": 804360,
       "name": "Necromancy (caster hit chance)",
       "kind": "metric_delta",
