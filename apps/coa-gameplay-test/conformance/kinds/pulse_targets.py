@@ -2,8 +2,8 @@ from dataclasses import dataclass, replace
 from pathlib import Path
 
 from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, waited_ms
-from cast_period import cast_period_label
 from hits import creature_fixture, timed
+from kinds.cast_period import cast_period_label
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
 from values import Expectation, dataset

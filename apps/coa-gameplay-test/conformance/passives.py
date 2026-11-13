@@ -141,8 +141,6 @@ BEHAVIOUR_LABELS = {
                                              'combat' if entry.get('combat_kill_spell') else
                                              'shared' if entry.get('shared_item') else 'plain']
                                          for metric in metrics],
-    'cast_period': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                  f"{entry.get('label_suffix', 'cast_period')}"],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
                                                      *(f'after_{tick}'

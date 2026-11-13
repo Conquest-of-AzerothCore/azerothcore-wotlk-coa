@@ -83,7 +83,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
-        'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'cast_period')
+        'strike_bursts', 'aura_expiry', 'item_cooldown_gate')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -7855,9 +7855,6 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return strike_bursts_scenario(class_file, strike_bursts_spec(entry))
     if entry['kind'] == 'aura_expiry':
         return aura_expiry_scenario(class_file, aura_expiry_spec(entry))
-    if entry['kind'] == 'cast_period':
-        from cast_period import cast_period_scenario, cast_period_spec
-        return cast_period_scenario(class_file, cast_period_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
     if entry['kind'] == 'group_target':

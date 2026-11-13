@@ -1873,13 +1873,6 @@ An `item_cooldown_gate` entry's `label_suffix` (ADR 0534) keeps several entries 
 and `shared_item` is refused right after the combat end, still refused just before the cooldown from the combat end
 and accepted just after it.
 
-### Cast periods (`behaviour_metric_delta`, `kind: "cast_period"`, ADR 0535)
-
-A real `setup_spell` cast raises creature `entry`; uncommanded for `control_ms` it must cast no `cast_spell`. Then
-`trigger_spell` at the dummy and, every `poll_ms` over `window_ms`, the game time and the creature's casts are read. The
-first and the last cast are bracketed between stamped reads, and (last - first) / (n - 1) must lie inside `expected_ms`
-+- the G-19 band (Animate: Plaguefather 805048: Bone Toss 704706 every 1000 ms).
-
 ## Behaviour kind modules
 
 A behaviour kind can live in its own module `kinds/<kind>.py` (ADR 0581), found at run time by
@@ -1899,6 +1892,7 @@ Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` 
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped windows (ADR 0551)
+- [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
 - [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit ratio (ADR 0541, ADR 0547)

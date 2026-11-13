@@ -1,12 +1,16 @@
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-from bonus import bonus_band
 from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, reagent_steps, waited_ms
+from bonus import bonus_band
 from hits import creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import TARGET, Expectation, dataset, facts_of, required_aura_steps
+from values import Expectation, TARGET, dataset, facts_of, required_aura_steps
+
+KIND = 'cast_period'
+ORDER = 5
+
 
 CAST_PERIOD_METRIC = 'owned_creature_spell_cast_count'
 CAST_PERIOD_MINIMUM_CASTS = 3
@@ -134,3 +138,15 @@ def cast_period_verdict(base, run, model: dict):
                                f'ms of game time after the command, the last in ({times[last - 1] - start:g}, '
                                f'{times[last] - start:g}]: a period between {low:.1f} and {high:.1f} ms against '
                                f'{expected:g} +- {band:g} (G-19); none in the control read before the trigger')
+
+
+def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
+    return cast_period_scenario(class_file, cast_period_spec(entry))
+
+
+def label(entry: dict) -> list[str]:
+    return [f"{entry['spell']} behaviour_metric_delta "
+            f"{entry.get('label_suffix', 'cast_period')}"]
+
+
+JUDGES = {BEHAVIOUR_METRIC_DELTA: cast_period_verdict}

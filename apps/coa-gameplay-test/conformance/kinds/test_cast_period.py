@@ -1,26 +1,11 @@
-from pathlib import Path
-import sys
 import unittest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from behaviours import behaviour_scenario
-from cast_period import cast_period_spec
 from compare import Verdict, judge_behaviour
+from kinds.cast_period import cast_period_spec
 from profile import DBC_DIR, load_class_file
 import run
-
-
-class FakeRun:
-    def __init__(self, values):
-        self.values = values
-        self.key = 'fake'
-        self.status = 'completed'
-        self.message = ''
-        self.steps = []
-        self.max_step_ms = None
-        self.cast_failures = {}
+from test_behaviours import FakeRun
 
 
 def bone_toss_entry() -> dict:
@@ -78,7 +63,3 @@ class CastPeriodTests(unittest.TestCase):
             cast_period_spec({**bone_toss_entry(), 'poll_ms': 600})
         with self.assertRaises(ValueError):
             cast_period_spec({**bone_toss_entry(), 'control_ms': 1000})
-
-
-if __name__ == '__main__':
-    unittest.main()
