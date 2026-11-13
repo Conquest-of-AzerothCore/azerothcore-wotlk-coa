@@ -66,11 +66,27 @@ when ninja exists:
 ```
 
 On macOS the default also passes `-DREADLINE_LIBRARY` and `-DREADLINE_INCLUDE_DIR` for Homebrew readline when it
-is installed; without them CMake finds the SDK's libedit stub and the worldserver does not compile. It also sets
-`CMAKE_C_FLAGS_RELWITHDEBINFO` and `CMAKE_CXX_FLAGS_RELWITHDEBINFO` to `-O2 -g1 -DNDEBUG` (Clang treats `-g1` as
-`-gline-tables-only`, and GCC accepts it too): object files shrink by an order of magnitude and archives and links
-get faster, while crash backtraces keep file and line but lose class names and arguments. A `cmake_args`
-setting replaces all of these defaults, so repeat the flags there when they are wanted.
+is installed; without them CMake finds the SDK's libedit stub and the worldserver does not compile.
+
+On macOS and Linux it sets `CMAKE_C_FLAGS_RELWITHDEBINFO` and `CMAKE_CXX_FLAGS_RELWITHDEBINFO` to
+`-O2 -g1 -DNDEBUG`. Clang treats `-g1` as `-gline-tables-only`, and GCC accepts it too. Object files shrink by an
+order of magnitude and archives and links get faster. Crash backtraces keep file, line and inlined frames, but
+gdb loses types, locals and arguments.
+
+On Linux it also passes:
+
+- `-DWITH_GAME_UNITY_BUILD=ON`, which compiles `game` as a unity build in batches of 8 (see
+  [build performance](build-performance.md)).
+- `CMAKE_C_ARCHIVE_CREATE`, `CMAKE_C_ARCHIVE_APPEND`, `CMAKE_CXX_ARCHIVE_CREATE` and `CMAKE_CXX_ARCHIVE_APPEND`
+  with `ar qcT` and `ar qT`. The static libraries become thin archives that reference the object files instead of
+  copying them.
+- `-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold` when `mold` is on `PATH`. This needs GCC 12.1 or later, or Clang.
+
+Windows keeps CMake's defaults.
+
+A `cmake_args` setting replaces all of these defaults, so repeat the flags there when they are wanted. An existing
+build directory is not reconfigured, so it keeps the flags it was configured with. To pick up new defaults, point
+`build_directory` at a new directory, or delete the build directory's `CMakeCache.txt`.
 
 The macOS CMake configuration also creates static libraries with `/usr/bin/libtool -static` instead of
 `ar` and `ranlib` (Ninja and Makefile generators; a cached `CMAKE_CXX_CREATE_STATIC_LIBRARY` overrides it), and
@@ -117,13 +133,20 @@ worktree's worldserver reads module configs from its own `<CONF_DIR>/modules`, s
 `server_modules_dir` to it. Run `--plan` in the worktree to see what is still missing, or verify from the
 primary checkout when that is possible.
 
+The first build of a worktree can reuse another worktree's objects through ccache when both use the same cache
+and `CCACHE_BASEDIR` covers both checkouts. Outside the paths `CCACHE_BASEDIR` rewrites, only `Config.cpp` and
+`GitRevision.cpp` embed the checkout path, so precompiled headers and the unit tests also hit with GCC. Clang
+precompiled headers do not hit across worktrees. Figures: [build performance](build-performance.md).
+
 ## Stages
 
 Stages run in this order. Each reports `passed`, `failed`, `unavailable` (a prerequisite is missing),
 `blocked` (the build failed) or `skipped` (not selected).
 
 1. `source`: `tools/check_source.py`, which covers SQL boundaries, comments in CoA-owned code, loader
-   registrations and the tooling test suites. See [Source comparison base](#source-comparison-base).
+   registrations and the tooling test suites. See [Source comparison base](#source-comparison-base). Its
+   commands run concurrently (`--jobs N`, default the CPU count; each command isolates its own temp directories
+   and mocked tools, so none of them share state); the stage's wall time is close to its single slowest command.
 2. `build`: configures a build directory as described for `cmake_args`, reconfigures one that has
    `BUILD_TESTING` off with `-DBUILD_TESTING=ON`, then runs `cmake --build <build> --parallel <jobs>` (with
    `--config` for a multi-config generator). The directory holding `mysql_config` is put first on `PATH`.
@@ -220,6 +243,27 @@ python -B tools/verify_all.py --stages gameplay --scenario /path/to/audit-zone.j
 
 The file is exploratory, so the run ends `INCOMPLETE` even when the audit passes, and it never blocks a PR. The
 report is the `placement_audit` step record in `gameplay/exploratory/<key>/result.json` of the output directory.
+
+### Class tooltip conformance
+
+`apps/coa-gameplay-test/conformance/` generates exploratory scenarios that check a class's spells, passives,
+passive triggers, procs and talent stack against their client tooltips, and judges a run with `conformance.py compare`
+([README](../../apps/coa-gameplay-test/conformance/README.md), method in
+[ADR 0011](../adr/0011-class-tooltip-conformance.md), passives in
+[ADR 0012](../adr/0012-passive-conformance-by-with-and-without-measurement.md), their modifier targets in
+[ADR 0017](../adr/0017-passive-modifier-targets-by-mask-namesake-and-sentence.md), rolled values in
+[ADR 0018](../adr/0018-rolled-tooltip-values-judged-on-the-mean-of-repeated-reads.md)). The scenarios run as exploratory
+files, so the run ends `INCOMPLETE` even when they pass; the verdicts come from `compare`, not from the stage result.
+Its unit tests are the `conformance` suite of the source stage. `compare` writes `alerts.tsv`,
+`report.md`, `verdicts.json`, `questions.md` (the checks that only players on live can settle,
+in English and in what a player sees) and, for stack runs, `levers.md`. `conformance.py diff`
+compares two outputs verdict by verdict (`impact.md`), and `conformance.py coverage
+--before OUT_A --after OUT_B` writes `coverage.md`: verdicts per status and the class spells, passives and actives
+judged on each side.
+
+```sh
+python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar-2/scenarios/*.json
+```
 
 ## Results and exit codes
 
@@ -340,6 +384,12 @@ the `batch.py` defaults (`--step-ms`, `--active-wait-cap-ms`, `--poll-cap-ms`), 
 change. `wait`, `within_ms` and step `elapsed_ms` use game time on both clocks; on the real clock it follows the
 wall clock at world-tick resolution. `timeout_ms` covers the real setup time until every actor is ready plus the
 game time after that, and the server fails a case that runs three times `timeout_ms` of real time from admission.
+An accelerated case may set `timeout_ms` up to one hour of game time under either schema; at real pace (the real
+clock, single mode and a `pace: real` diagnostic) the cap stays 10 minutes under schema 1 and 20 minutes under
+schema 2 ([ADR 0139](../adr/0139-accelerated-scenarios-may-run-an-hour-of-game-time.md)). Catalog definitions keep
+the real-pace cap so that they run on both clocks; only a `--scenario` file outside the catalog can use the longer
+one, and `verify_all.py --gameplay-clock real` rejects such a file before any stage. The hang rule below scales
+with the case's own `timeout_ms`, so only a case that asks for more time waits longer before it counts as hung.
 The runner treats a case as hung `3 * timeout_ms / 1000 + 60` seconds after a lane could first have admitted it, not
 after it wrote the file ahead: the count starts once the case is among the first `lanes` unfinished case files and
 no exclusive case keeps it waiting (an exclusive case counts only once it is the first).

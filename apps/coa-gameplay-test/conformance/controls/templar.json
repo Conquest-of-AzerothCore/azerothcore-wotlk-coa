@@ -1,0 +1,41 @@
+{
+  "class_id": 19,
+  "name": "Templar controls",
+  "behaviours": [
+    {
+      "spell": 1161,
+      "name": "Challenging Shout",
+      "kind": "aggro_redirect",
+      "control_for": 800424,
+      "variant": "edge",
+      "label_suffix": "edge",
+      "quote": "Forces all enemies within $a1 yards",
+      "self_cast": true,
+      "rooted": true,
+      "geometry": true,
+      "targets": [
+        {
+          "distance": 9.5,
+          "expected_redirect": true
+        },
+        {
+          "distance": 13.6,
+          "expected_redirect": false
+        },
+        {
+          "distance": 13.85,
+          "expected_redirect": false
+        },
+        {
+          "distance": 14.1,
+          "expected_redirect": false
+        },
+        {
+          "distance": 14.35,
+          "expected_redirect": false
+        }
+      ],
+      "observe_source": "Control for claim 279 (lean/radius.md), not a Templar claim: stock Warrior Challenging Shout 1161, no CoA code names it. Effect[0] aura 11 SPELL_AURA_MOD_TAUNT on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY like Absolution, SpellRadius 13 (RadiusMin 10, RadiusMax 10), MaxAffectedTargets 0. One rooted dummy inside 10 yd guards the cast; four beyond it bracket the engine's edge, predicted at 10 + 2.66 + the dummy's combat reach, near 13.935 yd. The same extension as Absolution's means general engine behaviour."
+    }
+  ]
+}

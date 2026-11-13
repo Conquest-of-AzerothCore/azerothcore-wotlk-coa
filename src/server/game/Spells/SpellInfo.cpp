@@ -402,6 +402,11 @@ uint32 SpellEffectInfo::GetItemArmorSubclassMask() const
         return EffectIndex == EFFECT_1 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
             MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 64 ? 64 : 0;
 
+    if (_spellInfo && _spellInfo->SpellFamilyName == 25 &&
+        (_spellInfo->Id == 301311 || _spellInfo->Id == 301360)) // Blessed Padding
+        return EffectIndex == EFFECT_0 && IsAura(SPELL_AURA_MOD_BASE_RESISTANCE_PCT) &&
+            MiscValue == SPELL_SCHOOL_MASK_NORMAL && MiscValueB == 8 ? 8 : 0;
+
     if (!_spellInfo || _spellInfo->SpellFamilyName != 24 || MiscValue != SPELL_SCHOOL_MASK_NORMAL)
         return 0;
 

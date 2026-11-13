@@ -24,8 +24,11 @@
  *                                                Serpents break out
  *     Venom Spit          first 5s,  every 10s   everyone in front, stacks
  *                                                Virulent Poison
- *     Corpse Explosion    first 17s, every 40s   every snake corpse nearby
- *                                                bursts and leaves acid
+ *     Corpse Explosion    first 20s, every 40s   every snake corpse nearby
+ *                                                bursts and leaves acid; Mythic
+ *                                                and Ascended only (tester, round
+ *                                                5; live logs: 19.9-21.4s after
+ *                                                Poisonous Fangs)
  *     Poisonous Fangs     passive, his hits apply Virulent Poison
  *
  *   Both forms
@@ -128,6 +131,7 @@ namespace
     constexpr float SPIT_ARC         = float(M_PI) / 2;
     constexpr float CORPSE_RANGE     = 80.0f;
     constexpr float VENOXIS_RANGE    = 200.0f;
+    constexpr uint8 CORPSE_EXPLOSION_MIN_SPAWN_MODE = 2;
 
     struct boss_venoxis_coa : public BossAI
     {
@@ -198,7 +202,8 @@ namespace
             events.ScheduleEvent(EVENT_TOXIC_BOMBARDEMENT, 1s, 0, PHASE_SNAKE);
             events.ScheduleEvent(EVENT_PARASITIC_POISON, 3s, 0, PHASE_SNAKE);
             events.ScheduleEvent(EVENT_VENOM_SPIT, 5s, 0, PHASE_SNAKE);
-            events.ScheduleEvent(EVENT_CORPSE_EXPLOSION, 17s, 0, PHASE_SNAKE);
+            if (me->GetMap()->GetSpawnMode() >= CORPSE_EXPLOSION_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_CORPSE_EXPLOSION, 20s, 0, PHASE_SNAKE);
         }
 
         // The casts are dummies; what they do happens when they finish.

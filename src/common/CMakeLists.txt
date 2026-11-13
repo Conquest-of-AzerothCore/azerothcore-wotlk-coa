@@ -48,6 +48,9 @@ GroupSources(${CMAKE_CURRENT_SOURCE_DIR})
 add_library(common
   ${PRIVATE_SOURCES})
 
+set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/Configuration/Config.cpp
+  APPEND PROPERTY COMPILE_DEFINITIONS "_CONF_DIR=\"${CONF_DIR}\"")
+
 CollectIncludeDirectories(
   ${CMAKE_CURRENT_SOURCE_DIR}
   PUBLIC_INCLUDES

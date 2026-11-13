@@ -1,0 +1,643 @@
+{
+  "schema": 1,
+  "name": "Keeping the Oath pays a delayed hit in eight equal payments over the debt's 8 seconds",
+  "contract": "Keeping the Oath 92109 reads 'You now delay 40% of direct damage taken, instead taking it over $803237d.' and Oathkeeper 803237 '40% of damage taken is now delayed and dealt to you over 8 seconds.' (DurationIndex 31, 8000 ms; Effect[0] amplitude 1000). A level 60 striker (entry 36) with the fixture's 100-point spell hit bonus, so that no strike misses, casts Light of the Naaru 41394 (1100 Holy, no die) at a level 60 Templar holding 92109, once per trial, four trials. Each strike delays 440. The debt pays one share per 1000 ms tick, including the tick at its 8000 ms expiry (AuraEffect::Update ticks while the duration is 0, and the expired aura is removed after the update), so 8 payments of 55: 7 and 385 at 7.5 s with the debt present, 8 and 440 at 8.5 s with the debt gone, every payment 1000 ms after the previous one. Counting the ticks left from the duration alone, after Aura::Update has taken the update step off it, paid the 440 in 7 payments by 7.5 s.",
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "striker",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3.0,
+      "stationary": true,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 92109,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "paid_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "payments_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "absorbed_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_1"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 1 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_1",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: Keeping the Oath delays 40% of the 1100 Holy strike",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "absorbed_1",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "wait",
+      "label": "trial 1: 7.5 s after the strike, 500 ms before the debt ends",
+      "ms": 7200
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: seven payments by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_1",
+      "min": 7,
+      "max": 7
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: seven eighths of the 440 paid by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_1",
+      "min": 385,
+      "max": 385
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the debt still runs at 7.5 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "trial 1: 8.5 s after the strike, 500 ms after the debt ends",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the eighth payment lands at the debt's end",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_1",
+      "min": 8,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the whole 440 is paid, nothing lost",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_1",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "assert",
+      "label": "Trial 1: the debt ends at 8 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "paid_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "payments_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "absorbed_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_2"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 2 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_2",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: Keeping the Oath delays 40% of the 1100 Holy strike",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "absorbed_2",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "wait",
+      "label": "trial 2: 7.5 s after the strike, 500 ms before the debt ends",
+      "ms": 7200
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: seven payments by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_2",
+      "min": 7,
+      "max": 7
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: seven eighths of the 440 paid by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_2",
+      "min": 385,
+      "max": 385
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the debt still runs at 7.5 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "trial 2: 8.5 s after the strike, 500 ms after the debt ends",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the eighth payment lands at the debt's end",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_2",
+      "min": 8,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the whole 440 is paid, nothing lost",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_2",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "assert",
+      "label": "Trial 2: the debt ends at 8 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "paid_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "payments_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "absorbed_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_3"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 3 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_3",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: Keeping the Oath delays 40% of the 1100 Holy strike",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "absorbed_3",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "wait",
+      "label": "trial 3: 7.5 s after the strike, 500 ms before the debt ends",
+      "ms": 7200
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: seven payments by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_3",
+      "min": 7,
+      "max": 7
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: seven eighths of the 440 paid by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_3",
+      "min": 385,
+      "max": 385
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: the debt still runs at 7.5 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "trial 3: 8.5 s after the strike, 500 ms after the debt ends",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: the eighth payment lands at the debt's end",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_3",
+      "min": 8,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: the whole 440 is paid, nothing lost",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_3",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "assert",
+      "label": "Trial 3: the debt ends at 8 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 20000,
+      "maximum": 20000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "paid_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "save_as": "payments_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "absorbed_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "save_as": "logs_4"
+    },
+    {
+      "action": "cast",
+      "actor": "striker",
+      "spell": 41394,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "label": "strike 4 lands",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: the strike lands, one damage log",
+      "actor": "caster",
+      "metric": "spell_log_count",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "logs_4",
+      "min": 1,
+      "max": 1
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: Keeping the Oath delays 40% of the 1100 Holy strike",
+      "actor": "caster",
+      "metric": "spell_absorb_total",
+      "spell": 41394,
+      "caster": "striker",
+      "target": "caster",
+      "relative_to": "absorbed_4",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "wait",
+      "label": "trial 4: 7.5 s after the strike, 500 ms before the debt ends",
+      "ms": 7200
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: seven payments by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_4",
+      "min": 7,
+      "max": 7
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: seven eighths of the 440 paid by 7.5 s",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_4",
+      "min": 385,
+      "max": 385
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: the debt still runs at 7.5 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "trial 4: 8.5 s after the strike, 500 ms after the debt ends",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: the eighth payment lands at the debt's end",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "payments_4",
+      "min": 8,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: the whole 440 is paid, nothing lost",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803237,
+      "target": "caster",
+      "relative_to": "paid_4",
+      "min": 440,
+      "max": 440
+    },
+    {
+      "action": "assert",
+      "label": "Trial 4: the debt ends at 8 s",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803237,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No two payments come closer than one 1000 ms tick",
+      "actor": "caster",
+      "metric": "event_interval_min_ms",
+      "stream": "spell_damage",
+      "spell": 803237,
+      "target": "caster",
+      "min": 900
+    },
+    {
+      "action": "assert",
+      "label": "Payments follow one another every 1000 ms",
+      "actor": "caster",
+      "metric": "event_interval_median_ms",
+      "stream": "spell_damage",
+      "spell": 803237,
+      "target": "caster",
+      "min": 900,
+      "max": 1100
+    }
+  ],
+  "timeout_ms": 60000
+}

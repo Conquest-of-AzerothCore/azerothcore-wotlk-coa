@@ -204,9 +204,9 @@ class ThreadOutput:
         return getattr(self.stream, name)
 
 
-def validated(scenario, where):
+def validated(scenario, where, clock=REAL_CLOCK):
     try:
-        return run.validate(scenario)
+        return run.validate(scenario, clock)
     except (ValueError, KeyError, TypeError) as error:
         raise ValueError(f'{where}: {error}') from None
 
@@ -272,7 +272,7 @@ def clock_policy(directory=catalog.DIRECTORY):
     return exclusive
 
 
-def select_cases(values, directory=catalog.DIRECTORY, excluded=()):
+def select_cases(values, directory=catalog.DIRECTORY, excluded=(), clock=REAL_CLOCK):
     checks = catalog.bindings(directory)
     definitions = {row['id']: catalog.read_json(catalog.ROOT / row['path'])
                    for row in catalog.catalog(directory)}
@@ -293,7 +293,7 @@ def select_cases(values, directory=catalog.DIRECTORY, excluded=()):
         elif str(path.resolve()) not in sources:
             sources.add(str(path.resolve()))
             name = exploratory_key(path, exploratory.keys() | definitions.keys())
-            exploratory[name] = Case(name, validated(scenario, value), str(path.resolve()))
+            exploratory[name] = Case(name, validated(scenario, value, clock), str(path.resolve()))
     cases = [Case(key, validated(definitions[key], key)) for key in catalog.companion_cases(requested, checks)]
     cases.extend(exploratory.values())
     run.require(cases, 'No scenarios selected')
@@ -1196,7 +1196,7 @@ class Batch:
 
 def run_batch(args, directory=catalog.DIRECTORY):
     started = time.monotonic()
-    cases = select_cases(args.scenario, directory, getattr(args, 'skip_scenario', []))
+    cases = select_cases(args.scenario, directory, getattr(args, 'skip_scenario', []), args.clock)
     if args.clock == SIMULATED_CLOCK:
         exclusive = clock_policy(directory)
         for case in cases:

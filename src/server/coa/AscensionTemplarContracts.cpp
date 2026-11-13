@@ -6,12 +6,47 @@
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include <algorithm>
+#include <array>
 #include <cmath>
 
 namespace
 {
 constexpr uint32 SPELL_RECENTLY_PARRIED_OR_DODGED = 681170;
+
+constexpr std::array<uint32, 15> TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS = {
+    801446, 501589, 501590, 501591, 501592, 501593, 573324,
+    805421, 748505, 748506, 748507, 572739, 572740, 572741, 804150};
+
+constexpr std::array<std::pair<uint32, uint8>, 2> TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS = {{
+    {803844, 0}, {807035, 1}}};
+
+float StockEffectRealPointsPerLevelAmount(Unit const* caster, SpellInfo const* info, uint8 index)
+{
+    float perLevel = info->Effects[index].RealPointsPerLevel;
+    if (perLevel == 0.0f)
+        return 0.0f;
+    int32 level = int32(caster->GetLevel());
+    if (int32(info->MaxLevel) > 0 && level > int32(info->MaxLevel))
+        level = int32(info->MaxLevel);
+    else if (level < int32(info->BaseLevel))
+        level = int32(info->BaseLevel);
+    level -= int32(std::max(info->BaseLevel, info->SpellLevel));
+    return float(level) * perLevel;
+}
+
+void CancelStockEffectRealPointsPerLevel(Unit const* caster, SpellInfo const* info, uint8 index, float& value)
+{
+    if (!caster || !info)
+        return;
+    if (std::find(TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.begin(), TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end(),
+                  info->Id) == TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_SPELLS.end() &&
+        std::find(TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS.begin(), TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS.end(),
+                  std::make_pair(info->Id, index)) == TEMPLAR_TOOLTIP_UNSCALED_BY_LEVEL_EFFECTS.end())
+        return;
+    value -= float(int32(StockEffectRealPointsPerLevelAmount(caster, info, index)));
+}
 }
 
 namespace AscensionTemplar
@@ -62,8 +97,16 @@ void ApplyContracts(SpellInfo* info)
             dummy(i);
     if (id == 300513)
         info->Effects[2].ApplyAuraName = SPELL_AURA_PREVENTS_FLEEING;
+    if (id == 705300)
+        info->Effects[2].ApplyAuraName = SPELL_AURA_MOD_HEALING_DONE_PERCENT;
+    if (id == 560834)
+        info->Effects[0].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    if (id == 800424)
+        info->MaxAffectedTargets = 0;
     if (id == 707111)
         info->Effects[0].Effect = info->Effects[1].Effect = 0;
+    if (id == 803163)
+        info->ProcFlags |= PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS;
     if (id == 92109 || id == 803149)
     {
         for (auto& effect : info->Effects)
@@ -94,9 +137,11 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].TargetB = SpellImplicitTargetInfo();
     }
     if ((id == 560650 || id == 561346) && info->Effects[0].ApplyAuraName == SPELL_AURA_MOD_CRIT_PCT &&
-        info->Effects[0].MiscValue == SPELLMOD_CRITICAL_CHANCE && info->Effects[0].SpellClassMask)
+        info->Effects[0].MiscValue == SPELLMOD_CRITICAL_CHANCE)
     {
-        info->Effects[0].ApplyAuraName = SPELL_AURA_ADD_FLAT_MODIFIER;
+        info->Effects[0].ApplyAuraName = SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL;
+        info->Effects[0].MiscValue = SPELL_SCHOOL_MASK_HOLY;
+        info->Effects[0].SpellClassMask = flag96();
     }
     if (id == 520034 && info->Effects[0].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE &&
         info->Effects[0].MiscValue == AURA_STATE_HEALTH_ABOVE_75_PERCENT && !info->Effects[0].SpellClassMask)
@@ -127,6 +172,8 @@ void ApplyContracts(SpellInfo* info)
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].Effect)
                 dummy(i);
+    if (id == 712678)
+        info->Effects[EFFECT_1].BasePoints = 4999;
     if (id == 520442)
         info->Effects[0].MiscValue = SPELLMOD_CRIT_DAMAGE_BONUS;
     if (id == 806522)
@@ -158,8 +205,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].BasePoints = int32(id - 803890);
     if (id == 300515)
         info->Effects[1].BasePoints = 5;
-    if (id == 801409)
-        info->DurationEntry = sSpellDurationStore.LookupEntry(8);
+    if (id == 520608)
+        info->Effects[1].BasePoints = 49;
     if (id == 807004)
         dummy(0), dummy(1);
     if (id == 806353)
@@ -187,9 +234,11 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 301340)
     {
+        info->Effects[0].ApplyAuraName = SPELL_AURA_MOD_SPEED_ALWAYS;
         info->Effects[0].BasePoints = 19;
         info->Effects[0].MiscValue = 0;
-        info->Effects[1].Effect = 0;
+        info->Effects[1].ApplyAuraName = SPELL_AURA_MECHANIC_IMMUNITY;
+        info->Effects[1].MiscValue = MECHANIC_SNARE;
     }
     if (id == 527272)
     {
@@ -255,6 +304,40 @@ float Mitigation(Player* player, Unit* attacker, uint32 school)
 }
 constexpr uint32 SPELL_TRANQUIL_STATE = 850010;
 constexpr int32 TRANQUIL_STATE_PLAYER_DURATION = 8000;
+constexpr std::array<uint32, 9> BLADE_OF_FAITH_RANKS = {803872, 803873, 803874, 803875, 803876,
+                                                         803877, 803878, 803879, 803880};
+void GrantBladeOfFaithPeriodicCrit(Unit* target, Aura* aura)
+{
+    if (std::find(BLADE_OF_FAITH_RANKS.begin(), BLADE_OF_FAITH_RANKS.end(), aura->GetId()) ==
+        BLADE_OF_FAITH_RANKS.end())
+        return;
+    Unit* caster = aura->GetCaster();
+    AuraEffect* effect = aura->GetEffect(EFFECT_0);
+    if (!caster || !effect || effect->GetAuraType() != SPELL_AURA_PERIODIC_DAMAGE)
+        return;
+    SpellInfo const* info = aura->GetSpellInfo();
+    float chance = caster->SpellDoneCritChance(nullptr, info, info->GetSchoolMask(), BASE_ATTACK, true);
+    if (chance > 0.0f)
+        chance = target->SpellTakenCritChance(caster, info, info->GetSchoolMask(), chance, BASE_ATTACK, true);
+    effect->SetCritChance(std::max(0.0f, chance));
+}
+constexpr int32 BLADE_OF_FAITH_UNREACHED_OATH_BONUS_PCT = 10;
+constexpr std::array<uint32, 2> BLADE_OF_FAITH_UNREACHED_OATHS = {804904, 804924};
+void AddBladeOfFaithUnreachedOathBonus(AuraEffect const* effect, Unit* caster, int32& amount)
+{
+    if (effect->GetEffIndex() != EFFECT_0 || effect->GetBase()->GetType() != UNIT_AURA_TYPE ||
+        std::find(BLADE_OF_FAITH_RANKS.begin(), BLADE_OF_FAITH_RANKS.end(), effect->GetId()) ==
+            BLADE_OF_FAITH_RANKS.end())
+        return;
+    Player* player = Owner(caster);
+    if (!player)
+        return;
+    int32 oaths = 0;
+    for (uint32 oath : BLADE_OF_FAITH_UNREACHED_OATHS)
+        if (Aura const* held = player->GetAura(oath))
+            oaths += held->GetStackAmount();
+    amount = int32(int64(amount) * (100 + BLADE_OF_FAITH_UNREACHED_OATH_BONUS_PCT * oaths) / 100);
+}
 class templar_scaling : public UnitScript
 {
   public:
@@ -262,11 +345,18 @@ class templar_scaling : public UnitScript
         : UnitScript("templar_scaling", true,
                      {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
                       UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
-                      UNITHOOK_ON_AURA_APPLY})
+                      UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT})
     {
+    }
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit* caster, int32& amount) override
+    {
+        if (effect && caster)
+            AddBladeOfFaithUnreachedOathBonus(effect, caster, amount);
     }
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
+        if (unit && aura)
+            GrantBladeOfFaithPeriodicCrit(unit, aura);
         if (unit && unit->IsPlayer() && aura && aura->GetId() == SPELL_TRANQUIL_STATE &&
             aura->GetMaxDuration() > TRANQUIL_STATE_PLAYER_DURATION)
         {
@@ -282,6 +372,7 @@ class templar_scaling : public UnitScript
         Player* player = Owner(caster);
         if (!player || !info)
             return;
+        CancelStockEffectRealPointsPerLevel(caster, info, index, value);
         if (info->Id == 527269 && index == 0)
             value = float(Amount(527270, 2, player));
         if (info->Id == 803160 && index == 0)
@@ -303,6 +394,10 @@ class templar_scaling : public UnitScript
         if (Player* player = Owner(target))
             if (info && !info->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
                 damage = int32(damage * Mitigation(player, attacker, info->SchoolMask));
+        if (Player* striker = Owner(attacker))
+            if (info && Named(info, 806521) && info->HasEffect(SPELL_EFFECT_HEALTH_LEECH) &&
+                striker->HasAura(300520) && target->HealthBelowPct(20))
+                damage = int32(damage * (1.0f + float(Amount(300520, EFFECT_0, striker)) / 100.0f));
     }
     void ModifyMeleeDamage(Unit* target, Unit* attacker, uint32& damage) override
     {

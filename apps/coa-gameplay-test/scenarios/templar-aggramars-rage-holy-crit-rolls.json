@@ -1,0 +1,1061 @@
+{
+  "schema": 1,
+  "name": "Aggramar's Rage: real Holy critical strike rolls",
+  "contract": "Aggramar's Rage [561346] reads \"Increases your Holy critical strike chance by $s1%\". Its effect 0 is a Holy-school spell crit aura (a40ba45efe), which the native SpellDoneCritChance adds for melee and magic damage classes alike. With the effect forced to 100, every real Chastise (Holy, melee damage class) and every Scourgebane (Holy, magic damage class) from Argent Blade crits, while the Physical Argent Blade and the untalented Templar keep their ordinary rate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "talent",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy_control",
+      "owner": "control",
+      "entry": 36,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "dummy_talent",
+      "owner": "talent",
+      "entry": 36,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 503141
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "add_item",
+      "actor": "talent",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "talent",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 503141
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "learn",
+      "actor": "talent",
+      "spell": 561346
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 561346,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 100
+    },
+    {
+      "action": "assert",
+      "label": "Aggramar's Rage carries the forced 100",
+      "actor": "talent",
+      "metric": "aura_amount",
+      "spell": 561346,
+      "effect": 0,
+      "equals": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_taken_crit_chance",
+      "spell": 503141,
+      "target": "dummy_control",
+      "save_as": "chastise_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_taken_crit_chance",
+      "spell": 801832,
+      "target": "dummy_control",
+      "save_as": "scourgebane_chance"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_taken_crit_chance",
+      "spell": 807268,
+      "target": "dummy_control",
+      "save_as": "argent_blade_chance"
+    },
+    {
+      "action": "assert",
+      "label": "Holy weapon ability Chastise rolls 100 points more crit chance",
+      "actor": "talent",
+      "metric": "spell_taken_crit_chance",
+      "spell": 503141,
+      "target": "dummy_talent",
+      "relative_to": "chastise_chance",
+      "min": 99.99,
+      "max": 100.01
+    },
+    {
+      "action": "assert",
+      "label": "Holy spell Scourgebane rolls 100 points more crit chance",
+      "actor": "talent",
+      "metric": "spell_taken_crit_chance",
+      "spell": 801832,
+      "target": "dummy_talent",
+      "relative_to": "scourgebane_chance",
+      "min": 99.99,
+      "max": 100.01
+    },
+    {
+      "action": "assert",
+      "label": "Physical Argent Blade rolls the same crit chance",
+      "actor": "talent",
+      "metric": "spell_taken_crit_chance",
+      "spell": 807268,
+      "target": "dummy_talent",
+      "relative_to": "argent_blade_chance",
+      "min": -0.01,
+      "max": 0.01
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 503141,
+      "target": "dummy_control"
+    },
+    {
+      "action": "set_aura",
+      "actor": "talent",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 503141,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1300
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807268,
+      "target": "dummy_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "talent",
+      "spell": 807268
+    },
+    {
+      "action": "set_power",
+      "actor": "talent",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "talent",
+      "spell": 807268,
+      "target": "dummy_talent"
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "wait",
+      "label": "Let the last hits land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Chastise of control deals damage",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 503141,
+      "target": "dummy_control",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Argent Blade of control deals damage",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 807268,
+      "target": "dummy_control",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Scourgebane of control deals damage",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy_control",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Chastise of talent deals damage",
+      "actor": "talent",
+      "metric": "spell_damage_count",
+      "spell": 503141,
+      "target": "dummy_talent",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Argent Blade of talent deals damage",
+      "actor": "talent",
+      "metric": "spell_damage_count",
+      "spell": 807268,
+      "target": "dummy_talent",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: every Scourgebane of talent deals damage",
+      "actor": "talent",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy_talent",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Holy weapon ability Chastise crits every time",
+      "actor": "talent",
+      "metric": "spell_damage_count",
+      "spell": 503141,
+      "target": "dummy_talent",
+      "critical": true,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Holy weapon ability Chastise does not always crit",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 503141,
+      "target": "dummy_control",
+      "critical": true,
+      "max": 9
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Holy spell Scourgebane crits every time",
+      "actor": "talent",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy_talent",
+      "critical": true,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Without the talent Holy spell Scourgebane does not always crit",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 801832,
+      "target": "dummy_control",
+      "critical": true,
+      "max": 9
+    },
+    {
+      "action": "assert",
+      "label": "Physical weapon ability Argent Blade does not always crit with the talent",
+      "actor": "talent",
+      "metric": "spell_damage_count",
+      "spell": 807268,
+      "target": "dummy_talent",
+      "critical": true,
+      "max": 9
+    }
+  ]
+}

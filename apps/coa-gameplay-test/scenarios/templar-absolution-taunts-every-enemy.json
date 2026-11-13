@@ -1,0 +1,537 @@
+{
+  "schema": 1,
+  "name": "Absolution taunts every enemy within its radius, with no count cap",
+  "contract": "Absolution 800424 says \"Taunt all enemies within 8 yds\". Its DBC MaxAffectedTargets 5 taunted five of six enemies inside the radius; the owner ruled that all means no count cap and that the radius stays the limit (ADR 0288). Six rooted dummies at 2 to 7 yd, each first engaged on the ally, all carry the taunt and attack the Templar after one self-centred cast. Control: a seventh rooted, engaged dummy at 14 yd, beyond the engine's effective edge of about 11.9 yd (8 yd plus the caster's leeway and the dummy's combat reach, ADR 0253), is not taunted.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d2",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 2.0,
+      "stationary": true,
+      "reaction": 1
+    },
+    {
+      "id": "d3",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3.0,
+      "stationary": true,
+      "reaction": 1
+    },
+    {
+      "id": "d4",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4.0,
+      "stationary": true,
+      "reaction": 1
+    },
+    {
+      "id": "d5",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 5.0,
+      "stationary": true,
+      "reaction": 1
+    },
+    {
+      "id": "d6",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 6.0,
+      "stationary": true,
+      "reaction": 1
+    },
+    {
+      "id": "d7",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 7.0,
+      "stationary": true,
+      "reaction": 1
+    },
+    {
+      "id": "d14",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 14.0,
+      "stationary": true,
+      "reaction": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 800424
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d2",
+      "caster": "d2",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d3",
+      "caster": "d3",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d4",
+      "caster": "d4",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d5",
+      "caster": "d5",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d6",
+      "caster": "d6",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d7",
+      "caster": "d7",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "target": "d14",
+      "caster": "d14",
+      "spell": 42716,
+      "stacks": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 2.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d2"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d2 is engaged on the ally before the cast",
+      "actor": "d2",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 1.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d3"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d3 is engaged on the ally before the cast",
+      "actor": "d3",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 1.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d4"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d4 is engaged on the ally before the cast",
+      "actor": "d4",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 1.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d5"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d5 is engaged on the ally before the cast",
+      "actor": "d5",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 1.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d6"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d6 is engaged on the ally before the cast",
+      "actor": "d6",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 1.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d7"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d7 is engaged on the ally before the cast",
+      "actor": "d7",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "ally",
+      "dx": 7.0
+    },
+    {
+      "action": "attack",
+      "actor": "ally",
+      "target": "d14"
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "stop_attack",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "d14 is engaged on the ally before the cast",
+      "actor": "d14",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d2 stands about 2 yd from the Templar",
+      "actor": "d2",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 1.7,
+      "max": 2.3
+    },
+    {
+      "action": "assert",
+      "label": "d3 stands about 3 yd from the Templar",
+      "actor": "d3",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 2.7,
+      "max": 3.3
+    },
+    {
+      "action": "assert",
+      "label": "d4 stands about 4 yd from the Templar",
+      "actor": "d4",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 3.7,
+      "max": 4.3
+    },
+    {
+      "action": "assert",
+      "label": "d5 stands about 5 yd from the Templar",
+      "actor": "d5",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 4.7,
+      "max": 5.3
+    },
+    {
+      "action": "assert",
+      "label": "d6 stands about 6 yd from the Templar",
+      "actor": "d6",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 5.7,
+      "max": 6.3
+    },
+    {
+      "action": "assert",
+      "label": "d7 stands about 7 yd from the Templar",
+      "actor": "d7",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 6.7,
+      "max": 7.3
+    },
+    {
+      "action": "assert",
+      "label": "d14 stands about 14 yd from the Templar",
+      "actor": "d14",
+      "metric": "distance_2d",
+      "target": "templar",
+      "min": 13.7,
+      "max": 14.3
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 800424
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 800424
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "d2 at 2 yd carries Absolution's taunt",
+      "actor": "d2",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d2 at 2 yd now attacks the Templar",
+      "actor": "d2",
+      "metric": "victim",
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d3 at 3 yd carries Absolution's taunt",
+      "actor": "d3",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d3 at 3 yd now attacks the Templar",
+      "actor": "d3",
+      "metric": "victim",
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d4 at 4 yd carries Absolution's taunt",
+      "actor": "d4",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d4 at 4 yd now attacks the Templar",
+      "actor": "d4",
+      "metric": "victim",
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d5 at 5 yd carries Absolution's taunt",
+      "actor": "d5",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d5 at 5 yd now attacks the Templar",
+      "actor": "d5",
+      "metric": "victim",
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d6 at 6 yd carries Absolution's taunt",
+      "actor": "d6",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d6 at 6 yd now attacks the Templar",
+      "actor": "d6",
+      "metric": "victim",
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d7 at 7 yd carries Absolution's taunt",
+      "actor": "d7",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "d7 at 7 yd now attacks the Templar",
+      "actor": "d7",
+      "metric": "victim",
+      "target": "templar",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: d14 at 14 yd, beyond the engine's 11.9 yd edge, is not taunted",
+      "actor": "d14",
+      "metric": "aura",
+      "spell": 800424,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: d14 at 14 yd still attacks the ally",
+      "actor": "d14",
+      "metric": "victim",
+      "target": "ally",
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,954 @@
+{
+  "schema": 1,
+  "name": "Blade of Faith's ticks gain 10% for each consumed Oath that adds nothing to them",
+  "contract": "Blade of Faith says \"Consumes your Oaths, dealing additional damage for each consumed.\" Righteous Lunge's and Retribution's Oaths carry only SPELLMOD_DAMAGE mods, which the periodic path never reads, so they added nothing to the ticks. The owner ruled +10% per such consumed Oath, a provisional value, additive (ADR 0289). Condemn and Vindication (+25% through aura 271) and Holy Cleave (+25 per tick) keep their own effects with no extra 10%. Each arm casts rank 9 (803880) at its own level 60 dummy with crit chance forced to 0 and the dummy's resistance removed, and reads the first tick against the no-Oath tick. Two stacks of the Lunge Oath count as two Oaths (x1.20). Under Keeping the Oath the Oath is held, not consumed, and the tick still gains 10%, mirroring the direct Oath Breakers. The dummies stand 11 yd apart, and the two arms with Holy Cleave's extra target come last, 15 yd from their neighbours and the Templar moves 3 yd from each in turn, so Holy Cleave's extra target cannot reach another arm's dummy. Absolute reads at level 60 (authoring run 20261112-081755): 191 with no Oath, 210 for Lunge, Retribution and Lunge under Keeping the Oath, 238 for Condemn and Vindication, 216 for Holy Cleave and 388 for all five.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d_none",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "d_lunge",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 14,
+      "stationary": true
+    },
+    {
+      "id": "d_lunge_two",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 25,
+      "stationary": true
+    },
+    {
+      "id": "d_retribution",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 36,
+      "stationary": true
+    },
+    {
+      "id": "d_vindication",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 47,
+      "stationary": true
+    },
+    {
+      "id": "d_condemn",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 58,
+      "stationary": true
+    },
+    {
+      "id": "d_keeping_the_oath",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 69,
+      "stationary": true
+    },
+    {
+      "id": "d_cleave",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 84,
+      "stationary": true
+    },
+    {
+      "id": "d_all",
+      "owner": "templar",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 99,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_none"
+    },
+    {
+      "action": "wait",
+      "label": "none: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "none: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_none",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "none: the no-Oath tick reads 191 at level 60",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_none",
+      "critical": false,
+      "equals": 191
+    },
+    {
+      "action": "snapshot",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_none",
+      "critical": false,
+      "save_as": "tick_none"
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_lunge",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_lunge",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_lunge"
+    },
+    {
+      "action": "wait",
+      "label": "lunge: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "lunge: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_lunge",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "lunge: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Oath: Righteous Lunge adds nothing through its data, so the tick gains 10%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_lunge",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_lunge_two",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_lunge_two",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 2
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_lunge_two"
+    },
+    {
+      "action": "wait",
+      "label": "lunge_two: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "lunge_two: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_lunge_two",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "lunge_two: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Two stacks of Oath: Righteous Lunge count as two consumed Oaths: the tick gains 20%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_lunge_two",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.19,
+      "max": 1.21
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_retribution",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_retribution",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804924,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_retribution"
+    },
+    {
+      "action": "wait",
+      "label": "retribution: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "retribution: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_retribution",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "retribution: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804924,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Oath: Retribution adds nothing through its data, so the tick gains 10%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_retribution",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_vindication",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_vindication",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 805332,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_vindication"
+    },
+    {
+      "action": "wait",
+      "label": "vindication: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "vindication: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_vindication",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "vindication: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 805332,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: Oath: Vindication keeps its own +25% through aura 271 and gets no extra 10%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_vindication",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.24,
+      "max": 1.26
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_condemn",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_condemn",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804922,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_condemn"
+    },
+    {
+      "action": "wait",
+      "label": "condemn: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "condemn: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_condemn",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "condemn: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804922,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: Oath: Condemn keeps its own +25% through aura 271 and gets no extra 10%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_condemn",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.24,
+      "max": 1.26
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 11
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_keeping_the_oath",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_keeping_the_oath",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 92109,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_keeping_the_oath"
+    },
+    {
+      "action": "wait",
+      "label": "keeping_the_oath: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "keeping_the_oath: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_keeping_the_oath",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Keeping the Oath: the Lunge Oath is still held after the cast",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 92109,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Keeping the Oath 92109 held: the Lunge Oath is not consumed, and the tick still gains 10%, as a direct Breaker keeps its Oath bonus under it",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_keeping_the_oath",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.09,
+      "max": 1.11
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 15
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_cleave",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_cleave",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804903,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_cleave"
+    },
+    {
+      "action": "wait",
+      "label": "cleave: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "cleave: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_cleave",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "cleave: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804903,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: Oath: Holy Cleave keeps its own +25 per tick and gets no extra 10%",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_cleave",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 1.125,
+      "max": 1.137
+    },
+    {
+      "action": "relocate",
+      "actor": "templar",
+      "dx": 15
+    },
+    {
+      "action": "assert",
+      "label": "The Templar stands 3 yd from d_all",
+      "actor": "templar",
+      "metric": "distance",
+      "target": "d_all",
+      "min": 2.5,
+      "max": 3.5
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 64481,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804904,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804922,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804903,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 804924,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 805332,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 803880
+    },
+    {
+      "action": "set_aura",
+      "actor": "templar",
+      "spell": 704576,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 803880,
+      "target": "d_all"
+    },
+    {
+      "action": "wait",
+      "label": "all: first tick at 3 sec",
+      "ms": 4700
+    },
+    {
+      "action": "assert",
+      "label": "all: one non-critical tick landed",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 803880,
+      "target": "d_all",
+      "critical": false,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "all: the cast consumed the Oaths",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 804904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "All five Oaths: (191 + 25) x 1.20 x 1.50 / 191 = 2.0356",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_all",
+      "critical": false,
+      "ratio_to": "tick_none",
+      "min": 2.02,
+      "max": 2.05
+    },
+    {
+      "action": "assert",
+      "label": "all: the all-Oaths tick reads 388 (216 x 1.20 = 259, then x 1.50)",
+      "actor": "templar",
+      "metric": "spell_damage_total",
+      "spell": 803880,
+      "target": "d_all",
+      "critical": false,
+      "min": 387,
+      "max": 389
+    }
+  ]
+}

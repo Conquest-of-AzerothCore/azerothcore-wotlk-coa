@@ -1,0 +1,358 @@
+{
+  "schema": 1,
+  "name": "The Finest of Heaven lasts 8 s from its first application while abilities keep landing",
+  "contract": "Heaven's Finest 805390: 'At 6 stacks, increases your Energy regeneration by $806517s1% for $806517d. Additional applications do not refresh the duration.' Heaven's Finest 806516 grants a stack on every damaging ability; at 6 stacks The Finest of Heaven 806517 (8 s) is applied. Argent Blades land every 1.1 s: the sixth applies 806517, five more land while it is up, and its remaining duration keeps counting down from the first application, so it is gone 8 s after it. The Ascension logs hold 2986 applications and 2990 removals of 806517, and no refresh.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "templar",
+      "race": 1,
+      "class": 19,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "templar",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "learn",
+      "actor": "templar",
+      "spell": 806516
+    },
+    {
+      "action": "add_item",
+      "actor": "templar",
+      "item": 2495
+    },
+    {
+      "action": "equip",
+      "actor": "templar",
+      "item": 2495,
+      "slot": 15
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 1"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 2"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 3"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 4"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 5"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 6"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "Six Argent Blades stack Heaven's Finest to 6",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 805390,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "The sixth stack grants The Finest of Heaven",
+      "actor": "templar",
+      "metric": "aura_duration_ms",
+      "spell": 806517,
+      "min": 6000,
+      "max": 8000
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 7"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 8"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 9"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 10"
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "Abilities keep landing at 6 stacks",
+      "actor": "templar",
+      "metric": "spell_damage_count",
+      "spell": 807268,
+      "target": "dummy",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "Heaven's Finest is still at 6 stacks",
+      "actor": "templar",
+      "metric": "aura_stacks",
+      "spell": 805390,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Four more hits did not refresh The Finest of Heaven",
+      "actor": "templar",
+      "metric": "aura_duration_ms",
+      "spell": 806517,
+      "min": 1,
+      "max": 4500
+    },
+    {
+      "action": "set_power",
+      "actor": "templar",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "templar",
+      "spell": 807268
+    },
+    {
+      "action": "cast",
+      "actor": "templar",
+      "spell": 807268,
+      "target": "dummy",
+      "label": "Argent Blade 11"
+    },
+    {
+      "action": "wait",
+      "label": "Past 8 s after the first application",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "The Finest of Heaven expired 8 s after its first application",
+      "actor": "templar",
+      "metric": "aura",
+      "spell": 806517,
+      "equals": 0
+    }
+  ]
+}

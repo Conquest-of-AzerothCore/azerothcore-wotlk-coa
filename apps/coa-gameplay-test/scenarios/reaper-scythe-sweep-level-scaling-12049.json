@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Reaper Spectral Scythe: Scythe Sweep scales with the scythe's level (#12049)",
+  "contract": [
+    "Scythe Sweep 500489 has SPELL_ATTR0_SCALES_WITH_CREATURE_LEVEL, spell level 20 and a 51 base. A level-60",
+    "scythe multiplies it by creature base damage 60/20 (33.96 / 9.68 = 3.51), about 179 before armor; a live",
+    "level 55-60 Reaper's log (2026-08-04) shows 104-237 per hit. Before the fix the guardian, being",
+    "player-controlled, skipped the scaling and every hit stayed near 51 before armor (about 37 reported)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 10, "class": 30, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "location": { "map": 530, "x": 10349.6, "y": -6357.29, "z": 33.4026, "o": 5.31605 },
+  "creatures": [
+    { "id": "enemy", "owner": "reaper", "entry": 299, "level": 60, "health": 1000000, "distance": 4 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "reaper", "spell": 500484 },
+    { "action": "grant_resource", "actor": "reaper", "spell": 500363, "amount": 1 },
+    { "action": "assert", "label": "SETUP: one Reaped Soul", "actor": "reaper", "metric": "aura_stacks",
+      "spell": 500363, "equals": 1, "within_ms": 2000 },
+    { "action": "cast", "label": "Spectral Scythe with one soul", "actor": "reaper", "spell": 500484 },
+    { "action": "assert", "label": "SETUP: one scythe", "actor": "reaper", "metric": "owned_creature_count",
+      "entry": 250305, "equals": 1, "within_ms": 3000 },
+    { "action": "attack", "label": "The Reaper engages the enemy", "actor": "reaper", "target": "enemy" },
+    { "action": "assert", "label": "The first Scythe Sweep lands", "actor": "reaper", "metric": "spell_damage_count",
+      "entry": 250305, "spell": 500489, "target": "enemy", "min": 1, "within_ms": 10000 },
+    { "action": "assert", "label": "SETUP: still a single hit", "actor": "reaper", "metric": "spell_damage_count",
+      "entry": 250305, "spell": 500489, "target": "enemy", "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the level-60 hit is scaled well above the level-20 base",
+      "actor": "reaper", "metric": "spell_damage_total", "entry": 250305, "spell": 500489, "target": "enemy",
+      "min": 90 },
+    { "action": "stop_attack", "actor": "reaper" }
+  ]
+}
