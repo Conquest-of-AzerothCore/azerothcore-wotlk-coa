@@ -3591,9 +3591,11 @@
     "spell": 803797,
     "clause": "Every 3rd Command spell now makes your next Lichfrost within $807856d guaranteed to critically strike.",
     "labels": [
-      "803797 spell_duration 807856 #0"
+      "803797 behaviour_metric_delta third_command_crits",
+      "803797 behaviour_metric_delta no_talent_crits"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (M side b counted pair PAIRID3). Four cycles of three Command: Undead 504868 casts then a Lichfrost 501978 at the dummy: with Ner'zhul's Blessing learned all 4 Lichfrosts crit (807856 readied on every 3rd Command, consumed by the next Lichfrost); talent control (an unrelated spell learned instead): 0 of 4 crit in both runs (natural crit chance). Limitation stated: a Lichfrost after only 1 or 2 Commands (the 'every 3rd' boundary) is not read separately. G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 803797 0 lines (a passive), its buff 807856 1158 lines (live procs; the logs do not show the Command count, so they do not decide the every-3rd rule); MCP not queried (unavailable)."
   },
   {
     "spell": 803850,
