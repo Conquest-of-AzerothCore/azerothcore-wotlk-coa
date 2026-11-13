@@ -728,7 +728,7 @@ class EvidenceTablesTest(unittest.TestCase):
                        for entry in class_file.get('behaviours', [])} - {None}
             metrics |= {entry['observe_metric'] for entry in class_file.get('triggers', [])
                         if 'observe_metric' in entry}
-            self.assertEqual(sorted(metrics - METRIC_EVIDENCE.keys()), [], path.name)
+            self.assertEqual(sorted(metrics - metric_evidence().keys()), [], path.name)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):

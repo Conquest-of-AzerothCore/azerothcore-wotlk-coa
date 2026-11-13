@@ -5739,7 +5739,9 @@
       },
       {
         "claim": "to themselves",
-        "labels": []
+        "labels": [
+          "805049 behaviour_metric_delta to_themselves"
+        ]
       },
       {
         "claim": "for $d.",
