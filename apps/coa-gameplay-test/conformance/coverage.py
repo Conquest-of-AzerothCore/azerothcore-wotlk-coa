@@ -22,7 +22,7 @@ from compare import (CONFORMANT, CONTRAST, DATA_ONLY, LINKED_VERDICT_REFERENCE, 
                      STACKED_SAME, STATUSES, Verdict, read_verdicts)
 from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
-from kinds import kind_rows
+from kinds import kind_modules, kind_rows
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK, PROC_ENERGIZE_CHECK
 from profile import DbcSetMismatch, require_server_sha
@@ -467,6 +467,16 @@ class EvidenceError(ValueError):
 
 def evidence_classes() -> dict[str, str]:
     return {**EVIDENCE, **kind_rows('EVIDENCE')}
+
+
+KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES}
+KIND_ROW_OVERRIDES = frozenset()
+
+
+def kind_row_overrides(modules=None) -> list[tuple[str, str, str]]:
+    modules = kind_modules() if modules is None else modules
+    return sorted((table, key, module.KIND) for module in modules for table, base in KIND_ROW_TABLES.items()
+                  for key in getattr(module, table, {}) if key in base)
 
 
 def metric_evidence() -> dict[str, str]:

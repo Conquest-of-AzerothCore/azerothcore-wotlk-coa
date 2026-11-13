@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import shutil
 import tempfile
+from types import SimpleNamespace
 import unittest
 from unittest import mock
 
@@ -17,7 +18,7 @@ from compare import DATA_ONLY, NOT_MEASURED, Verdict, evaluate, judge_behaviour,
 from conformance import DIFF_EXIT, main
 from coverage import (BEHAVIOUR, BY_METRIC, CONSUMED, COVERAGE_FILE, DATA, EFFECTIVENESS_OF, EVENT, EVIDENCE, K3,
                       METRIC_EVIDENCE, NOT_CONSUMED, READBACK, STATE, STATE_PROMISES, UNPROVEN, Consumption,
-                      EvidenceError, acting,
+                      KIND_ROW_OVERRIDES, EvidenceError, acting, kind_row_overrides,
                       clause_coverage, clause_coverage_lines, coverage, TOOL_GAP, TOOL_GAP_ACCEPTED, TOOL_GAP_PENDING,
                       NO_BEHAVIOUR_ROUTE, NO_ROUTE_NOT_DATA, NO_ROUTE_PENDING, NO_ROUTE_TERMINAL,
                       fragment_entries, load_clauses, metric_evidence, read_fragment, require_claims, states_value,
@@ -746,6 +747,17 @@ class EvidenceTablesTest(unittest.TestCase):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
         self.assertEqual(states, set(STATE_PROMISES))
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
+
+
+class KindRowOverrideGuardTest(unittest.TestCase):
+    def test_cross_class_guard_no_kind_module_overrides_a_base_row_unless_allowed(self):
+        overrides = kind_row_overrides()
+        self.assertEqual(sorted({(table, key) for table, key, _ in overrides} - KIND_ROW_OVERRIDES), [])
+
+    def test_cross_class_guard_a_seeded_override_of_a_base_row_is_found(self):
+        seeded = SimpleNamespace(KIND='seeded', METRIC_EVIDENCE={'distance_2d': EVENT, 'a_new_metric': EVENT})
+        self.assertEqual(kind_row_overrides([seeded]), [('METRIC_EVIDENCE', 'distance_2d', 'seeded')])
+        self.assertNotIn(('METRIC_EVIDENCE', 'distance_2d'), KIND_ROW_OVERRIDES)
 
 
 class StampTest(unittest.TestCase):
