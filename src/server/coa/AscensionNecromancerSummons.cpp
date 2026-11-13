@@ -44,14 +44,6 @@ bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
 }
-bool PlayerInCloud(Creature* minion, uint32 spell)
-{
-    SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
-    for (Unit* unit : Nearby(minion, info->Effects[EFFECT_0].CalcRadius(minion)))
-        if (unit->GetCharmerOrOwnerPlayerOrPlayerItself() && minion->_IsValidAttackTarget(unit, info))
-            return true;
-    return false;
-}
 bool Travelling(Player const* player)
 {
     return player->IsMounted() || player->IsInFlight();
@@ -581,6 +573,13 @@ class npc_ascension_necromancer : public ScriptedAI
         if (key == 1)
             _target = guid;
     }
+    void DamageTaken(Unit* attacker, uint32& damage, DamageEffectType, SpellSchoolMask) override
+    {
+        Player* player = Owner(me);
+        if (me->GetEntry() == 50068 && damage && attacker && player && !Pacified(player) &&
+            !me->HasUnitState(UNIT_STATE_CONTROLLED) && player->IsValidAttackTarget(attacker))
+            Cast(me, me, 802353);
+    }
     void JustDied(Unit*) override
     {
         if (uint32 champion = ChampionAura(me->GetEntry()))
@@ -817,8 +816,6 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 {
-                    if (me->GetEntry() == 50068 && (me->IsInCombat() || PlayerInCloud(me, 802353)))
-                        Cast(me, me, 802353);
                     if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))
                             if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
