@@ -109,7 +109,8 @@
     {
       "action": "attack_nearby",
       "actor": "p",
-      "entry": 4275
+      "entry": 4275,
+      "damage_pct": 5
     },
     {
       "action": "assert",
