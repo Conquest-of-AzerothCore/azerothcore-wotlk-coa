@@ -1895,3 +1895,24 @@ class ShareNeighbourTest(unittest.TestCase):
         scaled = share_neighbour_reason(self.verdict(16.0, 16.0), {'relation': 'scale'},
                                         SimpleNamespace(values={}), 'combat_rating')
         self.assertIsNone(scaled)
+
+
+class EngineAmountBandTests(unittest.TestCase):
+    STATED = {'bonus': 15, 'parts': [10], 'truncated': True, 'band': True}
+
+    def reading(self, ratio: float, half_ratio: float) -> str:
+        from bonus import Bonus
+        from compare import engine_amount_band_reading
+        found = Bonus((ratio - 1) * 100, half_ratio * 100, (1.11 / 1.10 - 1) * 100, 40)
+        return engine_amount_band_reading(found, self.STATED).status
+
+    def test_a_ratio_under_the_exact_step_is_inside_the_amount_band(self):
+        self.assertEqual(self.reading(1.0082, 0.0008), 'ok')
+        self.assertEqual(self.reading(1.0091, 0.0008), 'ok')
+
+    def test_no_talent_and_a_doubled_talent_alert(self):
+        self.assertEqual(self.reading(1.0, 0.0008), 'alert')
+        self.assertEqual(self.reading(1.12 / 1.10, 0.0008), 'alert')
+
+    def test_an_interval_across_a_band_edge_is_not_judged(self):
+        self.assertEqual(self.reading(1.0046, 0.0008), 'insufficient_trials')
