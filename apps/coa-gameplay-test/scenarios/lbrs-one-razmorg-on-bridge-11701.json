@@ -3,7 +3,7 @@
   "name": "Lower Blackrock Spire has a single Razmorg the Decapitator on the bridge to Overlord Wyrmthalak",
   "contract": [
     "Razmorg the Decapitator (9218) stands once in a Lower Blackrock Spire run on Normal and on Mythic,",
-    "and with Chop'gog (9219) and Wizz'Magg (9217) at most one of the three is up, as the maintainer decided for #11383.",
+    "and so do Chop'gog (9219) and Wizz'Magg (9217): all three, once each.",
     "A player on the bridge next to the reported position loads the grid of every candidate."
   ],
   "timeout_ms": 60000,
@@ -104,7 +104,7 @@
     },
     {
       "action": "assert",
-      "label": "Normal: exactly one of the three rares is up",
+      "label": "Normal: all three rares are up, once each",
       "actor": "normal",
       "metric": "map_creature_count",
       "entries": [
@@ -112,12 +112,12 @@
         9218,
         9219
       ],
-      "equals": 1,
+      "equals": 3,
       "within_ms": 5000
     },
     {
       "action": "assert",
-      "label": "Mythic: exactly one of the three rares is up",
+      "label": "Mythic: all three rares are up, once each",
       "actor": "mythic",
       "metric": "map_creature_count",
       "entries": [
@@ -125,7 +125,7 @@
         9218,
         9219
       ],
-      "equals": 1,
+      "equals": 3,
       "within_ms": 5000
     }
   ]

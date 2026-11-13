@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Lower Blackrock Spire has Chop'gog, Razmorg and Wizz'Magg once each per run",
+  "contract": [
+    "Chop'gog the Butcher (9219), Razmorg the Decapitator (9218) and Wizz'Magg the Magus (9217) each stand once in a",
+    "Lower Blackrock Spire instance, on Normal and on Mythic. All three stand in the same map grid, so a player inside",
+    "loads every one of them."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 229,
+      "x": -40.0,
+      "y": -381.7,
+      "z": 31.62,
+      "o": 0.0
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 229,
+      "x": -40.0,
+      "y": -381.7,
+      "z": 31.62,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal is in a Normal Lower Blackrock Spire",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: mythic is in a Mythic Lower Blackrock Spire",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Normal: Chop'gog stands once",
+      "actor": "normal",
+      "metric": "map_creature_count",
+      "entries": [
+        9219
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Normal: Razmorg stands once",
+      "actor": "normal",
+      "metric": "map_creature_count",
+      "entries": [
+        9218
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Normal: Wizz'Magg stands once",
+      "actor": "normal",
+      "metric": "map_creature_count",
+      "entries": [
+        9217
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mythic: Chop'gog stands once",
+      "actor": "mythic",
+      "metric": "map_creature_count",
+      "entries": [
+        9219
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mythic: Razmorg stands once",
+      "actor": "mythic",
+      "metric": "map_creature_count",
+      "entries": [
+        9218
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mythic: Wizz'Magg stands once",
+      "actor": "mythic",
+      "metric": "map_creature_count",
+      "entries": [
+        9217
+      ],
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
