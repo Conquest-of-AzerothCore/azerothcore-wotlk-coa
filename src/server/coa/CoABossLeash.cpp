@@ -19,6 +19,8 @@
 #include "WorldSession.h"
 #include <array>
 #include <cmath>
+#include <mutex>
+#include <optional>
 #include <shared_mutex>
 #include <unordered_map>
 #include <vector>
@@ -43,6 +45,18 @@ namespace
         float radius = 0.0f;
         std::vector<Position> points;
     };
+
+    struct HiddenBoss
+    {
+        int32 remaining = 0;
+        ReactStates react = REACT_AGGRESSIVE;
+        bool immuneToPC = false;
+        bool immuneToNPC = false;
+        bool selectable = true;
+    };
+
+    std::mutex HiddenLock;
+    std::unordered_map<ObjectGuid, HiddenBoss> Hidden;
 
     std::shared_mutex LeashLock;
     std::unordered_map<uint32, Leash> Leashes;
@@ -166,32 +180,57 @@ namespace
 
     void HideForReset(Creature* creature)
     {
-        Position const home = creature->GetHomePosition();
-        ReactStates const react = creature->GetReactState();
-        bool const immuneToPC = creature->IsImmuneToPC();
-        bool const immuneToNPC = creature->IsImmuneToNPC();
-        bool const selectable = !creature->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        HiddenBoss boss;
+        boss.remaining = int32(ResetHidden.count());
+        boss.react = creature->GetReactState();
+        boss.immuneToPC = creature->IsImmuneToPC();
+        boss.immuneToNPC = creature->IsImmuneToNPC();
+        boss.selectable = !creature->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
 
+        Position const home = creature->GetHomePosition();
         creature->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), home.GetOrientation());
         creature->SetReactState(REACT_PASSIVE);
         creature->SetImmuneToAll(true);
         creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         creature->SetVisible(false);
 
-        creature->m_Events.AddEventAtOffset([creature, react, immuneToPC, immuneToNPC, selectable]()
+        std::lock_guard lock(HiddenLock);
+        Hidden[creature->GetGUID()] = boss;
+    }
+
+    void ShowAfterReset(Creature* creature, HiddenBoss const& boss)
+    {
+        creature->SetImmuneToPC(boss.immuneToPC);
+        creature->SetImmuneToNPC(boss.immuneToNPC);
+        if (boss.selectable)
+            creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetFullHealth();
+        if (creature->getPowerType() == POWER_MANA)
+            creature->SetPower(POWER_MANA, creature->GetMaxPower(POWER_MANA));
+        creature->SetReactState(boss.react);
+        creature->SetVisible(true);
+    }
+
+    bool UpdateHidden(Creature* creature, uint32 diff)
+    {
+        std::optional<HiddenBoss> back;
         {
-            if (!creature->IsAlive())
-                return;
-            creature->SetImmuneToPC(immuneToPC);
-            creature->SetImmuneToNPC(immuneToNPC);
-            if (selectable)
-                creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
-            creature->SetFullHealth();
-            if (creature->getPowerType() == POWER_MANA)
-                creature->SetPower(POWER_MANA, creature->GetMaxPower(POWER_MANA));
-            creature->SetReactState(react);
-            creature->SetVisible(true);
-        }, ResetHidden);
+            std::lock_guard lock(HiddenLock);
+            auto const itr = Hidden.find(creature->GetGUID());
+            if (itr == Hidden.end())
+                return false;
+            itr->second.remaining -= int32(diff);
+            if (itr->second.remaining <= 0)
+            {
+                back = itr->second;
+                Hidden.erase(itr);
+            }
+        }
+        if (back)
+            ShowAfterReset(creature, *back);
+        else if (creature->IsInCombat())
+            creature->CombatStop(true);
+        return true;
     }
 
     bool LeashedOnMap(Map const* map)
@@ -216,8 +255,11 @@ class CoABossLeashCheck final : public AllCreatureScript
 public:
     CoABossLeashCheck() : AllCreatureScript("CoABossLeashCheck") { }
 
-    void OnAllCreatureUpdate(Creature* creature, uint32) override
+    void OnAllCreatureUpdate(Creature* creature, uint32 diff) override
     {
+        if (UpdateHidden(creature, diff))
+            return;
+
         if (!creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive() || !LeashedOnMap(creature->GetMap()))
             return;
 
@@ -236,6 +278,12 @@ public:
         ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
         if (creature->IsInWorld() && creature->IsAlive() && creature->IsVisible())
             HideForReset(creature);
+    }
+
+    void OnCreatureRemoveWorld(Creature* creature) override
+    {
+        std::lock_guard lock(HiddenLock);
+        Hidden.erase(creature->GetGUID());
     }
 };
 
