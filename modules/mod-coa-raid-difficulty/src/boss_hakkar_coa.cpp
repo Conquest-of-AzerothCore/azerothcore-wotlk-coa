@@ -176,7 +176,7 @@ namespace
         {
             if (me->GetPositionZ() < 52.f || me->GetPositionZ() > 57.28f)
             {
-                BossAI::EnterEvadeMode(EVADE_REASON_BOUNDARY);
+                EnterEvadeMode(EVADE_REASON_BOUNDARY);
                 return false;
             }
             return true;
