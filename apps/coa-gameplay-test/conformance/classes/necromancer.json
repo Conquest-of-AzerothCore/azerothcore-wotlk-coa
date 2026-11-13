@@ -210,7 +210,7 @@
     {
       "aura": 503740, "name": "Ghoul Mastery",
       "tooltip": "Damage dealt by your |cffffffffGhouls|r now has a $h% chance to transform them into a |cffffffffFrenzied Ghoul|r.",
-      "aura_on_minion": true, "baseline": true, "chance_token": "$h",
+      "aura_on_minion": true, "baseline": true, "band": true, "chance_token": "$h",
       "trigger": {"action": "minion", "spell": 500971, "entry": 50073, "swing_ms": 2000,
                   "swing_source": "Scale() in AscensionNecromancerSummons.cpp: SetAttackTime(BASE_ATTACK, 2000 x the owner's cast speed)"},
       "trigger_text": "Damage dealt by your Ghouls", "trial_metric": "owned_creature_damage_count",
@@ -6647,9 +6647,9 @@
       "variant": "siphon_base",
       "label_suffix": "siphon_base",
       "quote": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
-      "expected": 174.96,
-      "after_at_least": 174.96,
-      "after_at_most": 212.96,
+      "expected": 174,
+      "after_at_least": 174,
+      "after_at_most": 212,
       "before_expected": 0,
       "trigger_spell": 583256,
       "target": "dummy",
@@ -6669,7 +6669,7 @@
         "spell": 583256,
         "target": "dummy"
       },
-      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 + RealPointsPerLevel 0.74 x (60 - SpellLevel 56) = 2.96 (174.96 to 212.96, $m1 at level 60), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power 0 (the reference character): no hit without the cast (control); the first tick lies in [174.96, 212.96], the tooltip's $m1 (the engine truncates the per-level term to 2, G-28, which this band does not model)."
+      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 + RealPointsPerLevel 0.74 x (60 - SpellLevel 56) = 2.96 (174.96 to 212.96, $m1 at level 60), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power 0 (the reference character): no hit without the cast (control); the first tick lies in [174, 212]. G-28 engine computation (ADR 0147): CalcValue adds int32((60 - BaseLevel 56) x 0.74f) = int32(2.96) = 2 to BasePoints 171 (SpellInfo.cpp:497; MaxLevel 68), then the roll irand(1, 39) (SpellInfo.cpp:510), so $m1 is an integer 174..212 (the tooltip's unrounded 174.96..212.96 less the truncated 0.96); Factor's 2 - health percent / 100 is 1.0f on the full dummy (AscensionNecromancerContracts.cpp:471, 538)."
     },
     {
       "spell": 583256,
@@ -6678,9 +6678,9 @@
       "variant": "siphon_power",
       "label_suffix": "siphon_power",
       "quote": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
-      "expected": 3174.96,
-      "after_at_least": 3174.96,
-      "after_at_most": 3212.96,
+      "expected": 3174,
+      "after_at_least": 3174,
+      "after_at_most": 3212,
       "before_expected": 0,
       "trigger_spell": 583256,
       "target": "dummy",
@@ -6701,7 +6701,7 @@
         "spell": 583256,
         "target": "dummy"
       },
-      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 + RealPointsPerLevel 0.74 x (60 - SpellLevel 56) = 2.96 (174.96 to 212.96, $m1 at level 60), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power held at 20000 (player fixture, precondition): no hit without the cast (control); the first tick lies in [174.96 + 3000, 212.96 + 3000], the tooltip's $m1 plus $SP*0.15 (the engine truncates the per-level term to 2, G-28, which this band does not model)."
+      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 + RealPointsPerLevel 0.74 x (60 - SpellLevel 56) = 2.96 (174.96 to 212.96, $m1 at level 60), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power held at 20000 (player fixture, precondition): no hit without the cast (control); the first tick lies in [3174, 3212], the tooltip's $m1 plus $SP*0.15. G-28 engine computation (ADR 0147): CalcValue adds int32((60 - BaseLevel 56) x 0.74f) = int32(2.96) = 2 to BasePoints 171 (SpellInfo.cpp:497; MaxLevel 68), then the roll irand(1, 39) (SpellInfo.cpp:510), so $m1 is an integer 174..212 (the tooltip's unrounded 174.96..212.96 less the truncated 0.96); ModifySpellEffectBaseValue adds 20000 x (0.15f x 100) / 100 = 3000.0002 in float to that integer (AscensionNecromancerContracts.cpp:522-524, SpellInfo.cpp:523) and CalcValue returns int32 (SpellInfo.cpp:592): 3174..3212, uniform over the 39 rolls (one roll per cast, the read's only spread; reads 3189 / 3201 (c10), 3174 / 3176 (c11) are rolls 1, 3, 16, 28); Factor's 2 - health percent / 100 is 1.0f on the full dummy (AscensionNecromancerContracts.cpp:471, 538)."
     },
     {
       "spell": 704723,
