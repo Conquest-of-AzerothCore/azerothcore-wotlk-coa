@@ -905,6 +905,9 @@ changes the cast time (Lich Essence 802988, which shortens Lichfrost by 15%).
 `repeats` (ADR 0546) repeats every cast; the judge then takes the mean bracket middle of each kind of cast and a 99%
 interval of the reduction from the repeats, since one poll is one world tick (8-10 ms of game time) and a single
 bracket cannot be narrower (Lich Essence: 10 repeats, 21-poll windows).
+The model stamps its contrast (ADR 0570): `own_cast` when `reducer_spell` is the entry's own spell and is cast,
+`learned` with `reducer_learn`, otherwise `condition`; coverage counts the `casting` read as behaviour for the first
+two where the clause promises it (`coverage.promised_state`, as ADR 0553 for `metric_delta`).
 
 ### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
 
@@ -1828,6 +1831,9 @@ the engine computation gives at the stated bonus, `insufficient_trials` when it 
 and `alert` otherwise (between two steps, another step, or several steps without the stated one). Radiant Blade
 524822 and 525080 (+25% and +50% on Oath: Righteous Lunge's +5% and +30%): amounts 6 and 37, 7 and 45, against the
 Oath alone.
+`stated` `band: true` with one truncated part (ADR 0571) judges in the G-19 band instead: the ratio is read as the aura amount on the part,
+(ratio x (1 + part / 100) - 1) x 100, and its 99% interval against the int32 amount of the stated bonus in 5% of that amount
+(Plague Protection 570046 on Fetid Ward: 11, band 10.45 to 11.55).
 
 ### Minion stats in metric_delta (ADR 0341)
 

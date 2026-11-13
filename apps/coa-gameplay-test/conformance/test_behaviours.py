@@ -11570,6 +11570,29 @@ class PushbackReductionTests(unittest.TestCase):
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739},
                                      {'hit': 1000.0, 'reduced': 1012.0}), 'unmeasured')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_reducer_stamps_its_own_cast_or_its_learn_as_the_contrast(self):
+        own = cycle_one_entry(807813, 'pushback_game_time')
+        learned = cycle_one_entry(802988, 'pushback_game_time')
+        contrast = lambda entry: behaviour_scenario(load_class_file(23), entry)[1][0].model['contrast']
+        self.assertEqual(contrast(own), 'own_cast')
+        self.assertEqual(contrast(learned), 'learned')
+        self.assertEqual(contrast({**own, 'reducer_spell': 802988}), 'condition')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_own_cast_reduction_is_a_promised_state_and_a_condition_one_is_not(self):
+        from compare import observed
+        from coverage import promised_state
+        clause = 'and reduces the pushback suffered from damaging attacks while casting by 50%'
+        _, [expectation] = self.built()
+        found = judge_behaviour(base_verdict(expectation),
+                                FakeRun(self.values({'unhit': 2495, 'hit': 2983, 'reduced': 2739})), expectation)
+        stamped = replace(found, detail={**found.detail, **observed(expectation)})
+        self.assertEqual(stamped.status, 'ok')
+        self.assertTrue(promised_state(stamped, clause))
+        self.assertFalse(promised_state(replace(stamped, detail={**stamped.detail, 'contrast': 'condition'}), clause))
+        self.assertFalse(promised_state(stamped, 'Summon an Icebound Champion'))
+
 
 
 class SummonLifetimeTests(unittest.TestCase):

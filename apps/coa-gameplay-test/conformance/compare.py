@@ -4351,6 +4351,29 @@ def engine_step_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
                                              'stated bonus gives', passes, text)
 
 
+def engine_amount_band_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
+    part = float(stated['parts'][0])
+    expected = float(engine_amount(part * (1 + float(stated['bonus']) / 100)))
+    amount = lambda points: ((1 + points / 100) * (1 + part / 100) - 1) * 100
+    band = RELATIVE_BAND * expected
+    passes = (expected - band, expected + band)
+    if not math.isfinite(bonus.half):
+        return EngineStepReading(Bonus(amount(bonus.measured), math.inf, expected, bonus.trials, band),
+                                 'insufficient_trials', 'not judged: one trial per arm gives no interval', passes,
+                                 'no interval')
+    low, high = amount(bonus.low), amount(bonus.high)
+    found = Bonus(amount(bonus.measured), (high - low) / 2, expected, bonus.trials, band)
+    text = (f'the ratio read as the aura amount on the part {part:g}: {found.measured:.4g} (99% interval {low:.4g} '
+            f'to {high:.4g}) against the int32 amount {expected:g} the stated {float(stated["bonus"]):g}% gives, '
+            f'band {passes[0]:.4g} to {passes[1]:.4g} (G-19, 5% of the amount)')
+    if passes[0] - FLOAT_EPSILON <= low and high <= passes[1] + FLOAT_EPSILON:
+        return EngineStepReading(found, 'ok', 'the whole interval lies inside the band', passes, text)
+    if high < passes[0] or low > passes[1]:
+        return EngineStepReading(found, 'alert', 'the whole interval lies outside the band', passes, text)
+    return EngineStepReading(found, 'insufficient_trials', 'not judged: the interval crosses a band edge', passes,
+                             text)
+
+
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
@@ -4398,7 +4421,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     except ValueError as error:
         return replace(base, status='unmeasured', explanation=f'not judged: {error}')
     stated = model.get('stated')
-    stepped = stated and flat is None and stated.get('truncated') and engine_step_reading(bonus, stated)
+    stepped = stated and flat is None and stated.get('truncated') and (
+        engine_amount_band_reading(bonus, stated) if stated.get('band') else engine_step_reading(bonus, stated))
     if stepped:
         bonus = stepped.bonus
         status, reason, needed = stepped.status, stepped.reason, None

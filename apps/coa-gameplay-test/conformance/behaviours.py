@@ -94,6 +94,7 @@ BEFORE = 'before'
 AFTER = 'after'
 LEARNED_CONTRAST = 'learned'
 CONDITION_CONTRAST = 'condition'
+OWN_CAST_CONTRAST = 'own_cast'
 HEALING_RATIO_METRICS = {'effect_value': 'spell_effect_value', 'taken': 'spell_healing_taken'}
 LINE_BREAKS = re.compile(r'\s+')
 
@@ -2402,6 +2403,12 @@ def pushback_phases(spec: PushbackReductionSpec) -> tuple[str, ...]:
     return PUSHBACK_LEARNED_PHASES if spec.reducer_learn else PUSHBACK_PHASES
 
 
+def pushback_contrast(spec: PushbackReductionSpec) -> str:
+    if spec.reducer_learn:
+        return LEARNED_CONTRAST
+    return OWN_CAST_CONTRAST if spec.reducer_spell == spec.spell else CONDITION_CONTRAST
+
+
 def pushback_label(spec: PushbackReductionSpec) -> str:
     return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
 
@@ -2485,8 +2492,8 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file), striker],
         'steps': steps}
-    model = {'kind': 'pushback_reduction', 'metric': 'casting', 'quote': entry.quote,
-             'expected_pct': spec.expected_pct,
+    model = {'kind': 'pushback_reduction', 'metric': 'casting', 'contrast': pushback_contrast(spec),
+             'quote': entry.quote, 'expected_pct': spec.expected_pct,
              'band': bonus_band(spec.expected_pct),
              'phases': ({name: pushback_phase_model(spec, name, name, polls) for name in phases}
                         if spec.repeats == 1 else {})}
@@ -6146,6 +6153,7 @@ class HitRatioSpec:
     stated_truncated: bool = False
     cast_unit_auras: tuple[tuple[int, int], ...] = ()
     target_auras: tuple[tuple[int, int], ...] = ()
+    stated_band: bool = False
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6496,6 +6504,10 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         model['stated'] = {'bonus': bonus, 'parts': list(parts)}
         if spec.stated_truncated:
             model['stated']['truncated'] = True
+        if spec.stated_band:
+            if not spec.stated_truncated or len(parts) != 1:
+                raise ValueError(f'{spec.spell} hit_ratio stated band judges one truncated part')
+            model['stated']['band'] = True
     if spec.scale_auras:
         model['scale_reads'] = {name: [hit_ratio_scale_label(spec, name, spell, effect)
                                        for spell, effect in spec.scale_auras] for name in HIT_RATIO_ARMS}
@@ -6524,7 +6536,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])),
                         bool((entry.get('stated') or {}).get('truncated', False)),
                         tuple((int(spell), int(stacks)) for spell, stacks in entry.get('cast_unit_auras', ())),
-                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('target_auras', ())))
+                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('target_auras', ())),
+                        bool((entry.get('stated') or {}).get('band', False)))
 
 
 CRIT_RATE_TRIALS = 300
