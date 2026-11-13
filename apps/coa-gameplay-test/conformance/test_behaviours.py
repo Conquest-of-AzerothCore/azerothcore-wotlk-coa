@@ -10390,5 +10390,28 @@ class PermanentImmunityTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**entry, 'remove_control': True})
 
 
+
+class MinionAuraCountTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 504489 and entry.get('label_suffix') == 'area')
+
+    def aura_reads(self, entry: dict) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_class_file(23), entry)
+        return [step for step in scenario['steps'] if step.get('metric') == 'aura']
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_aura_is_read_whatever_its_caster(self):
+        reads = self.aura_reads(self.entry())
+        self.assertTrue(reads)
+        self.assertTrue(all('caster' not in step for step in reads))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_caster_aura_keeps_its_caster_filter(self):
+        entry = {key: value for key, value in self.entry().items() if key not in ('caster_entry', 'setup_casts')}
+        reads = self.aura_reads(entry)
+        self.assertTrue(all(step.get('caster') == 'caster' for step in reads))
+
+
 if __name__ == '__main__':
     unittest.main()

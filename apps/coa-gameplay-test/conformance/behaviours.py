@@ -186,6 +186,8 @@ def hit_measurement(spec: TargetCountSpec, index: int, moment: str) -> dict:
     if spec.metric == 'spell_damage_count':
         minion = {'caster_entry': spec.caster_entry} if getattr(spec, 'caster_entry', None) else {}
         return measurement(label, CASTER, spec.metric, spell=spec.target_rank, target=dummy_id(index), **minion)
+    if getattr(spec, 'caster_entry', None):
+        return measurement(label, dummy_id(index), spec.metric, spell=spec.target_rank)
     return measurement(label, dummy_id(index), spec.metric, spell=spec.target_rank, caster=CASTER)
 
 

@@ -1633,6 +1633,10 @@ alerts). Norgannon's Wrath 524739 `cap`: twelve dummies, each cast strikes the p
 `cap_control`: ten dummies, all struck. Their labels take the suffix after the spell id, as every `fixed_count`
 `label_suffix` does (ADR 0240): `524739 cap behaviour_fixed_count`.
 
+A `fixed_count` entry with `metric: "aura"` and a `caster_entry` (ADR 0422) reads `target_rank` on each dummy
+whatever its caster, since the minion casts it: Command: Bonefreeze 504489's freeze 504845, cast by the Skeletal Mage
+on every enemy within 8 yd of the target.
+
 `cluster_yd` (ADR 0254), on a target-centred entry with `primary_distance_reads`, places the additional dummies within
 that distance of the primary instead of within `radius`, and judges their reads under it. Norgannon's Wrath 524739
 `cap_cluster`: twelve dummies within 2.5 yd of the primary, six casts.
