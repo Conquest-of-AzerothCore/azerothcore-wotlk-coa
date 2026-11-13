@@ -3521,7 +3521,9 @@
     "spell": 802986,
     "clause": "and emit Zombie Plague, dealing ${$504022m1*$<scalingbp>+$SP*0.1} Plague damage to their target.",
     "labels": [
-      "802986 effect_value 504022e0 #2"
+      "802986 effect_value 504022e0 #2",
+      "802986 script_hit 504022 zombie_plague",
+      "802986 script_hit 504022 zombie_plague_sp"
     ],
     "kind": "claim",
     "reason": "Not final, route pending (morning batch M side a): with the forced roll of ADR 0482 the Zombie Plague 504022 hit is at a known time, but forced_chance exists for metric_delta only; the route is a script_hit 504022 (caster_entry of the minion) with the same fixture, or a metric_delta gain of spell_damage_total of 504022 at the dummy. Not built. G-11: server DBC set and class code read; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 807653 15562 lines by id, \"Plague Horde\" 31124 by name; 6089 applications of 807653, all self-cast by a minion, each with 807765 on the same minion within 0.2 s; ~/CoaServer/reference: bindmysoul \"Damage dealt by your Undead minions now has a 10% chance to cast Plague Horde on themselves\"; coa-obtainable: in the live capture and the shipped table; sources.md followed; MCP not queried (unavailable)."
