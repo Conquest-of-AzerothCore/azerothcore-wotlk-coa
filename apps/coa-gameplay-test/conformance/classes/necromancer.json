@@ -3343,6 +3343,12 @@
           1,
           "dummy",
           "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "aura_stacks",
@@ -3350,7 +3356,7 @@
         "spell": 801728,
         "caster": "caster"
       },
-      "observe_source": "Soulfreeze 801724 (Effect[0] aura 23 every 1000 ms for 3000 ms, DurationIndex 27, triggering 801728 on the target) cast twice at the dummy 3500 ms apart (cooldown reset before each): six triggered 801728 ticks, each adding a stack (StackAmount 3, $801728u); read on the dummy, cast by the caster, 3500 ms after the second cast: 3, the cap. Ice Lock 22856 on the dummy (harness set_aura by the caster, precondition fixture, both phases): Frost school (SchoolMask 16) SPELL_AURA_MOD_STUN, so the dummy holds AURA_STATE_FROZEN (SpellInfo.cpp:2342-2346); ProcFlags 0 and AuraInterruptFlags 0, so damage does not break it (Frost Nova 122 carries ProcFlags 0xa22a8 and broke under the 801728 ticks, pair r6), DurationIndex permanent. 801728 needs a Frozen target (TargetAuraState 4; unfrozen, its triggered ticks fail SPELL_FAILED_DONT_REPORT, pair r4). 560848 learned at the start; no cast before (control): 0."
+      "observe_source": "Fixture 823764 beeg spellpen on the caster in both phases (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on the magic schools, as the 801724 chain entries carry): without it the one Soulfreeze cast that lands is resisted whole about one time in six, which leaves 0 stacks (cycle 3, build 725ce2120bd9: 10 of 60 repeats read 0 without it, 0 of 60 with it; pair c1 20261113-105514 / -111950 read 0 / 0, pair M 3 / 3). The second cast fails SPELL_FAILED_NOT_READY (reason 67, the 20 s cooldown is reset only before the first), so the 3 stacks come from one cast. Soulfreeze 801724 (Effect[0] aura 23 every 1000 ms for 3000 ms, DurationIndex 27, triggering 801728 on the target) cast twice at the dummy 3500 ms apart (cooldown reset before each): six triggered 801728 ticks, each adding a stack (StackAmount 3, $801728u); read on the dummy, cast by the caster, 3500 ms after the second cast: 3, the cap. Ice Lock 22856 on the dummy (harness set_aura by the caster, precondition fixture, both phases): Frost school (SchoolMask 16) SPELL_AURA_MOD_STUN, so the dummy holds AURA_STATE_FROZEN (SpellInfo.cpp:2342-2346); ProcFlags 0 and AuraInterruptFlags 0, so damage does not break it (Frost Nova 122 carries ProcFlags 0xa22a8 and broke under the 801728 ticks, pair r6), DurationIndex permanent. 801728 needs a Frozen target (TargetAuraState 4; unfrozen, its triggered ticks fail SPELL_FAILED_DONT_REPORT, pair r4). 560848 learned at the start; no cast before (control): 0."
     },
     {
       "spell": 560848,
