@@ -1064,7 +1064,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found. Claim 'by party and raid members': measured, not final (G-20 step 1): +2.01% [+0.11, +3.91] and +0.92% [-0.96, +2.79] at 332 trials per arm (4 pooled parts, final2 20261113-020126 / -020211); Frost partial resists on the ally spread the hits, the pilot asks about 1,166-1,940 per arm; sized only if slack remains (mentor)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '3%', 'does not stack', '25%'; coa-obtainable: in the live capture; logs: nothing found. Claim 'by party and raid members': status 1 on the route final pair rfinal 20261113-030915 / -031039 (build 5ebc3da2cbd8, head 96b0bd3be5) (24 pooled parts, about 1,990 trials per arm as the pilot sized): +2.44% [+1.67, +3.22] and +2.73% [+1.98, +3.49] (99% intervals, inside the G-19 band +1..+5); earlier 332-trial reads (final2) were measured, not final."
   },
   {
     "spell": 503738,
