@@ -12,6 +12,7 @@
 #include "EtherealBazaar.h"
 
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "QueryResult.h"
@@ -97,10 +98,16 @@ public:
                 if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, member, stack) == EQUIP_ERR_OK)
                 {
                     if (Item* given = player->StoreNewItem(dest, member, true, Item::GenerateItemRandomPropertyId(member)))
+                    {
                         player->SendNewItem(given, stack, true, false);
+                        CoAEconomyLog::CacheItem(player, cacheEntry, given, stack);
+                    }
                 }
                 else if (Item* piece = Item::CreateItem(member, stack, player))
+                {
+                    CoAEconomyLog::CacheItem(player, cacheEntry, piece, stack);
                     mail.push_back(piece);
+                }
             }
         }
 

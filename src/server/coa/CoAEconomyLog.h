@@ -7,6 +7,7 @@
 #include <optional>
 #include <string_view>
 
+class Item;
 class Player;
 
 enum class CoAEconomyEvent : uint8
@@ -74,6 +75,7 @@ namespace CoAEconomyLog
         CoAEconomyRow const& row);
     void FlushQueue(Player* player, CharacterDatabaseTransaction trans);
     void AddTokensEarned(Player* player, int32 tokens, CoATokenSource source);
+    void CacheItem(Player* player, uint32 cacheEntry, Item const* item, uint32 count);
 }
 
 void AddSC_CoAEconomyLog();

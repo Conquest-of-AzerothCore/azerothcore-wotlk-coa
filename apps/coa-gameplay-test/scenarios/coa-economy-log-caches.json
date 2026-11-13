@@ -1,0 +1,57 @@
+{
+  "schema": 1,
+  "name": "Economy log: what a cache or container gives is logged with the cache it came from",
+  "contract": [
+    "With the economy log on, every item a cache or container gives writes one cache_open row for the character who opened it, with the item, its count and the cache's entry as source, whether it lands in the bags or is mailed because the bags are full.",
+    "Champion's Battlegear - Experience Heirloom Cache (1339054, item_ethereal_set_cache) holds x3 Heirloom Weapon Token 414010, x2 Swift Hand of Justice 1642991, Champion's Deathdealer Breastplate 1648677 and Champion Herod's Shoulder 1642950: seven unstackable items; with four free slots the breastplate and the shoulder are mailed.",
+    "The Ethereal Tool Dispenser Crate (8263511, item_ethereal_lost_cache) has one reward, the Ethereal Tool Dispenser (8263501).",
+    "The Sentinel Basic Care Package (19150) opens a loot window with 20 Warsong Gulch Field Rations (19062) at 100%."
+  ],
+  "timeout_ms": 90000,
+  "economy_log": true,
+  "players": [
+    {"id": "roomy", "race": 1, "class": 1, "level": 60},
+    {"id": "cramped", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+
+    {"action": "add_item", "actor": "roomy", "item": 1339054},
+    {"action": "use_item", "label": "Open the set cache with room to spare", "actor": "roomy", "item": 1339054, "spell": 18282},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The cache is used up", "actor": "roomy", "metric": "item_count", "item": 1339054, "equals": 0},
+    {"action": "assert", "label": "Three weapon tokens", "actor": "roomy", "metric": "item_count", "item": 414010, "equals": 3},
+    {"action": "assert", "label": "two trinkets", "actor": "roomy", "metric": "item_count", "item": 1642991, "equals": 2},
+    {"action": "assert", "label": "the breastplate", "actor": "roomy", "metric": "item_count", "item": 1648677, "equals": 1},
+    {"action": "assert", "label": "and the shoulder", "actor": "roomy", "metric": "item_count", "item": 1642950, "equals": 1},
+
+    {"action": "add_item", "actor": "cramped", "item": 1339054},
+    {"action": "fill_bags", "actor": "cramped", "slots": 4},
+    {"action": "wait", "ms": 1000},
+    {"action": "fill_bags", "label": "Refill a slot freed by a filler item that vanished", "actor": "cramped", "slots": 4},
+    {"action": "assert", "label": "Four slots are free", "actor": "cramped", "metric": "free_inventory_slots", "equals": 4},
+    {"action": "use_item", "label": "Open the set cache with four free slots", "actor": "cramped", "item": 1339054, "spell": 18282},
+    {"action": "wait", "ms": 500},
+    {"action": "assert", "label": "The tokens fit", "actor": "cramped", "metric": "item_count", "item": 414010, "equals": 3},
+    {"action": "assert", "label": "The breastplate is mailed", "actor": "cramped", "metric": "mail_has_item", "item": 1648677, "equals": 1},
+    {"action": "assert", "label": "The shoulder is mailed", "actor": "cramped", "metric": "mail_has_item", "item": 1642950, "equals": 1},
+
+    {"action": "add_item", "actor": "roomy", "item": 8263511},
+    {"action": "use_item", "label": "Open the Ethereal Tool Dispenser Crate", "actor": "roomy", "item": 8263511, "spell": 60034},
+    {"action": "assert", "label": "It gives the Ethereal Tool Dispenser", "actor": "roomy", "metric": "item_count", "item": 8263501, "equals": 1, "within_ms": 2000},
+
+    {"action": "add_item", "actor": "roomy", "item": 19150},
+    {"action": "open_item", "label": "Open the Sentinel Basic Care Package", "actor": "roomy", "item": 19150},
+    {"action": "collect_loot", "label": "Take the rations", "actor": "roomy"},
+    {"action": "assert", "label": "Twenty rations", "actor": "roomy", "metric": "item_count", "item": 19062, "equals": 20},
+
+    {"action": "assert", "label": "THE LOG: three weapon tokens from the set cache", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 414010, "economy_count": 1, "economy_source": 1339054, "equals": 3},
+    {"action": "assert", "label": "THE LOG: the breastplate from the set cache", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 1648677, "economy_source": 1339054, "equals": 1},
+    {"action": "assert", "label": "THE LOG: seven pieces in all", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 1339054, "equals": 7},
+    {"action": "assert", "label": "THE LOG: the mailed shoulder still counts", "actor": "cramped", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 1642950, "economy_source": 1339054, "equals": 1},
+    {"action": "assert", "label": "THE LOG: seven pieces for the cramped opener too", "actor": "cramped", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 1339054, "equals": 7},
+    {"action": "assert", "label": "THE LOG: the crate's dispenser", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 8263501, "economy_count": 1, "economy_source": 8263511, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the looted rations, with the package as source", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "item": 19062, "economy_count": 20, "economy_source": 19150, "equals": 1},
+    {"action": "assert", "label": "THE LOG: nine cache rows for the roomy opener", "actor": "roomy", "metric": "economy_log_rows", "economy_event": "cache_open", "equals": 9}
+  ]
+}

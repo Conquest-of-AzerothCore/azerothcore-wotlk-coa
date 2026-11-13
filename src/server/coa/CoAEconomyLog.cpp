@@ -176,6 +176,19 @@ void CoAEconomyLog::FlushQueue(Player* player, CharacterDatabaseTransaction tran
         Write(trans, pending.account, player->GetGUID().GetCounter(), pending.map, pending.zone, pending.row);
 }
 
+void CoAEconomyLog::CacheItem(Player* player, uint32 cacheEntry, Item const* item, uint32 count)
+{
+    if (!item)
+        return;
+    CoAEconomyRow row;
+    row.event = CoAEconomyEvent::CacheOpen;
+    row.itemEntry = item->GetEntry();
+    row.itemGuid = item->GetGUID().GetCounter();
+    row.itemCount = count;
+    row.source = cacheEntry;
+    Queue(player, row);
+}
+
 void CoAEconomyLog::AddTokensEarned(Player*, int32, CoATokenSource)
 {
 }
@@ -188,7 +201,8 @@ namespace
         CoAEconomyLogPlayer() : PlayerScript("CoAEconomyLogPlayer", { PLAYERHOOK_ON_SAVE_INVENTORY, PLAYERHOOK_ON_LOGOUT,
             PLAYERHOOK_ON_AFTER_DESTROY_ITEM, PLAYERHOOK_ON_AFTER_STORE_OR_EQUIP_NEW_ITEM, PLAYERHOOK_ON_AFTER_SELL_ITEM,
             PLAYERHOOK_ON_AFTER_BUY_BACK_ITEM, PLAYERHOOK_ON_AFTER_TAKE_MAIL_ITEM, PLAYERHOOK_ON_AFTER_TAKE_MAIL_MONEY,
-            PLAYERHOOK_ON_AFTER_TRADE_ITEM, PLAYERHOOK_ON_AFTER_TRADE_MONEY, PLAYERHOOK_ON_AFTER_PLACE_AUCTION_BID }) { }
+            PLAYERHOOK_ON_AFTER_TRADE_ITEM, PLAYERHOOK_ON_AFTER_TRADE_MONEY, PLAYERHOOK_ON_AFTER_PLACE_AUCTION_BID,
+            PLAYERHOOK_ON_LOOT_ITEM }) { }
 
         void OnPlayerAfterPlaceAuctionBid(Player* player, AuctionEntry const* auction, uint32 paid, bool buyout,
             CharacterDatabaseTransaction trans) override
@@ -245,6 +259,16 @@ namespace
             CoAEconomyRow row = MailTakeRow(mail);
             row.gold = int64(money);
             WriteFor(trans, player->GetGUID().GetCounter(), row);
+        }
+
+        void OnPlayerLootItem(Player* player, Item* item, uint32 count, ObjectGuid lootguid) override
+        {
+            if (!item || !lootguid.IsItem())
+                return;
+            Item const* container = player->GetItemByGuid(lootguid);
+            if (!container || !container->GetTemplate()->HasFlag(ITEM_FLAG_HAS_LOOT))
+                return;
+            CoAEconomyLog::CacheItem(player, container->GetEntry(), item, count);
         }
 
         void OnPlayerAfterStoreOrEquipNewItem(Player* player, uint32, Item* item, uint8 count, uint8, uint8,
