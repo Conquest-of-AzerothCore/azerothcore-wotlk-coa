@@ -356,11 +356,12 @@
         504022
       ],
       "trial_excluded_reason": "each proc has the minion cast Zombie Plague 504022 inside the event handler (AscensionNecromancerEvents.cpp:201-205), whose hits the State(player).event guard keeps from rolling (AscensionNecromancerEvents.cpp:60-61), so they are not trials",
-      "event_metric": "spell_cast_count",
+      "event_metric": "spell_go_count",
+      "event_actor": "minion",
       "proc_spell": 807653,
       "proc_spell_source": "tooltip reference @s:807653:0@ and $807653d",
       "events_per_proc": 1,
-      "handler": "AscensionNecromancerEvents.cpp:198-202: Chance(player, 802986) (ProcChance 10) has the caster cast 807653 on the minion and the minion cast Zombie Plague 504022",
+      "handler": "AscensionNecromancerEvents.cpp:192-197: MinionChance(player, actor, 802986) (ProcChance 10) has the minion cast 807653 and 807765 on itself and Zombie Plague 504022 (ADR 0483, commit 5ed0f26125: before it the player cast 807653); the events are the Ghoul's own 807653 casts (spell_go_count of the minion entry)",
       "dbc": {
         "802986": {
           "ProcChance": 10,
