@@ -10742,5 +10742,63 @@ class MetricDeltaCasterHealthTests(unittest.TestCase):
         self.assertEqual(steps[sets[0]]['value'], 5000)
 
 
+class B3ToolMutantTests(unittest.TestCase):
+    def expectations(self, spell: int, suffix: str | None = None, kind: str | None = None) -> list:
+        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['spell'] == spell
+                     and (suffix is None or entry.get('label_suffix') == suffix)
+                     and (kind is None or entry['kind'] == kind))
+        return behaviour_scenario(load_class_file(23), entry)[1]
+
+    def judged(self, expectation, values: dict) -> str:
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def delta(self, spell: int, suffix: str, before: float, after: float, expired: float | None = None) -> str:
+        [expectation] = self.expectations(spell, suffix)
+        values = {expectation.model['before_label']: before, expectation.model['after_label']: after}
+        if expired is not None:
+            values[expectation.model['expired_label']] = expired
+        return self.judged(expectation, values)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_frozen_gate_still_refused_alerts(self):
+        blocked, allowed, bypassed = self.expectations(707402, kind='cast_gate')
+        self.assertEqual(self.judged(allowed, {allowed.label: 67.0}), 'alert')
+        self.assertEqual(self.judged(allowed, {allowed.label: 0.0}), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_mass_grave_past_its_cap_alerts(self):
+        [expectation] = self.expectations(803741, 'targets')
+        labels = expectation.model['dummy_labels']
+        far = expectation.model['far_label']
+        six = {label: 1.0 if index < 6 else 0.0 for index, label in enumerate(labels)}
+        five = {label: 1.0 if index < 5 else 0.0 for index, label in enumerate(labels)}
+        self.assertEqual(self.judged(expectation, {**six, far: 0.0}), 'alert')
+        self.assertEqual(self.judged(expectation, {**five, far: 0.0}), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_mass_grave_cast_at_520_runic_power_alerts(self):
+        self.assertEqual(self.delta(803741, 'instant', 1.0, 1.0), 'alert')
+        self.assertEqual(self.delta(803741, 'instant', 1.0, 0.0), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_mechanical_dummy_affected_alerts(self):
+        self.assertEqual(self.delta(803741, 'humanoids_only', 0.0, 1.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_four_reliquaries_alert(self):
+        self.assertEqual(self.delta(803771, 'count', 0.0, 4.0), 'alert')
+        self.assertEqual(self.delta(803771, 'count', 0.0, 5.0), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_double_heal_alerts(self):
+        self.assertEqual(self.delta(803771, 'restore', 5000.0, 9500.0), 'alert')
+        self.assertEqual(self.delta(803771, 'restore_low', 2000.0, 7400.0), 'alert')
+        self.assertEqual(self.delta(803771, 'restore', 5000.0, 6500.0), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_permafrost_expired_before_the_read_alerts(self):
+        self.assertEqual(self.delta(704681, 'charges', 0.0, 0.0), 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

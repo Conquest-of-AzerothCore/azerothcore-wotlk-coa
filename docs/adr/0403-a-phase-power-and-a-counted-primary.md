@@ -27,3 +27,5 @@ alert of the judge, not of the server.
 
 - Entries without the fields generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
 - Mass Grave reads its cast state at 500 and 520 Runic Power, and counts five of seven Humanoids within 8 yd.
+- Mutants (B3ToolMutantTests): Mass Grave still casting at 520 Runic Power alerts; six of seven Humanoids affected
+  alerts (count_primary), five passes.

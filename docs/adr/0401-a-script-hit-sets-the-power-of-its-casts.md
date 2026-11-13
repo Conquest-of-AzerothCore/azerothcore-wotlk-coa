@@ -20,3 +20,5 @@ power value; `hit_ratio` and `metric_delta` entries expose it as `cast_power`.
 
 - Entries without `cast_power` generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
 - Ice Barrage 501997's tick entry sets 1000 Runic Power.
+- Mutant: the pre-fix pair itself (every Ice Barrage cast refused with 85, no 803779 hit) read insufficient_trials, so a
+  missing power fixture cannot pass; the tick entry then measured 16 hits.

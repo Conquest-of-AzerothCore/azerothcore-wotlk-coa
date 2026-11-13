@@ -28,3 +28,4 @@ cooldown of the bypassed cast, not the frozen gate.
 - Health-fixture gates (Templar Titanstrike 806521) are unchanged: `generate --class 19` and `--stack` are
   byte-identical.
 - Necromancer Glacial Impact 707402's "Requires Frozen Target" reads its allowed attempt after the cooldown.
+- Mutant (B3ToolMutantTests): the allowed attempt read 67, the global cooldown this ADR waits out, alerts; 0 passes.

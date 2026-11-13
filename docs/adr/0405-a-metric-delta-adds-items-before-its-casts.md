@@ -27,3 +27,5 @@ evidence class in `coverage.METRIC_EVIDENCE`.
 
 - Entries without `items` generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
 - Create Bone Reliquary reads 0 items without a cast and 5 after one.
+- Mutants (B3ToolMutantTests): four Bone Reliquaries alert (five pass); the pre-fix double heal 5000 -> 9500 and
+  2000 -> 7400 alerts (6500 passes); a Permafrost expired before its read (0 charges) alerts.

@@ -27,3 +27,5 @@ not hold. Mass Grave's "up to $i nearby enemies" also needs several Humanoids ar
 - Entries without the fields generate as before: Templar `generate --class 19` and `--stack` are byte-identical.
 - Mass Grave reads its targets, durations and creature type on Kobold Vermin 6 (creature type 7 Humanoid).
 - The cherry-picked B2 side b tests that read that branch's class-file entries stay on that branch.
+- Mutant (B3ToolMutantTests): the Mechanical dummy carrying 803741's aura alerts the humanoids_only entry; six of seven
+  Humanoids affected alerts the targets entry.
