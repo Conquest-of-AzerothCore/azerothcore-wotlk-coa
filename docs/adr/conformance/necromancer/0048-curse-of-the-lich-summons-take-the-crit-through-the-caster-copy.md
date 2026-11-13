@@ -31,3 +31,8 @@ Effect[1] stay.
   `summon_talent_aura` expects no 300240 aura on the Ghoul. If either reads a gain again, a separate summon grant has
   returned.
 - Two arms with the 26127 gate, `summon_other_source` and `summon_other_source_base` (+3 each), cover the general copy.
+- Every live Necromancer summon goes through Scale(): each family-29 summon effect (28) in the server Spell.dbc, and
+  each `NecromancerSummons` row (AscensionNecromancerData.h:94), names a creature whose `creature_template` has
+  ScriptName `npc_ascension_necromancer` and type 6 (Undead), or a creature that does not exist (5030301, 50077,
+  50130, 55065, 55066, 3333313); that AI calls Scale() on summon (AscensionNecromancerSummons.cpp:515) and every
+  second in event 1 (:763, rescheduled at :817).
