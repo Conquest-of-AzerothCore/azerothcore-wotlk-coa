@@ -51,3 +51,10 @@ def option_after_trigger_steps(spec, after: bool) -> list[dict]:
     present = dict(spec.options)
     return [step for module in option_modules() if module.NAME in present and hasattr(module, 'after_trigger_steps')
             for step in module.after_trigger_steps(spec, present[module.NAME], after)]
+
+
+def option_verdict(verdict, run, model: dict):
+    for module in option_modules():
+        if module.NAME in model and hasattr(module, 'verdict'):
+            verdict = module.verdict(verdict, run, model[module.NAME])
+    return verdict

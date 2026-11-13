@@ -12,3 +12,8 @@ creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorde
 `strike_flat` takes that flat amount off every strike hit before the ratio (ADR 0547). Greater Skeletal Warrior 504901
 judges Command: Skeletal Warriors 570042 at 2.0 after its flat Effect[1] part of 1 (fix FN-c1t-1, controller cycle 2). `player_spell_power` gives the
 caster the harness spell-power fixture; weapon_ratio_sp holds 1000, a flat part of 137.5.
+`learn` lists spells learned before the raise (a Life Force gate such as Summoning Adept 92123). `strike_flat_armor:
+true` reads `armor_reduced_damage` of `strike_spell` on the dummy once (per 1000, the caster as the attacker, at the
+minion's level) and the judge scales `strike_flat` by it before taking it off a Physical strike, whose flat part the
+dummy's armor reduces with the weapon part (ADR 0631). Raise: Decaying Colossus 500989 judges Bone Smash 505229 at 1.0
+after its armor-scaled flat 100.

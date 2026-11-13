@@ -31,6 +31,7 @@ class EnergizeRangeSpec:
     target_auras: tuple[tuple[int, int], ...] = ()
     caster_auras: tuple[tuple[int, int], ...] = ()
     label_suffix: str = ''
+    learn: tuple[int, ...] = ()
 
 
 def energize_range_label(spec: EnergizeRangeSpec) -> str:
@@ -51,7 +52,9 @@ def energize_range_scenario(class_file: dict, spec: EnergizeRangeSpec) -> tuple[
         return [measurement(total, CASTER, 'spell_energize_total', **fields),
                 measurement(count, CASTER, 'spell_energize_count', **fields)]
 
-    steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell}] + reads('start')
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in (spec.cast_spell, *spec.learn)]
+             + reads('start'))
     for cast in range(1, spec.casts + 1):
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks}
                   for spell, stacks in spec.caster_auras]
@@ -67,9 +70,10 @@ def energize_range_scenario(class_file: dict, spec: EnergizeRangeSpec) -> tuple[
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour energize range'
                 + (f' {spec.label_suffix}' if spec.label_suffix else ''),
-        'contract': (f'{spec.casts} casts of {spec.cast_spell} at the dummy (fixtures {list(spec.caster_auras)} on the '
-                     f'caster and {list(spec.target_auras)} on the dummy before each cast, Runic Power set to 0); the '
-                     f'cumulative {spec.energize_spell} energize total and count are read every '
+        'contract': ((f'{list(spec.learn)} learned after {spec.cast_spell}; ' if spec.learn else '')
+                     + f'{spec.casts} casts of {spec.cast_spell} at the dummy (fixtures {list(spec.caster_auras)} '
+                     f'on the caster and {list(spec.target_auras)} on the dummy before each cast, Runic Power set '
+                     f'to 0); the cumulative {spec.energize_spell} energize total and count are read every '
                      f'{ENERGIZE_RANGE_POLL_MS} ms; an interval holding exactly one energize event gives that event\'s '
                      f'amount. At least {spec.minimum_events} single events must be read, every amount must lie in '
                      f'{spec.low}..{spec.high}, and both ends must be seen.'),
@@ -89,7 +93,7 @@ def energize_range_spec(entry: dict) -> EnergizeRangeSpec:
                              int(entry['energize_spell']), int(entry['low']), int(entry['high']), int(entry['casts']),
                              int(entry['minimum_events']), int(entry.get('polls_per_cast', 14)),
                              pairs(entry.get('target_auras', ())), pairs(entry.get('caster_auras', ())),
-                             entry.get('label_suffix', ''))
+                             entry.get('label_suffix', ''), tuple(int(spell) for spell in entry.get('learn', ())))
 
 
 def behaviour_energize_range_verdict(base: Verdict, run: Run, model: dict) -> Verdict:

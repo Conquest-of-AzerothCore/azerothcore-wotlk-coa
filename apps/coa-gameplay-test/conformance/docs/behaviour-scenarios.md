@@ -1870,8 +1870,10 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   stamped game time (ADR 0593)
 - [`minion_range_arms`](kinds/minion_range_arms.md): a caster-centred minion effect inside and beyond its radius (ADR
   0594)
+- [`minion_swing_arms`](kinds/minion_swing_arms.md): a minion's plain swings with and without a damage aura, in
+  alternating windows (ADR 0630)
 - [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit
-  ratio (ADR 0541, ADR 0547)
+  ratio (ADR 0541, ADR 0547, ADR 0631)
 - [`minion_travel_ratio`](kinds/minion_travel_ratio.md): a slowed minion's travel speed against an unslowed one (ADR
   0594)
 - [`npc_repair`](kinds/npc_repair.md): repair at an owned creature through the real repair handler, per requester (ADR
@@ -1911,3 +1913,5 @@ Options with a module:
   in the treatment phase (ADR 0620)
 - [`after_trigger_strike`](metric_delta_options/after_trigger_strike.md): a strike at the caster after the treatment
   cast only, the fourth named point `after_trigger_steps` (ADR 0606)
+- [`strike_landed`](metric_delta_options/strike_landed.md): the strike's damage logs read after the after reading, no
+  landed strike is unmeasured, the fifth named point `verdict` (ADR 0625)

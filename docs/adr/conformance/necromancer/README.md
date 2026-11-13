@@ -55,6 +55,8 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0050](0050-command-bonefreeze-casts-once-at-its-target.md) | - | Command: Bonefreeze casts once at its target | new |
 | [0051](0051-entomb-physical-immunity-is-measured-on-an-enemy-player.md) | - | Entomb's Physical immunity is measured on an enemy player | new |
 | [0052](0052-underking-random-pick-is-attributed-per-cycle.md) | - | The Underking random pick is attributed per cycle | new |
+| [0061](0061-bone-smash-is-read-over-the-colossus-swing-after-its-armored-flat.md) | - | Bone Smash is read over the Colossus swing after its armored flat | new |
+| [0062](0062-rotting-flesh-and-fetid-mark-are-read-on-swing-arms.md) | - | Rotting Flesh and Fetid Mark are read on swing arms | new |
 
 ## Re-auditable verdict set
 

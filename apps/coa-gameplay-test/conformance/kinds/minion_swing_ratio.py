@@ -31,6 +31,8 @@ class MinionSwingRatioSpec:
     label_suffix: str = ''
     strike_flat: float = 0.0
     player_spell_power: int | None = None
+    learn: tuple[int, ...] = ()
+    strike_flat_armor: bool = False
 
 
 def minion_swing_ratio_label(spec: MinionSwingRatioSpec) -> str:
@@ -51,6 +53,9 @@ def minion_swing_ratio_scenario(class_file: dict, spec: MinionSwingRatioSpec) ->
     strike = {'spell': spec.strike_spell, 'caster_entry': spec.entry, 'target': TARGET, 'critical': False,
               'blocked': False}
     weapon_label = f'{minion_swing_ratio_label(spec)} weapon_damage_min'
+    armor_label = f'{minion_swing_ratio_label(spec)} armor_reduced_damage'
+    if spec.strike_flat_armor and not spec.strike_flat:
+        raise ValueError(f'{spec.spell} minion_swing_ratio mitigates a strike_flat by armor only when it has one')
 
     def reads(mark) -> list[dict]:
         swing_total, swing_count = minion_swing_ratio_marks(spec, 'control', mark)
@@ -65,11 +70,13 @@ def minion_swing_ratio_scenario(class_file: dict, spec: MinionSwingRatioSpec) ->
             {'action': 'wait', 'label': 'command swings', 'ms': spec.wait_ms}]
 
     steps = (base_steps(class_file)
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in (spec.raise_spell,
-                                                                                   spec.command_spell)]
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+                for spell in dict.fromkeys((*spec.learn, spec.raise_spell, spec.command_spell))]
              + hit_ratio_cast(records, spec.raise_spell, CASTER, CASTER)
              + [{'action': 'wait', 'label': 'raise', 'ms': MINION_SWING_RATIO_RAISE_WAIT_MS}]
              + command() + [measurement(weapon_label, CASTER, 'owned_creature_weapon_damage_min', entry=spec.entry)]
+             + ([measurement(armor_label, CASTER, 'armor_reduced_damage', spell=spec.strike_spell, target=TARGET)]
+                if spec.strike_flat_armor else [])
              + reads('start'))
     for trial in range(1, spec.trials + 1):
         steps += command() + reads(trial)
@@ -99,6 +106,11 @@ def minion_swing_ratio_scenario(class_file: dict, spec: MinionSwingRatioSpec) ->
         model['treatment_flat'] = spec.strike_flat
         scenario['contract'] += (f' The strike\'s flat part, {spec.strike_flat:g} per hit, is taken off the strike '
                                  f'before the ratio.')
+    if spec.strike_flat_armor:
+        model['treatment_flat_armor'] = armor_label
+        scenario['contract'] += (f' The dummy\'s armor reduces the flat part too: it is scaled by the read '
+                                 f'armor_reduced_damage of {spec.strike_spell} on the dummy (per 1000) before it is '
+                                 f'taken off.')
     expectation = Expectation(minion_swing_ratio_label(spec), BEHAVIOUR_HIT_RATIO, spec.spell, spec.strike_spell,
                               None, str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -110,7 +122,9 @@ def minion_swing_ratio_spec(entry: dict) -> MinionSwingRatioSpec:
                                 float(entry['expected']), int(entry.get('trials', 20)),
                                 int(entry.get('wait_ms', 3000)), entry.get('command_power'),
                                 entry.get('label_suffix', ''), float(entry.get('strike_flat', 0.0)),
-                                entry.get('player_spell_power'))
+                                entry.get('player_spell_power'),
+                                tuple(int(spell) for spell in entry.get('learn', [])),
+                                bool(entry.get('strike_flat_armor', False)))
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

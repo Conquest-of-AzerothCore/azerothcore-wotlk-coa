@@ -38,6 +38,7 @@ from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readin
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
 from kinds import kind_judge, kind_pooled_judge
+from metric_delta_options import option_verdict
 from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
@@ -76,6 +77,7 @@ ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
+ARMOR_PROBE_DAMAGE = 1000.0
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
 MAGNITUDE_RATIO_POINTS = 0.02
@@ -3014,7 +3016,7 @@ def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    verdict = forced_or_plain_metric_delta_verdict(base, run, model)
+    verdict = option_verdict(forced_or_plain_metric_delta_verdict(base, run, model), run, model)
     stamps = model.get('game_time')
     if stamps is None or verdict.status == 'unmeasured':
         return verdict
@@ -4114,6 +4116,11 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                 if isinstance(found, str):
                     return replace(base, explanation=found)
             flat = float(model.get('treatment_flat', 0.0)) if arm == 'treatment' else 0.0
+            if flat and model.get('treatment_flat_armor'):
+                reduced = part.values.get(model['treatment_flat_armor'])
+                if reduced is None:
+                    return replace(base, explanation=missing_measurement(part, model['treatment_flat_armor']))
+                flat *= reduced / ARMOR_PROBE_DAMAGE
             totals += [(total - flat * count) * scale for total, count in zip(*found)]
             counts += found[1]
         series[arm] = (totals, counts)
