@@ -77,6 +77,8 @@ TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
+MAGNITUDE_RATIO_POINTS = 0.02
+FORCED_CHANCE = 'forced_chance'
 METRIC_DELTA_FLOAT_TOLERANCE = 1e-5
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
                           'effect_radius', 'aura_amplitude_ms'})
@@ -1845,7 +1847,7 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     kept = kept_count / observe_count
     tooltip_ratio = expected
     expected = tooltip_ratio * kept
-    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_TOLERANCE * expected)
+    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_POINTS, MAGNITUDE_RATIO_TOLERANCE * expected)
     low, high = expected - margin, expected + margin
     judged = replace(base, measured=ratio, expected=expected, low=low, high=high)
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
@@ -1859,7 +1861,8 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
                                f'{observe_count:g} of its own events, against mean {mean_trigger:g} '
                                f'{model["trigger_metric"]} of {trigger_source} over {trigger_count:g} of its own '
                                f'events, = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
-                               f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}{resisted}; '
+                               f'{MAGNITUDE_RATIO_POINTS:g}, {MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of '
+                               f'{expected:g}{resisted}; '
                                f'{expectation.rule} ({notes}); {excluded_note}')
 
 
@@ -3004,6 +3007,30 @@ def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    forced = model.get('forced_chance')
+    if forced is None:
+        return judged_metric_delta(base, run, model)
+    absent = run.values.get(forced['absent_label'])
+    present = run.values.get(forced['present_label'])
+    count = run.values.get(forced['count_label'])
+    released = run.values.get(forced['released_label'])
+    fixture = (f'forcing fixture: a {forced["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant, '
+               f'{forced["aura"]} read on creature {forced["entry"]} before both readings')
+    if present is None or count is None or present < 1 or present != count:
+        return replace(base, status='unmeasured', explanation=f'{fixture}: the forced aura is on {present} of {count} '
+                                                              f'creatures, so the effect is not read')
+    verdict = judged_metric_delta(base, run, model)
+    if absent is None or absent != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the aura is on the '
+                                                            f'creature without the passive ({absent})')
+    if released is None or released != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the modifier is '
+                                                            f'still active at the end ({released})')
+    return replace(verdict, explanation=f'{verdict.explanation}; {fixture}: absent without the passive, present '
+                                                    f'({present:g}) with it, released at the end')
+
+
+def judged_metric_delta(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
     if before is None or after is None:
@@ -3072,6 +3099,48 @@ def metric_ratio_verdict(base: Verdict, model: dict, before: float, after: float
                    f'(expected {ratio:g}, within {tolerance:g}); the before reading must reach {least_before:g}')
     return replace(base, status=status, measured=measured, expected=ratio, low=ratio - tolerance,
                    high=ratio + tolerance, explanation=explanation)
+
+
+def behaviour_aura_expiry_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    series = [[run.values.get(label) for label in labels] for labels in model['reads']]
+    missing = [labels[0] for labels, values in zip(model['reads'], series) if any(value is None for value in values)]
+    if missing:
+        return replace(base, explanation=missing_measurement(run, missing[0]))
+    times = [values[0] for values in series]
+    present = [values[1] > 0 for values in series]
+    marks = [values[2] for values in series]
+    switch = model['switch_index']
+    expected, band = float(model['expected_ms']), float(model['band_ms'])
+    rises = [index for index in range(1, len(marks)) if marks[index] > marks[index - 1]]
+    onset = [index for index in rises if index < switch]
+    if not onset:
+        return replace(base, status='unmeasured', explanation='no cast of the marker spell before the switch, so the '
+                                                              'forced aura has no stamp')
+    if any(index >= switch for index in rises):
+        return replace(base, status='alert', explanation=f'the marker spell was cast again after the switch at read '
+                                                         f'{min(index for index in rises if index >= switch)}: the '
+                                                         f'roll was not stopped')
+    last = onset[-1]
+    if not present[last]:
+        return replace(base, status='unmeasured', explanation=f'the aura is absent at the last cast\'s read {last}')
+    gone = next((index for index in range(last + 1, len(present)) if not present[index]), None)
+    if gone is None:
+        return replace(base, status='alert', measured=times[-1] - times[last], expected=expected,
+                       explanation=f'the aura outlasts the reads: still present {times[-1] - times[last]:g} ms after '
+                                   f'the last cast')
+    if not all(present[last:gone]):
+        return replace(base, status='alert', explanation='the aura is absent between the last cast and its expiry')
+    low, high = times[gone - 1] - times[last], times[gone] - times[last - 1]
+    start = times[0]
+    released = run.values.get(model['released_label'])
+    status = 'ok' if expected - band <= low and high <= expected + band and released == 0 else 'alert'
+    return replace(base, status=status, measured=(low + high) / 2, expected=expected, low=expected - band,
+                   high=expected + band,
+                   explanation=f'last cast of the marker in ({times[last - 1] - start:g}, {times[last] - start:g}] '
+                               f'ms of game time after the command, the aura gone in ({times[gone - 1] - start:g}, '
+                               f'{times[gone] - start:g}]: it lasted between {low:g} and '
+                               f'{high:g} ms, against {expected:g} +- {band:g} (5%); the forcing mutant removed '
+                               f'({released})')
 
 
 def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -3921,7 +3990,8 @@ def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) ->
 
 def observed(expectation: Expectation) -> dict:
     model = expectation.model or {}
-    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST)}
+    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST),
+             FORCED_CHANCE: (model.get(FORCED_CHANCE) or {}).get('talent')}
     return {key: value for key, value in found.items() if value is not None}
 
 
@@ -4197,6 +4267,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_stat_gain_verdict(base, run, model)
         if model.get('kind') == 'strike_bursts':
             return behaviour_strike_bursts_verdict(base, run, model)
+        if model.get('kind') == 'aura_expiry':
+            return behaviour_aura_expiry_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)

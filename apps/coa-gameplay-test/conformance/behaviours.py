@@ -82,7 +82,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
-        'strike_bursts')
+        'strike_bursts', 'aura_expiry')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -1342,6 +1342,7 @@ class MetricDeltaSpec:
     trigger_item: int | None = None
     phase_power: tuple[int, int, int] | None = None
     caster_health: tuple[int, int] | None = None
+    forced_chance: tuple[int, int, int] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1360,6 +1361,7 @@ class MetricDeltaStrike:
     wait_ms: int = 200
     dx: float = 0.0
     after_trigger_ms: int | None = None
+    in_before: bool = False
 
 
 def reagent_steps(records: Records, spell: int) -> list[dict]:
@@ -1375,14 +1377,17 @@ def reagent_steps(records: Records, spell: int) -> list[dict]:
 def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if raw is None:
         return None
-    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms'}
+    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms', 'in_before'}
     if unknown:
         raise ValueError(f'metric_delta strike fields {sorted(unknown)} are unknown')
     strike = MetricDeltaStrike(int(raw['spell']), int(raw['health']), int(raw['max_health']),
                                int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)),
-                               None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']))
+                               None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']),
+                               raw.get('in_before', False))
     if not 0 < strike.health <= strike.max_health or strike.count < 1:
         raise ValueError('metric_delta strike needs 0 < health <= max_health and at least one strike')
+    if type(strike.in_before) is not bool or (strike.in_before and strike.after_trigger_ms is not None):
+        raise ValueError('metric_delta strike in_before is a boolean, for a strike before the trigger only')
     return strike
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
 
@@ -1411,6 +1416,46 @@ def attack_setup_cast_steps(records: Records, spell: int, wait_ms: int) -> list[
             + ([{'action': 'wait', 'ms': wait_ms}] if wait_ms else []))
 
 
+FORCED_CHANCE_OP = 18
+FORCED_CHANCE_PERCENT = 1000
+FORCED_CHANCE_OWNER_AURA = 100523
+
+
+def forced_chance_of(raw: dict | None) -> tuple[int, int, int] | None:
+    if raw is None:
+        return None
+    unknown = set(raw) - {'talent', 'aura', 'entry'}
+    if unknown or len(raw) != 3:
+        raise ValueError(f'forced_chance needs exactly talent, aura and entry, not {sorted(raw)}')
+    return int(raw['talent']), int(raw['aura']), int(raw['entry'])
+
+
+def forced_chance_labels(spec: MetricDeltaSpec) -> tuple[str, str, str, str]:
+    return (f'{spec.spell} forced_chance {spec.forced_chance[1]} absent',
+            f'{spec.spell} forced_chance {spec.forced_chance[1]} present',
+            f'{spec.spell} forced_chance {spec.forced_chance[2]} count',
+            f'{spec.spell} forced_chance released')
+
+
+def with_forced_chance(steps: list[dict], spec: MetricDeltaSpec, settled: int, before_label: str,
+                       after_label: str) -> list[dict]:
+    talent, aura, entry = spec.forced_chance
+    absent, present, count, released = forced_chance_labels(spec)
+    before = next(index for index, step in enumerate(steps) if step.get('label') == before_label)
+    after = next(index for index, step in enumerate(steps) if step.get('label') == after_label)
+    return (steps[:settled]
+            + [{'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': talent, 'op': FORCED_CHANCE_OP,
+                'percent': FORCED_CHANCE_PERCENT}]
+            + steps[settled:before]
+            + [measurement(absent, CASTER, 'owned_creature_count', entry=entry, spell=aura)]
+            + steps[before:after]
+            + [measurement(present, CASTER, 'owned_creature_count', entry=entry, spell=aura),
+               measurement(count, CASTER, 'owned_creature_count', entry=entry)]
+            + steps[after:]
+            + [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
+               measurement(released, CASTER, 'spell_mod_mutants')])
+
+
 def metric_delta_label(spec: MetricDeltaSpec, moment: str) -> str:
     return f'{spec.spell} {spec.metric} {moment}'
 
@@ -1424,6 +1469,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                  or spec.setup_only_after):
         raise ValueError(f'{spec.spell} sets setup_in_before without cast_in_before false, setup_casts and the '
                          f'default gate timing')
+    if spec.strike is not None and spec.strike.in_before and (
+            spec.cast_in_before or spec.gate_timing != 'between' or spec.setup_only_after or spec.attack_swings):
+        raise ValueError(f'{spec.spell} repeats its strike in an uncast before phase only with cast_in_before false '
+                         f'and the default gate timing')
     if spec.expiry_wait_ms is not None and spec.gate_timing != 'start':
         raise ValueError(f'{spec.spell} sets expiry_wait_ms but gate_timing is not "start"')
     if spec.expected_gain is not None and (spec.after_at_least is not None or spec.expiry_wait_ms is not None
@@ -1662,17 +1711,27 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                     f'second cast.' + ('' if spec.cast_in_before else ' The before phase skips casting '
                     f'{spec.trigger_spell} entirely (cast_in_before=False), measuring the baseline state alone.') +
                     (f' The before phase still makes the setup casts {list(spec.setup_casts)}, so the measured '
-                     f'unit exists in both phases.' if spec.setup_in_before else ''))
+                     f'unit exists in both phases.' if spec.setup_in_before else '') +
+                    (' The before phase repeats the strike after its setup casts.'
+                     if spec.strike and spec.strike.in_before else ''))
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
         steps = (base_steps(class_file) + learn_steps +
                  cast_steps(include_cast=spec.cast_in_before and not spec.trigger_only_after, after=False) +
                  (setup_cast_steps() if spec.setup_in_before else []) +
+                 (strike_steps() if spec.strike and spec.strike.in_before else []) +
                  (enemy_cast_steps() if spec.enemy_casts_in_before else []) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
+    if spec.forced_chance is not None:
+        steps = with_forced_chance(steps, spec, len(base_steps(class_file)), before_label, after_label)
+        contract += (f' A forcing fixture raises the roll of {spec.forced_chance[0]} by {FORCED_CHANCE_PERCENT}% '
+                     f'(a SPELLMOD_CHANCE_OF_SUCCESS spell modifier mutant) for the whole scenario, so the aura '
+                     f'{spec.forced_chance[1]} it applies is read at a known time; its presence on creature '
+                     f'{spec.forced_chance[2]} is read before both readings (absent without the passive, on every '
+                     f'creature of that entry with it), and the modifier is removed at the end and read gone.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
@@ -1736,6 +1795,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.after_at_least is None or spec.after_at_most < spec.after_at_least:
             raise ValueError(f'{spec.spell} sets after_at_most without an after_at_least at or below it')
         model['after_at_most'] = spec.after_at_most
+    if spec.forced_chance is not None:
+        absent, present, count, released = forced_chance_labels(spec)
+        model['forced_chance'] = {'talent': spec.forced_chance[0], 'aura': spec.forced_chance[1],
+                                  'entry': spec.forced_chance[2], 'absent_label': absent, 'present_label': present,
+                                  'count_label': count, 'released_label': released}
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected
@@ -1776,7 +1840,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            None if entry.get('phase_power') is None
                            else tuple(int(value) for value in entry['phase_power']),
                            None if entry.get('caster_health') is None
-                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])))
+                           else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
+                           forced_chance_of(entry.get('forced_chance')))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -5615,8 +5680,10 @@ def stated_ratio(bonus: float, parts: tuple[float, ...], truncated: bool = False
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
-                     'melee_damage_total': 'melee_damage_count'}
-HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal', 'melee_damage_total': 'melee damage'}
+                     'melee_damage_total': 'melee_damage_count', 'spell_energize_total': 'spell_energize_count'}
+HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal', 'melee_damage_total': 'melee damage',
+                   'spell_energize_total': 'energize'}
+ENERGIZE_METRIC = 'spell_energize_total'
 SWING_METRIC = 'melee_damage_total'
 SWING_HANDS = frozenset({MAIN_HAND, 1})
 SWING_SETTLE_MS = 100
@@ -5678,6 +5745,7 @@ def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: st
 
 def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> list[dict]:
     fields = ({'hand': spec.swing_hand, 'glancing': False} if spec.swing_hand is not None
+              else {'spell': spec.observe_spell} if spec.metric == ENERGIZE_METRIC
               else {'spell': spec.observe_spell, 'target': spec.target})
     if spec.critical is not None:
         fields['critical'] = spec.critical
@@ -5807,6 +5875,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         raise ValueError(f'{spec.spell} force_crit {spec.force_crit!r} is not one of {sorted(FORCE_CRIT_RATINGS)}')
     if spec.metric not in HIT_RATIO_METRICS:
         raise ValueError(f'{spec.spell} hit_ratio metric {spec.metric!r} is not one of {sorted(HIT_RATIO_METRICS)}')
+    if spec.metric == ENERGIZE_METRIC and (spec.critical is not None or spec.force_crit is not None
+                                           or spec.rate == 'critical'):
+        raise ValueError(f'{spec.spell} hit_ratio reads energizes, which carry no critical flag')
     swinging = spec.swing_hand is not None
     if swinging != (spec.metric == SWING_METRIC) or (swinging and spec.swing_hand not in SWING_HANDS):
         raise ValueError(f'{spec.spell} hit_ratio reads {SWING_METRIC} exactly when it sets a swing_hand of '
@@ -5961,8 +6032,42 @@ def crit_rate_reads(spec: HitRatioSpec, arm: str) -> dict[str, dict[str, str]]:
     return {mark: {read: f'{base} {arm} {mark} {read}' for read in CRIT_RATE_READS} for mark in ('start', 'end')}
 
 
-def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list[Expectation]]:
-    if spec.trials < 1 or spec.control == spec.treatment:
+@dataclass(frozen=True)
+class CritRateArm:
+    observe_spell: int | None = None
+    wait_ms: int = 0
+
+
+CRIT_RATE_ARM_FIELDS = {'observe_spell', 'wait_ms'}
+
+
+def crit_rate_arm_overrides(entry: dict) -> tuple[dict, dict[str, CritRateArm]]:
+    common, arms = dict(entry), {}
+    for name in HIT_RATIO_ARMS:
+        raw = dict(entry.get(name, {}))
+        own = {field: raw.pop(field) for field in CRIT_RATE_ARM_FIELDS & set(raw)}
+        observe, wait = own.get('observe_spell'), own.get('wait_ms', 0)
+        if observe is not None and (type(observe) is not int or observe <= 0):
+            raise ValueError(f'{entry["spell"]} crit_rate {name} observe_spell {observe!r} must be a spell id')
+        if type(wait) is not int or not 0 <= wait <= CRIT_RATE_MAX_WAIT_MS:
+            raise ValueError(f'{entry["spell"]} crit_rate {name} wait_ms {wait!r} must lie between 0 and '
+                             f'{CRIT_RATE_MAX_WAIT_MS}')
+        if name in entry:
+            common[name] = raw
+        arms[name] = CritRateArm(observe, wait)
+    return common, arms
+
+
+CRIT_RATE_MAX_WAIT_MS = 30000
+
+
+def crit_rate_scenario(class_file: dict, spec: HitRatioSpec,
+                       overrides: dict[str, CritRateArm] | None = None) -> tuple[dict, list[Expectation]]:
+    overrides = overrides or {}
+    observed = {name: overrides.get(name, CritRateArm()).observe_spell or spec.observe_spell
+                for name in HIT_RATIO_ARMS}
+    waits = {name: overrides.get(name, CritRateArm()).wait_ms for name in HIT_RATIO_ARMS}
+    if spec.trials < 1 or (spec.control == spec.treatment and observed['control'] == observed['treatment']):
         raise ValueError(f'{spec.spell} crit_rate needs trials and two different arms')
     if spec.force_crit is not None or spec.critical is not None or spec.cast_spell is not None or \
             spec.swing_hand is not None:
@@ -5970,16 +6075,19 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                          f'crit filter, other cast or swing')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'crit_rate', spec.quote, spec.expected)
-    class_file = armed_for(class_file, records, spec.observe_spell)
-    fields = {'spell': spec.observe_spell, 'target': spec.target}
+    for spell in dict.fromkeys((spec.observe_spell, *observed.values())):
+        class_file = armed_for(class_file, records, spell)
+    extra_observed = tuple(spell for spell in observed.values() if spell != spec.observe_spell)
     learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts)
     steps = [{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}]
+    steps += [{'action': 'learn', 'actor': spec.caster, 'spell': spell} for spell in dict.fromkeys(extra_observed)]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
-              if spell != spec.observe_spell or spec.caster != CASTER]
+              if (spell != spec.observe_spell and spell not in extra_observed) or spec.caster != CASTER]
     reads = {}
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = reads[name] = crit_rate_reads(spec, name)
+        fields = {'spell': observed[name], 'target': spec.target}
 
         def read(mark: str) -> list[dict]:
             return [measurement(marks[mark]['hits'], spec.caster, 'spell_damage_count', **fields),
@@ -5991,7 +6099,9 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
-            steps += hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
+            steps += hit_ratio_cast(records, observed[name], spec.caster, spec.target)
+            if waits[name]:
+                steps.append({'action': 'wait', 'label': f'{name} ticks', 'ms': waits[name]})
         steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
         steps += read('end')
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
@@ -6003,16 +6113,25 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         'contract': f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target} per arm, control '
                     f'first, the arm\'s auras {list(spec.control.auras)} / {list(spec.treatment.auras)} set before '
                     f'every cast; the landed hits and the critical ones are counted at the start and the end of each '
-                    f'arm; the treatment\'s critical share must exceed the control\'s by {spec.expected:g} points',
+                    f'arm; the treatment\'s critical share must exceed the control\'s by {spec.expected:g} points'
+                    + crit_rate_arm_contract(observed, waits, spec.observe_spell),
         'players': [player],
         'creatures': [creature_fixture(class_file)],
         'steps': base_steps(class_file) + steps}
     model = {'kind': 'crit_rate', 'reads': reads, 'expected': spec.expected, 'trials': spec.trials,
              'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)), 'quote': entry.quote}
+    if any(spell != spec.observe_spell for spell in observed.values()):
+        model['observed'] = dict(observed)
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_CRIT_RATE}' + suffix, BEHAVIOUR_CRIT_RATE, spec.spell,
                               spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                               model)
     return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
+
+
+def crit_rate_arm_contract(observed: dict[str, int], waits: dict[str, int], common: int) -> str:
+    parts = [f'the {name} arm counts {spell}' for name, spell in observed.items() if spell != common]
+    parts += [f'the {name} arm waits {wait} ms after each cast' for name, wait in waits.items() if wait]
+    return '; ' + '; '.join(parts) if parts else ''
 
 
 TAKEN_HIT_TRIALS = 10
@@ -7496,6 +7615,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return npc_repair_scenario(class_file, npc_repair_spec(entry))
     if entry['kind'] == 'strike_bursts':
         return strike_bursts_scenario(class_file, strike_bursts_spec(entry))
+    if entry['kind'] == 'aura_expiry':
+        return aura_expiry_scenario(class_file, aura_expiry_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
     if entry['kind'] == 'group_target':
@@ -7511,7 +7632,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
     if entry['kind'] == 'hit_ratio':
         return hit_ratio_scenario(class_file, hit_ratio_spec(entry))
     if entry['kind'] == 'crit_rate':
-        return crit_rate_scenario(class_file, hit_ratio_spec({'trials': CRIT_RATE_TRIALS, **entry}))
+        common, arms = crit_rate_arm_overrides(entry)
+        return crit_rate_scenario(class_file, hit_ratio_spec({'trials': CRIT_RATE_TRIALS, **common}), arms)
     if entry['kind'] == 'taken_hit':
         return taken_hit_scenario(class_file, taken_hit_spec(entry))
     if entry['kind'] == 'threat_redirect':
@@ -7842,3 +7964,100 @@ def strike_bursts_scenario(class_file: dict, spec: StrikeBurstsSpec) -> tuple[di
                                         f'{arm["low"]}..{arm["high"]}', prose_rule(entry.quote, spec.spell),
                                         {**model, 'mode': 'range', **arm}))
     return scenario, expectations
+
+
+@dataclass(frozen=True)
+class AuraExpirySpec:
+    spell: int
+    name: str
+    quote: str
+    aura: int
+    entry: int
+    marker_spell: int
+    expected_ms: int
+    command: int
+    raise_spell: int
+    onset_ms: int = 4000
+    poll_ms: int = 100
+    tail_ms: int | None = None
+    band_ms: int | None = None
+    raise_wait_ms: int = 3000
+    label_suffix: str = 'aura_expiry'
+
+
+def aura_expiry_spec(entry: dict) -> AuraExpirySpec:
+    return AuraExpirySpec(entry['spell'], entry['name'], entry['quote'], int(entry['aura']), int(entry['entry']),
+                          int(entry['marker_spell']), int(entry['expected_ms']), int(entry['command']),
+                          int(entry['raise_spell']), int(entry.get('onset_ms', 4000)), int(entry.get('poll_ms', 100)),
+                          entry.get('tail_ms'), entry.get('band_ms'), int(entry.get('raise_wait_ms', 3000)),
+                          entry.get('label_suffix', 'aura_expiry'))
+
+
+def aura_expiry_label(spec: AuraExpirySpec, index: int, read: str) -> str:
+    return f'{spec.spell} aura_expiry {index} {read}'
+
+
+def aura_expiry_scenario(class_file: dict, spec: AuraExpirySpec) -> tuple[dict, list[Expectation]]:
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'aura_expiry', spec.quote, spec.expected_ms)
+    if spec.poll_ms < 50 or spec.onset_ms < spec.poll_ms or spec.expected_ms <= 0:
+        raise ValueError(f'{spec.spell} aura_expiry needs a positive duration and polls of at least 50 ms')
+    tail_ms = spec.tail_ms if spec.tail_ms is not None else spec.expected_ms + 3000
+    band_ms = spec.band_ms if spec.band_ms is not None else spec.expected_ms * 5 // 100
+    power = facts_of(records, spec.command)
+    reads = []
+
+    def poll(index: int) -> list[dict]:
+        labels = [aura_expiry_label(spec, index, read) for read in ('time', 'aura', 'marker')]
+        reads.append(labels)
+        return [measurement(labels[0], CASTER, 'game_time_ms'),
+                measurement(labels[1], CASTER, 'owned_creature_count', entry=spec.entry, spell=spec.aura),
+                measurement(labels[2], CASTER, 'owned_creature_spell_cast_count', entry=spec.entry,
+                            spell=spec.marker_spell)]
+
+    released = f'{spec.spell} aura_expiry released'
+    switched = f'{spec.spell} aura_expiry switched'
+    steps = (base_steps(class_file)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+                for spell in (spec.spell, spec.command, spec.raise_spell)]
+             + [{'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.spell, 'op': FORCED_CHANCE_OP,
+                 'percent': FORCED_CHANCE_PERCENT},
+                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.raise_spell},
+                {'action': 'cast', 'actor': CASTER, 'spell': spec.raise_spell, 'target': CASTER},
+                {'action': 'wait', 'label': 'raise settle', 'ms': spec.raise_wait_ms}]
+             + cast_gate_power_step(power)
+             + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.command},
+                {'action': 'cast', 'actor': CASTER, 'spell': spec.command, 'target': TARGET}]
+             + poll(0))
+    onset = spec.onset_ms // spec.poll_ms
+    for index in range(1, onset + 1):
+        steps += [{'action': 'wait', 'ms': spec.poll_ms}] + poll(index)
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
+              {'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.spell, 'op': FORCED_CHANCE_OP,
+               'percent': -100},
+              measurement(switched, CASTER, 'spell_mod_mutants')]
+    for index in range(onset + 1, onset + 1 + tail_ms // spec.poll_ms):
+        steps += [{'action': 'wait', 'ms': spec.poll_ms}] + poll(index)
+    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
+              measurement(released, CASTER, 'spell_mod_mutants')]
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura expiry',
+        'contract': f'{spec.spell} is known and its roll forced (a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier '
+                    f'mutant); {spec.raise_spell} raises a creature {spec.entry} and {spec.command} sends it at the '
+                    f'dummy. Every {spec.poll_ms} ms for {spec.onset_ms} ms the game time, the creatures of that entry '
+                    f'carrying {spec.aura} and the casts of {spec.marker_spell} by the creature are read; then the '
+                    f'forcing mutant is removed and a -100% one set, so no roll applies {spec.aura} again, and the '
+                    f'reads go on for {tail_ms} ms. The last cast of {spec.marker_spell} and the first read without '
+                    f'{spec.aura} after it bracket the aura\'s duration in game time.',
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'), MAX_ACCELERATED_SCENARIO_MS)
+    model = {'kind': 'aura_expiry', 'metric': 'owned_creature_count', 'quote': entry.quote, 'reads': reads,
+             'switch_index': onset + 1, 'expected_ms': spec.expected_ms, 'band_ms': band_ms,
+             'switched_label': switched, 'released_label': released}
+    label = f'{spec.spell} behaviour_metric_delta {spec.label_suffix}'
+    return scenario, [Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None, str(spec.expected_ms),
+                                  prose_rule(entry.quote, spec.spell), model)]
+

@@ -2628,5 +2628,32 @@ class MinionMagnitudeTests(unittest.TestCase):
             checked_magnitude_entry(entry)
 
 
+class MagnitudeTwoPointBandTest(unittest.TestCase):
+    setUp = MagnitudeTriggerCompareTest.setUp
+    tearDown = MagnitudeTriggerCompareTest.tearDown
+    verdict = MagnitudeTriggerCompareTest.verdict
+
+    def test_a_small_stated_fraction_passes_within_two_points(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(expected_ratio=0.1)],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=11700))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.low, 0.08)
+        self.assertAlmostEqual(verdict.high, 0.12)
+        self.assertIn('0.02', verdict.explanation)
+
+    def test_a_small_stated_fraction_beyond_two_points_alerts(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(expected_ratio=0.1)],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=12300))
+        self.assertEqual(self.verdict().status, 'alert')
+
+    def test_a_large_stated_fraction_keeps_five_percent_of_its_value(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(expected_ratio=0.8)],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=83500))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.high, 0.84)
+
+
 if __name__ == '__main__':
     unittest.main()

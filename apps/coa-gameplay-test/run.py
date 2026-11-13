@@ -109,7 +109,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'system_message_contains', 'whispers_received', 'whisper_contains', 'challenge_start_responses',
     'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
-    'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+    'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms', 'owned_creature_max_health',
+    'owned_creature_health',
     'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
@@ -157,7 +158,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'channel_object_entry',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
     'spell_hit_bonus_taken', 'rooted', 'stunned', 'school_prohibited', 'spell_cast_count', 'spell_go_count',
-    'cast_failure', 'guid_counter',
+    'cast_failure', 'guid_counter', 'game_time_ms',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
     'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
@@ -202,6 +203,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'server_packet_float', 'server_packet_contains',
     'known_entry_rank',
     'pet_autocast_enabled', 'pet_react_state', 'pet_free_talent_points', 'pet_player_react_state', 'combo_points', 'game_mode_mask', 'owned_creature_spell_proc_count',
+    'owned_creature_spell_cast_count',
     'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
@@ -1039,10 +1041,11 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric in {'equipped_item', 'visible_item'}:
                 require(step['actor'] in player_ids, f'{where}: equipment metric needs a player')
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
-            if metric in {'known_entry_rank', 'owned_creature_spell_proc_count', 'owned_creature_summon_count'}:
+            if metric in {'known_entry_rank', 'owned_creature_spell_proc_count', 'owned_creature_summon_count',
+                          'owned_creature_spell_cast_count'}:
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
-            if metric in {'pet_autocast_enabled', 'owned_creature_spell_proc_count'}:
+            if metric in {'pet_autocast_enabled', 'owned_creature_spell_proc_count', 'owned_creature_spell_cast_count'}:
                 number(step.get('spell'), f'{where}.spell', 1, 2**31 - 1, True)
             if metric == 'spell_damage_done' and 'base' in step:
                 number(step['base'], f'{where}.base', 0, 2**32 - 1, True)
@@ -1270,7 +1273,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:
                 require(False, f'{where}: x and y only apply to point metrics')
-            if metric in {'stat', 'stat_exact'}:
+            if metric in {'stat', 'stat_exact', 'owned_creature_stat'}:
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)
             if metric == 'track_creature_type':
                 number(step.get('id'), f'{where}.id', 1, 32, True)
@@ -1370,7 +1373,9 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
                           'owned_creature_virtual_item', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
-                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+                          'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms',
+                          'owned_creature_max_health',
+                          'owned_creature_health',
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',
@@ -1481,7 +1486,9 @@ def validate(scenario, clock=REAL_CLOCK):
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
                           'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim', 'owned_creature_virtual_item',
-                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+                          'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms',
+                          'owned_creature_max_health',
+                          'owned_creature_health',
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',

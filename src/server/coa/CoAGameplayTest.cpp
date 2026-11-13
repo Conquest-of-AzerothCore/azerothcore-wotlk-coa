@@ -3900,6 +3900,8 @@ private:
             return std::count_if(unit->m_Controlled.begin(), unit->m_Controlled.end(),
                 [spell](Unit const* controlled) { return controlled->IsAlive() && controlled->HasAura(spell); });
         }
+        if (metric == "game_time_ms")
+            return double(GameNowMs());
         if (metric == "guid_counter")
             return unit->GetGUID().GetCounter();
         if (metric == "spell_cast_count")
@@ -5560,6 +5562,29 @@ private:
             Creature* enemy = GetUnit(step.get<std::string>("target"))->ToCreature();
             Require(enemy != nullptr, "Owned creature threat needs a creature target");
             return enemy->GetThreatMgr().GetThreat(creature);
+        }
+        if (metric == "owned_creature_spell_cast_count")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature cast spell");
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Cast observation needs a present owned creature");
+            return ProcCounter::CastCount(creature, spell);
+        }
+        if (metric == "owned_creature_aura_max_duration_ms")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature aura spell");
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Aura duration observation needs a present owned creature");
+            Aura const* aura = creature->GetAura(spell);
+            return aura ? aura->GetMaxDuration() : 0;
+        }
+        if (metric == "owned_creature_stat")
+        {
+            uint32 stat = step.get<uint32>("stat");
+            Require(stat < MAX_STATS, "Invalid stat index");
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Stat observation needs a present owned creature");
+            return creature->GetStat(Stats(stat));
         }
         if (metric == "owned_creature_armor")
         {

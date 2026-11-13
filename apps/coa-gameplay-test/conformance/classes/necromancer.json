@@ -1268,6 +1268,1629 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 805044,
+      "name": "Animate: Tomb King (no claws from the player's swings)",
+      "kind": "metric_delta",
+      "variant": "player_swings",
+      "label_suffix": "player_swings",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 570050,
+      "target": "dummy",
+      "attack_swings": 6,
+      "gate_spell": 805044,
+      "gate_cast": true,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 570050,
+        "target": "dummy"
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Scope arm (mentor item, M side c): Putrid Claws 570050 sourced from the player. The caster auto-attacks the dummy for six swing intervals without a Tomb King (control), then casts Animate: Tomb King 805044 (a real cast, gate_cast; its Effect[2] casts Putrid Aura 800027) and attacks six more. Tooltip: all of your Undead minion's attacks, so the player's own swings add no claw: 0 in both phases (live: no player-sourced 570050). Code lead: the (minion || own) gate at AscensionNecromancerEvents.cpp:97 with actor->HasAura(800027) at :99-100. Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 805044,
+      "name": "Animate: Tomb King (no claws from the player's spell)",
+      "kind": "metric_delta",
+      "variant": "player_spell",
+      "label_suffix": "player_spell",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "setup_casts": [
+        805044
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 570050,
+        "target": "dummy"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "Scope arm: a direct Lichfrost 501978 by the player at the dummy without a Tomb King (control) and after a real Animate: Tomb King 805044: player-sourced Putrid Claws 570050 hits 0 in both phases (tooltip: minion attacks only; live: none from players). The player_spell_lands entry shows the Lichfrost hit in both phases. Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 805044,
+      "name": "Animate: Tomb King (the player's spell lands)",
+      "kind": "metric_delta",
+      "variant": "player_spell_lands",
+      "label_suffix": "player_spell_lands",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 2,
+      "before_expected": 1,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "setup_casts": [
+        805044
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "measure_actor": "caster",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501978,
+        "target": "dummy"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "The landing arm of player_spell: the Lichfrost 501978 hits counted cumulatively, 1 after the control cast and 2 after the cast with the Tomb King up. Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 805044,
+      "name": "Animate: Tomb King (no claws from its own swings)",
+      "kind": "metric_delta",
+      "variant": "tomb_king_swings",
+      "label_suffix": "tomb_king_swings",
+      "quote": "all of your Undead minion's attacks",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        805044
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "wait_ms": 8000,
+      "expire_ms": 500,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 570050,
+        "caster_entry": 50320,
+        "target": "dummy"
+      },
+      "observe_source": "Scope arm: the layout of the combat entry (Command: Undead 504868 at the dummy, a real Animate: Tomb King first in the treatment; that entry reads at least 2 Tomb King 50320 hits in 8000 ms): Putrid Claws 570050 sourced from the Tomb King 50320 (caster_entry). Live: the Tomb King's own swings never claw (0 of 2,289); expected 0, and 0 without a Tomb King (control). Side c entry (feat/coa-necro-m-c 45348a54e0) taken as the regression of fix FN-mc-2 (ADR 0486): after the fix only an owned minion other than the Tomb King 50320 copies 570050."
+    },
+    {
+      "spell": 503740,
+      "name": "Ghoul Mastery (Frenzied Ghoul duration)",
+      "kind": "aura_expiry",
+      "label_suffix": "frenzied_expiry",
+      "quote": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
+      "aura": 707014,
+      "entry": 50073,
+      "marker_spell": 707014,
+      "expected_ms": 10000,
+      "command": 504868,
+      "raise_spell": 500971,
+      "tail_ms": 13000,
+      "observe_source": "Frenzied Ghoul 707014 \"for $d\" (DurationIndex 1 = 10000 ms). One Ghoul 50073, 503740 known, its roll forced (ADR 0482 mutant) while the Ghoul attacks the dummy, then a -100% mutant so no roll applies 707014 again (the switch); the Ghoul's 707014 casts (owned_creature_spell_cast_count) and the Ghouls carrying 707014 are read every 100 ms with the game time (game_time_ms, ADR 0485): the last cast and the first read without the aura bracket its duration in game time, judged within 5% (500 ms). The no-talent control is the frenzied_display entry's absent read (no 707014 under the same mutant without 503740)."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (Enrage duration)",
+      "kind": "aura_expiry",
+      "label_suffix": "horde_expiry",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "aura": 807653,
+      "entry": 50073,
+      "marker_spell": 807653,
+      "expected_ms": 5000,
+      "command": 504868,
+      "raise_spell": 500971,
+      "tail_ms": 8000,
+      "observe_source": "Plague Horde 807653 \"for $807653d\" / \"Enrage for $d\" (DurationIndex 28 = 5000 ms), cast by the minion on itself since fix F-ma-1 (ADR 0483). One Ghoul 50073, 802986 known, its roll forced (ADR 0482 mutant), then a -100% mutant (the switch); the Ghoul's 807653 casts and the Ghouls carrying it are read every 100 ms with the game time (ADR 0485): the last cast and the first read without the aura bracket its duration, judged within 5% (250 ms). The no-talent control is the horde_no_talent entry (no 807653 without 802986)."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (no-talent control)",
+      "kind": "metric_delta",
+      "variant": "horde_no_talent",
+      "label_suffix": "horde_no_talent",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "gate_spell": 707421,
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 807653
+      },
+      "observe_source": "F-ma-1 regression, no-talent control: 802986 is never learned (the gate learned between the phases is 707421, which changes nothing until cast); a Ghoul 50073 raised and commanded at the dummy in each phase carries no 807653 (0 and 0)."
+    },
+    {
+      "spell": 707006,
+      "name": "Bone Legion 707006 (Lichfrost Runic Power)",
+      "kind": "hit_ratio",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "and its Runic Power generated by $s2%.",
+      "expected": 1.25,
+      "observe_spell": 804112,
+      "cast_spell": 501978,
+      "metric": "spell_energize_total",
+      "cast_power": 1373,
+      "cast_wait_ms": 500,
+      "control": {},
+      "treatment": {
+        "learn": [
+          707006
+        ]
+      },
+      "trials": 58,
+      "expected_source": "707006 Effect[1] aura 108 SPELLMOD_EFFECT2 +25 ($s2) on Lichfrost's energize 804112 (Effect[1] SPELL_EFFECT_ENERGIZE Runic Power, BasePoints 61 + DieSides 31). Lichfrost 501978 cast at the dummy; the Runic Power it gives the caster (spell_energize_total / count, ADR 0500) without the talent (control) and with it learned (a real learn): ratio 1.25 on the observed control (G-19 band). The energize rolls 62-92, so the trials are sized by the pilot (G-20). Which spell id the energize event carries is read from the pilot (804112 expected). Pilot p8: the energize event carries 804112; sized to about 4756 trials per arm (G-20), run as 82 pooled parts of 58.",
+      "parts": 82
+    },
+    {
+      "spell": 707881,
+      "name": "Bone Legion 707881 (Lichfrost Runic Power)",
+      "kind": "hit_ratio",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "and its Runic Power generated by $s2%.",
+      "expected": 1.5,
+      "observe_spell": 804112,
+      "cast_spell": 501978,
+      "metric": "spell_energize_total",
+      "cast_power": 1373,
+      "cast_wait_ms": 500,
+      "control": {},
+      "treatment": {
+        "learn": [
+          707881
+        ]
+      },
+      "trials": 58,
+      "expected_source": "707881 Effect[1] aura 108 SPELLMOD_EFFECT2 +50 ($s2) on Lichfrost's energize 804112 (Effect[1] SPELL_EFFECT_ENERGIZE Runic Power, BasePoints 61 + DieSides 31). Lichfrost 501978 cast at the dummy; the Runic Power it gives the caster (spell_energize_total / count, ADR 0500) without the talent (control) and with it learned (a real learn): ratio 1.5 on the observed control (G-19 band). The energize rolls 62-92, so the trials are sized by the pilot (G-20). Which spell id the energize event carries is read from the pilot (804112 expected). Pilot p8: the energize event carries 804112; sized to about 5220 trials per arm (G-20), run as 90 pooled parts of 58.",
+      "parts": 90
+    },
+    {
+      "spell": 500338,
+      "name": "Flesh to Worms (natural tick crit rate)",
+      "kind": "crit_rate",
+      "variant": "natural_tick_crit",
+      "label_suffix": "natural_tick_crit",
+      "quote": "Periodic damage dealt by this can critically strike.",
+      "expected": 0,
+      "observe_spell": 801722,
+      "learn": [
+        801722,
+        500338
+      ],
+      "control": {
+        "auras": [
+          [
+            680486,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            680486,
+            1
+          ]
+        ],
+        "observe_spell": 500338,
+        "wait_ms": 3000
+      },
+      "trials": 300,
+      "expected_source": "FN-c4-1 natural-rate check (ADR 0442 fix, ADR 0498 per-arm spells): Flesh to Worms 500338 ticks (aura 3 periodic damage, made crit-capable by the contract) must crit at the caster's own spell crit chance, read as the critical share of Lichfrost 801722 direct hits in the control arm; expected difference 0 points (an 'always crits' tick would read about +95). Treatment: Flesh to Worms cast at the dummy, its ticks counted 3000 ms after each cast. Both arms share the caster's spell crit: neither arm sets an aura or fixture, and the class file's known_auras and probe_auras carry no aura 57 or 71 (scanned 2026-11-13); a school-specific crit modifier from elsewhere on the reference is not read. 300 casts per arm; the 2-point band needs the larger counts the verdict states (G-20). The End Is Near 680486 (aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT -101 on every school, permanent) is set on the caster in both arms (precondition fixture): crit_rate sets no power before a cast, and pilot p8 / pair f2 counted only 56 landed Lichfrosts of 300 once the mana ran out."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (Enrage on the minions)",
+      "kind": "metric_delta",
+      "variant": "horde_on_ghouls",
+      "label_suffix": "horde_on_ghouls",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 807653
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). 802986 known from the start (setup_only_after); the before phase commands with no minion (0), the after phase raises one Ghoul 50073 and sends it at the dummy (one Ghoul: with one raised per phase, the first one carried the aura in only some runs, pair f2 run 1). The no-talent control is the horde_crit and horde_on_caster entries. Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The Ghoul carries one 807653 after the rolls.",
+      "setup_only_after": true
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (crit aura on the minions)",
+      "kind": "metric_delta",
+      "variant": "horde_crit_on_ghouls",
+      "label_suffix": "horde_crit_on_ghouls",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 807765
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). 802986 known from the start (setup_only_after); the before phase commands with no minion (0), the after phase raises one Ghoul 50073 and sends it at the dummy (one Ghoul: with one raised per phase, the first one carried the aura in only some runs, pair f2 run 1). The no-talent control is the horde_crit and horde_on_caster entries. Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The Ghoul carries one 807765 (neither aura stacks, StackAmount 0).",
+      "setup_only_after": true
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (crit aura not on the caster)",
+      "kind": "metric_delta",
+      "variant": "horde_crit_off_caster",
+      "label_suffix": "horde_crit_off_caster",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 807765
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. 807765 never on the caster, before or after. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped)."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (crit aura duration)",
+      "kind": "metric_delta",
+      "variant": "horde_crit_duration",
+      "label_suffix": "horde_crit_duration",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 5000,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_aura_max_duration_ms",
+      "fields": {
+        "entry": 50073,
+        "spell": 807765
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The applied 807765 on a Ghoul has its DBC duration, DurationIndex 28 = 5000 ms (a read-only harness read of the aura's maximum duration, ADR 0484; a readback, the condition of the mentor approval, not the duration claim). Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped)."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (where the Enrage lands)",
+      "kind": "metric_delta",
+      "variant": "horde_on_caster",
+      "label_suffix": "horde_on_caster",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 807653
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 802986,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (was the probe of the horde_crit lead, 1 before the fix in pair p6): with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped)."
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (ten casts: ten stacks)",
+      "kind": "metric_delta",
+      "variant": "ten_casts_stacks",
+      "label_suffix": "ten_casts_stacks",
+      "quote": "you now gain a stack of Frozen Bodies.",
+      "expected": 10,
+      "before_expected": 1,
+      "trigger_spell": 712434,
+      "target": "caster",
+      "setup_only_after": true,
+      "setup_casts": [
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Precondition read of the ten_stacks_crit entry: one 712434 cast by the caster gives 1 stack, ten casts give 10 (the cap), the stack count at which OnSpellCritChance forces the crit."
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (ten stacks: the impact crits)",
+      "kind": "metric_delta",
+      "variant": "ten_stacks_crit",
+      "label_suffix": "ten_stacks_crit",
+      "quote": "you now gain a stack of Frozen Bodies.",
+      "expected": 1,
+      "before_expected": 0,
+      "expected_gain": 1,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 1373,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          801747,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 707592,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "712434 cast for real by the caster (the spell 707562 casts on a Frost crit; a Glacial Impact does not consume it, the consumed entry). Glacial Impact 707402 at the dummy; Permafrost 801747 (frozen condition), 984954 (spell crit -1000) and 823764 (unresisted) on the caster in both phases (precondition fixtures). OnSpellCritChance sets 707592's crit chance to 100 while 712434 holds its StackAmount 10 (AscensionNecromancerAbilities.cpp:125-132). Before: one impact without stacks, 0 critical 707592 hits; after: ten 712434 casts then an impact: 1 critical hit (gain 1)."
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (nine stacks: no crit)",
+      "kind": "metric_delta",
+      "variant": "nine_stacks_no_crit",
+      "label_suffix": "nine_stacks_no_crit",
+      "quote": "you now gain a stack of Frozen Bodies.",
+      "expected": 0,
+      "before_expected": 0,
+      "expected_gain": 0,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434,
+        712434
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 1373,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          801747,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 707592,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "712434 cast for real by the caster (the spell 707562 casts on a Frost crit; a Glacial Impact does not consume it, the consumed entry). Glacial Impact 707402 at the dummy; Permafrost 801747 (frozen condition), 984954 (spell crit -1000) and 823764 (unresisted) on the caster in both phases (precondition fixtures). OnSpellCritChance sets 707592's crit chance to 100 while 712434 holds its StackAmount 10 (AscensionNecromancerAbilities.cpp:125-132). Contrast: nine 712434 casts then an impact: still no critical hit (gain 0)."
+    },
+    {
+      "spell": 503740,
+      "name": "Ghoul Mastery (Frenzied Ghoul haste)",
+      "kind": "metric_delta",
+      "variant": "frenzied_haste",
+      "label_suffix": "frenzied_haste",
+      "quote": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
+      "expected": 1428.571,
+      "before_expected": 2000,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500331,
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_attack_time_ms",
+      "fields": {
+        "entry": 50073
+      },
+      "forced_chance": {
+        "talent": 503740,
+        "aura": 707014,
+        "entry": 50073
+      },
+      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's main-hand swing interval 2000 ms without the talent (control), 2000 / 1.40 = 1428.571 ms with the Frenzied Ghoul aura (tolerance 1 ms). Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (mentor ruling 2026-11-13, flip in f6; with two Ghouls one carried 707014 in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 503740 is learned, and it must carry 707014 (the every-creature precondition).",
+      "tolerance": 1
+    },
+    {
+      "spell": 503740,
+      "name": "Ghoul Mastery (transformed)",
+      "kind": "metric_delta",
+      "variant": "frenzied_display",
+      "label_suffix": "frenzied_display",
+      "quote": "Damage dealt by your Ghouls now has a $h% chance to transform them into a Frenzied Ghoul.",
+      "expected": 14708,
+      "before_expected": 10626,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500331,
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_display",
+      "fields": {
+        "entry": 50073
+      },
+      "forced_chance": {
+        "talent": 503740,
+        "aura": 707014,
+        "entry": 50073
+      },
+      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's display: 10626 (creature_template_model of Ghoul 50073) without the talent, 14708 (the model of Frenzied Ghoul 50173, the transform's MiscValue) with it. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (mentor ruling 2026-11-13, flip in f6; with two Ghouls one carried 707014 in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 503740 is learned, and it must carry 707014 (the every-creature precondition)."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (minion crit)",
+      "kind": "metric_delta",
+      "variant": "horde_crit",
+      "label_suffix": "horde_crit",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "dummy"
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "Plague Horde 802986 rolls MinionChance(player, actor, 802986) on a minion's damage and casts Plague Horde 807653 on the minion (AscensionNecromancerEvents.cpp:190-193); its 10% roll is proven by 802986 proc_rate. Tooltip: \"Enrage for $d, increasing their critical strike chance by $807765s1%\" ($807765s1 = 10: 807765 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases. Forcing fixture (mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 802986 (10% x 11 > 100%), 807653 on a Ghoul read before the after reading (absent: unmeasured), removed at the end and read gone. The Ghoul's melee crit chance against the dummy: +10 points. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped).",
+      "expected_gain": 10
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (one stack: Glacial Impact damage)",
+      "kind": "metric_delta",
+      "variant": "one_stack_damage",
+      "label_suffix": "one_stack_damage",
+      "quote": "you now gain a stack of Frozen Bodies.",
+      "expected": 1735,
+      "before_expected": 855,
+      "expected_gain": 880,
+      "tolerance": 1,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        712434
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 1373,
+      "wait_ms": 1600,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          801747,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 707592,
+        "target": "dummy"
+      },
+      "observe_source": "Frozen Bodies 712434 Effect[0] aura 108 SPELLMOD_DAMAGE +3% ($s1) on the Glacial Impact 707592 mask; Effect[1] aura 108 SPELLMOD_EFFECT1 +3% on mask word 0 536870912. 712434 cast for real by the caster (the spell 707562 casts on a Frost crit). Glacial Impact 707402 at the dummy with Permafrost 801747 (frozen condition), 984954 (no crit) and 823764 (unresisted) on the caster in both phases (precondition fixtures). Before: one impact, 855 (the Glacial Impact damage entry's value). After: one 712434 cast then a second impact: its hit, the gain of the cumulative total, is 855 x 1.03 = 880.65, 880 after truncation (tolerance 1)."
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (consumed by the next Glacial Impact)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "you now gain a stack of Frozen Bodies.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        712434
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 1373,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          801747,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Frozen Bodies 712434 (the stack 707562 grants on a Frost crit, proven by the frost_crit entry): Effect[0] aura 108 SPELLMOD_DAMAGE +3% on the Glacial Impact 707592 mask (EffectSpellClassMask[2] 268435456), Effect[1] aura 108 SPELLMOD_EFFECT1 +3%, StackAmount 10. 712434 is cast for real by the caster (the spell the talent casts, AscensionNecromancerEvents.cpp:146-149), not set by the harness. Glacial Impact 707402 (instant, triggers 707592 with its value) at the dummy; fixtures on the caster in both arms as the Glacial Impact damage entry: Permafrost 801747 (the frozen condition of OnSpellCheckCast, not the claim), 984954 (spell crit -1000) and 823764 (target resistance -9999). \"your next Glacial Impact\": before (no impact): a 712434 cast leaves the stack on the caster (1); after: another 712434 cast then a Glacial Impact: the stack is gone (0) if the impact consumes it. The gate learned between the phases is 707562 (crits removed, so it adds no stack)."
+    },
+    {
+      "spell": 92122,
+      "name": "Tundra Warriors (minion crit, one stack)",
+      "kind": "metric_delta",
+      "variant": "minion_crit",
+      "label_suffix": "minion_crit",
+      "quote": "Casting any spell now has a $h% chance to grant you",
+      "expected": 4,
+      "before_expected": 0,
+      "expected_gain": 4,
+      "trigger_spell": 707421,
+      "target": "caster",
+      "select_dummy": true,
+      "gate_spell": 707421,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2800,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "dummy"
+      },
+      "observe_source": "Tundra Warriors 707421 (the aura Tundra Warriors 92122 rolls on a cast, 25%, proven by 92122 proc_rate): Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1, BasePoints 3 + 1), DurationIndex 1 = 10000 ms ($d), StackAmount 3 ($u). 707421 is cast for real by the caster (the spell the proc casts, AscensionNecromancerAbilities.cpp:273-274), not set by the harness; 92122 itself stays unlearned so no proc adds a stack. One Raise: Ghoul 500971 in each phase (setup_in_before); the gate learned between the phases is 707421 itself (it changes nothing until cast). The Ghoul 50073's melee crit chance against the dummy is read; the before phase has no 707421 cast. Before: no stack; after one 707421 cast: +4 points (the second Ghoul raised in the after phase carries the same area aura)."
+    },
+    {
+      "spell": 92122,
+      "name": "Tundra Warriors (minion crit, third stack)",
+      "kind": "metric_delta",
+      "variant": "minion_crit_third",
+      "label_suffix": "minion_crit_third",
+      "quote": "Casting any spell now has a $h% chance to grant you",
+      "expected": 8,
+      "before_expected": 0,
+      "expected_gain": 8,
+      "trigger_spell": 707421,
+      "target": "caster",
+      "select_dummy": true,
+      "gate_spell": 707421,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971,
+        707421
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2800,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "dummy"
+      },
+      "observe_source": "Tundra Warriors 707421 (the aura Tundra Warriors 92122 rolls on a cast, 25%, proven by 92122 proc_rate): Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1, BasePoints 3 + 1), DurationIndex 1 = 10000 ms ($d), StackAmount 3 ($u). 707421 is cast for real by the caster (the spell the proc casts, AscensionNecromancerAbilities.cpp:273-274), not set by the harness; 92122 itself stays unlearned so no proc adds a stack. One Raise: Ghoul 500971 in each phase (setup_in_before); the gate learned between the phases is 707421 itself (it changes nothing until cast). The Ghoul 50073's melee crit chance against the dummy is read; the before phase has no 707421 cast. Before: one 707421 cast (1 stack); the after phase casts it twice more (3 stacks): +8 points, so the third stack counts."
+    },
+    {
+      "spell": 92122,
+      "name": "Tundra Warriors (minion crit, stack cap)",
+      "kind": "metric_delta",
+      "variant": "minion_crit_cap",
+      "label_suffix": "minion_crit_cap",
+      "quote": "Casting any spell now has a $h% chance to grant you",
+      "expected": 4,
+      "before_expected": 0,
+      "expected_gain": 4,
+      "trigger_spell": 707421,
+      "target": "caster",
+      "select_dummy": true,
+      "gate_spell": 707421,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971,
+        707421,
+        707421
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2800,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "owned_creature_crit_chance",
+      "fields": {
+        "entry": 50073,
+        "target": "dummy"
+      },
+      "observe_source": "Tundra Warriors 707421 (the aura Tundra Warriors 92122 rolls on a cast, 25%, proven by 92122 proc_rate): Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1, BasePoints 3 + 1), DurationIndex 1 = 10000 ms ($d), StackAmount 3 ($u). 707421 is cast for real by the caster (the spell the proc casts, AscensionNecromancerAbilities.cpp:273-274), not set by the harness; 92122 itself stays unlearned so no proc adds a stack. One Raise: Ghoul 500971 in each phase (setup_in_before); the gate learned between the phases is 707421 itself (it changes nothing until cast). The Ghoul 50073's melee crit chance against the dummy is read; the before phase has no 707421 cast. Before: two casts (2 stacks); the after phase casts it three more times: 3 stacks, +4 points (+12 if uncapped): the cap is 3 ($u)."
+    },
+    {
+      "spell": 92122,
+      "name": "Tundra Warriors (on the minions, held)",
+      "kind": "metric_delta",
+      "variant": "minion_buff_held",
+      "label_suffix": "minion_buff_held",
+      "quote": "Casting any spell now has a $h% chance to grant you",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 707421,
+      "target": "caster",
+      "gate_spell": 707421,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2800,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 707421
+      },
+      "observe_source": "Tundra Warriors 707421 (the aura Tundra Warriors 92122 rolls on a cast, 25%, proven by 92122 proc_rate): Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1, BasePoints 3 + 1), DurationIndex 1 = 10000 ms ($d), StackAmount 3 ($u). 707421 is cast for real by the caster (the spell the proc casts, AscensionNecromancerAbilities.cpp:273-274), not set by the harness; 92122 itself stays unlearned so no proc adds a stack. One Raise: Ghoul 500971 in each phase (setup_in_before); the gate learned between the phases is 707421 itself (it changes nothing until cast). The Ghoul 50073's melee crit chance against the dummy is read; the before phase has no 707421 cast. Both Ghouls (one per phase) carry 707421 9500 ms after the cast (a shorter duration would read 0)."
+    },
+    {
+      "spell": 92122,
+      "name": "Tundra Warriors (on the minions, ends)",
+      "kind": "metric_delta",
+      "variant": "minion_buff_ends",
+      "label_suffix": "minion_buff_ends",
+      "quote": "Casting any spell now has a $h% chance to grant you",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 707421,
+      "target": "caster",
+      "gate_spell": 707421,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2800,
+      "wait_ms": 10500,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 707421
+      },
+      "observe_source": "Tundra Warriors 707421 (the aura Tundra Warriors 92122 rolls on a cast, 25%, proven by 92122 proc_rate): Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 290 SPELL_AURA_MOD_CRIT_PCT +4 ($s1, BasePoints 3 + 1), DurationIndex 1 = 10000 ms ($d), StackAmount 3 ($u). 707421 is cast for real by the caster (the spell the proc casts, AscensionNecromancerAbilities.cpp:273-274), not set by the harness; 92122 itself stays unlearned so no proc adds a stack. One Raise: Ghoul 500971 in each phase (setup_in_before); the gate learned between the phases is 707421 itself (it changes nothing until cast). The Ghoul 50073's melee crit chance against the dummy is read; the before phase has no 707421 cast. No Ghoul carries 707421 10500 ms after the cast (a longer duration would read 2); the held entry is the other bracket."
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (a stack per Frost crit)",
+      "kind": "metric_delta",
+      "variant": "frost_crit",
+      "label_suffix": "frost_crit",
+      "quote": "critically strike with Frost damage you now gain a stack of Frozen Bodies.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "cast_power": 2800,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Frozen Bodies 707562 (passive, aura 42 dummied by the family contract): necromancer_events casts Frozen Bodies 712434 on the caster when a Frost (SchoolMask 16) spell of the caster critically strikes (AscensionNecromancerEvents.cpp:144-149). 712434: two aura 108 effects +3 ($s1, BasePoints 2 + 1) on the Glacial Impact mask, DurationIndex 18 = 20000 ms ($d), StackAmount 10 ($u). Lichfrost 801722 (Frost, 1500 ms cast) at the dummy; spell crits forced by the player fixture's spell crit rating (force_crit spell, a precondition fixture: the claim is the stack, not the crit). Control (before): 707562 unknown. One forced-crit Lichfrost: 1 stack with 707562 learned, 0 without.",
+      "force_crit": "spell"
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (no stack without a crit)",
+      "kind": "metric_delta",
+      "variant": "no_crit",
+      "label_suffix": "no_crit",
+      "quote": "critically strike with Frost damage you now gain a stack of Frozen Bodies.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "cast_power": 2800,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Frozen Bodies 707562 (passive, aura 42 dummied by the family contract): necromancer_events casts Frozen Bodies 712434 on the caster when a Frost (SchoolMask 16) spell of the caster critically strikes (AscensionNecromancerEvents.cpp:144-149). 712434: two aura 108 effects +3 ($s1, BasePoints 2 + 1) on the Glacial Impact mask, DurationIndex 18 = 20000 ms ($d), StackAmount 10 ($u). Lichfrost 801722 (Frost, 1500 ms cast) at the dummy; spell crits forced by the player fixture's spell crit rating (force_crit spell, a precondition fixture: the claim is the stack, not the crit). Control (before): 707562 unknown. Contrast: crits removed by 984954 on the caster (both phases, precondition fixture): a non-critical Lichfrost gives no stack even with 707562 learned.",
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (stack cap)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "critically strike with Frost damage you now gain a stack of Frozen Bodies.",
+      "expected": 10,
+      "before_expected": 0,
+      "trigger_spell": 801722,
+      "target": "dummy",
+      "cast_power": 2800,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Frozen Bodies 707562 (passive, aura 42 dummied by the family contract): necromancer_events casts Frozen Bodies 712434 on the caster when a Frost (SchoolMask 16) spell of the caster critically strikes (AscensionNecromancerEvents.cpp:144-149). 712434: two aura 108 effects +3 ($s1, BasePoints 2 + 1) on the Glacial Impact mask, DurationIndex 18 = 20000 ms ($d), StackAmount 10 ($u). Lichfrost 801722 (Frost, 1500 ms cast) at the dummy; spell crits forced by the player fixture's spell crit rating (force_crit spell, a precondition fixture: the claim is the stack, not the crit). Control (before): 707562 unknown. Eleven forced-crit Lichfrosts: 10 stacks, the cap ($u; 11 if uncapped). Live logs: doses up to 10 (87 at 10, none above).",
+      "force_crit": "spell",
+      "setup_casts": [
+        801722,
+        801722,
+        801722,
+        801722,
+        801722,
+        801722,
+        801722,
+        801722,
+        801722,
+        801722
+      ],
+      "setup_wait_ms": 2000
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (held)",
+      "kind": "metric_delta",
+      "variant": "stack_held",
+      "label_suffix": "stack_held",
+      "quote": "critically strike with Frost damage you now gain a stack of Frozen Bodies.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "cast_power": 1373,
+      "wait_ms": 19500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          801747,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Frozen Bodies 707562 (passive, aura 42 dummied by the family contract): necromancer_events casts Frozen Bodies 712434 on the caster when a Frost (SchoolMask 16) spell of the caster critically strikes (AscensionNecromancerEvents.cpp:144-149). 712434: two aura 108 effects +3 ($s1, BasePoints 2 + 1) on the Glacial Impact mask, DurationIndex 18 = 20000 ms ($d), StackAmount 10 ($u). Lichfrost 801722 (Frost, 1500 ms cast) at the dummy; spell crits forced by the player fixture's spell crit rating (force_crit spell, a precondition fixture: the claim is the stack, not the crit). Control (before): 707562 unknown. After one forced-crit Glacial Impact 707402 (instant, a direct hit only; Permafrost 801747 on the caster in both phases, its frozen condition, a precondition fixture) the stack is still on the caster 19500 ms later (a shorter duration would read 0).",
+      "force_crit": "spell"
+    },
+    {
+      "spell": 707562,
+      "name": "Frozen Bodies (ends)",
+      "kind": "metric_delta",
+      "variant": "stack_ends",
+      "label_suffix": "stack_ends",
+      "quote": "critically strike with Frost damage you now gain a stack of Frozen Bodies.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "cast_power": 1373,
+      "wait_ms": 20500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          801747,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 712434
+      },
+      "observe_source": "Frozen Bodies 707562 (passive, aura 42 dummied by the family contract): necromancer_events casts Frozen Bodies 712434 on the caster when a Frost (SchoolMask 16) spell of the caster critically strikes (AscensionNecromancerEvents.cpp:144-149). 712434: two aura 108 effects +3 ($s1, BasePoints 2 + 1) on the Glacial Impact mask, DurationIndex 18 = 20000 ms ($d), StackAmount 10 ($u). Lichfrost 801722 (Frost, 1500 ms cast) at the dummy; spell crits forced by the player fixture's spell crit rating (force_crit spell, a precondition fixture: the claim is the stack, not the crit). Control (before): 707562 unknown. Gone 20500 ms after that one crit (pilot p2 read 1 at 20500 ms after a Lichfrost, cause not read: Lichfrost also triggers 804112, and any later Frost crit would refresh the stack; the duration entries use an instant direct hit instead) (a longer duration would read 1); the held entry is the other bracket.",
+      "force_crit": "spell"
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (applied on a diseased enemy)",
+      "variant": "expunge_applied",
+      "label_suffix": "expunge_applied",
+      "quote": "Casting Command spells on an enemy now applies Expunge if they are Diseased.",
+      "expected": 1,
+      "before_expected": 0,
+      "kind": "metric_delta",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "setup_wait_ms": 1600,
+      "setup_casts": [
+        570131
+      ],
+      "wait_ms": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 573233,
+        "caster": "caster"
+      },
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Crypt Plague first: 573233 on the dummy 1000 ms after the Command with 705754 learned, none without. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (none on a healthy enemy)",
+      "variant": "expunge_not_diseased",
+      "label_suffix": "expunge_not_diseased",
+      "quote": "Casting Command spells on an enemy now applies Expunge if they are Diseased.",
+      "expected": 0,
+      "before_expected": 0,
+      "kind": "metric_delta",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 573233,
+        "caster": "caster"
+      },
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Contrast: the same Command at the dummy without a disease applies no 573233, with or without 705754. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (one stack per Command)",
+      "variant": "expunge_one_stack",
+      "label_suffix": "expunge_one_stack",
+      "quote": "now applies Expunge if they are Diseased.",
+      "expected": 1,
+      "before_expected": 0,
+      "kind": "metric_delta",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "setup_wait_ms": 1600,
+      "setup_casts": [
+        570131
+      ],
+      "wait_ms": 1000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 573233,
+        "caster": "caster"
+      },
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. One Command after Crypt Plague: 1 stack. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (stack cap)",
+      "variant": "expunge_stack_cap",
+      "label_suffix": "expunge_stack_cap",
+      "quote": "now applies Expunge if they are Diseased.",
+      "expected": 2,
+      "before_expected": 0,
+      "kind": "metric_delta",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "setup_wait_ms": 1600,
+      "setup_casts": [
+        570131,
+        504868,
+        504868
+      ],
+      "wait_ms": 1000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 573233,
+        "caster": "caster"
+      },
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Three Commands after Crypt Plague: 2 stacks, the cap (3 if uncapped). 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (held)",
+      "variant": "expunge_held",
+      "label_suffix": "expunge_held",
+      "quote": "now applies Expunge if they are Diseased.",
+      "expected": 1,
+      "before_expected": 0,
+      "kind": "metric_delta",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "setup_wait_ms": 1600,
+      "setup_casts": [
+        570131
+      ],
+      "wait_ms": 9500,
+      "metric": "aura",
+      "fields": {
+        "spell": 573233,
+        "caster": "caster"
+      },
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. 573233 still on the dummy 9500 ms after the Command (a shorter duration would read 0). 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (ends)",
+      "variant": "expunge_ends",
+      "label_suffix": "expunge_ends",
+      "quote": "now applies Expunge if they are Diseased.",
+      "expected": 0,
+      "before_expected": 0,
+      "kind": "metric_delta",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "expire_ms": 500,
+      "setup_wait_ms": 1600,
+      "setup_casts": [
+        570131
+      ],
+      "wait_ms": 10500,
+      "metric": "aura",
+      "fields": {
+        "spell": 573233,
+        "caster": "caster"
+      },
+      "observe_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. 573233 gone 10500 ms after the Command (a longer duration would read 1); the held entry is the other bracket. 823764 (target resistance -9999) on the caster in both phases, a precondition fixture as in the damage entry: without it a Command missed its Expunge in some runs (pairs f2 and f3: 0 or 1 of 3 stacks); a resisted triggered 500443 is the suspected cause, not read.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 705754,
+      "name": "Expunge (two stacks)",
+      "kind": "hit_ratio",
+      "variant": "disease_damage_two",
+      "label_suffix": "disease_damage_two",
+      "quote": "now applies Expunge if they are Diseased.",
+      "expected": 1.2,
+      "observe_spell": 570131,
+      "cast_wait_ms": 2500,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          504868
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          705754
+        ],
+        "casts": [
+          504868
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "warmup": [
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        570131,
+        504868,
+        504868
+      ],
+      "expected_source": "Expunge 705754 Effect[0] aura 42 casts Expunge 500443 from a Command (necromancer_casts::OnSpellCast, AscensionNecromancerAbilities.cpp:348-349); 500443's hit applies Expunge 573233 to the target only while it holds one of the caster's diseases (Abilities.cpp:421-423; the contract drops 500443's own Effect[2] trigger, Contracts.cpp:366-369). 573233: aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER +10 ($573233s1) on the disease class mask, DurationIndex 1 = 10000 ms ($573233d), StackAmount 2 ($573233u). Command: Undead 504868 (no minion needed) at the dummy; Crypt Plague 570131 is the disease. Control (before): 705754 unknown. No fixture. Crypt Plague 570131 ticks (aura 3, every 2000 ms; the first tick read 2500 ms after each cast, as Waking Crypts 570136) at 20000 spell power; twelve warm-up Crypt Plagues put both arms at its stack cap, then two Commands, and a Command before every trial keeps 2 Expunge stacks in the treatment: 1 + 2 x 10% = 1.20 (G-19 band 18-22%). Control: the same casts without 705754 (no Expunge). 823764 in both arms."
+    },
+    {
+      "spell": 504431,
+      "name": "Master Animator (Life Force cap: Ghouls kept)",
+      "variant": "life_force_cap",
+      "label_suffix": "life_force_cap",
+      "cast_power": 2800,
+      "quote": "Increases your maximum Life Force by 1.",
+      "kind": "metric_delta",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971,
+        500971,
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "observe_source": "504431 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31, BasePoints 0 + DieSides 1 = 1, on the Life Force spell mask: the maximum Life Force grows by 1. Behaviour read: four Raise: Ghoul 500971 casts (each Ghoul 50073 occupies 1 Life Force, tooltip) per phase; a raise beyond the maximum evicts the oldest raised minion, so the living Ghouls count the maximum. Control (before, 504431 unknown): 2 Ghouls (base maximum 2); with 504431 learned between the phases: 3, not 4 (the fourth raise still evicts). No fixture."
+    },
+    {
+      "spell": 807494,
+      "name": "Summoning Expert (Life Force cap: Ghouls kept)",
+      "variant": "life_force_cap",
+      "label_suffix": "life_force_cap",
+      "cast_power": 2800,
+      "quote": "Increases your maximum Life Force by $s1",
+      "kind": "metric_delta",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971,
+        500971,
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "observe_source": "807494 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31, BasePoints 0 + DieSides 1 = 1, on the Life Force spell mask: the maximum Life Force grows by 1. Behaviour read: four Raise: Ghoul 500971 casts (each Ghoul 50073 occupies 1 Life Force, tooltip) per phase; a raise beyond the maximum evicts the oldest raised minion, so the living Ghouls count the maximum. Control (before, 807494 unknown): 2 Ghouls (base maximum 2); with 807494 learned between the phases: 3, not 4 (the fourth raise still evicts). No fixture."
+    },
+    {
+      "spell": 680283,
+      "name": "Scourge Apprentice Training (Life Force cap: Ghouls kept)",
+      "variant": "life_force_cap",
+      "label_suffix": "life_force_cap",
+      "cast_power": 2800,
+      "quote": "Your Life Force is increased by 1.",
+      "kind": "metric_delta",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971,
+        500971,
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "observe_source": "680283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31, BasePoints 0 + DieSides 1 = 1, on the Life Force spell mask: the maximum Life Force grows by 1. Behaviour read: four Raise: Ghoul 500971 casts (each Ghoul 50073 occupies 1 Life Force, tooltip) per phase; a raise beyond the maximum evicts the oldest raised minion, so the living Ghouls count the maximum. Control (before, 680283 unknown): 2 Ghouls (base maximum 2); with 680283 learned between the phases: 3, not 4 (the fourth raise still evicts). No fixture."
+    },
+    {
+      "spell": 807937,
+      "name": "Grave Mages (two Skeletal Mages kept)",
+      "kind": "metric_delta",
+      "variant": "mage_cost",
+      "label_suffix": "mage_cost",
+      "cast_power": 2800,
+      "quote": "Your Skeletal Mages now only cost 1 Life Force.",
+      "target": "caster",
+      "trigger_spell": 500331,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50075
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "observe_source": "807937 Effect[0] aura 4 (dummy); Raise: Skeletal Mage 500331 reads $?s807937[1][2] Life Force. Behaviour read: two Raise: Skeletal Mage casts per phase at the base maximum of 2 Life Force: without 807937 (control) a Mage occupies 2, so the second raise evicts the first and 1 Mage 50075 lives; with 807937 learned between the phases a Mage occupies 1 and both live: 2. No fixture."
+    },
+    {
+      "spell": 807494,
+      "name": "Summoning Expert (Ghoul Stamina)",
+      "kind": "metric_delta",
+      "variant": "minion_stamina",
+      "label_suffix": "minion_stamina",
+      "cast_power": 2800,
+      "quote": "and your Undead minion's Stamina by $s2%.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_stat",
+      "fields": {
+        "entry": 50073,
+        "stat": 2
+      },
+      "before_expected": 43,
+      "expected": 47,
+      "observe_source": "807494 Effect[1] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue 2 (Stamina), BasePoints 9 + 1 = 10 ($s2). One Raise: Ghoul 500971 per phase; the Ghoul 50073's Stamina (owned_creature_stat, a read-only harness metric, ADR 0480) without 807494 (control) and with it learned between the phases: the control value x 1.10: 43 without it, int(43 x 1.10) = int(47.3) = 47 with it (judged to the rounding, the stat is an integer field; pilot pair p1)."
+    },
+    {
+      "spell": 572638,
+      "name": "Sepulchral Might (Ghoul Stamina with the talent)",
+      "kind": "metric_delta",
+      "variant": "ghoul_stamina",
+      "label_suffix": "ghoul_stamina",
+      "cast_power": 2800,
+      "quote": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_stat",
+      "fields": {
+        "entry": 50073,
+        "stat": 2
+      },
+      "before_expected": 43,
+      "expected": 45,
+      "observe_source": "Companion read of the spell_power_factor entry: two Raise: Ghoul 500971 casts per phase; the Ghoul 50073's Stamina (owned_creature_stat, ADR 0480) without 572638 (control) and with it learned between the phases (572638 Effect[1] also raises the caster's Stamina, which the Ghoul's scaling follows). The after value is the Stamina the 30% factor applies to: 43 without, 45 with 572638 (pilot pair p1)."
+    },
+    {
+      "spell": 572638,
+      "name": "Sepulchral Might (spell power from two Ghouls)",
+      "kind": "metric_delta",
+      "variant": "spell_power_factor",
+      "label_suffix": "spell_power_factor",
+      "cast_power": 2800,
+      "quote": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 27,
+      "observe_source": "572638 Effect[0] ($s1 = 30): two Raise: Ghoul 500971 casts per phase; Frost spell power 0 without 572638 (control), and with it learned between the phases int(30% x the total Stamina of the two Ghouls), the Stamina read by the ghoul_stamina entry on the same build (2 x one Ghoul's): int(30% x (45 + 45)) = 27."
+    },
+    {
+      "spell": 706472,
+      "name": "Sepulchral Might (Ghoul Stamina with the talent)",
+      "kind": "metric_delta",
+      "variant": "ghoul_stamina",
+      "label_suffix": "ghoul_stamina",
+      "cast_power": 2800,
+      "quote": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_stat",
+      "fields": {
+        "entry": 50073,
+        "stat": 2
+      },
+      "before_expected": 43,
+      "expected": 44,
+      "observe_source": "Companion read of the spell_power_factor entry: two Raise: Ghoul 500971 casts per phase; the Ghoul 50073's Stamina (owned_creature_stat, ADR 0480) without 706472 (control) and with it learned between the phases (706472 Effect[1] also raises the caster's Stamina, which the Ghoul's scaling follows). The after value is the Stamina the 15% factor applies to: 43 without, 44 with 706472 (pilot pair p1)."
+    },
+    {
+      "spell": 706472,
+      "name": "Sepulchral Might (spell power from two Ghouls)",
+      "kind": "metric_delta",
+      "variant": "spell_power_factor",
+      "label_suffix": "spell_power_factor",
+      "cast_power": 2800,
+      "quote": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 13,
+      "observe_source": "706472 Effect[0] ($s1 = 15): two Raise: Ghoul 500971 casts per phase; Frost spell power 0 without 706472 (control), and with it learned between the phases int(15% x the total Stamina of the two Ghouls), the Stamina read by the ghoul_stamina entry on the same build (2 x one Ghoul's): int(15% x (44 + 44)) = int(13.2) = 13."
+    },
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (Command damage, +100 spell power)",
+      "kind": "script_hit",
+      "variant": "command_damage_sp",
+      "label_suffix": "command_damage_sp",
+      "quote": "Plague damage,",
+      "hit_spell": 707598,
+      "hit_effect": 0,
+      "caster_entry": 50067,
+      "trials": 6,
+      "minimum_hits": 6,
+      "learn": [
+        92123
+      ],
+      "casts": [
+        [
+          500329,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "Command: Undead 504868 orders every non-stationary minion (Responds(), AscensionNecromancerSummons.cpp:177-182); npc_ascension_necromancer::DoAction case 50067 casts Command: Gargoyle 707598 at the target (AscensionNecromancerSummons.cpp:715-716): Effect[0] SCHOOL_DAMAGE, Plague (SchoolMask 40), BasePoints 472 + DieSides 22, coefficient row {707598, 0, 0.65} (AscensionNecromancerData.h:68). Factor() multiplies by 1 + 0.5 per disease of the caster on the target (AscensionNecromancerContracts.cpp:410-411): the dummy carries none (Bone Toss 704706 of Effect[1] has Dispel 0). The control commands without a Gargoyle and must count no 707598 hit. 984954 removes crits, 823764 partial resists (both read through the owner, as the Ghoul Command entry). Spell power arm: QA Test +100 SP 10062 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 every school including Physical, BasePoints 99 + 1, DurationIndex 21 permanent) is set on the caster before its stats are measured (a precondition fixture by harness set_aura), so the tooltip's $SP reads 100 in every school and the minion's hit, which reads its owner's spell power of the coefficient row's school, must rise by the stated coefficient x 100.",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 531130,
+      "name": "Animate: Bone Construct (damage, +100 spell power)",
+      "kind": "script_hit",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Shadow damage, piercing all invulnerabilities, resistances, and immunities.",
+      "hit_spell": 531132,
+      "cast_power": 1000,
+      "caster_entry": 503200,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          531130,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 4000,
+      "observe_source": "IsSummonedBy casts Bone Construct Hidden 531133 on every 503200 (AscensionNecromancerSummons.cpp:559-560); aura_ascension_necromancer_event casts Bone Deconstruct 531132 from the Construct at its melee target while 531133 is on it (AscensionNecromancerEvents.cpp:179-180): Effect[0] SCHOOL_DAMAGE Shadow, BasePoints 1499 + 1, 20 per level from 57, coefficient row {531132, 0, SP 2.0, AP 0.5} (AscensionNecromancerData.h:50). The Construct is animated at the dummy and Command: Undead 504868 sends it in; the control commands without a Construct and must count no 531132 hit. 984954 removes crits, 823764 partial resists. Spell power arm: QA Test +100 SP 10062 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 every school including Physical, BasePoints 99 + 1, DurationIndex 21 permanent) is set on the caster before its stats are measured (a precondition fixture by harness set_aura), so the tooltip's $SP reads 100 in every school and the minion's hit, which reads its owner's spell power of the coefficient row's school, must rise by the stated coefficient x 100.",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 805032,
+      "name": "Animate: Bone Wraith (Bonestorm damage, +100 spell power)",
+      "kind": "script_hit",
+      "variant": "bonestorm_sp",
+      "label_suffix": "bonestorm_sp",
+      "quote": "Physical damage every",
+      "hit_spell": 801411,
+      "caster_entry": 50309,
+      "trials": 3,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          805032,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ]
+      ],
+      "settle_ms": 5500,
+      "observe_source": "805032 Effect[0] 28 SPELL_EFFECT_SUMMON of Bone Wraith 50309 (NecromancerSummons row {805032, 0, 50309, 1}), DurationIndex 8 (15000 ms, $d), instant, 28% of base mana, 60000 ms cooldown (reset before each cast). npc_ascension_necromancer::DoAction case 50309 (AscensionNecromancerSummons.cpp:705-706): the Command makes the Wraith cast Bonestorm 801412 on itself (aura 23 every 500 ms for 5000 ms, triggering 801411: SCHOOL_DAMAGE Physical, BasePoints 29 + 1, coefficient row 0.4 SP, AscensionNecromancerData.h:69). The control commands without a Wraith and must count no 801411 hit; 984954 removes crits. Spell power arm: QA Test +100 SP 10062 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 every school including Physical, BasePoints 99 + 1, DurationIndex 21 permanent) is set on the caster before its stats are measured (a precondition fixture by harness set_aura), so the tooltip's $SP reads 100 in every school and the minion's hit, which reads its owner's spell power of the coefficient row's school, must rise by the stated coefficient x 100.",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
       "spell": 802990,
       "name": "Necrosis (Crypt Plague duration)",
       "kind": "metric_delta",
@@ -14741,8 +16364,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "expected_source": "707006 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +10 ($s1, BasePoints 9 + 1) on the Lichfrost mask (Lichfrost 501978 the level-60 rank it matches). No CoA code names 707006. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned (a real learn); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+      "trials": 62,
+      "expected_source": "707006 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +10 ($s1, BasePoints 9 + 1) on the Lichfrost mask (Lichfrost 501978 the level-60 rank it matches). No CoA code names 707006. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned (a real learn); 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast. Trials 62 per arm in the class file (the merged pair runs plain generate; pair f4 at 20 trials read insufficient_trials, its sizing asked for 62)."
     },
     {
       "spell": 707881,
@@ -14774,8 +16397,8 @@
         ]
       },
       "critical": false,
-      "trials": 20,
-      "expected_source": "707881 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +20 ($s1, BasePoints 19 + 1) on the Lichfrost mask (Lichfrost 501978). No CoA code names 707881. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast."
+      "trials": 45,
+      "expected_source": "707881 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DAMAGE (MiscValue 0) +20 ($s1, BasePoints 19 + 1) on the Lichfrost mask (Lichfrost 501978). No CoA code names 707881. Non-critical Lichfrost 501978 hits on the dummy without the talent (control) and with it learned; 823764 on the caster (harness set_aura, precondition fixture) removes partial resists in both arms; cast_power 1373 refills mana before each cast. Trials 45 per arm in the class file (the merged pair runs plain generate; pair f4 at 20 trials read insufficient_trials, its sizing asked for 41)."
     },
     {
       "spell": 704670,
@@ -15457,15 +17080,14 @@
       "label_suffix": "return_position",
       "quote": "While active, you may cast Ritual Return to return to it.",
       "expected": 0,
-      "before_expected": -1,
-      "tolerance": 0.5,
+      "before_expected": 15,
+      "tolerance": 1.6,
       "trigger_spell": 807098,
       "target": "caster",
       "measure_actor": "caster",
       "setup_casts": [
         805038
       ],
-      "setup_only_after": true,
       "setup_wait_ms": 2000,
       "strike": {
         "spell": 41394,
@@ -15473,7 +17095,8 @@
         "max_health": 100000,
         "count": 1,
         "wait_ms": 100,
-        "dx": 15
+        "dx": 15,
+        "in_before": true
       },
       "expire_ms": 500,
       "wait_ms": 1000,
@@ -15481,7 +17104,9 @@
       "fields": {
         "entry": 575091
       },
-      "observe_source": "Ritual Return 807098: OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) NearTeleportTo the caster's owned living Scourge Transporter 575091 (the harness acknowledges the teleport, CoAGameplayTest.cpp:2900-2902). nearest_creature_distance reads the caster's 2D distance to the nearest living 575091 within 60 yd (-1 when there is none). Before (control): no circle, Ritual Return refused: -1. After: a real Summoning Ritual 805038 places the circle, the caster is moved 15 yd along x (strike fixture: relocate, one Light of the Naaru 41394 from the striker), then Ritual Return brings it back onto the circle: 0 (15 yd without the return). Ritual Return's DBC caster aura 807317 (the circle's own area aura in play, AscensionNecromancerSummons.cpp:568) is set on the caster by the generator in both phases (values.py:190-193, required_aura_steps): a precondition fixture by harness set_aura; the CoA circle check (AscensionNecromancerAbilities.cpp:176-185) is what the before phase refuses."
+      "observe_source": "Ritual Return 807098: OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) NearTeleportTo the caster's owned living Scourge Transporter 575091 (the harness acknowledges the teleport, CoAGameplayTest.cpp:2900-2902). nearest_creature_distance reads the caster's 2D distance to the nearest living 575091 within 60 yd (-1 when there is none). Both phases place the circle with a real Summoning Ritual 805038 and move the caster 15 yd along x (strike fixture: relocate, one Light of the Naaru 41394 from the striker; strike.in_before, ADR 0499); only the after phase casts Ritual Return 807098 (cast_in_before false). Before (control): 15 yd from the circle (tolerance 0.5); after: Ritual Return brings the caster onto it, 0. Pilot p8 read 13.5 yd before in both runs (the circle stands about 1.5 yd off the cast point along the relocation; cause not traced), inside 15 +- 1.6.",
+      "setup_in_before": true,
+      "cast_in_before": false
     },
     {
       "spell": 805429,

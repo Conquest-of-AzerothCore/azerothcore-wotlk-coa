@@ -417,7 +417,8 @@ trigger spell for `cast`, `melee_damage_count` of the main hand for `attack`), a
 `judge_trigger_magnitude` sums each of the four numbers across every part, then judges
 `ratio = (observe_total / observe_count) / (trigger_total / trigger_count)` — the triggered spell's own mean
 amount per occurrence, over the trigger side's own mean amount per attempt — against `expected_ratio` within
-`max(0.01, 5% of expected)` (the owner's own "within 5% on numbers" standard), everything outside is `alert`.
+`max(0.01, 0.02, 5% of expected)` (the owner's own "within 5% on numbers" standard and the G-19 band, the larger
+of 5% of the stated value and 2 points, ADR 0481), everything outside is `alert`.
 The explanation and `detail.excluded` state the ratio range the check excludes (`compare.magnitude_excluded`): the
 band widened by the 99% half-width of the mean of the per-part ratios when two parts or more were usable, otherwise
 the band alone with the statement that one part gives no sampling interval.

@@ -282,6 +282,18 @@ attacks, then is cast, and the Ghoul adds no hit. `expected_gain` (ADR 0380) jud
 reading, with `before_expected` the least before reading at which a floor of the metric cannot hide the gain, and
 `expected` their sum: Bone Ward 681529 reads a dummy's attack power, lifted by AP Test 56412, fall by 223 after a
 Bone Toss 707669.
+`forced_chance` (`{"talent", "aura", "entry"}`, ADR 0482) is a forcing fixture for the effect of a rolled aura on
+a minion: a `spell_mod_mutant` of SPELLMOD_CHANCE_OF_SUCCESS +1000% on `talent` right after the base steps, a read of
+`aura` on the owned creature `entry` just before the before reading (it must be absent) and just before the after
+reading, on every creature of that entry (otherwise the verdict is `unmeasured`, never `ok`), and at the end the mutant owner aura removed and
+`spell_mod_mutants` read 0 (otherwise an alert). It never proves a rate: rate claims stay with their proc entries.
+`kind: "aura_expiry"` (ADR 0485) reads how long a rolled minion aura lasts: the talent's roll is forced (the ADR
+0482 mutant) while one raised minion attacks the dummy, then a -100% mutant stops every roll; every `poll_ms` the game
+time (`game_time_ms`), the minions carrying `aura` and the minion's casts of `marker_spell`
+(`owned_creature_spell_cast_count`) are read. The last cast and the first read without the aura bracket the duration in
+game time; the verdict is `ok` when the bracket lies inside `expected_ms` +- `band_ms` (5% by default). A cast after the
+switch alerts; no cast before it is `unmeasured`. Durations are judged on game-time stamps, never on the nominal waits:
+each wait step costs about 10 to 17 ms of game time beyond its `ms` (ADR 0485).
 `expected_ratio` with a `tolerance` (ADR 0380) judges the after reading over the before reading instead, with
 `before_expected` its least before reading: Pierced 570216 leaves 0.9 of the dummy's armor. `setup_target` sends the
 setup casts to their own unit: Greater Skeletal Warrior 504901's raise goes to the caster and its Command to the dummy.
@@ -1562,12 +1574,36 @@ Newcombe interval of the difference of the critical shares (Wilson per arm) agai
 stated, not final", with the hits per arm an interval inside the band would need). Scourge-Defense Training 520608:
 300 Argent Blades per arm with Warrior of Dawn 561156, 520608 set first in the treatment.
 
+An arm may name its own `observe_spell` and a `wait_ms` (0 to 30000) slept after each of its casts (ADR 0498). The arm
+then casts and counts that spell, and `model['observed']` names each arm's spell. A natural-rate check compares the
+periodic ticks of a damage over time with a direct spell of the same caster at `expected` 0 points: Flesh to Worms
+500338 ticks (treatment, `wait_ms` 3000) against Lichfrost 801722 hits (control). A tick share far from the direct
+share alerts, which catches "always crits"; an interval inside the 2-point band needs the pooled hit counts the verdict
+states.
+
 ### Selected dummy and lower bound in metric_delta (ADR 0174)
 
 `metric_delta` `select_dummy` (default `false`) adds the dummy fixture and selects it at the start of both phases;
 `after_at_least` (default none) judges the after read as at least that value instead of equal to `expected`, while
 the before read stays exact. Testament of Hope 1397742 `combat`: the copies attack the selected dummy, 0
 `owned_creature_damage_count` before the cast and at least 1 hit 6000 ms after it (6 in the diagnostic).
+
+### Energize ratios in hit_ratio (ADR 0500)
+
+`hit_ratio` takes `metric: "spell_energize_total"`: each arm reads the caster's own energizes of `observe_spell`
+(`spell_energize_total` and `spell_energize_count`, any target), and the judge compares the mean energize per event of
+the two arms. Energizes carry no critical flag, so `critical`, `force_crit` and `rate: "critical"` are refused. A
+`cast_spell` casts the spell whose triggered energize is observed. Lichfrost's Runic Power with Bone Legion 707006:
+`cast_spell` 501978, `observe_spell` 804112, `expected` 1.25.
+
+### A strike repeated in the uncast before phase (ADR 0499)
+
+`metric_delta` `strike.in_before` (default `false`) repeats the strike (its `dx` relocation, the health fixture and the
+striker casts) in a before phase that does not cast the trigger, right after that phase's setup casts. It needs
+`cast_in_before: false`, the default `between` gate timing, `setup_in_before` where the setup must exist in both
+phases, and no `setup_only_after`, `attack_swings` or `after_trigger_ms`. Ritual Return 807098 after Summoning Ritual
+805038: both phases place the circle and move the caster 15 yd; only the after phase casts Ritual Return, so the
+before read is the moved caster and the after read is the return.
 
 ### Stat-gain scenarios (`behaviour_metric_delta`, `kind: "stat_gain"`, ADR 0213)
 
