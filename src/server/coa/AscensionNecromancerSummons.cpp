@@ -846,8 +846,11 @@ class npc_ascension_necromancer : public ScriptedAI
             if (event == 6 && !Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 if (Unit* victim = ObjectAccessor::GetUnit(*me, _target))
                     if (me->IsWithinMeleeRange(victim))
-                        for (uint8 hit = 0; hit < (victim->HealthBelowPct(35) ? 5 : 2); ++hit)
+                    {
+                        int32 const strikes = victim->HealthBelowPct(35) ? 5 : Amount(805938, 0, me);
+                        for (int32 hit = 0; hit < strikes; ++hit)
                             me->AttackerStateUpdate(victim, BASE_ATTACK, true);
+                    }
             if (event == 7)
             {
                 me->ToTempSummon()->SetTempSummonType(TEMPSUMMON_CORPSE_TIMED_DESPAWN);
