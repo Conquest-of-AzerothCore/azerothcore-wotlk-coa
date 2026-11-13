@@ -550,11 +550,10 @@
     "spell": 500329,
     "clause": "Command: Shoots necrotic bile at an enemy, dealing ${$707598m1+$707598ppl1+$SP*0.65} Plague damage,",
     "labels": [
-      "500329 script_hit 707598 command_damage",
-      "500329 script_hit 707598 command_damage_sp"
+      "500329 script_hit 707598 command_damage"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067. Spell-power term (review I-3): open, tool gap: a script_hit's stat_auras fixture is set before the base steps and read 0 spell power (pair rv1 pilot), and a minion's hits are not a hit_ratio observation; the formula is measured at spell power 0 only."
   },
   {
     "spell": 500329,
@@ -1439,8 +1438,7 @@
       {
         "claim": "upon reaching an enemy, deals ${$531132m1+$531132ppl1+$SP*2+$AP*.5} Shadow damage",
         "labels": [
-          "531130 script_hit 531132 damage",
-          "531130 script_hit 531132 damage_sp"
+          "531130 script_hit 531132 damage"
         ]
       },
       {
@@ -1451,7 +1449,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities': open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities': open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura. Spell-power term (review I-3): open, tool gap: a script_hit's stat_auras fixture is set before the base steps and read 0 spell power (pair rv1 pilot), and a minion's hits are not a hit_ratio observation; the formula is measured at spell power 0 only."
   },
   {
     "spell": 531135,
@@ -2151,7 +2149,7 @@
     "clause": "Call down icy boulders onto a Frozen enemy, dealing ${$m1+0+$spfr*1.405} Frost damage.",
     "labels": [
       "707402 script_hit 707592 damage",
-      "707402 script_hit 707592 damage_sp"
+      "707402 behaviour_hit_ratio spell_power"
     ],
     "kind": "claim",
     "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick text matches (with the Glacier Lord crit line); bindmysoul, WDB spells.json, coabuildhub, cachepacks nothing found; exiles-db spell.csv only; coa-obtainable: not in the live capture nor the shipped table (707402 is rank 58 of 704355); logs: 707592 2878 hits, all critical, median 17976. Status 1 tolerated (mentor, G-19 band): 707592 reads 855 on every hit (sigma 0, 99% interval 855 to 855) against the 815 the tooltip gives at the measured stats, +4.91%, inside 5% in both runs. Cause: the stock SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE passes 707402's CalcValue (812 + 1.92 x 2 = 815) as BasePoints0 (SpellEffects.cpp:1847-1852), and CalcValue of 707592 adds its own EffectRealPointsPerLevel 2.0 x (38 - 18) = 40 on top of the passed value (SpellInfo.cpp:482-497). Stock path, not CoA code; +40 at every level 58-64 of this rank. No fix."
@@ -3022,7 +3020,7 @@
         "claim": "dealing ${$m1+0+$SP*.5971} Frost damage",
         "labels": [
           "501997 script_hit 803779 tick",
-          "501997 script_hit 803779 tick_sp"
+          "501997 behaviour_hit_ratio spell_power"
         ]
       },
       {
@@ -4941,7 +4939,7 @@
         "claim": "dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies",
         "labels": [
           "805197 script_hit 500365 raised",
-          "805197 script_hit 500365 raised_sp"
+          "805197 behaviour_hit_ratio spell_power"
         ]
       },
       {

@@ -1268,225 +1268,144 @@
   "stack": [],
   "behaviours": [
     {
-      "spell": 500329,
-      "name": "Raise: Gargoyle (Command damage, +220 spell power)",
-      "kind": "script_hit",
-      "variant": "command_damage_sp",
-      "label_suffix": "command_damage_sp",
-      "quote": "Plague damage,",
-      "hit_spell": 707598,
-      "hit_effect": 0,
-      "caster_entry": 50067,
-      "trials": 6,
-      "minimum_hits": 6,
-      "learn": [
-        92123
-      ],
-      "casts": [
-        [
-          500329,
-          "caster"
-        ],
-        [
-          504868,
-          "dummy"
-        ]
-      ],
-      "control_casts": [
-        [
-          504868,
-          "dummy"
-        ]
-      ],
-      "caster_auras": [
-        [
-          984954,
-          1
-        ],
-        [
-          823764,
-          1
-        ]
-      ],
-      "unresisted": true,
-      "settle_ms": 1500,
-      "observe_source": "Command: Undead 504868 orders every non-stationary minion (Responds(), AscensionNecromancerSummons.cpp:177-182); npc_ascension_necromancer::DoAction case 50067 casts Command: Gargoyle 707598 at the target (AscensionNecromancerSummons.cpp:715-716): Effect[0] SCHOOL_DAMAGE, Plague (SchoolMask 40), BasePoints 472 + DieSides 22, coefficient row {707598, 0, 0.65} (AscensionNecromancerData.h:68). Factor() multiplies by 1 + 0.5 per disease of the caster on the target (AscensionNecromancerContracts.cpp:410-411): the dummy carries none (Bone Toss 704706 of Effect[1] has Dispel 0). The control commands without a Gargoyle and must count no 707598 hit. 984954 removes crits, 823764 partial resists (both read through the owner, as the Ghoul Command entry). Spell power arm (review I-3): Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage) is set on the caster before its stats are measured (stat_auras, a precondition fixture), so the coefficient term is exercised; the entry without it is the contrast on the same build.",
-      "stat_auras": [
-        [
-          1140480,
-          1
-        ]
-      ]
-    },
-    {
       "spell": 707402,
-      "name": "Glacial Impact (damage, +220 spell power)",
-      "kind": "script_hit",
-      "variant": "damage_sp",
-      "label_suffix": "damage_sp",
+      "name": "Glacial Impact (spell power)",
+      "kind": "hit_ratio",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
       "quote": "Frost damage.",
-      "hit_spell": 707592,
-      "value_spell": 707402,
-      "value_effect": 0,
-      "trials": 6,
-      "minimum_hits": 6,
-      "casts": [
-        [
-          707402,
-          "dummy"
+      "expected": 1.361404,
+      "observe_spell": 707592,
+      "cast_spell": 707402,
+      "cast_wait_ms": 1600,
+      "cast_power": 1373,
+      "control": {
+        "auras": [
+          [
+            801747,
+            1
+          ],
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
         ]
-      ],
-      "control_casts": [],
-      "caster_auras": [
-        [
-          801747,
-          1
-        ],
-        [
-          984954,
-          1
-        ],
-        [
-          823764,
-          1
+      },
+      "treatment": {
+        "auras": [
+          [
+            801747,
+            1
+          ],
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ],
+          [
+            1140480,
+            1
+          ]
         ]
-      ],
-      "unresisted": true,
-      "settle_ms": 1000,
-      "observe_source": "707402 Effect[0] 142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE casts Glacial Impact 707592 (SCHOOL_DAMAGE, Frost) with BasePoints0 = $m1 = 812; AscensionNecromancerContracts.cpp ModifySpellEffectBaseValue applies the NecromancerCoefficients row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67). Each trial casts 707402 at the dummy; the control arm knows 707402 and does not cast it (no 707592 hit). Fixtures on the caster: Permafrost 801747 (the frozen condition of OnSpellCheckCast, AscensionNecromancerAbilities.cpp:169-171; not the claim), 984954 (spell crit -1000: non-critical hits) and 823764 (-9999 target resistance: unresisted). Spell power arm (review I-3): Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage) is set on the caster before its stats are measured (stat_auras, a precondition fixture), so the coefficient term is exercised; the entry without it is the contrast on the same build.",
-      "stat_auras": [
-        [
-          1140480,
-          1
-        ]
-      ]
+      },
+      "critical": false,
+      "trials": 12,
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$spfr*1.405}: the coefficient row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67) adds 1.405 x 220 = 309.1 to 707592: 855 -> 1164, ratio 1.3614 (the control's 855 holds the +40 per-level points of the tolerated damage entry). Fixtures in both arms as the damage entry."
     },
     {
       "spell": 501997,
-      "name": "Ice Barrage (tick damage, +220 spell power)",
-      "kind": "script_hit",
-      "variant": "tick_sp",
-      "label_suffix": "tick_sp",
+      "name": "Ice Barrage (spell power)",
+      "kind": "hit_ratio",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
       "quote": "Frost damage every",
-      "hit_spell": 803779,
-      "value_spell": 501997,
+      "expected": 1.417727,
+      "observe_spell": 803779,
+      "cast_spell": 501997,
+      "cast_wait_ms": 3500,
       "cast_power": 1000,
-      "value_effect": 0,
-      "trials": 4,
-      "minimum_hits": 12,
-      "casts": [
-        [
-          501997,
-          "dummy"
+      "control": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
         ]
-      ],
-      "control_casts": [],
-      "caster_auras": [
-        [
-          984954,
-          1
-        ],
-        [
-          823764,
-          1
+      },
+      "treatment": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ],
+          [
+            1140480,
+            1
+          ]
         ]
-      ],
-      "unresisted": true,
-      "settle_ms": 1500,
-      "observe_source": "501997 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, amplitude 250 ms, triggers Ice Barrage 803779 (SCHOOL_DAMAGE Frost) with the aura amount ($m1 = 311, EffectRealPointsPerLevel 0.914 from level 60) on the target; no NecromancerCoefficients row names 803779 or 501997. Each trial casts 501997 at the dummy; the control knows 501997 and does not cast it (no 803779 hit). 984954 removes crits, 823764 partial resists. Spell power arm (review I-3): Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage) is set on the caster before its stats are measured (stat_auras, a precondition fixture), so the coefficient term is exercised; the entry without it is the contrast on the same build.",
-      "stat_auras": [
-        [
-          1140480,
-          1
-        ]
-      ]
+      },
+      "critical": false,
+      "trials": 12,
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$SP*.5971}: the coefficient row {803779, 0, 0.5971, Frost} (AscensionNecromancerData.h:82) adds 0.5971 x 220 = 131.4 per tick: mean 314.5 (311 plus the 1-6 die) -> 445.9, ratio 1.4177."
     },
     {
       "spell": 805197,
-      "name": "Graveyard (raised damage, +220 spell power)",
-      "kind": "script_hit",
-      "variant": "raised_sp",
-      "label_suffix": "raised_sp",
+      "name": "Graveyard (spell power)",
+      "kind": "hit_ratio",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
       "quote": "Plague damage to nearby enemies",
-      "hit_spell": 500365,
-      "hit_effect": 1,
-      "trials": 2,
-      "minimum_hits": 4,
-      "casts": [
-        [
-          805197,
-          "dummy"
-        ]
-      ],
-      "control_casts": [],
+      "expected": 1.364322,
+      "observe_spell": 500365,
+      "cast_spell": 805197,
+      "cast_wait_ms": 6500,
       "cast_power": 1373,
-      "caster_auras": [
-        [
-          984954,
-          1
-        ],
-        [
-          823764,
-          1
+      "control": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
         ]
-      ],
-      "unresisted": true,
-      "settle_ms": 6500,
-      "observe_source": "805197 Effect[0] triggers Graveyard Tombstone Layout A 899900, which summons two Tombstones 542064 at the cast location; each Tombstone's event 4 (2 s after it is summoned, then every 3 s, AscensionNecromancerSummons.cpp:838-842) has the player cast Graveyard 500365 at its position: Effect[0] summons a Risen Ghoul 542065, Effect[1] SCHOOL_DAMAGE BasePoints 198 + 1 on enemies within SpellRadius 29 (6 yd). Each trial casts 805197 at the dummy; the control knows 805197 and does not cast it (no 500365 hit). 984954 removes crits, 823764 partial resists. Spell power arm (review I-3): Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage) is set on the caster before its stats are measured (stat_auras, a precondition fixture), so the coefficient term is exercised; the entry without it is the contrast on the same build.",
-      "stat_auras": [
-        [
-          1140480,
-          1
+      },
+      "treatment": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ],
+          [
+            1140480,
+            1
+          ]
         ]
-      ]
-    },
-    {
-      "spell": 531130,
-      "name": "Animate: Bone Construct (damage, +220 spell power)",
-      "kind": "script_hit",
-      "variant": "damage_sp",
-      "label_suffix": "damage_sp",
-      "quote": "Shadow damage, piercing all invulnerabilities, resistances, and immunities.",
-      "hit_spell": 531132,
-      "cast_power": 1000,
-      "caster_entry": 503200,
-      "trials": 6,
-      "minimum_hits": 4,
-      "casts": [
-        [
-          531130,
-          "dummy"
-        ],
-        [
-          504868,
-          "dummy"
-        ]
-      ],
-      "control_casts": [
-        [
-          504868,
-          "dummy"
-        ]
-      ],
-      "caster_auras": [
-        [
-          984954,
-          1
-        ],
-        [
-          823764,
-          1
-        ]
-      ],
-      "unresisted": true,
-      "settle_ms": 4000,
-      "observe_source": "IsSummonedBy casts Bone Construct Hidden 531133 on every 503200 (AscensionNecromancerSummons.cpp:559-560); aura_ascension_necromancer_event casts Bone Deconstruct 531132 from the Construct at its melee target while 531133 is on it (AscensionNecromancerEvents.cpp:179-180): Effect[0] SCHOOL_DAMAGE Shadow, BasePoints 1499 + 1, 20 per level from 57, coefficient row {531132, 0, SP 2.0, AP 0.5} (AscensionNecromancerData.h:50). The Construct is animated at the dummy and Command: Undead 504868 sends it in; the control commands without a Construct and must count no 531132 hit. 984954 removes crits, 823764 partial resists. Spell power arm (review I-3): Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage) is set on the caster before its stats are measured (stat_auras, a precondition fixture), so the coefficient term is exercised; the entry without it is the contrast on the same build.",
-      "stat_auras": [
-        [
-          1140480,
-          1
-        ]
-      ]
+      },
+      "critical": false,
+      "trials": 8,
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$500365m2+$SP*.33}: the coefficient row {500365, 1, 0.33, Shadow} (AscensionNecromancerData.h:19) adds 0.33 x 220 = 72.6: 199 -> 271.6, ratio 1.3643."
     },
     {
       "spell": 500329,
