@@ -23,8 +23,9 @@ from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, cast
                   MELEE_LABEL, hit_parts, melee_scenario, rank_hit, records_of, reference_caster, reference_hit_model,
                   reference_melee_model)
 from ledger import ledger, parse_text_bases, write_ledger
-from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, proc_entries, proc_plan, proc_scenario,
-                   proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell, trigger_key)
+from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, modifier_key, proc_entries, proc_plan,
+                   proc_scenario, proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell,
+                   trigger_key)
 from profile import (DBC_DIR, DbcSetMismatch, control_entries, ledger_consumption_path, load_class_file,
                      server_dbc_dir, spell_dbc_sha256)
 from questions import QUESTIONS_FILE
@@ -301,6 +302,7 @@ def add_proc(writer: ManifestWriter, entry: dict):
         key_parts = (aura, entry['proc_spell'])
     else:
         key_parts = (aura,)
+    key_parts += modifier_key(entry)
     key = scenario_key(class_file['name'], 'proc', *key_parts)
     if entry.get('status'):
         writer.add(key, 'proc', None, aura, [proc_status_expectation(entry)], name=name)

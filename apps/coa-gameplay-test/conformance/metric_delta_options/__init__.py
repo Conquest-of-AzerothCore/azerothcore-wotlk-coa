@@ -27,3 +27,21 @@ def option_fixtures(class_file: dict, spec, scenario: dict):
     for module in option_modules():
         if module.NAME in present and hasattr(module, 'fixtures'):
             module.fixtures(class_file, spec, present[module.NAME], scenario)
+
+
+def option_phase_steps(spec, after: bool) -> list[dict]:
+    present = dict(spec.options)
+    return [step for module in option_modules() if module.NAME in present and hasattr(module, 'phase_steps')
+            for step in module.phase_steps(spec, present[module.NAME], after)]
+
+
+def option_model(spec) -> dict:
+    present = dict(spec.options)
+    return {key: value for module in option_modules() if module.NAME in present and hasattr(module, 'model')
+            for key, value in module.model(spec, present[module.NAME]).items()}
+
+
+def option_setup_cast_steps(spec, index: int, after: bool) -> list[dict]:
+    present = dict(spec.options)
+    return [step for module in option_modules() if module.NAME in present and hasattr(module, 'setup_cast_steps')
+            for step in module.setup_cast_steps(spec, present[module.NAME], index, after)]

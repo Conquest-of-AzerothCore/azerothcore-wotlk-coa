@@ -1848,6 +1848,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped
   windows (ADR 0551)
+- [`bounce_amounts`](kinds/bounce_amounts.md): the per-hit amount of each enemy a bouncing spell strikes, against
+  its jump multiplier (ADR 0587)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
@@ -1880,3 +1882,7 @@ Options with a module:
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
+- [`forced_roll`](metric_delta_options/forced_roll.md): a talent's roll forced for the scenario, without a creature
+  read, the named point `model` (ADR 0588)
+- [`phase_aura_amounts`](metric_delta_options/phase_aura_amounts.md): an effect amount on a phase or after aura
+  fixture, the second named point `phase_steps` (ADR 0585)

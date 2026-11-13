@@ -17,6 +17,8 @@ RATE_HALF_WIDTH = 0.025
 BAND_RELATIVE = 0.05
 BAND_POINTS = 0.02
 CHANCE_KIND = 'chance_pct'
+ADD_FLAT_MODIFIER = 107
+SPELLMOD_CHANCE_OF_SUCCESS = 18
 PERCENT_KIND = 'percent'
 ATTACK = 'attack'
 CAST = 'cast'
@@ -144,15 +146,57 @@ def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[d
                {**events, 'label': labels['events']}])
 
 
+def same_roll(entry: dict, other: dict) -> bool:
+    return other['aura'] == entry['aura'] and chance_modifiers(other) == chance_modifiers(entry)
+
+
 def shares_aura(class_file: dict, entry: dict) -> bool:
-    return sum(1 for other in class_file.get('procs', []) if other['aura'] == entry['aura']) > 1
+    return sum(1 for other in class_file.get('procs', []) if same_roll(entry, other)) > 1
 
 
 def shares_proc_spell(class_file: dict, entry: dict) -> bool:
     if 'proc_spell' not in entry:
         return False
     return sum(1 for other in class_file.get('procs', [])
-              if other['aura'] == entry['aura'] and other.get('proc_spell') == entry['proc_spell']) > 1
+              if same_roll(entry, other) and other.get('proc_spell') == entry['proc_spell']) > 1
+
+
+def chance_modifiers(entry: dict) -> tuple[tuple[int, str], ...]:
+    raw = entry.get('chance_modifiers', ())
+    if not isinstance(raw, list | tuple) or not all(
+            isinstance(pair, list | tuple) and len(pair) == 2 and isinstance(pair[0], int)
+            and isinstance(pair[1], str) for pair in raw):
+        raise ValueError(f'Proc {entry["aura"]} chance_modifiers must list [spell, tooltip token] pairs')
+    return tuple((spell, token) for spell, token in raw)
+
+
+def modifier_key(entry: dict) -> tuple:
+    return tuple(part for spell, _ in chance_modifiers(entry) for part in ('with', spell))
+
+
+def entry_proc_label(class_file: dict, entry: dict) -> str:
+    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
+    label = (proc_label(entry['aura'], entry['proc_spell'], trigger) if shares_aura(class_file, entry)
+             else proc_label(entry['aura']))
+    return ' '.join((label, *map(str, modifier_key(entry))))
+
+
+def modifier_points(class_file: dict, entry: dict) -> float:
+    records = records_of(class_file)
+    points = 0.0
+    for spell, token in chance_modifiers(entry):
+        shown = next((value for value in read_tooltip(records.dbc, spell, reference_caster(class_file)).values
+                      if value.text == token and value.kind == PERCENT_KIND), None)
+        if shown is None or shown.effect_index is None:
+            raise ValueError(f'The tooltip of {spell} shows no percent token {token}')
+        effect = shown.effect_index
+        aura = records.field('Spell', spell, f'EffectApplyAuraName[{effect}]')
+        modifier = records.field('Spell', spell, f'EffectMiscValue[{effect}]')
+        if aura != ADD_FLAT_MODIFIER or modifier != SPELLMOD_CHANCE_OF_SUCCESS:
+            raise ValueError(f'{token} of {spell} is effect {effect}, aura {aura} on modifier {modifier}, not a flat '
+                             f'SPELLMOD_CHANCE_OF_SUCCESS modifier')
+        points += shown.value
+    return points
 
 
 def trigger_key(entry: dict) -> int | str:
@@ -188,7 +232,7 @@ def proc_chance(class_file: dict, entry: dict) -> float:
     chance = chance_of(readout.values, entry['chance_token'], kind)
     if chance is None:
         raise ValueError(f'The tooltip of {shown} shows no chance token {entry["chance_token"]}')
-    return chance
+    return chance + modifier_points(class_file, entry) if chance_modifiers(entry) else chance
 
 
 def chance_model(entry: dict) -> dict:
@@ -199,9 +243,10 @@ def chance_model(entry: dict) -> dict:
 
 
 def aura_steps(entry: dict) -> list[dict]:
+    modifiers = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell, _ in chance_modifiers(entry)]
     if applied_by(entry) is None:
-        return [{'action': 'learn', 'actor': CASTER, 'spell': entry['aura']}]
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': entry['aura'], 'stacks': 1}]
+        return [{'action': 'learn', 'actor': CASTER, 'spell': entry['aura']}] + modifiers
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': entry['aura'], 'stacks': 1}] + modifiers
 
 
 def trigger_spell(entry: dict) -> int:
@@ -585,7 +630,8 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
              'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms,
              'trigger': dict(entry['trigger']), 'proc_spell': entry['proc_spell'],
-             **chance_model(entry),
+             **chance_model(entry), **({'chance_modifiers': [list(pair) for pair in chance_modifiers(entry)]}
+                                        if chance_modifiers(entry) else {}),
              'event_metric': entry['event_metric'], 'events_per_proc': entry.get('events_per_proc', 1),
              'measurements': labels, 'event_labels': event_labels(entry, plan),
              'exclude_trigger_casts': excludes_trigger_casts(entry),
@@ -616,8 +662,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         model[PER_TRIGGER] = limit
         model['trigger_boundaries'] = trigger_boundaries(entry, plan.per_part)
         rule = f'{rule}; {PER_TRIGGER_RULE} ({limit})'
-    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
-    label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
+    label = entry_proc_label(class_file, entry)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{rule}{handler_note(entry)}', model)
     baseline_ms = baseline_attempts(plan.chance_pct) * plan.attempt_ms + DRAIN_MS if baseline else 0
@@ -740,8 +785,7 @@ def delta_proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
             'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms, 'trigger': dict(entry['trigger']),
             'proc_spell': entry['proc_spell'], 'event_metric': entry['event_metric'], 'measurements': labels,
             'baseline_co_learn': list(entry['baseline_co_learn'])}
-    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
-    label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
+    label = entry_proc_label(class_file, entry)
     expectation = Expectation(label, DELTA_CHECK, aura, aura, None, entry['chance_token'],
                               f'{DELTA_RULE}; {trial_rule(entry)}{handler_note(entry)}', model)
     return timed(scenario, SETTLE_MS + 2 * plan.per_part * plan.attempt_ms + 2 * DRAIN_MS), [expectation]

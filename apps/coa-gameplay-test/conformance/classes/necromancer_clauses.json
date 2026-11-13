@@ -112,7 +112,11 @@
         "labels": [
           "300235 effect_value #0",
           "300235 effect_value 301334e0 #1",
-          "300235 spell_duration 301334 #2"
+          "300235 spell_duration 301334 #2",
+          "300235 behaviour_metric_delta caster_haste",
+          "300235 behaviour_metric_delta caster_proc_haste",
+          "300235 behaviour_metric_delta minion_haste",
+          "300235 behaviour_metric_delta lasts"
         ]
       }
     ],
@@ -368,7 +372,10 @@
       },
       {
         "claim": "Each",
-        "labels": []
+        "labels": [
+          "301207 behaviour_metric_delta armor_each",
+          "301207 behaviour_metric_delta capacity_fixture"
+        ]
       },
       {
         "claim": "and magic resistance by $805017s2%",
@@ -1302,7 +1309,8 @@
       {
         "claim": "Command your Abominations to hook an enemy to their location",
         "labels": [
-          "504316 spell_duration 800043 #0"
+          "504316 spell_duration 800043 #0",
+          "504316 behaviour_metric_delta hook_pull"
         ]
       },
       {
@@ -1334,7 +1342,8 @@
     "spell": 504357,
     "clause": "Increases the chance to trigger Refreshing Chill by $s1%.",
     "labels": [
-      "504357 effect_value e0 #0"
+      "504357 effect_value e0 #0",
+      "300940 proc_rate with 504357"
     ],
     "kind": "claim",
     "reason": "Not final, tool gap (C4 author m-b, 2026-11-13, no run): the existing proc_rate kind cannot judge +5 points: proc_chance (procs.py:185-191) reads the expected chance only from the entry aura's own tooltip ($h of 300940 = 20), and a proc entry has no field that learns a second spell (504357) beside its aura; baseline_co_learn belongs to proc_rate_delta, whose DELTA_RULE proves a positive difference only; hit_ratio rate proc counts damage/heal/energize/melee events, not the 800979 cast. Gap: a proc_rate option that learns a chance modifier with the aura and adds its stated $s1 = 5 (SPELLMOD 18 flat BP 4 + 1) to the expected chance: 25%, band 23-27%, sized as 2.0 (12443 trials, 18665 attempts, about 77 parts at the 2000 ms Command interval). Route agent c (2026-11-13, second attempt): parked: a chance claim beyond the accelerated cap (G-20): step 1 (about 300 casts per arm) not run tonight; not status 3. Open, route pending: a chance claim (+5 points of a proc chance): G-20 sizing not run tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Winds\",\"Freeze Dry\",\"Necrotic Chains\",\"Ner\\'zhul\\'s Blessing (spec)\",\"Blood and Ice\",\"Death and Ice\",\"Command: Bon'; bindmysoul found: Increases the chance to trigger Refreshing Chill by 5%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
@@ -1524,7 +1533,11 @@
       },
       {
         "claim": "only",
-        "labels": []
+        "labels": [
+          "525600 behaviour_metric_delta two_abominations",
+          "525600 behaviour_metric_delta two_raises_one",
+          "525600 behaviour_metric_delta two_abominations_count"
+        ]
       }
     ],
     "kind": "claim",
@@ -1788,7 +1801,7 @@
     "spell": 560596,
     "clause": "at ${-($800343f1-1)*100}% reduced value per enemy struck.",
     "labels": [
-      "560596 effect_value #0"
+      "560596 behaviour_metric_delta reduced_value"
     ],
     "kind": "claim",
     "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: the bounce's reduced value needs the secondary dummy's hit amount against the primary's; fixed_count reads counts only."
@@ -2598,12 +2611,13 @@
       {
         "claim": "your next 2 spells",
         "labels": [
-          "704681 behaviour_metric_delta charges"
+          "704681 behaviour_metric_delta charges",
+          "704681 behaviour_metric_delta next_two"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Claim \"your next 2 spells\" (M side c, state): the charges entry reads 801747 aura_charges 0 then 2 in both runs of the merged pair 20261113-043355 / -044317, a state read (data). Not final: behaviour route pending: three Glacial Impact 707402 casts at an unfrozen dummy after one proc, the first two allowed (treated as frozen) and the third refused, against a no-proc control refused at once; not built in the M window."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Claim \"your next 2 spells\" (M side c, state): the charges entry reads 801747 aura_charges 0 then 2 in both runs of the merged pair 20261113-043355 / -044317, a state read (data). Behaviour route (C5, ADR 0589): the next_two entry casts one Command: Undead 504868 with the roll forced and released right after it, then three Glacial Impact 707402 at an unfrozen dummy: 2 go out after the learn and 0 in the no-talent control in both runs of pilot 20261113-153145 / -153249."
   },
   {
     "spell": 704681,
@@ -2880,7 +2894,12 @@
       {
         "claim": "within $572777d",
         "labels": [
-          "704724 spell_duration 572777 #1"
+          "704724 spell_duration 572777 #1",
+          "704724 cost_gate 504868 free_within without",
+          "704724 cost_gate 504868 free_within with",
+          "704724 cost_gate 504868 free_within held",
+          "704724 cost_gate 504868 free_within expired",
+          "704724 cost_gate 504868 free_within released"
         ]
       }
     ]
@@ -2973,7 +2992,10 @@
         "labels": [
           "705750 effect_value #0",
           "705750 effect_value 705751e0 #1",
-          "705750 spell_duration 705751 #2"
+          "705750 spell_duration 705751 #2",
+          "705750 behaviour_metric_delta cast_haste",
+          "705750 behaviour_metric_delta melee_haste",
+          "705750 behaviour_metric_delta lasts"
         ]
       }
     ],
@@ -3268,7 +3290,8 @@
       {
         "claim": "to make your next Lichfrost or Blight free of cost and instant cast.",
         "labels": [
-          "707175 effect_value #0"
+          "707175 effect_value #0",
+          "707175 behaviour_metric_delta instant"
         ]
       }
     ],

@@ -283,7 +283,9 @@ not in the table fails the whole run (`EvidenceError`, no default):
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition
   set up, the talent known in both phases) is behaviour for a claim that states that condition: its words start with
   "While", "Whenever" or "As long as" (`coverage.CONDITION_WORDS`, ADR 0548); the effect claim of the same sentence
-  still needs its own promised read. A stat read as a
+  still needs its own promised read. `distance_2d` (the distance between two actors) is a state read too: behaviour
+  under a learned or own-cast contrast for a clause that promises the move ("location", "hook", "pull", ADR 0584).
+  A stat read as a
   proxy for another effect stays data. A conformant verdict with `detail['data_only']` (a `passive_delta` the integer floor alone accepted, or
   whose integer stat did not move; ADR 0124) is data whatever its metric.
 - linked: a `checked by` label (`unmodelled` check closed by the labels it names) is behaviour when one of the

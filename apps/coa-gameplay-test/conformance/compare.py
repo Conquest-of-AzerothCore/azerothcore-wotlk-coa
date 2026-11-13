@@ -42,8 +42,8 @@ from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
-from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK,
-                   PROC_ENERGIZE_CHECK, chance_of, rate_band, wilson_interval)
+from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
+                   PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, wilson_interval)
 from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
@@ -1017,6 +1017,12 @@ def stated_chance(manifest: dict, run: Run, expectation: Expectation, tooltips: 
     if chance is None:
         return replace(base, measured=measured, explanation=f'the tooltip of {shown} no longer shows '
                                                             f'the chance token {expectation.displayed}')
+    for spell, token in expectation.model.get('chance_modifiers', ()):
+        points = chance_of(tooltips.read(spell, caster).values, token, PERCENT_KIND)
+        if points is None:
+            return replace(base, measured=measured, explanation=f'the tooltip of {spell} no longer shows the '
+                                                                f'chance modifier token {token}')
+        chance += points
     if abs(chance - expectation.model['chance_pct']) > FLOAT_EPSILON:
         return replace(base, measured=measured, expected=chance / 100,
                        explanation=f'{expectation.displayed} shows {chance:g}%, generated as '
@@ -3034,6 +3040,8 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
 
 def forced_or_plain_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     forced = model.get('forced_chance')
+    if model.get('forced_roll') is not None:
+        return forced_roll_metric_delta_verdict(base, run, model)
     if forced is None:
         return judged_metric_delta(base, run, model)
     absent = run.values.get(forced['absent_label'])
@@ -3054,6 +3062,17 @@ def forced_or_plain_metric_delta_verdict(base: Verdict, run: Run, model: dict) -
                                                             f'still active at the end ({released})')
     return replace(verdict, explanation=f'{verdict.explanation}; {fixture}: absent without the passive, present '
                                                     f'({present:g}) with it, released at the end')
+
+
+def forced_roll_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    roll = model['forced_roll']
+    verdict = judged_metric_delta(base, run, model)
+    released = run.values.get(roll['released_label'])
+    fixture = f'forcing fixture: a {roll["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant'
+    if released is None or released != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the modifier is '
+                                                            f'still active at the end ({released})')
+    return replace(verdict, explanation=f'{verdict.explanation}; {fixture}, released at the end')
 
 
 def judged_metric_delta(base: Verdict, run: Run, model: dict) -> Verdict:

@@ -7,7 +7,8 @@ from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_
                   TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
 from kinds import kind_module, kind_names
-from metric_delta_options import checked_options, option_fixtures, parsed_options
+from metric_delta_options import (checked_options, option_fixtures, option_model, option_phase_steps,
+                                  option_setup_cast_steps, parsed_options)
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
@@ -1613,11 +1614,11 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     facts = facts_of(records, spec.trigger_spell)
     class_file = armed_for(class_file, records, spec.trigger_spell)
 
-    def setup_cast_steps() -> list[dict]:
+    def setup_cast_steps(after: bool = True) -> list[dict]:
         if not spec.setup_casts:
             return []
         steps = []
-        for setup_spell in spec.setup_casts:
+        for index, setup_spell in enumerate(spec.setup_casts):
             setup_facts = facts_of(records, setup_spell)
             if setup_facts.mana_cost > 0 and not setup_facts.mana_cost_percentage \
                     and not setup_facts.mana_cost_per_level:
@@ -1629,6 +1630,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                           'target': spec.setup_target or spec.target})
             if spec.setup_wait_ms:
                 steps.append({'action': 'wait', 'ms': spec.setup_wait_ms})
+            steps += option_setup_cast_steps(spec, index, after)
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
@@ -1639,6 +1641,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.setup_actor_aura is not None:
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.setup_actor_aura, 'stacks': 1})
         steps += [phase_aura_step(aura) for aura in (*(spec.after_auras if after else ()), *spec.phase_auras)]
+        steps += option_phase_steps(spec, after)
         if spec.caster_health is not None:
             steps.append({'action': 'set_health', 'actor': CASTER, 'value': spec.caster_health[0],
                           'maximum': spec.caster_health[1]})
@@ -1658,7 +1661,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
         steps += required_aura_steps(facts) + reagent_steps(records, spec.trigger_spell)
         if apply_setup_casts:
-            steps += setup_cast_steps()
+            steps += setup_cast_steps(after)
         after_trigger = spec.strike is not None and spec.strike.after_trigger_ms is not None
         if not after_trigger:
             steps += strike_steps(after)
@@ -1801,7 +1804,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
         steps = (base_steps(class_file) + learn_steps +
                  cast_steps(include_cast=spec.cast_in_before and not spec.trigger_only_after, after=False) +
-                 (setup_cast_steps() if spec.setup_in_before else []) +
+                 (setup_cast_steps(False) if spec.setup_in_before else []) +
                  (strike_steps() if spec.strike and spec.strike.in_before else []) +
                  (enemy_cast_steps() if spec.enemy_casts_in_before else []) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
@@ -1903,6 +1906,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                               'after_window': list(spec.game_time[0])}
         if spec.game_time[1] is not None:
             model['game_time'].update({'expired_label': expired_stamp, 'expired_window': list(spec.game_time[1])})
+    model.update(option_model(spec))
     expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
                               str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
