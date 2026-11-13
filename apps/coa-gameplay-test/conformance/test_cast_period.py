@@ -107,7 +107,7 @@ class PulseTargetsTests(unittest.TestCase):
         return judge_behaviour(base, FakeRun(values), expectation)
 
     def test_the_dummies_and_the_polls_are_placed(self):
-        scenario, expectation = behaviour_scenario(load_class_file(23), bonestorm_cap_entry())
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), bonestorm_cap_entry())
         run.validate(scenario)
         self.assertEqual(len(scenario['creatures']), 8)
         self.assertEqual(len(expectation.model['reads'][0]), 1 + 8)
@@ -181,7 +181,7 @@ class HitPeriodTests(unittest.TestCase):
         return judge_behaviour(base, FakeRun(values), expectation)
 
     def test_the_fixtures_precede_the_cast_and_the_polls_follow_it(self):
-        scenario, expectation = behaviour_scenario(load_class_file(23), chain_period_entry())
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), chain_period_entry())
         steps = run.validate(scenario)['steps']
         cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
         self.assertTrue(any(step['action'] == 'set_aura' and step['spell'] == 22856 for step in steps[:cast]))

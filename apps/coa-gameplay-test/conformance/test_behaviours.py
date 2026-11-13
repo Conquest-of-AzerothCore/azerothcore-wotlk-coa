@@ -9693,7 +9693,7 @@ class MinionScriptHitTests(unittest.TestCase):
                                             hit_effect=0)
         heal = reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS, hit_effect=2)
         self.assertEqual((damage.kind, damage.mean), ('school', 48.0))
-        self.assertEqual((heal.kind, heal.mean), ('heal', 93.0))
+        self.assertEqual((heal.kind, heal.mean), ('heal', 65.0))
         with self.assertRaises(Unmodelled):
             reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS)
 
@@ -9772,15 +9772,17 @@ class MinionModelAuraTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_minion_aura_is_modelled_without_a_cast(self):
-        _, [expectation] = behaviour_scenario(load_class_file(23), self.entry('auto_attack_heal_modelled'))
+        modelled = {**self.entry('auto_attack_heal_modelled'), 'minion_model_auras': [805290]}
+        _, [expectation] = behaviour_scenario(load_class_file(23), modelled)
         self.assertEqual(expectation.model['model_auras'], [805290])
-        self.assertEqual(expectation.model['reference']['mean'], 17.0)
+        self.assertEqual(expectation.model['reference']['mean'], 11.0)
         _, [plain] = behaviour_scenario(load_class_file(23), self.entry('auto_attack_heal'))
-        self.assertEqual(plain.model['reference']['mean'], 25.0)
+        self.assertEqual(plain.model['reference']['mean'], 17.0)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_minion_aura_needs_a_minion_caster(self):
         entry = {key: value for key, value in self.entry('auto_attack_heal_modelled').items() if key != 'caster_entry'}
+        entry['minion_model_auras'] = [805290]
         with self.assertRaises(ValueError):
             behaviour_scenario(load_class_file(23), entry)
 
