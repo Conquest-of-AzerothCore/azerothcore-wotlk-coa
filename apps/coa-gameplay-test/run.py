@@ -108,7 +108,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
-    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'economy_log_rows',
+    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'economy_log_rows', 'economy_log_queued',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
     'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
@@ -272,7 +272,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius', 'economy_event',
                  'economy_save', 'economy_count', 'economy_gold', 'economy_tokens', 'economy_cost_item',
-                 'economy_cost_count', 'economy_source',
+                 'economy_cost_count', 'economy_source', 'economy_other', 'economy_other_account', 'economy_item_of',
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
                   'school_mask', 'rolls', 'stacks', 'target_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
@@ -1074,6 +1074,8 @@ def validate(scenario, clock=REAL_CLOCK):
             require(('economy_event' in step) == (metric == 'economy_log_rows'), f'{where}: economy_event belongs to economy_log_rows')
             require(metric == 'economy_log_rows' or not {f for f in step if f.startswith('economy_')},
                     f'{where}: economy fields belong to economy_log_rows')
+            if metric == 'economy_log_queued':
+                require(step['actor'] in player_ids, f'{where}: economy_log_queued needs a player')
             if metric == 'economy_log_rows':
                 require(step['actor'] in player_ids, f'{where}: economy_log_rows needs a player')
                 require(step['economy_event'] in ECONOMY_EVENTS, f'{where}: unknown economy_event')
@@ -1081,6 +1083,11 @@ def validate(scenario, clock=REAL_CLOCK):
                     number(step['item'], f'{where}.item', 1, 2**31 - 1, True)
                 if 'economy_save' in step:
                     require(type(step['economy_save']) is bool, f'{where}: economy_save must be boolean')
+                for field in ('economy_other', 'economy_other_account'):
+                    if field in step:
+                        require(step[field] in player_ids, f'{where}: {field} must name a player')
+                if 'economy_item_of' in step:
+                    number(step['economy_item_of'], f'{where}.economy_item_of', 1, 2**31 - 1, True)
                 for field in ('economy_count', 'economy_cost_item', 'economy_cost_count', 'economy_source'):
                     if field in step:
                         number(step[field], f'{where}.{field}', 0, 2**32 - 1, True)

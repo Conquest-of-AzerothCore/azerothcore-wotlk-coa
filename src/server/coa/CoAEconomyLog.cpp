@@ -1,6 +1,7 @@
 #include "CoAEconomyLog.h"
 
 #include "AscensionBazaarTokenReserve.h"
+#include "AscensionVanityItems.h"
 #include "AuctionHouseMgr.h"
 #include "CharacterCache.h"
 #include "Config.h"
@@ -215,6 +216,13 @@ void CoAEconomyLog::AddTokensEarned(Player* player, int32 tokens, CoATokenSource
     rows.push_back(pending);
 }
 
+uint32 CoAEconomyLog::QueuedRows(Player const* player)
+{
+    std::lock_guard<std::mutex> guard(s_queueLock);
+    auto const found = s_queue.find(player->GetGUID().GetCounter());
+    return found == s_queue.end() ? 0 : uint32(found->second.size());
+}
+
 void CoAEconomyLog::Cleanup(uint32 now, bool wait)
 {
     uint64 const keep = uint64(s_keepDays.load()) * DAY;
@@ -402,7 +410,7 @@ namespace
         void OnPlayerAfterDestroyItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count) override
         {
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry);
-            if (!proto || proto->Quality < ITEM_QUALITY_RARE)
+            if (!proto || (proto->Quality < ITEM_QUALITY_RARE && !IsAscensionVanityItem(itemEntry)))
                 return;
             CoAEconomyRow row;
             row.event = CoAEconomyEvent::ItemDestroy;
@@ -428,7 +436,10 @@ namespace
                 AuctionMail(draft, staged, trans);
                 return;
             }
-            bool const fromPlayer = type == MAIL_NORMAL && staged.sender.GetSenderId();
+            bool const fromPlayer = type == MAIL_NORMAL && staged.sender.GetSenderId()
+                && staged.sender.GetSenderId() != staged.receiverGuidLow
+                && (staged.checked & (MAIL_CHECK_MASK_COPIED | MAIL_CHECK_MASK_HAS_BODY | MAIL_CHECK_MASK_COD_PAYMENT))
+                && !(staged.checked & MAIL_CHECK_MASK_RETURNED);
             ObjectGuid::LowType const owner = fromPlayer ? staged.sender.GetSenderId() : staged.receiverGuidLow;
             CoAEconomyRow row;
             row.event = fromPlayer ? CoAEconomyEvent::MailSend : CoAEconomyEvent::SystemMail;

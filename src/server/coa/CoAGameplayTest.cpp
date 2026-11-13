@@ -6331,6 +6331,8 @@ private:
                 player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), foreignOnly);
             return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
         }
+        if (metric == "economy_log_queued")
+            return double(CoAEconomyLog::QueuedRows(player));
         if (metric == "economy_log_rows")
         {
             std::optional<CoAEconomyEvent> const event = CoAEconomyLog::EventByName(step.get<std::string>("economy_event"));
@@ -6350,6 +6352,24 @@ private:
                      std::pair{"economy_cost_count", "cost_count"}, std::pair{"economy_source", "source"}})
                 if (auto const value = step.get_optional<int64>(field))
                     filter += Acore::StringFormat(" AND {} = {}", column, *value);
+            if (auto const other = step.get_optional<std::string>("economy_other"))
+            {
+                Player* const party = GetPlayer(*other);
+                Require(party != nullptr, "economy_other needs a player actor");
+                filter += Acore::StringFormat(" AND other_guid = {}", party->GetGUID().GetCounter());
+            }
+            if (auto const other = step.get_optional<std::string>("economy_other_account"))
+            {
+                Player* const party = GetPlayer(*other);
+                Require(party != nullptr, "economy_other_account needs a player actor");
+                filter += Acore::StringFormat(" AND other_account = {}", party->GetSession()->GetAccountId());
+            }
+            if (auto const entry = step.get_optional<uint32>("economy_item_of"))
+            {
+                Item* const held = player->GetItemByEntry(*entry);
+                Require(held != nullptr, "economy_item_of needs a carried item");
+                filter += Acore::StringFormat(" AND item_guid = {}", held->GetGUID().GetCounter());
+            }
             QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_economy_log WHERE guid = {} AND event = {}{}",
                 player->GetGUID().GetCounter(), uint32(*event), filter);
             return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;

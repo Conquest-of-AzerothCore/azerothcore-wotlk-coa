@@ -16,6 +16,7 @@
 #include "AscensionItemScaling.h"
 #include "AscensionPyromancer.h"
 #include "AscensionCultist.h"
+#include "AscensionVanityItems.h"
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
 #include "AscensionTinkerData.h"
@@ -6118,6 +6119,8 @@ public:
     return instance;
   }
 
+  [[nodiscard]] bool IsVanityItem(uint32 itemId) const { return _vanityItems.contains(itemId); }
+
   bool OwnsVanityItem(Player const* player, uint32 itemId) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
     if (!state || !state->OwnedVanityItems.contains(itemId))
@@ -11885,4 +11888,9 @@ void AddAscensionCompatScripts() {
   new AscensionCompatWorldScript();
   new AscensionCompatAllCreatureScript();
   new AscensionCompatPetScript();
+}
+
+bool IsAscensionVanityItem(uint32 itemId)
+{
+  return AscensionCollectionService::Instance().IsVanityItem(itemId);
 }

@@ -9,15 +9,47 @@
   ],
   "timeout_ms": 60000,
   "economy_log": true,
-  "two_side": {"auction": true},
+  "two_side": {
+    "auction": true
+  },
   "players": [
-    {"id": "seller", "name": "Coaelahsel", "race": 1, "class": 1, "level": 20},
-    {"id": "bidder", "name": "Coaelahbid", "race": 1, "class": 1, "level": 20},
-    {"id": "buyer", "name": "Coaelahbuy", "race": 1, "class": 1, "level": 20}
+    {
+      "id": "seller",
+      "name": "Coaelahsel",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "bidder",
+      "name": "Coaelahbid",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "buyer",
+      "name": "Coaelahbuy",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
   ],
-  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
   "creatures": [
-    {"id": "auctioneer", "owner": "seller", "entry": 8719, "faction": 35, "distance": 2}
+    {
+      "id": "auctioneer",
+      "owner": "seller",
+      "entry": 8719,
+      "faction": 35,
+      "distance": 2
+    }
   ],
   "steps": [
     {"action": "wait", "ms": 1000},
@@ -26,32 +58,22 @@
     {"action": "money", "label": "fixture: the buyer's buyout", "actor": "buyer", "copper": 1000},
     {"action": "add_item", "label": "fixture: the Peacebloom to sell", "actor": "seller", "item": 2447},
     {"action": "add_item", "label": "fixture: the Silverleaf to list and cancel", "actor": "seller", "item": 765},
-
     {"action": "snapshot", "actor": "seller", "metric": "carried_money", "save_as": "seller_purse"},
-    {"action": "client_packet", "label": "List the Peacebloom: bid 100, buyout 500, 12 hours", "actor": "seller", "opcode": 598, "consumed": false,
-     "fields": [{"actor_guid": "auctioneer"}, {"u32": 1}, {"item_guid": 2447}, {"u32": 1}, {"u32": 100}, {"u32": 500}, {"u32": 720}]},
+    {"action": "client_packet", "label": "List the Peacebloom: bid 100, buyout 500, 12 hours", "actor": "seller", "opcode": 598, "consumed": false, "fields": [{"actor_guid": "auctioneer"}, {"u32": 1}, {"item_guid": 2447}, {"u32": 1}, {"u32": 100}, {"u32": 500}, {"u32": 720}]},
     {"action": "assert", "label": "The Peacebloom left the bags", "actor": "seller", "metric": "item_count", "item": 2447, "equals": 0, "within_ms": 1000},
     {"action": "assert", "label": "and the seller paid the 100 copper deposit", "actor": "seller", "metric": "carried_money", "relative_to": "seller_purse", "equals": -100},
-
     {"action": "snapshot", "actor": "bidder", "metric": "carried_money", "save_as": "bidder_purse"},
-    {"action": "client_packet", "label": "The bidder bids 150", "actor": "bidder", "opcode": 602, "consumed": false,
-     "fields": [{"actor_guid": "auctioneer"}, {"auction_id": 2447}, {"u32": 150}]},
+    {"action": "client_packet", "label": "The bidder bids 150", "actor": "bidder", "opcode": 602, "consumed": false, "fields": [{"actor_guid": "auctioneer"}, {"auction_id": 2447}, {"u32": 150}]},
     {"action": "assert", "label": "The bidder paid 150", "actor": "bidder", "metric": "carried_money", "relative_to": "bidder_purse", "equals": -150, "within_ms": 1000},
-
     {"action": "snapshot", "actor": "buyer", "metric": "carried_money", "save_as": "buyer_purse"},
-    {"action": "client_packet", "label": "The buyer buys it out for 500", "actor": "buyer", "opcode": 602, "consumed": false,
-     "fields": [{"actor_guid": "auctioneer"}, {"auction_id": 2447}, {"u32": 500}]},
+    {"action": "client_packet", "label": "The buyer buys it out for 500", "actor": "buyer", "opcode": 602, "consumed": false, "fields": [{"actor_guid": "auctioneer"}, {"auction_id": 2447}, {"u32": 500}]},
     {"action": "assert", "label": "The buyer paid 500", "actor": "buyer", "metric": "carried_money", "relative_to": "buyer_purse", "equals": -500, "within_ms": 1000},
-
     {"action": "snapshot", "actor": "seller", "metric": "carried_money", "save_as": "seller_purse2"},
-    {"action": "client_packet", "label": "List the Silverleaf: bid 100, no buyout", "actor": "seller", "opcode": 598, "consumed": false,
-     "fields": [{"actor_guid": "auctioneer"}, {"u32": 1}, {"item_guid": 765}, {"u32": 1}, {"u32": 100}, {"u32": 0}, {"u32": 720}]},
+    {"action": "client_packet", "label": "List the Silverleaf: bid 100, no buyout", "actor": "seller", "opcode": 598, "consumed": false, "fields": [{"actor_guid": "auctioneer"}, {"u32": 1}, {"item_guid": 765}, {"u32": 1}, {"u32": 100}, {"u32": 0}, {"u32": 720}]},
     {"action": "assert", "label": "The Silverleaf left the bags", "actor": "seller", "metric": "item_count", "item": 765, "equals": 0, "within_ms": 1000},
     {"action": "assert", "label": "for another 100 copper deposit", "actor": "seller", "metric": "carried_money", "relative_to": "seller_purse2", "equals": -100},
-    {"action": "client_packet", "label": "The seller cancels the Silverleaf", "actor": "seller", "opcode": 599, "consumed": false,
-     "fields": [{"actor_guid": "auctioneer"}, {"auction_id": 765}]},
+    {"action": "client_packet", "label": "The seller cancels the Silverleaf", "actor": "seller", "opcode": 599, "consumed": false, "fields": [{"actor_guid": "auctioneer"}, {"auction_id": 765}]},
     {"action": "assert", "label": "The cancelled Silverleaf comes back by mail", "actor": "seller", "metric": "mail_has_item", "item": 765, "equals": 1, "within_ms": 1000},
-
     {"action": "assert", "label": "THE LOG: the Peacebloom listing and its deposit", "actor": "seller", "metric": "economy_log_rows", "economy_event": "ah_list", "item": 2447, "economy_count": 1, "economy_gold": -100, "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: the Silverleaf listing and its deposit", "actor": "seller", "metric": "economy_log_rows", "economy_event": "ah_list", "item": 765, "economy_count": 1, "economy_gold": -100, "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: two listings", "actor": "seller", "metric": "economy_log_rows", "economy_event": "ah_list", "equals": 2, "within_ms": 2000},
@@ -67,6 +89,9 @@
     {"action": "assert", "label": "THE LOG: the sale mail is not a system mail", "actor": "seller", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 575, "equals": 0},
     {"action": "assert", "label": "THE LOG: nor is the cancelled Silverleaf's mail", "actor": "seller", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 765, "equals": 0},
     {"action": "assert", "label": "THE LOG: nor the buyer's won Peacebloom", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "system_mail", "item": 2447, "equals": 0},
-    {"action": "assert", "label": "THE LOG: nor the bidder's refund", "actor": "bidder", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 150, "equals": 0}
+    {"action": "assert", "label": "THE LOG: nor the bidder's refund", "actor": "bidder", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 150, "equals": 0},
+    {"action": "assert", "label": "THE LOG: the buyout names the seller", "actor": "buyer", "metric": "economy_log_rows", "economy_event": "ah_buyout", "item": 2447, "economy_other": "seller", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the sale names the buyer", "actor": "seller", "metric": "economy_log_rows", "economy_event": "ah_sold", "item": 2447, "economy_other": "buyer", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: both bid rows name the seller", "actor": "bidder", "metric": "economy_log_rows", "economy_event": "ah_bid", "economy_other": "seller", "equals": 2, "within_ms": 2000}
   ]
 }

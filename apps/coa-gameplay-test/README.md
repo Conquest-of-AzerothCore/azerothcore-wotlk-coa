@@ -634,8 +634,10 @@ returns whether any mail carries it, and `mail_pool_item_count` takes `cache` (o
 counts only the mail items that are in that cache's own pool. `economy_log_rows` takes `economy_event` (an event
 name such as `vendor_buy`, `mail_send` or `ah_sold`) and counts the actor's `coa_economy_log` rows of that event,
 narrowed by the optional `item` and `economy_count`, `economy_gold`, `economy_tokens`, `economy_cost_item`,
-`economy_cost_count` and `economy_source`; it saves the actor first so queued rows are written, and `economy_save: false` counts
-without that save. `account_character_count` counts the stored
+`economy_cost_count` and `economy_source`, and by `economy_other` / `economy_other_account` (a player actor whose GUID
+or account is the row's other party) and `economy_item_of` (an item entry the actor carries; its GUID is the row's item
+GUID); it saves the actor first so queued rows are written, and `economy_save: false` counts without that save.
+`economy_log_queued` reports how many of the actor's economy log rows are still waiting in memory for a save. `account_character_count` counts the stored
 characters on the player's account, and `account_other_item_count` takes `item` and counts that item on the
 account's other characters, which is how a character copy proves it carried the inventory.
 `account_other_bank_item_count` (needs `item`) counts that item in those characters' own Personal Banks,

@@ -330,9 +330,9 @@ void WorldSession::HandleDestroyItemOpcode(WorldPackets::Item::DestroyItem& pack
     {
         _player->DestroyItem(packet.Bag, packet.Slot, true);
     }
+    sScriptMgr->OnPlayerAfterDestroyItem(_player, destroyedEntry, destroyedGuid, removedCount);
     if (archived && AscensionItemRecovery::Persist)
         AscensionItemRecovery::Persist(_player);
-    sScriptMgr->OnPlayerAfterDestroyItem(_player, destroyedEntry, destroyedGuid, removedCount);
     _player->SendQuestGiverStatusMultiple();
 }
 
@@ -756,9 +756,9 @@ void WorldSession::HandleSellItemOpcode(WorldPackets::Item::SellItem& packet)
                 }
 
                 _player->ModifyMoney(money);
+                sScriptMgr->OnPlayerAfterSellItem(_player, soldItem->GetEntry(), soldItem->GetGUID().GetCounter(), packet.Count, money, creature);
                 if (AscensionItemRecovery::Persist)
                     AscensionItemRecovery::Persist(_player);
-                sScriptMgr->OnPlayerAfterSellItem(_player, soldItem->GetEntry(), soldItem->GetGUID().GetCounter(), packet.Count, money, creature);
                 _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
             }
             else
@@ -814,9 +814,9 @@ void WorldSession::HandleBuybackItem(WorldPackets::Item::BuybackItem& packet)
             _player->RemoveItemFromBuyBackSlot(packet.Slot, false);
             _player->ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
             _player->StoreItem(dest, pItem, true);
+            sScriptMgr->OnPlayerAfterBuyBackItem(_player, boughtEntry, boughtGuid, boughtCount, price, creature);
             if (AscensionItemRecovery::Persist)
                 AscensionItemRecovery::Persist(_player);
-            sScriptMgr->OnPlayerAfterBuyBackItem(_player, boughtEntry, boughtGuid, boughtCount, price, creature);
         }
         else
             _player->SendEquipError(msg, pItem, nullptr);

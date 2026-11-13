@@ -608,7 +608,8 @@ class RunnerTests(unittest.TestCase):
     def test_economy_log_rows_takes_an_event_and_typed_filters(self):
         rows = {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_rows', 'economy_event': 'vendor_buy',
                 'item': 159, 'economy_count': 5, 'economy_gold': -25, 'economy_tokens': -300, 'economy_cost_item': 1297307,
-                'economy_cost_count': 500, 'economy_source': 900008, 'economy_save': False, 'equals': 1}
+                'economy_cost_count': 500, 'economy_source': 900008, 'economy_save': False, 'economy_other': 'caster',
+                'economy_other_account': 'caster', 'economy_item_of': 159, 'equals': 1}
         scenario = copy.deepcopy(self.scenario)
         scenario['economy_log'] = True
         scenario['steps'].insert(0, rows)
@@ -620,7 +621,10 @@ class RunnerTests(unittest.TestCase):
                               ({'economy_count': -1}, 'economy_count'),
                               ({'economy_source': 2**32}, 'economy_source'),
                               ({'economy_gold': 2**63}, 'economy_gold'),
-                              ({'actor': 'target'}, 'economy_log_rows needs a player')):
+                              ({'actor': 'target'}, 'economy_log_rows needs a player'),
+                              ({'economy_other': 'target'}, 'economy_other must name a player'),
+                              ({'economy_other_account': 'nobody'}, 'economy_other_account must name a player'),
+                              ({'economy_item_of': 0}, 'economy_item_of')):
             step = {key: value for key, value in {**rows, **change}.items() if value is not None}
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].insert(0, step)
@@ -631,6 +635,15 @@ class RunnerTests(unittest.TestCase):
             scenario['economy_log'] = value
             with self.subTest(economy_log=value), self.assertRaisesRegex(ValueError, 'economy_log must be boolean'):
                 run.validate(scenario)
+
+    def test_economy_log_queued_counts_a_players_waiting_rows(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_queued', 'equals': 0})
+        self.assertIs(run.validate(scenario), scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'assert', 'actor': 'target', 'metric': 'economy_log_queued', 'equals': 0})
+        with self.assertRaisesRegex(ValueError, 'economy_log_queued needs a player'):
+            run.validate(scenario)
 
     def test_economy_log_cleanup_takes_a_day_count(self):
         step = {'action': 'economy_log_cleanup', 'actor': 'caster', 'days_ahead': 91}
