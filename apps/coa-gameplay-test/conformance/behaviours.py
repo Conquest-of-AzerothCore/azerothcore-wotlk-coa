@@ -83,7 +83,8 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
-        'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'minion_swing_ratio', 'pushback_reduction')
+        'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'minion_swing_ratio', 'pushback_reduction',
+        'summon_lifetime')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -2472,6 +2473,114 @@ def pushback_reduction_spec(entry: dict) -> PushbackReductionSpec:
                                  int(entry['strike_at_ms']),
                                  tuple((int(low), int(high)) for low, high in entry['windows']),
                                  float(entry['expected_pct']), entry.get('label_suffix', ''))
+
+
+SUMMON_LIFETIME_POLL_MS = 25
+
+
+@dataclass(frozen=True)
+class SummonLifetimeSpec:
+    spell: int
+    name: str
+    quote: str
+    talent: int
+    trigger_spell: int
+    stop_ms: int
+    entry: int
+    expected_ms: int
+    spawn_window: tuple[int, int]
+    end_window: tuple[int, int]
+    cast_power: int | None = None
+    label_suffix: str = ''
+
+
+def summon_lifetime_mark(spec: SummonLifetimeSpec, phase: str, mark: str) -> str:
+    return f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}' + (f' {spec.label_suffix}' if spec.label_suffix else '') + \
+        f' {phase} {mark}'
+
+
+def summon_lifetime_scenario(class_file: dict, spec: SummonLifetimeSpec) -> tuple[dict, list[Expectation]]:
+    (spawn_low, spawn_high), (end_low, end_high) = spec.spawn_window, spec.end_window
+    if not 0 < spawn_low < spawn_high < spec.stop_ms < end_low < end_high:
+        raise ValueError(f'{spec.spell} summon_lifetime polls the spawn, stops the trigger, then polls the end, in that '
+                         f'order after the cast')
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    entry = behaviour_entry(records, spec.spell, spec.name, 'summon_lifetime', spec.quote, float(spec.expected_ms))
+    facts = facts_of(records, spec.trigger_spell)
+    count = {'entry': spec.entry}
+    polls = {}
+
+    def cast(phase: str) -> list[dict]:
+        power = spec.cast_power if spec.cast_power is not None else facts.mana_cost
+        return [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': power},
+                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell},
+                measurement(summon_lifetime_mark(spec, phase, 'start'), CASTER, 'game_time_ms'),
+                {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET}]
+
+    def stop() -> list[dict]:
+        return [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.trigger_spell, 'stacks': 0, 'target': TARGET,
+                 'caster': CASTER}]
+
+    def poll(window: str, low: int, high: int) -> list[dict]:
+        steps, marks = [], []
+        for index in range((high - low) // SUMMON_LIFETIME_POLL_MS + 1):
+            at = summon_lifetime_mark(spec, window, f'{index} at')
+            present = summon_lifetime_mark(spec, window, f'{index} count')
+            steps += [measurement(at, CASTER, 'game_time_ms'), measurement(present, CASTER, 'owned_creature_count',
+                                                                           **count),
+                      {'action': 'wait', 'label': f'{window} poll', 'ms': SUMMON_LIFETIME_POLL_MS}]
+            marks.append([at, present])
+        polls[window] = marks
+        return steps
+
+    steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell},
+                                       {'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.talent,
+                                        'op': FORCED_CHANCE_OP, 'percent': FORCED_CHANCE_PERCENT}]
+             + cast('control') + [{'action': 'wait', 'label': 'control trigger', 'ms': spec.stop_ms}] + stop()
+             + [{'action': 'wait', 'label': 'control settle', 'ms': GCD_WAIT_MS},
+                measurement(summon_lifetime_mark(spec, 'control', 'count'), CASTER, 'owned_creature_count', **count),
+                {'action': 'learn', 'actor': CASTER, 'spell': spec.talent}]
+             + cast('treatment') + [{'action': 'wait', 'label': 'to the spawn window', 'ms': spawn_low}]
+             + poll('spawn', spawn_low, spawn_high))
+    polled = spawn_low + len(polls['spawn']) * SUMMON_LIFETIME_POLL_MS
+    steps += ([{'action': 'wait', 'label': 'to the trigger stop', 'ms': max(1, spec.stop_ms - polled)}] + stop()
+              + [{'action': 'wait', 'label': 'to the end window', 'ms': end_low - max(spec.stop_ms, polled + 1)}]
+              + poll('end', end_low, end_high)
+              + [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
+                 measurement(summon_lifetime_mark(spec, 'treatment', 'released'), CASTER, 'spell_mod_mutants')])
+    scenario = {
+        'schema': 1,
+        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour summon lifetime'
+                + (f' {spec.label_suffix}' if spec.label_suffix else ''),
+        'contract': (f'A forcing fixture raises the roll of {spec.talent} by {FORCED_CHANCE_PERCENT}% (a '
+                     f'SPELLMOD_CHANCE_OF_SUCCESS spell modifier mutant, removed at the end and read gone). Control: '
+                     f'{spec.trigger_spell} cast at the dummy without {spec.talent}, its aura removed {spec.stop_ms} '
+                     f'ms later: no creature {spec.entry}. Treatment: the same cast with {spec.talent} learned; the '
+                     f'owned creature {spec.entry} count is polled with game-time stamps every '
+                     f'{SUMMON_LIFETIME_POLL_MS} ms in {spec.spawn_window} and {spec.end_window} ms after the cast, '
+                     f'the trigger aura removed at {spec.stop_ms} ms so one creature is summoned; its lifetime, '
+                     f'bracketed by the polls, must be {spec.expected_ms} ms within the G-19 band.'),
+        'players': [player_fixture(class_file)],
+        'creatures': [creature_fixture(class_file)],
+        'steps': steps}
+    model = {'kind': 'summon_lifetime', 'quote': entry.quote, 'expected_ms': spec.expected_ms,
+             'band': bonus_band(float(spec.expected_ms)), 'polls': polls,
+             'starts': {phase: summon_lifetime_mark(spec, phase, 'start') for phase in ('control', 'treatment')},
+             'control': summon_lifetime_mark(spec, 'control', 'count'),
+             'released': summon_lifetime_mark(spec, 'treatment', 'released')}
+    expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA}'
+                              + (f' {spec.label_suffix}' if spec.label_suffix else ''), BEHAVIOUR_METRIC_DELTA,
+                              spec.spell, spec.trigger_spell, None, str(spec.expected_ms),
+                              prose_rule(entry.quote, spec.spell), model)
+    return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def summon_lifetime_spec(entry: dict) -> SummonLifetimeSpec:
+    return SummonLifetimeSpec(entry['spell'], entry['name'], entry['quote'], int(entry['talent']),
+                              int(entry['trigger_spell']), int(entry['stop_ms']), int(entry['entry']),
+                              int(entry['expected_ms']), tuple(int(value) for value in entry['spawn_window']),
+                              tuple(int(value) for value in entry['end_window']), entry.get('cast_power'),
+                              entry.get('label_suffix', ''))
 
 DEFAULT_AURA_PRESENCE_WAIT_MS = 1500
 
@@ -7941,6 +8050,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return aggro_redirect_scenario(class_file, aggro_redirect_spec(entry))
     if entry['kind'] == 'dispel_removal':
         return dispel_removal_scenario(class_file, dispel_removal_spec(entry))
+    if entry['kind'] == 'summon_lifetime':
+        return summon_lifetime_scenario(class_file, summon_lifetime_spec(entry))
     if entry['kind'] == 'pushback_reduction':
         return pushback_reduction_scenario(class_file, pushback_reduction_spec(entry))
     if entry['kind'] == 'minion_swing_ratio':

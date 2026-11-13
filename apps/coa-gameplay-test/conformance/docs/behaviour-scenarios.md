@@ -870,6 +870,19 @@ when set, replaces `removed` for the caster's reads of that arm only (ADR 0291).
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
 
+### Summon lifetime (`behaviour_metric_delta`, `kind: "summon_lifetime"`, ADR 0544)
+
+A proc that summons a timed creature is read for the creature's lifetime. A forcing fixture (mentor N-a1, as in
+`forced_chance`) raises `talent`'s roll by 1000% for the scenario and is removed and read gone at the end. Control:
+`trigger_spell` cast at the dummy before `talent` is learned, its aura removed `stop_ms` later, then the owned
+`entry` count must read 0. Treatment: the same cast with `talent` learned; the owned `entry` count is polled every
+25 ms with `game_time_ms` stamps in `spawn_window` and `end_window` (ms after the cast, nominal), the trigger aura
+removed at `stop_ms` between them so one creature is summoned. The creature appears between the last empty and the
+first present poll and is gone between the last present and the first empty poll; the bracketed lifetime is judged
+against `expected_ms` in the G-19 band (`ok` inside, `alert` outside, `measured` across an edge); a window without
+its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) and
+Unholy Erosion's Lesser Zombie 807700 (10000 ms) use Harvest Plague 500968, stopped after its first tick.
+
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
 One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once

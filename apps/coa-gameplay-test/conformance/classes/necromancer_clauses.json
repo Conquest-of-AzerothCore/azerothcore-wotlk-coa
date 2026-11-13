@@ -2770,7 +2770,8 @@
       {
         "claim": "for $525379d.",
         "labels": [
-          "705747 spell_duration 525379 #1"
+          "705747 spell_duration 525379 #1",
+          "705747 behaviour_metric_delta zombie_lifetime"
         ]
       }
     ],
@@ -3170,7 +3171,8 @@
       {
         "claim": "for $525379d.",
         "labels": [
-          "707880 spell_duration 525379 #1"
+          "707880 spell_duration 525379 #1",
+          "707880 behaviour_metric_delta zombie_lifetime"
         ]
       }
     ],
@@ -4311,7 +4313,8 @@
       {
         "claim": "for $302586d.",
         "labels": [
-          "807700 spell_duration 302586 #1"
+          "807700 spell_duration 302586 #1",
+          "807700 behaviour_metric_delta zombie_lifetime"
         ]
       }
     ],
