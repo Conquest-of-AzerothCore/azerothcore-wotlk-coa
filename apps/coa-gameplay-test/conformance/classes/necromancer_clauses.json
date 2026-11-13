@@ -5314,7 +5314,7 @@
       {
         "claim": "that restores $803767s1% of your missing health",
         "labels": [
-          "803771 effect_value 803767e0 #1"
+          "803771 behaviour_metric_delta restore"
         ]
       }
     ],
@@ -5331,7 +5331,8 @@
     "spell": 803771,
     "clause": "Shares a cooldown with similar effects.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Route pending: a harness cast of 803767 put no cooldown on Frozen Reliquary 803773 (spell Category 520, pair p13 20261113-01xx); the items 11521 and 555555 share item spell category 1153 (60 s), which needs a use_item route."
   },
   {
     "spell": 804360,
