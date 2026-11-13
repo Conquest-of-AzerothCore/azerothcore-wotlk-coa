@@ -524,10 +524,22 @@
   {
     "spell": 302923,
     "clause": "Increases the durations of Ghoulify and Mass Grave by $s1%.",
-    "labels": [
-      "302923 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the durations of Ghoulify by $s1%",
+        "labels": [
+          "302923 behaviour_metric_delta ghoulify"
+        ]
+      },
+      {
+        "claim": "Increases the durations of Mass Grave by $s1%",
+        "labels": [
+          "302923 behaviour_metric_delta mass_grave"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm: without Putrifier). On Kobold Vermin 6: Ghoulify 49481 and Mass Grave 49475 ms left 500 ms after landing vs 40000 x 1.25 - 500 = 49500 (39500 without). The player cap (8/9 sec) is the Ghoulify/Mass Grave rows' own claims (putrifier_lasts/ends). G-11 (2026-11-13, B6 side a): server DBC; code AscensionNecromancerAbilities.cpp:223-237 (OnCalcMaxDuration x1.25); combat logs (coa-history spell 302923): nothing found; sidekick data.js nothing found; MCP not queried (unavailable)."
   },
   {
     "spell": 500329,
@@ -2372,10 +2384,19 @@
   {
     "spell": 704713,
     "clause": "Reduces the Runic Power cost of your Command spells by $/10;s1.",
-    "labels": [
-      "704713 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the Runic Power cost of your Command spells by $/10;s1",
+        "labels": [
+          "704713 behaviour_metric_delta command_spent",
+          "704713 cost_gate 504868 command without",
+          "704713 cost_gate 504868 command with",
+          "704713 cost_gate 504868 command beyond"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arms: without the talent). Command: Undead 504868 (300 RP) spends 300 without, 250 with Lich Commander ($/10;s1 = 5, BasePoints -51 + DieSides 1 = -50); 250 RP casts only with it, 249 refused. One Command spell sampled (504868); the mask word 2 0x01000000 names the Command set. An author error (-52 instead of -50) in a first draft alerted and was corrected from the DBC, not from the reading. G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 704713; combat logs (coa-history spell 704713): nothing found; sidekick data.js 'Reduces the cost of your Command spells by %.' (percent wording, no number; our DBC is a flat -50 RP); MCP not queried (unavailable); combat logs: passive, nothing to see."
   },
   {
     "spell": 704715,
@@ -2388,10 +2409,23 @@
   {
     "spell": 704717,
     "clause": "Removes the cooldown from March of the Dead, but gives it a $/1000;s2 sec cast time.",
-    "labels": [
-      "704717 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the cooldown from March of the Dead",
+        "labels": [
+          "704717 behaviour_metric_delta no_cooldown"
+        ]
+      },
+      {
+        "claim": "but gives it a $/1000;s2 sec cast time",
+        "labels": [
+          "704717 behaviour_metric_delta cast_time",
+          "704717 behaviour_metric_delta cast_ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm: without Long March). March of the Dead 707007 cooldown 8494 ms left 1500 ms after the cast without, 0 with; casting at 500 ms with (instant without), not casting at 1300 ms: cast in (500, 1300] ms, $/1000;s2 = 1. G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 704717; combat logs (coa-history spell 704717): nothing found; sidekick data.js same text without the number; MCP not queried (unavailable)."
   },
   {
     "spell": 704718,
@@ -2846,10 +2880,20 @@
   {
     "spell": 707445,
     "clause": "Reduces the cooldown of Animate: Skeletal Archers and Command: Hook by $s2%.",
-    "labels": [
-      "707445 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Animate: Skeletal Archers by $s2%",
+        "labels": [
+          "707445 behaviour_metric_delta archers_cooldown"
+        ]
+      },
+      {
+        "claim": "and Command: Hook by $s2%",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Animate: Skeletal Archers part status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control without the talent): 805040 cooldown 29494 -> 23494 ms 500 ms after the cast (30000 x 0.8). Command: Hook part route pending: 504316 needs a living minion (Command gate AscensionNecromancerAbilities.cpp:163), a setup raise was not built in time; DBC mask word 0 1024 matches 504316. G-11 (2026-11-13, B6 side a): server DBC; combat logs (coa-history spell 707445): nothing found; sidekick data.js talent 'by -20%' (agrees); MCP not queried (unavailable)."
   },
   {
     "spell": 707562,
@@ -3570,11 +3614,23 @@
   {
     "spell": 805040,
     "clause": "Animate ${$500330m1} Skeletal Archers to aid you in combat for $500330d.",
-    "labels": [
-      "805040 effect_value 500330e0 #0",
-      "805040 spell_duration 500330 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Animate ${$500330m1} Skeletal Archers",
+        "labels": [
+          "805040 behaviour_metric_delta archers"
+        ]
+      },
+      {
+        "claim": "to aid you in combat for $500330d",
+        "labels": [
+          "805040 behaviour_metric_delta archers_last",
+          "805040 behaviour_metric_delta archers_end"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm: no cast). 3 owned 50076 1500 ms after the cast (${$500330m1} = 3); still 3 at 14000 ms and 0 at 16500 ms ($500330d = 15000). G-11 (2026-11-13, B6 side a): server DBC (packet: 500330 SUMMON 50076, BasePoints 2, DurationIndex 8); class file Skeletal Artillery entries read 3 archers without the talent; combat logs (coa-history spell 805040): nothing found; sidekick data.js 'Animate its value Skeletal Archers to aid you in combat.' (no numbers); MCP not queried (unavailable)."
   },
   {
     "spell": 805044,
@@ -3681,10 +3737,20 @@
   {
     "spell": 805424,
     "clause": "Reduces the channel and cast time of Ice Barrage by $s1%.",
-    "labels": [
-      "805424 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cast time of Ice Barrage by $s1%",
+        "labels": [
+          "805424 behaviour_metric_delta cast_time"
+        ]
+      },
+      {
+        "claim": "Reduces the channel of Ice Barrage by $s1%",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Cast-time part status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control without the talent): Ice Barrage 501997 (2000 ms) casting at 1750 ms without, done with (1500 = 2000 x 0.75; $s1 = 25, BasePoints -26 + 1). Channel part route pending: Effect[0] SPELLMOD_DURATION -25 on 501997 (DurationIndex 36) needs a duration read of the channel aura; not built in time. G-11 (2026-11-13, B6 side a): server DBC; combat logs (coa-history spell 805424): nothing found; sidekick data.js same text without the number; MCP not queried (unavailable)."
   },
   {
     "spell": 805427,
@@ -4808,10 +4874,34 @@
   {
     "spell": 707738,
     "clause": "Beckon the dead, removing the cost and cast time of all Raise spells and Animates for $d.",
-    "labels": [
-      "707738 aura_duration_ms #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "removing the cost of all Raise spells",
+        "labels": [
+          "707738 behaviour_metric_delta raise_cost"
+        ]
+      },
+      {
+        "claim": "removing the cost of Animates",
+        "labels": [
+          "707738 behaviour_metric_delta animate_cost"
+        ]
+      },
+      {
+        "claim": "removing the cast time of all Raise spells",
+        "labels": [
+          "707738 behaviour_metric_delta raise_cast_time"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "707738 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm: without Call of the Grave). Raise: Ghoul 500971 and Animate: Tomb King 805044 (384 mana each) cost 0 after Call of the Grave (mana 2800 -> 2540 = its own 260 only; 2416 without); Raise: Ghoul not casting 200 ms after the start (casting without); aura 9894 ms left 100 ms after the cast ($d = 10000). One Raise and one Animate sampled; 'cast time of Animates' has no claim of its own here (Animates sampled are instant). A first draft assumed mana reset between phases and alerted (2204); the cast_power fixture removed the ambiguity. G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 707738; combat logs (coa-history spell 707738): nothing found; sidekick data.js same text without the duration; MCP not queried (unavailable)."
   },
   {
     "spell": 573298,
