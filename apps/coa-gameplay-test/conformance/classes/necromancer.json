@@ -2147,13 +2147,8 @@
       "quote": "but during that time you cannot attack or cast spells.",
       "expected": 0,
       "before_expected": 1,
-      "trigger_spell": 504868,
-      "target": "dummy",
-      "setup_casts": [
-        500933
-      ],
-      "setup_only_after": true,
-      "setup_wait_ms": 2600,
+      "trigger_spell": 500933,
+      "target": "caster",
       "expire_ms": 500,
       "wait_ms": 500,
       "strike": {
@@ -2162,13 +2157,15 @@
         "max_health": 100000,
         "count": 1,
         "wait_ms": 200,
-        "dx": 10
+        "dx": 10,
+        "after_trigger_ms": 2600
       },
       "metric": "can_attack",
       "fields": {
         "target": "dummy"
       },
-      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. After the Shade strike: the caster may attack the dummy without a Phylactery (control, Unit::IsValidAttackTarget 1) and may not as a Shade (0, through the CanUnitAttack hook, Unit.cpp:12016)."
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. After the Shade strike: the caster may attack the dummy without a Phylactery (control, Unit::IsValidAttackTarget 1) and may not as a Shade (0, through the CanUnitAttack hook, Unit.cpp:12016).",
+      "cast_in_before": false
     },
     {
       "spell": 500933,
@@ -2179,13 +2176,8 @@
       "quote": "Reaching your Phylactery in this state revives you with $500802s2% of your maximum health.",
       "expected": 40000,
       "before_expected": 9516,
-      "trigger_spell": 504868,
-      "target": "dummy",
-      "setup_casts": [
-        500933
-      ],
-      "setup_only_after": true,
-      "setup_wait_ms": 2600,
+      "trigger_spell": 500933,
+      "target": "caster",
       "expire_ms": 500,
       "wait_ms": 2000,
       "strike": {
@@ -2193,11 +2185,13 @@
         "health": 10500,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 200
+        "wait_ms": 200,
+        "after_trigger_ms": 2600
       },
       "metric": "health",
       "fields": {},
-      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster stays beside its Phylactery (summoned 2 yd in front, TARGET_DEST_CASTER_FRONT) and becomes a Shade from 10500 of 100000 health: without a Phylactery (control) the strike leaves 9516 health (1000 less the caster's 94 armor); with it the next Phylactery update revives it at 40% of 100000 = 40000 ($500802s2 = 40)."
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster stays beside its Phylactery (summoned 2 yd in front, TARGET_DEST_CASTER_FRONT) and becomes a Shade from 10500 of 100000 health: without the Phylactery cast (control, the strike alone) the strike leaves 9516 health (1000 less the caster's 94 armor); with it the next Phylactery update revives it at 40% of 100000 = 40000 ($500802s2 = 40).",
+      "cast_in_before": false
     },
     {
       "spell": 500933,
@@ -2208,13 +2202,8 @@
       "quote": "If you do not reach it in time you will die.",
       "expected": 0,
       "before_expected": 1,
-      "trigger_spell": 504868,
-      "target": "dummy",
-      "setup_casts": [
-        500933
-      ],
-      "setup_only_after": true,
-      "setup_wait_ms": 2600,
+      "trigger_spell": 500933,
+      "target": "caster",
       "expire_ms": 500,
       "wait_ms": 9000,
       "strike": {
@@ -2223,11 +2212,13 @@
         "max_health": 100000,
         "count": 1,
         "wait_ms": 200,
-        "dx": 10
+        "dx": 10,
+        "after_trigger_ms": 2600
       },
       "metric": "alive",
       "fields": {},
-      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster stands 10 yd off its Phylactery as a Shade: without a Phylactery (control) the strike leaves it alive; with one, 9000 ms later (past the Shade's 8000 ms) it is dead."
+      "observe_source": "Phylactery 500933: Effect[0] SPELL_EFFECT_SUMMON of the Phylactery 50132 (2000 ms cast, DurationIndex 4, 120000 ms $d); Effect[1] (a school absorb) is removed by AscensionNecromancerContracts.cpp:303-304. necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:329-353): while the caster's Phylactery lives, a hit that would leave the caster below 10% health is cut to leave 1 health and casts Shade 500730 (8000 ms; Effect[2] aura 40 school immunity, all schools) and Shade Hidden 500729; while 500730 is up every damage is set to 0; OnSpellCheckCast refuses the caster's casts (SPELL_FAILED_CASTER_AURASTATE, AscensionNecromancerAbilities.cpp:158-159) and CanUnitAttack refuses its attacks (AscensionNecromancerEvents.cpp:355-361). The Phylactery's UpdateAI (AscensionNecromancerSummons.cpp:805-813) revives a Shade within 3 yd: 500730 and 500729 removed, health 40% of maximum; aura_ascension_necromancer_lifecycle::Removed kills the caster when 500730 ends with the Shade state still set (AscensionNecromancerAuras.cpp:241-247). The striker (Harvest Golem 36, passive, spell_hit_bonus 100) casts the strikes at the caster through the harness. The caster stands 10 yd off its Phylactery as a Shade: without the Phylactery cast (control, the strike alone) the strike leaves it alive; with one, 9000 ms later (past the Shade's 8000 ms) it is dead.",
+      "cast_in_before": false
     },
     {
       "spell": 804360,
