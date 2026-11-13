@@ -1028,6 +1028,8 @@
         "swing_source": "creature_template 50073 BaseAttackTime 2000"
       },
       "trigger_metric": "pet_melee_damage",
+      "trial_attempts_factor": 2,
+      "trial_attempts_reason": "Bone Club fires on half the crits ($h = 50%, 638403 ProcChance 50), so twice the swings give the 182 Bone Club samples the ratio needs",
       "trigger_text": "their critical melee auto attacks",
       "minion_auras": [
         {
