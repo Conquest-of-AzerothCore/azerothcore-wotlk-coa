@@ -11357,5 +11357,33 @@ class ResurrectAmountTests(unittest.TestCase):
             cast_combat_spec({'spell': 803605, 'name': 'n', 'quote': 'q', 'resurrect_amounts': True})
 
 
+class MetricDeltaDummyDistanceTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_stands_at_the_entry_distance(self):
+        scenario, _ = behaviour_scenario(load_class_file(23), cycle_one_entry(300240, 'range_extended'))
+        run.validate(scenario)
+        self.assertEqual(scenario['creatures'][0]['distance'], 35.0)
+        plain = {**cycle_one_entry(300240, 'range_extended')}
+        plain.pop('dummy_distance')
+        unplaced, _ = behaviour_scenario(load_class_file(23), plain)
+        self.assertEqual(unplaced['creatures'][0]['distance'], 3)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_still_refused_with_the_talent_alerts(self):
+        _, [expectation] = behaviour_scenario(load_class_file(23), cycle_one_entry(300240, 'range_extended'))
+        model = expectation.model
+
+        def judged(after: float) -> str:
+            values = {model['before_label']: 97.0, model['after_label']: after}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(0.0), 'ok')
+        self.assertEqual(judged(97.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_distance_outside_the_harness_bound_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**cycle_one_entry(300240, 'range_extended'), 'dummy_distance': 150})
+
+
 if __name__ == '__main__':
     unittest.main()

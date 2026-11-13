@@ -1345,6 +1345,7 @@ class MetricDeltaSpec:
     forced_chance: tuple[int, int, int] | None = None
     corpse: tuple[int, int, float] | None = None
     game_time: tuple[tuple[int, int], tuple[int, int] | None] | None = None
+    dummy_distance: float | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1352,6 +1353,7 @@ ENEMY_PLAYER = 'enemy'
 ENEMY_HELPER = 'enemy_helper'
 ENEMY_PLAYER_SETTLE_MS = 500
 METRIC_DELTA_UNTIMED_WAIT_MS = 80000
+METRIC_DELTA_MAX_DUMMY_DISTANCE = 100
 
 
 @dataclass(frozen=True)
@@ -1841,8 +1843,14 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         scenario['creatures'] = [creature_fixture(class_file)]
         if spec.target_entry is not None:
             scenario['creatures'][0]['entry'] = spec.target_entry
-    elif spec.target_entry is not None:
-        raise ValueError(f'{spec.spell} names a target entry without the dummy in its scenario')
+        if spec.dummy_distance is not None:
+            if not 0 < spec.dummy_distance <= METRIC_DELTA_MAX_DUMMY_DISTANCE:
+                raise ValueError(f'{spec.spell} places the dummy {spec.dummy_distance:g} yd away, outside (0, '
+                                 f'{METRIC_DELTA_MAX_DUMMY_DISTANCE}] yd')
+            scenario['creatures'][0]['distance'] = spec.dummy_distance
+            scenario['contract'] += f' The dummy stands {spec.dummy_distance:g} yd from the caster.'
+    elif spec.target_entry is not None or spec.dummy_distance is not None:
+        raise ValueError(f'{spec.spell} names a target entry or a dummy distance without the dummy in its scenario')
     if spec.corpse is not None:
         entry_id, health, distance = spec.corpse
         scenario.setdefault('creatures', []).append(
@@ -1929,7 +1937,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
                            forced_chance_of(entry.get('forced_chance')),
                            metric_delta_corpse(entry.get('corpse')),
-                           metric_delta_game_time(entry.get('game_time')))
+                           metric_delta_game_time(entry.get('game_time')),
+                           None if entry.get('dummy_distance') is None else float(entry['dummy_distance']))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
