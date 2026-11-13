@@ -1152,7 +1152,8 @@ class NoStackStatePromiseTest(unittest.TestCase):
         self.assertEqual(evidence_of([clause], self.capped())[0], [BEHAVIOUR])
 
     def test_a_stack_cap_state_read_proves_no_other_clause(self):
-        clause = claim('In addition, increases the critical strike chance of Ice Barrage', '1 behaviour_group_stack_cap')
+        clause = claim('In addition, increases the critical strike chance of Ice Barrage',
+                       '1 behaviour_group_stack_cap')
         self.assertEqual(evidence_of([clause], self.capped())[0], [DATA])
 
     def test_a_summed_reading_leaves_the_clause_unproven(self):
