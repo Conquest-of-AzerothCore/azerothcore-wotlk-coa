@@ -5910,10 +5910,14 @@
     "spell": 807941,
     "clause": "Sacrifices your Undead, returning their Life Force to you, and restoring ${$m1+$SP*.3} health for each Undead minion destroyed.",
     "labels": [
-      "807941 effect_value e0 #0"
+      "807941 behaviour_metric_delta heal_one",
+      "807941 behaviour_metric_delta heal_one_sp",
+      "807941 behaviour_metric_delta heal_two",
+      "807941 behaviour_metric_delta lf_returned",
+      "807941 behaviour_metric_delta lf_held"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/807941.md."
+    "reason": "Status 1 (M side b counted pair PAIRID3; control: the same cast with no minion heals nothing). Sacrifice Undead 807941 (level-54 rank) after one raised Ghoul heals 874 ($m1 at level 60: 802 + 12 x 6) at spell power 0 and 1174 at 1000 (+ 1000 x .3), after two Ghouls 1748 (for each minion destroyed), exact (805031 heal logs); Life Force 525004 reads 2 after the sacrifice against 1 while the Ghoul is up (lf_held control). G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 807941 0 lines by id, 'Sacrifice Undead' 8 lines by name (other ranks; no heal amounts at a known spell power), so the logs do not decide; MCP not queried (unavailable)."
   },
   {
     "spell": 503740,
