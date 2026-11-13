@@ -7,3 +7,6 @@ INSERT INTO `creature_model_info` (`DisplayID`, `BoundingRadius`, `CombatReach`,
   `VerifiedBuild`) VALUES
 (79329, 1.5, 4, 2, 0, 12340),
 (79411, 1.5, 4, 2, 0, 12340);
+
+-- Atal'zul hit about twice as hard as intended: his damage is halved, his adds keep theirs.
+UPDATE `creature_template` SET `DamageModifier` = 10.2 WHERE `entry` = 67532;
