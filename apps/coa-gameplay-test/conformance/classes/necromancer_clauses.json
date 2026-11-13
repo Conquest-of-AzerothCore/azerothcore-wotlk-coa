@@ -1305,19 +1305,33 @@
   {
     "spell": 531135,
     "clause": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
-    "labels": [
-      "531135 effect_value 706732e0 #0",
-      "531135 spell_duration 706732 #1"
+    "claims": [
+      {
+        "claim": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1%",
+        "labels": [
+          "531135 behaviour_metric_delta stack",
+          "531135 behaviour_metric_delta crit"
+        ]
+      },
+      {
+        "claim": "for $706732d,",
+        "labels": [
+          "531135 behaviour_metric_delta held",
+          "531135 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; one Lichfrost leaves one 706732 stack on the dummy, none without 531135; the caster's melee crit chance against the dummy is 1 point higher; on 12000 ms after the cast step, gone by 14000 ms (scope: the attacker read is the caster, no second ally)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19419 \"Icecrown\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Your Frost damage dealt now increases your allies' critical strike chance against the enem\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 531135,
     "clause": "stacking $706732u times.",
     "labels": [
-      "531135 max_stacks 706732 #2"
+      "531135 behaviour_metric_delta stack_cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; four Lichfrosts leave 3 stacks, none without 531135). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19419 \"Icecrown\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Your Frost damage dealt now increases your allies' critical strike chance against the enem\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 537208,
@@ -1735,17 +1749,30 @@
     "spell": 572638,
     "clause": "Increases your Stamina by $s2%.",
     "labels": [
-      "572638 effect_value e1 #0"
+      "572638 behaviour_metric_delta stamina"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; Stamina 68 without 572638, 74 with it (int32 truncation, G-26)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Sepulchral Might\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 572638,
     "clause": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
-    "labels": [
-      "572638 effect_value e0 #1"
+    "claims": [
+      {
+        "claim": "Increases your spell power",
+        "labels": [
+          "572638 behaviour_metric_delta spell_power"
+        ]
+      },
+      {
+        "claim": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+        "labels": [
+          "572638 effect_value e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim spell power: Status 1 (counted pair pending; Frost spell power 0 without it, positive with a Ghoul raised). Claim factor: route pending (second agent; author.md): needs a read of the minion's Stamina (a read-only harness metric, G-39 note first). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Sepulchral Might\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 573426,
@@ -2386,17 +2413,30 @@
     "spell": 706472,
     "clause": "Increases your Stamina by $s2%.",
     "labels": [
-      "706472 effect_value e1 #0"
+      "706472 behaviour_metric_delta stamina"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; Stamina 68 without 706472, 71 with it (int32 truncation, G-26)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Sepulchral Might\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases your Stamina by 5%.Increases your spell damage by an amount equal to 15% of the \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 706472,
     "clause": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
-    "labels": [
-      "706472 effect_value e0 #1"
+    "claims": [
+      {
+        "claim": "Increases your spell power",
+        "labels": [
+          "706472 behaviour_metric_delta spell_power"
+        ]
+      },
+      {
+        "claim": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+        "labels": [
+          "706472 effect_value e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim spell power: Status 1 (counted pair pending; Frost spell power 0 without it, positive with a Ghoul raised). Claim factor: route pending (second agent; author.md): needs a read of the minion's Stamina (a read-only harness metric, G-39 note first). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Sepulchral Might\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases your Stamina by 5%.Increases your spell damage by an amount equal to 15% of the \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 706948,
@@ -2672,17 +2712,39 @@
   {
     "spell": 801739,
     "clause": "Chill an enemy's heart, interrupting their current spell cast.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "801739 behaviour_metric_delta interrupt"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; the dummy's Evocation 12051 channel runs without Heartchill and stops after it (target_casts, ADR 0426)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Heartchill\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Chill an enemy's heart, interrupting their current spell cast.Successfully interrupting a \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 801739,
     "clause": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
-    "labels": [
-      "801739 effect_value 803677e0 #0",
-      "801739 spell_duration 803677 #1"
+    "claims": [
+      {
+        "claim": "Successfully interrupting a spell also reduces their movement speed",
+        "labels": [
+          "801739 behaviour_metric_delta slowed",
+          "801739 behaviour_metric_delta no_interrupt"
+        ]
+      },
+      {
+        "claim": "and haste by $803677s1%",
+        "labels": [
+          "801739 effect_value 803677e0 #0"
+        ]
+      },
+      {
+        "claim": "for $803677d.",
+        "labels": [
+          "801739 behaviour_metric_delta held",
+          "801739 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims speed and duration: Status 1 (counted pair pending; after the interrupt the dummy runs at 0.2 of its 1.14286 and carries 803677 2500 ms later, not 3700 ms later; Heartchill without a cast to interrupt leaves no 803677). Claim haste: data, route pending (second agent; author.md): a creature cast speed read. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Heartchill\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Chill an enemy's heart, interrupting their current spell cast.Successfully interrupting a \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 501997,
@@ -2796,17 +2858,45 @@
   {
     "spell": 802121,
     "clause": "Siphon life from your undead minions, sacrificing $s1% of their health to grant yourself an absorb shield equal to half of the health stolen for $802122d.",
-    "labels": [
-      "802121 effect_value e0 #0",
-      "802121 spell_duration 802122 #1"
+    "claims": [
+      {
+        "claim": "Siphon life from your undead minions, sacrificing $s1% of their health",
+        "labels": [
+          "802121 behaviour_metric_delta sacrifice"
+        ]
+      },
+      {
+        "claim": "to grant yourself an absorb shield",
+        "labels": [
+          "802121 behaviour_metric_delta shield"
+        ]
+      },
+      {
+        "claim": "equal to half of the health stolen",
+        "labels": [
+          "802121 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "for $802122d.",
+        "labels": [
+          "802121 behaviour_metric_delta shield_held",
+          "802121 behaviour_metric_delta shield_ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims sacrifice, shield and duration: Status 1 (counted pair pending; the Ghoul keeps 0.6 of its health after the cast; 802122 on the caster after it, still at 19000 ms, gone by 21500 ms). Claim half: data, route pending (second agent; author.md): an absorbed hit against the Ghoul health lost. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 8 \"Bone Tithe\" lines (8 by id); ~/CoaServer/reference: bindmysoul \"Siphon life from your undead minions, sacrificing 40% of their health to grant yourself an\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 802121,
     "clause": "Usable while stunned.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "802121 behaviour_metric_delta stunned",
+      "802121 behaviour_metric_delta stun_control"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; Bone Tithe goes through under a Hammer of Justice 853 stun set on the caster by the dummy (precondition fixture), which refuses a Lichfrost with 108 SPELL_FAILED_STUNNED). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 8 \"Bone Tithe\" lines (8 by id); ~/CoaServer/reference: bindmysoul \"Siphon life from your undead minions, sacrificing 40% of their health to grant yourself an\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 802132,
@@ -2931,13 +3021,15 @@
       "803777 effect_value e0 #0",
       "803777 effect_value 803773e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data, route pending (second agent; author.md): the cast needs reagent 37201 (Reagent[0]); the item_count entry read 0 items without it (pair b4-1). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 803777,
     "clause": "Allies may only use a Frozen Reliquary once per minute.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "route pending (second agent; author.md): an ally using a Reliquary twice within a minute. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 803797,
@@ -3221,18 +3313,42 @@
   {
     "spell": 805428,
     "clause": "Animate a Frost Wyrm that flies behind the Necromancer that blasts nearby enemies every 2 sec for $d,",
-    "labels": [
-      "805428 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Animate a Frost Wyrm",
+        "labels": [
+          "805428 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "that flies behind the Necromancer",
+        "labels": []
+      },
+      {
+        "claim": "that blasts nearby enemies every 2 sec",
+        "labels": [
+          "805428 behaviour_metric_delta blasts"
+        ]
+      },
+      {
+        "claim": "for $d,",
+        "labels": [
+          "805428 behaviour_metric_delta held",
+          "805428 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims animate, blasts and duration: Status 1 (counted pair pending; one Wyrm 50177, at least 4 Frost Wyrm Breath 807339 hits on the dummy in 10500 ms, there at 29000 ms and gone by 31500 ms). Claim position: route pending (second agent; author.md): a position read of the Wyrm behind the caster. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 405 \"Animate: Frost Wyrm\" lines, 3887 \"Frost Wyrm Breath\" lines (405 by id); ~/CoaServer/reference: bindmysoul \"Animate a Frost Wyrm that flies behind the Necromancer that blasts nearby enemies every 2 \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 805428,
     "clause": "dealing ${$807339m1+(($spfr*0.702)+($INT*0.702))*0.212} Frost damage.",
     "labels": [
-      "805428 effect_value 807339e0 #1"
+      "805428 script_hit 807339 breath"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; 807339 hits match the tooltip formula with the measured stats; control without the Wyrm 0 hits). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 405 \"Animate: Frost Wyrm\" lines, 3887 \"Frost Wyrm Breath\" lines (405 by id); ~/CoaServer/reference: bindmysoul \"Animate a Frost Wyrm that flies behind the Necromancer that blasts nearby enemies every 2 \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 805429,
@@ -3358,18 +3474,32 @@
     "spell": 806324,
     "clause": "Reduces the cost of Command spells by $s1%",
     "labels": [
-      "806324 effect_value e0 #0"
+      "806324 cost_gate 504868 command"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; Command: Undead at 255 Runic Power refused without 806324, through with it, refused at 254). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Festering Decay\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Reduces the cost of Command spells by -15% and causes them to increase the target's spell \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 806324,
     "clause": "and causes them to increase the target's spell damage taken by $806325s1% for $806325d.",
-    "labels": [
-      "806324 effect_value 806325e0 #1",
-      "806324 spell_duration 806325 #2"
+    "claims": [
+      {
+        "claim": "and causes them to increase the target's spell damage taken by $806325s1%",
+        "labels": [
+          "806324 behaviour_metric_delta applied",
+          "806324 behaviour_hit_ratio damage_taken"
+        ]
+      },
+      {
+        "claim": "for $806325d.",
+        "labels": [
+          "806324 behaviour_metric_delta held",
+          "806324 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; a Command leaves 806325 on the dummy only with 806324; Lichfrost hits it about 10% harder after a Command with 806324; on at 14000 ms, gone by 16500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Festering Decay\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Reduces the cost of Command spells by -15% and causes them to increase the target's spell \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 806328,
@@ -3416,15 +3546,28 @@
     "labels": [
       "807700 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Data, route pending (second agent; author.md): a hit on a target with a resistance fixture, with and without 807700. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Unholy Erosion\" lines, 32 \"Animate: Lesser Zombie\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Level 50 PassiveIncreases your spell penetration by 50, scaling with your level.\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807700,
     "clause": "In addition, periodic damage dealt now has a chance to animate a Lesser Zombie for $302586d.",
-    "labels": [
-      "807700 spell_duration 302586 #1"
+    "claims": [
+      {
+        "claim": "In addition, periodic damage dealt now has a chance to animate a Lesser Zombie",
+        "labels": [
+          "807700 behaviour_metric_delta zombie"
+        ]
+      },
+      {
+        "claim": "for $302586d.",
+        "labels": [
+          "807700 spell_duration 302586 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim chance: Status 1 (counted pair pending; no Lesser Zombie 503030 hit in 35 Crypt Swarm channels without 807700, at least one with it). Claim duration: data, route pending (second agent; author.md): a zombie lifetime read. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Unholy Erosion\" lines, 32 \"Animate: Lesser Zombie\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Level 50 PassiveIncreases your spell penetration by 50, scaling with your level.\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807796,
@@ -4291,19 +4434,49 @@
   {
     "spell": 805049,
     "clause": "Summon a Gravebound Champion that redirects $805050s3% of all damage the caster takes to themselves for $d.",
-    "labels": [
-      "805049 effect_value 805050e2 #0",
-      "805049 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Summon a Gravebound Champion",
+        "labels": [
+          "805049 behaviour_metric_delta summon"
+        ]
+      },
+      {
+        "claim": "that redirects $805050s3% of all damage the caster takes to themselves",
+        "labels": [
+          "805049 behaviour_hit_ratio split"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "805049 behaviour_metric_delta held",
+          "805049 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair pending; one Champion 500482 after the cast, none before; a striker's Light of the Naaru hits the caster for half with it; there at 19000 ms, gone by 21500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 2575 \"Gravebound Champion\" lines (70 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 42 (AscensionCustomClassData.h 486); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 805049,
     "clause": "@ext:Shares a $?s301198[2min][3min] cooldown with other Champion spells.:ext@",
-    "labels": [
-      "805049 effect_value #2"
+    "claims": [
+      {
+        "claim": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+        "labels": [
+          "805049 behaviour_metric_delta shared"
+        ]
+      },
+      {
+        "claim": "$?s301198[2min][3min]",
+        "labels": [
+          "805049 effect_value #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim shared: Status 1 (counted pair pending; the next Champion goes through alone and is refused with 67 SPELL_FAILED_NOT_READY after this one (Category 55)). Claim duration: route pending (second agent; author.md): a refused cast just before and an accepted one just after 180000 ms. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 2575 \"Gravebound Champion\" lines (70 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 42 (AscensionCustomClassData.h 486); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 805197,
@@ -4333,35 +4506,100 @@
   {
     "spell": 807811,
     "clause": "Summon a Spellbound Champion that deflects spells cast on you, redirecting them to itself for $d.",
-    "labels": [
-      "807811 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Summon a Spellbound Champion",
+        "labels": [
+          "807811 behaviour_metric_delta summon"
+        ]
+      },
+      {
+        "claim": "that deflects spells cast on you, redirecting them to itself",
+        "labels": [
+          "807811 behaviour_hit_ratio deflect"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "807811 behaviour_metric_delta held",
+          "807811 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims summon and duration: Status 1 (counted pair pending; one Champion 500483, there at 19000 ms, gone by 21500 ms). Claim deflect: route pending (second agent; author.md): the taken-hit judge reads unmeasured when no hit lands on the caster (6 control hits, 0 with the Champion, pair b4-1); it needs a judge that counts the redirected hit. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 622 \"Spellbound Champion\" lines (16 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 56 (AscensionCustomClassData.h 489); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807811,
     "clause": "@ext:Shares a $?s301198[2min][3min] cooldown with other Champion spells.:ext@",
-    "labels": [
-      "807811 effect_value #1"
+    "claims": [
+      {
+        "claim": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+        "labels": [
+          "807811 behaviour_metric_delta shared"
+        ]
+      },
+      {
+        "claim": "$?s301198[2min][3min]",
+        "labels": [
+          "807811 effect_value #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim shared: Status 1 (counted pair pending; the next Champion goes through alone and is refused with 67 SPELL_FAILED_NOT_READY after this one (Category 55)). Claim duration: route pending (second agent; author.md): a refused cast just before and an accepted one just after 180000 ms. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 622 \"Spellbound Champion\" lines (16 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 56 (AscensionCustomClassData.h 489); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807813,
     "clause": "Summon an Icebound Champion that prevents you from being silenced or interrupted and reduces the pushback suffered from damaging attacks while casting by $807812s1% for $d.",
-    "labels": [
-      "807813 effect_value 807812e0 #0",
-      "807813 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Summon an Icebound Champion",
+        "labels": [
+          "807813 behaviour_metric_delta summon"
+        ]
+      },
+      {
+        "claim": "that prevents you from being silenced or interrupted",
+        "labels": []
+      },
+      {
+        "claim": "and reduces the pushback suffered from damaging attacks while casting by $807812s1%",
+        "labels": [
+          "807813 effect_value 807812e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "807813 behaviour_metric_delta held",
+          "807813 behaviour_metric_delta ends"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims summon and duration: Status 1 (counted pair pending; one Champion 500484 and 807812 on the caster after the cast; there at 19000 ms, gone by 21500 ms). Claims silence/interrupt and pushback: route pending (second agent; author.md): a silence and an interrupt cast at the caster with the Champion up, and a pushback read. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 908 \"Icebound Champion\" lines (34 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 50 (AscensionCustomClassData.h 488); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807813,
     "clause": "@ext:Shares a $?s301198[2min][3min] cooldown with other Champion spells.:ext@",
-    "labels": [
-      "807813 effect_value #2"
+    "claims": [
+      {
+        "claim": "Shares a $?s301198[2min][3min] cooldown with other Champion spells.",
+        "labels": [
+          "807813 behaviour_metric_delta shared"
+        ]
+      },
+      {
+        "claim": "$?s301198[2min][3min]",
+        "labels": [
+          "807813 effect_value #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim shared: Status 1 (counted pair pending; the next Champion goes through alone and is refused with 67 SPELL_FAILED_NOT_READY after this one (Category 55)). Claim duration: route pending (second agent; author.md): a refused cast just before and an accepted one just after 180000 ms. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 908 \"Icebound Champion\" lines (34 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 50 (AscensionCustomClassData.h 488); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500969,
@@ -4536,21 +4774,51 @@
   {
     "spell": 801530,
     "clause": "Channel life into your Raised minions within $a1 yds for $d,",
-    "labels": [
-      "801530 effect_radius e0 #0",
-      "801530 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Channel life into your Raised minions",
+        "labels": [
+          "801530 behaviour_metric_delta ticks"
+        ]
+      },
+      {
+        "claim": "within $a1 yds",
+        "labels": [
+          "801530 effect_radius e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d,",
+        "labels": [
+          "801530 behaviour_metric_delta ticks",
+          "801530 aura_duration_ms #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claims channel and duration: Status 1 (counted pair pending; at least 10 Transfer Life 801545 heals on the raised Ghoul within 10500 ms of one cast, none without it). Claim radius: data, route pending (second agent; author.md): a minion beyond 20 yd. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Transfer Life\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 18 (AscensionCustomClassData.h 473); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 801530,
     "clause": "healing them for $801545s1% of their maximum health plus ${$801545m2+$801545ppl2+$SP*.25} every $t2 sec.",
-    "labels": [
-      "801530 effect_value 801545e0 #2",
-      "801530 effect_value 801545e1 #3",
-      "801530 aura_amplitude_ms #4"
+    "claims": [
+      {
+        "claim": "healing them for $801545s1% of their maximum health plus ${$801545m2+$801545ppl2+$SP*.25}",
+        "labels": [
+          "801530 effect_value 801545e0 #2",
+          "801530 effect_value 801545e1 #3"
+        ]
+      },
+      {
+        "claim": "every $t2 sec.",
+        "labels": [
+          "801530 behaviour_metric_delta ticks",
+          "801530 aura_amplitude_ms #4"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim period: Status 1 (counted pair pending; 10 heals in 10500 ms). Claim amount: data, route pending (second agent; author.md): a heal total on the minion against its maximum health. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Transfer Life\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture; granted to class 23 at level 18 (AscensionCustomClassData.h 473); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 803605,

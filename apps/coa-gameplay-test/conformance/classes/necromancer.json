@@ -6645,6 +6645,1142 @@
       "observe_source": "As the area entry, read 38500 ms after the Command: the Mage's splash hits only within 6 yd of its target (diagnostic pair prove-10: the dummies 2 to 6 yd away took a hit and lost the freeze), so the dummy 7.5 yd away takes no damage and is still frozen, the no-damage control of ADR 0421 and the creature duration's lower bound against 40000 ms."
     },
     {
+      "spell": 531135,
+      "name": "Icecrown (one stack)",
+      "kind": "metric_delta",
+      "variant": "stack",
+      "label_suffix": "stack",
+      "quote": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706732
+      },
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:141-144): an own Frost hit of a caster with 531135 casts Icecrown 706732 at the target (Chance(player, 531135), 531135 ProcChance 100): aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126. One Lichfrost 501978 (Frost) per phase: no 706732 without 531135 (control), one stack with it learned."
+    },
+    {
+      "spell": 531135,
+      "name": "Icecrown (crit against the enemy)",
+      "kind": "metric_delta",
+      "variant": "crit",
+      "label_suffix": "crit",
+      "quote": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0.001,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "metric": "melee_crit_chance_against",
+      "fields": {
+        "target": "dummy"
+      },
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "observe_source": "The caster's melee crit chance against the dummy (Unit::GetUnitCriticalChance, the attacker crit modifiers of the target included) after one Lichfrost: one point higher with 531135's 706732 on the dummy (BasePoints 0 + 1 = 1, $706732s1) than without (expected_gain, ADR 0380). Scope: an attacker of the debuffed enemy is read (the caster); a second ally is not read."
+    },
+    {
+      "spell": 531135,
+      "name": "Icecrown (three stacks)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking $706732u times.",
+      "expected": 3,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        501978,
+        501978,
+        501978
+      ],
+      "setup_wait_ms": 2700,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706732
+      },
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "observe_source": "Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4."
+    },
+    {
+      "spell": 531135,
+      "name": "Icecrown (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706732
+      },
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "observe_source": "706732 DurationIndex 1 (10000 ms, $706732d), applied at the Lichfrost hit about 2600 ms after the cast step: still on 12000 ms after it (about 9400 ms in)."
+    },
+    {
+      "spell": 531135,
+      "name": "Icecrown (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Your Frost damage dealt now increases your allies' critical strike chance against the enemy by $706732s1% for $706732d,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706732
+      },
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "observe_source": "As the held entry, 14000 ms after the cast step (about 11400 ms in): gone."
+    },
+    {
+      "spell": 572638,
+      "name": "Sepulchral Might (Stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases your Stamina by $s2%.",
+      "expected": 74,
+      "before_expected": 68,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "572638 Effect[1] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 2 (Stamina), BasePoints 9 + 1 = 10 ($s2). The caster's Stamina 68 (reference) without 572638, int32(68 x 1.1f) = 74 with it learned (G-26 truncation); a Lich Form 500981 cast stands in as the timed trigger in both phases."
+    },
+    {
+      "spell": 572638,
+      "name": "Sepulchral Might (spell power from the minions)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 500971,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "572638 Effect[0]: the contract makes it SPELL_AURA_MOD_DAMAGE_DONE on the magic schools (AscensionNecromancerContracts.cpp:204-208) and aura_ascension_necromancer_lifecycle sets its amount to int32(the summed Stamina of the raised minions x 0.3) (AscensionNecromancerAuras.cpp:51-57), recalculated every 500 ms. A Ghoul is raised in each phase: Frost spell power 0 without 572638, positive with it. The 30% factor needs the minion's Stamina, which no harness read gives (route pending)."
+    },
+    {
+      "spell": 706472,
+      "name": "Sepulchral Might (Stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases your Stamina by $s2%.",
+      "expected": 71,
+      "before_expected": 68,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "706472 Effect[1] aura 137, Stamina, BasePoints 4 + 1 = 5 ($s2): int32(68 x 1.05f) = 71 with it learned, 68 without."
+    },
+    {
+      "spell": 706472,
+      "name": "Sepulchral Might (spell power from the minions)",
+      "kind": "metric_delta",
+      "variant": "spell_power",
+      "label_suffix": "spell_power",
+      "quote": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 500971,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "As the 572638 entry with the 0.15 factor of 706472 (AscensionNecromancerAuras.cpp:56): Frost spell power 0 without it, positive with a Ghoul raised; the 15% factor is route pending (no minion Stamina read)."
+    },
+    {
+      "spell": 801530,
+      "name": "Transfer Life (heals over the channel)",
+      "kind": "metric_delta",
+      "variant": "ticks",
+      "label_suffix": "ticks",
+      "quote": "Channel life into your Raised minions within $a1 yds for $d,",
+      "expected": 10,
+      "after_at_least": 10,
+      "before_expected": 0,
+      "trigger_spell": 801530,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 801545
+      },
+      "wait_ms": 10500,
+      "expire_ms": 500,
+      "observe_source": "801530 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, Amplitude 1000 ($t2), on the raised minions in 20 yd (TARGET_UNIT_SRC_AREA_ALLY), DurationIndex 1 (10000 ms, $d): each tick casts Transfer Life 801545 (HEAL_PCT 5% and HEAL) on the minion. A Ghoul is raised in both phases; no 801545 heal without the cast, at least 10 within 10500 ms of one cast."
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (minion health)",
+      "kind": "metric_delta",
+      "variant": "sacrifice",
+      "label_suffix": "sacrifice",
+      "quote": "Siphon life from your undead minions, sacrificing $s1% of their health",
+      "expected": 0.6,
+      "expected_ratio": 0.6,
+      "tolerance": 0.01,
+      "before_expected": 1,
+      "trigger_spell": 802121,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "owned_creature_health",
+      "fields": {
+        "entry": 50073
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "spell_ascension_necromancer_ability (AscensionNecromancerAbilities.cpp:397-406): each minion loses CalculatePct(health, 40) ($s1) and the caster gets 802122 with half the total. A Ghoul is raised in both phases; its health after the cast is 0.6 of its health without the cast (owned_creature_health, ADR 0425)."
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (absorb shield)",
+      "kind": "metric_delta",
+      "variant": "shield",
+      "label_suffix": "shield",
+      "quote": "to grant yourself an absorb shield equal to half of the health stolen for $802122d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 802121,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 802122
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Copy(player, player, 802122, stolen / 2) (AscensionNecromancerAbilities.cpp:406): the absorb aura on the caster after the cast, none without it. Its amount (half the stolen health) is an aura amount readback, data."
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (shield held)",
+      "kind": "metric_delta",
+      "variant": "shield_held",
+      "label_suffix": "shield_held",
+      "quote": "to grant yourself an absorb shield equal to half of the health stolen for $802122d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 802121,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 802122
+      },
+      "wait_ms": 19000,
+      "expire_ms": 500,
+      "observe_source": "802122 DurationIndex 18 (20000 ms, $802122d): still on 19000 ms after the cast."
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (shield ends)",
+      "kind": "metric_delta",
+      "variant": "shield_ends",
+      "label_suffix": "shield_ends",
+      "quote": "to grant yourself an absorb shield equal to half of the health stolen for $802122d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 802121,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 802122
+      },
+      "wait_ms": 21500,
+      "expire_ms": 500,
+      "observe_source": "21500 ms after the cast: gone."
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (usable while stunned)",
+      "kind": "metric_delta",
+      "variant": "stunned",
+      "label_suffix": "stunned",
+      "quote": "Usable while stunned.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 802121,
+      "target": "caster",
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 2500,
+      "after_auras": [
+        [
+          853,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 802121
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "802121 AttributesEx5 holds SPELL_ATTR5_ALLOW_WHILE_STUNNED (0x8). A Ghoul is raised in both phases; the treatment phase has Hammer of Justice 853 (aura 12 stun) set on the caster by the dummy (precondition fixture) before the cast: no failure either way. The stun control is the Lichfrost entry."
+    },
+    {
+      "spell": 802121,
+      "name": "Bone Tithe (stun control)",
+      "kind": "metric_delta",
+      "variant": "stun_control",
+      "label_suffix": "stun_control",
+      "quote": "Usable while stunned.",
+      "expected": 108,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "after_auras": [
+        [
+          853,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 501978
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "The same stun fixture refuses Lichfrost 501978 (no ALLOW_WHILE_STUNNED) with SPELL_FAILED_STUNNED (108): the fixture does stun; without it the cast goes through (0)."
+    },
+    {
+      "spell": 803777,
+      "name": "Create Frozen Reliquary (items)",
+      "kind": "metric_delta",
+      "variant": "items",
+      "label_suffix": "items",
+      "quote": "Create $s1 Frozen Reliquary",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 803777,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "item_count",
+      "fields": {
+        "item": 555555
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "803777 Effect[0] 24 SPELL_EFFECT_CREATE_ITEM, item 555555, BasePoints 4 + 1 = 5 ($s1). No cast: none in the bags; one cast: 5 (item_count, ADR 0425)."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (summoned)",
+      "kind": "metric_delta",
+      "variant": "summon",
+      "label_suffix": "summon",
+      "quote": "Summon a Gravebound Champion that redirects",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500482
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "805049 Effect[0] 28 SPELL_EFFECT_SUMMON, MiscValue 500482. No cast: none; one cast: one Gravebound Champion."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (damage redirected)",
+      "kind": "taken_hit",
+      "variant": "split",
+      "label_suffix": "split",
+      "judge": "damage_ratio",
+      "expected": 0.5,
+      "quote": "that redirects $805050s3% of all damage the caster takes to themselves",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 6,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              805049,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "The Champion carries Gravebound Champion 805050 (ChampionAura(500482), AscensionNecromancerSummons.cpp:98-109), Effect[2] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 81 SPELL_AURA_SPLIT_DAMAGE_PCT, BasePoints 49 + 1 = 50 ($805050s3): with it up the caster takes half of a hit. A stationary striker casts Light of the Naaru 41394 (Holy, fixed amount) at the caster: control without a Champion, treatment after one real cast. Expected treatment / control = 0.5."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Summon a Gravebound Champion that redirects",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500482
+      },
+      "wait_ms": 19000,
+      "expire_ms": 500,
+      "observe_source": "805049 DurationIndex 18 (20000 ms, $d): the Champion is still there 19000 ms after the cast."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Summon a Gravebound Champion that redirects",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500482
+      },
+      "wait_ms": 21500,
+      "expire_ms": 500,
+      "observe_source": "21500 ms after the cast: gone."
+    },
+    {
+      "spell": 805049,
+      "name": "Gravebound Champion (shared cooldown)",
+      "kind": "metric_delta",
+      "variant": "shared",
+      "label_suffix": "shared",
+      "quote": "cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "setup_casts": [
+        805049
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807811
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Gravebound, Spellbound and Icebound Champion share Category 55 (CategoryRecoveryTime 180000). Spellbound Champion 807811 goes through in the control phase (0, its own cooldown reset before each cast); in the treatment phase Gravebound Champion 805049 is cast first and 807811 is refused with SPELL_FAILED_NOT_READY (67)."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (summoned)",
+      "kind": "metric_delta",
+      "variant": "summon",
+      "label_suffix": "summon",
+      "quote": "Summon a Spellbound Champion that deflects spells cast on you",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500483
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "807811 Effect[0] SPELL_EFFECT_SUMMON, MiscValue 500483. No cast: none; one cast: one Spellbound Champion."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (spells deflected)",
+      "kind": "taken_hit",
+      "variant": "deflect",
+      "label_suffix": "deflect",
+      "judge": "damage_ratio",
+      "expected": 0,
+      "quote": "that deflects spells cast on you, redirecting them to itself",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 6,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              807811,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "The Champion carries 808017 (ChampionAura(500483)); its contract makes Effect[2] SPELL_AURA_SPELL_MAGNET and clears its charges (AscensionNecromancerContracts.cpp, 808017). A striker's Light of the Naaru 41394 at the caster: the full hit without a Champion, none on the caster with it (redirected)."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Summon a Spellbound Champion that deflects spells cast on you",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500483
+      },
+      "wait_ms": 19000,
+      "expire_ms": 500,
+      "observe_source": "807811 DurationIndex 18 (20000 ms): still there 19000 ms after the cast."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Summon a Spellbound Champion that deflects spells cast on you",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807811,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500483
+      },
+      "wait_ms": 21500,
+      "expire_ms": 500,
+      "observe_source": "21500 ms after the cast: gone."
+    },
+    {
+      "spell": 807811,
+      "name": "Spellbound Champion (shared cooldown)",
+      "kind": "metric_delta",
+      "variant": "shared",
+      "label_suffix": "shared",
+      "quote": "cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "setup_casts": [
+        807811
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807813
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "As the Gravebound entry: Icebound Champion 807813 goes through alone and is refused (67) after Spellbound Champion 807811 (Category 55)."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (summoned)",
+      "kind": "metric_delta",
+      "variant": "summon",
+      "label_suffix": "summon",
+      "quote": "Summon an Icebound Champion that prevents you from being silenced or interrupted",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500484
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "807813 Effect[0] SPELL_EFFECT_SUMMON, MiscValue 500484. No cast: none; one cast: one Icebound Champion."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (aura on you)",
+      "kind": "metric_delta",
+      "variant": "aura",
+      "label_suffix": "aura",
+      "quote": "Summon an Icebound Champion that prevents you from being silenced or interrupted",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 807812
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The Champion carries Icebound Champion 807812 (ChampionAura(500484)): Effect[0..2] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER, aura 149 SPELL_AURA_REDUCE_PUSHBACK 50% and aura 77 mechanic immunity 26 (interrupt) and 9 (silence), on its owner. The caster carries 807812 after the cast, not before; the immunities themselves are route pending."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Summon an Icebound Champion that prevents you from being silenced or interrupted",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500484
+      },
+      "wait_ms": 19000,
+      "expire_ms": 500,
+      "observe_source": "807813 DurationIndex 18 (20000 ms): still there 19000 ms after the cast."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Summon an Icebound Champion that prevents you from being silenced or interrupted",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 807813,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 500484
+      },
+      "wait_ms": 21500,
+      "expire_ms": 500,
+      "observe_source": "21500 ms after the cast: gone."
+    },
+    {
+      "spell": 807813,
+      "name": "Icebound Champion (shared cooldown)",
+      "kind": "metric_delta",
+      "variant": "shared",
+      "label_suffix": "shared",
+      "quote": "cooldown with other Champion spells.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 805049,
+      "target": "caster",
+      "setup_casts": [
+        807813
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 805049
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Gravebound Champion 805049 goes through alone and is refused (67) after Icebound Champion 807813 (Category 55)."
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (animated)",
+      "kind": "metric_delta",
+      "variant": "count",
+      "label_suffix": "count",
+      "quote": "Animate a Frost Wyrm that flies behind the Necromancer",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805428,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50177
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "805428 Effect[0] SPELL_EFFECT_SUMMON, MiscValue 50177. No cast: none; one cast: one Frost Wyrm."
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (blasts)",
+      "kind": "metric_delta",
+      "variant": "blasts",
+      "label_suffix": "blasts",
+      "quote": "that blasts nearby enemies every 2 sec for $d,",
+      "expected": 5,
+      "after_at_least": 4,
+      "before_expected": 0,
+      "trigger_spell": 805428,
+      "target": "dummy",
+      "select_dummy": true,
+      "setup_casts": [
+        501978
+      ],
+      "setup_wait_ms": 2700,
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807339,
+        "caster_entry": 50177,
+        "target": "dummy"
+      },
+      "wait_ms": 10500,
+      "expire_ms": 500,
+      "observe_source": "The Frost Wyrm 50177 casts Frost Wyrm Breath 807339 at nearby enemies (AscensionNecromancerSummons.cpp:868-873). The Wyrm breathes at the caster's PvE combat enemies (BreathTarget, :621-632), so each phase opens with a Lichfrost 501978 at the dummy (a cast without one blasted nothing, pair b4-1). No cast: none; within 10500 ms of one cast at least 4 blasts on the dummy (every 2 sec gives 5)."
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "that blasts nearby enemies every 2 sec for $d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805428,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50177
+      },
+      "wait_ms": 29000,
+      "expire_ms": 500,
+      "observe_source": "805428 DurationIndex 9 (30000 ms, $d): the Wyrm is there 29000 ms after the cast."
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "that blasts nearby enemies every 2 sec for $d,",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 805428,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50177
+      },
+      "wait_ms": 31500,
+      "expire_ms": 500,
+      "observe_source": "31500 ms after the cast: gone."
+    },
+    {
+      "spell": 805428,
+      "name": "Animate: Frost Wyrm (Frost damage)",
+      "kind": "script_hit",
+      "variant": "breath",
+      "label_suffix": "breath",
+      "quote": "Frost damage.",
+      "hit_spell": 807339,
+      "hit_effect": 0,
+      "caster_entry": 50177,
+      "trials": 2,
+      "minimum_hits": 6,
+      "control_casts": [
+        [
+          501978,
+          "dummy"
+        ]
+      ],
+      "casts": [
+        [
+          501978,
+          "dummy"
+        ],
+        [
+          805428,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 10000,
+      "observe_source": "807339 Effect[0] SCHOOL_DAMAGE, BasePoints 1499 + 1 = 1500 plus (Frost spell power x 0.702 + Intellect x 0.702) x 0.212: the tooltip's ${$807339m1+(($spfr*0.702)+($INT*0.702))*0.212}. Each trial opens with a Lichfrost 501978 at the dummy, so the Wyrm has a combat enemy (BreathTarget, AscensionNecromancerSummons.cpp:621-632). Control: the same trials with the Lichfrost alone (control_casts; 805428 is known in both arms, an unlearned control counted 21 hits in pair b4-2) count no 807339 hit."
+    },
+    {
+      "spell": 806324,
+      "name": "Festering Decay (Command cost)",
+      "kind": "cost_gate",
+      "variant": "command",
+      "label_suffix": "command",
+      "quote": "Reduces the cost of Command spells by $s1%",
+      "gated_spell": 504868,
+      "resource": "power",
+      "reduction": 45,
+      "target": "dummy",
+      "observe_source": "806324 Effect[0] aura 108 SPELLMOD_COST (MiscValue 14), BasePoints -16 + 1 = -15 ($s1). Command: Undead 504868 costs 300 Runic Power: 255 with the talent. Arms: 255 without it refused (SPELL_FAILED_NO_POWER), with it through, 254 with it refused."
+    },
+    {
+      "spell": 806324,
+      "name": "Festering Decay (applied by a Command)",
+      "kind": "metric_delta",
+      "variant": "applied",
+      "label_suffix": "applied",
+      "quote": "and causes them to increase the target's spell damage taken by $806325s1% for $806325d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806325
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:323-327): a Command at a valid enemy of a caster with 806324 casts Festering Decay 806325 at it. One Command: Undead 504868 per phase: no 806325 without 806324, on the dummy with it."
+    },
+    {
+      "spell": 806324,
+      "name": "Festering Decay (spell damage taken)",
+      "kind": "hit_ratio",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "quote": "and causes them to increase the target's spell damage taken by $806325s1% for $806325d.",
+      "expected": 1.1,
+      "observe_spell": 501978,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          504868
+        ]
+      },
+      "treatment": {
+        "learn": [
+          806324
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          504868
+        ]
+      },
+      "critical": false,
+      "trials": 40,
+      "parts": 2,
+      "cast_power": 1373,
+      "expected_source": "806325 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 126 (magic), BasePoints 9 + 1 = 10 ($806325s1). Both arms cast Command: Undead 504868 at the dummy before each Lichfrost 501978; the treatment has 806324 learned, so the Command leaves 806325 on the dummy. Non-critical Lichfrost hits, 823764 removing partial resists in both arms."
+    },
+    {
+      "spell": 806324,
+      "name": "Festering Decay (held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "and causes them to increase the target's spell damage taken by $806325s1% for $806325d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806325
+      },
+      "wait_ms": 14000,
+      "expire_ms": 500,
+      "observe_source": "806325 DurationIndex 8 (15000 ms, $806325d): still on 14000 ms after the Command."
+    },
+    {
+      "spell": 806324,
+      "name": "Festering Decay (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "and causes them to increase the target's spell damage taken by $806325s1% for $806325d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 806325
+      },
+      "wait_ms": 16500,
+      "expire_ms": 500,
+      "observe_source": "16500 ms after the Command: gone."
+    },
+    {
+      "spell": 801739,
+      "name": "Heartchill (interrupt)",
+      "kind": "metric_delta",
+      "variant": "interrupt",
+      "label_suffix": "interrupt",
+      "quote": "Chill an enemy's heart, interrupting their current spell cast.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 801739,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "metric": "casting",
+      "fields": {},
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "Heartchill 801739 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST at the target; necromancer_casts::OnSpellSuccessfulInterrupt (AscensionNecromancerAbilities.cpp:239-245) casts 803677 at the interrupted target. The dummy channels Evocation 12051 (the Templar school_lockout channel, ADR 0171) right before the cast (target_casts, ADR 0426). Control (no Heartchill): the dummy is still channelling (1, its channel cast in the uncast phase too, ADR 0427); after Heartchill: not (0)."
+    },
+    {
+      "spell": 801739,
+      "name": "Heartchill (slow on a successful interrupt)",
+      "kind": "metric_delta",
+      "variant": "slowed",
+      "label_suffix": "slowed",
+      "quote": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
+      "expected": 0.228572,
+      "expected_ratio": 0.2,
+      "tolerance": 0.001,
+      "before_expected": 1.14286,
+      "trigger_spell": 801739,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "metric": "run_speed_rate",
+      "fields": {},
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "Heartchill 801739 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST at the target; necromancer_casts::OnSpellSuccessfulInterrupt (AscensionNecromancerAbilities.cpp:239-245) casts 803677 at the interrupted target. The dummy channels Evocation 12051 (the Templar school_lockout channel, ADR 0171) right before the cast (target_casts, ADR 0426). 803677 Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -81 + 1 = -80 ($803677s1): the dummy's run speed 1.14286 before, 0.2 of it after the interrupt."
+    },
+    {
+      "spell": 801739,
+      "name": "Heartchill (no slow without an interrupt)",
+      "kind": "metric_delta",
+      "variant": "no_interrupt",
+      "label_suffix": "no_interrupt",
+      "quote": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 801739,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 803677
+      },
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "observe_source": "The success gate: Heartchill at a dummy that casts nothing interrupts nothing and leaves no 803677."
+    },
+    {
+      "spell": 801739,
+      "name": "Heartchill (slow held)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 801739,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 803677
+      },
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "803677 DurationIndex 27 (3000 ms, $803677d): on the dummy 2500 ms after the interrupt, not before it."
+    },
+    {
+      "spell": 801739,
+      "name": "Heartchill (slow ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Successfully interrupting a spell also reduces their movement speed and haste by $803677s1% for $803677d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 801739,
+      "target": "dummy",
+      "cast_in_before": false,
+      "target_casts_before": [
+        12051
+      ],
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 803677
+      },
+      "wait_ms": 3700,
+      "expire_ms": 500,
+      "observe_source": "3700 ms after the interrupt: gone."
+    },
+    {
+      "spell": 807700,
+      "name": "Unholy Erosion (Lesser Zombie)",
+      "kind": "metric_delta",
+      "variant": "zombie",
+      "label_suffix": "zombie",
+      "quote": "In addition, periodic damage dealt now has a chance to animate a Lesser Zombie for $302586d.",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "setup_casts": [
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886,
+        501886
+      ],
+      "setup_wait_ms": 3600,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 503030
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:128-129): a periodic hit of a caster with 807700 summons a Lesser Zombie 503030 at the target when Chance(player, 807700) rolls (807700 ProcChance 3; the tooltip states no chance), and the zombie charges its target and hits it (AscensionNecromancerSummons.cpp:711-715), read as the Lesser Zombies' hits in the caster's log (owned_creature_damage_count; the 504022 read of the caster's hits saw none and a diagnostic read 5 zombie hits in 15 channels, pair b4-4). 35 Crypt Swarm channels per phase, 210 periodic 800343 hits: no zombie hit without 807700, at least one with it (at 3% per hit no zombie in 210 hits has chance 0.0017)."
+    },
+    {
       "spell": 680388,
       "name": "Fetid Ward (duration)",
       "kind": "cast_applies_aura",
