@@ -21,8 +21,8 @@
  *   Bat form, when the avatar dies
  *     Bat-tering Charge  first 2s, every 20s   random player out of melee and within 25
  *                                              yards, knocks back everyone within 10 yards
- *     Terrifying Screech the moment the charge stuns, or in its place when no player
- *                                              is in reach (live: 12 of 12 landed charges, 0-9 ms):
+ *     Terrifying Screech the moment the charge lands, in place, or in its place when no
+ *                                              player is in reach (live: 12 of 12 landed charges, 0-9 ms):
  *                                              everyone in the room, and fears everyone
  *                                              within 20 yards
  *     Vampirism          passive, her hits drain life
@@ -193,6 +193,7 @@ namespace
             _avatar.Restore(me);
             _bat = false;
             _riders = 0;
+            _screechOnLanding = false;
             DoCastSelf(SPELL_GREEN_CHANNELING, true);
         }
 
@@ -252,6 +253,7 @@ namespace
             DoCastSelf(SPELL_ASPECT_OF_HIREEK, true);
             DoCastSelf(SPELL_VAMPIRISM, true);
             DoResetThreatList();
+            _screechOnLanding = false;
 
             events.SetPhase(PHASE_BAT);
             events.ScheduleEvent(EVENT_BATTERING_CHARGE, 2s, 0, PHASE_BAT);
@@ -315,7 +317,21 @@ namespace
                 return;
 
             me->CastSpell(target, SPELL_BATTERING_IMPACT, true);
-            events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
+            if (_screechOnLanding && !me->HasUnitState(UNIT_STATE_CHARGING))
+            {
+                _screechOnLanding = false;
+                events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type != POINT_MOTION_TYPE || (id != ::EVENT_CHARGE && id != EVENT_CHARGE_PREPATH) || !_screechOnLanding)
+                return;
+
+            _screechOnLanding = false;
+            me->StopMoving();
+            DoCastSelf(SPELL_SCREECH);
         }
 
         void CallOfHireek()
@@ -405,7 +421,7 @@ namespace
                             {
                                 return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinDist(u, BATTERING_CHARGE_MAX_RANGE);
                             }))
-                            DoCast(target, SPELL_BATTERING_CHARGE);
+                            _screechOnLanding = DoCast(target, SPELL_BATTERING_CHARGE) == SPELL_CAST_OK;
                         else
                             events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
                         events.ScheduleEvent(EVENT_BATTERING_CHARGE, 20s, 0, PHASE_BAT);
@@ -435,6 +451,7 @@ namespace
     private:
         bool _bat = false;
         uint8 _riders = 0;
+        bool _screechOnLanding = false;
         LoaAvatar _avatar{ NPC_AVATAR_OF_HIREEK, SPELL_DRAIN_POWER };
         ObjectGuid _target;
     };
