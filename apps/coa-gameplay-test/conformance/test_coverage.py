@@ -1100,7 +1100,6 @@ class FragmentTest(unittest.TestCase):
                                    str(ledger)]), DIFF_EXIT)
 
 
-
 class CastSpeedPromiseTest(unittest.TestCase):
     def test_a_learned_cast_speed_contrast_proves_a_casting_speed_clause(self):
         verdicts = [judged('1 behaviour_metric_delta poison_speed', BEHAVIOUR_METRIC_DELTA, 'cast_speed_multiplier',
@@ -1129,7 +1128,6 @@ class CastSpeedPromiseTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['health'], EVENT)
 
 
-
 class NoStackStatePromiseTest(unittest.TestCase):
     def capped(self, status: str = 'ok') -> list:
         from behaviours import BEHAVIOUR_GROUP_STACK_CAP
@@ -1146,7 +1144,6 @@ class NoStackStatePromiseTest(unittest.TestCase):
     def test_a_summed_reading_leaves_the_clause_unproven(self):
         clause = claim('Does not stack with similar effects.', '1 behaviour_group_stack_cap')
         self.assertEqual(evidence_of([clause], self.capped('alert'))[0], [UNPROVEN])
-
 
 
 class OwnedHealthAndItemCountTest(unittest.TestCase):

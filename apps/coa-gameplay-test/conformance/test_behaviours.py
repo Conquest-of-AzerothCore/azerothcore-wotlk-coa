@@ -10299,7 +10299,6 @@ class RemovedOwnEffectTests(unittest.TestCase):
         self.assertEqual([step['effect'] for step in reads], [1])
 
 
-
 def chilling_presence_entry(kind: str) -> dict:
     return next(entry for entry in load_class_file(23)['behaviours']
                 if entry['spell'] == 300958 and entry['kind'] == kind)
