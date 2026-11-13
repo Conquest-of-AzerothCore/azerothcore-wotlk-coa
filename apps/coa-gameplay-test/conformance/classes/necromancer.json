@@ -1268,6 +1268,81 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 704680,
+      "name": "Freeze Dry (Glacial Impact Runic Power)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "Your Glacial Impact now generates $/10;804111s1 Runic Power.",
+      "expected": 200,
+      "before_expected": 0,
+      "gate_spell": 704680,
+      "trigger_spell": 707402,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "phase_power": [
+        6,
+        0,
+        0
+      ],
+      "setup_casts": [
+        801747
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 6
+      },
+      "observe_source": "Freeze Dry 704680 Effect[0] aura 42 triggers 804111 (rewritten to a dummy for family 29, AscensionNecromancerContracts.cpp:57-61); 804111 Effect[0] SPELL_EFFECT_ENERGIZE Runic Power (MiscValue 6), BasePoints 199 + 1 = 200 ($/10;804111s1 = 20). Each phase casts Permafrost 801747 on the caster (a real cast: Glacial Impact's frozen condition, AscensionNecromancerAbilities.cpp:169-171; not the claim) then Glacial Impact 707402 (14% base mana, no Runic Power cost) at the dummy. The gain is added directly, not as an 804111 energize event: NativePowerGainRules {23, 707399, 707402, 6, 200, FirstSuccessfulHostileTarget, 704680} (AscensionCustomResourceData.h:477-478). Runic Power set to 0 before each phase's casts (phase_power), regeneration off, read 1500 ms after: 0 without Freeze Dry (control), 200 with it learned between the phases."
+    },
+    {
+      "spell": 300234,
+      "name": "Icecrown Scriptures (Frost damage on a Humanoid)",
+      "kind": "hit_ratio",
+      "variant": "humanoid_frost",
+      "label_suffix": "humanoid_frost",
+      "quote": "Increases your Shadow and Frost damage dealt against Humanoids and Undead by $s1%.",
+      "expected": 1.04,
+      "observe_spell": 803779,
+      "cast_spell": 501997,
+      "cast_wait_ms": 3500,
+      "cast_power": 1000,
+      "target_entry": 6,
+      "control": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            984954,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300234
+        ]
+      },
+      "trials": 12,
+      "critical": false,
+      "expected_source": "300234 Effect[0] aura 168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, MiscValue 96 (creature type mask: Undead 32 + Humanoid 64), BasePoints 3 + 1 = 4 ($s1); the aura carries no school limit in the DBC (the tooltip's Shadow and Frost is checked here on Frost only). Non-critical Ice Barrage 803779 (Frost) hits on Kobold Vermin 6 (Humanoid), one 501997 cast per trial, without the talent (control) and with it learned; 984954 (spell crit -1000) and 823764 (-9999 target resistance) on the caster in both arms (harness set_aura, precondition fixtures, as the Piercing Icicles entry); cast_power 1000 Runic Power."
+    },
+    {
       "spell": 704717,
       "name": "Long March (cast time)",
       "kind": "metric_delta",

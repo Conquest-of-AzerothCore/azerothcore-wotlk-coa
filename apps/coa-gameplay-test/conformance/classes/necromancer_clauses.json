@@ -73,10 +73,24 @@
   {
     "spell": 300234,
     "clause": "Increases your Shadow and Frost damage dealt against Humanoids and Undead by $s1%.",
-    "labels": [
-      "300234 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your Frost damage dealt against Humanoids by $s1%",
+        "labels": [
+          "300234 behaviour_hit_ratio humanoid_frost"
+        ]
+      },
+      {
+        "claim": "Increases your Shadow damage dealt against Humanoids by $s1%",
+        "labels": []
+      },
+      {
+        "claim": "against Undead",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Frost-on-Humanoid part status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without the talent, same Kobold Vermin 6 target): Ice Barrage 803779 non-critical hits +3.894% and +3.958% (99% intervals +3.606..+4.181 and +3.717..+4.2, inside the 2..6 band, excluding 0) vs $s1 = 4 (aura 168 MiscValue 96 = Undead 32 + Humanoid 64). Fixtures 984954 (spell crit -1000) and 823764 (-9999 target resistance), harness set_aura in both arms. Shadow part and Undead part route pending (a Shadow hit spell on a Humanoid and an Undead target entry were not built in time). G-11 (2026-11-13, B6 side a): server DBC; src/server/coa nothing names 300234; combat logs (coa-history spell 300234): nothing found; sidekick data.js talent text 'by 4%' (agrees); MCP not queried (unavailable)."
   },
   {
     "spell": 300235,
@@ -2259,10 +2273,16 @@
   {
     "spell": 704680,
     "clause": "Your Glacial Impact now generates $/10;804111s1 Runic Power.",
-    "labels": [
-      "704680 effect_value 804111e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Glacial Impact now generates $/10;804111s1 Runic Power",
+        "labels": [
+          "704680 behaviour_metric_delta runic_power"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm without Freeze Dry). Runic Power 0 -> 200 after one Glacial Impact 707402 ($/10;804111s1 = 20, 804111 BasePoints 199 + 1); 0 without the talent. Fixture: Permafrost 801747 really cast on the caster (Glacial Impact's frozen condition, not the claim). The gain is a direct add (AscensionCustomResourceData.h:477-478), so a first draft reading 804111 energize events saw 0 (incorrect test, corrected). G-11 (2026-11-13, B6 side a): server DBC; code above; combat logs (coa-history spell 704680): nothing found; sidekick data.js same text without the number; MCP not queried (unavailable)."
   },
   {
     "spell": 704681,
