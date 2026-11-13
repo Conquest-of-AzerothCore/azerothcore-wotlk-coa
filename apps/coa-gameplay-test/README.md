@@ -1052,6 +1052,12 @@ creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 (default Shadow), `GetResistance(school)`, `m_modMeleeHitChance` and `UNIT_MOD_CAST_SPEED`.
 `owned_creature_threat` reads the threat the creature named by `target` holds against it.
 `owned_creature_power` reads the same creature's current `power` (default mana).
+`repair_at` (`owner`, `entry`) sends the actor's repair-all request (`CMSG_REPAIR_ITEM` through
+`WorldSession::HandleRepairItemOpcode`) to the creature of `entry` that `owner` has out, or to no creature when
+`owner` has none; the server's NPC flag, distance and reaction checks decide. `durability_loss` (`percent`) wears every
+equipped item of the actor by that percent of its maximum (`Player::DurabilityLossAll`), a precondition fixture.
+`equipped_durability` reads the sum of the current durability of the actor's equipped items, or of those of
+entry `item`.
 `owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
 applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
 `melee_crit_chance_against` reads the player's melee crit chance against the unit named by `target`
