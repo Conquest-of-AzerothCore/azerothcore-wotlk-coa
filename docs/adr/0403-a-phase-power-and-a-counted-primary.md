@@ -10,7 +10,7 @@ Mass Grave 803741 has two claims no existing shape reads. "While above 50 Runic 
 different value in each phase of one `metric_delta`, right before the cast; `cast_power` sets only the cast spell's own
 power type, to one value. "Transform up to $i nearby enemies" is centred on the caster: `fixed_count` judges the
 dummies after the nearest one and assumes the nearest is always hit, but Mass Grave picks any five of the Humanoids in
-its radius. Pair 20261113-0122 run 1 read all five further dummies affected (the nearest not), an alert of the judge,
+its radius. Pair 20261113-012204 / -012237 (build 17ff0cc7e580) run 1 read all five further dummies affected (the nearest not), an alert of the judge,
 not of the server.
 
 ## Decision
