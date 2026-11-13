@@ -11239,6 +11239,7 @@ class OwnedCreatureStrikeTests(unittest.TestCase):
             values = {model['before_label']: 0.0, model['after_label']: after}
             return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
         self.assertEqual(judged(4.0), 'ok')
+        self.assertEqual(judged(5.0), 'ok')
         self.assertEqual(judged(1.0), 'alert')
         self.assertEqual(judged(0.0), 'alert')
 
