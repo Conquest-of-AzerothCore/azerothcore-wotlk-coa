@@ -8906,22 +8906,8 @@
       "repeats": 3, "settle_ms": 1000,
       "observe_source": "One Ghoul is raised, then Command: Undead 504868 at the primary dummy three times; every Ghoul Command casts 801514, read per dummy from the Ghoul's (entry 50073) hits. Up to 5 enemies ($801514i) is the primary dummy and 4 more: the judge counts the additional dummies each cast that hit the primary also hit. Six candidates within 8 yd of the caster for the 4 additional, one at 13 yd that must stay unhit."
     },
-    {
-      "spell": 500971, "name": "Raise: Ghoul (auto attack heal, minion healing modelled)", "kind": "script_hit",
-      "variant": "auto_attack_heal_modelled", "label_suffix": "auto_attack_heal_modelled",
-      "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster",
-      "minion_model_auras": [805290], "trials": 6, "minimum_hits": 6,
-      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000,
-      "observe_source": "Regression of the 707000 coefficient row (ADR 0322): the tooltip value ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} read with the measured stats, then Ghoul Passive Healing 805290 Effect[1] (aura 136 -30% healing done, on every Ghoul from IsSummonedBy) modelled on the Ghoul's heal; the -30% itself is owner question Q-a1-6. Control: no Ghoul, no 707000 heal."
-    },
-    {
-      "spell": 500971, "name": "Raise: Ghoul (auto attack heal, more Intellect)", "kind": "script_hit",
-      "variant": "auto_attack_heal_intellect", "label_suffix": "auto_attack_heal_intellect",
-      "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster",
-      "minion_model_auras": [805290], "stat_auras": [[43002, 1]], "trials": 6, "minimum_hits": 6,
-      "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000,
-      "observe_source": "Second arm of the 707000 coefficient regression: Arcane Brilliance 43002 (Effect[0] SPELL_AURA_MOD_STAT +60 Intellect) is set on the caster before its stats are measured (a precondition fixture; the claim is the heal's Intellect term), so the model reads the higher Intellect and the heal rises by 0.504 x 0.07 = 0.03528 per point before the -30%. Without the coefficient row both arms read the same heal."
-    },
+    {"spell": 500971, "name": "Raise: Ghoul (auto attack heal, minion healing modelled)", "kind": "script_hit", "variant": "auto_attack_heal_modelled", "label_suffix": "auto_attack_heal_modelled", "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster", "trials": 6, "minimum_hits": 6, "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000, "observe_source": "Regression of the 707000 coefficient row (ADR 0322): the tooltip value ${$707000m1+$707000ppl1+(($INT*0.504)+($SP*0.504))*0.07} read with the measured stats, then Ghoul Passive Healing 805290 Effect[1] (aura 136 -30% healing done, on every Ghoul from IsSummonedBy) modelled on the Ghoul's heal; the -30% itself is owner question Q-a1-6. Control: no Ghoul, no 707000 heal. Cycle 2 F2: the client text now states 70% (owner text item 8, rev_20261113_32_necromancer_owner_text_items.sql), so the tooltip model already carries the Ghoul's -30% healing done (805290 Effect[1]); 805290 is no longer added as a model aura."},
+    {"spell": 500971, "name": "Raise: Ghoul (auto attack heal, more Intellect)", "kind": "script_hit", "variant": "auto_attack_heal_intellect", "label_suffix": "auto_attack_heal_intellect", "quote": "health to you.", "hit_spell": 707000, "caster_entry": 50073, "receiver": "caster", "stat_auras": [[43002, 1]], "trials": 6, "minimum_hits": 6, "casts": [[500971, "caster"], [504868, "dummy"]], "control_casts": [[504868, "dummy"]], "settle_ms": 4000, "observe_source": "Second arm of the 707000 coefficient regression: Arcane Brilliance 43002 (Effect[0] SPELL_AURA_MOD_STAT +60 Intellect) is set on the caster before its stats are measured (a precondition fixture; the claim is the heal's Intellect term), so the model reads the higher Intellect and the heal rises by 0.504 x 0.07 = 0.03528 per point before the -30%. Without the coefficient row both arms read the same heal. Cycle 2 F2: the client text now states 70% (owner text item 8, rev_20261113_32_necromancer_owner_text_items.sql), so the tooltip model already carries the Ghoul's -30% healing done (805290 Effect[1]); 805290 is no longer added as a model aura."},
     {
       "spell": 500971, "name": "Raise: Ghoul (raised)", "kind": "metric_delta", "variant": "count",
       "label_suffix": "count", "quote": "to aid you in combat occupying 1", "expected": 1, "before_expected": 0,
@@ -9949,118 +9935,9 @@
       "remove_control": true,
       "observe_source": "aura_ascension_necromancer_lifecycle casts Lich Form 504747 on the caster when 500981 applies (AscensionNecromancerAuras.cpp:122-123) and removes it when neither 500981 nor 804371 remains (:252-253): 504747 carries aura 77 SPELL_AURA_MECHANIC_IMMUNITY with MiscValue 5 (fear) and 10 (sleep). Fixtures cast by the dummy: Fear 12096 (aura 7, Mechanic 5) and Sleep 9159 (aura 12, Mechanic 10). 500981 is permanent (DurationIndex 21), so its control removes 500981 (remove_control) and the same casts must land again."
     },
-    {
-      "spell": 500459,
-      "name": "Blight (Shadow damage over the duration)",
-      "kind": "metric_delta",
-      "variant": "shadow_total",
-      "label_suffix": "shadow_total",
-      "quote": "Shadow damage over",
-      "expected": 630,
-      "before_expected": 0,
-      "trigger_spell": 500459,
-      "target": "dummy",
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 500237,
-        "target": "dummy"
-      },
-      "wait_ms": 23000,
-      "expire_ms": 500,
-      "observe_source": "500459 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, BasePoints 125 + 1 = 126 ($m1), Amplitude 4000 ($t1), DurationIndex 18 (20000 ms, $d): every tick casts Blight 500237 with the value at the target, so ($d*1000/$t1) x $m1 = 5 x 126 = 630 at spell power 0 over the duration, the tooltip's stated total, judged as stated (mentor, 2026-11-13); the server adds the Effect[2] 142 hit of 126 at the cast (Blight (initial hit) entry), 756 in all, as live does (6 hits of 500237 per full-duration application on the target in 27 of 42 live applications, 2026-08-16 log). 984954 (spell crit -1000) and 823764 (-9999 target resistance) on the caster remove crits and partial resists. Blight casts in 2000 ms (CastingTimeIndex 5); its Effect[2] 142 hits once at the cast, then the aura ticks until it expires 20000 ms later. No cast (control): 0; one real cast: 630 on the dummy, read 23000 ms after the cast step, past the expiry."
-    },
-    {
-      "spell": 500459,
-      "name": "Blight (Shadow damage with spell power)",
-      "kind": "metric_delta",
-      "variant": "shadow_total_sp",
-      "label_suffix": "shadow_total_sp",
-      "quote": "Shadow damage over",
-      "expected": 688.4,
-      "tolerance": 5,
-      "before_expected": 0,
-      "trigger_spell": 500459,
-      "target": "dummy",
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          23265,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 500237,
-        "target": "dummy"
-      },
-      "wait_ms": 23000,
-      "expire_ms": 500,
-      "observe_source": "As the Shadow damage entry, with Increase Shadow Dam 69 23265 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, +69) on the caster: the tooltip's total, 5 x (126 + 69 x 0.169175) = 688.4 (NecromancerCoefficients row {500237, 0, 0.169175, 32}); the tolerance 5 covers the engine's truncation of each of five hits (at most 1 each). The server adds the cast hit (6 hits)."
-    },
-    {
-      "spell": 500459,
-      "name": "Blight (five ticks)",
-      "kind": "metric_delta",
-      "variant": "ticks",
-      "label_suffix": "ticks",
-      "quote": "Shadow damage over",
-      "expected": 5,
-      "before_expected": 0,
-      "trigger_spell": 500459,
-      "target": "dummy",
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 500237,
-        "target": "dummy"
-      },
-      "wait_ms": 23000,
-      "expire_ms": 500,
-      "observe_source": "The same cast, counting the 500237 hits on the dummy past the expiry (23000 ms after the cast step): the tooltip's ($d*1000/$t1) = 5 hits, judged as stated; the server adds the initial Effect[2] hit."
-    },
+    {"spell": 500459, "name": "Blight (Shadow damage over the duration)", "kind": "metric_delta", "variant": "shadow_total", "label_suffix": "shadow_total", "quote": "Shadow damage over", "expected": 756, "before_expected": 0, "trigger_spell": 500459, "target": "dummy", "cast_in_before": false, "phase_auras": [[984954, 1, "caster", "caster"], [823764, 1, "caster", "caster"]], "metric": "spell_damage_total", "fields": {"spell": 500237, "target": "dummy"}, "wait_ms": 23000, "expire_ms": 500, "observe_source": "500459 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, BasePoints 125 + 1 = 126 ($m1), Amplitude 4000 ($t1), DurationIndex 18 (20000 ms, $d): every tick casts Blight 500237 with the value at the target, so ($d*1000/$t1) x $m1 = 5 x 126 = 630 at spell power 0 over the duration, the tooltip's stated total, judged as stated (mentor, 2026-11-13); the server adds the Effect[2] 142 hit of 126 at the cast (Blight (initial hit) entry), 756 in all, as live does (6 hits of 500237 per full-duration application on the target in 27 of 42 live applications, 2026-08-16 log). 984954 (spell crit -1000) and 823764 (-9999 target resistance) on the caster remove crits and partial resists. Blight casts in 2000 ms (CastingTimeIndex 5); its Effect[2] 142 hits once at the cast, then the aura ticks until it expires 20000 ms later. No cast (control): 0; one real cast: 630 on the dummy, read 23000 ms after the cast step, past the expiry. Cycle 2 F2: expected from the streamed text (owner text items 4 and 5, Q-b3b-2 (a), Q-b3b-3 (a)): the 5 ticks of ${($d*1000/$t1)*($m1+0+$SP*0.169175)} plus one ${$m1+0+$SP*0.169175} hit when cast, 6 hits of 126 at SP 0; the expunge $500459s2 = 670."},
+    {"spell": 500459, "name": "Blight (Shadow damage with spell power)", "kind": "metric_delta", "variant": "shadow_total_sp", "label_suffix": "shadow_total_sp", "quote": "Shadow damage over", "expected": 826.08, "tolerance": 5, "before_expected": 0, "trigger_spell": 500459, "target": "dummy", "cast_in_before": false, "phase_auras": [[984954, 1, "caster", "caster"], [823764, 1, "caster", "caster"], [23265, 1, "caster", "caster"]], "metric": "spell_damage_total", "fields": {"spell": 500237, "target": "dummy"}, "wait_ms": 23000, "expire_ms": 500, "observe_source": "As the Shadow damage entry, with Increase Shadow Dam 69 23265 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, +69) on the caster: the tooltip's total, 5 x (126 + 69 x 0.169175) = 688.4 (NecromancerCoefficients row {500237, 0, 0.169175, 32}); the tolerance 5 covers the engine's truncation of each of five hits (at most 1 each). The server adds the cast hit (6 hits). Cycle 2 F2: expected from the streamed text (owner text items 4 and 5, Q-b3b-2 (a), Q-b3b-3 (a)): the 5 ticks of ${($d*1000/$t1)*($m1+0+$SP*0.169175)} plus one ${$m1+0+$SP*0.169175} hit when cast, 6 hits of 126 at SP 0; the expunge $500459s2 = 670. With the SP fixture: 6 x (126 + 69.04 x 0.169175 = 137.68) = 826.08 before the per-hit int32 truncation (6 x 137 = 822), inside the entry's tolerance of 5."},
+    {"spell": 500459, "name": "Blight (five ticks)", "kind": "metric_delta", "variant": "ticks", "label_suffix": "ticks", "quote": "Shadow damage over", "expected": 6, "before_expected": 0, "trigger_spell": 500459, "target": "dummy", "cast_in_before": false, "phase_auras": [[984954, 1, "caster", "caster"], [823764, 1, "caster", "caster"]], "metric": "spell_damage_count", "fields": {"spell": 500237, "target": "dummy"}, "wait_ms": 23000, "expire_ms": 500, "observe_source": "The same cast, counting the 500237 hits on the dummy past the expiry (23000 ms after the cast step): the tooltip's ($d*1000/$t1) = 5 hits, judged as stated; the server adds the initial Effect[2] hit. Cycle 2 F2: expected from the streamed text (owner text items 4 and 5, Q-b3b-2 (a), Q-b3b-3 (a)): the 5 ticks of ${($d*1000/$t1)*($m1+0+$SP*0.169175)} plus one ${$m1+0+$SP*0.169175} hit when cast, 6 hits of 126 at SP 0; the expunge $500459s2 = 670."},
     {
       "spell": 500459,
       "name": "Blight (no expunge before the duration)",
@@ -10131,42 +10008,7 @@
       "expire_ms": 500,
       "observe_source": "As the held entry, read 23500 ms after the cast step (1500 ms past the expiry): one 500267 hit, so the expunge lands at the expiry of the 20000 ms aura. No cast (control): none."
     },
-    {
-      "spell": 500459,
-      "name": "Blight (expunge damage)",
-      "kind": "metric_delta",
-      "variant": "expunge_damage",
-      "label_suffix": "expunge_damage",
-      "quote": "the blight expunges from the target dealing $500459s2 Nature damage.",
-      "expected": 128.1,
-      "tolerance": 1,
-      "before_expected": 0,
-      "trigger_spell": 500459,
-      "target": "dummy",
-      "cast_in_before": false,
-      "phase_auras": [
-        [
-          984954,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_damage_total",
-      "fields": {
-        "spell": 500267,
-        "target": "dummy"
-      },
-      "wait_ms": 23500,
-      "expire_ms": 500,
-      "observe_source": "The tooltip's $500217s2 is rank 1's Effect[1]: BasePoints 92 + 1 = 93 plus RealPointsPerLevel 2.19375 x (MaxLevel 30 - BaseLevel 14) = 128.1. The server casts 500267 with Amount(<rank>, 1) (AscensionNecromancerAuras.cpp:233), this rank's own Effect[1] (500459: BasePoints 669 + 1 = 670). Expected the tooltip's 128.1; the measured hit decides between the two."
-    },
+    {"spell": 500459, "name": "Blight (expunge damage)", "kind": "metric_delta", "variant": "expunge_damage", "label_suffix": "expunge_damage", "quote": "the blight expunges from the target dealing $500459s2 Nature damage.", "expected": 670, "tolerance": 1, "before_expected": 0, "trigger_spell": 500459, "target": "dummy", "cast_in_before": false, "phase_auras": [[984954, 1, "caster", "caster"], [823764, 1, "caster", "caster"]], "metric": "spell_damage_total", "fields": {"spell": 500267, "target": "dummy"}, "wait_ms": 23500, "expire_ms": 500, "observe_source": "The tooltip's $500217s2 is rank 1's Effect[1]: BasePoints 92 + 1 = 93 plus RealPointsPerLevel 2.19375 x (MaxLevel 30 - BaseLevel 14) = 128.1. The server casts 500267 with Amount(<rank>, 1) (AscensionNecromancerAuras.cpp:233), this rank's own Effect[1] (500459: BasePoints 669 + 1 = 670). Expected the tooltip's 128.1; the measured hit decides between the two. Cycle 2 F2: expected from the streamed text (owner text items 4 and 5, Q-b3b-2 (a), Q-b3b-3 (a)): the 5 ticks of ${($d*1000/$t1)*($m1+0+$SP*0.169175)} plus one ${$m1+0+$SP*0.169175} hit when cast, 6 hits of 126 at SP 0; the expunge $500459s2 = 670."},
     {
       "spell": 500459,
       "name": "Blight (nearby enemies)",
