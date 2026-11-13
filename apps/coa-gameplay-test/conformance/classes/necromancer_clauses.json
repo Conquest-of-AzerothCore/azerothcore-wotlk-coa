@@ -4955,8 +4955,7 @@
       {
         "claim": "dealing ${$500365m2+$SP*.33} Plague damage to nearby enemies",
         "labels": [
-          "805197 script_hit 500365 raised",
-          "805197 behaviour_hit_ratio spell_power"
+          "805197 script_hit 500365 raised"
         ]
       },
       {
@@ -4967,7 +4966,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats). Claim 'periodically raising the Undead from the ground ... and creating a corpse': open, route pending: each 500365 summons a Risen Ghoul 542065 that kills itself after 500 ms (AscensionNecromancerSummons.cpp:561-565, 851-855); owned_creature_count reads living summons only; route: a dead-creature count near the dummy."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick, bindmysoul, coabuildhub nothing found; coa-obtainable: not in the live capture; logs: 805197 aura on creatures modal 20 s, 500365 hits from Tombstones median 427 (live stats). Claim 'periodically raising the Undead from the ground ... and creating a corpse': open, route pending: each 500365 summons a Risen Ghoul 542065 that kills itself after 500 ms (AscensionNecromancerSummons.cpp:561-565, 851-855); owned_creature_count reads living summons only; route: a dead-creature count near the dummy. Spell-power term (review I-3): open: the +220 fixture Power of the Ashtongue 1140480 lasts 5000 ms (DurationIndex 28), shorter than a graveyard's 20000 ms of tombstone pulses (every 3000 ms), so the arms mix pulses with and without it (pairs rv2 and rv3c read 236 and 226 for 199 -> 271.6); route: a lasting spell-power fixture."
   },
   {
     "spell": 805197,

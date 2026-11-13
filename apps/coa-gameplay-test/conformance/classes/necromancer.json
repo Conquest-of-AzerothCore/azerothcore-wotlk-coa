@@ -1421,50 +1421,6 @@
       "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$SP*.5971}: the coefficient row {803779, 0, 0.5971, Frost} (AscensionNecromancerData.h:82) adds 0.5971 x 220 = 131.4 per tick: mean 314.5 (311 plus the 1-6 die) -> 445.9, ratio 1.4177."
     },
     {
-      "spell": 805197,
-      "name": "Graveyard (spell power)",
-      "kind": "hit_ratio",
-      "variant": "spell_power",
-      "label_suffix": "spell_power",
-      "quote": "Plague damage to nearby enemies",
-      "expected": 1.364322,
-      "observe_spell": 500365,
-      "cast_spell": 805197,
-      "cast_wait_ms": 11500,
-      "cast_power": 1373,
-      "control": {
-        "auras": [
-          [
-            984954,
-            1
-          ],
-          [
-            823764,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            984954,
-            1
-          ],
-          [
-            823764,
-            1
-          ],
-          [
-            1140480,
-            1
-          ]
-        ]
-      },
-      "critical": false,
-      "trials": 12,
-      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$500365m2+$SP*.33}: the coefficient row {500365, 1, 0.33, Shadow} (AscensionNecromancerData.h:19) adds 0.33 x 220 = 72.6: 199 -> 271.6, ratio 1.3643. Each trial waits 11500 ms (what one scenario holds at the pilot's 20 trials): a first design at 6500 ms let the control arm's tombstones keep pulsing well into the treatment arm (pair rv2 pilot: 236.2, a mix of 199 and 271); at 11500 ms only the control's last graveyard overlaps the first treatment trial for about 8500 ms, a share of about 1% of the treatment hits."
-    },
-    {
       "spell": 500329,
       "name": "Raise: Gargoyle (Command damage, two diseases)",
       "kind": "script_hit",
