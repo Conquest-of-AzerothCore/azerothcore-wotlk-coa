@@ -2410,20 +2410,37 @@
   {
     "spell": 503640,
     "clause": "Disease an enemy dealing ${$m1+0+$sps*0.25} Plague damage every $T1 sec",
-    "labels": [
-      "503640 effect_value e0 #0",
-      "503640 aura_amount e0 #0",
-      "503640 effect_value #5"
+    "claims": [
+      {
+        "claim": "Disease an enemy dealing ${$m1+0+$sps*0.25} Plague damage",
+        "labels": [
+          "503640 hit_mean"
+        ]
+      },
+      {
+        "claim": "every $T1 sec",
+        "labels": [
+          "503640 behaviour_metric_delta haste"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 503640,
     "clause": "and reduces the targets Holy healing received by $s3% for $d.",
-    "labels": [
-      "503640 effect_value e2 #1",
-      "503640 aura_amount e2 #1",
-      "503640 aura_duration_ms #2"
+    "claims": [
+      {
+        "claim": "and reduces the targets Holy healing received by $s3%",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "503640 behaviour_metric_delta lasts",
+          "503640 behaviour_metric_delta ends"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2447,7 +2464,7 @@
     "spell": 503640,
     "clause": "@ext:Periodic damage dealt by this benefits from your spell haste.:ext@",
     "labels": [
-      "503640 effect_value #6"
+      "503640 behaviour_metric_delta haste"
     ],
     "kind": "claim"
   },
@@ -3248,23 +3265,59 @@
   {
     "spell": 504901,
     "clause": "Raise a Greater Skeletal Warrior to aid you in combat, occupying 1 Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Raise a Greater Skeletal Warrior to aid you in combat",
+        "labels": [
+          "504901 behaviour_metric_delta raise"
+        ]
+      },
+      {
+        "claim": "occupying 1 Life Force",
+        "labels": [
+          "504901 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 504901,
     "clause": "Command: Strikes an enemy in front of it and deals Weapon Damage plus ${$570042m2+($SP*.35)*0.39},",
-    "labels": [
-      "504901 effect_value 570042e1 #0"
+    "claims": [
+      {
+        "claim": "Command: Strikes an enemy in front of it",
+        "labels": [
+          "504901 behaviour_metric_delta command_pierced"
+        ]
+      },
+      {
+        "claim": "and deals Weapon Damage plus ${$570042m2+($SP*.35)*0.39}",
+        "labels": [
+          "504901 effect_value 570042e1 #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 504901,
     "clause": "reducing their Armor by $570216s1% for $570216d,",
-    "labels": [
-      "504901 effect_value 570216e0 #1",
-      "504901 spell_duration 570216 #2"
+    "claims": [
+      {
+        "claim": "reducing their Armor by $570216s1%",
+        "labels": [
+          "504901 behaviour_metric_delta pierced_armor",
+          "504901 behaviour_metric_delta command_pierced"
+        ]
+      },
+      {
+        "claim": "for $570216d",
+        "labels": [
+          "504901 behaviour_cast_applies_aura",
+          "504901 behaviour_expiry"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3272,7 +3325,7 @@
     "spell": 504901,
     "clause": "stacking $570216u times.",
     "labels": [
-      "504901 max_stacks 570216 #3"
+      "504901 behaviour_metric_delta pierced_stacks"
     ],
     "kind": "claim"
   },
@@ -3302,7 +3355,20 @@
   {
     "spell": 500983,
     "clause": "Your undead minions assume a passive behavior and will not attack enemies or cast spells.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Your undead minions assume a passive behavior and will not attack enemies",
+        "labels": [
+          "500983 behaviour_metric_delta no_attack"
+        ]
+      },
+      {
+        "claim": "or cast spells",
+        "labels": [
+          "500983 behaviour_metric_delta no_spells"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
@@ -3315,7 +3381,9 @@
     "spell": 500983,
     "clause": "@ext:Only 1 Undead Stance can be active at a time.:ext@",
     "labels": [
-      "500983 effect_value #0"
+      "500983 behaviour_exclusivity",
+      "500982 behaviour_exclusivity",
+      "500985 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
@@ -3492,8 +3560,26 @@
   {
     "spell": 681529,
     "clause": "Activate a Bone Ward on yourself and your Undead minions for $d.",
-    "labels": [
-      "681529 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Activate a Bone Ward on yourself",
+        "labels": [
+          "681529 behaviour_cast_applies_aura",
+          "681529 behaviour_expiry"
+        ]
+      },
+      {
+        "claim": "and your Undead minions",
+        "labels": [
+          "681529 behaviour_metric_delta minions"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "681529 behaviour_expiry"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3501,8 +3587,7 @@
     "spell": 681529,
     "clause": "While active, Armor is increased by $s2%",
     "labels": [
-      "681529 effect_value e1 #1",
-      "681529 aura_amount e1 #1"
+      "681529 behaviour_metric_delta armor"
     ],
     "kind": "claim"
   },
@@ -3510,16 +3595,32 @@
     "spell": 681529,
     "clause": "and Stamina by $s3%",
     "labels": [
-      "681529 effect_value e2 #2",
-      "681529 aura_amount e2 #2"
+      "681529 behaviour_metric_delta stamina"
     ],
     "kind": "claim"
   },
   {
     "spell": 681529,
     "clause": "and melee and ranged damage taken reduces the target's attack power by ${-($704706m1+$704706ppl1)}.",
-    "labels": [
-      "681529 effect_value 704706e0 #3"
+    "claims": [
+      {
+        "claim": "melee damage taken reduces the target's attack power",
+        "labels": [
+          "681529 trigger_count 16827"
+        ]
+      },
+      {
+        "claim": "ranged damage taken reduces the target's attack power",
+        "labels": [
+          "681529 trigger_count 4164"
+        ]
+      },
+      {
+        "claim": "by ${-($704706m1+$704706ppl1)}",
+        "labels": [
+          "681529 behaviour_metric_delta attack_power"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3527,7 +3628,9 @@
     "spell": 681529,
     "clause": "@ext:Only 1 Ward can be active at a time.:ext@",
     "labels": [
-      "681529 effect_value #4"
+      "681529 behaviour_exclusivity",
+      "680388 behaviour_exclusivity",
+      "681460 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
@@ -3570,8 +3673,24 @@
   {
     "spell": 804681,
     "clause": "Animate a Skeletal Smith that can repair the equipment of allies for $d.",
-    "labels": [
-      "804681 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "Animate a Skeletal Smith",
+        "labels": [
+          "804681 behaviour_metric_delta lasts"
+        ]
+      },
+      {
+        "claim": "that can repair the equipment of allies",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804681 behaviour_metric_delta lasts",
+          "804681 behaviour_metric_delta ends"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3679,15 +3798,45 @@
   {
     "spell": 500969,
     "clause": "Raise a Skeletal Rogue to aid you in combat, occupying 1 Life Force.",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "Raise a Skeletal Rogue to aid you in combat",
+        "labels": [
+          "500969 behaviour_metric_delta raise"
+        ]
+      },
+      {
+        "claim": "occupying 1 Life Force",
+        "labels": [
+          "500969 behaviour_metric_delta life_force"
+        ]
+      }
+    ],
     "kind": "claim"
   },
   {
     "spell": 500969,
     "clause": "Has a chance to apply Decaying Poison on hit, reducing the target's casting speed by $805024s1% for $805024d,",
-    "labels": [
-      "500969 effect_value 805024e0 #0",
-      "500969 spell_duration 805024 #1"
+    "claims": [
+      {
+        "claim": "Has a chance to apply Decaying Poison on hit",
+        "labels": [
+          "500969 behaviour_metric_delta poison_chance"
+        ]
+      },
+      {
+        "claim": "reducing the target's casting speed by $805024s1%",
+        "labels": [
+          "500969 behaviour_metric_delta poison_speed"
+        ]
+      },
+      {
+        "claim": "for $805024d",
+        "labels": [
+          "500969 behaviour_cast_applies_aura",
+          "500969 behaviour_expiry"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3695,7 +3844,7 @@
     "spell": 500969,
     "clause": "stacking $805024u times.",
     "labels": [
-      "500969 max_stacks 805024 #2"
+      "500969 behaviour_metric_delta poison_stacks"
     ],
     "kind": "claim"
   },

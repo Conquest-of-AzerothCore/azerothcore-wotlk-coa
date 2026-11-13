@@ -1079,6 +1079,46 @@
         "source": "player_class_stats class 23 level 60 BaseMana 1373: covers the base-mana percentage cost of Unholy Frenzy 805029 (15%)"
       },
       "observe_source": "AscensionNecromancerEvents.cpp:206-212: with 704721 known, a Frost or Physical damage event of a minion reduces Unholy Frenzy 805029 by |Amount(302597)| (302597 BasePoints -501 + 1 = 500 ms, $/1000;302597S1) plus 1000 ms per Abomination 50068 or Decaying Colossus 50115 minion, at most once per 1000 ms (State cooldown 704721). Each cast of 805029 with 704721 known raises 5 Greater Zombies for 15 s (AscensionNecromancerAbilities.cpp:346-353), whose hits share that 1000 ms gate; each window starts 17000 ms after the cast, once they have expired, so only the Ghoul (Physical melee, one swing per 2000 ms, above the 1000 ms gate) acts in it"
+    },
+    {
+      "aura": 681529,
+      "name": "Bone Ward (melee)",
+      "tooltip": "Activate a |cffffffffBone Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, Armor is increased by $s2% and Stamina by $s3% and melee and ranged damage taken reduces the target's attack power by ${-($704706m1+$704706ppl1)}.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
+      "trigger": {
+        "action": "taken_hit",
+        "spell": 16827,
+        "striker_entry": 36
+      },
+      "aura_cast": true,
+      "trigger_text": "melee and ranged damage taken",
+      "trigger_spell_text": "Claw (Pet)",
+      "trial_metric": "spell_damage_count",
+      "observe_spell": 707669,
+      "observe_source": "EffectTriggerSpell[0] of 681529",
+      "observe_note": "681529 Effect[0] aura 42 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61); the event script casts 707669 from the caster at the attacker for every melee or ranged damage the ward holder takes (AscensionNecromancerEvents.cpp:87-92). The striker's Claw (Pet) 16827 is a DmgClass 2 (melee) Physical hit (PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS)",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "melee and ranged damage taken reduces the target's attack power"
+    },
+    {
+      "aura": 681529,
+      "name": "Bone Ward (ranged)",
+      "tooltip": "Activate a |cffffffffBone Ward|r on yourself and your Undead minions for $d.\r\n\r\nWhile active, Armor is increased by $s2% and Stamina by $s3% and melee and ranged damage taken reduces the target's attack power by ${-($704706m1+$704706ppl1)}.\r\n\r\n@ext:Only 1 |cffffffffWard|r can be active at a time.:ext@",
+      "trigger": {
+        "action": "taken_hit",
+        "spell": 4164,
+        "striker_entry": 36
+      },
+      "aura_cast": true,
+      "trigger_text": "melee and ranged damage taken",
+      "trigger_spell_text": "Throw Rock",
+      "trial_metric": "spell_damage_count",
+      "observe_spell": 707669,
+      "observe_source": "EffectTriggerSpell[0] of 681529",
+      "observe_note": "681529 Effect[0] aura 42 is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:57-61); the event script casts 707669 from the caster at the attacker for every melee or ranged damage the ward holder takes (AscensionNecromancerEvents.cpp:87-92). The striker's Throw Rock 4164 is a DmgClass 3 (ranged) Physical hit (PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS)",
+      "observe_metric": "spell_cast_count",
+      "per_trigger": 1,
+      "per_trigger_text": "melee and ranged damage taken reduces the target's attack power"
     }
   ],
   "talent_modifiers": [],
@@ -2215,6 +2255,640 @@
       "after_casts": [[500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"], [500237, "dummy"]],
       "after_wait_ms": 1500,
       "observe_source": "AscensionNecromancerEvents.cpp:130-131: an own Blight 500237 hit (periodic by id, :80-81) with Chance(player, 561353) ($h 5, ProcChance of 561353) removes Corpse Explosion 533236's cooldown (Reduce with INT32_MAX: RemoveSpellCooldown, AscensionNecromancer.cpp:214-220). Corpse Explosion (RecoveryTime 60000 ms) is primed, 300 Blight 500237 hits (cast directly, no global cooldown) land on the dummy 1500 ms later, and Corpse Explosion is attempted 500 ms after them: refused without 561353 (SPELL_FAILED_NOT_READY 67), through with it. At 5% per hit, no reset in 300 hits has probability 0.95^300 = 2.1e-7 per run; the chance itself is a data value (561353 ProcChance), the reset is the behaviour."
+    },
+    {
+      "spell": 681529,
+      "name": "Bone Ward",
+      "kind": "cast_applies_aura",
+      "quote": "Activate a Bone Ward on yourself and your Undead minions for $d",
+      "expected_ms": 1800000,
+      "applied_aura": 681529,
+      "target": "caster",
+      "cast_spell": 681529,
+      "cast_target": "caster",
+      "observe_source": "681529 DurationIndex 30 (1800000 ms, $d), its own aura on the caster (Effect[0] and Effect[1] TARGET_UNIT_CASTER; Effect[2] 190 rewritten to SPELL_EFFECT_APPLY_AURA, AscensionNecromancerContracts.cpp:209-210). A real cast of 681529, read on the caster before the cast (absent) and right after it, and its expiry pair around 1800000 ms on the accelerated clock."
+    },
+    {
+      "spell": 681529,
+      "name": "Bone Ward",
+      "kind": "stat_gain",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "While active, Armor is increased by $s2%",
+      "cast_spell": 681529,
+      "cast_target": "caster",
+      "metric": "armor",
+      "clear_auras": [
+        681529
+      ],
+      "wait_ms": 500,
+      "terms": [
+        {
+          "coefficient": 0.5,
+          "reads": [
+            {
+              "metric": "armor"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "reference"
+        },
+        {
+          "name": "armor",
+          "auras": [
+            [
+              11348,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "681529 Effect[1] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints 49 DieSides 1 (50, $s2), TARGET_UNIT_CASTER: a TOTAL_PCT modifier of UNIT_MOD_ARMOR, so the armor read before the cast gains 50% of itself. The caster's armor is read before and after a real cast of 681529 (its aura removed first), at the reference armor and with Greater Armor 11348 (aura 22, +450 armor, a precondition fixture by harness set_aura) set, so the gain follows the armor; the reading before each cast is the no-ward control (ADR 0213)."
+    },
+    {
+      "spell": 681529,
+      "name": "Bone Ward (Stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "and Stamina by $s3%",
+      "expected": 74,
+      "before_expected": 68,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 681529,
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "681529 Effect[2] (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS rewritten to SPELL_EFFECT_APPLY_AURA on the caster, AscensionNecromancerContracts.cpp:209-210) aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue 2 (Stamina), BasePoints 9 DieSides 1 (10, $s3). The reference Stamina 68 (class file reference_stats) is read with no cast, then after a real cast: Player::UpdateStats stores int32(68 x 1.1f) = int32(74.8) = 74 (the percent-path truncation of G-26 / ADR 0141)."
+    },
+    {
+      "spell": 681529,
+      "name": "Bone Ward (minions)",
+      "kind": "metric_delta",
+      "variant": "minions",
+      "label_suffix": "minions",
+      "quote": "Activate a Bone Ward on yourself and your Undead minions",
+      "expected": 2,
+      "before_expected": 0,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "setup_casts": [
+        681529
+      ],
+      "setup_wait_ms": 1000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 681529,
+        "caster": "caster"
+      },
+      "wait_ms": 3000,
+      "expire_ms": 1000,
+      "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:109-121): when 681529 applies to the caster it adds a copy (WardMinionEffectMask, AscensionNecromancer.h:98-107) to every minion; a minion raised while the ward is up gets the copy at its summon (AscensionNecromancerSummons.cpp:532-538). The Ghouls 50073 carrying 681529 from the caster are counted: one Ghoul raised without the ward reads 0 (the control); then Bone Ward is cast (the first Ghoul still up) and a second Ghoul raised, so both carry it: 2 (Life Force capacity 2, a Ghoul occupies 1, AscensionNecromancer.cpp:93-104)."
+    },
+    {
+      "spell": 681529,
+      "name": "Bone Ward (attack power)",
+      "kind": "metric_delta",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "reduces the target's attack power by ${-($704706m1+$704706ppl1)}",
+      "expected": 578,
+      "before_expected": 801,
+      "expected_gain": -223,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 707669,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "attack_power",
+      "fields": {},
+      "phase_auras": [
+        [
+          56412,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Bone Toss 707669 (the spell AscensionNecromancerEvents.cpp:87-92 casts from the caster at the attacker of a ward holder) Effect[0] 64 triggers 704706: Effect[0] aura 344 rewritten to SPELL_AURA_MOD_ATTACK_POWER (AscensionNecromancerContracts.cpp:127-128), BasePoints -24 DieSides 1, RealPointsPerLevel -4 from SpellLevel 10: at caster level 60, -24 - 4 x 50 + 1 = -223 (${-($704706m1+$704706ppl1)} = 223). The dummy (Harvest Golem 36 at level 60) carries AP Test 56412 (aura 99, +801 attack power, a precondition fixture by harness set_aura in both phases, so the reading starts above 223 and the metric's floor of 0 cannot hide the reduction; without it the dummy read 38 / 42 and 0 in pair 20261112-235807 / -235926). Its attack power is read with no cast and after one real 707669 cast by the caster at it: the gain must be -223 (expected_gain, ADR 0380). The trigger from damage taken is proven by the 681529 trigger_count entries."
+    },
+    {
+      "spell": 500983,
+      "name": "Undead: Pacify (no attack)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "Your undead minions assume a passive behavior and will not attack enemies",
+      "expected": 1,
+      "before_expected": 1,
+      "expected_gain": 0,
+      "trigger_spell": 500983,
+      "target": "dummy",
+      "attack_swings": 4,
+      "gate_cast": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Undead: Pacify 500983 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-186): while the caster holds it, npc_ascension_necromancer::Pacified (AscensionNecromancerSummons.cpp:497-500) stops the minion's attacks and casts and necromancer_defense::CanUnitAttack refuses a minion's attack (AscensionNecromancerEvents.cpp:355-361); Effect[1] 190 puts aura 60 SPELL_AURA_MOD_PACIFY_SILENCE on the summons. A Ghoul 50073 is raised once; the caster auto-attacks the dummy for 4 swing intervals and the REACT_DEFENSIVE Ghoul joins it: at least 1 Ghoul hit (the control, no stance). Pacify is then cast and the caster attacks again for 4 swing intervals: the Ghoul adds no hit (a gain of 0, ADR 0380)."
+    },
+    {
+      "spell": 500983,
+      "name": "Undead: Pacify (no spells)",
+      "kind": "metric_delta",
+      "variant": "no_spells",
+      "label_suffix": "no_spells",
+      "quote": "and will not attack enemies or cast spells.",
+      "expected": 1,
+      "before_expected": 1,
+      "expected_gain": 0,
+      "trigger_spell": 500983,
+      "target": "dummy",
+      "attack_swings": 6,
+      "gate_cast": true,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50075
+      },
+      "observe_source": "Undead: Pacify 500983 (DurationIndex forced to 21, permanent, AscensionNecromancerContracts.cpp:182-186): while the caster holds it, npc_ascension_necromancer::Pacified (AscensionNecromancerSummons.cpp:497-500) stops the minion's attacks and casts; Effect[1] 190 puts aura 60 SPELL_AURA_MOD_PACIFY_SILENCE on the summons. A Skeletal Mage 50075 (Raise: Skeletal Mage 500331, a ranged caster) is raised once; the caster auto-attacks the dummy for 6 swing intervals and the Mage casts at it: at least 1 Mage spell hit (the control, no stance). Pacify is then cast and the caster attacks again for 6 swing intervals: the Mage adds no hit (a gain of 0, ADR 0380)."
+    },
+    {
+      "spell": 500983,
+      "name": "Undead: Pacify",
+      "kind": "exclusivity",
+      "quote": "Only 1 Undead Stance can be active at a time.",
+      "chain": [
+        500983,
+        500982,
+        500985
+      ],
+      "wait_ms": 3500,
+      "observe_source": "aura_ascension_necromancer_lifecycle (AscensionNecromancerAuras.cpp:83-95): when Undead: Assault 500982, Undead: Pacify 500983 or Undead: Protect 500985 applies to the caster it removes the other two from the caster and its minions. Each stance is cast in turn, starting from Pacify and looping back to it, 3500 ms apart: the stances share StartRecoveryCategory 222 with StartRecoveryTime 3000 (a 1500 ms spacing refused every second cast, pair 20261113-000828 / -000904)."
+    },
+    {
+      "spell": 500983,
+      "name": "Undead: Pacify (without Putrid Summoner)",
+      "kind": "taken_hit",
+      "variant": "without_560595",
+      "label_suffix": "without_560595",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "$?s560595[ Reduces your damage taken by $560595s2%.][]",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              500983,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:330-337) takes 10% off the damage the caster takes only while it knows Putrid Summoner 560595 and holds Undead: Pacify 500983. Without 560595 ($?s560595 false, the text shows nothing): a real Pacify cast leaves the damage of Light of the Naaru 41394 (Holy, fixed 1100) unchanged, 1.0 against the control arm without the stance. The caster is held at 100000 health; non-critical hits."
+    },
+    {
+      "spell": 560595,
+      "name": "Putrid Summoner (Undead: Pacify)",
+      "kind": "taken_hit",
+      "variant": "pacify",
+      "label_suffix": "pacify",
+      "judge": "damage_ratio",
+      "expected": 0.9,
+      "quote": "Undead: Pacify: Reduces your damage taken by $s2%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "learn": [
+        560595
+      ],
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              500983,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "560595 Effect[1] aura 107 (rewritten to SPELL_AURA_DUMMY with every effect of 560595, AscensionNecromancerContracts.cpp:144-146), BasePoints -11 DieSides 1 ($s2 = 10 shown as a reduction). necromancer_defense::OnDamage (AscensionNecromancerEvents.cpp:330-337) takes CalculatePct(damage, 10) off the damage the caster takes while it knows 560595 and holds Undead: Pacify 500983. With 560595 learned, a real Pacify cast: Light of the Naaru 41394 (Holy, fixed 1100) deals 990 against 1100 in the control arm without the stance, 0.9. The caster is held at 100000 health; non-critical hits."
+    },
+    {
+      "spell": 804681,
+      "name": "Animate: Skeletal Smith (lasts)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Animate a Skeletal Smith that can repair the equipment of allies for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 56000,
+      "after_expiry_expected": 1,
+      "trigger_spell": 804681,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50261
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804681 Effect[0] SPELL_EFFECT_SUMMON of creature 50261 (Skeletal Smith), DurationIndex 3 (60000 ms, $d); spell_ascension_necromancer_summon (AscensionNecromancerSummons.cpp:890-911) summons it 3 yd in front of the caster with a timed despawn (AscensionNecromancerSummons.cpp:432). No Smith before the cast (control), 1 at 1.5 s and still 1 at 57.5 s after the cast."
+    },
+    {
+      "spell": 804681,
+      "name": "Animate: Skeletal Smith (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "Animate a Skeletal Smith that can repair the equipment of allies for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 61000,
+      "after_expiry_expected": 0,
+      "trigger_spell": 804681,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50261
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "804681 Effect[0] SPELL_EFFECT_SUMMON of creature 50261 (Skeletal Smith), DurationIndex 3 (60000 ms, $d), timed despawn (AscensionNecromancerSummons.cpp:432). 1 Smith at 1.5 s and none at 62.5 s after the cast: with the lasts entry it bounds the end between 57.5 s and 62.5 s."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue",
+      "kind": "metric_delta",
+      "variant": "raise",
+      "label_suffix": "raise",
+      "quote": "Raise a Skeletal Rogue to aid you in combat,",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 500969,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50078
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "500969 Effect[0] SPELL_EFFECT_SUMMON of creature 50078 (Skeletal Rogue), raised through spell_ascension_necromancer_summon (AscensionNecromancerSummons.cpp:890-911, AscensionNecromancerData.h:103). No Rogue before the cast (control), 1 after a real cast."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue (Life Force)",
+      "kind": "metric_delta",
+      "variant": "life_force",
+      "label_suffix": "life_force",
+      "quote": "occupying 1 Life Force.",
+      "expected": 1,
+      "before_expected": 2,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 500969,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "Cost (AscensionNecromancer.cpp:80-101): 500969 occupies 1; Sync (AscensionNecromancer.cpp:187-204) shows the free Life Force, capacity 2 (Capacity, :102-107) less the occupied total (Used, :161-171), as the stacks of 525004. 2 free with no minion (control), 1 after a real cast of 500969."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue (Decaying Poison chance)",
+      "kind": "metric_delta",
+      "variant": "poison_chance",
+      "label_suffix": "poison_chance",
+      "quote": "Has a chance to apply Decaying Poison on hit,",
+      "expected": 1,
+      "before_expected": 0,
+      "after_at_least": 1,
+      "trigger_spell": 805024,
+      "gate_spell": 500969,
+      "gate_cast": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "attack_swings": 20,
+      "expire_ms": 4000,
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 805024
+      },
+      "observe_source": "AscensionNecromancerEvents.cpp:175-176: a melee hit of the Skeletal Rogue 50078 casts Decaying Poison 805024 at its target on roll_chance_i(805023 ProcChance 40, Skeletal Rogue Passive). The caster auto-attacks the dummy for 20 swing intervals alone: no 805024 application (control). Raise: Skeletal Rogue 500969 is then cast and the caster attacks again: the Rogue joins and at least one 805024 application lands (about 20 Rogue swings at 2000 ms; a correct server reads 0 with probability about 0.6^16, under 0.03%)."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue (Decaying Poison casting speed)",
+      "kind": "metric_delta",
+      "variant": "poison_speed",
+      "label_suffix": "poison_speed",
+      "quote": "reducing the target's casting speed by $805024s1%",
+      "expected": 1.1,
+      "before_expected": 1.0,
+      "tolerance": 0.0001,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 805024,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Decaying Poison 805024 (the spell AscensionNecromancerEvents.cpp:175-176 has the Rogue cast at its target) Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints -11 DieSides 1 (-10, $805024s1 = 10): AuraEffect::HandleModCastingSpeed calls Unit::ApplyCastTimePercentMod(-10), which multiplies UNIT_MOD_CAST_SPEED by 1.1 (Unit.cpp:14913-14923): casting is 10% slower. An enemy player (race 2) reads 1.0 with no cast and 1.1 after one real 805024 cast at it; the Rogue's application is the poison_chance entry."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue (Decaying Poison)",
+      "kind": "cast_applies_aura",
+      "quote": "for $805024d,",
+      "expected_ms": 6000,
+      "applied_aura": 805024,
+      "target": "dummy",
+      "cast_spell": 805024,
+      "cast_target": "dummy",
+      "observe_source": "Decaying Poison 805024 DurationIndex 32 (6000 ms, $805024d), its aura on the target (Effect[0] TARGET_UNIT_TARGET_ENEMY). A real cast of 805024 at the dummy, read before the cast (absent) and right after it, and its expiry pair around 6000 ms; the Rogue's application is the poison_chance entry."
+    },
+    {
+      "spell": 500969,
+      "name": "Raise: Skeletal Rogue (Decaying Poison stacks)",
+      "kind": "metric_delta",
+      "variant": "poison_stacks",
+      "label_suffix": "poison_stacks",
+      "quote": "stacking $805024u times.",
+      "expected": 3,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 805024,
+      "setup_casts": [
+        805024,
+        805024,
+        805024
+      ],
+      "setup_wait_ms": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 805024
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Decaying Poison 805024 StackAmount 3 ($805024u). Four real casts of 805024 at the dummy, 1000 ms apart, inside its 6000 ms duration: the aura holds 3 stacks; none before the casts (control)."
+    },
+    {
+      "spell": 503640,
+      "name": "Plague of Undeath (period and haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Disease an enemy dealing ${$m1+0+$sps*0.25} Plague damage every $T1 sec",
+      "expected": 2083,
+      "before_expected": 2500,
+      "tolerance": 60,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "gate_spell": 12472,
+      "target": "dummy",
+      "after_auras": [
+        [
+          12472,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "event_interval_min_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 503640,
+        "caster": "caster",
+        "target": "dummy"
+      },
+      "wait_ms": 22000,
+      "expire_ms": 1000,
+      "observe_source": "503640 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 2500 ($T1 = 2.5 sec); AttributesEx5 0x2000 (SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC): AuraEffect::CalculatePeriodic scales the amplitude by the caster's UNIT_MOD_CAST_SPEED. The shortest interval between the caster's 503640 ticks on the dummy: 2500 ms over a whole cast at the reference stats (no haste); then, with Icy Veins 12472 (aura 65, +20% casting speed, a precondition fixture by harness set_aura) on the caster for the second cast, int32(2500 x 100 / 120) = 2083 ms. Tolerance 60 ms for the world-tick stamps of the damage events. Runic Power is set to 1000 before each cast: set to the 300 cost, it decays during the 1500 ms cast and the cast fails with SPELL_FAILED_NO_POWER (the hit scenarios' 10 failed casts, 20261113-002039)."
+    },
+    {
+      "spell": 503640,
+      "name": "Plague of Undeath (lasts)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "and reduces the targets Holy healing received by $s3% for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 18500,
+      "after_expiry_expected": 1,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 503640,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "Plague of Undeath 503640 (rank 6 of 801945) DurationIndex 18 (20000 ms, $d), its aura on the target. A real cast at the dummy (1500 ms cast, Runic Power set to 1000 first): absent before (control), present 500 ms after the cast lands and still present 19000 ms after it."
+    },
+    {
+      "spell": 503640,
+      "name": "Plague of Undeath (ends)",
+      "kind": "metric_delta",
+      "variant": "ends",
+      "label_suffix": "ends",
+      "quote": "and reduces the targets Holy healing received by $s3% for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expiry_wait_ms": 20500,
+      "after_expiry_expected": 0,
+      "trigger_spell": 503640,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 503640,
+        "caster": "caster"
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "Plague of Undeath 503640 DurationIndex 18 (20000 ms, $d). Present 500 ms after the cast lands and gone 21000 ms after it: with the lasts entry the end lies between 19000 and 21000 ms after the cast lands (the 1500 ms cast time of CastingTimeIndex 16 counted from the cast step)."
+    },
+    {
+      "spell": 504901,
+      "name": "Raise: Greater Skeletal Warrior",
+      "kind": "metric_delta",
+      "variant": "raise",
+      "label_suffix": "raise",
+      "quote": "Raise a Greater Skeletal Warrior to aid you in combat,",
+      "expected": 1,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 504901,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 51065
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "504901 Effect[0] SPELL_EFFECT_SUMMON of creature 51065 (Greater Skeletal Warrior), raised through spell_ascension_necromancer_summon (AscensionNecromancerSummons.cpp:890-911, AscensionNecromancerData.h:112). No Warrior before the cast (control), 1 after a real cast."
+    },
+    {
+      "spell": 504901,
+      "name": "Raise: Greater Skeletal Warrior (Life Force)",
+      "kind": "metric_delta",
+      "variant": "life_force",
+      "label_suffix": "life_force",
+      "quote": "occupying 1 Life Force.",
+      "expected": 1,
+      "before_expected": 2,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 504901,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 525004
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "Cost (AscensionNecromancer.cpp:80-101): 504901 occupies 1; Sync (AscensionNecromancer.cpp:187-204) shows the free Life Force, capacity 2 less the occupied total, as the stacks of 525004. 2 free with no minion (control), 1 after a real cast of 504901."
+    },
+    {
+      "spell": 504901,
+      "name": "Raise: Greater Skeletal Warrior (Command strike)",
+      "kind": "metric_delta",
+      "variant": "command_pierced",
+      "label_suffix": "command_pierced",
+      "quote": "Command: Strikes an enemy in front of it",
+      "expected": 1,
+      "before_expected": 0,
+      "after_at_least": 1,
+      "trigger_spell": 504905,
+      "cast_power": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        504901
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3100,
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 570216
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Command: Skeletal Warriors 504905 (Command family flag, AscensionNecromancerAbilities.cpp:376-378) orders every responding minion (Responds, AscensionNecromancerSummons.cpp:163-165: 50065 and 51065) to its target; the Greater Skeletal Warrior turns to it and casts 570042 (AscensionNecromancerSummons.cpp:679-682), and spell_ascension_necromancer_warrior_strike (AscensionNecromancerSummons.cpp:943-962) casts Pierced 570216 on the target when the strike deals damage. A Warrior is raised at the caster in both phases; no Command: no 570216 application on the dummy (control); after the Command at the dummy, at least one."
+    },
+    {
+      "spell": 504901,
+      "name": "Raise: Greater Skeletal Warrior (Pierced armor)",
+      "kind": "metric_delta",
+      "variant": "pierced_armor",
+      "label_suffix": "pierced_armor",
+      "quote": "reducing their Armor by $570216s1%",
+      "expected": 450,
+      "before_expected": 500,
+      "expected_ratio": 0.9,
+      "tolerance": 0.0025,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 570216,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "armor",
+      "fields": {},
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Pierced 570216 (the spell the Warrior's Command strike casts, AscensionNecromancerSummons.cpp:956-957) Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT, MiscValue 1 (armor), BasePoints -11 DieSides 1 (-10, $570216s1): a TOTAL_PCT factor of 0.9 on the target's armor, stored truncated. The dummy's armor (528 or 562 in earlier runs) is read with no cast and after one real 570216 cast at it: the ratio must be 0.9 within 0.0025, the truncation of an armor above 400 (expected_ratio, ADR 0380)."
+    },
+    {
+      "spell": 504901,
+      "name": "Raise: Greater Skeletal Warrior (Pierced)",
+      "kind": "cast_applies_aura",
+      "quote": "for $570216d,",
+      "expected_ms": 15000,
+      "applied_aura": 570216,
+      "target": "dummy",
+      "cast_spell": 570216,
+      "cast_target": "dummy",
+      "observe_source": "Pierced 570216 DurationIndex 8 (15000 ms, $570216d), its aura on the target. A real cast of 570216 at the dummy, read before the cast (absent) and right after it, and its expiry pair around 15000 ms; the Warrior's application is the command_pierced entry."
+    },
+    {
+      "spell": 504901,
+      "name": "Raise: Greater Skeletal Warrior (Pierced stacks)",
+      "kind": "metric_delta",
+      "variant": "pierced_stacks",
+      "label_suffix": "pierced_stacks",
+      "quote": "stacking $570216u times.",
+      "expected": 2,
+      "before_expected": 0,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 570216,
+      "setup_casts": [
+        570216,
+        570216
+      ],
+      "setup_wait_ms": 1000,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 570216
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Pierced 570216 StackAmount 2 ($570216u). Three real casts of 570216 at the dummy, 1000 ms apart, inside its 15000 ms duration: the aura holds 2 stacks; none before the casts (control)."
     }
   ],
   "player_observations": [],
