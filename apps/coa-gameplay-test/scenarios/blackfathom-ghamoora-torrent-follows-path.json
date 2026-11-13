@@ -1,0 +1,46 @@
+{
+  "schema": 1,
+  "name": "Ghamoo-ra's Torrent sweeps after an unseen walker on the ground path and hits three times as hard",
+  "contract": [
+    "Torrent (2102687) is a 20.5 s channel whose cone (2102688) follows Ghamoo-ra's (4887) facing. He used to spin on the",
+    "spot. Our tester asked for the Road boss's beam: an unseen walker (World Trigger 21252) starts on a random point of",
+    "path 4200001 around his pool and walks it on the ground, and Ghamoo-ra faces it for the whole channel, whoever hits",
+    "him. The walker is gone when the channel ends. The cone's damage is three times as high through the dungeon damage",
+    "hooks."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6, "o": 0.0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 500 },
+    { "action": "teleport", "actor": "p", "map": 48, "x": -436.0, "y": 211.8, "z": -53.0, "o": 3.1 },
+    { "action": "assert", "label": "CONTROL: p is in a Heroic Blackfathom Deeps", "actor": "p", "metric": "map_difficulty",
+      "equals": 1, "within_ms": 15000 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "set_health", "actor": "p", "value": 100000000, "maximum": 100000000 },
+    { "action": "summon", "actor": "p", "as": "ghamoora", "entry": 4887, "distance": 3 },
+    { "action": "snapshot", "actor": "p", "metric": "script_spell_damage_taken", "target": "ghamoora", "spell": 5568,
+      "save_as": "trample" },
+    { "action": "assert", "label": "The Torrent cone comes out three times as high as his Trample through the damage hooks",
+      "actor": "p", "metric": "script_spell_damage_taken", "target": "ghamoora", "spell": 2102688, "ratio_to": "trample",
+      "min": 2.95, "max": 3.05 },
+    { "action": "assert", "label": "CONTROL: no walker before the channel", "actor": "p", "metric": "nearby_creature_count",
+      "entry": 21252, "equals": 0 },
+    { "action": "attack", "actor": "p", "target": "ghamoora" },
+    { "action": "cast", "actor": "ghamoora", "spell": 2102687 },
+    { "action": "assert", "label": "A walker appears with the channel", "actor": "p", "metric": "nearby_creature_count",
+      "entry": 21252, "equals": 1, "within_ms": 1000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "Ghamoo-ra faces the walker", "actor": "p", "metric": "nearby_creature_facing_offset",
+      "entry": 4887, "target_entry": 21252, "max": 0.2 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "He still faces the walker 3 s later while p keeps hitting him",
+      "actor": "p", "metric": "nearby_creature_facing_offset", "entry": 4887, "target_entry": 21252, "max": 0.2 },
+    { "action": "assert", "label": "The walker is gone once the channel ends", "actor": "p", "metric": "nearby_creature_count",
+      "entry": 21252, "equals": 0, "within_ms": 22000 }
+  ]
+}

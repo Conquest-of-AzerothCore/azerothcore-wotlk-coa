@@ -9,6 +9,9 @@
 #include "GridNotifiersImpl.h"
 #include <cmath>
 #include "MotionMaster.h"
+#include "MoveSplineInit.h"
+#include "ObjectAccessor.h"
+#include "WaypointMgr.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "ScriptMgr.h"
@@ -26,31 +29,17 @@
 
 namespace
 {
+    constexpr uint32 TorrentPath = 4200001;
+    constexpr uint32 NpcTorrentWalker = 21252;
+    constexpr float TorrentWalkerSpeed = 7.0f;
+    constexpr uint32 TorrentLaps = 3;
+
     class spell_coa_torrent_spin : public AuraScript
     {
         PrepareAuraScript(spell_coa_torrent_spin);
 
         ReactStates _react = REACT_AGGRESSIVE;
-        float _start = 0.0f;
-        uint32 _ticks = 0;
-
-        void Start(AuraEffect const*, AuraEffectHandleModes)
-        {
-            Creature* boss = GetTarget()->ToCreature();
-            if (!boss)
-                return;
-            _react = boss->GetReactState();
-            _start = boss->GetOrientation();
-            _ticks = 0;
-            boss->SetReactState(REACT_PASSIVE);
-            boss->AttackStop();
-            boss->SetTarget();
-            boss->SetUnitFlag(UNIT_FLAG_PACIFIED);
-            boss->GetMotionMaster()->Clear();
-            boss->StopMoving();
-            boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
-            boss->SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, ObjectGuid::Empty);
-        }
+        ObjectGuid _walker;
 
         static void SendFacing(Creature* boss)
         {
@@ -60,23 +49,89 @@ namespace
             boss->SendMessageToSet(&data, false);
         }
 
-        void Turn(AuraEffect const* effect)
+        static G3D::Vector3 Ground(Creature* boss, WaypointNode const& node)
+        {
+            float const ground = boss->GetMapHeight(node.X, node.Y, node.Z + 2.0f);
+            return { node.X, node.Y, ground > INVALID_HEIGHT ? ground : node.Z };
+        }
+
+        Creature* SummonWalker(Creature* boss)
+        {
+            WaypointPath const* path = sWaypointMgr->GetPath(TorrentPath);
+            if (!path || path->Nodes.size() < 2)
+                return nullptr;
+            std::vector<WaypointNode> const& nodes = path->Nodes;
+            size_t const first = urand(0, nodes.size() - 1);
+            G3D::Vector3 const start = Ground(boss, nodes[first]);
+            Creature* walker = boss->SummonCreature(NpcTorrentWalker, start.x, start.y, start.z, 0.0f,
+                TEMPSUMMON_TIMED_DESPAWN, GetMaxDuration() + 2000);
+            if (!walker)
+                return nullptr;
+            walker->SetReactState(REACT_PASSIVE);
+            Movement::PointsArray points;
+            points.push_back(start);
+            for (size_t step = 1; step <= nodes.size() * TorrentLaps; ++step)
+            {
+                G3D::Vector3 const next = Ground(boss, nodes[(first + step) % nodes.size()]);
+                if ((next - points.back()).length() >= 0.5f)
+                    points.push_back(next);
+            }
+            Movement::MoveSplineInit init(walker);
+            init.MovebyPath(points);
+            init.SetVelocity(TorrentWalkerSpeed);
+            init.Launch();
+            return walker;
+        }
+
+        void Face(Creature* boss)
+        {
+            Creature* walker = ObjectAccessor::GetCreature(*boss, _walker);
+            if (!walker)
+                return;
+            boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
+            boss->SetOrientation(boss->GetAngle(walker));
+            SendFacing(boss);
+        }
+
+        void Start(AuraEffect const*, AuraEffectHandleModes)
         {
             Creature* boss = GetTarget()->ToCreature();
-            if (!boss || !GetMaxDuration())
+            if (!boss)
                 return;
-            ++_ticks;
-            float turned = float(_ticks * effect->GetAmplitude()) / float(GetMaxDuration()) * float(2 * M_PI);
-            float angle = Position::NormalizeOrientation(_start - turned);
+            _react = boss->GetReactState();
+            boss->SetReactState(REACT_PASSIVE);
+            boss->AttackStop();
+            boss->SetUnitFlag(UNIT_FLAG_PACIFIED);
+            boss->GetMotionMaster()->Clear();
+            boss->StopMoving();
             boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
-            boss->SetOrientation(angle);
-            SendFacing(boss);
+            boss->SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, ObjectGuid::Empty);
+            _walker.Clear();
+            if (Creature* walker = SummonWalker(boss))
+            {
+                _walker = walker->GetGUID();
+                boss->SetTarget(_walker);
+                Face(boss);
+            }
+            else
+                boss->SetTarget();
+        }
+
+        void Turn(AuraEffect const*)
+        {
+            if (Creature* boss = GetTarget()->ToCreature())
+                Face(boss);
         }
 
         void Stop(AuraEffect const*, AuraEffectHandleModes)
         {
             Creature* boss = GetTarget()->ToCreature();
-            if (!boss || !boss->IsAlive())
+            if (!boss)
+                return;
+            if (Creature* walker = ObjectAccessor::GetCreature(*boss, _walker))
+                walker->DespawnOrUnsummon();
+            _walker.Clear();
+            if (!boss->IsAlive())
                 return;
             boss->RemoveUnitFlag(UNIT_FLAG_PACIFIED);
             boss->SetReactState(_react);
