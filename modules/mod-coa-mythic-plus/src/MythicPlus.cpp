@@ -2573,8 +2573,7 @@ public:
         for (Player* target : BoonTargets(player))
         {
             uint32 const boon = MYTHICAL_BOON_ITEMS[urand(0, MYTHICAL_BOON_ITEMS.size() - 1)];
-            if (!target->AddItem(boon, 1))
-                target->SendItemRetrievalMail(boon, 1);
+            target->AddItem(boon, 1);
         }
         creature->DespawnOrUnsummon(0ms, 7 * 24h);
         return true;
