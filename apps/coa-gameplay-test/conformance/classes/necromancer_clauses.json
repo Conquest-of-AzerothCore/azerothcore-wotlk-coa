@@ -3286,7 +3286,9 @@
       {
         "claim": "increases the range of your Death spells by $s2%.",
         "labels": [
-          "707113 effect_value e1 #0"
+          "707113 effect_value e1 #0",
+          "707113 behaviour_metric_delta range_extended",
+          "707113 behaviour_metric_delta range_capped"
         ]
       }
     ],
