@@ -6,19 +6,17 @@
     "The item had no item_template row and no loot entry, so it could never drop and the objective could not be completed (issue #9053).",
     "The Armorer's one spawn is Pyrewood Armorer 3528 (faction 123, friendly to the Alliance) and turns into Moonrage Armorer 3529 (faction 24) by SmartAI, so an Alliance character can only kill the worgen form. The Exiles DB mirror of db.exil.es lists the item at 100% from the human form only; by the contributor's decision both forms drop it at 100%.",
     "Looting it below level 15 completes the objective, which the module reports with SMSG_COA_CHALLENGE_CRITERIA_UPDATED (0x59A): word 1 the challenge, word 5 the objective's item, word 6 its progress.",
-    "A level 1 Alliance character on the trial cannot attack the human form, kills a 1-health Moonrage Armorer with its own faction, loots the item and receives the completed criterion for 611 and 421531. A second character kills a human-form fixture and finds the item as well; the Armorer's SmartAI updates its entry every 5 s out of combat, which restores its template health, so the fixture is lowered to 1% just before that attack.",
+    "A level 1 Alliance character on the trial cannot attack the human form, kills a 1-health Moonrage Armorer with its own faction, loots the item and receives the completed criterion for 611 and 421531. The human form's loot template 3528 is filled 1000 times and must hold the item every time.",
     "The trial also requires Pet Rock 20030 before level 60, whose only source was pickpocketing Timbermaw Shaman 6188 (2.766%), which only Rogues, Rangers and Reapers can do. By the contributor's decision the Shaman's kill loot drops it at the same 2.766%.",
     "The kill loot is filled 100000 times: the standard deviation of the rate is about 0.05 percentage points, so the 2.5 to 3.0% window is about five deviations wide on each side (residual failure probability below one in a million), while 0% before the change cannot pass."
   ],
   "timeout_ms": 120000,
   "players": [
-    { "id": "hero", "race": 1, "class": 1, "level": 1 },
-    { "id": "other", "race": 2, "class": 1, "level": 1 }
+    { "id": "hero", "race": 1, "class": 1, "level": 1 }
   ],
   "creatures": [
     { "id": "worgen", "owner": "hero", "entry": 3529, "faction": 24, "level": 14, "health": 1, "distance": 2 },
-    { "id": "villager", "owner": "hero", "entry": 3528, "faction": 123, "level": 14, "health": 1, "distance": 8 },
-    { "id": "armorer", "owner": "other", "entry": 3528, "level": 14, "health": 1, "distance": 2 }
+    { "id": "villager", "owner": "hero", "entry": 3528, "faction": 123, "level": 14, "health": 1, "distance": 8 }
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
@@ -66,16 +64,8 @@
       "metric": "server_packet_u32", "opcode": 1434, "index": 6, "equals": 1
     },
     {
-      "action": "set_health_pct", "label": "The Armorer's out-of-combat entry update restores full health: lower it again",
-      "actor": "other", "target": "armorer", "pct": 1
-    },
-    { "action": "attack", "actor": "other", "target": "armorer" },
-    { "action": "assert", "actor": "armorer", "metric": "alive", "equals": 0, "within_ms": 30000 },
-    { "action": "wait", "ms": 500 },
-    { "action": "loot_creature", "actor": "other", "target": "armorer" },
-    {
-      "action": "assert", "label": "DISCRIMINATING: the human form drops the chain links too", "actor": "other",
-      "metric": "loot_count", "item": 421531, "equals": 1
+      "action": "assert", "label": "DISCRIMINATING: the human form's loot always holds the chain links too",
+      "actor": "hero", "metric": "creature_loot_item_rate", "entry": 3528, "item": 421531, "rolls": 1000, "equals": 100
     },
     {
       "action": "assert", "label": "DISCRIMINATING: killing a Timbermaw Shaman drops the Pet Rock at its pickpocket rate",
