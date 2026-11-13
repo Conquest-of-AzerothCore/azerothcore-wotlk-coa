@@ -146,6 +146,8 @@ BEHAVIOUR_LABELS = {
                                     f"{entry.get('label_suffix', 'pulse_targets')}"],
     'aura_window': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
                                   f"{entry.get('label_suffix', 'aura_window')}"],
+    'hit_period': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
+                                 f"{entry.get('label_suffix', 'hit_period')}"],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
                                                      *(f'after_{tick}'
