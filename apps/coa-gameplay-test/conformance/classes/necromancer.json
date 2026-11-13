@@ -1267,6 +1267,81 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 705746,
+      "name": "Life For Power (healing taken)",
+      "kind": "hit_ratio",
+      "variant": "absorb",
+      "label_suffix": "absorb",
+      "quote": "You absorb $s1% of healing taken",
+      "expected": 0.8,
+      "metric": "spell_heal_total",
+      "observe_spell": 2054,
+      "caster": "ally",
+      "target": "caster",
+      "target_health_pct": 30,
+      "control": {},
+      "treatment": {
+        "learn": [
+          705746
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Life For Power 705746 Effect[0] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB (contract, AscensionNecromancerContracts.cpp:232-233), BasePoints 19 + 1 = 20 ($s1). Unit's heal absorb (Unit.cpp:3038-3050) takes 20% of every heal the Necromancer receives (the shield cannot pass its maximum health) and casts Life For Power 707194 (aura 69 SPELL_AURA_SCHOOL_ABSORB, DurationIndex 1 = 10000 ms, $707194d) on it with the stored plus the converted amount. A grouped ally heals the Necromancer with Greater Heal 2054 (rank 1, BasePoints 165 + DieSides 22) at 30% health before every heal: control without 705746, treatment with it learned (a real learn); only non-critical heals: 0.8 of the control's heal reaches the Necromancer."
+    },
+    {
+      "spell": 705746,
+      "name": "Life For Power (shield)",
+      "kind": "metric_delta",
+      "variant": "shield",
+      "label_suffix": "shield",
+      "quote": "and gain a shield for the amount absorbed, lasting $707194d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 2054,
+      "target": "caster",
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 707194
+      },
+      "observe_source": "Life For Power 705746 Effect[0] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB (contract, AscensionNecromancerContracts.cpp:232-233), BasePoints 19 + 1 = 20 ($s1). Unit's heal absorb (Unit.cpp:3038-3050) takes 20% of every heal the Necromancer receives (the shield cannot pass its maximum health) and casts Life For Power 707194 (aura 69 SPELL_AURA_SCHOOL_ABSORB, DurationIndex 1 = 10000 ms, $707194d) on it with the stored plus the converted amount. The Necromancer heals itself with Greater Heal 2054 (1500 ms cast) at 3000 of 10000 health: without 705746 (control) no 707194; with it learned between the phases, the shield is on it."
+    },
+    {
+      "spell": 705746,
+      "name": "Life For Power (shield lasts)",
+      "kind": "metric_delta",
+      "variant": "shield_lasts",
+      "label_suffix": "shield_lasts",
+      "quote": "and gain a shield for the amount absorbed, lasting $707194d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 2054,
+      "target": "caster",
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 11000,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 707194
+      },
+      "observe_source": "Life For Power 705746 Effect[0] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB (contract, AscensionNecromancerContracts.cpp:232-233), BasePoints 19 + 1 = 20 ($s1). Unit's heal absorb (Unit.cpp:3038-3050) takes 20% of every heal the Necromancer receives (the shield cannot pass its maximum health) and casts Life For Power 707194 (aura 69 SPELL_AURA_SCHOOL_ABSORB, DurationIndex 1 = 10000 ms, $707194d) on it with the stored plus the converted amount. 705746 learned at the start; no cast (control): no shield; one self heal (lands 1500 ms after the cast starts): the shield is up 11000 ms after the cast starts (9500 ms after it lands) and gone 1000 ms later: (9500, 10500] ms."
+    },
+    {
       "spell": 801938,
       "name": "Virulency (refresh)",
       "kind": "metric_delta",
