@@ -5627,6 +5627,21 @@ private:
             Require(creature != nullptr, "Armor observation needs a present owned creature");
             return creature->GetArmor();
         }
+        if (metric == "owned_creature_health_modifier")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Health modifier observation needs a present owned creature");
+            switch (step.get<uint32>("part"))
+            {
+                case 0: return creature->GetFlatModifierValue(UNIT_MOD_HEALTH, BASE_VALUE);
+                case 1: return creature->GetPctModifierValue(UNIT_MOD_HEALTH, BASE_PCT);
+                case 2: return creature->GetFlatModifierValue(UNIT_MOD_HEALTH, TOTAL_VALUE);
+                case 3: return creature->GetPctModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
+                default:
+                    Require(false, "Health modifier part must be 0..3 (base value, base pct, total value, total pct)");
+                    return 0.0;
+            }
+        }
         if (metric == "owned_creature_max_health" || metric == "owned_creature_health")
         {
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));

@@ -110,7 +110,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
     'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms', 'owned_creature_max_health',
-    'owned_creature_health',
+    'owned_creature_health', 'owned_creature_health_modifier',
     'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
@@ -249,7 +249,7 @@ PLAYER_STAT_METRICS = {
 }
 METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
                  'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'aura_state', 'school', 'hand',
-                 'rating', 'op', 'subclass',
+                 'rating', 'op', 'subclass', 'part',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
                  'min_distance', 'owner_display', 'creator_only', 'caster_entry', 'ranged_weapon_subclass',
                  'sheath_state', 'skill',
@@ -1375,7 +1375,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
                           'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms',
                           'owned_creature_max_health',
-                          'owned_creature_health',
+                          'owned_creature_health', 'owned_creature_health_modifier',
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',
@@ -1387,6 +1387,9 @@ def validate(scenario, clock=REAL_CLOCK):
                 require('target' in step, f'{where}: metric needs the victim as target')
             if metric == 'owned_creature_resistance':
                 require('school' in step, f'{where}: metric needs the resistance school')
+            if metric == 'owned_creature_health_modifier':
+                require('part' in step, f'{where}: metric needs the health modifier part')
+                number(step['part'], f'{where}.part', 0, 3, True)
             if metric in {'owned_creature_damage_total', 'owned_creature_damage_count',
                           'owned_creature_attack_count', 'owned_creature_avoided_count',
                           'owned_creature_heal_count',
@@ -1488,7 +1491,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim', 'owned_creature_virtual_item',
                           'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms',
                           'owned_creature_max_health',
-                          'owned_creature_health',
+                          'owned_creature_health', 'owned_creature_health_modifier',
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',

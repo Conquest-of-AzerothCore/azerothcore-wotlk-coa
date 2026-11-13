@@ -1053,6 +1053,8 @@ owned creatures of that entry in the same phase and within 100 yards, so every c
 `owned_creature_armor` requires a player and a present owned creature selected by `entry`. It reads that creature's
 native `GetArmor()`, zero when absent. `owned_creature_max_health` and `owned_creature_health` read the same
 creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
+`owned_creature_health_modifier` reads the same creature's unrounded `UNIT_MOD_HEALTH` parts as floats: `part` 0
+the base value, 1 the base percent, 2 the total value, 3 the total percent (a read only, ADR 0528).
 `owned_creature_stat` reads the same creature's `GetStat(stat)` for `stat` 0 to 4 (Strength, Agility, Stamina,
 Intellect, Spirit) and requires it to be present (a read only, ADR 0480).
 `owned_creature_aura_max_duration_ms` reads the maximum duration of the aura `spell` on the same creature (0 when

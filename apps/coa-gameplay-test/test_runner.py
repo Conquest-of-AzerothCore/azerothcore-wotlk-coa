@@ -1120,6 +1120,17 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'metric needs spell'):
             run.validate(self.scenario)
 
+    def test_owned_creature_health_modifier_needs_entry_and_part(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'owned_creature_health_modifier',
+                                       'entry': 50073, 'part': 0, 'min': 0, 'max': 100000})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        self.scenario['steps'][-1]['part'] = 4
+        with self.assertRaises(ValueError):
+            run.validate(self.scenario)
+        del self.scenario['steps'][-1]['part']
+        with self.assertRaisesRegex(ValueError, 'metric needs the health modifier part'):
+            run.validate(self.scenario)
+
     def test_pet_aura_amount_needs_spell(self):
         self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'pet_aura_amount',
                                        'spell': 500939, 'effect': 1, 'equals': 5})
