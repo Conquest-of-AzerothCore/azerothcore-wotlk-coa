@@ -39,6 +39,9 @@ INSERT INTO `waypoint_data` (`id`, `point`, `position_x`, `position_y`, `positio
 (4200001, 37, -410.522, 193.902, -53.953, NULL, 1.2, 0, 1, 0, 0, 100, 0),
 (4200001, 38, -415.327, 187.295, -53.934, NULL, 1.2, 0, 1, 0, 0, 100, 0);
 
-DELETE FROM `coa_dungeon_spell_damage` WHERE `spell_id` = 2102688;
+DELETE FROM `coa_dungeon_spell_damage` WHERE `spell_id` IN (2102688, 2102689, 2102690, 2102691);
 INSERT INTO `coa_dungeon_spell_damage` (`spell_id`, `multiplier`, `comment`) VALUES
-(2102688, 3, 'Ghamoo-ra: Torrent x3');
+(2102688, 3, 'Ghamoo-ra: Torrent x3'),
+(2102689, 1.488, 'Ghamoo-ra: Torrent (Heroic) x0.496, x3 for the rebuilt Torrent'),
+(2102690, 0.417, 'Ghamoo-ra: Torrent (Mythic) x0.139, x3 for the rebuilt Torrent'),
+(2102691, 3, 'Ghamoo-ra: Torrent (Ascended) x3');
