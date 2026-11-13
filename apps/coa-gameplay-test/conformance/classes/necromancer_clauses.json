@@ -148,9 +148,11 @@
     "spell": 300580,
     "clause": "Each of your summons now reduces your damage taken by $s2%,",
     "labels": [
-      "300580 effect_value e1 #0"
+      "300580 behaviour_hit_ratio one_summon",
+      "300580 behaviour_hit_ratio two_summons"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1%', 'up to a maximum of 10%'; coa-obtainable: in the live capture; logs: no line for 300580."
   },
   {
     "spell": 300580,
@@ -2240,8 +2242,22 @@
   {
     "spell": 704681,
     "clause": "which treats your next 2 spells cast as if the target were Frozen.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "which treats your ... spells cast as if the target were Frozen",
+        "labels": [
+          "704681 behaviour_metric_delta as_frozen"
+        ]
+      },
+      {
+        "claim": "your next 2 spells",
+        "labels": [
+          "704681 behaviour_metric_delta charges"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier)."
   },
   {
     "spell": 704681,
@@ -5085,8 +5101,12 @@
   {
     "spell": 500991,
     "clause": "Usable while casting or channeling.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "500991 behaviour_metric_delta while_casting",
+      "500991 behaviour_metric_delta cast_survives"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul and coabuildhub nothing found; coa-obtainable: not in the live capture; logs: nothing found."
   },
   {
     "spell": 504868,
