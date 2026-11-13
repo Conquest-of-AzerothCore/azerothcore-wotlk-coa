@@ -598,8 +598,6 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) != LEARNED_CONTRAST:
         return False
     words = STATE_PROMISES.get(detail[PASSIVE_METRIC])
-    if words is not None and verdict.check == BEHAVIOUR_METRIC_DELTA:
-        words = rf'{words}|{NO_STACK_WORDS}'
     return words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is not None
 
 
