@@ -356,11 +356,12 @@
         504022
       ],
       "trial_excluded_reason": "each proc has the minion cast Zombie Plague 504022 inside the event handler (AscensionNecromancerEvents.cpp:201-205), whose hits the State(player).event guard keeps from rolling (AscensionNecromancerEvents.cpp:60-61), so they are not trials",
-      "event_metric": "spell_cast_count",
+      "event_metric": "spell_go_count",
+      "event_actor": "minion",
       "proc_spell": 807653,
       "proc_spell_source": "tooltip reference @s:807653:0@ and $807653d",
       "events_per_proc": 1,
-      "handler": "AscensionNecromancerEvents.cpp:198-202: Chance(player, 802986) (ProcChance 10) has the caster cast 807653 on the minion and the minion cast Zombie Plague 504022",
+      "handler": "AscensionNecromancerEvents.cpp:192-197: MinionChance(player, actor, 802986) (ProcChance 10) has the minion cast 807653 and 807765 on itself and Zombie Plague 504022 (ADR 0483, commit 5ed0f26125: before it the player cast 807653); the events are the Ghoul's own 807653 casts (spell_go_count of the minion entry)",
       "dbc": {
         "802986": {
           "ProcChance": 10,
@@ -5300,6 +5301,7 @@
     {
       "spell": 500991,
       "name": "Grave March (focus)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "focus",
       "label_suffix": "focus",
@@ -5319,7 +5321,7 @@
         "entry": 50073,
         "target": "dummy"
       },
-      "observe_source": "Grave March 500991 Effect[0] DUMMY: aura_ascension_necromancer_dummy calls Order(player, target, 500991) (AscensionNecromancerAbilities.cpp:377-378), and every non-stationary minion answers it (Responds(), AscensionNecromancerSummons.cpp:177-182) with AttackStart(target) and nothing else (:650-652). A Ghoul 50073 is raised at the caster (not at the dummy, so the raise gives it no target, :444/:911) in each phase; no Grave March has set a focus before (:464, :781-796). Read: Ghouls of the caster whose victim is the dummy, 3000 ms after the phase's last cast. Before (control): one Ghoul, no Grave March: 0. After: a second Ghoul (Life Force 2), then Grave March at the dummy: both Ghouls on it, 2. Review I-2: the control keeps the Ghoul and drops the cast.",
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). Grave March 500991 Effect[0] DUMMY: aura_ascension_necromancer_dummy calls Order(player, target, 500991) (AscensionNecromancerAbilities.cpp:377-378), and every non-stationary minion answers it (Responds(), AscensionNecromancerSummons.cpp:177-182) with AttackStart(target) and nothing else (:650-652). A Ghoul 50073 is raised at the caster (not at the dummy, so the raise gives it no target, :444/:911) in each phase; no Grave March has set a focus before (:464, :781-796). Read: Ghouls of the caster whose victim is the dummy, 3000 ms after the phase's last cast. Before (control): one Ghoul, no Grave March: 0. After: a second Ghoul (Life Force 2), then Grave March at the dummy: both Ghouls on it, 2. Review I-2: the control keeps the Ghoul and drops the cast.",
       "cast_in_before": false,
       "setup_in_before": true,
       "setup_target": "caster"
@@ -8814,7 +8816,47 @@
       "trigger_spell": 504868, "target": "enemy", "enemy_player_race": 2, "setup_casts": [504861], "setup_only_after": true,
       "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500,
       "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "enemy"},
-      "observe_source": "An enemy player (a Necromancer, race 2, 2803 maximum mana, full) is the target: the dummy has no mana. Both phases cast Command: Undead 504868 at it; the treatment raises a Banshee 500650 first. npc_ascension_necromancer::DoAction, case 500650: mana = min(target mana, min(target max / 10, Banshee max / 5)), ModifyPower(-mana), then Copy 505225 (Frost) for that amount. The tooltip's 10% of the target's mana is 280; with the cap read as 20% of the target's own maximum (560) the drain is 280. Control: no Banshee, no hit."
+      "observe_source": "An enemy player (a Necromancer, race 2, 2803 maximum mana, full) is the target: the dummy has no mana. Both phases cast Command: Undead 504868 at it; the treatment raises a Banshee 500650 first. npc_ascension_necromancer::DoAction, case 500650: mana = min(target mana, min(target max / 10, the player's max / 5)) (owner ruling Q-a1-4 (b), ADR 0521), ModifyPower(-mana), then Copy 505225 (Frost) for that amount. The tooltip's 10% of the target's mana is 280; neither cap binds here (20% of the player's 2848 is 569). Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (Command drain capped by the player's mana)", "kind": "metric_delta", "variant": "drain_cap",
+      "label_suffix": "drain_cap", "quote": "up to a maximum of", "expected": 635, "before_expected": 0,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"], [4270, 1, "caster", "caster"]],
+      "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "dummy"},
+      "observe_source": "Cap-binding arm (owner ruling Q-a1-4 (b): the player's maximum mana caps the drain, ADR 0521). Target: the dummy fixture as Magus Zabraxis 16829 (creature_template level 60, unit_class 2, ManaModifier 3, no script; creature_classlevelstats level 60 class 2 basemana 2434: 7302 maximum mana, read by drain_cap_target). Precondition fixtures on the caster: 823764 keeps the Frost copy unresisted; Mental Acuity 4270 (Effect[0] aura 35, +330 mana, permanent) raises the player's maximum mana to 2848 + 330 = 3178 (read by drain_cap_player) and leaves the Banshee's (level x 30 + Intellect x 5 x 2 Life Force, Scale() in AscensionNecromancerSummons.cpp: 2970 read in pilot probe3) unchanged. Expected: 10% of the target is 730, 20% of the player's maximum mana is 635, so the player cap binds: 635. The other readings give 730 (the target's cap, 15% above) and 594 (the Banshee's cap, the code before ADR 0521, 6.5% below), both outside the G-19 band of 635. Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (Command drain: a tenth of the target's mana)", "kind": "metric_delta", "variant": "drain_share",
+      "label_suffix": "drain_share", "quote": "Command: Drains $504862m1% of your target's mana", "expected": 243, "before_expected": 0,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 11795, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "metric": "spell_damage_total", "fields": {"spell": 505225, "caster_entry": 500650, "target": "dummy"},
+      "observe_source": "Uncapped arm at a creature: the dummy fixture as Mylentha Riverbend 11795 (creature_template level 60, unit_class 2, ManaModifier 1, no script; creature_classlevelstats level 60 class 2 basemana 2434: 2434 maximum mana, read by drain_share_target). 504862 Effect[0] BasePoints 9 + 1 = 10% ($504862m1): 2434 / 10 = 243, under the player's cap (2848 / 5 = 569), so the hit equals the drain, 243. 823764 keeps the Frost copy unresisted. Control: no Banshee, no hit."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (drain share: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_share_target",
+      "label_suffix": "drain_share_target", "quote": "of your target's mana", "expected": 2434, "before_expected": 2434,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 11795, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"]],
+      "measure_actor": "dummy", "metric": "max_power", "fields": {"power": 0},
+      "observe_source": "Precondition read for drain_share: the maximum mana of Mylentha Riverbend 11795 at level 60 (basemana 2434 x ManaModifier 1 from the world DB rows), before and after the same Command as drain_share."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (drain cap: the target's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_target",
+      "label_suffix": "drain_cap_target", "quote": "of your target's mana", "expected": 7302, "before_expected": 7302,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"], [4270, 1, "caster", "caster"]],
+      "measure_actor": "dummy", "metric": "max_power", "fields": {"power": 0},
+      "observe_source": "Precondition read for drain_cap: the maximum mana of Magus Zabraxis 16829 at level 60 (2434 x 3 = 7302 from the world DB rows), before and after the same Command as drain_cap."
+    },
+    {
+      "spell": 504861, "name": "Raise: Banshee (drain cap: the player's maximum mana)", "kind": "metric_delta", "variant": "drain_cap_player",
+      "label_suffix": "drain_cap_player", "quote": "of their own maximum mana", "expected": 3178, "before_expected": 3178,
+"trigger_spell": 504868, "target": "dummy", "target_entry": 16829, "setup_casts": [504861], "setup_only_after": true,
+      "setup_wait_ms": 4000, "wait_ms": 1500, "expire_ms": 500, "phase_auras": [[823764, 1, "caster", "caster"], [4270, 1, "caster", "caster"]],
+      "measure_actor": "caster", "metric": "max_power", "fields": {"power": 0},
+      "observe_source": "Precondition read for drain_cap: the player's maximum mana with Mental Acuity 4270 (+330): 2848 + 330 = 3178 (2848 on the reference character, owner-questions Q-a1-4: 2464 + 384), read before the Command without a Banshee and after it with the Banshee raised, as in drain_cap."
     },
     {
       "spell": 805044, "name": "Animate: Tomb King (animated)", "kind": "metric_delta", "variant": "count",
@@ -9468,12 +9510,26 @@
       "variant": "crypt_swarm",
       "label_suffix": "crypt_swarm",
       "quote": "Increases the damage of Crypt Swarm and Blight by $s1%",
-      "expected": 1.15,
+      "expected": 1.1379310344827587,
       "observe_spell": 800343,
       "cast_spell": 501886,
       "cast_wait_ms": 3600,
-      "control": {},
+      "cast_power": 2848,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
       "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
         "learn": [
           561353
         ]
@@ -9481,7 +9537,7 @@
       "critical": false,
       "trials": 51,
       "parts": 25,
-      "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Crypt Swarm 800343, the damage the Crypt Swarm channel rank 8 501886 (3000 ms, the level-60 rank) triggers every 500 ms; each trial is one channel and its 6 hits (800343 cast directly deals only its 1-point base, the channel sets the amount)."
+      "expected_source": "561353 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 14 + 1 = 15 ($s1), on the Crypt Swarm and Blight class mask. Per-tick rounding from the DBC (mentor condition 2026-11-13): Crypt Swarm 501886 Effect[0] aura 227 passes 800343 its base point BasePoints 56 + DieSides 1 + EffectRealPointsPerLevel 0.24 x (60 - SpellLevel 54) = 58.44, int32 58; the +15% applies to that integer hit and truncates: 58 x 1.15 = 66.7 -> 66; expected ratio 66 / 58 = 1.13793 (+13.79%, not +15%). The tool band stays the larger of 5% of the bonus and 2 points around it (G-19). Precondition fixtures in both arms: beeg spellpen 823764 (Effect[0] aura 123 -9999 target resistance, all schools: no partial resist, which spread the per-hit values 49-54 and the pooled reading +12.7..+14.1%) and the caster's mana set to 2848 before each channel (cast_power: 63-80% of the channels failed with SPELL_FAILED_NO_POWER in pair 20261113-084238 / -085831). The control arm hits without 561353, the treatment arm with it learned (a real learn); non-critical hits on the dummy are compared. Observed spell: Crypt Swarm 800343, the damage the Crypt Swarm channel rank 8 501886 (3000 ms, the level-60 rank) triggers every 500 ms; each trial is one channel and its 6 hits (800343 cast directly deals only its 1-point base, the channel sets the amount)."
     },
     {
       "spell": 561353,
@@ -10716,6 +10772,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "dummy",
@@ -10725,7 +10787,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 3000 ms after the cast step (1000 ms cast; reads at 1000 and 1500 ms found the shield still on in 3 of 20 runs, final2 and final3)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). 807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 3000 ms after the cast step (1000 ms cast; reads at 1000 and 1500 ms found the shield still on in 3 of 20 runs, final2 and final3)."
     },
     {
       "spell": 807796,
@@ -10747,6 +10809,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "dummy",
@@ -10756,11 +10824,12 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). 807796 Effect[2] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 25 (MECHANIC_INVULNERABILITY). Diplomatic Immunity 38916 (Mechanic 25, aura 39 school immunity) set on the dummy by the dummy (precondition fixture): kept without a cast, removed by one Death's Due."
     },
     {
       "spell": 807796,
       "name": "Death's Due (curse held)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "curse_held",
       "label_suffix": "curse_held",
@@ -10779,11 +10848,12 @@
       },
       "wait_ms": 3500,
       "expire_ms": 500,
-      "observe_source": "807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 3500 ms after the cast step (1000 ms cast, so 2500 ms into the curse): present (a read at 4500 ms flipped between runs, pair prove-8)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). 807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 3500 ms after the cast step (1000 ms cast, so 2500 ms into the curse): present (a read at 4500 ms flipped between runs, pair prove-8)."
     },
     {
       "spell": 807796,
       "name": "Death's Due (curse ends)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "curse_ends",
       "label_suffix": "curse_ends",
@@ -10802,7 +10872,7 @@
       },
       "wait_ms": 6500,
       "expire_ms": 500,
-      "observe_source": "As the held entry, 6500 ms after the cast step (5500 ms into the curse): gone, so the curse ends between 2500 and 5500 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). As the held entry, 6500 ms after the cast step (5500 ms into the curse): gone, so the curse ends between 2500 and 5500 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
     },
     {
       "spell": 807796,
@@ -10844,6 +10914,7 @@
     {
       "spell": 807796,
       "name": "Death's Due (not above 20%)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "above_twenty",
       "label_suffix": "above_twenty",
@@ -10862,7 +10933,7 @@
       },
       "wait_ms": 7000,
       "expire_ms": 500,
-      "observe_source": "The health gate's control: the same cast on a dummy at 25% health deals no 808016 at the end of the curse."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). The health gate's control: the same cast on a dummy at 25% health deals no 808016 at the end of the curse."
     },
     {
       "spell": 807796,
@@ -11537,6 +11608,7 @@
     {
       "spell": 531135,
       "name": "Icecrown (one stack)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "stack",
       "label_suffix": "stack",
@@ -11552,11 +11624,12 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:141-144): an own Frost hit of a caster with 531135 casts Icecrown 706732 at the target (Chance(player, 531135), 531135 ProcChance 100): aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126. One Lichfrost 501978 (Frost) per phase: no 706732 without 531135 (control), one stack with it learned."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). necromancer_event (AscensionNecromancerEvents.cpp:141-144): an own Frost hit of a caster with 531135 casts Icecrown 706732 at the target (Chance(player, 531135), 531135 ProcChance 100): aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 126. One Lichfrost 501978 (Frost) per phase: no 706732 without 531135 (control), one stack with it learned."
     },
     {
       "spell": 531135,
       "name": "Icecrown (crit against the enemy)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "crit",
       "label_suffix": "crit",
@@ -11573,11 +11646,12 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "The caster's melee crit chance against the dummy (Unit::GetUnitCriticalChance, the attacker crit modifiers of the target included) after one Lichfrost: one point higher with 531135's 706732 on the dummy (BasePoints 0 + 1 = 1, $706732s1) than without (expected_gain, ADR 0380). Scope: an attacker of the debuffed enemy is read (the caster); a second ally is not read."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). The caster's melee crit chance against the dummy (Unit::GetUnitCriticalChance, the attacker crit modifiers of the target included) after one Lichfrost: one point higher with 531135's 706732 on the dummy (BasePoints 0 + 1 = 1, $706732s1) than without (expected_gain, ADR 0380). Scope: an attacker of the debuffed enemy is read (the caster); a second ally is not read."
     },
     {
       "spell": 531135,
       "name": "Icecrown (three stacks)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "stack_cap",
       "label_suffix": "stack_cap",
@@ -11599,11 +11673,12 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4. Each setup Lichfrost waits 3000 ms (its 2500 ms cast plus margin; 2700 ms left two stacks in one run of pair route-5)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4. Each setup Lichfrost waits 3000 ms (its 2500 ms cast plus margin; 2700 ms left two stacks in one run of pair route-5)."
     },
     {
       "spell": 531135,
       "name": "Icecrown (held)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "held",
       "label_suffix": "held",
@@ -11619,11 +11694,12 @@
       },
       "wait_ms": 12000,
       "expire_ms": 500,
-      "observe_source": "706732 DurationIndex 1 (10000 ms, $706732d), applied at the Lichfrost hit about 2600 ms after the cast step: still on 12000 ms after it (about 9400 ms in)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). 706732 DurationIndex 1 (10000 ms, $706732d), applied at the Lichfrost hit about 2600 ms after the cast step: still on 12000 ms after it (about 9400 ms in)."
     },
     {
       "spell": 531135,
       "name": "Icecrown (ends)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "ends",
       "label_suffix": "ends",
@@ -11639,7 +11715,7 @@
       },
       "wait_ms": 14000,
       "expire_ms": 500,
-      "observe_source": "As the held entry, 14000 ms after the cast step (about 11400 ms in): gone."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). As the held entry, 14000 ms after the cast step (about 11400 ms in): gone."
     },
     {
       "spell": 572638,
@@ -12614,6 +12690,7 @@
     {
       "spell": 807700,
       "name": "Unholy Erosion (Lesser Zombie)",
+      "phase_auras": [[680486, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "zombie",
       "label_suffix": "zombie",
@@ -12666,7 +12743,7 @@
       },
       "wait_ms": 3600,
       "expire_ms": 500,
-      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:128-129): a periodic hit of a caster with 807700 summons a Lesser Zombie 503030 at the target when Chance(player, 807700) rolls (807700 ProcChance 3; the tooltip states no chance), and the zombie charges its target and hits it (AscensionNecromancerSummons.cpp:711-715), read as the Lesser Zombies' hits in the caster's log (owned_creature_damage_count; the 504022 read of the caster's hits saw none and a diagnostic read 5 zombie hits in 15 channels, pair b4-4). 35 Crypt Swarm channels per phase, 210 periodic 800343 hits: no zombie hit without 807700, at least one with it (at 3% per hit no zombie in 210 hits has chance 0.0017)."
+      "observe_source": "Precondition fixture The End Is Near 680486 on the caster (Effect[0] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT -100%, all schools, permanent): Crypt Swarm costs 17% of base mana and the setup casts refill only a flat cost, so 50 of the 70 channels failed with SPELL_FAILED_NO_POWER (85) in the night and merged pairs, leaving about 60 periodic hits in the treatment, not 210 (P(no zombie) = 0.97^60 = 0.16; one night run read 0). necromancer_event (AscensionNecromancerEvents.cpp:128-129): a periodic hit of a caster with 807700 summons a Lesser Zombie 503030 at the target when Chance(player, 807700) rolls (807700 ProcChance 3; the tooltip states no chance), and the zombie charges its target and hits it (AscensionNecromancerSummons.cpp:711-715), read as the Lesser Zombies' hits in the caster's log (owned_creature_damage_count; the 504022 read of the caster's hits saw none and a diagnostic read 5 zombie hits in 15 channels, pair b4-4). 35 Crypt Swarm channels per phase, 210 periodic 800343 hits: no zombie hit without 807700, at least one with it (at 3% per hit no zombie in 210 hits has chance 0.0017)."
     },
     {
       "spell": 504489,
@@ -12732,7 +12809,86 @@
       ],
       "unresisted": true,
       "settle_ms": 6000,
-      "observe_source": "As the explosion entry with Increase Frost Dam 132 24666 (+132 Frost) set on the caster before its stats are measured: the walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 16}) adds 0.75 x 132 = 99 to each hit, the $SP*.75 term of the tooltip read with the measured stats."
+      "observe_source": "Non-matching school arm (owner ruling Q-b3b-6 (b): the spell's own schools, mask 40, ADR 0525): Increase Frost Dam 132 24666 (+132 Frost) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}) reads Shadow and Nature spell power only, so the hit stays the spell power 0 value of the explosion entry; before ADR 0525 it added 0.75 x 132 = 99."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (explosion damage with spell power of every school)",
+      "kind": "script_hit",
+      "variant": "explosion_sp_all",
+      "label_suffix": "explosion_sp_all",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 707010,
+      "hit_effect": 0,
+      "caster_entry": 523032,
+      "trials": 3,
+      "minimum_hits": 6,
+      "control_casts": [],
+      "casts": [
+        [
+          707007,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6000,
+      "observe_source": "Matching arm (owner ruling Q-b3b-6 (b), ADR 0525): QA Test +100 SP 10062 (Effect[0] aura 345 MiscValue 127, every school, +100) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}) adds 0.75 x 100 = 75 to each hit, the $SP*.75 term of the tooltip read with the measured stats ($SP is the lowest school spell power, so a one-school fixture cannot raise the expectation; a Shadow-only +78 33819 read 749 per hit in pair1, 691 + 0.75 x 78 = 749.5 truncated). Control: the same trials without the cast (control_casts empty) count no 707010 hit."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (explosion damage with Shadow spell power)",
+      "kind": "script_hit",
+      "variant": "explosion_sp_shadow",
+      "label_suffix": "explosion_sp_shadow",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 707010,
+      "hit_effect": 0,
+      "caster_entry": 523032,
+      "trials": 3,
+      "minimum_hits": 6,
+      "control_casts": [],
+      "casts": [
+        [
+          707007,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "stat_auras": [
+        [
+          33819,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "multiplier": 1.0839363241678726,
+      "settle_ms": 6000,
+      "observe_source": "Matching single-school arm (owner ruling Q-b3b-6 (b): the spell's own schools, mask 40 = Nature + Shadow, so Shadow spell power counts; mentor ruling 2026-11-13, ADR 0525). Increase Shadow Dam 78 33819 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, BasePoints 77 + 1 = 78, permanent) set on the caster before its stats are measured. Expected per hit: $707010m1 x $<scalingbp> + 0.75 x 78 = 691.2 + 58.5 = 749.7, the engine's integer 749. The tool reads the tooltip's $SP as the lowest school spell power (0 here), so its model gives the spell power 0 value 691 (the explosion entry); multiplier = 749 / 691 = 1.0839363241678726 carries the 0.75 x 78 Shadow term onto that model. The tooltip's displayed $SP (lowest school) and the server (mask 40) disagree for a one-school fixture: a text observation, no server change. Control: the same trials without the cast (control_casts empty) count no 707010 hit."
     },
     {
       "spell": 301207,
@@ -12880,6 +13036,7 @@
     {
       "spell": 807796,
       "name": "Death's Due (21% at the end)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "at_twentyone",
       "label_suffix": "at_twentyone",
@@ -12898,7 +13055,7 @@
       },
       "wait_ms": 7000,
       "expire_ms": 500,
-      "observe_source": "The edge above 20%: a dummy at 21% takes no 808016."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). The edge above 20%: a dummy at 21% takes no 808016."
     },
     {
       "spell": 501978,
@@ -13667,6 +13824,7 @@
     {
       "spell": 531135,
       "name": "Icecrown (no stack from Shadow damage)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "nonfrost",
       "label_suffix": "nonfrost",
@@ -13685,7 +13843,7 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "The school gate (review b4 I-6): AscensionNecromancerEvents.cpp:141 applies 706732 only for a hit with SPELL_SCHOOL_MASK_FROST. Crypt Swarm 501886 hits the dummy with 800343 (SchoolMask 32, Shadow) with 531135 learned in both phases: no 706732, against the stack entry's one stack after a Frost Lichfrost 501978 hit."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (12%) binary-resists Icecrown's 706732 in about 12% of procs (diagnostic 20261113-093040, F1 cycle 1). The school gate (review b4 I-6): AscensionNecromancerEvents.cpp:141 applies 706732 only for a hit with SPELL_SCHOOL_MASK_FROST. Crypt Swarm 501886 hits the dummy with 800343 (SchoolMask 32, Shadow) with 531135 learned in both phases: no 706732, against the stack entry's one stack after a Frost Lichfrost 501978 hit."
     },
     {
       "spell": 801530,
@@ -13733,6 +13891,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "dummy",
@@ -13742,7 +13906,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "Diagnostic for the parked dispel claim (route agent): the removes_shield scenario's setup (Divine Shield 642 on the dummy by harness set_aura, 99% health, cast_power 1000), reading Death's Due's own curse 807796 on the dummy 3000 ms after the cast step: if a run keeps the shield while the curse is on, the dispel effect was skipped on a landed spell; if the curse is absent too, the spell did not land."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). Diagnostic for the parked dispel claim (route agent): the removes_shield scenario's setup (Divine Shield 642 on the dummy by harness set_aura, 99% health, cast_power 1000), reading Death's Due's own curse 807796 on the dummy 3000 ms after the cast step: if a run keeps the shield while the curse is on, the dispel effect was skipped on a landed spell; if the curse is absent too, the spell did not land."
     },
     {
       "spell": 807796,
@@ -13764,6 +13928,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "caster",
@@ -13773,7 +13943,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "Diagnostic for the parked dispel claim (route agent): the removes_shield setup, reading the caster's cast failure for Death's Due (0: no failure)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists Death's Due in about 12% of casts (diagnostic 20261113-092941; flipped in the F1 cycle 1 pair 20261113-093904 / -094026). Diagnostic for the parked dispel claim (route agent): the removes_shield setup, reading the caster's cast failure for Death's Due (0: no failure)."
     },
     {
       "spell": 803777,

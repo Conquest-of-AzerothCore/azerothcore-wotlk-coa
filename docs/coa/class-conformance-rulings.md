@@ -474,17 +474,17 @@ still needs a fix note with the cause read, the narrowest change, a regression a
 
 | Date, author | Spell and question | Ruling | Owner's words | Recorded in |
 |---|---|---|---|---|
-| 2026-11-13, owner, through the mentor | Decaying Colossus (Q-a1-3) | Apply the 25% split: the caster takes 25% less and the Colossus takes it | not recorded | Pending (fix note) |
-| 2026-11-13, owner, through the mentor | Banshee drain (Q-a1-4) | The player's maximum mana caps the drain, not the Banshee's | not recorded | Pending (fix note) |
-| 2026-11-13, owner, through the mentor | Tomb King Putrid Claws baseline (Q-a1-5) | The claw is 10% of the post-mitigation hit, then resisted as a Plague hit (0.088 of the hit on the dummy) | not recorded | Pending (fix note) |
+| 2026-11-13, owner, through the mentor | Decaying Colossus (Q-a1-3) | Apply the 25% split: the caster takes 25% less and the Colossus takes it | not recorded | ADR 0520 |
+| 2026-11-13, owner, through the mentor | Banshee drain (Q-a1-4) | The player's maximum mana caps the drain, not the Banshee's | not recorded | ADR 0521 |
+| 2026-11-13, owner, through the mentor | Tomb King Putrid Claws baseline (Q-a1-5) | The claw is 10% of the post-mitigation hit, then resisted as a Plague hit (0.088 of the hit on the dummy) | not recorded | ADR 0522 |
 | 2026-11-13, owner, through the mentor | Abomination cloud (Q-a1-7) | The cloud fires only when the Abomination is attacked. The live logs fit this in 7% of hits only; the owner ruled it | not recorded | Pending (fix note) |
 | 2026-11-13, owner, through the mentor | Bone Toss (Q-a1-8) | The Plaguefather casts Bone Toss 704706 on its current target every 1 s | "toute les 1sec" ("every 1 s") | Pending (fix note) |
-| 2026-11-13, owner, through the mentor | Diabolical duration (Q-a2-1) | Stacks last 20 s (706504), not 30 s | not recorded | Pending (fix note) |
+| 2026-11-13, owner, through the mentor | Diabolical duration (Q-a2-1) | Stacks last 20 s (706504), not 30 s | not recorded | ADR 0523 |
 | 2026-11-13, owner, through the mentor | Glacial Impact (Q-a3-1) | Always damage x (1 + the caster's Frost spell crit chance); the hit can still crit as usual, guaranteed under Glacier Lord. The formula is the owner's; the tooltip gives no number | "Pour moi les degats doivent augmenter en fonction du pourcentage de coup critique des sorts que l'on a. Donc si on a 25% de critique, cela augmente de 25% les dégâts, etc.." ("For me the damage should grow with our spell crit percentage: 25% crit adds 25% damage, and so on") | Pending (fix note) |
-| 2026-11-13, owner, through the mentor | Foul Invocation (Q-b1-3) | Total Stamina | not recorded | Pending (fix note) |
+| 2026-11-13, owner, through the mentor | Foul Invocation (Q-b1-3) | Total Stamina | not recorded | ADR 0524 |
 | 2026-11-13, owner, through the mentor | Crypt Swarm slow (Q-b3b-1) | The slow is meant | "je ne vois pas le rapport entre Crypt Swarm et le passif ??" ("I do not see the link between Crypt Swarm and the passive??"), answered by the mentor: the $?s92123 condition names the Animation passive | Pending (fix note) |
-| 2026-11-13, owner, through the mentor | March of the Dead schools (Q-b3b-6) | The spell's own schools (mask 40) | not recorded | Pending (fix note) |
-| 2026-11-13, owner, through the mentor | Frozen Bodies stack bonus (Q-ma-2) | A single +3% per stack, as the tooltip says | "c'est peut etre un bonus caché donné par le live, mais on va s'en tenir à la tooltip, et on buffera si besoin plus tard" ("it may be a hidden live bonus, but we keep to the tooltip and buff later if needed") | Pending (fix note) |
+| 2026-11-13, owner, through the mentor | March of the Dead schools (Q-b3b-6) | The spell's own schools (mask 40) | not recorded | ADR 0525 |
+| 2026-11-13, owner, through the mentor | Frozen Bodies stack bonus (Q-ma-2) | A single +3% per stack, as the tooltip says | "c'est peut etre un bonus caché donné par le live, mais on va s'en tenir à la tooltip, et on buffera si besoin plus tard" ("it may be a hidden live bonus, but we keep to the tooltip and buff later if needed") | ADR 0526 |
 | 2026-11-13, owner, through the mentor | Parasite Plague 560730 (Q-mb-2; claim 123.0) | Any damage dealt rolls, as the tooltip says, not only periodic damage (the live logs lean to periodic only; the owner ruled for the tooltip) | not recorded | ADR 0496 |
 | 2026-11-13, owner, through the mentor | Bone and Frozen Reliquaries (Q-mb-1) | Both items share the healing and mana potion cooldown (category 5004). The owner authorized the item SQL | "Ici pour moi il faudrait que ces sorts partagent leur CD avec les consommables eéquivalent style potion de soin et de mana par exemple" ("these should share their cooldown with the equivalent consumables, such as healing and mana potions") | Pending (fix note) |
 

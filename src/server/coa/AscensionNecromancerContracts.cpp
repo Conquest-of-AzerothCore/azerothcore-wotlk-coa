@@ -239,6 +239,7 @@ void ApplyContracts(SpellInfo* info)
     if (id == 804371)
     {
         info->Effects[0].MiscValue = 444914;
+        info->Effects[1].ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
         info->Attributes |= SPELL_ATTR0_NO_IMMUNITIES;
     }
     if (id == 505224)
@@ -339,6 +340,7 @@ void ApplyContracts(SpellInfo* info)
         dummy(0);
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
         info->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+        info->DurationEntry = sSpellDurationStore.LookupEntry(18);
     }
     if (Family(info, 0, 16) && id >= 562210 && id <= 562213)
     {
@@ -406,6 +408,10 @@ void ApplyContracts(SpellInfo* info)
     if (id == 707575)
         for (auto& effect : info->Effects)
             effect.BonusMultiplier = 0.0f;
+    if (id == 570050)
+        info->Effects[0].RealPointsPerLevel = 0.0f;
+    if (id == 712434)
+        info->Effects[1].Effect = 0;
     for (uint32 child : {573242, 801241, 561318, 561095, 570050, 505225, 681463})
         if (id == child)
         {

@@ -105,6 +105,8 @@ uint32 ChampionAura(uint32 entry)
         return 808017;
     case 500484:
         return 807812;
+    case 50115:
+        return 520376;
     default:
         return 0;
     }
@@ -696,7 +698,7 @@ class npc_ascension_necromancer : public ScriptedAI
         case 500650:
         {
             uint32 mana = std::min<uint32>(target->GetPower(POWER_MANA), std::min(target->GetMaxPower(POWER_MANA) / 10,
-                                                                                  me->GetMaxPower(POWER_MANA) / 5));
+                                                                                  player->GetMaxPower(POWER_MANA) / 5));
             target->ModifyPower(POWER_MANA, -int32(mana));
             if (_command != 504864)
                 Copy(me, target, 505225, mana);
