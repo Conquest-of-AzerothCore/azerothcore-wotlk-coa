@@ -11364,6 +11364,111 @@
         "critical": true
       },
       "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000. The caster's spell crit rating is forced (FORCED_CRIT_RATING, harness fixture). spell_damage_count with critical counts the critical 501861 periodic damage events on the dummy: no cast before (control, 0); 6200 ms after a real cast both ticks (3000, 6000 ms) are critical: 2."
+    },
+    {
+      "spell": 560537,
+      "name": "Apothecary's Cauldron (party spell haste)",
+      "kind": "party_stat_ratio",
+      "quote": "Increases the spell haste of all party and raid members by $s1%.",
+      "expected": 0.970874,
+      "metric": "cast_speed_multiplier",
+      "radius_reason": "560537 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = +3 ($s1), EffectRadiusIndex 287 (100 yd). AuraEffect::HandleModCastingSpeed calls Unit::ApplyCastTimePercentMod(+3), which divides UNIT_MOD_CAST_SPEED by 1.03 (stock): a grouped non-caster ally's cast speed multiplier reads 1 / 1.03 = 0.970874 of its value without the passive. Effect[1] (aura 79, Magic damage) is TARGET_UNIT_CASTER only and is the separate magic_damage entry. No CoA code names 560537."
+    },
+    {
+      "spell": 802988,
+      "name": "Lich Essence (pushback still delays Lichfrost)",
+      "kind": "metric_delta",
+      "variant": "pushback_delays",
+      "label_suffix": "pushback_delays",
+      "quote": "and reduces your spell pushback suffered from taking damage by $s1%.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 1200,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 1000
+      },
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 501978
+      },
+      "observe_source": "Lichfrost 501978 InterruptFlags 47 (SPELL_INTERRUPT_FLAG_PUSH_BACK, not ABORT_ON_DMG), 2500 ms cast, 2125 ms with 802988 (Effect[1] SPELLMOD_CASTING_TIME -15). Spell::Delayed (Spell.cpp:8056-8090, stock) pushes a cast back 500 ms per damage taken, reduced by SPELL_AURA_REDUCE_PUSHBACK: 802988 Effect[0] aura 149 +50 ($s1) gives 250 ms. 802988 known throughout; one real Lichfrost at the dummy, a stationary striker hits the caster with Light of the Naaru 41394 (Holy, 1100) 1000 ms into the cast. No cast before (0); 2300 ms after the cast starts it has not completed (0): without the strike it completes by 2250 ms (the cast_by_2250 entry), so the hit delayed it by more than 50 ms."
+    },
+    {
+      "spell": 802988,
+      "name": "Lich Essence (pushback halved)",
+      "kind": "metric_delta",
+      "variant": "pushback_halved",
+      "label_suffix": "pushback_halved",
+      "quote": "and reduces your spell pushback suffered from taking damage by $s1%.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 1373,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "expire_ms": 500,
+      "wait_ms": 1400,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 1000
+      },
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 501978
+      },
+      "observe_source": "Lichfrost 501978 (2125 ms with 802988's -15% cast time), pushed back by one Light of the Naaru 41394 hit 1000 ms into the cast; Spell::Delayed (Spell.cpp:8075-8082, stock): 500 ms, x (1 - 50%) with 802988 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK +50 ($s1) = 250 ms, so the cast completes near 2375 ms; an unreduced 500 ms pushback would end it near 2625 ms. No cast before (0); 2500 ms after the cast starts it has completed (1). With pushback_delays the pushback lies in (175, 375] ms, a reduction of 25% to 65% of the 500 ms base."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (tick damage)",
+      "kind": "metric_delta",
+      "variant": "tick_damage",
+      "label_suffix": "tick_damage",
+      "quote": "Disease an enemy, dealing ${$m1+0+$sps*0.11055} Plague damage",
+      "expected": 210,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 500,
+      "wait_ms": 6200,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy"
+      },
+      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, $m1 at level 60 = 101 + 1 + 0.942857 x 4 = 105.771 (the packet's resolved value; spell power 0 at the reference, so the $sps term is 0); SpellEffectInfo::CalcValue truncates to int32: 105 per tick (G-26, known engine rounding). beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit) on the caster are precondition fixtures (harness set_aura). No cast before (control, 0); 6200 ms after one real cast two ticks (3000, 6000 ms): 210."
     }
   ],
   "player_observations": [],

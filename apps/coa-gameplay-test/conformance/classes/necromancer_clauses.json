@@ -97,15 +97,18 @@
     "labels": [
       "300240 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[0] SPELLMOD_RANGE +6 on Command: Crypt Fiend, Command: Skeletal Mage, Glacial Impact, Ice Barrage, Lichfrost (class mask); route: a Lichfrost cast at a dummy placed 33 yd away, refused out of range without the talent and through with it (metric_delta has no dummy distance; strike dx relocations add up per phase). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 300240,
     "clause": "and increases the Frost critical strike chance of you and your summons by $s2%.",
     "labels": [
-      "300240 effect_value e1 #1"
+      "300240 behaviour_metric_delta caster_frost_crit",
+      "300240 behaviour_metric_delta summon_frost_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Caster Frost spell crit 3.2817 -> 6.2817; Ghoul 50073 spell crit 3 -> 6. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 300241,
@@ -412,17 +415,19 @@
     "spell": 302519,
     "clause": "Your Glacial Tap now generates an additional $/10;s1 Runic Power,",
     "labels": [
-      "302519 effect_value e0 #0"
+      "302519 behaviour_metric_delta runic_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Glacial Tap +20 Runic Power, cost +25%; bindmysoul found: same text; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs; Glacial Tap 805369 energize 30 x482 and 50 x260. Related MCP not queried (unavailable); sidekick found: instantly regenerating Runic Power; bindmysoul found: 30 Runic Power; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True, server_class_spell=True); logs: 742 casts, energize 30 x482, 50 x260."
   },
   {
     "spell": 302519,
     "clause": "but its cost is increased by $s3%.",
     "labels": [
-      "302519 effect_value e2 #1"
+      "302519 behaviour_metric_delta cost"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). 549 -> 686 mana. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Glacial Tap +20 Runic Power, cost +25%; bindmysoul found: same text; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs; Glacial Tap 805369 energize 30 x482 and 50 x260."
   },
   {
     "spell": 302888,
@@ -640,45 +645,60 @@
   {
     "spell": 501861,
     "clause": "Disease an enemy, dealing ${$m1+0+$sps*0.11055} Plague damage",
-    "labels": [
-      "501861 effect_value e0 #0",
-      "501861 aura_amount e0 #0"
+    "claims": [
+      {
+        "claim": "dealing $m1 Plague damage",
+        "labels": [
+          "501861 behaviour_metric_delta tick_damage"
+        ]
+      },
+      {
+        "claim": "+$sps*0.11055",
+        "labels": [
+          "501861 behaviour_hit_ratio spell_power"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Tick 105 per tick = int32(105.771) (G-26 truncation); spell-power term by a real Inner Fire 48168 (+120). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events. Related MCP not queried (unavailable); sidekick nothing found; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: 183 energizes day 8/10 Runic Power: 5 x65, 4 x64, 3 x43, 6 x11."
   },
   {
     "spell": 501861,
     "clause": "and generating Runic Power every $t1 sec for $d.",
     "labels": [
-      "501861 aura_amplitude_ms #1",
-      "501861 aura_duration_ms #2"
+      "501861 behaviour_metric_delta runic_power_period",
+      "501861 behaviour_metric_delta runic_power_duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Parasitic Infestation 804272 energizes counted: 2 by 8800 ms, 6 by 20500 ms. Live ticks about 2.5 s apart (hasted players), not judged. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events. Related MCP not queried (unavailable); sidekick nothing found; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: 183 energizes day 8/10 Runic Power: 5 x65, 4 x64, 3 x43, 6 x11."
   },
   {
     "spell": 501861,
     "clause": "@ext:Periodic damage dealt by this can critically strike.:ext@",
     "labels": [
-      "501861 effect_value #3"
+      "501861 behaviour_metric_delta periodic_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Confirmed defect, fix note FN-c4-1 (awaiting mentor approval): 0 critical ticks of 2 under forced spell crit; AuraEffect::CalcPeriodicCritChance (SpellAuraEffects.cpp:1180-1209) gives periodic damage a crit chance only with a SPELL_AURA_ABILITY_PERIODIC_CRIT aura; live logs: 31 of 192 ticks critical. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events."
   },
   {
     "spell": 500342,
     "clause": "For the next $d your diseases mutate causing them to act with accelerated lethality,",
     "labels": [
-      "500342 aura_duration_ms #0"
+      "500342 behaviour_cast_applies_aura duration",
+      "500342 behaviour_expiry duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: next seconds diseases tick % faster; bindmysoul found: 15 seconds, diseases tick 50% faster; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 5 casts day 8/10 (Cherelia), aura 15.0-15.3 s (median 15.2); FtW tick ~1.25 s while active vs ~2.5 s."
   },
   {
     "spell": 500342,
     "clause": "allowing your freshly applied diseases to tick $s1% faster.",
     "labels": [
-      "500342 effect_value e0 #1",
-      "500342 aura_amount e0 #1"
+      "500342 behaviour_metric_delta tick_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Flesh to Worms 2 ticks in 6200 ms without, 4 with Mutation (1500 ms). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: next seconds diseases tick % faster; bindmysoul found: 15 seconds, diseases tick 50% faster; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 5 casts day 8/10 (Cherelia), aura 15.0-15.3 s (median 15.2); FtW tick ~1.25 s while active vs ~2.5 s."
   },
   {
     "spell": 500572,
@@ -1391,23 +1411,26 @@
     "spell": 560537,
     "clause": "Increases the spell haste of all party and raid members by $s1%.",
     "labels": [
-      "560537 effect_value e0 #0"
+      "560537 behaviour_party_stat_ratio"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Grouped non-caster ally cast speed multiplier 1 -> 0.970874 (1/1.03). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 560537,
     "clause": "Does not stack with similar effects.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: spell_group 2000182 (rev_20260909_01_necromancer_completion.sql:613-614, stack rule exclusive same effect) holds 560537 with Rune of Haste 300874 and Dark Prophecy 800517 (aura 216, +2%); a group_stack_cap read of cast_speed_multiplier needs the inverse relation (the multiplier divides), which group_stack_cap sets only for swing intervals (behaviours.py group_stack_cap_scenario); behaviours.py held by B3 side b (B4) tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 560537,
     "clause": "In addition, increases your Magic damage dealt by $s2%.",
     "labels": [
-      "560537 effect_value e1 #1"
+      "560537 behaviour_hit_ratio magic_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 560595,
@@ -2005,17 +2028,19 @@
     "spell": 704670,
     "clause": "Increases your Frost damage by $s2%",
     "labels": [
-      "704670 effect_value e1 #0"
+      "704670 behaviour_hit_ratio frost_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Frost damage by %, max Runic Power; bindmysoul found: +5% Frost damage, +15 max Runic Power; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 704670,
     "clause": "and your maximum Runic Power by $/10;s1.",
     "labels": [
-      "704670 effect_value e0 #1"
+      "704670 behaviour_metric_delta max_runic_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Maximum Runic Power 1000 -> 1150. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Frost damage by %, max Runic Power; bindmysoul found: +5% Frost damage, +15 max Runic Power; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 704676,
@@ -2495,9 +2520,10 @@
     "spell": 707006,
     "clause": "Increases the damage of Lichfrost by $s1%",
     "labels": [
-      "707006 effect_value e0 #0"
+      "707006 behaviour_hit_ratio lichfrost"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost damage +10%, its Runic Power +25% (up to 2 ranks); bindmysoul found: same; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 707006,
@@ -2505,7 +2531,8 @@
     "labels": [
       "707006 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[1] SPELLMOD_EFFECT2 +25 on Lichfrost 804112 (energize 62..92 units, DieSides 31) and Ice Barrage 803779; the roll spread (sd about 11.6% per energize) needs about 2800 energizes per arm for the 2-point band and hit_ratio has no energize metric (HIT_RATIO_METRICS, behaviours.py). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost damage +10%, its Runic Power +25% (up to 2 ranks); bindmysoul found: same; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 707007,
@@ -2674,9 +2701,10 @@
     "spell": 707881,
     "clause": "Increases the damage of Lichfrost by $s1%",
     "labels": [
-      "707881 effect_value e0 #0"
+      "707881 behaviour_hit_ratio lichfrost"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 707006; bindmysoul nothing found (only 707006 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 707881,
@@ -2684,7 +2712,8 @@
     "labels": [
       "707881 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: as 707006 (+50%): about 800 energizes per arm for the band; no energize metric in hit_ratio. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 707006; bindmysoul nothing found (only 707006 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 707882,
@@ -2967,17 +2996,21 @@
     "spell": 802988,
     "clause": "Reduces the cast time of Lichfrost by $s2%",
     "labels": [
-      "802988 effect_value e1 #0"
+      "802988 behaviour_metric_delta cast_by_2050",
+      "802988 behaviour_metric_delta cast_by_2250"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Lichfrost completes in (2050, 2250] ms with the talent, after 2250 ms without (2500): 10% to 18%. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 802988,
     "clause": "and reduces your spell pushback suffered from taking damage by $s1%.",
     "labels": [
-      "802988 effect_value e0 #1"
+      "802988 behaviour_metric_delta pushback_delays",
+      "802988 behaviour_metric_delta pushback_halved"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). One Light of the Naaru 41394 hit 1000 ms into the cast: still casting at 2300 ms, done by 2500 ms: pushback in (175, 375] ms against 500. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 802990,
@@ -2991,17 +3024,21 @@
     "spell": 803291,
     "clause": "Increases the duration of Lichfrost's movement speed slow by $/1000;s1 sec",
     "labels": [
-      "803291 effect_value e0 #0"
+      "803291 behaviour_metric_delta slow_longer",
+      "803291 behaviour_metric_delta slow_end"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost slow duration by (sidekick id 6488); bindmysoul found: +4 sec Lichfrost slow duration, +4% hit chance; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 803291,
     "clause": "and your hit chance by $s2%.",
     "labels": [
-      "803291 effect_value e1 #1"
+      "803291 behaviour_metric_delta spell_hit_chance",
+      "803291 behaviour_metric_delta melee_hit_chance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Spell hit 1250 -> 1254, melee hit 1000 -> 1004. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost slow duration by (sidekick id 6488); bindmysoul found: +4 sec Lichfrost slow duration, +4% hit chance; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 803741,
@@ -3071,17 +3108,19 @@
     "spell": 803850,
     "clause": "Increases your Frost damage by $s2%",
     "labels": [
-      "803850 effect_value e1 #0"
+      "803850 behaviour_hit_ratio frost_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 704670; bindmysoul nothing found (only 704670 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 803850,
     "clause": "and your maximum Runic Power by $/10;s1.",
     "labels": [
-      "803850 effect_value e0 #1"
+      "803850 behaviour_metric_delta max_runic_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Maximum Runic Power 1000 -> 1300. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: same text as 704670; bindmysoul nothing found (only 704670 in calculator); coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); logs: no events in 186 logs."
   },
   {
     "spell": 804371,
@@ -3203,15 +3242,28 @@
     "spell": 805038,
     "clause": "Summon a ritual circle at your location for $d.",
     "labels": [
-      "805038 aura_duration_ms #0"
+      "805038 behaviour_metric_delta lasts"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon."
   },
   {
     "spell": 805038,
     "clause": "While active, you may cast Ritual Return to return to it.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "While active, you may cast Ritual Return",
+        "labels": [
+          "805038 behaviour_metric_delta ritual_return"
+        ]
+      },
+      {
+        "claim": "to return to it",
+        "labels": []
+      }
+    ],
+    "kind": "claim",
+    "reason": "Claim \"you may cast Ritual Return\": status 1 (refused without a circle, through after a real Summoning Ritual). Claim \"to return to it\": open, route pending: NearTeleportTo the circle (AscensionNecromancerAbilities.cpp:421-431); route: move the caster after the summon and read its distance to the circle before and after the cast (distance and position reads are not in the coverage evidence tables). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
   },
   {
     "spell": 805040,
@@ -3789,9 +3841,11 @@
     "spell": 501965,
     "clause": "Frozen spikes erupt from the bodies of an ally and Raised minions for $d,",
     "labels": [
-      "501965 aura_duration_ms #0"
+      "501965 behaviour_cast_applies_aura duration",
+      "501965 behaviour_expiry duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). On the caster as the ally; the Raised-minion copy (Effect[1] 190) not read. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: frost damage to attackers when hit (no numbers); bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: DAMAGE_SHIELD 5 hits day 8/30, median 78 (72-79), no crit, aura apply->remove median 606 s (14.1-799.2)."
   },
   {
     "spell": 501965,
@@ -3800,7 +3854,8 @@
       "501965 effect_value e0 #1",
       "501965 aura_amount e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Unit::DealDamageShieldDamage (Unit.cpp:2360-2410) fires on melee hits and melee-class spells (Unit.cpp:1166-1167); SMSG_SPELLDAMAGESHIELD is not recorded by the harness, so the read would be the attacker's health loss (21 per landed hit); a stationary striker's melee-class Strike 11976 can be dodged, parried or missed, so the landed count needs its own read. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: frost damage to attackers when hit (no numbers); bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: DAMAGE_SHIELD 5 hits day 8/30, median 78 (72-79), no crit, aura apply->remove median 606 s (14.1-799.2)."
   },
   {
     "spell": 583256,
@@ -4146,9 +4201,11 @@
     "spell": 572214,
     "clause": "Frozen spikes erupt from the bodies of nearby allies and Raised minions for $d,",
     "labels": [
-      "572214 aura_duration_ms #0"
+      "572214 behaviour_cast_applies_aura duration",
+      "572214 behaviour_expiry duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). On the caster; live aura lifetimes (median 17 s) end early when the holder (minions) dies, not judged. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: nearby allies and Raised minions, frost damage to attackers; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: DAMAGE_SHIELD 6304, median 64 (0-327), mean 65.15, no crit; aura common 14/17/18/15 s, median 17.0 s; casts 172."
   },
   {
     "spell": 572214,
@@ -4157,7 +4214,8 @@
       "572214 effect_value e0 #1",
       "572214 aura_amount e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: as Razorice 501965 (damage shield read on the attacker). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: nearby allies and Raised minions, frost damage to attackers; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: DAMAGE_SHIELD 6304, median 64 (0-327), mean 65.15, no crit; aura common 14/17/18/15 s, median 17.0 s; casts 172."
   },
   {
     "spell": 572789,
@@ -4896,10 +4954,23 @@
   {
     "spell": 803605,
     "clause": "Bring a dead ally back to life with $s1 health",
-    "labels": [
-      "803605 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Bring a dead ally back to life",
+        "labels": [
+          "803605 cast_combat revive alive before",
+          "803605 cast_combat revive alive after"
+        ]
+      },
+      {
+        "claim": "with $s1 health",
+        "labels": [
+          "803605 effect_value e0 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim \"back to life\": status 1 (dead before, alive after a real cast in combat). Claim \"with $s1 health\": open, route pending: the cast_combat resurrect scenario reads alive, not the ally health after the accept (583 = 582 + 1, SPELL_EFFECT_RESURRECT_NEW); route: a health read on the ally after CMSG_RESURRECT_RESPONSE. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
   },
   {
     "spell": 803605,
@@ -4907,13 +4978,18 @@
     "labels": [
       "803605 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: $q1 = EffectMiscValue[0] 833 (the tooltip reader cannot read $q); route: a mana read on the ally after the resurrection accept, as for the health claim. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
   },
   {
     "spell": 803605,
     "clause": "Can be used in combat.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "803605 cast_combat combat",
+      "803605 cast_combat cast_failure"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
   },
   {
     "spell": 803771,
