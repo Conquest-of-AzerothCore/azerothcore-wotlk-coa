@@ -257,9 +257,13 @@ void CoAEconomyLog::GainedInto(CharacterDatabaseTransaction trans, uint32 guid, 
     if (item ? !count : !tag.gold)
         return;
     WriteFor(trans, guid, ItemRow(tag, item, count));
-    if (item && item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
-        if (Player* player = ObjectAccessor::FindPlayerByLowGUID(guid))
-            AddTokensEarned(player, int32(count), TokenSourceOf(tag.event));
+    if (!item || item->GetEntry() != AscensionBazaarTokenReserve::TOKEN_ITEM)
+        return;
+    CoAEconomyRow tokens;
+    tokens.event = CoAEconomyEvent::TokensEarned;
+    tokens.tokens = int32(count);
+    tokens.source = uint32(TokenSourceOf(tag.event));
+    WriteFor(trans, guid, tokens);
 }
 
 CoAEconomyLog::GainScope::GainScope(Player* player, CoAEconomyRow const& tag)

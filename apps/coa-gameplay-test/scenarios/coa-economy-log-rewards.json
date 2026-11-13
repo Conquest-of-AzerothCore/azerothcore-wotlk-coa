@@ -6,7 +6,8 @@
     "The final boss of normal Scarlet Monastery - Graveyard (Bloodmage Thalnos 4543) gives a level 30 player outside the Dungeon Finder one Dungeon Spoils 2021814: source 5 (dungeon boss). Opening the spoils gives one dungeon item: one cache_open row with the spoils as source.",
     "Outside the Dungeon Finder the Heroic final boss gives one Heroic Dungeon Spoils 1202039 (Mythic+ module): source 5. Opening them (item_coa_dungeon_spoils) gives their dungeon item: cache_open rows with the spoils as source.",
     "A Heroic dungeon boss kill (Anub'shiah 9031, Blackrock Depths) gives one Mark of Triumph 1414502: source 5.",
-    "Capturing a Void Portal (gameobject 239828) gives Voidtalon of the Dark Star 121815: source 6 (Void Portal)."
+    "Capturing a Void Portal (gameobject 239828) gives Voidtalon of the Dark Star 121815: source 6 (Void Portal).",
+    "A second capture (spawn 8001309) by a player whose bags are full mails the Voidtalon: one reward row (source 6) written with the mail and the mail's own system_mail row, nothing twice."
   ],
   "timeout_ms": 150000,
   "economy_log": true,
@@ -39,6 +40,12 @@
     },
     {
       "id": "portal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "fullportal",
       "race": 1,
       "class": 1,
       "level": 60
@@ -269,6 +276,78 @@
       "within_ms": 5000
     },
     {
+      "action": "set_phase",
+      "actor": "fullportal",
+      "value": 1
+    },
+    {
+      "action": "fill_bags",
+      "actor": "fullportal",
+      "slots": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "fill_bags",
+      "label": "Refill a slot freed by a filler item that vanished",
+      "actor": "fullportal",
+      "slots": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second capturer's bags are full",
+      "actor": "fullportal",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "voidportal",
+      "actor": "fullportal",
+      "op": "force",
+      "group": 9000001,
+      "spawn": 8001309
+    },
+    {
+      "action": "voidportal",
+      "actor": "fullportal",
+      "op": "roll",
+      "success": false
+    },
+    {
+      "action": "teleport",
+      "actor": "fullportal",
+      "map": 0,
+      "x": 2858.920898,
+      "y": -2883.853516,
+      "z": 97.198929,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second portal stands",
+      "actor": "fullportal",
+      "metric": "nearby_gameobject_count",
+      "entry": 239828,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "fullportal",
+      "entry": 239828
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with full bags the Voidtalon is mailed",
+      "actor": "fullportal",
+      "metric": "mail_has_item",
+      "item": 121815,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
       "action": "assert",
       "label": "THE LOG: the Dungeon Spoils from the final boss",
       "actor": "spoils",
@@ -334,6 +413,37 @@
       "item": 121815,
       "economy_count": 1,
       "economy_source": 6,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the mailed Voidtalon is one reward row",
+      "actor": "fullportal",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 121815,
+      "economy_count": 1,
+      "economy_source": 6,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: and the mail itself one system_mail row",
+      "actor": "fullportal",
+      "metric": "economy_log_rows",
+      "economy_event": "system_mail",
+      "item": 121815,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: no other reward rows for the full-bag capturer",
+      "actor": "fullportal",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
       "equals": 1,
       "within_ms": 2000
     }

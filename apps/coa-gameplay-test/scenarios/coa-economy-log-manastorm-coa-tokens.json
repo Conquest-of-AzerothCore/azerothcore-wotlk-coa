@@ -1,0 +1,129 @@
+{
+  "schema": 1,
+  "name": "Economy log: Manastorm CoA loot mode tokens are logged in the delivery's own transaction",
+  "contract": [
+    "Requires Manastorm.CoALootMode.Enabled = 1 (the module's CoA loot mode, off by default).",
+    "With the economy log on, a level 60 non-Wildcard leader's clear of test segment 1 (Taragaman 11520) delivers Bazaar Tokens 975001 through PrepareItemDelivery. With full bags they stay in the mail, so no character save follows: the reward row (source 4) and the tokens_earned row (source 7, other) must be written in the delivery's own transaction to exist at all before a save."
+  ],
+  "timeout_ms": 120000,
+  "economy_log": true,
+  "players": [
+    {
+      "id": "leader",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Go to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "fill_bags",
+      "actor": "leader",
+      "slots": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "fill_bags",
+      "label": "Refill a slot freed by a filler item that vanished",
+      "actor": "leader",
+      "slots": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader's bags are full",
+      "actor": "leader",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with full bags the clear's Bazaar Tokens stay in the mail",
+      "actor": "leader",
+      "metric": "mail_has_item",
+      "item": 975001,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the token delivery's reward row, without a save",
+      "actor": "leader",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 975001,
+      "economy_source": 4,
+      "economy_save": false,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: its tokens_earned row is in the same transaction, without a save",
+      "actor": "leader",
+      "metric": "economy_log_rows",
+      "economy_event": "tokens_earned",
+      "economy_source": 7,
+      "economy_save": false,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: after a save there is still exactly one tokens_earned row",
+      "actor": "leader",
+      "metric": "economy_log_rows",
+      "economy_event": "tokens_earned",
+      "economy_source": 7,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}
