@@ -98,7 +98,7 @@
       "300240 effect_value e0 #0"
     ],
     "kind": "claim",
-    "reason": "Open, route pending: Effect[0] SPELLMOD_RANGE +6 on Command: Crypt Fiend, Command: Skeletal Mage, Glacial Impact, Ice Barrage, Lichfrost (class mask); route: a Lichfrost cast at a dummy placed 33 yd away, refused out of range without the talent and through with it (metric_delta has no dummy distance; strike dx relocations add up per phase). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Open, route pending: Effect[0] SPELLMOD_RANGE +6 on Command: Crypt Fiend, Command: Skeletal Mage, Glacial Impact, Ice Barrage, Lichfrost (class mask); route: a Lichfrost cast at a dummy 36 yd away, refused out of range (97) without the talent and through with it (Spell::CheckRange, Spell.cpp:7302-7339); tried: metric_delta strike dx relocation, refused by the scenario validator (relocate dx/dy within 20 yd, run.py:801-803), and metric_delta has no dummy distance. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 300240,
@@ -1419,9 +1419,11 @@
   {
     "spell": 560537,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560537 behaviour_metric_delta no_stack"
+    ],
     "kind": "claim",
-    "reason": "Open, route pending: spell_group 2000182 (rev_20260909_01_necromancer_completion.sql:613-614, stack rule exclusive same effect) holds 560537 with Rune of Haste 300874 and Dark Prophecy 800517 (aura 216, +2%); a group_stack_cap read of cast_speed_multiplier needs the inverse relation (the multiplier divides), which group_stack_cap sets only for swing intervals (behaviours.py group_stack_cap_scenario); behaviours.py held by B3 side b (B4) tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Status 1 (counted pair, mentor ruling G-21 point 2 / ADR 0424, read as ADR 0440): the caster cast speed multiplier after one application (560537, 0.970874) and after the similar Dark Prophecy 800517 too (spell_group 2000182) stays 0.970874, not 0.951837 summed. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 560537,
@@ -3010,7 +3012,7 @@
       "802988 behaviour_metric_delta pushback_halved"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). One Light of the Naaru 41394 hit 1000 ms into the cast: still casting at 2300 ms, done by 2500 ms: pushback in (175, 375] ms against 500. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Status 1 (counted pair, control arm in each entry). One Light of the Naaru 41394 hit 1000 ms into the cast: no Lichfrost hit by 2350 ms, one by 2600 ms: pushback between about 125 and 375 ms against the 500 ms base (Spell::Delayed, Spell.cpp:8075-8082). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 802990,

@@ -437,7 +437,7 @@ STATE_PROMISES = {
     'owned_creature_cast_speed': r'haste|cast speed', 'owned_creature_threat': r'threat',
     'owned_creature_power': r'mana|energy|rage|focus',
     'owned_creature_threat_multiplier': r'threat', 'melee_crit_chance_against': CRIT_WORDS,
-    'cast_speed_multiplier': r'casting speed|cast speed',
+    'cast_speed_multiplier': r'casting speed|cast speed|spell haste',
     'display_id': r'transform\w*',
     'threat_per_damage': r'threat',
     'threat_multiplier': r'threat',
@@ -597,6 +597,8 @@ def promised_state(verdict: Verdict, clause: str) -> bool:
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) != LEARNED_CONTRAST:
         return False
     words = STATE_PROMISES.get(detail[PASSIVE_METRIC])
+    if words is not None and verdict.check == BEHAVIOUR_METRIC_DELTA:
+        words = rf'{words}|{NO_STACK_WORDS}'
     return words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is not None
 
 

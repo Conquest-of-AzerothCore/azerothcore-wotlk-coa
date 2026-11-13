@@ -1152,5 +1152,34 @@ class OwnedHealthAndItemCountTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['item_count'], EVENT)
 
 
+class SpellHasteAndNoStackPromiseTest(unittest.TestCase):
+    def test_a_party_cast_speed_ratio_proves_a_spell_haste_clause(self):
+        clauses = [claim('Increases the spell haste of all party and raid members by $s1%.', '1 party')]
+        promised = judged('1 party', BEHAVIOUR_PARTY_STAT_RATIO, 'cast_speed_multiplier')
+        self.assertEqual(evidence_of(clauses, [promised])[0], [BEHAVIOUR])
+        proxy = [claim('Increases the attack power of all party and raid members $s1%.', '1 party')]
+        self.assertEqual(evidence_of(proxy, [promised])[0], [DATA])
+
+    def test_a_learned_state_contrast_proves_a_no_stack_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta no_stack', BEHAVIOUR_METRIC_DELTA, 'cast_speed_multiplier',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Does not stack with similar effects.', '1 behaviour_metric_delta no_stack')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Stacks up to 3 times.', '1 behaviour_metric_delta no_stack')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_a_no_stack_clause_without_a_learned_contrast_stays_data(self):
+        verdicts = [judged('1 behaviour_metric_delta no_stack', BEHAVIOUR_METRIC_DELTA, 'cast_speed_multiplier')]
+        promised = claim('Does not stack with similar effects.', '1 behaviour_metric_delta no_stack')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [DATA])
+
+    def test_seeded_no_stack_rule_dropped_is_caught(self):
+        verdicts = [judged('1 behaviour_metric_delta no_stack', BEHAVIOUR_METRIC_DELTA, 'cast_speed_multiplier',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Does not stack with similar effects.', '1 behaviour_metric_delta no_stack')
+        with mock.patch('coverage.NO_STACK_WORDS', r'(?!x)x'):
+            self.assertEqual(evidence_of([promised], verdicts)[0], [DATA])
+
+
 if __name__ == '__main__':
     unittest.main()

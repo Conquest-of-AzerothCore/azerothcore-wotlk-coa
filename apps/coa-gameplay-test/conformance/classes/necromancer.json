@@ -11377,11 +11377,10 @@
     {
       "spell": 802988,
       "name": "Lich Essence (pushback still delays Lichfrost)",
-      "kind": "metric_delta",
       "variant": "pushback_delays",
       "label_suffix": "pushback_delays",
+      "kind": "metric_delta",
       "quote": "and reduces your spell pushback suffered from taking damage by $s1%.",
-      "expected": 0,
       "before_expected": 0,
       "trigger_spell": 501978,
       "target": "dummy",
@@ -11389,7 +11388,6 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "expire_ms": 500,
-      "wait_ms": 1200,
       "strike": {
         "spell": 41394,
         "health": 100000,
@@ -11398,20 +11396,22 @@
         "wait_ms": 100,
         "after_trigger_ms": 1000
       },
-      "metric": "spell_go_count",
+      "metric": "spell_damage_count",
       "fields": {
-        "spell": 501978
+        "spell": 501978,
+        "target": "dummy"
       },
-      "observe_source": "Lichfrost 501978 InterruptFlags 47 (SPELL_INTERRUPT_FLAG_PUSH_BACK, not ABORT_ON_DMG), 2500 ms cast, 2125 ms with 802988 (Effect[1] SPELLMOD_CASTING_TIME -15). Spell::Delayed (Spell.cpp:8056-8090, stock) pushes a cast back 500 ms per damage taken, reduced by SPELL_AURA_REDUCE_PUSHBACK: 802988 Effect[0] aura 149 +50 ($s1) gives 250 ms. 802988 known throughout; one real Lichfrost at the dummy, a stationary striker hits the caster with Light of the Naaru 41394 (Holy, 1100) 1000 ms into the cast. No cast before (0); 2300 ms after the cast starts it has not completed (0): without the strike it completes by 2250 ms (the cast_by_2250 entry), so the hit delayed it by more than 50 ms."
+      "expected": 0,
+      "wait_ms": 1250,
+      "observe_source": "Lichfrost 501978 InterruptFlags 47 (SPELL_INTERRUPT_FLAG_PUSH_BACK, not ABORT_ON_DMG), 2500 ms cast, 2125 ms with 802988 (Effect[1] SPELLMOD_CASTING_TIME -15), Speed 30 (about 100 ms to the dummy 3 yd away). Spell::Delayed (Spell.cpp:8056-8090, stock) pushes a cast back 500 ms per damage taken, reduced by SPELL_AURA_REDUCE_PUSHBACK: 802988 Effect[0] aura 149 +50 ($s1) gives 250 ms. 802988 known throughout; one real Lichfrost at the dummy, a stationary striker hits the caster with Light of the Naaru 41394 (Holy, 1100) 1000 ms into the cast. No cast before (0); 2350 ms after the cast starts no Lichfrost hit has landed (0): unpushed, the hit lands near 2225 ms; pushed back 250 ms, near 2475 ms."
     },
     {
       "spell": 802988,
       "name": "Lich Essence (pushback halved)",
-      "kind": "metric_delta",
       "variant": "pushback_halved",
       "label_suffix": "pushback_halved",
+      "kind": "metric_delta",
       "quote": "and reduces your spell pushback suffered from taking damage by $s1%.",
-      "expected": 1,
       "before_expected": 0,
       "trigger_spell": 501978,
       "target": "dummy",
@@ -11419,7 +11419,6 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "expire_ms": 500,
-      "wait_ms": 1400,
       "strike": {
         "spell": 41394,
         "health": 100000,
@@ -11428,11 +11427,14 @@
         "wait_ms": 100,
         "after_trigger_ms": 1000
       },
-      "metric": "spell_go_count",
+      "metric": "spell_damage_count",
       "fields": {
-        "spell": 501978
+        "spell": 501978,
+        "target": "dummy"
       },
-      "observe_source": "Lichfrost 501978 (2125 ms with 802988's -15% cast time), pushed back by one Light of the Naaru 41394 hit 1000 ms into the cast; Spell::Delayed (Spell.cpp:8075-8082, stock): 500 ms, x (1 - 50%) with 802988 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK +50 ($s1) = 250 ms, so the cast completes near 2375 ms; an unreduced 500 ms pushback would end it near 2625 ms. No cast before (0); 2500 ms after the cast starts it has completed (1). With pushback_delays the pushback lies in (175, 375] ms, a reduction of 25% to 65% of the 500 ms base."
+      "expected": 1,
+      "wait_ms": 1500,
+      "observe_source": "Lichfrost 501978 (2125 ms with 802988's -15% cast time, Speed 30: about 100 ms of travel), pushed back by one Light of the Naaru 41394 hit 1000 ms into the cast; Spell::Delayed (Spell.cpp:8075-8082, stock): 500 ms, x (1 - 50%) with 802988 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK +50 ($s1) = 250 ms, so the hit lands near 2475 ms; an unreduced 500 ms pushback would land it near 2725 ms. No cast before (0); 2600 ms after the cast starts the hit has landed (1). With pushback_delays the pushback lies between about 125 and 375 ms, against the 500 ms base."
     },
     {
       "spell": 501861,
@@ -11469,6 +11471,28 @@
         "target": "dummy"
       },
       "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, $m1 at level 60 = 101 + 1 + 0.942857 x 4 = 105.771 (the packet's resolved value; spell power 0 at the reference, so the $sps term is 0); SpellEffectInfo::CalcValue truncates to int32: 105 per tick (G-26, known engine rounding). beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit) on the caster are precondition fixtures (harness set_aura). No cast before (control, 0); 6200 ms after one real cast two ticks (3000, 6000 ms): 210."
+    },
+    {
+      "spell": 560537,
+      "name": "Apothecary's Cauldron (no stack with Dark Prophecy)",
+      "kind": "metric_delta",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "expected": 0.970874,
+      "before_expected": 0.970874,
+      "tolerance": 0.0001,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "learn": [
+        560537
+      ],
+      "gate_spell": 800517,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "observe_source": "560537 Effect[0] 65 APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1); Dark Prophecy 800517 Effect[0] 65 aura 216 +2 (BasePoints 1 + 1), a similar spell-haste raid aura. Both are in spell_group 2000182 (rev_20260909_01_necromancer_completion.sql:613-614, rev_20260908_05_guardian_completion.sql:358), whose stack rule keeps the strongest exclusive amount. 560537 learned up front: the caster's cast speed multiplier reads 1 / 1.03 = 0.970874 around a Glacial Tap 805369 cast (one application); after Dark Prophecy 800517 is also learned (two applications) it still reads 0.970874, not 0.970874 / 1.02 = 0.951837 (stacked). Control: the party_stat_ratio entry reads 1 without 560537."
     }
   ],
   "player_observations": [],
