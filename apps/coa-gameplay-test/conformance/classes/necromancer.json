@@ -1268,6 +1268,149 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 705746,
+      "name": "Life For Power (shield amount)",
+      "kind": "metric_delta",
+      "variant": "shield_amount",
+      "label_suffix": "shield_amount",
+      "quote": "and gain a shield for the amount absorbed, lasting $707194d.",
+      "expected": 200,
+      "before_expected": 0,
+      "trigger_spell": 49,
+      "target": "caster",
+      "caster_health": [
+        3000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_actor_aura": 984954,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 707194,
+        "effect": 0
+      },
+      "observe_source": "Review I-c: the shield's amount. Tooltip: \"You absorb $s1% of healing taken and gain a shield for the amount absorbed\", $s1 = 20 (705746 Effect[0] BasePoints 19 + 1). Heal 1000 (TEST) 49 (SPELL_EFFECT_HEAL 1000, no die, no cost, instant) cast by the caster on itself at 3000 of 10000 health, spell crit held at -1000 (984954, harness set_aura precondition fixture) so the heal does not crit: 20% of 1000 = 200 absorbed, so Life For Power 707194 (aura 69) holds 200. 705746 learned at the start; no heal before (control): no shield, amount 0."
+    },
+    {
+      "spell": 570136,
+      "name": "Waking Crypts (Crypt Swarm, two diseases)",
+      "kind": "hit_ratio",
+      "variant": "crypt_swarm_two",
+      "label_suffix": "crypt_swarm_two",
+      "quote": "and Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target.",
+      "expected": 1.08,
+      "observe_spell": 800343,
+      "cast_spell": 501886,
+      "cast_wait_ms": 3600,
+      "cast_power": 1373,
+      "learn": [
+        570136
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            37643,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            37643,
+            1
+          ]
+        ],
+        "casts": [
+          570131,
+          500338
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Tooltip: \"$s2% more damage for each Necromancer disease\", $s2 = 4: two diseases x1.08 against none (review I-b, multi-disease arm). As the crypt_swarm entry, with Flesh to Worms 500338 (Dispel disease, instant, no cost) cast after Crypt Plague 570131 in the treatment; Increase Damage 37643 (+500%, harness set_aura precondition fixture) in both arms."
+    },
+    {
+      "spell": 807925,
+      "name": "Damnation rank 2 (dummy at 34%)",
+      "kind": "hit_ratio",
+      "variant": "edge_34",
+      "label_suffix": "edge_34",
+      "quote": "doubled against enemies below 35% health.",
+      "expected": 1.2,
+      "observe_spell": 680928,
+      "cast_wait_ms": 1600,
+      "target_health_pct": 34,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807925
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Edge arm of the below_35 entry (ADR 0409): the dummy held at 34% health in both arms, just below 35%: x1.20, 546 for 456 (HealthBelowPct(35), AscensionNecromancerContracts.cpp; 40 hits of about 550 move a 50000000-health dummy by 0.04%). Control without 807925 (no talent), treatment with it learned (a real learn); Plague of Undeath 680928, 823764 in both arms, non-critical hits only."
+    },
+    {
+      "spell": 807925,
+      "name": "Damnation rank 2 (dummy at 36%)",
+      "kind": "hit_ratio",
+      "variant": "edge_36",
+      "label_suffix": "edge_36",
+      "quote": "doubled against enemies below 35% health.",
+      "expected": 1.1,
+      "observe_spell": 680928,
+      "cast_wait_ms": 1600,
+      "target_health_pct": 36,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807925
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Edge arm of the below_35 entry (ADR 0409): the dummy held at 36% health in both arms, just above 35%: the aura only, x1.10, 501 for 456 (HealthBelowPct(35), AscensionNecromancerContracts.cpp; 40 hits of about 550 move a 50000000-health dummy by 0.04%). Control without 807925 (no talent), treatment with it learned (a real learn); Plague of Undeath 680928, 823764 in both arms, non-critical hits only."
+    },
+    {
       "spell": 92122,
       "name": "Tundra Warriors (Grave March rolls)",
       "kind": "metric_delta",
@@ -1281,6 +1424,37 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "setup_casts": [
+        500971,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
         500991,
         500991,
         500991,
@@ -1344,11 +1518,12 @@
       "setup_wait_ms": 100,
       "wait_ms": 500,
       "expire_ms": 500,
-      "metric": "aura",
+      "metric": "owned_creature_count",
       "fields": {
+        "entry": 50073,
         "spell": 707421
       },
-      "observe_source": "FN-a4-1 regression (ADR 0408): Grave March 500991 carries SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING, whose two added trigger flags (Spell.cpp:641-642) no longer make necromancer_casts::OnSpellCast skip it. Tundra Warriors 92122 (ProcChance 25) rolls on each of 60 Grave Marches; none rolls with probability 0.75^60 = 3e-8. Before (control) no cast: no 707421; after: 707421 on the caster."
+      "observe_source": "FN-a4-1 regression (ADR 0408): Grave March 500991 carries SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING, whose two added trigger flags (Spell.cpp:641-642) no longer make necromancer_casts::OnSpellCast skip it. A Ghoul 50073 is raised (500971, cast time running) and 89 Grave Marches follow at 100 ms (usable while casting, each cooldown reset); Tundra Warriors 92122 (ProcChance 25) rolls on each, and 707421 Effect[0] 190 puts its aura 290 on the summons (as the buff_minions entry reads). About 59 casts land after the Ghoul exists: none rolls with probability 0.75^59 = 4e-8. The phase's trigger Grave March follows the last setup cast without a reset and is refused (not ready). Before (control) no cast: no Ghoul with 707421; after: the Ghoul carries it."
     },
     {
       "spell": 704723,
@@ -1365,6 +1540,7 @@
       "trigger_only_after": true,
       "setup_casts": [
         500991,
+        500991,
         500991
       ],
       "setup_wait_ms": 100,
@@ -1374,7 +1550,7 @@
       "fields": {
         "spell": 707133
       },
-      "observe_source": "FN-a4-1 regression (ADR 0408): three Grave March 500991 casts (cast while casting, no global cooldown) each grant one Diabolical 707133 stack through necromancer_casts::OnSpellCast (HasAura(704723), no roll). Before (control) no cast: 0 stacks; after: 3."
+      "observe_source": "FN-a4-1 regression (ADR 0408): three Grave March 500991 setup casts (cast while casting, StartRecoveryTime 0, cooldown reset before each) each grant one Diabolical 707133 stack through necromancer_casts::OnSpellCast (HasAura(704723), no roll); the phase's trigger Grave March follows without a reset and is refused (not ready, pilot r1). Before (control) no cast: 0 stacks; after: 3."
     },
     {
       "spell": 704723,
@@ -1498,7 +1674,7 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Frost damage.",
-      "expected": 1.361404,
+      "expected": 1.379141,
       "observe_spell": 707592,
       "cast_spell": 707402,
       "cast_wait_ms": 1600,
@@ -1541,7 +1717,7 @@
       },
       "critical": false,
       "trials": 12,
-      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$spfr*1.405}: the coefficient row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67) adds 1.405 x 220 = 309.1 to 707592: 855 -> 1164, ratio 1.3614 (the control's 855 holds the +40 per-level points of the tolerated damage entry). Fixtures in both arms as the damage entry."
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$spfr*1.405}: the coefficient row {707592, 0, 1.405, Frost} (AscensionNecromancerData.h:67) adds 1.405 x 220 = 309.1 to 707592: 855 -> 1164, ratio 1.3614 (the control's 855 holds the +40 per-level points of the tolerated damage entry). Fixtures in both arms as the damage entry. Method sweep (mentor 2026-11-13): the expectation is the tooltip's, (815 + 1.405 x 220) / 815 = 1.3791 at the tooltip base 815.84; the measured 855 base carries the tolerated +40 per-level points (mentor ruling, stock SpellInfo.cpp:482-497), so the read 1164 / 855 = 1.3614 is judged against 1.3791 inside the band."
     },
     {
       "spell": 501997,
@@ -1550,7 +1726,7 @@
       "variant": "spell_power",
       "label_suffix": "spell_power",
       "quote": "Frost damage every",
-      "expected": 1.417727,
+      "expected": 1.421222,
       "observe_spell": 803779,
       "cast_spell": 501997,
       "cast_wait_ms": 3500,
@@ -1585,7 +1761,7 @@
       },
       "critical": false,
       "trials": 12,
-      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$SP*.5971}: the coefficient row {803779, 0, 0.5971, Frost} (AscensionNecromancerData.h:82) adds 0.5971 x 220 = 131.4 per tick: mean 314.5 (311 plus the 1-6 die) -> 445.9, ratio 1.4177."
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$m1+0+$SP*.5971}: the coefficient row {803779, 0, 0.5971, Frost} (AscensionNecromancerData.h:82) adds 0.5971 x 220 = 131.4 per tick: mean 314.5 (311 plus the 1-6 die) -> 445.9, ratio 1.4177. Method sweep (mentor 2026-11-13): the expectation is the tooltip's, (311 + 0.5971 x 220) / 311 = 1.4212 at the tooltip base 311 (the 1-6 die is the tolerated stock per-level/die addition); the read is judged against 1.4212 inside the band."
     },
     {
       "spell": 500329,
@@ -1670,6 +1846,10 @@
           [
             823764,
             1
+          ],
+          [
+            37643,
+            1
           ]
         ]
       },
@@ -1677,6 +1857,10 @@
         "auras": [
           [
             823764,
+            1
+          ],
+          [
+            37643,
             1
           ]
         ],
@@ -1686,7 +1870,7 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "Factor() (AscensionNecromancerContracts.cpp:414-415) multiplies Crypt Swarm 800343 by 1 + Diseases(player, target) x 0.04 while the caster knows 570136 ($s2 = 4, Effect[1] aura 107 dummied by contract :157-158). 570136 learned in both arms; each trial channels Crypt Swarm 501886 (3000 ms, 800343 every 500 ms) at the dummy; the treatment casts Crypt Plague 570131 (a Necromancer disease) first: 1 disease, x1.04; the control none. 823764 removes partial resists in both arms; only non-critical hits; 1373 mana set before each channel."
+      "expected_source": "Tooltip: \"Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target\", $s2 = 4 (570136 Effect[1] BasePoints 3 + 1): one disease x1.04. 570136 learned in both arms; each trial channels Crypt Swarm 501886 (3000 ms, 800343 every 500 ms) at the dummy; the treatment casts Crypt Plague 570131 (Dispel disease) first: 1 disease; the control none. Increase Damage 37643 (aura 79, +500% all schools, harness set_aura precondition fixture in both arms, review I-b) raises the 58 base to about 348 so one disease's 4% (about 14 points) is resolvable against the integer truncation. 823764 removes partial resists in both arms; only non-critical hits; 1373 mana set before each channel. The crypt_swarm_two entry adds a second disease."
     },
     {
       "spell": 801733,
@@ -1961,7 +2145,7 @@
       "variant": "below_35",
       "label_suffix": "below_35",
       "quote": "doubled against enemies below 35% health.",
-      "expected": 1.1025,
+      "expected": 1.1,
       "observe_spell": 680928,
       "cast_wait_ms": 1600,
       "target_health_pct": 30,
@@ -1986,7 +2170,7 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "Damnation 806149 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 4 + 1 = 5% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.05 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 806149, treatment with it learned (a real learn). The dummy is held at 30% health in both arms: the aura's 5% and Factor()'s x1.05 multiply to 1.1025, a bonus of 10.25% against the stated doubled 10% (inside the band of the larger of 5% and 2 points)."
+      "expected_source": "Damnation 806149 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 4 + 1 = 5% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.05 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 806149, treatment with it learned (a real learn). The dummy is held at 30% health in both arms. Expected from the tooltip (mentor 2026-11-13, G-1, G-6): \"doubled\" doubles the increase, +10% = x1.1. Since ADR 0409 Factor() multiplies a Shadow hit below 35% by (1 + 2 x 0.05) / (1 + 0.05) on top of the aura's x1.05; the two integer steps read int(456 x 1.05) = 478, then int(478 x 1.10 / 1.05) = 500: ratio 1.0965 (the 1 point below 456 x 1.1 is the truncation of the two steps)."
     },
     {
       "spell": 807925,
@@ -2028,7 +2212,7 @@
       "variant": "below_35",
       "label_suffix": "below_35",
       "quote": "doubled against enemies below 35% health.",
-      "expected": 1.21,
+      "expected": 1.2,
       "observe_spell": 680928,
       "cast_wait_ms": 1600,
       "target_health_pct": 30,
@@ -2053,7 +2237,7 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "Damnation 807925 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 9 + 1 = 10% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.1 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 807925, treatment with it learned (a real learn). The dummy is held at 30% health in both arms: the aura's 10% and Factor()'s x1.1 multiply to 1.21, a bonus of 21% against the stated doubled 20% (inside the band of the larger of 5% and 2 points)."
+      "expected_source": "Damnation 807925 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 9 + 1 = 10% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.1 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 807925, treatment with it learned (a real learn). The dummy is held at 30% health in both arms. Expected from the tooltip (mentor 2026-11-13, G-1, G-6): \"doubled\" doubles the increase, +20% = x1.2. Since ADR 0409 Factor() multiplies a Shadow hit below 35% by (1 + 2 x 0.1) / (1 + 0.1) on top of the aura's x1.1; the two integer steps read int(456 x 1.10) = 501, then int(501 x 1.20 / 1.10) = 546: ratio 1.1974 (the 1 point below 456 x 1.2 is the truncation of the two steps)."
     },
     {
       "spell": 570136,
@@ -2529,7 +2713,7 @@
       "name": "Corpse Wagon (party member)",
       "kind": "hit_ratio",
       "variant": "party",
-      "parts": 4,
+      "parts": 24,
       "label_suffix": "party",
       "quote": "Increases all damage dealt by party and raid members by $s1%.",
       "expected": 1.03,

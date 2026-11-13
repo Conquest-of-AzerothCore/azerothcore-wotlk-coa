@@ -152,7 +152,7 @@
       "300580 behaviour_hit_ratio two_summons"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1%', 'up to a maximum of 10%'; coa-obtainable: in the live capture; logs: no line for 300580. Status 1 pending mentor (review I-4): the readings are deterministic (1100 -> 1089 with one summon, 1078 with two, sigma 0, -1.000% and -2.000% exactly), but the taken_hit judge applies the 2-point G-19 band, under which 0% and a flat 1% would also pass; a judge to the rounding was tried (the hit_ratio 'stated' parts model, which does not fit an absent-to-present bonus) and dropped."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1%', 'up to a maximum of 10%'; coa-obtainable: in the live capture; logs: no line for 300580. Status 1 (mentor 2026-11-13): the reads are exactly -1.000% (1100 -> 1089, one summon) and -2.000% (1078, two summons), deterministic, sigma 0, judged to the rounding (G-19); the taken_hit judge's 2-point band was not the deciding judge. A taken_hit judge to the rounding is a tool gap for the report (tried: the hit_ratio 'stated' parts model, which does not fit an absent-to-present bonus)."
   },
   {
     "spell": 300580,
@@ -1729,7 +1729,7 @@
       "560848 effect_value e1 #1"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 801728 6629 hits, stacks to 3, 801724 median 2.3 s. Open, route pending: Factor() multiplies the caster's Frost damage by 1 + 0.05 x min(3, stacks of 801728) on a target carrying it with 560848 known (AscensionNecromancerContracts.cpp:432-434); a hit_ratio with Soulfreeze 801728 cast before each Frost hit would read it; not built tonight."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 801728 6629 hits, stacks to 3, 801724 median 2.3 s. Open, route attempt (B3/B4 side a route agent, 2026-11-13), parked with state: a direct Soulfreeze 801728 cast is refused (TargetAuraState 4, Frozen; pairs r2/r3, SPELL_FAILED_TARGET_AURASTATE), and the Soulfreeze ability 801724's triggered ticks fail on an unfrozen dummy (SPELL_FAILED_DONT_REPORT, r4). With Frost Nova 122 on the dummy (ADR 0303 fixture) one 801724 left 3 stacks of 801728 in both runs of r5 (0 without the cast), but two casts (six ticks, to show the cap) read 3 then 0 (r6 flip), probably the ticks' damage breaking the Frost Nova fixture; not a counted pair. Next: a Frozen fixture that damage does not break, then a metric_delta expected_ratio of the Ice Barrage 803779 ticks with and without 3 stacks (x1.15; a hit_ratio cannot set a target aura)."
   },
   {
     "spell": 560848,
@@ -1738,7 +1738,7 @@
       "560848 max_stacks 801728 #2"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 801728 6629 hits, stacks to 3, 801724 median 2.3 s. Open, route pending: Factor() multiplies the caster's Frost damage by 1 + 0.05 x min(3, stacks of 801728) on a target carrying it with 560848 known (AscensionNecromancerContracts.cpp:432-434); a hit_ratio with Soulfreeze 801728 cast before each Frost hit would read it; not built tonight."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Logs: 801728 6629 hits, stacks to 3, 801724 median 2.3 s. Open, route attempt (B3/B4 side a route agent, 2026-11-13), parked with state: a direct Soulfreeze 801728 cast is refused (TargetAuraState 4, Frozen; pairs r2/r3, SPELL_FAILED_TARGET_AURASTATE), and the Soulfreeze ability 801724's triggered ticks fail on an unfrozen dummy (SPELL_FAILED_DONT_REPORT, r4). With Frost Nova 122 on the dummy (ADR 0303 fixture) one 801724 left 3 stacks of 801728 in both runs of r5 (0 without the cast), but two casts (six ticks, to show the cap) read 3 then 0 (r6 flip), probably the ticks' damage breaking the Frost Nova fixture; not a counted pair. Next: a Frozen fixture that damage does not break, then a metric_delta expected_ratio of the Ice Barrage 803779 ticks with and without 3 stacks (x1.15; a hit_ratio cannot set a target aura)."
   },
   {
     "spell": 560851,
@@ -1902,10 +1902,11 @@
     "spell": 570136,
     "clause": "and Crypt Swarm now deals $s2% more damage for each Necromancer disease you have on the target.",
     "labels": [
-      "570136 behaviour_hit_ratio crypt_swarm"
+      "570136 behaviour_hit_ratio crypt_swarm",
+      "570136 behaviour_hit_ratio crypt_swarm_two"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '50%' and '4% per disease'; coa-obtainable: in the live capture; logs: nothing found by id."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '50%' and '4% per disease'; coa-obtainable: in the live capture; logs: nothing found by id. Review I-b: with Increase Damage 37643 (+500%, harness set_aura precondition fixture in both arms) the base reads 348; one disease 361 (int(348 x 1.04) = int(361.92)), two diseases 375 (int(348 x 1.08) = int(375.84)), deterministic, judged to the rounding (pair r3 20261113-030024 / -030058, build a43f6e417e6a): status 1."
   },
   {
     "spell": 570226,
@@ -2250,7 +2251,7 @@
       "704681 behaviour_metric_delta grave_march"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Grave March 500991 rolls measured separately (grave_march entry, mentor 2026-11-13: 'your spells' covers it). Confirmed deviation, fix note FN-a4-1 (not built): Grave March 500991 rolls no Permafrost because its SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING makes Spell::IsTriggered() true (Spell.cpp:641-642) and necromancer_casts::OnSpellCast returns on it (AscensionNecromancerAbilities.cpp:249-250); the proc rate itself is sized to the band (review I-1)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Grave March 500991 rolls measured separately (grave_march entry, mentor 2026-11-13: 'your spells' covers it). FN-a4-1 fixed (mentor approval 2026-11-13, ADR 0408, commit c6cceac0e4): OnSpellCast ignores the two trigger flags SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING adds (Spell.cpp:641-642), so a player's Grave March 500991 rolls Permafrost, Tundra Warriors 92122 and Diabolical 704723; a real triggered cast still does not (704723 triggered / triggered_ticks control). The grave_march entry reads 0 -> 2 charges after 59 Grave Marches; the proc rate itself is sized to the band (review I-1)."
   },
   {
     "spell": 704681,
@@ -2557,10 +2558,11 @@
     "clause": "and gain a shield for the amount absorbed, lasting $707194d.",
     "labels": [
       "705746 behaviour_metric_delta shield",
-      "705746 behaviour_metric_delta shield_lasts"
+      "705746 behaviour_metric_delta shield_lasts",
+      "705746 behaviour_metric_delta shield_amount"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20% of healing taken', 'shield ... 10 seconds'; coa-obtainable: in the live capture; logs: nothing found by id."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20% of healing taken', 'shield ... 10 seconds'; coa-obtainable: in the live capture; logs: nothing found by id. Review I-c: the amount: a fixed 1000 heal (Heal 1000 (TEST) 49, crit held at -1000 by 984954, a precondition fixture) leaves a 707194 shield of exactly 200 = 20% of 1000 (aura_amount, shield_amount entry, pair r3): status 1."
   },
   {
     "spell": 705747,
@@ -3521,7 +3523,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85. Part 'striking up to $801411i nearby enemies': five of five dummies within 3 yd struck, the one at 8 yd not (805032 bonestorm_targets behaviour_fixed_count, uncapped); the cap of five and 'every $801412t1 sec for $801412d' are not judged (data labels only)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85. Part 'striking up to $801411i nearby enemies': five of five dummies within 3 yd struck, the one at 8 yd not (805032 bonestorm_targets behaviour_fixed_count, uncapped); the cap of five and 'every $801412t1 sec for $801412d' are not judged (data labels only). Review I-d: the Bonestorm hit (28 per hit) was measured at spell power 0 only; the $SP*.4 term is not judged (limit: a minion's hit reads its owner's spell power, and a script_hit's stat_auras read 0 spell power for minion hits, review I-3), so this clause stays partly proven: the hit at SP 0 is status 1, the SP term open (tool gap)."
   },
   {
     "spell": 805038,
@@ -3846,7 +3848,7 @@
       "806149 behaviour_hit_ratio below_35"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5%, doubled against enemies below 35% health'; coa-obtainable: in the live capture; logs: nothing found by id. +9.87% at 30% target health (the aura x1.05 and Factor() x1.05 multiply to 1.1025; 501 for 502.7 truncated) against the doubled 10%."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '5%, doubled against enemies below 35% health'; coa-obtainable: in the live capture; logs: nothing found by id. +9.87% at 30% target health (the aura x1.05 and Factor() x1.05 multiply to 1.1025; 501 for 502.7 truncated) against the doubled 10%. Review I-a and mentor ruling 2026-11-13 (G-1, G-6): \"doubled\" doubles the increase; before the fix the code multiplied 1.1 x 1.1 (456 -> 551, +20.83%) and the expectation had been taken from the code. Fixed (ADR 0409, commit a43f6e417e): Factor() supplies (1 + 2s) / (1 + s) below 35%. Measured on pair r3 (20261113-030024 / -030058, build a43f6e417e6a): rank 1: 456 -> 500 below 35% (int(int(456 x 1.05) x 1.10 / 1.05) = int(500.76)) against x1.10; deterministic, the 1 point below 456 x (1 + 2s) is the truncation of the two integer steps. No-talent control arm in every entry."
   },
   {
     "spell": 806321,
@@ -4036,10 +4038,12 @@
     "spell": 807925,
     "clause": "doubled against enemies below 35% health.",
     "labels": [
-      "807925 behaviour_hit_ratio below_35"
+      "807925 behaviour_hit_ratio below_35",
+      "807925 behaviour_hit_ratio edge_34",
+      "807925 behaviour_hit_ratio edge_36"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub (rank 1 text) agree in form; coa-obtainable: in the live capture; logs: nothing found by id. +20.83% (x1.1 x 1.1) against the doubled 20%."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub (rank 1 text) agree in form; coa-obtainable: in the live capture; logs: nothing found by id. Review I-a and mentor ruling 2026-11-13 (G-1, G-6): \"doubled\" doubles the increase; before the fix the code multiplied 1.1 x 1.1 (456 -> 551, +20.83%) and the expectation had been taken from the code. Fixed (ADR 0409, commit a43f6e417e): Factor() supplies (1 + 2s) / (1 + s) below 35%. Measured on pair r3 (20261113-030024 / -030058, build a43f6e417e6a): rank 2: 456 -> 546 below 35% at 30% and at 34% health (int(int(456 x 1.10) x 1.20 / 1.10) = int(546.5)), 501 at 36% (the aura only), against x1.20 / x1.10; deterministic, the 1 point below 456 x (1 + 2s) is the truncation of the two integer steps. No-talent control arm in every entry."
   },
   {
     "spell": 807937,
