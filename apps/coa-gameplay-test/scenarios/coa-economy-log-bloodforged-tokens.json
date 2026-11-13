@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Economy log: a Bloodforged rare kill's Bazaar Tokens count as tokens earned from kills",
+  "contract": [
+    "Requires Bloodforged.Enable = 1, PvpPower.Enable = 1, Bloodforged.BazaarTokens.RareMob = 300 and CoA.BazaarTokens.HourlyCap.Amount = 1250, like bloodforged-rare-mob-bazaar-tokens.",
+    "With the economy log on, the 300 Bazaar Tokens a level 60 High-Risk character gets for killing the rare Foreman Marcrid (1844) are summed into the tokens_earned row with source 1 (kill), so that row holds at least 300."
+  ],
+  "timeout_ms": 180000,
+  "economy_log": true,
+  "location": {"map": 0, "x": 2422.5, "y": -1692.1, "z": 103.6, "o": 0},
+  "players": [
+    {"id": "h", "race": 2, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "set_aura", "actor": "h", "spell": 1004019, "stacks": 1},
+    {"action": "set_health", "actor": "h", "maximum": 2000000, "value": 2000000},
+    {"action": "set_phase", "actor": "h", "value": 1},
+    {"action": "assert", "actor": "h", "metric": "nearby_creature_count", "entry": 1844, "min": 1, "within_ms": 10000},
+    {"action": "attack_nearby", "actor": "h", "entry": 1844, "kill": true},
+    {"action": "wait", "ms": 1500},
+    {"action": "assert", "label": "CONTROL: the rare kill gives the 300 Bazaar Tokens", "actor": "h", "metric": "item_count", "item": 975001, "min": 300, "within_ms": 3000},
+    {"action": "assert", "label": "THE LOG: the kill's tokens_earned row holds them", "actor": "h", "metric": "economy_log_rows", "economy_event": "tokens_earned", "economy_source": 1, "economy_min_tokens": 300, "equals": 1, "within_ms": 2000}
+  ]
+}

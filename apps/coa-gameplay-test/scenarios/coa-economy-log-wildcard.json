@@ -1,0 +1,290 @@
+{
+  "schema": 1,
+  "name": "Economy log: Wildcard rewards, the Specialization Cache and Silas Darkmoon's stores",
+  "contract": [
+    "With the economy log on, a Wildcard Hero's items are logged: rewards with source 8 (Wildcard), purchases as store_buy with source 10 (Wildcard store) and the price on the first row, cache contents as cache_open with the cache as source.",
+    "Opening the Specialization Cache 2977359 gives five Tomes of Specialization: five cache_open rows. Being handed the cache itself is not logged (a once-per-account starter item).",
+    "The level-10 Scroll of Fortune claim (0x6AD) gives 2 Scrolls of Fortune I 1101244 and 6 talent scrolls 97933: two reward rows.",
+    "Revealing the five cards of a sealed pack 97885 pays one Darkmoon Ticket 246190 per card: one reward row for 5 tickets.",
+    "Buying Starsurge 133169 from the Skill Cards store (0x6BB) for 250 Darkmoon Tickets: one store_buy row with the tickets as cost.",
+    "Buying two boosters (0x6DD) for 100 gold gives 2 Golden Ability packs 778998 and 2 Golden Talent packs 97870: two store_buy rows, the first carrying the 100 gold."
+  ],
+  "timeout_ms": 60000,
+  "economy_log": true,
+  "players": [
+    {
+      "id": "wild",
+      "race": 1,
+      "class": 10,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "coa gamemode WildCard on Harnessa"
+    },
+    {
+      "action": "login_hooks",
+      "actor": "wild"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first Wildcard login brings the Specialization Cache",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 2977359,
+      "equals": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Specialization Cache",
+      "actor": "wild",
+      "item": 2977359,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cache is used up",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 2977359,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_level",
+      "actor": "wild",
+      "value": 10
+    },
+    {
+      "action": "client_packet",
+      "label": "Claim the level-10 scrolls",
+      "actor": "wild",
+      "opcode": 1717,
+      "fields": [
+        {
+          "u32": 0
+        },
+        {
+          "u32": 1
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: two Scrolls of Fortune I",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 1101244,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 97885,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open a sealed pack",
+      "actor": "wild",
+      "item": 97885,
+      "spell": 93330
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: five cards wait",
+      "actor": "wild",
+      "metric": "wildcard_cards_pending",
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Reveal the five cards",
+      "actor": "wild",
+      "opcode": 1622,
+      "fields": [
+        {
+          "wildcard_pending_cards": 5
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: five Darkmoon Tickets",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 246190,
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "wild",
+      "item": 246190,
+      "count": 295
+    },
+    {
+      "action": "client_packet",
+      "label": "Buy Starsurge for 250 tickets",
+      "actor": "wild",
+      "opcode": 1723,
+      "fields": [
+        {
+          "u32": 133169
+        },
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the card is sold",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 133169,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_money",
+      "actor": "wild",
+      "value": 1000000
+    },
+    {
+      "action": "client_packet",
+      "label": "Buy two boosters from Silas",
+      "actor": "wild",
+      "opcode": 1757,
+      "fields": [
+        {
+          "u32": 2
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: two Golden Talent packs",
+      "actor": "wild",
+      "metric": "item_count",
+      "item": 97870,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: for 100 gold",
+      "actor": "wild",
+      "metric": "carried_money",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: five tomes from the Specialization Cache",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 2977359,
+      "equals": 5,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the handed-out Specialization Cache is no reward row",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 2977359,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the two Scrolls of Fortune I",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1101244,
+      "economy_count": 2,
+      "economy_source": 8,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the six talent scrolls",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 97933,
+      "economy_count": 6,
+      "economy_source": 8,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the five tickets for the revealed cards",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 246190,
+      "economy_count": 5,
+      "economy_source": 8,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: Starsurge for 250 tickets",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "item": 133169,
+      "economy_count": 1,
+      "economy_cost_item": 246190,
+      "economy_cost_count": 250,
+      "economy_source": 10,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the boosters' Golden Ability packs carry the 100 gold",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "item": 778998,
+      "economy_count": 2,
+      "economy_gold": -1000000,
+      "economy_source": 10,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: and the Golden Talent packs come with them",
+      "actor": "wild",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "item": 97870,
+      "economy_count": 2,
+      "economy_gold": 0,
+      "economy_source": 10,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

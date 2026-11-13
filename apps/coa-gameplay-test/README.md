@@ -556,7 +556,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `fill_bags` | `actor`, optional `slots` (default 0): fill the bags with distinct non-stacking armor until that many free slots remain, so a scenario can prove what a full inventory does. Fails if the bags cannot be filled. |
 | `equip` | `actor`, `item`, `slot` (0..18 equipment, 19..22 bag slots): equip an owned item through the session handler. |
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
-| `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
+| `use_nearby_gameobject` | `actor`, `entry` or `entries` (a list, for an object whose entry is rolled), optional `owner` (a player id): native use request for the single gameobject of that entry (or of any listed entry) within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
 | `select` | `actor`, `target` (any actor id): native `CMSG_SET_SELECTION` on that unit, as the client sends on clicking it; meeting stones summon the selected party member. |
 | `minion_kill` | Player `actor`, `minion` (creature entry), `target` (creature fixture or `summon` id): the actor's living owned creature of that entry deals the target's whole health in direct damage through `Unit::DealDamage`, so the kill credits the minion as the killer. |
@@ -634,7 +634,10 @@ returns whether any mail carries it, and `mail_pool_item_count` takes `cache` (o
 counts only the mail items that are in that cache's own pool. `economy_log_rows` takes `economy_event` (an event
 name such as `vendor_buy`, `mail_send` or `ah_sold`) and counts the actor's `coa_economy_log` rows of that event,
 narrowed by the optional `item` and `economy_count`, `economy_gold`, `economy_tokens`, `economy_cost_item`,
-`economy_cost_count` and `economy_source`, and by `economy_other` / `economy_other_account` (a player actor whose GUID
+`economy_cost_count` and `economy_source` (for `reward` and `store_buy` rows the granting system: 1 Crow's Cache,
+2 arena, 3 Mythic+, 4 Manastorm, 5 dungeon boss, 6 Void Portal, 7 Call Board, 8 Wildcard, 9 tool dispenser, 10 Wildcard
+store, 11 Class Bundle store), `economy_min_tokens` (rows holding at least that many tokens), and by `economy_other` /
+`economy_other_account` (a player actor whose GUID
 or account is the row's other party) and `economy_item_of` (an item entry the actor carries; its GUID is the row's item
 GUID); it saves the actor first so queued rows are written, and `economy_save: false` counts without that save.
 `economy_log_queued` reports how many of the actor's economy log rows are still waiting in memory for a save. `account_character_count` counts the stored
@@ -1256,6 +1259,8 @@ whose grid is not loaded is not counted.
 below the floor under them, or over no floor at all. The floor is searched downward from the higher of the
 creature's current Z and its spawn Z, so a creature that sank through the ground counts while one that walked
 down a ramp does not. Each one counted is logged with its spawn id, position and floor.
+`nearby_gameobject_count` takes `entry` (or `entries`, a list) and counts those gameobjects within 20 yards in the
+actor's phase.
 `nearby_gameobject_flags` takes `entry` and returns the `GameObjectFlags` the client gets for the nearest such
 gameobject within 20 yards (4 is `GO_FLAG_INTERACT_COND`, which keeps the client from using it), and
 `nearby_gameobject_quest` the quest a goober requires (0 for none); both return -1 when there is no such gameobject.

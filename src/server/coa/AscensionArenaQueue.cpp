@@ -11,6 +11,7 @@
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Config.h"
 #include "DBCStores.h"
 #include "DisableMgr.h"
@@ -1109,7 +1110,10 @@ namespace
     {
         GrantWinArenaPoints(player, teamType);
         if (WinRewards.RunesOfAscension)
+        {
+            CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Arena));
             player->AddItem(RUNE_OF_ASCENSION_ITEM, WinRewards.RunesOfAscension);
+        }
     }
 
     void GrantRatingTitles(Player* player, uint32 personalRating)

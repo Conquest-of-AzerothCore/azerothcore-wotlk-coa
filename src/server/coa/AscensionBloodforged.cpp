@@ -11,6 +11,7 @@
 #include "Creature.h"
 #include "Formulas.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "ChatCommand.h"
 #include "CommandScript.h"
 #include "DBCStores.h"
@@ -669,7 +670,8 @@ int HiddenCacheTier(LootTemplate const* loot)
 
 void FillHiddenCache(Settings const& current, Loot& loot, int tier, Player* opener)
 {
-    AscensionBazaarTokenCap::Give(opener, current.options.hiddenCacheTokens[tier]);
+    CoAEconomyLog::AddTokensEarned(opener, int32(AscensionBazaarTokenCap::Give(opener,
+        current.options.hiddenCacheTokens[tier])), CoATokenSource::Cache);
     AddMarks(loot, current.options.hiddenCacheMarks[tier], current.options);
     LevelPools const& pools = current.pools[60][1];
     unsigned const level = 60;
@@ -754,10 +756,12 @@ public:
             {
                 for (auto* reference = group->GetFirstMember(); reference; reference = reference->next())
                     if (EligiblePlayer(reference->GetSource(), creature))
-                        AscensionBazaarTokenCap::Give(reference->GetSource(), tokens);
+                        CoAEconomyLog::AddTokensEarned(reference->GetSource(),
+                            int32(AscensionBazaarTokenCap::Give(reference->GetSource(), tokens)), CoATokenSource::Kill);
             }
             else
-                AscensionBazaarTokenCap::Give(eligibleOwner, tokens);
+                CoAEconomyLog::AddTokensEarned(eligibleOwner, int32(AscensionBazaarTokenCap::Give(eligibleOwner, tokens)),
+                    CoATokenSource::Kill);
         }
         if (highRiskElite && !IsRare(rank))
         {

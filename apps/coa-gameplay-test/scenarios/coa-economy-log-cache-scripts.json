@@ -1,0 +1,434 @@
+{
+  "schema": 1,
+  "name": "Economy log: CoA cache scripts that put their rewards straight in the bags log what they give",
+  "contract": [
+    "With the economy log on, a cache that skips the loot window writes one cache_open row per item it gives (and one for its gold), with the cache entry as source; a store or upgrade writes its own row.",
+    "Heroic Dungeon Callboard Cache 1615001 (open packet) gives one gear piece and 1 to 15 gold: two rows.",
+    "Adventurer's Cache 1397886 at level 12 gives one green item and supplies: at least two rows.",
+    "Prestigious Cache (Heroic Dungeons) 1287304 gives one gear piece and sometimes one or two tokens: one to three rows.",
+    "Cache of the Fire Lord 2400040 gives one raid item: one row.",
+    "Rune of Descension Pouch (12,500) 509872 pays 12500 Rune of Descension 375250: one row with that count.",
+    "The Ethereal Tool Dispenser 8263501 with a Runed Arcanite Rod 16207 becomes Ethereal Tool Dispenser I 8263502: one reward row with the old dispenser as cost item and source 9 (tool dispenser).",
+    "Buying the Necromancer Class Bundle 2615021 through the custom store (0x06BB) with a Conquest of Azeroth Class Bundle 2499003 writes one store_buy row with the bundle token as cost and source 11 (class bundle store).",
+    "Reaching 150 Callboard points with four elite Callboard quests (18034, 18036, 18104, 18109: 25 each) and the world boss quest 170015 (50) pays an unequipped level 60 character the Adventurer's Cache 1397886: one reward row with source 7 (Call Board)."
+  ],
+  "timeout_ms": 120000,
+  "economy_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "board",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "adventurer",
+      "race": 1,
+      "class": 18,
+      "level": 12
+    },
+    {
+      "id": "prestige",
+      "race": 1,
+      "class": 15,
+      "level": 80
+    },
+    {
+      "id": "firelord",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "pouch",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "tinker",
+      "race": 2,
+      "class": 7,
+      "level": 80
+    },
+    {
+      "id": "bundle",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "points",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "board",
+      "item": 1615001,
+      "count": 1
+    },
+    {
+      "action": "open_item",
+      "label": "Open the Callboard Cache",
+      "actor": "board",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "label": "The Callboard Cache is used up",
+      "actor": "board",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "adventurer",
+      "item": 1397886,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Adventurer's Cache",
+      "actor": "adventurer",
+      "item": 1397886,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The Adventurer's Cache is used up",
+      "actor": "adventurer",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "prestige",
+      "id": 11
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "add_item",
+      "actor": "prestige",
+      "item": 1287304,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Prestigious Cache",
+      "actor": "prestige",
+      "item": 1287304,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The Prestigious Cache is used up",
+      "actor": "prestige",
+      "metric": "item_count",
+      "item": 1287304,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "firelord",
+      "item": 2400040,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Cache of the Fire Lord",
+      "actor": "firelord",
+      "item": 2400040,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The Cache of the Fire Lord is used up",
+      "actor": "firelord",
+      "metric": "item_count",
+      "item": 2400040,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "pouch",
+      "item": 509872,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Rune Pouch",
+      "actor": "pouch",
+      "item": 509872,
+      "spell": 18282
+    },
+    {
+      "action": "assert",
+      "label": "The pouch is used up",
+      "actor": "pouch",
+      "metric": "item_count",
+      "item": 509872,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and pays 12500 runes",
+      "actor": "pouch",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 12500
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 8263501,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "tinker",
+      "item": 16207,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "Upgrade the dispenser with the Runed Arcanite Rod",
+      "actor": "tinker",
+      "item": 8263501,
+      "spell": 8263501
+    },
+    {
+      "action": "assert",
+      "label": "The dispenser becomes Dispenser I",
+      "actor": "tinker",
+      "metric": "item_count",
+      "item": 8263502,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "add_item",
+      "actor": "bundle",
+      "item": 2499003,
+      "count": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Buy the Necromancer Class Bundle",
+      "actor": "bundle",
+      "opcode": 1723,
+      "fields": [
+        {
+          "u32": 2615021
+        },
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The bundle arrives",
+      "actor": "bundle",
+      "metric": "item_count",
+      "item": 2615021,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and the token is spent",
+      "actor": "bundle",
+      "metric": "item_count",
+      "item": 2499003,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "points",
+      "quest": 18034
+    },
+    {
+      "action": "reward_quest",
+      "actor": "points",
+      "quest": 18034
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "points",
+      "quest": 18036
+    },
+    {
+      "action": "reward_quest",
+      "actor": "points",
+      "quest": 18036
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "points",
+      "quest": 18104
+    },
+    {
+      "action": "reward_quest",
+      "actor": "points",
+      "quest": 18104
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "points",
+      "quest": 18109
+    },
+    {
+      "action": "reward_quest",
+      "actor": "points",
+      "quest": 18109
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "points",
+      "quest": 170015
+    },
+    {
+      "action": "reward_quest",
+      "actor": "points",
+      "quest": 170015
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: 150 points pay the Adventurer's Cache",
+      "actor": "points",
+      "metric": "item_count",
+      "item": 1397886,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Callboard Cache's gear piece and its gold",
+      "actor": "board",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 1615001,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: one of them is the gold",
+      "actor": "board",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 1615001,
+      "economy_count": 0,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Adventurer's Cache rewards",
+      "actor": "adventurer",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 1397886,
+      "min": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Prestigious Cache rewards",
+      "actor": "prestige",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 1287304,
+      "min": 1,
+      "max": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Fire Lord's raid item",
+      "actor": "firelord",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 2400040,
+      "economy_count": 1,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the pouch's runes",
+      "actor": "pouch",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "item": 375250,
+      "economy_count": 12500,
+      "economy_source": 509872,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the dispenser upgrade, paid with the old dispenser",
+      "actor": "tinker",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 8263502,
+      "economy_count": 1,
+      "economy_cost_item": 8263501,
+      "economy_cost_count": 1,
+      "economy_source": 9,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the class bundle, paid with the bundle token",
+      "actor": "bundle",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "item": 2615021,
+      "economy_count": 1,
+      "economy_cost_item": 2499003,
+      "economy_cost_count": 1,
+      "economy_source": 11,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Callboard points' Adventurer's Cache",
+      "actor": "points",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1397886,
+      "economy_count": 1,
+      "economy_source": 7,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

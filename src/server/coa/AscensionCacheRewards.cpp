@@ -2,12 +2,14 @@
 #include "AscensionCacheRewards.h"
 #include "Bag.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Item.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -109,7 +111,7 @@ void UndoOne(Player* player, Item* item, uint32 count)
 }
 }
 
-bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache)
+bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache, CoAEconomyRow const* tag)
 {
     if (rewards.empty())
         return false;
@@ -154,6 +156,19 @@ bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache)
         LOG_ERROR("coa", "cache {} rewards could not be prepared for {}; cache kept",
             cache ? cache->GetEntry() : 0, player->GetGUID().ToString());
         return false;
+    }
+
+    std::optional<CoAEconomyRow> log;
+    if (tag)
+        log = *tag;
+    else if (cache)
+        log = CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, cache->GetEntry());
+    if (log)
+    {
+        for (auto const& given : stored)
+            CoAEconomyLog::Gained(player, CoAEconomyLog::NextRow(*log), given.first, given.second);
+        for (std::unique_ptr<Item> const& item : mailItems)
+            CoAEconomyLog::Gained(player, CoAEconomyLog::NextRow(*log), item.get(), item->GetCount());
     }
 
     for (std::unique_ptr<Item>& item : mailItems)

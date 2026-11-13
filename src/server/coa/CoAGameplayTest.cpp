@@ -4450,7 +4450,11 @@ private:
         {
             bool const questActiveOnly = metric == "nearby_gameobject_quest_active";
             std::list<GameObject*> objects;
-            player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
+            if (auto listed = step.get_child_optional("entries"))
+                for (auto const& [key, entry] : *listed)
+                    player->GetGameObjectListWithEntryInGrid(objects, entry.get_value<uint32>(), 20.0f);
+            else
+                player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
             objects.remove_if([player, questActiveOnly](GameObject* object)
             {
                 return !object->IsInWorld() || !player->InSamePhase(object) ||
@@ -6352,6 +6356,8 @@ private:
                      std::pair{"economy_cost_count", "cost_count"}, std::pair{"economy_source", "source"}})
                 if (auto const value = step.get_optional<int64>(field))
                     filter += Acore::StringFormat(" AND {} = {}", column, *value);
+            if (auto const tokens = step.get_optional<int64>("economy_min_tokens"))
+                filter += Acore::StringFormat(" AND tokens >= {}", *tokens);
             if (auto const other = step.get_optional<std::string>("economy_other"))
             {
                 Player* const party = GetPlayer(*other);
@@ -7821,7 +7827,11 @@ private:
             if (auto ownerId = step.get_optional<std::string>("owner"))
                 owner = GetPlayer(*ownerId)->GetGUID();
             std::list<GameObject*> objects;
-            player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
+            if (auto listed = step.get_child_optional("entries"))
+                for (auto const& [key, entry] : *listed)
+                    player->GetGameObjectListWithEntryInGrid(objects, entry.get_value<uint32>(), 20.0f);
+            else
+                player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
             objects.remove_if([player, owner](GameObject* object)
             {
                 return !object->IsInWorld() || !player->InSamePhase(object) ||

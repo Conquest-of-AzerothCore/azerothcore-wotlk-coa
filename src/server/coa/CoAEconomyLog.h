@@ -35,7 +35,8 @@ enum class CoAEconomyEvent : uint8
     ItemDestroy,
     HighRiskDrop,
     HighRiskClaim,
-    Reward
+    Reward,
+    StoreBuy
 };
 
 enum class CoATokenSource : uint32
@@ -47,6 +48,21 @@ enum class CoATokenSource : uint32
     Cache,
     Exchange,
     Other
+};
+
+enum class CoAGrantSource : uint32
+{
+    CrowsCache = 1,
+    Arena,
+    MythicPlus,
+    Manastorm,
+    DungeonBoss,
+    VoidPortal,
+    CallBoard,
+    Wildcard,
+    ToolDispenser,
+    WildcardStore,
+    ClassBundleStore
 };
 
 struct CoAEconomyRow
@@ -76,8 +92,32 @@ namespace CoAEconomyLog
     void FlushQueue(Player* player, CharacterDatabaseTransaction trans);
     void AddTokensEarned(Player* player, int32 tokens, CoATokenSource source);
     void CacheItem(Player* player, uint32 cacheEntry, Item const* item, uint32 count);
+    CoAEconomyRow Tag(CoAEconomyEvent event, uint32 source, uint32 costItem = 0, uint32 costCount = 0, int64 gold = 0);
+    CoAEconomyRow Tag(CoAEconomyEvent event, CoAGrantSource source, uint32 costItem = 0, uint32 costCount = 0,
+        int64 gold = 0);
+    CoAEconomyRow NextRow(CoAEconomyRow& tag);
+    void Gained(Player* player, CoAEconomyRow const& tag, Item const* item, uint32 count);
+    void GainedGold(Player* player, CoAEconomyRow const& tag, uint32 copper);
+    void GainedInto(CharacterDatabaseTransaction trans, uint32 guid, CoAEconomyRow const& tag, Item const* item,
+        uint32 count);
     void Cleanup(uint32 now, bool wait);
     uint32 QueuedRows(Player const* player);
+
+    class GainScope
+    {
+    public:
+        GainScope(Player* player, CoAEconomyRow const& tag);
+        ~GainScope();
+        GainScope(GainScope const&) = delete;
+        GainScope& operator=(GainScope const&) = delete;
+
+        static CoAEconomyRow* Find(uint32 guid);
+
+    private:
+        uint32 _guid;
+        CoAEconomyRow _tag;
+        GainScope* _outer;
+    };
 }
 
 void AddSC_CoAEconomyLog();

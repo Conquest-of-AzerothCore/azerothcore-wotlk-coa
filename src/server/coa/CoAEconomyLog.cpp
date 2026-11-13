@@ -33,7 +33,7 @@ namespace
     std::atomic<bool> s_enabled{false};
     std::atomic<uint32> s_keepDays{90};
 
-    constexpr std::array<std::pair<std::string_view, CoAEconomyEvent>, 24> EventNames{{
+    constexpr std::array<std::pair<std::string_view, CoAEconomyEvent>, 25> EventNames{{
         {"vanity_store_buy", CoAEconomyEvent::VanityStoreBuy},
         {"vanity_collect", CoAEconomyEvent::VanityCollect},
         {"vendor_buy", CoAEconomyEvent::VendorBuy},
@@ -58,6 +58,7 @@ namespace
         {"highrisk_drop", CoAEconomyEvent::HighRiskDrop},
         {"highrisk_claim", CoAEconomyEvent::HighRiskClaim},
         {"reward", CoAEconomyEvent::Reward},
+        {"store_buy", CoAEconomyEvent::StoreBuy},
     }};
 
     struct PendingRow
@@ -180,17 +181,104 @@ void CoAEconomyLog::FlushQueue(Player* player, CharacterDatabaseTransaction tran
 
 void CoAEconomyLog::CacheItem(Player* player, uint32 cacheEntry, Item const* item, uint32 count)
 {
-    if (!item)
-        return;
+    Gained(player, Tag(CoAEconomyEvent::CacheOpen, cacheEntry), item, count);
+}
+
+namespace
+{
+    thread_local CoAEconomyLog::GainScope* t_gainScope = nullptr;
+
+    CoATokenSource TokenSourceOf(CoAEconomyEvent event)
+    {
+        return event == CoAEconomyEvent::CacheOpen ? CoATokenSource::Cache : CoATokenSource::Other;
+    }
+
+    CoAEconomyRow ItemRow(CoAEconomyRow const& tag, Item const* item, uint32 count)
+    {
+        CoAEconomyRow row = tag;
+        if (item)
+        {
+            row.itemEntry = item->GetEntry();
+            row.itemGuid = item->GetGUID().GetCounter();
+            row.itemCount = count;
+        }
+        return row;
+    }
+}
+
+CoAEconomyRow CoAEconomyLog::Tag(CoAEconomyEvent event, uint32 source, uint32 costItem, uint32 costCount, int64 gold)
+{
     CoAEconomyRow row;
-    row.event = CoAEconomyEvent::CacheOpen;
-    row.itemEntry = item->GetEntry();
-    row.itemGuid = item->GetGUID().GetCounter();
-    row.itemCount = count;
-    row.source = cacheEntry;
+    row.event = event;
+    row.source = source;
+    row.costItem = costItem;
+    row.costCount = costCount;
+    row.gold = gold;
+    return row;
+}
+
+CoAEconomyRow CoAEconomyLog::Tag(CoAEconomyEvent event, CoAGrantSource source, uint32 costItem, uint32 costCount,
+    int64 gold)
+{
+    return Tag(event, uint32(source), costItem, costCount, gold);
+}
+
+CoAEconomyRow CoAEconomyLog::NextRow(CoAEconomyRow& tag)
+{
+    CoAEconomyRow const row = tag;
+    tag.gold = 0;
+    tag.tokens = 0;
+    tag.costItem = 0;
+    tag.costCount = 0;
+    return row;
+}
+
+void CoAEconomyLog::Gained(Player* player, CoAEconomyRow const& tag, Item const* item, uint32 count)
+{
+    if (!item || !count)
+        return;
+    Queue(player, ItemRow(tag, item, count));
+    if (item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+        AddTokensEarned(player, int32(count), TokenSourceOf(tag.event));
+}
+
+void CoAEconomyLog::GainedGold(Player* player, CoAEconomyRow const& tag, uint32 copper)
+{
+    if (!copper)
+        return;
+    CoAEconomyRow row = tag;
+    row.gold += int64(copper);
     Queue(player, row);
-    if (row.itemEntry == AscensionBazaarTokenReserve::TOKEN_ITEM)
-        AddTokensEarned(player, int32(count), CoATokenSource::Cache);
+}
+
+void CoAEconomyLog::GainedInto(CharacterDatabaseTransaction trans, uint32 guid, CoAEconomyRow const& tag,
+    Item const* item, uint32 count)
+{
+    if (item ? !count : !tag.gold)
+        return;
+    WriteFor(trans, guid, ItemRow(tag, item, count));
+    if (item && item->GetEntry() == AscensionBazaarTokenReserve::TOKEN_ITEM)
+        if (Player* player = ObjectAccessor::FindPlayerByLowGUID(guid))
+            AddTokensEarned(player, int32(count), TokenSourceOf(tag.event));
+}
+
+CoAEconomyLog::GainScope::GainScope(Player* player, CoAEconomyRow const& tag)
+    : _guid(player ? player->GetGUID().GetCounter() : 0), _tag(tag), _outer(t_gainScope)
+{
+    t_gainScope = this;
+}
+
+CoAEconomyLog::GainScope::~GainScope()
+{
+    t_gainScope = _outer;
+}
+
+CoAEconomyRow* CoAEconomyLog::GainScope::Find(uint32 guid)
+{
+    for (GainScope* scope = t_gainScope; scope; scope = scope->_outer)
+        if (scope->_guid == guid)
+            return &scope->_tag;
+    return nullptr;
 }
 
 void CoAEconomyLog::AddTokensEarned(Player* player, int32 tokens, CoATokenSource source)
@@ -249,7 +337,13 @@ namespace
             PLAYERHOOK_ON_AFTER_DESTROY_ITEM, PLAYERHOOK_ON_AFTER_STORE_OR_EQUIP_NEW_ITEM, PLAYERHOOK_ON_AFTER_SELL_ITEM,
             PLAYERHOOK_ON_AFTER_BUY_BACK_ITEM, PLAYERHOOK_ON_AFTER_TAKE_MAIL_ITEM, PLAYERHOOK_ON_AFTER_TAKE_MAIL_MONEY,
             PLAYERHOOK_ON_AFTER_TRADE_ITEM, PLAYERHOOK_ON_AFTER_TRADE_MONEY, PLAYERHOOK_ON_AFTER_PLACE_AUCTION_BID,
-            PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM }) { }
+            PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM }) { }
+
+        void OnPlayerStoreNewItem(Player* player, Item* item, uint32 count) override
+        {
+            if (CoAEconomyRow* tag = CoAEconomyLog::GainScope::Find(player->GetGUID().GetCounter()))
+                CoAEconomyLog::Gained(player, CoAEconomyLog::NextRow(*tag), item, count);
+        }
 
         void OnPlayerAfterPlaceAuctionBid(Player* player, AuctionEntry const* auction, uint32 paid, bool buyout,
             CharacterDatabaseTransaction trans) override
@@ -463,6 +557,19 @@ namespace
                 row.itemCount = 0;
                 row.gold = fromPlayer ? -int64(draft->GetMoney()) : int64(draft->GetMoney());
                 WriteFor(trans, owner, row);
+            }
+            if (fromPlayer)
+                return;
+            CoAEconomyRow* tag = CoAEconomyLog::GainScope::Find(staged.receiverGuidLow);
+            if (!tag)
+                return;
+            for (auto const& [itemGuid, item] : draft->GetItems())
+                CoAEconomyLog::GainedInto(trans, staged.receiverGuidLow, CoAEconomyLog::NextRow(*tag), item, item->GetCount());
+            if (draft->GetMoney())
+            {
+                CoAEconomyRow money = CoAEconomyLog::NextRow(*tag);
+                money.gold += int64(draft->GetMoney());
+                CoAEconomyLog::GainedInto(trans, staged.receiverGuidLow, money, nullptr, 0);
             }
         }
 

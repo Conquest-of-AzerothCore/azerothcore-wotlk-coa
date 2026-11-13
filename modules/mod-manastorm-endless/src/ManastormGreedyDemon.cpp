@@ -1,4 +1,5 @@
 #include "ManastormGreedyDemon.h"
+#include "CoAEconomyLog.h"
 
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -1024,6 +1025,8 @@ bool ManastormGreedyDemon::ClaimLoot(
             return true;
         }
 
+        CoAEconomyLog::GainScope scope(player,
+            CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Manastorm));
         if (!player->AddItem(
                 itemEntry,
                 1))
@@ -1064,8 +1067,9 @@ bool ManastormGreedyDemon::ClaimLoot(
             return true;
         }
     }
-    else if (goldCopper)
-        player->ModifyMoney(int32(goldCopper));
+    else if (goldCopper && player->ModifyMoney(int32(goldCopper)))
+        CoAEconomyLog::GainedGold(player,
+            CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Manastorm), goldCopper);
 
     gameObject->SetGameObjectFlag(
         GO_FLAG_NOT_SELECTABLE);

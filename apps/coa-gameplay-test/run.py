@@ -63,7 +63,7 @@ ECONOMY_EVENTS = {
     'vanity_store_buy', 'vanity_collect', 'vendor_buy', 'vendor_sell', 'vendor_buyback', 'bazaar_rotation_buy',
     'heirloom_token_buy', 'cache_open', 'ah_list', 'ah_cancel', 'ah_bid', 'ah_buyout', 'ah_sold', 'ah_expired', 'trade',
     'mail_send', 'mail_take', 'system_mail', 'tokens_earned', 'tokens_spent', 'item_destroy', 'highrisk_drop',
-    'highrisk_claim', 'reward',
+    'highrisk_claim', 'reward', 'store_buy',
 }
 METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
@@ -272,7 +272,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius', 'economy_event',
                  'economy_save', 'economy_count', 'economy_gold', 'economy_tokens', 'economy_cost_item',
-                 'economy_cost_count', 'economy_source', 'economy_other', 'economy_other_account', 'economy_item_of',
+                 'economy_cost_count', 'economy_source', 'economy_min_tokens', 'economy_other', 'economy_other_account',
+                 'economy_item_of',
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
                   'school_mask', 'rolls', 'stacks', 'target_entry'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
@@ -355,7 +356,7 @@ ACTIONS = {
     'add_at_login_flag': ({'actor', 'id'}, {'actor', 'id'}),
     'set_player_setting': ({'actor', 'source', 'index', 'value'}, {'actor', 'source', 'index', 'value'}),
     'set_phase': ({'actor'}, {'actor', 'value'}),
-    'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'owner'}),
+    'use_nearby_gameobject': ({'actor'}, {'actor', 'entry', 'entries', 'owner'}),
     'voidportal': ({'actor', 'op'}, {'actor', 'op', 'group', 'spawn', 'success'}),
     'spell_click_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'attack_owned_creature': ({'actor', 'target', 'entry'}, {'actor', 'target', 'entry'}),
@@ -848,8 +849,15 @@ def validate(scenario, clock=REAL_CLOCK):
             if 'owner' in step:
                 require(step['owner'] in player_ids, f'{where}: binder owner needs a player')
                 number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
-        if action == 'use_nearby_gameobject' and 'owner' in step:
-            require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
+        if action == 'use_nearby_gameobject':
+            require(('entry' in step) != ('entries' in step), f'{where}: use_nearby_gameobject needs entry or entries')
+            if 'entries' in step:
+                require(type(step['entries']) is list and 0 < len(step['entries']) <= 50,
+                        f'{where}.entries must be a list of 1 to 50 entries')
+                for index, entry in enumerate(step['entries']):
+                    number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
+            if 'owner' in step:
+                require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
         if action == 'voidportal':
             require(step['op'] in {'force', 'roll'}, f'{where}: unknown voidportal op')
             if step['op'] == 'force':
@@ -1091,7 +1099,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 for field in ('economy_count', 'economy_cost_item', 'economy_cost_count', 'economy_source'):
                     if field in step:
                         number(step[field], f'{where}.{field}', 0, 2**32 - 1, True)
-                for field in ('economy_gold', 'economy_tokens'):
+                for field in ('economy_gold', 'economy_tokens', 'economy_min_tokens'):
                     if field in step:
                         number(step[field], f'{where}.{field}', -2**62, 2**62, True)
             if 'creator_only' in step:
@@ -1175,8 +1183,15 @@ def validate(scenario, clock=REAL_CLOCK):
             validate_placement_metric(step, where, player_ids)
             require(metric not in PLACEMENT_AUDIT_METRICS or placement_audited,
                     f'{where}: placement audit metric needs an earlier placement_audit')
-            require('entries' not in step or metric == 'map_creature_count',
-                    f'{where}: entries only applies to map creature counts')
+            require('entries' not in step or metric in {'map_creature_count', 'nearby_gameobject_count'},
+                    f'{where}: entries only applies to map creature and nearby gameobject counts')
+            if metric == 'nearby_gameobject_count':
+                require(('entry' in step) != ('entries' in step), f'{where}: give entry or entries, not both')
+                if 'entries' in step:
+                    require(type(step['entries']) is list and 0 < len(step['entries']) <= 50,
+                            f'{where}.entries must be a list of 1 to 50 entries')
+                    for index, entry in enumerate(step['entries']):
+                        number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 if 'entry' in step:

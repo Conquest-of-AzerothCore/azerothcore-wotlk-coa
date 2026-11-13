@@ -1,0 +1,876 @@
+{
+  "schema": 1,
+  "name": "Economy log: Mythic+ boons, timed run rewards, Mythical Cache and recycling",
+  "contract": [
+    "With the economy log on, every Mythic+ reward item writes one reward row with source 3 (Mythic+).",
+    "A Mythical Boon (80215) picked up during a run gives the ally beside the clicker one boon item: one row.",
+    "Timing the Scarlet Monastery - Armory +1 (keystone 1233152; 80 forces and Herod) gives each member Mythical Caches 2093952 (one row with their count) and Mythic Coins 1414500 (one row); the owner's new keystone is a swap, not a reward.",
+    "Opening a Mythical Cache gives one item: one cache_open row with the cache as source.",
+    "Upgrading Robes of Arugal (Mythic Dungeon, 1656324) at Edrim into its Mythic 1 version 400168 writes one reward row with the old robes as cost item.",
+    "Selling the Mythic 1 robes 400168 to Edrim Skysong (416000) recycles them into Mythic Coins: one reward row with the robes as cost item."
+  ],
+  "timeout_ms": 240000,
+  "economy_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "set_health",
+      "actor": "ally",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "group",
+      "actor": "hero",
+      "target": "ally"
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "teleport",
+      "actor": "ally",
+      "map": 189,
+      "x": 1630.3,
+      "y": -333.9,
+      "z": 18.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally is in the Mythic Armory",
+      "actor": "ally",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1233152,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 1233152,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: socket window",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1319
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Start Keystone starts the countdown",
+      "actor": "ally",
+      "metric": "rooted",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the run is under way",
+      "actor": "hero",
+      "metric": "rooted",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 80215,
+      "as": "boon",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Pick up the Mythical Boon",
+      "actor": "hero",
+      "target": "boon"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally gets a boon item",
+      "actor": "ally",
+      "metric": "item_count",
+      "items": [
+        2104920,
+        2104921,
+        2104922,
+        2104923,
+        2104925,
+        2104926,
+        2104927,
+        2104928,
+        2104929,
+        2104930,
+        2104931,
+        2104932,
+        2104935
+      ],
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the ally's boon item",
+      "actor": "ally",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "economy_count": 1,
+      "economy_source": 3,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Armory trash is spawned",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1879.8,
+      "y": -388.1,
+      "z": 19.3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1773.4,
+      "y": -411.6,
+      "z": 8.6
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1700.6,
+      "y": -357.3,
+      "z": 18.6
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4289,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1920.6,
+      "y": -422.0,
+      "z": 18.6
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4295,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1630.3,
+      "y": -341.4,
+      "z": 18.6
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1641.4,
+      "y": -383.2,
+      "z": 19.3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4286,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4297,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1747.4,
+      "y": -386.7,
+      "z": 8.6
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4292,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1848.5,
+      "y": -430.0,
+      "z": 19.3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4290,
+      "kill": true
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 189,
+      "x": 1895.9,
+      "y": -362.6,
+      "z": 19.3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 4298,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the trash cleared gives the 80 forces the Armory needs",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2313,
+      "index": 1,
+      "min": 80,
+      "within_ms": 1000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 3975,
+      "as": "herod",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 3975,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the timed run gives the ally a Mythical Cache",
+      "actor": "ally",
+      "metric": "item_count",
+      "item": 2093952,
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and Mythic Coins",
+      "actor": "ally",
+      "metric": "item_count",
+      "item": 1414500,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the ally's Mythical Caches",
+      "actor": "ally",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 2093952,
+      "economy_source": 3,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the ally's Mythic Coins",
+      "actor": "ally",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1414500,
+      "economy_source": 3,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the ally has three reward rows (boon, caches, coins)",
+      "actor": "ally",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "economy_source": 3,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the owner has three reward rows (boon, caches, coins): the swapped keystone is none",
+      "actor": "hero",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "economy_source": 3,
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "use_item",
+      "label": "The ally opens a Mythical Cache",
+      "actor": "ally",
+      "item": 2093952,
+      "spell": 84284
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Mythical Cache's item",
+      "actor": "ally",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_count": 1,
+      "economy_source": 2093952,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 416000,
+      "as": "edrim",
+      "distance": 3
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1656324,
+      "count": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1414500,
+      "count": 200
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "hero",
+      "target": "edrim"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Upgrade Items",
+      "actor": "hero",
+      "option": 4
+    },
+    {
+      "action": "gossip_select",
+      "label": "Upgrade the Robes of Arugal",
+      "actor": "hero",
+      "option": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic 1 robes replace the Mythic Dungeon robes",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 400168,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the upgraded robes, paid with the old ones",
+      "actor": "hero",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 400168,
+      "economy_count": 1,
+      "economy_cost_item": 1656324,
+      "economy_cost_count": 1,
+      "economy_source": 3,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "hero",
+      "target": "edrim"
+    },
+    {
+      "action": "gossip_select",
+      "label": "Open the recycle menu",
+      "actor": "hero",
+      "option": 7
+    },
+    {
+      "action": "gossip_select",
+      "label": "Mass recycle by selling",
+      "actor": "hero",
+      "option": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Edrim's merchant window opens",
+      "actor": "hero",
+      "metric": "vendor_list_packets",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Sell the Mythic robe to Edrim",
+      "actor": "hero",
+      "opcode": 416,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "edrim"
+        },
+        {
+          "item_guid": 400168
+        },
+        {
+          "u32": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the robe is recycled",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 400168,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the recycle's coins, paid with the robe",
+      "actor": "hero",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1414500,
+      "economy_cost_item": 400168,
+      "economy_cost_count": 1,
+      "economy_source": 3,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

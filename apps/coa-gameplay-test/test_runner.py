@@ -360,6 +360,27 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(owner=owner), self.assertRaisesRegex(ValueError, 'owner needs a player'):
                 run.validate(self.scenario)
 
+    def test_nearby_gameobjects_take_one_entry_or_a_list(self):
+        use = {'action': 'use_nearby_gameobject', 'actor': 'caster', 'entries': [710014, 710015, 710016]}
+        count = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_gameobject_count',
+                 'entries': [710014, 710015], 'equals': 1}
+        self.scenario['steps'] += [use, count]
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for step in (use, count):
+            for change, error in (({'entry': 710014}, 'entry or entries'),
+                                  ({'entries': None}, 'entry or entries'),
+                                  ({'entries': []}, 'entries must be a list'),
+                                  ({'entries': [0]}, 'entries')):
+                scenario = copy.deepcopy(self.scenario)
+                changed = scenario['steps'][-2 if step is use else -1]
+                for key, value in change.items():
+                    if value is None:
+                        changed.pop(key)
+                    else:
+                        changed[key] = value
+                with self.subTest(action=step['action'], change=change), self.assertRaisesRegex(ValueError, error):
+                    run.validate(scenario)
+
     def test_spell_cast_and_proc_counts_can_share_relative_snapshots(self):
         for measured, captured in (('spell_cast_count', 'spell_proc_count'),
                                    ('spell_proc_count', 'spell_cast_count')):
@@ -634,6 +655,22 @@ class RunnerTests(unittest.TestCase):
             scenario = copy.deepcopy(self.scenario)
             scenario['economy_log'] = value
             with self.subTest(economy_log=value), self.assertRaisesRegex(ValueError, 'economy_log must be boolean'):
+                run.validate(scenario)
+
+    def test_economy_log_rows_takes_store_buy_and_a_token_minimum(self):
+        rows = {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_rows', 'economy_event': 'store_buy',
+                'economy_min_tokens': 300, 'equals': 1}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['economy_log'] = True
+        scenario['steps'].insert(0, rows)
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'economy_min_tokens': 2**63}, 'economy_min_tokens'),
+                              ({'economy_min_tokens': 1.5}, 'economy_min_tokens'),
+                              ({'metric': 'item_count', 'economy_event': None}, 'economy fields belong to economy_log_rows')):
+            step = {key: value for key, value in {**rows, **change}.items() if value is not None}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
     def test_economy_log_queued_counts_a_players_waiting_rows(self):

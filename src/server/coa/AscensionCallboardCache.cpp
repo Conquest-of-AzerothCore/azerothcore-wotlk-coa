@@ -5,6 +5,7 @@
 #include "AscensionRaidReleasePolicy.h"
 #include "AscensionSpecLoot.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "GameTime.h"
@@ -257,10 +258,11 @@ bool PickReward(Player* player, CallboardPool const& pool, uint32 averageItemLev
     return true;
 }
 
-void GrantGold(Player* player, uint32 copper)
+void GrantGold(Player* player, uint32 copper, uint32 cache)
 {
     if (!player->ModifyMoney(int32(copper)))
         return;
+    CoAEconomyLog::GainedGold(player, CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, cache), copper);
 
     WorldPacket notice(SMSG_LOOT_MONEY_NOTIFY, 4 + 1);
     notice << copper << uint8(1);
@@ -269,6 +271,7 @@ void GrantGold(Player* player, uint32 copper)
 
 bool OpenCallboardCache(Player* player, Item* item)
 {
+    uint32 const opened = item->GetEntry();
     uint32 cacheItemId = item->GetEntry();
     if (cacheItemId == CallboardGeneric || cacheItemId == CallboardGenericOld ||
         cacheItemId == CallboardGenericVoucher || cacheItemId == CallboardBonus)
@@ -292,7 +295,7 @@ bool OpenCallboardCache(Player* player, Item* item)
 
     std::vector<AscensionCacheRewards::Reward> payout = { reward };
     if (AscensionCacheRewards::Deliver(player, payout, item) && g_goldMax)
-        GrantGold(player, urand(g_goldMin, g_goldMax) * GOLD);
+        GrantGold(player, urand(g_goldMin, g_goldMax) * GOLD, opened);
 
     return true;
 }
@@ -419,6 +422,7 @@ void SendCacheConfig(Player* player)
 
 bool GrantCache(Player* player, uint32 cacheItemId)
 {
+    CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::CallBoard));
     ItemPosCountVec dest;
     if (player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, cacheItemId, 1) == EQUIP_ERR_OK)
     {

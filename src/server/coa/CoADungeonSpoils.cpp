@@ -4,6 +4,7 @@
 
 #include "AscensionCacheRewards.h"
 #include "AscensionSpecLoot.h"
+#include "CoAEconomyLog.h"
 #include "Containers.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -277,8 +278,10 @@ public:
             return;
         map->DoForAllPlayers([reward](Player* player)
         {
-            if (reward != DungeonSpoils || !InDungeonFinderGroup(player))
-                player->AddItem(reward, 1);
+            if (reward == DungeonSpoils && InDungeonFinderGroup(player))
+                return;
+            CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::DungeonBoss));
+            player->AddItem(reward, 1);
         });
     }
 
@@ -328,6 +331,7 @@ public:
             return;
         boss->GetMap()->DoForAllPlayers([](Player* player)
         {
+            CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::DungeonBoss));
             player->AddItem(MarkOfTriumph, 1);
         });
     }
