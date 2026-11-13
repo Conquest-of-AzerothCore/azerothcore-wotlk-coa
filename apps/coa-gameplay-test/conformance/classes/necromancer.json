@@ -1430,7 +1430,7 @@
       "expected": 1.364322,
       "observe_spell": 500365,
       "cast_spell": 805197,
-      "cast_wait_ms": 20500,
+      "cast_wait_ms": 13000,
       "cast_power": 1373,
       "control": {
         "auras": [
@@ -1461,8 +1461,8 @@
         ]
       },
       "critical": false,
-      "trials": 6,
-      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$500365m2+$SP*.33}: the coefficient row {500365, 1, 0.33, Shadow} (AscensionNecromancerData.h:19) adds 0.33 x 220 = 72.6: 199 -> 271.6, ratio 1.3643. Each trial waits 20500 ms so its graveyard (20000 ms) has ended before the next cast: a first design at 6500 ms let the control arm's tombstones keep pulsing into the treatment arm (pair rv2 pilot: 236.2, a mix of 199 and 271)."
+      "trials": 12,
+      "expected_source": "Power of the Ashtongue 1140480 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 126, +220 spell damage; a harness set_aura precondition fixture, the claim is the coefficient) is set in the treatment arm only (review I-3: spell power is 0 at the reference, so the coefficient term needs its own arm). ${$500365m2+$SP*.33}: the coefficient row {500365, 1, 0.33, Shadow} (AscensionNecromancerData.h:19) adds 0.33 x 220 = 72.6: 199 -> 271.6, ratio 1.3643. Each trial waits 13000 ms (the most one scenario holds at the pilot's 20 trials): a first design at 6500 ms let the control arm's tombstones keep pulsing well into the treatment arm (pair rv2 pilot: 236.2, a mix of 199 and 271); at 13000 ms only the control's last graveyard overlaps the first treatment trial for about 7000 ms, a share of about 1% of the treatment hits."
     },
     {
       "spell": 500329,
