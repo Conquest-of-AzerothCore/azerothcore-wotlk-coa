@@ -5815,6 +5815,7 @@ class HitRatioSpec:
     cast_unit_auras: tuple[tuple[int, int], ...] = ()
     target_auras: tuple[tuple[int, int], ...] = ()
     stated_band: bool = False
+    clear_observed: bool = False
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -5914,8 +5915,10 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                         else {**fields, 'spell': spec.rate_spell})
 
     def reads(labels: tuple[str, str]) -> list[dict]:
-        return [measurement(labels[0], spec.caster, total_metric, **event_fields),
-                measurement(labels[1], spec.caster, count_metric, **fields)]
+        cleared = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.observe_spell, 'stacks': 0,
+                     'target': spec.target, 'caster': spec.caster}] if spec.clear_observed else [])
+        return cleared + [measurement(labels[0], spec.caster, total_metric, **event_fields),
+                          measurement(labels[1], spec.caster, count_metric, **fields)]
 
     steps = []
     healed = []
@@ -5979,7 +5982,7 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                                              spec.cast_power)
             if spec.cast_wait_ms:
                 steps.append({'action': 'wait', 'label': f'{name} trial {trial} hits', 'ms': spec.cast_wait_ms})
-            if trial == spec.trials:
+            if trial == spec.trials and not spec.clear_observed:
                 steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
             steps += reads(marks[trial])
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
@@ -6062,6 +6065,10 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.target_auras and (swinging or spec.target == CASTER):
         raise ValueError(f'{spec.spell} hit_ratio target_auras hold a fixture on the cast target, not on the caster '
                          f'or a swing')
+    if spec.clear_observed and (swinging or spec.target == spec.caster or spec.rate):
+        raise ValueError(f'{spec.spell} hit_ratio clear_observed removes the observed spell\'s aura from the cast '
+                         f'target before each read, which needs a cast target other than the caster and no swings '
+                         f'or rate')
     if spec.ally_distance is not None and (ALLY not in (spec.caster, spec.target) or spec.ally_distance < 0):
         raise ValueError(f'{spec.spell} hit_ratio groups the ally at {spec.ally_distance} yd, which needs the ally as '
                          f'its caster or target and a distance not below 0')
@@ -6152,6 +6159,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.target_auras:
         scenario['contract'] += (f'; the fixture auras {list(spec.target_auras)} are set on the {spec.target} by the '
                                  f'caster before every observed cast')
+    if spec.clear_observed:
+        scenario['contract'] += (f'; the {spec.caster}\'s {spec.observe_spell} aura is removed from the {spec.target} '
+                                 f'before every read, so no periodic hit lands between a trial\'s total and count')
     if spec.parts > 1:
         model['parts'] = spec.parts
         scenario['contract'] += f'; one of {spec.parts} identical parts whose trials are pooled'
@@ -6198,7 +6208,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         bool((entry.get('stated') or {}).get('truncated', False)),
                         tuple((int(spell), int(stacks)) for spell, stacks in entry.get('cast_unit_auras', ())),
                         tuple((int(spell), int(stacks)) for spell, stacks in entry.get('target_auras', ())),
-                        bool((entry.get('stated') or {}).get('band', False)))
+                        bool((entry.get('stated') or {}).get('band', False)),
+                        bool(entry.get('clear_observed', False)))
 
 
 CRIT_RATE_TRIALS = 300

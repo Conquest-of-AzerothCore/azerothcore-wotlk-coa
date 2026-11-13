@@ -8466,6 +8466,31 @@ class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
+    def test_a_cleared_observed_aura_leaves_the_target_before_every_read_and_drops_the_drain(self):
+        entry = {**r1a_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith'), 'clear_observed': True}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        totals = [index for index, step in enumerate(steps) if step.get('label', '').endswith(' total')]
+        self.assertEqual(len(totals), 2 * (entry['trials'] + 1))
+        for index in totals:
+            self.assertEqual({key: steps[index - 1].get(key) for key in ('action', 'spell', 'stacks', 'target')},
+                             {'action': 'set_aura', 'spell': self.BLADE_OF_FAITH, 'stacks': 0, 'target': 'dummy'})
+            self.assertTrue(steps[index + 1]['label'].endswith(' count'))
+        self.assertFalse(any(step.get('label', '').endswith('drain') for step in steps))
+        self.assertIn('removed from the dummy before every read', scenario['contract'])
+
+    def test_an_uncleared_observed_aura_keeps_its_reads_adjacent_and_its_drain(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, r1a_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith'))
+        steps = run.validate(scenario)['steps']
+        self.assertFalse(any(step['action'] == 'set_aura' and step.get('spell') == self.BLADE_OF_FAITH
+                             for step in steps))
+        self.assertTrue(any(step.get('label', '').endswith('drain') for step in steps))
+
+    def test_a_cleared_observed_aura_beside_swings_is_refused(self):
+        entry = {**variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing'), 'clear_observed': True}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
 
 def stat_gain_values(model: dict, gains: dict, stats: dict, changed: dict | None = None) -> dict:
     values = {}
