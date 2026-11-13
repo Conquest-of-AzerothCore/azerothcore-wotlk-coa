@@ -14,6 +14,13 @@ Parasites: side c's raw-log scan counts 107 of 119 player-applied Parasites afte
 the same target (side b's scan of the same logs: most of those SPELL_DAMAGE events are Blight 500237 and Rot
 Fetishist 573242, which this server treats as periodic, so the live sample hardly separates the two readings).
 
+## Owner ruling
+
+- The mentor withdrew its approval at 09:08 (G-37 criterion 3 failed: live direct hits did not trigger) and sent the
+  claim to the owner as Q-mb-2. The owner ruling of 2026-11-13 (Q-mb-2, option a: any damage dealt, as the tooltip
+  says) is now the G-37 criterion 3, and the fix stays. The live split (124 of 177 live Parasites applications follow
+  a periodic-class hit within 50 ms; 1 of 95 direct hits proc'd) stays as context only.
+
 ## Decision
 
 - 560730 rolls on every own damaging hit, outside the periodic branch. 561319 ("Periodic damage dealt") keeps its
