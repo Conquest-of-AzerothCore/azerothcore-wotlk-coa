@@ -595,10 +595,11 @@
     "spell": 500329,
     "clause": "Command: Shoots necrotic bile at an enemy, dealing ${$707598m1+$707598ppl1+$SP*0.65} Plague damage,",
     "labels": [
-      "500329 script_hit 707598 command_damage"
+      "500329 script_hit 707598 command_damage",
+      "500329 script_hit 707598 command_damage_sp"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067. Spell-power term (review I-3): open, tool gap: a script_hit's stat_auras fixture is set before the base steps and read 0 spell power (pair rv1 pilot), and a minion's hits are not a hit_ratio observation; the formula is measured at spell power 0 only."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067. Spell-power term: Status 1 (PAIR; precondition fixture QA Test +100 SP 10062 by harness set_aura before the stats are measured, aura 345 MiscValue 127 every school incl. Physical): the Gargoyle's 707598 hit 483.5 at SP 0 (command_damage) and 548.5 at SP 100 (model mean, measured 546.7 and 551.2): +65 = 0.65 x 100 . G-11 raw logs: raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 707598, 0 by \"Command: Gargoyle\", 0 by id 500329 and \"Raise: Gargoyle\"."
   },
   {
     "spell": 500329,
@@ -1238,9 +1239,11 @@
   {
     "spell": 504431,
     "clause": "Increases your maximum Life Force by 1.",
-    "labels": [],
+    "labels": [
+      "504431 behaviour_metric_delta life_force_cap"
+    ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: no Life Force read in the harness (the cap is a CoA power held in class code); the route raises minions up to the cap with and without the talent. Open, route pending: Effect[0] aura 107 MiscValue 31 (CoA Life Force op, BasePoints 0 + 1); route: raise minions up to the Life Force cap with and without the talent (no Life Force read in the harness). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Master Animator\",\"Chomp\",\"Fetid Mark\",\"Icecrown Scriptures\",\"Glacial Tap\",\"Command: Hook\",\"Mass Grave\"],\"code\":\"NU/JEcB'; bindmysoul found: Increases your maximum Life Force by 1.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Status 1 (PAIR; a behaviour read, no fixture): four Raise: Ghoul 500971 casts per phase (each Ghoul 50073 occupies 1 Life Force; a raise beyond the maximum evicts the oldest minion): 2 living Ghouls without 504431 (control, base maximum 2), 3 with it learned between the phases, not 4: the maximum Life Force grows by exactly 1 (Effect[0] aura 107 MiscValue 31, BasePoints 0 + DieSides 1). G-11: server DBC set (/srv/coa/server-data/dbc); raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 504431, 0 by \"Master Animator\"; ~/CoaServer/reference: bindmysoul \"Increases your maximum Life Force by 1.\", sidekick data.js names it, mind_of_ascension_talent.csv and advancement.tsv list it; coa-obtainable: advancement Necromancer level 0, live capture, calculator; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504439,
@@ -1484,7 +1487,8 @@
       {
         "claim": "upon reaching an enemy, deals ${$531132m1+$531132ppl1+$SP*2+$AP*.5} Shadow damage",
         "labels": [
-          "531130 script_hit 531132 damage"
+          "531130 script_hit 531132 damage",
+          "531130 script_hit 531132 damage_sp"
         ]
       },
       {
@@ -1495,7 +1499,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities': open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura. Spell-power term (review I-3): open, tool gap: a script_hit's stat_auras fixture is set before the base steps and read 0 spell power (pair rv1 pilot), and a minion's hits are not a hit_ratio observation; the formula is measured at spell power 0 only. Route attempt (B3/B4 side a, pair r13): with Divine Shield 642 (aura 39 SCHOOL_IMMUNITY 127, harness set_aura) on the dummy, the Construct's Bone Deconstruct 531132 (SPELL_ATTR0_NO_IMMUNITIES) never hit it (0), while Plague of Undeath was blocked as expected (control); the Construct's trigger (aura_ascension_necromancer_event on reaching the target) did not fire against the immune target, cause not read: parked (uncertain expectation: whether the Construct engages an immune target at all). 'moves at a slow speed': no route (owned_creature_run_speed_rate needs the Construct in the control phase, and 531133 cannot be withheld)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '20 seconds', '1560 + 200% SP + 50% AP'; coa-obtainable: in the live capture; logs: 531132 26 hits median 3860. Claim 'moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities': open, route pending: Bone Construct Hidden 531133 (aura 33, -50%) is on every Construct, so no Construct without it is a contrast; the damage entries remove resistances with 823764, the opposite of a pierce test; route: owned_creature_run_speed_rate against a Crypt Fiend (same template speed), and a Bone Deconstruct hit on a dummy with an immunity or resistance aura. Spell-power term: Status 1 (PAIR; precondition fixture QA Test +100 SP 10062 by harness set_aura before the stats are measured, aura 345 MiscValue 127 every school incl. Physical): Bone Deconstruct 531132 1577 at SP 0 and 1777 at SP 100: +200 = 2 x 100 (the $AP*.5 term at the measured AP in both) . G-11 raw logs: raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 26 by id 531132 and 26 by \"Bone Deconstruct\". Route attempt (B3/B4 side a, pair r13): with Divine Shield 642 (aura 39 SCHOOL_IMMUNITY 127, harness set_aura) on the dummy, the Construct's Bone Deconstruct 531132 (SPELL_ATTR0_NO_IMMUNITIES) never hit it (0), while Plague of Undeath was blocked as expected (control); the Construct's trigger (aura_ascension_necromancer_event on reaching the target) did not fire against the immune target, cause not read: parked (uncertain expectation: whether the Construct engages an immune target at all). 'moves at a slow speed': no route (owned_creature_run_speed_rate needs the Construct in the control phase, and 531133 cannot be withheld)."
   },
   {
     "spell": 531135,
@@ -2018,12 +2022,14 @@
       {
         "claim": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
         "labels": [
-          "572638 effect_value e0 #1"
+          "572638 effect_value e0 #1",
+          "572638 behaviour_metric_delta ghoul_stamina",
+          "572638 behaviour_metric_delta spell_power_factor"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim spell power: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; Frost spell power 0 without it, positive with a Ghoul raised). Claim factor: parked (route agent): needs a read of the minion's Stamina, a read-only harness metric (G-39 note first); not attempted in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Sepulchral Might\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim spell power: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; Frost spell power 0 without it, positive with a Ghoul raised). Claim factor: Status 1 (PAIR; read-only harness metric owned_creature_stat, ADR 0480): two Raise: Ghoul 500971 per phase; each Ghoul 50073's Stamina 43 without 572638, 45 with it (its Stamina clause raises the caster's Stamina, which the Ghoul's scaling follows); Frost spell power 0 without, 27 with it = int(30% x (45 + 45)), the stated percent of the two Ghouls' total, both reads on one build (stated value x the measured Stamina, as the Fetid Ward derivation). G-11: server DBC and code (class-file observe_source); raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 572638, 0 by \"Sepulchral Might\"; ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 573426,
@@ -2733,12 +2739,14 @@
       {
         "claim": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
         "labels": [
-          "706472 effect_value e0 #1"
+          "706472 effect_value e0 #1",
+          "706472 behaviour_metric_delta ghoul_stamina",
+          "706472 behaviour_metric_delta spell_power_factor"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim spell power: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; Frost spell power 0 without it, positive with a Ghoul raised). Claim factor: parked (route agent): needs a read of the minion's Stamina, a read-only harness metric (G-39 note first); not attempted in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Sepulchral Might\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases your Stamina by 5%.Increases your spell damage by an amount equal to 15% of the \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim spell power: Status 1 (the final route pair 20261113-032244 / -032351, build f90703a57ebc; Frost spell power 0 without it, positive with a Ghoul raised). Claim factor: Status 1 (PAIR; read-only harness metric owned_creature_stat, ADR 0480): two Raise: Ghoul 500971 per phase; each Ghoul 50073's Stamina 43 without 706472, 44 with it (its Stamina clause raises the caster's Stamina, which the Ghoul's scaling follows); Frost spell power 0 without, 13 with it = int(15% x (44 + 44)), the stated percent of the two Ghouls' total, both reads on one build (stated value x the measured Stamina, as the Fetid Ward derivation). G-11: server DBC and code (class-file observe_source); raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 706472, 0 by \"Sepulchral Might\"; ~/CoaServer/reference: bindmysoul \"Increases your Stamina by 5%.Increases your spell damage by an amount equal to 15% of the \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 706948,
@@ -3621,7 +3629,8 @@
       {
         "claim": "striking ... for ${$801411m1+$801411ppl1+$SP*.4} Physical damage",
         "labels": [
-          "805032 script_hit 801411 bonestorm"
+          "805032 script_hit 801411 bonestorm",
+          "805032 script_hit 801411 bonestorm_sp"
         ]
       },
       {
@@ -3638,7 +3647,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85. Part 'striking up to $801411i nearby enemies': five of five dummies within 3 yd struck, the one at 8 yd not (805032 bonestorm_targets behaviour_fixed_count, uncapped); the cap of five and 'every $801412t1 sec for $801412d' are not judged (data labels only). Review I-d: the Bonestorm hit (28 per hit) was measured at spell power 0 only; the $SP*.4 term is not judged (limit: a minion's hit reads its owner's spell power, and a script_hit's stat_auras read 0 spell power for minion hits, review I-3), so this clause stays partly proven: the hit at SP 0 is status 1, the SP term open (tool gap). Route (B3/B4 side a, 2026-11-13): 'every $801412t1 sec for $801412d': status 1, 11 Bonestorm 801411 hits on one dummy per unleash (0 with no Wraith, the control), = 5000 / 500 periodic pulses plus the one at application that 801412's SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200) adds (pairs r11, r12 and the route final). The cap of five stays data (a 6-dummy cap read needs per-pulse counts; the fixed_count reads 'ever hit' over ten pulses). The $SP*.4 term: no route: the coefficient reads the owner's SpellBaseDamageBonusDone for the Physical school (AscensionNecromancerContracts.cpp:474-481), no stock aura 13 in the DBC covers Physical (MiscValue 127, single effect, flat) and Power of the Ashtongue 1140480 is MiscValue 126; a script_hit with the player 'spell_power' fixture would need a script_hit fixture field (behaviours.py, held by the side b route): tool gap."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul '15 seconds', 'up to 5', '30 + 40% SP'; coabuildhub 'every 0.5 sec'; coa-obtainable: in the live capture; logs: 65 casts and 65 summons, 801411 median 85. Part 'striking up to $801411i nearby enemies': five of five dummies within 3 yd struck, the one at 8 yd not (805032 bonestorm_targets behaviour_fixed_count, uncapped); the cap of five and 'every $801412t1 sec for $801412d' are not judged (data labels only). Review I-d: the Bonestorm hit (28 per hit) was measured at spell power 0 only; the $SP*.4 term is not judged (limit: a minion's hit reads its owner's spell power, and a script_hit's stat_auras read 0 spell power for minion hits, review I-3), the hit at SP 0 is status 1; the SP term:Spell-power term: Status 1 (PAIR; precondition fixture QA Test +100 SP 10062 by harness set_aura before the stats are measured, aura 345 MiscValue 127 every school incl. Physical): Bonestorm 801411 28 at SP 0 and 64 at SP 100 after the dummy's armor (tooltip 30 and 70 before it): the Physical row reads the +100, $SP*.4 = 40 . G-11 raw logs: raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 2607 by id 801411 and by \"Bonestorm\". Route (B3/B4 side a, 2026-11-13): 'every $801412t1 sec for $801412d': status 1, 11 Bonestorm 801411 hits on one dummy per unleash (0 with no Wraith, the control), = 5000 / 500 periodic pulses plus the one at application that 801412's SPELL_ATTR5_EXTRA_INITIAL_PERIOD (AttributesEx5 0x200) adds (pairs r11, r12 and the route final). The cap of five stays data (a 6-dummy cap read needs per-pulse counts; the fixed_count reads 'ever hit' over ten pulses). The $SP*.4 term: no route: the coefficient reads the owner's SpellBaseDamageBonusDone for the Physical school (AscensionNecromancerContracts.cpp:474-481), no stock aura 13 in the DBC covers Physical (MiscValue 127, single effect, flat) and Power of the Ashtongue 1140480 is MiscValue 126; a script_hit with the player 'spell_power' fixture would need a script_hit fixture field (behaviours.py, held by the side b route): tool gap."
   },
   {
     "spell": 805038,
@@ -4065,19 +4074,21 @@
     "spell": 807494,
     "clause": "Increases your maximum Life Force by $s1",
     "labels": [
-      "807494 effect_value e0 #0"
+      "807494 effect_value e0 #0",
+      "807494 behaviour_metric_delta life_force_cap"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: as 504431 (no Life Force read). Open, route pending: as Master Animator 504431 (no Life Force read). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: \"Level 30 Passive Increases your maximum Life Force by and your Undead minion's Stamina by %.\"; bindmysoul found: Level 30 PassiveIncreases your maximum Life Force by 1 and your Undead minion's Stamina by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 30, calculator=True, server_class_spell=True); logs: no events in 186 logs."
+    "reason": "Status 1 (PAIR; a behaviour read, no fixture): four Raise: Ghoul 500971 casts per phase (each Ghoul 50073 occupies 1 Life Force; a raise beyond the maximum evicts the oldest minion): 2 living Ghouls without 807494 (control, base maximum 2), 3 with it learned between the phases, not 4: the maximum Life Force grows by exactly 1 (Effect[0] aura 107 MiscValue 31, BasePoints 0 + DieSides 1). G-11: server DBC set (/srv/coa/server-data/dbc); raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 807494, 0 by \"Summoning Expert\"; ~/CoaServer/reference: bindmysoul \"Increases your maximum Life Force by 1 and your Undead minion's Stamina by 10%.\", sidekick data.js the same sentence without values; coa-obtainable: advancement Necromancer level 30, live capture, calculator, server class spell; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807494,
     "clause": "and your Undead minion's Stamina by $s2%.",
     "labels": [
-      "807494 effect_value e1 #1"
+      "807494 effect_value e1 #1",
+      "807494 behaviour_metric_delta minion_stamina"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: no minion Stamina read (owned_creature_max_health follows CoA scaling, not Stamina alone); the extension is an owned_creature stat read. Open, route pending: Effect[1] 190 aura 137 Stamina +10% on the minions; route: a minion stat read (no minion Stamina metric; maximum health follows CoA scaling code). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: \"Level 30 Passive Increases your maximum Life Force by and your Undead minion's Stamina by %.\"; bindmysoul found: Level 30 PassiveIncreases your maximum Life Force by 1 and your Undead minion's Stamina by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 30, calculator=True, server_class_spell=True); logs: no events in 186 logs."
+    "reason": "Status 1 (PAIR; read-only harness metric owned_creature_stat, ADR 0480, G-39): one Raise: Ghoul 500971 per phase, the Ghoul 50073's Stamina 43 without 807494 (control) and 47 with it learned between the phases: 43 x 1.10 = 47.3, judged to the rounding (the stat field is an integer, int 47; G-26). G-11: server DBC set; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 807494, 0 by \"Summoning Expert\"; ~/CoaServer/reference: bindmysoul \"and your Undead minion's Stamina by 10%.\"; coa-obtainable as the Life Force clause; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807700,
@@ -4201,8 +4212,11 @@
   {
     "spell": 807937,
     "clause": "Your Skeletal Mages now only cost 1 Life Force.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "807937 behaviour_metric_delta mage_cost"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (PAIR; a behaviour read, no fixture): two Raise: Skeletal Mage 500331 casts per phase at the base maximum of 2 Life Force: without 807937 (control) a Mage occupies 2 and the second raise evicts the first, 1 Mage 50075 lives; with 807937 learned between the phases both live, 2: each occupies 1. G-11: server DBC set (Raise: Skeletal Mage reads $?s807937[1][2]); raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 807937, 0 by \"Grave Mages\"; ~/CoaServer/reference: advancement.tsv lists 807937 (Rime talent); bindmysoul and sidekick nothing found; coa-obtainable: advancement Necromancer level 0, live capture, calculator; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807960,
@@ -5503,8 +5517,11 @@
   {
     "spell": 680283,
     "clause": "Your Life Force is increased by 1.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "680283 behaviour_metric_delta life_force_cap"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (PAIR; a behaviour read, no fixture): four Raise: Ghoul 500971 casts per phase (each Ghoul 50073 occupies 1 Life Force; a raise beyond the maximum evicts the oldest minion): 2 living Ghouls without 680283 (control, base maximum 2), 3 with it learned between the phases, not 4: the maximum Life Force grows by exactly 1 (Effect[0] aura 107 MiscValue 31, BasePoints 0 + DieSides 1). G-11: server DBC set (/srv/coa/server-data/dbc); 680283 is granted at level 10 by AscensionCustomClassData.h:467; raw combat logs (rg over the 186 logs of ~/Projects/coa-log-history/data/logs by id and by name, positive controls in the same query: 802353 1551 lines by id, \"Bonestorm\" 2607 by name): 0 by id 680283, 0 by \"Scourge Apprentice Training\"; ~/CoaServer/reference: sidekick data.js \"Your Life Force is increased by 1.\"; bindmysoul nothing found; coa-obtainable: no advancement row, not in the live capture (the server grant at level 10 is the acquisition); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 800706,

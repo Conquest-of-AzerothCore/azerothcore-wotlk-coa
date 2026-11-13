@@ -109,7 +109,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'system_message_contains', 'whispers_received', 'whisper_contains', 'challenge_start_responses',
     'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
-    'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+    'owned_creature_armor', 'owned_creature_stat', 'owned_creature_max_health', 'owned_creature_health',
     'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
@@ -1270,7 +1270,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     number(step.get(key), f'{where}.{key}', -17000, 17000)
             elif 'x' in step or 'y' in step:
                 require(False, f'{where}: x and y only apply to point metrics')
-            if metric in {'stat', 'stat_exact'}:
+            if metric in {'stat', 'stat_exact', 'owned_creature_stat'}:
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)
             if metric == 'track_creature_type':
                 number(step.get('id'), f'{where}.id', 1, 32, True)
@@ -1370,7 +1370,8 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
                           'owned_creature_virtual_item', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
                           'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
-                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+                          'owned_creature_armor', 'owned_creature_stat', 'owned_creature_max_health',
+                          'owned_creature_health',
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',
@@ -1481,7 +1482,8 @@ def validate(scenario, clock=REAL_CLOCK):
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
                           'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim', 'owned_creature_virtual_item',
-                          'owned_creature_armor', 'owned_creature_max_health', 'owned_creature_health',
+                          'owned_creature_armor', 'owned_creature_stat', 'owned_creature_max_health',
+                          'owned_creature_health',
                           'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
                           'owned_creature_run_speed_rate', 'owned_creature_attack_power',
                           'owned_creature_spell_power', 'owned_creature_resistance',

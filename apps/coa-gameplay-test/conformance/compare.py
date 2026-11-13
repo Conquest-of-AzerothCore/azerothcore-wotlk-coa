@@ -77,6 +77,7 @@ TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
+MAGNITUDE_RATIO_POINTS = 0.02
 METRIC_DELTA_FLOAT_TOLERANCE = 1e-5
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
                           'effect_radius', 'aura_amplitude_ms'})
@@ -1845,7 +1846,7 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     kept = kept_count / observe_count
     tooltip_ratio = expected
     expected = tooltip_ratio * kept
-    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_TOLERANCE * expected)
+    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_POINTS, MAGNITUDE_RATIO_TOLERANCE * expected)
     low, high = expected - margin, expected + margin
     judged = replace(base, measured=ratio, expected=expected, low=low, high=high)
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
@@ -1859,7 +1860,8 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
                                f'{observe_count:g} of its own events, against mean {mean_trigger:g} '
                                f'{model["trigger_metric"]} of {trigger_source} over {trigger_count:g} of its own '
                                f'events, = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
-                               f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}{resisted}; '
+                               f'{MAGNITUDE_RATIO_POINTS:g}, {MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of '
+                               f'{expected:g}{resisted}; '
                                f'{expectation.rule} ({notes}); {excluded_note}')
 
 

@@ -1268,6 +1268,368 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 504431,
+      "name": "Master Animator (Life Force cap: Ghouls kept)",
+      "variant": "life_force_cap",
+      "label_suffix": "life_force_cap",
+      "cast_power": 2800,
+      "quote": "Increases your maximum Life Force by 1.",
+      "kind": "metric_delta",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971,
+        500971,
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "observe_source": "504431 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31, BasePoints 0 + DieSides 1 = 1, on the Life Force spell mask: the maximum Life Force grows by 1. Behaviour read: four Raise: Ghoul 500971 casts (each Ghoul 50073 occupies 1 Life Force, tooltip) per phase; a raise beyond the maximum evicts the oldest raised minion, so the living Ghouls count the maximum. Control (before, 504431 unknown): 2 Ghouls (base maximum 2); with 504431 learned between the phases: 3, not 4 (the fourth raise still evicts). No fixture."
+    },
+    {
+      "spell": 807494,
+      "name": "Summoning Expert (Life Force cap: Ghouls kept)",
+      "variant": "life_force_cap",
+      "label_suffix": "life_force_cap",
+      "cast_power": 2800,
+      "quote": "Increases your maximum Life Force by $s1",
+      "kind": "metric_delta",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971,
+        500971,
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "observe_source": "807494 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31, BasePoints 0 + DieSides 1 = 1, on the Life Force spell mask: the maximum Life Force grows by 1. Behaviour read: four Raise: Ghoul 500971 casts (each Ghoul 50073 occupies 1 Life Force, tooltip) per phase; a raise beyond the maximum evicts the oldest raised minion, so the living Ghouls count the maximum. Control (before, 807494 unknown): 2 Ghouls (base maximum 2); with 807494 learned between the phases: 3, not 4 (the fourth raise still evicts). No fixture."
+    },
+    {
+      "spell": 680283,
+      "name": "Scourge Apprentice Training (Life Force cap: Ghouls kept)",
+      "variant": "life_force_cap",
+      "label_suffix": "life_force_cap",
+      "cast_power": 2800,
+      "quote": "Your Life Force is increased by 1.",
+      "kind": "metric_delta",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971,
+        500971,
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "observe_source": "680283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31, BasePoints 0 + DieSides 1 = 1, on the Life Force spell mask: the maximum Life Force grows by 1. Behaviour read: four Raise: Ghoul 500971 casts (each Ghoul 50073 occupies 1 Life Force, tooltip) per phase; a raise beyond the maximum evicts the oldest raised minion, so the living Ghouls count the maximum. Control (before, 680283 unknown): 2 Ghouls (base maximum 2); with 680283 learned between the phases: 3, not 4 (the fourth raise still evicts). No fixture."
+    },
+    {
+      "spell": 807937,
+      "name": "Grave Mages (two Skeletal Mages kept)",
+      "kind": "metric_delta",
+      "variant": "mage_cost",
+      "label_suffix": "mage_cost",
+      "cast_power": 2800,
+      "quote": "Your Skeletal Mages now only cost 1 Life Force.",
+      "target": "caster",
+      "trigger_spell": 500331,
+      "setup_casts": [
+        500331
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50075
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "observe_source": "807937 Effect[0] aura 4 (dummy); Raise: Skeletal Mage 500331 reads $?s807937[1][2] Life Force. Behaviour read: two Raise: Skeletal Mage casts per phase at the base maximum of 2 Life Force: without 807937 (control) a Mage occupies 2, so the second raise evicts the first and 1 Mage 50075 lives; with 807937 learned between the phases a Mage occupies 1 and both live: 2. No fixture."
+    },
+    {
+      "spell": 807494,
+      "name": "Summoning Expert (Ghoul Stamina)",
+      "kind": "metric_delta",
+      "variant": "minion_stamina",
+      "label_suffix": "minion_stamina",
+      "cast_power": 2800,
+      "quote": "and your Undead minion's Stamina by $s2%.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_stat",
+      "fields": {
+        "entry": 50073,
+        "stat": 2
+      },
+      "before_expected": 43,
+      "expected": 47,
+      "observe_source": "807494 Effect[1] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue 2 (Stamina), BasePoints 9 + 1 = 10 ($s2). One Raise: Ghoul 500971 per phase; the Ghoul 50073's Stamina (owned_creature_stat, a read-only harness metric, ADR 0480) without 807494 (control) and with it learned between the phases: the control value x 1.10: 43 without it, int(43 x 1.10) = int(47.3) = 47 with it (judged to the rounding, the stat is an integer field; pilot pair p1)."
+    },
+    {
+      "spell": 572638,
+      "name": "Sepulchral Might (Ghoul Stamina with the talent)",
+      "kind": "metric_delta",
+      "variant": "ghoul_stamina",
+      "label_suffix": "ghoul_stamina",
+      "cast_power": 2800,
+      "quote": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_stat",
+      "fields": {
+        "entry": 50073,
+        "stat": 2
+      },
+      "before_expected": 43,
+      "expected": 45,
+      "observe_source": "Companion read of the spell_power_factor entry: two Raise: Ghoul 500971 casts per phase; the Ghoul 50073's Stamina (owned_creature_stat, ADR 0480) without 572638 (control) and with it learned between the phases (572638 Effect[1] also raises the caster's Stamina, which the Ghoul's scaling follows). The after value is the Stamina the 30% factor applies to: 43 without, 45 with 572638 (pilot pair p1)."
+    },
+    {
+      "spell": 572638,
+      "name": "Sepulchral Might (spell power from two Ghouls)",
+      "kind": "metric_delta",
+      "variant": "spell_power_factor",
+      "label_suffix": "spell_power_factor",
+      "cast_power": 2800,
+      "quote": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 27,
+      "observe_source": "572638 Effect[0] ($s1 = 30): two Raise: Ghoul 500971 casts per phase; Frost spell power 0 without 572638 (control), and with it learned between the phases int(30% x the total Stamina of the two Ghouls), the Stamina read by the ghoul_stamina entry on the same build (2 x one Ghoul's): int(30% x (45 + 45)) = 27."
+    },
+    {
+      "spell": 706472,
+      "name": "Sepulchral Might (Ghoul Stamina with the talent)",
+      "kind": "metric_delta",
+      "variant": "ghoul_stamina",
+      "label_suffix": "ghoul_stamina",
+      "cast_power": 2800,
+      "quote": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "owned_creature_stat",
+      "fields": {
+        "entry": 50073,
+        "stat": 2
+      },
+      "before_expected": 43,
+      "expected": 44,
+      "observe_source": "Companion read of the spell_power_factor entry: two Raise: Ghoul 500971 casts per phase; the Ghoul 50073's Stamina (owned_creature_stat, ADR 0480) without 706472 (control) and with it learned between the phases (706472 Effect[1] also raises the caster's Stamina, which the Ghoul's scaling follows). The after value is the Stamina the 15% factor applies to: 43 without, 44 with 706472 (pilot pair p1)."
+    },
+    {
+      "spell": 706472,
+      "name": "Sepulchral Might (spell power from two Ghouls)",
+      "kind": "metric_delta",
+      "variant": "spell_power_factor",
+      "label_suffix": "spell_power_factor",
+      "cast_power": 2800,
+      "quote": "Increases your spell power by an amount equal to $s1% of the total of your Raised minion's Stamina.",
+      "target": "caster",
+      "trigger_spell": 500971,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3000,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "metric": "spell_power",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 13,
+      "observe_source": "706472 Effect[0] ($s1 = 15): two Raise: Ghoul 500971 casts per phase; Frost spell power 0 without 706472 (control), and with it learned between the phases int(15% x the total Stamina of the two Ghouls), the Stamina read by the ghoul_stamina entry on the same build (2 x one Ghoul's): int(15% x (44 + 44)) = int(13.2) = 13."
+    },
+    {
+      "spell": 500329,
+      "name": "Raise: Gargoyle (Command damage, +100 spell power)",
+      "kind": "script_hit",
+      "variant": "command_damage_sp",
+      "label_suffix": "command_damage_sp",
+      "quote": "Plague damage,",
+      "hit_spell": 707598,
+      "hit_effect": 0,
+      "caster_entry": 50067,
+      "trials": 6,
+      "minimum_hits": 6,
+      "learn": [
+        92123
+      ],
+      "casts": [
+        [
+          500329,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 1500,
+      "observe_source": "Command: Undead 504868 orders every non-stationary minion (Responds(), AscensionNecromancerSummons.cpp:177-182); npc_ascension_necromancer::DoAction case 50067 casts Command: Gargoyle 707598 at the target (AscensionNecromancerSummons.cpp:715-716): Effect[0] SCHOOL_DAMAGE, Plague (SchoolMask 40), BasePoints 472 + DieSides 22, coefficient row {707598, 0, 0.65} (AscensionNecromancerData.h:68). Factor() multiplies by 1 + 0.5 per disease of the caster on the target (AscensionNecromancerContracts.cpp:410-411): the dummy carries none (Bone Toss 704706 of Effect[1] has Dispel 0). The control commands without a Gargoyle and must count no 707598 hit. 984954 removes crits, 823764 partial resists (both read through the owner, as the Ghoul Command entry). Spell power arm: QA Test +100 SP 10062 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 every school including Physical, BasePoints 99 + 1, DurationIndex 21 permanent) is set on the caster before its stats are measured (a precondition fixture by harness set_aura), so the tooltip's $SP reads 100 in every school and the minion's hit, which reads its owner's spell power of the coefficient row's school, must rise by the stated coefficient x 100.",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 531130,
+      "name": "Animate: Bone Construct (damage, +100 spell power)",
+      "kind": "script_hit",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Shadow damage, piercing all invulnerabilities, resistances, and immunities.",
+      "hit_spell": 531132,
+      "cast_power": 1000,
+      "caster_entry": 503200,
+      "trials": 6,
+      "minimum_hits": 4,
+      "casts": [
+        [
+          531130,
+          "dummy"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 4000,
+      "observe_source": "IsSummonedBy casts Bone Construct Hidden 531133 on every 503200 (AscensionNecromancerSummons.cpp:559-560); aura_ascension_necromancer_event casts Bone Deconstruct 531132 from the Construct at its melee target while 531133 is on it (AscensionNecromancerEvents.cpp:179-180): Effect[0] SCHOOL_DAMAGE Shadow, BasePoints 1499 + 1, 20 per level from 57, coefficient row {531132, 0, SP 2.0, AP 0.5} (AscensionNecromancerData.h:50). The Construct is animated at the dummy and Command: Undead 504868 sends it in; the control commands without a Construct and must count no 531132 hit. 984954 removes crits, 823764 partial resists. Spell power arm: QA Test +100 SP 10062 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 every school including Physical, BasePoints 99 + 1, DurationIndex 21 permanent) is set on the caster before its stats are measured (a precondition fixture by harness set_aura), so the tooltip's $SP reads 100 in every school and the minion's hit, which reads its owner's spell power of the coefficient row's school, must rise by the stated coefficient x 100.",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 805032,
+      "name": "Animate: Bone Wraith (Bonestorm damage, +100 spell power)",
+      "kind": "script_hit",
+      "variant": "bonestorm_sp",
+      "label_suffix": "bonestorm_sp",
+      "quote": "Physical damage every",
+      "hit_spell": 801411,
+      "caster_entry": 50309,
+      "trials": 3,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          805032,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ]
+      ],
+      "settle_ms": 5500,
+      "observe_source": "805032 Effect[0] 28 SPELL_EFFECT_SUMMON of Bone Wraith 50309 (NecromancerSummons row {805032, 0, 50309, 1}), DurationIndex 8 (15000 ms, $d), instant, 28% of base mana, 60000 ms cooldown (reset before each cast). npc_ascension_necromancer::DoAction case 50309 (AscensionNecromancerSummons.cpp:705-706): the Command makes the Wraith cast Bonestorm 801412 on itself (aura 23 every 500 ms for 5000 ms, triggering 801411: SCHOOL_DAMAGE Physical, BasePoints 29 + 1, coefficient row 0.4 SP, AscensionNecromancerData.h:69). The control commands without a Wraith and must count no 801411 hit; 984954 removes crits. Spell power arm: QA Test +100 SP 10062 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 every school including Physical, BasePoints 99 + 1, DurationIndex 21 permanent) is set on the caster before its stats are measured (a precondition fixture by harness set_aura), so the tooltip's $SP reads 100 in every school and the minion's hit, which reads its owner's spell power of the coefficient row's school, must rise by the stated coefficient x 100.",
+      "stat_auras": [
+        [
+          10062,
+          1
+        ]
+      ]
+    },
+    {
       "spell": 802990,
       "name": "Necrosis (Crypt Plague duration)",
       "kind": "metric_delta",

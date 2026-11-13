@@ -1234,5 +1234,18 @@ class TrackCreaturePromiseTest(unittest.TestCase):
     def test_a_tracking_read_is_a_state_read(self):
         self.assertEqual(METRIC_EVIDENCE['track_creature_type'], STATE)
 
+
+class OwnedCreatureStatPromiseTest(unittest.TestCase):
+    def test_a_learned_minion_stat_contrast_proves_a_minion_stamina_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta minion_stamina', BEHAVIOUR_METRIC_DELTA, 'owned_creature_stat',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim("and your Undead minion's Stamina by $s2%.", '1 behaviour_metric_delta minion_stamina')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your maximum Life Force by $s1', '1 behaviour_metric_delta minion_stamina')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_a_minion_stat_read_is_a_state_read(self):
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_stat'], STATE)
+
 if __name__ == '__main__':
     unittest.main()
