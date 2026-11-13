@@ -105,6 +105,8 @@ uint32 ChampionAura(uint32 entry)
         return 808017;
     case 500484:
         return 807812;
+    case 50115:
+        return 520376;
     default:
         return 0;
     }

@@ -473,7 +473,7 @@ still needs a fix note with the cause read, the narrowest change, a regression a
 
 | Date, author | Spell and question | Ruling | Owner's words | Recorded in |
 |---|---|---|---|---|
-| 2026-11-13, owner, through the mentor | Decaying Colossus (Q-a1-3) | Apply the 25% split: the caster takes 25% less and the Colossus takes it | not recorded | Pending (fix note) |
+| 2026-11-13, owner, through the mentor | Decaying Colossus (Q-a1-3) | Apply the 25% split: the caster takes 25% less and the Colossus takes it | not recorded | ADR 0520 |
 | 2026-11-13, owner, through the mentor | Banshee drain (Q-a1-4) | The player's maximum mana caps the drain, not the Banshee's | not recorded | Pending (fix note) |
 | 2026-11-13, owner, through the mentor | Tomb King Putrid Claws baseline (Q-a1-5) | The claw is 10% of the post-mitigation hit, then resisted as a Plague hit (0.088 of the hit on the dummy) | not recorded | Pending (fix note) |
 | 2026-11-13, owner, through the mentor | Abomination cloud (Q-a1-7) | The cloud fires only when the Abomination is attacked. The live logs fit this in 7% of hits only; the owner ruled it | not recorded | Pending (fix note) |
