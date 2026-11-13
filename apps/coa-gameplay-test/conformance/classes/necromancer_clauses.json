@@ -2140,7 +2140,8 @@
     "labels": [
       "561353 cost_gate 533236 corpse_explosion without",
       "561353 cost_gate 533236 corpse_explosion with",
-      "561353 effect_value #1"
+      "561353 effect_value #1",
+      "561353 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim",
     "reason": "The reset: status 1 (route agent): Corpse Explosion 533236 (RecoveryTime 60000 ms) primed, 300 Blight 500237 hits on the dummy, attempted again: refused without 561353 (67), through with it; counted pair route-5 20261113-005909/-005953, build b0d0ace11c2b (0.95^300 = 2.1e-7 chance of no reset per run). The $h = 5% rate: data conformant (561353 ProcChance); a rate route needs a per-hit reset count (a cooldown_ms read after each Blight hit as the proc event), not built: route pending, parked by the route agent. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): nothing found; ~/CoaServer/reference: bindmysoul \"Crypt Swarm by 15%\" only (an older state), sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used.",
