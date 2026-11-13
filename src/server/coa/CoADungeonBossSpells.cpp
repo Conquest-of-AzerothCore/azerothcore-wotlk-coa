@@ -13,7 +13,6 @@
 #include "ObjectAccessor.h"
 #include "WaypointMgr.h"
 #include "Opcodes.h"
-#include "WorldPacket.h"
 #include "ScriptMgr.h"
 #include "SpellAuraEffects.h"
 #include "SpellScript.h"
@@ -40,14 +39,6 @@ namespace
 
         ReactStates _react = REACT_AGGRESSIVE;
         ObjectGuid _walker;
-
-        static void SendFacing(Creature* boss)
-        {
-            WorldPacket data(MSG_MOVE_SET_FACING, 64);
-            data << boss->GetPackGUID();
-            boss->BuildMovementPacket(&data);
-            boss->SendMessageToSet(&data, false);
-        }
 
         static G3D::Vector3 Ground(Creature* boss, WaypointNode const& node)
         {
@@ -90,7 +81,6 @@ namespace
                 return;
             boss->RemoveUnitMovementFlag(MOVEMENTFLAG_MASK_MOVING);
             boss->SetOrientation(boss->GetAngle(walker));
-            SendFacing(boss);
         }
 
         void Start(AuraEffect const*, AuraEffectHandleModes)
@@ -111,6 +101,8 @@ namespace
             {
                 _walker = walker->GetGUID();
                 boss->SetTarget(_walker);
+                boss->SetGuidValue(UNIT_FIELD_CHANNEL_OBJECT, _walker);
+                boss->SetFacingToObject(walker);
                 Face(boss);
             }
             else
