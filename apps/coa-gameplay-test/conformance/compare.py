@@ -5043,7 +5043,7 @@ def calc_amount_verdict(verdict: Verdict, run: Run, expectation: Expectation) ->
 
 LINKED_VERDICT_REFERENCE = re.compile(r'"([^"]+)" \(status \w+\)')
 VALUE_LINK = 'value_link'
-VALUE_LINK_STATUSES = frozenset({'unmodelled', NOT_MEASURED})
+VALUE_LINK_STATUSES = frozenset({'unmodelled', NOT_MEASURED, 'ambiguous_tooltip'})
 
 
 def apply_value_links(verdicts: list[Verdict], class_file: dict | None) -> list[Verdict]:

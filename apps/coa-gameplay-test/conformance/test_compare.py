@@ -1870,6 +1870,16 @@ class ApplyValueLinksTest(unittest.TestCase):
         self.assertEqual(self.linked('ok', 'not_measured').status, 'closed')
         self.assertEqual(self.linked('alert', 'not_measured').status, 'alert')
 
+    def test_an_ambiguous_sign_value_label_follows_its_link(self):
+        self.assertEqual(self.linked('ok', 'ambiguous_tooltip').status, 'closed')
+        self.assertEqual(self.linked('alert', 'ambiguous_tooltip').status, 'alert')
+
+    def test_an_unlinked_ambiguous_value_label_keeps_its_status(self):
+        verdicts = [replace(value_verdict('ambiguous_tooltip'), label='2 effect_value #1'),
+                    verdict('1 behaviour_metric_delta rate', 'ok')]
+        self.assertEqual(resolve_linked_statuses(apply_value_links(verdicts, VALUE_LINKS))[0].status,
+                         'ambiguous_tooltip')
+
     def test_a_missing_measuring_label_leaves_the_value_label_unmodelled(self):
         resolved = resolve_linked_statuses(apply_value_links([value_verdict()], VALUE_LINKS))[0]
         self.assertEqual(resolved.status, 'unmodelled')
