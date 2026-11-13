@@ -115,7 +115,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
     'owned_creature_threat', 'owned_creature_power', 'owned_creature_threat_multiplier',
-    'owned_creature_spell_crit_chance', 'owned_creature_react_state',
+    'owned_creature_spell_crit_chance', 'owned_creature_school_spell_crit_chance', 'owned_creature_react_state',
     'melee_crit_chance_against', 'threat_multiplier', 'owned_aura',
     'unit_scale', 'combat_reach',
     'token_count', 'item_sell_price', 'item_spell_ppm', 'monster_chat_count', 'creature_model_scale', 'creature_model_display',
@@ -1398,8 +1398,11 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_spell_power', 'owned_creature_resistance',
                           'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat',
                           'owned_creature_power', 'owned_creature_threat_multiplier',
-                          'owned_creature_spell_crit_chance', 'owned_creature_react_state'}:
+                          'owned_creature_spell_crit_chance', 'owned_creature_react_state',
+                          'owned_creature_school_spell_crit_chance'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
+            if metric == 'owned_creature_school_spell_crit_chance':
+                require('spell' in step, f'{where}: metric needs a magic probe spell')
             if metric in {'owned_creature_crit_chance', 'owned_creature_threat', 'melee_crit_chance_against'}:
                 require('target' in step, f'{where}: metric needs the victim as target')
             if metric == 'owned_creature_resistance':
@@ -1527,6 +1530,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_melee_hit_chance', 'owned_creature_cast_speed', 'owned_creature_threat',
                           'owned_creature_power', 'owned_creature_threat_multiplier',
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
+                          'owned_creature_school_spell_crit_chance',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',

@@ -156,12 +156,19 @@
       {
         "claim": "and your summons by $s2%",
         "labels": [
-          "300240 effect_value e1 #1"
+          "300240 effect_value e1 #1",
+          "300240 behaviour_metric_delta summon_school_crit",
+          "300240 behaviour_metric_delta summon_school_crit_alone",
+          "300240 behaviour_metric_delta summon_base_alone",
+          "300240 behaviour_metric_delta summon_talent_aura",
+          "300240 behaviour_metric_delta caster_crit_alone",
+          "300240 behaviour_metric_delta summon_other_source",
+          "300240 behaviour_metric_delta summon_other_source_base"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim \"and your summons\" (C6, 2026-11-13, mentor ruling 4): not final; the discriminating arm (phase_aura_amounts with Effect[1] at 0) does not fit the existing read: owned_creature_spell_crit_chance returns the minion's m_baseSpellCritChance (CoAGameplayTest.cpp:5615-5616), which Scale() sets from the caster's Frost crit plus non-school crit auras (AscensionNecromancerSummons.cpp:318-320); the Effect[2] grant is aura 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL on the minion, which stock code adds only at roll time (Unit.cpp:10267, :10297), so that arm would read 0 whether the grant works or not. Route: a G-39 Frost-school spell crit read on the minion (base plus GetTotalAuraModifierByMiscMask(71, Frost)), then the Effect[1]-at-0 arm on it. Route agent c (2026-11-13, second attempt): summons part parked, tool gap: the minion read copies the caster crit (Scale()), so the talent's own Effect[2] grant on the summon is not separable; route: a summon spell crit read with the caster bonus removed (owned_creature_spell_crit_chance against a caster-only crit aura contrast). Not attempted to a run tonight. Claim \"you\": status 1 (caster Frost spell crit 3.2817 -> 6.2817). Claim \"and your summons\": open, route pending (review I-1): the Ghoul read is m_baseSpellCritChance, set by Scale() from the caster's Frost crit (AscensionNecromancerSummons.cpp:324, CoAGameplayTest.cpp:5519-5520), so 3 -> 6 is the copy of the caster bonus; the talent's own summon effect (Effect[2] 190 aura 71 Frost) is not read; route: a Frost-school crit read on the minion with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Claim \"you\": status 1 (caster Frost spell crit 3.2817 -> 6.2817, caster_frost_crit). Claim \"and your summons\": fixed (C7, 2026-11-13, mentor decision 19:16, Necromancer ADR 0048). Cause: Scale() (AscensionNecromancerSummons.cpp:318-320) copies the caster's whole Frost spell crit (PLAYER_SPELL_CRIT_PERCENTAGE1 + Frost) into the minion's m_baseSpellCritChance, and Effect[2] (190, aura 71 Frost +3) granted the summons the same +3 again: arm A summon_school_crit read +6 in the pair 20261113-181149 / -181218 at 2f52a169cf. Read: the copy is general (pilot 20261113-181949: another caster source, Enigma Crit Bonus 26127 aura 71 Frost +3 learned in place of 300240, summon_other_source +3, summon_other_source_base +3). Change: a Necromancer contract zeroes 300240 Effect[2] (AscensionNecromancerContracts.cpp), so the summons get the +3 through the copy of Effect[1]. Regression, counted pair 20261113-182248 / -182320 on the build at 886354cf05 (12 ok in both runs, no flips): A +3, the other-source arms +3, B summon_school_crit_alone +0 and summon_talent_aura 0 (no separate summon grant left), C summon_base_alone +0, caster_crit_alone +0, caster_frost_crit (\"you\") +3. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 300241,

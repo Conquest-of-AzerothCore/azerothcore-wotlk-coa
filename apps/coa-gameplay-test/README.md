@@ -1089,6 +1089,9 @@ victim state of every `SMSG_ATTACKERSTATEUPDATE` the actor received.
 `owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
 applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
 `owned_creature_spell_crit_chance` reads the owned creature's base spell crit chance (`m_baseSpellCritChance`).
+`owned_creature_school_spell_crit_chance` reads the same creature's spell crit chance for `school_mask` (default
+Frost), `SpellDoneCritChance` with the magic probe `spell` and no victim: the base, the school crit auras (aura 71)
+and the owner's crit spell modifiers on the probe. It requires `spell`, a magic spell.
 `melee_crit_chance_against` reads the player's melee crit chance against the unit named by `target`
 (`GetUnitCriticalChance(BASE_ATTACK)`, the conditional crit modifiers included).
 `owned_gameobject_count` requires a player and `entry`. It counts their summoned gameobjects of that entry
