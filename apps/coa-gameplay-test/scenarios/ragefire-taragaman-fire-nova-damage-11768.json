@@ -125,6 +125,44 @@
       "ratio_to": "plain_massive",
       "min": 1.98,
       "max": 2.02
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 154039,
+      "save_as": "plain_heroic_nova"
+    },
+    {
+      "label": "DISCRIMINATING: his Heroic Fire Nova comes out 1.3 times softer than the Mythic one, 5.128 times Jergosh's",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "taragaman",
+      "spell": 154039,
+      "ratio_to": "plain_heroic_nova",
+      "min": 5.08,
+      "max": 5.18
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 2102517,
+      "save_as": "plain_heroic_massive"
+    },
+    {
+      "label": "DISCRIMINATING: his Heroic Massive Fire Nova comes out 1.538 times Jergosh's",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "taragaman",
+      "spell": 2102517,
+      "ratio_to": "plain_heroic_massive",
+      "min": 1.52,
+      "max": 1.56
     }
   ]
 }
