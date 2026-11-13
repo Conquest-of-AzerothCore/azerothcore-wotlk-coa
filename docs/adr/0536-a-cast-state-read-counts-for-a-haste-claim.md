@@ -20,15 +20,16 @@ metric keeps its class):
 ## Decision
 
 - STATE_PROMISES: `haste` also promises the `casting` state (a cast that ends sooner is the stated haste), as it
-  already promises `owned_creature_cast_speed` and `attack_time_ms`. The read still counts only in a learned-contrast
+  already promises `owned_creature_cast_speed` and `attack_time_ms`; so does `all actions` (Entomb 500341, "preventing
+  all actions": the banished dummy's casting state, claim 302.1). The read still counts only in a learned-contrast
   metric_delta.
-- Ledger rows 405 (391.0) and 131 (125.1, its explosion-time claim): the non-conformant readbacks are removed from the
-  labels and the reasons say so. No readback is reclassified as behaviour; the claims rest on their behaviour labels.
+- Ledger rows 405 (391.0), 131 (125.1, its explosion-time claim), 62 (58.0) and 151 (145.1): the non-conformant
+  readbacks are removed from the labels and the reasons say so. No readback is reclassified as behaviour; the claims rest on their behaviour labels.
 
 ## Consequences
 
-- Re-audit of both runs of the merged pair with this change: 97.0, 391.0 and 125.1 are behaviour in both runs
-  (behaviour clauses 296 -> 298 per run).
+- Re-audit of both runs of the merged pair with this change: 97.0, 391.0, 125.1, 58.0, 145.1 and 302.1 are behaviour
+  in both runs where their labels are conformant.
 - Test: `test_a_cast_state_is_a_state_read_where_the_clause_promises_haste` (test_coverage.py): a haste claim counts
   the learned-contrast casting read; an armor claim, an unlearned contrast and a casting metric classed as a readback
   (mutant) do not. Templar `generate` is unaffected (audit-only change); the Templar audit was not re-run.
