@@ -17,6 +17,7 @@ from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, E
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
+                     apply_value_links,
                      write_outputs)
 from behaviours import BEHAVIOUR_METRIC_DELTA
 from hits import HitModel, Modifier
@@ -1838,6 +1839,48 @@ class ResolveLinkedStatusesTest(unittest.TestCase):
         plain = verdict('1 e0', 'ok')
         resolved = resolve_linked_statuses([plain])
         self.assertEqual(resolved[0], plain)
+
+
+VALUE_LINKS = {'value_links': [{'label': '1 effect_value #1', 'checked_by': ['1 behaviour_metric_delta rate'],
+                                 'arithmetic': '$h = ProcChance 5, the rate band 3%..7%'}]}
+
+
+def value_verdict(status: str = 'unmodelled') -> Verdict:
+    return Verdict('1 effect_value #1', status, None, None, None, None, 'unmeasurable: chance_pct token',
+                   check='effect_value')
+
+
+class ApplyValueLinksTest(unittest.TestCase):
+    def linked(self, measuring_status: str, value_status: str = 'unmodelled') -> Verdict:
+        verdicts = [value_verdict(value_status), verdict('1 behaviour_metric_delta rate', measuring_status)]
+        return resolve_linked_statuses(apply_value_links(verdicts, VALUE_LINKS))[0]
+
+    def test_a_passing_measuring_label_closes_the_linked_value_label(self):
+        resolved = self.linked('ok')
+        self.assertEqual(resolved.status, 'closed')
+        self.assertIn('"1 behaviour_metric_delta rate" (status ok)', resolved.explanation)
+        self.assertIn('ProcChance 5', resolved.explanation)
+
+    def test_a_failing_measuring_label_fails_the_linked_value_label_with_it(self):
+        resolved = self.linked('alert')
+        self.assertEqual(resolved.status, 'alert')
+        self.assertIn('(status alert)', resolved.explanation)
+
+    def test_a_not_measured_hooked_value_label_follows_its_link(self):
+        self.assertEqual(self.linked('ok', 'not_measured').status, 'closed')
+        self.assertEqual(self.linked('alert', 'not_measured').status, 'alert')
+
+    def test_a_missing_measuring_label_leaves_the_value_label_unmodelled(self):
+        resolved = resolve_linked_statuses(apply_value_links([value_verdict()], VALUE_LINKS))[0]
+        self.assertEqual(resolved.status, 'unmodelled')
+
+    def test_an_already_judged_value_label_is_not_relinked(self):
+        verdicts = [value_verdict('ok'), verdict('1 behaviour_metric_delta rate', 'alert')]
+        self.assertEqual(resolve_linked_statuses(apply_value_links(verdicts, VALUE_LINKS))[0].status, 'ok')
+
+    def test_a_class_file_without_value_links_changes_nothing(self):
+        verdicts = [value_verdict(), verdict('1 behaviour_metric_delta rate', 'ok')]
+        self.assertEqual(apply_value_links(verdicts, {}), verdicts)
 
 
 class ObservationLinesTest(unittest.TestCase):

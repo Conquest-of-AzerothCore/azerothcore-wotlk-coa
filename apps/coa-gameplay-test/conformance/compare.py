@@ -5034,6 +5034,24 @@ def calc_amount_verdict(verdict: Verdict, run: Run, expectation: Expectation) ->
 
 
 LINKED_VERDICT_REFERENCE = re.compile(r'"([^"]+)" \(status \w+\)')
+VALUE_LINK = 'value_link'
+VALUE_LINK_STATUSES = frozenset({'unmodelled', NOT_MEASURED})
+
+
+def apply_value_links(verdicts: list[Verdict], class_file: dict | None) -> list[Verdict]:
+    links = {link['label']: link for link in (class_file or {}).get('value_links', [])}
+    linked = []
+    for verdict in verdicts:
+        link = links.get(verdict.label)
+        if link is None or verdict.status not in VALUE_LINK_STATUSES:
+            linked.append(verdict)
+            continue
+        pointers = ', '.join(f'"{label}" (status unmodelled)' for label in link['checked_by'])
+        explanation = (f'checked by value link (verdict {pointers}): {link["arithmetic"]}; '
+                       f'the read alone: {verdict.explanation}')
+        linked.append(replace(verdict, explanation=explanation,
+                              detail={**(verdict.detail or {}), VALUE_LINK: list(link['checked_by'])}))
+    return linked
 
 
 def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
@@ -5045,13 +5063,17 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
 
     resolved = []
     for verdict in verdicts:
+        value_link = VALUE_LINK in (verdict.detail or {})
         referenced = (LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
-                     if verdict.check == 'unmodelled' and 'checked by' in verdict.explanation else [])
+                     if (verdict.check == 'unmodelled' or value_link) and 'checked by' in verdict.explanation
+                     else [])
         if not referenced:
             resolved.append(verdict)
             continue
         explanation = LINKED_VERDICT_REFERENCE.sub(live_text, verdict.explanation)
         status = 'closed' if all(by_label.get(label) in CONFORMANT for label in referenced) else verdict.status
+        if value_link and any(by_label.get(label) == 'alert' for label in referenced):
+            status = 'alert'
         resolved.append(replace(verdict, status=status, explanation=explanation))
     return resolved
 
@@ -5155,7 +5177,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     stamped = [with_provenance(verdict, judged, label_runs.get(verdict.label) or scenario_runs(runs, verdict))
-               for verdict in resolve_linked_statuses(verdicts)]
+               for verdict in resolve_linked_statuses(apply_value_links(verdicts, manifest['class_file']))]
     return Comparison(manifest, runs, missing, stamped, judged, other_build)
 
 

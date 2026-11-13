@@ -52,6 +52,9 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0046](0046-study-of-death-cut-is-bracketed-by-repeated-casts.md) | - | The Study of Death cut is bracketed by repeated casts | new |
 | [0047](0047-curse-of-the-lich-summon-grant-is-split-by-zeroing-the-caster-effect.md) | - | The Curse of the Lich summon grant is split by zeroing the caster effect | new |
 | [0048](0048-curse-of-the-lich-summons-take-the-crit-through-the-caster-copy.md) | - | Curse of the Lich's summons take the Frost crit through the caster copy | new |
+| [0050](0050-command-bonefreeze-casts-once-at-its-target.md) | - | Command: Bonefreeze casts once at its target | new |
+| [0051](0051-entomb-physical-immunity-is-measured-on-an-enemy-player.md) | - | Entomb's Physical immunity is measured on an enemy player | new |
+| [0052](0052-underking-random-pick-is-attributed-per-cycle.md) | - | The Underking random pick is attributed per cycle | new |
 
 ## Re-auditable verdict set
 
