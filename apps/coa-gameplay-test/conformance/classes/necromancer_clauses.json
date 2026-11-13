@@ -1311,7 +1311,8 @@
         "claim": "Command your Abominations to hook an enemy to their location",
         "labels": [
           "504316 spell_duration 800043 #0",
-          "504316 behaviour_metric_delta hook_pull"
+          "504316 behaviour_metric_delta hook_pull",
+          "504316 behaviour_metric_delta hook_to_abomination"
         ]
       },
       {
@@ -3273,8 +3274,19 @@
   {
     "spell": 707113,
     "clause": "Allows Expunge to stack an additional time and increases the range of your Death spells by $s2%.",
-    "labels": [
-      "707113 effect_value e1 #0"
+    "claims": [
+      {
+        "claim": "Allows Expunge to stack an additional time",
+        "labels": [
+          "707113 behaviour_metric_delta expunge_three_stacks"
+        ]
+      },
+      {
+        "claim": "increases the range of your Death spells by $s2%.",
+        "labels": [
+          "707113 effect_value e1 #0"
+        ]
+      }
     ],
     "kind": "claim",
     "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/707113.md."
