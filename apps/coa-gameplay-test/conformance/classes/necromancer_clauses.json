@@ -1415,7 +1415,9 @@
       },
       {
         "claim": "(8 sec vs players).",
-        "labels": []
+        "labels": [
+          "504489 behaviour_metric_delta player_duration"
+        ]
       }
     ],
     "kind": "claim",
