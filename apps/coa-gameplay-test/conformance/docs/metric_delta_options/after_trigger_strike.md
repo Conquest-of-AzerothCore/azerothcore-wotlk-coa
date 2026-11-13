@@ -1,4 +1,4 @@
-# After-trigger strike (`metric_delta` `after_trigger_strike`, ADR 0597)
+# After-trigger strike (`metric_delta` `after_trigger_strike`, ADR 0606)
 
 `after_trigger_strike` is `{"spell": ID, "delay_ms": N, "count": 1, "wait_ms": 300}`: in the treatment phase only,
 `delay_ms` after the trigger cast, the striker (the `strike` fixture creature) casts `spell` at the caster `count`

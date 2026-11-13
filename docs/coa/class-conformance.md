@@ -1092,9 +1092,14 @@ in the same commit; the owner assigns the final number at merge.
     `test_cross_class_guard_class_file_paths_leaves_out_the_clause_ledger`,
     `test_cross_class_guard_unknown_class_is_refused`;
   - `test_coverage.py`: `test_cross_class_guard_consumption_files_are_not_class_files`,
-    `test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class`,
+    `test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class` (against `metric_evidence()`,
+    kind-module rows included; seeded case `test_cross_class_guard_a_metric_without_its_evidence_row_is_found`),
     `test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric`,
-    `test_cross_class_guard_every_declared_clause_of_the_class_ledgers_is_well_formed`;
+    `test_cross_class_guard_every_declared_clause_of_the_class_ledgers_is_well_formed`,
+    `test_cross_class_guard_no_kind_module_overrides_a_base_row_unless_allowed` (`KindRowOverrideGuardTest`: a kind
+    module's `EVIDENCE`, `METRIC_EVIDENCE` or `STATE_PROMISES` row may not replace a built-in row unless
+    `coverage.KIND_ROW_OVERRIDES` names it; seeded case
+    `test_cross_class_guard_a_seeded_override_of_a_base_row_is_found`);
   - `test_questions.py`: `test_cross_class_guard_templar_class_file_settles_from_logs_not_a_live_player`.
 
 ### 14.6 Rules for agent sessions
@@ -1126,8 +1131,4 @@ Every agent session on conformance work follows these rules, the controller incl
 - **`cooldown_gate` has no trigger-kind registry.** It still has branches in `conformance.py`'s trigger table,
   `triggers.checked_entry` and `trigger_plan`, the compare part-judge table and the coverage evidence table; a new
   trigger kind edits those shared files until a follow-up gives it a registry like the behaviour kinds.
-- **No guard on kind-module evidence overrides.** `coverage.evidence_classes()`, `metric_evidence()` and
-  `state_promises()` merge a kind module's rows over the built-in tables (`coverage.py`), so a module row with a
-  built-in key silently replaces it; no test refuses that yet. Review a kind module's `EVIDENCE`, `METRIC_EVIDENCE`
-  and `STATE_PROMISES` keys against the built-in tables.
 - **The engine rerun is printed, not enforced** (ADR 0591), and the snapshot check runs only locally (ADR 0590).

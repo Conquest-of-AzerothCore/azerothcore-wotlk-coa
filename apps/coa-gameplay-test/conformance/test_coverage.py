@@ -722,14 +722,24 @@ class EvidenceTablesTest(unittest.TestCase):
         self.assertGreater(len(checks), 40)
         self.assertEqual(sorted(checks - EVIDENCE.keys()), [])
 
-    def test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class(self):
+    def unclassed_metrics(self, evidence: dict[str, str]) -> dict[str, list[str]]:
+        unclassed = {}
         for path in class_file_paths():
             class_file = load_class_file(json.loads(path.read_text(encoding='utf-8'))['class_id'])
             metrics = {entry.get('metric') or entry.get('observe', {}).get('metric')
                        for entry in class_file.get('behaviours', [])} - {None}
             metrics |= {entry['observe_metric'] for entry in class_file.get('triggers', [])
                         if 'observe_metric' in entry}
-            self.assertEqual(sorted(metrics - metric_evidence().keys()), [], path.name)
+            if missing := sorted(metrics - evidence.keys()):
+                unclassed[path.name] = missing
+        return unclassed
+
+    def test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class(self):
+        self.assertEqual(self.unclassed_metrics(metric_evidence()), {})
+
+    def test_cross_class_guard_a_metric_without_its_evidence_row_is_found(self):
+        seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'owned_creature_distance_2d'}
+        self.assertEqual(self.unclassed_metrics(seeded), {'necromancer.json': ['owned_creature_distance_2d']})
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):

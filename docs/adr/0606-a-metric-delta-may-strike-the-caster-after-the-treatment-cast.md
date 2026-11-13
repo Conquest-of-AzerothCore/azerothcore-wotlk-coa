@@ -1,4 +1,4 @@
-# 0597. A metric delta may strike the caster after the treatment cast
+# 0606. A metric delta may strike the caster after the treatment cast
 
 - Status: accepted
 - Date: 2026-11-13
