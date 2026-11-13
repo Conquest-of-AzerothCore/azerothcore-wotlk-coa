@@ -12756,7 +12756,46 @@
       ],
       "unresisted": true,
       "settle_ms": 6000,
-      "observe_source": "As the explosion entry with Increase Frost Dam 132 24666 (+132 Frost) set on the caster before its stats are measured: the walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 16}) adds 0.75 x 132 = 99 to each hit, the $SP*.75 term of the tooltip read with the measured stats."
+      "observe_source": "Non-matching school arm (owner ruling Q-b3b-6 (b): the spell's own schools, mask 40, ADR 0525): Increase Frost Dam 132 24666 (+132 Frost) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}) reads Shadow and Nature spell power only, so the hit stays the spell power 0 value of the explosion entry; before ADR 0525 it added 0.75 x 132 = 99."
+    },
+    {
+      "spell": 707007,
+      "name": "March of the Dead (explosion damage with Shadow spell power)",
+      "kind": "script_hit",
+      "variant": "explosion_sp_shadow",
+      "label_suffix": "explosion_sp_shadow",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 707010,
+      "hit_effect": 0,
+      "caster_entry": 523032,
+      "trials": 3,
+      "minimum_hits": 6,
+      "control_casts": [],
+      "casts": [
+        [
+          707007,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "stat_auras": [
+        [
+          33819,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "settle_ms": 6000,
+      "observe_source": "Matching school arm (owner ruling Q-b3b-6 (b), ADR 0525): Increase Shadow Dam 78 33819 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, BasePoints 77 + 1 = 78, permanent) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}, mask 40 = Shadow and Nature) adds 0.75 x 78 = 58.5 to each hit, the $SP*.75 term of the tooltip read with the measured stats. Control: the same trials without the cast (control_casts empty) count no 707010 hit."
     },
     {
       "spell": 301207,
