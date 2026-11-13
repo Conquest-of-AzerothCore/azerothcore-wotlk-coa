@@ -10,5 +10,9 @@ The control arm casts `cast_spell` at the primary `repeats` times (after `setup_
 arm (`spell_damage_count`, from `caster_entry` when given). Verdict: the treatment strikes the inside dummy and never
 the outside one, the control strikes none; a treatment that never strikes the primary is unmeasured.
 
+With `corpse` (`entry`, `health`, `kill_spell`, `reach`) the primary is that creature, killed by a real `kill_spell`
+cast before the arms; the edge adds its object size as well (a script search with `IsWithinDistInMap`). `cast_at:
+caster` casts a self-targeted spell. A `gate_spell` equal to `cast_spell` is learned only between the arms.
+
 Fields: `gate_spell`, `cast_spell`, `hit_spell`, `radius`, `dummy_reach`, `reach_source`, optional `caster_entry`,
 `learn`, `setup_casts`, `power` (set before each cast), `repeats` (3), `settle_ms` (1500), `margin_yd` (0.5).

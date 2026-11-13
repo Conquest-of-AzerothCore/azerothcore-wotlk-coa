@@ -38,6 +38,8 @@ class RadiusEdgeSpec:
     repeats: int = 3
     settle_ms: int = 1500
     label_suffix: str = 'radius_edge'
+    cast_at: str = PRIMARY
+    corpse: tuple[int, int, int, float] | None = None
 
 
 def radius_edge_spec(entry: dict) -> RadiusEdgeSpec:
@@ -49,16 +51,27 @@ def radius_edge_spec(entry: dict) -> RadiusEdgeSpec:
                           tuple(int(spell) for spell in entry.get('setup_casts', [])),
                           int(entry['power']) if entry.get('power') is not None else None,
                           int(entry.get('repeats', 3)), int(entry.get('settle_ms', 1500)),
-                          entry.get('label_suffix', 'radius_edge'))
+                          entry.get('label_suffix', 'radius_edge'), entry.get('cast_at', PRIMARY),
+                          radius_edge_corpse(entry.get('corpse')))
+    if spec.cast_at not in (PRIMARY, CASTER):
+        raise ValueError(f'{spec.spell} radius_edge casts at the primary or the caster, not {spec.cast_at!r}')
     if spec.radius <= 0 or not 0 < spec.margin_yd < spec.radius or spec.dummy_reach < 0 or spec.repeats < 1:
         raise ValueError(f'{spec.spell} radius_edge needs a radius, a margin inside it, a dummy reach and a cast')
-    if spec.gate_spell in (spec.cast_spell, *spec.learn):
+    if spec.gate_spell in spec.learn:
         raise ValueError(f'{spec.spell} radius_edge learns its gate {spec.gate_spell} only between the arms')
     return spec
 
 
+def radius_edge_corpse(raw: dict | None) -> tuple[int, int, int, float] | None:
+    if raw is None:
+        return None
+    if set(raw) != {'entry', 'health', 'kill_spell', 'reach'} or int(raw['health']) < 1 or float(raw['reach']) < 0:
+        raise ValueError(f'radius_edge corpse {raw!r} needs an entry, a positive health, a kill spell and its reach')
+    return int(raw['entry']), int(raw['health']), int(raw['kill_spell']), float(raw['reach'])
+
+
 def radius_edge_offsets(spec: RadiusEdgeSpec) -> dict[str, float]:
-    edge = spec.radius + spec.dummy_reach
+    edge = spec.radius + spec.dummy_reach + (spec.corpse[3] if spec.corpse else 0.0)
     return {PRIMARY: 0.0, INSIDE: edge - spec.margin_yd, OUTSIDE: edge + spec.margin_yd}
 
 
@@ -73,6 +86,12 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
     offsets = radius_edge_offsets(spec)
     creatures = [{**creature_fixture(class_file), 'id': dummy, 'distance': RADIUS_EDGE_PRIMARY_YD + offsets[dummy]}
                  for dummy in DUMMIES]
+    kill = []
+    if spec.corpse:
+        corpse_entry, health, kill_spell, _ = spec.corpse
+        creatures[0].update({'entry': corpse_entry, 'health': health})
+        kill = (hit_ratio_cast(records, kill_spell, CASTER, PRIMARY)
+                + [{'action': 'wait', 'label': 'corpse settle', 'ms': spec.settle_ms}])
     origin = {'caster_entry': spec.caster_entry} if spec.caster_entry is not None else {}
 
     def label(read: str) -> str:
@@ -88,16 +107,17 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
     def arm(name: str) -> list[dict]:
         steps = [step for spell in spec.setup_casts for step in hit_ratio_cast(records, spell, CASTER, CASTER)]
         for _ in range(spec.repeats):
-            steps += required_target_health_steps(facts, PRIMARY)
-            steps += hit_ratio_cast(records, spec.cast_spell, CASTER, PRIMARY, spec.power)
+            steps += required_target_health_steps(facts, PRIMARY) if spec.cast_at == PRIMARY else []
+            steps += hit_ratio_cast(records, spec.cast_spell, CASTER, spec.cast_at, spec.power)
             steps.append({'action': 'wait', 'label': f'{name} settle', 'ms': spec.settle_ms})
         return steps + [measurement(label(f'{name} {dummy}'), CASTER, RADIUS_EDGE_METRIC, spell=spec.hit_spell,
                                     target=dummy, **origin) for dummy in DUMMIES]
 
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
-                for spell in dict.fromkeys((*spec.learn, spec.cast_spell))]
-             + geometry + arm(ARMS[0])
+                for spell in dict.fromkeys((*spec.learn, *(spec.corpse or ())[2:3], spec.cast_spell))
+                if spell != spec.gate_spell]
+             + kill + geometry + arm(ARMS[0])
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gate_spell}] + arm(ARMS[1]))
     scenario = {
         'schema': 1,
@@ -108,13 +128,17 @@ def radius_edge_scenario(class_file: dict, spec: RadiusEdgeSpec) -> tuple[dict, 
                      f'{spec.dummy_reach:g} yd ({spec.reach_source}), the engine\'s area test '
                      f'(WorldObject::IsWithinDist3d adds the target\'s object size). Each dummy\'s combat reach, '
                      f'height and distance to the primary are read first. Control arm: {spec.repeats} casts of '
-                     f'{spec.cast_spell} at the primary before {spec.gate_spell} is learned; treatment arm: the same '
-                     f'casts after it. {spec.hit_spell} hits per dummy are read after each arm: in the treatment the '
-                     f'inside dummy is struck and the outside one never; the control strikes neither.'),
+                     f'{spec.cast_spell} at the {spec.cast_at} before {spec.gate_spell} is learned; treatment arm: the '
+                     f'same casts after it. {spec.hit_spell} hits per dummy are read after each arm: in the treatment '
+                     f'the inside dummy is struck and the outside one never; the control strikes neither.'
+                     + (f' The primary is a creature {spec.corpse[0]} killed by {spec.corpse[2]} first, a corpse whose '
+                        f'object size {spec.corpse[3]:g} yd the edge adds too (WorldObject::IsWithinDistInMap, both '
+                        f'radii).' if spec.corpse else '')),
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': steps}
     model = {'kind': KIND, 'metric': RADIUS_EDGE_METRIC, 'quote': entry.quote, 'radius': spec.radius,
+             'center_size': spec.corpse is not None,
              'reach': {dummy: label(f'{dummy} combat_reach') for dummy in DUMMIES},
              'height': {dummy: label(f'{dummy} position_z') for dummy in DUMMIES},
              'distance': {dummy: label(f'{dummy} distance_2d primary') for dummy in (INSIDE, OUTSIDE)},
@@ -137,7 +161,8 @@ def radius_edge_verdict(base, run, model: dict):
     primary_z = value[model['height'][PRIMARY]]
     span = {dummy: hypot(value[model['distance'][dummy]], value[model['height'][dummy]] - primary_z)
             for dummy in (INSIDE, OUTSIDE)}
-    edge = {dummy: radius + value[model['reach'][dummy]] for dummy in (INSIDE, OUTSIDE)}
+    center = value[model['reach'][PRIMARY]] if model.get('center_size') else 0.0
+    edge = {dummy: radius + center + value[model['reach'][dummy]] for dummy in (INSIDE, OUTSIDE)}
     if not (span[INSIDE] < edge[INSIDE] and span[OUTSIDE] >= edge[OUTSIDE]):
         return replace(base, status='unmeasured',
                        explanation=f'the layout does not bracket the edge: inside {span[INSIDE]:.2f} yd against '
@@ -145,8 +170,9 @@ def radius_edge_verdict(base, run, model: dict):
     control = {dummy: value[label] for dummy, label in model['arms']['control'].items()}
     treatment = {dummy: value[label] for dummy, label in model['arms']['treatment'].items()}
     layout = (f'inside {span[INSIDE]:.2f} yd and outside {span[OUTSIDE]:.2f} yd from the primary, edge '
-              f'{radius:g} + reach {value[model["reach"][INSIDE]]:g} yd')
-    if treatment[PRIMARY] < 1:
+              f'{radius:g} + reach {value[model["reach"][INSIDE]]:g}'
+              + (f' + center {center:g}' if model.get('center_size') else '') + ' yd')
+    if treatment[PRIMARY] < 1 and not model.get('center_size'):
         return replace(base, status='unmeasured', explanation=f'the treatment never struck the primary; {layout}')
     if any(control.values()):
         return replace(base, status='alert', measured=control[INSIDE],

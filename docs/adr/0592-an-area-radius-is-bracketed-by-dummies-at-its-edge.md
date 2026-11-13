@@ -26,6 +26,10 @@ struck, the outside one never, the control none.
 
 ## Consequences
 
-- One kind serves 47.1 (801513, 6 yd) and 187.1 (707575, 6 yd); pilot 20261113-150027 read both ok.
+- One kind serves 47.1 (801513, 6 yd), 187.1 (707575, 6 yd) and 325.0 (Corpse Explosion, 10 yd around a corpse);
+  pilots 20261113-150027 and 20261113-151811 read all three ok.
+- With `corpse` the primary is a creature killed by a real cast first, and the edge adds its object size too: the
+  Necromancer script searches with `WorldObject::IsWithinDistInMap`, which adds both radii. `cast_at: caster` casts a
+  self-targeted spell; a gate equal to the cast spell is learned only between the arms.
 - The bracket is 1 yd wide around the edge (G-19 is not stated for yards; the tooltip value is whole).
 - Templar `generate --class 19` and `--stack` byte-identical (no Templar entry has the kind).

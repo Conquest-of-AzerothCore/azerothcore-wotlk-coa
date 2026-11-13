@@ -18,3 +18,7 @@ edge reading (shared ADR 0592).
 ## Consequences
 
 - Expected from the DBC only: the dummy 0.5 yd inside 6 yd plus its 1.275 yd reach struck, the one 0.5 yd beyond not.
+- Claim 325.0 (Corpse Explosion 533239 "to all enemies within $533240A1 yds", 10 yd): entry `533239
+  corpse_radius_edge`, a Kobold Vermin 6 corpse (CombatReach 0.875, world DB) killed by Void Zone 92559, dummies 0.5 yd
+  inside and beyond 10 + 0.875 + 1.275 yd of it; control: the cast before 533239 is learned. The several-corpse part of
+  325.0 stays open.

@@ -53,6 +53,34 @@ class RadiusEdgeTests(unittest.TestCase):
         self.assertEqual(self.judged({'primary': 3, 'inside': 3}, reach=0.2).status, 'unmeasured')
         self.assertEqual(self.judged({'inside': 3}).status, 'unmeasured')
 
+    def test_a_corpse_center_adds_its_own_size(self):
+        entry = {**ENTRY, 'spell': 533239, 'label_suffix': 'corpse_radius_edge',
+                 'quote': 'to all enemies within $533240A1 yds.', 'gate_spell': 533239, 'cast_spell': 533239,
+                 'cast_at': 'caster', 'hit_spell': 533240, 'radius': 10, 'repeats': 1,
+                 'corpse': {'entry': 6, 'health': 100, 'kill_spell': 92559, 'reach': 0.875}}
+        entry.pop('caster_entry')
+        entry.pop('setup_casts')
+        scenario, [expectation] = self.built(entry)
+        run.validate(scenario)
+        self.assertEqual([creature['distance'] for creature in scenario['creatures']], [3.0, 14.65, 15.65])
+        self.assertEqual(scenario['creatures'][0]['entry'], 6)
+        learns = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertEqual((learns.count(533239), learns[-1]), (1, 533239))
+        model = expectation.model
+        values = {model['reach']['primary']: 0.875, model['reach']['inside']: 1.275, model['reach']['outside']: 1.275}
+        values.update({label: 83.5 for label in model['height'].values()})
+        values.update({model['distance']['inside']: 11.65, model['distance']['outside']: 12.65})
+        for arm, struck in (('control', 0.0), ('treatment', 1.0)):
+            values.update({model['arms'][arm]['primary']: 0.0, model['arms'][arm]['inside']: struck,
+                           model['arms'][arm]['outside']: 0.0})
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        self.assertEqual(judge_behaviour(base, FakeRun(values), expectation).status, 'ok')
+        values[model['arms']['treatment']['outside']] = 1.0
+        self.assertEqual(judge_behaviour(base, FakeRun(values), expectation).status, 'alert')
+        values[model['reach']['primary']] = 0.0
+        self.assertEqual(judge_behaviour(base, FakeRun(values), expectation).status, 'unmeasured')
+
     def test_the_gate_cannot_be_learned_in_both_arms(self):
         with self.assertRaises(ValueError):
             self.built({**ENTRY, 'learn': [500331]})
