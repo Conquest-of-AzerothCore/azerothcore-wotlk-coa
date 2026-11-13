@@ -11346,5 +11346,57 @@ class HitRatioTargetAuraTests(unittest.TestCase):
             behaviour_scenario(load_class_file(23), {**entry, 'target': CASTER})
 
 
+
+class PushbackReductionTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'pushback_reduction')
+        return behaviour_scenario(load_class_file(23), entry)
+
+    def values(self, ends: dict, strikes: dict | None = None, step_ms: float = 1.0) -> dict:
+        _, [expectation] = self.built()
+        found = {}
+        for index, (name, phase) in enumerate(expectation.model['phases'].items()):
+            start = 10000.0 * (index + 1)
+            found[phase['start']] = start
+            low = {'unhit': 2440, 'hit': 2930, 'reduced': 2680}[name]
+            for poll, (time_label, casting_label) in enumerate(phase['polls']):
+                at = start + low + poll * step_ms
+                found[time_label], found[casting_label] = at, 1.0 if at - start < ends[name] else 0.0
+            if 'strike' in phase:
+                offset = (strikes or {}).get(name, 1000.0)
+                found[phase['strike']], found[phase['struck']] = start + offset, start + offset
+                found[phase['strikes'][0]], found[phase['strikes'][1]] = 0.0, 1.0
+        return found
+
+    def judged(self, ends: dict, strikes: dict | None = None) -> str:
+        _, [expectation] = self.built()
+        return judge_behaviour(base_verdict(expectation), FakeRun(self.values(ends, strikes)), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_every_poll_and_strike_is_stamped_in_game_time(self):
+        scenario, [expectation] = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(len(strikes), 2)
+        for index in strikes:
+            self.assertEqual((steps[index - 1]['metric'], steps[index + 1]['metric']), ('game_time_ms', 'game_time_ms'))
+        reducer = cast_indices(steps, 807813)
+        self.assertEqual(len(reducer), 1)
+        self.assertLess(strikes[0], reducer[0])
+        self.assertLess(reducer[0], strikes[1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_halved_pushback_is_ok_and_a_full_one_alerts(self):
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739}), 'ok')
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2983}), 'alert')
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2760}), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_strikes_at_different_offsets_are_invalid(self):
+        self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739},
+                                     {'hit': 1000.0, 'reduced': 1012.0}), 'unmeasured')
+
+
 if __name__ == '__main__':
     unittest.main()

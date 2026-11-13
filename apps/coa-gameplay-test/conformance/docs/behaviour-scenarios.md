@@ -870,6 +870,19 @@ when set, replaces `removed` for the caster's reads of that arm only (ADR 0291).
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
 
+### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
+
+One scenario casts `cast_spell` at the dummy three times (power set to `cast_power`, cooldown reset): unhit; hit once
+by the passive striker's `strike_spell` `strike_at_ms` into the cast; and the same after a real cast of
+`reducer_spell` (`reducer_wait_ms` later). The cast start, the moments just before and just after the strike step
+and every poll of the caster's `casting` state inside the phase's window (`windows`, `[start, end]` ms after the cast
+start, one poll per 1 ms wait step) are read with `game_time_ms`, so each cast end lies between the last casting and
+the first idle poll in game time. The judge brackets the reduction 1 - (reduced end - unhit end) / (hit end - unhit
+end) from those ends and judges it against `expected_pct` in the G-19 band: `ok` when the whole bracket lies inside,
+`alert` when it lies outside, `measured` when it crosses an edge. A hit cast that takes other than one strike, or two
+strikes at game-time offsets further apart than the poll bracket, leave the reading `unmeasured` (invalid, not
+failed). Icebound Champion 807813: Lichfrost 501978, Light of the Naaru 41394 at 1000 ms, expected 50.
+
 ### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
 
 A minion's command strike stated as "Weapon Damage" is read against the same minion's own swing. A real

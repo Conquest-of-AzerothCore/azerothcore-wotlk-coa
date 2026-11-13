@@ -3191,6 +3191,76 @@ def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Ver
                    high=float(high), explanation=explanation)
 
 
+
+def pushback_end_bracket(run: Run, phase: dict) -> tuple[float, float] | str:
+    start = run.values.get(phase['start'])
+    if start is None:
+        return missing_measurement(run, phase['start'])
+    last_casting, first_idle = None, None
+    for time_label, casting_label in phase['polls']:
+        at, casting = run.values.get(time_label), run.values.get(casting_label)
+        if at is None or casting is None:
+            return missing_measurement(run, time_label if at is None else casting_label)
+        if casting >= 0.5:
+            if first_idle is not None:
+                return f'the caster casts again at {at - start:g} ms after an idle poll'
+            last_casting = at
+        elif first_idle is None:
+            first_idle = at
+    if last_casting is None or first_idle is None:
+        return 'the polls do not hold both the cast and its end'
+    return last_casting - start, first_idle - start
+
+
+def behaviour_pushback_reduction_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    ends, strikes = {}, {}
+    for name, phase in model['phases'].items():
+        bracket = pushback_end_bracket(run, phase)
+        if isinstance(bracket, str):
+            return replace(base, status='unmeasured', explanation=f'{name}: {bracket}')
+        ends[name] = bracket
+        if 'strike' in phase:
+            labels = [phase['start'], phase['strike'], phase['struck'], *phase['strikes']]
+            values = [run.values.get(label) for label in labels]
+            if None in values:
+                return replace(base, explanation=missing_measurement(run, labels[values.index(None)]))
+            start, strike, struck, before, after = values
+            if after - before != 1:
+                return replace(base, status='unmeasured',
+                               explanation=f'{name}: {after - before:g} strikes landed during the cast, not 1')
+            strikes[name] = (strike - start, struck - start)
+    width = max(high - low for low, high in ends.values())
+    offsets = [offset for pair in strikes.values() for offset in pair]
+    if max(offsets) - min(offsets) > width:
+        return replace(base, status='unmeasured',
+                       explanation=f'invalid: the strikes land {strikes} ms into their casts, more than the poll '
+                                   f'bracket {width:g} ms apart')
+    (unhit_low, unhit_high), (hit_low, hit_high), (reduced_low, reduced_high) = (
+        ends['unhit'], ends['hit'], ends['reduced'])
+    middle = lambda bracket: (bracket[0] + bracket[1]) / 2
+    if hit_low <= unhit_high:
+        return replace(base, status='alert', explanation=f'the hit cast ends {ends["hit"]} ms, no later than the '
+                                                         f'unhit cast {ends["unhit"]} ms: no pushback to reduce')
+    reduction = lambda reduced, unhit, hit: (1 - (reduced - unhit) / (hit - unhit)) * 100
+    lowest = reduction(reduced_high, unhit_low, hit_low)
+    highest = reduction(reduced_low, unhit_high, hit_high)
+    measured = reduction(middle(ends['reduced']), middle(ends['unhit']), middle(ends['hit']))
+    expected, band = float(model['expected_pct']), float(model['band'])
+    low, high = expected - band, expected + band
+    if low - 1e-9 <= lowest and highest <= high + 1e-9:
+        status, reason = 'ok', 'the whole bracketed reduction lies inside the band'
+    elif highest < low or lowest > high:
+        status, reason = 'alert', 'the whole bracketed reduction lies outside the band'
+    else:
+        status, reason = 'measured', 'the bracketed reduction crosses a band edge: effect present, not final'
+    return replace(base, status=status, measured=measured, expected=expected, low=low, high=high,
+                   detail={'ends_ms': ends, 'strikes_ms': strikes, 'reduction_range': [lowest, highest]},
+                   explanation=f'cast ends after the start in game time: unhit {ends["unhit"]}, hit {ends["hit"]}, '
+                               f'reduced {ends["reduced"]} ms (last casting, first idle poll); strikes at '
+                               f'{strikes} ms; the pushback falls by {lowest:.4g}% to {highest:.4g}% '
+                               f'({measured:.4g}% at the bracket middles) against the stated {expected:g}%, band '
+                               f'{low:g} to {high:g}: {reason}')
+
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4294,6 +4364,8 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_stat_gain_verdict(base, run, model)
         if model.get('kind') == 'strike_bursts':
             return behaviour_strike_bursts_verdict(base, run, model)
+        if model.get('kind') == 'pushback_reduction':
+            return behaviour_pushback_reduction_verdict(base, run, model)
         if model.get('kind') == 'aura_expiry':
             return behaviour_aura_expiry_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
