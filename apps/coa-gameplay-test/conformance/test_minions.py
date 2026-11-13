@@ -154,6 +154,28 @@ class MinionJudgeTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('baseline trials without the passive', verdict.explanation)
 
+    def banded_proc(self, procs: int, trials: int):
+        labels = proc_measurements(OVERWHELMING_FORCE)
+        model = {**self.proc_model(False), 'band': 0.02, 'minimum_trials': 100}
+        expectation = Expectation(f'{OVERWHELMING_FORCE} {PROC_CHECK}', PROC_CHECK, OVERWHELMING_FORCE,
+                                  OVERWHELMING_FORCE, None, '$h', 'rule', model)
+        steps = [assert_step(labels['trials'], str(trials)), assert_step(labels['attempts'], str(trials)),
+                 assert_step(labels['events'], str(procs)), assert_step(labels['aura'], '1')]
+        self.workspace.scenario('conformance-necromancer-proc-531128-part-1', 'proc', [expectation], steps=steps,
+                                spell=OVERWHELMING_FORCE, rank=OVERWHELMING_FORCE)
+        return self.verdict(PROC_CHECK, constant_reader(Displayed('$h', 5.0, None, 'chance_pct')))
+
+    def test_banded_proc_inside_the_band_is_ok(self):
+        self.assertEqual(self.banded_proc(250, 5000).status, 'ok')
+
+    def test_banded_proc_wider_than_the_band_is_measured_not_final(self):
+        verdict = self.banded_proc(40, 800)
+        self.assertEqual(verdict.status, 'measured')
+        self.assertIn('not final', verdict.explanation)
+
+    def test_banded_proc_mutant_at_half_the_chance_alerts(self):
+        self.assertEqual(self.banded_proc(125, 5000).status, 'alert')
+
     def energize(self, each: int):
         labels = energize_labels(OVERWHELMING_FORCE, 6)
         model = {'part': 0, 'parts': 1, 'power': 6, 'expected': 20, 'percent_of_max': None, 'measurements': labels}
