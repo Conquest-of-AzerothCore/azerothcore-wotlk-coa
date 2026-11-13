@@ -239,6 +239,7 @@ void ApplyContracts(SpellInfo* info)
     if (id == 804371)
     {
         info->Effects[0].MiscValue = 444914;
+        info->Effects[1].ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
         info->Attributes |= SPELL_ATTR0_NO_IMMUNITIES;
     }
     if (id == 505224)
