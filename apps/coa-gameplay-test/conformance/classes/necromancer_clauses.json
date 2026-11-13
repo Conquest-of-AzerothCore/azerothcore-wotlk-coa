@@ -1199,12 +1199,13 @@
       {
         "claim": "dealing Weapon Damage plus ${$505229m2+$505229ppl2} to all enemies in front of it",
         "labels": [
+          "500989 behaviour_hit_ratio weapon_plus",
           "500989 effect_value 505229e1 #1"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim \"dealing Weapon Damage plus\": not final (integration, owner rule through the controller: status 3 needs two genuinely different failed designs or a proven impossibility; this claim was closed on cost alone; earlier C6 timebox status 3 withdrawn). Route: per-hit 505229 amounts of the Colossus (owned_creature_damage_* has no spell filter, so a spell-filtered per-hit read is needed), a read of the Colossus weapon maximum (a G-39 pure read), and a judge that allows for armor and crits on Weapon Damage + ${$505229m2+$505229ppl2}. Attack (cast) proven; the damage and the cone part open (route pending: minion weapon model). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same (25%, +100), coabuildhub +100+1.0 per level; logs: 1244 Bone Smash hits, 807 Colossus swings, no 520376 event; exiles creature 50115 spells exclude 520376."
+    "reason": "Claim \"dealing Weapon Damage plus\": cycle 9 route (design review/c9-73-design.md, approved by the mentor 21:32): kind minion_swing_ratio, label 500989 behaviour_hit_ratio weapon_plus, the Colossus 50115's non-critical Bone Smash 505229 hits over its own plain swings after the flat 100 (BasePoints 99 + DieSides 1; EffectRealPointsPerLevel[1] 0.0 in the server DBC set, so $505229ppl2 = 0) scaled by the run's armor_reduced_damage read of 505229 on the dummy, expected 1.0 in the 5% ratio band; the effect_value read stays as a readback. The cone breadth (\"all enemies in front of it\") is not measured by a second dummy: one dummy in front is hit. Attack (cast) proven. G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul same (25%, +100), coabuildhub +100+1.0 per level; logs: 1244 Bone Smash hits, 807 Colossus swings, no 520376 event; exiles creature 50115 spells exclude 520376."
   },
   {
     "spell": 503738,
@@ -2290,7 +2291,7 @@
     "spell": 574138,
     "clause": "Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions, increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.",
     "kind": "claim",
-    "reason": "Claim 'Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions,': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2); control without the talent): a Lichfrost 501978 with Crypt Plague 92121 learned applies Crypt Plague through Plague() (the CoA apply path; a harness cast of 570131 bypasses it, first pilot 0), and both raised Ghouls 50073 carry 573131 about 1 s after (0 without the talent), still at about 4.4 s and gone by about 5.6 s after the plague. Claim 'increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.': not final, route pending (a minion hit ratio with Rotting Flesh stacks; the 5 sec duration is bracketed only to 4.4 to 5.6 s, wider than the G-19 band). G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 574138 0 lines (a passive); MCP not queried (unavailable).",
+    "reason": "Claim 'Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions,': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2); control without the talent): a Lichfrost 501978 with Crypt Plague 92121 learned applies Crypt Plague through Plague() (the CoA apply path; a harness cast of 570131 bypasses it, first pilot 0), and both raised Ghouls 50073 carry 573131 about 1 s after (0 without the talent), still at about 4.4 s and gone by about 5.6 s after the plague. Claim 'increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.': cycle 9, kind minion_swing_arms (label 574138 behaviour_metric_delta swing_arms): a Ghoul 50073's plain swings in windows where the caster holds 573131 at 10 stacks (read on the Ghoul) against windows without it, expected +20% (10 x $573131s1 = 2) in the G-19 band; the 5 sec duration stays the 574138 SPELLMOD_DURATION readback (bracketed in game only to 4.4 to 5.6 s, wider than the G-19 band). G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 574138 0 lines (a passive); MCP not queried (unavailable).",
     "claims": [
       {
         "claim": "Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions,",
@@ -2303,6 +2304,7 @@
       {
         "claim": "increasing their damage dealt by $573131s1% per stack for $/1000;s1 sec.",
         "labels": [
+          "574138 behaviour_metric_delta swing_arms",
           "574138 effect_value 573131e0 #0",
           "574138 effect_value e0 #1"
         ]
@@ -3117,6 +3119,7 @@
       {
         "claim": "Dealing Shadow damage now increases the damage the target takes from your Skeletal Warriors by $706949s1%",
         "labels": [
+          "706948 behaviour_metric_delta swing_arms",
           "706948 effect_value 706949e0 #0"
         ]
       },
@@ -3128,7 +3131,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 10 times'; coa-obtainable: in the live capture; logs: 706949 stacks to 10, median 10.9 s. Part 'increases the damage the target takes from your Skeletal Warriors by $706949s1%': open, route pending: Mark() scales a Skeletal Warrior 50065/51065 melee hit (AscensionNecromancerContracts.cpp:449-455); a minion magnitude entry with and without the mark would read it."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '1% for 10 seconds, stacking 10 times'; coa-obtainable: in the live capture; logs: 706949 stacks to 10, median 10.9 s. Part 'increases the damage the target takes from your Skeletal Warriors by $706949s1%': cycle 9, kind minion_swing_arms (label 706948 behaviour_metric_delta swing_arms): a Skeletal Warrior 50065's plain swings in windows where the dummy holds 706949 from the caster at 10 stacks against windows without it, expected +10% (10 x $706949s1 = 1) in the G-19 band; Mark() (AscensionNecromancerContracts.cpp:499-510) is the server path."
   },
   {
     "spell": 706948,
