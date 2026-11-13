@@ -10,7 +10,8 @@
     "Rune of Descension Pouch (12,500) 509872 pays 12500 Rune of Descension 375250: one row with that count.",
     "The Ethereal Tool Dispenser 8263501 with a Runed Arcanite Rod 16207 becomes Ethereal Tool Dispenser I 8263502: one reward row with the old dispenser as cost item and source 9 (tool dispenser).",
     "Buying the Necromancer Class Bundle 2615021 through the custom store (0x06BB) with a Conquest of Azeroth Class Bundle 2499003 writes one store_buy row with the bundle token as cost and source 11 (class bundle store).",
-    "Reaching 150 Callboard points with four elite Callboard quests (18034, 18036, 18104, 18109: 25 each) and the world boss quest 170015 (50) pays an unequipped level 60 character the Adventurer's Cache 1397886: one reward row with source 7 (Call Board)."
+    "Reaching 150 Callboard points with four elite Callboard quests (18034, 18036, 18104, 18109: 25 each) and the world boss quest 170015 (50) pays an unequipped level 60 character the Adventurer's Cache 1397886: one reward row with source 7 (Call Board).",
+    "With full bags the Callboard Cache's gear piece is mailed: its cache_open row is written in the mail's transaction, so it exists before any character save."
   ],
   "timeout_ms": 120000,
   "economy_log": true,
@@ -324,6 +325,69 @@
       "metric": "item_count",
       "item": 1397886,
       "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "firelord",
+      "item": 1615001,
+      "count": 1
+    },
+    {
+      "action": "fill_bags",
+      "actor": "firelord",
+      "slots": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "fill_bags",
+      "label": "Refill a slot freed by a filler item that vanished",
+      "actor": "firelord",
+      "slots": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the full-bag opener has no free slot",
+      "actor": "firelord",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "open_item",
+      "label": "Open a Callboard Cache with full bags",
+      "actor": "firelord",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cache is used up",
+      "actor": "firelord",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: its gear piece is mailed",
+      "actor": "firelord",
+      "metric": "mail_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the mailed gear piece's row is written with the mail, before any save",
+      "actor": "firelord",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_count": 1,
+      "economy_source": 1615001,
+      "economy_save": false,
+      "equals": 1,
+      "within_ms": 2000
     },
     {
       "action": "assert",

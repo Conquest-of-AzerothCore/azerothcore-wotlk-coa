@@ -1,8 +1,8 @@
 #include "ManastormRewards.h"
 #include "ScriptMgr.h"
-#include "CoAEconomyLog.h"
 #include "ManastormExperience.h"
 
+#include "CoAEconomyLog.h"
 #include "Creature.h"
 #include "Field.h"
 #include "GameTime.h"

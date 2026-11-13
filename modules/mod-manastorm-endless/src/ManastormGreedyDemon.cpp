@@ -1,6 +1,6 @@
 #include "ManastormGreedyDemon.h"
-#include "CoAEconomyLog.h"
 
+#include "CoAEconomyLog.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
 #include "Field.h"

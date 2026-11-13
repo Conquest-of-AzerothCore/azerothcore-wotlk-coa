@@ -856,6 +856,7 @@ def validate(scenario, clock=REAL_CLOCK):
                         f'{where}.entries must be a list of 1 to 50 entries')
                 for index, entry in enumerate(step['entries']):
                     number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
+                require(len(set(step['entries'])) == len(step['entries']), f'{where}.entries has a duplicate entry')
             if 'owner' in step:
                 require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
         if action == 'voidportal':
@@ -1192,6 +1193,7 @@ def validate(scenario, clock=REAL_CLOCK):
                             f'{where}.entries must be a list of 1 to 50 entries')
                     for index, entry in enumerate(step['entries']):
                         number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
+                    require(len(set(step['entries'])) == len(step['entries']), f'{where}.entries has a duplicate entry')
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 if 'entry' in step:

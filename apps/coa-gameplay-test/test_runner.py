@@ -370,6 +370,7 @@ class RunnerTests(unittest.TestCase):
             for change, error in (({'entry': 710014}, 'entry or entries'),
                                   ({'entries': None}, 'entry or entries'),
                                   ({'entries': []}, 'entries must be a list'),
+                                  ({'entries': [710014, 710014]}, 'duplicate'),
                                   ({'entries': [0]}, 'entries')):
                 scenario = copy.deepcopy(self.scenario)
                 changed = scenario['steps'][-2 if step is use else -1]

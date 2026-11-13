@@ -2237,6 +2237,9 @@ namespace
             return false;
         }
         player->DestroyItemCount(coinItem, coins, true);
+        if (coins)
+            CoAEconomyLog::Queue(player, CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::MythicPlus,
+                coinItem, coins));
         return true;
     }
 

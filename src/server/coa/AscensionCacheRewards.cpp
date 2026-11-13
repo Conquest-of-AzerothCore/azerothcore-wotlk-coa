@@ -164,15 +164,16 @@ bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache, Co
     else if (cache)
         log = CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, cache->GetEntry());
     if (log)
-    {
         for (auto const& given : stored)
             CoAEconomyLog::Gained(player, CoAEconomyLog::NextRow(*log), given.first, given.second);
-        for (std::unique_ptr<Item> const& item : mailItems)
-            CoAEconomyLog::Gained(player, CoAEconomyLog::NextRow(*log), item.get(), item->GetCount());
-    }
 
-    for (std::unique_ptr<Item>& item : mailItems)
-        player->SendItemRetrievalMail(item.release());
+    {
+        std::optional<CoAEconomyLog::GainScope> scope;
+        if (log)
+            scope.emplace(player, *log);
+        for (std::unique_ptr<Item>& item : mailItems)
+            player->SendItemRetrievalMail(item.release());
+    }
 
     for (auto const& given : stored)
         player->SendNewItem(given.first, given.second, true, false, false);

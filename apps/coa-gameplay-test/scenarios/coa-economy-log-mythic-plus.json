@@ -7,6 +7,7 @@
     "Timing the Scarlet Monastery - Armory +1 (keystone 1233152; 80 forces and Herod) gives each member Mythical Caches 2093952 (one row with their count) and Mythic Coins 1414500 (one row); the owner's new keystone is a swap, not a reward.",
     "Opening a Mythical Cache gives one item: one cache_open row with the cache as source.",
     "Upgrading Robes of Arugal (Mythic Dungeon, 1656324) at Edrim into its Mythic 1 version 400168 writes one reward row with the old robes as cost item.",
+    "The upgrade's 130 Mythic Coins 1414500 are one store_buy row (source 3) with the coins as cost; Upgrade All writes one such row for its whole price.",
     "Selling the Mythic 1 robes 400168 to Edrim Skysong (416000) recycles them into Mythic Coins: one reward row with the robes as cost item."
   ],
   "timeout_ms": 240000,
@@ -803,6 +804,18 @@
       "economy_count": 1,
       "economy_cost_item": 1656324,
       "economy_cost_count": 1,
+      "economy_source": 3,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the 130 Mythic Coins the upgrade cost",
+      "actor": "hero",
+      "metric": "economy_log_rows",
+      "economy_event": "store_buy",
+      "economy_cost_item": 1414500,
+      "economy_cost_count": 130,
       "economy_source": 3,
       "equals": 1,
       "within_ms": 2000

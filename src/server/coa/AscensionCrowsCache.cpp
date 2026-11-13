@@ -500,8 +500,10 @@ bool Open(Player* player, Item* cache)
     Save(found->second, player, true);
     events.erase(found);
     UpdateCarrier(player);
-    CoAEconomyLog::AddTokensEarned(player, int32(AscensionBazaarTokenCap::Give(player, bazaarTokens)),
-        CoATokenSource::Cache);
+    {
+        CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, CacheItem));
+        AscensionBazaarTokenCap::Give(player, bazaarTokens);
+    }
     ChatHandler(player->GetSession()).SendSysMessage(
         "Crow's Cache opened: three Heroic Bloodforged items, one of them from the newest released tier, High-Risk materials, Marks of War and Bazaar Tokens.");
     return true;
