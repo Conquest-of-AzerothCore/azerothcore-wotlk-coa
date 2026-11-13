@@ -427,20 +427,28 @@
     "clause": "Increases your Shadow and Frost damage dealt against Humanoids and Undead by $s1%.",
     "claims": [
       {
-        "claim": "Increases your Frost damage dealt against Undead by $s1%.",
+        "claim": "Increases your Shadow and Frost damage",
         "labels": [
-          "301325 behaviour_hit_ratio frost_undead"
+          "301325 behaviour_hit_ratio frost_undead",
+          "301325 behaviour_hit_ratio frost_humanoid",
+          "301325 behaviour_hit_ratio shadow_undead",
+          "301325 behaviour_hit_ratio shadow_humanoid",
+          "301325 behaviour_hit_ratio physical_undead"
         ]
       },
       {
-        "claim": "Increases your Shadow damage dealt against Humanoids by $s1%.",
+        "claim": "dealt against Humanoids and Undead by $s1%.",
         "labels": [
-          "301325 behaviour_hit_ratio shadow_humanoid"
+          "301325 behaviour_hit_ratio frost_undead",
+          "301325 behaviour_hit_ratio frost_humanoid",
+          "301325 behaviour_hit_ratio shadow_undead",
+          "301325 behaviour_hit_ratio shadow_humanoid",
+          "301325 behaviour_hit_ratio frost_beast"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). Lichfrost (Frost) on a Mindless Zombie 1501 (Undead): ratio 1.08 (run 1 +8.005%, 99% interval +7.964% to +8.046%; run 2 +7.987%, +7.942% to +8.032%); Plague of Undeath 680928 (SchoolMask 40, Shadow and Nature) on a Kobold Vermin 6 (Humanoid): +7.998% both runs. Not measured: Frost against Humanoids, Shadow against Undead, and a non-matching school or type control (scope arms); the claims name the two pairs proven. G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul nothing found; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False)."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; control arm in each entry). Claims restored to the tooltip words (review I-1). All four school/type pairs, non-critical hits, ratio on the observed control arm, 823764 and 20000 spell power fixtures in both arms: Lichfrost 501978 (Frost) on a Mindless Zombie 1501 (Undead) +8.02% and on a Kobold Vermin 6 (Humanoid) +7.98% / +8.01%; Blight 500237 (pure Shadow) on Undead and Humanoid +8.00%; stated 8%, inside the G-19 band. Scope controls: Void Zone 92559 (Physical) on Undead +0.00%; Lichfrost on a Timber Wolf 69 (Beast) +0.01%. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 301325 0 lines, 'Icecrown Scriptures' 0 (a passive); bindmysoul nothing found; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=False); MCP not queried (unavailable)."
   },
   {
     "spell": 301326,
@@ -2973,10 +2981,13 @@
     "spell": 707588,
     "clause": "Critical strikes with Frost spells now refund $707886s1% of your maximum mana.",
     "labels": [
-      "707588 behaviour_metric_delta crit_mana"
+      "707588 behaviour_metric_delta crit_mana",
+      "707588 behaviour_metric_delta no_crit_mana",
+      "707588 behaviour_metric_delta nonfrost_crit_mana",
+      "707588 behaviour_metric_delta max_mana"
     ],
     "kind": "claim",
-    "reason": "Status 1 (B6 side b counted pair pair7-counted, build f6ac75aac372, worldserver 58f4c694, 2 runs, control arm in each entry, no flips). 707886 mana energize after one forced-crit Lichfrost 501978: 0 without the talent, 85 with it (3% of a maximum mana in [2800, 2849]: 84 or 85). G-11 searched (2026-11-13, B6 side b): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; MCP not queried (unavailable); combat logs: no events (class map: 0 casts, 0 events in 186 logs); bindmysoul found: refund 3% of your maximum mana; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True)."
+    "reason": "Status 1 (M side b counted pair PAIRID, build BUILDID, 2 runs, 0 flips; control arm in each entry). A forced-crit Lichfrost 501978 (Frost): 707886 mana 0 without Arch Lich (control), 85 with it; the caster's maximum mana read on the same fixture 2848: int(0.03 x 2848) = 85, exact (review I-2). Crit control: the same Lichfrost forced non-critical (984954 spell crit -1000%): no refund with the talent. School control: a forced-crit Void Zone 92559 (Physical): no refund with the talent. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id ',<id>,' and by quoted name; positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): 707588 0 lines (a passive); its refund 707886 2756 SPELL_ENERGIZE lines named 'Arch Lich', 200 to 247 mana each (3% of a maximum mana of about 6700 to 8200; the live maximum mana is not in the log, so the logs do not decide the percent); bindmysoul found: refund 3% of your maximum mana; sidekick found: name; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); MCP not queried (unavailable)."
   },
   {
     "spell": 707627,
