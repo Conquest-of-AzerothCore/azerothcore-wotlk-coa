@@ -1,3 +1,4 @@
+from dataclasses import fields
 from pathlib import Path
 import sys
 import unittest
@@ -5,8 +6,9 @@ import unittest
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from behaviours import KINDS, behaviour_kinds
+from behaviours import KINDS, MetricDeltaSpec, behaviour_kinds
 from kinds import kind_modules
+from metric_delta_options import option_modules
 from passives import BEHAVIOUR_LABELS
 
 PACKAGE = Path(__file__).resolve().parent
@@ -34,8 +36,25 @@ class KindRegistryTests(unittest.TestCase):
                 self.assertTrue((PACKAGE / 'kinds' / f'test_{module.KIND}.py').is_file())
 
 
+class MetricDeltaOptionRegistryTests(unittest.TestCase):
+    def test_every_option_module_names_its_entry_field_and_parses_it(self):
+        modules = option_modules()
+        self.assertTrue(modules)
+        for module in modules:
+            with self.subTest(module=module.__name__):
+                self.assertEqual(module.__name__, f'metric_delta_options.{module.NAME}')
+                self.assertIsInstance(module.ORDER, int)
+                self.assertTrue(callable(module.parse))
+                self.assertTrue((PACKAGE / 'metric_delta_options' / f'test_{module.NAME}.py').is_file())
+
+    def test_an_option_field_is_not_also_a_spec_field(self):
+        names = {field.name for field in fields(MetricDeltaSpec)}
+        self.assertEqual(sorted(module.NAME for module in option_modules() if module.NAME in names), [])
+
+
 def load_tests(loader, tests, pattern):
-    tests.addTests(loader.discover(str(PACKAGE / 'kinds'), pattern='test_*.py', top_level_dir=str(PACKAGE)))
+    for package in ('kinds', 'metric_delta_options'):
+        tests.addTests(loader.discover(str(PACKAGE / package), pattern='test_*.py', top_level_dir=str(PACKAGE)))
     return tests
 
 

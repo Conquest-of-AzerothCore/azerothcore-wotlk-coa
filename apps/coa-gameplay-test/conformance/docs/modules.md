@@ -18,6 +18,9 @@
   that the tool tests use (ADR 0580). Its name shadows the standard library `profile`: run the package from its own directory.
 - `kinds/`: one module per behaviour kind that is not built into `behaviours.py`, found at run time
   (`kinds.kind_modules()`); see [Behaviour kind modules](behaviour-scenarios.md#behaviour-kind-modules) (ADR 0581).
+- `metric_delta_options/`: one module per `metric_delta` option that is not a `MetricDeltaSpec` field
+  (`metric_delta_options.option_modules()`); see
+  [Metric-delta option modules](behaviour-scenarios.md#metric-delta-option-modules) (ADR 0582).
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank, its
   `Expectation` list, and the `periodic_totals` of any `OVER_TICKS` token deferred to a companion scenario (below).
 - `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected

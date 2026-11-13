@@ -261,9 +261,9 @@ A `hit_ratio` arm's `target_health_pct` (ADR 0362) sets the dummy to that health
 the arms differ by target health (Harvest Plague 583256: the tick at 50% against about 100%).
 A `metric_delta` entry's `player_ratings` (ADR 0363) sets class file ratings to other values for its scenario
 (Necromancy 804360: melee hit rating 0, so the Ghouls' swings are dodged and parried).
-`after_at_most` (with `after_at_least`) and `player_spell_power` (ADR 0364) judge one rolled amount inside its
-stated range at a set spell power (Harvest Plague 583256: the first tick in [172, 210] at 0 and [3172, 3210] at
-20000).
+`after_at_most` (with `after_at_least`) and [`player_spell_power`](metric_delta_options/player_spell_power.md)
+(ADR 0364) judge one rolled amount inside its stated range at a set spell power (Harvest Plague 583256: the first
+tick in [172, 210] at 0 and [3172, 3210] at 20000).
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).
@@ -1791,14 +1791,6 @@ haste and crit words, so a learned contrast is behaviour; `owned_aura` is a read
 Ghoul's swing interval and crit chance with an Abomination raised in both phases, and its condition arm raises the
 Abomination in the second phase only (`setup_only_after`).
 
-### Corpse fixture (`metric_delta` `corpse`, ADR 0493)
-
-`corpse` (`{"entry", "health", "distance"}`) adds a creature `corpse` of that entry, at the class level, with that
-health, `distance` yd from the caster. A `setup_only_after` entry kills it with a real cast (`setup_target:
-"corpse"`, for example Void Zone 92559 for 1000 Physical damage) in the treatment phase only, so the control phase has
-no corpse. Corpse Explosion 533239: a Humanoid corpse explodes on the dummy near it, a Mechanical (480) or an Elemental
-(2022) corpse does not.
-
 ### Stat attribution for stats (`stat_gain`, `attribute_stat`, ADR 0385)
 
 `attribute_stat: true` on a `stat_gain` of the `stat` metric adds the attribution reads (the auras around each cast,
@@ -1872,3 +1864,19 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
 - [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
   parts (ADR 0544, ADR 0546)
+
+## Metric-delta option modules
+
+A `metric_delta` option can live in its own module `metric_delta_options/<field>.py` (ADR 0582) instead of a
+`MetricDeltaSpec` field, found at run time by `metric_delta_options.option_modules()`. A module states `NAME` (the
+entry field), `ORDER` (the order in which options of one entry apply), `parse(raw)` (its parsed value, stored in
+`MetricDeltaSpec.options`) and, when it has them, `check(spec, value)` (called for every entry after the built-in
+checks, `value` `None` when the field is absent) and `fixtures(class_file, spec, value, scenario)` (called after the
+player ratings, before the striker creature is added). An option that needs another point of
+`metric_delta_scenario` (a step inside a phase, a model field) adds that named point in its own ADR. Its tests are
+`metric_delta_options/test_<field>.py` (run by `test_kinds.py`), its page `docs/metric_delta_options/<field>.md`.
+Options with a module:
+
+- [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
+  0493)
+- [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
