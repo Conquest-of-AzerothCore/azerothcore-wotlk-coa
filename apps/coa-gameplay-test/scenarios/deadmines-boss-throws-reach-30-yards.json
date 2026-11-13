@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Deadmines boss throws reach 30 yards and need line of sight",
+  "contract": [
+    "Cookie's Throw Food (2102589) has the Anywhere range in Spell.dbc and ignores line of sight, so our tester was hit",
+    "from across the room. It and Sneed's Shredder's Throw Buzzing Saw Blade (2102569, 100 yards) now reach 30 yards and need",
+    "line of sight through coa_dungeon_spell_reach."
+  ],
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Cookie: Throw Food reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102589,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Cookie: Throw Food needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102589,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Sneed's Shredder: Throw Buzzing Saw Blade reaches 30 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102569,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "label": "Sneed's Shredder: Throw Buzzing Saw Blade needs line of sight",
+      "actor": "p",
+      "metric": "spell_ignores_los",
+      "spell": 2102569,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jergosh's Shadow Bolt Storm keeps 100 yards",
+      "actor": "p",
+      "metric": "spell_max_range",
+      "spell": 2102546,
+      "equals": 100
+    }
+  ]
+}
