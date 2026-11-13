@@ -33,3 +33,9 @@ def option_phase_steps(spec, after: bool) -> list[dict]:
     present = dict(spec.options)
     return [step for module in option_modules() if module.NAME in present and hasattr(module, 'phase_steps')
             for step in module.phase_steps(spec, present[module.NAME], after)]
+
+
+def option_model(spec) -> dict:
+    present = dict(spec.options)
+    return {key: value for module in option_modules() if module.NAME in present and hasattr(module, 'model')
+            for key, value in module.model(spec, present[module.NAME]).items()}

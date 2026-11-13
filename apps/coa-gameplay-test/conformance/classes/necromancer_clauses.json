@@ -112,7 +112,10 @@
         "labels": [
           "300235 effect_value #0",
           "300235 effect_value 301334e0 #1",
-          "300235 spell_duration 301334 #2"
+          "300235 spell_duration 301334 #2",
+          "300235 behaviour_metric_delta caster_haste",
+          "300235 behaviour_metric_delta caster_proc_haste",
+          "300235 behaviour_metric_delta minion_haste"
         ]
       }
     ],
@@ -1797,7 +1800,7 @@
     "spell": 560596,
     "clause": "at ${-($800343f1-1)*100}% reduced value per enemy struck.",
     "labels": [
-      "560596 effect_value #0"
+      "560596 behaviour_metric_delta reduced_value"
     ],
     "kind": "claim",
     "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub match the text; coa-obtainable: in the live capture. Open, route pending: the bounce's reduced value needs the secondary dummy's hit amount against the primary's; fixed_count reads counts only."
@@ -3277,7 +3280,8 @@
       {
         "claim": "to make your next Lichfrost or Blight free of cost and instant cast.",
         "labels": [
-          "707175 effect_value #0"
+          "707175 effect_value #0",
+          "707175 behaviour_metric_delta instant"
         ]
       }
     ],

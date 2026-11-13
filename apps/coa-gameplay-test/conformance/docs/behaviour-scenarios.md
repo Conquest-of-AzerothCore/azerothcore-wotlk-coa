@@ -1882,5 +1882,7 @@ Options with a module:
 - [`corpse`](metric_delta_options/corpse.md): a creature corpse a real setup cast kills in the treatment phase (ADR
   0493)
 - [`player_spell_power`](metric_delta_options/player_spell_power.md): the caster's spell-power fixture (ADR 0364)
+- [`forced_roll`](metric_delta_options/forced_roll.md): a talent's roll forced for the scenario, without a creature
+  read, the named point `model` (ADR 0588)
 - [`phase_aura_amounts`](metric_delta_options/phase_aura_amounts.md): an effect amount on a phase or after aura
   fixture, the second named point `phase_steps` (ADR 0585)

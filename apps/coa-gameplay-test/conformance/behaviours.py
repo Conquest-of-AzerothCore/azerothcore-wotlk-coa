@@ -7,7 +7,7 @@ from hits import (ARMOR_LABEL, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_
                   TIMEOUT_MARGIN_MS, VIEW_LEVEL_LABEL, Unmodelled, aura_modifiers, cast_steps, creature_fixture,
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
 from kinds import kind_module, kind_names
-from metric_delta_options import checked_options, option_fixtures, option_phase_steps, parsed_options
+from metric_delta_options import checked_options, option_fixtures, option_model, option_phase_steps, parsed_options
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
@@ -1904,6 +1904,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                               'after_window': list(spec.game_time[0])}
         if spec.game_time[1] is not None:
             model['game_time'].update({'expired_label': expired_stamp, 'expired_window': list(spec.game_time[1])})
+    model.update(option_model(spec))
     expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
                               str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]

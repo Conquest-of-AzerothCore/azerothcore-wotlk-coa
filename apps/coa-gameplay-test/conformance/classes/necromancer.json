@@ -1976,6 +1976,100 @@
       "expected_gain": 10
     },
     {
+      "spell": 300235,
+      "name": "Death Commander (minion haste)",
+      "kind": "metric_delta",
+      "variant": "minion_haste",
+      "label_suffix": "minion_haste",
+      "quote": "to increase your and your Undead minion's haste by $301334s1% for $301334d.",
+      "expected": 0.83333,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "trigger_spell": 500237,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "owned_creature_cast_speed",
+      "fields": {
+        "entry": 50073
+      },
+      "forced_roll": 300235,
+      "observe_source": "Death Commander 300235 (ProcChance 10, proven by 300235 proc_rate): an own periodic hit rolls Chance(player, 300235) and BuffArmy(player, 301334, true) casts Death Commander 301334 on the caster and on every minion (AscensionNecromancerEvents.cpp:121-124, AscensionNecromancer.cpp:180-186). 301334 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + 1 = 20 ($301334s1). Each phase raises a Ghoul 50073 (Raise: Ghoul 500971 at the caster) and casts Blight 500237 at the dummy (a periodic hit by id); 300235 learned between the phases (the before phase is the no-talent control). Forcing fixture (forced_roll, ADR 0588, effect claims only, mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 300235 for the scenario, removed at the end and read gone. The Ghoul's UNIT_MOD_CAST_SPEED: 1.0 without the talent, 1 / 1.20 = 0.83333 with 301334. The caster_proc_haste entry reads the caster in the same layout (the forced roll landed). forced_roll, not forced_chance: with forced_chance (c5 pilot4, 20261113-150728 / -150755) its presence read counted 301334 on 0 of 2 Ghouls and left the entry unmeasured, while this reading shows the haste on the Ghoul (c5 pilot7: 1 -> 0.833333 in both runs); why the presence read misses the aura was not traced."
+    },
+    {
+      "spell": 300235,
+      "name": "Death Commander (caster haste after a landed proc)",
+      "kind": "metric_delta",
+      "variant": "caster_proc_haste",
+      "label_suffix": "caster_proc_haste",
+      "quote": "to increase your and your Undead minion's haste by $301334s1% for $301334d.",
+      "expected": 0.83333,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "trigger_spell": 500237,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "forced_roll": 300235,
+      "observe_source": "Death Commander 300235 (ProcChance 10, proven by 300235 proc_rate): an own periodic hit rolls Chance(player, 300235) and BuffArmy(player, 301334, true) casts Death Commander 301334 on the caster and on every minion (AscensionNecromancerEvents.cpp:121-124, AscensionNecromancer.cpp:180-186). 301334 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + 1 = 20 ($301334s1). Each phase raises a Ghoul 50073 (Raise: Ghoul 500971 at the caster) and casts Blight 500237 at the dummy (a periodic hit by id); 300235 learned between the phases (the before phase is the no-talent control). Forcing fixture (forced_roll, ADR 0588, effect claims only, mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 300235 for the scenario, removed at the end and read gone. The caster's UNIT_MOD_CAST_SPEED in the minion_haste layout: 1.0 without the talent, 0.83333 with the landed proc (the precondition read of minion_haste: the forced roll reached BuffArmy)."
+    },
+    {
+      "spell": 707175,
+      "name": "Bone King (instant Lichfrost)",
+      "kind": "metric_delta",
+      "variant": "instant",
+      "label_suffix": "instant",
+      "quote": "to make your next Lichfrost or Blight free of cost and instant cast.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "setup_casts": [
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 1373,
+      "wait_ms": 300,
+      "expire_ms": 3000,
+      "metric": "spell_go_count",
+      "fields": {
+        "spell": 501978
+      },
+      "forced_roll": 707175,
+      "observe_source": "Bone King 707175 (ProcChance 15, proven by 707175 proc_rate): a Command cast rolls Chance(player, 707175) and readies Bone King 707176 (AscensionNecromancerAbilities.cpp:316-317); 707176 Effect[0] SPELLMOD 10 CASTING_TIME -200% and Effect[1] SPELLMOD 14 COST -200% on Lichfrost/Blight (DurationIndex 28, 5000 ms), consumed by Lichfrost. Lichfrost 501978 CastingTimeIndex 19 = 2500 ms. Each phase casts Command: Undead 504868 at the dummy (allowed without a minion), then Lichfrost at the dummy; 707175 learned between the phases. Forcing fixture (forced_roll, ADR 0588, effect claims only, mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 707175, removed at the end and read gone. The Lichfrost spell_go_count is read 300 ms after the cast starts: before (control, no talent): 0 (the 2500 ms cast is still running; it completes during the 3000 ms between the phases); after: 2, the control's completed cast and the instant one (a cast still running reads 1)."
+    },
+    {
+      "spell": 300235,
+      "name": "Death Commander (caster haste)",
+      "kind": "metric_delta",
+      "variant": "caster_haste",
+      "label_suffix": "caster_haste",
+      "quote": "to increase your and your Undead minion's haste by $301334s1% for $301334d.",
+      "expected": 0.83333,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "trigger_spell": 301334,
+      "target": "caster",
+      "cast_in_before": false,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "observe_source": "Death Commander 301334, the buff 300235's roll casts on the caster through BuffArmy(player, 301334, true) (AscensionNecromancerEvents.cpp:123-124, AscensionNecromancer.cpp:180-186), cast for real at the caster (the 92122 / 707421 pattern: the proc spell itself, no roll; 301334 is no periodic damage, so it rolls nothing). 301334 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + 1 = 20 ($301334s1). Before (control): no cast, UNIT_MOD_CAST_SPEED 1.0; after: 1 / 1.20 = 0.83333."
+    },
+    {
       "spell": 707562,
       "name": "Frozen Bodies (one stack: Glacial Impact damage)",
       "kind": "metric_delta",
@@ -4726,6 +4820,28 @@
       "repeats": 2,
       "settle_ms": 3600,
       "observe_source": "The Crypt Swarm channel 501886 (3000 ms) triggers 800343 at the primary dummy every 500 ms; with 560596 learned each hit jumps to two more enemies. Read per dummy: two of the three further dummies within the radius are ever hit."
+    },
+    {
+      "spell": 560596,
+      "name": "Crypt Keeper (reduced value per enemy struck)",
+      "kind": "bounce_amounts",
+      "variant": "reduced_value",
+      "label_suffix": "reduced_value",
+      "quote": "at ${-($800343f1-1)*100}% reduced value per enemy struck.",
+      "cast_spell": 501886,
+      "hit_spell": 800343,
+      "distances": [
+        5,
+        8,
+        11
+      ],
+      "cast_wait_ms": 3600,
+      "cast_power": 1373,
+      "caster_auras": [
+        984954,
+        823764
+      ],
+      "observe_source": "Crypt Keeper 560596 Effect[0] aura 107 SPELLMOD_JUMP_TARGETS +2 on Crypt Swarm 800343 (EffectChainTarget 1); 800343 EffectDamageMultiplier[0] = 0.7, which the engine applies once per jump (m_damage *= m_damageMultipliers[i]; m_damageMultipliers[i] *= multiplier, Spell.cpp:8635-8636): the second enemy struck takes 0.7 and the third 0.49 of the primary's hit (${-($800343f1-1)*100}% = 30% reduced per enemy struck). The Crypt Swarm channel 501886 (3000 ms) triggers 800343 at the primary dummy every 500 ms. Dummies at 5, 8 and 11 yd from the caster (the bounce dummies 3 and 6 yd from the primary, inside the 8 yd jump reach of the bounces entry) and one at 27 yd. 984954 (spell crit -1000) and 823764 (unresisted) on the caster (precondition fixtures): every hit is a plain unresisted hit (348 per primary hit in the 570136 crypt_swarm entry). Control: the same channel before 560596 is learned strikes the primary only. Per-hit means, largest first, judged against 0.7 and 0.49 of the primary in the G-19 band (5% of each)."
     },
     {
       "spell": 704681,

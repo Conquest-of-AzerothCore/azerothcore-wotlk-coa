@@ -3040,6 +3040,8 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
 
 def forced_or_plain_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     forced = model.get('forced_chance')
+    if model.get('forced_roll') is not None:
+        return forced_roll_metric_delta_verdict(base, run, model)
     if forced is None:
         return judged_metric_delta(base, run, model)
     absent = run.values.get(forced['absent_label'])
@@ -3060,6 +3062,17 @@ def forced_or_plain_metric_delta_verdict(base: Verdict, run: Run, model: dict) -
                                                             f'still active at the end ({released})')
     return replace(verdict, explanation=f'{verdict.explanation}; {fixture}: absent without the passive, present '
                                                     f'({present:g}) with it, released at the end')
+
+
+def forced_roll_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    roll = model['forced_roll']
+    verdict = judged_metric_delta(base, run, model)
+    released = run.values.get(roll['released_label'])
+    fixture = f'forcing fixture: a {roll["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant'
+    if released is None or released != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the modifier is '
+                                                            f'still active at the end ({released})')
+    return replace(verdict, explanation=f'{verdict.explanation}; {fixture}, released at the end')
 
 
 def judged_metric_delta(base: Verdict, run: Run, model: dict) -> Verdict:
