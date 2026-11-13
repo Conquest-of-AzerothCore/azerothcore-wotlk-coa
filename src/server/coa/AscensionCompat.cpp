@@ -94,6 +94,7 @@
 #include "Chat.h"
 #include "StringFormat.h"
 #include "ClientDBC.h"
+#include "CoAEconomyLog.h"
 #include "CommandScript.h"
 #include "ConfigValueCache.h"
 #include "DatabaseEnv.h"
@@ -7944,8 +7945,15 @@ private:
     player->SendDirectMessage(&learned);
   }
 
+  static void LogVanityCollect(Player *player, uint32 itemId) {
+    CoAEconomyRow row;
+    row.event = CoAEconomyEvent::VanityCollect;
+    row.itemEntry = itemId;
+    CoAEconomyLog::Queue(player, row);
+  }
+
   void CollectItem(Player *player, PlayerCollectionState &state, uint32 itemId,
-                   bool notifyClient, bool bound) {
+                   bool notifyClient, bool bound, bool storePurchase = false) {
     CollectItemAppearance(player, state, itemId, notifyClient);
 
     if (bound && _vanityItems.contains(itemId))
@@ -7963,6 +7971,8 @@ private:
       stmt->SetData(0, state.AccountId);
       stmt->SetData(1, itemId);
       CharacterDatabase.Execute(stmt);
+      if (!storePurchase)
+        LogVanityCollect(player, itemId);
 
       if (notifyClient)
         SendVanityCollectionAdded(player, itemId);
@@ -7974,6 +7984,8 @@ private:
       stmt->SetData(0, state.AccountId);
       stmt->SetData(1, itemId);
       CharacterDatabase.Execute(stmt);
+      if (!storePurchase)
+        LogVanityCollect(player, itemId);
 
       if (notifyClient)
         SendVanityCollectionAdded(player, itemId);
@@ -8333,7 +8345,13 @@ private:
         }
 
         player->DestroyItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost, true);
-        CollectItem(player, *state, itemId, true, true);
+        CollectItem(player, *state, itemId, true, true, true);
+        CoAEconomyRow row;
+        row.event = CoAEconomyEvent::VanityStoreBuy;
+        row.itemEntry = itemId;
+        row.itemCount = 1;
+        row.tokens = -int32(cost);
+        CoAEconomyLog::Queue(player, row);
         LOG_INFO("coa", "{} bought vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);
     }
 
@@ -8370,6 +8388,13 @@ private:
         {
             bought->SetBinding(true);
             player->SendNewItem(bought, 1, true, false);
+            CoAEconomyRow row;
+            row.event = CoAEconomyEvent::VanityStoreBuy;
+            row.itemEntry = itemId;
+            row.itemGuid = bought->GetGUID().GetCounter();
+            row.itemCount = 1;
+            row.tokens = -int32(cost);
+            CoAEconomyLog::Queue(player, row);
         }
 
         LOG_INFO("coa", "{} bought consumable vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);

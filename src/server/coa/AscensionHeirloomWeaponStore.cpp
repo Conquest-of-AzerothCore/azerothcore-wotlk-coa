@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCompatOpcodes.h"
+#include "CoAEconomyLog.h"
 
 #include "../../../modules/mod-worldforged-upgrades/src/WorldforgedUpgrades.h"
 
@@ -112,7 +113,17 @@ bool HandlePurchase(WorldSession* session, WorldPacket const& packet)
 
     player->DestroyItemCount(HEIRLOOM_WEAPON_TOKEN, TOKENS_PER_WEAPON, true);
     if (Item* bought = player->StoreNewItem(destination, weapon, true, Item::GenerateItemRandomPropertyId(weapon)))
+    {
         player->SendNewItem(bought, 1, true, false);
+        CoAEconomyRow row;
+        row.event = CoAEconomyEvent::HeirloomTokenBuy;
+        row.itemEntry = weapon;
+        row.itemGuid = bought->GetGUID().GetCounter();
+        row.itemCount = 1;
+        row.costItem = HEIRLOOM_WEAPON_TOKEN;
+        row.costCount = TOKENS_PER_WEAPON;
+        CoAEconomyLog::Queue(player, row);
+    }
 
     SendPurchaseResult(session, Worldforged::RESULT_PURCHASE_OK);
     LOG_INFO("coa", "Heirloom weapon store: {} bought {} for {} x {}", player->GetName(), weapon,
