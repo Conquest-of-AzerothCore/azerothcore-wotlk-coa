@@ -19,7 +19,9 @@
  *                                             hit ends the siphon).
  *   Corrupted Blood    first 25s, every 30s   everyone: stacking Plague damage
  *                                             that heals him; when it ends, a
- *                                             Pool of Corrupted Blood stays
+ *                                             Pool of Corrupted Blood stays;
+ *                                             it ends on everyone when he dies
+ *                                             or evades (live logs)
  *   Will of Hakkar     first 45s, every 45s   a player feels it for 5s, then is
  *                                             his for 15s; Mythic and Ascended
  *                                             only (tester, live)
@@ -147,6 +149,7 @@ namespace
     constexpr float AVATAR_RING          = 10.0f;
     constexpr float HEART_HEIGHT         = 8.0f;
     constexpr uint8 WILL_OF_HAKKAR_MIN_SPAWN_MODE = 2;
+    constexpr std::array<uint32, 4> CORRUPTED_BLOOD_VARIANTS = { 2118601, 2118602, 2118603, 2118604 };
 
     // The launch-day Normal kill (youtube c7iqfz04PmI) gives each player 2500 Runes of Ascension in one loot slot,
     // more than a loot row's 8-bit count holds, so they are handed out at his death instead.
@@ -278,6 +281,7 @@ namespace
             ClearWill();
             me->RemoveAllDynObjects();
             BossAI::EnterEvadeMode(why);
+            CleanseCorruptedBlood();
             Talk(SAY_EVADE);
         }
 
@@ -288,7 +292,14 @@ namespace
             ClearWill();
             me->RemoveAllDynObjects();
             BossAI::JustDied(killer);
+            CleanseCorruptedBlood();
             GrantRunes();
+        }
+
+        void CleanseCorruptedBlood()
+        {
+            for (uint32 spell : CORRUPTED_BLOOD_VARIANTS)
+                instance->DoRemoveAurasDueToSpellOnPlayers(spell);
         }
 
         void GrantRunes()
