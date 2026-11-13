@@ -30,7 +30,9 @@ test-only (G-39).
 - Regression (class file 500335): `cloud` (script_hit): both arms raise the Abomination and command it into the
   dummy; the control arm, in combat but not attacked, counts no 802353 hit; the treatment arm's striker hits the
   Abomination once per trial and the cloud hits the dummy at the modelled amount. `cloud_per_strike` (metric_delta):
-  4 strikes give 4 casts of 802353 by the Abomination (owned_creature_spell_cast_count), 0 without an Abomination.
+  a raised Abomination not attacked casts no 802353 (control); commanded into the dummy and struck 4 times it casts at
+  least 4 (owned_creature_spell_cast_count). A run read 5: a further damaging hit on the Abomination, most likely the
+  striker's melee answer to a cloud, which no metric reads (not verified).
 - Cloud hits feed the minion proc branch and the Chomp trigger (707283 trigger_count 500335): their rates fall when
   the Abomination is not attacked. The out-of-combat PvP pulse is gone. Under heavy attack (several attackers, ticks)
   the cloud can fire more often than the old pulse.
