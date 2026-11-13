@@ -15,6 +15,11 @@ evidence class in `coverage.METRIC_EVIDENCE`.
   spell, in both phases.
 - `item_count` is a state read (the caster's bags), promised by a clause that names a creation (`creat\w*`).
 
+- A `metric_delta` whose waits pass `METRIC_DELTA_UNTIMED_WAIT_MS` (80000 ms) is timed (its waits plus the 60 s
+  margin) instead of keeping the 90 s default timeout: Permafrost's 50 Command: Undead casts at the global cooldown
+  timed out at the default. On the merged branch this threshold replaces ADR 0361's 90000 ms in the same rule, which
+  keeps its cap at the accelerated scenario limit.
+
 ## Consequences
 
 - Entries without `items` generate as before: Templar `generate --class 19` and `--stack` are byte-identical.

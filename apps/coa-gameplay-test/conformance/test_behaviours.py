@@ -10713,5 +10713,19 @@ class MetricDeltaItemTests(unittest.TestCase):
         self.assertFalse(any(step.get('item') == 37201 for step in plain['steps']))
 
 
+class MetricDeltaLongWaitTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_waits_beyond_the_default_timeout_time_the_scenario(self):
+        entries = {entry.get('label_suffix'): entry for entry in load_class_file(23)['behaviours']
+                   if entry['spell'] == 704681 and entry['kind'] == 'metric_delta'}
+        scenario, _ = behaviour_scenario(load_class_file(23), entries['charges'])
+        waits = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(waits, 80000)
+        self.assertGreater(scenario['timeout_ms'], waits)
+        short = {**entries['charges'], 'setup_casts': [504868]}
+        plain, _ = behaviour_scenario(load_class_file(23), short)
+        self.assertNotIn('timeout_ms', plain)
+
+
 if __name__ == '__main__':
     unittest.main()

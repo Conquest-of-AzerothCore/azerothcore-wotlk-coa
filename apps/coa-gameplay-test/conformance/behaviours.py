@@ -1348,7 +1348,7 @@ TARGET_CAST_SETTLE_MS = 300
 ENEMY_PLAYER = 'enemy'
 ENEMY_HELPER = 'enemy_helper'
 ENEMY_PLAYER_SETTLE_MS = 500
-METRIC_DELTA_DEFAULT_TIMEOUT_MS = 90000
+METRIC_DELTA_UNTIMED_WAIT_MS = 80000
 
 
 @dataclass(frozen=True)
@@ -1698,7 +1698,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     waited = sum(step['ms'] for step in steps if step['action'] == 'wait')
     if spec.attack_swings:
         timed(scenario, waited)
-    elif waited > METRIC_DELTA_DEFAULT_TIMEOUT_MS:
+    elif waited > METRIC_DELTA_UNTIMED_WAIT_MS:
         timed(scenario, waited, MAX_ACCELERATED_SCENARIO_MS)
     if spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target')) or any(
             TARGET in aura[2:] for aura in (*spec.phase_auras, *spec.after_auras)):

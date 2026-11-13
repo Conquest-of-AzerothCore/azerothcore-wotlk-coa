@@ -253,8 +253,8 @@ scenario like a cast target does (ADR 0360): Undead: Assault 500982, a self cast
 `strike` (ADR 0361) has the passive striker of `taken_hit` hit the caster in each phase, after the setup casts and
 before the trigger cast: the caster moves by `dx`, its health is set to `health` of `max_health`, and the striker
 casts `spell` at it `count` times, `wait_ms` apart (Phylactery 500933: the Shade, its immunity, its revive and its
-death). Setup and trigger casts first get their reagents; a scenario whose waits pass 90000 ms takes a matching
-timeout.
+death). Setup and trigger casts first get their reagents; a scenario whose waits pass 80000 ms (ADR 0405) takes a
+matching timeout, up to the accelerated cap.
 A `cost_gate` entry's `after_cast_gap_ms` (ADR 0361) waits after each of its `after_casts` (Underking 704701: ten Command
 casts 1600 ms apart); the gaps count toward the attempt's wait.
 A `hit_ratio` arm's `target_health_pct` (ADR 0362) sets the dummy to that health percent before every trial's cast, so
