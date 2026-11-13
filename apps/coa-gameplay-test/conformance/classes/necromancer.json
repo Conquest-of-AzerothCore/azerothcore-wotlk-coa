@@ -147,6 +147,28 @@
      "citation": "ascensionsidekick data.js coaKits Necromancer Death kit, fetched 2026-09-18"}
   ],
   "disabled_foreign_effects": [],
+  "removed_own_effects": [
+    {
+      "spell": 562210,
+      "effect": 0,
+      "reason": "AscensionNecromancerContracts.cpp:317-322 sets Effects[0].Effect = 0 for the Runic Harvest ranks 562210-562213; the unreadable $t2 was read as effect 0 and stopped the value scenario (Spell effect does not exist)"
+    },
+    {
+      "spell": 562211,
+      "effect": 0,
+      "reason": "AscensionNecromancerContracts.cpp:317-322 sets Effects[0].Effect = 0 for the Runic Harvest ranks 562210-562213; the unreadable $t2 was read as effect 0 and stopped the value scenario (Spell effect does not exist)"
+    },
+    {
+      "spell": 562212,
+      "effect": 0,
+      "reason": "AscensionNecromancerContracts.cpp:317-322 sets Effects[0].Effect = 0 for the Runic Harvest ranks 562210-562213; the unreadable $t2 was read as effect 0 and stopped the value scenario (Spell effect does not exist)"
+    },
+    {
+      "spell": 562213,
+      "effect": 0,
+      "reason": "AscensionNecromancerContracts.cpp:317-322 sets Effects[0].Effect = 0 for the Runic Harvest ranks 562210-562213; the unreadable $t2 was read as effect 0 and stopped the value scenario (Spell effect does not exist)"
+    }
+  ],
   "foreign_aura_grants": [],
   "effect_overrides": [],
   "item_armor_subclass_effects": [],
@@ -1125,6 +1147,161 @@
   "rotation": [],
   "stack": [],
   "behaviours": [
+    {
+      "spell": 500985,
+      "name": "Undead: Protect (defensive after Assault)",
+      "kind": "metric_delta",
+      "variant": "react",
+      "label_suffix": "react",
+      "quote": "Your undead minions assume a defensive behavior,",
+      "expected": 1,
+      "before_expected": 2,
+      "trigger_spell": 500985,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971,
+        500982
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1500,
+      "metric": "owned_creature_react_state",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Undead: Protect 500985 and Undead: Assault 500982: npc_ascension_necromancer::UpdateAI event 1 (AscensionNecromancerSummons.cpp:760-766), every 1000 ms, sets each minion REACT_AGGRESSIVE (2) while the caster holds 500982 and REACT_DEFENSIVE (1) otherwise; casting Protect removes Assault from the caster and its minions (AscensionNecromancerAuras.cpp:83-93). A Ghoul is raised and Undead: Assault cast in both phases: the Ghoul is aggressive (2) without Protect (control) and defensive (1) 1500 ms after Protect is cast."
+    },
+    {
+      "spell": 583256,
+      "name": "Harvest Plague (siphon at no spell power)",
+      "kind": "metric_delta",
+      "variant": "siphon_base",
+      "label_suffix": "siphon_base",
+      "quote": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
+      "expected": 172,
+      "after_at_least": 172,
+      "after_at_most": 210,
+      "before_expected": 0,
+      "trigger_spell": 583256,
+      "target": "dummy",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 3500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 583256,
+        "target": "dummy"
+      },
+      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power 0 (the reference character): no hit without the cast (control); the first tick lies in [172, 210]."
+    },
+    {
+      "spell": 583256,
+      "name": "Harvest Plague (siphon at 20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "siphon_power",
+      "label_suffix": "siphon_power",
+      "quote": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
+      "expected": 3172,
+      "after_at_least": 3172,
+      "after_at_most": 3210,
+      "before_expected": 0,
+      "trigger_spell": 583256,
+      "target": "dummy",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 3500,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 583256,
+        "target": "dummy"
+      },
+      "observe_source": "Harvest Plague 583256: Effect[0] rewritten to SPELL_AURA_PERIODIC_DAMAGE (AscensionNecromancerContracts.cpp:112-118), BasePoints 171 + DieSides 39 (172 to 210, $m1), coefficient 0.15 x spell power (AscensionNecromancerData.h:59, $SP*0.15), first tick 3000 ms after the cast; the target-health factor 2 - health percent / 100 is exactly 1 on the full dummy (50000000 health) at the first tick. 823764 on the caster (harness set_aura, precondition) removes partial resists. Spell power held at 20000 (player fixture, precondition): no hit without the cast (control); the first tick lies in [172 + 3000, 210 + 3000]."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (non-Necromancer spell)",
+      "kind": "metric_delta",
+      "variant": "racial",
+      "label_suffix": "racial",
+      "quote": "Casting spells now grants you 1 stack of Diabolical,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 20600,
+      "target": "caster",
+      "expire_ms": 1600,
+      "wait_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 707133
+      },
+      "observe_source": "Diabolical 704723: necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:269-270) casts 707133 only for spells of SpellFamilyName 29 (Necromancer). Perception 20600, the Human racial the caster (race 1) casts, family 0: the tooltip's 'Casting spells' expects a stack with 704723 known (no stack without it, control)."
+    },
+    {
+      "spell": 704723,
+      "name": "Diabolical (Crypt Swarm channel)",
+      "kind": "metric_delta",
+      "variant": "channel",
+      "label_suffix": "channel",
+      "quote": "to deal $707133s1% increased damage per stack.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "expire_ms": 31000,
+      "wait_ms": 3500,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800343,
+        "target": "dummy"
+      },
+      "observe_source": "probe"
+    },
     {
       "spell": 804360,
       "kind": "metric_delta",

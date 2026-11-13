@@ -609,7 +609,8 @@
     "labels": [
       "500933 behaviour_metric_delta lifetime"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Phylactery: bindmysoul and coabuildhub same text, 'for 2 minutes' / '2 min' (120000 ms, as our DBC); sidekick same text; logs one Phylactery cycle of 120 s; coa-obtainable: class advancement row and live capture."
   },
   {
     "spell": 500933,
@@ -642,7 +643,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Phylactery: bindmysoul and coabuildhub same text, 'for 2 minutes' / '2 min' (120000 ms, as our DBC); sidekick same text; logs one Phylactery cycle of 120 s; coa-obtainable: class advancement row and live capture."
   },
   {
     "spell": 500933,
@@ -650,7 +652,8 @@
     "labels": [
       "500933 behaviour_metric_delta revive"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Phylactery: bindmysoul and coabuildhub same text, 'for 2 minutes' / '2 min' (120000 ms, as our DBC); sidekick same text; logs one Phylactery cycle of 120 s; coa-obtainable: class advancement row and live capture."
   },
   {
     "spell": 500933,
@@ -658,7 +661,8 @@
     "labels": [
       "500933 behaviour_metric_delta death"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Phylactery: bindmysoul and coabuildhub same text, 'for 2 minutes' / '2 min' (120000 ms, as our DBC); sidekick same text; logs one Phylactery cycle of 120 s; coa-obtainable: class advancement row and live capture."
   },
   {
     "spell": 500971,
@@ -1868,7 +1872,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Underking: bindmysoul 'for 20 seconds ... reduced by -15 sec at random', coabuildhub '20 sec ... 15 sec at random', as our DBC; sidekick same text; logs 490 Greater Zombie 525380 summons; coa-obtainable: advancement row and live capture."
   },
   {
     "spell": 704701,
@@ -1879,7 +1884,8 @@
       "704701 behaviour_metric_delta ten",
       "704701 behaviour_metric_delta zombie"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Underking: bindmysoul 'for 20 seconds ... reduced by -15 sec at random', coabuildhub '20 sec ... 15 sec at random', as our DBC; sidekick same text; logs 490 Greater Zombie 525380 summons; coa-obtainable: advancement row and live capture."
   },
   {
     "spell": 704701,
@@ -1898,7 +1904,8 @@
         "labels": []
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Underking: bindmysoul 'for 20 seconds ... reduced by -15 sec at random', coabuildhub '20 sec ... 15 sec at random', as our DBC; sidekick same text; logs 490 Greater Zombie 525380 summons; coa-obtainable: advancement row and live capture. 'at random': parked, tool gap: no check kind attributes a cooldown cut to one of several known Animates over repeated ten-Command cycles (a sized two-Animate distribution needs a per-cycle attribution read and a rate judge). The 15 sec cut is status 1 (cost_gate on Tomb King 805044, the only Animate known)."
   },
   {
     "spell": 704701,
@@ -1907,7 +1914,8 @@
       "704701 behaviour_metric_delta zombie",
       "704701 behaviour_metric_delta zombie_lifetime"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Underking: bindmysoul 'for 20 seconds ... reduced by -15 sec at random', coabuildhub '20 sec ... 15 sec at random', as our DBC; sidekick same text; logs 490 Greater Zombie 525380 summons; coa-obtainable: advancement row and live capture."
   },
   {
     "spell": 704713,
@@ -2002,10 +2010,22 @@
   {
     "spell": 704723,
     "clause": "Casting spells now grants you 1 stack of Diabolical,",
-    "labels": [
-      "704723 behaviour_metric_delta stack"
+    "claims": [
+      {
+        "claim": "Casting spells now grants you 1 stack of Diabolical, (a Necromancer spell)",
+        "labels": [
+          "704723 behaviour_metric_delta stack"
+        ]
+      },
+      {
+        "claim": "Casting spells now grants you 1 stack of Diabolical, (a spell of another family)",
+        "labels": [
+          "704723 behaviour_metric_delta racial"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Diabolical: bindmysoul and coabuildhub 'stacking up to 15 times, for 20 seconds/sec ... 10% increased damage per stack'; sidekick same text; logs: 707133 on the caster, 72 natural expiries at 30 s after its last application, none at 20 s; coa-obtainable: advancement row (level 40) and live capture. Spell class: Command: Undead 504868 (family 29) stacks (status 1); Perception 20600, a Human racial (family 0), is the non-class arm (racial label): the code stacks only on family 29 casts (AscensionNecromancerAbilities.cpp:269-270)."
   },
   {
     "spell": 704723,
@@ -2013,17 +2033,15 @@
     "labels": [
       "704723 behaviour_metric_delta cap"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Diabolical: bindmysoul and coabuildhub 'stacking up to 15 times, for 20 seconds/sec ... 10% increased damage per stack'; sidekick same text; logs: 707133 on the caster, 72 natural expiries at 30 s after its last application, none at 20 s; coa-obtainable: advancement row (level 40) and live capture."
   },
   {
     "spell": 704723,
     "clause": "for $706504d.",
-    "labels": [
-      "704723 behaviour_metric_delta duration_long",
-      "704723 behaviour_metric_delta past_stated"
-    ],
+    "labels": [],
     "kind": "claim",
-    "reason": "Status 2 asked of the mentor (ruling of 2026-11-12: when two of our tooltips disagree, the cast spell's tooltip that the measurement and live logs agree with governs): the stack cast is Diabolical 707133, whose $d is 30000 ms (DurationIndex 9); measured (29500, 30500] ms; live logs 72 natural expiries at 30 s. 704723's text names 706504's $d, 20000 ms."
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Diabolical: bindmysoul and coabuildhub 'stacking up to 15 times, for 20 seconds/sec ... 10% increased damage per stack'; sidekick same text; logs: 707133 on the caster, 72 natural expiries at 30 s after its last application, none at 20 s; coa-obtainable: advancement row (level 40) and live capture. Status 5, owner question Q-a2-1 (mentor ruling 2026-11-13: 707133 is a triggered aura whose duration is data, not a tooltip; not status 2): the tooltip says 20 s, the server's 707133 lasts 30 s (measured (29500, 30500] ms, still present at 20500 ms) and live logs ran 30 s. bindmysoul and coabuildhub 'for 20 seconds' are older or text-only references (G-9) that do not decide against live behaviour. Status-1 labels removed."
   },
   {
     "spell": 704723,
@@ -2037,10 +2055,13 @@
       },
       {
         "claim": "to deal $707133s1% increased damage per stack",
-        "labels": []
+        "labels": [
+          "704723 behaviour_metric_delta channel"
+        ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Diabolical: bindmysoul and coabuildhub 'stacking up to 15 times, for 20 seconds/sec ... 10% increased damage per stack'; sidekick same text; logs: 707133 on the caster, 72 natural expiries at 30 s after its last application, none at 20 s; coa-obtainable: advancement row (level 40) and live capture. Crypt Swarm 800343 cast alone hits for 1 (BasePoints 0 + DieSides 1): it is the tick of the Crypt Swarm channel (500965, 501880-501888; Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE triggering 800343 with the channel's own value, 501886 at level 60). No defect: the bonus per stack is measured on the channel's ticks (channel label)."
   },
   {
     "spell": 704724,
@@ -3349,7 +3370,10 @@
     "claims": [
       {
         "claim": "Disease the enemy, siphoning ${$m1+0+$SP*0.15} health",
-        "labels": []
+        "labels": [
+          "583256 behaviour_metric_delta siphon_base",
+          "583256 behaviour_metric_delta siphon_power"
+        ]
       },
       {
         "claim": "every $t sec",
@@ -3371,7 +3395,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Harvest Plague: sidekick same text without numbers; bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 2672 ticks and 2675 heals of the caster. The tooltip states no factor for the health scaling; the x(2 - health%) factor is the code's (AscensionNecromancerContracts.cpp:418-419), no reference states another. Siphon value: first-tick range checks at 0 and 20000 spell power (siphon_base, siphon_power); the hit model refuses a rolled periodic amount (hits.py:385), so a mean judge is a tool gap."
   },
   {
     "spell": 583256,
@@ -3379,7 +3404,8 @@
     "labels": [
       "583256 behaviour_hit_ratio close_to_death"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Harvest Plague: sidekick same text without numbers; bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 2672 ticks and 2675 heals of the caster. The tooltip states no factor for the health scaling; the x(2 - health%) factor is the code's (AscensionNecromancerContracts.cpp:418-419), no reference states another."
   },
   {
     "spell": 504901,
@@ -3476,7 +3502,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Undead: Assault: sidekick same text; coabuildhub gives +50% movement speed, an older or other state than our DBC and tooltip (30%), which the measurement matches (G-9); bindmysoul (560595 Putrid Summoner) +5% crit against Humanoids, same as our DBC; logs 6657 applications on minions, 203 casts."
   },
   {
     "spell": 500982,
@@ -3486,7 +3513,8 @@
       "500982 behaviour_metric_delta humanoid_crit_control",
       "500982 behaviour_metric_delta mechanical_crit_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Undead: Assault: sidekick same text; coabuildhub gives +50% movement speed, an older or other state than our DBC and tooltip (30%), which the measurement matches (G-9); bindmysoul (560595 Putrid Summoner) +5% crit against Humanoids, same as our DBC; logs 6657 applications on minions, 203 casts."
   },
   {
     "spell": 500982,
@@ -3494,7 +3522,8 @@
     "labels": [
       "500982 behaviour_metric_delta one_stance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Undead: Assault: sidekick same text; coabuildhub gives +50% movement speed, an older or other state than our DBC and tooltip (30%), which the measurement matches (G-9); bindmysoul (560595 Putrid Summoner) +5% crit against Humanoids, same as our DBC; logs 6657 applications on minions, 203 casts."
   },
   {
     "spell": 500983,
@@ -3544,8 +3573,8 @@
       {
         "claim": "Your undead minions assume a defensive behavior",
         "labels": [
-          "500985 behaviour_metric_delta defensive",
-          "500982 behaviour_metric_delta aggressive"
+          "500985 behaviour_metric_delta react",
+          "500985 behaviour_metric_delta defensive"
         ]
       },
       {
@@ -3562,7 +3591,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Undead: Protect: sidekick and coabuildhub same text, no numbers; bindmysoul (560595) -75% threat, same as our DBC; logs 135 applications, 3 casts. The +1000% minion threat and +10% minion armor are Spell.dbc values the tooltip does not state."
   },
   {
     "spell": 500985,
@@ -3571,7 +3601,8 @@
       "500985 behaviour_metric_delta your_threat",
       "500985 behaviour_metric_delta your_threat_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Undead: Protect: sidekick and coabuildhub same text, no numbers; bindmysoul (560595) -75% threat, same as our DBC; logs 135 applications, 3 casts. The +1000% minion threat and +10% minion armor are Spell.dbc values the tooltip does not state."
   },
   {
     "spell": 500985,
@@ -3579,7 +3610,8 @@
     "labels": [
       "500985 behaviour_metric_delta one_stance"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Undead: Protect: sidekick and coabuildhub same text, no numbers; bindmysoul (560595) -75% threat, same as our DBC; logs 135 applications, 3 casts. The +1000% minion threat and +10% minion armor are Spell.dbc values the tooltip does not state."
   },
   {
     "spell": 504859,
@@ -3640,7 +3672,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Runic Harvest: sidekick, bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 262 casts, 5761 energizes of 4 Runic Power (one per minion per tick), ticks 0.8-0.9 s and auras about 9 s (hasted by the live caster's cast speed, AttributesEx5 0x2000); the reference character has no haste. Base value scenario: incorrect test (it read the removed effect 0), corrected by removed_own_effects."
   },
   {
     "spell": 562213,
@@ -3648,7 +3681,8 @@
     "labels": [
       "562213 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Runic Harvest: sidekick, bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 262 casts, 5761 energizes of 4 Runic Power (one per minion per tick), ticks 0.8-0.9 s and auras about 9 s (hasted by the live caster's cast speed, AttributesEx5 0x2000); the reference character has no haste. Base value scenario: incorrect test (it read the removed effect 0), corrected by removed_own_effects."
   },
   {
     "spell": 572176,
@@ -3741,7 +3775,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Glacial Ward: sidekick same text without numbers; bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 114 casts, Ward copies 681461 and 681462 on minions."
   },
   {
     "spell": 681460,
@@ -3761,7 +3796,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Intellect 117 x 1.10 = 128.7 reads 128: known engine rounding 1, percent-derived stat truncated (G-26)."
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Glacial Ward: sidekick same text without numbers; bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 114 casts, Ward copies 681461 and 681462 on minions. Status 2 for the Intellect part, known engine rounding 1 (G-26): emulated in float, AddPct builds the factor 1.1f, 117 x 1.1f = 128.7, truncated 128, read 128. The Runic Power part (1000 -> 1100) is status 1."
   },
   {
     "spell": 681460,
@@ -3771,7 +3806,8 @@
       "681460 behaviour_metric_delta stun_held",
       "681460 behaviour_metric_delta stun"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Glacial Ward: sidekick same text without numbers; bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 114 casts, Ward copies 681461 and 681462 on minions."
   },
   {
     "spell": 681460,
@@ -3779,7 +3815,8 @@
     "labels": [
       "681460 behaviour_metric_delta one_ward"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Glacial Ward: sidekick same text without numbers; bindmysoul, coabuildhub, WDB, cachepacks nothing found; logs 114 casts, Ward copies 681461 and 681462 on minions."
   },
   {
     "spell": 681529,
@@ -3940,7 +3977,8 @@
       "805029 behaviour_metric_delta duration_held",
       "805029 behaviour_metric_delta duration_end"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Unholy Frenzy: coabuildhub same text and numbers (15 sec, 30%, 50%); sidekick same text without numbers; bindmysoul, WDB, cachepacks nothing found; logs 342 casts, 3944 applications on minions, natural lengths 14-15 s; coa-obtainable: base kit (skill line 84), cast in live logs."
   },
   {
     "spell": 805029,
@@ -3959,7 +3997,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Unholy Frenzy: coabuildhub same text and numbers (15 sec, 30%, 50%); sidekick same text without numbers; bindmysoul, WDB, cachepacks nothing found; logs 342 casts, 3944 applications on minions, natural lengths 14-15 s; coa-obtainable: base kit (skill line 84), cast in live logs."
   },
   {
     "spell": 805029,
@@ -3967,7 +4006,8 @@
     "labels": [
       "805029 behaviour_metric_delta speed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Unholy Frenzy: coabuildhub same text and numbers (15 sec, 30%, 50%); sidekick same text without numbers; bindmysoul, WDB, cachepacks nothing found; logs 342 casts, 3944 applications on minions, natural lengths 14-15 s; coa-obtainable: base kit (skill line 84), cast in live logs."
   },
   {
     "spell": 805049,
@@ -4282,7 +4322,8 @@
     "labels": [
       "804360 behaviour_metric_delta life_force"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Necromancy: sidekick and coabuildhub same text, no factors; bindmysoul, WDB, cachepacks nothing found; logs nothing by id (dummied aura). The tooltip states no factor; 0.4 attack power, 0.2 spell power, 0.4 resistance, 0.35 armor and the hit copy are the code's (Scale(), AscensionNecromancerSummons.cpp:279-332), no reference states another."
   },
   {
     "spell": 804360,
@@ -4312,7 +4353,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Necromancy: sidekick and coabuildhub same text, no factors; bindmysoul, WDB, cachepacks nothing found; logs nothing by id (dummied aura). The tooltip states no factor; 0.4 attack power, 0.2 spell power, 0.4 resistance, 0.35 armor and the hit copy are the code's (Scale(), AscensionNecromancerSummons.cpp:279-332), no reference states another."
   },
   {
     "spell": 804360,
@@ -4363,7 +4405,8 @@
         ]
       }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 search (2026-11-13, author B2 side a): server DBC set /srv/coa/server-data/dbc and src/server/coa read; combat logs (coa-log-history, raw lines by spell id); ~/CoaServer/reference: sidekick data.js coaKits, bindmysoul talents, ascension-data exiles-db export (spell rows equal our DBC, no independent weight), WDB cachepacks and spells.json, advancement.tsv, coabuildhub; coa-obtainable; sources.md; MCP not queried (unavailable). Necromancy: sidekick and coabuildhub same text, no factors; bindmysoul, WDB, cachepacks nothing found; logs nothing by id (dummied aura). The tooltip states no factor; 0.4 attack power, 0.2 spell power, 0.4 resistance, 0.35 armor and the hit copy are the code's (Scale(), AscensionNecromancerSummons.cpp:279-332), no reference states another."
   },
   {
     "spell": 807941,
