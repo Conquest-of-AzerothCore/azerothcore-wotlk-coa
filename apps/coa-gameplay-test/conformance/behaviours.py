@@ -1314,11 +1314,46 @@ class MetricDeltaSpec:
     enemy_casts_in_before: bool = False
     helper_casts: tuple[int, ...] = ()
     target_casts: tuple[int, ...] = ()
+    strike: 'MetricDeltaStrike | None' = None
 
 
 ENEMY_PLAYER = 'enemy'
 ENEMY_HELPER = 'enemy_helper'
 ENEMY_PLAYER_SETTLE_MS = 500
+METRIC_DELTA_DEFAULT_TIMEOUT_MS = 90000
+
+
+@dataclass(frozen=True)
+class MetricDeltaStrike:
+    spell: int
+    health: int
+    max_health: int
+    count: int = 1
+    wait_ms: int = 200
+    dx: float = 0.0
+
+
+def reagent_steps(records: Records, spell: int) -> list[dict]:
+    steps = []
+    for index in range(8):
+        item = int(records.field('Spell', spell, f'Reagent[{index}]') or 0)
+        count = int(records.field('Spell', spell, f'ReagentCount[{index}]') or 0)
+        if item > 0 and count > 0:
+            steps.append({'action': 'add_item', 'actor': CASTER, 'item': item, 'count': count})
+    return steps
+
+
+def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
+    if raw is None:
+        return None
+    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx'}
+    if unknown:
+        raise ValueError(f'metric_delta strike fields {sorted(unknown)} are unknown')
+    strike = MetricDeltaStrike(int(raw['spell']), int(raw['health']), int(raw['max_health']),
+                               int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)))
+    if not 0 < strike.health <= strike.max_health or strike.count < 1:
+        raise ValueError('metric_delta strike needs 0 < health <= max_health and at least one strike')
+    return strike
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
 
 
@@ -1418,7 +1453,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                 steps.append({'action': 'set_power', 'actor': CASTER, 'power': setup_facts.power_type,
                              'value': setup_facts.mana_cost})
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': setup_spell})
-            steps += required_aura_steps(setup_facts)
+            steps += required_aura_steps(setup_facts) + reagent_steps(records, setup_spell)
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': setup_spell,
                           'target': spec.setup_target or spec.target})
             if spec.setup_wait_ms:
@@ -1442,9 +1477,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
                          'value': facts.mana_cost})
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell})
-        steps += required_aura_steps(facts)
+        steps += required_aura_steps(facts) + reagent_steps(records, spec.trigger_spell)
         if apply_setup_casts:
             steps += setup_cast_steps()
+        steps += strike_steps()
         if spec.target_health_pct is not None:
             steps.append({'action': 'set_health_pct', 'actor': CASTER, 'target': spec.target,
                           'pct': spec.target_health_pct})
@@ -1460,6 +1496,17 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         return [step for spell in spec.enemy_casts
                 for step in ({'action': 'cast', 'actor': ENEMY_PLAYER, 'spell': spell, 'target': ENEMY_PLAYER},
                              {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})]
+
+    def strike_steps() -> list[dict]:
+        strike = spec.strike
+        if strike is None:
+            return []
+        steps = [{'action': 'relocate', 'actor': CASTER, 'dx': strike.dx}] if strike.dx else []
+        steps.append({'action': 'set_health', 'actor': CASTER, 'value': strike.health, 'maximum': strike.max_health})
+        for _ in range(strike.count):
+            steps += [{'action': 'cast', 'actor': STRIKER, 'spell': strike.spell, 'target': CASTER},
+                      {'action': 'wait', 'label': 'strike', 'ms': strike.wait_ms}]
+        return steps
 
     if spec.gate_timing not in ('between', 'start'):
         raise ValueError(f'unknown gate_timing {spec.gate_timing!r}')
@@ -1576,8 +1623,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                       + [{'action': 'learn', 'actor': ENEMY_HELPER, 'spell': spell}
                                          for spell in dict.fromkeys(spec.helper_casts)])
         scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
-    if spec.attack_swings:
-        timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
+    waited = sum(step['ms'] for step in steps if step['action'] == 'wait')
+    if spec.attack_swings or waited > METRIC_DELTA_DEFAULT_TIMEOUT_MS:
+        timed(scenario, waited)
     if spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target')) or any(
             TARGET in aura[2:] for aura in (*spec.phase_auras, *spec.after_auras)):
         scenario['creatures'] = [creature_fixture(class_file)]
@@ -1585,6 +1633,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             scenario['creatures'][0]['entry'] = spec.target_entry
     elif spec.target_entry is not None:
         raise ValueError(f'{spec.spell} names a target entry without the dummy in its scenario')
+    if spec.strike is not None:
+        scenario.setdefault('creatures', []).append(
+            {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
+             'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100})
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
@@ -1627,7 +1679,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('expected_ratio'), entry.get('target_entry'),
                            tuple(entry.get('enemy_casts', ())), entry.get('enemy_cast_wait_ms', 0),
                            entry.get('target_health_pct'), entry.get('enemy_casts_in_before', False),
-                           tuple(entry.get('helper_casts', ())), tuple(entry.get('target_casts', ())))
+                           tuple(entry.get('helper_casts', ())), tuple(entry.get('target_casts', ())),
+                           metric_delta_strike(entry.get('strike')))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

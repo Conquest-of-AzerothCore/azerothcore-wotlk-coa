@@ -10118,5 +10118,49 @@ class MetricDeltaReadTargetTests(unittest.TestCase):
         self.assertEqual([player.get('id', 'caster') for player in scenario['players']], ['caster'])
 
 
+
+class MetricDeltaStrikeTests(unittest.TestCase):
+    def phylactery_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 500933 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_striker_hits_the_caster_before_the_trigger_in_both_phases(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.phylactery_entry('physical')))
+        run.validate(scenario)
+        self.assertIn('striker', [creature['id'] for creature in scenario['creatures']])
+        steps = scenario['steps']
+        strikes = [index for index, step in enumerate(steps) if step.get('actor') == 'striker']
+        triggers = [index for index, step in enumerate(steps)
+                    if step.get('action') == 'cast' and step.get('spell') == 504868]
+        self.assertEqual(len(strikes), 6)
+        self.assertEqual(len(triggers), 2)
+        self.assertLess(max(strikes[:3]), triggers[0])
+        self.assertLess(triggers[0], strikes[3])
+        self.assertLess(max(strikes[3:]), triggers[1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_phylactery_cast_gets_its_corpse_dust(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.phylactery_entry('shade')))
+        steps = scenario['steps']
+        cast = next(index for index, step in enumerate(steps)
+                    if step.get('action') == 'cast' and step.get('spell') == 500933)
+        self.assertIn({'action': 'add_item', 'actor': 'caster', 'item': 37201, 'count': 2}, steps[:cast])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_long_scenario_takes_a_matching_timeout(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.phylactery_entry('lifetime')))
+        run.validate(scenario)
+        waited = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(waited, 90000)
+        self.assertGreaterEqual(scenario['timeout_ms'], waited)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_strike_needs_a_health_within_its_maximum(self):
+        entry = self.phylactery_entry('shade')
+        with self.assertRaises(ValueError):
+            metric_delta_spec({**entry, 'strike': {**entry['strike'], 'health': 200000}})
+
+
 if __name__ == '__main__':
     unittest.main()

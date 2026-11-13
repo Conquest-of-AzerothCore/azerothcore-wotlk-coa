@@ -240,6 +240,11 @@ with a Ghoul raised and no cast, then with a second Ghoul raised and 805029 cast
 A read's `target` field that names the enemy player (with `enemy_player_race`) or the dummy brings that unit into the
 scenario like a cast target does (ADR 0360): Undead: Assault 500982, a self cast, reads the caster's
 `melee_crit_chance_against` an enemy player and the dummy.
+`strike` (ADR 0361) has the passive striker of `taken_hit` hit the caster in each phase, after the setup casts and
+before the trigger cast: the caster moves by `dx`, its health is set to `health` of `max_health`, and the striker
+casts `spell` at it `count` times, `wait_ms` apart (Phylactery 500933: the Shade, its immunity, its revive and its
+death). Setup and trigger casts first get their reagents; a scenario whose waits pass 90000 ms takes a matching
+timeout.
 
 The caster is armed for `trigger_spell` (`values.armed_for`): a trigger that needs another weapon class than the
 reference weapon gets the class file's matching alternate (Divine Fury 500689, a one-hand weapon).
