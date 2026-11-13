@@ -2140,7 +2140,6 @@
     "labels": [
       "561353 cost_gate 533236 corpse_explosion without",
       "561353 cost_gate 533236 corpse_explosion with",
-      "561353 effect_value #1",
       "561353 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim",
@@ -3079,7 +3078,6 @@
       {
         "claim": "by an amount equal to $s1% of the total of your Raised minion's Stamina.",
         "labels": [
-          "706472 effect_value e0 #1",
           "706472 behaviour_metric_delta ghoul_stamina",
           "706472 behaviour_metric_delta spell_power_factor"
         ]
@@ -4492,7 +4490,6 @@
     "spell": 806086,
     "clause": "and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
     "labels": [
-      "806086 aura_amplitude_ms #1",
       "806086 effect_value 500585e0 #2",
       "806086 behaviour_metric_delta fuse"
     ],
