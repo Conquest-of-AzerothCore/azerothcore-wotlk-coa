@@ -12135,6 +12135,44 @@
       "reduction": 60000,
       "target": "caster",
       "observe_source": "Gravebound Champion 805049 RecoveryTime 300000. 301198 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_COOLDOWN (MiscValue 11) -60000 ($/1000;s1 = 60, BasePoints -60001 + 1) on the Champion mask (Gravebound, Icebound, Spellbound Champion). Cooldown gate arms: 805049 refused at the reduced cooldown without the talent, through with it, refused just before it."
+    },
+    {
+      "spell": 302518,
+      "name": "Skeletal Artillery 302518 (archers)",
+      "kind": "metric_delta",
+      "variant": "archers",
+      "label_suffix": "archers",
+      "quote": "Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archer.",
+      "expected": 4,
+      "before_expected": 3,
+      "trigger_spell": 805040,
+      "target": "caster",
+      "expire_ms": 16000,
+      "wait_ms": 1500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50076
+      },
+      "observe_source": "Animate: Skeletal Archer 805040 animates ${$500330m1} Skeletal Archers (500330 Effect[0] SUMMON 50076, BasePoints 2 + 1 = 3; DurationIndex 8, 15000 ms). 302518 Effect[0] aura 107 SPELLMOD_EFFECT1 (MiscValue 3) +1 ($s1) on the 500330 mask: 4. Owned living 50076 1500 ms after a real 805040 cast: 3 without the talent (control), 4 with it learned; the first archers expire during the 16000 ms between phases."
+    },
+    {
+      "spell": 302921,
+      "name": "Skeletal Artillery 302921 (archers)",
+      "kind": "metric_delta",
+      "variant": "archers",
+      "label_suffix": "archers",
+      "quote": "Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archers.",
+      "expected": 5,
+      "before_expected": 3,
+      "trigger_spell": 805040,
+      "target": "caster",
+      "expire_ms": 16000,
+      "wait_ms": 1500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50076
+      },
+      "observe_source": "Animate: Skeletal Archer 805040 animates ${$500330m1} Skeletal Archers (500330 Effect[0] SUMMON 50076, BasePoints 2 + 1 = 3; DurationIndex 8, 15000 ms). 302921 Effect[0] aura 107 SPELLMOD_EFFECT1 (MiscValue 3) +2 ($s1) on the 500330 mask: 5. Owned living 50076 1500 ms after a real 805040 cast: 3 without the talent (control), 5 with it learned; the first archers expire during the 16000 ms between phases."
     }
   ],
   "player_observations": [],
