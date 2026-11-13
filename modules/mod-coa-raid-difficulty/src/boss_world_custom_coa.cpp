@@ -92,6 +92,7 @@
 #include "LootMgr.h"
 #include "Map.h"
 #include "MoveSpline.h"
+#include "MapCollisionData.h"
 #include "MapMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -280,7 +281,7 @@ namespace
     constexpr uint8 SETIS_HEROIC_GROUP = 2;
     constexpr uint16 SMSG_COA_CHECKPOINTS_ENABLED = 0x767;
     constexpr uint16 CMSG_COA_RESPAWN_AT_CHECKPOINT = 0x774;
-    Position const SetisEntrance = { -8093.0f, 1663.6f, 12.9f, 0.0f };
+    Position const SetisEntrance = { -7922.047f, 1675.575f, 0.046f, 4.773f };
     Position const SetisShrine = { -7864.724f, 1326.674f, -7.357f, 5.4786f };
     constexpr float SETIS_SHRINE_ARRIVAL = 20.0f;
     Position const SetisExitPortal = { -7970.9f, 1507.22f, 2.61f, 0.0f };
@@ -621,7 +622,12 @@ namespace
     constexpr float RING_THROW_XY     = 8.0f;   // about six yards, onto the next ring
     constexpr float RING_THROW_Z      = 4.0f;
     constexpr uint8 GRASP_RINGS       = 6;
-    constexpr uint8 MAX_FALLEN        = 12;  // icicles left on the ground at once; the oldest melts
+    constexpr uint32 GO_STALACTITE    = 978099;
+    constexpr float STALACTITE_GRID   = 8.0f;
+    constexpr float STALACTITE_REACH  = 50.0f;
+    constexpr float CEILING_SEARCH    = 40.0f;
+    constexpr float STALACTITE_PICK   = 10.0f;
+    constexpr float SNOWGRAVE_LEASH   = 45.0f;
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
     {
@@ -657,6 +663,43 @@ namespace
             DoCastSelf(SPELL_FROZEN_CLUB, true);
             _stomps = 0;
             ClearIcicles();
+            HangStalactites();
+        }
+
+        void UpdateAI(uint32 diff) override
+        {
+            if (me->IsInCombat() && me->GetExactDist2d(&me->GetHomePosition()) > SNOWGRAVE_LEASH)
+            {
+                EnterEvadeMode();
+                return;
+            }
+            custom_world_boss_coa::UpdateAI(diff);
+        }
+
+        void HangStalactites()
+        {
+            Position const& home = me->GetHomePosition();
+            Map* map = me->GetMap();
+            StaticVMapCollisionData const& tree = map->GetMapCollisionData().GetStaticTree();
+            for (float dx = -STALACTITE_REACH; dx <= STALACTITE_REACH; dx += STALACTITE_GRID)
+                for (float dy = -STALACTITE_REACH; dy <= STALACTITE_REACH; dy += STALACTITE_GRID)
+                {
+                    if (dx * dx + dy * dy > STALACTITE_REACH * STALACTITE_REACH)
+                        continue;
+                    float const x = home.GetPositionX() + dx + frand(-2.0f, 2.0f);
+                    float const y = home.GetPositionY() + dy + frand(-2.0f, 2.0f);
+                    float const ground = map->GetHeight(me->GetPhaseMask(), x, y, home.GetPositionZ() + 10.0f);
+                    if (ground <= INVALID_HEIGHT)
+                        continue;
+                    float rx, ry, rz;
+                    if (!tree.GetObjectHitPos(x, y, ground + 2.0f, x, y, ground + CEILING_SEARCH, rx, ry, rz, -0.5f))
+                        continue;
+                    if (rz >= ground + CEILING_SEARCH - 1.0f)
+                        continue;
+                    float const turn = frand(0.0f, 2 * float(M_PI));
+                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 0, 0, 0, 0, 0))
+                        _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
+                }
         }
 
         void JustDied(Unit* killer) override
@@ -675,6 +718,10 @@ namespace
                 if (GameObject* icicle = me->GetMap()->GetGameObject(guid))
                     icicle->DespawnOrUnsummon();
             _fallen.clear();
+            for (Stalactite const& stalactite : _stalactites)
+                if (GameObject* hanging = me->GetMap()->GetGameObject(stalactite.hanging))
+                    hanging->DespawnOrUnsummon();
+            _stalactites.clear();
         }
 
         void Schedule() override
@@ -776,32 +823,30 @@ namespace
                     _icicles.clear();
                     for (Player* p : pool)
                     {
-                        // On the ground under the player, even one who is in the air when it is picked.
-                        Position pos = p->GetPosition();
-                        pos.m_positionZ = me->GetMap()->GetHeight(me->GetPhaseMask(), pos.GetPositionX(),
-                            pos.GetPositionY(), pos.GetPositionZ() + 2.0f);
-                        _icicles.push_back(pos);
-                        CastAt(pos, SPELL_CAVE_IN_WARNING);
+                        auto nearest = _stalactites.end();
+                        for (auto it = _stalactites.begin(); it != _stalactites.end(); ++it)
+                            if (it->hanging && p->GetExactDist2d(&it->ground) < STALACTITE_PICK &&
+                                (nearest == _stalactites.end() ||
+                                 p->GetExactDist2d(&it->ground) < p->GetExactDist2d(&nearest->ground)))
+                                nearest = it;
+                        if (nearest == _stalactites.end())
+                            continue;
+                        if (GameObject* hanging = me->GetMap()->GetGameObject(nearest->hanging))
+                            hanging->DespawnOrUnsummon(4s);
+                        nearest->hanging.Clear();
+                        _icicles.push_back(nearest->ground);
+                        CastAt(nearest->ground, SPELL_CAVE_IN_WARNING);
                     }
                     _clock.ScheduleEvent(TW_ICICLE, 4s);
                     break;
                 }
                 case TW_ICICLE:
-                    // The icicle stays where it fell until the fight ends; the last wave's chilling areas go (each
-                    // one lasts ten minutes, and wave after wave of them weighs on every client).
-                    me->RemoveDynObject(SPELL_WATER_SPIKE);
                     for (Position const& pos : _icicles)
                     {
                         CastAt(pos, SPELL_WATER_SPIKE);
                         if (GameObject* icicle = me->SummonGameObject(GO_FALLEN_ICICLE, pos.GetPositionX(),
                                 pos.GetPositionY(), pos.GetPositionZ(), frand(0.0f, 2 * float(M_PI)), 0, 0, 0, 0, 0))
                             _fallen.push_back(icicle->GetGUID());
-                        if (_fallen.size() > MAX_FALLEN)
-                        {
-                            if (GameObject* oldest = me->GetMap()->GetGameObject(_fallen.front()))
-                                oldest->DespawnOrUnsummon();
-                            _fallen.erase(_fallen.begin());
-                        }
                     }
                     break;
                 case TW_HAIL:
@@ -912,6 +957,12 @@ namespace
         ObjectGuid _hailTarget;
         std::vector<Position> _hailImpacts;
         std::vector<Position> _icicles;
+        struct Stalactite
+        {
+            Position ground;
+            ObjectGuid hanging;
+        };
+        std::vector<Stalactite> _stalactites;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
     };
