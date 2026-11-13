@@ -14,7 +14,9 @@
 #include "MapCollisionData.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "WorldPacket.h"
 #include "WorldScript.h"
+#include "WorldSession.h"
 #include <array>
 #include <cmath>
 #include <shared_mutex>
@@ -33,6 +35,8 @@ namespace
     constexpr float RoomExitSlack = 1.15f;
     constexpr float RoomPadding = 2.0f;
     constexpr std::array<float, 2> RoomRayHeights = { 2.0f, 5.0f };
+    constexpr Milliseconds ResetHidden = 10s;
+    constexpr char const* ResetText = "%s has lost interest in fighting with you.";
 
     struct Leash
     {
@@ -149,6 +153,47 @@ namespace
         return outline;
     }
 
+    void AnnounceReset(Creature* creature)
+    {
+        creature->GetMap()->DoForAllPlayers([creature](Player* player)
+        {
+            WorldPacket data;
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, creature, player, ResetText, 0, "",
+                player->GetSession()->GetSessionDbLocaleIndex());
+            player->SendDirectMessage(&data);
+        });
+    }
+
+    void HideForReset(Creature* creature)
+    {
+        Position const home = creature->GetHomePosition();
+        ReactStates const react = creature->GetReactState();
+        bool const immuneToPC = creature->IsImmuneToPC();
+        bool const immuneToNPC = creature->IsImmuneToNPC();
+        bool const selectable = !creature->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+
+        creature->NearTeleportTo(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), home.GetOrientation());
+        creature->SetReactState(REACT_PASSIVE);
+        creature->SetImmuneToAll(true);
+        creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetVisible(false);
+
+        creature->m_Events.AddEventAtOffset([creature, react, immuneToPC, immuneToNPC, selectable]()
+        {
+            if (!creature->IsAlive())
+                return;
+            creature->SetImmuneToPC(immuneToPC);
+            creature->SetImmuneToNPC(immuneToNPC);
+            if (selectable)
+                creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            creature->SetFullHealth();
+            if (creature->getPowerType() == POWER_MANA)
+                creature->SetPower(POWER_MANA, creature->GetMaxPower(POWER_MANA));
+            creature->SetReactState(react);
+            creature->SetVisible(true);
+        }, ResetHidden);
+    }
+
     bool LeashedOnMap(Map const* map)
     {
         return map && map->IsNonRaidDungeon() && map->GetSpawnMode() != DUNGEON_DIFFICULTY_NORMAL;
@@ -183,8 +228,14 @@ public:
                 return;
         }
 
-        if (CreatureAI* ai = creature->AI())
-            ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
+        CreatureAI* ai = creature->AI();
+        if (!ai)
+            return;
+
+        AnnounceReset(creature);
+        ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
+        if (creature->IsInWorld() && creature->IsAlive() && creature->IsVisible())
+            HideForReset(creature);
     }
 };
 
