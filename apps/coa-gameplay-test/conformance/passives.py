@@ -68,14 +68,6 @@ OUT_OF_SCOPE = {
     110: 'no energy regeneration metric',
 }
 LINKED_FAMILY = 'P5'
-GATE_USE = ('cast_failure', 'spell_go_count')
-ITEM_COOLDOWN_GATE_ARMS = {
-    'plain': (('first', GATE_USE), ('early', GATE_USE), ('ready', GATE_USE)),
-    'shared': (('first', GATE_USE), ('early', GATE_USE), ('ready', GATE_USE), ('shared', ('cast_failure',))),
-    'combat': (('combat_start', ('combat',)), ('first', GATE_USE), ('in_combat', ('cast_failure',)),
-               ('combat_end', ('combat',)), ('after_combat', ('cast_failure',)),
-               ('after_combat_early', ('cast_failure',)), ('after_combat_ready', ('cast_failure',))),
-}
 BEHAVIOUR_LABELS = {
     'count': lambda entry: [f"{entry['spell']} behaviour_count"],
     'ally_heal_breadth': lambda entry: [f"{entry['spell']} behaviour_count"],
@@ -134,13 +126,6 @@ BEHAVIOUR_LABELS = {
                                             *(f'cast_{cast}' for cast in range(3, (entry.get('charges') or 0) + 3)),
                                             *(('next',) if entry.get('next_arm') else ()), 'beyond',
                                             *(('held', 'expired') if entry.get('aura_duration_ms') else ()))],
-    'item_cooldown_gate': lambda entry: [f"{entry['spell']} item_cooldown_gate {entry['item']}"
-                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')
-                                         + f" {arm} {metric}"
-                                         for arm, metrics in ITEM_COOLDOWN_GATE_ARMS[
-                                             'combat' if entry.get('combat_kill_spell') else
-                                             'shared' if entry.get('shared_item') else 'plain']
-                                         for metric in metrics],
     'periodic_dispel': lambda entry: [f"{entry['spell']} periodic_dispel {moment}"
                                       for moment in ('control', 'before_first',
                                                      *(f'after_{tick}'

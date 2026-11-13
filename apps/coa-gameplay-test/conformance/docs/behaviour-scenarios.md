@@ -1814,16 +1814,6 @@ health, `distance` yd from the caster. A `setup_only_after` entry kills it with 
 no corpse. Corpse Explosion 533239: a Humanoid corpse explodes on the dummy near it, a Mechanical (480) or an Elemental
 (2022) corpse does not.
 
-### Item cooldown gate (`behaviour_cast_condition`, `kind: "item_cooldown_gate"`, ADR 0492)
-
-A grouped ally holds `item` (a named precondition fixture: the caster creates it and hands it out) and uses it through
-the real item-use handler (harness `use_item`): first with no earlier use (accepted, the control), then
-`cooldown_ms - margin_ms` after the first use (refused, 67 SPELL_FAILED_NOT_READY) and `cooldown_ms + margin_ms`
-after it (accepted). Each attempt reads the ally's `cast_failure` of `item_spell` and its completed `spell_go_count`
-(1, 1, 2), judged exactly. With `shared_item`/`shared_spell`, the ally uses that item right after the second accepted
-use: refused for a shared cooldown. Create Bone Reliquary 803771 and Create Frozen Reliquary 803777: "Allies may only
-use a ... once per minute."
-
 ### Strike bursts (`behaviour_metric_delta`, `kind: "strike_bursts"`, ADR 0383)
 
 A minion's scripted strikes after a Command: `command` is cast at the dummy (`distance` yd away) once with no minion
@@ -1867,11 +1857,7 @@ treatment arm only, after the arm's casts and one `settle_ms`, while the control
 `control_casts` may repeat the casts (Raise: Abomination 500335: the cloud fires when the Abomination is attacked).
 A `hit_ratio` arm's `aura_amounts` (ADR 0533) sets an effect of one of the arm's auras to an amount before every trial
 (Glacial Impact 707402: 984954's aura 57 at +2 or +22 holds the Frost spell crit sheet at 5.28% or 25.28%).
-An `item_cooldown_gate` entry's `label_suffix` (ADR 0534) keeps several entries of one item apart, and
-`combat_kill_spell` reads the shared potion rule in combat: the ally attacks the dummy, uses `item`, is refused
-`shared_item` past the cooldown while still in combat, the caster kills the dummy (set to 1 health) with that spell,
-and `shared_item` is refused right after the combat end, still refused just before the cooldown from the combat end
-and accepted just after it.
+The `item_cooldown_gate` part of ADR 0534 is on [its kind page](kinds/item_cooldown_gate.md).
 
 ## Behaviour kind modules
 
@@ -1895,6 +1881,7 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
+- [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and in combat (ADR 0492, ADR 0534)
 - [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit ratio (ADR 0541, ADR 0547)
 - [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR 0550)
 - [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast ends (ADR 0543, ADR 0546, ADR 0570)
