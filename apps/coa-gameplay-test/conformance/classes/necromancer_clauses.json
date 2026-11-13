@@ -1950,7 +1950,8 @@
       {
         "claim": "for $/1000;s2 sec",
         "labels": [
-          "560848 effect_value e1 #1"
+          "560848 effect_value e1 #1",
+          "560848 behaviour_metric_delta soulfreeze_lasts"
         ]
       }
     ],
