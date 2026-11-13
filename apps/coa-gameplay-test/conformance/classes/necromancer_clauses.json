@@ -689,7 +689,8 @@
       {
         "claim": "within $801513a1 yds,",
         "labels": [
-          "500331 effect_radius 801513e0 #0"
+          "500331 effect_radius 801513e0 #0",
+          "500331 behaviour_metric_delta command_radius_edge"
         ]
       }
     ],
@@ -1308,7 +1309,8 @@
       {
         "claim": "slowing their movement speed to a halt",
         "labels": [
-          "504316 behaviour_metric_delta halt"
+          "504316 behaviour_metric_delta halt",
+          "504316 behaviour_metric_delta chase_halt"
         ]
       },
       {
@@ -1611,7 +1613,8 @@
       {
         "claim": "It moves at a slow speed ... piercing all invulnerabilities, resistances, and immunities",
         "labels": [
-          "531130 effect_value 531132e0 #1"
+          "531130 effect_value 531132e0 #1",
+          "531130 behaviour_metric_delta travel_ratio"
         ]
       }
     ],
@@ -2908,7 +2911,8 @@
       {
         "claim": "to enemies within $707575a1 yds of the primary target.",
         "labels": [
-          "705745 effect_radius 707575e0 #1"
+          "705745 effect_radius 707575e0 #1",
+          "705745 behaviour_metric_delta radius_edge"
         ]
       }
     ],
@@ -3228,7 +3232,8 @@
       {
         "claim": "for $707010d.",
         "labels": [
-          "707007 spell_duration 707010 #2"
+          "707007 spell_duration 707010 #2",
+          "707007 behaviour_metric_delta slow_expiry"
         ]
       }
     ],
@@ -5753,7 +5758,8 @@
       {
         "claim": "and periodically raising the Undead from the ground ... and creating a corpse",
         "labels": [
-          "805197 effect_value 500365e1 #1"
+          "805197 effect_value 500365e1 #1",
+          "805197 behaviour_metric_delta corpse_per_raise"
         ]
       }
     ],
@@ -6114,7 +6120,8 @@
       {
         "claim": "within $a1 yds",
         "labels": [
-          "801530 effect_radius e0 #0"
+          "801530 effect_radius e0 #0",
+          "801530 behaviour_metric_delta minion_range"
         ]
       },
       {
