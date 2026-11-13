@@ -3044,12 +3044,13 @@
       {
         "claim": "that restores $803773s1% of your missing mana.",
         "labels": [
-          "803777 effect_value 803773e0 #1"
+          "803777 behaviour_metric_delta restore",
+          "803777 behaviour_metric_delta spent"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim create: Status 1 (the final route pair ROUTEPAIR; with its reagent 37201 given (ADR 0429) one cast puts 5 Frozen Reliquaries in the bags, none without the cast; the 3000 ms cast read at 4000 ms). Claim restore: data, parked (route agent): needs the item used (the harness has use_item, metric_delta has no use step) and a mana read; not built in the route segment. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim create: Status 1 (the final route pair ROUTEPAIR; with its reagent 37201 given (ADR 0429) one cast puts 5 Frozen Reliquaries in the bags, none without the cast; the 3000 ms cast read at 4000 ms). Claim restore: Status 1 (the final route pair ROUTEPAIR; one Create Frozen Reliquary spends 823 mana (spent control, regeneration off), and using one Reliquary 555555 (ADR 0431) then returns 30% of that missing mana: the mana ends 576 to 577 below full; the control use with no Reliquary created leaves full mana). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9 \"Create Frozen Reliquary\" lines, 0 \"Frozen Reliquary\" lines (8 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Create Frozen Reliquary 803772 (AscensionSpellProgressionData.h 1471); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 803777,
