@@ -4345,7 +4345,7 @@
     "spell": 805649,
     "clause": "Your Command spells now have a $h% chance to refund a portion of their Runic Power cost.",
     "kind": "claim",
-    "reason": "Claim 'Your Command spells now have a $h% chance': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2); baseline without the talent): Command: Undead 504868 casts energize 359505 at 40.16% / 40.15% (9563 in 23815, 9561 in 23811; pilot19 39.76% / 39.75%), Wilson 99% inside the G-19 band 38%-42% of $h = 40 (ADR 0497: an energize count is a proc event). Claim 'to refund a portion of their Runic Power cost.': not final, route pending; observation: the handler refunds the whole cost the Command paid (the script value set at AscensionNecromancerAbilities.cpp:204), not a stated portion (amount not judged). G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 805649 0 lines (a passive) and its energize 359505 0 lines, so the logs do not decide; MCP not queried (unavailable).",
+    "reason": "Claim 'Your Command spells now have a $h% chance': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2); baseline without the talent): Command: Undead 504868 casts energize 359505 at 40.16% / 40.15% (9563 in 23815, 9561 in 23811; pilot19 39.76% / 39.75%), Wilson 99% inside the G-19 band 38%-42% of $h = 40 (ADR 0497: an energize count is a proc event). Claim 'to refund a portion of their Runic Power cost.': status 1 by owner ruling Q-c4-1 (a fixed 10 Runic Power, the 359505 text 'Gain 10 Runic Power'; ADR 0562; before it the handler refunded the whole paid cost, 300 for Command: Undead 504868): c4 focused pair 20261113-140305 / -140428 (worldserver 9ab6323cc61e, server commit ba7e75a7c6, 98 parts each): every 359505 Runic Power energize after a 30 Runic Power Command restores 100 (942500 over 9425 and 950100 over 9501 energizes); control: the baseline arm without the talent, no 359505 energize in 20 attempts; the rate in the same pair 39.57% / 39.88%, Wilson 99% inside 38%-42%. The readback '805649 effect_value #0' (unmodelled: a chance token, not the refund) leaves the claim's labels. G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 805649 0 lines (a passive) and its energize 359505 0 lines, so the logs do not decide; MCP not queried (unavailable).",
     "claims": [
       {
         "claim": "Your Command spells now have a $h% chance",
@@ -4356,7 +4356,7 @@
       {
         "claim": "to refund a portion of their Runic Power cost.",
         "labels": [
-          "805649 effect_value #0"
+          "805649 proc_energize_amount 6"
         ]
       }
     ]
