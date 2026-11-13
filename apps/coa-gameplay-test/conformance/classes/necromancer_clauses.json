@@ -4097,9 +4097,14 @@
   {
     "spell": 805675,
     "clause": "causing you to replicate 20% of your periodic damage dealt as direct damage.",
-    "labels": [],
+    "labels": [
+      "805675 behaviour_metric_delta copy",
+      "805675 behaviour_metric_delta blight",
+      "805675 behaviour_metric_delta ftw",
+      "805675 behaviour_metric_delta copies"
+    ],
     "kind": "claim",
-    "reason": "Open: route pending (periodic magnitude with a Virulency recast). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"for 10 seconds ... 20%\"; logs: 9 applications of 573223, 288 hits of 573242."
+    "reason": "Status 1 (the M side c counted pair PAIR_M_C2 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): with Rot Fetishist known, a Virulency 801938 at a dummy carrying Flesh to Worms 500338 applies 573223 to the caster; the following periodic hits, a Blight 500237 of 306 and one Flesh to Worms tick of 17, are each copied once as Rot Fetishist 573242 direct damage totalling 64 = int(306 x 0.20) + int(17 x 0.20), judged to the rounding on the observed hits; without the Virulency (control) no copy. Spell crit -1000 984954 and 823764 precondition fixtures. Open: route pending (periodic magnitude with a Virulency recast). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"for 10 seconds ... 20%\"; logs: 9 applications of 573223, 288 hits of 573242."
   },
   {
     "spell": 806086,
