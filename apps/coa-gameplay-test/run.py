@@ -61,7 +61,7 @@ MAX_MUTANT_PERCENT = 1000
 METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
-    'mana_regen', 'mana_regen_interrupted', 'resting',
+    'mana_regen', 'mana_regen_interrupted', 'resting', 'track_creature_type',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
     'moving', 'spline_remaining_ms', 'spline_speed', 'water_walk', 'in_water', 'terrain_in_water', 'ground_height',
     'forced_forward', 'distance_2d',
@@ -209,7 +209,7 @@ MELEE_OUTCOME_METRICS = {'melee_damage_count', 'melee_damage_total'}
 MAX_VICTIM_STATE = 8
 SPELL_DAMAGE_METRICS = {'spell_damage_count', 'spell_damage_total'}
 PLAYER_STAT_METRICS = {
-    'mana_regen', 'mana_regen_interrupted', 'resting',
+    'mana_regen', 'mana_regen_interrupted', 'resting', 'track_creature_type',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
     'spell_go_count',
     'global_cooldown_ms',
@@ -1267,6 +1267,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(False, f'{where}: x and y only apply to point metrics')
             if metric in {'stat', 'stat_exact'}:
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)
+            if metric == 'track_creature_type':
+                number(step.get('id'), f'{where}.id', 1, 32, True)
             if metric == 'aura_script_value':
                 number(step.get('key'), f'{where}.key', 0, 2**32 - 1, True)
             if metric in {'resistance', 'spell_power', 'spell_resist_chance'}:

@@ -1219,5 +1219,20 @@ class SlowPromiseTest(unittest.TestCase):
         self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
 
 
+
+class TrackCreaturePromiseTest(unittest.TestCase):
+    def test_a_cast_tracking_contrast_proves_a_location_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta track_undead', BEHAVIOUR_METRIC_DELTA, 'track_creature_type',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Shows the location of all nearby Undead on the minimap',
+                         '1 behaviour_metric_delta track_undead')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('and increases damage dealt to Undead by $s2% while active',
+                      '1 behaviour_metric_delta track_undead')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_a_tracking_read_is_a_state_read(self):
+        self.assertEqual(METRIC_EVIDENCE['track_creature_type'], STATE)
+
 if __name__ == '__main__':
     unittest.main()

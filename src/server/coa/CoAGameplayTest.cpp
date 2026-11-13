@@ -3412,6 +3412,13 @@ private:
             Require(unit->IsPlayer(), "Resting state needs a player");
             return unit->ToPlayer()->HasPlayerFlag(PLAYER_FLAGS_RESTING);
         }
+        if (metric == "track_creature_type")
+        {
+            Require(unit->IsPlayer(), "Creature tracking needs a player");
+            uint32 type = step.get<uint32>("id");
+            Require(type >= 1 && type <= 32, "Invalid creature type");
+            return unit->HasFlag(PLAYER_TRACK_CREATURES, uint32(1) << (type - 1));
+        }
         if (metric == "creature_type")
             return unit->GetCreatureType();
         if (metric == "display_id")

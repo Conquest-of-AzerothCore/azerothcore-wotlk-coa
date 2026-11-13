@@ -5243,18 +5243,22 @@
     "claims": [
       {
         "claim": "Shows the location of all nearby Undead on the minimap",
-        "labels": []
+        "labels": [
+          "562028 behaviour_metric_delta track_undead",
+          "562028 behaviour_metric_delta track_only_undead"
+        ]
       },
       {
         "claim": "and increases damage dealt to Undead by $s2% while active",
         "labels": [
+          "562028 behaviour_hit_ratio undead_damage",
           "562028 effect_value e1 #0",
           "562028 aura_amount e1 #0"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Claim \"minimap\": status 4 candidate, client-only (aura 44 SPELL_AURA_TRACK_CREATURES, MiscValue 6; the minimap display needs a lab client check). Claim \"damage dealt to Undead\": open, route pending: a hit ratio on an Undead target (target_entry) with and without the aura. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Shows the location of all nearby Undead on the minimap and increases damage dealt to Undead by % while active.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: no events in 186 logs."
+    "reason": "Claim \"Shows the location of all nearby Undead\": server part status 1 (route agent, mentor note 2026-11-13): a real Sense Undead sets the Undead (type 6) bit of the caster's PLAYER_TRACK_CREATURES field (0 before, 1 after; read-only harness metric track_creature_type, ADR 0445, G-39), while the Humanoid (type 7) bit stays 0 (contrast); the minimap rendering is status 4, client-only: the client draws tracked creatures from that field, and a check needs a lab client (coa-client-check) with the aura on and an Undead in range, reading the minimap blips. Claim \"damage dealt to Undead by $s2%\": status 1 (route agent): Lichfrost 501978 at a Mindless Zombie 1501 (Undead), treatment with a real Sense Undead before each hit against the observed control, expected x1.05 (DBC EffectBasePoints[1] 4 + 1, aura 168 MiscValue 32), band 1.03 to 1.07. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Shows the location of all nearby Undead on the minimap and increases damage dealt to Undead by % while active.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: no events in 186 logs."
   },
   {
     "spell": 680283,

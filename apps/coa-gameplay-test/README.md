@@ -1085,6 +1085,8 @@ teleports and expiry. It requires `mod-portablemail`; mailbox and altar client i
 `power`/`max_power` and `pet_power`/`pet_max_power` accept a numeric `power` (0..6).
 `mana_regen` and `mana_regen_interrupted` read the player's owner-visible mana regeneration fields in
 mana per second, outside and inside the five-second rule. `resting` reads the native resting player flag.
+`track_creature_type` reads whether a player's PLAYER_TRACK_CREATURES field holds the bit of creature type `id`
+(1 to 32), the field SPELL_AURA_TRACK_CREATURES sets.
 `sent_mana_regen` and `sent_mana_regen_interrupted` decode those fields from native values-update packets
 received by the owner's session, returning -1 until the field has been observed. These metrics do not
 inspect a rendered resource bar.
