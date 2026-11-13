@@ -11,12 +11,15 @@ from test_compare import Workspace, assert_step, constant_reader
 from tooltip import Displayed
 from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, MINION_COOLDOWN_BAND, TRIGGER_TRIALS, checked_entry,
                       cooldown_gate_label, cooldown_gate_scenario, cooldown_label, cooldown_measurement_labels,
-                      cooldown_trial_label, minion_cooldown_event_label, minion_cooldown_scenario, trigger_scenario)
+                      cooldown_trial_label, magnitude_measurement_labels, magnitude_ratio_scenario,
+                      minion_cooldown_event_label, minion_cooldown_scenario, trigger_scenario)
 from values import Expectation
 
 CLASSES_DIR = Path(__file__).resolve().parent / 'classes'
 NECROMANCER = json.loads((CLASSES_DIR / 'necromancer.json').read_text(encoding='utf-8'))
 CHOMP = 707283
+TOMB_KING = 805044
+DEPRAVITY = 638403
 PANDEMIC = 560798
 OVERWHELMING_FORCE = 531128
 GHOUL = 50073
@@ -184,9 +187,23 @@ class MinionPlanTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             checked_entry(entry)
 
+    def test_a_minion_magnitude_count_is_one_its_trigger_metric_allows(self):
+        entry = copy.deepcopy(necromancer_entry('triggers', DEPRAVITY, 'magnitude_ratio'))
+        checked_entry(entry)
+        entry['trigger_count_metric'] = 'pet_melee_swings'
+        with self.assertRaises(ValueError):
+            checked_entry(entry)
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MinionScenarioTest(unittest.TestCase):
+    def test_a_minion_magnitude_counts_the_melee_outcome_its_entry_names(self):
+        for aura, count in ((TOMB_KING, 'pet_melee_hits'), (DEPRAVITY, 'pet_melee_crits')):
+            scenario, _ = magnitude_ratio_scenario(NECROMANCER, necromancer_entry('triggers', aura, 'magnitude_ratio'))
+            label = magnitude_measurement_labels(aura)['trigger_count']
+            step = next(step for step in scenario['steps'] if step.get('label') == label)
+            self.assertEqual((step['metric'], step['entry']), (count, GHOUL))
+
     def test_chomp_raises_its_minion_and_refreshes_the_crit_fixture_by_remove_and_add(self):
         scenario, expectations = trigger_scenario(NECROMANCER, necromancer_entry('triggers', CHOMP))
         steps = scenario['steps']
