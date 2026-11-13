@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Crow's Cache: a War Mode Mercenary cannot claim the cache, a High-Risk Mercenary can",
+  "contract": "Crow's Cache is claimable only by living level-60 High-Risk players; Mercenary for Hire! does not replace High-Risk. Two Orcs pick their rulesets in Orgrimmar, one War Mode and one High-Risk, and both take up Mercenary for Hire!. At the Thousand Needles cache, which has no wildlife nearby to interrupt the claim, the War Mode Mercenary is refused and gets no cache; the High-Risk Mercenary completes the ten-second claim and receives it. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 (the cache needs released Heroic Bloodforged rewards) with automatic cycles deferred so the manual three-second countdown is the only event.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "warmode",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "highrisk",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": 1629.85,
+    "y": -4373.64,
+    "z": 31.5573,
+    "o": 3.5
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Orgrimmar lets both characters rest",
+      "actor": "warmode",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "warmode",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "One character is in War Mode",
+      "actor": "warmode",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "highrisk",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "The other is in High-Risk",
+      "actor": "highrisk",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spells' global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "warmode",
+      "spell": 9930874
+    },
+    {
+      "action": "cast",
+      "actor": "highrisk",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "The War Mode character takes up Mercenary for Hire!",
+      "actor": "warmode",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "and so does the High-Risk character",
+      "actor": "highrisk",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "actor": "warmode",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "highrisk",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3901.4,
+      "z": -95.32
+    },
+    {
+      "action": "set_phase",
+      "actor": "warmode",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "highrisk",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive at the Thousand Needles cache",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "crows needles 3"
+    },
+    {
+      "action": "assert",
+      "label": "The crow announces the cache",
+      "actor": "highrisk",
+      "metric": "nearby_creature_count",
+      "entry": 994310,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The cache appears",
+      "actor": "highrisk",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "warmode",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "label": "The War Mode Mercenary is refused",
+      "actor": "warmode",
+      "metric": "system_message_contains",
+      "text": "Only living level-60 High-Risk players can claim Crow's Cache.",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "and gets no cache",
+      "actor": "warmode",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "highrisk",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "label": "The High-Risk Mercenary starts the claim",
+      "actor": "highrisk",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the ten-second claim finish",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "and receives the cache",
+      "actor": "highrisk",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 1500
+    }
+  ]
+}

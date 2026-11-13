@@ -1062,7 +1062,8 @@ The [portable gadgets scenario](scenarios/portable-gadgets.json) checks item sum
 teleports and expiry. It requires `mod-portablemail`; mailbox and altar client interfaces are not tested.
 `power`/`max_power` and `pet_power`/`pet_max_power` accept a numeric `power` (0..6).
 `mana_regen` and `mana_regen_interrupted` read the player's owner-visible mana regeneration fields in
-mana per second, outside and inside the five-second rule. `resting` reads the native resting player flag.
+mana per second, outside and inside the five-second rule. `resting` reads the native resting player flag and
+`free_for_all_pvp` the native free-for-all PvP flag the player's own client receives.
 `sent_mana_regen` and `sent_mana_regen_interrupted` decode those fields from native values-update packets
 received by the owner's session, returning -1 until the field has been observed. These metrics do not
 inspect a rendered resource bar.
