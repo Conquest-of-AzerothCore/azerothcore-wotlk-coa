@@ -107,12 +107,22 @@
   {
     "spell": 300240,
     "clause": "and increases the Frost critical strike chance of you and your summons by $s2%.",
-    "labels": [
-      "300240 behaviour_metric_delta caster_frost_crit",
-      "300240 behaviour_metric_delta summon_frost_crit"
+    "claims": [
+      {
+        "claim": "and increases the Frost critical strike chance of you",
+        "labels": [
+          "300240 behaviour_metric_delta caster_frost_crit"
+        ]
+      },
+      {
+        "claim": "and your summons by $s2%",
+        "labels": [
+          "300240 effect_value e1 #1"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). Caster Frost spell crit 3.2817 -> 6.2817; Ghoul 50073 spell crit 3 -> 6. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Claim \"you\": status 1 (caster Frost spell crit 3.2817 -> 6.2817). Claim \"and your summons\": open, route pending (review I-1): the Ghoul read is m_baseSpellCritChance, set by Scale() from the caster's Frost crit (AscensionNecromancerSummons.cpp:324, CoAGameplayTest.cpp:5519-5520), so 3 -> 6 is the copy of the caster bonus; the talent's own summon effect (Effect[2] 190 aura 71 Frost) is not read; route: a Frost-school crit read on the minion with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Rime range by % yds, Frost crit by %; bindmysoul found: +6 yds Rime range, +3% Frost crit; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 300241,
@@ -679,22 +689,35 @@
       {
         "claim": "+$sps*0.11055",
         "labels": [
+          "501861 behaviour_metric_delta tick_damage_sp",
           "501861 behaviour_hit_ratio spell_power"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). Tick 105 per tick = int32(105.771) (G-26 truncation); spell-power term by a real Inner Fire 48168 (+120). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events. Related MCP not queried (unavailable); sidekick nothing found; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: 183 energizes day 8/10 Runic Power: 5 x65, 4 x64, 3 x43, 6 x11."
+    "reason": "Status 2, known engine rounding G-28 (review I-2): the tooltip gives 105.771 per tick and 119.037 with Inner Fire 48168 (+120 spell power); G-28 per-level truncation (SpellInfo.cpp:497) gives 101 + 1 + int32(0.942857 x 4) = 105 and int32(105 + 13.266) = 118, which the reads reproduce exactly on the counted pair (tick_damage 2 x 105 = 210; tick_damage_sp 2 x 118 = 236). The spell-power hit ratio (treatment / observed control, 1.1263) is kept as a supporting read. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events."
   },
   {
     "spell": 501861,
     "clause": "and generating Runic Power every $t1 sec for $d.",
-    "labels": [
-      "501861 behaviour_metric_delta runic_power_period",
-      "501861 behaviour_metric_delta runic_power_duration"
+    "claims": [
+      {
+        "claim": "and generating Runic Power every $t1 sec",
+        "labels": [
+          "501861 behaviour_metric_delta runic_power_first",
+          "501861 behaviour_metric_delta runic_power_period"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "501861 behaviour_metric_delta runic_power_fifth",
+          "501861 behaviour_metric_delta runic_power_duration"
+        ]
+      }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). Parasitic Infestation 804272 energizes counted: 2 by 8800 ms, 6 by 20500 ms. Live ticks about 2.5 s apart (hasted players), not judged. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events. Related MCP not queried (unavailable); sidekick nothing found; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: 183 energizes day 8/10 Runic Power: 5 x65, 4 x64, 3 x43, 6 x11."
+    "reason": "Status 1 (counted pair, control arm in each entry). Parasitic Infestation 804272 energizes: 1 by 5900 ms, 2 by 6150 ms (period in (2950, 3075] ms); 5 by 17900 ms, 6 by 20500 ms (the sixth tick at 18000 ms, none after). Live ticks about 2.5 s apart (hasted players), not judged. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick description only (no numbers; 'Periodic damage dealt by this can critically strike', generates Runic Power every sec); bindmysoul nothing found (rank family 500338: 'Plague damage 15 + 11.06% shadow SP, Runic Power every 3 sec for 18 seconds'); coa-obtainable live_capture=False, no advancement row, no calculator; logs: 192 ticks day 8/10 only, median 270 (min 147 max 1005), 31/192 crit, interval ~2.5 s normal / ~1.25 s under Mutation, aura median 14.15 s (n=26); 501860/501862-65 and 500338 no events."
   },
   {
     "spell": 501861,
@@ -721,10 +744,11 @@
     "spell": 500342,
     "clause": "allowing your freshly applied diseases to tick $s1% faster.",
     "labels": [
-      "500342 behaviour_metric_delta tick_rate"
+      "500342 behaviour_metric_delta tick_rate",
+      "500342 behaviour_metric_delta running_disease"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). Flesh to Worms 2 ticks in 6200 ms without, 4 with Mutation (1500 ms). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: next seconds diseases tick % faster; bindmysoul found: 15 seconds, diseases tick 50% faster; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 5 casts day 8/10 (Cherelia), aura 15.0-15.3 s (median 15.2); FtW tick ~1.25 s while active vs ~2.5 s."
+    "reason": "Status 1 (counted pair, control arm in each entry). \"tick $s1% faster\" read as the period halved (DBC SPELLMOD_ACTIVATION_TIME -50), the reading the live logs decide (G-11 order): Flesh to Worms ticks about 2.5 s apart normally and about 1.25 s while Mutation is active (refs-c4.txt). A fresh Flesh to Worms under Mutation: 4 ticks in 6200 ms against 2 without; one applied 200 ms before Mutation keeps 3000 ms (2 ticks, running_disease). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: next seconds diseases tick % faster; bindmysoul found: 15 seconds, diseases tick 50% faster; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 5 casts day 8/10 (Cherelia), aura 15.0-15.3 s (median 15.2); FtW tick ~1.25 s while active vs ~2.5 s."
   },
   {
     "spell": 500572,
@@ -1453,10 +1477,12 @@
     "spell": 560537,
     "clause": "Does not stack with similar effects.",
     "labels": [
-      "560537 behaviour_metric_delta no_stack"
+      "560537 behaviour_metric_delta no_stack",
+      "560537 behaviour_metric_delta dp_applied",
+      "560537 behaviour_metric_delta dp_alone"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, mentor ruling G-21 point 2 / ADR 0424, read as ADR 0440): the caster cast speed multiplier after one application (560537, 0.970874) and after the similar Dark Prophecy 800517 too (spell_group 2000182) stays 0.970874, not 0.951837 summed. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Open, tool gap pending (review C-1, I-8; ADR 0444): measured as the mentor ruled (G-21 point 2): the caster cast speed multiplier after one application (560537, 0.970874) and after a real Dark Prophecy 800517 cast too (its aura read present, dp_applied) stays 0.970874, not 0.951837 summed; Dark Prophecy alone reads 0.980392 (dp_alone). Coverage has no stack-cap judge for an inverse-relation state read, so it counts the read as data. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 560537,
@@ -3054,11 +3080,11 @@
     "spell": 802988,
     "clause": "Reduces the cast time of Lichfrost by $s2%",
     "labels": [
-      "802988 behaviour_metric_delta cast_by_2050",
-      "802988 behaviour_metric_delta cast_by_2250"
+      "802988 behaviour_metric_delta cast_by_2100",
+      "802988 behaviour_metric_delta cast_by_2150"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). Lichfrost completes in (2050, 2250] ms with the talent, after 2250 ms without (2500): 10% to 18%. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Status 1 (counted pair, control arm in each entry). Lichfrost completes after 2100 ms and by 2150 ms with the talent (14% to 16%; 2125 ms stated), after 2150 ms without (2500). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 802988,
@@ -3085,7 +3111,7 @@
       "803291 behaviour_metric_delta slow_end"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost slow duration by (sidekick id 6488); bindmysoul found: +4 sec Lichfrost slow duration, +4% hit chance; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
+    "reason": "Status 1 (counted pair, control arm in each entry). Slow present 8750 ms after the cast only with the talent (control ends near 8.6 s); with it present at 12450 ms and gone at 12750 ms: about 9.85 to 10.15 s after it lands, 10 s stated. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost slow duration by (sidekick id 6488); bindmysoul found: +4 sec Lichfrost slow duration, +4% hit chance; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost description; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: SPELL_DAMAGE 498, median 2762 (noncrit median 1658, crit median 6916.5, 186 crits), slow aura median 3.6 s; 804112 energize 1683 (6..22, top 18 x183)."
   },
   {
     "spell": 803291,
@@ -3322,7 +3348,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim 'you may cast Ritual Return': status 1 (counted pair 20261113-025816 / -025856): refused without a circle, through after a real Summoning Ritual. Claim 'to return to it': open, route pending: measured on the same pair (moved 15 yd after the summon, the caster stands on the circle, nearest 575091 at 0 yd; ADR 0441), but the entry's contrast is a setup condition (no circle before), which coverage counts as data for a state read; route: a learned contrast or an event read of the teleport. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
+    "reason": "Claim 'you may cast Ritual Return': status 1 (counted pair 20261113-025816 / -025856): refused without a circle, through after a real Summoning Ritual; Ritual Return's DBC caster aura 807317 is a precondition fixture set by the generator (harness set_aura, values.py:190-193), the CoA circle check (AscensionNecromancerAbilities.cpp:176-185) is what refuses (review I-6). Claim 'to return to it': open, route pending: measured on the same pair (moved 15 yd after the summon, the caster stands on the circle, nearest 575091 at 0 yd; ADR 0441), but the entry's contrast is a setup condition (no circle before), which coverage counts as data for a state read; route: a learned contrast or an event read of the teleport. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
   },
   {
     "spell": 805040,
@@ -3924,10 +3950,11 @@
     "clause": "Frozen spikes erupt from the bodies of an ally and Raised minions for $d,",
     "labels": [
       "501965 behaviour_cast_applies_aura duration",
-      "501965 behaviour_expiry duration"
+      "501965 behaviour_expiry duration",
+      "501965 behaviour_metric_delta on_minions"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). On the caster as the ally; the Raised-minion copy (Effect[1] 190) not read. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: frost damage to attackers when hit (no numbers); bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: DAMAGE_SHIELD 5 hits day 8/30, median 78 (72-79), no crit, aura apply->remove median 606 s (14.1-799.2)."
+    "reason": "Status 1 (counted pair, control arm in each entry). Read on the grouped ally player (cast at it; expiry pair around 1800000 ms) and on the Raised minions (both Ghouls carry the aura after a real cast, on_minions). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: frost damage to attackers when hit (no numbers); bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: DAMAGE_SHIELD 5 hits day 8/30, median 78 (72-79), no crit, aura apply->remove median 606 s (14.1-799.2)."
   },
   {
     "spell": 501965,
@@ -4284,10 +4311,11 @@
     "clause": "Frozen spikes erupt from the bodies of nearby allies and Raised minions for $d,",
     "labels": [
       "572214 behaviour_cast_applies_aura duration",
-      "572214 behaviour_expiry duration"
+      "572214 behaviour_expiry duration",
+      "572214 behaviour_metric_delta on_minions"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair, control arm in each entry). On the caster; live aura lifetimes (median 17 s) end early when the holder (minions) dies, not judged. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: nearby allies and Raised minions, frost damage to attackers; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: DAMAGE_SHIELD 6304, median 64 (0-327), mean 65.15, no crit; aura common 14/17/18/15 s, median 17.0 s; casts 172."
+    "reason": "Status 1 (counted pair, control arm in each entry). Read on the grouped ally player (cast at it; expiry pair around 1800000 ms) and on the Raised minions (both Ghouls carry the aura after a real cast, on_minions). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: nearby allies and Raised minions, frost damage to attackers; bindmysoul nothing found; coa-obtainable not known (live_capture=False); logs: DAMAGE_SHIELD 6304, median 64 (0-327), mean 65.15, no crit; aura common 14/17/18/15 s, median 17.0 s; casts 172."
   },
   {
     "spell": 572214,
@@ -5378,7 +5406,21 @@
   {
     "spell": 805038,
     "clause": "Teleport back to the position of your Scourge Transporter and remove all movement slowing effects from you.",
-    "labels": [],
-    "kind": "claim"
+    "claims": [
+      {
+        "claim": "Teleport back to the position of your Scourge Transporter",
+        "labels": [
+          "805038 behaviour_metric_delta return_position"
+        ]
+      },
+      {
+        "claim": "and remove all movement slowing effects from you.",
+        "labels": [
+          "805038 behaviour_metric_delta removes_slows"
+        ]
+      }
+    ],
+    "kind": "claim",
+    "reason": "Pulled Ritual Return 807098 sentence (@s:807098:0@, review I-7). Claim \"remove all movement slowing effects\": status 1 (a striker's Slow 31589 stays on the caster when Ritual Return is refused without a circle, gone after it goes through). Claim \"Teleport back\": measured (the caster on the circle at 0 yd after a 15 yd move, ADR 0441) but the contrast is a setup condition, counted as data; route pending as clause 259. Ritual Return's caster aura 807317 is a generator fixture (values.py:190-193). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: ritual circle, Ritual Return; bindmysoul found: 1 minute circle, Ritual Return teleports back and removes movement slowing effects; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: 3 casts day 8/11 (Darkprofit): CAST_START->SPELL_SUMMON Scourge Transporter 0.87 s later; Ritual Return 807098 3 casts 7.9-11.9 s after summon. Related server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: teleport to Scourge Transporter, remove slows; bindmysoul nothing found (text under 805038); coa-obtainable not known as separate id (live_capture=False); logs: 3 SPELL_CAST_SUCCESS day 8/11."
   }
 ]

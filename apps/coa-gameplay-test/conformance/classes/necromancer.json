@@ -10838,6 +10838,31 @@
       "observe_source": "500342 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_ACTIVATION_TIME (MiscValue 19), BasePoints -51 + 1 = -50 ($s1), on the disease mask (Flesh to Worms 501861 among them); AuraEffect::CalculatePeriodic applies SPELLMOD_ACTIVATION_TIME to the amplitude when the aura is created (stock), so a disease applied under Mutation ticks every 1500 ms instead of 3000. Flesh to Worms 501861 (Effect[0] aura 3, Amplitude 3000, DurationIndex 85, 18000 ms) is cast at the dummy: control (no Mutation) 2 ticks in 6200 ms; its remaining 4 ticks land during the 12500 ms between phases (cumulative 6); then Mutation is learned and cast, a fresh Flesh to Worms gets 4 ticks in 6200 ms (1500, 3000, 4500, 6000): 10."
     },
     {
+      "spell": 500342,
+      "name": "Mutation (running disease keeps its period)",
+      "kind": "metric_delta",
+      "variant": "running_disease",
+      "label_suffix": "running_disease",
+      "quote": "allowing your freshly applied diseases to tick $s1% faster.",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 500342,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        501861
+      ],
+      "setup_wait_ms": 200,
+      "expire_ms": 500,
+      "wait_ms": 6200,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy"
+      },
+      "observe_source": "The 'freshly applied' part: a Flesh to Worms 501861 cast at the dummy 200 ms before Mutation 500342 keeps its 3000 ms period: 2 ticks by 6400 ms after it (3000, 6000), not 4 (a running disease sped up). No cast before (control, 0)."
+    },
+    {
       "spell": 501965,
       "name": "Razorice (duration)",
       "kind": "cast_applies_aura",
@@ -10845,10 +10870,36 @@
       "quote": "Frozen spikes erupt from the bodies of an ally and Raised minions for $d,",
       "expected_ms": 1800000,
       "applied_aura": 501965,
-      "target": "caster",
+      "target": "ally",
       "cast_spell": 501965,
-      "cast_target": "caster",
-      "observe_source": "501965 DurationIndex 30 (1800000 ms, $d); Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD TARGET_UNIT_TARGET_ALLY. No CoA code names 501965. A real cast of 501965 at the caster (an ally of itself), read before the cast (absent) and right after it, and its expiry pair around 1800000 ms on the accelerated clock."
+      "cast_target": "ally",
+      "observe_source": "501965 DurationIndex 30 (1800000 ms, $d); Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD TARGET_UNIT_TARGET_ALLY. No CoA code names 501965. A real cast of 501965 at the grouped ally player, read on the ally before the cast (absent) and right after it, and its expiry pair around 1800000 ms on the accelerated clock; the on_minions entry reads the Raised minions."
+    },
+    {
+      "spell": 501965,
+      "name": "Razorice (on Raised minions)",
+      "kind": "metric_delta",
+      "variant": "on_minions",
+      "label_suffix": "on_minions",
+      "quote": "Frozen spikes erupt from the bodies of an ally and Raised minions for $d,",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 501965,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 501965
+      },
+      "observe_source": "501965 Effect[1] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS aura 15. A Ghoul 50073 is raised (Raise: Ghoul 500971) in each phase; owned Ghouls carrying 501965: none before (control), both after a real Razorice cast at the caster."
     },
     {
       "spell": 572214,
@@ -10858,10 +10909,36 @@
       "quote": "Frozen spikes erupt from the bodies of nearby allies and Raised minions for $d,",
       "expected_ms": 1800000,
       "applied_aura": 572214,
-      "target": "caster",
+      "target": "ally",
       "cast_spell": 572214,
-      "cast_target": "caster",
-      "observe_source": "572214 DurationIndex 30 (1800000 ms, $d); Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD TARGET_UNIT_CASTER_AREA_RAID. No CoA code names 572214. A real cast of 572214, read on the caster before the cast (absent) and right after it, and its expiry pair around 1800000 ms on the accelerated clock."
+      "cast_target": "ally",
+      "observe_source": "572214 DurationIndex 30 (1800000 ms, $d); Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD TARGET_UNIT_CASTER_AREA_RAID. No CoA code names 572214. A real cast with the grouped ally player as its target, read on the ally (a nearby raid member) before the cast (absent) and right after it, and its expiry pair around 1800000 ms; the on_minions entry reads the Raised minions."
+    },
+    {
+      "spell": 572214,
+      "name": "Greater Razorice (on Raised minions)",
+      "kind": "metric_delta",
+      "variant": "on_minions",
+      "label_suffix": "on_minions",
+      "quote": "Frozen spikes erupt from the bodies of nearby allies and Raised minions for $d,",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 572214,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        500971
+      ],
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 572214
+      },
+      "observe_source": "572214 Effect[1] 190 aura 15 on the summons. A Ghoul 50073 is raised in each phase; owned Ghouls carrying 572214: none before (control), both after a real Greater Razorice cast."
     },
     {
       "spell": 803291,
@@ -11180,12 +11257,12 @@
       "measure_actor": "dummy",
       "cast_power": 1373,
       "expire_ms": 1000,
-      "wait_ms": 10800,
+      "wait_ms": 8750,
       "metric": "aura",
       "fields": {
         "spell": 501978
       },
-      "observe_source": "Lichfrost 501978 (level-60 rank, CastingTimeIndex 19: 2500 ms, Speed 30) DurationIndex 32 (6000 ms), Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED on the target. 803291 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_DURATION (MiscValue 1) +4000 ($/1000;s1 = 4) on the Lichfrost mask. No CoA code names 803291. A real Lichfrost at the dummy lands about 2.6 s after the cast starts; 10800 ms after the cast the slow is gone without the talent (control, ends near 8.6 s) and still on the dummy with it (ends near 12.6 s)."
+      "observe_source": "Lichfrost 501978 (level-60 rank, CastingTimeIndex 19: 2500 ms, Speed 30) DurationIndex 32 (6000 ms), Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED on the target. 803291 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_DURATION (MiscValue 1) +4000 ($/1000;s1 = 4) on the Lichfrost mask. No CoA code names 803291. A real Lichfrost at the dummy lands about 2.6 s after the cast starts; 8750 ms after the cast the slow is gone without the talent (control, ends near 8.6 s) and still on the dummy with it (ends near 12.6 s)."
     },
     {
       "spell": 803291,
@@ -11203,21 +11280,21 @@
       "gate_timing": "start",
       "trigger_only_after": true,
       "expire_ms": 500,
-      "wait_ms": 12100,
-      "expiry_wait_ms": 1500,
+      "wait_ms": 12450,
+      "expiry_wait_ms": 300,
       "after_expiry_expected": 0,
       "metric": "aura",
       "fields": {
         "spell": 501978
       },
-      "observe_source": "Lichfrost 501978 (2500 ms cast, Speed 30, DurationIndex 32: 6000 ms) with 803291 learned (+4000 ms SPELLMOD_DURATION on the Lichfrost mask): the slow lands about 2.6 s after the cast starts and should end near 12.6 s. No cast before (control, absent); 12100 ms after the cast it is on the dummy, 13600 ms after it gone: the slow lasts about 9.5 to 11 s, 10 s stated (6 + 4); the slow_longer entry is the without-talent contrast."
+      "observe_source": "Lichfrost 501978 (2500 ms cast, Speed 30, DurationIndex 32: 6000 ms) with 803291 learned (+4000 ms SPELLMOD_DURATION on the Lichfrost mask): the slow lands about 2.6 s after the cast starts and should end near 12.6 s. No cast before (control, absent); 12450 ms after the cast it is on the dummy, 12750 ms after it gone: about 9.85 to 10.15 s after it lands, 10 s stated (6 + 4); the slow_longer entry is the without-talent contrast."
     },
     {
       "spell": 802988,
-      "name": "Lich Essence (Lichfrost cast completes by 2250 ms)",
+      "name": "Lich Essence (Lichfrost cast completes by 2150 ms)",
       "kind": "metric_delta",
-      "variant": "cast_by_2250",
-      "label_suffix": "cast_by_2250",
+      "variant": "cast_by_2150",
+      "label_suffix": "cast_by_2150",
       "quote": "Reduces the cast time of Lichfrost by $s2%",
       "expected": 2,
       "before_expected": 0,
@@ -11225,19 +11302,19 @@
       "target": "dummy",
       "cast_power": 1373,
       "expire_ms": 1500,
-      "wait_ms": 2250,
+      "wait_ms": 2150,
       "metric": "spell_go_count",
       "fields": {
         "spell": 501978
       },
-      "observe_source": "Lichfrost 501978 CastingTimeIndex 19 (2500 ms). 802988 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_CASTING_TIME (MiscValue 10) -15 ($s2, BasePoints -16 + 1) on the Lichfrost mask: 2125 ms. No CoA code names 802988. spell_go_count counts the caster's 501978 SMSG_SPELL_GO (cumulative). Without the talent (control) no cast has completed 2250 ms after the cast starts (0); the first cast completes during the 1500 ms between phases (1); with the talent learned the second cast has completed 2250 ms after it starts (2). With cast_by_2050 the cast time lies in (2050, 2250] ms, a reduction of 10% to 18%."
+      "observe_source": "Lichfrost 501978 CastingTimeIndex 19 (2500 ms). 802988 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_CASTING_TIME (MiscValue 10) -15 ($s2, BasePoints -16 + 1) on the Lichfrost mask: 2125 ms. No CoA code names 802988. spell_go_count counts the caster's 501978 SMSG_SPELL_GO (cumulative). Without the talent (control) no cast has completed 2150 ms after the cast starts (0); the first cast completes during the 1500 ms between phases (1); with the talent learned the second cast has completed 2150 ms after it starts (2). With cast_by_2100 the cast time lies in (2100, 2150] ms, a reduction of 14% to 16% (stated 15%: 2125 ms)."
     },
     {
       "spell": 802988,
-      "name": "Lich Essence (Lichfrost cast still running at 2050 ms)",
+      "name": "Lich Essence (Lichfrost cast still running at 2100 ms)",
       "kind": "metric_delta",
-      "variant": "cast_by_2050",
-      "label_suffix": "cast_by_2050",
+      "variant": "cast_by_2100",
+      "label_suffix": "cast_by_2100",
       "quote": "Reduces the cast time of Lichfrost by $s2%",
       "expected": 1,
       "before_expected": 0,
@@ -11245,12 +11322,12 @@
       "target": "dummy",
       "cast_power": 1373,
       "expire_ms": 1500,
-      "wait_ms": 2050,
+      "wait_ms": 2100,
       "metric": "spell_go_count",
       "fields": {
         "spell": 501978
       },
-      "observe_source": "Lichfrost 501978 CastingTimeIndex 19 (2500 ms); 802988 Effect[1] SPELLMOD_CASTING_TIME -15 ($s2): 2125 ms. 2050 ms after the cast starts no cast has completed without the talent (control, 0); the first completes between phases (1); with the talent the second has not completed 2050 ms after it starts (still 1), so the reduced cast time is above 2050 ms (a reduction below 18%)."
+      "observe_source": "Lichfrost 501978 CastingTimeIndex 19 (2500 ms); 802988 Effect[1] SPELLMOD_CASTING_TIME -15 ($s2): 2125 ms. 2100 ms after the cast starts no cast has completed without the talent (control, 0); the first completes between phases (1); with the talent the second has not completed 2100 ms after it starts (still 1), so the reduced cast time is above 2100 ms (a reduction below 16%)."
     },
     {
       "spell": 805038,
@@ -11297,7 +11374,7 @@
       "fields": {
         "spell": 807098
       },
-      "observe_source": "Ritual Return 807098 (Effect[0] 77 SCRIPT_EFFECT, Effect[1] trigger 807125, RecoveryTime 25000). necromancer OnSpellCheckCast (AscensionNecromancerAbilities.cpp:176-185) refuses 807098 with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW unless an owned, living 575091 circle is in the caster's map and phase; OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) teleports the caster to it. Without a circle (control) 807098 is refused, no SMSG_SPELL_GO (0); after a real Summoning Ritual 805038 (1000 ms cast, 2000 ms wait) it goes through (1)."
+      "observe_source": "Ritual Return 807098 (Effect[0] 77 SCRIPT_EFFECT, Effect[1] trigger 807125, RecoveryTime 25000). necromancer OnSpellCheckCast (AscensionNecromancerAbilities.cpp:176-185) refuses 807098 with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW unless an owned, living 575091 circle is in the caster's map and phase; OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) teleports the caster to it. Without a circle (control) 807098 is refused, no SMSG_SPELL_GO (0); after a real Summoning Ritual 805038 (1000 ms cast, 2000 ms wait) it goes through (1). Ritual Return's DBC caster aura 807317 (the circle's own area aura in play, AscensionNecromancerSummons.cpp:568) is set on the caster by the generator in both phases (values.py:190-193, required_aura_steps): a precondition fixture by harness set_aura; the CoA circle check (AscensionNecromancerAbilities.cpp:176-185) is what the before phase refuses."
     },
     {
       "spell": 501861,
@@ -11313,12 +11390,33 @@
       "cast_in_before": false,
       "cast_power": 1373,
       "expire_ms": 500,
-      "wait_ms": 8800,
+      "wait_ms": 6150,
       "metric": "spell_energize_count",
       "fields": {
         "spell": 804272
       },
-      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000 ($t1), DurationIndex 85 (18000 ms, $d). The class code casts Parasitic Infestation 804272 on the caster at each Effect[0] tick of a Flesh to Worms rank (aura_ascension_necromancer_lifecycle::Tick, AscensionNecromancerAuras.cpp:167-168, Named(500338)); 804272 Effect[1] 30 SPELL_EFFECT_ENERGIZE Runic Power (MiscValue 6). spell_energize_count counts the caster's 804272 energize events. No cast before (control, 0); 8800 ms after a real cast at the dummy two energizes (ticks at 3000 and 6000 ms): a period at or below 2930 ms would give three, at or above 4400 ms one."
+      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000 ($t1), DurationIndex 85 (18000 ms, $d). The class code casts Parasitic Infestation 804272 on the caster at each Effect[0] tick of a Flesh to Worms rank (aura_ascension_necromancer_lifecycle::Tick, AscensionNecromancerAuras.cpp:167-168, Named(500338)); 804272 Effect[1] 30 SPELL_EFFECT_ENERGIZE Runic Power (MiscValue 6). spell_energize_count counts the caster's 804272 energize events. No cast before (control, 0); 6150 ms after a real cast at the dummy two energizes (ticks at 3000 and 6000 ms); with runic_power_first (one by 5900 ms) the period lies in (2950, 3075] ms."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (Runic Power, one by 5900 ms)",
+      "kind": "metric_delta",
+      "variant": "runic_power_first",
+      "label_suffix": "runic_power_first",
+      "quote": "and generating Runic Power every $t1 sec for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "expire_ms": 500,
+      "wait_ms": 5900,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 804272
+      },
+      "observe_source": "Companion of runic_power_period: 5900 ms after a real cast one Parasitic Infestation 804272 energize (the 3000 ms tick), the second (6000 ms) not yet; no cast before (0)."
     },
     {
       "spell": 501861,
@@ -11340,6 +11438,27 @@
         "spell": 804272
       },
       "observe_source": "501861 Amplitude 3000 ($t1), DurationIndex 85 (18000 ms, $d); each Effect[0] tick casts Parasitic Infestation 804272 (Runic Power energize) on the caster (AscensionNecromancerAuras.cpp:167-168). No cast before (control, 0); 20500 ms after one real cast six energizes (3000 to 18000 ms), none after the end: a duration of 21000 ms or more would give seven, of 17999 ms or less five."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (Runic Power, five by 17900 ms)",
+      "kind": "metric_delta",
+      "variant": "runic_power_fifth",
+      "label_suffix": "runic_power_fifth",
+      "quote": "and generating Runic Power every $t1 sec for $d.",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "expire_ms": 500,
+      "wait_ms": 17900,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 804272
+      },
+      "observe_source": "Companion of runic_power_duration: 17900 ms after one real cast five energizes, the sixth (18000 ms, the aura's last tick) not yet; with runic_power_duration (six by 20500 ms, no seventh) the aura lasts from 18000 ms to below 21000 ms."
     },
     {
       "spell": 501861,
@@ -11528,6 +11647,46 @@
       "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, $m1 at level 60 = 101 + 1 + 0.942857 x 4 = 105.771 (the packet's resolved value; spell power 0 at the reference, so the $sps term is 0); SpellEffectInfo::CalcValue truncates to int32: 105 per tick (G-26, known engine rounding). beeg spellpen 823764 (no partial resist) and ARoy buff 3 600002 (no spell crit) on the caster are precondition fixtures (harness set_aura). No cast before (control, 0); 6200 ms after one real cast two ticks (3000, 6000 ms): 210."
     },
     {
+      "spell": 501861,
+      "name": "Flesh to Worms (tick damage with spell power)",
+      "kind": "metric_delta",
+      "variant": "tick_damage_sp",
+      "label_suffix": "tick_damage_sp",
+      "quote": "Disease an enemy, dealing ${$m1+0+$sps*0.11055} Plague damage",
+      "expected": 866,
+      "before_expected": 210,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_power": 1373,
+      "setup_casts": [
+        48168
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          600002,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expire_ms": 12500,
+      "wait_ms": 6200,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy"
+      },
+      "observe_source": "Tooltip: $m1 + 0.11055 x spell power per tick: 105.771 at 0 spell power, 119.037 with Inner Fire 48168 (+120). G-28 (per-level truncation, SpellInfo.cpp:497): 101 + 1 + int32(0.942857 x 4) = 105, and int32(105 + 13.266) = 118. beeg spellpen 823764 and ARoy buff 3 600002 (no spell crit) are precondition fixtures. Before: one cast, two ticks by 6200 ms: 210 (control, no spell power); its other four ticks land during the 12500 ms between phases (630); after: a real Inner Fire, then Flesh to Worms, two ticks of 118: 866."
+    },
+    {
       "spell": 560537,
       "name": "Apothecary's Cauldron (no stack with Dark Prophecy)",
       "kind": "metric_delta",
@@ -11542,12 +11701,68 @@
       "learn": [
         560537
       ],
-      "gate_spell": 800517,
       "expire_ms": 500,
       "wait_ms": 1000,
       "metric": "cast_speed_multiplier",
       "fields": {},
-      "observe_source": "560537 Effect[0] 65 APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1); Dark Prophecy 800517 Effect[0] 65 aura 216 +2 (BasePoints 1 + 1), a similar spell-haste raid aura. Both are in spell_group 2000182 (rev_20260909_01_necromancer_completion.sql:613-614, rev_20260908_05_guardian_completion.sql:358), whose stack rule keeps the strongest exclusive amount. 560537 learned up front: the caster's cast speed multiplier reads 1 / 1.03 = 0.970874 around a Glacial Tap 805369 cast (one application); after Dark Prophecy 800517 is also learned (two applications) it still reads 0.970874, not 0.970874 / 1.02 = 0.951837 (stacked). Control: the party_stat_ratio entry reads 1 without 560537."
+      "observe_source": "560537 Effect[0] 65 APPLY_AREA_AURA_RAID aura 216 SPELL_AURA_HASTE_SPELLS +3 ($s1); Dark Prophecy 800517 (not passive, Attributes 0x40000) Effect[0] 65 aura 216 +2 (BasePoints 1 + 1), a similar spell-haste raid aura; both in spell_group 2000182. 560537 learned up front: the caster's cast speed multiplier reads 1 / 1.03 = 0.970874 around a Glacial Tap 805369 cast (one application); in the after phase a real Dark Prophecy 800517 cast applies the second effect (its aura read by dp_applied) and the multiplier still reads 0.970874, not 0.970874 / 1.02 = 0.951837 (stacked). dp_alone shows Dark Prophecy alone changes it (1 / 1.02).",
+      "setup_casts": [
+        800517
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1000
+    },
+    {
+      "spell": 560537,
+      "name": "Apothecary's Cauldron (Dark Prophecy applied)",
+      "kind": "metric_delta",
+      "variant": "dp_applied",
+      "label_suffix": "dp_applied",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1,
+      "before_expected": 0,
+      "learn": [
+        560537
+      ],
+      "trigger_spell": 805369,
+      "target": "caster",
+      "setup_casts": [
+        800517
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1000,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 800517,
+        "caster": "caster"
+      },
+      "observe_source": "The no_stack entry's second application: Dark Prophecy 800517's aura is absent on the caster before (control) and present after the real cast in the after phase."
+    },
+    {
+      "spell": 560537,
+      "name": "Apothecary's Cauldron (Dark Prophecy alone)",
+      "kind": "metric_delta",
+      "variant": "dp_alone",
+      "label_suffix": "dp_alone",
+      "quote": "Does not stack with similar effects.",
+      "expected": 0.980392,
+      "before_expected": 1,
+      "tolerance": 0.0001,
+      "gate_spell": 805369,
+      "trigger_spell": 805369,
+      "target": "caster",
+      "setup_casts": [
+        800517
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1000,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "observe_source": "Control of the no_stack entry: without 560537, a real Dark Prophecy 800517 cast alone moves the caster's cast speed multiplier from 1 to 1 / 1.02 = 0.980392, so the second effect is live when no_stack reads it."
     },
     {
       "spell": 805038,
@@ -11581,7 +11796,7 @@
       "fields": {
         "entry": 575091
       },
-      "observe_source": "Ritual Return 807098: OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) NearTeleportTo the caster's owned living Scourge Transporter 575091 (the harness acknowledges the teleport, CoAGameplayTest.cpp:2900-2902). nearest_creature_distance reads the caster's 2D distance to the nearest living 575091 within 60 yd (-1 when there is none). Before (control): no circle, Ritual Return refused: -1. After: a real Summoning Ritual 805038 places the circle, the caster is moved 15 yd along x (strike fixture: relocate, one Light of the Naaru 41394 from the striker), then Ritual Return brings it back onto the circle: 0 (15 yd without the return)."
+      "observe_source": "Ritual Return 807098: OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) NearTeleportTo the caster's owned living Scourge Transporter 575091 (the harness acknowledges the teleport, CoAGameplayTest.cpp:2900-2902). nearest_creature_distance reads the caster's 2D distance to the nearest living 575091 within 60 yd (-1 when there is none). Before (control): no circle, Ritual Return refused: -1. After: a real Summoning Ritual 805038 places the circle, the caster is moved 15 yd along x (strike fixture: relocate, one Light of the Naaru 41394 from the striker), then Ritual Return brings it back onto the circle: 0 (15 yd without the return). Ritual Return's DBC caster aura 807317 (the circle's own area aura in play, AscensionNecromancerSummons.cpp:568) is set on the caster by the generator in both phases (values.py:190-193, required_aura_steps): a precondition fixture by harness set_aura; the CoA circle check (AscensionNecromancerAbilities.cpp:176-185) is what the before phase refuses."
     },
     {
       "spell": 805429,
@@ -12243,6 +12458,38 @@
         "target": "dummy"
       },
       "observe_source": "Flesh to Worms 501861 ticks every 3000 ms ($t1) for 18000 ms. Disciple of Kel'thuzad 560616 (+8% spell haste, its spell_haste entry) is learned throughout. 301304 Effect[1] aura 316 SPELL_AURA_PERIODIC_HASTE lets the ticks scale with spell haste: 3000 / 1.08 = 2778 ms. Without the talent (control) 2 ticks in 8500 ms (3000, 6000); the first cast's other 4 ticks land during the 10000 ms between phases (6); with the talent a fresh cast ticks at 2778, 5556 and 8333 ms: 3 more, 9."
+    },
+    {
+      "spell": 805038,
+      "name": "Summoning Ritual (Ritual Return removes slows)",
+      "kind": "metric_delta",
+      "variant": "removes_slows",
+      "label_suffix": "removes_slows",
+      "quote": "@s:807098:0@",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 807098,
+      "target": "caster",
+      "setup_casts": [
+        805038
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 2000,
+      "strike": {
+        "spell": 31589,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "expire_ms": 500,
+      "wait_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 31589,
+        "caster": "striker"
+      },
+      "observe_source": "Ritual Return 807098 OnSpellCast (AscensionNecromancerAbilities.cpp:421-431) teleports the caster to its circle and calls RemoveMovementImpairingAuras. A striker casts Slow 31589 (snare, 15000 ms) at the caster before each Ritual Return attempt. Before (control): no circle, Ritual Return refused, the slow stays (1); after a real Summoning Ritual 805038, Ritual Return goes through and the slow is gone (0). Ritual Return's DBC caster aura 807317 is set by the generator (values.py:190-193), a precondition fixture by harness set_aura."
     }
   ],
   "player_observations": [],
