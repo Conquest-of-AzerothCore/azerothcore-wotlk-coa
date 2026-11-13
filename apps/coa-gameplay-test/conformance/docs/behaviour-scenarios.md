@@ -870,21 +870,6 @@ when set, replaces `removed` for the caster's reads of that arm only (ADR 0291).
 Sacred Restraint 102208 from both on an ally, from the caster alone on the dummy (ADR 0292), and from neither when
 refused out of range (97).
 
-### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
-
-A minion's command strike stated as "Weapon Damage" is read against the same minion's own swing. A real
-`raise_spell` raises creature `entry` at the caster; one `command_spell` at the dummy (power set to `command_power`)
-starts its attack, then `trials` more follow, `wait_ms` apart. After the first and each later Command the scenario
-reads the non-critical, unblocked `strike_spell` hits of that creature on the dummy (`spell_damage_total` and
-`spell_damage_count` with `caster_entry`) and its plain melee swings (`pet_melee_plain_damage` and
-`pet_melee_plain_count`, no crit and no glancing). The hit ratio judge takes the swings as the control arm and the
-strike as the treatment: the per-hit mean of the strike over the per-swing mean must lie within 5% of the stated
-ratio `expected` (`ratio_band`, the G-19 band of a ratio), with the 99% interval rules of the hit ratio judge. The
-creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorded once and not judged. Raise:
-`strike_flat` takes that flat amount off every strike hit before the ratio (ADR 0547). Greater Skeletal Warrior 504901
-judges Command: Skeletal Warriors 570042 at 2.0 after its flat Effect[1] part of 1 (fix FN-c1t-1, controller cycle 2). `player_spell_power` gives the
-caster the harness spell-power fixture; weapon_ratio_sp holds 1000, a flat part of 137.5.
-
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 
 "For the same amount" compares two amounts of one cast (ADR 0200). `amount_match_scenario` casts `cast_spell` at
@@ -1916,6 +1901,7 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped windows (ADR 0551)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
+- [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit ratio (ADR 0541, ADR 0547)
 - [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR 0550)
 - [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast ends (ADR 0543, ADR 0546, ADR 0570)
 - [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over parts (ADR 0544, ADR 0546)
