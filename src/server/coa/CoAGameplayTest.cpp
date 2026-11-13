@@ -7266,6 +7266,20 @@ private:
             creature->SetHealth(health);
             return;
         }
+        if (action == "move_point" && !_actors.count(id))
+        {
+            Creature* creature = GetUnit(id)->ToCreature();
+            Require(creature && creature->IsAlive() && !creature->HasUnitFlag(UNIT_FLAG_DISABLE_MOVE),
+                "Point move needs a living movable fixture creature");
+            float const x = creature->GetPositionX() + step.get<float>("dx");
+            float const y = creature->GetPositionY() + step.get<float>("dy", 0.0f);
+            float const z = creature->GetMapHeight(x, y, creature->GetPositionZ());
+            Require(z > INVALID_HEIGHT, "Point move destination has no ground");
+            creature->GetMotionMaster()->MovePoint(0, x, y, z, FORCED_MOVEMENT_RUN);
+            record.put("destination_x", x);
+            record.put("destination_y", y);
+            return;
+        }
         if (action == "cast" && !_actors.count(id))
         {
             Unit* creature = GetUnit(id);

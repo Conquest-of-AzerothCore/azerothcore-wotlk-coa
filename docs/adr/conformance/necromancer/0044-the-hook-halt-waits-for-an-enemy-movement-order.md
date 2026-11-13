@@ -1,6 +1,6 @@
 # 0044. The Hook's halt waits for an enemy movement order
 
-- Status: accepted
+- Status: superseded by [0604](../../0604-a-fixture-creature-moves-on-a-harness-point-order.md)
 - Date: 2026-11-13
 
 ## Context
