@@ -1267,6 +1267,546 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 806149,
+      "name": "Damnation rank 1 (Shadow damage)",
+      "kind": "hit_ratio",
+      "variant": "shadow",
+      "label_suffix": "shadow",
+      "quote": "Increases your Shadow damage by $s1%,",
+      "expected": 1.05,
+      "observe_spell": 680928,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          806149
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Damnation 806149 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 4 + 1 = 5% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.05 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 806149, treatment with it learned (a real learn). Expected 1.05."
+    },
+    {
+      "spell": 806149,
+      "name": "Damnation rank 1 (below 35%)",
+      "kind": "hit_ratio",
+      "variant": "below_35",
+      "label_suffix": "below_35",
+      "quote": "doubled against enemies below 35% health.",
+      "expected": 1.1025,
+      "observe_spell": 680928,
+      "cast_wait_ms": 1600,
+      "target_health_pct": 30,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          806149
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Damnation 806149 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 4 + 1 = 5% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.05 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 806149, treatment with it learned (a real learn). The dummy is held at 30% health in both arms: the aura's 5% and Factor()'s x1.05 multiply to 1.1025, a bonus of 10.25% against the stated doubled 10% (inside the band of the larger of 5% and 2 points)."
+    },
+    {
+      "spell": 807925,
+      "name": "Damnation rank 2 (Shadow damage)",
+      "kind": "hit_ratio",
+      "variant": "shadow",
+      "label_suffix": "shadow",
+      "quote": "Increases your Shadow damage by $s1%,",
+      "expected": 1.1,
+      "observe_spell": 680928,
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807925
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Damnation 807925 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 9 + 1 = 10% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.1 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 807925, treatment with it learned (a real learn). Expected 1.1."
+    },
+    {
+      "spell": 807925,
+      "name": "Damnation rank 2 (below 35%)",
+      "kind": "hit_ratio",
+      "variant": "below_35",
+      "label_suffix": "below_35",
+      "quote": "doubled against enemies below 35% health.",
+      "expected": 1.21,
+      "observe_spell": 680928,
+      "cast_wait_ms": 1600,
+      "target_health_pct": 30,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          807925
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "Damnation 807925 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 9 + 1 = 10% ($s1); Effect[0] (aura 112, MiscValueB 13) is rewritten to SPELL_AURA_DUMMY (AscensionNecromancerContracts.cpp:180-181), and Factor() multiplies a Shadow-school hit on a target below 35% health by 1.1 (AscensionNecromancerContracts.cpp:404-405). Observed: Plague of Undeath 680928 (SCHOOL_DAMAGE, Plague = Nature and Shadow, SchoolMask 40, BasePoints 79 + 1, no die) cast at the dummy; 823764 removes partial resists in both arms; only non-critical hits. Control without 807925, treatment with it learned (a real learn). The dummy is held at 30% health in both arms: the aura's 10% and Factor()'s x1.1 multiply to 1.21, a bonus of 21% against the stated doubled 20% (inside the band of the larger of 5% and 2 points)."
+    },
+    {
+      "spell": 570136,
+      "name": "Waking Crypts (Crypt Plague)",
+      "kind": "hit_ratio",
+      "variant": "crypt_plague",
+      "label_suffix": "crypt_plague",
+      "quote": "Increases the damage of Crypt Plague by $s1%",
+      "expected": 1.5,
+      "observe_spell": 570131,
+      "cast_wait_ms": 2100,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          570136
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "570136 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 22 (SPELLMOD_DOT), BasePoints 49 + 1 = 50 ($s1), on class mask word 1 bit 8388608, Crypt Plague 570131's own flag. Crypt Plague 570131 (aura 3 periodic damage every 2000 ms, BasePoints 1 + 1, coefficient row 0.06 Shadow) is cast at the dummy each trial and its first tick read 2100 ms later, at 20000 spell power so the coefficient term dominates; 823764 in both arms; control without 570136, treatment with it learned."
+    },
+    {
+      "spell": 802132,
+      "name": "Lichplague (per disease)",
+      "kind": "hit_ratio",
+      "variant": "per_disease",
+      "label_suffix": "per_disease",
+      "quote": "Damage increased by $704291s1% for each Necromancer disease on the enemy.",
+      "expected": 1.038462,
+      "observe_spell": 802132,
+      "cast_wait_ms": 4800,
+      "cast_power": 1000,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          570131
+        ]
+      },
+      "critical": false,
+      "trials": 12,
+      "expected_source": "Factor() (AscensionNecromancerContracts.cpp:412-413) multiplies Lichplague 802132 by 1 + Diseases(player, target) x Amount(704291) / 100, Amount(704291) = 4 ($704291s1); Diseases counts the caster's own family-29 disease auras on the target, Lichplague itself included (AscensionNecromancer.cpp:252-265). Control: Lichplague alone, 1 disease, x1.04; treatment: Crypt Plague 570131 cast first, 2 diseases, x1.08: ratio 1.08 / 1.04 = 1.03846, +3.85% per added disease against the stated 4% (inside 2 points). 1500 ms cast, 3000 ms ticks: one tick per trial at 4800 ms; 1000 Runic Power set before each cast; 823764 in both arms."
+    },
+    {
+      "spell": 805674,
+      "name": "Mindless Fury (stacks)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "stacking $805786u times.",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504868,
+        504868,
+        504868,
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 805786
+      },
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:344-345): a Command spell (Command: Undead 504868, SpellFamilyFlags[2] 16777216) or an Animate with 805674 known calls BuffArmy(player, 805786, true), a cast of Mindless Fury 805786 on the caster and its minions: Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 0 + 1 = 1 ($805786s1), Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS 10, DurationIndex 1 (10000 ms, $805786d), StackAmount 5 ($805786u). 805674 learned at the start; no cast before (control): 0 stacks; six Commands: 5, the cap."
+    },
+    {
+      "spell": 805674,
+      "name": "Mindless Fury (haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Casting Animate or Command spells now increases your haste by $805786s1% for $805786d,",
+      "expected": 1584.158,
+      "before_expected": 1600,
+      "tolerance": 0.01,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "metric": "attack_time_ms",
+      "fields": {},
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:344-345): a Command spell (Command: Undead 504868, SpellFamilyFlags[2] 16777216) or an Animate with 805674 known calls BuffArmy(player, 805786, true), a cast of Mindless Fury 805786 on the caster and its minions: Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 0 + 1 = 1 ($805786s1), Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS 10, DurationIndex 1 (10000 ms, $805786d), StackAmount 5 ($805786u). A Command without 805674 (control) leaves the reference weapon's 1600 ms swing; with 805674 learned between the phases, one Command gives one stack: 1600 / 1.01 = 1584.16 ms."
+    },
+    {
+      "spell": 805674,
+      "name": "Mindless Fury (lasts)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Casting Animate or Command spells now increases your haste by $805786s1% for $805786d,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 805786
+      },
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:344-345): a Command spell (Command: Undead 504868, SpellFamilyFlags[2] 16777216) or an Animate with 805674 known calls BuffArmy(player, 805786, true), a cast of Mindless Fury 805786 on the caster and its minions: Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 0 + 1 = 1 ($805786s1), Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS 10, DurationIndex 1 (10000 ms, $805786d), StackAmount 5 ($805786u). 805674 learned at the start; no cast (control): no 805786; one Command: present 9500 ms later, gone 1000 ms after: (9500, 10500] ms."
+    },
+    {
+      "spell": 801733,
+      "name": "Necrotic Chain (third Command)",
+      "kind": "metric_delta",
+      "variant": "third",
+      "label_suffix": "third",
+      "quote": "Every 3rd Command spell now freezes the target in place for $704860d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 704860
+      },
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:314-318): every Command spell increments State(player).commands, and on every third one with 801733 known casts Necrotic Chain 704860 (two aura 26 roots, DurationIndex 28 = 5000 ms, $704860d) on the target. Command: Undead 504868 needs no minion; 801733 is learned at the start, the counter starts at 0 in each scenario. No cast (control): no 704860; three Commands: on the dummy."
+    },
+    {
+      "spell": 801733,
+      "name": "Necrotic Chain (second Command)",
+      "kind": "metric_delta",
+      "variant": "second",
+      "label_suffix": "second",
+      "quote": "Every 3rd Command spell now freezes the target in place for $704860d.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 704860
+      },
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:314-318): every Command spell increments State(player).commands, and on every third one with 801733 known casts Necrotic Chain 704860 (two aura 26 roots, DurationIndex 28 = 5000 ms, $704860d) on the target. Command: Undead 504868 needs no minion; 801733 is learned at the start, the counter starts at 0 in each scenario. Two Commands: no 704860 yet (the third entry's contrast)."
+    },
+    {
+      "spell": 801733,
+      "name": "Necrotic Chain (lasts)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "Every 3rd Command spell now freezes the target in place for $704860d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        504868,
+        504868
+      ],
+      "setup_wait_ms": 1600,
+      "wait_ms": 4500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "aura",
+      "fields": {
+        "spell": 704860
+      },
+      "observe_source": "necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:314-318): every Command spell increments State(player).commands, and on every third one with 801733 known casts Necrotic Chain 704860 (two aura 26 roots, DurationIndex 28 = 5000 ms, $704860d) on the target. Command: Undead 504868 needs no minion; 801733 is learned at the start, the counter starts at 0 in each scenario. Three Commands: present 4500 ms after the third, gone 1000 ms later: (4500, 5500] ms."
+    },
+    {
+      "spell": 805032,
+      "name": "Animate: Bone Wraith (lifetime)",
+      "kind": "metric_delta",
+      "variant": "lifetime",
+      "label_suffix": "lifetime",
+      "quote": "Animate a Bone Wraith to aid you in combat for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 805032,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 14500,
+      "expire_ms": 500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50309
+      },
+      "observe_source": "805032 Effect[0] 28 SPELL_EFFECT_SUMMON of Bone Wraith 50309 (NecromancerSummons row {805032, 0, 50309, 1}), DurationIndex 8 (15000 ms, $d), instant, 28% of base mana, 60000 ms cooldown (reset before each cast). No cast (control): none; one cast: owned 14500 ms later, gone 1000 ms after: (14500, 15500] ms."
+    },
+    {
+      "spell": 805032,
+      "name": "Animate: Bone Wraith (Bonestorm damage)",
+      "kind": "script_hit",
+      "variant": "bonestorm",
+      "label_suffix": "bonestorm",
+      "quote": "Physical damage every",
+      "hit_spell": 801411,
+      "caster_entry": 50309,
+      "trials": 3,
+      "minimum_hits": 6,
+      "casts": [
+        [
+          805032,
+          "caster"
+        ],
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "control_casts": [
+        [
+          504868,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ]
+      ],
+      "settle_ms": 5500,
+      "observe_source": "805032 Effect[0] 28 SPELL_EFFECT_SUMMON of Bone Wraith 50309 (NecromancerSummons row {805032, 0, 50309, 1}), DurationIndex 8 (15000 ms, $d), instant, 28% of base mana, 60000 ms cooldown (reset before each cast). npc_ascension_necromancer::DoAction case 50309 (AscensionNecromancerSummons.cpp:705-706): the Command makes the Wraith cast Bonestorm 801412 on itself (aura 23 every 500 ms for 5000 ms, triggering 801411: SCHOOL_DAMAGE Physical, BasePoints 29 + 1, coefficient row 0.4 SP, AscensionNecromancerData.h:69). The control commands without a Wraith and must count no 801411 hit; 984954 removes crits."
+    },
+    {
+      "spell": 560596,
+      "name": "Crypt Keeper (bounces)",
+      "kind": "fixed_count",
+      "variant": "bounces",
+      "label_suffix": "bounces",
+      "quote": "Your Crypt Swarm now bounces to 2 additional nearby enemies,",
+      "expected": 2,
+      "radius": 8,
+      "radius_reason": "560596 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 17 (SPELLMOD_JUMP_TARGETS) +2 on Crypt Swarm 800343 (EffectChainTarget 1): the primary and two more dummies within 8 yd of it are hit, the far one at 16 yd not",
+      "cast_spell": 501886,
+      "target_rank": 800343,
+      "learn": [
+        560596
+      ],
+      "repeats": 2,
+      "settle_ms": 3600,
+      "observe_source": "The Crypt Swarm channel 501886 (3000 ms) triggers 800343 at the primary dummy every 500 ms; with 560596 learned each hit jumps to two more enemies. Read per dummy: two of the three further dummies within the radius are ever hit."
+    },
+    {
+      "spell": 704681,
+      "name": "Permafrost (Grave March rolls)",
+      "kind": "metric_delta",
+      "variant": "grave_march",
+      "label_suffix": "grave_march",
+      "quote": "Gives your spells a $h% chance to grant you the Permafrost,",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 500991,
+      "target": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991,
+        500991
+      ],
+      "setup_wait_ms": 100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 801747
+      },
+      "observe_source": "\"Gives your spells\": Grave March 500991 is a Necromancer spell (family 29, non-triggered, no cost, no global cooldown, its 2000 ms cooldown reset before each). necromancer_casts::OnSpellCast (AscensionNecromancerAbilities.cpp:265-266) should roll Chance(player, 704681) on each; 60 casts in about 6 s leave no Permafrost with probability 0.85^60 = 6e-5. Before (control) no cast: 0 charges; after 60 Grave Marches: 2 expected. Spell::prepare sends a Necromancer's 500991 straight to cast(true) (Spell.cpp:3722-3732)."
+    },
+    {
+      "spell": 803771,
+      "name": "Create Bone Reliquary (restores missing health, low)",
+      "kind": "metric_delta",
+      "variant": "restore_low",
+      "label_suffix": "restore_low",
+      "quote": "that restores $803767s1% of your missing health.",
+      "expected": 4400,
+      "before_expected": 2000,
+      "trigger_spell": 803767,
+      "target": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        2000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "health",
+      "fields": {},
+      "observe_source": "Bone Reliquary 11521's use spell is 803767 (item_template spellid_1). 803767 Effect[0] becomes SPELL_EFFECT_DUMMY (AscensionNecromancerContracts.cpp:285-290), and the Necromancer dummy handler calls ModifyHealth((max - current) x 30 / 100) (AscensionNecromancerAbilities.cpp:408-409; $803767s1 = 30). The caster is set to 2000 of 10000 health, regeneration off, before each phase: no cast (control) 2000; one real cast of 803767, the item's spell, 2000 + 30% of 8000 = 4400 by the tooltip. Regression of ADR 0406: before it, 7400 (diagnostic) (pair 20261113-015053 / -015124), since 803767's stock Effect[0] SPELL_EFFECT_HEAL_PCT 30% of the maximum also healed (its contract block sat after the family-29 return). 803771 entered the ledger from the sidekick kit listing; live logs: 9 SPELL_HEAL of 803767 at 228 to 1145."
+    },
+    {
       "spell": 803771,
       "name": "Create Bone Reliquary (restores missing health)",
       "kind": "metric_delta",
@@ -1287,7 +1827,7 @@
       "expire_ms": 500,
       "metric": "health",
       "fields": {},
-      "observe_source": "Bone Reliquary 11521's use spell is 803767 (item_template spellid_1). 803767 Effect[0] becomes SPELL_EFFECT_DUMMY (AscensionNecromancerContracts.cpp:285-290), and the Necromancer dummy handler calls ModifyHealth((max - current) x 30 / 100) (AscensionNecromancerAbilities.cpp:408-409; $803767s1 = 30). The caster is set to 5000 of 10000 health, regeneration off, before each phase: no cast (control) 5000; one real cast of 803767, the item's spell, 5000 + 30% of 5000 = 6500 by the tooltip. Measured 9500 (pair p13) and 7400 from 2000 (diagnostic): 803767's own Effect[0] SPELL_EFFECT_HEAL_PCT 30% of the maximum still heals, because ApplyContracts returns for SpellFamilyName 27 (AscensionNecromancerContracts.cpp:36) before the 803767 block (:285-290); fix note FN-a3-1."
+      "observe_source": "Bone Reliquary 11521's use spell is 803767 (item_template spellid_1). 803767 Effect[0] becomes SPELL_EFFECT_DUMMY (AscensionNecromancerContracts.cpp:285-290), and the Necromancer dummy handler calls ModifyHealth((max - current) x 30 / 100) (AscensionNecromancerAbilities.cpp:408-409; $803767s1 = 30). The caster is set to 5000 of 10000 health, regeneration off, before each phase: no cast (control) 5000; one real cast of 803767, the item's spell, 5000 + 30% of 5000 = 6500 by the tooltip. Regression of ADR 0406: before it, 9500 (pair 20261113-015053 / -015124), since 803767's stock Effect[0] SPELL_EFFECT_HEAL_PCT 30% of the maximum also healed (its contract block sat after the family-29 return). 803771 entered the ledger from the sidekick kit listing; live logs: 9 SPELL_HEAL of 803767 at 228 to 1145."
     },
     {
       "spell": 803771,

@@ -2234,10 +2234,11 @@
     "spell": 704681,
     "clause": "Gives your spells a $h% chance to grant you the Permafrost,",
     "labels": [
-      "704681 proc_rate"
+      "704681 proc_rate",
+      "704681 behaviour_metric_delta grave_march"
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); bindmysoul and coabuildhub '15% chance', 'next 2 spells', '12 seconds'; coa-obtainable: in the live capture (level 50); logs: 801747 applied 1581 times on players, durations up to 12 s (the 12 s tail, charges end it earlier). Grave March 500991 rolls measured separately (grave_march entry, mentor 2026-11-13: 'your spells' covers it)."
   },
   {
     "spell": 704681,
@@ -5314,12 +5315,13 @@
       {
         "claim": "that restores $803767s1% of your missing health",
         "labels": [
-          "803771 behaviour_metric_delta restore"
+          "803771 behaviour_metric_delta restore",
+          "803771 behaviour_metric_delta restore_low"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit)."
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); 803771 entered the ledger from the sidekick kit listing; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit). Restore part: fixed by ADR 0406 (FN-a3-1, mentor-approved), regression 5000 -> 6500 and 2000 -> 4400."
   },
   {
     "spell": 803771,
