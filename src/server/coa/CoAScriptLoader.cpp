@@ -78,6 +78,7 @@ void AddSC_CoAOtherSideEmbryo();
 void AddSC_CoAOtherSideTrash();
 void AddSC_CoAVaults();
 void AddSC_CoABlackrockCaverns();
+void AddSC_CoABlackrockDepths();
 void AddSC_CoADungeonCompletion();
 void AddSC_CoADungeonSpoils();
 void AddSC_CoADungeonLoot();
@@ -889,6 +890,7 @@ void AddCoAScripts()
     AddSC_CoAOtherSideTrash();
     AddSC_CoAVaults();
     AddSC_CoABlackrockCaverns();
+    AddSC_CoABlackrockDepths();
     AddSC_CoADungeonCompletion();
     AddSC_CoADungeonSpoils();
     AddSC_CoADungeonTuning();
