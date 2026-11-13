@@ -5,7 +5,7 @@
     "all": {
       "arguments": [],
       "files": {
-        "manifest.json": "ad67cb323d7bbe85f1614f00765339f3824e4863f5511d106dbdab28e14291ce",
+        "manifest.json": "ace4ac1408ff8a3da0acc2c9a4b2fbc0177d72def0d4e8660edce8434c137ce0",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-root-ends.json": "282773a8fa9eb67e9b45500b2e36834b764356ed9bc606d72dedbfb0e01fa875",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-root-held.json": "1a635628d443863d266fda0231995a9d5024b6c118e22a9fed8b0ca5901c3be4",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-slow-ends.json": "21fb66cb57dcc36799a9f043eeccb1dbb818481d28fe79907662a5e077795bcc",
@@ -855,8 +855,8 @@
         "scenarios/conformance-necromancer-behaviour-503740-aura-expiry.json": "cae35da39ffe00cffeaefdbf09a88ea5c6e8f05c7601268cb38636dbac28d477",
         "scenarios/conformance-necromancer-behaviour-503740-metric-delta-frenzied-display.json": "f844916b00caf7d8978e7b84d73e0e1e96e87ef2a4147691ff8e1f7d69496d15",
         "scenarios/conformance-necromancer-behaviour-503740-metric-delta-frenzied-haste.json": "2411400b17d49be4bfa1c90b1d460405b5be9875a0a8c062f6e2a3f3a70033f6",
-        "scenarios/conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune.json": "cfd3f45b335469f3270394a2ef12c095b7a9e9ff560f4460b90acbb10484597a",
-        "scenarios/conformance-necromancer-behaviour-503740-metric-delta-snare-control.json": "081c864e561ddb7d3831e5ef819950932f09dd3e0ddd2af0ba24c5d5decf0c97",
+        "scenarios/conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune.json": "edcc4b73a780d3619415517c5b4438b97c3c96e8940f5e22bd2704a32ce74e72",
+        "scenarios/conformance-necromancer-behaviour-503740-metric-delta-snare-control.json": "91a866fa9002b3dd2346191db8a33b6f1793eef325bb511b83165a8755781e5b",
         "scenarios/conformance-necromancer-behaviour-503757-metric-delta-cast-by-1150.json": "02bfe1be5008317d2dc6bfdc93e63595a3a282e8e5dad28ab13dded43752a6c6",
         "scenarios/conformance-necromancer-behaviour-503757-metric-delta-cast-by-950.json": "660db2eb0428f69258e01b4a9650753906c87111a1cbe7ac91111d84a7350191",
         "scenarios/conformance-necromancer-behaviour-503757-metric-delta-cost.json": "bfbbec76f19c56528d6395817932dea21ab6d45d06fee95f9e92639f6a071a3b",
@@ -1136,6 +1136,8 @@
         "scenarios/conformance-necromancer-behaviour-704163-hit-ratio-disease-below-20.json": "20b236341bba78e93c092667c6bf24b62c579991229c73de02230d02d1527427",
         "scenarios/conformance-necromancer-behaviour-704163-hit-ratio-swarm-above-20.json": "c9ceba288a235be0fbd7399caed460fa298cc4c40f36d94ce7f5728c83a57ccd",
         "scenarios/conformance-necromancer-behaviour-704163-hit-ratio-swarm-below-20.json": "9b53c75f72f997225a1c77cf12f1d1ed31d612ae2a22991ff12b866bfacd827f",
+        "scenarios/conformance-necromancer-behaviour-704528-energize-range-control.json": "ac074f02524476c92ca77a4319041ab496991dad00225253d441248afe89e284",
+        "scenarios/conformance-necromancer-behaviour-704528-energize-range-pooled.json": "b925d335ccf806b5bbdbcbf9bbcf8f515c187da027210c455f5b0f8ac03fff86",
         "scenarios/conformance-necromancer-behaviour-704670-hit-ratio-frost-damage.json": "c6c0bd15101f5ff451e547b06d5c90134c386d435f4b4b190449fec6d4bb2991",
         "scenarios/conformance-necromancer-behaviour-704670-metric-delta-max-runic-power.json": "25faa47acb92a0e51266b15a038ff434904cfcc6a1e58825f79e15d85e0aade7",
         "scenarios/conformance-necromancer-behaviour-704676-cost-gate.json": "b26c8a61d7b515e22e512fd6bf7f32e7164f84f23e19f2e6b78ca0763cf5dfe9",
