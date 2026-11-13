@@ -5,7 +5,7 @@
 
 ## Context
 
-Claim 302.2, Entomb 500341 "making them immune to Physical damage": Effect[2] aura 40 SPELL_AURA_SCHOOL_IMMUNITY,
+Claim 302.2, Entomb 500341 "making them immune to Physical damage": Effect[2] aura 40 SPELL_AURA_DAMAGE_IMMUNITY,
 MiscValue 1 (Physical). On the dummy the Physical Void Zone 92559 hit still landed after a real Entomb: partial school
 immunity is dropped on NPCs by #6786 (212d773dde). Owner ruling Q-c7-1 (2026-11-13): keep #6786, the drop on NPCs is
 by design; the entry moves onto an enemy player, plus a text item (Entomb's immunity applies to players, not NPCs).

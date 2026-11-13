@@ -59,3 +59,20 @@ class ChaseHaltTests(unittest.TestCase):
     def test_a_point_move_past_the_far_dummy_is_rejected(self):
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), {**MOVE_ENTRY, 'move_yd': 20})
+
+    def test_the_halt_ratio_is_an_event_read_that_proves_the_halt(self):
+        from coverage import BEHAVIOUR, EVENT, metric_evidence, verdict_evidence
+        found = self.judged(0.16, 8.0, MOVE_ENTRY)
+        self.assertEqual(found.detail['metric'], 'chase_travel_ratio')
+        self.assertEqual(metric_evidence()['chase_travel_ratio'], EVENT)
+        self.assertEqual(verdict_evidence(found, MOVE_ENTRY['quote'], {}), BEHAVIOUR)
+
+    def test_a_halt_ratio_without_its_evidence_row_is_refused(self):
+        from unittest import mock
+        import coverage
+        found = self.judged(0.16, 8.0, MOVE_ENTRY)
+        without = {metric: kind for metric, kind in coverage.metric_evidence().items()
+                   if metric != 'chase_travel_ratio'}
+        with mock.patch.object(coverage, 'metric_evidence', return_value=without), \
+                self.assertRaises(coverage.EvidenceError):
+            coverage.verdict_evidence(found, MOVE_ENTRY['quote'], {})

@@ -677,17 +677,19 @@ When two authors work in parallel:
 - class ADRs are numbered inside the class folder; shared ADRs carry provisional numbers and take the next free ones
   just before merge (section 14.4). Number blocks per author are retired (ADR 0583).
 
-Cadence, the default for every class and every cycle (owner, through the mentor, 2026-11-13):
-1. Every cycle starts with a written plan: its end time, the claims taken and the target final count. The start time
-   of the counted pair is fixed in advance.
+Cadence, the default for every class and every cycle (owner, through the mentor, 2026-11-13; no clock and no end
+time since the evening ruling of that day):
+1. Every cycle starts with a written plan: the claims taken and the target final count. There is no clock and no end
+   time: speed comes from ordering and grouping, not from deadlines.
 2. Order inside a cycle: (a) ledger-only and audit fixes, counted by a re-audit, with no runs; (b) claims that ride
    existing kinds; (c) new kinds, grouped by tool, one author per tool group; (d) harness C++ only after a G-39 note.
-3. The timebox applies at every cycle's triage: two failed designs, or more than 90 agent-minutes on a claim, give
-   status 3 or 4 with the reason.
+3. At every cycle's triage, status 3 or 4 only after two genuinely different designs failed (the second-agent rule)
+   or a proven impossibility. More than 90 agent-minutes on a claim only flags it for a design review with the
+   mentor; it never closes a claim by itself.
 4. The bench never idles: the next cycle's read-only work (grouping, designs, tables) runs while the merged pair runs.
 5. Two authors at most, fresh agents; Sonnet for mechanical work, Opus for design and review.
-6. A checkpoint after each merged pair: the count, the delta, the next cycle's plan and an ETA, to the mentor in one
-   message.
+6. A checkpoint after each merged pair: the count, the delta and the next cycle's plan, to the mentor in one message,
+   and a report written at that checkpoint.
 7. A cycle that gains less than half its target: the next plan says why and changes the split.
 
 Each batch sets a stop rule before it starts, in minutes per resolved clause.
@@ -711,7 +713,8 @@ When the tool cannot express a claim, extend it:
 
 A tool extension needs no prior approval and is reported in the batch report. A harness C++ change beyond reading and
 recording needs a note first (G-39): to the mentor, or without one to the owner. A gap becomes status 5 only after two
-different designs have failed, or when one claim would cost more than 90 agent-minutes.
+genuinely different designs have failed or on a proven impossibility; more than 90 agent-minutes on one claim only
+flags it for a design review with the mentor (section 9.6, Cadence).
 
 A new check or metric needs a row in the closed evidence tables first (`coverage.EVIDENCE`, `METRIC_EVIDENCE`, ADR
 0120). Without the row the coverage run fails.

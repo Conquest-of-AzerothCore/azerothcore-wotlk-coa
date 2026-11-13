@@ -15,6 +15,7 @@ HOOKED, CHASER, FAR = 'hooked', 'chaser', 'far'
 MOVERS = (HOOKED, CHASER)
 CHASE_MINIMUM_YD = 3.0
 ATTACK, MOVE_POINT = 'attack', 'move_point'
+CHASE_TRAVEL_RATIO = 'chase_travel_ratio'
 
 
 @dataclass(frozen=True)
@@ -98,7 +99,7 @@ def chase_halt_scenario(class_file: dict, spec: ChaseHaltSpec) -> tuple[dict, li
         'players': [player_fixture(class_file)],
         'creatures': creatures,
         'steps': steps}
-    model = {'kind': KIND, 'metric': 'distance_2d', 'quote': entry.quote, 'expected': spec.expected_ratio,
+    model = {'kind': KIND, 'metric': CHASE_TRAVEL_RATIO, 'quote': entry.quote, 'expected': spec.expected_ratio,
              'reads': {moment: [chase_label(spec, f'{moment} {read}') for read in ('time', *MOVERS)]
                        for moment in ('start', 'end')}}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
@@ -158,3 +159,4 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: chase_halt_verdict}
+METRIC_EVIDENCE = {CHASE_TRAVEL_RATIO: 'event'}
