@@ -1306,7 +1306,8 @@ def magnitude_ratio_scenario(class_file: dict, entry: dict, part: int = 0) -> tu
     observe_count_metric = MAGNITUDE_OBSERVE_COUNT_METRICS[entry['observe_metric']]
     steps.append(measurement(labels['observe_count'], CASTER, observe_count_metric, spell=entry['observe_spell'],
                              **observed_on))
-    steps.append(measurement(labels['aura'], CASTER, 'aura', spell=entry.get('presence_aura', aura)))
+    steps.append(measurement(labels['aura'], CASTER, 'aura', spell=entry['presence_aura'])
+                 if entry.get('presence_aura') else aura_measurement(entry, labels['aura']))
     resisted_school = magnitude_resisted_school(class_file, entry, cast_target)
     target_labels: dict[str, str] = {}
     if resisted_school:

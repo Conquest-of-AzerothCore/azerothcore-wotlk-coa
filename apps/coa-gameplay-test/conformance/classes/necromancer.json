@@ -2134,7 +2134,8 @@
         ]
       },
       "critical": false,
-      "trials": 40,
+      "trials": 68,
+      "parts": 7,
       "cast_power": 1373,
       "expected_source": "680388 Effect[1] aura 118 SPELL_AURA_MOD_HEALING_PCT on the caster, BasePoints 9 + 1 = 10 ($s2); Unit::SpellHealingBonusTaken (Unit.cpp:10873-10898, stock) multiplies every heal its holder receives. A heal from another source, Flash Heal 10917 (rank 7, BaseLevel 56) cast by the caster on itself: non-critical heal per hit without the ward (control) and with the ward learned and cast before each heal (treatment). cast_power 1373 (player_class_stats BaseMana) refills mana before each heal, which also covers the next ward cast (20% of base mana)."
     }
