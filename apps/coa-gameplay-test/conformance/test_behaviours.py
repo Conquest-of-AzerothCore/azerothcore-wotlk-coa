@@ -10223,7 +10223,7 @@ class MetricDeltaPlayerRatingsTests(unittest.TestCase):
     def test_the_override_sets_only_the_named_rating(self):
         scenario, _ = metric_delta_scenario(load_class_file(23),
                                             metric_delta_spec(self.necromancy_entry('expertise_control')))
-        run.validate(scenario)
+        run.validate(scenario, run.SIMULATED_CLOCK)
         player = scenario['players'][0]
         self.assertEqual((player['melee_hit_rating'], player['spell_hit_rating']), (0, 10000))
 
