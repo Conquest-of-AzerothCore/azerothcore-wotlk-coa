@@ -311,7 +311,8 @@
     "spell": 300958,
     "clause": "In addition, increases the critical strike chance of Ice Barrage by $s2% against Frozen targets.",
     "labels": [
-      "300958 effect_value e1 #1"
+      "300958 effect_value e1 #1",
+      "300958 behaviour_hit_ratio frozen_crit_rate"
     ],
     "kind": "claim",
     "reason": "Status 5, owner question Q-b3b-5 (progress.md): a chance claim beyond one accelerated scenario (G-20); the crit_rate kind counts only its own cast spell and sets no target aura, while Ice Barrage lands 803779 on a Frozen target; the band at +20 points needs about 10600 hits per arm. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Chilling Presence\" lines (0 by id), live Ice Barrage 803779 hits: 4373 critical of 11601 (37.7%), frozen and unfrozen targets mixed, 20616 Ice Barrage lines; ~/CoaServer/reference: bindmysoul \"Increases critical strike chance of all party and raid members by 3%. Does not stack with \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
