@@ -9,7 +9,7 @@ DELETE FROM `gameobject` WHERE `guid` IN (12101024, 12101025, 12101026, 12101027
 INSERT INTO `creature`(`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`)
 VALUES
 (12101022, 1415,  0, 0, 0, 1, 1, 1, -8997.77, 858.99,  105.81,  0.8252511480258712, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
-(12101023, 1413,  0, 0, 0, 1, 1, 0, -8998.21, 861.51,  105.88,  5.6377,             300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
+(12101023, 1413,  0, 0, 0, 1, 1, 0, -8953.36, 862.729,  105.55394625503253, 6.28191, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101024, 1414,  0, 0, 0, 1, 1, 0, -8995.65, 861.07,  105.75,  3.9751775344342897, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
 (12101026, 14757, 0, 0, 0, 1, 1, 0, -531.0075726373829, -3872.7412350927298, 232.56292677815676, 5.508129681681255, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view');
 
