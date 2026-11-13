@@ -1268,6 +1268,32 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 802986,
+      "name": "Plague Horde (no-talent control)",
+      "kind": "metric_delta",
+      "variant": "horde_no_talent",
+      "label_suffix": "horde_no_talent",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "gate_spell": 707421,
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 12000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 807653
+      },
+      "observe_source": "F-ma-1 regression, no-talent control: 802986 is never learned (the gate learned between the phases is 707421, which changes nothing until cast); a Ghoul 50073 raised and commanded at the dummy in each phase carries no 807653 (0 and 0)."
+    },
+    {
       "spell": 707006,
       "name": "Bone Legion 707006 (Lichfrost Runic Power)",
       "kind": "hit_ratio",
@@ -1436,7 +1462,9 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. 807765 never on the caster, before or after."
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. 807765 never on the caster, before or after. Gate at the start (gate_timing start, trigger_only_after): the talent is known in both phases and both Ghouls are raised after it is learned (with the talent learned between the phases, the Ghoul raised before it carried the aura in only some runs: pairs f2 and f3 run 1, 1 of 2); the before phase raises a Ghoul and leaves it idle (no Command, no hit, no roll), the after phase raises a second one and commands both at the dummy.",
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 802986,
@@ -1466,7 +1494,9 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The applied 807765 on a Ghoul has its DBC duration, DurationIndex 28 = 5000 ms (a read-only harness read of the aura's maximum duration, ADR 0484; a readback, the condition of the mentor approval, not the duration claim)."
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The applied 807765 on a Ghoul has its DBC duration, DurationIndex 28 = 5000 ms (a read-only harness read of the aura's maximum duration, ADR 0484; a readback, the condition of the mentor approval, not the duration claim). Gate at the start (gate_timing start, trigger_only_after): the talent is known in both phases and both Ghouls are raised after it is learned (with the talent learned between the phases, the Ghoul raised before it carried the aura in only some runs: pairs f2 and f3 run 1, 1 of 2); the before phase raises a Ghoul and leaves it idle (no Command, no hit, no roll), the after phase raises a second one and commands both at the dummy.",
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 802986,
@@ -1495,7 +1525,9 @@
         "aura": 802986,
         "entry": 50073
       },
-      "observe_source": "F-ma-1 regression (was the probe of the horde_crit lead, 1 before the fix in pair p6): with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER."
+      "observe_source": "F-ma-1 regression (was the probe of the horde_crit lead, 1 before the fix in pair p6): with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER. Gate at the start (gate_timing start, trigger_only_after): the talent is known in both phases and both Ghouls are raised after it is learned (with the talent learned between the phases, the Ghoul raised before it carried the aura in only some runs: pairs f2 and f3 run 1, 1 of 2); the before phase raises a Ghoul and leaves it idle (no Command, no hit, no roll), the after phase raises a second one and commands both at the dummy.",
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 707562,
@@ -1669,8 +1701,10 @@
         "aura": 707014,
         "entry": 50073
       },
-      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's main-hand swing interval 2000 ms without the talent (control), 2000 / 1.40 = 1428.571 ms with the Frenzied Ghoul aura (tolerance 1 ms).",
-      "tolerance": 1
+      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's main-hand swing interval 2000 ms without the talent (control), 2000 / 1.40 = 1428.571 ms with the Frenzied Ghoul aura (tolerance 1 ms). Gate at the start (gate_timing start, trigger_only_after): the talent is known in both phases and both Ghouls are raised after it is learned (with the talent learned between the phases, the Ghoul raised before it carried the aura in only some runs: pairs f2 and f3 run 1, 1 of 2); the before phase raises a Ghoul and leaves it idle (no Command, no hit, no roll), the after phase raises a second one and commands both at the dummy.",
+      "tolerance": 1,
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 503740,
@@ -1699,7 +1733,9 @@
         "aura": 707014,
         "entry": 50073
       },
-      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's display: 10626 (creature_template_model of Ghoul 50073) without the talent, 14708 (the model of Frenzied Ghoul 50173, the transform's MiscValue) with it."
+      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's display: 10626 (creature_template_model of Ghoul 50073) without the talent, 14708 (the model of Frenzied Ghoul 50173, the transform's MiscValue) with it. Gate at the start (gate_timing start, trigger_only_after): the talent is known in both phases and both Ghouls are raised after it is learned (with the talent learned between the phases, the Ghoul raised before it carried the aura in only some runs: pairs f2 and f3 run 1, 1 of 2); the before phase raises a Ghoul and leaves it idle (no Command, no hit, no roll), the after phase raises a second one and commands both at the dummy.",
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 802986,
@@ -1729,8 +1765,10 @@
         "aura": 807653,
         "entry": 50073
       },
-      "observe_source": "Plague Horde 802986 rolls MinionChance(player, actor, 802986) on a minion's damage and casts Plague Horde 807653 on the minion (AscensionNecromancerEvents.cpp:190-193); its 10% roll is proven by 802986 proc_rate. Tooltip: \"Enrage for $d, increasing their critical strike chance by $807765s1%\" ($807765s1 = 10: 807765 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases. Forcing fixture (mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 802986 (10% x 11 > 100%), 807653 on a Ghoul read before the after reading (absent: unmeasured), removed at the end and read gone. The Ghoul's melee crit chance against the dummy: +10 points.",
-      "expected_gain": 10
+      "observe_source": "Plague Horde 802986 rolls MinionChance(player, actor, 802986) on a minion's damage and casts Plague Horde 807653 on the minion (AscensionNecromancerEvents.cpp:190-193); its 10% roll is proven by 802986 proc_rate. Tooltip: \"Enrage for $d, increasing their critical strike chance by $807765s1%\" ($807765s1 = 10: 807765 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + 1). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases. Forcing fixture (mentor N-a1): SPELLMOD_CHANCE_OF_SUCCESS +1000% on 802986 (10% x 11 > 100%), 807653 on a Ghoul read before the after reading (absent: unmeasured), removed at the end and read gone. The Ghoul's melee crit chance against the dummy: +10 points. Gate at the start (gate_timing start, trigger_only_after): the talent is known in both phases and both Ghouls are raised after it is learned (with the talent learned between the phases, the Ghoul raised before it carried the aura in only some runs: pairs f2 and f3 run 1, 1 of 2); the before phase raises a Ghoul and leaves it idle (no Command, no hit, no roll), the after phase raises a second one and commands both at the dummy.",
+      "expected_gain": 10,
+      "gate_timing": "start",
+      "trigger_only_after": true
     },
     {
       "spell": 707562,
