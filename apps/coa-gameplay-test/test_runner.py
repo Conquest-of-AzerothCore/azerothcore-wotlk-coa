@@ -1120,6 +1120,17 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'metric needs spell'):
             run.validate(self.scenario)
 
+    def test_owned_creature_school_spell_crit_needs_entry_and_probe_spell(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster',
+                                       'metric': 'owned_creature_school_spell_crit_chance', 'entry': 50073,
+                                       'spell': 501978, 'school_mask': 16, 'min': 0, 'max': 100})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for field, message in (('spell', 'metric needs a magic probe spell'), ('entry', 'metric needs creature entry')):
+            scenario = copy.deepcopy(self.scenario)
+            del scenario['steps'][-1][field]
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, message):
+                run.validate(scenario)
+
     def test_owned_creature_health_modifier_needs_entry_and_part(self):
         self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'owned_creature_health_modifier',
                                        'entry': 50073, 'part': 0, 'min': 0, 'max': 100000})

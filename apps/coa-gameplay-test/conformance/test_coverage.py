@@ -1322,6 +1322,19 @@ class RunicPowerPromiseTest(unittest.TestCase):
             self.assertEqual(evidence_of([claim(words, '1 behaviour_metric_delta spent')], verdicts)[0], [BEHAVIOUR])
 
 
+class OwnedCreatureSchoolSpellCritPromiseTest(unittest.TestCase):
+    def test_a_learned_minion_school_crit_contrast_proves_a_summon_crit_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta summon_school_crit', BEHAVIOUR_METRIC_DELTA,
+                           'owned_creature_school_spell_crit_chance', contrast=LEARNED_CONTRAST)]
+        promised = claim('increases the Frost critical strike chance of your summons by $s2%.',
+                         '1 behaviour_metric_delta summon_school_crit')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases the range of your Rime spells by $s1 yds',
+                      '1 behaviour_metric_delta summon_school_crit')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_school_spell_crit_chance'], STATE)
+
+
 class ServerPacketEvidenceTest(unittest.TestCase):
     def test_a_learned_damage_shield_packet_read_is_an_event(self):
         verdicts = [judged('1 behaviour_metric_delta shield_damage', BEHAVIOUR_METRIC_DELTA, 'server_packet_u32',

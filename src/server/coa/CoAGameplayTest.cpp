@@ -5627,6 +5627,17 @@ private:
             Require(enemy != nullptr, "Owned creature threat needs a creature target");
             return enemy->GetThreatMgr().GetThreat(creature);
         }
+        if (metric == "owned_creature_school_spell_crit_chance")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            Require(info != nullptr && info->DmgClass == SPELL_DAMAGE_CLASS_MAGIC,
+                "School spell crit observation needs a magic probe spell");
+            uint32 const schoolMask = step.get<uint32>("school_mask", SPELL_SCHOOL_MASK_FROST);
+            Require(schoolMask && schoolMask <= SPELL_SCHOOL_MASK_ALL, "Invalid school mask");
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "School spell crit observation needs a present owned creature");
+            return creature->SpellDoneCritChance(nullptr, info, SpellSchoolMask(schoolMask), BASE_ATTACK, true);
+        }
         if (metric == "owned_creature_spell_cast_count")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature cast spell");
