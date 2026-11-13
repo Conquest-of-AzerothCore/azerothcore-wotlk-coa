@@ -4520,5 +4520,77 @@
     ],
     "kind": "claim",
     "reason": "Status: route pending (route agent 2026-11-13, parked: not built; owned_creature_crit_chance on a minion carrying 807653 needs the proc-gated aura first (harness set_aura would make the subject a fixture)). Pulled sentence; owned_creature_crit_chance on a minion carrying 807653 would read it. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 31124 Plague Horde 807653 lines, 38119 Zombie Plague lines; ~/CoaServer/reference: bindmysoul the same sentence, sidekick coaKits Necromancer names it, ascension-data advancement.tsv, exiles-db tables and cachepacks list the spell (acquisition, no value), coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable); videos not used."
+  },
+  {
+    "spell": 560730,
+    "clause": "Your Undead minions feast upon the parasites on hit, leeching $561319s1% of their damage dealt as Plague Damage to the target.",
+    "labels": [
+      "560730 effect_value 561319e0 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572023,
+    "clause": "Launch a chain of frost at an enemy, dealing ${$801728m1+$801728ppl1+$spfr*0.35} Frost Damage every $t1 sec for $d.",
+    "labels": [
+      "572023 effect_value 801728e0 #1",
+      "572023 spell_duration 801724 #2",
+      "572023 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572023,
+    "clause": "Each tick generates $/10;800344s2 Runic Power.",
+    "labels": [
+      "572023 effect_value #4"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705754,
+    "clause": "Increases the target's damage taken from your Necromancer diseases by $573233s1% for $573233d,",
+    "labels": [
+      "705754 effect_value 573233e0 #0",
+      "705754 spell_duration 573233 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 705754,
+    "clause": "stacking $573233u times.",
+    "labels": [
+      "705754 max_stacks 573233 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707562,
+    "clause": "Increases the damage of your next Glacial Impact by $s1% for $d,",
+    "labels": [
+      "707562 effect_value 712434e0 #0",
+      "707562 spell_duration 712434 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707562,
+    "clause": "stacking $u times.",
+    "labels": [
+      "707562 max_stacks 712434 #2"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707562,
+    "clause": "Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 805038,
+    "clause": "Teleport back to the position of your Scourge Transporter and remove all movement slowing effects from you.",
+    "labels": [],
+    "kind": "claim"
   }
 ]
