@@ -6015,8 +6015,42 @@ def crit_rate_reads(spec: HitRatioSpec, arm: str) -> dict[str, dict[str, str]]:
     return {mark: {read: f'{base} {arm} {mark} {read}' for read in CRIT_RATE_READS} for mark in ('start', 'end')}
 
 
-def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list[Expectation]]:
-    if spec.trials < 1 or spec.control == spec.treatment:
+@dataclass(frozen=True)
+class CritRateArm:
+    observe_spell: int | None = None
+    wait_ms: int = 0
+
+
+CRIT_RATE_ARM_FIELDS = {'observe_spell', 'wait_ms'}
+
+
+def crit_rate_arm_overrides(entry: dict) -> tuple[dict, dict[str, CritRateArm]]:
+    common, arms = dict(entry), {}
+    for name in HIT_RATIO_ARMS:
+        raw = dict(entry.get(name, {}))
+        own = {field: raw.pop(field) for field in CRIT_RATE_ARM_FIELDS & set(raw)}
+        observe, wait = own.get('observe_spell'), own.get('wait_ms', 0)
+        if observe is not None and (type(observe) is not int or observe <= 0):
+            raise ValueError(f'{entry["spell"]} crit_rate {name} observe_spell {observe!r} must be a spell id')
+        if type(wait) is not int or not 0 <= wait <= CRIT_RATE_MAX_WAIT_MS:
+            raise ValueError(f'{entry["spell"]} crit_rate {name} wait_ms {wait!r} must lie between 0 and '
+                             f'{CRIT_RATE_MAX_WAIT_MS}')
+        if name in entry:
+            common[name] = raw
+        arms[name] = CritRateArm(observe, wait)
+    return common, arms
+
+
+CRIT_RATE_MAX_WAIT_MS = 30000
+
+
+def crit_rate_scenario(class_file: dict, spec: HitRatioSpec,
+                       overrides: dict[str, CritRateArm] | None = None) -> tuple[dict, list[Expectation]]:
+    overrides = overrides or {}
+    observed = {name: overrides.get(name, CritRateArm()).observe_spell or spec.observe_spell
+                for name in HIT_RATIO_ARMS}
+    waits = {name: overrides.get(name, CritRateArm()).wait_ms for name in HIT_RATIO_ARMS}
+    if spec.trials < 1 or (spec.control == spec.treatment and observed['control'] == observed['treatment']):
         raise ValueError(f'{spec.spell} crit_rate needs trials and two different arms')
     if spec.force_crit is not None or spec.critical is not None or spec.cast_spell is not None or \
             spec.swing_hand is not None:
@@ -6024,16 +6058,19 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                          f'crit filter, other cast or swing')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'crit_rate', spec.quote, spec.expected)
-    class_file = armed_for(class_file, records, spec.observe_spell)
-    fields = {'spell': spec.observe_spell, 'target': spec.target}
+    for spell in dict.fromkeys((spec.observe_spell, *observed.values())):
+        class_file = armed_for(class_file, records, spell)
+    extra_observed = tuple(spell for spell in observed.values() if spell != spec.observe_spell)
     learned = (*spec.learn, *spec.control.casts, *spec.treatment.casts)
     steps = [{'action': 'learn', 'actor': spec.caster, 'spell': spec.observe_spell}]
+    steps += [{'action': 'learn', 'actor': spec.caster, 'spell': spell} for spell in dict.fromkeys(extra_observed)]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(learned)
-              if spell != spec.observe_spell or spec.caster != CASTER]
+              if (spell != spec.observe_spell and spell not in extra_observed) or spec.caster != CASTER]
     reads = {}
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = reads[name] = crit_rate_reads(spec, name)
+        fields = {'spell': observed[name], 'target': spec.target}
 
         def read(mark: str) -> list[dict]:
             return [measurement(marks[mark]['hits'], spec.caster, 'spell_damage_count', **fields),
@@ -6045,7 +6082,9 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                       for spell, stacks in arm.auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
-            steps += hit_ratio_cast(records, spec.observe_spell, spec.caster, spec.target)
+            steps += hit_ratio_cast(records, observed[name], spec.caster, spec.target)
+            if waits[name]:
+                steps.append({'action': 'wait', 'label': f'{name} ticks', 'ms': waits[name]})
         steps.append({'action': 'wait', 'label': f'{name} drain', 'ms': DRAIN_MS})
         steps += read('end')
         steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
@@ -6057,16 +6096,25 @@ def crit_rate_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         'contract': f'{spec.trials} casts of {spec.observe_spell} by {spec.caster} at {spec.target} per arm, control '
                     f'first, the arm\'s auras {list(spec.control.auras)} / {list(spec.treatment.auras)} set before '
                     f'every cast; the landed hits and the critical ones are counted at the start and the end of each '
-                    f'arm; the treatment\'s critical share must exceed the control\'s by {spec.expected:g} points',
+                    f'arm; the treatment\'s critical share must exceed the control\'s by {spec.expected:g} points'
+                    + crit_rate_arm_contract(observed, waits, spec.observe_spell),
         'players': [player],
         'creatures': [creature_fixture(class_file)],
         'steps': base_steps(class_file) + steps}
     model = {'kind': 'crit_rate', 'reads': reads, 'expected': spec.expected, 'trials': spec.trials,
              'minimum_hits': max(1, int(spec.trials * HIT_RATIO_MINIMUM_SHARE)), 'quote': entry.quote}
+    if any(spell != spec.observe_spell for spell in observed.values()):
+        model['observed'] = dict(observed)
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_CRIT_RATE}' + suffix, BEHAVIOUR_CRIT_RATE, spec.spell,
                               spec.observe_spell, None, str(spec.expected), prose_rule(entry.quote, spec.spell),
                               model)
     return timed(scenario, waited_ms(steps), MAX_ACCELERATED_SCENARIO_MS), [expectation]
+
+
+def crit_rate_arm_contract(observed: dict[str, int], waits: dict[str, int], common: int) -> str:
+    parts = [f'the {name} arm counts {spell}' for name, spell in observed.items() if spell != common]
+    parts += [f'the {name} arm waits {wait} ms after each cast' for name, wait in waits.items() if wait]
+    return '; ' + '; '.join(parts) if parts else ''
 
 
 TAKEN_HIT_TRIALS = 10
@@ -7565,7 +7613,8 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
     if entry['kind'] == 'hit_ratio':
         return hit_ratio_scenario(class_file, hit_ratio_spec(entry))
     if entry['kind'] == 'crit_rate':
-        return crit_rate_scenario(class_file, hit_ratio_spec({'trials': CRIT_RATE_TRIALS, **entry}))
+        common, arms = crit_rate_arm_overrides(entry)
+        return crit_rate_scenario(class_file, hit_ratio_spec({'trials': CRIT_RATE_TRIALS, **common}), arms)
     if entry['kind'] == 'taken_hit':
         return taken_hit_scenario(class_file, taken_hit_spec(entry))
     if entry['kind'] == 'threat_redirect':

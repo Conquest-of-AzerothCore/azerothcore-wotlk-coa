@@ -78,6 +78,7 @@ import run
 import compare as compare_module
 
 CLASS_FILE = load_class_file(19)
+LICHFROST = 801722
 RECORDS = Records(dataset(DBC_DIR)) if DBC_DIR.is_dir() else None
 SCARLET_JUDICATOR = 525024
 JUSTICE = 712437
@@ -8147,6 +8148,61 @@ class CritRateTests(unittest.TestCase):
     def test_a_forced_crit_is_refused(self):
         with self.assertRaisesRegex(ValueError, 'no forced crit'):
             behaviour_scenario(CLASS_FILE, {**r1a_entry(520608, 'crit_rate'), 'force_crit': 'melee'})
+
+    def periodic_entry(self, **treatment) -> dict:
+        entry = r1a_entry(520608, 'crit_rate')
+        return {**entry, 'expected': 0, 'control': {'auras': []},
+                'treatment': {'auras': [], 'observe_spell': LICHFROST, 'wait_ms': 3000, **treatment}}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_each_arm_may_count_its_own_spell_and_wait_after_each_cast(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.periodic_entry())
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        self.assertEqual(len(cast_indices(steps, 807268)), 300)
+        self.assertEqual(len(cast_indices(steps, LICHFROST)), 300)
+        reads = [step for step in steps if step.get('metric') == 'spell_damage_count']
+        self.assertEqual([step['spell'] for step in reads], [807268] * 4 + [LICHFROST] * 4)
+        ticks = [step for step in steps if step.get('label') == 'treatment ticks']
+        self.assertEqual((len(ticks), {step['ms'] for step in ticks}), (300, {3000}))
+        self.assertFalse(any(step.get('label') == 'control ticks' for step in steps))
+        self.assertEqual(expectation.model['observed'], {'control': 807268, 'treatment': LICHFROST})
+        self.assertIn(f'the treatment arm counts {LICHFROST}', scenario['contract'])
+        learned = [step['spell'] for step in steps if step['action'] == 'learn']
+        self.assertEqual(learned.count(LICHFROST), 1)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_shared_spell_keeps_the_model_without_observed_arms(self):
+        _, [expectation] = self.built()
+        self.assertNotIn('observed', expectation.model)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_equal_arms_on_different_spells_are_two_arms(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.periodic_entry(wait_ms=0))
+        self.assertFalse(any(step.get('label') == 'treatment ticks' for step in scenario['steps']))
+
+    def test_arm_overrides_are_checked(self):
+        with self.assertRaisesRegex(ValueError, 'wait_ms'):
+            behaviour_scenario(CLASS_FILE, self.periodic_entry(wait_ms=-1))
+        with self.assertRaisesRegex(ValueError, 'wait_ms'):
+            behaviour_scenario(CLASS_FILE, self.periodic_entry(wait_ms=30001))
+        with self.assertRaisesRegex(ValueError, 'observe_spell'):
+            behaviour_scenario(CLASS_FILE, self.periodic_entry(observe_spell='801722'))
+        same = {**r1a_entry(520608, 'crit_rate'), 'control': {}, 'treatment': {}}
+        with self.assertRaisesRegex(ValueError, 'two different arms'):
+            behaviour_scenario(CLASS_FILE, same)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_zero_point_claim_judges_ticks_against_direct_hits(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, self.periodic_entry())
+        values = {}
+        for arm, (hits, crits) in (('control', (4000.0, 400.0)), ('treatment', (4000.0, 404.0))):
+            marks = expectation.model['reads'][arm]
+            values.update({marks['start']['hits']: 0.0, marks['start']['crits']: 0.0,
+                           marks['end']['hits']: hits, marks['end']['crits']: crits})
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'ok')
+        values[expectation.model['reads']['treatment']['end']['crits']] = 4000.0
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
