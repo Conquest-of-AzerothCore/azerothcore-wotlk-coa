@@ -3007,6 +3007,31 @@ def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    verdict = forced_or_plain_metric_delta_verdict(base, run, model)
+    stamps = model.get('game_time')
+    if stamps is None or verdict.status == 'unmeasured':
+        return verdict
+    cast = run.values.get(stamps['cast_label'])
+    windows = [(stamps['after_label'], stamps['after_window'], 'after')]
+    if 'expired_label' in stamps:
+        windows.append((stamps['expired_label'], stamps['expired_window'], 'expired'))
+    if cast is None or any(run.values.get(label) is None for label, _, _ in windows):
+        return replace(verdict, status='unmeasured', explanation=f'{verdict.explanation}; a game-time stamp is '
+                                                                 f'missing, so the reading\'s time is not known')
+    texts, inside = [], True
+    for label, (low, high), moment in windows:
+        elapsed = run.values[label] - cast
+        inside = inside and low <= elapsed <= high
+        texts.append(f'the {moment} reading at {elapsed:g} ms of game time after the trigger cast (window '
+                     f'{low:g}..{high:g} ms)')
+    explanation = f'{verdict.explanation}; {", ".join(texts)}'
+    if not inside:
+        return replace(verdict, status='alert', explanation=f'{explanation}: a reading falls outside its game-time '
+                                                            f'window, so the bracket is not proven')
+    return replace(verdict, explanation=explanation)
+
+
+def forced_or_plain_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     forced = model.get('forced_chance')
     if forced is None:
         return judged_metric_delta(base, run, model)

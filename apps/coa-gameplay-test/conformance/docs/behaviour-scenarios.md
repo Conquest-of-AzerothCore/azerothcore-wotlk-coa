@@ -294,6 +294,11 @@ time (`game_time_ms`), the minions carrying `aura` and the minion's casts of `ma
 game time; the verdict is `ok` when the bracket lies inside `expected_ms` +- `band_ms` (5% by default). A cast after the
 switch alerts; no cast before it is `unmeasured`. Durations are judged on game-time stamps, never on the nominal waits:
 each wait step costs about 10 to 17 ms of game time beyond its `ms` (ADR 0485).
+`game_time` (ADR 0501) stamps a metric_delta reading in game time: `{"after": [low, high]}` reads `game_time_ms` right
+before the treatment phase's trigger cast and right before the after reading, and `"expired": [low, high]` (with
+`expiry_wait_ms`) also before the expiry reading. Each reading's game time after the cast must lie in its window (the
+G-19 band around the stated duration or cast time, so a held / ends pair brackets the end inside the band on both sides
+in game time); a reading outside its window alerts, a missing stamp is `unmeasured`.
 `expected_ratio` with a `tolerance` (ADR 0380) judges the after reading over the before reading instead, with
 `before_expected` its least before reading: Pierced 570216 leaves 0.9 of the dummy's armor. `setup_target` sends the
 setup casts to their own unit: Greater Skeletal Warrior 504901's raise goes to the caster and its Command to the dummy.

@@ -1344,6 +1344,7 @@ class MetricDeltaSpec:
     caster_health: tuple[int, int] | None = None
     forced_chance: tuple[int, int, int] | None = None
     corpse: tuple[int, int, float] | None = None
+    game_time: tuple[tuple[int, int], tuple[int, int] | None] | None = None
 
 
 TARGET_CAST_SETTLE_MS = 300
@@ -1399,6 +1400,46 @@ def metric_delta_corpse(raw: dict | None) -> tuple[int, int, float] | None:
     if set(raw) != {'entry', 'health', 'distance'} or int(raw['health']) < 1 or float(raw['distance']) <= 0:
         raise ValueError(f'metric_delta corpse {raw!r} needs an entry, a positive health and a distance')
     return int(raw['entry']), int(raw['health']), float(raw['distance'])
+
+
+def metric_delta_game_time(raw: dict | None) -> tuple[tuple[int, int], tuple[int, int] | None] | None:
+    if raw is None:
+        return None
+    if not set(raw) <= {'after', 'expired'} or 'after' not in raw:
+        raise ValueError(f'metric_delta game_time {raw!r} needs an after window and at most an expired one')
+    windows = []
+    for moment in ('after', 'expired'):
+        window = raw.get(moment)
+        if window is None:
+            windows.append(None)
+            continue
+        if len(window) != 2 or not 0 < int(window[0]) <= int(window[1]):
+            raise ValueError(f'metric_delta game_time {moment} window {window!r} needs 0 < low <= high')
+        windows.append((int(window[0]), int(window[1])))
+    return windows[0], windows[1]
+
+
+def game_time_labels(spec: MetricDeltaSpec) -> tuple[str, str, str]:
+    return tuple(f'{spec.spell} game_time {moment}' for moment in ('cast', AFTER, 'expired'))
+
+
+def with_game_time(steps: list[dict], spec: MetricDeltaSpec, after_label: str, expired_label: str | None) -> list[dict]:
+    cast_label, after_stamp, expired_stamp = game_time_labels(spec)
+    reads = [index for index, step in enumerate(steps) if step.get('label') == after_label]
+    if len(reads) != 1:
+        raise ValueError(f'{spec.spell} game_time needs exactly one after reading')
+    trigger = [index for index, step in enumerate(steps[:reads[0]]) if step.get('actor') == CASTER and (
+        (step['action'] == 'cast' and step['spell'] == spec.trigger_spell)
+        or (step['action'] == 'use_item' and step.get('spell') == spec.trigger_spell))]
+    if not trigger:
+        raise ValueError(f'{spec.spell} game_time finds no trigger cast before its after reading')
+    stamped = list(steps)
+    if expired_label is not None:
+        expired = next(index for index, step in enumerate(stamped) if step.get('label') == expired_label)
+        stamped.insert(expired, measurement(expired_stamp, CASTER, 'game_time_ms'))
+    stamped.insert(reads[0], measurement(after_stamp, CASTER, 'game_time_ms'))
+    stamped.insert(trigger[-1], measurement(cast_label, CASTER, 'game_time_ms'))
+    return stamped
 
 
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
@@ -1528,6 +1569,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         raise ValueError(f'{spec.spell} has the dummy cast before the trigger only with the dummy as its target')
     if spec.setup_target == CORPSE and (spec.corpse is None or not spec.setup_only_after):
         raise ValueError(f'{spec.spell} kills a corpse fixture only when it declares one, in the treatment phase only')
+    if spec.game_time is not None and (spec.attack_swings or (spec.game_time[1] is None)
+                                       != (spec.expiry_wait_ms is None)):
+        raise ValueError(f'{spec.spell} stamps game time around a trigger cast only, with an expired window exactly '
+                         f'when it reads an expiry')
     if spec.corpse is not None and spec.setup_target != CORPSE:
         raise ValueError(f'{spec.spell} declares a corpse fixture that no setup cast kills')
     if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
@@ -1748,6 +1793,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                      f'{spec.forced_chance[1]} it applies is read at a known time; its presence on creature '
                      f'{spec.forced_chance[2]} is read before both readings (absent without the passive, on every '
                      f'creature of that entry with it), and the modifier is removed at the end and read gone.')
+    if spec.game_time is not None:
+        steps = with_game_time(steps, spec, after_label,
+                               metric_delta_label(spec, 'expired') if spec.expiry_wait_ms is not None else None)
+        contract += (' The game time is read right before the treatment phase\'s trigger cast and right before each '
+                     'judged reading, so the reading\'s time after the cast is judged in game time, not as the sum '
+                     'of the nominal waits.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour metric delta',
@@ -1824,6 +1875,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     if spec.expiry_wait_ms is not None:
         model['expired_label'] = metric_delta_label(spec, 'expired')
         model['after_expiry_expected'] = spec.after_expiry_expected
+    if spec.game_time is not None:
+        cast_stamp, after_stamp, expired_stamp = game_time_labels(spec)
+        model['game_time'] = {'cast_label': cast_stamp, 'after_label': after_stamp,
+                              'after_window': list(spec.game_time[0])}
+        if spec.game_time[1] is not None:
+            model['game_time'].update({'expired_label': expired_stamp, 'expired_window': list(spec.game_time[1])})
     expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
                               str(spec.expected), prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
@@ -1863,7 +1920,8 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            None if entry.get('caster_health') is None
                            else (int(entry['caster_health'][0]), int(entry['caster_health'][1])),
                            forced_chance_of(entry.get('forced_chance')),
-                           metric_delta_corpse(entry.get('corpse')))
+                           metric_delta_corpse(entry.get('corpse')),
+                           metric_delta_game_time(entry.get('game_time')))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10

@@ -70,6 +70,7 @@ from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
 from behaviours import forced_chance_of
+from passives import behaviour_label
 from profile import CASTER, DBC_DIR, base_steps, control_entries, load_class_file
 from tooltip import Records
 from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
@@ -11145,6 +11146,71 @@ class CastUnitAuraTests(unittest.TestCase):
                      if entry['kind'] == 'hit_ratio' and entry.get('swing_hand') is not None)
         with self.assertRaises(ValueError):
             behaviour_scenario(load_class_file(19), {**swing, 'cast_unit_auras': [[823764, 1]]})
+
+
+class MetricDeltaGameTimeTests(unittest.TestCase):
+    def entry(self, spell: int, variant: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('variant') == variant)
+
+    def judged(self, spell: int, variant: str, after: float, expired: float | None = None, stamped: bool = True):
+        _, [expectation] = behaviour_scenario(load_class_file(23), self.entry(spell, variant))
+        model = expectation.model
+        values = {model['before_label']: float(model['before_expected']),
+                  model['after_label']: float(model['expected'])}
+        if 'expired_label' in model:
+            values[model['expired_label']] = float(model['after_expiry_expected'])
+        stamps = model['game_time']
+        if stamped:
+            values[stamps['cast_label']] = 50000.0
+        values[stamps['after_label']] = 50000.0 + after
+        if expired is not None:
+            values[stamps['expired_label']] = 50000.0 + expired
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_game_time_is_read_before_the_trigger_cast_and_the_reading(self):
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), self.entry(500341, 'ends'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        cast = next(index for index, step in enumerate(steps) if step.get('label') == '500341 game_time cast')
+        after = next(index for index, step in enumerate(steps) if step.get('label') == '500341 game_time after')
+        self.assertEqual((steps[cast + 1]['action'], steps[cast + 1]['spell']), ('cast', 500341))
+        self.assertEqual(steps[after + 1]['label'], expectation.model['after_label'])
+        self.assertEqual(expectation.model['game_time']['after_window'], [3800, 4200])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_reading_inside_its_window_is_ok(self):
+        self.assertEqual(self.judged(500341, 'ends', 4166.0).status, 'ok')
+        self.assertEqual(self.judged(570131, 'lasts', 9714.0, 10330.0).status, 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_reading_drifted_past_its_window_alerts(self):
+        self.assertEqual(self.judged(500341, 'ends', 4217.0).status, 'alert')
+        self.assertEqual(self.judged(570131, 'lasts', 9714.0, 10534.0).status, 'alert')
+        self.assertEqual(self.judged(531126, 'cast_held', 1705.0).status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_missing_stamp_is_unmeasured(self):
+        self.assertEqual(self.judged(500341, 'ends', 4166.0, stamped=False).status, 'unmeasured')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_expired_window_needs_an_expiry_reading(self):
+        entry = self.entry(500341, 'ends')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**entry, 'game_time': {'after': [3800, 4200],
+                                                                            'expired': [3800, 4200]}})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**entry, 'game_time': {'after': [4200, 3800]}})
+
+
+class AuraExpiryPassiveLinkTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_p5_link_names_the_aura_expiry_label(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'aura_expiry')
+        _, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        self.assertEqual(behaviour_label(entry), [expectation.label])
+
 
 if __name__ == '__main__':
     unittest.main()
