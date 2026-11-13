@@ -5,11 +5,11 @@
 
 ## Context
 
-`cast_gate_scenario` attempts the gated spell three times: blocked, after the bypass spell, and through the target
-state fixture. A health fixture (`AURA_STATE_HEALTHLESS_35_PERCENT`, `AURA_STATE_HEALTHLESS_20_PERCENT`) waits 1000 ms
-before the last attempt, so the gated spell's 1500 ms global cooldown from the bypassed attempt has run out. The frozen
-fixture (`AURA_STATE_FROZEN`, a `set_aura` of Frost Nova 122, ADR 0303) has no wait. Glacial Impact 707402's allowed
-attempt read `SPELL_FAILED_NOT_READY` (67) in both runs of pair 20261113-010525 / -010554 (build 17ff0cc7e580): the global
+`cast_gate_scenario` attempts the gated spell three times: blocked, after the bypass spell, and through the target state
+fixture. A health fixture (`AURA_STATE_HEALTHLESS_35_PERCENT`, `AURA_STATE_HEALTHLESS_20_PERCENT`) waits 1000 ms before
+the last attempt, so the gated spell's 1500 ms global cooldown from the bypassed attempt has run out. The frozen fixture
+(`AURA_STATE_FROZEN`, a `set_aura` of Frost Nova 122, ADR 0303) has no wait. Glacial Impact 707402's allowed attempt
+read `SPELL_FAILED_NOT_READY` (67) in both runs of pair 20261113-010525 / -010554 (build 17ff0cc7e580): the global
 cooldown of the bypassed cast, not the frozen gate.
 
 ## Considered options
