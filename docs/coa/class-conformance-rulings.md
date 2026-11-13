@@ -111,6 +111,14 @@ Otherwise the conclusion reads "not found in the places searched", naming them. 
 - Its spell values therefore confirm nothing on their own.
 - No ADR found.
 
+**G-43. Conformance does not balance.** 2026-11-13, owner, through the mentor, on the Ghoul healing question.
+- Conformance verifies and fixes spells against their tooltips and live behaviour. A balance change is out of scope:
+  it is recorded as an observation for a later balance pass and never built inside a conformance batch.
+- The owner's words: "si c'est pour un niveau 60 pourquoi pas, on garde le -30%. l'équilibrage viendra dans un second
+  temps, ici on cherche a vérifier et fix les sorts plutot" ("for level 60, why not, we keep the -30%. Balancing comes
+  later; here we verify and fix the spells").
+- No ADR found.
+
 ### 1.2 What counts as proof
 
 **G-15. Two proof statuses.** 2026-11-10, owner, on the mentor's external review.
@@ -458,6 +466,8 @@ still needs a fix note with the cause read, the narrowest change, a regression a
 | 2026-11-13, owner, through the mentor | Blight six hits (Q-b3b-3) | Keep six hits; the text states the cast hit | not recorded | No ADR found |
 | 2026-11-13, owner, through the mentor | Frozen Bodies not consumed (Q-ma-1) | Keep it unconsumed; the text is aligned | "mais si on consomme le proc une fois arrivé à 10 stacks, comment ça se passe pour recréer 10 stacks et avoir de nouveau le proc pour glacial impact ? l'interface ne saura plus à combien de stacks on est non ?" ("but if the proc is consumed at 10 stacks, how do we build 10 stacks again for a new Glacial Impact proc? The interface would no longer know the stack count, would it?") | No ADR found |
 | 2026-11-13, owner, through the mentor | Heartchill (Q-rb-1) | The engine convention x1.8 | not recorded | No ADR found |
+| 2026-11-13, owner, through the mentor | Frost Runes 705750 (Q-mb-3; claim 191.0) | Keep the server's 5% (705750's own chance); the text's $706473h token (15%, Death Runes) becomes 705750's own chance. Live players proc at about 3.4% per magic hit | not recorded | No ADR found |
+| 2026-11-13, owner, through the mentor | Ghoul healing done -30% (Q-a1-6; claims 64, 67) | Keep 805290 Effect[1] (-30%); the texts of Raise: Ghoul's auto-attack heal and the Command heal state 70% of the current values (G-8). No heal curve: the owner first chose to remove the -30%, then reversed it (G-43) | "si c'est pour un niveau 60 pourquoi pas, on garde le -30%" ("for level 60, why not, we keep the -30%") | No ADR found |
 
 ### 3.2 Server changes ruled by the owner
 
@@ -474,6 +484,7 @@ still needs a fix note with the cause read, the narrowest change, a regression a
 | 2026-11-13, owner, through the mentor | Crypt Swarm slow (Q-b3b-1) | The slow is meant | "je ne vois pas le rapport entre Crypt Swarm et le passif ??" ("I do not see the link between Crypt Swarm and the passive??"), answered by the mentor: the $?s92123 condition names the Animation passive | Pending (fix note) |
 | 2026-11-13, owner, through the mentor | March of the Dead schools (Q-b3b-6) | The spell's own schools (mask 40) | not recorded | Pending (fix note) |
 | 2026-11-13, owner, through the mentor | Frozen Bodies stack bonus (Q-ma-2) | A single +3% per stack, as the tooltip says | "c'est peut etre un bonus caché donné par le live, mais on va s'en tenir à la tooltip, et on buffera si besoin plus tard" ("it may be a hidden live bonus, but we keep to the tooltip and buff later if needed") | Pending (fix note) |
+| 2026-11-13, owner, through the mentor | Parasite Plague 560730 (Q-mb-2; claim 123.0) | Any damage dealt rolls, as the tooltip says, not only periodic damage (the live logs lean to periodic only; the owner ruled for the tooltip) | not recorded | ADR 0496 |
 | 2026-11-13, owner, through the mentor | Bone and Frozen Reliquaries (Q-mb-1) | Both items share the healing and mana potion cooldown (category 5004). The owner authorized the item SQL | "Ici pour moi il faudrait que ces sorts partagent leur CD avec les consommables eéquivalent style potion de soin et de mana par exemple" ("these should share their cooldown with the equivalent consumables, such as healing and mana potions") | Pending (fix note) |
 
 ### 3.3 Scope and tools
@@ -486,11 +497,7 @@ still needs a fix note with the cause read, the narrowest change, a regression a
 
 ### 3.4 Open
 
-- Ghoul -30% healing done (Q-a1-6): the owner chose to remove it and asked for a per-level heal curve that helps
-  levelling without making the minions invulnerable at high level ("retirer le -30% qui a mon avis est là car bcp trop
-  fort, il faudrait essayer de balancer ce sort et que le heal progresse par niveau aussi.. Sachant que l'on peut avoir
-  jusqu'à 5 ou 6 pets au 60 avec les bons talents.."). The mentor drafts the curve for the owner's approval; nothing is
-  built before it.
+None.
 
 ---
 
@@ -499,7 +506,7 @@ still needs a fix note with the cause read, the narrowest change, a regression a
 No ADR states these decisions; this page is their record:
 - **General rules:** G-3 (the rule; ADR 0118 has only the finding), G-4, G-9, G-10, G-11, G-12, G-13
   (the rule), G-21 (rule 4 and its amendment, applied in ADRs 0258, 0263 and 0287), G-23, G-25, G-30, G-31, G-32 (as a
-  whole), G-33, G-37, G-38, G-39, G-40, G-41 and G-42.
+  whole), G-33, G-37, G-38, G-39, G-40, G-41, G-42 and G-43.
 - **Templar rulings:** the live Zealot dual wield (owner, checked on a video), Legacy of the Silver Hand, Argent Blade,
   Untainted, Staffguard, Force of Golganneth, Zealotry and Oath Flow, the batch protocol, the three-set limit and "quote
   the tooltip in full".
