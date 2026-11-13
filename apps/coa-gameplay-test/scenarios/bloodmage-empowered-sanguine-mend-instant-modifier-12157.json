@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Empowered Sanguine Mend carries a player instant-cast modifier while Empowered is up (#12157)",
+  "contract": [
+    "Pooled Vitality 681078 lets a Rage spell consume ten Pooled Vitality 680687 stacks to become empowered; the",
+    "Sanguine Mend description reads 'Empowered: Becomes instant cast and heals yourself for $680033s1% of the heal",
+    "value'. The server zeroed the empowered cast's own cast time inside Player::ApplySpellMod, but the player held",
+    "no spell modifier, so the client, which applies only the SMSG_SET_PCT_SPELL_MODIFIER totals Player::AddSpellMod",
+    "sends, still saw CastingTimeIndex 19 (2500 ms) and refused the instant cast while moving (#12157).",
+    "Sanguine Mend (Empowered) 680033 effect 1 is that modifier: aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 10",
+    "(SPELLMOD_CASTING_TIME), BasePoints -101 with DieSides 1 (-100%) and EffectSpellClassMask (524288, 0, 0), the",
+    "nine Sanguine Mend ranks. The Empowered indicator 524899 exists exactly while ten stacks can empower a cast",
+    "(bloodmage-pooled-vitality-empowered-glow-8454), so it carries that modifier. spell_cast_time_ms is the",
+    "native cast time without a Spell, i.e. only the player's spell modifiers, the same totals the client is sent.",
+    "Expected: 2500 ms at nine stacks, 0 at ten stacks, an empowered Mend cast while moving succeeds and spends",
+    "the stacks, and the modifier leaves with Empowered so the next Mend is 2500 ms again. Packet delivery and the",
+    "client's own movement check are outside the runner's coverage."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "bloodmage", "race": 1, "class": 20, "level": 30, "allow_regeneration": false }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 681078 },
+    { "action": "learn", "actor": "bloodmage", "spell": 504081 },
+    { "action": "set_health", "label": "Injured fixture so the mend has something to heal", "actor": "bloodmage", "value": 100 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+
+    { "action": "set_aura", "label": "Nine stacks of Pooled Vitality", "actor": "bloodmage", "spell": 680687, "stacks": 9 },
+    { "action": "assert", "actor": "bloodmage", "metric": "aura_stacks", "spell": 680687, "equals": 9 },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: nine stacks do not empower", "actor": "bloodmage", "metric": "aura", "spell": 524899, "equals": 0 },
+    { "action": "assert", "label": "Nine stacks leave Sanguine Mend at its 2500 ms cast time", "actor": "bloodmage", "metric": "spell_cast_time_ms", "spell": 504081, "equals": 2500 },
+
+    { "action": "set_aura", "label": "The tenth stack", "actor": "bloodmage", "spell": 680687, "stacks": 10 },
+    { "action": "assert", "label": "SETUP: ten stacks show Empowered", "actor": "bloodmage", "metric": "aura", "spell": 524899, "caster": "bloodmage", "equals": 1, "within_ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the player's spell modifiers make Sanguine Mend instant", "actor": "bloodmage", "metric": "spell_cast_time_ms", "spell": 504081, "equals": 0 },
+
+    { "action": "set_moving", "label": "Moving forward", "actor": "bloodmage", "enabled": true },
+    { "action": "cast", "label": "An empowered Sanguine Mend while moving", "actor": "bloodmage", "spell": 504081, "target": "bloodmage" },
+    { "action": "assert", "label": "The moving empowered Mend is accepted", "actor": "bloodmage", "metric": "cast_failure", "spell": 504081, "equals": 0 },
+    { "action": "assert", "label": "and spends the stacks", "actor": "bloodmage", "metric": "aura_stacks", "spell": 680687, "equals": 0, "within_ms": 2000 },
+    { "action": "set_moving", "actor": "bloodmage", "enabled": false },
+    { "action": "assert", "label": "Spending the stacks ends Empowered", "actor": "bloodmage", "metric": "aura", "spell": 524899, "equals": 0, "within_ms": 1000 },
+    { "action": "assert", "label": "and its instant-cast modifier with it", "actor": "bloodmage", "metric": "spell_cast_time_ms", "spell": 504081, "equals": 2500 }
+  ]
+}

@@ -1,162 +1,290 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Mar'li does not Evolve herself (#8075)",
+  "name": "Zul'Gurub: High Priestess Mar'li Evolves a spawn on Mythic, never herself (#8075), and not on Normal",
   "contract": [
     "Evolve (2118116) evolves a target spider egg: it heals its target to full health (effect 67) and applies a",
     "+200% scale aura. Mar'li (14510) casts it 22 s into the troll phase on a Spawn of Mar'li (15041) she hatches",
-    "from the nearest free egg (179985), never on herself, so she neither carries the Evolve aura nor heals to",
-    "full health. The world's eggs share phase 1 and the fixture lives in the lane's own phase, so the hero places",
-    "eleven untimed eggs before the pull: Hatch Eggs at 17 s claims ten of them, which leaves Evolve one free egg",
-    "whichever of the two comes first."
+    "from the nearest free egg (179985), never on herself, so she neither carries the Evolve aura nor heals to full",
+    "health. Evolve belongs to Mythic and Ascended only (round-5 tester: the Mythic and Ascended mechanics), so a",
+    "Normal Mar'li never casts it. A Normal and a Mythic hero each fight one Mar'li alone. The world's eggs share",
+    "phase 1 and the fixture lives in the lane's own phase, so each hero places eleven untimed eggs right after the",
+    "pull (eggs on a hero before it keep Mar'li from engaging): Hatch Eggs at 17 s claims ten of them and hatches",
+    "them 10 s later, which leaves Evolve one free egg whichever of the two comes first. The Normal hero therefore",
+    "sees ten spawns, the eleventh egg unclaimed."
   ],
-  "timeout_ms": 120000,
+  "timeout_ms": 150000,
   "location": {
-    "map": 309,
-    "x": -12326.5,
-    "y": -1577.11,
-    "z": 133.588,
-    "o": 4.817,
-    "ignore_access": true
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
   },
   "players": [
     {
-      "id": "hero",
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "mythic",
       "race": 1,
       "class": 1,
       "level": 60,
       "security": 3
     }
   ],
-  "creatures": [
-    {
-      "id": "boss",
-      "owner": "hero",
-      "entry": 14510,
-      "level": 63,
-      "health": 4979280,
-      "reaction": 2,
-      "distance": 4
-    }
-  ],
   "steps": [
     {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
       "action": "set_health",
-      "actor": "hero",
+      "actor": "normal",
       "value": 10000000,
       "maximum": 10000000
     },
     {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
       "action": "wait",
-      "label": "Let the fixtures settle",
-      "ms": 3000
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
     },
     {
       "action": "assert",
-      "label": "CONTROL: the hero is in Zul'Gurub",
-      "actor": "hero",
-      "metric": "map_id",
-      "equals": 309
+      "label": "CONTROL: the Normal hero is in Zul'Gurub on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
     },
     {
-      "action": "command",
-      "label": "Place eleven Spider Eggs",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero is on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
     },
     {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
+      "action": "summon",
+      "actor": "normal",
+      "entry": 14510,
+      "as": "marli_normal",
+      "distance": 4
     },
     {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14510,
+      "as": "marli_mythic",
+      "distance": 4
     },
     {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
-    },
-    {
-      "action": "command",
-      "actor": "hero",
-      "command": ".gobject add temp 179985 0"
+      "action": "wait",
+      "ms": 300
     },
     {
       "action": "attack",
-      "label": "Engage High Priestess Mar'li",
-      "actor": "hero",
-      "target": "boss"
+      "label": "Engage the Normal Mar'li",
+      "actor": "normal",
+      "target": "marli_normal"
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mar'li fights the hero",
-      "actor": "boss",
+      "label": "CONTROL: the Normal Mar'li fights",
+      "actor": "marli_normal",
       "metric": "combat",
       "equals": 1,
       "within_ms": 10000
     },
     {
       "action": "stop_attack",
-      "actor": "hero"
+      "actor": "normal"
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Mythic Mar'li",
+      "actor": "mythic",
+      "target": "marli_mythic"
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mar'li has her one-player flex health",
-      "actor": "boss",
-      "metric": "max_health",
-      "min": 4000000,
-      "max": 5000000
+      "label": "CONTROL: the Mythic Mar'li fights",
+      "actor": "marli_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
     },
     {
-      "action": "set_health",
-      "label": "Wound Mar'li to about 60%, above her spider phase",
-      "actor": "boss",
-      "value": 3000000
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "command",
+      "label": "The Normal hero places eleven Spider Eggs",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "label": "The Mythic hero places eleven Spider Eggs",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "command",
+      "actor": "mythic",
+      "command": ".gobject add temp 179985 0"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound the Mythic Mar'li to 60%, above her spider phase",
+      "actor": "mythic",
+      "entry": 14510,
+      "pct": 60
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mar'li is wounded and has not Evolved yet",
-      "actor": "boss",
+      "label": "CONTROL: the Mythic Mar'li is wounded and has not Evolved yet",
+      "actor": "marli_mythic",
       "metric": "aura",
       "spell": 2118116,
       "equals": 0
     },
     {
       "action": "assert",
-      "label": "CONTROL: Hatch Eggs claims ten eggs about 17 s into the troll phase",
-      "actor": "hero",
+      "label": "CONTROL: the Mythic Hatch Eggs claims ten eggs about 17 s into the troll phase",
+      "actor": "mythic",
       "metric": "spell_go_count",
       "entry": 14510,
       "spell": 2118115,
@@ -165,15 +293,15 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mar'li is alive and still fighting",
-      "actor": "boss",
+      "label": "CONTROL: the Mythic Mar'li is alive and still fighting",
+      "actor": "marli_mythic",
       "metric": "combat",
       "equals": 1
     },
     {
       "action": "assert",
-      "label": "CONTROL: Mar'li casts Evolve about 22 s into the troll phase",
-      "actor": "hero",
+      "label": "DISCRIMINATING: the Mythic Mar'li casts Evolve about 22 s into the troll phase",
+      "actor": "mythic",
       "metric": "spell_go_count",
       "entry": 14510,
       "spell": 2118116,
@@ -183,7 +311,7 @@
     {
       "action": "assert",
       "label": "The Spawn of Mar'li hatched from the egg carries Evolve",
-      "actor": "hero",
+      "actor": "mythic",
       "metric": "nearby_creature_count",
       "entry": 15041,
       "spell": 2118116,
@@ -193,7 +321,7 @@
     {
       "action": "assert",
       "label": "Mar'li does not carry Evolve",
-      "actor": "boss",
+      "actor": "marli_mythic",
       "metric": "aura",
       "spell": 2118116,
       "equals": 0
@@ -201,9 +329,42 @@
     {
       "action": "assert",
       "label": "Mar'li was not healed to full health",
-      "actor": "boss",
+      "actor": "marli_mythic",
       "metric": "health_pct",
       "max": 90
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Mar'li's Hatch Eggs hatches ten spawns",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "min": 10,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Mar'li is still fighting past 22 s",
+      "actor": "marli_normal",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Mar'li never casts Evolve",
+      "actor": "normal",
+      "metric": "spell_go_count",
+      "entry": 14510,
+      "spell": 2118116,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: so the eleventh egg stays unhatched",
+      "actor": "normal",
+      "metric": "nearby_creature_count",
+      "entry": 15041,
+      "equals": 10
     }
   ]
 }

@@ -504,14 +504,23 @@ def configure_arguments(context):
     prefix = (context.root / 'env/dist').as_posix()
     return [*generator, '-DCMAKE_BUILD_TYPE=RelWithDebInfo', '-DAPPS_BUILD=world-only', '-DSCRIPTS=static',
             '-DMODULES=static', '-DBUILD_TESTING=ON', f'-DCMAKE_INSTALL_PREFIX={prefix}', *readline_arguments(),
-            *line_table_debug_arguments()]
+            *line_table_debug_arguments(), *linux_development_arguments(context.environment)]
 
 
 def line_table_debug_arguments(platform=sys.platform):
-    if platform != 'darwin':
+    if platform not in ('darwin', 'linux'):
         return []
     flags = '-O2 -g1 -DNDEBUG'
     return [f'-DCMAKE_C_FLAGS_RELWITHDEBINFO={flags}', f'-DCMAKE_CXX_FLAGS_RELWITHDEBINFO={flags}']
+
+
+def linux_development_arguments(environment, platform=sys.platform):
+    if platform != 'linux':
+        return []
+    thin_archives = [f'-DCMAKE_{language}_ARCHIVE_{step}=<CMAKE_AR> {flags} <TARGET> <LINK_FLAGS> <OBJECTS>'
+                     for language in ('C', 'CXX') for step, flags in (('CREATE', 'qcT'), ('APPEND', 'qT'))]
+    linker = ['-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold'] if find_program('mold', environment) else []
+    return ['-DWITH_GAME_UNITY_BUILD=ON', *thin_archives, *linker]
 
 
 def readline_arguments(platform=sys.platform, candidates=HOMEBREW_READLINE_DIRECTORIES):

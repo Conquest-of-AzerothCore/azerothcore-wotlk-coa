@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: the Heart of Hakkar appears inside Hakkar's chest however large Hakkar's Power makes him",
+  "contract": [
+    "Reported 2026-11-12 from a Mythic run the day before: the Heart of Hakkar (92005) appeared well below its spot;",
+    "on Normal it appears inside his chest, 8 yards above Hakkar (14834). Hakkar's Power (24692) grows him by a",
+    "fifth for each living High Priest (+20% scale per stack, five stacks), so the heart must rise with his",
+    "size: 8 yards times his scale. A Normal and a Mythic hero each fight one Hakkar alone in a fresh instance,",
+    "where all five priests live. The Normal Hakkar loses Hakkar's Power, as after a raid that killed them, and",
+    "keeps his size; the Mythic one keeps five stacks and doubles. Each Blood Siphon (2118615) brings the heart",
+    "out 8 yards above the Normal Hakkar and 16 above the Mythic one."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "normal",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mythic",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal hero is in Zul'Gurub on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic hero is in Zul'Gurub on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 14834,
+      "as": "hakkar_normal",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 14834,
+      "as": "hakkar_mythic",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with all five High Priests alive the Mythic Hakkar carries five stacks of Hakkar's Power",
+      "actor": "hakkar_mythic",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 5
+    },
+    {
+      "action": "select",
+      "label": "The Normal raid has killed every High Priest",
+      "actor": "normal",
+      "target": "hakkar_normal"
+    },
+    {
+      "action": "command",
+      "actor": "normal",
+      "command": ".unaura 24692"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: so the Normal Hakkar has no Hakkar's Power",
+      "actor": "hakkar_normal",
+      "metric": "aura",
+      "spell": 24692,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Hakkar is his own size",
+      "actor": "hakkar_normal",
+      "metric": "unit_scale",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar is twice his size",
+      "actor": "hakkar_mythic",
+      "metric": "unit_scale",
+      "min": 1.99,
+      "max": 2.01
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Normal Hakkar",
+      "actor": "normal",
+      "target": "hakkar_normal"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Hakkar fights",
+      "actor": "hakkar_normal",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "normal"
+    },
+    {
+      "action": "attack",
+      "label": "Engage the Mythic Hakkar",
+      "actor": "mythic",
+      "target": "hakkar_mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar fights",
+      "actor": "hakkar_mythic",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mythic"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal Hakkar casts Blood Siphon",
+      "actor": "normal",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118615,
+      "min": 1,
+      "within_ms": 100000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Normal heart appears 8 yards above Hakkar, inside his chest",
+      "actor": "normal",
+      "metric": "nearby_creature_height",
+      "entry": 92005,
+      "target": "hakkar_normal",
+      "min": 7.0,
+      "max": 9.0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mythic Hakkar casts Blood Siphon",
+      "actor": "mythic",
+      "metric": "spell_go_count",
+      "entry": 14834,
+      "spell": 2118615,
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic heart appears 16 yards above the doubled Hakkar, inside his chest too",
+      "actor": "mythic",
+      "metric": "nearby_creature_height",
+      "entry": 92005,
+      "target": "hakkar_mythic",
+      "min": 15.0,
+      "max": 17.0,
+      "within_ms": 3000
+    }
+  ]
+}

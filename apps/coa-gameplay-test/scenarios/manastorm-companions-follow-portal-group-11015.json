@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Manastorm: a group member who follows through the stage portal keeps their Necromancer companions (#11015)",
+  "contract": [
+    "Player report (#11015): in a group, a Necromancer lost the Crypt Fiend and Skeletal Archers on every floor",
+    "change, while solo they stayed. Only the first member to cross the stage portal is moved by PrepareStage; every",
+    "other member follows later through TransferMemberToCurrentStage, which captured no companions before #11035",
+    "added PrepareStageMemberTransfer to both paths.",
+    "This Duo case makes the Necromancer the follower: n1 kills the segment 1 objective and clicks the stage portal",
+    "(80910) at once, so n1 crosses first and n2, who stays at the entrance, follows through the five-second",
+    "fallback. n2 must arrive with the companions cast before the crossing: one Crypt Fiend (50323) and three",
+    "Skeletal Archers (50076)."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "n1",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 100000,
+      "melee_crit_rating": 100000
+    },
+    {
+      "id": "n2",
+      "race": 5,
+      "class": 23,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "n2 joins n1's group so the run starts in Duo mode",
+      "actor": "n1",
+      "target": "n2"
+    },
+    {
+      "action": "command",
+      "actor": "n1",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "n1 entered the private Manastorm instance",
+      "actor": "n1",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "n2 entered the private Manastorm instance",
+      "actor": "n2",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "n2",
+      "spell": 504859
+    },
+    {
+      "action": "cast",
+      "label": "n2 raises a Crypt Fiend",
+      "actor": "n2",
+      "spell": 504859
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 owns one Crypt Fiend",
+      "actor": "n2",
+      "metric": "owned_creature_count",
+      "entry": 50323,
+      "within_ms": 8000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "n2",
+      "spell": 805040
+    },
+    {
+      "action": "cast",
+      "label": "n2 raises the Skeletal Archers",
+      "actor": "n2",
+      "spell": 805040
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n2 owns three Skeletal Archers",
+      "actor": "n2",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "within_ms": 3000,
+      "equals": 3
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss and the portal are visible to n1",
+      "actor": "n1",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "n1 leaves the preparation bubble for the objective",
+      "actor": "n1",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: n1 left the preparation bubble",
+      "actor": "n1",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the active run also cleared n2's bubble at the entrance",
+      "actor": "n2",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "n1 kills the segment 1 objective",
+      "actor": "n1",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "gossip_hello",
+      "label": "n1 clicks the stage portal and crosses first",
+      "actor": "n1",
+      "entry": 80910
+    },
+    {
+      "action": "assert",
+      "label": "n1 arrives on the next floor in the preparation bubble",
+      "actor": "n1",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 12000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "n2 follows to the next floor through the fallback",
+      "actor": "n2",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 15000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The follower keeps the Crypt Fiend",
+      "actor": "n2",
+      "metric": "owned_creature_count",
+      "entry": 50323,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The follower keeps all three Skeletal Archers",
+      "actor": "n2",
+      "metric": "owned_creature_count",
+      "entry": 50076,
+      "within_ms": 3000,
+      "equals": 3
+    }
+  ]
+}

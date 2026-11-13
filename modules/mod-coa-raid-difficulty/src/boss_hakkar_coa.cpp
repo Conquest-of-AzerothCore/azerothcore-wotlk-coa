@@ -45,7 +45,8 @@
  *   - Animate Blood and Rain of Blood are left out (the
  *     Orb of Corrupted Blood exists nowhere in the data).
  * The Heart is creature 92005, as in the log: the stock one (15069) despawns itself.
- * It appears inside his chest, 8 yards above him (tester, live).
+ * It appears inside his chest, 8 yards above him (tester, live), higher as Hakkar's Power
+ * grows him by a fifth for each living High Priest.
  */
 
 #include "CreatureScript.h"
@@ -311,7 +312,7 @@ namespace
                 {
                     _siphoning = true;
                     Position pos = me->GetPosition();
-                    pos.m_positionZ += HEART_HEIGHT;
+                    pos.m_positionZ += HEART_HEIGHT * me->GetObjectScale();
                     if (Creature* heart = me->SummonCreature(NPC_HEART_OF_HAKKAR, pos, TEMPSUMMON_MANUAL_DESPAWN))
                     {
                         heart->AddAura(SPELL_HEART_EXPOSED, heart);

@@ -6,7 +6,8 @@
  * troll and spider every minute; on Ascension she stays a troll until 50% and
  * a spider after (in the video from 49%, 230s in). The spider form's cycle
  * (Web Spray, Burrow, Poison Shock every 45s) and Fierce Blow follow the CoA
- * combat log of 2026-08-02.
+ * combat log of 2026-08-02; on Mythic and Ascended the cycle is 58s (the CoA
+ * Mythic log of 2026-08-04: 58.5s; Bronzebeard Ascended, 2025-12-21: 56-58s).
  *
  *   Both forms
  *     Poison Bolt Volley first 12s, every 15s   everyone, stacking poison
@@ -19,36 +20,48 @@
  *
  *   Troll form
  *     Drain Life         first 6s,  every 10s   random player, interruptible
- *     Evolve             first 22s, every 60s   an egg hatches a colossal spider
- *     Infest             first 87s, every 60s   an egg hatches a festering
- *                                               spider that bursts on death
+ *     Evolve             first 22s, every 60s   an egg hatches a colossal spider;
+ *                                               Mythic and Ascended only (tester,
+ *                                               round 5)
  *
  *   At 50% she drains the Avatar of Shadra (see LoaAvatar), taking ~1% damage
  *   while it dies; then the Gift of the Blood God and her spider form.
  *
  *   Spider form, when the avatar dies
  *     Acid Spit          first 1s,  every 12s   on the tank, poison and -10% armour
- *     Web Spray          first 15s, every 45s   everyone within 35 yards (the
+ *     Web Spray          first 15s, every cycle everyone within 35 yards (the
  *                                               spell's own 20 widened: tester,
  *                                               2026-11-08) is slowed, then
  *                                               webbed; then she charges a
  *                                               caster, as in stock
- *     Burrow             first 20.5s, every 45s under ground for 3s, untargetable
+ *     Burrow             first 20.5s, every cycle under ground for 3s, untargetable
  *                                               and hidden (the Hide Body display
  *                                               of Burrow's misc value 24417, as
  *                                               Kurinnaxx's Tunneling);
- *                                               she comes up on the player
- *                                               farthest from her and stays on
+ *                                               she comes up where the player
+ *                                               farthest from her stands (tester,
+ *                                               2026-11-12) and stays on
  *                                               them for 8s, untauntable (tester,
- *                                               live, 2026-11-04)
- *     Poison Shock       first 27s, every 45s   Poison Nova, 20 yards around her,
- *                                               less the farther away
+ *                                               live, 2026-11-04); on Mythic and
+ *                                               Ascended for 21s, through Poison
+ *                                               Shock and about 15s of melee (the
+ *                                               Mythic log: 12-19s on non-tanks)
+ *     Poison Shock       1.8s after she comes up (both logs), Poison Nova,
+ *                                               20 yards around her, less the
+ *                                               farther away
+ *     Infest             first 15s, every 60s   Ascended only: an egg hatches a
+ *                                               festering spider that carries
+ *                                               Putrid Cloud and leaves a
+ *                                               Festering Cloud where it dies
+ *                                               (the Ascended log of 2025-12-21)
  *     Furious Strikes    passive, her hits speed her up
  *
  * Decided here, not in the data:
- *   - Evolve and Infest act on an egg she hatches for it: the spawn of Evolve
- *     is twice the size with twice the health; the spawn of Infest bursts for
- *     Poison Shock's damage where it dies;
+ *   - Evolve and Infest act on an egg she hatches for it at once (live, Infest's
+ *     egg hatches about 15s later); the spawn of Evolve is twice the size with
+ *     twice the health;
+ *   - the festering spawn is a Spawn of Mar'li (15041), estimated: the live
+ *     Festering Spawn of Mar'li has no creature data in any source;
  *   - Drain Life heals her for what each tick deals;
  *   - Poison Nova falls off evenly to nothing at 20 yards (the tooltip says
  *     reduced, not by how much);
@@ -56,13 +69,16 @@
  *     on them (no combat log shows it).
  */
 
+#include "Containers.h"
 #include "CreatureScript.h"
 #include "GameObject.h"
 #include "ScriptedCreature.h"
+#include "Spell.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <list>
 #include <vector>
@@ -86,6 +102,7 @@ namespace
 
         INFO_DRAIN_LIFE           = 2118101,
         SPELL_DRAIN_LIFE          = 2118105,
+        SPELL_DRAIN_LIFE_SPLASH   = 2118106,
         SPELL_DRAIN_LIFE_TICK     = 2118107,
         SPELL_DRAIN_LIFE_HEAL     = 2118108,
         SPELL_POISON_BOLT_VOLLEY  = 2118109,
@@ -106,13 +123,14 @@ namespace
         SPELL_MENACING_GAZE       = 2118141,
         SPELL_POISON_NOVA         = 2118150,
         SPELL_INFEST              = 2118151,
+        SPELL_PUTRID_CLOUD        = 2118170,
+        SPELL_FESTERING_CLOUD     = 2118176,
     };
 
     enum Misc
     {
         GO_SPIDER_EGGS     = 179985,
         NPC_SPAWN_OF_MARLI = 15041,
-        NPC_WORLD_TRIGGER  = 12999,
         NPC_AVATAR_OF_SHADRA = 666990
     };
 
@@ -148,9 +166,17 @@ namespace
     constexpr uint32 DISPLAY_HIDE_BODY = 22452;
     constexpr Milliseconds BURROW_LENGTH        = 3s;
     constexpr Milliseconds HUNT_LENGTH          = 8s;
+    constexpr Milliseconds HUNT_LENGTH_MYTHIC   = 21s;
+    constexpr Milliseconds SPIDER_CYCLE         = 45s;
+    constexpr Milliseconds SPIDER_CYCLE_MYTHIC  = 58s;
+    constexpr Milliseconds POISON_SHOCK_AFTER_EMERGE = 1800ms;
     constexpr Milliseconds HATCH_EVERY          = 30s;
     constexpr Milliseconds HATCH_DELAY          = 10s;
     constexpr float EGG_SEARCH_RANGE = 100.0f;
+    constexpr float DRAIN_LIFE_RANGE = 100.0f;
+    constexpr float DRAIN_LIFE_SPLASH_SHARE = 0.32f;
+    constexpr uint8 MYTHIC_SPAWN_MODE = 2;
+    constexpr uint8 INFEST_MIN_SPAWN_MODE = 3;
     constexpr float HUNT_THREAT    = 1000000.0f;
 
     struct boss_marli_coa : public BossAI
@@ -167,6 +193,7 @@ namespace
             _festering.clear();
             _usedEggs.clear();
             _hatchingEggs.clear();
+            EndDrainLifeSplash();
             EndHunt();
             Emerge();
 
@@ -191,13 +218,14 @@ namespace
             events.ScheduleEvent(EVENT_DRAIN_LIFE, 6s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_POISON_BOLT_VOLLEY, 12s);
             events.ScheduleEvent(EVENT_HATCH_EGGS, 17s);
-            events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
-            events.ScheduleEvent(EVENT_INFEST, 87s, 0, PHASE_TROLL);
+            if (MythicOrHigher())
+                events.ScheduleEvent(EVENT_EVOLVE, 22s, 0, PHASE_TROLL);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, FIERCE_BLOW_FIRST_MIN, FIERCE_BLOW_FIRST_MAX);
         }
 
         void JustDied(Unit* killer) override
         {
+            EndDrainLifeSplash();
             EndHunt();
             BossAI::JustDied(killer);
             _avatar.Release(me);
@@ -228,7 +256,18 @@ namespace
             events.ScheduleEvent(EVENT_ACID_SPIT, 1s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_WEB_SPRAY, 15s, 0, PHASE_SPIDER);
             events.ScheduleEvent(EVENT_BURROW, 20500ms, 0, PHASE_SPIDER);
-            events.ScheduleEvent(EVENT_POISON_SHOCK, 27s, 0, PHASE_SPIDER);
+            if (me->GetMap()->GetSpawnMode() >= INFEST_MIN_SPAWN_MODE)
+                events.ScheduleEvent(EVENT_INFEST, 15s, 0, PHASE_SPIDER);
+        }
+
+        bool MythicOrHigher() const
+        {
+            return me->GetMap()->GetSpawnMode() >= MYTHIC_SPAWN_MODE;
+        }
+
+        Milliseconds SpiderCycle() const
+        {
+            return MythicOrHigher() ? SPIDER_CYCLE_MYTHIC : SPIDER_CYCLE;
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -240,6 +279,9 @@ namespace
                 case SPELL_POISON_BOLT_VOLLEY:
                     for (Player* p : PlayersWithin(me, VOLLEY_RANGE))
                         me->CastSpell(p, SPELL_POISON_BOLT_HIT, true);
+                    break;
+                case SPELL_DRAIN_LIFE:
+                    DrainLifeSplash();
                     break;
                 case SPELL_HATCH_EGGS:
                     Talk(SAY_SPIDER_SPAWN);
@@ -286,6 +328,7 @@ namespace
                     break;
                 case SPELL_INFEST:
                     _festering.insert(target->GetGUID());
+                    target->CastSpell(target, SPELL_PUTRID_CLOUD, true);
                     break;
                 // Drain Life heals her for what each tick deals.
                 case SPELL_DRAIN_LIFE_TICK:
@@ -299,17 +342,48 @@ namespace
             }
         }
 
-        // A festering spawn bursts where it dies.
+        // A festering spawn bursts into a Festering Cloud where it dies.
         void SummonedCreatureDies(Creature* summon, Unit* killer) override
         {
             BossAI::SummonedCreatureDies(summon, killer);
             if (!_festering.erase(summon->GetGUID()))
                 return;
-            if (Creature* spot = me->SummonCreature(NPC_WORLD_TRIGGER, summon->GetPosition(), TEMPSUMMON_TIMED_DESPAWN, 5000))
+            me->CastSpell(summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ(),
+                SPELL_FESTERING_CLOUD, true);
+        }
+
+        void OnChannelFinished(SpellInfo const* spell) override
+        {
+            if (spell->Id == SPELL_DRAIN_LIFE)
+                _drainSplashed.clear();
+        }
+
+        void DrainLifeSplash()
+        {
+            std::vector<Player*> raid = PlayersWithin(me, DRAIN_LIFE_RANGE);
+            size_t const count = size_t(std::lround(raid.size() * DRAIN_LIFE_SPLASH_SHARE));
+            std::erase_if(raid, [this](Player const* p) { return p->GetGUID() == _drainTarget; });
+            Acore::Containers::RandomShuffle(raid);
+            raid.resize(std::min(raid.size(), count));
+            for (Player* p : raid)
             {
-                spot->SetFaction(me->GetFaction());
-                spot->CastSpell(spot, SPELL_POISON_SHOCK_HIT, true, nullptr, nullptr, me->GetGUID());
+                me->CastCustomSpell(p, SPELL_DRAIN_LIFE_SPLASH, nullptr, &_drainTick, nullptr, true);
+                _drainSplashed.push_back(p->GetGUID());
             }
+        }
+
+        bool DrainingLife() const
+        {
+            Spell const* channel = me->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
+            return channel && channel->GetSpellInfo()->Id == SPELL_DRAIN_LIFE;
+        }
+
+        void EndDrainLifeSplash()
+        {
+            for (ObjectGuid const& guid : _drainSplashed)
+                if (Player* p = ObjectAccessor::GetPlayer(*me, guid))
+                    p->RemoveAurasDueToSpell(SPELL_DRAIN_LIFE_SPLASH, me->GetGUID());
+            _drainSplashed.clear();
         }
 
         void KilledUnit(Unit* victim) override
@@ -330,12 +404,19 @@ namespace
             me->SetReactState(REACT_AGGRESSIVE);
         }
 
-        void HuntFarthest()
+        void EmergeAtFarthest()
         {
             Unit* prey = SelectTarget(SelectTargetMethod::MaxDistance, 0, 0.0f, true);
-            if (!prey)
-                return;
+            if (prey)
+                me->NearTeleportTo(prey->GetPositionX(), prey->GetPositionY(), prey->GetPositionZ(),
+                    me->GetAngle(prey));
+            Emerge();
+            if (prey)
+                Hunt(prey);
+        }
 
+        void Hunt(Unit* prey)
+        {
             _hunted = prey->GetGUID();
             _huntThreat = HighestThreat() * 2.0f + HUNT_THREAT;
             me->AddAura(SPELL_MENACING_GAZE, prey);
@@ -343,7 +424,7 @@ namespace
             me->ApplySpellImmune(0, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
             me->ApplySpellImmune(0, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
             AttackStart(prey);
-            events.ScheduleEvent(EVENT_END_HUNT, HUNT_LENGTH, 0, PHASE_SPIDER);
+            events.ScheduleEvent(EVENT_END_HUNT, MythicOrHigher() ? HUNT_LENGTH_MYTHIC : HUNT_LENGTH, 0, PHASE_SPIDER);
         }
 
         void EndHunt()
@@ -449,6 +530,9 @@ namespace
             if (!UpdateVictim())
                 return;
 
+            if (!_drainSplashed.empty() && !DrainingLife())
+                EndDrainLifeSplash();
+
             if (_avatar.Consumed(me))
                 TakeSpiderForm();
 
@@ -466,10 +550,11 @@ namespace
                         events.ScheduleEvent(EVENT_THRASH, 10s, 20s);
                         break;
                     case EVENT_DRAIN_LIFE:
-                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true))
+                        if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, DRAIN_LIFE_RANGE, true))
                         {
-                            int32 tick = Info(me, INFO_DRAIN_LIFE);
-                            me->CastCustomSpell(target, SPELL_DRAIN_LIFE, nullptr, &tick, nullptr, false);
+                            _drainTarget = target->GetGUID();
+                            _drainTick = Info(me, INFO_DRAIN_LIFE);
+                            me->CastCustomSpell(target, SPELL_DRAIN_LIFE, nullptr, &_drainTick, nullptr, false);
                         }
                         events.ScheduleEvent(EVENT_DRAIN_LIFE, 10s, 0, PHASE_TROLL);
                         break;
@@ -492,7 +577,7 @@ namespace
                     case EVENT_INFEST:
                         if (Creature* spawn = HatchNearestEgg())
                             DoCast(spawn, SPELL_INFEST);
-                        events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_TROLL);
+                        events.ScheduleEvent(EVENT_INFEST, 60s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_ACID_SPIT:
                         DoCastVictim(SPELL_ACID_SPIT);
@@ -501,7 +586,7 @@ namespace
                     case EVENT_WEB_SPRAY:
                         DoCastVictim(SPELL_WEB_SPRAY);
                         events.ScheduleEvent(EVENT_CHARGE, 5s, 0, PHASE_SPIDER);
-                        events.ScheduleEvent(EVENT_WEB_SPRAY, 45s, 0, PHASE_SPIDER);
+                        events.ScheduleEvent(EVENT_WEB_SPRAY, SpiderCycle(), 0, PHASE_SPIDER);
                         break;
                     case EVENT_CHARGE:
                         // From stock: after the webs she goes for a caster out of reach.
@@ -516,15 +601,14 @@ namespace
                         break;
                     case EVENT_POISON_SHOCK:
                         DoCastSelf(SPELL_POISON_SHOCK);
-                        events.ScheduleEvent(EVENT_POISON_SHOCK, 45s, 0, PHASE_SPIDER);
                         break;
                     case EVENT_BURROW:
                         DoCastSelf(SPELL_BURROW);
-                        events.ScheduleEvent(EVENT_BURROW, 45s, 0, PHASE_SPIDER);
+                        events.ScheduleEvent(EVENT_BURROW, SpiderCycle(), 0, PHASE_SPIDER);
                         break;
                     case EVENT_EMERGE:
-                        Emerge();
-                        HuntFarthest();
+                        EmergeAtFarthest();
+                        events.ScheduleEvent(EVENT_POISON_SHOCK, POISON_SHOCK_AFTER_EMERGE, 0, PHASE_SPIDER);
                         break;
                     case EVENT_END_HUNT:
                         EndHunt();
@@ -544,6 +628,9 @@ namespace
         GuidSet _festering;
         GuidSet _usedEggs;
         GuidVector _hatchingEggs;
+        GuidVector _drainSplashed;
+        ObjectGuid _drainTarget;
+        int32 _drainTick = 0;
         ObjectGuid _hunted;
         float _huntThreat = 0.0f;
     };
