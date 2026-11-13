@@ -325,6 +325,19 @@ void ApplyContracts(SpellInfo* info)
         cost.TargetB = SpellImplicitTargetInfo();
         info->Effects[EFFECT_2].Effect = 0;
     }
+    if ((id == 300382 || id == 570100) && !info->Effects[EFFECT_1].Effect &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE)
+    {
+        SpellEffectInfo const& strength = info->Effects[EFFECT_0];
+        SpellEffectInfo& intellect = info->Effects[EFFECT_1];
+        intellect.Effect = SPELL_EFFECT_APPLY_AURA;
+        intellect.ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
+        intellect.BasePoints = strength.BasePoints;
+        intellect.DieSides = strength.DieSides;
+        intellect.MiscValue = STAT_INTELLECT;
+        intellect.TargetA = strength.TargetA;
+        intellect.TargetB = SpellImplicitTargetInfo();
+    }
     if (id == 707388)
     {
         SpellEffectInfo& crit = info->Effects[EFFECT_0];
