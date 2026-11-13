@@ -404,10 +404,13 @@
     "spell": 301250,
     "clause": "Allows Crypt Plague to stack $s1 additional times.",
     "labels": [
-      "301250 effect_value e0 #0"
+      "301250 effect_value e0 #0",
+      "301250 behaviour_metric_delta above_cap",
+      "301250 behaviour_metric_delta cap",
+      "301250 behaviour_metric_delta cap_holds"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: no stack-count read of Crypt Plague 570131 against its cap in metric_delta (aura stacks after N applications); a behaviour route exists, so not status 3. Open, route pending: Effect[0] aura 107 MiscValue 31 (a CoA stack-cap op) +5; route: count Crypt Plague 570131 stacks past its base cap with and without the talent (the base cap is set in class code, not stated in this tooltip). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Level 40 Passive Allows Crypt Plague to stack additional times.'; bindmysoul found: Level 40 PassiveAllows Crypt Plague to stack 5 additional times.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 40, calculator=True, server_class_spell=False); logs: no events in 186 logs."
+    "reason": "Cycle 1 F2 (tool gap 'Crypt Plague stack-count read past its cap' closed without a tool change: aura_stacks on the dummy, an event read): working pair prove-11 (2 runs, all ok): on a named fixture of 9 Crypt Plague stacks, one Lichfrost reads 10 without Withering (the base cap, control) and 11 with it; three read 10 / 15; four read 10 / 15 (the new cap 10 + $s1 = 15 holds). Withering 301250 aura 107 SPELLMOD_MAX_AURA_STACKS +5 (SpellDefines.h:107). Previous record: Route agent c (2026-11-13, second attempt): parked, tool gap: no stack-count read of Crypt Plague 570131 against its cap in metric_delta (aura stacks after N applications); a behaviour route exists, so not status 3. Open, route pending: Effect[0] aura 107 MiscValue 31 (a CoA stack-cap op) +5; route: count Crypt Plague 570131 stacks past its base cap with and without the talent (the base cap is set in class code, not stated in this tooltip). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Level 40 Passive Allows Crypt Plague to stack additional times.'; bindmysoul found: Level 40 PassiveAllows Crypt Plague to stack 5 additional times.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 40, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 301303,
