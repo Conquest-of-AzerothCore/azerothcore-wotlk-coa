@@ -190,7 +190,8 @@ class aura_ascension_necromancer_event : public AuraScript
                 Cast(actor, target, 707002);
             if (MinionChance(player, actor, 802986))
             {
-                Cast(player, actor, 807653);
+                Cast(actor, actor, 807653);
+                Cast(actor, actor, 807765);
                 Cast(actor, actor, 504022);
             }
             if (target->HasAura(560729, player->GetGUID()) && player->HasAura(561319))
