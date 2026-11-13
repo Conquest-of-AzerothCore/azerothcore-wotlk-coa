@@ -4558,12 +4558,22 @@
   {
     "spell": 572176,
     "clause": "Increases the target's resistance to Frost spells by $s1 for $d.",
-    "labels": [
-      "572176 effect_value e0 #0",
-      "572176 aura_amount e0 #0",
-      "572176 aura_duration_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the target's resistance to Frost spells by $s1",
+        "labels": [
+          "572176 behaviour_metric_delta amount"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "572176 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair pair1 on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm in each entry: no cast). Frost resistance 0 -> 60 ($s1, aura 143 Frost mask 16); remaining duration 1799894 ms vs 1800000 ($d). G-11 (2026-11-13, B6 side a): server DBC (packet), src/server/coa (only the progression row AscensionSpellProgressionData.h:1423); combat logs (coa-history raw grep): casts by several players on themselves (BUFF, refresh); sidekick data.js same text without numbers; MCP not queried (unavailable)."
   },
   {
     "spell": 572177,
@@ -4599,12 +4609,22 @@
   {
     "spell": 572789,
     "clause": "Places a Mandate on the friendly target, increasing spell power by $s1 for $d.",
-    "labels": [
-      "572789 effect_value e0 #0",
-      "572789 aura_amount e0 #0",
-      "572789 aura_duration_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing spell power by $s1",
+        "labels": [
+          "572789 behaviour_metric_delta amount"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "572789 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair pair1 on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm in each entry: no cast). Shadow spell power 0 -> 49 ($s1 = 49, aura 345 all schools); remaining duration 1799894 ms read 100 ms after the cast vs 1800000 ($d, DurationIndex 30). G-11 (2026-11-13, B6 side a): server DBC (packet), src/server/coa (only the progression row AscensionSpellProgressionData.h:1425); combat logs (coa-history): 2 casts, aura BUFF on the caster itself; sidekick data.js same text without numbers; coabuildhub spells_master_index nothing for this rank; MCP not queried (unavailable)."
   },
   {
     "spell": 572790,
@@ -4619,12 +4639,22 @@
   {
     "spell": 680286,
     "clause": "Empowers raid and party members with a dark Mandate, increasing Stamina by $s1 for $d.",
-    "labels": [
-      "680286 effect_value e0 #0",
-      "680286 aura_amount e0 #0",
-      "680286 aura_duration_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing Stamina by $s1",
+        "labels": [
+          "680286 behaviour_metric_delta amount"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "680286 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair pair1 on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm in each entry: no cast). Stamina 68 -> 122 (+54, $s1, aura 29 at caster area raid, the caster included); remaining duration 1799894 ms vs 1800000 ($d). The raid/party reach is not a separate claim of this row; it was read on the caster only. G-11 (2026-11-13, B6 side a): server DBC (packet), src/server/coa (grant AscensionCustomClassData.h:493); combat logs (coa-history): nothing found; sidekick data.js same text without numbers; MCP not queried (unavailable)."
   },
   {
     "spell": 681460,
@@ -4786,12 +4816,22 @@
   {
     "spell": 573298,
     "clause": "Empowers an ally with a dark Mandate, increasing Stamina by $s1 for $d.",
-    "labels": [
-      "573298 effect_value e0 #0",
-      "573298 aura_amount e0 #0",
-      "573298 aura_duration_ms #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing Stamina by $s1",
+        "labels": [
+          "573298 behaviour_metric_delta amount"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "573298 behaviour_metric_delta duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Status 1 (counted pair pair1 on build 76f6af5fc098, server f6ac75aac372, 2 runs, 0 flips; control arm in each entry: no cast). Stamina 68 -> 122 (+54, $s1, aura 29); remaining duration 1799894 ms read 100 ms after the cast vs 1800000 ($d). G-11 (2026-11-13, B6 side a): server DBC (packet), src/server/coa (only the progression row AscensionSpellProgressionData.h:1434); combat logs (coa-history): 2 casts; sidekick data.js same text without numbers; coabuildhub spells_master_index rank 1 800199 'increasing Stamina by 8 for 30 min' (duration agrees); MCP not queried (unavailable)."
   },
   {
     "spell": 501978,

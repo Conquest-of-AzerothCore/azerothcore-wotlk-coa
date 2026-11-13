@@ -1268,6 +1268,178 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 572789,
+      "name": "Grim Mandate (spell power)",
+      "kind": "metric_delta",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "quote": "increasing spell power by $s1",
+      "expected": 49,
+      "before_expected": 0,
+      "trigger_spell": 572789,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "observe_source": "Grim Mandate 572789 Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, MiscValue 127 (all schools), BasePoints 48 DieSides 1 ($s1 = 49), TARGET_UNIT_TARGET_ALLY; no CoA code names 572789. The caster's Shadow spell power: 0 before (control, no cast), 49 after a real cast on itself."
+    },
+    {
+      "spell": 572789,
+      "name": "Grim Mandate (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d",
+      "expected": 1800000,
+      "before_expected": 0,
+      "tolerance": 1500,
+      "trigger_spell": 572789,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 100,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 572789,
+        "caster": "caster"
+      },
+      "observe_source": "Grim Mandate 572789. DurationIndex 30 = 1800000 ms ($d, 30 min). A real cast on the caster (a valid friendly target, TARGET_UNIT_TARGET_ALLY / caster area raid); the applied aura's remaining duration read 100 ms after the cast: 1800000 within 1500 ms of step clock; before the cast (control, no cast) the aura is absent, 0."
+    },
+    {
+      "spell": 573298,
+      "name": "Foul Mandate (Stamina)",
+      "kind": "metric_delta",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "quote": "increasing Stamina by $s1",
+      "expected": 122,
+      "before_expected": 68,
+      "trigger_spell": 573298,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "observe_source": "Foul Mandate 573298 Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 2 (Stamina), BasePoints 53 DieSides 1 ($s1 = 54), TARGET_UNIT_TARGET_ALLY; no CoA code names 573298. The caster's Stamina: 68 before (control, no cast; the class file's Sepulchral Might reference reading), 68 + 54 = 122 after a real cast on itself."
+    },
+    {
+      "spell": 573298,
+      "name": "Foul Mandate (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d",
+      "expected": 1800000,
+      "before_expected": 0,
+      "tolerance": 1500,
+      "trigger_spell": 573298,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 100,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 573298,
+        "caster": "caster"
+      },
+      "observe_source": "Foul Mandate 573298. DurationIndex 30 = 1800000 ms ($d, 30 min). A real cast on the caster (a valid friendly target, TARGET_UNIT_TARGET_ALLY / caster area raid); the applied aura's remaining duration read 100 ms after the cast: 1800000 within 1500 ms of step clock; before the cast (control, no cast) the aura is absent, 0."
+    },
+    {
+      "spell": 680286,
+      "name": "Greater Foul Mandate (Stamina)",
+      "kind": "metric_delta",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "quote": "increasing Stamina by $s1",
+      "expected": 122,
+      "before_expected": 68,
+      "trigger_spell": 680286,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "observe_source": "Greater Foul Mandate 680286 Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 2 (Stamina), BasePoints 53 DieSides 1 ($s1 = 54), TARGET_UNIT_CASTER_AREA_RAID (the caster is a raid member); no CoA code names 680286 beyond its level-60 grant (AscensionCustomClassData.h:493). The caster's Stamina: 68 before (control, no cast), 68 + 54 = 122 after a real cast."
+    },
+    {
+      "spell": 680286,
+      "name": "Greater Foul Mandate (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d",
+      "expected": 1800000,
+      "before_expected": 0,
+      "tolerance": 1500,
+      "trigger_spell": 680286,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 100,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 680286,
+        "caster": "caster"
+      },
+      "observe_source": "Greater Foul Mandate 680286. DurationIndex 30 = 1800000 ms ($d, 30 min). A real cast on the caster (a valid friendly target, TARGET_UNIT_TARGET_ALLY / caster area raid); the applied aura's remaining duration read 100 ms after the cast: 1800000 within 1500 ms of step clock; before the cast (control, no cast) the aura is absent, 0."
+    },
+    {
+      "spell": 572176,
+      "name": "Chill of the Tomb (Frost resistance)",
+      "kind": "metric_delta",
+      "variant": "amount",
+      "label_suffix": "amount",
+      "quote": "Increases the target's resistance to Frost spells by $s1",
+      "expected": 60,
+      "before_expected": 0,
+      "trigger_spell": 572176,
+      "target": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 1000,
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "observe_source": "Chill of the Tomb 572176 Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 16 (Frost mask), BasePoints 59 DieSides 1 ($s1 = 60), TARGET_UNIT_TARGET_ALLY; no CoA code names 572176. The caster's Frost resistance: 0 before (control, no cast), 60 after a real cast on itself."
+    },
+    {
+      "spell": 572176,
+      "name": "Chill of the Tomb (duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d",
+      "expected": 1800000,
+      "before_expected": 0,
+      "tolerance": 1500,
+      "trigger_spell": 572176,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "wait_ms": 100,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 572176,
+        "caster": "caster"
+      },
+      "observe_source": "Chill of the Tomb 572176. DurationIndex 30 = 1800000 ms ($d, 30 min). A real cast on the caster (a valid friendly target, TARGET_UNIT_TARGET_ALLY / caster area raid); the applied aura's remaining duration read 100 ms after the cast: 1800000 within 1500 ms of step clock; before the cast (control, no cast) the aura is absent, 0."
+    },
+    {
       "spell": 300580,
       "name": "Deadly Defense (the Crypt Fiend stays)",
       "kind": "metric_delta",
