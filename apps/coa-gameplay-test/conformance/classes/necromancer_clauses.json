@@ -95,12 +95,24 @@
   {
     "spell": 300235,
     "clause": "Periodic damage dealt now has a $h% chance to increase your and your Undead minion's haste by $301334s1% for $301334d.",
-    "labels": [
-      "300235 effect_value #0",
-      "300235 effect_value 301334e0 #1",
-      "300235 spell_duration 301334 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Periodic damage dealt now has a $h% chance",
+        "labels": [
+          "300235 proc_rate"
+        ]
+      },
+      {
+        "claim": "to increase your and your Undead minion's haste by $301334s1% for $301334d.",
+        "labels": [
+          "300235 effect_value #0",
+          "300235 effect_value 301334e0 #1",
+          "300235 spell_duration 301334 #2"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Claim 'Periodic damage dealt now has a $h% chance': status 1 (M side b counted pair PAIRID3, baseline without the talent): Blight 500237 periodic hits (periodic by id, AscensionNecromancerEvents.cpp:80-81) roll BuffArmy 301334 at 10.58% / 10.17% (948 in 8964, 912 in 8964), Wilson 99% inside the G-19 band 8%-12% of $h = 10, at the generated trial count. Claim 'to increase your and your Undead minion's haste by $301334s1% for $301334d.': not final, route pending (a haste read of the caster and a minion after a landed proc). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
   },
   {
     "spell": 300236,
@@ -1751,13 +1763,25 @@
   {
     "spell": 560730,
     "clause": "Damage dealt now has a $h% chance to apply Parasites for $560729d.",
-    "labels": [
-      "560730 effect_value #0",
-      "560730 spell_duration 560729 #1",
-      "560730 effect_value 561319e0 #2"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/560730.md."
+    "reason": "Claim 'Damage dealt now has a $h% chance': not final, alert reproduced (lead, G-3; M side b counted pair PAIRID3 and pilot11, 4 runs): periodic Blight 500237 hits roll Parasites 560729 at 4.76% / 4.95% (inside the band 3%-7% of $h = 5), but direct Glacial Impact 707592 hits never do (0 in 4730, both runs) although the tooltip names all damage dealt. Cause (read): the roll sits in the periodic branch of aura_ascension_necromancer_event::Proc (AscensionNecromancerEvents.cpp:117-125). Fix note candidate FN-mb-2 to the controller (nothing built). Claim 'to apply Parasites for $560729d.': not final, route pending. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Damage dealt now has a $h% chance",
+        "labels": [
+          "560730 proc_rate 560729 500237",
+          "560730 proc_rate 560729 707592"
+        ]
+      },
+      {
+        "claim": "to apply Parasites for $560729d.",
+        "labels": [
+          "560730 effect_value #0",
+          "560730 spell_duration 560729 #1",
+          "560730 effect_value 561319e0 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 560798,
@@ -1822,8 +1846,14 @@
   {
     "spell": 560852,
     "clause": "Your Glacial Impact is now guaranteed to critically strike against Frozen targets.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560852 behaviour_metric_delta frozen_crits",
+      "560852 behaviour_metric_delta frozen_no_plain",
+      "560852 behaviour_metric_delta unfrozen_plain",
+      "560852 behaviour_metric_delta no_talent_plain"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (M side b counted pair PAIRID3). Ten Glacial Impact 707592 hits on a dummy held Frozen by Ice Lock 22856 (named precondition fixture, ADR 0491): all 10 critical, no plain hit, with Glacier Lord learned; controls: the same talent on an unfrozen dummy (10 plain hits) and the Frozen dummy without the talent (10 plain hits). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
   },
   {
     "spell": 561138,
@@ -2210,9 +2240,12 @@
     "spell": 704163,
     "clause": "Your diseases and Crypt Swarm now deal $s1% increased damage to enemies below 20% health.",
     "labels": [
-      "704163 effect_value e0 #0"
+      "704163 behaviour_hit_ratio disease_below_20",
+      "704163 behaviour_hit_ratio swarm_below_20",
+      "704163 behaviour_hit_ratio swarm_above_20"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (M side b counted pair PAIRID3; control without the talent, 823764 in both arms, non-critical hits, the dummy held at the stated health: the below-20% fixture allowed for a damage subject). Flesh to Worms 500338 (a disease) ticks at 19% health: 17 -> 38 (x2.235, int32 of 17 x 2.25); Crypt Swarm 800343 ticks at 19%: 58 -> 130 (x2.241, int32 of 130.5); at 21%: 58 -> 58 (edge control). $s1 = 125% stated (x2.25), inside the G-19 band. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
   },
   {
     "spell": 707402,
@@ -2365,9 +2398,11 @@
     "spell": 704682,
     "clause": "Increases the duration of Skeletal Archers by $/1000;s1 sec.",
     "labels": [
-      "704682 effect_value e0 #0"
+      "704682 behaviour_metric_delta archers_last",
+      "704682 behaviour_metric_delta archers_end"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (M side b counted pair PAIRID3; control: without the talent). Animate: Skeletal Archer 805040's 3 Archers 50076 are up 17500 ms after a real cast with Summoning Prodigy learned (0 without: 15 s) and gone at 18500 ms: (17500, 18500] ms, 15 + 3 sec within 0.5 s (G-19 band 5%). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
   },
   {
     "spell": 704701,
@@ -2600,12 +2635,23 @@
   {
     "spell": 704724,
     "clause": "Casting Command spells now has a $h% chance to cause their next use within $572777d to be free of cost.",
-    "labels": [
-      "704724 effect_value #0",
-      "704724 spell_duration 572777 #1"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/704724.md."
+    "reason": "Claim 'Casting Command spells now has a $h% chance': status 1 (M side b counted pair PAIRID3): Command: Undead 504868 casts roll 572777 at 30.44% / 29.37% (6372 in 20931, 6146 in 20927), Wilson 99% inside the G-19 band 28%-32% of $h = 30; no proc in the baseline. Claim 'to cause their next use within $572777d to be free of cost.': not final, route pending (a cost gate after a landed proc). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Casting Command spells now has a $h% chance",
+        "labels": [
+          "704724 proc_rate"
+        ]
+      },
+      {
+        "claim": "to cause their next use within $572777d to be free of cost.",
+        "labels": [
+          "704724 effect_value #0",
+          "704724 spell_duration 572777 #1"
+        ]
+      }
+    ]
   },
   {
     "spell": 704729,
@@ -2680,13 +2726,24 @@
   {
     "spell": 705750,
     "clause": "Dealing Magic damage now has a $706473h% chance to increase your haste by $705751s1% for $705751d.",
-    "labels": [
-      "705750 effect_value #0",
-      "705750 effect_value 705751e0 #1",
-      "705750 spell_duration 705751 #2"
-    ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/705750.md."
+    "reason": "Claim 'Dealing Magic damage now has a $706473h% chance': not final, alert reproduced (lead, G-3; M side b counted pair PAIRID3 and pilot11, 4 runs): Glacial Impact 707592 (Frost) hits roll 705751 at 5.19% / 5.02% (659 in 12701, 637 in 12701), Wilson 99% about [4.5%, 5.7%], against the tooltip's $706473h = 15% (Death Runes 706473 ProcChance 15). Cause (read): Chance(player, 705750) uses 705750's own ProcChance 5 (AscensionNecromancerEvents.cpp:156); the tooltip token names another spell. Owner question candidate (text alignment or chance), no fix note. Claim 'to increase your haste by $705751s1% for $705751d.': not final, route pending. G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable).",
+    "claims": [
+      {
+        "claim": "Dealing Magic damage now has a $706473h% chance",
+        "labels": [
+          "705750 proc_rate"
+        ]
+      },
+      {
+        "claim": "to increase your haste by $705751s1% for $705751d.",
+        "labels": [
+          "705750 effect_value #0",
+          "705750 effect_value 705751e0 #1",
+          "705750 spell_duration 705751 #2"
+        ]
+      }
+    ]
   },
   {
     "spell": 705752,
@@ -2918,10 +2975,22 @@
   {
     "spell": 707175,
     "clause": "Casting Command spells now has a $h% chance to make your next Lichfrost or Blight free of cost and instant cast.",
-    "labels": [
-      "707175 effect_value #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Command spells now has a $h% chance",
+        "labels": [
+          "707175 proc_rate"
+        ]
+      },
+      {
+        "claim": "to make your next Lichfrost or Blight free of cost and instant cast.",
+        "labels": [
+          "707175 effect_value #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Claim 'Casting Command spells now has a $h% chance': status 1 (M side b counted pair PAIRID3): Command: Undead 504868 casts roll 707176 at 15.05% / 15.43% (1910 in 12694, 1959 in 12698), Wilson 99% inside the G-19 band 13%-17% of $h = 15; no proc in the baseline. Claim 'to make your next Lichfrost or Blight free of cost and instant cast.': not final, route pending (a cost gate and a completion read after a landed proc). G-11 search (2026-11-13, M side b): server DBC set /srv/coa/server-data/dbc and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, 186 logs, rg by id and quoted name, positive control 802353 1551 lines in the same search; coa-history spell and the class-map log columns not used as evidence): the talent ids have 0 lines (passives); the logs carry no roll attempts, so they do not decide a chance; MCP not queried (unavailable)."
   },
   {
     "spell": 707283,
