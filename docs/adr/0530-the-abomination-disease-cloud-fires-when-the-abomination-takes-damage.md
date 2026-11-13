@@ -23,7 +23,8 @@ test-only (G-39).
 - Conformance tools: a `metric_delta` `strike` may name `owned_entry`: the striker casts at the caster's owned
   creature of that entry, in the after phase only. A `script_hit` entry may name `strike_owned_entry`: the striker
   casts `strike_spell` at that owned creature in the treatment arm only, both arms waiting the same time, so
-  `control_casts` may repeat the casts.
+  `control_casts` may repeat the casts. `coverage.py` classes the `owned_creature_spell_cast_count` metric (ADR 0485)
+  as an event, like `spell_cast_count`, now that a metric_delta entry reads it.
 
 ## Consequences
 
