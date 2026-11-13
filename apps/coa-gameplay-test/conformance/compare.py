@@ -3127,48 +3127,6 @@ def metric_ratio_verdict(base: Verdict, model: dict, before: float, after: float
                    high=ratio + tolerance, explanation=explanation)
 
 
-def behaviour_aura_expiry_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    series = [[run.values.get(label) for label in labels] for labels in model['reads']]
-    missing = [labels[0] for labels, values in zip(model['reads'], series) if any(value is None for value in values)]
-    if missing:
-        return replace(base, explanation=missing_measurement(run, missing[0]))
-    times = [values[0] for values in series]
-    present = [values[1] > 0 for values in series]
-    marks = [values[2] for values in series]
-    switch = model['switch_index']
-    expected, band = float(model['expected_ms']), float(model['band_ms'])
-    rises = [index for index in range(1, len(marks)) if marks[index] > marks[index - 1]]
-    onset = [index for index in rises if index < switch]
-    if not onset:
-        return replace(base, status='unmeasured', explanation='no cast of the marker spell before the switch, so the '
-                                                              'forced aura has no stamp')
-    if any(index >= switch for index in rises):
-        return replace(base, status='alert', explanation=f'the marker spell was cast again after the switch at read '
-                                                         f'{min(index for index in rises if index >= switch)}: the '
-                                                         f'roll was not stopped')
-    last = onset[-1]
-    if not present[last]:
-        return replace(base, status='unmeasured', explanation=f'the aura is absent at the last cast\'s read {last}')
-    gone = next((index for index in range(last + 1, len(present)) if not present[index]), None)
-    if gone is None:
-        return replace(base, status='alert', measured=times[-1] - times[last], expected=expected,
-                       explanation=f'the aura outlasts the reads: still present {times[-1] - times[last]:g} ms after '
-                                   f'the last cast')
-    if not all(present[last:gone]):
-        return replace(base, status='alert', explanation='the aura is absent between the last cast and its expiry')
-    low, high = times[gone - 1] - times[last], times[gone] - times[last - 1]
-    start = times[0]
-    released = run.values.get(model['released_label'])
-    status = 'ok' if expected - band <= low and high <= expected + band and released == 0 else 'alert'
-    return replace(base, status=status, measured=(low + high) / 2, expected=expected, low=expected - band,
-                   high=expected + band,
-                   explanation=f'last cast of the marker in ({times[last - 1] - start:g}, {times[last] - start:g}] '
-                               f'ms of game time after the command, the aura gone in ({times[gone - 1] - start:g}, '
-                               f'{times[gone] - start:g}]: it lasted between {low:g} and '
-                               f'{high:g} ms, against {expected:g} +- {band:g} (5%); the forcing mutant removed '
-                               f'({released})')
-
-
 def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     if model['mode'] == 'absent':
         value = run.values.get(model['label'])
@@ -4323,8 +4281,6 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
             return behaviour_stat_gain_verdict(base, run, model)
         if model.get('kind') == 'strike_bursts':
             return behaviour_strike_bursts_verdict(base, run, model)
-        if model.get('kind') == 'aura_expiry':
-            return behaviour_aura_expiry_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)

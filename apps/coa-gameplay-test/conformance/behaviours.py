@@ -83,7 +83,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'periodic_dispel', 'event_delay', 'proc_reset', 'taken_hit', 'threat_redirect', 'dispel_count',
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
-        'strike_bursts', 'aura_expiry')
+        'strike_bursts')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -7851,8 +7851,6 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
         return npc_repair_scenario(class_file, npc_repair_spec(entry))
     if entry['kind'] == 'strike_bursts':
         return strike_bursts_scenario(class_file, strike_bursts_spec(entry))
-    if entry['kind'] == 'aura_expiry':
-        return aura_expiry_scenario(class_file, aura_expiry_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
     if entry['kind'] == 'group_target':
@@ -8200,99 +8198,3 @@ def strike_bursts_scenario(class_file: dict, spec: StrikeBurstsSpec) -> tuple[di
                                         f'{arm["low"]}..{arm["high"]}', prose_rule(entry.quote, spec.spell),
                                         {**model, 'mode': 'range', **arm}))
     return scenario, expectations
-
-
-@dataclass(frozen=True)
-class AuraExpirySpec:
-    spell: int
-    name: str
-    quote: str
-    aura: int
-    entry: int
-    marker_spell: int
-    expected_ms: int
-    command: int
-    raise_spell: int
-    onset_ms: int = 4000
-    poll_ms: int = 100
-    tail_ms: int | None = None
-    band_ms: int | None = None
-    raise_wait_ms: int = 3000
-    label_suffix: str = 'aura_expiry'
-
-
-def aura_expiry_spec(entry: dict) -> AuraExpirySpec:
-    return AuraExpirySpec(entry['spell'], entry['name'], entry['quote'], int(entry['aura']), int(entry['entry']),
-                          int(entry['marker_spell']), int(entry['expected_ms']), int(entry['command']),
-                          int(entry['raise_spell']), int(entry.get('onset_ms', 4000)), int(entry.get('poll_ms', 100)),
-                          entry.get('tail_ms'), entry.get('band_ms'), int(entry.get('raise_wait_ms', 3000)),
-                          entry.get('label_suffix', 'aura_expiry'))
-
-
-def aura_expiry_label(spec: AuraExpirySpec, index: int, read: str) -> str:
-    return f'{spec.spell} aura_expiry {index} {read}'
-
-
-def aura_expiry_scenario(class_file: dict, spec: AuraExpirySpec) -> tuple[dict, list[Expectation]]:
-    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
-    entry = behaviour_entry(records, spec.spell, spec.name, 'aura_expiry', spec.quote, spec.expected_ms)
-    if spec.poll_ms < 50 or spec.onset_ms < spec.poll_ms or spec.expected_ms <= 0:
-        raise ValueError(f'{spec.spell} aura_expiry needs a positive duration and polls of at least 50 ms')
-    tail_ms = spec.tail_ms if spec.tail_ms is not None else spec.expected_ms + 3000
-    band_ms = spec.band_ms if spec.band_ms is not None else spec.expected_ms * 5 // 100
-    power = facts_of(records, spec.command)
-    reads = []
-
-    def poll(index: int) -> list[dict]:
-        labels = [aura_expiry_label(spec, index, read) for read in ('time', 'aura', 'marker')]
-        reads.append(labels)
-        return [measurement(labels[0], CASTER, 'game_time_ms'),
-                measurement(labels[1], CASTER, 'owned_creature_count', entry=spec.entry, spell=spec.aura),
-                measurement(labels[2], CASTER, 'owned_creature_spell_cast_count', entry=spec.entry,
-                            spell=spec.marker_spell)]
-
-    released = f'{spec.spell} aura_expiry released'
-    switched = f'{spec.spell} aura_expiry switched'
-    steps = (base_steps(class_file)
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
-                for spell in (spec.spell, spec.command, spec.raise_spell)]
-             + [{'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.spell, 'op': FORCED_CHANCE_OP,
-                 'percent': FORCED_CHANCE_PERCENT},
-                {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.raise_spell},
-                {'action': 'cast', 'actor': CASTER, 'spell': spec.raise_spell, 'target': CASTER},
-                {'action': 'wait', 'label': 'raise settle', 'ms': spec.raise_wait_ms}]
-             + cast_gate_power_step(power)
-             + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.command},
-                {'action': 'cast', 'actor': CASTER, 'spell': spec.command, 'target': TARGET}]
-             + poll(0))
-    onset = spec.onset_ms // spec.poll_ms
-    for index in range(1, onset + 1):
-        steps += [{'action': 'wait', 'ms': spec.poll_ms}] + poll(index)
-    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
-              {'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.spell, 'op': FORCED_CHANCE_OP,
-               'percent': -100},
-              measurement(switched, CASTER, 'spell_mod_mutants')]
-    for index in range(onset + 1, onset + 1 + tail_ms // spec.poll_ms):
-        steps += [{'action': 'wait', 'ms': spec.poll_ms}] + poll(index)
-    steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
-              measurement(released, CASTER, 'spell_mod_mutants')]
-    scenario = {
-        'schema': 1,
-        'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour aura expiry',
-        'contract': f'{spec.spell} is known and its roll forced (a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier '
-                    f'mutant); {spec.raise_spell} raises a creature {spec.entry} and {spec.command} sends it at the '
-                    f'dummy. Every {spec.poll_ms} ms for {spec.onset_ms} ms the game time, the creatures of that entry '
-                    f'carrying {spec.aura} and the casts of {spec.marker_spell} by the creature are read; then the '
-                    f'forcing mutant is removed and a -100% one set, so no roll applies {spec.aura} again, and the '
-                    f'reads go on for {tail_ms} ms. The last cast of {spec.marker_spell} and the first read without '
-                    f'{spec.aura} after it bracket the aura\'s duration in game time.',
-        'players': [player_fixture(class_file)],
-        'creatures': [creature_fixture(class_file)],
-        'steps': steps}
-    timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'), MAX_ACCELERATED_SCENARIO_MS)
-    model = {'kind': 'aura_expiry', 'metric': 'owned_creature_count', 'quote': entry.quote, 'reads': reads,
-             'switch_index': onset + 1, 'expected_ms': spec.expected_ms, 'band_ms': band_ms,
-             'switched_label': switched, 'released_label': released}
-    label = f'{spec.spell} behaviour_metric_delta {spec.label_suffix}'
-    return scenario, [Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None, str(spec.expected_ms),
-                                  prose_rule(entry.quote, spec.spell), model)]

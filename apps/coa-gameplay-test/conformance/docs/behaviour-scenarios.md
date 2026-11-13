@@ -287,13 +287,7 @@ a minion: a `spell_mod_mutant` of SPELLMOD_CHANCE_OF_SUCCESS +1000% on `talent` 
 `aura` on the owned creature `entry` just before the before reading (it must be absent) and just before the after
 reading, on every creature of that entry (otherwise the verdict is `unmeasured`, never `ok`), and at the end the mutant owner aura removed and
 `spell_mod_mutants` read 0 (otherwise an alert). It never proves a rate: rate claims stay with their proc entries.
-`kind: "aura_expiry"` (ADR 0485) reads how long a rolled minion aura lasts: the talent's roll is forced (the ADR
-0482 mutant) while one raised minion attacks the dummy, then a -100% mutant stops every roll; every `poll_ms` the game
-time (`game_time_ms`), the minions carrying `aura` and the minion's casts of `marker_spell`
-(`owned_creature_spell_cast_count`) are read. The last cast and the first read without the aura bracket the duration in
-game time; the verdict is `ok` when the bracket lies inside `expected_ms` +- `band_ms` (5% by default). A cast after the
-switch alerts; no cast before it is `unmeasured`. Durations are judged on game-time stamps, never on the nominal waits:
-each wait step costs about 10 to 17 ms of game time beyond its `ms` (ADR 0485).
+`kind: "aura_expiry"` (ADR 0485) has [its own page](kinds/aura_expiry.md).
 `game_time` (ADR 0501) stamps a metric_delta reading in game time: `{"after": [low, high]}` reads `game_time_ms` right
 before the treatment phase's trigger cast and right before the after reading, and `"expired": [low, high]` (with
 `expiry_wait_ms`) also before the expiry reading. Each reading's game time after the cast must lie in its window (the
@@ -1877,6 +1871,7 @@ A behaviour kind can live in its own module `kinds/<kind>.py` (ADR 0581), found 
 Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` suite command, which also checks that
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
+- [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
 - [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped windows (ADR 0551)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)

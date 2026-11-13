@@ -75,8 +75,6 @@ BEHAVIOUR_LABELS = {
     'spread': lambda entry: [f"{entry['spell']} behaviour_count"],
     'metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
     'aura_metric_delta': lambda entry: [f"{entry['spell']} behaviour_metric_delta"],
-    'aura_expiry': lambda entry: [f"{entry['spell']} behaviour_metric_delta "
-                                  f"{entry.get('label_suffix', 'aura_expiry')}"],
     'threat_tick_ratio': lambda entry: [f"{entry['spell']} behaviour_metric_ratio_delta"
                                         + (f" {entry['label_suffix']}" if entry.get('label_suffix') else '')],
     'absorb_pierce_ratio': lambda entry: [f"{entry['spell']} behaviour_absorb_pierce_ratio"],
