@@ -2996,7 +2996,8 @@
         "claim": "$SP*.75",
         "labels": [
           "707007 script_hit 707010 explosion_sp",
-          "707007 script_hit 707010 explosion_sp_all"
+          "707007 script_hit 707010 explosion_sp_all",
+          "707007 script_hit 707010 explosion_sp_shadow"
         ]
       },
       {
@@ -3007,7 +3008,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Claim damage: status 2, known engine rounding G-27 (the final route pair 20261113-032244 / -032351, build f90703a57ebc): the walkers explode at the dummy (at least one 707010 hit, judged as presence: the tooltip states no walker count, mentor method rule 2026-11-13), 691 per hit at spell power 0 against the tooltip 691.2; control without the cast 0 hits. Claim $SP*.75: status 1 by owner ruling Q-b3b-6 (b) (the spell's own schools, mask 40, ADR 0525; C1 F1 final pair 20261113-085350 / -085431, build 0b36305456 (binary a057fcc38269)): +132 Frost (24666) leaves the hit at 691 (explosion_sp), +100 every-school spell power (10062) gives 766 = 691.2 + 75 (explosion_sp_all), both runs; a Shadow-only +78 (33819) read 749 in pilot pair1 (not a counted label: the tooltip's $SP is the lowest school). Claim nearby enemies: Status 1 (same pair; the three dummies within 2.5 yd of the primary are hit by 707010 from the walkers, the far dummy 10 yd beyond never). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim damage: status 2, known engine rounding G-27 (the final route pair 20261113-032244 / -032351, build f90703a57ebc): the walkers explode at the dummy (at least one 707010 hit, judged as presence: the tooltip states no walker count, mentor method rule 2026-11-13), 691 per hit at spell power 0 against the tooltip 691.2; control without the cast 0 hits. Claim $SP*.75: status 1 by owner ruling Q-b3b-6 (b) (the spell's own schools, mask 40 = Nature + Shadow, ADR 0525; mentor ruling 2026-11-13: Shadow spell power counts): +132 Frost (24666) leaves the hit at 691 (explosion_sp); +78 Shadow (33819) gives 749 = trunc(691.2 + 0.75 x 78 = 749.7) (explosion_sp_shadow, multiplier 749 / 691 on the tool's spell power 0 model, since the tool reads $SP as the lowest school); +100 every-school spell power (10062) gives 766 = trunc(691.2 + 75) (explosion_sp_all); focused pair 20261113-090205 / -090240 (build 95ffb7407f) and, for explosion_sp / explosion_sp_all, the C1 F1 final pair 20261113-085350 / -085431. Observation (text, no server change): the tooltip's displayed $SP (lowest school) does not show the Shadow-only spell power the server adds. Claim nearby enemies: Status 1 (same pair; the three dummies within 2.5 yd of the primary are hit by 707010 from the walkers, the far dummy 10 yd beyond never). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707007,

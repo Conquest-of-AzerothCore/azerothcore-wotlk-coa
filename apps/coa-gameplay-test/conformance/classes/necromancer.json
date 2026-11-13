@@ -12814,6 +12814,46 @@
       "observe_source": "Matching arm (owner ruling Q-b3b-6 (b), ADR 0525): QA Test +100 SP 10062 (Effect[0] aura 345 MiscValue 127, every school, +100) set on the caster before its stats are measured. The walkers' 707010 (NecromancerCoefficients row {707010, 0, 0.75, 40}) adds 0.75 x 100 = 75 to each hit, the $SP*.75 term of the tooltip read with the measured stats ($SP is the lowest school spell power, so a one-school fixture cannot raise the expectation; a Shadow-only +78 33819 read 749 per hit in pair1, 691 + 0.75 x 78 = 749.5 truncated). Control: the same trials without the cast (control_casts empty) count no 707010 hit."
     },
     {
+      "spell": 707007,
+      "name": "March of the Dead (explosion damage with Shadow spell power)",
+      "kind": "script_hit",
+      "variant": "explosion_sp_shadow",
+      "label_suffix": "explosion_sp_shadow",
+      "quote": "Plague damage to nearby enemies",
+      "hit_spell": 707010,
+      "hit_effect": 0,
+      "caster_entry": 523032,
+      "trials": 3,
+      "minimum_hits": 6,
+      "control_casts": [],
+      "casts": [
+        [
+          707007,
+          "dummy"
+        ]
+      ],
+      "caster_auras": [
+        [
+          984954,
+          1
+        ],
+        [
+          823764,
+          1
+        ]
+      ],
+      "stat_auras": [
+        [
+          33819,
+          1
+        ]
+      ],
+      "unresisted": true,
+      "multiplier": 1.0839363241678726,
+      "settle_ms": 6000,
+      "observe_source": "Matching single-school arm (owner ruling Q-b3b-6 (b): the spell's own schools, mask 40 = Nature + Shadow, so Shadow spell power counts; mentor ruling 2026-11-13, ADR 0525). Increase Shadow Dam 78 33819 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, BasePoints 77 + 1 = 78, permanent) set on the caster before its stats are measured. Expected per hit: $707010m1 x $<scalingbp> + 0.75 x 78 = 691.2 + 58.5 = 749.7, the engine's integer 749. The tool reads the tooltip's $SP as the lowest school spell power (0 here), so its model gives the spell power 0 value 691 (the explosion entry); multiplier = 749 / 691 = 1.0839363241678726 carries the 0.75 x 78 Shadow term onto that model. The tooltip's displayed $SP (lowest school) and the server (mask 40) disagree for a one-school fixture: a text observation, no server change. Control: the same trials without the cast (control_casts empty) count no 707010 hit."
+    },
+    {
       "spell": 301207,
       "name": "Flesh Symbiosis (armor with a Decaying Colossus)",
       "kind": "metric_delta",

@@ -15,8 +15,9 @@ NecromancerCoefficients row read Frost spell power (school 16): +132 Frost added
 
 ## Consequences
 
-- Regression (class file): `explosion_sp` (+132 Frost 24666: the hit stays the spell power 0 value, 691) and a
-  matching arm `explosion_sp_all` (QA Test +100 SP 10062, every school: +0.75 x 100 per hit, 766); `explosion` (spell
-  power 0) is the base, the uncast trials the control. The tooltip's $SP is the lowest school spell power, so a
-  one-school fixture cannot raise the expectation: a Shadow-only +78 (33819) read 749 per hit (691 + 58.5), which the
-  check judges against 691.
+- Regression (class file): `explosion_sp` (+132 Frost 24666: the hit stays the spell power 0 value, 691),
+  `explosion_sp_shadow` (+78 Shadow 33819: 691.2 + 0.75 x 78 = 749.7, the engine's 749) and `explosion_sp_all` (+100
+  every school 10062: 691.2 + 75 = 766.2, 766); `explosion` (spell power 0) is the base, the uncast trials the control.
+- The tool reads the tooltip's $SP as the lowest school spell power, so the Shadow arm carries its 0.75 x 78 term as a
+  stated multiplier (749 / 691) on the tool's spell power 0 model. The tooltip's displayed $SP and the server differ for
+  a one-school fixture: a text observation, no server change.
