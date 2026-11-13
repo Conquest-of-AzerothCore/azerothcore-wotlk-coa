@@ -11297,6 +11297,16 @@ class MinionSwingRatioTests(unittest.TestCase):
         self.assertEqual(len(commands), expectation.model['trials'] + 1)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_spell_power_arm_sets_the_fixture_and_its_flat_part(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry.get('label_suffix') == 'weapon_ratio_sp')
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        self.assertEqual(scenario['players'][0]['spell_power'], 1000)
+        self.assertEqual(expectation.model['treatment_flat'], 137.5)
+        plain, _ = self.built()
+        self.assertNotIn('spell_power', plain['players'][0])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_the_band_is_five_percent_of_the_stated_ratio_after_the_flat_part(self):
         self.assertEqual(self.judged(401.0), 'ok')
         self.assertEqual(self.judged(381.0), 'ok')

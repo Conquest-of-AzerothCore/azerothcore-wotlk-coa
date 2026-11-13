@@ -926,7 +926,8 @@ strike as the treatment: the per-hit mean of the strike over the per-swing mean 
 ratio `expected` (`ratio_band`, the G-19 band of a ratio), with the 99% interval rules of the hit ratio judge. The
 creature's minimum weapon damage (`owned_creature_weapon_damage_min`) is recorded once and not judged. Raise:
 `strike_flat` takes that flat amount off every strike hit before the ratio (ADR 0547). Greater Skeletal Warrior 504901
-judges Command: Skeletal Warriors 570042 at 2.0 after its flat Effect[1] part of 1 (fix FN-c1t-1, controller cycle 2).
+judges Command: Skeletal Warriors 570042 at 2.0 after its flat Effect[1] part of 1 (fix FN-c1t-1, controller cycle 2). `player_spell_power` gives the
+caster the harness spell-power fixture; weapon_ratio_sp holds 1000, a flat part of 137.5.
 
 ### Amount-match scenarios (`behaviour_amount_match`, `kind: "amount_match"`)
 

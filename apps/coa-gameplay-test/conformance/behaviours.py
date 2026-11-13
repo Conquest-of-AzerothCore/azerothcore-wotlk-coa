@@ -2284,6 +2284,7 @@ class MinionSwingRatioSpec:
     command_power: int | None = None
     label_suffix: str = ''
     strike_flat: float = 0.0
+    player_spell_power: int | None = None
 
 
 def minion_swing_ratio_label(spec: MinionSwingRatioSpec) -> str:
@@ -2345,6 +2346,9 @@ def minion_swing_ratio_scenario(class_file: dict, spec: MinionSwingRatioSpec) ->
              'expected': spec.expected, 'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials,
              'trial_limit': spec.trials, 'minimum_hits': max(1, spec.trials // 2), 'metric': 'spell_damage_total',
              'ratio_band': True, 'quote': entry.quote}
+    if spec.player_spell_power is not None:
+        scenario['players'][0]['spell_power'] = spec.player_spell_power
+        scenario['contract'] += f' The caster holds {spec.player_spell_power} spell power (harness fixture).'
     if spec.strike_flat:
         model['treatment_flat'] = spec.strike_flat
         scenario['contract'] += (f' The strike\'s flat part, {spec.strike_flat:g} per hit, is taken off the strike '
@@ -2359,7 +2363,8 @@ def minion_swing_ratio_spec(entry: dict) -> MinionSwingRatioSpec:
                                 int(entry['command_spell']), int(entry['strike_spell']), int(entry['entry']),
                                 float(entry['expected']), int(entry.get('trials', 20)),
                                 int(entry.get('wait_ms', 3000)), entry.get('command_power'),
-                                entry.get('label_suffix', ''), float(entry.get('strike_flat', 0.0)))
+                                entry.get('label_suffix', ''), float(entry.get('strike_flat', 0.0)),
+                                entry.get('player_spell_power'))
 
 
 PUSHBACK_PHASES = ('unhit', 'hit', 'reduced')

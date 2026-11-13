@@ -4672,7 +4672,8 @@
       {
         "claim": "and deals Weapon Damage plus ${$570042m2+($SP*.35)*0.39}",
         "labels": [
-          "504901 behaviour_hit_ratio weapon_ratio"
+          "504901 behaviour_hit_ratio weapon_ratio",
+          "504901 behaviour_hit_ratio weapon_ratio_sp"
         ]
       }
     ],

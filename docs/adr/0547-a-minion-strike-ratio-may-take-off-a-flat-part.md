@@ -16,15 +16,18 @@ computed from spell power, in the 5% band, with the plain swing as the control. 
   divided by the per-swing mean (model `treatment_flat`, applied by the hit ratio judge to the treatment totals only).
 - 504901 weapon_ratio now expects 2.0 with `strike_flat` 1: Effect[1] BasePoints 0 + DieSides 1, plus 0.1365 x SP
   (AscensionNecromancerData.h:52) at the reference spell power 0.
-- The approved server change for this regression, a `SetScriptWeaponDamageMultiplier(2.0f)` in the 570042 spell
-  script, is not built: `Spell::SetScriptWeaponDamageMultiplier` refuses a spell without
-  SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (Spell.cpp:8737-8747), and the multiplier only scales that effect's percent
-  (SpellEffects.cpp:4722 and the WEAPON_PERCENT_DAMAGE case below it); 570042 has none, so the call would change
-  nothing. The change that acts is a contract turning 570042 Effect[2] into SPELL_EFFECT_WEAPON_PERCENT_DAMAGE 200;
-  it waits for approval.
+- Fix FN-c1t-1 (b), approved by the controller: a Necromancer contract sets 570042 Effect[2] to
+  SPELL_EFFECT_WEAPON_PERCENT_DAMAGE with BasePoints 199 (200%), one spell, the engine untouched
+  (AscensionNecromancerContracts.cpp). The script-multiplier option (a) could not act:
+  `Spell::SetScriptWeaponDamageMultiplier` refuses a spell without a WEAPON_PERCENT_DAMAGE effect
+  (Spell.cpp:8737-8747). Effect[1] is SPELL_EFFECT_SCHOOL_DAMAGE, which `Spell::EffectWeaponDmg` does not collect as
+  a weapon bonus, so the 200% doubles the weapon roll only and the flat part stays single, as the live fit (a flat
+  21.2 next to 2.03 x the swing) shows. The NORMALIZED_WEAPON_DMG effect's own +1 goes with it.
+- `minion_swing_ratio` takes `player_spell_power` (the harness spell-power fixture); weapon_ratio_sp holds 1000 spell
+  power, a flat part of 137.5, so a doubled flat part would read about 2.95 instead of 2.0.
 - Entries without `strike_flat` judge as before (Templar `generate --class 19` and `--stack` byte-identical).
 
 ## Consequences
 
-- Until a change that acts is approved and built, weapon_ratio reads about 1.0 and alerts.
+- 311.1 counts once a counted pair reads both arms in the band.
 - Tests: `MinionSwingRatioTests` (test_behaviours.py) with the flat part.
