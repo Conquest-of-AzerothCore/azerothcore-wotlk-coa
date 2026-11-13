@@ -339,6 +339,7 @@ void ApplyContracts(SpellInfo* info)
         dummy(0);
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
         info->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ANY);
+        info->DurationEntry = sSpellDurationStore.LookupEntry(18);
     }
     if (Family(info, 0, 16) && id >= 562210 && id <= 562213)
     {
