@@ -1581,6 +1581,15 @@ states.
 the before read stays exact. Testament of Hope 1397742 `combat`: the copies attack the selected dummy, 0
 `owned_creature_damage_count` before the cast and at least 1 hit 6000 ms after it (6 in the diagnostic).
 
+### A strike repeated in the uncast before phase (ADR 0499)
+
+`metric_delta` `strike.in_before` (default `false`) repeats the strike (its `dx` relocation, the health fixture and the
+striker casts) in a before phase that does not cast the trigger, right after that phase's setup casts. It needs
+`cast_in_before: false`, the default `between` gate timing, `setup_in_before` where the setup must exist in both
+phases, and no `setup_only_after`, `attack_swings` or `after_trigger_ms`. Ritual Return 807098 after Summoning Ritual
+805038: both phases place the circle and move the caster 15 yd; only the after phase casts Ritual Return, so the
+before read is the moved caster and the after read is the return.
+
 ### Stat-gain scenarios (`behaviour_metric_delta`, `kind: "stat_gain"`, ADR 0213)
 
 A `stat_gain` entry judges what a real cast adds to a stat of its target against the caster's own stats. It names

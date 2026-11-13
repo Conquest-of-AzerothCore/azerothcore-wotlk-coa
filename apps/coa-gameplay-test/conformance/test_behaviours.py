@@ -10304,6 +10304,52 @@ class MetricDeltaStrikeAfterTriggerTests(unittest.TestCase):
         self.assertEqual(steps[phylactery + 1], {'action': 'wait', 'label': 'before the strike', 'ms': 2600})
 
 
+class MetricDeltaStrikeInBeforeTests(unittest.TestCase):
+    def entry(self, **strike) -> dict:
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 805038 and entry.get('label_suffix') == 'return_position')
+        cast_contrast = {key: value for key, value in entry.items() if key != 'setup_only_after'}
+        return {**cast_contrast, 'before_expected': 15, 'tolerance': 0.5, 'cast_in_before': False,
+                'setup_in_before': True, 'strike': {**entry['strike'], **strike}}
+
+    def phases(self, entry: dict) -> tuple[list[dict], list[dict]]:
+        scenario, [expectation, *_] = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        before = next(index for index, step in enumerate(steps)
+                      if step.get('label') == expectation.model['before_label'])
+        return steps[:before], steps[before:]
+
+    @staticmethod
+    def index(phase: list[dict], match) -> int:
+        return next(index for index, step in enumerate(phase) if match(step))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_in_before_strike_follows_the_setup_casts_of_the_uncast_phase(self):
+        first, second = self.phases(self.entry(in_before=True))
+        for phase in (first, second):
+            circle = self.index(phase, lambda step: step.get('action') == 'cast' and step.get('spell') == 805038)
+            moved = self.index(phase, lambda step: step == {'action': 'relocate', 'actor': CASTER, 'dx': 15.0})
+            self.assertLess(circle, moved)
+        self.assertFalse(any(step.get('action') == 'cast' and step.get('spell') == 807098 for step in first))
+        self.assertTrue(any(step.get('action') == 'cast' and step.get('spell') == 807098 for step in second))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_in_before_the_uncast_phase_keeps_no_strike(self):
+        first, _ = self.phases(self.entry())
+        self.assertFalse(any(step.get('action') == 'relocate' or step.get('actor') == 'striker' for step in first))
+
+    def test_in_before_needs_an_uncast_between_phase_and_no_after_trigger_strike(self):
+        with self.assertRaisesRegex(ValueError, 'in_before'):
+            metric_delta_spec(self.entry(in_before='yes'))
+        with self.assertRaisesRegex(ValueError, 'in_before'):
+            metric_delta_spec(self.entry(in_before=True, after_trigger_ms=500))
+        with self.assertRaisesRegex(ValueError, 'uncast before phase'):
+            metric_delta_scenario(load_class_file(23),
+                                  metric_delta_spec({**self.entry(in_before=True), 'cast_in_before': True,
+                                                     'setup_in_before': False}))
+
+
 class MetricDeltaRangeTests(unittest.TestCase):
     def siphon_entry(self, suffix: str) -> dict:
         return next(entry for entry in load_class_file(23)['behaviours']

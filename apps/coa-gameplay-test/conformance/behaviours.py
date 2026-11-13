@@ -1361,6 +1361,7 @@ class MetricDeltaStrike:
     wait_ms: int = 200
     dx: float = 0.0
     after_trigger_ms: int | None = None
+    in_before: bool = False
 
 
 def reagent_steps(records: Records, spell: int) -> list[dict]:
@@ -1376,14 +1377,17 @@ def reagent_steps(records: Records, spell: int) -> list[dict]:
 def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if raw is None:
         return None
-    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms'}
+    unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms', 'in_before'}
     if unknown:
         raise ValueError(f'metric_delta strike fields {sorted(unknown)} are unknown')
     strike = MetricDeltaStrike(int(raw['spell']), int(raw['health']), int(raw['max_health']),
                                int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)),
-                               None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']))
+                               None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']),
+                               raw.get('in_before', False))
     if not 0 < strike.health <= strike.max_health or strike.count < 1:
         raise ValueError('metric_delta strike needs 0 < health <= max_health and at least one strike')
+    if type(strike.in_before) is not bool or (strike.in_before and strike.after_trigger_ms is not None):
+        raise ValueError('metric_delta strike in_before is a boolean, for a strike before the trigger only')
     return strike
 PHASE_AURA_UNITS = frozenset({CASTER, TARGET})
 
@@ -1465,6 +1469,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                  or spec.setup_only_after):
         raise ValueError(f'{spec.spell} sets setup_in_before without cast_in_before false, setup_casts and the '
                          f'default gate timing')
+    if spec.strike is not None and spec.strike.in_before and (
+            spec.cast_in_before or spec.gate_timing != 'between' or spec.setup_only_after or spec.attack_swings):
+        raise ValueError(f'{spec.spell} repeats its strike in an uncast before phase only with cast_in_before false '
+                         f'and the default gate timing')
     if spec.expiry_wait_ms is not None and spec.gate_timing != 'start':
         raise ValueError(f'{spec.spell} sets expiry_wait_ms but gate_timing is not "start"')
     if spec.expected_gain is not None and (spec.after_at_least is not None or spec.expiry_wait_ms is not None
@@ -1703,13 +1711,16 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                     f'second cast.' + ('' if spec.cast_in_before else ' The before phase skips casting '
                     f'{spec.trigger_spell} entirely (cast_in_before=False), measuring the baseline state alone.') +
                     (f' The before phase still makes the setup casts {list(spec.setup_casts)}, so the measured '
-                     f'unit exists in both phases.' if spec.setup_in_before else ''))
+                     f'unit exists in both phases.' if spec.setup_in_before else '') +
+                    (' The before phase repeats the strike after its setup casts.'
+                     if spec.strike and spec.strike.in_before else ''))
         learn_steps = [{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
         steps = (base_steps(class_file) + learn_steps +
                  cast_steps(include_cast=spec.cast_in_before and not spec.trigger_only_after, after=False) +
                  (setup_cast_steps() if spec.setup_in_before else []) +
+                 (strike_steps() if spec.strike and spec.strike.in_before else []) +
                  (enemy_cast_steps() if spec.enemy_casts_in_before else []) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
