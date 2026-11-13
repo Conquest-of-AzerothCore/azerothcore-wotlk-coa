@@ -2417,11 +2417,11 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
         waited = 0
         if name in ('hit', 'reduced'):
             steps += [{'action': 'wait', 'label': f'{name} before the strike', 'ms': spec.strike_at_ms},
+                      measurement(pushback_mark(spec, name, 'strikes'), CASTER, 'spell_damage_count',
+                                  spell=spec.strike_spell, caster=STRIKER, target=CASTER),
                       measurement(pushback_mark(spec, name, 'strike'), CASTER, 'game_time_ms'),
                       {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
-                      measurement(pushback_mark(spec, name, 'struck'), CASTER, 'game_time_ms'),
-                      measurement(pushback_mark(spec, name, 'strikes'), CASTER, 'spell_damage_count',
-                                  spell=spec.strike_spell, caster=STRIKER, target=CASTER)]
+                      measurement(pushback_mark(spec, name, 'struck'), CASTER, 'game_time_ms')]
             waited = spec.strike_at_ms
         steps.append({'action': 'wait', 'label': f'{name} to the window', 'ms': low - waited})
         marks = []
@@ -4116,6 +4116,7 @@ class CostGateSpec:
     cast_power: int | None = None
     removal_wait_ms: int | None = None
     after_cast_gap_ms: int = 0
+    forced_roll: int | None = None
 
 
 @dataclass(frozen=True)
@@ -4294,6 +4295,9 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
     steps = base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spec.gated_spell}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in dict.fromkeys(
         spell for spell, _ in spec.setup_casts + spec.after_casts if spell != spec.spell)]
+    if spec.forced_roll is not None:
+        steps.append({'action': 'spell_mod_mutant', 'actor': CASTER, 'spell': spec.forced_roll,
+                      'op': FORCED_CHANCE_OP, 'percent': FORCED_CHANCE_PERCENT})
     if spec.target_health_pct is not None:
         steps += [{'action': 'set_health_pct', 'actor': CASTER, 'target': TARGET, 'pct': spec.target_health_pct},
                   {'action': 'wait', 'ms': HIT_RATIO_HEALTH_SETTLE_MS}]
@@ -4356,6 +4360,12 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
             expectations.append(Expectation(f'{label} cooldown', BEHAVIOUR_CAST_CONDITION, spec.spell,
                                             spec.gated_spell, None, '0', rule,
                                             {'kind': 'cost_gate', 'arm': arm.name, 'reading': 'cooldown_ms'}))
+    if spec.forced_roll is not None:
+        released = cost_gate_label(spec, 'released')
+        steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': FORCED_CHANCE_OWNER_AURA, 'stacks': 0},
+                  measurement(released, CASTER, 'spell_mod_mutants')]
+        expectations.append(Expectation(released, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.forced_roll, None, '0',
+                                        rule, {**model, 'arm': 'released', 'reading': 'spell_mod_mutants'}))
     unit = 'power' if spec.resource == 'power' else 'ms after a cast'
     players = [{**player_fixture(class_file), 'allow_regeneration': False}]
     if ALLY in (spec.target, *(target for _, target in (*spec.setup_casts, *spec.after_casts))):
@@ -4388,7 +4398,11 @@ def cost_gate_scenario(class_file: dict, spec: CostGateSpec) -> tuple[dict, list
                        if spec.resets else '')
                     + (f' {[spell for spell, _ in spec.after_casts]} are cast {spec.after_wait_ms} ms after the '
                        f'priming cast, in every arm except {spec.spell} itself, which only the arms with it cast and '
-                       f'learn.' if spec.after_casts else ''),
+                       f'learn.' if spec.after_casts else '')
+                    + (f' A forcing fixture raises the roll of {spec.forced_roll} by {FORCED_CHANCE_PERCENT}% (a '
+                       f'SPELLMOD_CHANCE_OF_SUCCESS spell modifier mutant) for the whole scenario, so the proc lands '
+                       f'on every roll; it is removed at the end and read gone.' if spec.forced_roll is not None
+                       else ''),
         'players': players,
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
@@ -4408,7 +4422,7 @@ def cost_gate_spec(entry: dict) -> CostGateSpec:
                         bool(entry.get('talent_aura_each_arm', False)), bool(entry.get('restore_charges', False)),
                         entry.get('target_health_pct'), bool(entry.get('unset_arm', False)), entry.get('charges'),
                         int(entry.get('arm_wait_ms', 0)), entry.get('cast_power'), entry.get('removal_wait_ms'),
-                        int(entry.get('after_cast_gap_ms', 0)))
+                        int(entry.get('after_cast_gap_ms', 0)), entry.get('forced_roll'))
 
 
 SITE_PURCHASE_SETTLE_MS = 3000

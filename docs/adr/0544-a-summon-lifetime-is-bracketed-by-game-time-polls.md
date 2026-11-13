@@ -25,6 +25,9 @@ so the spawn time is not known in advance, and nominal wait sums drift (ADR 0485
 
 ## Consequences
 
-- Ledger claims 190.1, 216.1 and 289.1 gain the `zombie_lifetime` label next to their duration data label. The
-  chance claims stay with their proc-rate entries; the forced roll proves no rate.
+- Ledger claims 190.1 and 216.1 gain the `zombie_lifetime` label next to their duration data label. The chance claims
+  stay with their proc-rate entries; the forced roll proves no rate.
+- Unholy Erosion 807700 (289.1) is not entered: its ProcChance is 3 and the scenario schema caps a mutant at +1000%,
+  so the forced roll reaches 33% and one tick summons in about one run of three (the pilot read no Lesser Zombie in
+  either run). A design that lets several ticks roll and judges the first creature's lifetime is not built.
 - Tests: `SummonLifetimeTests` (test_behaviours.py).

@@ -11456,5 +11456,38 @@ class PushbackLearnedReducerTests(unittest.TestCase):
         self.assertNotIn('strike', expectation.model['phases']['reduced_unhit'])
 
 
+
+class CostGateForcedRollTests(unittest.TestCase):
+    def built(self, spell: int):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'cost_gate' and entry.get('forced_roll') == spell)
+        return behaviour_scenario(load_class_file(23), entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_roll_is_forced_before_the_first_arm_and_released_at_the_end(self):
+        scenario, expectations = self.built(300940)
+        run.validate(scenario)
+        steps = scenario['steps']
+        mutant = next(index for index, step in enumerate(steps) if step['action'] == 'spell_mod_mutant')
+        self.assertEqual(steps[mutant]['spell'], 300940)
+        self.assertLess(mutant, cast_indices(steps, 801760)[0])
+        self.assertEqual(steps[-1]['metric'], 'spell_mod_mutants')
+        released = next(expectation for expectation in expectations if expectation.label.endswith(' released'))
+        self.assertEqual(released.displayed, '0')
+        values = {expectation.label: 0.0 for expectation in expectations}
+        self.assertEqual(judge_behaviour(base_verdict(released), FakeRun(values), released).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(released), FakeRun({**values, released.label: 1.0}),
+                                         released).status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_a_forced_roll_has_no_mutant(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'cost_gate' and entry.get('forced_roll') == 704724)
+        plain = {key: value for key, value in entry.items() if key != 'forced_roll'}
+        scenario, expectations = behaviour_scenario(load_class_file(23), plain)
+        self.assertFalse([step for step in scenario['steps'] if step['action'] == 'spell_mod_mutant'])
+        self.assertFalse([expectation for expectation in expectations if expectation.label.endswith(' released')])
+
+
 if __name__ == '__main__':
     unittest.main()

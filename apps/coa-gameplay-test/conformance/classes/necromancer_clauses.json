@@ -231,7 +231,9 @@
       {
         "claim": "to reset the cooldown of Ice Barrage",
         "labels": [
-          "300940 cost_gate 801760 reset"
+          "300940 cost_gate 801760 reset without",
+          "300940 cost_gate 801760 reset with",
+          "300940 cost_gate 801760 reset released"
         ]
       }
     ],
@@ -2706,7 +2708,11 @@
         "claim": "to cause their next use within $572777d to be free of cost.",
         "labels": [
           "704724 effect_value #0",
-          "704724 spell_duration 572777 #1"
+          "704724 spell_duration 572777 #1",
+          "704724 cost_gate 504868 free_next without",
+          "704724 cost_gate 504868 free_next with",
+          "704724 cost_gate 504868 free_next next",
+          "704724 cost_gate 504868 free_next released"
         ]
       }
     ]
@@ -4324,8 +4330,7 @@
       {
         "claim": "for $302586d.",
         "labels": [
-          "807700 spell_duration 302586 #1",
-          "807700 behaviour_metric_delta zombie_lifetime"
+          "807700 spell_duration 302586 #1"
         ]
       }
     ],

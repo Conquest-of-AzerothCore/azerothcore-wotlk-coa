@@ -880,8 +880,9 @@ A proc that summons a timed creature is read for the creature's lifetime. A forc
 removed at `stop_ms` between them so one creature is summoned. The creature appears between the last empty and the
 first present poll and is gone between the last present and the first empty poll; the bracketed lifetime is judged
 against `expected_ms` in the G-19 band (`ok` inside, `alert` outside, `measured` across an edge); a window without
-its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) and
-Unholy Erosion's Lesser Zombie 807700 (10000 ms) use Harvest Plague 500968, stopped after its first tick.
+its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) use
+Harvest Plague 500968, stopped after its first tick. The talent's ProcChance x 11 must reach 100%: the schema caps the
+mutant at +1000%.
 
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
@@ -1077,6 +1078,12 @@ after-cast arms are refused.
 the gated spell `margin_ms` after the after casts, `without` refused (the control) and `with` through; there is no
 `beyond` arm, since any later attempt goes through. Tome of Light 805422 resets Barrier of Light 805417
 (`AscensionTemplarAuras.cpp:122-128`): Barrier is primed, Tome is cast 2000 ms later, Barrier is attempted at 2500 ms.
+
+`forced_roll` (a talent id, ADR 0545) adds the forcing fixture of mentor ruling N-a1 to a cost gate whose opening
+needs a proc: a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant on that talent right after the learns, so its
+roll lands on every setup or after cast, removed at the end and read gone (the `released` label, 0). It is for effect
+claims only; the talent's chance stays with its proc entry. Refreshing Chill 300940 (`resets`, Command: Undead after
+Ice Barrage) and Deadly Bond 704724 (a free next Command) use it.
 
 ### Hit-ratio heals and actors
 
