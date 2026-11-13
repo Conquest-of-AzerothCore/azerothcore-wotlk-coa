@@ -2373,7 +2373,7 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
 
     Powers PowerType = Powers(m_spellInfo->Effects[effIndex].MiscValue);
 
-    if (!unitTarget || !unitTarget->IsAlive() || !unitTarget->HasActivePowerType(PowerType) || damage < 0)
+    if (!unitTarget || !unitTarget->IsAlive() || !unitTarget->CanLosePowerToSpell(PowerType) || damage < 0)
         return;
 
     // add spell damage bonus
@@ -2452,7 +2452,7 @@ void Spell::EffectPowerBurn(SpellEffIndex effIndex)
 
     Powers PowerType = Powers(m_spellInfo->Effects[effIndex].MiscValue);
 
-    if (!unitTarget || !unitTarget->IsAlive() || !unitTarget->HasActivePowerType(PowerType) || damage < 0)
+    if (!unitTarget || !unitTarget->IsAlive() || !unitTarget->CanLosePowerToSpell(PowerType) || damage < 0)
         return;
 
     // burn x% of target's mana, up to maximum of 2x% of caster's mana (Mana Burn)
