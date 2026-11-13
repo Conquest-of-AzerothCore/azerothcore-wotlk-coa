@@ -31,8 +31,9 @@
  *                      Avatars of the living priests' loas one at a time, the
  *                      nearest first (Drain Power, -99% damage taken while it
  *                      lasts), gains its Aspect when it dies and moves on to
- *                      the next
- *   Fierce Blow        tank, first 6.7-17.3s, then every 6-10s
+ *                      the next; Bethekk's also brings Arlokk's Razor Claws
+ *                      (live logs: his swings bleed the tank)
+ *   Fierce Blow       tank, first 6.7-17.3s, then every 6-10s
  *   Berserk            at 10 minutes
  *
  * Decided here, not in the data:
@@ -91,6 +92,7 @@ namespace
         SPELL_BLOOD_SCYTHE        = 2118630,
         SPELL_BLOOD_SCYTHE_HIT    = 2118631,
         SPELL_BLOOD_SCYTHE_ARMOR  = 2118632,
+        SPELL_RAZOR_CLAWS         = 2118325,
         SPELL_WILL_SLIPPING       = 2118633,
         SPELL_WILL_CONTROL        = 2118634,
         SPELL_WILL_SHIELD         = 2118635,
@@ -191,6 +193,7 @@ namespace
                 loa.avatar.Despawn(me);
                 me->RemoveAurasDueToSpell(loa.aspect);
             }
+            me->RemoveAurasDueToSpell(SPELL_RAZOR_CLAWS);
             _undrained.clear();
             _siphoning = false;
             _pools.clear();
@@ -246,8 +249,15 @@ namespace
                 _undrained.erase(nearest);
                 if (loa->avatar.Drain(me))
                     return;
-                DoCastSelf(loa->aspect, true);
+                TakeAspect(*loa);
             }
+        }
+
+        void TakeAspect(PriestLoa const& loa)
+        {
+            DoCastSelf(loa.aspect, true);
+            if (loa.priest == DATA_ARLOKK)
+                DoCastSelf(SPELL_RAZOR_CLAWS, true);
         }
 
         void TakeConsumedAspects()
@@ -256,7 +266,7 @@ namespace
             {
                 if (!loa.avatar.Consumed(me))
                     continue;
-                DoCastSelf(loa.aspect, true);
+                TakeAspect(loa);
                 DrainNearestLoa();
             }
         }
