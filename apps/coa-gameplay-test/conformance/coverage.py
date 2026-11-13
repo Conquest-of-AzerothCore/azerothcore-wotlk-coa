@@ -398,7 +398,7 @@ METRIC_EVIDENCE = {
                      'spell_done_crit_chance', 'melee_damage_done', 'aoe_damage_taken', 'script_spell_damage_taken',
                      'spell_damage_taken', 'melee_damage_taken',
                      'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune',
-                     'owned_aura'),
+                     'owned_aura', 'owned_creature_aura_max_duration_ms'),
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',

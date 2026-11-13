@@ -1269,6 +1269,125 @@
   "behaviours": [
     {
       "spell": 802986,
+      "name": "Plague Horde (Enrage on the minions)",
+      "kind": "metric_delta",
+      "variant": "horde_on_ghouls",
+      "label_suffix": "horde_on_ghouls",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 807653
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. Both Ghouls (one raised per phase, both sent at the dummy) carry one 807653 after the rolls; none before."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (crit aura on the minions)",
+      "kind": "metric_delta",
+      "variant": "horde_crit_on_ghouls",
+      "label_suffix": "horde_crit_on_ghouls",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 2,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 807765
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. Both Ghouls carry one 807765 (one per Ghoul: neither aura stacks, StackAmount 0); none before."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (crit aura not on the caster)",
+      "kind": "metric_delta",
+      "variant": "horde_crit_off_caster",
+      "label_suffix": "horde_crit_off_caster",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 807765
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. 807765 never on the caster, before or after."
+    },
+    {
+      "spell": 802986,
+      "name": "Plague Horde (crit aura duration)",
+      "kind": "metric_delta",
+      "variant": "horde_crit_duration",
+      "label_suffix": "horde_crit_duration",
+      "quote": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
+      "expected": 5000,
+      "before_expected": 0,
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 3000,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "metric": "owned_creature_aura_max_duration_ms",
+      "fields": {
+        "entry": 50073,
+        "spell": 807765
+      },
+      "forced_chance": {
+        "talent": 802986,
+        "aura": 807653,
+        "entry": 50073
+      },
+      "observe_source": "F-ma-1 regression (mentor-approved, ADR 0483): on a minion's damage MinionChance(player, actor, 802986) now has the minion cast Plague Horde 807653 (aura 79, 192, 216, all TARGET_UNIT_CASTER) and Plague Horde 807765 (aura 290 +10% crit, $807765s1) on itself, as the live logs show (6089 of 6089 807653 applications self-cast by the minion with 807765). Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 802986 learned between the phases (the before phase is the no-talent control). Forcing fixture (ADR 0482): 802986 SPELLMOD_CHANCE_OF_SUCCESS +1000%, 807653 read absent on the Ghoul without the talent and present with it, the modifier removed at the end. The applied 807765 on a Ghoul has its DBC duration, DurationIndex 28 = 5000 ms (a read-only harness read of the aura's maximum duration, ADR 0484; a readback, the condition of the mentor approval, not the duration claim)."
+    },
+    {
+      "spell": 802986,
       "name": "Plague Horde (where the Enrage lands)",
       "kind": "metric_delta",
       "variant": "horde_on_caster",
@@ -1294,7 +1413,7 @@
         "aura": 802986,
         "entry": 50073
       },
-      "observe_source": "Probe of the horde_crit lead: with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER."
+      "observe_source": "F-ma-1 regression (was the probe of the horde_crit lead, 1 before the fix in pair p6): with the forced roll (precondition: the 802986 aura on the Ghoul, its native holder) and the Ghoul attacking, Plague Horde 807653 must not land on the caster (\"on themselves\", the minions): 0 before and after. Events.cpp:192 casts it with the caster as caster and the minion as target, and 807653 targets TARGET_UNIT_CASTER."
     },
     {
       "spell": 707562,

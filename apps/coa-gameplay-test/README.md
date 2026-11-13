@@ -1054,6 +1054,8 @@ native `GetArmor()`, zero when absent. `owned_creature_max_health` and `owned_cr
 creature's `GetMaxHealth()` and `GetHealth()` and require it to be present.
 `owned_creature_stat` reads the same creature's `GetStat(stat)` for `stat` 0 to 4 (Strength, Agility, Stamina,
 Intellect, Spirit) and requires it to be present (a read only, ADR 0480).
+`owned_creature_aura_max_duration_ms` reads the maximum duration of the aura `spell` on the same creature (0 when
+absent; a read only, ADR 0484).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,

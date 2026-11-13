@@ -5561,6 +5561,14 @@ private:
             Require(enemy != nullptr, "Owned creature threat needs a creature target");
             return enemy->GetThreatMgr().GetThreat(creature);
         }
+        if (metric == "owned_creature_aura_max_duration_ms")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature aura spell");
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Aura duration observation needs a present owned creature");
+            Aura const* aura = creature->GetAura(spell);
+            return aura ? aura->GetMaxDuration() : 0;
+        }
         if (metric == "owned_creature_stat")
         {
             uint32 stat = step.get<uint32>("stat");

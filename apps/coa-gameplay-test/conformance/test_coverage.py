@@ -1247,5 +1247,10 @@ class OwnedCreatureStatPromiseTest(unittest.TestCase):
     def test_a_minion_stat_read_is_a_state_read(self):
         self.assertEqual(METRIC_EVIDENCE['owned_creature_stat'], STATE)
 
+
+class OwnedCreatureAuraDurationReadbackTest(unittest.TestCase):
+    def test_a_minion_aura_duration_read_is_a_readback(self):
+        self.assertEqual(METRIC_EVIDENCE['owned_creature_aura_max_duration_ms'], READBACK)
+
 if __name__ == '__main__':
     unittest.main()
