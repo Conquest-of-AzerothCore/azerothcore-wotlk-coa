@@ -30,6 +30,8 @@ computed from spell power, in the 5% band, with the plain swing as the control. 
 ## Consequences
 
 - 311.1 counts: pair 20261113-110216 / -110253 reads weapon_ratio 1.993 / 2.018 and weapon_ratio_sp 1.953 / 1.951
-  (90 Commands per part, 3 and 2 parts pooled). The SP arm sits about 2.4% under 2.0; the judge takes off the
-  unmitigated flat part of a Physical, armor-reduced hit, which explains part of that gap.
+  (90 Commands per part, 3 and 2 parts pooled).
+- Observation: the SP arm sits about 2.4% under 2.0 (99% interval about 1.91..1.99, which excludes 2.0, inside the
+  band). Likely cause, NOT measured: the judge takes off the unmitigated 137.5 from an armor-reduced Physical hit.
+  The judge is not changed.
 - Tests: `MinionSwingRatioTests` (test_behaviours.py) with the flat part.
