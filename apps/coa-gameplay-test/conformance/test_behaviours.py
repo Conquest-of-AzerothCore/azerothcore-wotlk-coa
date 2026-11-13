@@ -10591,9 +10591,9 @@ class MetricDeltaTriggerItemTests(unittest.TestCase):
         uses = [index for index, step in enumerate(steps) if step.get('action') == 'use_item']
         create = max(index for index, step in enumerate(steps)
                      if step.get('action') == 'cast' and step.get('spell') == 803777)
-        self.assertEqual(len(uses), 2)
-        self.assertLess(create, uses[1])
-        self.assertEqual(steps[uses[1]], {'action': 'use_item', 'actor': 'caster', 'item': 555555, 'spell': 803773})
+        self.assertEqual(len(uses), 1)
+        self.assertLess(create, uses[0])
+        self.assertEqual(steps[uses[0]], {'action': 'use_item', 'actor': 'caster', 'item': 555555, 'spell': 803773})
         self.assertFalse(any(step.get('action') == 'cast' and step.get('spell') == 803773 for step in steps))
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

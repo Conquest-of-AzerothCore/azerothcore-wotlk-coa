@@ -13,8 +13,9 @@
 ## Decision
 
 - `metric_delta` takes `trigger_item`: the trigger step is `use_item` of that item with `trigger_spell` as its spell,
-  in place of a cast. It is refused unless the target is the caster, with no attack phases, `cast_in_before` false and
-  no `trigger_only_after`.
+  in place of a cast. It needs `setup_only_after` (the setup cast creates the item), and the control phase then
+  makes no use (a use with no item fails the scenario). It is refused unless the target is the caster, with no
+  attack phases, `cast_in_before` false and no `trigger_only_after`.
 - An entry without it is unchanged: `generate --class 19` and `--stack` are byte-identical (2460 and 40 scenarios).
 
 ## Consequences

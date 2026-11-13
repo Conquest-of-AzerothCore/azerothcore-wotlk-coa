@@ -8982,7 +8982,7 @@
       "expected_gain": -576.7,
       "expected": 423.3,
       "wait_ms": 1000,
-      "observe_source": "Tooltip: a Frozen Reliquary 'restores $803773s1% of your missing mana' ($803773s1 = 30). The treatment phase casts Create Frozen Reliquary (setup, 823 mana spent, the spent entry) and uses one Frozen Reliquary 555555 (use_item with its spell 803773, trigger_item, ADR 0431), natural regeneration off: the mana ends 823 - 30% x 823 = 576.1 to 576.7 below full (the engine truncates the 246.9 restore); the control phase uses the item with no Reliquary created (setup_only_after) and reads full mana. Against the spent control's -823 the use returns 246 or 247, 30% of the observed missing mana."
+      "observe_source": "Tooltip: a Frozen Reliquary 'restores $803773s1% of your missing mana' ($803773s1 = 30). The treatment phase casts Create Frozen Reliquary (setup, 823 mana spent, the spent entry) and uses one Frozen Reliquary 555555 (use_item with its spell 803773, trigger_item, ADR 0431), natural regeneration off: the mana ends 823 - 30% x 823 = 576.1 to 576.7 below full (the engine truncates the 246.9 restore); the control phase neither creates nor uses a Reliquary (setup_only_after; with trigger_item the control phase makes no use, ADR 0431) and reads full mana. Against the spent control's -823 the use returns 246 or 247, 30% of the observed missing mana."
     },
     {
       "spell": 680388,

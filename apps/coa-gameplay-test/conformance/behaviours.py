@@ -1448,7 +1448,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     if spec.caster_health_pct is not None and (spec.attack_swings or not 0 < spec.caster_health_pct < 100):
         raise ValueError(f'{spec.spell} holds the caster at a health percent between 0 and 100, outside attack phases')
     if spec.trigger_item is not None and (spec.target != CASTER or spec.attack_swings or spec.cast_in_before
-                                          or spec.trigger_only_after):
+                                          or not spec.setup_only_after or spec.trigger_only_after):
         raise ValueError(f'{spec.spell} uses its trigger item on the caster only, in the treatment phase only')
     if spec.target_health_after is not None and (
             spec.target != TARGET or spec.attack_swings or not 0 < spec.target_health_after[0] < spec.wait_ms
@@ -1589,7 +1589,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         learn_steps = [gate_learn_step, {'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': setup_spell} for setup_spell in spec.setup_casts] + \
             [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
-        steps = (base_steps(class_file) + learn_steps + cast_steps(apply_setup_casts=False, after=False) +
+        steps = (base_steps(class_file) + learn_steps +
+                 cast_steps(apply_setup_casts=False, include_cast=spec.trigger_item is None, after=False) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] +
                  [{'action': 'wait', 'label': 'let the first phase fully expire', 'ms': spec.expire_ms}] +
                  cast_steps(apply_setup_casts=True) +
