@@ -215,7 +215,7 @@
         }
       ],
       "minion_aura_refresh_ms": 8000,
-      "event_metric": "spell_damage_count",
+      "event_metric": "spell_go_count",
       "event_actor": "minion",
       "proc_spell": 801241,
       "proc_spell_source": "EffectTriggerSpell[1] of 638403 (Bone Club)",
@@ -302,6 +302,10 @@
       },
       "trigger_text": "Damage dealt by your Undead minions",
       "trial_metric": "owned_creature_damage_count",
+      "trial_excluded_spells": [
+        504022
+      ],
+      "trial_excluded_reason": "each proc has the minion cast Zombie Plague 504022 inside the event handler (AscensionNecromancerEvents.cpp:201-205), whose hits the State(player).event guard keeps from rolling (AscensionNecromancerEvents.cpp:60-61), so they are not trials",
       "event_metric": "spell_cast_count",
       "proc_spell": 807653,
       "proc_spell_source": "tooltip reference @s:807653:0@ and $807653d",

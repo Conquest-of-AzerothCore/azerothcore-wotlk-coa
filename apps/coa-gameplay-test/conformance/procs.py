@@ -93,6 +93,17 @@ def baseline_attempts(chance_pct: float) -> int:
     return max(MINION_BASELINE_ATTEMPTS, math.ceil(math.log(BASELINE_MISS_RISK) / math.log(1 - chance_pct / 100)))
 
 
+def excluded_trial_labels(entry: dict) -> list[str]:
+    return [f'{entry["aura"]} proc trials excluded {spell}' for spell in entry.get('trial_excluded_spells', [])]
+
+
+def excluded_trial_steps(entry: dict) -> list[dict]:
+    if entry.get('trial_excluded_spells') and minion_entry(entry) is None:
+        raise ValueError(f'Proc {entry["aura"]} excludes trial spells without a minion trigger')
+    return [measurement(label, CASTER, 'spell_damage_count', spell=spell, entry=minion_entry(entry))
+            for label, spell in zip(excluded_trial_labels(entry), entry.get('trial_excluded_spells', []))]
+
+
 def baseline_labels(aura: int) -> dict[str, str]:
     return {'trials': f'{aura} proc baseline trials', 'events': f'{aura} proc baseline events'}
 
@@ -281,7 +292,8 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
 def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> ProcPlan:
     if entry.get('status'):
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
-    if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry):
+    minion_cast_events = entry.get('event_actor') == MINION and entry['event_metric'] == 'spell_go_count'
+    if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry) and not minion_cast_events:
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
     if entry['event_metric'] == MINION_PROC_COUNT and entry.get('event_actor') != MINION:
         raise ValueError(f'Proc {entry["aura"]} counts minion procs without a minion event actor')
@@ -449,8 +461,9 @@ def event_steps(entry: dict) -> list[dict]:
     if counts_charges(entry):
         return []
     if entry.get('event_actor') == MINION:
-        if entry['event_metric'] not in ('spell_damage_count', MINION_PROC_COUNT) or minion_entry(entry) is None:
-            raise ValueError(f'Proc {entry["aura"]} reads minion events other than spell_damage_count or '
+        if entry['event_metric'] not in ('spell_damage_count', 'spell_go_count', MINION_PROC_COUNT) \
+                or minion_entry(entry) is None:
+            raise ValueError(f'Proc {entry["aura"]} reads minion events other than damage, casts or '
                              f'{MINION_PROC_COUNT} of a minion')
         on_target = {'target': TARGET} \
             if entry['event_metric'] == 'spell_damage_count' and not entry.get('extra_dummies') else {}
@@ -518,7 +531,7 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
     limit = per_trigger_limit(entry)
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
-        steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry)
+        steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry) + excluded_trial_steps(entry)
     if entry.get('aura_on_minion'):
         if minion_entry(entry) is None:
             raise ValueError(f'Proc {aura} reads its aura on a minion without a minion trigger')
@@ -548,10 +561,15 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct)}
     if entry.get('band'):
         model['band'] = rate_band(plan.chance_pct / 100)
+    if entry.get('trial_excluded_spells'):
+        model['trial_exclusions'] = excluded_trial_labels(entry)
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
     if entry.get('band'):
         rule += (f'; the 99% interval inside the band of {rate_band(plan.chance_pct / 100) * 100:g} points around '
                  f'the chance (G-19, ADR 0346)')
+    if entry.get('trial_excluded_spells'):
+        rule += (f'; the minion hits of {entry["trial_excluded_spells"]} are left out of the trials '
+                 f'({entry["trial_excluded_reason"]})')
     if entry.get('extra_dummies'):
         rule += (f'; {len(entry["extra_dummies"])} more dummies at {entry["extra_dummies"]} yd from the caster, the '
                  f'events counted on every dummy')

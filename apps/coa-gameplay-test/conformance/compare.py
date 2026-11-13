@@ -1093,7 +1093,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         values = [run.values.get(label) for label in wanted]
         part_baseline = part.model.get('baseline')
         held = [run.values.get(part_baseline[name]) for name in ('trials', 'events')] if part_baseline else [0.0, 0.0]
-        if None in values or None in held:
+        excluded = [run.values.get(label) for label in part.model.get('trial_exclusions', [])]
+        if None in values or None in held or None in excluded:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif values[0] <= 0:
             without_aura.append(run.key)
@@ -1101,6 +1102,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             counted.append(run.key)
             for label, value in zip(wanted[1:], values[1:]):
                 totals[label] += value
+            totals[labels['trials']] -= sum(excluded)
             if part_baseline:
                 baseline_trials, baseline_events = held
                 totals[labels['trials']] -= baseline_trials

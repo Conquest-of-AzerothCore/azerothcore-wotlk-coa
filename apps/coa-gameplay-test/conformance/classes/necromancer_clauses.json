@@ -17,27 +17,8 @@
   {
     "spell": 92121,
     "clause": "and Lichfrost applies 2 stacks.",
-    "claims": [
-      {
-        "claim": "and Lichfrost applies 2 stacks.",
-        "labels": [
-          "92121 behaviour_metric_delta lichfrost"
-        ]
-      },
-      {
-        "claim": "@s:570131:0@ Crypt Plague: stacking $u times.",
-        "labels": [
-          "92121 behaviour_metric_delta cap"
-        ]
-      },
-      {
-        "claim": "@s:570131:0@ Crypt Plague: Deals ${$m1+0+$SP*0.06} Plague Damage every $t sec for $d",
-        "labels": [
-          "92121 effect_value 570131e0 #0",
-          "92121 spell_duration 570131 #1",
-          "92121 effect_value #3"
-        ]
-      }
+    "labels": [
+      "92121 behaviour_metric_delta lichfrost"
     ],
     "kind": "claim"
   },
@@ -2427,9 +2408,19 @@
   {
     "spell": 802986,
     "clause": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves for $807653d",
-    "labels": [
-      "802986 effect_value #0",
-      "802986 spell_duration 807653 #1"
+    "claims": [
+      {
+        "claim": "Damage dealt by your Undead minions now has a $h% chance to cast Plague Horde on themselves",
+        "labels": [
+          "802986 proc_rate"
+        ]
+      },
+      {
+        "claim": "for $807653d",
+        "labels": [
+          "802986 spell_duration 807653 #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -2437,9 +2428,7 @@
     "spell": 802986,
     "clause": "and emit Zombie Plague, dealing ${$504022m1*$<scalingbp>+$SP*0.1} Plague damage to their target.",
     "labels": [
-      "802986 effect_value 504022e0 #2",
-      "802986 spell_duration 807653 #3",
-      "802986 effect_value 807765e0 #4"
+      "802986 effect_value 504022e0 #2"
     ],
     "kind": "claim"
   },
@@ -3821,5 +3810,46 @@
     ],
     "kind": "claim",
     "reason": "Pulled sentence (@s:) of 707421, joins the parent tooltip (G-5). Open: no read of a minion's aura stacks, haste or crit chance yet (route pending). G-11 searched: server DBC set and class code read; MCP not queried (unavailable); WDB extracted/spells.json nothing found; exiles-db spell.csv = the DBC values (no independent weight); coa-obtainable: in the live capture and the shipped table. bindmysoul \"25% ... +4%, stacking 3 times, 10 seconds\"; logs: 1880 applications, 1053 doses, 86039 refreshes of 707421."
+  },
+  {
+    "spell": 92121,
+    "clause": "Deals ${$m1+0+$SP*0.06} Plague Damage every $t sec for $d,",
+    "labels": [
+      "92121 effect_value 570131e0 #0",
+      "92121 spell_duration 570131 #1",
+      "92121 effect_value #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92121,
+    "clause": "stacking $u times.",
+    "labels": [
+      "92121 max_stacks 570131 #2",
+      "92121 behaviour_metric_delta cap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92121,
+    "clause": "Additional applications do not refresh duration.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 802986,
+    "clause": "Enrage for $d,",
+    "labels": [
+      "802986 spell_duration 807653 #3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802986,
+    "clause": "increasing their critical strike chance by $807765s1%.",
+    "labels": [
+      "802986 effect_value 807765e0 #4"
+    ],
+    "kind": "claim"
   }
 ]
