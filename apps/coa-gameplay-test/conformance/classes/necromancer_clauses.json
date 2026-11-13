@@ -1813,7 +1813,9 @@
     "spell": 560613,
     "clause": "Increases the effectiveness of your Mandates by $s1%.",
     "labels": [
-      "560613 effect_value e0 #0"
+      "560613 effect_value e0 #0",
+      "560613 behaviour_metric_delta grim_mandate",
+      "560613 behaviour_metric_delta foul_mandate"
     ],
     "kind": "claim",
     "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: no Mandate value read wired (aura_amount on the Mandate aura after a real Mandate cast, with and without the talent, is the route); not attempted to a run tonight. Open, route pending: SPELLMOD_ALL_EFFECTS +20 on the Mandates (Foul, Grim and their Greater ranks); route: a Mandate value read with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Mandates by 20%.'; bindmysoul found: Increases the effectiveness of your Mandates by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."

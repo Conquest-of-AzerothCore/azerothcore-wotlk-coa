@@ -1854,6 +1854,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
 - [`chase_halt`](kinds/chase_halt.md): a hooked enemy's chase against an unhooked one; unmeasured until enemies can
   be moved (ADR 0596)
 - [`corpse_per_raise`](kinds/corpse_per_raise.md): the corpses a periodic raise leaves, against the raises (ADR 0595)
+- [`effectiveness_delta`](kinds/effectiveness_delta.md): an effect cast without and with the modifier that raises its
+  effectiveness (ADR 0601)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
 - [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and
