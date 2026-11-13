@@ -11581,7 +11581,7 @@ class EnergizeRangeTests(unittest.TestCase):
     def test_every_poll_reads_the_energize_total_and_count(self):
         scenario, [expectation] = self.built()
         run.validate(scenario)
-        self.assertEqual(len(expectation.model['marks']), 1 + 140 * 14)
+        self.assertEqual(len(expectation.model['marks']), 1 + 160 * 13)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_both_ends_inside_the_roll_are_ok_and_a_missing_end_or_an_outlier_alerts(self):

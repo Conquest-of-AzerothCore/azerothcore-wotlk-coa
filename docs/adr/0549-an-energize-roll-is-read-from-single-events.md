@@ -18,8 +18,8 @@ existed. The harness reads only cumulative energize totals and counts.
   change: the single-event amount is the difference of two cumulative reads.
 - The judge needs `minimum_events` single events, every amount inside `low`..`high`, and both ends seen: `ok`; an
   amount outside or an end not reached in enough events: `alert`; too few events: `unmeasured`.
-- Soulfreeze: 140 casts of 801724 at an Ice-Locked dummy (The End Is Near 680486 for the cost, 572023 not learned so the
-  ticks do not re-proc), about 420 ticks, 384 needed.
+- Soulfreeze: 160 casts of 801724 (140 gave 354 and 372 single events) at an Ice-Locked dummy (The End Is Near 680486 for the cost, 572023 not learned so the
+  ticks do not re-proc), 384 single events needed.
 - Other entries generate the same scenarios (Templar `generate --class 19` and `--stack` byte-identical).
 
 ## Consequences
