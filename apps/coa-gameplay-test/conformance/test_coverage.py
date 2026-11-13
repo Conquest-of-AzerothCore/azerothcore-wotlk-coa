@@ -1195,5 +1195,15 @@ class ReturnDistancePromiseTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['nearest_creature_distance'], STATE)
 
 
+class SlowPromiseTest(unittest.TestCase):
+    def test_a_learned_run_speed_contrast_proves_a_slow_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta slow', BEHAVIOUR_METRIC_DELTA, 'run_speed_rate',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Increases the amount slowed by Lichfrost by $s1%.', '1 behaviour_metric_delta slow')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('Increases your Frost damage by $s1%.', '1 behaviour_metric_delta slow')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+
 if __name__ == '__main__':
     unittest.main()
