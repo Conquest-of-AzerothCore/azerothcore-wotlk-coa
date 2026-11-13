@@ -127,10 +127,11 @@
     "spell": 300236,
     "clause": "Each stack of Expunge now increases the target's damage taken from your Plague of Undeath by an additional $s1%.",
     "labels": [
-      "300236 effect_value e0 #0"
+      "300236 effect_value e0 #0",
+      "300236 behaviour_hit_ratio two_stacks"
     ],
     "kind": "claim",
-    "reason": "Route pending (B6 side a, 2026-11-13): not attempted before the 06:00 hard stop; no entry, no G-11 search yet. Next author: read the packet b6-packets-a6/300236.md."
+    "reason": "Status 1 (the M side c counted pair PAIR_M_C (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): Plague of Undeath 503640 ticks on a dummy holding Flesh to Worms 500338 and two Expunge 573233 stacks (real casts of 500443, refreshed before every tick) read 6307 without 300236 (control) and 6937 with it: +9.989% both runs (deterministic), 2 stacks x $s1 = 5% = 10% (band 8..12 points); the increase multiplies with Expunge's own 10% per stack on diseases (1.30 / 1.20 would read +8.3%). 20000 spell power and 823764 in both arms (precondition fixtures). G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Expediting Death\" 0 lines by name, 0 lines by id 300236; ~/CoaServer/reference: bindmysoul \"Each stack of Expunge now increases the target's damage taken from your Plague of Undeath by an additional 5%.\", sidekick coaKits names it (4 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: not queried; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 300240,
