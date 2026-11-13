@@ -106,3 +106,10 @@ Tool tests read frozen class files from `fixtures/classes/` (`profile.load_fixtu
 tool test (ADR 0580). Only the tests named `test_cross_class_guard_*` read every live class file on purpose. The
 Necromancer fixtures (`necromancer.json`, `necromancer_clauses.json`) were frozen after the ADR citation rewrite
 (ADR 0583).
+
+The finished classes (Templar, Necromancer) keep the SHA-256 of every generated file in `snapshots/<class>.json`
+(ADR 0590). The `conformance` suite runs `snapshots.py check --class N` for each: it regenerates the class and names
+the files that differ. It needs the DBC set, so GitHub CI skips it and the local source stage is the guard; run it
+before every PR. When a difference is intended, `python -B snapshots.py write --class N` and commit the digest file
+with the change. A change to a shared engine file (`Unit.cpp`, `Spell.cpp`, ...) does not change the digests; the
+source stage then prints the gameplay rerun of every finished class (ADR 0591).
