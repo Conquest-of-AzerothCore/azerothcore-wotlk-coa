@@ -21,8 +21,10 @@ Unholy Erosion lifetime as a pooled proof (G-20 step 2).
 - A `pushback_reduction` entry may set `repeats`: each of its casts is repeated, and the judge takes the mean bracket
   middle per kind of cast, its standard error from the repeats, and a 99% interval of the reduction by propagation;
   `ok` inside the band, `alert` outside, `measured` across an edge. Lich Essence repeats 10 times, with 21-poll windows
-  so the scenario stays under 10000 steps. Entries without `repeats` keep the bracket judge (Icebound Champion's
-  scenario is byte-identical).
+  so the scenario stays under 10000 steps. A hit cast whose strike did not land on the caster is invalid and left out
+  of the mean; each kind needs at least half its casts (and two) valid. Icebound Champion repeats 4 times (its 20 s
+  hold four casts after the summon) after pair p5 read one Champion-phase strike that never landed on the caster.
+  Entries without `repeats` keep the bracket judge.
 - No harness C++ change; Templar generation unchanged.
 
 ## Consequences

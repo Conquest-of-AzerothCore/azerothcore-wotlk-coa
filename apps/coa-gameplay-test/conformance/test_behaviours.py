@@ -11350,7 +11350,8 @@ class HitRatioTargetAuraTests(unittest.TestCase):
 class PushbackReductionTests(unittest.TestCase):
     def built(self):
         entry = next(entry for entry in load_class_file(23)['behaviours'] if entry['kind'] == 'pushback_reduction')
-        return behaviour_scenario(load_class_file(23), entry)
+        single = {**entry, 'repeats': 1, 'windows': [[2440, 2560], [2930, 3050], [2680, 2800]]}
+        return behaviour_scenario(load_class_file(23), single)
 
     def values(self, ends: dict, strikes: dict | None = None, step_ms: float = 1.0) -> dict:
         _, [expectation] = self.built()
@@ -11449,11 +11450,12 @@ class PushbackLearnedReducerTests(unittest.TestCase):
         learn = next(index for index, step in enumerate(steps)
                      if step['action'] == 'learn' and step['spell'] == entry['reducer_spell'])
         casts = cast_indices(steps, entry['cast_spell'])
-        self.assertEqual(len(casts), 4)
-        self.assertLess(casts[1], learn)
-        self.assertLess(learn, casts[2])
-        self.assertEqual(list(expectation.model['phases']), ['unhit', 'hit', 'reduced_unhit', 'reduced'])
-        self.assertNotIn('strike', expectation.model['phases']['reduced_unhit'])
+        repeats = entry.get('repeats', 1)
+        self.assertEqual(len(casts), 4 * repeats)
+        self.assertLess(casts[2 * repeats - 1], learn)
+        self.assertLess(learn, casts[2 * repeats])
+        self.assertEqual(list(expectation.model['samples']), ['unhit', 'hit', 'reduced_unhit', 'reduced'])
+        self.assertNotIn('strike', expectation.model['samples']['reduced_unhit'][0])
 
 
 
@@ -11529,7 +11531,8 @@ class SummonLifetimePooledTests(unittest.TestCase):
 class PushbackSampledTests(unittest.TestCase):
     def built(self):
         entry = next(entry for entry in load_class_file(23)['behaviours']
-                     if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1)
+                     if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1
+                     and entry.get('reducer_learn'))
         return entry, behaviour_scenario(load_class_file(23), entry)
 
     def judged(self, ends: dict) -> str:

@@ -3223,20 +3223,25 @@ def pushback_strike_offsets(run: Run, phase: dict) -> tuple[float, float] | str:
 
 
 def behaviour_pushback_samples_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    means, spreads, offsets, widths = {}, {}, [], []
+    means, spreads, offsets, widths, skipped = {}, {}, [], [], []
     for kind, samples in model['samples'].items():
         middles = []
         for index, phase in enumerate(samples, 1):
+            if 'strike' in phase:
+                found = pushback_strike_offsets(run, phase)
+                if isinstance(found, str):
+                    skipped.append(f'{kind} {index}: {found}')
+                    continue
             bracket = pushback_end_bracket(run, phase)
             if isinstance(bracket, str):
                 return replace(base, status='unmeasured', explanation=f'{kind} {index}: {bracket}')
             middles.append((bracket[0] + bracket[1]) / 2)
             widths.append(bracket[1] - bracket[0])
             if 'strike' in phase:
-                found = pushback_strike_offsets(run, phase)
-                if isinstance(found, str):
-                    return replace(base, status='unmeasured', explanation=f'{kind} {index}: {found}')
                 offsets += list(found)
+        if len(middles) < max(2, len(samples) // 2):
+            return replace(base, status='unmeasured', explanation=f'{kind}: {len(middles)} of {len(samples)} casts '
+                                                                  f'valid ({"; ".join(skipped)})')
         means[kind] = sum(middles) / len(middles)
         spreads[kind] = (sum((middle - means[kind]) ** 2 for middle in middles) / (len(middles) - 1)
                          / len(middles))
@@ -3269,7 +3274,8 @@ def behaviour_pushback_samples_verdict(base: Verdict, run: Run, model: dict) -> 
                                f'game time: {", ".join(f"{kind} {value:.2f}" for kind, value in means.items())} ms; '
                                f'strikes {min(offsets):g} to {max(offsets):g} ms into their casts; the pushback falls '
                                f'by {measured:.4g}% (99% interval {measured - half:.4g} to {measured + half:.4g}) '
-                               f'against the stated {expected:g}%, band {low:g} to {high:g}: {reason}')
+                               f'against the stated {expected:g}%, band {low:g} to {high:g}: {reason}'
+                               + (f'; invalid hit casts left out: {"; ".join(skipped)}' if skipped else ''))
 
 
 def behaviour_pushback_reduction_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
