@@ -555,8 +555,12 @@
   {
     "spell": 500329,
     "clause": "dealing 50% increased damage for each of your diseases on the target.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "500329 script_hit 707598 one_disease",
+      "500329 script_hit 707598 command_damage"
+    ],
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick and bindmysoul match the text (bindmysoul '73 + 65% SP', coabuildhub '73+22.0 Points Per Level': older or other state than our DBC BasePoints 472 + DieSides 22, G-9); coa-obtainable: in the live capture; logs: no line for 500329, 707598 or 50067."
   },
   {
     "spell": 500331,

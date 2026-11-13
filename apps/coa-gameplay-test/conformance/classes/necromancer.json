@@ -1588,7 +1588,7 @@
       "settle_ms": 1000,
       "dummy_entry": 6,
       "count_primary": true,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Seven Kobold Vermin 6 (creature type 7 Humanoid, level 60) within 8 yd of the caster and one at 13 yd; one real cast centred on the caster; the 803741 aura of the caster is read on each, the nearest included (count_primary): exactly five of the seven are affected, never the one beyond 8 yd."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Seven Kobold Vermin 6 (creature type 7 Humanoid, level 60) within 8 yd of the caster and one at 13 yd; one real cast centred on the caster; the 803741 aura of the caster is read on each, the nearest included (count_primary): exactly five of the seven are affected, never the one beyond 8 yd."
     },
     {
       "kind": "metric_delta",
@@ -1615,7 +1615,7 @@
       "target_entry": 6,
       "expiry_wait_ms": 37500,
       "after_expiry_expected": 1,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target (Humanoid) within 3 yd: the aura is absent before (control), present 500 ms after the cast lands and still present 38000 ms after it."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target (Humanoid) within 3 yd: the aura is absent before (control), present 500 ms after the cast lands and still present 38000 ms after it."
     },
     {
       "kind": "metric_delta",
@@ -1642,7 +1642,7 @@
       "target_entry": 6,
       "expiry_wait_ms": 41500,
       "after_expiry_expected": 0,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target: present 500 ms after the cast lands, gone 42000 ms after it: with the creature_lasts entry the end lies in (38000, 42000] ms."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Kobold Vermin 6 target: present 500 ms after the cast lands, gone 42000 ms after it: with the creature_lasts entry the end lies in (38000, 42000] ms."
     },
     {
       "kind": "metric_delta",
@@ -1669,7 +1669,7 @@
       "enemy_player_race": 2,
       "expiry_wait_ms": 7100,
       "after_expiry_expected": 1,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. An enemy player (race 2, Humanoid) as the target, 302923 not known: present 500 ms after the cast lands and still present 7600 ms after it."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. An enemy player (race 2, Humanoid) as the target, 302923 not known: present 500 ms after the cast lands and still present 7600 ms after it."
     },
     {
       "kind": "metric_delta",
@@ -1696,7 +1696,7 @@
       "enemy_player_race": 2,
       "expiry_wait_ms": 7900,
       "after_expiry_expected": 0,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player, 302923 not known: gone 8400 ms after the cast lands; with player_lasts the end lies in (7600, 8400] ms, 8 sec."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player, 302923 not known: gone 8400 ms after the cast lands; with player_lasts the end lies in (7600, 8400] ms, 8 sec."
     },
     {
       "kind": "metric_delta",
@@ -1726,7 +1726,7 @@
       ],
       "expiry_wait_ms": 8100,
       "after_expiry_expected": 1,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with Putrifier 302923 learned: still present 8600 ms after the cast lands (past the 8 sec cap without it)."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with Putrifier 302923 learned: still present 8600 ms after the cast lands (past the 8 sec cap without it)."
     },
     {
       "kind": "metric_delta",
@@ -1756,7 +1756,7 @@
       ],
       "expiry_wait_ms": 8900,
       "after_expiry_expected": 0,
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with 302923 learned: gone 9400 ms after the cast lands; with putrifier_lasts the end lies in (8600, 9400] ms, 9 sec."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. Enemy player with 302923 learned: gone 9400 ms after the cast lands; with putrifier_lasts the end lies in (8600, 9400] ms, 9 sec."
     },
     {
       "kind": "metric_delta",
@@ -1779,7 +1779,7 @@
       "quote": "Only affects Humanoids.",
       "target": "dummy",
       "measure_actor": "dummy",
-      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. The dummy (Harvest Golem 36, creature type 9 Mechanical) within 3 yd: no 803741 aura before (control) and none after a real cast (SpellInfo::CheckTarget refuses a TargetCreatureType mismatch); the Humanoid Kobold Vermin of the creature_lasts and targets entries, at the same distance, are the affected contrast."
+      "observe_source": "Mass Grave 803741: Effect[0] aura 7 SPELL_AURA_MOD_FEAR (Mechanic 5) and Effect[1] aura 56 SPELL_AURA_TRANSFORM MiscValue 570 (the Brain Eater ghoul), both TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ENEMY in SpellRadius 14 (8 yd), MaxAffectedTargets 5 ($i), TargetCreatureType 64 (Humanoid), DurationIndex 64 (40000 ms, $d), 2000 ms cast (CastingTimeIndex 5; the timed entries set Runic Power 0 before the cast, so the cast time runs, Unit.cpp:13029-13034). necromancer_casts::OnCalcMaxDuration (AscensionNecromancerAbilities.cpp:223-237): x1.25 with Putrifier 302923, and on a player at most 8000 ms, 9000 ms with 302923. The dummy (Harvest Golem 36, creature type 9 Mechanical) within 3 yd: no 803741 aura before (control) and none after a real cast (SpellInfo::CheckTarget refuses a TargetCreatureType mismatch); the Humanoid Kobold Vermin of the creature_lasts and targets entries, at the same distance, are the affected contrast."
     },
     {
       "spell": 504316,
