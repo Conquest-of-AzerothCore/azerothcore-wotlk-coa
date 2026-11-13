@@ -1057,7 +1057,7 @@
       {
         "claim": "by party and raid members",
         "labels": [
-          "503738 effect_value e0 #0"
+          "503738 behaviour_hit_ratio party"
         ]
       }
     ],
@@ -5304,11 +5304,22 @@
   {
     "spell": 803771,
     "clause": "Create $s1 Bone Reliquaries that restores $803767s1% of your missing health.",
-    "labels": [
-      "803771 effect_value e0 #0",
-      "803771 effect_value 803767e0 #1"
+    "claims": [
+      {
+        "claim": "Create $s1 Bone Reliquaries",
+        "labels": [
+          "803771 behaviour_metric_delta count"
+        ]
+      },
+      {
+        "claim": "that restores $803767s1% of your missing health",
+        "labels": [
+          "803771 effect_value 803767e0 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "G-11 searched: server DBC set and class code read; MCP not queried (unavailable); sidekick matches the text; bindmysoul, coabuildhub, WDB nothing found; coa-obtainable: not in the live capture; logs: 803771 15 cast starts, 803767 9 SPELL_HEAL self heals (228 to 1145, no crit)."
   },
   {
     "spell": 803771,

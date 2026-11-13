@@ -1268,6 +1268,52 @@
   "behaviours": [
     {
       "spell": 803771,
+      "name": "Create Bone Reliquary (restores missing health)",
+      "kind": "metric_delta",
+      "variant": "restore",
+      "label_suffix": "restore",
+      "quote": "that restores $803767s1% of your missing health.",
+      "expected": 6500,
+      "before_expected": 5000,
+      "trigger_spell": 803767,
+      "target": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "metric": "health",
+      "fields": {},
+      "observe_source": "Bone Reliquary 11521's use spell is 803767 (item_template spellid_1). 803767 Effect[0] becomes SPELL_EFFECT_DUMMY (AscensionNecromancerContracts.cpp:285-290), and the Necromancer dummy handler calls ModifyHealth((max - current) x 30 / 100) (AscensionNecromancerAbilities.cpp:408-409; $803767s1 = 30). The caster is set to 5000 of 10000 health, regeneration off, before each phase: no cast (control) 5000; one real cast of 803767, the item's spell, 5000 + 30% of 5000 = 6500."
+    },
+    {
+      "spell": 803771,
+      "name": "Create Bone Reliquary (shared cooldown)",
+      "kind": "metric_delta",
+      "variant": "shared_cooldown",
+      "label_suffix": "shared_cooldown",
+      "quote": "Shares a cooldown with similar effects.",
+      "expected": 67,
+      "before_expected": 0,
+      "trigger_spell": 803773,
+      "target": "caster",
+      "setup_casts": [
+        803767
+      ],
+      "setup_only_after": true,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 803773
+      },
+      "observe_source": "Bone Reliquary 803767 (CategoryRecoveryTime 60000) and Frozen Reliquary 803773, the mana item 555555's spell, share spell Category 520 (and item spell category 1153). 803767 has no global cooldown (StartRecoveryTime 0). Before (control): 803773 alone goes through (0); after: 803767 is cast first, then 803773 is refused with SPELL_FAILED_NOT_READY (67): the category cooldown, not a global one."
+    },
+    {
+      "spell": 803771,
       "name": "Create Bone Reliquary (count)",
       "kind": "metric_delta",
       "variant": "count",
