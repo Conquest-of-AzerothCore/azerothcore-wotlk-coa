@@ -2378,6 +2378,7 @@ class PushbackReductionSpec:
     expected_pct: float
     label_suffix: str = ''
     reducer_learn: bool = False
+    repeats: int = 1
 
 
 def pushback_phases(spec: PushbackReductionSpec) -> tuple[str, ...]:
@@ -2405,8 +2406,9 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
     windows = dict(zip(phases, spec.windows))
     polls = {}
 
-    def phase(name: str) -> list[dict]:
-        low, high = windows[name]
+    def phase(kind: str, sample: int = 0) -> list[dict]:
+        name = f'{kind} {sample}' if sample else kind
+        low, high = windows[kind]
         steps = [{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': spec.cast_power},
                  {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell},
                  {'action': 'set_health', 'actor': CASTER, 'value': PUSHBACK_CASTER_HEALTH,
@@ -2414,7 +2416,7 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
                  measurement(pushback_mark(spec, name, 'start'), CASTER, 'game_time_ms'),
                  {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}]
         waited = 0
-        if name in ('hit', 'reduced'):
+        if kind in ('hit', 'reduced'):
             steps += [{'action': 'wait', 'label': f'{name} before the strike', 'ms': spec.strike_at_ms},
                       measurement(pushback_mark(spec, name, 'strikes'), CASTER, 'spell_damage_count',
                                   spell=spec.strike_spell, caster=STRIKER, target=CASTER),
@@ -2434,14 +2436,21 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
                         measurement(pushback_mark(spec, name, 'after strikes'), CASTER, 'spell_damage_count',
                                     spell=spec.strike_spell, caster=STRIKER, target=CASTER)]
 
+    def repeated(kind: str) -> list[dict]:
+        if spec.repeats == 1:
+            return phase(kind)
+        return [step for sample in range(1, spec.repeats + 1) for step in phase(kind, sample)]
+
+    if spec.repeats < 1:
+        raise ValueError(f'{spec.spell} pushback_reduction repeats each cast at least once')
     learned = (spec.cast_spell,) if spec.reducer_learn else (spec.cast_spell, spec.reducer_spell)
     reducer = ([{'action': 'learn', 'actor': CASTER, 'spell': spec.reducer_spell}] if spec.reducer_learn
                else hit_ratio_cast(records, spec.reducer_spell, CASTER, CASTER))
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
-             + phase('unhit') + phase('hit') + reducer
+             + repeated('unhit') + repeated('hit') + reducer
              + [{'action': 'wait', 'label': 'reducer', 'ms': spec.reducer_wait_ms}]
-             + (phase('reduced_unhit') if spec.reducer_learn else []) + phase('reduced'))
+             + (repeated('reduced_unhit') if spec.reducer_learn else []) + repeated('reduced'))
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
                'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True}
     scenario = {
@@ -2462,16 +2471,23 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
     model = {'kind': 'pushback_reduction', 'metric': 'casting', 'quote': entry.quote,
              'expected_pct': spec.expected_pct,
              'band': bonus_band(spec.expected_pct),
-             'phases': {name: {'start': pushback_mark(spec, name, 'start'), 'polls': polls[name],
-                               **({'strike': pushback_mark(spec, name, 'strike'),
-                                   'struck': pushback_mark(spec, name, 'struck'),
-                                   'strikes': [pushback_mark(spec, name, 'strikes'),
-                                               pushback_mark(spec, name, 'after strikes')]}
-                                  if name in ('hit', 'reduced') else {})}
-                        for name in phases}}
+             'phases': ({name: pushback_phase_model(spec, name, name, polls) for name in phases}
+                        if spec.repeats == 1 else {})}
+    if spec.repeats > 1:
+        model['samples'] = {kind: [pushback_phase_model(spec, kind, f'{kind} {sample}', polls)
+                                   for sample in range(1, spec.repeats + 1)] for kind in phases}
+        scenario['contract'] += (f' Each of the casts is repeated {spec.repeats} times; the judge takes the mean '
+                                 f'bracket middle of each kind of cast and its 99% interval.')
     expectation = Expectation(pushback_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.cast_spell, None,
                               str(spec.expected_pct), prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def pushback_phase_model(spec: PushbackReductionSpec, kind: str, name: str, polls: dict) -> dict:
+    return {'start': pushback_mark(spec, name, 'start'), 'polls': polls[name],
+            **({'strike': pushback_mark(spec, name, 'strike'), 'struck': pushback_mark(spec, name, 'struck'),
+                'strikes': [pushback_mark(spec, name, 'strikes'), pushback_mark(spec, name, 'after strikes')]}
+               if kind in ('hit', 'reduced') else {})}
 
 
 def pushback_reduction_spec(entry: dict) -> PushbackReductionSpec:
@@ -2481,7 +2497,7 @@ def pushback_reduction_spec(entry: dict) -> PushbackReductionSpec:
                                  int(entry['strike_at_ms']),
                                  tuple((int(low), int(high)) for low, high in entry['windows']),
                                  float(entry['expected_pct']), entry.get('label_suffix', ''),
-                                 bool(entry.get('reducer_learn', False)))
+                                 bool(entry.get('reducer_learn', False)), int(entry.get('repeats', 1)))
 
 
 SUMMON_LIFETIME_POLL_MS = 25

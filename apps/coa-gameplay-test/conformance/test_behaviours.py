@@ -11489,5 +11489,74 @@ class CostGateForcedRollTests(unittest.TestCase):
         self.assertFalse([expectation for expectation in expectations if expectation.label.endswith(' released')])
 
 
+
+class SummonLifetimePooledTests(unittest.TestCase):
+    def expectation(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
+        _, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        return replace(expectation, model={**expectation.model, 'parts': entry['parts']})
+
+    def values(self, model: dict, end_ms: float | None) -> dict:
+        found = {model['control']: 0.0, model['released']: 0.0, model['starts']['control']: 0.0,
+                 model['starts']['treatment']: 100000.0}
+        for window, low in (('spawn', 2500), ('end', 11500)):
+            for index, (at, count) in enumerate(model['polls'][window]):
+                offset = low + index * 25.0
+                present = end_ms is not None and 3010.0 <= offset < end_ms
+                found[at], found[count] = 100000.0 + offset, 1.0 if present else 0.0
+        return found
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_parts_without_a_summon_are_left_out_and_a_summoned_part_is_judged(self):
+        from compare import behaviour_summon_lifetime_pooled_verdict
+        expectation = self.expectation()
+        model = expectation.model
+        judged = lambda ends: behaviour_summon_lifetime_pooled_verdict(
+            base_verdict(expectation), [FakeRun(self.values(model, end)) for end in ends], model).status
+        self.assertEqual(judged([None, 13010.0, None]), 'ok')
+        self.assertEqual(judged([None, None]), 'unmeasured')
+        self.assertEqual(judged([13010.0, 12010.0]), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_pooled_entry_writes_one_scenario_per_part(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'summon_lifetime' and entry['spell'] == 807700)
+        self.assertGreaterEqual(entry['parts'], 40)
+
+
+
+class PushbackSampledTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1)
+        return entry, behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, ends: dict) -> str:
+        entry, (_, [expectation]) = self.built()
+        lows = dict(zip(('unhit', 'hit', 'reduced_unhit', 'reduced'), (low for low, _ in entry['windows'])))
+        values = {}
+        for kind, samples in expectation.model['samples'].items():
+            for index, phase in enumerate(samples):
+                start = 100000.0 * (len(values) + 1)
+                values[phase['start']] = start
+                end = ends[kind] + (index % 3) * 3.0
+                for poll, (at, casting) in enumerate(phase['polls']):
+                    offset = lows[kind] + poll * 9.0
+                    values[at], values[casting] = start + offset, 1.0 if offset < end else 0.0
+                if 'strike' in phase:
+                    values[phase['strike']], values[phase['struck']] = start + 1012.0, start + 1016.0
+                    values[phase['strikes'][0]], values[phase['strikes'][1]] = 0.0, 1.0
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_mean_of_repeated_casts_is_judged_with_its_interval(self):
+        entry, (scenario, [expectation]) = self.built()
+        run.validate(scenario)
+        self.assertEqual(len(expectation.model['samples']['hit']), entry['repeats'])
+        self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2375}), 'ok')
+        self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2475}), 'alert')
+
+
 if __name__ == '__main__':
     unittest.main()

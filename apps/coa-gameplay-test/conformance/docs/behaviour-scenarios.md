@@ -883,6 +883,9 @@ against `expected_ms` in the G-19 band (`ok` inside, `alert` outside, `measured`
 its edge or with more than one creature is `unmeasured`. Harvest Plague's zombies 705747 / 707880 (15000 ms) use
 Harvest Plague 500968, stopped after its first tick. The talent's ProcChance x 11 must reach 100%: the schema caps the
 mutant at +1000%.
+`parts` (ADR 0546) pools one-tick parts for a talent whose forced roll stays below 100%: a part whose spawn window never
+shows the creature is left out, every summoned part must pass, and at least one must summon (Unholy Erosion 807700,
+33% per tick, 40 parts).
 
 ### Pushback reduction (`behaviour_metric_delta`, `kind: "pushback_reduction"`, ADR 0543)
 
@@ -899,6 +902,9 @@ failed). Icebound Champion 807813: Lichfrost 501978, Light of the Naaru 41394 at
 `reducer_learn: true` learns `reducer_spell` between the phases instead of casting it and adds a fourth window, an unhit
 cast after the learn (`reduced_unhit`); each pushback is then taken within its own talent state, for a talent that also
 changes the cast time (Lich Essence 802988, which shortens Lichfrost by 15%).
+`repeats` (ADR 0546) repeats every cast; the judge then takes the mean bracket middle of each kind of cast and a 99%
+interval of the reduction from the repeats, since one poll is one world tick (8-10 ms of game time) and a single
+bracket cannot be narrower (Lich Essence: 10 repeats, 21-poll windows).
 
 ### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
 
