@@ -65,7 +65,7 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
-from behaviours import item_cooldown_gate_spec, hit_arm, metric_delta_strike
+from behaviours import item_cooldown_gate_spec, hit_arm, metric_delta_strike, cast_combat_spec
 from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
@@ -11330,6 +11330,31 @@ class ItemCooldownGateCombatTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             item_cooldown_gate_spec({'spell': 1, 'name': 'n', 'quote': 'q', 'item': 2, 'item_spell': 3,
                                      'cooldown_ms': 60000, 'combat_kill_spell': 501978})
+
+
+class ResurrectAmountTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_ally_health_and_mana_are_read_after_the_accept(self):
+        scenario, expectations = behaviour_scenario(load_class_file(23), cycle_one_entry(803605, 'revive'))
+        steps = run.validate(scenario)['steps']
+        shown = {expectation.label: expectation.displayed for expectation in expectations}
+        self.assertEqual(shown['803605 cast_combat revive health after'], '583')
+        self.assertEqual(shown['803605 cast_combat revive mana after'], '833')
+        alive = first_index(steps, label='803605 cast_combat revive alive after')
+        self.assertLess(alive, first_index(steps, label='803605 cast_combat revive health after'))
+        ally = next(player for player in scenario['players'] if player['id'] == ALLY)
+        self.assertIs(ally['allow_regeneration'], False)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_resurrection_at_another_amount_alerts(self):
+        _, expectations = behaviour_scenario(load_class_file(23), cycle_one_entry(803605, 'revive'))
+        health = next(expectation for expectation in expectations if expectation.label.endswith('health after'))
+        self.assertEqual(judge_behaviour(base_verdict(health), FakeRun({health.label: 583.0}), health).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(health), FakeRun({health.label: 1.0}), health).status, 'alert')
+
+    def test_amounts_need_a_resurrection(self):
+        with self.assertRaises(ValueError):
+            cast_combat_spec({'spell': 803605, 'name': 'n', 'quote': 'q', 'resurrect_amounts': True})
 
 
 if __name__ == '__main__':

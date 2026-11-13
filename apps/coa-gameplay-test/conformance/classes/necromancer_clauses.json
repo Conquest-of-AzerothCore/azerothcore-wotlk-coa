@@ -5859,21 +5859,22 @@
       {
         "claim": "with $s1 health",
         "labels": [
-          "803605 effect_value e0 #0"
+          "803605 effect_value e0 #0",
+          "803605 cast_combat revive health after"
         ]
       }
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): claim \"with $s1 health\" parked, tool gap: cast_combat revive reads alive only; the extension is an ally health read after the resurrection accept. Claim \"back to life\": status 1 (dead before, alive after a real cast in combat). Claim \"with $s1 health\": open, route pending: the cast_combat resurrect scenario reads alive, not the ally health after the accept (583 = 582 + 1, SPELL_EFFECT_RESURRECT_NEW); route: a health read on the ally after CMSG_RESURRECT_RESPONSE. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
+    "reason": "Cycle 1 F2 (tool gap 'ally health/mana read after the resurrection accept' closed, ADR 0537): the revive entry reads the ally's health right after CMSG_RESURRECT_RESPONSE with its regeneration off: expected 583 = EffectBasePoints 582 + 1 ($s1); the control arm (accept before any cast) leaves the ally dead. Route agent c (2026-11-13, second attempt): claim \"with $s1 health\" parked, tool gap: cast_combat revive reads alive only; the extension is an ally health read after the resurrection accept. Claim \"back to life\": status 1 (dead before, alive after a real cast in combat). Claim \"with $s1 health\": open, route pending: the cast_combat resurrect scenario reads alive, not the ally health after the accept (583 = 582 + 1, SPELL_EFFECT_RESURRECT_NEW); route: a health read on the ally after CMSG_RESURRECT_RESPONSE. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
   },
   {
     "spell": 803605,
     "clause": "and $q1 mana.",
     "labels": [
-      "803605 effect_value #1"
+      "803605 cast_combat revive mana after"
     ],
     "kind": "claim",
-    "reason": "Route agent c (2026-11-13, second attempt): parked, tool gap: as the health claim (ally mana read after the accept). Open, route pending: $q1 = EffectMiscValue[0] 833 (the tooltip reader cannot read $q); route: a mana read on the ally after the resurrection accept, as for the health claim. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
+    "reason": "Cycle 1 F2 (tool gap closed, ADR 0537): the revive entry reads the ally's mana right after the accept with its regeneration off: expected 833 = EffectMiscValue[0] ($q1, SPELL_EFFECT_RESURRECT_NEW's mana); the label '803605 effect_value #1' (unreadable: the tooltip reader cannot read $q1) is no evidence either way and is removed, not reclassified. Route agent c (2026-11-13, second attempt): parked, tool gap: as the health claim (ally mana read after the accept). Open, route pending: $q1 = EffectMiscValue[0] 833 (the tooltip reader cannot read $q); route: a mana read on the ally after the resurrection accept, as for the health claim. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bring a dead ally back to life with health and mana. Can be used in combat.'; bindmysoul nothing found; coa-obtainable not obtainable/known (live_capture=False, no advancement row); logs: CAST_START 18, SPELL_RESURRECT 14 (days 8/15,16,17,23,30)."
   },
   {
     "spell": 803605,

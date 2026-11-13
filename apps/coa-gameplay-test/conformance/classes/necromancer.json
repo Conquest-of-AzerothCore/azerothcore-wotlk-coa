@@ -15973,7 +15973,8 @@
       "quote": "Bring a dead ally back to life with $s1 health",
       "cast_spell": 803605,
       "resurrect": true,
-      "observe_source": "803605 Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW, EffectBasePoints[0] 582 + 1 = 583 health ($s1), EffectMiscValue[0] 833 mana ($q1), CastingTimeIndex 5, RangeIndex 5. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) that the dead ally takes with CMSG_RESURRECT_RESPONSE 348. Control: the dead ally sends the response before any cast and stays dead; after the cast it sends it again and must be alive. The cast is made in combat."
+      "resurrect_amounts": true,
+      "observe_source": "803605 Effect[0] 113 SPELL_EFFECT_RESURRECT_NEW, EffectBasePoints[0] 582 + 1 = 583 health ($s1), EffectMiscValue[0] 833 mana ($q1), CastingTimeIndex 5, RangeIndex 5. A player resurrection is an offer (SMSG_RESURRECT_REQUEST) that the dead ally takes with CMSG_RESURRECT_RESPONSE 348. Control: the dead ally sends the response before any cast and stays dead; after the cast it sends it again and must be alive. The cast is made in combat. Tool gap closed (ADR 0537): after the accept the ally's health and mana are read with its regeneration off: 583 ($s1) and 833 ($q1)."
     },
     {
       "spell": 803291,

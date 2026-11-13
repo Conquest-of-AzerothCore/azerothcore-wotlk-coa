@@ -4462,10 +4462,13 @@ class CastCombatSpec:
     cast_spell: int = 0
     resurrect: bool = False
     label_suffix: str = ''
+    resurrect_amounts: bool = False
 
     def __post_init__(self):
         if not self.cast_spell:
             object.__setattr__(self, 'cast_spell', self.spell)
+        if self.resurrect_amounts and not self.resurrect:
+            raise ValueError(f'{self.spell} cast_combat reads the resurrection amounts of a resurrection only')
 
 
 def cast_combat_label(spell: int, metric: str, suffix: str = '') -> str:
@@ -4490,6 +4493,10 @@ def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, 
                + [measurement(alive_before, ALLY, 'alive')]) if spec.resurrect else []
     revival = (resurrect_response('accept the resurrection')
                + [measurement(alive_after, ALLY, 'alive')]) if spec.resurrect else []
+    health_after = cast_combat_label(spec.spell, 'health after', spec.label_suffix)
+    mana_after = cast_combat_label(spec.spell, 'mana after', spec.label_suffix)
+    if spec.resurrect_amounts:
+        revival += [measurement(health_after, ALLY, 'health'), measurement(mana_after, ALLY, 'power', power=0)]
     steps = (base_steps(class_file)
             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.cast_spell},
                {'action': 'die', 'actor': ALLY}]
@@ -4518,7 +4525,8 @@ def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, 
                     + (f' The dead ally sends the resurrection response before the cast (the control: it stays '
                        f'dead) and after it (it must be alive), the stock CMSG_RESURRECT_RESPONSE '
                        f'{CAST_COMBAT_RESURRECT_RESPONSE_OPCODE}.' if spec.resurrect else ''),
-        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY}],
+        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY,
+                                                 **({'allow_regeneration': False} if spec.resurrect_amounts else {})}],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     model = {'kind': 'cast_combat', 'quote': entry.quote}
@@ -4534,16 +4542,31 @@ def cast_combat_scenario(class_file: dict, spec: CastCombatSpec) -> tuple[dict, 
                         prose_rule(entry.quote, spec.spell), {**model, 'reading': 'alive', 'arm': 'control'}),
             Expectation(alive_after, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.cast_spell, None, str(STATE_PRESENT),
                         prose_rule(entry.quote, spec.spell), {**model, 'reading': 'alive', 'arm': 'cast'})]
+    if spec.resurrect_amounts:
+        effect = next(index for index in range(3)
+                      if records.field('Spell', spec.cast_spell, f'Effect[{index}]') in RESURRECT_EFFECTS)
+        health = (int(records.field('Spell', spec.cast_spell, f'EffectBasePoints[{effect}]'))
+                  + int(records.field('Spell', spec.cast_spell, f'EffectDieSides[{effect}]') or 0))
+        mana = int(records.field('Spell', spec.cast_spell, f'EffectMiscValue[{effect}]'))
+        scenario['contract'] += (f' After the accept the ally\'s health and mana are read (regeneration off for the '
+                                 f'ally): {health} and {mana}, the effect\'s BasePoints + DieSides and MiscValue.')
+        expectations += [
+            Expectation(health_after, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.cast_spell, None, str(health),
+                        prose_rule(entry.quote, spec.spell), {**model, 'reading': 'health', 'arm': 'cast'}),
+            Expectation(mana_after, BEHAVIOUR_CAST_COMBAT, spec.spell, spec.cast_spell, None, str(mana),
+                        prose_rule(entry.quote, spec.spell), {**model, 'reading': 'mana', 'arm': 'cast'})]
     return scenario, expectations
 
 
 def cast_combat_spec(entry: dict) -> CastCombatSpec:
     return CastCombatSpec(entry['spell'], entry['name'], entry['quote'], int(entry.get('cast_spell', 0)),
-                          bool(entry.get('resurrect', False)), entry.get('label_suffix', ''))
+                          bool(entry.get('resurrect', False)), entry.get('label_suffix', ''),
+                          bool(entry.get('resurrect_amounts', False)))
 
 
 STATE_PRESENT = 1
 STATE_ABSENT = 0
+RESURRECT_EFFECTS = frozenset({113})
 
 
 @dataclass(frozen=True)
