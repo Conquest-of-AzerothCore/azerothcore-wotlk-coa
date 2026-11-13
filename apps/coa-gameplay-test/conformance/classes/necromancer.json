@@ -5301,6 +5301,7 @@
     {
       "spell": 500991,
       "name": "Grave March (focus)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "focus",
       "label_suffix": "focus",
@@ -5320,7 +5321,7 @@
         "entry": 50073,
         "target": "dummy"
       },
-      "observe_source": "Grave March 500991 Effect[0] DUMMY: aura_ascension_necromancer_dummy calls Order(player, target, 500991) (AscensionNecromancerAbilities.cpp:377-378), and every non-stationary minion answers it (Responds(), AscensionNecromancerSummons.cpp:177-182) with AttackStart(target) and nothing else (:650-652). A Ghoul 50073 is raised at the caster (not at the dummy, so the raise gives it no target, :444/:911) in each phase; no Grave March has set a focus before (:464, :781-796). Read: Ghouls of the caster whose victim is the dummy, 3000 ms after the phase's last cast. Before (control): one Ghoul, no Grave March: 0. After: a second Ghoul (Life Force 2), then Grave March at the dummy: both Ghouls on it, 2. Review I-2: the control keeps the Ghoul and drops the cast.",
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). Grave March 500991 Effect[0] DUMMY: aura_ascension_necromancer_dummy calls Order(player, target, 500991) (AscensionNecromancerAbilities.cpp:377-378), and every non-stationary minion answers it (Responds(), AscensionNecromancerSummons.cpp:177-182) with AttackStart(target) and nothing else (:650-652). A Ghoul 50073 is raised at the caster (not at the dummy, so the raise gives it no target, :444/:911) in each phase; no Grave March has set a focus before (:464, :781-796). Read: Ghouls of the caster whose victim is the dummy, 3000 ms after the phase's last cast. Before (control): one Ghoul, no Grave March: 0. After: a second Ghoul (Life Force 2), then Grave March at the dummy: both Ghouls on it, 2. Review I-2: the control keeps the Ghoul and drops the cast.",
       "cast_in_before": false,
       "setup_in_before": true,
       "setup_target": "caster"
@@ -10771,6 +10772,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "measure_actor": "dummy",
@@ -10780,7 +10787,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 3000 ms after the cast step (1000 ms cast; reads at 1000 and 1500 ms found the shield still on in 3 of 20 runs, final2 and final3)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). 807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0), read 3000 ms after the cast step (1000 ms cast; reads at 1000 and 1500 ms found the shield still on in 3 of 20 runs, final2 and final3)."
     },
     {
       "spell": 807796,
@@ -10816,6 +10823,7 @@
     {
       "spell": 807796,
       "name": "Death's Due (curse held)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "curse_held",
       "label_suffix": "curse_held",
@@ -10834,7 +10842,7 @@
       },
       "wait_ms": 3500,
       "expire_ms": 500,
-      "observe_source": "807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 3500 ms after the cast step (1000 ms cast, so 2500 ms into the curse): present (a read at 4500 ms flipped between runs, pair prove-8)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). 807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 3500 ms after the cast step (1000 ms cast, so 2500 ms into the curse): present (a read at 4500 ms flipped between runs, pair prove-8)."
     },
     {
       "spell": 807796,
@@ -11612,6 +11620,7 @@
     {
       "spell": 531135,
       "name": "Icecrown (crit against the enemy)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "crit",
       "label_suffix": "crit",
@@ -11628,11 +11637,12 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "The caster's melee crit chance against the dummy (Unit::GetUnitCriticalChance, the attacker crit modifiers of the target included) after one Lichfrost: one point higher with 531135's 706732 on the dummy (BasePoints 0 + 1 = 1, $706732s1) than without (expected_gain, ADR 0380). Scope: an attacker of the debuffed enemy is read (the caster); a second ally is not read."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). The caster's melee crit chance against the dummy (Unit::GetUnitCriticalChance, the attacker crit modifiers of the target included) after one Lichfrost: one point higher with 531135's 706732 on the dummy (BasePoints 0 + 1 = 1, $706732s1) than without (expected_gain, ADR 0380). Scope: an attacker of the debuffed enemy is read (the caster); a second ally is not read."
     },
     {
       "spell": 531135,
       "name": "Icecrown (three stacks)",
+      "phase_auras": [[823764, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "stack_cap",
       "label_suffix": "stack_cap",
@@ -11654,7 +11664,7 @@
       },
       "wait_ms": 3200,
       "expire_ms": 500,
-      "observe_source": "Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4. Each setup Lichfrost waits 3000 ms (its 2500 ms cast plus margin; 2700 ms left two stacks in one run of pair route-5)."
+      "observe_source": "Precondition fixture beeg spellpen 823764 on the caster (Effect[0] aura 123 -9999 target resistance): the level-60 dummy's linear resistance (CoA.MonsterResistance.PerLevel 1.0 x 60 / PerPercent 5 = 12%, spell_resist_chance read 12.0) binary-resists a hostile spell without direct damage in about 12% of casts (cause of the merged-pair flip, diagnostics 20261113-092941 / -093040 / -093202, F1 cycle 1). Four Lichfrosts per phase (2500 ms casts, 2700 ms apart): none without 531135, 3 stacks with it (706732 StackAmount 3, $706732u), not 4. Each setup Lichfrost waits 3000 ms (its 2500 ms cast plus margin; 2700 ms left two stacks in one run of pair route-5)."
     },
     {
       "spell": 531135,
@@ -12669,6 +12679,7 @@
     {
       "spell": 807700,
       "name": "Unholy Erosion (Lesser Zombie)",
+      "phase_auras": [[680486, 1, "caster", "caster"]],
       "kind": "metric_delta",
       "variant": "zombie",
       "label_suffix": "zombie",
@@ -12721,7 +12732,7 @@
       },
       "wait_ms": 3600,
       "expire_ms": 500,
-      "observe_source": "necromancer_event (AscensionNecromancerEvents.cpp:128-129): a periodic hit of a caster with 807700 summons a Lesser Zombie 503030 at the target when Chance(player, 807700) rolls (807700 ProcChance 3; the tooltip states no chance), and the zombie charges its target and hits it (AscensionNecromancerSummons.cpp:711-715), read as the Lesser Zombies' hits in the caster's log (owned_creature_damage_count; the 504022 read of the caster's hits saw none and a diagnostic read 5 zombie hits in 15 channels, pair b4-4). 35 Crypt Swarm channels per phase, 210 periodic 800343 hits: no zombie hit without 807700, at least one with it (at 3% per hit no zombie in 210 hits has chance 0.0017)."
+      "observe_source": "Precondition fixture The End Is Near 680486 on the caster (Effect[0] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT -100%, all schools, permanent): Crypt Swarm costs 17% of base mana and the setup casts refill only a flat cost, so 50 of the 70 channels failed with SPELL_FAILED_NO_POWER (85) in the night and merged pairs, leaving about 60 periodic hits in the treatment, not 210 (P(no zombie) = 0.97^60 = 0.16; one night run read 0). necromancer_event (AscensionNecromancerEvents.cpp:128-129): a periodic hit of a caster with 807700 summons a Lesser Zombie 503030 at the target when Chance(player, 807700) rolls (807700 ProcChance 3; the tooltip states no chance), and the zombie charges its target and hits it (AscensionNecromancerSummons.cpp:711-715), read as the Lesser Zombies' hits in the caster's log (owned_creature_damage_count; the 504022 read of the caster's hits saw none and a diagnostic read 5 zombie hits in 15 channels, pair b4-4). 35 Crypt Swarm channels per phase, 210 periodic 800343 hits: no zombie hit without 807700, at least one with it (at 3% per hit no zombie in 210 hits has chance 0.0017)."
     },
     {
       "spell": 504489,
