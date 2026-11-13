@@ -346,3 +346,10 @@ distances from the caster and reads the proc spell on every dummy, with `events_
 expectation per power: the summed `spell_energize_total` of the proc spell must equal its count times the stated
 amount, or times `floor(max_power x percent_of_max / 100)` read in the same part (Overwhelming Force 531128: 20
 Runic Power and 2% of maximum mana).
+
+`band: true` (ADR 0346) sizes the trials so the 99% half-width is half the G-19 band (the larger of 5% of the chance
+and 2 points) and judges the Wilson interval inside the band: `ok` inside, `alert` when it excludes the chance,
+`measured` (effect present, interval stated, not final) otherwise. A minion proc may count the proc spell's casts
+(`event_metric: "spell_go_count"`, `event_actor: "minion"`) when a hit can be fully resisted, and
+`trial_excluded_spells` (with `trial_excluded_reason`) removes the minion's hits of those spells from the trials,
+for hits the event script cannot roll on (Plague Horde's Zombie Plague 504022, cast inside its own handler).

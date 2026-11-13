@@ -656,3 +656,8 @@ and `observe_cleared_auras` set the observed cast's target and its precondition 
 on the dummy, Infestation 803782 cleared). A `kind: "cooldown_gate"` entry (`effect` and `label_suffix` to keep it
 apart) primes the observed spell, lets the minion attack for `gate_wait_ms` and casts it again: refused
 (`SPELL_FAILED_NOT_READY`) without the passive, cast with it (check `trigger_cooldown_gate`, behaviour).
+
+A minion `magnitude_ratio` may measure `pet_melee_damage` over the minion's melee crits (`pet_melee_crits`, for a
+proc of forced crits) and read the copy on the minion (`observe_actor: "minion"`); `aura_on_minion` applies to it
+too. `expected_note` adds the derivation of `expected_ratio` to the rule (Fetid Ward's leech, 0.30 x the healing
+received factor its own entry proves). `target_state_fixture` may be `{"spell", "source"}`, which the rule then names.
