@@ -16,9 +16,12 @@
 #include "SpellScript.h"
 #include "Log.h"
 #include "SpellAuras.h"
+#include "DBCStores.h"
 #include "SpellMgr.h"
 #include "Player.h"
 #include "UnitScript.h"
+#include <algorithm>
+#include <array>
 #include <memory>
 
 namespace
@@ -416,6 +419,21 @@ namespace
     };
 }
 
+class CoADungeonBossSpellRange final : public GlobalScript
+{
+public:
+    CoADungeonBossSpellRange() : GlobalScript("CoADungeonBossSpellRange", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        static constexpr std::array<uint32, 4> ThirtyYards = { 2102536, 2102540, 2102677, 2102679 };
+        if (!info || std::find(ThirtyYards.begin(), ThirtyYards.end(), info->Id) == ThirtyYards.end())
+            return;
+        info->RangeEntry = sSpellRangeStore.LookupEntry(4);
+        info->AttributesEx2 &= ~SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    }
+};
+
 class spell_coa_summon_hearty_heart : public SpellScript
 {
     PrepareSpellScript(spell_coa_summon_hearty_heart);
@@ -501,4 +519,5 @@ void AddSC_CoADungeonBossSpells()
     new CoATargorrBerserkerLeapMarker();
     RegisterSpellScript(spell_coa_mothers_milk_spray);
     RegisterSpellScript(spell_coa_mothers_milk_debuff);
+    new CoADungeonBossSpellRange();
 }
