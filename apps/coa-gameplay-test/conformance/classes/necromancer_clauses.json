@@ -1482,7 +1482,7 @@
       "560537 behaviour_metric_delta dp_alone"
     ],
     "kind": "claim",
-    "reason": "Open, tool gap pending (review C-1, I-8; ADR 0444): measured as the mentor ruled (G-21 point 2): the caster cast speed multiplier after one application (560537, 0.970874) and after a real Dark Prophecy 800517 cast too (its aura read present, dp_applied) stays 0.970874, not 0.951837 summed; Dark Prophecy alone reads 0.980392 (dp_alone). Coverage has no stack-cap judge for an inverse-relation state read, so it counts the read as data. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
+    "reason": "Status 1 (counted pair 20261113-032419 / -032507; mentor ruling G-21 point 2, review C-1 folded): the caster cast speed multiplier after one application (560537, 0.970874) and after a real Dark Prophecy 800517 cast too (its aura read present, dp_applied) stays 0.970874, not 0.951837 summed; Dark Prophecy alone reads 0.980392 (dp_alone). The words alone no longer promise the clause (ADR 0444); coverage reaches behaviour through the dp_applied event read of the second application. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: spell haste of party/raid by %, Magic damage dealt by %; bindmysoul found: 3% haste, 3% Magic damage; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."
   },
   {
     "spell": 560537,
