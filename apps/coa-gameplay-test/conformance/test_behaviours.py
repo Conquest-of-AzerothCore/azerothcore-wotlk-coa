@@ -10580,5 +10580,27 @@ class ImmunityCarrierAuraTests(unittest.TestCase):
         self.assertEqual(set(self.aura_reads(500981).values()), {500981})
 
 
+class MetricDeltaTriggerItemTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == 803777 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_trigger_is_an_item_use_after_the_setup_cast(self):
+        steps = behaviour_scenario(load_class_file(23), self.entry('restore'))[0]['steps']
+        uses = [index for index, step in enumerate(steps) if step.get('action') == 'use_item']
+        create = max(index for index, step in enumerate(steps)
+                     if step.get('action') == 'cast' and step.get('spell') == 803777)
+        self.assertEqual(len(uses), 2)
+        self.assertLess(create, uses[1])
+        self.assertEqual(steps[uses[1]], {'action': 'use_item', 'actor': 'caster', 'item': 555555, 'spell': 803773})
+        self.assertFalse(any(step.get('action') == 'cast' and step.get('spell') == 803773 for step in steps))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_item_use_on_the_dummy_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_class_file(23), {**self.entry('restore'), 'target': 'dummy'})
+
+
 if __name__ == '__main__':
     unittest.main()

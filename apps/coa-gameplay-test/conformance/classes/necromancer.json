@@ -8933,6 +8933,58 @@
       "observe_source": "The Spellbound Champion 500483 carries Spellbound Champion 808017 (ChampionAura, AscensionNecromancerSummons.cpp:98-109), Effect[2] 143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER on the caster, made SPELL_AURA_SPELL_MAGNET with no charges by its contract (AscensionNecromancerContracts.cpp:230-234): a magic spell cast at the caster goes to the aura's caster, the Champion. The read is 808017 on the caster (aura, ADR 0430). Fixture cast by the dummy: Fear 12096 (magic, aura 7): it lands on the caster without the Champion, is not on the caster with 808017 up, and lands again once the 20000 ms Champion ($d) has gone (the control)."
     },
     {
+      "spell": 803777,
+      "kind": "metric_delta",
+      "quote": "that restores $803773s1% of your missing mana.",
+      "target": "caster",
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "expire_ms": 500,
+      "tolerance": 1.5,
+      "before_expected": 1000,
+      "name": "Create Frozen Reliquary (mana spent, control)",
+      "variant": "spent",
+      "label_suffix": "spent",
+      "trigger_spell": 803777,
+      "cast_in_before": false,
+      "expected_gain": -823.8,
+      "expected": 176.2,
+      "wait_ms": 3500,
+      "observe_source": "The control for the restore entry: one Create Frozen Reliquary cast (its reagent 37201 given, ADR 0429), natural regeneration off: the caster's mana falls by its cost, ManaCostPercentage 60 of the 1373 base mana (823.8, the engine truncates to 823), from full mana in the uncast phase. This observed missing mana is the base of the restore entry's 30%."
+    },
+    {
+      "spell": 803777,
+      "kind": "metric_delta",
+      "quote": "that restores $803773s1% of your missing mana.",
+      "target": "caster",
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "expire_ms": 500,
+      "tolerance": 1.5,
+      "before_expected": 1000,
+      "name": "Create Frozen Reliquary (mana restored)",
+      "variant": "restore",
+      "label_suffix": "restore",
+      "trigger_spell": 803773,
+      "trigger_item": 555555,
+      "setup_casts": [
+        803777
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3500,
+      "cast_in_before": false,
+      "expected_gain": -576.7,
+      "expected": 423.3,
+      "wait_ms": 1000,
+      "observe_source": "Tooltip: a Frozen Reliquary 'restores $803773s1% of your missing mana' ($803773s1 = 30). The treatment phase casts Create Frozen Reliquary (setup, 823 mana spent, the spent entry) and uses one Frozen Reliquary 555555 (use_item with its spell 803773, trigger_item, ADR 0431), natural regeneration off: the mana ends 823 - 30% x 823 = 576.1 to 576.7 below full (the engine truncates the 246.9 restore); the control phase uses the item with no Reliquary created (setup_only_after) and reads full mana. Against the spent control's -823 the use returns 246 or 247, 30% of the observed missing mana."
+    },
+    {
       "spell": 680388,
       "name": "Fetid Ward (duration)",
       "kind": "cast_applies_aura",
