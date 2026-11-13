@@ -11348,22 +11348,77 @@
       "variant": "periodic_crit",
       "label_suffix": "periodic_crit",
       "quote": "@ext:Periodic damage dealt by this can critically strike.:ext@",
-      "expected": 2,
+      "expected": 12,
       "before_expected": 0,
       "trigger_spell": 501861,
       "target": "dummy",
       "cast_in_before": false,
       "cast_power": 1373,
       "force_crit": "spell",
+      "setup_casts": [
+        500342
+      ],
+      "setup_wait_ms": 200,
       "expire_ms": 500,
-      "wait_ms": 6200,
+      "wait_ms": 18300,
       "metric": "spell_damage_count",
       "fields": {
         "spell": 501861,
         "target": "dummy",
         "critical": true
       },
-      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000. The caster's spell crit rating is forced (FORCED_CRIT_RATING, harness fixture). spell_damage_count with critical counts the critical 501861 periodic damage events on the dummy: no cast before (control, 0); 6200 ms after a real cast both ticks (3000, 6000 ms) are critical: 2."
+      "observe_source": "501861 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 3000, DurationIndex 85 (18000 ms); under Mutation 500342 (SPELLMOD_ACTIVATION_TIME -50 on the disease mask) a fresh Flesh to Worms ticks every 1500 ms: 12 ticks in 18000 ms. The caster's spell crit rating is forced (FORCED_CRIT_RATING, harness player fixture, the same forcing as the direct_crit_control entry). No cast before (control, 0); 18300 ms after a real Mutation and a real Flesh to Worms at the dummy every tick is critical: 12 (the ticks entry counts 12 ticks in all)."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (ticks under forced crit)",
+      "kind": "metric_delta",
+      "variant": "periodic_ticks",
+      "label_suffix": "periodic_ticks",
+      "quote": "@ext:Periodic damage dealt by this can critically strike.:ext@",
+      "expected": 12,
+      "before_expected": 0,
+      "trigger_spell": 501861,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "force_crit": "spell",
+      "setup_casts": [
+        500342
+      ],
+      "setup_wait_ms": 200,
+      "expire_ms": 500,
+      "wait_ms": 18300,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501861,
+        "target": "dummy"
+      },
+      "observe_source": "Companion of periodic_crit: the same scenario shape counts every 501861 tick on the dummy, critical or not: 12 (1500 ms apart under Mutation 500342 for 18000 ms), so periodic_crit's 12 critical ticks are every tick."
+    },
+    {
+      "spell": 501861,
+      "name": "Flesh to Worms (direct spell crit under the same forcing)",
+      "kind": "metric_delta",
+      "variant": "direct_crit_control",
+      "label_suffix": "direct_crit_control",
+      "quote": "@ext:Periodic damage dealt by this can critically strike.:ext@",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1373,
+      "force_crit": "spell",
+      "expire_ms": 500,
+      "wait_ms": 3000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501978,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "Forcing check for periodic_crit: under the same forced spell crit rating (FORCED_CRIT_RATING) a direct Necromancer spell, Lichfrost 501978 (Effect[0] SCHOOL_DAMAGE Frost, 2500 ms cast), lands one critical hit on the dummy (no cast before: 0)."
     },
     {
       "spell": 560537,
