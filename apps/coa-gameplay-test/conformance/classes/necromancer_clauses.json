@@ -240,7 +240,7 @@
       "300958 behaviour_party_stat_ratio"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the grouped ally's melee crit chance gains 3 points when the caster learns 300958 (relation additive, ADR 0420)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Chilling Presence\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases critical strike chance of all party and raid members by 3%. Does not stack with \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the grouped ally's melee crit chance gains 3 points when the caster learns 300958 (relation additive, ADR 0420)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Chilling Presence\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases critical strike chance of all party and raid members by 3%. Does not stack with \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 300958,
@@ -249,7 +249,7 @@
       "300958 behaviour_group_stack_cap"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; Frost spell crit 3.2817 -> 6.2817 with 300958, still 6.2817 (not 9.2817) with Electrifying Aura 560568 of spell_group 2000181). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Chilling Presence\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases critical strike chance of all party and raid members by 3%. Does not stack with \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; Frost spell crit 3.2817 -> 6.2817 with 300958, still 6.2817 (not 9.2817) with Electrifying Aura 560568 of spell_group 2000181). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Chilling Presence\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Increases critical strike chance of all party and raid members by 3%. Does not stack with \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 300958,
@@ -304,7 +304,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; with an Abomination raised the caster armor and Frost resistance read 1.3 times their values without 301207; without an Abomination 301207 changes nothing). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Flesh Symbiosis\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resi\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; with an Abomination raised the caster armor and Frost resistance read 1.3 times their values without 301207; without an Abomination 301207 changes nothing). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Flesh Symbiosis\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resi\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 301207,
@@ -325,7 +325,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; held at 5000 of 10000 health, 5200 after 5000 ms and 5400 after 10000 ms with an Abomination, unchanged without one). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Flesh Symbiosis\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resi\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; held at 5000 of 10000 health, 5200 after 5000 ms and 5400 after 10000 ms with an Abomination, unchanged without one). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Flesh Symbiosis\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Each Abomination or Decaying Colossus active now increases your total Armor and magic resi\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 301250,
@@ -436,7 +436,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the mana left after a Lichfrost and after a Crypt Swarm channel is 10% of their cost higher with 302888 than without). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Reduces the mana cost of Lichfrost and Crypt Swarm by -10%. Blight now refunds 25% of its \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the mana left after a Lichfrost and after a Crypt Swarm channel is 10% of their cost higher with 302888 than without). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Reduces the mana cost of Lichfrost and Crypt Swarm by -10%. Blight now refunds 25% of its \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 302888,
@@ -446,7 +446,7 @@
       "302888 behaviour_metric_delta blight_refund_held"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; no 500307 refund without 302888; with it none 19000 ms into the aura and 25% of the 384 mana Blight cost after it expires). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Reduces the mana cost of Lichfrost and Crypt Swarm by -10%. Blight now refunds 25% of its \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; no 500307 refund without 302888; with it none 19000 ms into the aura and 25% of the 384 mana Blight cost after it expires). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Reduces the mana cost of Lichfrost and Crypt Swarm by -10%. Blight now refunds 25% of its \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 302920,
@@ -466,7 +466,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the mana left after a Lichfrost and after a Crypt Swarm channel is 20% of their cost higher with 302920 than without). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the mana left after a Lichfrost and after a Crypt Swarm channel is 20% of their cost higher with 302920 than without). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 302920,
@@ -476,7 +476,7 @@
       "302920 behaviour_metric_delta blight_refund_held"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; no 500307 refund without 302920; with it none 19000 ms into the aura and 50% of the 384 mana Blight cost after it expires). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; no 500307 refund without 302920; with it none 19000 ms into the aura and 50% of the 384 mana Blight cost after it expires). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Living Dead\" lines (0 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 302921,
@@ -539,7 +539,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; 0 then 1 Skeletal Mage 50075; 0 then at least 1 Mage hit after a Command; Life Force 2 -> 0, and 2 -> 1 with Grave Mages 807937). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 69 \"Raise: Skeletal Mage\" lines, 3348 \"Command: Skeletal Mage\" lines (69 by id); ~/CoaServer/reference: bindmysoul \"Raise a Skeletal Mage to aid you in combat, occupying 2 Life Force.Command: Unleashes ice \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; 0 then 1 Skeletal Mage 50075; 0 then at least 1 Mage hit after a Command; Life Force 2 -> 0, and 2 -> 1 with Grave Mages 807937). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 69 \"Raise: Skeletal Mage\" lines, 3348 \"Command: Skeletal Mage\" lines (69 by id); ~/CoaServer/reference: bindmysoul \"Raise a Skeletal Mage to aid you in combat, occupying 2 Life Force.Command: Unleashes ice \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500331,
@@ -548,7 +548,7 @@
       "500331 command_targets behaviour_fixed_count"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the three dummies within 6 yd of the target struck by every Command, the one 11 yd away never; no hit before the raise). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 69 \"Raise: Skeletal Mage\" lines, 3348 \"Command: Skeletal Mage\" lines (69 by id); ~/CoaServer/reference: bindmysoul \"Raise a Skeletal Mage to aid you in combat, occupying 2 Life Force.Command: Unleashes ice \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the three dummies within 6 yd of the target struck by every Command, the one 11 yd away never; no hit before the raise). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 69 \"Raise: Skeletal Mage\" lines, 3348 \"Command: Skeletal Mage\" lines (69 by id); ~/CoaServer/reference: bindmysoul \"Raise a Skeletal Mage to aid you in combat, occupying 2 Life Force.Command: Unleashes ice \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500331,
@@ -558,7 +558,7 @@
       "500331 script_hit 801513 command_damage_sp"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; 801513 51 per hit at spell power 0 and 156 with +133 Frost spell power (tooltip 156.6, engine truncation G-26); control without a Mage 0 hits). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 69 \"Raise: Skeletal Mage\" lines, 3348 \"Command: Skeletal Mage\" lines (69 by id); ~/CoaServer/reference: bindmysoul \"Raise a Skeletal Mage to aid you in combat, occupying 2 Life Force.Command: Unleashes ice \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; 801513 51 per hit at spell power 0 and 156 with +132 Frost spell power (tooltip 156.6, engine truncation G-26); control without a Mage 0 hits). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 69 \"Raise: Skeletal Mage\" lines, 3348 \"Command: Skeletal Mage\" lines (69 by id); ~/CoaServer/reference: bindmysoul \"Raise a Skeletal Mage to aid you in combat, occupying 2 Life Force.Command: Unleashes ice \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500335,
@@ -833,7 +833,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; 504691 shapeshift and 504747 immunities absent without the cast, present after it; Lichfrost hit_ratio with Lich Form cast before each hit against none). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9175 \"Lich Form\" lines (9175 by id); ~/CoaServer/reference: bindmysoul \"Transform into a Lich, becoming Undead increasing your Frost damage dealt by 10%.While act\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; 504691 shapeshift and 504747 immunities absent without the cast, present after it; Lichfrost hit_ratio with Lich Form cast before each hit against none). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9175 \"Lich Form\" lines (9175 by id); ~/CoaServer/reference: bindmysoul \"Transform into a Lich, becoming Undead increasing your Frost damage dealt by 10%.While act\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500981,
@@ -855,7 +855,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; no energize without the cast; 60 tenths (2 x 3 Runic Power) by 10500 ms, none by 4500 ms, one by 5500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9175 \"Lich Form\" lines (9175 by id); ~/CoaServer/reference: bindmysoul \"Transform into a Lich, becoming Undead increasing your Frost damage dealt by 10%.While act\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; no energize without the cast; 60 tenths (2 x 3 Runic Power) by 10500 ms, none by 4500 ms, one by 5500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9175 \"Lich Form\" lines (9175 by id); ~/CoaServer/reference: bindmysoul \"Transform into a Lich, becoming Undead increasing your Frost damage dealt by 10%.While act\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500981,
@@ -894,7 +894,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; Fear 12096 and Sleep 9159 land without Lich Form, never with it, and again after 500981 is removed (remove_control, ADR 0420); Domination 37122 lands without it, refused with it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9175 \"Lich Form\" lines (9175 by id); ~/CoaServer/reference: bindmysoul \"Transform into a Lich, becoming Undead increasing your Frost damage dealt by 10%.While act\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; Fear 12096 and Sleep 9159 land without Lich Form, never with it, and again after 500981 is removed (remove_control, ADR 0420); Domination 37122 lands without it, refused with it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 9175 \"Lich Form\" lines (9175 by id); ~/CoaServer/reference: bindmysoul \"Transform into a Lich, becoming Undead increasing your Frost damage dealt by 10%.While act\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500989,
@@ -1021,7 +1021,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; claim blight: a raised Decaying Colossus alone leaves no 801534 on the dummy; its Command puts the blighted ground on it). Claims radius, healing received and duration: data, route pending (author.md). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Blight\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Decaying Colossus to blight the ground in a 10 yd radius beneath it, reducing\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; claim blight: a raised Decaying Colossus alone leaves no 801534 on the dummy; its Command puts the blighted ground on it). Claims radius, healing received and duration: data, route pending (author.md). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Blight\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Decaying Colossus to blight the ground in a 10 yd radius beneath it, reducing\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504050,
@@ -1030,7 +1030,7 @@
       "504050 behaviour_metric_delta pacify"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the Command goes through without Pacify (0) and is refused with 173 with Undead: Pacify 500983 set on the caster (harness set_aura, precondition fixture)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Blight\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Decaying Colossus to blight the ground in a 10 yd radius beneath it, reducing\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the Command goes through without Pacify (0) and is refused with 173 with Undead: Pacify 500983 set on the caster (harness set_aura, precondition fixture)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Blight\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Decaying Colossus to blight the ground in a 10 yd radius beneath it, reducing\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504316,
@@ -1121,7 +1121,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; a raised Mage alone leaves the dummy unfrozen; its Command freezes the target and the three dummies 2 to 6 yd from it; a dummy 7.5 yd away, outside the Mage splash, is still frozen 38500 ms later (the 40000 ms upper side rests on the DBC duration label)). Observation O-b3b-1: 504845 is itself an 8 yd area, so the freeze reaches about 16 yd from the target (a dummy 13 yd away froze, diagnostic pair prove-10). Claim \"(8 sec vs players)\": route pending (author.md), the cap (OnCalcMaxDuration, AscensionNecromancerAbilities.cpp:233-234) untouched by ADR 0421. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; a raised Mage alone leaves the dummy unfrozen; its Command freezes the target and the three dummies 2 to 6 yd from it; a dummy 7.5 yd away, outside the Mage splash, is still frozen 38500 ms later (the 40000 ms upper side rests on the DBC duration label)). Observation O-b3b-1: 504845 is itself an 8 yd area, so the freeze reaches about 16 yd from the target (a dummy 13 yd away froze, diagnostic pair prove-10). Claim \"(8 sec vs players)\": route pending (author.md), the cap (OnCalcMaxDuration, AscensionNecromancerAbilities.cpp:233-234) untouched by ADR 0421. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504489,
@@ -1132,7 +1132,7 @@
       "504489 area_held behaviour_fixed_count"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; fix F-b3b-1, ADR 0421: the Mage hits the frozen target twice within 6000 ms and its freeze is gone; the dummy outside the Mage splash keeps its freeze 38500 ms (no-damage control); before the fix the freeze held to 38500 ms under the same hits (pairs prove-3 to prove-5, build 1f17eb215ef3)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; fix F-b3b-1, ADR 0421: the Mage hits the frozen target twice within 6000 ms and its freeze is gone; the dummy outside the Mage splash keeps its freeze 38500 ms (no-damage control); before the fix the freeze held to 38500 ms under the same hits (pairs prove-3 to prove-5, build 1f17eb215ef3)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504489,
@@ -1141,7 +1141,7 @@
       "504489 behaviour_metric_delta pacify"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the Command goes through without Pacify (0) and is refused with 173 SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW with Undead: Pacify 500983 set on the caster (harness set_aura, precondition fixture)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the Command goes through without Pacify (0) and is refused with 173 SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW with Undead: Pacify 500983 set on the caster (harness set_aura, precondition fixture)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 0 \"Command: Bonefreeze\" lines, 0 \"Bonefreeze\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Command your Skeletal Mages to freeze enemies at target location for 40 seconds (8 sec vs \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 504861,
@@ -2351,7 +2351,7 @@
       "705752 behaviour_metric_delta no_crit"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; one forced-crit Lichfrost restores 3% of maximum mana through 705753 only with 705752; a non-crit restores nothing). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19197 \"Tears of Lordaeron\" lines (0 by id), live 705753 energizes 9 Runic Power and 3% mana together on 9583 direct crits; ~/CoaServer/reference: bindmysoul \"Direct critical strikes regenerate 3% of your maximum mana and 9% of your maximum runic po\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; one forced-crit Lichfrost restores 3% of maximum mana through 705753 only with 705752; a non-crit restores nothing). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19197 \"Tears of Lordaeron\" lines (0 by id), live 705753 energizes 9 Runic Power and 3% mana together on 9583 direct crits; ~/CoaServer/reference: bindmysoul \"Direct critical strikes regenerate 3% of your maximum mana and 9% of your maximum runic po\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 705752,
@@ -2360,7 +2360,7 @@
       "705752 behaviour_metric_delta direct_runic_power"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; 90 of the maximum 1000 Runic Power with 705752, none without). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19197 \"Tears of Lordaeron\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Direct critical strikes regenerate 3% of your maximum mana and 9% of your maximum runic po\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; 90 of the maximum 1000 Runic Power with 705752, none without). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19197 \"Tears of Lordaeron\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Direct critical strikes regenerate 3% of your maximum mana and 9% of your maximum runic po\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 705752,
@@ -2370,7 +2370,7 @@
       "705752 behaviour_metric_delta periodic_not_direct"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; six forced-crit Crypt Swarm hits restore 6 x 1% of maximum mana through 706424, none without 705752, and never the direct reward 705753). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19197 \"Tears of Lordaeron\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Direct critical strikes regenerate 3% of your maximum mana and 9% of your maximum runic po\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; six forced-crit Crypt Swarm hits restore 6 x 1% of maximum mana through 706424, none without 705752, and never the direct reward 705753). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 19197 \"Tears of Lordaeron\" lines (0 by id); ~/CoaServer/reference: bindmysoul \"Direct critical strikes regenerate 3% of your maximum mana and 9% of your maximum runic po\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 705754,
@@ -2469,7 +2469,7 @@
     "spell": 707007,
     "clause": "Beckon the restless dead to rise and march forward.",
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; six March of the Dead 707010 hits from walkers 523032 on the dummy after one cast, none without it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable).",
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; six March of the Dead 707010 hits from walkers 523032 on the dummy after one cast, none without it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable).",
     "labels": [
       "707007 behaviour_metric_delta explode"
     ]
@@ -2482,7 +2482,7 @@
       "707007 script_hit 707010 explosion"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; each walker that reaches the dummy explodes once: 6 hits of 691 against the tooltip 691.2 (G-26 truncation); control without the cast 0 hits). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; each walker that reaches the dummy explodes once: 6 hits of 691 against the tooltip 691.2 (G-26 truncation); control without the cast 0 hits). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707007,
@@ -2504,7 +2504,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the dummy runs at 0.3 of its 1.14286 after the explosions; the slow is on it 1500 ms after the cast and gone by 8000 ms (the exact 3000 ms on the DBC duration label)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the dummy runs at 0.3 of its 1.14286 after the explosions; the slow is on it 1500 ms after the cast and gone by 8000 ms (the exact 3000 ms on the DBC duration label)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 1970 \"March of the Dead\" lines (94 by id); ~/CoaServer/reference: bindmysoul \"Beckon the restless dead to rise and march forward.When they reach an enemy they explode, \", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 707113,
@@ -3446,7 +3446,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; Divine Shield 642 (Mechanic 29) and Diplomatic Immunity 38916 (Mechanic 25) set on the dummy are kept without a cast and removed by one; the curse is on the target 4500 ms after the cast and gone by 6000 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 120 \"Death's Due\" lines (103 by id); ~/CoaServer/reference: bindmysoul \"Force a target to accept the reality of death, removing any invulnerability or immunity ef\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Claim curse: Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the curse is on the target 3500 ms after the cast step and gone by 6500 ms). Claim dispel: parked (stop rule), state in author.md: Divine Shield 642 (Mechanic 29) and Diplomatic Immunity 38916 (Mechanic 25) set on the dummy are kept without a cast and removed by one Death's Due in 23 of 30 reads; the fixture stayed in 7 (final2 run 2, final3 run 1 and prove-12 run 1 both entries, final4 one entry in each run), so both labels flip in the final pair; Aura::CalcDispelChance (SpellAuras.cpp:1143-1165) has no roll; cause not found. G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 120 \"Death's Due\" lines (103 by id), live curse 807796 lasted 4.88 to 4.98 s in 29 of 30 full applications and 808016 hit 17 times (1142 to 8254); ~/CoaServer/reference: bindmysoul \"Force a target to accept the reality of death, removing any invulnerability or immunity ef\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807796,
@@ -3456,7 +3456,7 @@
       "807796 behaviour_metric_delta above_twenty"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; one 808016 hit at the end of the curse on a 15% dummy, none on a 25% one, none without the cast). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 120 \"Death's Due\" lines (103 by id); ~/CoaServer/reference: bindmysoul \"Force a target to accept the reality of death, removing any invulnerability or immunity ef\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; one 808016 hit at the end of the curse on a 15% dummy, none on a 25% one, none without the cast). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 120 \"Death's Due\" lines (103 by id), live curse 807796 lasted 4.88 to 4.98 s in 29 of 30 full applications and 808016 hit 17 times (1142 to 8254); ~/CoaServer/reference: bindmysoul \"Force a target to accept the reality of death, removing any invulnerability or immunity ef\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807796,
@@ -3466,7 +3466,7 @@
       "807796 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; 1040 at spell power 0 ($m2 at level 60: 800 + 12 x 20) and 1178 with +69 Shadow (x 2)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 120 \"Death's Due\" lines (103 by id); ~/CoaServer/reference: bindmysoul \"Force a target to accept the reality of death, removing any invulnerability or immunity ef\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; 1040 at spell power 0 ($m2 at level 60: 800 + 12 x 20) and 1178 with +69 Shadow (x 2)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 120 \"Death's Due\" lines (103 by id), live curse 807796 lasted 4.88 to 4.98 s in 29 of 30 full applications and 808016 hit 17 times (1142 to 8254); ~/CoaServer/reference: bindmysoul \"Force a target to accept the reality of death, removing any invulnerability or immunity ef\", sidekick coaKits names it, advancement.tsv 3 rows, exiles-db tables list it, cachepacks list it (acquisition, no value); coa-obtainable: in the class 23 live capture; sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 807924,
@@ -3539,7 +3539,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; claim \"nearby enemies\": every dummy within 5 yd of the target struck, the far one never). Claims damage and \"over $d\": status 5, owner question Q-b3b-3 (mentor, 2026-11-13: judged against the stated total): 756 (6 hits: 126 at the cast from Effect[2], then 5 ticks) against the stated 630 (5 hits), 822 against 688.4 with +69 Shadow; the initial_hit entry reads the cast hit alone (126). Observation: live does the same, 6 hits of 500237 per full-duration application in 27 of 42 (log 2026-08-16-18.59.34; read as the SPELL_DAMAGE 500237 events of one caster on one target from 0.6 s before SPELL_AURA_APPLIED 500459 to 0.6 s after its SPELL_AURA_REMOVED, applications of at least 19.5 s; the other 15 show 7 to 18 hits, overlapping Blights). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; claim \"nearby enemies\": every dummy within 5 yd of the target struck, the far one never). Claims damage and \"over $d\": status 5, owner question Q-b3b-3 (mentor, 2026-11-13: judged against the stated total): 756 (6 hits: 126 at the cast from Effect[2], then 5 ticks) against the stated 630 (5 hits), 822 against 688.4 with +69 Shadow; the initial_hit entry reads the cast hit alone (126). Observation: live does the same, 6 hits of 500237 per full-duration application in 27 of 42 (log 2026-08-16-18.59.34; read as the SPELL_DAMAGE 500237 events of one caster on one target from 0.6 s before SPELL_AURA_APPLIED 500459 to 0.6 s after its SPELL_AURA_REMOVED, applications of at least 19.5 s; the other 15 show 7 to 18 hits, overlapping Blights). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500459,
@@ -3549,7 +3549,7 @@
       "500459 behaviour_metric_delta expunge"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; no Expunge Blight 500267 21000 ms after the cast step (2000 ms cast), one by 23500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; no Expunge Blight 500267 21000 ms after the cast step (2000 ms cast), one by 23500 ms). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6506 \"Blight\" lines, 136 \"Expunge Blight\" lines (1182 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 56 rank of Blight 500217 (AscensionSpellProgressionData.h 1383); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 500459,
@@ -3587,7 +3587,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; 6 Crypt Swarm 800343 hits, 348 against $o1 350.64, the per-level truncation of 58.44 to 58 per tick (G-26, ADR 0147)). Claim slow: status 5, owner question Q-b3b-1 (803530 is applied 6 times per channel with 92123 but has no duration, the run speed never changes; live logs show no 803530). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 25567 \"Crypt Swarm\" lines, 0 \"Cryptfury\" lines (2764 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 54 rank of Crypt Swarm 500965 (AscensionSpellProgressionData.h 1397); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; 6 Crypt Swarm 800343 hits, 348 against $o1 350.64, the per-level truncation of 58.44 to 58 per tick (G-26, ADR 0147)). Claim slow: status 5, owner question Q-b3b-1 (803530 is applied 6 times per channel with 92123 but has no duration, the run speed never changes; live logs show no 803530). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 25567 \"Crypt Swarm\" lines, 0 \"Cryptfury\" lines (2764 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 54 rank of Crypt Swarm 500965 (AscensionSpellProgressionData.h 1397); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 501886,
@@ -3596,7 +3596,7 @@
       "501886 behaviour_metric_delta runic_power"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; six 800344 Runic Power energizes over the 3000 ms channel, none without it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 25567 \"Crypt Swarm\" lines, 0 \"Cryptfury\" lines (2764 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 54 rank of Crypt Swarm 500965 (AscensionSpellProgressionData.h 1397); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; six 800344 Runic Power energizes over the 3000 ms channel, none without it). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 25567 \"Crypt Swarm\" lines, 0 \"Cryptfury\" lines (2764 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 54 rank of Crypt Swarm 500965 (AscensionSpellProgressionData.h 1397); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 501886,
@@ -3605,7 +3605,7 @@
       "501886 behaviour_metric_delta cryptfury"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; no Ghoul carries Crypt Fury 806588 without 500165; both Ghouls carry it after a channel with 500165). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 25567 \"Crypt Swarm\" lines, 0 \"Cryptfury\" lines (2764 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 54 rank of Crypt Swarm 500965 (AscensionSpellProgressionData.h 1397); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; no Ghoul carries Crypt Fury 806588 without 500165; both Ghouls carry it after a channel with 500165). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 25567 \"Crypt Swarm\" lines, 0 \"Cryptfury\" lines (2764 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 54 rank of Crypt Swarm 500965 (AscensionSpellProgressionData.h 1397); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 501965,
@@ -4186,7 +4186,7 @@
       "501978 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; one Lichfrost hit inside 569 to 597 at Frost spell power 0 and 115.7 higher with +133 Frost). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6034 \"Lichfrost\" lines (1192 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Lichfrost 801722 (AscensionSpellProgressionData.h 1444); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; one Lichfrost hit inside 569 to 597 at Frost spell power 0 and 114.8 higher with +132 Frost (truncated, 683 and 706 read)). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6034 \"Lichfrost\" lines (1192 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Lichfrost 801722 (AscensionSpellProgressionData.h 1444); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 501978,
@@ -4213,7 +4213,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Status 1 (counted pair pending; the dummy runs at 0.65 of its 1.14286 after the hit; the slow is on it 5500 ms into it and gone by 6500 ms; one 804112 Runic Power energize per cast). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6034 \"Lichfrost\" lines (1192 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Lichfrost 801722 (AscensionSpellProgressionData.h 1444); sources.md followed; MCP not queried (unavailable)."
+    "reason": "Status 1 (final counted pair final4 20261113-020718 / -020802, build f90703a57ebc; the dummy runs at 0.65 of its 1.14286 after the hit; the slow is on it 5500 ms into it and gone by 6500 ms; one 804112 Runic Power energize per cast). G-11: server DBC and code (class-file observe_source); own combat logs (coa-log-history): 6034 \"Lichfrost\" lines (1192 by id); ~/CoaServer/reference: bindmysoul: nothing found, sidekick coaKits names it, advancement.tsv: nothing found, exiles-db tables list it, cachepacks: nothing found (acquisition, no value); coa-obtainable: not in the live capture as its own id; it is the level 60 rank of Lichfrost 801722 (AscensionSpellProgressionData.h 1444); sources.md followed; MCP not queried (unavailable)."
   },
   {
     "spell": 804681,
