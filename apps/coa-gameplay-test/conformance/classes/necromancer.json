@@ -1816,7 +1816,7 @@
       "trigger_spell": 504868,
       "target": "dummy",
       "setup_casts": [
-        500971,
+        500331,
         500971
       ],
       "setup_target": "caster",
@@ -1832,7 +1832,7 @@
         "aura": 707014,
         "entry": 50073
       },
-      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's main-hand swing interval 2000 ms without the talent (control), 2000 / 1.40 = 1428.571 ms with the Frenzied Ghoul aura (tolerance 1 ms). Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). Per-Ghoul precondition (mentor ruling 2026-11-13, flip in f6): each phase raises two Ghouls; at a maximum of 2 Life Force the after phase's two raises evict the before phase's Ghouls, so both Ghouls read in the after phase are raised after 503740 is learned, and both must carry 707014 (the every-creature precondition).",
+      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's main-hand swing interval 2000 ms without the talent (control), 2000 / 1.40 = 1428.571 ms with the Frenzied Ghoul aura (tolerance 1 ms). Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (mentor ruling 2026-11-13, flip in f6; with two Ghouls one carried 707014 in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 503740 is learned, and it must carry 707014 (the every-creature precondition).",
       "tolerance": 1
     },
     {
@@ -1847,7 +1847,7 @@
       "trigger_spell": 504868,
       "target": "dummy",
       "setup_casts": [
-        500971,
+        500331,
         500971
       ],
       "setup_target": "caster",
@@ -1863,7 +1863,7 @@
         "aura": 707014,
         "entry": 50073
       },
-      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's display: 10626 (creature_template_model of Ghoul 50073) without the talent, 14708 (the model of Frenzied Ghoul 50173, the transform's MiscValue) with it. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). Per-Ghoul precondition (mentor ruling 2026-11-13, flip in f6): each phase raises two Ghouls; at a maximum of 2 Life Force the after phase's two raises evict the before phase's Ghouls, so both Ghouls read in the after phase are raised after 503740 is learned, and both must carry 707014 (the every-creature precondition)."
+      "observe_source": "Ghoul Mastery 503740 reaches the Ghoul as a native proc (Effect 190 aura 42 kept by nativeSummonProc, AscensionNecromancerContracts.cpp:77-82; the live logs show 707014 self-cast by Ghouls); its 15% roll is proven by 503740 proc_rate. Frenzied Ghoul 707014: Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 50173, Effect[1] aura 192 haste +40 ($s2, BasePoints 39 + 1), Effect[2] aura 77 mechanic immunity 11. Each phase raises a Ghoul 50073 and sends it at the dummy with Command: Undead 504868; 503740 learned between the phases. Forcing fixture (mentor N-a1, effect claims only): a SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier on 503740 for the scenario (15% x 11 > 100%), 707014 on a Ghoul read before the after reading (absent: unmeasured), the modifier removed at the end and read gone. The Ghoul's display: 10626 (creature_template_model of Ghoul 50073) without the talent, 14708 (the model of Frenzied Ghoul 50173, the transform's MiscValue) with it. Both phases raise and command a Ghoul (two in the after phase); every Ghoul must carry the forced aura (pairs f2, f3 and f4 run 1 read it on 1 of 2 Ghouls once each: unmeasured, never ok; a start-gate variant left the before phase without a Ghoul, pair f4 run 1, and was dropped). One Ghoul per phase (mentor ruling 2026-11-13, flip in f6; with two Ghouls one carried 707014 in some runs, pairs f2-f8): each phase raises a Skeletal Mage 500331 (2 Life Force), then a Ghoul, so at the maximum of 2 the Mage evicts the previous Ghoul and the Ghoul evicts the Mage: one Ghoul lives in each phase, the after phase's raised after 503740 is learned, and it must carry 707014 (the every-creature precondition)."
     },
     {
       "spell": 802986,
