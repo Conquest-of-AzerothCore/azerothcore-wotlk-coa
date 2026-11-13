@@ -3542,7 +3542,8 @@
     "spell": 802988,
     "clause": "and reduces your spell pushback suffered from taking damage by $s1%.",
     "labels": [
-      "802988 effect_value e0 #1"
+      "802988 effect_value e0 #1",
+      "802988 behaviour_metric_delta pushback_game_time"
     ],
     "kind": "claim",
     "reason": "Route agent c (2026-11-13, second attempt): parked: the route is a no-talent control arm read of cast_pushback_ms after the same hit, judged as a ratio 0.5 on the observed control (no engine base in the expectation); metric_delta judges a gain, not a ratio of two arms, so a ratio judge or a pushback arm in hit_ratio is the extension. Open, route pending (re-judged under the mentor method rule of 2026-11-13: expected values from the DBC/tooltip only): the pushback_delays / pushback_halved entries pass (no Lichfrost hit by 2350 ms, one by 2600 ms after one Light of the Naaru 41394 hit 1000 ms into the cast), but their windows rest on the engine base pushback of 500 ms (Spell::Delayed, Spell.cpp:8075), which no tooltip or DBC token states; route: a no-talent control arm with the same strike, judging the with/without pushback ratio 0.5 (cast_remaining_ms read just before and after the strike in each arm). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: Lichfrost cast time by %, spell pushback by %; bindmysoul found: -15% Lichfrost cast time, 50% less pushback; coa-obtainable obtainable (live_capture=True, advancement Necromancer, calculator=True); logs: no events in 186 logs."

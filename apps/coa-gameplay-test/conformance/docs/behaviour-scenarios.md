@@ -895,6 +895,9 @@ end) from those ends and judges it against `expected_pct` in the G-19 band: `ok`
 `alert` when it lies outside, `measured` when it crosses an edge. A hit cast that takes other than one strike, or two
 strikes at game-time offsets further apart than the poll bracket, leave the reading `unmeasured` (invalid, not
 failed). Icebound Champion 807813: Lichfrost 501978, Light of the Naaru 41394 at 1000 ms, expected 50.
+`reducer_learn: true` learns `reducer_spell` between the phases instead of casting it and adds a fourth window, an unhit
+cast after the learn (`reduced_unhit`); each pushback is then taken within its own talent state, for a talent that also
+changes the cast time (Lich Essence 802988, which shortens Lichfrost by 15%).
 
 ### Minion swing ratio (`behaviour_hit_ratio`, `kind: "minion_swing_ratio"`, ADR 0541)
 

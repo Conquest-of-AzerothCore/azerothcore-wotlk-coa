@@ -2359,6 +2359,7 @@ def minion_swing_ratio_spec(entry: dict) -> MinionSwingRatioSpec:
 
 
 PUSHBACK_PHASES = ('unhit', 'hit', 'reduced')
+PUSHBACK_LEARNED_PHASES = ('unhit', 'hit', 'reduced_unhit', 'reduced')
 PUSHBACK_POLL_MS = 1
 PUSHBACK_CASTER_HEALTH = 100000
 
@@ -2377,6 +2378,11 @@ class PushbackReductionSpec:
     windows: tuple[tuple[int, int], ...]
     expected_pct: float
     label_suffix: str = ''
+    reducer_learn: bool = False
+
+
+def pushback_phases(spec: PushbackReductionSpec) -> tuple[str, ...]:
+    return PUSHBACK_LEARNED_PHASES if spec.reducer_learn else PUSHBACK_PHASES
 
 
 def pushback_label(spec: PushbackReductionSpec) -> str:
@@ -2388,15 +2394,16 @@ def pushback_mark(spec: PushbackReductionSpec, phase: str, mark: str) -> str:
 
 
 def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -> tuple[dict, list[Expectation]]:
-    if len(spec.windows) != len(PUSHBACK_PHASES) or any(not 0 < low < high for low, high in spec.windows):
+    phases = pushback_phases(spec)
+    if len(spec.windows) != len(phases) or any(not 0 < low < high for low, high in spec.windows):
         raise ValueError(f'{spec.spell} pushback_reduction polls one window (start, end) after the cast start per '
-                         f'phase {PUSHBACK_PHASES}')
+                         f'phase {phases}')
     if not 0 < spec.strike_at_ms < min(low for low, _ in spec.windows):
         raise ValueError(f'{spec.spell} pushback_reduction strikes inside the cast, before every polled window')
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     entry = behaviour_entry(records, spec.spell, spec.name, 'pushback_reduction', spec.quote, spec.expected_pct)
     facts = facts_of(records, spec.cast_spell)
-    windows = dict(zip(PUSHBACK_PHASES, spec.windows))
+    windows = dict(zip(phases, spec.windows))
     polls = {}
 
     def phase(name: str) -> list[dict]:
@@ -2408,7 +2415,7 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
                  measurement(pushback_mark(spec, name, 'start'), CASTER, 'game_time_ms'),
                  {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET}]
         waited = 0
-        if name != 'unhit':
+        if name in ('hit', 'reduced'):
             steps += [{'action': 'wait', 'label': f'{name} before the strike', 'ms': spec.strike_at_ms},
                       measurement(pushback_mark(spec, name, 'strike'), CASTER, 'game_time_ms'),
                       {'action': 'cast', 'actor': STRIKER, 'spell': spec.strike_spell, 'target': CASTER},
@@ -2428,13 +2435,14 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
                         measurement(pushback_mark(spec, name, 'after strikes'), CASTER, 'spell_damage_count',
                                     spell=spec.strike_spell, caster=STRIKER, target=CASTER)]
 
+    learned = (spec.cast_spell,) if spec.reducer_learn else (spec.cast_spell, spec.reducer_spell)
+    reducer = ([{'action': 'learn', 'actor': CASTER, 'spell': spec.reducer_spell}] if spec.reducer_learn
+               else hit_ratio_cast(records, spec.reducer_spell, CASTER, CASTER))
     steps = (base_steps(class_file)
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in (spec.cast_spell,
-                                                                                   spec.reducer_spell)]
-             + phase('unhit') + phase('hit')
-             + hit_ratio_cast(records, spec.reducer_spell, CASTER, CASTER)
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
+             + phase('unhit') + phase('hit') + reducer
              + [{'action': 'wait', 'label': 'reducer', 'ms': spec.reducer_wait_ms}]
-             + phase('reduced'))
+             + (phase('reduced_unhit') if spec.reducer_learn else []) + phase('reduced'))
     striker = {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
                'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'stationary': True}
     scenario = {
@@ -2460,8 +2468,8 @@ def pushback_reduction_scenario(class_file: dict, spec: PushbackReductionSpec) -
                                    'struck': pushback_mark(spec, name, 'struck'),
                                    'strikes': [pushback_mark(spec, name, 'strikes'),
                                                pushback_mark(spec, name, 'after strikes')]}
-                                  if name != 'unhit' else {})}
-                        for name in PUSHBACK_PHASES}}
+                                  if name in ('hit', 'reduced') else {})}
+                        for name in phases}}
     expectation = Expectation(pushback_label(spec), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.cast_spell, None,
                               str(spec.expected_pct), prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -2473,7 +2481,8 @@ def pushback_reduction_spec(entry: dict) -> PushbackReductionSpec:
                                  int(entry.get('reducer_wait_ms', 1600)), int(entry['strike_spell']),
                                  int(entry['strike_at_ms']),
                                  tuple((int(low), int(high)) for low, high in entry['windows']),
-                                 float(entry['expected_pct']), entry.get('label_suffix', ''))
+                                 float(entry['expected_pct']), entry.get('label_suffix', ''),
+                                 bool(entry.get('reducer_learn', False)))
 
 
 SUMMON_LIFETIME_POLL_MS = 25

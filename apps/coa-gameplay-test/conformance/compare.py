@@ -3237,14 +3237,20 @@ def behaviour_pushback_reduction_verdict(base: Verdict, run: Run, model: dict) -
                                    f'bracket {width:g} ms apart')
     (unhit_low, unhit_high), (hit_low, hit_high), (reduced_low, reduced_high) = (
         ends['unhit'], ends['hit'], ends['reduced'])
+    base_low, base_high = ends.get('reduced_unhit', ends['unhit'])
     middle = lambda bracket: (bracket[0] + bracket[1]) / 2
     if hit_low <= unhit_high:
         return replace(base, status='alert', explanation=f'the hit cast ends {ends["hit"]} ms, no later than the '
                                                          f'unhit cast {ends["unhit"]} ms: no pushback to reduce')
-    reduction = lambda reduced, unhit, hit: (1 - (reduced - unhit) / (hit - unhit)) * 100
-    lowest = reduction(reduced_high, unhit_low, hit_low)
-    highest = reduction(reduced_low, unhit_high, hit_high)
-    measured = reduction(middle(ends['reduced']), middle(ends['unhit']), middle(ends['hit']))
+    reduction = lambda reduced, reduced_base, unhit, hit: (1 - (reduced - reduced_base) / (hit - unhit)) * 100
+    if 'reduced_unhit' in ends:
+        lowest = reduction(reduced_high, base_low, unhit_high, hit_low)
+        highest = reduction(reduced_low, base_high, unhit_low, hit_high)
+    else:
+        lowest = reduction(reduced_high, unhit_low, unhit_low, hit_low)
+        highest = reduction(reduced_low, unhit_high, unhit_high, hit_high)
+    measured = reduction(middle(ends['reduced']), middle(ends.get('reduced_unhit', ends['unhit'])),
+                         middle(ends['unhit']), middle(ends['hit']))
     expected, band = float(model['expected_pct']), float(model['band'])
     low, high = expected - band, expected + band
     if low - 1e-9 <= lowest and highest <= high + 1e-9:

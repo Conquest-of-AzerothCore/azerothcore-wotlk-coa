@@ -11437,5 +11437,24 @@ class SummonLifetimeTests(unittest.TestCase):
         self.assertEqual(self.judged(3010.0, 18010.0, control=1.0), 'alert')
 
 
+
+class PushbackLearnedReducerTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_learned_reducer_adds_its_own_unhit_cast_after_the_learn(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['kind'] == 'pushback_reduction' and entry.get('reducer_learn'))
+        scenario, [expectation] = behaviour_scenario(load_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['spell'] == entry['reducer_spell'])
+        casts = cast_indices(steps, entry['cast_spell'])
+        self.assertEqual(len(casts), 4)
+        self.assertLess(casts[1], learn)
+        self.assertLess(learn, casts[2])
+        self.assertEqual(list(expectation.model['phases']), ['unhit', 'hit', 'reduced_unhit', 'reduced'])
+        self.assertNotIn('strike', expectation.model['phases']['reduced_unhit'])
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -30,3 +30,11 @@ and the arm invalid (not failed) when the two hits land at different game-time o
 - Ledger claim 360.3 counts only the new label; the six nominal-wait labels stay as context. The working evidence
   (50.3..52.2) leaves thin headroom under 52.5, which the ledger reason states.
 - Tests: `PushbackReductionTests` (test_behaviours.py).
+
+## Amendment (same day): a learned reducer
+
+A talent that reduces pushback may also change the cast time (Lich Essence 802988 shortens Lichfrost by 15%), so the
+unhit cast of the first phase is no base for its hit cast. `reducer_learn: true` learns the reducer between the
+phases instead of casting it and adds a fourth cast, `reduced_unhit`, after the learn; the reduction is then
+1 - (reduced end - reduced unhit end) / (hit end - unhit end), each pushback taken within its own talent state, and
+the bracket takes the four ends independently. Lich Essence's pushback claim (240.0) uses it.
