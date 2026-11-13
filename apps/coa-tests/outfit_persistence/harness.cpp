@@ -17,6 +17,7 @@
 #include <variant>
 #include <vector>
 
+using uint8 = std::uint8_t;
 using uint16 = std::uint16_t;
 using uint32 = std::uint32_t;
 using TransactionFuture = std::future<bool>;
@@ -215,6 +216,14 @@ Player* FindConnectedPlayer(ObjectGuid guid)
 }
 
 // ACTUAL_COLLECTION_STATE
+// ACTUAL_PROGRESS_EVENT
+
+struct ScriptMgr
+{
+    void OnPlayerCoAProgress(Player*, CoAProgressEvent, uint32) { }
+} scriptMgr;
+
+ScriptMgr* sScriptMgr = &scriptMgr;
 
 std::shared_ptr<PlayerCollectionState> NewState()
 {
@@ -239,6 +248,7 @@ struct CollectionService
     void ProcessPendingCompanionSpells(Player*, uint32) { }
     void ProcessCompanionLoot(Player*, uint32, bool = false) { }
     void RefreshCosmetics(Player*, PlayerCollectionState&) { }
+    void RefreshIncarnationSpell(Player*) { }
     void HandleClientPacket(Player* player, WorldPacket& packet)
     {
         if (packet.GetOpcode() == CMSG_SAVE_APPEARANCE_OUTFIT)
