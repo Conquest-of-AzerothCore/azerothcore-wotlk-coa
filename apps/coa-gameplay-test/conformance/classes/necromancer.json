@@ -9407,6 +9407,124 @@
       "observe_source": "AscensionNecromancerAuras.cpp:215-224: with 525600 known throughout, the Ghoul carries the caster's 525388 only while one Abomination 50068 is a minion: 0 Ghouls with 525388 when the Ghoul is raised alone, 1 when an Abomination is raised first (Life Force 4: 92123 + 680283)."
     },
     {
+      "spell": 525600,
+      "name": "Army of the Dead (two Abominations: no Ghoul aura)",
+      "kind": "metric_delta",
+      "variant": "two_abominations",
+      "label_suffix": "two_abominations",
+      "quote": "While only 1 Abomination is active,",
+      "expected": 0,
+      "before_expected": 0,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335,
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "phase_auras": [
+        [
+          92123,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          92123,
+          2,
+          4
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 525388,
+        "caster": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "The \"only\" claim: with 525600 known throughout, the Ghoul carries 525388 only while exactly one Abomination 50068 is a minion (Count(player, {50068}) == 1, AscensionNecromancerAuras.cpp:215-224). Capacity fixture (ADR 0585): Summoning Adept 92123 Effect[2] (aura 107, SPELLMOD_MAX_AURA_STACKS on Life Force 805011, BasePoints 0 + 1 = +1) set by harness set_aura with amount 4 (effect 2), so Capacity() = 2 + 4 + 1 (Scourge Apprentice Training 680283) = 7 (AscensionNecromancer.cpp:103-107: ApplySpellMod(805011, SPELLMOD_MAX_AURA_STACKS) on a base of 2; set_aura calls AuraEffect::ChangeAmount, which reapplies the modifier). After: two Abominations (6 Life Force), then the Ghoul (1): 0 Ghouls with 525388. Control arms: the two_raises_one entry (the same raises without the fixture, capacity 4: the second Abomination evicts the first, 1) and the abomination_aura entry (one Abomination, 1); the two_abominations_count entry reads the two Abominations of this layout. Before: the Ghoul alone, 0."
+    },
+    {
+      "spell": 525600,
+      "name": "Army of the Dead (two raises at capacity 4: one Abomination)",
+      "kind": "metric_delta",
+      "variant": "two_raises_one",
+      "label_suffix": "two_raises_one",
+      "quote": "While only 1 Abomination is active,",
+      "expected": 1,
+      "before_expected": 0,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335,
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50073,
+        "spell": 525388,
+        "caster": "caster"
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "Control arm of the two_abominations entry: the same two Abomination raises without the capacity fixture (92123 + 680283: capacity 4), so the second raise evicts the first (Evict, AscensionNecromancerSummons.cpp:132-145) and one Abomination 50068 and the Ghoul stay: 1 Ghoul with 525388 (AscensionNecromancerAuras.cpp:215-224). Before: the Ghoul alone, 0."
+    },
+    {
+      "spell": 525600,
+      "name": "Army of the Dead (two Abominations held)",
+      "kind": "metric_delta",
+      "variant": "two_abominations_count",
+      "label_suffix": "two_abominations_count",
+      "quote": "While only 1 Abomination is active,",
+      "expected": 2,
+      "before_expected": 0,
+      "setup_only_after": true,
+      "trigger_spell": 500971,
+      "learn": [
+        92123,
+        680283
+      ],
+      "setup_casts": [
+        500335,
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "phase_auras": [
+        [
+          92123,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          92123,
+          2,
+          4
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50068
+      },
+      "wait_ms": 4000,
+      "expire_ms": 3000,
+      "observe_source": "Precondition read of the two_abominations entry in its layout: two owned Abominations 50068 after the two raises and the Ghoul at capacity 7 (the same fixture); before: the Ghoul alone, 0 Abominations."
+    },
+    {
       "spell": 560012,
       "name": "Death and Ice",
       "kind": "metric_delta",
@@ -12864,6 +12982,84 @@
       "wait_ms": 5000,
       "expire_ms": 500,
       "observe_source": "As the armor entry with a Decaying Colossus 50115 (Raise: Decaying Colossus 500989, 3 Life Force, Summoning Adept 92123 learned) in place of the Abomination: 1.3 times the armor without 301207 (Count(player, {50068, 50115}), AscensionNecromancerAuras.cpp:66-67)."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (capacity fixture read)",
+      "kind": "metric_delta",
+      "variant": "capacity_fixture",
+      "label_suffix": "capacity_fixture",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "expected": 6,
+      "before_expected": 3,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "after_auras": [
+        [
+          92123,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          92123,
+          2,
+          4
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 805011
+      },
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Precondition read of the armor_each entry: Capacity fixture (ADR 0585): Summoning Adept 92123 Effect[2] (aura 107, SPELLMOD_MAX_AURA_STACKS on Life Force 805011, BasePoints 0 + 1 = +1) set by harness set_aura with amount 4 (effect 2), so Capacity() = 2 + 4 = 6 (AscensionNecromancer.cpp:103-107: ApplySpellMod(805011, SPELLMOD_MAX_AURA_STACKS) on a base of 2; set_aura calls AuraEffect::ChangeAmount, which reapplies the modifier). Sync keeps Life Force 805011 at Capacity() stacks (AscensionNecromancer.cpp:193-197). Lich Form 500981 stands in as the timed trigger (no capacity effect). Before: 92123 learned, no amount fixture: 3; after: the after-phase fixture: 6."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (armor with two Abominations)",
+      "kind": "metric_delta",
+      "variant": "armor_each",
+      "label_suffix": "armor_each",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "expected": 1.6,
+      "expected_ratio": 1.6,
+      "tolerance": 0.005,
+      "before_expected": 1,
+      "trigger_spell": 500335,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500335
+      ],
+      "setup_wait_ms": 4000,
+      "phase_auras": [
+        [
+          92123,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          92123,
+          2,
+          4
+        ]
+      ],
+      "metric": "armor",
+      "fields": {},
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "The \"Each\" contrast of the armor entry: two Abominations 50068 at once. Capacity fixture (ADR 0585): Summoning Adept 92123 Effect[2] (aura 107, SPELLMOD_MAX_AURA_STACKS on Life Force 805011, BasePoints 0 + 1 = +1) set by harness set_aura with amount 4 (effect 2), so Capacity() = 2 + 4 = 6 (AscensionNecromancer.cpp:103-107: ApplySpellMod(805011, SPELLMOD_MAX_AURA_STACKS) on a base of 2; set_aura calls AuraEffect::ChangeAmount, which reapplies the modifier). Both phases raise two Abominations (500335, 3 Life Force each: the setup raise, then the trigger raise; in the after phase the later raises evict the oldest, Evict, AscensionNecromancerSummons.cpp:132-145, so two stay). 805017's amount is 30 x Count(player, {50068, 50115}) (AscensionNecromancerAuras.cpp:66-67, $805017s2 = 30): the caster's armor without 301207 (control, before phase) and 1 + 2 x 0.30 = 1.6 times it with 301207 learned between the phases (the one-Abomination armor entry reads 1.3); the capacity_fixture entry reads the fixture's capacity."
     },
     {
       "spell": 302888,

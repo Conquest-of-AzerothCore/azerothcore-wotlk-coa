@@ -368,7 +368,10 @@
       },
       {
         "claim": "Each",
-        "labels": []
+        "labels": [
+          "301207 behaviour_metric_delta armor_each",
+          "301207 behaviour_metric_delta capacity_fixture"
+        ]
       },
       {
         "claim": "and magic resistance by $805017s2%",
@@ -1525,7 +1528,11 @@
       },
       {
         "claim": "only",
-        "labels": []
+        "labels": [
+          "525600 behaviour_metric_delta two_abominations",
+          "525600 behaviour_metric_delta two_raises_one",
+          "525600 behaviour_metric_delta two_abominations_count"
+        ]
       }
     ],
     "kind": "claim",
