@@ -38,6 +38,7 @@ from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readin
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
 from kinds import kind_judge, kind_pooled_judge
+from metric_delta_options import option_verdict
 from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
@@ -3014,7 +3015,7 @@ def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    verdict = forced_or_plain_metric_delta_verdict(base, run, model)
+    verdict = option_verdict(forced_or_plain_metric_delta_verdict(base, run, model), run, model)
     stamps = model.get('game_time')
     if stamps is None or verdict.status == 'unmeasured':
         return verdict

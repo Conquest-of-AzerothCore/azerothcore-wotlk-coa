@@ -1905,3 +1905,5 @@ Options with a module:
   fixture, the second named point `phase_steps` (ADR 0585)
 - [`after_trigger_strike`](metric_delta_options/after_trigger_strike.md): a strike at the caster after the treatment
   cast only, the fourth named point `after_trigger_steps` (ADR 0606)
+- [`strike_landed`](metric_delta_options/strike_landed.md): the strike's damage logs read after the after reading, no
+  landed strike is unmeasured, the fifth named point `verdict` (ADR 0625)
