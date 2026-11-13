@@ -32,5 +32,5 @@ Necromancer code only; no shared engine change and no cross-class link.
 - With 560730 learned, a minion hit on a target carrying the player's 560729 casts 561318 (SPELL_EFFECT_HEALTH_LEECH,
   EffectValueMultiplier 1.0: the minion is healed for the damage the leech deals) for 15% of the hit.
 - Regression: trigger `560730 trigger_magnitude_ratio parasites_leech` (the leech per Ghoul hit on the debuffed dummy
-  against 0.15 after the dummy's Shadow resist) and behaviour `560730 behaviour_metric_delta parasites_leech` (no leech
+  against 0.15 after the dummy's Shadow resist) and behaviour `560729 behaviour_metric_delta parasites_leech` (no leech
   without the debuff, at least one with it). Without 560730 no debuff is applied (the existing 560730 entries).
