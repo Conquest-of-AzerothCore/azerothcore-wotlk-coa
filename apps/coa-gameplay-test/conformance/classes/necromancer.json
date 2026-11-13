@@ -5070,7 +5070,7 @@
       "variant": "shadow_total",
       "label_suffix": "shadow_total",
       "quote": "Shadow damage over",
-      "expected": 756,
+      "expected": 630,
       "before_expected": 0,
       "trigger_spell": 500459,
       "target": "dummy",
@@ -5096,7 +5096,7 @@
       },
       "wait_ms": 23000,
       "expire_ms": 500,
-      "observe_source": "500459 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, BasePoints 125 + 1 = 126 ($m1), Amplitude 4000 ($t1), DurationIndex 18 (20000 ms, $d): every tick casts Blight 500237 with the value at the target, so ($d*1000/$t1) x $m1 = 5 x 126 = 630 at spell power 0 over the duration, plus the Effect[2] 142 hit of 126 at the cast (Blight (initial hit) entry): 756 in all, as live does (6 hits of 500237 per full-duration application on the target in 27 of 42 live applications, 2026-08-16 log). 984954 (spell crit -1000) and 823764 (-9999 target resistance) on the caster remove crits and partial resists. Blight casts in 2000 ms (CastingTimeIndex 5); its Effect[2] 142 hits once at the cast, then the aura ticks until it expires 20000 ms later. No cast (control): 0; one real cast: 630 on the dummy, read 23000 ms after the cast step, past the expiry."
+      "observe_source": "500459 Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, BasePoints 125 + 1 = 126 ($m1), Amplitude 4000 ($t1), DurationIndex 18 (20000 ms, $d): every tick casts Blight 500237 with the value at the target, so ($d*1000/$t1) x $m1 = 5 x 126 = 630 at spell power 0 over the duration, the tooltip's stated total, judged as stated (mentor, 2026-11-13); the server adds the Effect[2] 142 hit of 126 at the cast (Blight (initial hit) entry), 756 in all, as live does (6 hits of 500237 per full-duration application on the target in 27 of 42 live applications, 2026-08-16 log). 984954 (spell crit -1000) and 823764 (-9999 target resistance) on the caster remove crits and partial resists. Blight casts in 2000 ms (CastingTimeIndex 5); its Effect[2] 142 hits once at the cast, then the aura ticks until it expires 20000 ms later. No cast (control): 0; one real cast: 630 on the dummy, read 23000 ms after the cast step, past the expiry."
     },
     {
       "spell": 500459,
@@ -5105,8 +5105,8 @@
       "variant": "shadow_total_sp",
       "label_suffix": "shadow_total_sp",
       "quote": "Shadow damage over",
-      "expected": 826.1,
-      "tolerance": 6,
+      "expected": 688.4,
+      "tolerance": 5,
       "before_expected": 0,
       "trigger_spell": 500459,
       "target": "dummy",
@@ -5138,7 +5138,7 @@
       },
       "wait_ms": 23000,
       "expire_ms": 500,
-      "observe_source": "As the Shadow damage entry, with Increase Shadow Dam 69 23265 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, +69) on the caster: the initial hit and the 5 ticks, 6 x (126 + 69 x 0.169175) = 826.1, of which the stated 5 x 137.67 = 688.4 over the duration (NecromancerCoefficients row {500237, 0, 0.169175, 32}); the tolerance 6 covers the engine's truncation of each of the six hits (at most 1 each)."
+      "observe_source": "As the Shadow damage entry, with Increase Shadow Dam 69 23265 (aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 32 Shadow, +69) on the caster: the tooltip's total, 5 x (126 + 69 x 0.169175) = 688.4 (NecromancerCoefficients row {500237, 0, 0.169175, 32}); the tolerance 5 covers the engine's truncation of each of five hits (at most 1 each). The server adds the cast hit (6 hits)."
     },
     {
       "spell": 500459,
@@ -5147,7 +5147,7 @@
       "variant": "ticks",
       "label_suffix": "ticks",
       "quote": "Shadow damage over",
-      "expected": 6,
+      "expected": 5,
       "before_expected": 0,
       "trigger_spell": 500459,
       "target": "dummy",
@@ -5173,7 +5173,7 @@
       },
       "wait_ms": 23000,
       "expire_ms": 500,
-      "observe_source": "The same cast, counting the 500237 hits on the dummy past the expiry (23000 ms after the cast step): 6, the initial Effect[2] hit and the 5 ticks of ($d*1000/$t1)."
+      "observe_source": "The same cast, counting the 500237 hits on the dummy past the expiry (23000 ms after the cast step): the tooltip's ($d*1000/$t1) = 5 hits, judged as stated; the server adds the initial Effect[2] hit."
     },
     {
       "spell": 500459,
@@ -5648,90 +5648,13 @@
       "observe_source": "Diagnostic for the slow entry: the applications of 803530 on the dummy over one channel, none without 92123 and one per Crypt Swarm 800343 hit (6) with it, if the event code casts it."
     },
     {
-      "spell": 504489,
-      "name": "Command: Bonefreeze (held near its duration)",
-      "kind": "metric_delta",
-      "variant": "duration_held",
-      "label_suffix": "duration_held",
-      "quote": "for $504845d (8 sec vs players).",
-      "expected": 1,
-      "before_expected": 0,
-      "trigger_spell": 504489,
-      "target": "caster",
-      "select_dummy": true,
-      "setup_casts": [
-        500331
-      ],
-      "setup_wait_ms": 3000,
-      "setup_in_before": true,
-      "cast_in_before": false,
-      "measure_actor": "dummy",
-      "metric": "aura",
-      "fields": {
-        "spell": 504845
-      },
-      "wait_ms": 38500,
-      "expire_ms": 500,
-      "observe_source": "504845 DurationIndex 9 (40000 ms, $504845d) on a creature. As the freeze entry, read 38500 ms after the Command: still frozen, the Mage's small hits staying below the breakable budget (damage_ends entry). Control: the Mage alone, no freeze."
-    },
-    {
-      "spell": 504489,
-      "name": "Command: Bonefreeze (ends at its duration)",
-      "kind": "metric_delta",
-      "variant": "duration_ends",
-      "label_suffix": "duration_ends",
-      "quote": "for $504845d (8 sec vs players).",
-      "expected": 0,
-      "before_expected": 0,
-      "trigger_spell": 504489,
-      "target": "caster",
-      "select_dummy": true,
-      "setup_casts": [
-        500331
-      ],
-      "setup_wait_ms": 3000,
-      "setup_in_before": true,
-      "cast_in_before": false,
-      "measure_actor": "dummy",
-      "metric": "aura",
-      "fields": {
-        "spell": 504845
-      },
-      "wait_ms": 41500,
-      "expire_ms": 500,
-      "observe_source": "As the held entry, read 41500 ms after the Command: gone, so with the held read the creature freeze lasts between 38500 and 41500 ms against the stated 40000."
-    },
-    {
-      "spell": 707007,
-      "name": "March of the Dead (rise)",
-      "kind": "metric_delta",
-      "variant": "rise",
-      "label_suffix": "rise",
-      "quote": "Beckon the restless dead to rise and march forward.",
-      "expected": 6,
-      "after_at_least": 1,
-      "before_expected": 0,
-      "trigger_spell": 707007,
-      "target": "dummy",
-      "select_dummy": true,
-      "cast_in_before": false,
-      "metric": "owned_creature_count",
-      "fields": {
-        "entry": 523032
-      },
-      "wait_ms": 300,
-      "expire_ms": 500,
-      "observe_source": "707007 Effect[0] 77 SPELL_EFFECT_SCRIPT_EFFECT, MiscValue 523032; spell_ascension_necromancer_summon spawns the NecromancerSummons row {707007, 0, 523032, 6} (AscensionNecromancerData.h:122): six walkers that walk to the selected enemy (Summon(), AscensionNecromancerSummons.cpp:375-392, 437-440). No cast (control): none; one cast: at least one walker 300 ms later (six by the data row, the tooltip states no count)."
-    },
-    {
       "spell": 707007,
       "name": "March of the Dead (explode on reaching an enemy)",
       "kind": "metric_delta",
       "variant": "explode",
       "label_suffix": "explode",
-      "quote": "When they reach an enemy they explode, dealing",
+      "quote": "Beckon the restless dead to rise and march forward.",
       "expected": 6,
-      "after_at_least": 1,
       "before_expected": 0,
       "trigger_spell": 707007,
       "target": "dummy",
@@ -5745,7 +5668,7 @@
       },
       "wait_ms": 6000,
       "expire_ms": 500,
-      "observe_source": "A walker 523032 explodes once an enemy is within 2.5 yd of it or when it reaches its aim point (UpdateAI, AscensionNecromancerSummons.cpp:875-880; MovementInform :591-592): event 3 casts March of the Dead 707010 on itself (:829-835), Effect[0] SCHOOL_DAMAGE around the walker (TARGET_UNIT_SRC_AREA_ENEMY, 5 yd), and despawns. No cast (control): no 707010 hit; one cast: the walkers' explosions hit the dummy."
+      "observe_source": "A walker 523032 explodes once an enemy is within 2.5 yd of it or when it reaches its aim point (UpdateAI, AscensionNecromancerSummons.cpp:875-880; MovementInform :591-592): event 3 casts March of the Dead 707010 on itself (:829-835), Effect[0] SCHOOL_DAMAGE around the walker (TARGET_UNIT_SRC_AREA_ENEMY, 5 yd), and despawns. No cast (control): no 707010 hit; one cast: six 707010 hits from walkers 523032 on the dummy, one per risen walker (the six of the data row; they spawn within 2.5 yd of the dummy at 3 yd and explode at once, so an owned_creature_count read 300 ms after the cast already found none, pair prove-6). The same hits carry the claim that they explode when they reach an enemy."
     },
     {
       "spell": 707007,
@@ -5759,6 +5682,7 @@
       "caster_entry": 523032,
       "trials": 3,
       "minimum_hits": 6,
+      "control_casts": [],
       "casts": [
         [
           707007,
@@ -5777,7 +5701,7 @@
       ],
       "unresisted": true,
       "settle_ms": 6000,
-      "observe_source": "Each walker's 707010 (Effect[0] SCHOOL_DAMAGE, MiscValue 16; NecromancerCoefficients row {707010, 0, 0.75, 16}, AscensionScalingBaseData {707010, 1}) on the dummy: the tooltip's ${$707010m1*$<scalingbp>+$SP*.75}. Control: the trials without 707007 known make no walker and count no 707010 hit. 984954 and 823764 remove crits and partial resists."
+      "observe_source": "Each walker's 707010 (Effect[0] SCHOOL_DAMAGE, MiscValue 16; NecromancerCoefficients row {707010, 0, 0.75, 16}, AscensionScalingBaseData {707010, 1}) on the dummy: the tooltip's ${$707010m1*$<scalingbp>+$SP*.75}. Control: the same trials without the cast (control_casts empty; 707007 is known in both arms, the unlearned control counted 18 hits in pair prove-6) count no 707010 hit. 984954 and 823764 remove crits and partial resists."
     },
     {
       "spell": 707007,
@@ -5891,6 +5815,7 @@
       "before_expected": 1,
       "trigger_spell": 807796,
       "target": "dummy",
+      "target_health_pct": 99,
       "cast_in_before": false,
       "phase_auras": [
         [
@@ -5907,7 +5832,7 @@
       },
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases: kept without a cast (control, 1), removed by one Death's Due (0)."
+      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast (target_health_pct, which also puts a step between the Runic Power fixture and the cast: without one the cast read SPELL_FAILED_NO_POWER 85, pair prove-7): kept without a cast (control, 1), removed by one Death's Due (0)."
     },
     {
       "spell": 807796,
@@ -5920,6 +5845,7 @@
       "before_expected": 1,
       "trigger_spell": 807796,
       "target": "dummy",
+      "target_health_pct": 99,
       "cast_in_before": false,
       "phase_auras": [
         [
@@ -5949,15 +5875,16 @@
       "before_expected": 0,
       "trigger_spell": 807796,
       "target": "dummy",
+      "target_health_pct": 99,
       "cast_in_before": false,
       "measure_actor": "dummy",
       "metric": "aura",
       "fields": {
         "spell": 807796
       },
-      "wait_ms": 4500,
+      "wait_ms": 3500,
       "expire_ms": 500,
-      "observe_source": "807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 4500 ms after one cast: present."
+      "observe_source": "807796 DurationIndex 28 (5000 ms, $d) on the target. No cast: absent; 3500 ms after the cast step (1000 ms cast, so 2500 ms into the curse): present (a read at 4500 ms flipped between runs, pair prove-8)."
     },
     {
       "spell": 807796,
@@ -5970,6 +5897,7 @@
       "before_expected": 0,
       "trigger_spell": 807796,
       "target": "dummy",
+      "target_health_pct": 99,
       "cast_in_before": false,
       "measure_actor": "dummy",
       "metric": "aura",
@@ -5978,7 +5906,7 @@
       },
       "wait_ms": 6000,
       "expire_ms": 500,
-      "observe_source": "As the held entry, 6000 ms after the cast: gone, so the curse lasts between 4500 and 6000 ms against the stated 5000."
+      "observe_source": "As the held entry, 6000 ms after the cast step (5000 ms into the curse): gone, so the curse ends between 2500 and 5000 ms after it lands, against the stated 5000 (the exact value on the DBC duration label)."
     },
     {
       "spell": 807796,
@@ -6045,7 +5973,7 @@
       "variant": "damage",
       "label_suffix": "damage",
       "quote": "they take ${$m2+0+$SP*2} Shadowfrost Damage.",
-      "expected": 800,
+      "expected": 1040,
       "before_expected": 0,
       "trigger_spell": 807796,
       "target": "dummy",
@@ -6072,7 +6000,7 @@
       },
       "wait_ms": 6000,
       "expire_ms": 500,
-      "observe_source": "808016 is cast with 807796 Effect[1]'s amount, BasePoints 799 + 1 = 800 ($m2), plus Shadow/Frost spell power x 2 (NecromancerCoefficients row {808016, 0, 2.0, 48}; the contract sets its SchoolMask to Frost | Shadow, AscensionNecromancerContracts.cpp:242-243). At spell power 0, 984954 and 823764 removing crits and partial resists: 800."
+      "observe_source": "808016 is cast with 807796 Effect[1]'s amount, BasePoints 799 + 1 + RealPointsPerLevel 12 x (60 - BaseLevel 40) = 1040 ($m2 at level 60), plus Shadow/Frost spell power x 2 (NecromancerCoefficients row {808016, 0, 2.0, 48}; the contract sets its SchoolMask to Frost | Shadow, AscensionNecromancerContracts.cpp:242-243). At spell power 0, 984954 and 823764 removing crits and partial resists: 1040."
     },
     {
       "spell": 807796,
@@ -6081,7 +6009,7 @@
       "variant": "damage_sp",
       "label_suffix": "damage_sp",
       "quote": "they take ${$m2+0+$SP*2} Shadowfrost Damage.",
-      "expected": 938,
+      "expected": 1178,
       "tolerance": 1,
       "before_expected": 0,
       "trigger_spell": 807796,
@@ -6115,7 +6043,598 @@
       },
       "wait_ms": 6000,
       "expire_ms": 500,
-      "observe_source": "As the damage entry with Increase Shadow Dam 69 23265 (+69 Shadow) on the caster: 800 + 69 x 2 = 938."
+      "observe_source": "As the damage entry with Increase Shadow Dam 69 23265 (+69 Shadow) on the caster: 1040 + 69 x 2 = 1178."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (armor)",
+      "kind": "metric_delta",
+      "variant": "armor",
+      "label_suffix": "armor",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "expected": 1.3,
+      "expected_ratio": 1.3,
+      "tolerance": 0.005,
+      "before_expected": 1,
+      "trigger_spell": 500335,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "metric": "armor",
+      "fields": {},
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "301207 Effect[0] aura 101 SPELL_AURA_MOD_RESISTANCE_PCT; its contract sets MiscValue to every school (AscensionNecromancerContracts.cpp:275-280) and aura_ascension_necromancer_lifecycle sets the amount to 30 x the count of Abominations 50068 and Decaying Colossi 50115 (AscensionNecromancerAuras.cpp:66-67, $805017s2 = 30), recalculated every 500 ms (AscensionNecromancer.cpp:409-411). Both phases raise an Abomination (500335, 3 Life Force; Summoning Adept 92123 learned for a capacity of 3; the second raise replaces the first): the caster's armor without 301207 (control) and 1.3 times it with 301207 learned between the phases."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (magic resistance)",
+      "kind": "metric_delta",
+      "variant": "resistance",
+      "label_suffix": "resistance",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "expected": 1.3,
+      "expected_ratio": 1.3,
+      "tolerance": 0.02,
+      "before_expected": 1,
+      "trigger_spell": 500335,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "phase_auras": [
+        [
+          24448,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "As the armor entry, the caster's Frost resistance with Frost Resistance 24448 (aura 22, +90 Frost, a precondition fixture by harness set_aura in both phases, the reference character has none): 90 without 301207, 117 with it; the tolerance covers the integer resistance."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (no gain without an Abomination)",
+      "kind": "metric_delta",
+      "variant": "armor_none",
+      "label_suffix": "armor_none",
+      "quote": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+      "expected": 1,
+      "expected_ratio": 1,
+      "tolerance": 0.0001,
+      "before_expected": 1,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "The count gate: without an Abomination or Colossus raised, learning 301207 leaves the armor unchanged (the amount is 30 x 0). A Lich Form 500981 cast stands in for the raise in both phases (no armor effect)."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (regeneration over one period)",
+      "kind": "metric_delta",
+      "variant": "regen_one",
+      "label_suffix": "regen_one",
+      "quote": "and causes you to periodically regenerate $805017s3% maximum health every $t2 sec.",
+      "expected": 1.04,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "before_expected": 1,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "gate_spell": 301207,
+      "gate_timing": "start",
+      "setup_casts": [
+        500335
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 4500,
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "observe_source": "The contract makes 301207 Effect[1] a 5000 ms periodic dummy ($t2) and its handler adds 2% of the maximum health ($805017s3) per Abomination or Colossus (player->ModifyHealth(CountPctFromMaxHealth(2) x Count), AscensionNecromancerAuras.cpp:197-201). 301207 is learned at the start; the caster is held at 50% of a 10000 health fixture (caster_health_pct, ADR 0423; natural regeneration off) and Lich Form 500981 is cast as the timed trigger, then health is read 5000 ms later: one tick in any 5000 ms window. Control phase without an Abomination: unchanged (1.0); with one raised: 5200 / 5000 = 1.04 (2% of 10000 per tick)."
+    },
+    {
+      "spell": 301207,
+      "name": "Flesh Symbiosis (regeneration over two periods)",
+      "kind": "metric_delta",
+      "variant": "regen_two",
+      "label_suffix": "regen_two",
+      "quote": "and causes you to periodically regenerate $805017s3% maximum health every $t2 sec.",
+      "expected": 1.08,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "before_expected": 1,
+      "trigger_spell": 500981,
+      "target": "caster",
+      "learn": [
+        92123
+      ],
+      "gate_spell": 301207,
+      "gate_timing": "start",
+      "setup_casts": [
+        500335
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 4500,
+      "caster_health_pct": 50,
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "wait_ms": 10000,
+      "expire_ms": 500,
+      "observe_source": "As the one-period entry, read 10000 ms after the trigger: two ticks (5400 / 5000 = 1.08), so the period is 5000 ms within one tick per window."
+    },
+    {
+      "spell": 302888,
+      "name": "Living Dead (Lichfrost cost)",
+      "kind": "metric_delta",
+      "variant": "lichfrost_cost",
+      "label_suffix": "lichfrost_cost",
+      "quote": "Reduces the mana cost of Lichfrost and Crypt Swarm by $s1%.",
+      "expected": 1020.5,
+      "expected_gain": 20.5,
+      "tolerance": 1.5,
+      "before_expected": 1000,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 2800,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "302888 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_COST (MiscValue 14), BasePoints -11 + 1 = -10 ($s1), on the Lichfrost and Crypt Swarm class mask. Lichfrost 501978 costs 15% of base mana (205 of 1373). The caster's mana is set to 2800 (cast_power; the maximum lies in [2800, 2849], 531128 proc_energize_amount 0 of B1) before each Lichfrost and read after it, regeneration off: the reading with 302888 learned exceeds the one without by 10% of the cost (20 or 21)."
+    },
+    {
+      "spell": 302888,
+      "name": "Living Dead (Crypt Swarm cost)",
+      "kind": "metric_delta",
+      "variant": "crypt_swarm_cost",
+      "label_suffix": "crypt_swarm_cost",
+      "quote": "Reduces the mana cost of Lichfrost and Crypt Swarm by $s1%.",
+      "expected": 1023.5,
+      "expected_gain": 23.5,
+      "tolerance": 1.5,
+      "before_expected": 1000,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "cast_power": 2800,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "As the Lichfrost entry with Crypt Swarm 501886 (17% of base mana, 233): 10% less with 302888, 23 or 24 mana."
+    },
+    {
+      "spell": 302888,
+      "name": "Living Dead (Blight refund)",
+      "kind": "metric_delta",
+      "variant": "blight_refund",
+      "label_suffix": "blight_refund",
+      "quote": "Blight now refunds 25% of its base mana cost if it lasts the full duration.",
+      "expected": 96,
+      "tolerance": 1,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 500307,
+        "power": 0
+      },
+      "wait_ms": 23500,
+      "expire_ms": 23000,
+      "observe_source": "aura_ascension_necromancer_lifecycle::Removed on an expired Blight energizes the caster with Expunge Blight - Caster Energize 500307 for CalculatePct(paid, 25 with 302888, 50 with 302920) of the mana the cast paid (AscensionNecromancerAuras.cpp:232-238). Blight 500459 costs 28% of base mana (384): no refund without 302888 (control), 96 with it once the 20000 ms aura has expired. expire_ms 23000 lets the control phase's Blight expire before the learn (with 500 ms its refund landed in the treatment phase, pair prove-8)."
+    },
+    {
+      "spell": 302888,
+      "name": "Living Dead (no refund before the full duration)",
+      "kind": "metric_delta",
+      "variant": "blight_refund_held",
+      "label_suffix": "blight_refund_held",
+      "quote": "Blight now refunds 25% of its base mana cost if it lasts the full duration.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "cast_in_before": false,
+      "target": "dummy",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 500307,
+        "power": 0
+      },
+      "wait_ms": 21000,
+      "expire_ms": 500,
+      "observe_source": "As the refund entry, read 21000 ms after the cast step (19000 ms into the aura): no refund yet with 302888 learned. No Blight in the control phase (cast_in_before false): a control Blight expiring after the learn refunded in the treatment phase (pairs prove-8, prove-9)."
+    },
+    {
+      "spell": 302920,
+      "name": "Living Dead (Lichfrost cost)",
+      "kind": "metric_delta",
+      "variant": "lichfrost_cost",
+      "label_suffix": "lichfrost_cost",
+      "quote": "Reduces the mana cost of Lichfrost and Crypt Swarm by $s1%.",
+      "expected": 1041,
+      "expected_gain": 41,
+      "tolerance": 1.5,
+      "before_expected": 1000,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_power": 2800,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "302920 Effect[0] aura 108 SPELLMOD_COST, BasePoints -21 + 1 = -20 ($s1). As the 302888 entry: 20% of Lichfrost's 205, 41."
+    },
+    {
+      "spell": 302920,
+      "name": "Living Dead (Crypt Swarm cost)",
+      "kind": "metric_delta",
+      "variant": "crypt_swarm_cost",
+      "label_suffix": "crypt_swarm_cost",
+      "quote": "Reduces the mana cost of Lichfrost and Crypt Swarm by $s1%.",
+      "expected": 1046.5,
+      "expected_gain": 46.5,
+      "tolerance": 1.5,
+      "before_expected": 1000,
+      "trigger_spell": 501886,
+      "target": "dummy",
+      "cast_power": 2800,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "observe_source": "As above with Crypt Swarm 501886: 20% of 233, 46 or 47."
+    },
+    {
+      "spell": 302920,
+      "name": "Living Dead (Blight refund)",
+      "kind": "metric_delta",
+      "variant": "blight_refund",
+      "label_suffix": "blight_refund",
+      "quote": "Blight now refunds 50% of its base mana cost if it lasts the full duration.",
+      "expected": 192,
+      "tolerance": 1,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "target": "dummy",
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 500307,
+        "power": 0
+      },
+      "wait_ms": 23500,
+      "expire_ms": 23000,
+      "observe_source": "As the 302888 refund entry with 302920: 50% of Blight's 384, 192."
+    },
+    {
+      "spell": 302920,
+      "name": "Living Dead (no refund before the full duration)",
+      "kind": "metric_delta",
+      "variant": "blight_refund_held",
+      "label_suffix": "blight_refund_held",
+      "quote": "Blight now refunds 50% of its base mana cost if it lasts the full duration.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 500459,
+      "cast_in_before": false,
+      "target": "dummy",
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 500307,
+        "power": 0
+      },
+      "wait_ms": 21000,
+      "expire_ms": 500,
+      "observe_source": "Read 21000 ms after the cast step: no refund before the expiry with 302920 learned."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (Frost damage)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "dealing ${$m1+0+$spfr*.86989416} Frost damage,",
+      "expected": 583,
+      "tolerance": 14.5,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501978,
+        "target": "dummy"
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "501978 Effect[0] SCHOOL_DAMAGE Frost, BasePoints 568 + DieSides 29: 569 to 597 at Frost spell power 0 ($m1 shown 569). One hit, crits and partial resists removed: inside [568.5, 597.5]. No cast: 0."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (Frost damage with spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$m1+0+$spfr*.86989416} Frost damage,",
+      "expected": 698.7,
+      "tolerance": 14.5,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          24666,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501978,
+        "target": "dummy"
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "As the damage entry with Increase Frost Dam 132 24666 (+133 Frost): 133 x 0.86989416 = 115.7 more (NecromancerCoefficients row {501978, 0, 0.86989416, 16}): 684.7 to 712.7."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing their movement speed by $s3% for $d, and generating Runic Power.",
+      "expected": 0.742859,
+      "expected_ratio": 0.65,
+      "tolerance": 0.001,
+      "before_expected": 1.14286,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "run_speed_rate",
+      "fields": {},
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "observe_source": "501978 Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, BasePoints -36 + 1 = -35 ($s3). The dummy's own run speed 1.14286, then 0.65 of it 1000 ms after the 2500 ms cast. No cast: unchanged."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (slow held)",
+      "kind": "metric_delta",
+      "variant": "slow_held",
+      "label_suffix": "slow_held",
+      "quote": "slowing their movement speed by $s3% for $d, and generating Runic Power.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 501978
+      },
+      "wait_ms": 8000,
+      "expire_ms": 500,
+      "observe_source": "501978 DurationIndex 32 (6000 ms, $d). Read 8000 ms after the cast step (2500 ms cast, so 5500 ms into the slow): present."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (slow ends)",
+      "kind": "metric_delta",
+      "variant": "slow_ends",
+      "label_suffix": "slow_ends",
+      "quote": "slowing their movement speed by $s3% for $d, and generating Runic Power.",
+      "expected": 0,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 501978
+      },
+      "wait_ms": 9000,
+      "expire_ms": 500,
+      "observe_source": "Read 9000 ms after the cast step (6500 ms into it): gone, so the slow lasts between 5500 and 6500 ms against 6000."
+    },
+    {
+      "spell": 501978,
+      "name": "Lichfrost (Runic Power)",
+      "kind": "metric_delta",
+      "variant": "runic_power",
+      "label_suffix": "runic_power",
+      "quote": "slowing their movement speed by $s3% for $d, and generating Runic Power.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501978,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 804112,
+        "power": 6
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "501978 Effect[1] 64 SPELL_EFFECT_TRIGGER_SPELL casts Lichfrost 804112, whose Effect[1] SPELL_EFFECT_ENERGIZE gives the caster Runic Power (MiscValue 6, 62 to 92 tenths). No cast: none; one Lichfrost: one energize."
+    },
+    {
+      "spell": 504050,
+      "name": "Command: Blight (blighted ground)",
+      "kind": "metric_delta",
+      "variant": "ground",
+      "label_suffix": "ground",
+      "quote": "Command your Decaying Colossus to blight the ground in a $801534a1 yd radius beneath it,",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 504050,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500989
+      ],
+      "setup_wait_ms": 5000,
+      "setup_in_before": true,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 801534
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "A Decaying Colossus 50115 answers Command: Blight (Responds(50115, 504050)) by casting 801534 on itself (DoAction, AscensionNecromancerSummons.cpp:671-674): Effect[1] SPELL_EFFECT_PERSISTENT_AREA_AURA aura 118 SPELL_AURA_MOD_HEALING_PCT -60 on enemies within 10 yd ($801534a1) of it. Both phases raise a Colossus (500989, 3 Life Force; Summoning Adept 92123 for a capacity of 3), which goes to the selected dummy; the control has no Command: no 801534 on the dummy; after the Command: the area aura on it."
+    },
+    {
+      "spell": 504050,
+      "name": "Command: Blight (not in Pacify)",
+      "kind": "metric_delta",
+      "variant": "pacify",
+      "label_suffix": "pacify",
+      "quote": "Not usable while in Undead: Pacify.",
+      "expected": 173,
+      "before_expected": 0,
+      "trigger_spell": 504050,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        92123
+      ],
+      "setup_casts": [
+        500989
+      ],
+      "setup_wait_ms": 5000,
+      "after_auras": [
+        [
+          500983,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504050
+      },
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "necromancer_casts::OnSpellCheckCast (AscensionNecromancerAbilities.cpp:162-164) refuses a Command with SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW (173) while the caster has Undead: Pacify 500983. Both phases raise a Decaying Colossus and cast 504050; the control is not Pacified (0); the treatment has 500983 set on the caster by harness set_aura (precondition fixture): 173."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (area)",
+      "kind": "fixed_count",
+      "variant": "area",
+      "label_suffix": "area",
+      "quote": "Command your Skeletal Mages to freeze enemies at target location",
+      "expected": 3,
+      "radius": 8,
+      "uncapped": true,
+      "far_dummy": false,
+      "metric": "aura",
+      "radius_reason": "DoAction casts Bonefreeze 504845 at every valid enemy within 8 yd of the Command's target (Nearby(target, 8.0f), AscensionNecromancerSummons.cpp:664-669); the three additional dummies stand 2, 4 and 6 yd from the primary. No dummy beyond: 504845 is itself an 8 yd area at its target (TARGET_UNIT_DEST_AREA_ENEMY, EffectRadiusIndex 14; the contract that would make it single-target is dead for family 21, observation O-b3b-1), so it reaches about 16 yd from the primary (the dummy at 13 yd was frozen, diagnostic pair prove-10)",
+      "cast_spell": 504489,
+      "target_rank": 504845,
+      "caster_entry": 50075,
+      "setup_casts": [
+        [
+          500331,
+          "caster"
+        ]
+      ],
+      "repeats": 1,
+      "select_primary": true,
+      "observe_source": "One Skeletal Mage is raised, then Command: Bonefreeze at the selected primary dummy (select_primary, ADR 0423); 504845 (cast by the Mage, read on each dummy whatever its caster) on every additional dummy right after the Command, before the Mage's first 801513 splash. Control: before 504489 is learned the Command is refused, no freeze."
+    },
+    {
+      "spell": 504489,
+      "name": "Command: Bonefreeze (held without damage)",
+      "kind": "fixed_count",
+      "variant": "area_held",
+      "label_suffix": "area_held",
+      "quote": "for $504845d (8 sec vs players).",
+      "expected": 1,
+      "radius": 15,
+      "uncapped": true,
+      "far_dummy": false,
+      "metric": "aura",
+      "radius_reason": "placement only: one additional dummy 7.5 yd from the primary (radius x 1/2), inside the 8 yd freeze around the target and outside the 6 yd of the Mage's 801513 splash ($801513a1), so no damage reaches it",
+      "cast_spell": 504489,
+      "target_rank": 504845,
+      "caster_entry": 50075,
+      "setup_casts": [
+        [
+          500331,
+          "caster"
+        ]
+      ],
+      "repeats": 1,
+      "select_primary": true,
+      "settle_ms": 38500,
+      "observe_source": "As the area entry, read 38500 ms after the Command: the Mage's splash hits only within 6 yd of its target (diagnostic pair prove-10: the dummies 2 to 6 yd away took a hit and lost the freeze), so the dummy 7.5 yd away takes no damage and is still frozen, the no-damage control of ADR 0421 and the creature duration's lower bound against 40000 ms."
     },
     {
       "spell": 680388,
