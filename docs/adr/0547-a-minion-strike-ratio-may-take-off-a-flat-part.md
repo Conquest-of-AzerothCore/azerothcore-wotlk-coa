@@ -24,10 +24,12 @@ computed from spell power, in the 5% band, with the plain swing as the control. 
   a weapon bonus, so the 200% doubles the weapon roll only and the flat part stays single, as the live fit (a flat
   21.2 next to 2.03 x the swing) shows. The NORMALIZED_WEAPON_DMG effect's own +1 goes with it.
 - `minion_swing_ratio` takes `player_spell_power` (the harness spell-power fixture); weapon_ratio_sp holds 1000 spell
-  power, a flat part of 137.5, so a doubled flat part would read about 2.95 instead of 2.0.
+  power, a flat part of 137.5, so a doubled flat part would read about 2.70 (swing about 197) instead of 2.0.
 - Entries without `strike_flat` judge as before (Templar `generate --class 19` and `--stack` byte-identical).
 
 ## Consequences
 
-- 311.1 counts once a counted pair reads both arms in the band.
+- 311.1 counts: pair 20261113-110216 / -110253 reads weapon_ratio 1.993 / 2.018 and weapon_ratio_sp 1.953 / 1.951
+  (90 Commands per part, 3 and 2 parts pooled). The SP arm sits about 2.4% under 2.0; the judge takes off the
+  unmitigated flat part of a Physical, armor-reduced hit, which explains part of that gap.
 - Tests: `MinionSwingRatioTests` (test_behaviours.py) with the flat part.
