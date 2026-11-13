@@ -1126,6 +1126,86 @@
   "stack": [],
   "behaviours": [
     {
+      "spell": 804360,
+      "kind": "metric_delta",
+      "quote": "and gain expertise from your hit chance.",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971,
+        500971
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 180000,
+      "name": "Necromancy (no expertise without hit chance)",
+      "variant": "expertise_control",
+      "label_suffix": "expertise_control",
+      "expected": 1,
+      "after_at_least": 1,
+      "before_expected": 0,
+      "player_ratings": {
+        "melee_hit_rating": 0
+      },
+      "metric": "owned_creature_avoided_count",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360: necromancer_scaling::OnBeforeRollMeleeOutcomeAgainst (AscensionNecromancerContracts.cpp:486-500) cuts the dodge and parry chance of a minion's swing by the caster's melee hit chance x 100 (in basis points): the minion gains expertise from the caster's hit chance. Two Ghouls 50073 are raised and Command: Undead 504868 sends them at the dummy (Harvest Golem 36, level 60) for 180000 ms, about 180 swings; dodged and parried swings are counted from the victim state of SMSG_ATTACKERSTATEUPDATE (owned_creature_avoided_count). The caster's melee hit rating is 0 here (scenario rating fixture, precondition): with no Ghoul (control phase) nothing is avoided; with them the dummy dodges or parries some of their swings."
+    },
+    {
+      "spell": 804360,
+      "kind": "metric_delta",
+      "quote": "and gain expertise from your hit chance.",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971,
+        500971
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 180000,
+      "name": "Necromancy (expertise)",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "expected": 0,
+      "before_expected": 0,
+      "metric": "owned_creature_avoided_count",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360: necromancer_scaling::OnBeforeRollMeleeOutcomeAgainst (AscensionNecromancerContracts.cpp:486-500) cuts the dodge and parry chance of a minion's swing by the caster's melee hit chance x 100 (in basis points): the minion gains expertise from the caster's hit chance. Two Ghouls 50073 are raised and Command: Undead 504868 sends them at the dummy (Harvest Golem 36, level 60) for 180000 ms, about 180 swings; dodged and parried swings are counted from the victim state of SMSG_ATTACKERSTATEUPDATE (owned_creature_avoided_count). The class file's 10000 melee hit rating (hit chance 1000%): no swing of the Ghouls is dodged or parried, against some in the no-hit-chance entry."
+    },
+    {
+      "spell": 804360,
+      "kind": "metric_delta",
+      "quote": "and gain expertise from your hit chance.",
+      "trigger_spell": 504868,
+      "target": "dummy",
+      "setup_casts": [
+        500971,
+        500971
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 3100,
+      "expire_ms": 500,
+      "wait_ms": 180000,
+      "name": "Necromancy (expertise swings)",
+      "variant": "expertise_swings",
+      "label_suffix": "expertise_swings",
+      "expected": 100,
+      "after_at_least": 100,
+      "before_expected": 0,
+      "metric": "owned_creature_attack_count",
+      "fields": {
+        "entry": 50073
+      },
+      "observe_source": "Necromancy 804360: necromancer_scaling::OnBeforeRollMeleeOutcomeAgainst (AscensionNecromancerContracts.cpp:486-500) cuts the dodge and parry chance of a minion's swing by the caster's melee hit chance x 100 (in basis points): the minion gains expertise from the caster's hit chance. Two Ghouls 50073 are raised and Command: Undead 504868 sends them at the dummy (Harvest Golem 36, level 60) for 180000 ms, about 180 swings; dodged and parried swings are counted from the victim state of SMSG_ATTACKERSTATEUPDATE (owned_creature_avoided_count). The expertise entry's layout: the Ghouls swing at least 100 times in 180000 ms, so its zero avoided swings are not a lack of swings."
+    },
+    {
       "spell": 583256,
       "name": "Harvest Plague (close to death)",
       "kind": "hit_ratio",

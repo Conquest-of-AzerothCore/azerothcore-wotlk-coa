@@ -4358,7 +4358,9 @@
       {
         "claim": "and gain expertise from your hit chance",
         "labels": [
-          "804360 behaviour_metric_delta expertise"
+          "804360 behaviour_metric_delta expertise",
+          "804360 behaviour_metric_delta expertise_control",
+          "804360 behaviour_metric_delta expertise_swings"
         ]
       }
     ],
