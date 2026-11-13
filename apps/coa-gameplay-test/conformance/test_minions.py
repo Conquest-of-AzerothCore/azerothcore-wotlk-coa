@@ -275,7 +275,9 @@ class MinionScenarioTest(unittest.TestCase):
                   if step.get('label') == cooldown_trial_label(STUDY_OF_DEATH, 'measured', 0, 'before')][0]
         settle = steps[before - 1]
         self.assertEqual((settle['action'], settle['label'], settle['ms']), ('wait', 'measured settle', 17000))
-        self.assertEqual(steps[before - 2]['action'], 'cast')
+        cast = max(index for index, step in enumerate(steps[:before]) if step['action'] == 'cast')
+        self.assertEqual(steps[cast]['spell'], 805029)
+        self.assertFalse([step for step in steps[cast + 1:before - 1] if step['action'] != 'wait'])
         self.assertEqual(expectations[0].model['attempt_ms'], 2 * 500 + 3000 + 17000)
         self.assertIn('17000 ms after the cast', expectations[0].rule)
 
