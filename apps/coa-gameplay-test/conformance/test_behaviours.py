@@ -11306,5 +11306,45 @@ class MinionSwingRatioTests(unittest.TestCase):
         self.assertEqual(self.judged(200.0), 'alert')
 
 
+
+class HitRatioTargetAuraTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
+        return behaviour_scenario(load_class_file(23), entry)
+
+    def judged(self, control_crits: float, treatment_crits: float) -> str:
+        _, [expectation] = self.built()
+        values = {}
+        for arm, marks in expectation.model['reads'].items():
+            crits = control_crits if arm == 'control' else treatment_crits
+            for index, (total, count) in enumerate(marks):
+                values[total], values[count] = index * crits, index * 4.0
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_fixture_is_set_on_the_dummy_before_every_observed_cast(self):
+        scenario, _ = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 501997)
+        self.assertTrue(casts)
+        for index in casts:
+            fixture = next(step for step in reversed(steps[:index])
+                           if step['action'] == 'set_aura' and step['spell'] == 22856)
+            self.assertEqual((fixture['target'], fixture['caster']), ('dummy', CASTER))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_stated_rise_is_ok_and_the_party_share_alone_alerts(self):
+        self.assertEqual(self.judged(0.4, 1.32), 'ok')
+        self.assertEqual(self.judged(0.4, 0.52), 'alert')
+
+    def test_a_target_aura_on_a_caster_target_is_refused(self):
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
+        with self.assertRaisesRegex(ValueError, 'target_auras'):
+            behaviour_scenario(load_class_file(23), {**entry, 'target': CASTER})
+
+
 if __name__ == '__main__':
     unittest.main()

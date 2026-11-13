@@ -1060,6 +1060,10 @@ the caster heals and healing received when the ally heals the caster. The caster
 `cast_unit_auras` (`[[spell, stacks], ...]`, ADR 0494) are set on the casting unit before every cast in both arms,
 the ally when it casts: a precondition fixture on the unit whose hits are read (Corpse Wagon 503738 party: 823764 on
 the casting ally removes its partial resists). Swing entries refuse them.
+`target_auras` (`[[spell, stacks], ...]`, ADR 0542) are set on the cast target by the caster before every observed
+cast in both arms: a precondition fixture on the unit that is hit, such as a frozen state for a crit claim "against
+Frozen targets" (Chilling Presence 300958: Ice Lock 22856 on the dummy before every Ice Barrage). Swing entries and a
+caster target refuse them.
 With a player `target`, `target_health_pct` sets that player to the percent of the fixture maximum before every
 observed and warm-up heal instead of holding the dummy once, for a heal whose script only reacts to a healed amount
 (Light's Guidance 524765 casts nothing after a Benediction on a target at full health).

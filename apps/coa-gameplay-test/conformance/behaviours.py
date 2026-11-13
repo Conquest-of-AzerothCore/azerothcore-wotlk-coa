@@ -5836,6 +5836,7 @@ class HitRatioSpec:
     stated: tuple[float, tuple[float, ...]] | None = None
     stated_truncated: bool = False
     cast_unit_auras: tuple[tuple[int, int], ...] = ()
+    target_auras: tuple[tuple[int, int], ...] = ()
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -5982,6 +5983,8 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
             steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks,
                        **({'target': spec.caster} if spec.caster != CASTER else {})}
                       for spell, stacks in spec.cast_unit_auras]
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks, 'target': spec.target,
+                       'caster': CASTER} for spell, stacks in spec.target_auras]
             for cast in arm.casts:
                 steps += hit_ratio_cast(records, cast)
             if arm.target_health_pct is not None:
@@ -6072,6 +6075,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                          f'non-negative cast_wait_ms and no swings')
     if spec.cast_unit_auras and swinging:
         raise ValueError(f'{spec.spell} hit_ratio cast_unit_auras hold a fixture on a casting unit, not a swing')
+    if spec.target_auras and (swinging or spec.target == CASTER):
+        raise ValueError(f'{spec.spell} hit_ratio target_auras hold a fixture on the cast target, not on the caster '
+                         f'or a swing')
     if spec.ally_distance is not None and (ALLY not in (spec.caster, spec.target) or spec.ally_distance < 0):
         raise ValueError(f'{spec.spell} hit_ratio groups the ally at {spec.ally_distance} yd, which needs the ally as '
                          f'its caster or target and a distance not below 0')
@@ -6159,6 +6165,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         model.update({'expected_delta': float(spec.expected_points), 'rate': spec.rate})
         scenario['contract'] += (f'; the arms\' {spec.rate} rate in percent per {HIT_RATIO_WORDS[spec.metric]} '
                                  f'event must differ by the stated {spec.expected_points:g} points')
+    if spec.target_auras:
+        scenario['contract'] += (f'; the fixture auras {list(spec.target_auras)} are set on the {spec.target} by the '
+                                 f'caster before every observed cast')
     if spec.parts > 1:
         model['parts'] = spec.parts
         scenario['contract'] += f'; one of {spec.parts} identical parts whose trials are pooled'
@@ -6199,7 +6208,8 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         None if entry.get('stated') is None else
                         (float(entry['stated']['bonus']), tuple(float(part) for part in entry['stated']['parts'])),
                         bool((entry.get('stated') or {}).get('truncated', False)),
-                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('cast_unit_auras', ())))
+                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('cast_unit_auras', ())),
+                        tuple((int(spell), int(stacks)) for spell, stacks in entry.get('target_auras', ())))
 
 
 CRIT_RATE_TRIALS = 300
