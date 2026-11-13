@@ -5680,8 +5680,10 @@ def stated_ratio(bonus: float, parts: tuple[float, ...], truncated: bool = False
 
 
 HIT_RATIO_METRICS = {'spell_damage_total': 'spell_damage_count', 'spell_heal_total': 'spell_heal_count',
-                     'melee_damage_total': 'melee_damage_count'}
-HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal', 'melee_damage_total': 'melee damage'}
+                     'melee_damage_total': 'melee_damage_count', 'spell_energize_total': 'spell_energize_count'}
+HIT_RATIO_WORDS = {'spell_damage_total': 'damage', 'spell_heal_total': 'heal', 'melee_damage_total': 'melee damage',
+                   'spell_energize_total': 'energize'}
+ENERGIZE_METRIC = 'spell_energize_total'
 SWING_METRIC = 'melee_damage_total'
 SWING_HANDS = frozenset({MAIN_HAND, 1})
 SWING_SETTLE_MS = 100
@@ -5743,6 +5745,7 @@ def hit_ratio_cast(records: Records, spell: int, actor: str = CASTER, target: st
 
 def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> list[dict]:
     fields = ({'hand': spec.swing_hand, 'glancing': False} if spec.swing_hand is not None
+              else {'spell': spec.observe_spell} if spec.metric == ENERGIZE_METRIC
               else {'spell': spec.observe_spell, 'target': spec.target})
     if spec.critical is not None:
         fields['critical'] = spec.critical
@@ -5872,6 +5875,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
         raise ValueError(f'{spec.spell} force_crit {spec.force_crit!r} is not one of {sorted(FORCE_CRIT_RATINGS)}')
     if spec.metric not in HIT_RATIO_METRICS:
         raise ValueError(f'{spec.spell} hit_ratio metric {spec.metric!r} is not one of {sorted(HIT_RATIO_METRICS)}')
+    if spec.metric == ENERGIZE_METRIC and (spec.critical is not None or spec.force_crit is not None
+                                           or spec.rate == 'critical'):
+        raise ValueError(f'{spec.spell} hit_ratio reads energizes, which carry no critical flag')
     swinging = spec.swing_hand is not None
     if swinging != (spec.metric == SWING_METRIC) or (swinging and spec.swing_hand not in SWING_HANDS):
         raise ValueError(f'{spec.spell} hit_ratio reads {SWING_METRIC} exactly when it sets a swing_hand of '

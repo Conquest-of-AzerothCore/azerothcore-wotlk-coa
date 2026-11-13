@@ -1581,6 +1581,14 @@ states.
 the before read stays exact. Testament of Hope 1397742 `combat`: the copies attack the selected dummy, 0
 `owned_creature_damage_count` before the cast and at least 1 hit 6000 ms after it (6 in the diagnostic).
 
+### Energize ratios in hit_ratio (ADR 0500)
+
+`hit_ratio` takes `metric: "spell_energize_total"`: each arm reads the caster's own energizes of `observe_spell`
+(`spell_energize_total` and `spell_energize_count`, any target), and the judge compares the mean energize per event of
+the two arms. Energizes carry no critical flag, so `critical`, `force_crit` and `rate: "critical"` are refused. A
+`cast_spell` casts the spell whose triggered energize is observed. Lichfrost's Runic Power with Bone Legion 707006:
+`cast_spell` 501978, `observe_spell` 804112, `expected` 1.25.
+
 ### A strike repeated in the uncast before phase (ADR 0499)
 
 `metric_delta` `strike.in_before` (default `false`) repeats the strike (its `dx` relocation, the health fixture and the

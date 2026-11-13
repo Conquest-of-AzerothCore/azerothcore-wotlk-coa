@@ -6526,6 +6526,33 @@ class CostGateScenarioTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioEnergizeTests(unittest.TestCase):
+    def entry(self, **changes) -> dict:
+        entry = next(entry for entry in load_class_file(23)['behaviours']
+                     if entry['spell'] == 707006 and entry['kind'] == 'hit_ratio'
+                     and entry.get('label_suffix') == 'lichfrost')
+        energize = {key: value for key, value in entry.items() if key != 'critical'}
+        return {**energize, 'label_suffix': 'runic_power', 'expected': 1.25, 'metric': 'spell_energize_total',
+                'cast_spell': 501978, 'observe_spell': 804112, **changes}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_energize_reads_count_the_casters_own_energizes_of_the_observed_spell(self):
+        scenario, (expectation,) = behaviour_scenario(load_class_file(23), self.entry())
+        steps = run.validate(scenario)['steps']
+        reads = [step for step in steps if step.get('metric') in ('spell_energize_total', 'spell_energize_count')]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['spell'] == 804112 and 'target' not in step and 'critical' not in step
+                            for step in reads))
+        self.assertEqual(expectation.model['metric'], 'spell_energize_total')
+        self.assertTrue(any(step['action'] == 'cast' and step['spell'] == 501978 for step in steps))
+        self.assertIn('energize', scenario['contract'])
+
+    def test_an_energize_read_takes_no_critical_filter(self):
+        for changes in ({'critical': False}, {'rate': 'critical', 'expected_points': 5}):
+            with self.subTest(changes=changes), self.assertRaisesRegex(ValueError, 'critical'):
+                behaviour_scenario(load_class_file(23), self.entry(**changes))
+
+
 class HitRatioFixtureTests(unittest.TestCase):
     def test_fixture_stats_reach_the_caster_only(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(705284, 'hit_ratio', 'oath_breakers'))
