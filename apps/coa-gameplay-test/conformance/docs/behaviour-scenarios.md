@@ -1866,6 +1866,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   stamped game time (ADR 0593)
 - [`minion_range_arms`](kinds/minion_range_arms.md): a caster-centred minion effect inside and beyond its radius (ADR
   0594)
+- [`minion_swing_arms`](kinds/minion_swing_arms.md): a minion's plain swings with and without a damage aura, in
+  alternating windows (ADR 0630)
 - [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit
   ratio (ADR 0541, ADR 0547)
 - [`minion_travel_ratio`](kinds/minion_travel_ratio.md): a slowed minion's travel speed against an unslowed one (ADR
