@@ -61,9 +61,13 @@
     "spell": 300233,
     "clause": "Reduces the duration of root and slow effects against you by $s1%.",
     "labels": [
-      "300233 effect_value e0 #0"
+      "300233 behaviour_metric_delta root_ends",
+      "300233 behaviour_metric_delta root_held",
+      "300233 behaviour_metric_delta slow_ends",
+      "300233 behaviour_metric_delta slow_held"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Frost Nova 122 root (8000 ms) and Slow 31589 snare (15000 ms) cast by a striker at the caster: present without the talent, ending within 500 ms of 6000 / 11250 ms with it. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Reduces the duration of root and slow effects against you by %.'; bindmysoul found: Reduces the duration of root and slow effects against you by -25%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 300234,
@@ -285,9 +289,12 @@
     "spell": 301198,
     "clause": "Reduces the cooldown of your Champion spells by $/1000;s1 sec.",
     "labels": [
-      "301198 effect_value e0 #0"
+      "301198 cost_gate 805049 gravebound without",
+      "301198 cost_gate 805049 gravebound with",
+      "301198 cost_gate 805049 gravebound beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Gravebound Champion 805049 tested (one SPELLMOD_COOLDOWN effect on one mask covers the three Champions, which are summons of one shape; G-23 subset 1 of 3). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Reduces the cooldown of your Champion spells by -60 sec.'; bindmysoul found: Reduces the cooldown of your Champion spells by -60 sec.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 301207,
@@ -349,7 +356,8 @@
     "labels": [
       "301250 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[0] aura 107 MiscValue 31 (a CoA stack-cap op) +5; route: count Crypt Plague 570131 stacks past its base cap with and without the talent (the base cap is set in class code, not stated in this tooltip). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Level 40 Passive Allows Crypt Plague to stack additional times.'; bindmysoul found: Level 40 PassiveAllows Crypt Plague to stack 5 additional times.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 40, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 301303,
@@ -357,15 +365,28 @@
     "labels": [
       "301303 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS +50 Frost; the tooltip does not say whether 50% multiplies the crit damage (x1.5) or the crit bonus (1.5 -> 1.75), and the base multiplier is engine code (mentor method rule); measurement and question not done tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Level 30 Passive Increases your critical damage with Frost spells by %.'; bindmysoul found: Level 30 PassiveIncreases your critical damage with Frost spells by 50%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 301304,
     "clause": "Increases the damage of Flesh to Worms by $s1% and allows its periodic damage to scale with your spell haste.",
-    "labels": [
-      "301304 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases the damage of Flesh to Worms by $s1%",
+        "labels": [
+          "301304 behaviour_hit_ratio damage"
+        ]
+      },
+      {
+        "claim": "and allows its periodic damage to scale with your spell haste",
+        "labels": [
+          "301304 behaviour_metric_delta haste"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Ticks 105 -> 131 (+24.76%); under Disciple of Kel'thuzad 560616 (+8% spell haste) 2 ticks in 8500 ms without the talent, 3 with it (2778 ms period). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Level 30 Passive Applying Crypt Plague to an enemy now additionally adds Rotting Flesh to your Undead minions, increasing their damage deal; bindmysoul found: Increases the damage of Flesh to Worms by 25% and allows its periodic damage to scale with your spell haste.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 301325,
@@ -399,17 +420,19 @@
     "spell": 301333,
     "clause": "Increases the amount slowed by Lichfrost by $s1%.",
     "labels": [
-      "301333 effect_value e0 #0"
+      "301333 behaviour_metric_delta slow"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Dummy run speed 0.742859 (-35%) without, 0.57143 (-50%) with the talent (DBC flat -15 on EFFECT3; ADR 0443). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the amount slowed by Lichfrost by -15%.'; bindmysoul found: Increases the amount slowed by Lichfrost by -15%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 302518,
     "clause": "Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archer.",
     "labels": [
-      "302518 effect_value e0 #0"
+      "302518 behaviour_metric_delta archers"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). 3 archers without, 4 with. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Skeletal Artillery\",\"pos\":\"r4,c6\",\"kind\":\"T\",\"id\":7146,\"why\":\"Your Animate: Skeletal Archers now summons 1 additional S'; bindmysoul found: Your Animate: Skeletal Archers now summons 1 additional Skeletal Archer.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 302519,
@@ -476,9 +499,10 @@
     "spell": 302921,
     "clause": "Your Animate: Skeletal Archers now summons $s1 additional Skeletal Archers.",
     "labels": [
-      "302921 effect_value e0 #0"
+      "302921 behaviour_metric_delta archers"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). 3 archers without, 5 with. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Skeletal Artillery\",\"pos\":\"r4,c6\",\"kind\":\"T\",\"id\":7146,\"why\":\"Your Animate: Skeletal Archers now summons 1 additional S'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 302923,
@@ -1009,9 +1033,12 @@
     "spell": 503757,
     "clause": "Reduces the mana cost and cast time of your Raise and Animate spells by $s1%.",
     "labels": [
-      "503757 effect_value e0 #0"
+      "503757 behaviour_metric_delta cost",
+      "503757 behaviour_metric_delta cast_by_1150",
+      "503757 behaviour_metric_delta cast_by_950"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Raise: Ghoul 500971 tested: 384 -> 268 mana, cast time in (950, 1150] ms against 1500 (one effect per op on one mask covers the Raises and Animates; G-23 subset). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Graverobber\",\"pos\":\"r1,c6\",\"kind\":\"T\",\"id\":30022,\"why\":\"Reduces the mana cost and cast time of your Raise and Animate s'; bindmysoul found: Reduces the mana cost and cast time of your Raise and Animate spells by -30%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 504050,
@@ -1077,13 +1104,15 @@
     "labels": [
       "504357 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: a chance claim (+5 points of a proc chance): G-20 sizing not run tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Winds\",\"Freeze Dry\",\"Necrotic Chains\",\"Ner\\'zhul\\'s Blessing (spec)\",\"Blood and Ice\",\"Death and Ice\",\"Command: Bon'; bindmysoul found: Increases the chance to trigger Refreshing Chill by 5%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 504431,
     "clause": "Increases your maximum Life Force by 1.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[0] aura 107 MiscValue 31 (CoA Life Force op, BasePoints 0 + 1); route: raise minions up to the Life Force cap with and without the talent (no Life Force read in the harness). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Master Animator\",\"Chomp\",\"Fetid Mark\",\"Icecrown Scriptures\",\"Glacial Tap\",\"Command: Hook\",\"Mass Grave\"],\"code\":\"NU/JEcB'; bindmysoul found: Increases your maximum Life Force by 1.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 504439,
@@ -1231,9 +1260,10 @@
     "spell": 524687,
     "clause": "Increases the damage of Ice Barrage by $s1%.",
     "labels": [
-      "524687 effect_value e0 #0"
+      "524687 behaviour_hit_ratio damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). 803779 hits +20.04%. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Piercing Icicles\",\"pos\":\"r2,c2\",\"kind\":\"T\",\"id\":34976,\"why\":\"Increases the damage of Ice Barrage by 20%.\",\"ae\":0,\"te\":1'; bindmysoul found: Increases the damage of Ice Barrage by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 525600,
@@ -1405,9 +1435,10 @@
     "spell": 560045,
     "clause": "Increases your spell power by $s3% of your Intellect.",
     "labels": [
-      "560045 effect_value e2 #0"
+      "560045 behaviour_metric_delta spell_power"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Frost spell power +35 (30% of 117 Intellect = 35.1, judged to the rounding). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Level 20 Passive Increases your spell power by % of your Intellect.'; bindmysoul found: Level 20 PassiveIncreases your spell power by 30% of your Intellect.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 20, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 560537,
@@ -1499,45 +1530,65 @@
     "labels": [
       "560613 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: SPELLMOD_ALL_EFFECTS +20 on the Mandates (Foul, Grim and their Greater ranks); route: a Mandate value read with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Mandates by 20%.'; bindmysoul found: Increases the effectiveness of your Mandates by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 560615,
     "clause": "Increases your spell haste by $s1%.",
     "labels": [
-      "560615 effect_value e0 #0"
+      "560615 behaviour_metric_delta spell_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Caster cast speed multiplier 1 -> 1/(1 + haste) (ADR 0440 promise). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your spell haste by 4%. (up to 2 ranks)'; bindmysoul found: Increases your spell haste by 4%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 560616,
     "clause": "Increases your spell haste by $s1%.",
     "labels": [
-      "560616 effect_value e0 #0"
+      "560616 behaviour_metric_delta spell_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Caster cast speed multiplier 1 -> 1/(1 + haste) (ADR 0440 promise). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your spell haste by 4%. (up to 2 ranks)'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 560620,
     "clause": "Increases the spell power scaling of Lichfrost and Ice Barrage by $s1%.",
-    "labels": [
-      "560620 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases the spell power scaling of Lichfrost",
+        "labels": [
+          "560620 behaviour_hit_ratio lichfrost"
+        ]
+      },
+      {
+        "claim": "and Ice Barrage by $s1%",
+        "labels": [
+          "560620 behaviour_hit_ratio ice_barrage"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Lichfrost +19.35% (1.1936 expected) and Ice Barrage 803779 +19.49% (1.1949 expected) at a 20000 spell power fixture. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Power\",\"pos\":\"r5,c7\",\"kind\":\"T\",\"id\":33731,\"why\":\"Increases the spell power scaling of Lichfrost and Ice Barrage'; bindmysoul found: Increases the spell power scaling of Lichfrost and Ice Barrage by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 560622,
     "clause": "Increases your Shadow and Frost resistances by 0.5 per level.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560622 behaviour_metric_delta shadow_resistance",
+      "560622 behaviour_metric_delta frost_resistance"
+    ],
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Shadow and Frost resistance +30 at level 60. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Shadow and Frost resistances by 0.5 per level.'; bindmysoul found: Increases your Shadow and Frost resistances by 0.5 per level.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 560727,
     "clause": "Increases your spell haste by $s1%.",
     "labels": [
-      "560727 effect_value e0 #0"
+      "560727 behaviour_metric_delta spell_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Caster cast speed multiplier 1 -> 1/(1 + haste) (ADR 0440 promise). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Cycle of Death\",\"pos\":\"r1,c2\",\"kind\":\"T\",\"id\":11904,\"why\":\"Increases your spell haste by 5%.\",\"ae\":0,\"te\":1},{\"n\":\"Rott'; bindmysoul found: Increases your spell haste by 5%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 560730,
@@ -1591,7 +1642,8 @@
     "labels": [
       "560851 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Glacial Impact 707592 needs a Frozen target (Frost Nova 122 fixture, ADR 0303); a hit ratio on it with and without the talent not built tonight. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: '\"Frigid Death\",\"pos\":\"r3,c7\",\"kind\":\"T\",\"id\":5605,\"why\":\"Increases the damage of Glacial Impact by 20%.\",\"ae\":0,\"te\":1},'; bindmysoul found: Increases the damage of Glacial Impact by 20%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 560852,
@@ -1728,9 +1780,10 @@
     "spell": 570046,
     "clause": "Increases the effectiveness of your Wards by $s1%.",
     "labels": [
-      "570046 effect_value e0 #0"
+      "570046 behaviour_metric_delta glacial_ward"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Glacial Ward 681460 tested (maximum Runic Power +10% -> 1110 / 1130, judged to the rounding of the aura amount); Bone and Fetid Ward share the mask but are scripted spells not run (G-23 point 2 not met: partly proven). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Wards by %.'; bindmysoul found: Increases the effectiveness of your Wards by 25%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 570136,
@@ -1752,9 +1805,10 @@
     "spell": 570226,
     "clause": "Increases the effectiveness of your Wards by $s1%.",
     "labels": [
-      "570226 effect_value e0 #0"
+      "570226 behaviour_metric_delta glacial_ward"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Glacial Ward 681460 tested (maximum Runic Power +10% -> 1110 / 1130, judged to the rounding of the aura amount); Bone and Fetid Ward share the mask but are scripted spells not run (G-23 point 2 not met: partly proven). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases the effectiveness of your Wards by %.'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 572023,
@@ -3441,9 +3495,10 @@
     "spell": 805429,
     "clause": "Increases your Intellect by $s2%",
     "labels": [
-      "805429 effect_value e1 #0"
+      "805429 behaviour_metric_delta intellect"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Intellect 117 -> 122. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Intellect by % and the Frost damage dealt by your Undead minions by %.'; bindmysoul found: Increases your Intellect by 5% and the Frost damage dealt by your Undead minions by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 805429,
@@ -3451,7 +3506,8 @@
     "labels": [
       "805429 effect_value e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[0] 190 aura 79 Frost damage on the minions; route: a Frost-dealing minion hit (script_hit / caster_entry) with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Intellect by % and the Frost damage dealt by your Undead minions by %.'; bindmysoul found: Increases your Intellect by 5% and the Frost damage dealt by your Undead minions by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=True, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 805649,
@@ -3612,7 +3668,8 @@
     "labels": [
       "807494 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: as Master Animator 504431 (no Life Force read). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: \"Level 30 Passive Increases your maximum Life Force by and your Undead minion's Stamina by %.\"; bindmysoul found: Level 30 PassiveIncreases your maximum Life Force by 1 and your Undead minion's Stamina by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 30, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 807494,
@@ -3620,7 +3677,8 @@
     "labels": [
       "807494 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[1] 190 aura 137 Stamina +10% on the minions; route: a minion stat read (no minion Stamina metric; maximum health follows CoA scaling code). G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: \"Level 30 Passive Increases your maximum Life Force by and your Undead minion's Stamina by %.\"; bindmysoul found: Level 30 PassiveIncreases your maximum Life Force by 1 and your Undead minion's Stamina by 10%.; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 30, calculator=True, server_class_spell=True); logs: no events in 186 logs."
   },
   {
     "spell": 807700,
@@ -3707,9 +3765,10 @@
     "spell": 807924,
     "clause": "Increases your Intellect by $s2%",
     "labels": [
-      "807924 effect_value e1 #0"
+      "807924 behaviour_metric_delta intellect"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (counted pair, control arm in each entry). Intellect 117 -> 128. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Intellect by % and the Frost damage dealt by your Undead minions by %.'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 807924,
@@ -3717,7 +3776,8 @@
     "labels": [
       "807924 effect_value e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Open, route pending: Effect[0] 190 aura 79 Frost damage on the minions; route: a Frost-dealing minion hit (script_hit / caster_entry) with and without the talent. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Increases your Intellect by % and the Frost damage dealt by your Undead minions by %.'; bindmysoul nothing found; coa-obtainable obtainable (live_capture=True, advancement Necromancer level 0, calculator=False, server_class_spell=False); logs: no events in 186 logs."
   },
   {
     "spell": 807925,
@@ -3798,10 +3858,27 @@
   {
     "spell": 500341,
     "clause": "Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to Physical damage for $d.",
-    "labels": [
-      "500341 aura_duration_ms #0"
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "500341 behaviour_metric_delta held",
+          "500341 behaviour_metric_delta ends"
+        ]
+      },
+      {
+        "claim": "banishing them, preventing all actions",
+        "labels": [
+          "500341 aura_duration_ms #0"
+        ]
+      },
+      {
+        "claim": "and making them immune to Physical damage",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim \"for $d\": status 1 (present at 3500 ms, gone at 4500 ms). Claims \"preventing all actions\" (Effect[0] aura 12 stun) and \"immune to Physical damage\" (Effect[2] aura 40, MiscValue 1): open, route pending: a dummy action read and a Physical hit on the entombed dummy. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Bury an enemy alive with necrotic energy, banishing them, preventing all actions and making them immune to damage.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: 8 casts, 4 IMMUNE misses, aura 3.98 s (n=1 valid; other 0.25 s) vs tooltip 4 sec."
   },
   {
     "spell": 501886,
@@ -4838,11 +4915,21 @@
   {
     "spell": 562028,
     "clause": "Shows the location of all nearby Undead on the minimap and increases damage dealt to Undead by $s2% while active.",
-    "labels": [
-      "562028 effect_value e1 #0",
-      "562028 aura_amount e1 #0"
+    "claims": [
+      {
+        "claim": "Shows the location of all nearby Undead on the minimap",
+        "labels": []
+      },
+      {
+        "claim": "and increases damage dealt to Undead by $s2% while active",
+        "labels": [
+          "562028 effect_value e1 #0",
+          "562028 aura_amount e1 #0"
+        ]
+      }
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Claim \"minimap\": status 4 candidate, client-only (aura 44 SPELL_AURA_TRACK_CREATURES, MiscValue 6; the minimap display needs a lab client check). Claim \"damage dealt to Undead\": open, route pending: a hit ratio on an Undead target (target_entry) with and without the aura. G-11 searched: server DBC set (/srv/coa/server-data/dbc) and class code read; MCP not queried (unavailable); sidekick found: 'Shows the location of all nearby Undead on the minimap and increases damage dealt to Undead by % while active.'; bindmysoul nothing found; coa-obtainable not known (live_capture=False, no advancement row); logs: no events in 186 logs."
   },
   {
     "spell": 680283,
