@@ -96,7 +96,7 @@ class aura_ascension_necromancer_event : public AuraScript
                 LeechArmy(player, damage, ward->GetAmount());
             if (minion && player->HealthBelowPct(50) && actor->HasAura(560607, player->GetGUID()))
                 Copy(player, player, 561095, uint64(damage) * std::max(0, Amount(560607, 1)) / 100);
-            if (actor->HasAura(800027, player->GetGUID()))
+            if (minion && actor->GetEntry() != 50320 && actor->HasAura(800027, player->GetGUID()))
                 Copy(actor, target, 570050, uint64(damage) * std::max(0, Amount(800027)) / 100);
             if (minion && melee && actor->HasAura(805290, player->GetGUID()))
                 Cast(actor, player, 707000);
