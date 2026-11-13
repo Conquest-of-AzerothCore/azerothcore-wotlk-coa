@@ -3860,6 +3860,14 @@ def observed(expectation: Expectation) -> dict:
     return {key: value for key, value in found.items() if value is not None}
 
 
+def health_loss_series(run: Run, labels: list[str], health_set: float,
+                       counts: list[float]) -> tuple[list[float], list[float]] | str:
+    readings = [run.values.get(label) for label in labels]
+    if any(reading is None for reading in readings):
+        return missing_measurement(run, labels[readings.index(None)])
+    return [health_set - reading if count else 0.0 for reading, count in zip(readings, counts)], counts
+
+
 def hit_ratio_series(run: Run, reads: list[list[str]]) -> tuple[list[float], list[float]] | str:
     marks = []
     for total_label, count_label in reads:
@@ -3962,6 +3970,10 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
             found = hit_ratio_series(part, model['reads'][arm])
             if isinstance(found, str):
                 return replace(base, explanation=found)
+            if 'health_reads' in model:
+                found = health_loss_series(part, model['health_reads'][arm], float(model['health_set']), found[1])
+                if isinstance(found, str):
+                    return replace(base, explanation=found)
             totals += [total * scale for total in found[0]]
             counts += found[1]
         series[arm] = (totals, counts)

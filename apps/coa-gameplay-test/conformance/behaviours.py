@@ -1306,6 +1306,11 @@ class MetricDeltaSpec:
     gate_cast: bool = False
     setup_target: str | None = None
     expected_ratio: float | None = None
+    target_entry: int | None = None
+    enemy_casts: tuple[int, ...] = ()
+    enemy_cast_wait_ms: int = 0
+    target_health_pct: int | None = None
+    enemy_casts_in_before: bool = False
 
 
 ENEMY_PLAYER = 'enemy'
@@ -1364,6 +1369,16 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                          f'attack phases and takes no setup casts, setup aura or after-only trigger')
     if spec.gate_cast and not spec.attack_swings:
         raise ValueError(f'{spec.spell} casts its gate between two attack phases only')
+    if spec.enemy_casts and (not spec.enemy_player_race or spec.attack_swings or spec.force_crit is not None):
+        raise ValueError(f'{spec.spell} has the enemy player cast at itself only with an enemy player and a cast '
+                         f'trigger')
+    if spec.enemy_casts_in_before and (not spec.enemy_casts or spec.cast_in_before or spec.gate_timing != 'between'
+                                       or spec.setup_only_after):
+        raise ValueError(f'{spec.spell} has the enemy cast in an uncast before phase only with enemy casts and the '
+                         f'default gate timing')
+    if spec.target_health_pct is not None and (spec.target not in (TARGET, ENEMY_PLAYER) or spec.attack_swings
+                                               or not 0 < spec.target_health_pct < 100):
+        raise ValueError(f'{spec.spell} sets the health percent of a cast target that is not the dummy or the enemy')
     if spec.setup_target is not None and (not spec.setup_casts or spec.gate_cast
                                           or spec.setup_target not in (CASTER, TARGET, ENEMY_PLAYER)):
         raise ValueError(f'{spec.spell} names a setup target without setup casts, or one that is not a scenario unit')
@@ -1421,9 +1436,17 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps += required_aura_steps(facts)
         if apply_setup_casts:
             steps += setup_cast_steps()
+        if spec.target_health_pct is not None:
+            steps.append({'action': 'set_health_pct', 'actor': CASTER, 'target': spec.target,
+                          'pct': spec.target_health_pct})
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': spec.target})
         steps.append({'action': 'wait', 'ms': spec.wait_ms})
-        return steps
+        return steps + enemy_cast_steps()
+
+    def enemy_cast_steps() -> list[dict]:
+        return [step for spell in spec.enemy_casts
+                for step in ({'action': 'cast', 'actor': ENEMY_PLAYER, 'spell': spell, 'target': ENEMY_PLAYER},
+                             {'action': 'wait', 'ms': spec.enemy_cast_wait_ms})]
 
     if spec.gate_timing not in ('between', 'start'):
         raise ValueError(f'unknown gate_timing {spec.gate_timing!r}')
@@ -1512,6 +1535,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         steps = (base_steps(class_file) + learn_steps +
                  cast_steps(include_cast=spec.cast_in_before and not spec.trigger_only_after, after=False) +
                  (setup_cast_steps() if spec.setup_in_before else []) +
+                 (enemy_cast_steps() if spec.enemy_casts_in_before else []) +
                  [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields), gate_learn_step] +
                  [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}] +
                  cast_steps() + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
@@ -1530,12 +1554,18 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
                                   {'action': 'pvp', 'actor': ENEMY_PLAYER, 'enabled': True},
                                   {'action': 'wait', 'label': 'pvp settle', 'ms': ENEMY_PLAYER_SETTLE_MS}]
         scenario['players'].append({**player_fixture(class_file), 'id': ENEMY_PLAYER, 'race': spec.enemy_player_race})
+        steps[settled:settled] = [{'action': 'learn', 'actor': ENEMY_PLAYER, 'spell': spell}
+                                  for spell in dict.fromkeys(spec.enemy_casts)]
         scenario['location'] = dict(TAKEN_HIT_PVP_LOCATION)
     if spec.attack_swings:
         timed(scenario, sum(step['ms'] for step in steps if step['action'] == 'wait'))
     if spec.select_dummy or TARGET in (spec.target, spec.measure_actor, spec.fields.get('target')) or any(
             TARGET in aura[2:] for aura in (*spec.phase_auras, *spec.after_auras)):
         scenario['creatures'] = [creature_fixture(class_file)]
+        if spec.target_entry is not None:
+            scenario['creatures'][0]['entry'] = spec.target_entry
+    elif spec.target_entry is not None:
+        raise ValueError(f'{spec.spell} names a target entry without the dummy in its scenario')
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
@@ -1575,7 +1605,9 @@ def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
                            entry.get('enemy_player_race', 0), entry.get('gate_settle_ms', 0),
                            tuple(entry.get('learn', ())), entry.get('setup_in_before', False),
                            entry.get('expected_gain'), entry.get('gate_cast', False), entry.get('setup_target'),
-                           entry.get('expected_ratio'))
+                           entry.get('expected_ratio'), entry.get('target_entry'),
+                           tuple(entry.get('enemy_casts', ())), entry.get('enemy_cast_wait_ms', 0),
+                           entry.get('target_health_pct'), entry.get('enemy_casts_in_before', False))
 
 
 CRIT_MAGNITUDE_DEFAULT_ATTEMPTS = 10
@@ -5839,6 +5871,7 @@ class TakenHitSpec:
     returned_spell: int = 0
     expected_points: float | None = None
     ally_health_pct: int | None = None
+    health_loss: bool = False
 
 
 def ally_cast_targets(spec: TakenHitSpec) -> bool:
@@ -5975,6 +6008,8 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
         else:
             steps.append({'action': 'wait', 'label': f'{arm.name} settle {trial}', 'ms': spec.settle_ms})
         steps += taken_hit_reads(spec, arm.name, trial, debt)
+        if spec.health_loss:
+            steps.append(measurement(taken_hit_mark(spec, arm.name, trial, 'health'), CASTER, 'health'))
     steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': 0} for spell, _ in arm.auras]
     return steps
 
@@ -5984,6 +6019,11 @@ def taken_hit_validate(spec: TakenHitSpec):
         raise ValueError(f'{spec.spell} taken_hit judge {spec.judge!r} is not one of {TAKEN_HIT_JUDGES}')
     if spec.trials < 1 or spec.strikes < 1:
         raise ValueError(f'{spec.spell} taken_hit needs at least one trial and one strike')
+    if spec.health_loss and (spec.judge != 'damage_ratio' or spec.caster_health_pct is None
+                             or any((arm.strikes or spec.strikes) != 1 or arm.casts or arm.after_casts
+                                    for arm in spec.arms)):
+        raise ValueError(f'{spec.spell} reads the health lost to one strike per trial of a damage_ratio entry, '
+                         f'from the caster health it sets before every trial, with no cast inside a trial')
     if spec.ally_health_pct is not None and (not ally_cast_targets(spec) or not 0 < spec.ally_health_pct < 100):
         raise ValueError(f'{spec.spell} taken_hit ally health {spec.ally_health_pct} needs a cast at the ally and a '
                          f'percent between 0 and 100')
@@ -6122,6 +6162,11 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
                  'expected_bonus': (spec.expected - 1) * 100, 'trials': spec.trials, 'trial_limit': spec.trials,
                  'minimum_hits': max(1, int(spec.trials * TAKEN_HIT_MINIMUM_SHARE)), 'metric': 'spell_damage_total',
                  'quote': entry.quote}
+        if spec.health_loss:
+            model['health_set'] = spec.caster_health_pct * (spec.caster_max_health or FIXTURE_MAX_HEALTH) // 100
+            model['health_reads'] = {arm.name: [taken_hit_mark(spec, arm.name, trial, 'health')
+                                                for trial in range(1, spec.trials + 1)] for arm in spec.arms}
+            model['metric'] = 'health'
         return scenario, [Expectation(label, BEHAVIOUR_HIT_RATIO, spec.spell, spec.strike_spell, None,
                                       str(spec.expected), prose_rule(entry.quote, spec.spell), model)]
     arms = []
@@ -6190,7 +6235,7 @@ def taken_hit_spec(entry: dict) -> TakenHitSpec:
                         tuple((str(name), float(distance)) for name, distance in entry.get('targets', ())),
                         entry.get('cast_power'), entry.get('settle_ms', TAKEN_HIT_SETTLE_MS),
                         entry.get('striker_race', 0), entry.get('returned_spell', 0), entry.get('expected_points'),
-                        entry.get('ally_health_pct'))
+                        entry.get('ally_health_pct'), entry.get('health_loss', False))
 
 
 THREAT_REDIRECT_SWINGS = 3

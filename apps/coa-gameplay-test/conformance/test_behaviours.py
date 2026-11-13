@@ -9831,5 +9831,119 @@ class MetricDeltaRatioAndSetupTargetTests(unittest.TestCase):
                                                                               **change}))
 
 
+
+class NecromancerB2TargetsAndHealthTests(unittest.TestCase):
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_target_entry_replaces_the_dummy_creature(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.entry(800706, 'transform')))
+        run.validate(scenario)
+        self.assertEqual([creature['entry'] for creature in scenario['creatures']], [6])
+        entry = {key: value for key, value in self.entry(800706, 'transform').items() if key != 'target_entry'}
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        self.assertEqual([creature['entry'] for creature in scenario['creatures']], [36])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_target_entry_needs_the_dummy(self):
+        entry = {**self.entry(800706, 'player_lasts'), 'target_entry': 6}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_enemy_learns_and_casts_at_itself_after_the_trigger(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.entry(503640,
+                                                                                              'dispel_damage')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn = steps.index({'action': 'learn', 'actor': 'enemy', 'spell': 528})
+        cast = steps.index({'action': 'cast', 'actor': 'enemy', 'spell': 528, 'target': 'enemy'})
+        plague = steps.index({'action': 'cast', 'actor': CASTER, 'spell': 503640, 'target': 'enemy'})
+        self.assertLess(learn, plague)
+        self.assertLess(plague, cast)
+        entry = {key: value for key, value in self.entry(503640, 'dispel_damage').items() if key != 'enemy_casts'}
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        self.assertFalse(any(step.get('actor') == 'enemy' and step['action'] in ('learn', 'cast')
+                             for step in scenario['steps']))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_enemy_also_casts_in_an_uncast_before_phase(self):
+        entry = self.entry(503640, 'holy_healing')
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        renews = [index for index, step in enumerate(steps) if step == {'action': 'cast', 'actor': 'enemy',
+                                                                         'spell': 25222, 'target': 'enemy'}]
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        plague = steps.index({'action': 'cast', 'actor': CASTER, 'spell': 503640, 'target': 'enemy'})
+        self.assertEqual(len(renews), 2)
+        self.assertLess(renews[0], before)
+        self.assertLess(before, plague)
+        self.assertLess(plague, renews[1])
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec({**entry, 'enemy_casts': []}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_enemy_casts_need_the_enemy(self):
+        entry = {**self.entry(503640, 'haste'), 'enemy_casts': [528]}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_target_health_is_set_before_each_trigger_cast(self):
+        scenario, _ = metric_delta_scenario(load_class_file(23), metric_delta_spec(self.entry(500969,
+                                                                                              'command_execute')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        command = steps.index({'action': 'cast', 'actor': CASTER, 'spell': 504318, 'target': 'dummy'})
+        self.assertEqual(steps[command - 1], {'action': 'set_health_pct', 'actor': CASTER, 'target': 'dummy',
+                                              'pct': 30})
+        for change in ({'target': 'caster'}, {'target_health_pct': 100}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_class_file(23), metric_delta_spec({**self.entry(500969,
+                                                                                           'command_execute'),
+                                                                              **change}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_health_loss_ratio_reads_the_health_after_every_strike(self):
+        scenario, expectations = behaviour_scenario(load_class_file(23), self.entry(560595, 'pacify'))
+        run.validate(scenario)
+        model = expectations[0].model
+        self.assertEqual(model['health_set'], 100000)
+        self.assertEqual(len(model['health_reads']['control']), 10)
+        labels = {step.get('label') for step in scenario['steps']}
+        self.assertTrue(all(label in labels for reads in model['health_reads'].values() for label in reads))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_reduction_hidden_from_the_log_shows_in_the_health(self):
+        _, expectations = behaviour_scenario(load_class_file(23), self.entry(560595, 'pacify'))
+        expectation = expectations[0]
+        model = expectation.model
+
+        def values(control_loss: float, treatment_loss: float) -> dict:
+            found = {}
+            for arm, loss in (('control', control_loss), ('treatment', treatment_loss)):
+                for index, (damage, count) in enumerate(model['reads'][arm]):
+                    found[damage], found[count] = 1100.0 * index, float(index)
+                for label in model['health_reads'][arm]:
+                    found[label] = 100000.0 - loss
+            return found
+
+        reduced = judge_behaviour(base_verdict(expectation), FakeRun(values(1100.0, 990.0)), expectation)
+        self.assertEqual(reduced.status, 'ok')
+        unreduced = judge_behaviour(base_verdict(expectation), FakeRun(values(1100.0, 1100.0)), expectation)
+        self.assertEqual(unreduced.status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_health_loss_read_needs_one_strike_per_trial_from_a_set_health(self):
+        for change in ({'caster_health_pct': None}, {'strikes': 2}, {'judge': 'absorb'}):
+            entry = {key: value for key, value in {**self.entry(560595, 'pacify'), **change}.items()
+                     if value is not None}
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                behaviour_scenario(load_class_file(23), entry)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -1110,6 +1110,17 @@ class CastSpeedPromiseTest(unittest.TestCase):
         proxy = claim('reducing their Armor by $570216s1%', '1 behaviour_metric_delta poison_speed')
         self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
 
+    def test_a_learned_display_contrast_proves_a_transform_clause(self):
+        verdicts = [judged('1 behaviour_metric_delta transform', BEHAVIOUR_METRIC_DELTA, 'display_id',
+                           contrast=LEARNED_CONTRAST)]
+        promised = claim('Transform an enemy into a ghoul', '1 behaviour_metric_delta transform')
+        self.assertEqual(evidence_of([promised], verdicts)[0], [BEHAVIOUR])
+        proxy = claim('fearing them for $d', '1 behaviour_metric_delta transform')
+        self.assertEqual(evidence_of([proxy], verdicts)[0], [DATA])
+
+    def test_a_health_loss_hit_ratio_is_behaviour(self):
+        self.assertEqual(METRIC_EVIDENCE['health'], EVENT)
+
 
 if __name__ == '__main__':
     unittest.main()

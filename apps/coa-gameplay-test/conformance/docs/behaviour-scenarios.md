@@ -261,6 +261,10 @@ Bone Toss 707669.
 `expected_ratio` with a `tolerance` (ADR 0380) judges the after reading over the before reading instead, with
 `before_expected` its least before reading: Pierced 570216 leaves 0.9 of the dummy's armor. `setup_target` sends the
 setup casts to their own unit: Greater Skeletal Warrior 504901's raise goes to the caster and its Command to the dummy.
+`target_entry` (ADR 0381) replaces the dummy's creature entry (Ghoulify 800706 on Kobold Vermin 6, a Humanoid);
+`enemy_casts` has the enemy player cast learned spells at itself after each trigger cast (Plague of Undeath 503640
+cured by Cure Disease 528); `target_health_pct` sets the trigger target's health percent before each trigger cast
+(the Skeletal Rogue's Command below 35%).
 
 ### Health-threshold ratio scenarios (`behaviour_ratio`, `kind: "health_ratio"`)
 
@@ -1247,6 +1251,9 @@ area strike, magic), Lacerating Slash 42395 (1735 Physical every 2 s for 18 s, a
 needs a magic-class strike: a melee-class spell goes to `MeleeSpellHitResult`, which reads no debuff resistance. A strike heavier than the caster's health kills it: hold `caster_health_pct` and
 `caster_max_health`.
 
+- `health_loss: true` (ADR 0381, `damage_ratio` only, one strike per trial from `caster_health_pct`) reads the
+  caster's health after each strike and judges the health lost instead of the logged damage, for a reduction a script
+  applies after the log is built (Putrid Summoner 560595 with Undead: Pacify: 990 against 1100).
 - `judge: "resist_rate"` with `expected_points` (ADR 0196) reads, 300 ms after each strike, whether its aura is on the
   caster and removes it; the arms' resisted shares, in percent, must differ by the stated points inside the larger of
   5% of them and 2 points. With `parts` the parts are pooled.
