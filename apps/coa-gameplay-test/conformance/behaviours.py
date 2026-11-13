@@ -84,7 +84,7 @@ KINDS = ('count', 'ratio', 'duration', 'duration_ratio', 'trigger', 'metric_delt
         'script_hit', 'taken_outcome', 'charm_immunity', 'school_lockout', 'crit_rate', 'amount_match', 'detection',
         'source_stack', 'mount_block', 'stat_gain', 'fall_damage', 'flee_block', 'npc_repair',
         'strike_bursts', 'aura_expiry', 'item_cooldown_gate', 'cast_period', 'minion_swing_ratio',
-        'pushback_reduction', 'summon_lifetime')
+        'pushback_reduction', 'summon_lifetime', 'pulse_targets', 'aura_window', 'hit_period')
 CRIT_GUARANTEE_ATTEMPTS = 100
 CRIT_GUARANTEE_MINIMUM_EVENTS = 5
 CRIT_GUARANTEE_CONTROL_TARGET = 'dummy_control'
@@ -94,6 +94,7 @@ BEFORE = 'before'
 AFTER = 'after'
 LEARNED_CONTRAST = 'learned'
 CONDITION_CONTRAST = 'condition'
+OWN_CAST_CONTRAST = 'own_cast'
 HEALING_RATIO_METRICS = {'effect_value': 'spell_effect_value', 'taken': 'spell_healing_taken'}
 LINE_BREAKS = re.compile(r'\s+')
 
@@ -1378,6 +1379,14 @@ class MetricDeltaStrike:
     owned_entry: int | None = None
 
 
+def metric_delta_contrast(spec) -> str:
+    from coverage import METRIC_EVIDENCE, STATE
+    if not spec.setup_only_after:
+        return LEARNED_CONTRAST
+    own = bool(spec.setup_casts) and all(spell == spec.spell for spell in spec.setup_casts)
+    return OWN_CAST_CONTRAST if own and METRIC_EVIDENCE.get(spec.metric) == STATE else CONDITION_CONTRAST
+
+
 def reagent_steps(records: Records, spell: int) -> list[dict]:
     steps = []
     for index in range(8):
@@ -1882,7 +1891,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
-             'contrast': CONDITION_CONTRAST if spec.setup_only_after else LEARNED_CONTRAST, 'quote': entry.quote}
+             'contrast': metric_delta_contrast(spec), 'quote': entry.quote}
     if spec.tolerance is not None:
         model['tolerance'] = spec.tolerance
     if spec.after_at_least is not None:
@@ -8187,6 +8196,15 @@ def behaviour_scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expect
     if entry['kind'] == 'cast_period':
         from cast_period import cast_period_scenario, cast_period_spec
         return cast_period_scenario(class_file, cast_period_spec(entry))
+    if entry['kind'] == 'pulse_targets':
+        from cast_period import pulse_targets_scenario, pulse_targets_spec
+        return pulse_targets_scenario(class_file, pulse_targets_spec(entry))
+    if entry['kind'] == 'aura_window':
+        from cast_period import aura_window_scenario, aura_window_spec
+        return aura_window_scenario(class_file, aura_window_spec(entry))
+    if entry['kind'] == 'hit_period':
+        from cast_period import hit_period_scenario, hit_period_spec
+        return hit_period_scenario(class_file, hit_period_spec(entry))
     if entry['kind'] == 'threat_tick_ratio':
         return threat_tick_ratio_scenario(class_file, threat_tick_ratio_spec(entry))
     if entry['kind'] == 'group_target':

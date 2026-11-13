@@ -9693,7 +9693,7 @@ class MinionScriptHitTests(unittest.TestCase):
                                             hit_effect=0)
         heal = reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS, hit_effect=2)
         self.assertEqual((damage.kind, damage.mean), ('school', 48.0))
-        self.assertEqual((heal.kind, heal.mean), ('heal', 93.0))
+        self.assertEqual((heal.kind, heal.mean), ('heal', 65.0))
         with self.assertRaises(Unmodelled):
             reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS)
 
@@ -9772,15 +9772,17 @@ class MinionModelAuraTests(unittest.TestCase):
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_minion_aura_is_modelled_without_a_cast(self):
-        _, [expectation] = behaviour_scenario(load_class_file(23), self.entry('auto_attack_heal_modelled'))
+        modelled = {**self.entry('auto_attack_heal_modelled'), 'minion_model_auras': [805290]}
+        _, [expectation] = behaviour_scenario(load_class_file(23), modelled)
         self.assertEqual(expectation.model['model_auras'], [805290])
-        self.assertEqual(expectation.model['reference']['mean'], 17.0)
+        self.assertEqual(expectation.model['reference']['mean'], 11.0)
         _, [plain] = behaviour_scenario(load_class_file(23), self.entry('auto_attack_heal'))
-        self.assertEqual(plain.model['reference']['mean'], 25.0)
+        self.assertEqual(plain.model['reference']['mean'], 17.0)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_minion_aura_needs_a_minion_caster(self):
         entry = {key: value for key, value in self.entry('auto_attack_heal_modelled').items() if key != 'caster_entry'}
+        entry['minion_model_auras'] = [805290]
         with self.assertRaises(ValueError):
             behaviour_scenario(load_class_file(23), entry)
 
@@ -11780,6 +11782,20 @@ class EnemyPlayerClassTests(unittest.TestCase):
         entry.pop('enemy_player_race')
         with self.assertRaises(ValueError):
             metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+
+
+class MetricDeltaOwnCastContrastTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_set_by_the_spells_own_cast_is_an_own_cast_contrast(self):
+        own = cycle_one_entry(807813, 'pushback_held')
+        _, [expectation] = behaviour_scenario(load_class_file(23), own)
+        self.assertEqual(expectation.model['contrast'], 'own_cast')
+        foreign = next(entry for entry in load_class_file(23)['behaviours']
+                       if entry['spell'] == 802986 and entry.get('label_suffix') == 'horde_on_ghouls')
+        _, [other] = behaviour_scenario(load_class_file(23), foreign)
+        self.assertEqual(other.model['contrast'], 'condition')
+        _, [learned] = behaviour_scenario(load_class_file(23), {**own, 'setup_only_after': False})
+        self.assertEqual(learned.model['contrast'], 'learned')
 
 
 if __name__ == '__main__':

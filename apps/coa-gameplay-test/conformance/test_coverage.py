@@ -537,6 +537,15 @@ class EvidenceStatusTest(unittest.TestCase):
             self.assertEqual(evidence_of([claim('increases your haste by 5%.', label)], [read])[0], [DATA])
         self.assertEqual(evidence_of([claim('banishing them, preventing all actions', label)], [read])[0], [BEHAVIOUR])
 
+    def test_a_state_read_after_the_spells_own_cast_counts_where_the_clause_promises_it(self):
+        label = '1 behaviour_metric_delta pushback_held'
+        clause = [claim('reduces the pushback suffered from damaging attacks while casting by 50%', label)]
+        own = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast='own_cast')
+        self.assertEqual(evidence_of(clause, [own])[0], [BEHAVIOUR])
+        condition = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast='condition')
+        self.assertEqual(evidence_of(clause, [condition])[0], [DATA])
+        self.assertEqual(evidence_of([claim('Summon an Icebound Champion', label)], [own])[0], [DATA])
+
     def test_a_minion_maximum_health_is_a_state_read_where_the_clause_promises_it(self):
         label = '1 behaviour_metric_delta'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'owned_creature_max_health', contrast=LEARNED_CONTRAST)
