@@ -27,4 +27,8 @@ it hits.
 
 - The +3 of Effect[0] on the caster is not separated from the +20 by this entry; the party entry (party_stat_ratio)
   proves the +3 on an ally.
+- The pilot read +21.18 points at 296 casts per arm; the pooled runs then read +23.7 / +22.6 at 7548 and +22.94 at
+  9620 casts per arm, each with a half-width just above the 1-point power limit, so the entry runs 170 parts.
+- Creeping Crypt 300960 ("by $s1% against enemies below 35% maximum health") uses the same pooled critical rate with
+  the dummy at 30% health, and a scope control at 50% (0 points).
 - Tests: `HitRatioTargetAuraTests` (test_behaviours.py).

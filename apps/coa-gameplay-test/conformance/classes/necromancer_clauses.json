@@ -2707,13 +2707,18 @@
         ]
       },
       {
-        "claim": "to cause their next use within $572777d to be free of cost.",
+        "claim": "to cause their next use ... to be free of cost.",
         "labels": [
           "704724 effect_value #0",
-          "704724 spell_duration 572777 #1",
           "704724 cost_gate 504868 free_next without",
           "704724 cost_gate 504868 free_next with",
           "704724 cost_gate 504868 free_next released"
+        ]
+      },
+      {
+        "claim": "within $572777d",
+        "labels": [
+          "704724 spell_duration 572777 #1"
         ]
       }
     ]

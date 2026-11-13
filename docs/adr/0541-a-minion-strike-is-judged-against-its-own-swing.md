@@ -30,5 +30,7 @@ DBC; the ruling records the live ratio as the expectation, not a derivation.
 ## Consequences
 
 - Necromancer entry 504901 `weapon_ratio`; ledger clause 325's weapon claim gets its label.
-- If the build reads outside the band, the result is a fix note with the computation read, not a change here.
+- If the build reads outside the band, the result is a fix note with the computation read, not a change here. The
+  first pairs read 1.03 to 1.10: a creature's normalized weapon damage is its swing (Unit::GetAPMultiplier returns
+  the attack time for a non-player), so 570042 is one swing plus its flat term; the fix note goes to the mentor.
 - Tests: `MinionSwingRatioTests` (test_behaviours.py).

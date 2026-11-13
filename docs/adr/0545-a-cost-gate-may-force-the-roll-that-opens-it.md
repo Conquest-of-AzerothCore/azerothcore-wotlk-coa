@@ -18,8 +18,10 @@ the talent, removed at the end and read gone. ADR 0482 put it in `metric_delta` 
   its learns and, at the end, removes the mutant and reads `spell_mod_mutants`; a `released` expectation
   (`<spell> cost_gate <gated>[ <suffix>] released`) must read 0.
 - Refreshing Chill: `resets` on Ice Barrage 801760, Command: Undead 504868 3500 ms after the priming cast, the attempt
-  500 ms later. Deadly Bond: a power gate on Command: Undead, the setup Command rolls, the next Command at 0 power goes
-  through only with the talent, and the one after is refused (`next_arm`).
+  1700 ms later (`margin_ms`; at 500 ms both arms read 67, the Command's global cooldown). Deadly Bond: a power gate on
+  Command: Undead, the setup Command rolls, the next Command at 0 power goes through only with the talent. A
+  `next_arm` cannot run under the fixture: the forced roll lands on the free Command too, so every later Command is
+  free (pair p2 read 0); the one-use scope stays unread.
 - Bone King 707175 is not entered: Lichfrost and Blight cost a percentage of base mana, which `cost_gate` does not
   model.
 - No harness C++ change. Entries without `forced_roll` generate the same scenarios (Templar `generate --class 19`
