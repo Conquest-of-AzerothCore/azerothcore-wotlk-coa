@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Xorothian Strength raises Strength and Intellect by the same percent",
+  "contract": "Xorothian Strength (CharacterAdvancement entry 29437, rank 1 spell 300382, rank 2 spell 570100) raised Strength only, which leaves one of the class's three specializations, Hellfire, whose Burning Power and Cinderblade work from Intellect, with almost nothing to multiply. AscensionXorothContracts.cpp gives both ranks a second effect, aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) on Intellect with the same base points as effect 1 (5 percent, then 10 percent in total: rank 2 replaces rank 1 and does not add to it). A level 60 Knight of Xoroth picks Hellfire (ChrSpecs 16), buys the entry at rank 1 and then rank 2 through the native upload, and the aura effect amounts are asserted exactly. Character sheet stats are whole numbers, so the stat ratios use bands and a guard first asserts that each raised stat is at least 25, which keeps the rounding inside them (rank 1 floor 1.05 - 1/25 stays above 1.01; rank 2 floor 1.10 - 1/25 stays above 1.06, and the two bands do not overlap); 15 percent in total would fail the rank 2 band. Agility is the unchanged control. The client tooltip is not observed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Hellfire",
+      "actor": "knight",
+      "id": 16
+    },
+    {
+      "action": "wait",
+      "label": "Let the specialization settle",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "label": "Strength before",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "str_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "int_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility before",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "agi_before"
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Strength is at least 25, so whole-number rounding stays inside the bands",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 0,
+      "min": 25
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Intellect is at least 25, so whole-number rounding stays inside the bands",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 3,
+      "min": 25
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Buy Xorothian Strength rank 1",
+      "actor": "knight",
+      "entry": 29437,
+      "rank": 1
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 passive 300382 is active",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 300382,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Strength effect resolves to 5",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 300382,
+      "effect": 0,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Intellect effect resolves to 5",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 300382,
+      "effect": 1,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength is up about 5 percent",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_before",
+      "min": 1.01,
+      "max": 1.0505,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is up about 5 percent",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int_before",
+      "min": 1.01,
+      "max": 1.0505,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility did not change",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agi_before",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "advancement_rank",
+      "label": "Buy Xorothian Strength rank 2",
+      "actor": "knight",
+      "entry": 29437,
+      "rank": 2
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 passive 570100 is active",
+      "actor": "knight",
+      "metric": "aura",
+      "spell": 570100,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Strength effect resolves to 10",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 570100,
+      "effect": 0,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 Intellect effect resolves to 10",
+      "actor": "knight",
+      "metric": "aura_amount",
+      "spell": 570100,
+      "effect": 1,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Strength is up about 10 percent in total, not 15",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "str_before",
+      "min": 1.06,
+      "max": 1.1005,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is up about 10 percent in total, not 15",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "int_before",
+      "min": 1.06,
+      "max": 1.1005,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility did not change",
+      "actor": "knight",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "agi_before",
+      "min": 0.9999,
+      "max": 1.0001
+    }
+  ]
+}
