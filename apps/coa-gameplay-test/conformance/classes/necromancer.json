@@ -4868,7 +4868,7 @@
       ],
       "unresisted": true,
       "settle_ms": 1500,
-      "observe_source": "As the Command damage entry, with Increase Frost Dam 132 24666 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 16 Frost, BasePoints 132 + 1 = 133) set on the caster before its stats are measured, so the $spfr*.8 term reads 133 x 0.8 = 106.4 on top of the base 51: the Mage's hit follows the owner's Frost spell power with the 0.8 coefficient (NecromancerCoefficients row {801513, 0, 0.8, 16})."
+      "observe_source": "As the Command damage entry, with Increase Frost Dam 132 24666 (Effect[0] aura 13 SPELL_AURA_MOD_DAMAGE_DONE, MiscValue 16 Frost, BasePoints 131 + 1 = 132) set on the caster before its stats are measured, so the $spfr*.8 term reads 132 x 0.8 = 105.6 on top of the base 51 (156.6, 156 after truncation): the Mage's hit follows the owner's Frost spell power with the 0.8 coefficient (NecromancerCoefficients row {801513, 0, 0.8, 16})."
     },
     {
       "spell": 500981,
@@ -5814,6 +5814,7 @@
       "expected": 0,
       "before_expected": 1,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "target_health_pct": 99,
       "cast_in_before": false,
@@ -5832,7 +5833,7 @@
       },
       "wait_ms": 1000,
       "expire_ms": 500,
-      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast (target_health_pct, which also puts a step between the Runic Power fixture and the cast: without one the cast read SPELL_FAILED_NO_POWER 85, pair prove-7): kept without a cast (control, 1), removed by one Death's Due (0)."
+      "observe_source": "807796 Effect[0] 108 SPELL_EFFECT_DISPEL_MECHANIC MiscValue 29 (MECHANIC_IMMUNE_SHIELD), Attributes SPELL_ATTR0_NO_IMMUNITIES. Divine Shield 642 (Mechanic 29, aura 39 school immunity) is set on the dummy by the dummy (precondition fixture, harness set_aura) in both phases; the dummy is set to 99% health before the cast; cast_power 1000 sets the caster's Runic Power above the 300 cost before every cast (at exactly the cost the cast read SPELL_FAILED_NO_POWER 85 in prove-7 and missed in one final-set run, Runic Power decaying out of combat between the fixture and the cast): kept without a cast (control, 1), removed by one Death's Due (0)."
     },
     {
       "spell": 807796,
@@ -5844,6 +5845,7 @@
       "expected": 0,
       "before_expected": 1,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "target_health_pct": 99,
       "cast_in_before": false,
@@ -5874,6 +5876,7 @@
       "expected": 1,
       "before_expected": 0,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "target_health_pct": 99,
       "cast_in_before": false,
@@ -5896,6 +5899,7 @@
       "expected": 0,
       "before_expected": 0,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "target_health_pct": 99,
       "cast_in_before": false,
@@ -5918,6 +5922,7 @@
       "expected": 1,
       "before_expected": 0,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "cast_in_before": false,
       "target_health_pct": 15,
@@ -5954,6 +5959,7 @@
       "expected": 0,
       "before_expected": 0,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "cast_in_before": false,
       "target_health_pct": 25,
@@ -5976,6 +5982,7 @@
       "expected": 1040,
       "before_expected": 0,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "cast_in_before": false,
       "target_health_pct": 15,
@@ -6013,6 +6020,7 @@
       "tolerance": 1,
       "before_expected": 0,
       "trigger_spell": 807796,
+      "cast_power": 1000,
       "target": "dummy",
       "cast_in_before": false,
       "target_health_pct": 15,
@@ -6399,8 +6407,8 @@
       "variant": "damage_sp",
       "label_suffix": "damage_sp",
       "quote": "dealing ${$m1+0+$spfr*.86989416} Frost damage,",
-      "expected": 698.7,
-      "tolerance": 14.5,
+      "expected": 697,
+      "tolerance": 14,
       "before_expected": 0,
       "trigger_spell": 501978,
       "target": "dummy",
@@ -6432,7 +6440,7 @@
       },
       "wait_ms": 3000,
       "expire_ms": 500,
-      "observe_source": "As the damage entry with Increase Frost Dam 132 24666 (+133 Frost): 133 x 0.86989416 = 115.7 more (NecromancerCoefficients row {501978, 0, 0.86989416, 16}): 684.7 to 712.7."
+      "observe_source": "As the damage entry with Increase Frost Dam 132 24666 (BasePoints 131 + 1 = +132 Frost): 132 x 0.86989416 = 114.8 more (NecromancerCoefficients row {501978, 0, 0.86989416, 16}), truncated: 683 to 711 (the final set read 683 and 706)."
     },
     {
       "spell": 501978,
