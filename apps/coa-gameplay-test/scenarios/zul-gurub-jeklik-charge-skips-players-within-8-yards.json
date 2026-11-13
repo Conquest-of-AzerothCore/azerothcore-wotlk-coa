@@ -9,7 +9,9 @@
     "about 8 yards from her, out of melee, and the far hero about 35 yards away: before the fix the close hero was",
     "the one player in reach 2 s in, so a charge came; now none comes. Then the far hero steps in to about 18",
     "yards and is the only player in reach at the next charge, which must land on them. Fear Ward keeps the tank",
-    "and the close hero in place through the first Screech."
+    "and the close hero in place through the first Screech.",
+    "Her bat form wipes her threat, and the hero who struck her last would draw her into melee; the tank is a",
+    "raid-bot tank whose threat floor keeps her on the tank, so the close hero stays out of her melee range."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -23,7 +25,8 @@
       "id": "tank",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 60,
+      "role": "tank"
     },
     {
       "id": "close",
@@ -134,6 +137,13 @@
       "ms": 300
     },
     {
+      "action": "encounter_start",
+      "label": "The tank holds her threat through the bat form's threat wipe",
+      "actor": "tank",
+      "boss_entry": 14517,
+      "radius": 10
+    },
+    {
       "action": "attack",
       "label": "The tank engages Jeklik",
       "actor": "tank",
@@ -159,12 +169,8 @@
     },
     {
       "action": "wait",
-      "label": "The tank builds threat",
+      "label": "The tank builds threat and keeps attacking, so she stays on the tank",
       "ms": 2000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "tank"
     },
     {
       "action": "stop_attack",

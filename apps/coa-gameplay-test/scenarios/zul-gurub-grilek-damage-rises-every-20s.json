@@ -6,9 +6,10 @@
     "2.0-2.13x by 424 s, with no cap, one step every 20 s with Relentless Pursuit (2118801). Decided 2026-11-13:",
     "Gri'lek (15082) gains one stack of a hidden +5% damage done aura (92432, custom 5 per stack) 1 s into the",
     "fight and every 20 s after. Two grouped heroes fight the Mythic Gri'lek. At the first slam (24 s) he has two",
-    "stacks (x1.10), at the second (49 s) three (x1.15), so the second slam's eight Trauma (2118802) ticks on the",
-    "leader total 1.15 / 1.10 = 1.045x the first; the old script gave exactly 1.00. Trauma's base is fixed",
-    "(500 per tick, no die roll), creatures cannot crit with spells and bleeds ignore armor, so the ratio is exact."
+    "stacks (x1.10), at the second (49 s) three (x1.15), so the second slam's eight Trauma ticks",
+    "(2118804, Mythic in 2118802's SpellDifficulty row) on the leader total 1.15 / 1.10 = 1.045x the first; the old",
+    "script gave exactly 1.00. Trauma's base is fixed (1000 per tick, no die roll), creatures cannot crit with",
+    "spells and bleeds ignore armor, so the ratio is exact."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -178,7 +179,7 @@
       "metric": "spell_damage_count",
       "caster": "grilek",
       "target": "lead",
-      "spell": 2118802,
+      "spell": 2118804,
       "equals": 8,
       "within_ms": 12000
     },
@@ -189,7 +190,7 @@
       "metric": "spell_damage_total",
       "caster": "grilek",
       "target": "lead",
-      "spell": 2118802,
+      "spell": 2118804,
       "save_as": "first_trauma"
     },
     {
@@ -217,7 +218,7 @@
       "metric": "spell_damage_count",
       "caster": "grilek",
       "target": "lead",
-      "spell": 2118802,
+      "spell": 2118804,
       "equals": 16,
       "within_ms": 12000
     },
@@ -228,7 +229,7 @@
       "metric": "spell_damage_total",
       "caster": "grilek",
       "target": "lead",
-      "spell": 2118802,
+      "spell": 2118804,
       "relative_to": "first_trauma",
       "ratio_to": "first_trauma",
       "min": 1.04,
