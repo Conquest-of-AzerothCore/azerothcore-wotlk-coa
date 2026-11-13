@@ -3127,29 +3127,6 @@ def metric_ratio_verdict(base: Verdict, model: dict, before: float, after: float
                    high=ratio + tolerance, explanation=explanation)
 
 
-def behaviour_strike_bursts_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    if model['mode'] == 'absent':
-        value = run.values.get(model['label'])
-        if value is None:
-            return replace(base, explanation=missing_measurement(run, model['label']))
-        return exact(base, float(value), 0.0, 'the minion hits read after the command with no minion raised')
-    counts = []
-    for before, after in model['reads']:
-        if run.values.get(before) is None or run.values.get(after) is None:
-            return replace(base, explanation=missing_measurement(run, before if run.values.get(before) is None
-                                                                 else after))
-        counts.append(int(round(run.values[after] - run.values[before])))
-    low, high = int(model['low']), int(model['high'])
-    inside = all(low <= count <= high for count in counts)
-    ends = low in counts and high in counts
-    status = 'ok' if inside and ends else 'alert'
-    seen = {count: counts.count(count) for count in sorted(set(counts))}
-    explanation = (f'{len(counts)} commands at {model["health_pct"]}% target health struck {seen} times each '
-                   f'(count: commands); every count must lie in {low}..{high} and both {low} and {high} be seen')
-    return replace(base, status=status, measured=float(min(counts)), expected=float(low), low=float(low),
-                   high=float(high), explanation=explanation)
-
-
 def stat_gain_arm_labels(arm: dict) -> list[str]:
     reads = arm.get(STAT_GAIN_ATTRIBUTION)
     if not reads:
@@ -4279,8 +4256,6 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
     if expectation.check == BEHAVIOUR_METRIC_DELTA:
         if model.get('kind') == 'stat_gain':
             return behaviour_stat_gain_verdict(base, run, model)
-        if model.get('kind') == 'strike_bursts':
-            return behaviour_strike_bursts_verdict(base, run, model)
         return behaviour_metric_delta_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_HEAL_BLOCK:
         return behaviour_heal_block_verdict(base, run, model)

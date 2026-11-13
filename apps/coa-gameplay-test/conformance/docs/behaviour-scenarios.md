@@ -1791,15 +1791,6 @@ haste and crit words, so a learned contrast is behaviour; `owned_aura` is a read
 Ghoul's swing interval and crit chance with an Abomination raised in both phases, and its condition arm raises the
 Abomination in the second phase only (`setup_only_after`).
 
-### Repair at an owned creature (`behaviour_cast_condition`, `kind: "npc_repair"`, ADR 0384)
-
-The caster, a grouped ally and an enemy-faction player each wear `item` (`full` durability), worn by `loss_percent`
-before each request (harness `durability_loss`, a precondition fixture), and send a repair-all request to the caster's
-creature `entry` (harness `repair_at`, the real `CMSG_REPAIR_ITEM` handler): before `spell` is cast (no creature), then
-after it for the caster, the ally and the enemy. Each worn and repaired reading of `equipped_durability` (the item's
-entry) is judged exactly: refused requests keep the worn value, granted ones restore `full`. Animate: Skeletal Smith
-804681 repairs the caster and the ally, not the enemy.
-
 ### Corpse fixture (`metric_delta` `corpse`, ADR 0493)
 
 `corpse` (`{"entry", "health", "distance"}`) adds a creature `corpse` of that entry, at the class level, with that
@@ -1807,15 +1798,6 @@ health, `distance` yd from the caster. A `setup_only_after` entry kills it with 
 "corpse"`, for example Void Zone 92559 for 1000 Physical damage) in the treatment phase only, so the control phase has
 no corpse. Corpse Explosion 533239: a Humanoid corpse explodes on the dummy near it, a Mechanical (480) or an Elemental
 (2022) corpse does not.
-
-### Strike bursts (`behaviour_metric_delta`, `kind: "strike_bursts"`, ADR 0383)
-
-A minion's scripted strikes after a Command: `command` is cast at the dummy (`distance` yd away) once with no minion
-(the control: no hit), then `spell` raises a creature `entry`; each cycle casts `command`, reads the minion's hits 25 ms
-before and after the strike tick (`burst_delay_ms`, 500), and casts the two `stances` (Pacify, then another) so the
-minion stops. `arms` (`name`, `health_pct` falling from arm to arm, `cycles`, `low`, `high`) set the dummy's health;
-every per-cycle count must lie in `low`..`high` and both ends must be seen. Raise: Skeletal Rogue 500969: 40
-Commands at 37% read 2 to 5, 10 at 33% read 5.
 
 ### Stat attribution for stats (`stat_gain`, `attribute_stat`, ADR 0385)
 
@@ -1872,12 +1854,21 @@ Its tests are `kinds/test_<kind>.py`, run by `test_kinds.py` (one `conformance` 
 every module imports, names its kind and has a test file); its page is `docs/kinds/<kind>.md`. Kinds with a module:
 
 - [`aura_expiry`](kinds/aura_expiry.md): how long a forced, rolled minion aura lasts, in game time (ADR 0485)
-- [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped windows (ADR 0551)
+- [`aura_window`](kinds/aura_window.md): a cast's aura duration on the dummy without and with a talent, from stamped
+  windows (ADR 0551)
 - [`cast_period`](kinds/cast_period.md): a minion's cast period from game-time stamped polls (ADR 0535)
 - [`energize_range`](kinds/energize_range.md): an energize amount range read from single-event intervals (ADR 0549)
 - [`hit_period`](kinds/hit_period.md): a cast's hit period on the dummy, judged as a cast period (ADR 0552)
-- [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and in combat (ADR 0492, ADR 0534)
-- [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit ratio (ADR 0541, ADR 0547)
-- [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR 0550)
-- [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast ends (ADR 0543, ADR 0546, ADR 0570)
-- [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over parts (ADR 0544, ADR 0546)
+- [`item_cooldown_gate`](kinds/item_cooldown_gate.md): an item's use cooldown through the item-use handler, shared and
+  in combat (ADR 0492, ADR 0534)
+- [`minion_swing_ratio`](kinds/minion_swing_ratio.md): a minion's command strike against its own plain swing, as a hit
+  ratio (ADR 0541, ADR 0547)
+- [`npc_repair`](kinds/npc_repair.md): repair at an owned creature through the real repair handler, per requester (ADR
+  0384)
+- [`pulse_targets`](kinds/pulse_targets.md): the targets of each area pulse of one creature, against the stated cap (ADR
+  0550)
+- [`pushback_reduction`](kinds/pushback_reduction.md): the share of spell pushback a talent removes, from game-time cast
+  ends (ADR 0543, ADR 0546, ADR 0570)
+- [`strike_bursts`](kinds/strike_bursts.md): a minion's scripted strikes per Command at falling dummy health (ADR 0383)
+- [`summon_lifetime`](kinds/summon_lifetime.md): a proc-summoned creature's lifetime from bracketed polls, pooled over
+  parts (ADR 0544, ADR 0546)

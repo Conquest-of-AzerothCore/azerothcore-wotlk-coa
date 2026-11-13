@@ -10039,67 +10039,6 @@ class NecromancerB2FixSegmentTests(unittest.TestCase):
                     if entry['spell'] == spell and entry['kind'] == kind
                     and (suffix is None or entry.get('label_suffix') == suffix))
 
-    def judged(self, entry: dict, values_of) -> list[str]:
-        scenario, expectations = behaviour_scenario(load_class_file(23), entry)
-        return [judge_behaviour(base_verdict(expectation), FakeRun(values_of(expectation)), expectation).status
-                for expectation in expectations]
-
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_the_repair_arms_and_their_expected_durability(self):
-        scenario, expectations = behaviour_scenario(load_class_file(23), self.entry(804681, 'npc_repair'))
-        run.validate(scenario)
-        self.assertEqual({player['id'] for player in scenario['players']}, {CASTER, ALLY, 'enemy'})
-        expected = {expectation.label.split(' npc_repair ')[1]: expectation.displayed for expectation in expectations}
-        self.assertEqual(expected, {'caster without 50261 worn': '23', 'caster without 50261 after': '23',
-                                    'caster with 50261 worn': '1', 'caster with 50261 after': '45',
-                                    'ally with 50261 worn': '23', 'ally with 50261 after': '45',
-                                    'enemy with 50261 worn': '23', 'enemy with 50261 after': '23'})
-        repairs = [step for step in scenario['steps'] if step['action'] == 'repair_at']
-        self.assertEqual([step['actor'] for step in repairs], [CASTER, CASTER, ALLY, 'enemy'])
-
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_a_repair_the_enemy_gets_alerts(self):
-        statuses = self.judged(self.entry(804681, 'npc_repair'),
-                               lambda expectation: {expectation.label: 45.0 if 'enemy' in expectation.label
-                                                    and expectation.label.endswith('after')
-                                                    else float(expectation.displayed)})
-        self.assertEqual(statuses.count('alert'), 1)
-
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_strike_bursts_need_the_range_and_both_ends(self):
-        _, expectations = behaviour_scenario(load_class_file(23), self.entry(500969, 'strike_bursts'))
-        above = next(expectation for expectation in expectations if expectation.label.endswith('bursts_above'))
-
-        def run_of(counts):
-            values = {}
-            for (before, after), count in zip(above.model['reads'], counts):
-                values[before], values[after] = 10.0, 10.0 + count
-            return FakeRun(values)
-
-        def status(counts):
-            return judge_behaviour(base_verdict(above), run_of(counts), above).status
-
-        cycles = len(above.model['reads'])
-        self.assertEqual(status([2, 3, 4, 5] * (cycles // 4)), 'ok')
-        self.assertEqual(status([2] * cycles), 'alert')
-        self.assertEqual(status([2, 5] * (cycles // 2 - 1) + [6, 5]), 'alert')
-        self.assertEqual(status([3, 4] * (cycles // 2)), 'alert')
-
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
-    def test_strike_burst_arms_lower_the_health(self):
-        entry = self.entry(500969, 'strike_bursts')
-        scenario, _ = behaviour_scenario(load_class_file(23), entry)
-        run.validate(scenario)
-        self.assertEqual([step['pct'] for step in scenario['steps'] if step['action'] == 'set_health_pct'], [37, 33])
-        self.assertEqual(scenario['creatures'][0]['distance'], 6)
-        raised = {'spell': 500969, 'action': 'cast', 'actor': CASTER, 'target': CASTER}
-        first_raise = next(index for index, step in enumerate(scenario['steps']) if step == raised)
-        first_command = next(index for index, step in enumerate(scenario['steps'])
-                             if step.get('action') == 'cast' and step.get('spell') == 504318)
-        self.assertLess(first_command, first_raise)
-        with self.assertRaises(ValueError):
-            behaviour_scenario(load_class_file(23), {**entry, 'arms': list(reversed(entry['arms']))})
-
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_stat_gain_with_attribute_stat_reads_the_auras_and_the_return(self):
         entry = self.entry(681529, 'stat_gain', 'stamina')
