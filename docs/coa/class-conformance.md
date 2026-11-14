@@ -9,6 +9,8 @@ finished classes.
 Figures and examples come from the Templar work; where no ADR records them, their source is the Templar's working
 records, which are not in the repository.
 
+To start a class from files alone, follow [conformance-start-a-class.md](conformance-start-a-class.md).
+
 Short names:
 - `CONF` = `apps/coa-gameplay-test/conformance/`;
 - `G&C` = `CONF/docs/generate-and-compare.md`;
@@ -739,10 +741,22 @@ Integration steps, in order:
    tooling, `coa-worktree-cleanup <wt>` prints its plan first and acts only with `--yes`
    (`references/guide-tooling.md:128`).
 
-The integrator's fixed steps run through `conformance.py cycle` (ADR 0655), which this guide does not restate. Agents
-are used only where the script stops: merge conflicts, flip causes and candidate rulings. At each checkpoint the
-controller compacts its context and records the cost with `conformance.py cost` (ADR 0656); without transcripts the
-checkpoint shows "not recorded".
+**The cycle script (ADR 0655).** After a merged pair is planned, write `cycle.json` in the class plan folder: class,
+pair name (`finalNN`), worktree, generation commit (`head`), `base`, ledger, `scenarios_dir` (empty), the worldserver
+sha256 (`build`), the record (`status`, `stamps`, `compare`, `manifest`), `decisions.json`, `gameplay_runner`
+(`["coa-verify", "--worktree", "{worktree}", "--ram"]`), `disk_checks` (`/` and `docker exec coa-test-mysql df -P
+/var/lib/mysql`), `guard_classes` (every finished class except this one), `archive`, `previous_status`, and
+`refactor.moved_kinds` when kinds moved. Then run `python3 -B conformance.py cycle --config cycle.json`. The script
+runs, in order: the guard-class gate, the digests, generate, the source stage, run 1 and run 2 (each after the disk
+check; above 97% it stops), compare and audit per run, the tally, the refactor gate, the archive and `checkpoint.md` /
+`.json`. It stops at the first failure and names the step and its log (`OUT/logs/NN-step.log`). `decisions.json` holds,
+by claim key, `candidates` (`{key: why}`), `rulings` (`{key: {status, why}}`, needed again in every cycle for each
+status 3-5 claim), `counted` (ledger-only re-audit corrections, counted at once, G-17) and `text_changed` (owner text
+items). A re-audit of an archived pair is the same command with `--skip gate --skip digests --skip generate --skip
+source --skip runs --skip compare` and `pair.stamps` / `pair.compare` set. Agents are used only where the script
+stops: a merge conflict, the cause of a flip, a candidate ruling. At each checkpoint the controller compacts its
+context, records the cost with `conformance.py cost` (ADR 0656; without transcripts the checkpoint shows "not
+recorded") and sends the checkpoint, with the next cycle's plan, to the mentor.
 
 Before a PR, `python -B tools/verify_all.py --stages source --base origin/main` (`CONF/README.md:94`). Run the codestyle
 linters on changed C++ and SQL files. SQL goes only under `data/sql/updates/pending_db_*/`.
@@ -949,22 +963,26 @@ source is the Templar's working records, which are not in the repository.
 
 ### 11.1 Standing rulings, decided alone
 
-A controller or integrator applies these without asking the mentor or the owner. Each carries its source; "Necromancer
-mentor decisions" are the class's working log (`mentor-decisions.md`, `mentor-decisions-local.md`), which is not in the
+A controller or integrator applies these without asking the mentor or the owner. Each carries its source; the mentor
+rulings of the Necromancer conformance work (2026-11-13/14) are stated here in full because their log is not in the
 repository.
 
-- **Cause first.** A claim that reads off its expectation gets its cause established (ticks, haste, read timing, resist,
-  expectation arithmetic) before a fix or a corrected expectation. Necromancer mentor decisions, 2026-11-13 (c11:
-  "399.0 cause first", "308.0 ... cause first"); the 300241 miss that fixed the wrong place first is in the Necromancer
-  final report.
+- **Cause first.** A claim that reads consistently off its expectation (a steady 4-5% low offset was the case) gets
+  its cause established (ticks, haste, read timing, resist, expectation arithmetic) before a fix: the ruling was "read
+  the cause first, no band ruling", then correct the expectation or write a defect lead. The same ruling applies to a
+  verdict change after a resize and to a precondition failure (no retry before the cause is known). The 300241 miss that
+  fixed the wrong place first is in the Necromancer final report.
+  Source: mentor ruling, Necromancer conformance, 2026-11-13/14.
 - **The band decides, and a rate's 99% interval sits inside the band.** A deterministic value is judged by the band on
   the value; a proc rate counts when its 99% interval lies inside the band, without holding the exact chance. ADR 0646
   (amends ADR 0346); G-19 for the band.
-- **A label drop is judged by the claim text.** A label is dropped only where the claim states no such value.
-  Necromancer mentor decisions, 2026-11-13 18:26.
-- **A ledger-only re-audit counts at once.** A ledger-only correction re-audited on the count-of-record pair counts
-  immediately (same build and runs, G-17); a measurement change waits for the next pair. Necromancer mentor decisions,
-  2026-11-13 14:31.
+- **A label drop is judged by the claim text.** "Label drops are allowed only where the claim states no such value":
+  a label that measures something the claim does not state may be dropped from the proof; one that measures a stated
+  value is restored, linked to the measuring label that passes in the same run, or the claim is demoted with the count
+  corrected honestly. Source: mentor ruling, Necromancer conformance, 2026-11-13/14.
+- **A ledger-only re-audit counts at once.** "A ledger-only correction re-audited on the count-of-record pair counts at
+  once (same build and runs, G-17); a measurement change waits for the next pair."
+  Source: mentor ruling, Necromancer conformance, 2026-11-13/14.
 - **Contrast is required.** A contrast-gated read is behaviour evidence only with its contrast. ADR 0616; G-22 for a
   stat gain.
 - **Status 3 only after two genuinely different designs.** Status 3 or 4 follows two different designs that failed (the
@@ -1161,21 +1179,8 @@ in the same commit; the owner assigns the final number at merge.
 
 ### 14.6 Rules for agent sessions
 
-Every agent session on conformance work follows these rules, the controller included:
-- **Never resume an agent for a new task** (owner rule, first priority: token use is a primary constraint). A resume
-  is only for a follow-up on the same task (a fix to its own report, a missing check), and only when it is cheaper
-  than a fresh agent with a handoff file. One agent per task, ended when the task is done. The controller makes no
-  exploratory reads either: grep or head on reports, short messages.
-- Fresh agents only, no forks. A brief points to files; it does not paste them.
-- Big files (`behaviours.py`, `compare.py`, `CoAGameplayTest.cpp`, ledgers, generated scenarios, run logs, verdict
-  JSON) are read by grep or line ranges, never whole. Run output goes to files, read by grep.
-- The full report goes to a named file; the agent returns at most 15 lines (reviewers 10).
-- Verification goes through `tools/verify_all.py` selections only; never run judges, tests or scripts directly.
-- Never wait in the background, never sleep-poll. The dispatch is the agent's task: it ignores messages that do not
-  come from its controller session.
-- Read only what the task needs: the files the dispatch names, by grep. Do not read whole briefs of other batches.
-- A brief never says "read X in full" for the growing files (night and morning briefs, the mentor's decision logs,
-  the rulings): it quotes the two to five decision lines the task needs, or names the grep pattern.
+Every agent session on conformance work follows [conformance-dispatch-rules.md](conformance-dispatch-rules.md), the
+controller included (ADR 0657). That file is the single source; do not copy it into a plan or brief.
 
 ### 14.7 Residual risks
 
