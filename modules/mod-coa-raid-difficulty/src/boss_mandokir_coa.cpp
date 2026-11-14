@@ -18,24 +18,25 @@
  *                                            the tank keeps his threat (the
  *                                            live log: 21 charges, never on
  *                                            his victim, 13 on ranged players)
- *   Whirlwind         as the charge lands     at once, 5 yards around him;
- *                                            in the charge's place when no
- *                                            one stands out of melee
+ *   Whirlwind         as the charge lands     a 6s spin, 100% weapon damage
+ *                                            (2118409) every second to all
+ *                                            within 5 yards, 1-6s in (live
+ *                                            logs); in the charge's place
+ *                                            when no one stands out of melee
  *   Mortal Strike     first 8s,  every 12s   the tank in melee range, -25%
  *                                            healing, stacks 3; it and
  *                                            Decapitate always hit (live:
  *                                            never dodged, parried or
  *                                            missed; SpellFix.cpp)
  *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s,
- *                                            then Menacing Gaze for 4s: an
- *                                            active action, any cast of a
- *                                            spell that requires a power
- *                                            source and is on the global
- *                                            cooldown (heals and buffs too,
- *                                            and free procs like Clearcasting;
- *                                            the 2118423 tooltip), Sentences
- *                                            them to Die and he Decapitates
- *                                            them
+ *                                            then Menacing Gaze for 4s: a
+ *                                            hostile cast of a spell that
+ *                                            requires a power source and is
+ *                                            on the global cooldown (the
+ *                                            2118423 tooltip), free procs
+ *                                            like Clearcasting too, but no
+ *                                            heals or buffs, Sentences them
+ *                                            to Die and he Decapitates them
  *   Execute           the tank below 20%, every 7-14s
  *   Fierce Blow       first 30.7-31.6s, every 22.5-44s   the tank; later and
  *                                            rarer than on the other bosses
@@ -103,6 +104,7 @@ namespace
         SPELL_EXECUTE_HIT       = 2118405,
         SPELL_BERSERKER_CHARGE  = 2118406,
         SPELL_WHIRLWIND         = 2118408,
+        SPELL_WHIRLWIND_HIT     = 2118409,
         SPELL_DECAPITATE        = 2118410,
         SPELL_LEAP              = 2118413,
         SPELL_BLOODLORDS_PRESENCE = 2118415,
@@ -523,9 +525,17 @@ namespace
             return requiresPower && info->StartRecoveryTime;
         }
 
+        static bool IsHostile(Player* player, Spell* spell)
+        {
+            if (Unit* target = spell->m_targets.GetUnitTarget())
+                if (target != player && player->IsValidAttackTarget(target))
+                    return true;
+            return !spell->GetSpellInfo()->IsPositive();
+        }
+
         void OnPlayerSpellCast(Player* player, Spell* spell, bool /*skipCheck*/) override
         {
-            if (spell->IsTriggered() || !IsActiveAction(spell->GetSpellInfo()))
+            if (spell->IsTriggered() || !IsActiveAction(spell->GetSpellInfo()) || !IsHostile(player, spell))
                 return;
             Aura* gaze = player->GetAura(SPELL_MENACING_GAZE);
             if (!gaze)
@@ -533,6 +543,30 @@ namespace
             if (Creature* mandokir = ObjectAccessor::GetCreature(*player, gaze->GetCasterGUID()))
                 if (mandokir->IsAIEnabled)
                     mandokir->AI()->SetGUID(player->GetGUID(), GUID_SENTENCED);
+        }
+    };
+
+    // Whirlwind's periodic aura names no spell to trigger; its tooltip and the live logs show the 5-yard hit
+    // 2118409 once a second, 1 to 6 s into the spin.
+    class spell_mandokir_coa_whirlwind : public AuraScript
+    {
+        PrepareAuraScript(spell_mandokir_coa_whirlwind);
+
+        bool Validate(SpellInfo const* /*spellInfo*/) override
+        {
+            return ValidateSpellInfo({ SPELL_WHIRLWIND_HIT });
+        }
+
+        void HandleTick(AuraEffect const* /*aurEff*/)
+        {
+            PreventDefaultAction();
+            GetTarget()->CastSpell(GetTarget(), SPELL_WHIRLWIND_HIT, true);
+        }
+
+        void Register() override
+        {
+            OnEffectPeriodic += AuraEffectPeriodicFn(spell_mandokir_coa_whirlwind::HandleTick, EFFECT_1,
+                SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 
@@ -560,5 +594,6 @@ void AddCoaMandokirScripts()
 {
     RegisterZulGurubCreatureAI(boss_mandokir_coa);
     RegisterSpellScript(spell_mandokir_coa_resurrection);
+    RegisterSpellScript(spell_mandokir_coa_whirlwind);
     new mandokir_coa_menacing_gaze();
 }
