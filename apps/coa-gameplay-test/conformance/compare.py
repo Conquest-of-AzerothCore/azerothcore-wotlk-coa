@@ -50,7 +50,7 @@ from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE,
-                   TALENT_DELTA, levers, mean_interval, ratio_interval)
+                   TALENT_DELTA, TWO_SIDED_99, levers, mean_interval, ratio_interval, student_t_quantile)
 from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
                      Unreadable)
 from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK,
@@ -951,12 +951,36 @@ RateJudgement = tuple[str, float | None, float | None, str]
 
 def banded_rate(status: str, low: float, high: float, expected: float, why: str) -> RateJudgement:
     band = rate_band(expected)
-    if status != 'ok':
+    if status not in ('ok', 'alert'):
         return status, low, high, why
     if expected - band - FLOAT_EPSILON <= low and high <= expected + band + FLOAT_EPSILON:
         return 'ok', low, high, f'{why} inside the band [{expected - band:.4f}, {expected + band:.4f}]'
+    if status == 'alert':
+        return status, low, high, why
     return 'measured', low, high, (f'{why} holds the chance but not inside the band [{expected - band:.4f}, '
                                    f'{expected + band:.4f}]: effect present, interval stated, not final (G-20)')
+
+
+def between_part_interval(parts: list[tuple[float, float]]) -> tuple[float, float] | None:
+    procs, trials = sum(events for events, _ in parts), sum(count for _, count in parts)
+    if len(parts) < 2 or trials <= 0:
+        return None
+    rate = procs / trials
+    spread = sum((events - rate * count) ** 2 for events, count in parts) * len(parts) / (len(parts) - 1)
+    half = student_t_quantile(TWO_SIDED_99, len(parts) - 1) * math.sqrt(spread) / trials
+    return max(0.0, rate - half), min(1.0, rate + half)
+
+
+def between_part_judgement(parts: list[tuple[float, float]], minimum: int, expected: float) -> RateJudgement:
+    procs, trials = sum(events for events, _ in parts), sum(count for _, count in parts)
+    status, low, high, why = rate_judgement(procs, trials, minimum, expected)
+    interval = between_part_interval(parts)
+    if low is None or interval is None:
+        return status, low, high, why
+    low, high = interval
+    status = 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert'
+    return status, low, high, (f'rate {procs / trials:.4f}, between-part 99% interval [{low:.4f}, {high:.4f}] '
+                               f'(t over {len(parts)} parts, {len(parts) - 1} df, trial-weighted)')
 
 
 def rate_judgement(procs: float, trials: float, minimum: int, expected: float) -> RateJudgement:
@@ -1080,6 +1104,17 @@ def judge_proc_per_trigger(manifest: dict, parts: list[ProcPart], tooltips: Tool
                                f'{expectation.displayed} shows {chance:g}%; {expectation.rule}')
 
 
+def proc_part_counts(per_part: list[tuple[dict[str, float], float]], model: dict, event_labels: list[str],
+                     reading: dict) -> list[tuple[float, float]]:
+    counts = []
+    for part_totals, offset in per_part:
+        events = offset + sum(part_totals[label] for label in event_labels)
+        excluded = events if reading.get('minus_events') else 0.0
+        counts.append((events / model['events_per_proc'],
+                       sum(part_totals[label] for label in reading['labels']) - excluded))
+    return counts
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
@@ -1098,6 +1133,7 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     totals = dict.fromkeys(wanted[1:], 0.0)
     events = 0.0
     counted, without_aura, unmeasured, reasons = [], [], [], []
+    per_part: list[tuple[dict[str, float], float]] = []
     baseline_trials = baseline_events = None
     for _, run, part in parts:
         if trigger:
@@ -1112,15 +1148,17 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
             without_aura.append(run.key)
         else:
             counted.append(run.key)
-            for label, value in zip(wanted[1:], values[1:]):
-                totals[label] += value
-            totals[labels['trials']] -= sum(excluded)
+            part_totals = dict(zip(wanted[1:], values[1:]))
+            part_totals[labels['trials']] -= sum(excluded)
             if part_baseline:
                 baseline_trials, baseline_events = held
-                totals[labels['trials']] -= baseline_trials
-                totals[event_labels[0]] -= baseline_events
-            events -= player_casts(model, run, trigger)
-            events += refund_offset(model, run)
+                part_totals[labels['trials']] -= baseline_trials
+                part_totals[event_labels[0]] -= baseline_events
+            for label, value in part_totals.items():
+                totals[label] += value
+            offset = refund_offset(model, run) - player_casts(model, run, trigger)
+            events += offset
+            per_part.append((part_totals, offset))
     if baseline_events:
         return replace(base, measured=baseline_events, expected=0.0, low=0.0, high=0.0,
                        explanation=f'{baseline_events:g} events in {baseline_trials:g} baseline trials without the '
@@ -1148,7 +1186,14 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     for reading in readings:
         excluded = events if reading.get('minus_events') else 0.0
         reading_trials = sum(totals[label] for label in reading['labels']) - excluded
-        status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
+        part_rates = proc_part_counts(per_part, model, event_labels, reading)
+        if model.get('band') and len(part_rates) > 1:
+            status, low, high, why = between_part_judgement(part_rates, model['minimum_trials'], expected)
+        else:
+            status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
+            spread = between_part_interval(part_rates) if low is not None else None
+            if spread:
+                why += f'; between-part 99% interval [{spread[0]:.4f}, {spread[1]:.4f}] over {len(part_rates)} parts'
         if model.get('band') and low is not None:
             status, low, high, why = banded_rate(status, low, high, expected, why)
         judged.append((status, procs / reading_trials if reading_trials > 0 else None, low, high,
@@ -4104,6 +4149,7 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
     scale = 100.0 if model.get('rate') else 1.0
+    between_parts = len(runs) > 1 and bool(model.get('rate'))
     series = {}
     for arm in ('control', 'treatment'):
         totals, counts = [], []
@@ -4121,8 +4167,13 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
                 if reduced is None:
                     return replace(base, explanation=missing_measurement(part, model['treatment_flat_armor']))
                 flat *= reduced / ARMOR_PROBE_DAMAGE
-            totals += [(total - flat * count) * scale for total, count in zip(*found)]
-            counts += found[1]
+            part_totals = [(total - flat * count) * scale for total, count in zip(*found)]
+            if between_parts:
+                totals.append(sum(part_totals))
+                counts.append(sum(found[1]))
+            else:
+                totals += part_totals
+                counts += found[1]
         series[arm] = (totals, counts)
     minimum = int(model['minimum_hits']) * len(runs)
     hits = {arm: sum(counts) for arm, (_, counts) in series.items()}
@@ -4172,6 +4223,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
               else '')
     if len(runs) > 1:
         beyond += f'; {len(runs)} parts pooled'
+    if between_parts:
+        beyond += ' (99% interval from the between-part variance of the per-part rates, t over the parts)'
     if model.get('rate'):
         beyond += f'; the {model["rate"]} rate is in percent of the counted events'
     ratio = f', ratio {treatment.mean / control.mean:.5g}' if control.mean else ''

@@ -1974,3 +1974,103 @@ class EngineAmountBandTests(unittest.TestCase):
 
     def test_an_interval_across_a_band_edge_is_not_judged(self):
         self.assertEqual(self.reading(1.0046, 0.0008), 'insufficient_trials')
+
+
+class BandedRateTests(unittest.TestCase):
+    EXPECTED = 0.15
+
+    def judged(self, procs: float, trials: float) -> str:
+        from compare import banded_rate, rate_judgement
+        status, low, high, why = rate_judgement(procs, trials, 1, self.EXPECTED)
+        return banded_rate(status, low, high, self.EXPECTED, why)[0]
+
+    def test_an_interval_inside_the_band_that_excludes_the_exact_chance_is_ok(self):
+        from procs import wilson_interval
+        low, high = wilson_interval(2213, 15573)
+        self.assertTrue(0.13 < low and high < 0.15)
+        self.assertEqual(self.judged(2213, 15573), 'ok')
+
+    def test_an_interval_across_a_band_edge_that_excludes_the_chance_alerts(self):
+        from procs import wilson_interval
+        low, high = wilson_interval(2000, 15573)
+        self.assertTrue(low < 0.13 < high < 0.15)
+        self.assertEqual(self.judged(2000, 15573), 'alert')
+
+    def test_an_interval_holding_the_chance_across_a_band_edge_stays_measured(self):
+        self.assertEqual(self.judged(300, 2000), 'measured')
+
+    def test_an_interval_wholly_outside_the_band_alerts(self):
+        self.assertEqual(self.judged(1500, 15573), 'alert')
+
+
+class BetweenPartIntervalTests(unittest.TestCase):
+    PARTS, TRIALS = 55, 300
+
+    def parts(self, chances: list[float], seed: int) -> list[tuple[float, float]]:
+        import random
+        draw = random.Random(seed)
+        return [(float(sum(draw.random() < chances[index % len(chances)] for _ in range(self.TRIALS))),
+                 float(self.TRIALS)) for index in range(self.PARTS)]
+
+    def widths(self, chances: list[float], seed: int) -> tuple[float, float]:
+        from compare import between_part_interval
+        from procs import wilson_interval
+        parts = self.parts(chances, seed)
+        low, high = between_part_interval(parts)
+        wilson = wilson_interval(sum(events for events, _ in parts), self.PARTS * self.TRIALS)
+        return high - low, wilson[1] - wilson[0]
+
+    def test_seeded_binomial_parts_give_about_the_wilson_width(self):
+        for seed in (1, 2, 3):
+            with self.subTest(seed=seed):
+                between, wilson = self.widths([0.15], seed)
+                self.assertLess(abs(between / wilson - 1), 0.25)
+
+    def test_seeded_overdispersed_parts_widen_the_interval(self):
+        for seed in (1, 2, 3):
+            with self.subTest(seed=seed):
+                between, wilson = self.widths([0.10, 0.20], seed)
+                self.assertGreater(between / wilson, 1.8)
+
+    def test_a_pooled_banded_rate_is_judged_on_the_between_part_interval(self):
+        from compare import between_part_judgement
+        binomial = self.parts([0.15], 4)
+        spread = self.parts([0.10, 0.20], 4)
+        self.assertEqual(between_part_judgement(binomial, 1, 0.15)[0], 'ok')
+        status, low, high, why = between_part_judgement(spread, 1, 0.15)
+        self.assertIn('between-part', why)
+        self.assertGreater(high - low, 0.02)
+
+    def test_one_part_has_no_between_part_interval(self):
+        from compare import between_part_interval
+        self.assertIsNone(between_part_interval([(10.0, 100.0)]))
+
+
+class BetweenPartHitRatioTests(unittest.TestCase):
+    CASTS = 20
+
+    def model(self) -> dict:
+        reads = {arm: [[f'{arm} {index} total', f'{arm} {index} count'] for index in range(self.CASTS + 1)]
+                 for arm in ('control', 'treatment')}
+        return {'kind': 'hit_ratio', 'reads': reads, 'minimum_hits': 1, 'trials': self.CASTS, 'expected': 1.0,
+                'expected_bonus': 0.0, 'expected_delta': 20.0, 'rate': 'critical', 'parts': 2}
+
+    def part(self, model: dict, shares: dict[str, float]):
+        values = {}
+        for arm, reads in model['reads'].items():
+            for index, (total, count) in enumerate(reads):
+                values[total] = index * 4 * shares[arm] + (index % 2) * 0.5
+                values[count] = index * 4.0
+        return type('Part', (), {'values': values, 'key': 'part', 'status': 'completed', 'message': ''})()
+
+    def test_overdispersed_parts_widen_a_pooled_rate_interval(self):
+        from compare import behaviour_hit_ratio_verdict
+        model = self.model()
+        base = Verdict('x', 'alert', None, None, None, None, '')
+        steady = [self.part(model, {'control': 0.05, 'treatment': 0.25}) for _ in range(8)]
+        spread = [self.part(model, {'control': 0.05, 'treatment': 0.25 + (0.04 if index % 2 else -0.04)})
+                  for index in range(8)]
+        narrow = behaviour_hit_ratio_verdict(base, steady, model).detail['bonus']['half']
+        wide = behaviour_hit_ratio_verdict(base, spread, model)
+        self.assertIn('between-part variance', wide.explanation)
+        self.assertGreater(wide.detail['bonus']['half'], 2 * narrow)
