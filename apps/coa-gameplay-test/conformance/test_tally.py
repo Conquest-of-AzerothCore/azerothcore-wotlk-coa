@@ -4,8 +4,8 @@ import tempfile
 import unittest
 
 from tally import (NOT_FINAL, Decisions, TallyError, TallyInputs, check_decisions, classify, flips, judge_changed,
-                   label_statuses, labels_pass, ledger_keys, load_decisions, record_rows, status_markdown, tally,
-                   tally_lines, write_status)
+                   label_statuses, labels_pass, ledger_keys, load_decisions, match_line, record_match, record_rows,
+                   status_markdown, tally, tally_lines, write_status)
 
 FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'cycle'
 RULING = 'mentor ruling on X 18:39, confirmed (c8 brief): status 3'
@@ -154,13 +154,51 @@ class RecordDecisionTest(unittest.TestCase):
         self.assertEqual((row['status'], row['basis']), (NOT_FINAL, 'flip'))
 
 
+class RecordMatchTest(unittest.TestCase):
+    def rewritten(self, name: str, change) -> Path:
+        self.directory = tempfile.TemporaryDirectory()
+        self.addCleanup(self.directory.cleanup)
+        manifest = json.loads((FIXTURES / name / 'manifest.json').read_text(encoding='utf-8'))
+        change(manifest)
+        path = Path(self.directory.name) / 'manifest.json'
+        path.write_text(json.dumps(manifest), encoding='utf-8')
+        return path
+
+    def inputs(self, name: str, manifest: Path) -> TallyInputs:
+        values = pair_inputs(name)
+        return TallyInputs(values.ledger, values.record_status, values.record_compare, values.record_manifest,
+                           values.compare, values.coverage, manifest, values.decisions)
+
+    def test_a_rehashed_scenario_is_compared_with_the_record_by_entry_and_label(self):
+        def rehash(manifest):
+            for scenario in manifest['scenarios']:
+                scenario['sha256'] = 'rehashed-' + scenario['sha256']
+        result = tally(self.inputs('final15', self.rewritten('final15', rehash)))
+        self.assertEqual(result['flips_vs_record'], ['389.0'])
+        self.assertEqual(result['record_scenarios'], {'matched': 22, 'unmatched': 0, 'unmatched_scenarios': []})
+
+    def test_a_record_scenario_missing_from_the_pair_is_counted_as_unmatched(self):
+        def drop(manifest):
+            manifest['scenarios'] = manifest['scenarios'][1:]
+        result = tally(self.inputs('final16', self.rewritten('final16', drop)))
+        self.assertEqual(result['record_scenarios'], {'matched': 21, 'unmatched': 1,
+                                                      'unmatched_scenarios': ['conformance-necromancer-value-301303']})
+        self.assertTrue(match_line(result['record_scenarios']).startswith(
+            'WARNING record scenarios matched by entry and label: 21, UNMATCHED: 1, not compared with the record'))
+
+    def test_a_record_scenario_without_its_label_in_the_pair_is_unmatched(self):
+        def relabel(manifest):
+            manifest['scenarios'][0]['expectations'][0]['label'] += ' renamed'
+        record = json.loads((FIXTURES / 'record' / 'manifest.json').read_text(encoding='utf-8'))
+        now = json.loads(self.rewritten('final16', relabel).read_text(encoding='utf-8'))
+        self.assertEqual(record_match(record, now)['unmatched_scenarios'], ['conformance-necromancer-value-301303'])
+
+
 class FlipRuleTest(unittest.TestCase):
-    def check(self, pair, record=None, old_sha=None, now_sha=None, changed=frozenset()):
-        new_runs = [{LABEL: {KEY: status}} if status else {} for status in pair]
-        old_runs = [{LABEL: {KEY: status}} if status else {} for status in (record or [None, None])]
-        sha = {'scenario-a': 'x'}
-        return flips([LABEL], new_runs, old_runs, sha if old_sha is None else old_sha,
-                     sha if now_sha is None else now_sha, changed)
+    def check(self, pair, record=None, matched=None, changed=frozenset(), key=KEY):
+        new_runs = [{LABEL: {key: status}} if status else {} for status in pair]
+        old_runs = [{LABEL: {key: status}} if status else {} for status in (record or [None, None])]
+        return flips([LABEL], new_runs, old_runs, {(LABEL, *KEY)} if matched is None else matched, changed)
 
     def test_ok_against_tolerated_is_not_a_flip(self):
         self.assertEqual(self.check(['ok', 'tolerated'], ['closed', 'ok']), ([], []))
@@ -187,9 +225,16 @@ class FlipRuleTest(unittest.TestCase):
         self.assertEqual(against, [{'label': LABEL, 'check': KEY[0], 'scenario': KEY[1], 'record': ['ok', 'ok'],
                                     'pair': ['alert', 'alert']}])
 
-    def test_a_changed_scenario_or_judge_is_not_compared_with_the_record(self):
-        self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], now_sha={'scenario-a': 'y'}), ([], []))
+    def test_an_unmatched_scenario_or_a_changed_judge_is_not_compared_with_the_record(self):
+        self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], matched=set()), ([], []))
         self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], changed={LABEL}), ([], []))
+
+    def test_a_pooled_scenario_matches_only_when_every_part_matches(self):
+        pooled = (KEY[0], 'part-1 + part-2')
+        both = {(LABEL, KEY[0], 'part-1'), (LABEL, KEY[0], 'part-2')}
+        self.assertEqual(len(self.check(['alert', 'alert'], ['ok', 'ok'], both, key=pooled)[1]), 1)
+        self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], both - {(LABEL, KEY[0], 'part-2')},
+                                    key=pooled), ([], []))
 
     def test_an_ordinal_free_label_reaches_its_ordinal_run_labels(self):
         runs = [{f'{LABEL} #0': {KEY: 'ok'}, f'{LABEL} #1': {KEY: 'tolerated'}, f'{LABEL} #1x': {KEY: 'alert'}}] * 2
@@ -197,7 +242,7 @@ class FlipRuleTest(unittest.TestCase):
         self.assertEqual(labels_pass(runs, [LABEL]), (True, {}))
         self.assertEqual(label_statuses(runs, [f'{LABEL} #2']), {f'{LABEL} #2': [[], []]})
         flipping = [{f'{LABEL} #1': {KEY: 'ok'}}, {f'{LABEL} #1': {KEY: 'unmeasured'}}]
-        inside, _ = flips([LABEL], flipping, [{}, {}], {}, {}, frozenset())
+        inside, _ = flips([LABEL], flipping, [{}, {}], set(), frozenset())
         self.assertEqual(inside, [{'label': f'{LABEL} #1', 'check': KEY[0], 'scenario': KEY[1],
                                    'statuses': ['ok', 'unmeasured']}])
 

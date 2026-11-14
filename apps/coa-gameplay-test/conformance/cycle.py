@@ -10,7 +10,8 @@ import subprocess
 import sys
 from typing import Callable, Sequence
 
-from tally import FINAL, TallyError, TallyInputs, load_decisions, tally, tally_lines, write_status
+from tally import (FINAL, TallyError, TallyInputs, load_decisions, match_line, record_match, tally, tally_lines,
+                   write_status)
 
 STEPS = ('gate', 'digests', 'generate', 'source', 'runs', 'compare', 'audit', 'tally', 'refactor', 'archive',
          'checkpoint')
@@ -739,6 +740,14 @@ def tally_rows(cycle: Cycle) -> list:
     return json.loads(json_path.read_text(encoding='utf-8'))
 
 
+def record_scenarios(cycle: Cycle) -> dict:
+    if cycle.tally_result is not None:
+        return cycle.tally_result['record_scenarios']
+    config = cycle.config
+    return record_match(json.loads(config.record.manifest.read_text(encoding='utf-8')),
+                        json.loads(manifest_path(config).read_text(encoding='utf-8')))
+
+
 def checkpoint_document(cycle: Cycle) -> dict:
     config = cycle.config
     rows = tally_rows(cycle)
@@ -764,6 +773,7 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'statuses': dict(sorted(statuses.items())),
         'flips': {'in_pair': [row['key'] for row in rows if row['flips_in_pair']],
                   'against_record': [row['key'] for row in rows if row['flips_vs_record']]},
+        'record_scenarios': record_scenarios(cycle),
         'lost': lost,
         'gained': [row['key'] for row in rows if row['key'] in now - before],
         'stamps': list(cycle.stamps),
@@ -774,6 +784,14 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'steps': [*cycle.done, 'checkpoint'],
         'cost': cost_of(config),
     }
+
+
+def match_markdown(match: dict) -> str:
+    if not match['unmatched']:
+        return f"Record scenarios: {match['matched']} matched by entry and label, 0 unmatched"
+    return (f"**WARNING: {match['unmatched']} record scenarios UNMATCHED** (not compared with the record), "
+            f"{match['matched']} matched by entry and label: {', '.join(match['unmatched_scenarios'][:10])}"
+            f"{' ...' if match['unmatched'] > 10 else ''}")
 
 
 def checkpoint_markdown(document: dict) -> str:
@@ -790,6 +808,7 @@ def checkpoint_markdown(document: dict) -> str:
              f"({', '.join(document['flips']['in_pair']) or 'none'}), "
              f"{len(document['flips']['against_record'])} against the record "
              f"({', '.join(document['flips']['against_record']) or 'none'})",
+             f"- {match_markdown(document['record_scenarios'])}",
              f"- Lost: {', '.join(document['lost']) or 'none'}; gained: {', '.join(document['gained']) or 'none'}",
              f"- Stamps: {' / '.join(document['stamps']) or NOT_RECORDED}; record {document['record']['name']} "
              f"({' / '.join(document['record']['stamps']) or NOT_RECORDED})",
@@ -806,6 +825,7 @@ def step_checkpoint(cycle: Cycle) -> None:
     (out / CHECKPOINT_JSON).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
     (out / CHECKPOINT_MD).write_text(checkpoint_markdown(document), encoding='utf-8')
     note(cycle, 'checkpoint', f"{document['count']} / {document['total']}, delta {document['delta']:+d}")
+    note(cycle, 'checkpoint', match_line(document['record_scenarios']))
 
 
 HANDLERS = {'gate': step_gate, 'digests': step_digests, 'generate': step_generate, 'source': step_source,
@@ -876,6 +896,8 @@ def cycle_command(args) -> int:
         lines = tally_lines(cycle.tally_result)
         for line in [lines[1], *(line for line in lines if line.startswith('LOST '))]:
             print(line)
+    if {'tally', 'checkpoint'} & set(cycle.done):
+        print(match_line(record_scenarios(cycle)))
     if (config.out / CHECKPOINT_MD).exists() and 'checkpoint' in cycle.done:
         print(config.out / CHECKPOINT_MD)
     return 0

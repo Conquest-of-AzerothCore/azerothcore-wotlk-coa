@@ -69,8 +69,36 @@ def verdict_index(directory: Path) -> dict:
     return by_label
 
 
-def scenario_shas(manifest: dict) -> dict:
-    return {entry['key']: entry.get('sha256') for entry in manifest['scenarios']}
+PART_SEPARATOR = ' + '
+
+
+def generated_expectations(manifest: dict) -> set:
+    return {(expectation['label'], expectation['check'], scenario['key']) for scenario in manifest['scenarios']
+            if scenario.get('sha256') for expectation in scenario['expectations']}
+
+
+def matched_expectations(record_manifest: dict, manifest: dict) -> set:
+    return generated_expectations(record_manifest) & generated_expectations(manifest)
+
+
+def record_match(record_manifest: dict, manifest: dict) -> dict:
+    now = generated_expectations(manifest)
+    keys = {key for _, _, key in now}
+    matched, unmatched = 0, []
+    for scenario in record_manifest['scenarios']:
+        if not scenario.get('sha256'):
+            continue
+        wanted = {(expectation['label'], expectation['check'], scenario['key'])
+                  for expectation in scenario['expectations']}
+        if scenario['key'] in keys and wanted <= now:
+            matched += 1
+        else:
+            unmatched.append(scenario['key'])
+    return {'matched': matched, 'unmatched': len(unmatched), 'unmatched_scenarios': sorted(unmatched)}
+
+
+def is_matched(label: str, key: tuple, matched: set) -> bool:
+    return all((label, key[0], part) in matched for part in key[1].split(PART_SEPARATOR))
 
 
 def expectations(manifest: dict) -> dict:
@@ -97,7 +125,7 @@ def run_labels(label: str, runs) -> list:
     return resolved_labels(label, present) or [label]
 
 
-def flips(labels, new_runs, old_runs, old_sha, now_sha, changed) -> tuple:
+def flips(labels, new_runs, old_runs, matched, changed) -> tuple:
     inside, against = [], []
     for label in (match for ledger_label in labels for match in run_labels(ledger_label, [*new_runs, *old_runs])):
         keys = set().union(*(run.get(label, {}).keys() for run in new_runs))
@@ -109,7 +137,7 @@ def flips(labels, new_runs, old_runs, old_sha, now_sha, changed) -> tuple:
             old = [run.get(label, {}).get(key) for run in old_runs]
             if all(status is None for status in old):
                 continue
-            if old_sha.get(key[1]) is None or old_sha.get(key[1]) != now_sha.get(key[1]) or label in changed:
+            if not is_matched(label, key, matched) or label in changed:
                 continue
             if len(judged_classes(seen + old)) > 1 or (None in old) != (None in seen):
                 against.append({'label': label, 'check': key[0], 'scenario': key[1], 'record': old, 'pair': seen})
@@ -203,7 +231,7 @@ def tally(inputs: TallyInputs) -> dict:
     new_runs = [verdict_index(path) for path in inputs.compare]
     old_runs = [verdict_index(path) for path in inputs.record_compare]
     record_manifest, manifest = load(inputs.record_manifest), load(inputs.manifest)
-    old_sha, now_sha = scenario_shas(record_manifest), scenario_shas(manifest)
+    matched = matched_expectations(record_manifest, manifest)
     changed = judge_changed(record_manifest, manifest)
     for path, audit in zip(inputs.coverage, audits):
         if len(audit['clauses']) != len(rows):
@@ -220,7 +248,7 @@ def tally(inputs: TallyInputs) -> dict:
                     raise TallyError(f'claim {prior["key"]}: the ledger text differs from the record; list the '
                                      f'key under text_changed when the change is intended')
             runs = [audit['clauses'][index]['claim_evidence'][part] for audit in audits]
-            inside, against = flips(labels, new_runs, old_runs, old_sha, now_sha, changed)
+            inside, against = flips(labels, new_runs, old_runs, matched, changed)
             rec = {'key': prior['key'], 'index': index, 'part': part, 'spell': row['spell'], 'claim': text,
                    'labels': labels, 'evidence': runs[0] if runs[0] == runs[1] else 'flip', 'run1': runs[0],
                    'run2': runs[1], 'record_status': prior['status'], 'record_evidence': prior['evidence'],
@@ -228,7 +256,9 @@ def tally(inputs: TallyInputs) -> dict:
             status, basis, detail = classify(rec, prior, new_runs, decisions)
             rec.update({'status': status, 'basis': basis, 'detail': detail})
             out.append(rec)
-    return summary(out, changed, decisions, missing_rows(keys, record), record)
+    result = summary(out, changed, decisions, missing_rows(keys, record), record)
+    result['record_scenarios'] = record_match(record_manifest, manifest)
+    return result
 
 
 def summary(out: list, changed: set, decisions: Decisions, missing: list, record: dict) -> dict:
@@ -249,6 +279,14 @@ def summary(out: list, changed: set, decisions: Decisions, missing: list, record
         'flips_in_pair': [row['key'] for row in out if row['flips_in_pair']],
         'flips_vs_record': [row['key'] for row in out if row['flips_vs_record']],
     }
+
+
+def match_line(match: dict) -> str:
+    if not match['unmatched']:
+        return f"record scenarios matched by entry and label: {match['matched']}, unmatched: 0"
+    shown = ', '.join(match['unmatched_scenarios'][:10])
+    return (f"WARNING record scenarios matched by entry and label: {match['matched']}, UNMATCHED: "
+            f"{match['unmatched']}, not compared with the record ({shown}{' ...' if match['unmatched'] > 10 else ''})")
 
 
 def tally_lines(result: dict) -> list:

@@ -1,5 +1,7 @@
+import contextlib
 import filecmp
 import hashlib
+import io
 import json
 from pathlib import Path
 import shutil
@@ -366,6 +368,26 @@ class CheckpointTest(CycleCase):
         self.assertIn('- Count: **13 / 14 = 92.9%**, delta **-1** vs 14 (final16-status.json)', markdown)
         self.assertIn('- Cost: not recorded', markdown)
 
+    def test_the_checkpoint_states_the_record_scenarios_matched(self):
+        run_cycle(self.replay(), REPLAY, FakeRunner(self.root))
+        self.assertEqual(self.checkpoint()['record_scenarios'],
+                         {'matched': 22, 'unmatched': 0, 'unmatched_scenarios': []})
+        markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
+        self.assertIn('- Record scenarios: 22 matched by entry and label, 0 unmatched', markdown)
+
+    def test_unmatched_record_scenarios_are_loud_in_the_checkpoint_and_the_command_line(self):
+        manifest = json.loads((FIXTURES / 'final16' / 'manifest.json').read_text(encoding='utf-8'))
+        manifest['scenarios'] = manifest['scenarios'][1:]
+        path = self.root / 'manifest.json'
+        path.write_text(json.dumps(manifest), encoding='utf-8')
+        run_cycle(self.replay(manifest=path), REPLAY, FakeRunner(self.root))
+        markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
+        self.assertIn('- **WARNING: 1 record scenarios UNMATCHED** (not compared with the record), 21 matched by '
+                      'entry and label: conformance-necromancer-value-301303', markdown)
+        self.assertEqual(self.checkpoint()['record_scenarios']['unmatched'], 1)
+        log = (self.root / 'out' / 'logs' / '11-checkpoint.log').read_text(encoding='utf-8')
+        self.assertIn('WARNING record scenarios matched by entry and label: 21, UNMATCHED: 1', log)
+
     def test_a_cost_file_fills_the_cost_field(self):
         cost = self.root / 'cost.json'
         cost.write_text(json.dumps({'roles': {'author': {'input': 10}}}), encoding='utf-8')
@@ -519,8 +541,11 @@ class CommandLineTest(CycleCase):
         self.assertEqual((config.out, config.decisions), (self.root / 'out', self.decisions))
         self.assertEqual((config.gameplay_db_workers, config.disk_limit_percent), (4, 97.0))
         skips = [part for step in REPLAY for part in ('--skip', step)]
-        self.assertEqual(main(['cycle', '--config', str(path), *skips]), 0)
+        output = io.StringIO()
+        with contextlib.redirect_stdout(output):
+            self.assertEqual(main(['cycle', '--config', str(path), *skips]), 0)
         self.assertEqual(self.checkpoint()['count'], 14)
+        self.assertIn('record scenarios matched by entry and label: 22, unmatched: 0\n', output.getvalue())
         document['pair']['stamps'] = list(STAMPS[:1])
         path.write_text(json.dumps(document), encoding='utf-8')
         with self.assertRaisesRegex(CycleError, 'pair.stamps'):

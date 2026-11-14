@@ -497,8 +497,13 @@ The tally (`tally.py`) gives every ledger claim a status 1-5 or `not final`. A c
 within the pair is a label/check/scenario whose judged status class (conformant, or the status itself) differs between
 the runs or that is present in one run only (`insufficient_trials` is not judged); a flip against the record compares
 the pair with the record's two runs on every label/check/scenario of either side, so a scenario with no result in both
-runs of the pair flips against the record, except on a scenario whose sha256 changed or a label whose judge changed
-(`judge_changed`: a changed expectation or a new value link). A ledger label without an ordinal reaches its
+runs of the pair flips against the record, except on a label whose judge changed (`judge_changed`: a changed
+expectation or a new value link). The record and the pair are matched by scenario key (the entry) and label/check,
+not by the scenario file's sha256 (ADR 0660): a re-hashed scenario, such as one that gained a fixture field, is
+compared; a pooled verdict (`part-1 + part-2 ...`) is compared when every part matches. A record scenario with a file
+whose key or labels the pair's manifest lacks is unmatched and not compared; the checkpoint (`record_scenarios` in
+`checkpoint.json`, a line in `checkpoint.md` and the checkpoint log) and the command output state the matched and
+unmatched counts, with a `WARNING` and the first unmatched keys when any is unmatched. A ledger label without an ordinal reaches its
 `label #N` verdicts in the flips and the label checks, as in the audit (`coverage.resolved_labels`). A ruling is
 applied first and stands over a flip: its status (2 to 5) rests on the rule or ruling it names, not on the runs
 (class-conformance.md section 2). Status 1 needs a pair with no flip (class-conformance.md 3.2) and never comes from a
