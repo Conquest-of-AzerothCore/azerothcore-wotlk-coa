@@ -305,6 +305,14 @@ class FlipRuleTest(unittest.TestCase):
         self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], both - {(LABEL, KEY[0], 'part-2')},
                                     key=pooled), ([], []))
 
+    def test_a_pooled_key_whose_parts_differ_in_the_pair_flips_against_the_record(self):
+        parts = {(LABEL, KEY[0], 'part-1'), (LABEL, KEY[0], 'part-2'), (LABEL, KEY[0], 'part-3')}
+        old_runs = [{LABEL: {(KEY[0], 'part-1 + part-2'): 'ok'}}] * 2
+        new_runs = [{LABEL: {(KEY[0], 'part-1 + part-3'): 'ok'}}] * 2
+        _, against = flips([LABEL], new_runs, old_runs, parts, frozenset())
+        self.assertEqual(against, [{'label': LABEL, 'check': KEY[0], 'scenario': 'part-1 + part-2',
+                                    'record': ['ok', 'ok'], 'pair': [None, None]}])
+
     def test_an_ordinal_free_label_reaches_its_ordinal_run_labels(self):
         runs = [{f'{LABEL} #0': {KEY: 'ok'}, f'{LABEL} #1': {KEY: 'tolerated'}, f'{LABEL} #1x': {KEY: 'alert'}}] * 2
         self.assertEqual(label_statuses(runs, [LABEL]), {LABEL: [['ok', 'tolerated'], ['ok', 'tolerated']]})
