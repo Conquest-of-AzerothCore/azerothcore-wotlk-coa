@@ -416,7 +416,8 @@ bool Open(Player* player, Item* cache)
     if (!CanOpen(found != events.end(), Eligible(player), player->GetAreaId(), player->IsInCombat()))
     {
         ChatHandler(player->GetSession()).SendSysMessage(
-            "You must be level 60, in High-Risk and Mercenary mode and out of combat in Gadgetzan, Cenarion Hold or Ratchet to open a claimed Crow's Cache.");
+            "You must be level 60, in High-Risk and Mercenary mode and out of combat in Gadgetzan, "
+            "Cenarion Hold or Ratchet to open a claimed Crow's Cache.");
         return false;
     }
     std::vector<uint32> const newest = Bloodforged::NewestReleasedHeroicGear();
@@ -773,7 +774,8 @@ public:
             return true;
         if (!Eligible(player))
         {
-            ChatHandler(player->GetSession()).SendSysMessage("Only living level-60 High-Risk Mercenaries can claim Crow's Cache.");
+            ChatHandler(player->GetSession()).SendSysMessage(
+                "Only living level-60 High-Risk Mercenaries can claim Crow's Cache.");
             return true;
         }
         if (object->GetEntry() == DropEntry)
