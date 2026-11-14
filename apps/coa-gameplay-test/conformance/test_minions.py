@@ -324,6 +324,7 @@ class MinionScenarioTest(unittest.TestCase):
         self.assertFalse([step for step in scenario['steps'] if str(step.get('label', '')).endswith(' settle')])
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class SummonProcTest(unittest.TestCase):
     def setUp(self):
         self.workspace = Workspace()

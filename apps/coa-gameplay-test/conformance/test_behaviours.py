@@ -6555,6 +6555,7 @@ class HitRatioEnergizeTests(unittest.TestCase):
                 behaviour_scenario(load_fixture_class_file(23), self.entry(**changes))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitRatioFixtureTests(unittest.TestCase):
     def test_fixture_stats_reach_the_caster_only(self):
         scenario, _ = behaviour_scenario(CLASS_FILE, variant_entry(705284, 'hit_ratio', 'oath_breakers'))
