@@ -21,7 +21,10 @@ Option 2. A record verdict is compared when its label/check exists for the same 
 every part of a pooled key, and its judge did not change (`judge_changed`). A record scenario with a file whose key or
 labels the pair's manifest lacks is unmatched. The tally result carries `record_scenarios` (matched, unmatched and
 the unmatched keys); the checkpoint JSON, the checkpoint markdown, the checkpoint log and the command output state the
-counts, with a `WARNING` naming the first unmatched keys when the count is above 0.
+counts, with a `WARNING` naming the first unmatched keys when the count is above 0. Because a verdict is skipped
+per verdict and not per scenario, the same outputs also carry `record_verdicts`: the record verdict keys of the
+ledger's labels that were not compared, split into "no scenario file" (every part is a scenario with no file in
+either manifest) and "other", with a `WARNING` when "other" is above 0.
 
 Option 1 leaves a fixture change that re-hashes every scenario with no comparison against the record.
 

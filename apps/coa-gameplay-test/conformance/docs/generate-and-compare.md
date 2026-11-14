@@ -503,7 +503,11 @@ not by the scenario file's sha256 (ADR 0660): a re-hashed scenario, such as one 
 compared; a pooled verdict (`part-1 + part-2 ...`) is compared when every part matches. A record scenario with a file
 whose key or labels the pair's manifest lacks is unmatched and not compared; the checkpoint (`record_scenarios` in
 `checkpoint.json`, a line in `checkpoint.md` and the checkpoint log) and the command output state the matched and
-unmatched counts, with a `WARNING` and the first unmatched keys when any is unmatched. A ledger label without an ordinal reaches its
+unmatched counts, with a `WARNING` and the first unmatched keys when any is unmatched. They also count the record
+verdicts (label, check, scenario) of the ledger's labels that were not compared because they match no filed scenario
+of both manifests (`record_verdicts`): those whose every scenario part has no file in either manifest ("no scenario
+file": their status comes from the manifest and the judge code, not from a run) and the others, with a `WARNING` and
+the first keys when any other is found. A ledger label without an ordinal reaches its
 `label #N` verdicts in the flips and the label checks, as in the audit (`coverage.resolved_labels`). A ruling is
 applied first and stands over a flip: its status (2 to 5) rests on the rule or ruling it names, not on the runs
 (class-conformance.md section 2). Status 1 needs a pair with no flip (class-conformance.md 3.2) and never comes from a

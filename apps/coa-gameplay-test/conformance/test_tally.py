@@ -5,12 +5,14 @@ import unittest
 
 from tally import (NOT_FINAL, Decisions, TallyError, TallyInputs, check_decisions, classify, flips, judge_changed,
                    label_statuses, labels_pass, ledger_keys, load_decisions, match_line, record_match, record_rows,
-                   status_markdown, tally, tally_lines, write_status)
+                   record_verdicts, status_markdown, tally, tally_lines, verdict_line, write_status)
 
 FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'cycle'
 RULING = 'mentor ruling on X 18:39, confirmed (c8 brief): status 3'
 DECISIONS = Decisions({}, {'81.0': ('3', RULING)}, frozenset(), frozenset({'125.2'}))
 LABEL = '900001 behaviour_metric_delta probe'
+VALUE_LABEL = '301303 effect_value e0 #0'
+NO_SKIPPED_VERDICT = {'no_scenario_file': 0, 'other': 0, 'other_verdicts': []}
 KEY = ('behaviour_metric_delta', 'scenario-a')
 
 
@@ -176,6 +178,7 @@ class RecordMatchTest(unittest.TestCase):
         result = tally(self.inputs('final15', self.rewritten('final15', rehash)))
         self.assertEqual(result['flips_vs_record'], ['389.0'])
         self.assertEqual(result['record_scenarios'], {'matched': 22, 'unmatched': 0, 'unmatched_scenarios': []})
+        self.assertEqual(result['record_verdicts'], NO_SKIPPED_VERDICT)
 
     def test_a_record_scenario_missing_from_the_pair_is_counted_as_unmatched(self):
         def drop(manifest):
@@ -192,6 +195,66 @@ class RecordMatchTest(unittest.TestCase):
         record = json.loads((FIXTURES / 'record' / 'manifest.json').read_text(encoding='utf-8'))
         now = json.loads(self.rewritten('final16', relabel).read_text(encoding='utf-8'))
         self.assertEqual(record_match(record, now)['unmatched_scenarios'], ['conformance-necromancer-value-301303'])
+
+
+class RecordVerdictTest(unittest.TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+
+    def with_verdicts(self, source: Path, name: str, added: list) -> Path:
+        out = self.root / name
+        out.mkdir()
+        document = json.loads((source / 'verdicts.json').read_text(encoding='utf-8'))
+        document['verdicts'] += added
+        (out / 'verdicts.json').write_text(json.dumps(document), encoding='utf-8')
+        return out
+
+    def inputs(self, scenario: str, record_status: str, pair_status: str, file_less: bool) -> TallyInputs:
+        values = pair_inputs('final16')
+        verdict = {'label': VALUE_LABEL, 'check': 'effect_value', 'scenario': scenario}
+        record = tuple(self.with_verdicts(path, f'record-{index}', [{**verdict, 'status': record_status}])
+                       for index, path in enumerate(values.record_compare))
+        pair = tuple(self.with_verdicts(path, f'pair-{index}', [{**verdict, 'status': pair_status}])
+                     for index, path in enumerate(values.compare))
+        manifest = json.loads(values.record_manifest.read_text(encoding='utf-8'))
+        if file_less:
+            manifest['scenarios'].append({'key': scenario, 'sha256': None, 'expectations': [
+                {'label': VALUE_LABEL, 'check': 'effect_value'}]})
+        record_manifest = self.root / 'record-manifest.json'
+        record_manifest.write_text(json.dumps(manifest), encoding='utf-8')
+        return TallyInputs(values.ledger, values.record_status, record, record_manifest, pair, values.coverage,
+                           values.manifest, values.decisions)
+
+    def test_a_file_less_closed_record_verdict_is_counted_as_not_compared(self):
+        result = tally(self.inputs('conformance-necromancer-unmodelled-301303', 'closed', 'alert', file_less=True))
+        self.assertEqual(result['flips_vs_record'], [])
+        self.assertEqual(result['record_verdicts'], {'no_scenario_file': 1, 'other': 0, 'other_verdicts': []})
+        self.assertEqual(verdict_line(result['record_verdicts']),
+                         'record verdicts not compared with the record: no scenario file 1, other 0')
+
+    def test_a_record_verdict_naming_no_manifest_scenario_is_other_and_warned(self):
+        result = tally(self.inputs('derived-301303', 'ok', 'alert', file_less=False))
+        self.assertEqual(result['record_scenarios']['unmatched'], 0)
+        self.assertEqual(result['record_verdicts'], {'no_scenario_file': 0, 'other': 1, 'other_verdicts': [
+            [VALUE_LABEL, 'effect_value', 'derived-301303']]})
+        self.assertEqual(verdict_line(result['record_verdicts']),
+                         'WARNING record verdicts not compared with the record: no scenario file 0, OTHER 1 '
+                         f'({VALUE_LABEL} | effect_value | derived-301303)')
+
+    def test_a_verdict_check_without_its_expectation_is_other(self):
+        matched = {(LABEL, 'other_check', 'scenario-a')}
+        old_runs = [{LABEL: {KEY: 'ok'}}] * 2
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, matched, set())['other'], 1)
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, {(LABEL, *KEY)}, set()),
+                         NO_SKIPPED_VERDICT)
+
+    def test_a_pooled_record_verdict_is_file_less_only_when_every_part_is(self):
+        pooled = {LABEL: {(KEY[0], 'part-1 + part-2'): 'closed'}}
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], [pooled] * 2, set(), {'part-1', 'part-2'})
+                         ['no_scenario_file'], 1)
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], [pooled] * 2, set(), {'part-1'})['other'], 1)
 
 
 class FlipRuleTest(unittest.TestCase):

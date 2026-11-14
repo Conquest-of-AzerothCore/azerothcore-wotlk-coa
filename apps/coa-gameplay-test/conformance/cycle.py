@@ -11,7 +11,7 @@ import sys
 from typing import Callable, Sequence
 
 from tally import (FINAL, TallyError, TallyInputs, load_decisions, match_line, record_match, tally, tally_lines,
-                   write_status)
+                   tally_record_verdicts, verdict_line, write_status)
 
 STEPS = ('gate', 'digests', 'generate', 'source', 'runs', 'compare', 'audit', 'tally', 'refactor', 'archive',
          'checkpoint')
@@ -748,6 +748,15 @@ def record_scenarios(cycle: Cycle) -> dict:
                         json.loads(manifest_path(config).read_text(encoding='utf-8')))
 
 
+def record_verdicts(cycle: Cycle) -> dict:
+    if cycle.tally_result is not None:
+        return cycle.tally_result['record_verdicts']
+    config = cycle.config
+    inputs = TallyInputs(config.clauses, config.record.status, config.record.compare, config.record.manifest,
+                         tuple(compare_dirs(cycle)), (), manifest_path(config), load_decisions(None))
+    return tally_record_verdicts(inputs)
+
+
 def checkpoint_document(cycle: Cycle) -> dict:
     config = cycle.config
     rows = tally_rows(cycle)
@@ -774,6 +783,7 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'flips': {'in_pair': [row['key'] for row in rows if row['flips_in_pair']],
                   'against_record': [row['key'] for row in rows if row['flips_vs_record']]},
         'record_scenarios': record_scenarios(cycle),
+        'record_verdicts': record_verdicts(cycle),
         'lost': lost,
         'gained': [row['key'] for row in rows if row['key'] in now - before],
         'stamps': list(cycle.stamps),
@@ -794,6 +804,15 @@ def match_markdown(match: dict) -> str:
             f"{' ...' if match['unmatched'] > 10 else ''}")
 
 
+def verdict_markdown(verdicts: dict) -> str:
+    counts = f"{verdicts['no_scenario_file']} with no scenario file, {verdicts['other']} other"
+    if not verdicts['other']:
+        return f'Record verdicts not compared with the record: {counts}'
+    shown = ', '.join(' | '.join(key) for key in verdicts['other_verdicts'][:10])
+    return (f"**WARNING: record verdicts not compared with the record: {counts}**: {shown}"
+            f"{' ...' if verdicts['other'] > 10 else ''}")
+
+
 def checkpoint_markdown(document: dict) -> str:
     total = document['total']
     share = f"{100.0 * document['count'] / total:.1f}%" if total else 'n/a'
@@ -809,6 +828,7 @@ def checkpoint_markdown(document: dict) -> str:
              f"{len(document['flips']['against_record'])} against the record "
              f"({', '.join(document['flips']['against_record']) or 'none'})",
              f"- {match_markdown(document['record_scenarios'])}",
+             f"- {verdict_markdown(document['record_verdicts'])}",
              f"- Lost: {', '.join(document['lost']) or 'none'}; gained: {', '.join(document['gained']) or 'none'}",
              f"- Stamps: {' / '.join(document['stamps']) or NOT_RECORDED}; record {document['record']['name']} "
              f"({' / '.join(document['record']['stamps']) or NOT_RECORDED})",
@@ -826,6 +846,7 @@ def step_checkpoint(cycle: Cycle) -> None:
     (out / CHECKPOINT_MD).write_text(checkpoint_markdown(document), encoding='utf-8')
     note(cycle, 'checkpoint', f"{document['count']} / {document['total']}, delta {document['delta']:+d}")
     note(cycle, 'checkpoint', match_line(document['record_scenarios']))
+    note(cycle, 'checkpoint', verdict_line(document['record_verdicts']))
 
 
 HANDLERS = {'gate': step_gate, 'digests': step_digests, 'generate': step_generate, 'source': step_source,
@@ -898,6 +919,7 @@ def cycle_command(args) -> int:
             print(line)
     if {'tally', 'checkpoint'} & set(cycle.done):
         print(match_line(record_scenarios(cycle)))
+        print(verdict_line(record_verdicts(cycle)))
     if (config.out / CHECKPOINT_MD).exists() and 'checkpoint' in cycle.done:
         print(config.out / CHECKPOINT_MD)
     return 0

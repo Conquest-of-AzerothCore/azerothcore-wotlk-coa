@@ -374,6 +374,31 @@ class CheckpointTest(CycleCase):
                          {'matched': 22, 'unmatched': 0, 'unmatched_scenarios': []})
         markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
         self.assertIn('- Record scenarios: 22 matched by entry and label, 0 unmatched', markdown)
+        self.assertEqual(self.checkpoint()['record_verdicts'],
+                         {'no_scenario_file': 0, 'other': 0, 'other_verdicts': []})
+        self.assertIn('- Record verdicts not compared with the record: 0 with no scenario file, 0 other', markdown)
+
+    def test_other_unmatched_record_verdicts_are_loud_in_the_checkpoint(self):
+        record = []
+        for index, source in enumerate((FIXTURES / 'record' / 'cmp-run1', FIXTURES / 'record' / 'cmp-run2')):
+            document = json.loads((source / 'verdicts.json').read_text(encoding='utf-8'))
+            document['verdicts'].append({'label': '301303 effect_value e0 #0', 'check': 'effect_value',
+                                         'scenario': 'derived-301303', 'status': 'ok'})
+            out = self.root / f'record-{index}'
+            out.mkdir()
+            (out / 'verdicts.json').write_text(json.dumps(document), encoding='utf-8')
+            record.append(out)
+        config = self.replay()
+        run_cycle(self.replay(record=Record(config.record.name, config.record.status, config.record.stamps,
+                                            tuple(record), config.record.manifest)), REPLAY, FakeRunner(self.root))
+        self.assertEqual(self.checkpoint()['record_verdicts'], {
+            'no_scenario_file': 0, 'other': 1, 'other_verdicts': [['301303 effect_value e0 #0', 'effect_value',
+                                                                   'derived-301303']]})
+        markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
+        self.assertIn('- **WARNING: record verdicts not compared with the record: 0 with no scenario file, 1 other**: '
+                      '301303 effect_value e0 #0 | effect_value | derived-301303', markdown)
+        log = (self.root / 'out' / 'logs' / '11-checkpoint.log').read_text(encoding='utf-8')
+        self.assertIn('WARNING record verdicts not compared with the record: no scenario file 0, OTHER 1', log)
 
     def test_unmatched_record_scenarios_are_loud_in_the_checkpoint_and_the_command_line(self):
         manifest = json.loads((FIXTURES / 'final16' / 'manifest.json').read_text(encoding='utf-8'))
@@ -546,6 +571,8 @@ class CommandLineTest(CycleCase):
             self.assertEqual(main(['cycle', '--config', str(path), *skips]), 0)
         self.assertEqual(self.checkpoint()['count'], 14)
         self.assertIn('record scenarios matched by entry and label: 22, unmatched: 0\n', output.getvalue())
+        self.assertIn('record verdicts not compared with the record: no scenario file 0, other 0\n',
+                      output.getvalue())
         document['pair']['stamps'] = list(STAMPS[:1])
         path.write_text(json.dumps(document), encoding='utf-8')
         with self.assertRaisesRegex(CycleError, 'pair.stamps'):
