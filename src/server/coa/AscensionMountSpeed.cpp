@@ -27,11 +27,6 @@ constexpr int32 BattlegroundGroundMountSpeed = 100;
 
 std::atomic<bool> legacyFlight{ false };
 
-bool IsLearnedMount(Player const* player, SpellInfo const* spell)
-{
-    return spell->HasAura(SPELL_AURA_MOUNTED) && player->HasSpell(spell->Id);
-}
-
 uint8 LegacyAshadarFlightMask(SpellInfo const* spell)
 {
     uint8 mask = 0;
@@ -139,16 +134,22 @@ public:
             return;
 
         Player* player = caster ? caster->ToPlayer() : nullptr;
-        if (!player || effect->GetBase()->GetOwner() != player || !IsLearnedMount(player, effect->GetSpellInfo()))
+        SpellInfo const* spell = effect->GetSpellInfo();
+        if (!player || effect->GetBase()->GetOwner() != player || !spell->HasAura(SPELL_AURA_MOUNTED))
+            return;
+
+        if (type == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED && player->InBattleground() && !player->InArena())
+        {
+            amount = BattlegroundGroundMountSpeed;
+            return;
+        }
+
+        if (!player->HasSpell(spell->Id))
             return;
 
         uint16 const riding = player->GetBaseSkillValue(SKILL_RIDING);
-        if (type == SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED)
-            amount = GetRidingFlightMountSpeed(riding);
-        else if (player->InBattleground() && !player->InArena())
-            amount = BattlegroundGroundMountSpeed;
-        else
-            amount = GetRidingGroundMountSpeed(riding);
+        amount = type == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED ? GetRidingGroundMountSpeed(riding) :
+            GetRidingFlightMountSpeed(riding);
     }
 };
 
