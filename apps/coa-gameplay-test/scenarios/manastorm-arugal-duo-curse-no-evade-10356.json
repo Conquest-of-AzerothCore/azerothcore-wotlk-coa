@@ -1,21 +1,19 @@
 {
   "schema": 1,
-  "name": "Manastorm Shadowfang Keep: Duo Archmage Arugal does not full-heal when his Curse charms the only engaged attacker (#10356)",
+  "name": "Manastorm Shadowfang Keep: Duo Archmage Arugal cannot charm the only engaged attacker with his Curse and keeps fighting (#10356)",
   "contract": [
-    "#10356: SetArugalEvadeSuppressed() (ManastormShadowfangKeepCompat.cpp) only calls SmartAI::SetSuppressEvade()",
-    "when ManastormMgr::GetRunFor(player)->GetMode() == ManastormMode::Solo; every other mode (Duo, Trio, Group)",
-    "returns early and leaves Arugal's evade path unsuppressed. #8345's own diagnosis of the root cause is not",
-    "about party size: 'the boss's only threat reference reads as friendly and SelectVictim() falls through to",
-    "EnterEvadeMode()' whenever Arugal's Curse charms the single player he is actually fighting. That happens in",
-    "any mode when only one party member is engaged with Arugal and the others are not (out of range, not yet",
-    "arrived, or otherwise uninvolved) -- the boss's threat list has exactly one entry at the moment the charm",
-    "lands, same as the solo case.",
-    "This scenario runs a two-player (Duo) Manastorm segment test (ManastormModeForMemberCount(2) == Duo). n1",
-    "walks up and engages Arugal alone; n2 stays back in the entry room, out of range and never engaging, so",
-    "Arugal's threat list holds only n1 when the curse is forced. The fix widens SetArugalEvadeSuppressed() to",
-    "every mode; without it, Arugal evades (his Chaotic Link encounter aura 93459 is stripped by",
-    "Unit::RemoveEvadeAuras() and he becomes unattackable) the instant the forced charm lands, exactly as in the",
-    "pre-#8345 Solo bug."
+    "#10356: in a two-player (Duo) Manastorm segment test, n1 engages Arugal alone while n2 stays back in the",
+    "entry room, out of range and never engaging, so Arugal's threat list holds only n1, the same as a solo",
+    "fight. Arugal's Curse 7621 must not charm n1 either.",
+    "Rule (2026-11-14): Archmage Arugal 4275 never mind-controls a player who fights him alone, even inside a group.",
+    "BossControlTargeting.h lets his charms, Arugal's Curse 7621 and the Ascension kit's Curse of Arugal 2102679",
+    "(both SPELL_AURA_MOD_CHARM on effect 0), land only while at least two players are on his threat list; his",
+    "SmartAI finds no target otherwise, and AscensionBossControlGuard refuses any other cast, a forced triggered one",
+    "included, with SPELL_FAILED_BAD_TARGETS. The case selects Arugal and forces the charm with '.cast back <spell>",
+    "triggered' (select_nearby sends the CMSG_SET_SELECTION that ChatHandler::getSelectedCreature() needs) to probe",
+    "that guard. The closing assertions confirm the lone engaged player stays uncharmed and Arugal keeps fighting:",
+    "an evade would strip his Chaotic Link encounter aura 93459 (Unit::RemoveEvadeAuras()) and make him",
+    "unattackable."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -151,20 +149,25 @@
     {
       "action": "command",
       "actor": "n1",
-      "command": ".cast back 7621 triggered"
+      "command": ".cast back 7621 triggered",
+      "rejected": true
+    },
+    {
+      "action": "wait",
+      "label": "Give the forced cast time to resolve",
+      "ms": 1500
     },
     {
       "action": "assert",
-      "label": "n1 is charmed by Arugal's Curse",
+      "label": "Arugal cannot charm the only player fighting him: Arugal's Curse is refused",
       "actor": "n1",
       "metric": "aura",
       "spell": 7621,
-      "within_ms": 2000,
-      "equals": 1
+      "equals": 0
     },
     {
       "action": "assert",
-      "label": "Arugal did not evade in Duo mode either: his Chaotic Link encounter aura survives the charm",
+      "label": "Arugal did not evade in Duo mode either: his Chaotic Link encounter aura survives the refused charm",
       "actor": "n1",
       "metric": "nearby_creature_aura_count",
       "entry": 4275,
