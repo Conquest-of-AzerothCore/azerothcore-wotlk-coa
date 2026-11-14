@@ -626,6 +626,7 @@ namespace
     constexpr float STALACTITE_GRID   = 10.0f;
     constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
+    constexpr float STALACTITE_SINK   = 4.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
     constexpr float SNOWGRAVE_LEASH   = 120.0f;
 
@@ -701,13 +702,10 @@ namespace
                         rz >= ground + CEILING_SEARCH - 1.0f)
                         continue;
                     float const turn = frand(0.0f, 2 * float(M_PI));
-                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 0, 0, 0, 0, 0))
-                    {
-                        hanging->SetWorldRotationAngles(turn, 0.0f, float(M_PI));
-                        hanging->DestroyForVisiblePlayers();
-                        hanging->UpdateObjectVisibility();
+                    G3D::Quat const tip(G3D::Matrix3::fromEulerAnglesZYX(turn, 0.0f, float(M_PI) - 0.05f));
+                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz - STALACTITE_SINK, turn,
+                            tip.x, tip.y, tip.z, tip.w, 0))
                         _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
-                    }
                 }
         }
 
