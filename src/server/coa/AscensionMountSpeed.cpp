@@ -157,21 +157,9 @@ class BattlegroundMountSpeed : public AllBattlegroundScript
 {
 public:
     BattlegroundMountSpeed() : AllBattlegroundScript("AscensionBattlegroundMountSpeed",
-        { ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER,
-          ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_REMOVE_PLAYER_AT_LEAVE }) { }
+        { ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER }) { }
 
     void OnBattlegroundAddPlayer(Battleground*, Player* player) override
-    {
-        RecalculateGroundMountSpeed(player);
-    }
-
-    void OnBattlegroundRemovePlayerAtLeave(Battleground*, Player* player) override
-    {
-        RecalculateGroundMountSpeed(player);
-    }
-
-private:
-    static void RecalculateGroundMountSpeed(Player* player)
     {
         auto const& mounted = player->GetAuraEffectsByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
         std::vector<AuraEffect*> const speeds(mounted.begin(), mounted.end());
