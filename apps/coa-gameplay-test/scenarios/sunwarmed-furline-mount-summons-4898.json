@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "name": "Sunwarmed Furline mounts its rider (#4898)",
+  "contract": [
+    "Issue #4898: the Sunwarmed Furline collection mount (wrapper spell 9931327, taught by item 1777060) did not",
+    "summon. #7150 bound the wrapper to spell_ascension_local_mount, which picks the child mount by Riding skill",
+    "(AscensionCollectibleSpellData row 9931327: creature 80403, Ground60 530422). Expected for a level 60 rider",
+    "with Riding 75 in Stormwind: the cast is not refused, the rider gets the Ground60 child aura 530422 and sits on",
+    "display 99008 (creature 80403, catmount.m2); dismounting clears the display."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8697.71, "y": 479.867, "z": 95.3789, "o": 0},
+  "players": [
+    {"id": "rider", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 2000},
+    {"action": "set_skill", "actor": "rider", "skill": 762, "value": 75, "maximum": 75},
+    {"action": "learn", "actor": "rider", "spell": 9931327},
+    {"action": "assert", "label": "CONTROL: the rider is not mounted", "actor": "rider",
+     "metric": "mount_display_id", "equals": 0},
+    {"action": "cast", "label": "Sunwarmed Furline", "actor": "rider", "spell": 9931327},
+    {"action": "assert", "label": "Sunwarmed Furline is not refused", "actor": "rider", "metric": "cast_failure",
+     "spell": 9931327, "equals": 0, "within_ms": 4000},
+    {"action": "assert", "label": "the wrapper applies the Ground60 child mount", "actor": "rider",
+     "metric": "aura", "spell": 530422, "equals": 1, "within_ms": 4000},
+    {"action": "assert", "label": "the rider sits on the Sunwarmed Furline", "actor": "rider",
+     "metric": "mount_display_id", "equals": 99008},
+    {"action": "cancel_mount", "actor": "rider"},
+    {"action": "assert", "label": "dismounting clears the mount display", "actor": "rider",
+     "metric": "mount_display_id", "equals": 0, "within_ms": 2000}
+  ]
+}

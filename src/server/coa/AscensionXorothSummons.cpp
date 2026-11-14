@@ -114,6 +114,7 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
                 State(player).imps.push_back(me->GetGUID());
                 me->GetThreatMgr().RegisterRedirectThreat(706571, owner, 100);
                 Cast(player, me, 800443);
+                Cast(me, me, 805916);
             }
             else
                 Cast(me, me, 302580);

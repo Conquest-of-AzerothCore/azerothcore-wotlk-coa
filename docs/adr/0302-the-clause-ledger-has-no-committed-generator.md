@@ -1,6 +1,6 @@
 # 0302. The clause ledger has no committed generator; its format lives in clause-ledger.md
 
-- Status: accepted
+- Status: accepted; its decision that no repository command builds a first ledger is superseded by ADR 0310
 - Date: 2026-11-12
 - Supersedes: ADR 0052's sentence that a future audit revision reruns "the same generation step ... (documented in
   `docs/ledger-format.md`)". The rest of ADR 0052 stays in force.

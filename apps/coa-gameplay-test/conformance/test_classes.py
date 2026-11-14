@@ -5,13 +5,18 @@ import tempfile
 import unittest
 
 from classes import ClassSpell, DataSet, advancement_levels, class_skill_lines, class_spells, table_rows
-from profile import load_class_file
+from profile import load_fixture_class_file
 import schemas
 
 DBC_DIR = Path('/srv/coa/server-data/dbc')
 HEADER = Path(__file__).resolve().parents[3] / 'src/server/coa/AscensionSpellProgressionData.h'
 
 TEMPLAR_CLASS_ID = 19
+NECROMANCER_CLASS_ID = 23
+KIT_CITATION = re.compile(
+    r'^ascensionsidekick data\.js coaKits Necromancer (Death|Rime|Animation) kit, fetched \d{4}-\d\d-\d\d$')
+OWNER_RULING_CITATION = re.compile(r'^owner ruling Q-[a-z0-9-]+, \d{4}-\d\d-\d\d$')
+NECROMANCER_LOGGED_UNDER_ANOTHER_NAME = {500970: 'Raise: Greater Skeletal Warrior', 562210: 'Siphon Mana'}
 TEMPLAR_SPELL_IDS = 172
 TEMPLAR_SPELL_IDS_WITH_RANKS = 221
 SHARED_CLASS_TYPE = 12
@@ -189,7 +194,7 @@ class ClientDbcClassSpellTest(unittest.TestCase):
     def test_skill_lines_are_the_ability_lines_of_the_class_spells_and_the_weapon(self):
         self.assertEqual(class_skill_lines(DBC_DIR, self.templar, STAFF_SUBCLASS), TEMPLAR_SKILL_LINES)
         self.assertEqual(class_skill_lines(DBC_DIR, self.templar, None), TEMPLAR_SKILL_LINES[:3])
-        self.assertEqual(load_class_file(TEMPLAR_CLASS_ID)['skill_lines'], TEMPLAR_SKILL_LINES)
+        self.assertEqual(load_fixture_class_file(TEMPLAR_CLASS_ID)['skill_lines'], TEMPLAR_SKILL_LINES)
 
     def test_extra_spells_join_the_set(self):
         extended = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER,
@@ -209,7 +214,7 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(len(extended[RIGHTEOUS_TEMPEST].ranks), 7)
 
     def test_templar_extra_spells_cite_a_logged_rank_of_their_chain(self):
-        entries = load_class_file(TEMPLAR_CLASS_ID)['extra_spells']
+        entries = load_fixture_class_file(TEMPLAR_CLASS_ID)['extra_spells']
         extended = {spell.spell_id: spell for spell in class_spells(
             DBC_DIR, TEMPLAR_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
         records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell',
@@ -226,6 +231,29 @@ class ClientDbcClassSpellTest(unittest.TestCase):
         self.assertEqual(outside_chain, {TEMPLE_GUARDIAN: TEMPLE_GUARDIAN_RANK_6})
         self.assertEqual(records[TEMPLE_GUARDIAN_RANK_6]['Rank[enUS]'], 'Rank 6')
         self.assertEqual(len(extended), TEMPLAR_SPELL_IDS + len(entries))
+
+    def test_necromancer_extra_spells_cite_a_logged_rank_of_their_chain(self):
+        entries = load_fixture_class_file(NECROMANCER_CLASS_ID)['extra_spells']
+        extended = {spell.spell_id: spell for spell in class_spells(
+            DBC_DIR, NECROMANCER_CLASS_ID, HEADER, extra_spells=[entry['spell'] for entry in entries])}
+        records = {identity: fields for identity, fields in table_rows(DataSet(DBC_DIR), 'Spell', ['SpellName[enUS]'])}
+        renamed, kits, rulings = {}, [], []
+        for entry in entries:
+            self.assertEqual(records[entry['spell']]['SpellName[enUS]'], entry['name'], entry['spell'])
+            if KIT_CITATION.match(entry['citation']):
+                kits.append(entry['spell'])
+                continue
+            if OWNER_RULING_CITATION.match(entry['citation']):
+                rulings.append(entry['spell'])
+                continue
+            citation = CITATION.match(entry['citation'])
+            self.assertIsNotNone(citation, entry['spell'])
+            logged_id, logged_name = int(citation.group(1)), citation.group(2)
+            self.assertIn(logged_id, extended[entry['spell']].ranks, entry['spell'])
+            if logged_name != entry['name']:
+                renamed[entry['spell']] = logged_name
+        self.assertEqual(renamed, NECROMANCER_LOGGED_UNDER_ANOTHER_NAME)
+        self.assertEqual((len(entries) - len(kits) - len(rulings), len(kits), len(rulings)), (29, 11, 1))
 
     def test_passive_flag_is_present_for_some_but_not_all_spells(self):
         passives = [spell for spell in self.templar if spell.passive]

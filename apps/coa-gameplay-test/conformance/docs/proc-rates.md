@@ -11,7 +11,7 @@ A `procs` entry of the class file describes one proc aura:
 | | `dummy`, with `"target": "ally"` for a cast at a second player |
 | `trigger_text` | the words of the tooltip that name the trigger |
 | `proc_spell`, `proc_spell_source` | the spell each proc casts, and where that id comes from |
-| `event_metric` | `spell_cast_count` or `spell_damage_count`, the metric of `proc_spell`; `melee_attack_count` (a `cast` |
+| `event_metric` | `spell_cast_count`, `spell_damage_count` or `spell_energize_count` (a proc that only energizes, ADR 0497), the metric of `proc_spell`; `melee_attack_count` (a `cast` |
 | | trigger only) for the main-hand auto attacks of an extra-attack proc (Paladin Training 504808); `spell_charges` when a proc |
 | | refreshes a charge of the trigger rank (`proc_spell`) instead of casting a spell |
 | `extra_event_terms` | further `{"metric", "spell"}` counts added to the events |
@@ -27,6 +27,8 @@ A `procs` entry of the class file describes one proc aura:
 | `status`, `reason` | `ambiguous_tooltip` or `unmodelled` for an entry without a scenario, and why |
 | `attempt_auras` | `{"spell", "stacks", "source"}` set before every cast of a `cast` trigger, for a fixture that keeps another |
 | | roll out of the trials (Blade Sermon 572548: Oath Chain at its cap, so Vindication grants no Oath: Vindication) |
+| | or, with `"target": "dummy"`, a state the trigger needs on the dummy (Soulfreeze 572023: Ice Lock 22856, a |
+| | Frost stun without interrupt flags, keeps the dummy Frozen through the damage, ADR 0491) |
 | `applied_by` | `{"spell", "source"}`: the aura is not learned but granted by a cast of `spell` (an Oath), so the |
 | | scenario sets it (`set_aura`, 1 stack) instead of learning it, and the chance is the aura's own `$<aura>s1` |
 | | percent token in the tooltip of `spell`, which `tooltip` then copies (ADR 0151) |
@@ -330,3 +332,48 @@ The off-hand-swing (92108) and Oath: Vindication (805332) sources named by the s
 measurable by this harness for reasons already on their own entries (92108: no `CanDualWield` path for Templar;
 805332/504107: no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round
 introduces, and out of scope for a `baseline_co_learn` fixture to close.
+
+### Minion procs (ADR 0340, ADR 0343)
+
+A `procs` entry may take the minion trigger action of
+[trigger entries](trigger-entries.md#minion-trigger-entries-adr-0340-adr-0342-adr-0343) with a `trial_metric` of
+`pet_melee_crits` or `owned_creature_damage_count`; the minion is raised before the passive is learned. `event_actor: "minion"` reads the proc spell cast by the minion; `aura_on_minion` reads a summons-only
+passive on the minion. `baseline: true` swings the minion before the learn for `max(20, ceil(log 0.01 / log(1 -
+p)))` attempts at the stated chance `p` (90 at 5%, 44 at 10%, 21 at 20%): any event there is an alert, and those
+trials and events are left out of the rate. Minion entries are keyed by their summon spell, so two rigs of one aura
+keep separate labels (`<aura> proc_rate <proc spell> <summon>`). `extra_dummies` places more dummies at the given
+distances from the caster and reads the proc spell on every dummy, with `events_per_proc` the targets per proc.
+
+`energize_amounts` (`{"power", "expected" or "percent_of_max", "source"}`) adds a `proc_energize_amount <power>`
+expectation per power: the summed `spell_energize_total` of the proc spell must equal its count times the stated
+amount, or times `floor(max_power x percent_of_max / 100)` read in the same part (Overwhelming Force 531128: 20
+Runic Power and 2% of maximum mana).
+
+`band: true` (ADR 0346) sizes the trials so the 99% half-width is half the G-19 band (the larger of 5% of the chance
+and 2 points) and judges the Wilson interval inside the band: `ok` inside, `alert` when it excludes the chance,
+`measured` (effect present, interval stated, not final) otherwise. A minion proc may count the proc spell's casts
+(`event_metric: "spell_go_count"`, `event_actor: "minion"`) when a hit can be fully resisted, and
+`trial_excluded_spells` (with `trial_excluded_reason`) removes the minion's hits of those spells from the trials,
+for hits the event script cannot roll on (Plague Horde's Zombie Plague 504022, cast inside its own handler).
+
+### Summon procs (ADR 0351)
+
+A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck
+Summoner 806086) counts it with `event_metric: "owned_creature_summon_count"` and `event_entry`, the creature entry:
+the harness's running count of creatures of that entry that entered the world with the player as owner, summoner or
+creator. It needs a cast trigger; `events_per_proc` is the creatures per proc (2 Rotlings). `baseline: true` on a cast
+trigger casts the trigger `max(20, ceil(log 0.01 / log(1 - p)))` times before the passive is learned (part 1 only):
+any summon there is an alert. `trials_per_attempt` divides the scheduled casts when each cast yields several trials
+(Harvest Plague's leech ticks: two per attempt, since aura 53 now counts in the tick spacing like aura 3).
+`min_parts` splits a proc into at least that many parts of the same attempts per part, adding attempts (the
+between-part t interval needs 10 parts, ADR 0647).
+
+### Chance modifiers learned with the aura (ADR 0586)
+
+`chance_modifiers` lists `[spell, token]` pairs of spells that raise the aura's roll: each spell is learned right
+after the aura (never in the baseline), and the expected chance is the aura's own chance plus the modifier's tooltip
+percent `token`. The token must be a flat `SPELLMOD_CHANCE_OF_SUCCESS` modifier (aura 107, MiscValue 18) in the
+server DBC set, or generation refuses the entry. The label and the scenario keys gain ` with <spell>` per modifier, so
+the plain entry of the same aura keeps its label; `compare` reads the modifier's token again from the tooltip and adds
+it to the chance it judges. Necromancer: Refreshing Chill 300940 ($h = 20) with Frigid Winds 504357 ($s1 = 5),
+judged at 25% in the 23-27% band (claim 83.0, pooled like 92122).

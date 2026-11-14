@@ -540,6 +540,17 @@ class WholeProcsPerTriggerCompareTest(unittest.TestCase):
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ProcScenarioTest(unittest.TestCase):
+    def test_min_parts_adds_parts_of_the_same_size(self):
+        entry = templar_proc(SCOURGEBANE)
+        base = proc_plan(CLASS_FILE, entry)
+        wider = proc_plan(CLASS_FILE, {**entry, 'min_parts': base.parts + 5})
+        self.assertEqual((wider.parts, wider.per_part), (base.parts + 5, base.per_part))
+        self.assertEqual(wider.scheduled, base.per_part * (base.parts + 5))
+        self.assertEqual(wider.needed, base.needed)
+        self.assertEqual(proc_plan(CLASS_FILE, {**entry, 'min_parts': 1}), base)
+        with self.assertRaises(ValueError):
+            proc_plan(CLASS_FILE, {**entry, 'min_parts': 0})
+
     def test_scourgebane_reads_every_swing_in_parts_that_fit_the_timeout(self):
         entry = templar_proc(SCOURGEBANE)
         plan = proc_plan(CLASS_FILE, entry)
@@ -761,6 +772,28 @@ class ProcScenarioTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             proc_scenario(CLASS_FILE, entry)
 
+    def test_an_attempt_aura_can_hold_a_dummy_state_before_every_cast(self):
+        entry = {**templar_proc(CONDEMNATION),
+                 'attempt_auras': [{'spell': 22856, 'stacks': 1, 'source': 'seeded', 'target': 'dummy'}]}
+        steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        for earlier, cast in zip([0] + casts, casts):
+            fixtures = [step for step in steps[earlier:cast] if step['action'] == 'set_aura' and step['spell'] == 22856]
+            self.assertEqual([step.get('target') for step in fixtures], ['dummy'])
+
+    def test_an_attempt_aura_on_another_unit_is_refused(self):
+        entry = {**templar_proc(CONDEMNATION),
+                 'attempt_auras': [{'spell': 22856, 'stacks': 1, 'source': 'seeded', 'target': 'ally'}]}
+        with self.assertRaises(ValueError):
+            proc_scenario(CLASS_FILE, entry)
+
+    def test_an_energize_count_is_a_proc_event(self):
+        entry = {**templar_proc(CONDEMNATION), 'event_metric': 'spell_energize_count'}
+        steps = run.validate(proc_scenario(CLASS_FILE, entry)[0])['steps']
+        reads = [step for step in steps if step.get('metric') == 'spell_energize_count']
+        self.assertTrue(reads)
+        self.assertTrue(all(step['spell'] == entry['proc_spell'] and 'target' not in step for step in reads))
+
     def test_an_applied_by_without_its_source_is_refused(self):
         entry = {**templar_proc(WARRIOR_OF_DAWN), 'applied_by': {'spell': WARRIOR_OF_DAWN}}
         with self.assertRaises(ValueError):
@@ -900,10 +933,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
         self.assertEqual(equips[0]['item'], CLASS_FILE['alternate_weapons'][0]['item'])
 
     def test_might_of_aggramar_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-might-of-aggramar-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[MIGHT_OF_AGGRAMAR])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[MIGHT_OF_AGGRAMAR])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -913,10 +946,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_lightkeeper_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-lightkeeper-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[LIGHTKEEPER])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[LIGHTKEEPER])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -947,10 +980,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
                                   proc_label(CONDEMNATION, ZEALOTRY_STRIKE, BLADE_OF_FAITH)])
 
     def test_condemnation_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-condemnation-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[CONDEMNATION])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[CONDEMNATION])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -964,10 +997,10 @@ class TemplarProcEntriesTest(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateProcTest(unittest.TestCase):
     def test_generate_writes_every_part(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-procs-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, procs=[SCOURGEBANE])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, procs=[SCOURGEBANE])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             self.assertEqual({entry['kind'] for entry in manifest['scenarios']}, {'proc'})
             parts = [entry for entry in manifest['scenarios'] if entry['file']]
@@ -984,14 +1017,163 @@ class GenerateProcTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_unknown_proc_aura_is_refused(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-procs-'))
         try:
             with self.assertRaises(ValueError):
-                generate(CLASS_FILE['class_id'], out, procs=[1])
+                fixture_generate(CLASS_FILE['class_id'], out, procs=[1])
         finally:
             shutil.rmtree(out)
 
 
+
+class CastProcBaselineTests(unittest.TestCase):
+    TUNDRA_WARRIORS = 92122
+
+    def entry(self) -> dict:
+        from profile import load_fixture_class_file
+        return next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.TUNDRA_WARRIORS)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_the_baseline_casts_come_before_the_passive_and_count_casts(self):
+        from procs import proc_scenario
+        from profile import load_fixture_class_file
+        scenario, expectations = proc_scenario(load_fixture_class_file(23), self.entry())
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step.get('action') == 'learn' and step.get('spell') == self.TUNDRA_WARRIORS)
+        baseline = next(index for index, step in enumerate(steps)
+                        if step.get('label') == f'{self.TUNDRA_WARRIORS} proc baseline trials')
+        self.assertLess(baseline, learn)
+        self.assertEqual(steps[baseline]['metric'], 'spell_cast_count')
+        self.assertIn('baseline', expectations[0].model)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_without_the_fields_the_trials_are_hits_and_no_baseline_runs(self):
+        from procs import proc_scenario
+        from profile import load_fixture_class_file
+        entry = {key: value for key, value in self.entry().items() if key not in ('baseline', 'trial_casts')}
+        scenario, expectations = proc_scenario(load_fixture_class_file(23), entry)
+        trials = next(step for step in scenario['steps'] if step.get('label') == f'{self.TUNDRA_WARRIORS} proc trials')
+        self.assertEqual(trials['metric'], 'spell_damage_count')
+        self.assertNotIn('baseline', expectations[0].model)
+
+
+
+class MinionNativeProcTests(unittest.TestCase):
+    GHOUL_MASTERY = 503740
+
+    def entry(self) -> dict:
+        from profile import load_fixture_class_file
+        return next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.GHOUL_MASTERY)
+
+    def test_native_procs_are_read_on_the_minion_without_a_target(self):
+        from procs import event_steps
+        steps = event_steps(self.entry())
+        self.assertEqual(len(steps), 1)
+        self.assertEqual((steps[0]['metric'], steps[0]['entry'], steps[0]['spell']),
+                         ('owned_creature_spell_proc_count', 50073, self.GHOUL_MASTERY))
+        self.assertNotIn('target', steps[0])
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_native_procs_need_the_minion_event_actor(self):
+        from procs import proc_plan
+        from profile import load_fixture_class_file
+        entry = {key: value for key, value in self.entry().items() if key != 'event_actor'}
+        with self.assertRaises(ValueError):
+            proc_plan(load_fixture_class_file(23), entry)
+
+
+
+BASELINE_LABELS = {'trials': '92111 proc baseline trials', 'events': '92111 proc baseline events'}
+
+
+class ProcBaselineCompareTest(unittest.TestCase):
+    def setUp(self):
+        self.workspace = Workspace()
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def verdict(self, baseline_events: int):
+        expectation = proc_expectation()
+        expectation = replace(expectation, model={**expectation.model,
+                                                  'baseline': {**BASELINE_LABELS, 'attempts': 20}})
+        steps = proc_steps(1699 + 20, 340 + baseline_events) + [
+            assert_step(BASELINE_LABELS['trials'], '20'), assert_step(BASELINE_LABELS['events'], str(baseline_events))]
+        self.workspace.scenario(PROC_KEY, 'proc', [expectation], steps=steps)
+        manifest, results = self.workspace.manifest()
+        from compare import compare
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader())
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_the_baseline_is_taken_out_of_the_judged_trials(self):
+        verdict = self.verdict(0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 340 / 1699)
+        self.assertIn('no event in 20 baseline trials without the passive', verdict.explanation)
+
+    def test_a_proc_without_the_passive_is_an_alert(self):
+        verdict = self.verdict(2)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('2 events in 20 baseline trials without the passive', verdict.explanation)
+
+
 if __name__ == '__main__':
     unittest.main()
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ChanceModifierTests(unittest.TestCase):
+    REFRESHING_CHILL = 300940
+    FRIGID_WINDS = 504357
+
+    def entry(self, **changes) -> dict:
+        from profile import load_fixture_class_file
+        entry = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.REFRESHING_CHILL)
+        return {**entry, 'band': True, 'chance_modifiers': [[self.FRIGID_WINDS, '$s1']], **changes}
+
+    def class_file(self) -> dict:
+        from profile import load_fixture_class_file
+        class_file = load_fixture_class_file(23)
+        return {**class_file, 'procs': [*class_file['procs'], self.entry()]}
+
+    def test_the_modifier_adds_its_stated_points_and_is_learned_with_the_aura(self):
+        class_file = self.class_file()
+        plan = proc_plan(class_file, self.entry())
+        self.assertEqual((plan.chance_pct, plan.needed), (25.0, 12443))
+        scenario, [expectation, *_] = proc_scenario(class_file, self.entry())
+        learned = [step['spell'] for step in scenario['steps'] if step['action'] == 'learn']
+        self.assertLess(learned.index(self.REFRESHING_CHILL), learned.index(self.FRIGID_WINDS))
+        baseline = next(index for index, step in enumerate(scenario['steps'])
+                        if step.get('label') == f'{self.REFRESHING_CHILL} proc baseline trials')
+        aura = next(index for index, step in enumerate(scenario['steps'])
+                    if step['action'] == 'learn' and step['spell'] == self.REFRESHING_CHILL)
+        self.assertLess(baseline, aura)
+        self.assertEqual(expectation.label, f'{self.REFRESHING_CHILL} proc_rate with {self.FRIGID_WINDS}')
+        self.assertEqual(expectation.model['chance_modifiers'], [[self.FRIGID_WINDS, '$s1']])
+
+    def test_the_entry_without_a_modifier_keeps_its_label_and_chance(self):
+        from profile import load_fixture_class_file
+        plain = next(entry for entry in load_fixture_class_file(23)['procs'] if entry['aura'] == self.REFRESHING_CHILL)
+        class_file = self.class_file()
+        _, [expectation, *_] = proc_scenario(class_file, plain)
+        self.assertEqual(expectation.label, f'{self.REFRESHING_CHILL} proc_rate')
+        self.assertEqual(proc_plan(class_file, plain).chance_pct, 20.0)
+        self.assertNotIn('chance_modifiers', expectation.model)
+
+    def test_a_modifier_without_its_chance_token_is_refused(self):
+        for modifiers in ([[self.FRIGID_WINDS, '$s2']], [[self.FRIGID_WINDS]], [['504357', '$s1']]):
+            with self.subTest(modifiers=modifiers), self.assertRaises(ValueError):
+                proc_plan(self.class_file(), self.entry(chance_modifiers=modifiers))
+
+    def test_the_stated_rate_passes_and_a_mutant_at_the_unmodified_chance_alerts(self):
+        from compare import banded_rate, rate_judgement
+        plan = proc_plan(self.class_file(), self.entry())
+        expected = plan.chance_pct / 100
+        for procs, status in ((4666.0, 'ok'), (3733.0, 'alert')):
+            with self.subTest(procs=procs):
+                judged, low, high, why = rate_judgement(procs, 18665.0, plan.needed, expected)
+                judged, *_ = banded_rate(judged, low, high, expected, why)
+                self.assertEqual(judged, status)

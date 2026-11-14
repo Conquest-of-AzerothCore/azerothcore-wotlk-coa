@@ -5,6 +5,7 @@ import shutil
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_TAKEN_HIT,
                         BEHAVIOUR_THREAT_REDIRECT, BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME,
@@ -65,10 +66,12 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
-from compare import Verdict, judge_behaviour
+from behaviours import hit_arm, metric_delta_strike, cast_combat_spec
+from compare import STACKED_SAME, Verdict, judge_behaviour
 from hits import MAX_SCENARIO_MS, aura_modifiers
 from procs import cast_interval
-from profile import CASTER, DBC_DIR, control_entries, load_class_file
+from behaviours import forced_chance_of
+from profile import CASTER, DBC_DIR, base_steps, control_entries, load_fixture_class_file
 from tooltip import Records
 from values import ALLY, Expectation, FORCED_CRIT_RATING, dataset
 
@@ -76,7 +79,8 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
 import compare as compare_module
 
-CLASS_FILE = load_class_file(19)
+CLASS_FILE = load_fixture_class_file(19)
+LICHFROST = 801722
 RECORDS = Records(dataset(DBC_DIR)) if DBC_DIR.is_dir() else None
 SCARLET_JUDICATOR = 525024
 JUSTICE = 712437
@@ -2804,9 +2808,9 @@ class GenerateBehaviourVariantTest(unittest.TestCase):
         shutil.rmtree(self.out)
 
     def test_two_behaviour_entries_sharing_a_spell_id_get_distinct_manifest_keys(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         manifest = json.loads(
-            generate(TEMPLAR_CLASS_ID, self.out, behaviours=[WHIRLING_TEMPEST]).read_text(encoding='utf-8'))
+            fixture_generate(TEMPLAR_CLASS_ID, self.out, behaviours=[WHIRLING_TEMPEST]).read_text(encoding='utf-8'))
         entries = [entry for entry in manifest['scenarios'] if entry['spell_id'] == WHIRLING_TEMPEST]
         self.assertEqual(len(entries), 2)
         self.assertEqual(len({entry['key'] for entry in entries}), 2)
@@ -4990,6 +4994,22 @@ class JudgeGroupStackCapTests(unittest.TestCase):
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'ok')
 
+    def test_an_unchanged_value_after_the_partner_is_marked_stacked_same(self):
+        expectation = self.expectation(own_pct=3.0, partner_pct=3.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.03, 'combined': baseline * 1.03})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIs(verdict.detail[STACKED_SAME], True)
+
+    def test_a_stronger_partner_that_raises_the_value_is_not_stacked_same(self):
+        expectation = self.expectation(own_pct=3.0, partner_pct=5.0)
+        baseline = 1000.0
+        run = FakeRun({'baseline': baseline, 'own': baseline * 1.03, 'combined': baseline * 1.05})
+        verdict = judge_behaviour(base_verdict(expectation), run, expectation)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIs(verdict.detail[STACKED_SAME], False)
+
     def test_combined_summing_both_percentages_is_an_alert(self):
         expectation = self.expectation(own_pct=5.0, partner_pct=4.0)
         baseline = 1000.0
@@ -6035,7 +6055,6 @@ class JudgeHealBlockTests(unittest.TestCase):
         self.assertEqual(verdict.measured, 1.0)
 
 
-
 def class_entry(spell: int, kind: str) -> dict:
     return next(entry for entry in CLASS_FILE['behaviours'] if entry['spell'] == spell and entry['kind'] == kind)
 
@@ -6174,7 +6193,6 @@ class ThreatSlopeScenarioTests(unittest.TestCase):
         self.assertEqual(self.judged(self.readings(400.0, 150.0, cast=34.0)).status, 'unmeasured')
 
 
-
 def variant_entry(spell: int, kind: str, variant: str) -> dict:
     return next(entry for entry in CLASS_FILE['behaviours']
                 if entry['spell'] == spell and entry['kind'] == kind and entry.get('variant') == variant)
@@ -6234,7 +6252,6 @@ class GroupTargetScenarioTests(unittest.TestCase):
             verdict = judge_behaviour(base_verdict(expectation), FakeRun({expectation.label: float(value)}),
                                       expectation)
             self.assertEqual(verdict.status, 'alert')
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -6510,6 +6527,33 @@ class CostGateScenarioTests(unittest.TestCase):
             behaviour_scenario(CLASS_FILE, {**self.after_cast_entry(), 'after_wait_ms': 99500})
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HitRatioEnergizeTests(unittest.TestCase):
+    def entry(self, **changes) -> dict:
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 707006 and entry['kind'] == 'hit_ratio'
+                     and entry.get('label_suffix') == 'lichfrost')
+        energize = {key: value for key, value in entry.items() if key != 'critical'}
+        return {**energize, 'label_suffix': 'runic_power', 'expected': 1.25, 'metric': 'spell_energize_total',
+                'cast_spell': 501978, 'observe_spell': 804112, **changes}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_energize_reads_count_the_casters_own_energizes_of_the_observed_spell(self):
+        scenario, (expectation,) = behaviour_scenario(load_fixture_class_file(23), self.entry())
+        steps = run.validate(scenario)['steps']
+        reads = [step for step in steps if step.get('metric') in ('spell_energize_total', 'spell_energize_count')]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['spell'] == 804112 and 'target' not in step and 'critical' not in step
+                            for step in reads))
+        self.assertEqual(expectation.model['metric'], 'spell_energize_total')
+        self.assertTrue(any(step['action'] == 'cast' and step['spell'] == 501978 for step in steps))
+        self.assertIn('energize', scenario['contract'])
+
+    def test_an_energize_read_takes_no_critical_filter(self):
+        for changes in ({'critical': False}, {'rate': 'critical', 'expected_points': 5}):
+            with self.subTest(changes=changes), self.assertRaisesRegex(ValueError, 'critical'):
+                behaviour_scenario(load_fixture_class_file(23), self.entry(**changes))
+
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitRatioFixtureTests(unittest.TestCase):
@@ -6661,7 +6705,6 @@ class AttackMetricDeltaTest(unittest.TestCase):
                        {'force_crit': 'ranged'}):
             with self.subTest(change=change), self.assertRaises(ValueError):
                 metric_delta_scenario(CLASS_FILE, metric_delta_spec({**self.entry, **change}))
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -8136,6 +8179,60 @@ class CritRateTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'no forced crit'):
             behaviour_scenario(CLASS_FILE, {**r1a_entry(520608, 'crit_rate'), 'force_crit': 'melee'})
 
+    def periodic_entry(self, **treatment) -> dict:
+        entry = r1a_entry(520608, 'crit_rate')
+        return {**entry, 'expected': 0, 'control': {'auras': []},
+                'treatment': {'auras': [], 'observe_spell': LICHFROST, 'wait_ms': 3000, **treatment}}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_each_arm_may_count_its_own_spell_and_wait_after_each_cast(self):
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, self.periodic_entry())
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        self.assertEqual(len(cast_indices(steps, 807268)), 300)
+        self.assertEqual(len(cast_indices(steps, LICHFROST)), 300)
+        reads = [step for step in steps if step.get('metric') == 'spell_damage_count']
+        self.assertEqual([step['spell'] for step in reads], [807268] * 4 + [LICHFROST] * 4)
+        ticks = [step for step in steps if step.get('label') == 'treatment ticks']
+        self.assertEqual((len(ticks), {step['ms'] for step in ticks}), (300, {3000}))
+        self.assertFalse(any(step.get('label') == 'control ticks' for step in steps))
+        self.assertEqual(expectation.model['observed'], {'control': 807268, 'treatment': LICHFROST})
+        self.assertIn(f'the treatment arm counts {LICHFROST}', scenario['contract'])
+        learned = [step['spell'] for step in steps if step['action'] == 'learn']
+        self.assertEqual(learned.count(LICHFROST), 1)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_shared_spell_keeps_the_model_without_observed_arms(self):
+        _, [expectation] = self.built()
+        self.assertNotIn('observed', expectation.model)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_equal_arms_on_different_spells_are_two_arms(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.periodic_entry(wait_ms=0))
+        self.assertFalse(any(step.get('label') == 'treatment ticks' for step in scenario['steps']))
+
+    def test_arm_overrides_are_checked(self):
+        with self.assertRaisesRegex(ValueError, 'wait_ms'):
+            behaviour_scenario(CLASS_FILE, self.periodic_entry(wait_ms=-1))
+        with self.assertRaisesRegex(ValueError, 'wait_ms'):
+            behaviour_scenario(CLASS_FILE, self.periodic_entry(wait_ms=30001))
+        with self.assertRaisesRegex(ValueError, 'observe_spell'):
+            behaviour_scenario(CLASS_FILE, self.periodic_entry(observe_spell='801722'))
+        same = {**r1a_entry(520608, 'crit_rate'), 'control': {}, 'treatment': {}}
+        with self.assertRaisesRegex(ValueError, 'two different arms'):
+            behaviour_scenario(CLASS_FILE, same)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_zero_point_claim_judges_ticks_against_direct_hits(self):
+        _, [expectation] = behaviour_scenario(CLASS_FILE, self.periodic_entry())
+        values = {}
+        for arm, (hits, crits) in (('control', (4000.0, 400.0)), ('treatment', (4000.0, 404.0))):
+            marks = expectation.model['reads'][arm]
+            values.update({marks['start']['hits']: 0.0, marks['start']['crits']: 0.0,
+                           marks['end']['hits']: hits, marks['end']['crits']: crits})
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'ok')
+        values[expectation.model['reads']['treatment']['end']['crits']] = 4000.0
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status, 'alert')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -8165,7 +8262,6 @@ class MetricDeltaSelectionTests(unittest.TestCase):
         self.assertEqual(self.judged(0.0, 1.0), 'ok')
         self.assertEqual(self.judged(0.0, 0.0), 'alert')
         self.assertEqual(self.judged(1.0, 6.0), 'alert')
-
 
 
 def binding_scripture_variant(kind: str, suffix: str) -> dict:
@@ -8241,7 +8337,6 @@ class AllyCastTargetTests(unittest.TestCase):
             self.assertEqual(steps[cast]['target'], ALLY)
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class MountBlockScenarioTests(unittest.TestCase):
     BRAND = 300513
@@ -8286,7 +8381,6 @@ class MountBlockScenarioTests(unittest.TestCase):
         entry = {**r1a_entry(self.BRAND, 'mount_block'), 'mount_spell': self.BRAND}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -8370,6 +8464,31 @@ class SelfObservedPeriodicHitRatioTests(unittest.TestCase):
 
     def test_a_cast_wait_beside_swings_is_still_refused(self):
         entry = {**variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing'), 'cast_wait_ms': 500}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, entry)
+
+    def test_a_cleared_observed_aura_leaves_the_target_before_every_read_and_drops_the_drain(self):
+        entry = {**r1a_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith'), 'clear_observed': True}
+        scenario, _ = behaviour_scenario(CLASS_FILE, entry)
+        steps = run.validate(scenario)['steps']
+        totals = [index for index, step in enumerate(steps) if step.get('label', '').endswith(' total')]
+        self.assertEqual(len(totals), 2 * (entry['trials'] + 1))
+        for index in totals:
+            self.assertEqual({key: steps[index - 1].get(key) for key in ('action', 'spell', 'stacks', 'target')},
+                             {'action': 'set_aura', 'spell': self.BLADE_OF_FAITH, 'stacks': 0, 'target': 'dummy'})
+            self.assertTrue(steps[index + 1]['label'].endswith(' count'))
+        self.assertFalse(any(step.get('label', '').endswith('drain') for step in steps))
+        self.assertIn('removed from the dummy before every read', scenario['contract'])
+
+    def test_an_uncleared_observed_aura_keeps_its_reads_adjacent_and_its_drain(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, r1a_entry(self.FOCUSED, 'hit_ratio', 'blade_of_faith'))
+        steps = run.validate(scenario)['steps']
+        self.assertFalse(any(step['action'] == 'set_aura' and step.get('spell') == self.BLADE_OF_FAITH
+                             for step in steps))
+        self.assertTrue(any(step.get('label', '').endswith('drain') for step in steps))
+
+    def test_a_cleared_observed_aura_beside_swings_is_refused(self):
+        entry = {**variant_entry(BURSTING_IMPACT, 'hit_ratio', 'swing'), 'clear_observed': True}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
 
@@ -8665,7 +8784,6 @@ class BladeOfFaithTickTests(unittest.TestCase):
                          'alert')
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class AllyImmunityTests(unittest.TestCase):
     TESTAMENT_OF_WILL = 801455
@@ -8939,7 +9057,6 @@ class ScriptHitCasterHealAndModelAurasTests(unittest.TestCase):
         self.assertEqual(strike.model['reference']['sigma'], 0.0)
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ScriptHitStatAuraTests(unittest.TestCase):
     def entry(self):
@@ -8958,7 +9075,6 @@ class ScriptHitStatAuraTests(unittest.TestCase):
         scenario, [expectation] = behaviour_scenario(CLASS_FILE, entry)
         self.assertEqual(expectation.label, '527023 script_hit 527269')
         self.assertNotEqual(scenario['steps'][0]['action'], 'set_aura')
-
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
@@ -9174,7 +9290,8 @@ class AggroRedirectRangeTests(unittest.TestCase):
         manifest_dir = Path(tempfile.mkdtemp())
         try:
             import conformance
-            conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--controls'])
+            with mock.patch('conformance.load_class_file', load_fixture_class_file):
+                conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--controls'])
             files = sorted(path.name for path in (manifest_dir / 'scenarios').glob('*.json'))
             self.assertEqual(files, ['conformance-templar-behaviour-1161-aggro-redirect-edge.json'])
         finally:
@@ -9206,7 +9323,8 @@ class HitCastAuraTests(unittest.TestCase):
         manifest_dir = Path(tempfile.mkdtemp())
         try:
             import conformance
-            conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--spell', '803880'])
+            with mock.patch('conformance.load_class_file', load_fixture_class_file):
+                conformance.main(['generate', '--class', '19', '--out', str(manifest_dir), '--spell', '803880'])
             files = sorted((manifest_dir / 'scenarios').glob('conformance-templar-*-803880-part-*.json'))
             self.assertTrue(files)
             for path in files:
@@ -9472,7 +9590,6 @@ class CostGateRemovalLimitTests(unittest.TestCase):
         self.assertNotIn('removal', expectations[0].model)
 
 
-
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HitRatioStatedBonusTests(unittest.TestCase):
     def runs(self, expectation: Expectation, ratio: float, spread: float = 0.002) -> FakeRun:
@@ -9572,6 +9689,1829 @@ class HitRatioEngineStepTests(unittest.TestCase):
         entry = {**r1a_entry(524822, 'hit_ratio', 'oath_heal'), 'expected': 1.0703}
         with self.assertRaises(ValueError):
             behaviour_scenario(CLASS_FILE, entry)
+
+
+class MinionScriptHitTests(unittest.TestCase):
+    RAISE_GHOUL = 500971
+    COMMAND_GHOULS = 801514
+    GHOUL = 50073
+
+    def ghoul_entry(self, suffix: str) -> dict:
+        class_file = load_fixture_class_file(23)
+        return next(entry for entry in class_file['behaviours']
+                    if entry['spell'] == self.RAISE_GHOUL and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_caster_entry_reads_the_minion_hits_in_both_arms(self):
+        scenario, expectations = behaviour_scenario(load_fixture_class_file(23), self.ghoul_entry('command_damage'))
+        run.validate(scenario)
+        reads = [step for step in scenario['steps'] if step.get('spell') == self.COMMAND_GHOULS
+                 and step.get('metric', '').startswith('spell_damage_')]
+        self.assertEqual(len(reads), 4)
+        for step in reads:
+            self.assertEqual(step['caster_entry'], self.GHOUL)
+            self.assertNotIn('entry', step)
+        self.assertEqual(expectations[0].model['hit_effect'], 0)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_hit_effect_picks_one_effect_of_a_damage_and_heal_spell(self):
+        from hits import Unmodelled, reference_script_hit_model
+        class_file = load_fixture_class_file(23)
+        damage = reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS, unresisted=True,
+                                            hit_effect=0)
+        heal = reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS, hit_effect=2)
+        self.assertEqual((damage.kind, damage.mean), ('school', 48.0))
+        self.assertEqual((heal.kind, heal.mean), ('heal', 65.0))
+        with self.assertRaises(Unmodelled):
+            reference_script_hit_model(class_file, self.RAISE_GHOUL, self.COMMAND_GHOULS)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_caster_entry_the_reads_keep_the_caster(self):
+        entry = {key: value for key, value in self.ghoul_entry('command_damage').items() if key != 'caster_entry'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        reads = [step for step in scenario['steps'] if step.get('spell') == self.COMMAND_GHOULS
+                 and step.get('metric', '').startswith('spell_damage_')]
+        self.assertTrue(reads)
+        self.assertTrue(all('caster_entry' not in step for step in reads))
+
+
+class MetricDeltaGateSettleTests(unittest.TestCase):
+    RAISE_ABOMINATION = 500335
+    SUMMONING_ADEPT = 92123
+
+    def life_force_entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == self.RAISE_ABOMINATION and entry.get('label_suffix') == 'life_force')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_start_gate_settles_before_the_first_read(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.life_force_entry()))
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step.get('action') == 'learn' and step.get('spell') == self.SUMMONING_ADEPT)
+        self.assertEqual(steps[learn + 1], {'action': 'wait', 'label': 'let the gate settle', 'ms': 1500})
+        first_read = next(index for index, step in enumerate(steps) if step.get('metric') == 'aura_stacks')
+        self.assertLess(learn + 1, first_read)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_no_settle_wait_without_the_field(self):
+        entry = {key: value for key, value in self.life_force_entry().items() if key != 'gate_settle_ms'}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        self.assertFalse(any(step.get('label') == 'let the gate settle' for step in scenario['steps']))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_settle_needs_the_start_gate(self):
+        entry = {**self.life_force_entry(), 'gate_timing': 'between', 'trigger_only_after': False}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+
+class MinionFixedCountTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_minion_is_raised_first_and_its_hits_are_read_per_dummy(self):
+        class_file = load_fixture_class_file(23)
+        entry = next(entry for entry in class_file['behaviours'] if entry.get('label_suffix') == 'command_targets')
+        scenario, _ = behaviour_scenario(class_file, entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        raise_cast = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == 500971)
+        command = next(index for index, step in enumerate(steps)
+                       if step.get('action') == 'cast' and step.get('spell') == 504868)
+        self.assertLess(raise_cast, command)
+        reads = [step for step in steps if step.get('metric') == 'spell_damage_count' and step.get('spell') == 801514]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['caster_entry'] == 50073 for step in reads))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_player_count_keeps_the_caster_reads(self):
+        class_file = load_fixture_class_file(23)
+        entry = next(entry for entry in class_file['behaviours'] if entry.get('label_suffix') == 'command_targets')
+        entry = {key: value for key, value in entry.items() if key not in ('caster_entry', 'setup_casts')}
+        scenario, _ = behaviour_scenario(class_file, entry)
+        reads = [step for step in scenario['steps'] if step.get('spell') == 801514]
+        self.assertTrue(all('caster_entry' not in step for step in reads))
+
+
+class MinionModelAuraTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_aura_is_modelled_without_a_cast(self):
+        modelled = {**self.entry('auto_attack_heal_modelled'), 'minion_model_auras': [805290]}
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), modelled)
+        self.assertEqual(expectation.model['model_auras'], [805290])
+        self.assertEqual(expectation.model['reference']['mean'], 11.0)
+        _, [plain] = behaviour_scenario(load_fixture_class_file(23), self.entry('auto_attack_heal'))
+        self.assertEqual(plain.model['reference']['mean'], 17.0)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_aura_needs_a_minion_caster(self):
+        entry = {key: value for key, value in self.entry('auto_attack_heal_modelled').items() if key != 'caster_entry'}
+        entry['minion_model_auras'] = [805290]
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), entry)
+
+
+class MetricDeltaGainAndGateCastTests(unittest.TestCase):
+    BONE_WARD = 681529
+    PACIFY = 500983
+    RAISE_GHOUL = 500971
+
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    def judged(self, entry: dict, before: float, after: float) -> str:
+        _, expectations = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        return judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (before, after)))),
+                               expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_gain_is_judged_on_the_difference(self):
+        entry = self.entry(self.BONE_WARD, 'attack_power')
+        self.assertEqual(self.judged(entry, 841.0, 618.0), 'ok')
+        self.assertEqual(self.judged(entry, 845.0, 622.0), 'ok')
+        self.assertEqual(self.judged(entry, 841.0, 841.0), 'alert')
+        self.assertEqual(self.judged(entry, 841.0, 730.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_floored_reading_cannot_pass_as_the_gain(self):
+        entry = self.entry(self.BONE_WARD, 'attack_power')
+        self.assertEqual(self.judged(entry, 223.0, 0.0), 'alert')
+        self.assertEqual(self.judged(entry, 38.0, 0.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_gain_must_match_the_stated_readings(self):
+        entry = {**self.entry(self.BONE_WARD, 'attack_power'), 'expected': 600}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        entry = {**self.entry(self.BONE_WARD, 'attack_power'), 'after_at_least': 1}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_the_gain_the_absolute_readings_are_judged(self):
+        entry = {key: value for key, value in self.entry(self.BONE_WARD, 'attack_power').items()
+                 if key != 'expected_gain'}
+        self.assertEqual(self.judged(entry, 801.0, 578.0), 'ok')
+        self.assertEqual(self.judged(entry, 841.0, 618.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_gate_is_cast_between_the_attack_phases(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.entry(self.PACIFY,
+                                                                                              'no_attack')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        attacks = [index for index, step in enumerate(steps) if step.get('action') == 'attack']
+        casts = [(index, step['spell']) for index, step in enumerate(steps) if step.get('action') == 'cast']
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        self.assertEqual(len(attacks), 2)
+        self.assertEqual([spell for index, spell in casts if index < attacks[0]], [self.RAISE_GHOUL])
+        self.assertEqual([spell for index, spell in casts if before < index < attacks[1]], [self.PACIFY])
+        self.assertFalse(any(step.get('action') == 'learn' and step.get('spell') == self.PACIFY
+                             for step in steps[before:]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_that_keeps_attacking_alerts(self):
+        entry = self.entry(self.PACIFY, 'no_attack')
+        self.assertEqual(self.judged(entry, 3.0, 3.0), 'ok')
+        self.assertEqual(self.judged(entry, 3.0, 6.0), 'alert')
+        self.assertEqual(self.judged(entry, 0.0, 0.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_gate_cast_needs_the_attack_phases(self):
+        entry = {**self.entry(self.PACIFY, 'no_attack'), 'attack_swings': 0}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        entry = {key: value for key, value in self.entry(self.PACIFY, 'no_attack').items() if key != 'gate_cast'}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+
+class MetricDeltaRatioAndSetupTargetTests(unittest.TestCase):
+    WARRIOR = 504901
+    COMMAND = 504905
+
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == self.WARRIOR and entry.get('label_suffix') == suffix)
+
+    def judged(self, entry: dict, before: float, after: float) -> str:
+        _, expectations = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        return judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (before, after)))),
+                               expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_ratio_is_judged_on_the_quotient(self):
+        entry = self.entry('pierced_armor')
+        self.assertEqual(self.judged(entry, 528.0, 475.0), 'ok')
+        self.assertEqual(self.judged(entry, 562.0, 505.0), 'ok')
+        self.assertEqual(self.judged(entry, 562.0, 562.0), 'alert')
+        self.assertEqual(self.judged(entry, 562.0, 449.0), 'alert')
+        self.assertEqual(self.judged(entry, 100.0, 90.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_ratio_needs_its_tolerance_and_matching_readings(self):
+        for change in ({'tolerance': None}, {'expected': 500}, {'expected_gain': -50}):
+            entry = {key: value for key, value in {**self.entry('pierced_armor'), **change}.items()
+                     if value is not None}
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_setup_casts_go_to_their_own_target(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.entry('command_pierced')))
+        run.validate(scenario)
+        casts = [(step['spell'], step['target']) for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertEqual(casts, [(self.WARRIOR, CASTER), (self.WARRIOR, CASTER), (self.COMMAND, 'dummy')])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_the_field_the_setup_casts_follow_the_trigger_target(self):
+        entry = {key: value for key, value in self.entry('command_pierced').items() if key != 'setup_target'}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        casts = [(step['spell'], step['target']) for step in scenario['steps'] if step.get('action') == 'cast']
+        self.assertEqual(casts, [(self.WARRIOR, 'dummy'), (self.WARRIOR, 'dummy'), (self.COMMAND, 'dummy')])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_setup_target_needs_setup_casts_and_a_scenario_unit(self):
+        for change in ({'setup_casts': [], 'setup_in_before': False}, {'setup_target': 'ally'}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec({**self.entry('command_pierced'),
+                                                                              **change}))
+
+
+class NecromancerB2TargetsAndHealthTests(unittest.TestCase):
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_target_entry_replaces_the_dummy_creature(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.entry(800706, 'transform')))
+        run.validate(scenario)
+        self.assertEqual([creature['entry'] for creature in scenario['creatures']], [6])
+        entry = {key: value for key, value in self.entry(800706, 'transform').items() if key != 'target_entry'}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        self.assertEqual([creature['entry'] for creature in scenario['creatures']], [36])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_target_entry_needs_the_dummy(self):
+        entry = {**self.entry(800706, 'player_lasts'), 'target_entry': 6}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_enemy_learns_and_casts_at_itself_after_the_trigger(self):
+        entry = {**self.entry(503640, 'holy_healing'), 'enemy_casts_in_before': False}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        learn = steps.index({'action': 'learn', 'actor': 'enemy', 'spell': 25222})
+        cast = steps.index({'action': 'cast', 'actor': 'enemy', 'spell': 25222, 'target': 'enemy'})
+        plague = steps.index({'action': 'cast', 'actor': CASTER, 'spell': 503640, 'target': 'enemy'})
+        self.assertLess(learn, plague)
+        self.assertLess(plague, cast)
+        entry = {key: value for key, value in entry.items() if key not in ('enemy_casts', 'enemy_casts_in_before')}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        self.assertFalse(any(step.get('actor') == 'enemy' and step['action'] in ('learn', 'cast')
+                             for step in scenario['steps']))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_enemy_also_casts_in_an_uncast_before_phase(self):
+        entry = self.entry(503640, 'holy_healing')
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        renews = [index for index, step in enumerate(steps) if step == {'action': 'cast', 'actor': 'enemy',
+                                                                         'spell': 25222, 'target': 'enemy'}]
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        plague = steps.index({'action': 'cast', 'actor': CASTER, 'spell': 503640, 'target': 'enemy'})
+        self.assertEqual(len(renews), 2)
+        self.assertLess(renews[0], before)
+        self.assertLess(before, plague)
+        self.assertLess(plague, renews[1])
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec({**entry, 'enemy_casts': []}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_enemy_casts_need_the_enemy(self):
+        entry = {**self.entry(503640, 'haste'), 'enemy_casts': [528]}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_target_health_is_set_before_each_trigger_cast(self):
+        entry = {**self.entry(500969, 'poison_stacks'), 'target_health_pct': 30}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        poison = max(index for index, step in enumerate(steps)
+                     if step == {'action': 'cast', 'actor': CASTER, 'spell': 805024, 'target': 'dummy'})
+        self.assertEqual(steps[poison - 1], {'action': 'set_health_pct', 'actor': CASTER, 'target': 'dummy',
+                                             'pct': 30})
+        for change in ({'target': 'caster', 'measure_actor': 'caster'}, {'target_health_pct': 100}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec({**entry, **change}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_health_loss_ratio_reads_the_health_after_every_strike(self):
+        scenario, expectations = behaviour_scenario(load_fixture_class_file(23), self.entry(560595, 'pacify'))
+        run.validate(scenario)
+        model = expectations[0].model
+        self.assertEqual(model['health_set'], 100000)
+        self.assertEqual(len(model['health_reads']['control']), 10)
+        labels = {step.get('label') for step in scenario['steps']}
+        self.assertTrue(all(label in labels for reads in model['health_reads'].values() for label in reads))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_reduction_hidden_from_the_log_shows_in_the_health(self):
+        _, expectations = behaviour_scenario(load_fixture_class_file(23), self.entry(560595, 'pacify'))
+        expectation = expectations[0]
+        model = expectation.model
+
+        def values(control_loss: float, treatment_loss: float) -> dict:
+            found = {}
+            for arm, loss in (('control', control_loss), ('treatment', treatment_loss)):
+                for index, (damage, count) in enumerate(model['reads'][arm]):
+                    found[damage], found[count] = 1100.0 * index, float(index)
+                for label in model['health_reads'][arm]:
+                    found[label] = 100000.0 - loss
+            return found
+
+        reduced = judge_behaviour(base_verdict(expectation), FakeRun(values(1100.0, 990.0)), expectation)
+        self.assertEqual(reduced.status, 'ok')
+        unreduced = judge_behaviour(base_verdict(expectation), FakeRun(values(1100.0, 1100.0)), expectation)
+        self.assertEqual(unreduced.status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_health_loss_read_needs_one_strike_per_trial_from_a_set_health(self):
+        for change in ({'caster_health_pct': None}, {'strikes': 2}, {'judge': 'absorb'}):
+            entry = {key: value for key, value in {**self.entry(560595, 'pacify'), **change}.items()
+                     if value is not None}
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), entry)
+
+
+class NecromancerB2FixSegmentTests(unittest.TestCase):
+    def entry(self, spell: int, kind: str, suffix: str | None = None) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry['kind'] == kind
+                    and (suffix is None or entry.get('label_suffix') == suffix))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_stat_gain_with_attribute_stat_reads_the_auras_and_the_return(self):
+        entry = self.entry(681529, 'stat_gain', 'stamina')
+        scenario, expectations = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        self.assertIn('attribution', expectations[0].model)
+        self.assertIn('Unit::GetStat', expectations[0].model['attribution']['read'])
+        plain = {key: value for key, value in entry.items() if key != 'attribute_stat'}
+        _, expectations = behaviour_scenario(load_fixture_class_file(23), plain)
+        self.assertNotIn('attribution', expectations[0].model)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.entry(681529, 'stat_gain', 'armor'), 'attribute_stat': True})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_and_the_helper_cast_after_the_trigger(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(
+            self.entry(503640, 'metric_delta', 'dispel_damage')))
+        run.validate(scenario)
+        steps = scenario['steps']
+        plague = steps.index({'action': 'cast', 'actor': CASTER, 'spell': 503640, 'target': 'dummy'})
+        cure = steps.index({'action': 'cast', 'actor': 'dummy', 'spell': 528, 'target': 'dummy'})
+        self.assertLess(plague, cure)
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(
+            self.entry(503640, 'metric_delta', 'dispelled_stunned')))
+        run.validate(scenario)
+        self.assertIn({'action': 'cast', 'actor': 'enemy_helper', 'spell': 528, 'target': 'enemy'}, scenario['steps'])
+        self.assertIn('enemy_helper', {player['id'] for player in scenario['players']})
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(
+                {**self.entry(503640, 'metric_delta', 'dispelled_stunned'), 'target_casts': [528]}))
+
+
+class MetricDeltaSetupInBeforeTests(unittest.TestCase):
+    UNHOLY_FRENZY = 805029
+    RAISE_GHOUL = 500971
+
+    def haste_entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == self.UNHOLY_FRENZY and entry.get('label_suffix') == 'haste')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_minion_is_raised_before_the_uncast_read(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.haste_entry()))
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        before = next(index for index, step in enumerate(steps)
+                      if step.get('label') == f'{self.UNHOLY_FRENZY} owned_creature_attack_time_ms before')
+        self.assertEqual([steps[index]['spell'] for index in casts if index < before], [self.RAISE_GHOUL])
+        self.assertEqual([steps[index]['spell'] for index in casts if index > before],
+                         [self.RAISE_GHOUL, self.UNHOLY_FRENZY])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_the_field_the_before_phase_casts_nothing(self):
+        entry = {key: value for key, value in self.haste_entry().items() if key != 'setup_in_before'}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        steps = scenario['steps']
+        before = next(index for index, step in enumerate(steps) if step.get('label', '').endswith(' before'))
+        self.assertFalse(any(step.get('action') == 'cast' for step in steps[:before]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_field_needs_an_uncast_before_phase_with_setup_casts(self):
+        for change in ({'cast_in_before': True}, {'setup_casts': []},
+                       {'gate_timing': 'start', 'trigger_only_after': True}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec({**self.haste_entry(), **change}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_without_the_haste_alerts(self):
+        _, expectations = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.haste_entry()))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        unhasted = FakeRun(dict(zip(labels, (2000.0, 2000.0))))
+        self.assertEqual(judge_behaviour(base_verdict(expectation), unhasted, expectation).status, 'alert')
+        hasted = FakeRun(dict(zip(labels, (2000.0, 1538.4615478515625))))
+        self.assertEqual(judge_behaviour(base_verdict(expectation), hasted, expectation).status, 'ok')
+
+
+class MetricDeltaReadTargetTests(unittest.TestCase):
+    def stance_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 500982 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_enemy_player_read_target_adds_the_enemy_player(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.stance_entry('humanoid_crit')))
+        run.validate(scenario)
+        self.assertIn('enemy', [player['id'] for player in scenario['players']])
+        cast = next(step for step in scenario['steps'] if step.get('action') == 'cast')
+        self.assertEqual(cast['target'], 'caster')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_dummy_read_target_adds_the_dummy(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23),
+                                            metric_delta_spec(self.stance_entry('mechanical_crit_control')))
+        run.validate(scenario)
+        self.assertEqual([creature['id'] for creature in scenario.get('creatures', [])], ['dummy'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_read_of_the_caster_alone_adds_neither(self):
+        entry = {**self.stance_entry('speed')}
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        self.assertNotIn('creatures', scenario)
+        self.assertEqual([player.get('id', 'caster') for player in scenario['players']], ['caster'])
+
+
+class MetricDeltaStrikeTests(unittest.TestCase):
+    def phylactery_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 500933 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_striker_hits_the_caster_before_the_trigger_in_both_phases(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.phylactery_entry('physical')))
+        run.validate(scenario)
+        self.assertIn('striker', [creature['id'] for creature in scenario['creatures']])
+        steps = scenario['steps']
+        strikes = [index for index, step in enumerate(steps) if step.get('actor') == 'striker']
+        triggers = [index for index, step in enumerate(steps)
+                    if step.get('action') == 'cast' and step.get('spell') == 504868]
+        self.assertEqual(len(strikes), 6)
+        self.assertEqual(len(triggers), 2)
+        self.assertLess(max(strikes[:3]), triggers[0])
+        self.assertLess(triggers[0], strikes[3])
+        self.assertLess(max(strikes[3:]), triggers[1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_phylactery_cast_gets_its_corpse_dust(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.phylactery_entry('shade')))
+        steps = scenario['steps']
+        cast = next(index for index, step in enumerate(steps)
+                    if step.get('action') == 'cast' and step.get('spell') == 500933)
+        self.assertIn({'action': 'add_item', 'actor': 'caster', 'item': 37201, 'count': 2}, steps[:cast])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_long_scenario_takes_a_matching_timeout(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.phylactery_entry('lifetime')))
+        run.validate(scenario)
+        waited = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(waited, 90000)
+        self.assertGreaterEqual(scenario['timeout_ms'], waited)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_strike_needs_a_health_within_its_maximum(self):
+        entry = self.phylactery_entry('shade')
+        with self.assertRaises(ValueError):
+            metric_delta_spec({**entry, 'strike': {**entry['strike'], 'health': 200000}})
+
+
+class CostGateAfterCastGapTests(unittest.TestCase):
+    def underking_entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 704701 and entry['kind'] == 'cost_gate')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_after_casts_wait_out_the_global_cooldown_and_the_attempt_keeps_its_time(self):
+        entry = self.underking_entry()
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        gaps = [index for index, step in enumerate(steps) if step.get('label') == 'with gap after an after cast']
+        self.assertEqual(len(gaps), 10)
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == 805044]
+        prime = max(index for index in casts if index < gaps[0])
+        attempt = min(index for index in casts if index > gaps[-1])
+        waited = sum(step['ms'] for step in steps[prime + 1:attempt] if step['action'] == 'wait')
+        self.assertEqual(waited, 60000 - 15000 + 500)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_no_gap_without_the_field(self):
+        entry = {key: value for key, value in self.underking_entry().items() if key != 'after_cast_gap_ms'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertFalse(any('gap after an after cast' in step.get('label', '') for step in scenario['steps']))
+
+
+class HitRatioArmHealthTests(unittest.TestCase):
+    def plague_entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 583256 and entry['kind'] == 'hit_ratio')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_only_the_treatment_trials_set_the_dummy_health(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.plague_entry())
+        run.validate(scenario)
+        sets = [step for step in scenario['steps'] if step.get('action') == 'set_health' and step['actor'] == 'dummy']
+        self.assertEqual(len(sets), self.plague_entry()['trials'])
+        self.assertTrue(all(step['value'] == 25_000_000 for step in sets))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_arm_health_refuses_a_scenario_health(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.plague_entry(), 'target_health_pct': 40})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.plague_entry(),
+                                                     'treatment': {'target_health_pct': 100}})
+
+
+class MetricDeltaPlayerRatingsTests(unittest.TestCase):
+    def necromancy_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 804360 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_override_sets_only_the_named_rating(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23),
+                                            metric_delta_spec(self.necromancy_entry('expertise_control')))
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        player = scenario['players'][0]
+        self.assertEqual((player['melee_hit_rating'], player['spell_hit_rating']), (0, 10000))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unknown_rating_is_refused(self):
+        entry = {**self.necromancy_entry('expertise_control'), 'player_ratings': {'parry_rating': 0}}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+
+class MetricDeltaStrikeAfterTriggerTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_strike_follows_the_phylactery_cast_and_still_lands_without_it(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 500933 and entry.get('label_suffix') == 'revive')
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        strikes = [index for index, step in enumerate(steps) if step.get('actor') == 'striker']
+        phylactery = next(index for index, step in enumerate(steps)
+                          if step.get('action') == 'cast' and step.get('spell') == 500933)
+        before = next(index for index, step in enumerate(steps) if step.get('label') == '500933 health before')
+        self.assertEqual(len(strikes), 2)
+        self.assertLess(strikes[0], before)
+        self.assertLess(before, phylactery)
+        self.assertLess(phylactery, strikes[1])
+        self.assertEqual(steps[phylactery + 1], {'action': 'wait', 'label': 'before the strike', 'ms': 2600})
+
+
+class MetricDeltaStrikeInBeforeTests(unittest.TestCase):
+    def entry(self, **strike) -> dict:
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 805038 and entry.get('label_suffix') == 'return_position')
+        cast_contrast = {key: value for key, value in entry.items() if key != 'setup_only_after'}
+        return {**cast_contrast, 'before_expected': 15, 'tolerance': 0.5, 'cast_in_before': False,
+                'setup_in_before': True,
+                'strike': {**{key: value for key, value in entry['strike'].items() if key != 'in_before'}, **strike}}
+
+    def phases(self, entry: dict) -> tuple[list[dict], list[dict]]:
+        scenario, [expectation, *_] = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        run.validate(scenario)
+        steps = scenario['steps']
+        before = next(index for index, step in enumerate(steps)
+                      if step.get('label') == expectation.model['before_label'])
+        return steps[:before], steps[before:]
+
+    @staticmethod
+    def index(phase: list[dict], match) -> int:
+        return next(index for index, step in enumerate(phase) if match(step))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_in_before_strike_follows_the_setup_casts_of_the_uncast_phase(self):
+        first, second = self.phases(self.entry(in_before=True))
+        for phase in (first, second):
+            circle = self.index(phase, lambda step: step.get('action') == 'cast' and step.get('spell') == 805038)
+            moved = self.index(phase, lambda step: step == {'action': 'relocate', 'actor': CASTER, 'dx': 15.0})
+            self.assertLess(circle, moved)
+        self.assertFalse(any(step.get('action') == 'cast' and step.get('spell') == 807098 for step in first))
+        self.assertTrue(any(step.get('action') == 'cast' and step.get('spell') == 807098 for step in second))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_in_before_the_uncast_phase_keeps_no_strike(self):
+        first, _ = self.phases(self.entry())
+        self.assertFalse(any(step.get('action') == 'relocate' or step.get('actor') == 'striker' for step in first))
+
+    def test_in_before_needs_an_uncast_between_phase_and_no_after_trigger_strike(self):
+        with self.assertRaisesRegex(ValueError, 'in_before'):
+            metric_delta_spec(self.entry(in_before='yes'))
+        with self.assertRaisesRegex(ValueError, 'in_before'):
+            metric_delta_spec(self.entry(in_before=True, after_trigger_ms=500))
+        with self.assertRaisesRegex(ValueError, 'uncast before phase'):
+            metric_delta_scenario(load_fixture_class_file(23),
+                                  metric_delta_spec({**self.entry(in_before=True), 'cast_in_before': True,
+                                                     'setup_in_before': False}))
+
+
+class MetricDeltaRangeTests(unittest.TestCase):
+    def siphon_entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 583256 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_tick_outside_the_stated_range_alerts(self):
+        _, expectations = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.siphon_entry('siphon_base')))
+        expectation = expectations[0]
+        labels = expectation.model['before_label'], expectation.model['after_label']
+        for after, status in ((175.0, 'ok'), (212.0, 'ok'), (174.0, 'alert'), (213.0, 'alert')):
+            with self.subTest(after=after):
+                verdict = judge_behaviour(base_verdict(expectation), FakeRun(dict(zip(labels, (0.0, after)))),
+                                          expectation)
+                self.assertEqual(verdict.status, status)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_spell_power_fixture_reaches_the_player(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23),
+                                            metric_delta_spec(self.siphon_entry('siphon_power')))
+        run.validate(scenario)
+        self.assertEqual(scenario['players'][0]['spell_power'], 20000)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_upper_bound_needs_a_lower_bound_below_it(self):
+        entry = {key: value for key, value in self.siphon_entry('siphon_base').items() if key != 'after_at_least'}
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+
+
+class RemovedOwnEffectTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_runic_harvest_period_is_read_on_its_live_effect(self):
+        with tempfile.TemporaryDirectory() as directory:
+            import conformance
+            with mock.patch('conformance.load_class_file', load_fixture_class_file), mock.patch('sys.stdout'):
+                conformance.main(['generate', '--class', '23', '--spell', '562213', '--out', directory])
+            scenario = json.loads((Path(directory) / 'scenarios' / 'conformance-necromancer-value-562213.json')
+                                  .read_text())
+        reads = [step for step in scenario['steps'] if step.get('label') == '562213 effect_value #3']
+        self.assertEqual([step['effect'] for step in reads], [1])
+
+
+def chilling_presence_entry(kind: str) -> dict:
+    return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                if entry['spell'] == 300958 and entry['kind'] == kind)
+
+
+class AdditiveRelationTests(unittest.TestCase):
+    def party_expectation(self) -> Expectation:
+        _, expectations = party_stat_ratio_scenario(load_fixture_class_file(23),
+                                                    party_stat_ratio_spec(chilling_presence_entry('party_stat_ratio')))
+        return expectations[0]
+
+    def cap_expectation(self) -> Expectation:
+        _, expectations = group_stack_cap_scenario(load_fixture_class_file(23),
+                                                   group_stack_cap_spec(chilling_presence_entry('group_stack_cap')))
+        return expectations[0]
+
+    def party_status(self, before: float, after: float) -> str:
+        expectation = self.party_expectation()
+        values = {expectation.model['near_before_label']: before, expectation.model['near_after_label']: after}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def cap_status(self, baseline: float, own: float, combined: float) -> str:
+        expectation = self.cap_expectation()
+        model = expectation.model
+        values = {model['baseline_label']: baseline, model['own_label']: own, model['combined_label']: combined}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_party_crit_chance_gains_its_points(self):
+        self.assertEqual(self.party_expectation().model['relation'], 'additive')
+        self.assertEqual(self.party_status(5.25, 8.25), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_party_crit_chance_multiplied_instead_alerts(self):
+        self.assertEqual(self.party_status(5.0, 5.15), 'alert')
+        self.assertEqual(self.party_status(5.0, 5.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_capped_crit_chance_adds_the_strongest_points_once(self):
+        self.assertEqual(self.cap_status(4.5, 7.5, 7.5), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_summed_crit_chances_alert(self):
+        self.assertEqual(self.cap_status(4.5, 7.5, 10.5), 'alert')
+        self.assertEqual(self.cap_status(4.5, 4.635, 4.635), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unknown_relation_is_refused(self):
+        entry = {**chilling_presence_entry('party_stat_ratio'), 'relation': 'inverse'}
+        with self.assertRaises(ValueError):
+            party_stat_ratio_scenario(load_fixture_class_file(23), party_stat_ratio_spec(entry))
+        entry = {**chilling_presence_entry('group_stack_cap'), 'relation': 'factor'}
+        with self.assertRaises(ValueError):
+            group_stack_cap_scenario(load_fixture_class_file(23), group_stack_cap_spec(entry))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_multiplied_entry_regenerates_without_a_relation(self):
+        spec = group_stack_cap_spec(serendipity_group_stack_cap_entry())
+        _, expectations = group_stack_cap_scenario(CLASS_FILE, spec)
+        self.assertNotIn('relation', expectations[0].model)
+
+
+class PermanentImmunityTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 500981 and entry['kind'] == 'immunity')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_permanent_aura_is_removed_before_its_control(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry())
+        steps = scenario['steps']
+        removal = next(index for index, step in enumerate(steps)
+                       if step.get('action') == 'set_aura' and step.get('spell') == 500981 and step['stacks'] == 0)
+        labels = [step.get('label') for step in steps]
+        expired = labels.index('500981 immunity 500981 expired')
+        control = labels.index('500981 immunity 12096 control')
+        self.assertLess(removal, expired)
+        self.assertLess(expired, control)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_permanent_aura_without_removal_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.entry(), 'remove_control': False})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_timed_aura_with_removal_is_refused(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 804371 and entry['kind'] == 'immunity')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'remove_control': True})
+
+
+class MinionAuraCountTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 504489 and entry.get('label_suffix') == 'area')
+
+    def aura_reads(self, entry: dict) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        return [step for step in scenario['steps'] if step.get('metric') == 'aura']
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_minion_aura_is_read_whatever_its_caster(self):
+        reads = self.aura_reads(self.entry())
+        self.assertTrue(reads)
+        self.assertTrue(all('caster' not in step for step in reads))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_caster_aura_keeps_its_caster_filter(self):
+        entry = {key: value for key, value in self.entry().items() if key not in ('caster_entry', 'setup_casts')}
+        reads = self.aura_reads(entry)
+        self.assertTrue(all(step.get('caster') == 'caster' for step in reads))
+
+
+class CasterHealthAndSelectedPrimaryTests(unittest.TestCase):
+    def necromancer_entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_caster_health_is_held_before_each_trigger_cast(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.necromancer_entry(301207, 'regen_one'))
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == 500981]
+        self.assertEqual(len(casts), 2)
+        for cast in casts:
+            self.assertEqual(steps[cast - 1], {'action': 'set_health', 'actor': 'caster', 'value': 5000,
+                                               'maximum': 10000})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_caster_health_outside_the_range_is_refused(self):
+        for pct in (0, 100):
+            with self.subTest(pct=pct), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), {**self.necromancer_entry(301207, 'regen_one'),
+                                                         'caster_health_pct': pct})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_selected_primary_is_selected_before_each_cast(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.necromancer_entry(504489, 'area'))
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps)
+                 if step.get('action') == 'cast' and step.get('spell') == 504489]
+        self.assertTrue(casts)
+        for cast in casts:
+            self.assertEqual(steps[cast - 1], {'action': 'select', 'actor': 'caster', 'target': 'primary'})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_unselected_count_keeps_its_steps(self):
+        entry = {key: value for key, value in self.necromancer_entry(504489, 'area').items()
+                 if key != 'select_primary'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertFalse(any(step.get('action') == 'select' for step in scenario['steps']))
+
+
+class TargetCastTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 801739 and entry.get('label_suffix') == 'interrupt')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_casts_right_before_the_trigger(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry())
+        steps = scenario['steps']
+        trigger = next(index for index, step in enumerate(steps)
+                       if step.get('action') == 'cast' and step.get('spell') == 801739)
+        self.assertEqual(steps[trigger - 2], {'action': 'cast', 'actor': 'dummy', 'spell': 12051})
+        self.assertEqual(steps[trigger - 1]['action'], 'wait')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_dummy_cast_needs_the_dummy_as_target(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.entry(), 'target': 'caster'})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_dummy_casts_keeps_its_steps(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'target_casts_before'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertFalse(any(step.get('actor') == 'dummy' and step.get('action') == 'cast'
+                             for step in scenario['steps']))
+
+
+class UncastTargetCastAndTimeoutTests(unittest.TestCase):
+    def entry(self, spell: int, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_casts_in_an_uncast_before_phase(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(801739, 'interrupt'))
+        steps = scenario['steps']
+        before = next(index for index, step in enumerate(steps) if step.get('label') == '801739 casting before')
+        self.assertTrue(any(step == {'action': 'cast', 'actor': 'dummy', 'spell': 12051} for step in steps[:before]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_long_metric_delta_carries_its_own_timeout(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(807700, 'zombie'))
+        waited = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(waited, 90000)
+        self.assertGreater(scenario['timeout_ms'], waited)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_short_metric_delta_keeps_the_default_timeout(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(801739, 'held'))
+        self.assertNotIn('timeout_ms', scenario)
+
+
+class TargetHealthAfterTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 807796 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_health_is_set_inside_the_wait_after_the_trigger(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry('crossing_down'))
+        steps = scenario['steps']
+        cast = max(index for index, step in enumerate(steps)
+                   if step.get('action') == 'cast' and step.get('spell') == 807796)
+        self.assertEqual(steps[cast + 1:cast + 4],
+                         [{'action': 'wait', 'ms': 1500},
+                          {'action': 'set_health_pct', 'actor': 'caster', 'target': 'dummy', 'pct': 15},
+                          {'action': 'wait', 'ms': 5500}])
+        self.assertEqual(steps[cast - 1], {'action': 'set_health_pct', 'actor': 'caster', 'target': 'dummy',
+                                           'pct': 25})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_delay_outside_the_wait_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.entry('crossing_down'), 'target_health_after': [7000, 15]})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_it_keeps_one_wait(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry('below_twenty'))
+        steps = scenario['steps']
+        cast = max(index for index, step in enumerate(steps)
+                   if step.get('action') == 'cast' and step.get('spell') == 807796)
+        self.assertEqual(steps[cast + 1], {'action': 'wait', 'ms': 7000})
+
+
+class MetricDeltaReagentTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_trigger_cast_gets_its_reagent(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 803777 and entry.get('label_suffix') == 'items')
+        steps = behaviour_scenario(load_fixture_class_file(23), entry)[0]['steps']
+        cast = next(index for index, step in enumerate(steps)
+                    if step.get('action') == 'cast' and step.get('spell') == 803777)
+        self.assertIn({'action': 'add_item', 'actor': 'caster', 'item': 37201, 'count': 1}, steps[:cast])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_without_reagents_adds_no_item(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 801739 and entry.get('label_suffix') == 'held')
+        steps = behaviour_scenario(load_fixture_class_file(23), entry)[0]['steps']
+        self.assertFalse(any(step.get('action') == 'add_item' and step.get('item') == 37201 for step in steps))
+
+
+class ImmunityCarrierAuraTests(unittest.TestCase):
+    def entry(self, spell: int) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry['kind'] == 'immunity')
+
+    def aura_reads(self, spell: int) -> dict:
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(spell))
+        return {step['label']: step['spell'] for step in scenario['steps']
+                if step.get('action') == 'assert' and step.get('label', '').endswith((' applied', ' expired'))}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_summon_reads_the_aura_that_carries_the_immunity(self):
+        self.assertEqual(self.aura_reads(807813), {'807813 immunity 807813 applied': 807812,
+                                                   '807813 immunity 807813 expired': 807812})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_a_carrier_reads_its_own_spell(self):
+        self.assertEqual(set(self.aura_reads(500981).values()), {500981})
+
+
+class MetricDeltaTriggerItemTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 803777 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_trigger_is_an_item_use_after_the_setup_cast(self):
+        steps = behaviour_scenario(load_fixture_class_file(23), self.entry('restore'))[0]['steps']
+        uses = [index for index, step in enumerate(steps) if step.get('action') == 'use_item']
+        create = max(index for index, step in enumerate(steps)
+                     if step.get('action') == 'cast' and step.get('spell') == 803777)
+        self.assertEqual(len(uses), 1)
+        self.assertLess(create, uses[0])
+        self.assertEqual(steps[uses[0]], {'action': 'use_item', 'actor': 'caster', 'item': 555555, 'spell': 803773})
+        self.assertFalse(any(step.get('action') == 'cast' and step.get('spell') == 803773 for step in steps))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_item_use_on_the_dummy_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.entry('restore'), 'target': 'dummy'})
+
+
+class CastGateAuraStateTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 707402 and entry['kind'] == 'cast_gate')
+
+    def steps_before_allowed(self, entry: dict) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        steps = scenario['steps']
+        unlearn = next(index for index, step in enumerate(steps) if step.get('action') == 'unlearn')
+        allowed = [index for index, step in enumerate(steps)
+                   if step.get('action') == 'cast' and step.get('spell') == entry['spell']][-1]
+        return steps[unlearn:allowed]
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_aura_state_fixture_waits_out_the_global_cooldown(self):
+        between = self.steps_before_allowed(self.entry())
+        fixture = next(index for index, step in enumerate(between) if step.get('spell') == 122)
+        wait = next(index for index, step in enumerate(between) if step.get('label') == 'Global cooldown')
+        self.assertLess(fixture, wait)
+        self.assertEqual(between[wait]['ms'], 1600)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_health_fixture_keeps_its_own_wait(self):
+        between = self.steps_before_allowed(titanstrike_cast_gate_entry())
+        self.assertFalse(any(step.get('label') == 'Global cooldown' for step in between))
+
+
+class ScriptHitCastPowerTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 501997 and entry['kind'] == 'script_hit')
+
+    def power_steps(self, entry: dict) -> list[dict]:
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        return [step for step in scenario['steps'] if step.get('action') == 'set_power']
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_cast_power_fills_the_power_before_every_cast(self):
+        steps = self.power_steps(self.entry())
+        self.assertEqual(len(steps), self.entry()['trials'])
+        self.assertTrue(all(step['value'] == 1000 and step['power'] == 6 for step in steps))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_cast_power_the_cost_is_set(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'cast_power'}
+        self.assertTrue(all(step['value'] == 300 for step in self.power_steps(entry)))
+
+
+class ScriptHitReceiverAuraTests(unittest.TestCase):
+    IMMUNITY = 7743
+
+    def entry(self, **fields) -> dict:
+        base = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 531130 and entry.get('label_suffix') == 'damage')
+        return {**base, 'receiver_auras': [[self.IMMUNITY, 1]], **fields}
+
+    def held(self, steps: list[dict]) -> list[int]:
+        return [index for index, step in enumerate(steps) if step.get('action') == 'set_aura'
+                and step.get('spell') == self.IMMUNITY and step.get('stacks') == 1]
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_receiver_auras_are_set_on_the_dummy_before_the_casts_of_every_trial(self):
+        entry = self.entry()
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        steps = scenario['steps']
+        held = self.held(steps)
+        self.assertEqual(len(held), 2 * entry['trials'])
+        self.assertTrue(all(steps[index]['target'] == 'dummy' for index in held))
+        self.assertEqual(steps[held[0] + 1:held[0] + 3][-1]['action'], 'reset_cooldown')
+        cleared = [step for step in steps if step.get('spell') == self.IMMUNITY and step.get('stacks') == 0]
+        self.assertEqual(len(cleared), 1)
+        self.assertIn('set on the dummy in every trial of both arms, before the casts', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_receiver_auras_after_the_casts_follow_the_last_cast_of_each_trial(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry(receiver_auras_after_casts=True))
+        steps = scenario['steps']
+        for index in self.held(steps):
+            self.assertEqual(steps[index - 1]['action'], 'wait')
+            self.assertEqual(steps[index - 2]['action'], 'cast')
+            self.assertEqual(steps[index + 1]['action'], 'wait')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_receiver_auras_sets_none(self):
+        entry = {key: value for key, value in self.entry().items() if key != 'receiver_auras'}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertEqual(self.held(scenario['steps']), [])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_timing_without_auras_or_an_empty_stack_is_refused(self):
+        for fields in ({'receiver_auras': [], 'receiver_auras_after_casts': True},
+                       {'receiver_auras': [[self.IMMUNITY, 0]]}):
+            with self.subTest(fields=fields), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), self.entry(**fields))
+
+
+class HumanoidTargetEntryTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 803741 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_metric_delta_target_entry_replaces_the_dummy_entry(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry('creature_lasts'))
+        self.assertEqual([creature['entry'] for creature in scenario['creatures']], [6])
+        plain, _ = behaviour_scenario(load_fixture_class_file(23), self.entry('humanoids_only'))
+        self.assertEqual([creature['entry'] for creature in plain['creatures']], [36])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_target_entry_needs_the_dummy(self):
+        entry = {**self.entry('player_lasts'), 'target_entry': 6}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_fixed_count_dummy_entry_replaces_every_dummy(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry('targets'))
+        self.assertEqual({creature['entry'] for creature in scenario['creatures']}, {6})
+        self.assertEqual(len(scenario['creatures']), 8)
+        entry = {key: value for key, value in self.entry('targets').items() if key != 'dummy_entry'}
+        plain, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertEqual({creature['entry'] for creature in plain['creatures']}, {36})
+
+
+class MassGraveToolTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 803741 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_count_primary_judges_every_dummy_inside_the_radius(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.entry('targets'))
+        self.assertEqual(len(expectation.model['dummy_labels']), 7)
+        self.assertIn('primary', expectation.model['dummy_labels'][0])
+        entry = {key: value for key, value in self.entry('targets').items() if key != 'count_primary'}
+        _, [plain] = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertEqual(len(plain.model['dummy_labels']), 6)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_phase_power_sets_each_phase_before_its_cast(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry('instant'))
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        powers = [(index, step['value']) for index, step in enumerate(steps)
+                  if step.get('action') == 'set_power' and step.get('power') == 6]
+        self.assertEqual([value for _, value in powers], [500, 520])
+        self.assertTrue(all(power < cast for (power, _), cast in zip(powers, casts)))
+
+
+class ScriptHitMultiplierTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 500329 and entry.get('label_suffix') == suffix)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_multiplier_scales_the_judged_hit(self):
+        _, [scaled] = behaviour_scenario(load_fixture_class_file(23), self.entry('one_disease'))
+        _, [plain] = behaviour_scenario(load_fixture_class_file(23), self.entry('command_damage'))
+        self.assertEqual(scaled.model['gate_multiplier'], 1.5)
+        self.assertEqual(plain.model['gate_multiplier'], 1.0)
+        self.assertIn('times 1.5', scaled.rule)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_multiplier_must_be_positive(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**self.entry('one_disease'), 'multiplier': 0})
+
+
+class MetricDeltaItemTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 803771 and entry.get('label_suffix') == 'count')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_items_are_added_before_each_cast(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry())
+        steps = scenario['steps']
+        adds = [index for index, step in enumerate(steps) if step.get('action') == 'add_item'
+                and step.get('item') == 37201]
+        casts = [index for index, step in enumerate(steps) if step.get('action') == 'cast']
+        self.assertEqual(len(adds), len(casts))
+        self.assertTrue(all(add < cast for add, cast in zip(adds, casts)))
+
+
+class MetricDeltaLongWaitTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_waits_beyond_the_default_timeout_time_the_scenario(self):
+        entries = {entry.get('label_suffix'): entry for entry in load_fixture_class_file(23)['behaviours']
+                   if entry['spell'] == 704681 and entry['kind'] == 'metric_delta'}
+        long = {**entries['charges'], 'setup_casts': [504868] * 50, 'setup_wait_ms': 1600}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), long)
+        waits = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(waits, 80000)
+        self.assertGreater(scenario['timeout_ms'], waits)
+        short = {**entries['charges'], 'setup_casts': [504868]}
+        plain, _ = behaviour_scenario(load_fixture_class_file(23), short)
+        self.assertNotIn('timeout_ms', plain)
+
+
+class MetricDeltaCasterHealthTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_caster_health_is_set_in_both_phases_before_the_reads(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 803771 and entry.get('label_suffix') == 'restore')
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        steps = scenario['steps']
+        sets = [index for index, step in enumerate(steps) if step.get('action') == 'set_health']
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'health']
+        self.assertEqual(len(sets), 2)
+        self.assertTrue(all(before < read for before, read in zip(sets, reads)))
+        self.assertEqual(steps[sets[0]]['value'], 5000)
+
+
+class B3ToolMutantTests(unittest.TestCase):
+    def expectations(self, spell: int, suffix: str | None = None, kind: str | None = None) -> list:
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours'] if entry['spell'] == spell
+                     and (suffix is None or entry.get('label_suffix') == suffix)
+                     and (kind is None or entry['kind'] == kind))
+        return behaviour_scenario(load_fixture_class_file(23), entry)[1]
+
+    def judged(self, expectation, values: dict) -> str:
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def delta(self, spell: int, suffix: str, before: float, after: float, expired: float | None = None) -> str:
+        [expectation] = self.expectations(spell, suffix)
+        values = {expectation.model['before_label']: before, expectation.model['after_label']: after}
+        if expired is not None:
+            values[expectation.model['expired_label']] = expired
+        return self.judged(expectation, values)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_frozen_gate_still_refused_alerts(self):
+        blocked, allowed, bypassed = self.expectations(707402, kind='cast_gate')
+        self.assertEqual(self.judged(allowed, {allowed.label: 67.0}), 'alert')
+        self.assertEqual(self.judged(allowed, {allowed.label: 0.0}), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_mass_grave_past_its_cap_alerts(self):
+        [expectation] = self.expectations(803741, 'targets')
+        labels = expectation.model['dummy_labels']
+        far = expectation.model['far_label']
+        six = {label: 1.0 if index < 6 else 0.0 for index, label in enumerate(labels)}
+        five = {label: 1.0 if index < 5 else 0.0 for index, label in enumerate(labels)}
+        self.assertEqual(self.judged(expectation, {**six, far: 0.0}), 'alert')
+        self.assertEqual(self.judged(expectation, {**five, far: 0.0}), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_mass_grave_cast_at_520_runic_power_alerts(self):
+        self.assertEqual(self.delta(803741, 'instant', 1.0, 1.0), 'alert')
+        self.assertEqual(self.delta(803741, 'instant', 1.0, 0.0), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_mechanical_dummy_affected_alerts(self):
+        self.assertEqual(self.delta(803741, 'humanoids_only', 0.0, 1.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_four_reliquaries_alert(self):
+        self.assertEqual(self.delta(803771, 'count', 0.0, 4.0), 'alert')
+        self.assertEqual(self.delta(803771, 'count', 0.0, 5.0), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_double_heal_alerts(self):
+        self.assertEqual(self.delta(803771, 'restore', 5000.0, 9500.0), 'alert')
+        self.assertEqual(self.delta(803771, 'restore_low', 2000.0, 7400.0), 'alert')
+        self.assertEqual(self.delta(803771, 'restore', 5000.0, 6500.0), 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_permafrost_expired_before_the_read_alerts(self):
+        self.assertEqual(self.delta(704681, 'charges', 0.0, 0.0), 'alert')
+
+
+class MetricDeltaForcedChanceTests(unittest.TestCase):
+    GHOUL_MASTERY = 503740
+    FRENZIED_GHOUL = 707014
+
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == self.GHOUL_MASTERY and entry.get('label_suffix') == 'frenzied_haste')
+
+    def judged(self, entry: dict, absent: float | None, present: float | None, released: float | None,
+               after: float = 1428.571) -> str:
+        _, expectations = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(entry))
+        expectation = expectations[0]
+        model = expectation.model
+        forced = model['forced_chance']
+        values = {model['before_label']: 2000.0, model['after_label']: after}
+        values[forced['count_label']] = 2.0
+        for key, value in (('absent_label', absent), ('present_label', present), ('released_label', released)):
+            if value is not None:
+                values[forced[key]] = value
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_modifier_is_set_after_the_base_steps_and_removed_at_the_end(self):
+        scenario, _ = metric_delta_scenario(load_fixture_class_file(23), metric_delta_spec(self.entry()))
+        run.validate(scenario)
+        steps = scenario['steps']
+        mutant = [index for index, step in enumerate(steps) if step['action'] == 'spell_mod_mutant']
+        self.assertEqual(len(mutant), 1)
+        self.assertEqual(steps[mutant[0]]['spell'], self.GHOUL_MASTERY)
+        self.assertEqual(steps[mutant[0]]['op'], 18)
+        self.assertEqual(mutant[0], len(base_steps(load_fixture_class_file(23))))
+        labels = [step.get('label', '') for step in steps]
+        absent = labels.index(f'{self.GHOUL_MASTERY} forced_chance {self.FRENZIED_GHOUL} absent')
+        present = labels.index(f'{self.GHOUL_MASTERY} forced_chance {self.FRENZIED_GHOUL} present')
+        self.assertEqual(labels[absent + 1], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms before')
+        self.assertEqual(labels[present + 1], f'{self.GHOUL_MASTERY} forced_chance 50073 count')
+        self.assertEqual(labels[present + 2], f'{self.GHOUL_MASTERY} owned_creature_attack_time_ms after')
+        self.assertEqual(steps[-2], {'action': 'set_aura', 'actor': 'caster', 'spell': 100523, 'stacks': 0})
+        self.assertEqual(steps[-1]['metric'], 'spell_mod_mutants')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_forced_effect_is_judged_only_with_the_aura_present(self):
+        entry = self.entry()
+        self.assertEqual(self.judged(entry, 0.0, 2.0, 0.0), 'ok')
+        self.assertEqual(self.judged(entry, 0.0, 0.0, 0.0), 'unmeasured')
+        self.assertEqual(self.judged(entry, 0.0, None, 0.0), 'unmeasured')
+        self.assertEqual(self.judged(entry, 0.0, 1.0, 0.0), 'unmeasured')
+        self.assertEqual(self.judged(entry, 0.0, 2.0, 0.0, after=2000.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_aura_without_the_passive_or_a_modifier_left_active_alerts(self):
+        entry = self.entry()
+        self.assertEqual(self.judged(entry, 1.0, 2.0, 0.0), 'alert')
+        self.assertEqual(self.judged(entry, 0.0, 2.0, 1.0), 'alert')
+        self.assertEqual(self.judged(entry, 0.0, 2.0, None), 'alert')
+
+    def test_the_fixture_names_talent_aura_and_entry(self):
+        with self.assertRaises(ValueError):
+            forced_chance_of({'talent': 1, 'aura': 2})
+        self.assertEqual(forced_chance_of({'talent': 1, 'aura': 2, 'entry': 3}), (1, 2, 3))
+
+
+class CastUnitAuraTests(unittest.TestCase):
+    def entry(self) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 503738 and entry.get('label_suffix') == 'party')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_unit_aura_lands_on_the_casting_ally_before_every_cast(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), self.entry())
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == ALLY]
+        self.assertTrue(casts)
+        for earlier, cast in zip([0] + casts, casts):
+            fixtures = [step for step in steps[earlier:cast] if step['action'] == 'set_aura' and step['spell'] == 823764]
+            self.assertEqual([step.get('target') for step in fixtures], [ALLY])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_unit_aura_is_refused_on_a_swing_entry(self):
+        swing = next(entry for entry in load_fixture_class_file(19)['behaviours']
+                     if entry['kind'] == 'hit_ratio' and entry.get('swing_hand') is not None)
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(19), {**swing, 'cast_unit_auras': [[823764, 1]]})
+
+
+class MetricDeltaGameTimeTests(unittest.TestCase):
+    def entry(self, spell: int, variant: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == spell and entry.get('variant') == variant)
+
+    def judged(self, spell: int, variant: str, after: float, expired: float | None = None, stamped: bool = True):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.entry(spell, variant))
+        model = expectation.model
+        values = {model['before_label']: float(model['before_expected']),
+                  model['after_label']: float(model['expected'])}
+        if 'expired_label' in model:
+            values[model['expired_label']] = float(model['after_expiry_expected'])
+        stamps = model['game_time']
+        if stamped:
+            values[stamps['cast_label']] = 50000.0
+        values[stamps['after_label']] = 50000.0 + after
+        if expired is not None:
+            values[stamps['expired_label']] = 50000.0 + expired
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_game_time_is_read_before_the_trigger_cast_and_the_reading(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.entry(500341, 'ends'))
+        run.validate(scenario)
+        steps = scenario['steps']
+        cast = next(index for index, step in enumerate(steps) if step.get('label') == '500341 game_time cast')
+        after = next(index for index, step in enumerate(steps) if step.get('label') == '500341 game_time after')
+        self.assertEqual((steps[cast + 1]['action'], steps[cast + 1]['spell']), ('cast', 500341))
+        self.assertEqual(steps[after + 1]['label'], expectation.model['after_label'])
+        self.assertEqual(expectation.model['game_time']['after_window'], [3800, 4200])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_reading_inside_its_window_is_ok(self):
+        self.assertEqual(self.judged(500341, 'ends', 4166.0).status, 'ok')
+        self.assertEqual(self.judged(570131, 'lasts', 9714.0, 10330.0).status, 'ok')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_reading_drifted_past_its_window_alerts(self):
+        self.assertEqual(self.judged(500341, 'ends', 4217.0).status, 'alert')
+        self.assertEqual(self.judged(570131, 'lasts', 9714.0, 10534.0).status, 'alert')
+        self.assertEqual(self.judged(531126, 'cast_held', 1705.0).status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_missing_stamp_is_unmeasured(self):
+        self.assertEqual(self.judged(500341, 'ends', 4166.0, stamped=False).status, 'unmeasured')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_expired_window_needs_an_expiry_reading(self):
+        entry = self.entry(500341, 'ends')
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'game_time': {'after': [3800, 4200],
+                                                                            'expired': [3800, 4200]}})
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'game_time': {'after': [4200, 3800]}})
+
+
+def cycle_one_entry(spell: int, suffix: str) -> dict:
+    return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                if entry['spell'] == spell and entry.get('label_suffix') == suffix)
+
+
+class OwnedCreatureStrikeTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_metric_delta_strike_hits_the_owned_creature_in_the_after_phase_only(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(500335, 'cloud_per_strike'))
+        steps = run.validate(scenario)['steps']
+        before = first_index(steps, label=expectation.model['before_label'])
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == 'striker']
+        self.assertEqual(len(strikes), 4)
+        self.assertTrue(all(index > before for index in strikes))
+        self.assertTrue(all(steps[index]['target_owned_entry'] == 50068 and steps[index]['target_owner'] == CASTER
+                            and 'target' not in steps[index] for index in strikes))
+        self.assertLess(first_index(steps, action='cast', spell=500335), strikes[0])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cloud_cast_per_strike_is_judged_and_a_pulse_alerts(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(500335, 'cloud_per_strike'))
+        model = expectation.model
+
+        def judged(after: float) -> str:
+            values = {model['before_label']: 0.0, model['after_label']: after}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(4.0), 'ok')
+        self.assertEqual(judged(5.0), 'ok')
+        self.assertEqual(judged(1.0), 'alert')
+        self.assertEqual(judged(0.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_strike_reaction_sets_the_striker_react_state_and_defaults_to_defensive(self):
+        entry = cycle_one_entry(500335, 'cloud_per_strike')
+        default, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        passive, _ = behaviour_scenario(load_fixture_class_file(23),
+                                        {**entry, 'strike': {**entry['strike'], 'reaction': 0}})
+
+        def striker(scenario: dict) -> dict:
+            return next(creature for creature in scenario['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker(default)['reaction'], 1)
+        self.assertEqual(striker(passive)['reaction'], 0)
+        self.assertEqual(default['steps'], passive['steps'])
+        self.assertNotIn('react state', default['contract'])
+
+    def test_a_strike_reaction_is_a_react_state(self):
+        for reaction in (3, -1, True, '0'):
+            with self.assertRaises(ValueError):
+                metric_delta_strike({'spell': 1715, 'health': 1, 'max_health': 1, 'reaction': reaction})
+
+    def test_an_owned_strike_never_runs_in_the_before_phase(self):
+        with self.assertRaises(ValueError):
+            metric_delta_strike({'spell': 41394, 'health': 1, 'max_health': 1, 'owned_entry': 50068,
+                                 'in_before': True})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_script_hit_strikes_the_owned_creature_in_the_treatment_arm_only(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(500335, 'cloud'))
+        steps = run.validate(scenario)['steps']
+        drain = first_index(steps, label='control drain')
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == 'striker']
+        self.assertTrue(strikes and all(index > drain for index in strikes))
+        self.assertTrue(all(steps[index]['target_owned_entry'] == 50068 for index in strikes))
+        control = sum(step.get('ms', 0) for step in steps[:drain] if step['action'] == 'wait')
+        self.assertEqual({step['spell'] for step in steps[:drain] if step['action'] == 'cast'}, {500335, 504868})
+        self.assertGreater(control, 0)
+
+    def test_an_owned_strike_needs_a_strike_spell(self):
+        entry = {'spell': 500335, 'name': 'n', 'quote': 'q', 'hit_spell': 802353, 'trials': 1, 'minimum_hits': 1,
+                 'casts': [[500335, 'caster']], 'strike_owned_entry': 50068}
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'kind': 'script_hit'})
+
+
+class HitRatioAuraAmountTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_treatment_arm_sets_its_aura_amount_before_every_trial(self):
+        entry = cycle_one_entry(707402, 'crit_factor_25')
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        steps = run.validate(scenario)['steps']
+        amounts = [step for step in steps if step['action'] == 'set_aura' and 'amount' in step]
+        self.assertEqual(len(amounts), entry['trials'])
+        self.assertTrue(all((step['spell'], step['effect'], step['amount'], step['stacks']) == (984954, 1, 22, 1)
+                            for step in amounts))
+        first_treatment = first_index(steps, label=f'707402 behaviour_hit_ratio crit_factor_25 treatment start total')
+        self.assertTrue(all(steps.index(step) > first_treatment for step in amounts))
+
+    def test_an_amount_names_one_of_the_arm_auras(self):
+        with self.assertRaises(ValueError):
+            hit_arm({'auras': [[801747, 1]], 'aura_amounts': [[984954, 1, 22]]})
+        with self.assertRaises(ValueError):
+            hit_arm({'auras': [[984954, 1]], 'aura_amounts': [[984954, 3, 22]]})
+        self.assertNotEqual(hit_arm({'auras': [[984954, 1]]}),
+                            hit_arm({'auras': [[984954, 1]], 'aura_amounts': [[984954, 1, 2]]}))
+
+
+class ResurrectAmountTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_ally_health_and_mana_are_read_after_the_accept(self):
+        scenario, expectations = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(803605, 'revive'))
+        steps = run.validate(scenario)['steps']
+        shown = {expectation.label: expectation.displayed for expectation in expectations}
+        self.assertEqual(shown['803605 cast_combat revive health after'], '583')
+        self.assertEqual(shown['803605 cast_combat revive mana after'], '833')
+        alive = first_index(steps, label='803605 cast_combat revive alive after')
+        self.assertLess(alive, first_index(steps, label='803605 cast_combat revive health after'))
+        ally = next(player for player in scenario['players'] if player['id'] == ALLY)
+        self.assertIs(ally['allow_regeneration'], False)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_resurrection_at_another_amount_alerts(self):
+        _, expectations = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(803605, 'revive'))
+        health = next(expectation for expectation in expectations if expectation.label.endswith('health after'))
+        self.assertEqual(judge_behaviour(base_verdict(health), FakeRun({health.label: 583.0}), health).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(health), FakeRun({health.label: 1.0}), health).status, 'alert')
+
+    def test_amounts_need_a_resurrection(self):
+        with self.assertRaises(ValueError):
+            cast_combat_spec({'spell': 803605, 'name': 'n', 'quote': 'q', 'resurrect_amounts': True})
+
+
+class MetricDeltaDummyDistanceTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_dummy_stands_at_the_entry_distance(self):
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(300240, 'range_extended'))
+        run.validate(scenario)
+        self.assertEqual(scenario['creatures'][0]['distance'], 35.0)
+        plain = {**cycle_one_entry(300240, 'range_extended')}
+        plain.pop('dummy_distance')
+        unplaced, _ = behaviour_scenario(load_fixture_class_file(23), plain)
+        self.assertEqual(unplaced['creatures'][0]['distance'], 3)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_cast_still_refused_with_the_talent_alerts(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), cycle_one_entry(300240, 'range_extended'))
+        model = expectation.model
+
+        def judged(after: float) -> str:
+            values = {model['before_label']: 97.0, model['after_label']: after}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(0.0), 'ok')
+        self.assertEqual(judged(97.0), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_distance_outside_the_harness_bound_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**cycle_one_entry(300240, 'range_extended'), 'dummy_distance': 150})
+
+
+CURSE_OF_THE_LICH_BASE = {
+    'spell': 300240, 'kind': 'metric_delta', 'quote': 'and your summons by $s2%.', 'before_expected': 0,
+    'trigger_spell': 805369, 'target': 'caster', 'cast_in_before': False, 'setup_in_before': True,
+    'setup_casts': [500971], 'setup_wait_ms': 3100, 'expire_ms': 500, 'wait_ms': 2000, 'tolerance': 0.0001,
+    'observe_source': 'seeded'}
+CURSE_OF_THE_LICH_ZERO = {'after_auras': [[300240, 1, 'caster', 'caster']], 'phase_aura_amounts': [[300240, 1, 0]]}
+SCHOOL_PROBE = {'entry': 50073, 'spell': 501978, 'school_mask': 16}
+
+
+def curse_of_the_lich_arm(suffix: str, metric: str, fields: dict, gain: float, alone: bool) -> dict:
+    return {**CURSE_OF_THE_LICH_BASE, **(CURSE_OF_THE_LICH_ZERO if alone else {}), 'name': suffix,
+            'variant': suffix, 'label_suffix': suffix, 'expected': gain, 'expected_gain': gain, 'metric': metric,
+            'fields': fields}
+
+
+class SummonSchoolCritArmTests(unittest.TestCase):
+    ARMS = {'a': ('summon_school_crit', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 3, False),
+            'b': ('summon_school_crit_alone', 'owned_creature_school_spell_crit_chance', SCHOOL_PROBE, 0, True),
+            'c': ('summon_base_alone', 'owned_creature_spell_crit_chance', {'entry': 50073}, 0, True)}
+
+    def built(self, arm: str):
+        entry = curse_of_the_lich_arm(*self.ARMS[arm])
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        return scenario, expectation
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_arms_read_the_probe_and_zero_effect_one_only_in_b_and_c(self):
+        for arm, (suffix, metric, fields, _, alone) in self.ARMS.items():
+            with self.subTest(arm=arm):
+                scenario, expectation = self.built(arm)
+                self.assertEqual(expectation.label, f'300240 behaviour_metric_delta {suffix}')
+                reads = [step for step in scenario['steps'] if step.get('metric') == metric]
+                self.assertEqual(len(reads), 2)
+                for read in reads:
+                    self.assertEqual({key: read[key] for key in fields}, fields)
+                zeroed = [step for step in scenario['steps'] if step.get('action') == 'set_aura'
+                          and step.get('spell') == 300240 and step.get('amount') == 0 and step.get('effect') == 1]
+                self.assertEqual(len(zeroed), int(alone))
+                learn = scenario['steps'].index({'action': 'learn', 'actor': CASTER, 'spell': 300240})
+                self.assertLess(scenario['steps'].index(reads[0]), learn)
+                self.assertLess(learn, scenario['steps'].index(reads[1]))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_arm_b_alerts_when_a_separate_summon_grant_returns(self):
+        _, expectation = self.built('b')
+        model = expectation.model
+
+        def judged(before: float, after: float) -> str:
+            values = {model['before_label']: before, model['after_label']: after}
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+        self.assertEqual(judged(3.0, 3.0), 'ok')
+        self.assertEqual(judged(4.5, 7.5), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_other_source_arm_learns_its_gate_between_the_reads_and_never_the_talent(self):
+        entry = {**curse_of_the_lich_arm('summon_other_source', 'owned_creature_school_spell_crit_chance',
+                                         SCHOOL_PROBE, 3, False), 'gate_spell': 26127}
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario)
+        steps = scenario['steps']
+        reads = [index for index, step in enumerate(steps)
+                 if step.get('metric') == 'owned_creature_school_spell_crit_chance']
+        gate = steps.index({'action': 'learn', 'actor': CASTER, 'spell': 26127})
+        self.assertEqual(len(reads), 2)
+        self.assertLess(reads[0], gate)
+        self.assertLess(gate, reads[1])
+        self.assertNotIn({'action': 'learn', 'actor': CASTER, 'spell': 300240}, steps)
+
+
+class TakenHitLearnedArmTests(unittest.TestCase):
+    def entry(self, suffix: str) -> dict:
+        return next(entry for entry in load_fixture_class_file(23)['behaviours']
+                    if entry['spell'] == 552011 and entry.get('label_suffix') == suffix)
+
+    def built(self, suffix: str):
+        return taken_hit_scenario(load_fixture_class_file(23), taken_hit_spec(self.entry(suffix)))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_control_arm_unlearns_and_the_treatment_arm_relearns_before_its_strikes(self):
+        scenario, _ = self.built('players')
+        run.validate(scenario)
+        steps = scenario['steps']
+        unlearn = next(index for index, step in enumerate(steps) if step['action'] == 'unlearn')
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['actor'] == CASTER and step['spell'] == 552011)
+        strikes = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['actor'] == STRIKER]
+        self.assertEqual(steps[unlearn]['spell'], 552011)
+        self.assertLess(unlearn, strikes[0])
+        self.assertLess(strikes[9], learn)
+        self.assertLess(learn, strikes[10])
+        checks = [step for step in steps if step['action'] == 'assert' and step.get('metric') == 'aura'
+                  and step.get('spell') == 552011]
+        self.assertEqual([step['equals'] for step in checks], [0, 1])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_critical_entry_forces_the_player_striker_and_reads_critical_hits_only(self):
+        scenario, [expectation] = self.built('player_crits')
+        striker = next(player for player in scenario['players'] if player['id'] == STRIKER)
+        self.assertEqual(striker['spell_crit_rating'], FORCED_CRIT_RATING)
+        reads = [step for step in scenario['steps'] if step['action'] == 'assert'
+                 and step.get('metric') == 'spell_damage_total' and step.get('caster') == STRIKER]
+        self.assertTrue(reads)
+        self.assertTrue(all(step['critical'] is True for step in reads))
+        plain, _ = self.built('players')
+        self.assertNotIn('spell_crit_rating', next(player for player in plain['players'] if player['id'] == STRIKER))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_halved_player_hit_is_ok_and_an_unreduced_one_alerts(self):
+        _, [expectation] = self.built('players')
+        judged = lambda hit: judge_behaviour(base_verdict(expectation),
+                                             FakeRun(ratio_values(expectation.model, hit)), expectation).status
+        self.assertEqual(judged(550.0), 'ok')
+        self.assertEqual(judged(1100.0), 'alert')
+        self.assertEqual(judged(880.0), 'alert')
+
+    def test_a_forced_striker_crit_without_a_critical_read_is_refused(self):
+        entry = {key: value for key, value in self.entry('player_crits').items() if key != 'critical'}
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(load_fixture_class_file(23), taken_hit_spec(entry))
+
+    def test_an_arm_learning_and_unlearning_one_spell_is_refused(self):
+        entry = self.entry('players')
+        arms = [{**entry['arms'][0], 'learn': [552011]}, entry['arms'][1]]
+        with self.assertRaises(ValueError):
+            taken_hit_scenario(load_fixture_class_file(23), taken_hit_spec({**entry, 'arms': arms}))
+
+
+class HitRatioTargetAuraTests(unittest.TestCase):
+    def built(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
+        return behaviour_scenario(load_fixture_class_file(23), entry)
+
+    def judged(self, control_crits: float, treatment_crits: float) -> str:
+        _, [expectation] = self.built()
+        values = {}
+        for arm, marks in expectation.model['reads'].items():
+            crits = control_crits if arm == 'control' else treatment_crits
+            for index, (total, count) in enumerate(marks):
+                values[total], values[count] = index * crits, index * 4.0
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_fixture_is_set_on_the_dummy_before_every_observed_cast(self):
+        scenario, _ = self.built()
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 501997)
+        self.assertTrue(casts)
+        for index in casts:
+            fixture = next(step for step in reversed(steps[:index])
+                           if step['action'] == 'set_aura' and step['spell'] == 22856)
+            self.assertEqual((fixture['target'], fixture['caster']), ('dummy', CASTER))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_stated_rise_is_ok_and_the_party_share_alone_alerts(self):
+        self.assertEqual(self.judged(0.4, 1.32), 'ok')
+        self.assertEqual(self.judged(0.4, 0.52), 'alert')
+
+    def test_a_target_aura_on_a_caster_target_is_refused(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['spell'] == 300958 and entry.get('label_suffix') == 'frozen_crit_rate')
+        with self.assertRaisesRegex(ValueError, 'target_auras'):
+            behaviour_scenario(load_fixture_class_file(23), {**entry, 'target': CASTER})
+
+
+class CostGateForcedRollTests(unittest.TestCase):
+    def built(self, spell: int):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['kind'] == 'cost_gate' and entry.get('forced_roll') == spell)
+        return behaviour_scenario(load_fixture_class_file(23), entry)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_roll_is_forced_before_the_first_arm_and_released_at_the_end(self):
+        scenario, expectations = self.built(300940)
+        run.validate(scenario)
+        steps = scenario['steps']
+        mutant = next(index for index, step in enumerate(steps) if step['action'] == 'spell_mod_mutant')
+        self.assertEqual(steps[mutant]['spell'], 300940)
+        self.assertLess(mutant, cast_indices(steps, 801760)[0])
+        self.assertEqual(steps[-1]['metric'], 'spell_mod_mutants')
+        released = next(expectation for expectation in expectations if expectation.label.endswith(' released'))
+        self.assertEqual(released.displayed, '0')
+        values = {expectation.label: 0.0 for expectation in expectations}
+        self.assertEqual(judge_behaviour(base_verdict(released), FakeRun(values), released).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(released), FakeRun({**values, released.label: 1.0}),
+                                         released).status, 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_entry_without_a_forced_roll_has_no_mutant(self):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['kind'] == 'cost_gate' and entry.get('forced_roll') == 704724)
+        plain = {key: value for key, value in entry.items() if key != 'forced_roll'}
+        scenario, expectations = behaviour_scenario(load_fixture_class_file(23), plain)
+        self.assertFalse([step for step in scenario['steps'] if step['action'] == 'spell_mod_mutant'])
+        self.assertFalse([expectation for expectation in expectations if expectation.label.endswith(' released')])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class FixedCountPostCastAuraTests(unittest.TestCase):
+    def test_a_post_cast_aura_is_set_right_after_every_cast(self):
+        entry = r1a_entry(524620, 'fixed_count')
+        spec = fixed_target_count_spec({**entry, 'post_cast_auras': [[500983, 1]]})
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, spec.cast_spell)
+        self.assertTrue(casts)
+        for index in casts:
+            self.assertEqual(steps[index + 1], {'action': 'set_aura', 'actor': 'caster', 'spell': 500983, 'stacks': 1})
+            self.assertEqual(steps[index + 2]['action'], 'wait')
+
+    def test_without_post_cast_auras_the_cast_is_followed_by_its_wait(self):
+        spec = fixed_target_count_spec(r1a_entry(524620, 'fixed_count'))
+        scenario, _ = fixed_target_count_scenario(CLASS_FILE, spec)
+        steps = scenario['steps']
+        self.assertTrue(all(steps[index + 1]['action'] == 'wait' for index in cast_indices(steps, spec.cast_spell)))
+
+    def test_a_post_cast_aura_without_a_stack_is_refused(self):
+        entry = {**r1a_entry(524620, 'fixed_count'), 'post_cast_auras': [[500983, 0]]}
+        with self.assertRaises(ValueError):
+            fixed_target_count_scenario(CLASS_FILE, fixed_target_count_spec(entry))
+
+
+class EnemyPlayerClassTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_an_enemy_player_class_replaces_the_class_file_class(self):
+        entry = {**r1a_entry(801205, 'metric_delta', 'sleep_player'), 'enemy_player_class': 8}
+        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+        run.validate(scenario)
+        enemy = next(player for player in scenario['players'] if player['id'] == 'enemy')
+        self.assertEqual((enemy['race'], enemy['class']), (2, 8))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_a_class_the_enemy_keeps_the_class_file_class(self):
+        scenario, _ = metric_delta_scenario(CLASS_FILE, metric_delta_spec(r1a_entry(801205, 'metric_delta',
+                                                                                    'sleep_player')))
+        enemy = next(player for player in scenario['players'] if player['id'] == 'enemy')
+        self.assertEqual(enemy['class'], CLASS_FILE['class_id'])
+
+    def test_an_enemy_class_without_an_enemy_race_is_refused(self):
+        entry = {**r1a_entry(801205, 'metric_delta', 'sleep_player'), 'enemy_player_class': 8}
+        entry.pop('enemy_player_race')
+        with self.assertRaises(ValueError):
+            metric_delta_scenario(CLASS_FILE, metric_delta_spec(entry))
+
+
+class MetricDeltaOwnCastContrastTests(unittest.TestCase):
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_set_by_the_spells_own_cast_is_an_own_cast_contrast(self):
+        own = cycle_one_entry(807813, 'pushback_held')
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), own)
+        self.assertEqual(expectation.model['contrast'], 'own_cast')
+        foreign = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                       if entry['spell'] == 802986 and entry.get('label_suffix') == 'horde_on_ghouls')
+        _, [other] = behaviour_scenario(load_fixture_class_file(23), foreign)
+        self.assertEqual(other.model['contrast'], 'condition')
+        _, [learned] = behaviour_scenario(load_fixture_class_file(23), {**own, 'setup_only_after': False})
+        self.assertEqual(learned.model['contrast'], 'learned')
 
 
 if __name__ == '__main__':

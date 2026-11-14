@@ -8,12 +8,12 @@ import unittest
 from unittest import mock
 
 from classes import class_spells
-from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_paths, load_class_file, skill_label,
+from profile import (CASTER, armed, base_steps, caster_stats_from, class_file_paths, load_class_file, load_fixture_class_file, skill_label,
                     unfit_reason)
 from test_tooltip import FIXTURE_CASTER, FIXTURE_SPELLS, FIXTURE_VARIABLES, write_fixture
 from tooltip import CasterStats, DataSet, Displayed, Records, read_tooltip
-from values import (ALLY, AURA_STATE_HEALTHLESS_35_PERCENT, CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH,
-                    GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
+from values import (ALLY, AURA_STATE_FROZEN, AURA_STATE_HEALTHLESS_20_PERCENT, AURA_STATE_HEALTHLESS_35_PERCENT,
+                    CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
                     calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
                     foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
@@ -111,7 +111,7 @@ def measured_labels(scenario):
 
 class ClassFileTest(unittest.TestCase):
     def test_templar_file_names_the_weapon_and_the_known_auras(self):
-        templar = load_class_file(TEMPLAR_CLASS_ID)
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
         self.assertEqual(templar['weapon']['item'], WALKING_STICK)
         self.assertEqual(templar['known_auras'], [CLASS_TUNING_AURA])
         self.assertEqual(templar['probe_auras'], [SCOURGEBANE])
@@ -123,20 +123,20 @@ class ClassFileTest(unittest.TestCase):
         table = DataSet(DBC_DIR).load('Item')[0]
         records = {item: (item_class, subclass) for item, item_class, subclass
                    in (ITEM_RECORD.unpack_from(table.record(row)) for row in range(table.rows))}
-        templar = load_class_file(TEMPLAR_CLASS_ID)
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
         self.assertEqual(records[WALKING_STICK], (2, templar['weapon']['subclass']))
         self.assertEqual(templar['weapon']['subclass'], STAFF_SUBCLASS)
 
-    def test_every_class_file_names_its_class(self):
+    def test_cross_class_guard_every_class_file_names_its_class(self):
         files = class_file_paths()
         self.assertTrue(files)
         for path in files:
             self.assertIn('class_id', json.loads(path.read_text(encoding='utf-8')), path.name)
 
-    def test_class_file_paths_leaves_out_the_clause_ledger(self):
+    def test_cross_class_guard_class_file_paths_leaves_out_the_clause_ledger(self):
         self.assertNotIn('templar_clauses.json', [path.name for path in class_file_paths()])
 
-    def test_unknown_class_is_refused(self):
+    def test_cross_class_guard_unknown_class_is_refused(self):
         with self.assertRaises(ValueError):
             load_class_file(0)
 
@@ -148,7 +148,7 @@ def requirement(item_class=2, subclasses=0, inventory_types=0):
 
 class ArmedTest(unittest.TestCase):
     def setUp(self):
-        self.templar = load_class_file(TEMPLAR_CLASS_ID)
+        self.templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
 
     def test_a_spell_the_main_weapon_fits_keeps_the_class_file(self):
         for fitting in (requirement(-1, ONE_HAND_MASK), requirement(2, TWO_HAND_MASK, TWO_HAND_INVENTORY_MASK),
@@ -186,7 +186,7 @@ class ArmedTest(unittest.TestCase):
 
 class BaseStepsTest(unittest.TestCase):
     def setUp(self):
-        self.steps = base_steps(load_class_file(TEMPLAR_CLASS_ID))
+        self.steps = base_steps(load_fixture_class_file(TEMPLAR_CLASS_ID))
 
     def test_settle_wait_comes_first_then_the_weapon_is_equipped(self):
         self.assertEqual(self.steps[0], {'action': 'wait', 'label': 'settle', 'ms': SETTLE_MS})
@@ -232,7 +232,7 @@ class BaseStepsTest(unittest.TestCase):
         measured.update({f'spell_power {school}': float(school) for school in range(1, SPELL_POWER_SCHOOLS + 1)})
         measured.update({f'stat {stat}': 10.0 + stat for stat in range(STAT_COUNT)})
         measured.update({skill_label(line): 295.0 for line in TEMPLAR_SKILL_LINES[:3]})
-        self.assertEqual(caster_stats_from(measured, load_class_file(TEMPLAR_CLASS_ID)), CasterStats(
+        self.assertEqual(caster_stats_from(measured, load_fixture_class_file(TEMPLAR_CLASS_ID)), CasterStats(
             level=60, ap=313.0, rap=7.0, sp_by_school={school: float(school) for school in range(1, 7)},
             stats={stat: 10.0 + stat for stat in range(STAT_COUNT)},
             skills=dict.fromkeys(TEMPLAR_SKILL_LINES[:3], 295.0), weapon_subclass=STAFF_SUBCLASS, race=HUMAN,
@@ -249,7 +249,7 @@ class BaseStepsTest(unittest.TestCase):
 class ClientDbcValueScenarioTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.class_file = load_class_file(TEMPLAR_CLASS_ID)
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
         cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}
         extra = tuple(entry['spell'] for entry in cls.class_file.get('extra_spells', []))
         cls.extra_spells = {spell.spell_id: spell
@@ -788,6 +788,16 @@ class RequiredTargetHealthStepsTest(unittest.TestCase):
         facts = facts_of(self.records, TITANSTRIKE_MAX_RANK)
         steps = required_target_health_steps(facts, 'leech_before')
         self.assertEqual(steps[0]['target'], 'leech_before')
+
+    def test_a_frozen_target_state_is_set_by_a_frost_nova_fixture_on_the_target(self):
+        facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK), target_aura_state=AURA_STATE_FROZEN)
+        self.assertEqual(required_target_health_steps(facts, 'dummy'),
+                         [{'action': 'set_aura', 'actor': CASTER, 'target': 'dummy', 'spell': 122, 'stacks': 1}])
+
+    def test_the_healthless_20_percent_state_sets_the_target_to_15_percent(self):
+        facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK),
+                        target_aura_state=AURA_STATE_HEALTHLESS_20_PERCENT)
+        self.assertEqual(required_target_health_steps(facts)[0]['pct'], 15)
 
     def test_an_unmapped_aura_state_raises_unmodelled_instead_of_a_silent_skip(self):
         facts = replace(facts_of(self.records, TITANSTRIKE_MAX_RANK), target_aura_state=99)

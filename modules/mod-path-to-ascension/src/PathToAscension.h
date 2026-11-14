@@ -139,6 +139,7 @@ namespace PathToAscension
     bool IsQuestAvailable(Player const* player, uint32 questId);
     void SyncTracking(Player* player, uint32 tutorialId);
     void StartTrackedQuest(Player* player, uint32 questId);
+    void ShowTrackedQuest(Player* player, uint32 questId);
     uint32 NpcRewardTutorial(Player const* player, uint32 questId);
     void Claim(Player* player, uint32 tutorialId);
     bool QueueClientRequest(WorldSession* session, WorldPacket const& packet);

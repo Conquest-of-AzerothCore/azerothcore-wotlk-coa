@@ -6393,7 +6393,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     // Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
                     if (m_caster->IsPlayer())
                         if (Unit* target = m_targets.GetUnitTarget())
-                            if (target != m_caster && !target->HasActivePowerType(Powers(m_spellInfo->Effects[i].MiscValue)))
+                            if (target != m_caster && !target->CanLosePowerToSpell(Powers(m_spellInfo->Effects[i].MiscValue)))
                                 return SPELL_FAILED_BAD_TARGETS;
                     break;
                 }
@@ -6529,7 +6529,9 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     if (GameObject* go = m_targets.GetGOTarget())
                     {
                         lockId = go->GetGOInfo()->GetLockId();
-                        if (!lockId && go->GetGoType() != GAMEOBJECT_TYPE_DOOR)
+                        if (!lockId && ((go->GetGoType() != GAMEOBJECT_TYPE_DOOR &&
+                            go->GetGoType() != GAMEOBJECT_TYPE_BUTTON) ||
+                            go->HasGameObjectFlag(GO_FLAG_NOT_SELECTABLE)))
                             return SPELL_FAILED_BAD_TARGETS;
                     }
                     else if (Item* itm = m_targets.GetItemTarget())
@@ -6941,7 +6943,7 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
                     if (!m_targets.GetUnitTarget())
                         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
-                    if (!m_targets.GetUnitTarget()->HasActivePowerType(POWER_MANA))
+                    if (!m_targets.GetUnitTarget()->CanLosePowerToSpell(POWER_MANA))
                         return SPELL_FAILED_BAD_TARGETS;
 
                     break;

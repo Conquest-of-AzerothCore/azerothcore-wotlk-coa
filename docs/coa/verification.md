@@ -265,6 +265,15 @@ judged on each side.
 python -B tools/verify_all.py --stages gameplay --scenario .cache/conformance/templar-2/scenarios/*.json
 ```
 
+The `conformance` suite also regenerates every finished class and compares it with its committed digests
+(`conformance/snapshots/<class>.json`, ADR 0590); without the DBC set, as in GitHub CI, that check is skipped, so the
+local source stage is mandatory before a PR. When the diff touches a shared engine file (`ENGINE_FILES` in
+`tools/check_source.py`: `Unit.cpp`, `StatSystem.cpp`, `Spell.cpp`, `SpellEffects.cpp`, `SpellAuraEffects.cpp`,
+`SpellInfo.cpp`, `SpellMgr.cpp`, ...), the source stage prints, and `report.json` keeps under the source summary's
+`conformance_reruns`, the gameplay rerun each finished class needs: generate, `--stages build,gameplay --scenario`,
+`compare`, and `diff` against the class's count of record. It does not fail the stage (ADR 0591); the rerun is still
+required ([class conformance guide](class-conformance.md#145-guards-for-finished-classes)).
+
 ## Results and exit codes
 
 Output defaults to a new `.cache/verify-all/<UTC YYYYmmdd-HHMMSS>/` directory (with a `-2`, `-3` suffix when

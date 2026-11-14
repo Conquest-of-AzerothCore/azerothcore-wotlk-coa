@@ -9,15 +9,22 @@
 #include "Creature.h"
 #include "CreatureAI.h"
 #include "DatabaseEnv.h"
+#include "GameTime.h"
 #include "Log.h"
 #include "Map.h"
 #include "MapCollisionData.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "WorldPacket.h"
 #include "WorldScript.h"
+#include "WorldSession.h"
 #include <array>
 #include <cmath>
+#include <map>
+#include <mutex>
+#include <optional>
 #include <shared_mutex>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -33,12 +40,33 @@ namespace
     constexpr float RoomExitSlack = 1.15f;
     constexpr float RoomPadding = 2.0f;
     constexpr std::array<float, 2> RoomRayHeights = { 2.0f, 5.0f };
+    constexpr Milliseconds ResetHidden = 10s;
+    constexpr char const* ResetText = "%s has lost interest in fighting with you.";
 
     struct Leash
     {
         float radius = 0.0f;
         std::vector<Position> points;
     };
+
+    struct HiddenBoss
+    {
+        Milliseconds until = 0ms;
+        ReactStates react = REACT_AGGRESSIVE;
+        bool immuneToPC = false;
+        bool immuneToNPC = false;
+        bool selectable = true;
+    };
+
+    using HiddenKey = std::tuple<uint32, uint32, ObjectGuid>;
+
+    std::mutex HiddenLock;
+    std::map<HiddenKey, HiddenBoss> Hidden;
+
+    HiddenKey KeyOf(Creature const* creature)
+    {
+        return { creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() };
+    }
 
     std::shared_mutex LeashLock;
     std::unordered_map<uint32, Leash> Leashes;
@@ -149,6 +177,73 @@ namespace
         return outline;
     }
 
+    void AnnounceReset(Creature* creature)
+    {
+        creature->GetMap()->DoForAllPlayers([creature](Player* player)
+        {
+            WorldPacket data;
+            ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, creature, player, ResetText, 0, "",
+                player->GetSession()->GetSessionDbLocaleIndex());
+            player->SendDirectMessage(&data);
+        });
+    }
+
+    void HideForReset(Creature* creature)
+    {
+        HiddenBoss boss;
+        boss.until = GameTime::GetGameTimeMS() + ResetHidden;
+        boss.react = creature->GetReactState();
+        boss.immuneToPC = creature->IsImmuneToPC();
+        boss.immuneToNPC = creature->IsImmuneToNPC();
+        boss.selectable = !creature->HasUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+
+        float x, y, z, o;
+        creature->GetRespawnPosition(x, y, z, &o);
+        creature->SetHomePosition(x, y, z, o);
+        creature->NearTeleportTo(x, y, z, o);
+        creature->SetReactState(REACT_PASSIVE);
+        creature->SetImmuneToAll(true);
+        creature->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetVisible(false);
+
+        std::lock_guard lock(HiddenLock);
+        Hidden[KeyOf(creature)] = boss;
+    }
+
+    void ShowAfterReset(Creature* creature, HiddenBoss const& boss)
+    {
+        creature->SetImmuneToPC(boss.immuneToPC);
+        creature->SetImmuneToNPC(boss.immuneToNPC);
+        if (boss.selectable)
+            creature->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+        creature->SetFullHealth();
+        if (creature->getPowerType() == POWER_MANA)
+            creature->SetPower(POWER_MANA, creature->GetMaxPower(POWER_MANA));
+        creature->SetReactState(boss.react);
+        creature->SetVisible(true);
+    }
+
+    bool UpdateHidden(Creature* creature)
+    {
+        std::optional<HiddenBoss> back;
+        {
+            std::lock_guard lock(HiddenLock);
+            auto const itr = Hidden.find(KeyOf(creature));
+            if (itr == Hidden.end())
+                return false;
+            if (GameTime::GetGameTimeMS() >= itr->second.until)
+            {
+                back = itr->second;
+                Hidden.erase(itr);
+            }
+        }
+        if (back)
+            ShowAfterReset(creature, *back);
+        else if (creature->IsInCombat())
+            creature->CombatStop(true);
+        return true;
+    }
+
     bool LeashedOnMap(Map const* map)
     {
         return map && map->IsNonRaidDungeon() && map->GetSpawnMode() != DUNGEON_DIFFICULTY_NORMAL;
@@ -173,6 +268,9 @@ public:
 
     void OnAllCreatureUpdate(Creature* creature, uint32) override
     {
+        if (UpdateHidden(creature))
+            return;
+
         if (!creature->IsInCombat() || creature->IsInEvadeMode() || !creature->IsAlive() || !LeashedOnMap(creature->GetMap()))
             return;
 
@@ -183,8 +281,20 @@ public:
                 return;
         }
 
-        if (CreatureAI* ai = creature->AI())
-            ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
+        CreatureAI* ai = creature->AI();
+        if (!ai)
+            return;
+
+        AnnounceReset(creature);
+        ai->EnterEvadeMode(CreatureAI::EVADE_REASON_BOUNDARY);
+        if (creature->IsInWorld() && creature->IsAlive() && creature->IsVisible())
+            HideForReset(creature);
+    }
+
+    void OnCreatureRemoveWorld(Creature* creature) override
+    {
+        std::lock_guard lock(HiddenLock);
+        Hidden.erase(KeyOf(creature));
     }
 };
 

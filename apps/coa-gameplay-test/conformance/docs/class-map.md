@@ -75,11 +75,19 @@ field, this pipeline builds it:
   of 165 and above, auras of 317 and above, and modifier operations of 29 and above.
 - `log_casts`, `log_other_events`: events in your log events file whose spell id is a rank of the spell.
 - `log_linked_events`: the same for its foreign and triggered spells.
+- `shared_with`: the other class ids whose spell list holds the same spell id (ADR 0597).
 
 Per class:
 - `own_files`: the code files that at least 5 of its spells hit, and at least 10% of the most-hit file, minus the shared
   files;
 - `shared_files`: files that three or more classes hit that way.
+
+At the top level, `shared_class_file_spells` lists every spell id that more than one class file under `classes/` uses
+(often a test fixture such as 12096 Fear), with the class ids and the class-file keys it appears under. A class file's
+spell ids are the integers under keys ending in `spell`, `spells`, `aura` or `auras`, and the first element of each
+pair inside such a list. Touching the code, data or fixture of a spell flagged either way requires the snapshot check
+and the gameplay rerun of every finished class that uses it
+([guide, section 14.5](../../../../docs/coa/class-conformance.md#145-guards-for-finished-classes)).
 
 ## Check against the Templar
 

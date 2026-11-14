@@ -255,7 +255,7 @@ as ground truth.
 
 ```sh
 python3 -B conformance.py prove --class 19 [--behaviour SPELL ...] [--proc AURA ...] [--trigger AURA ...] \
-    --out DIR --worktree W [--runs 2] [--build] [--timeout-ms 600000] [--clauses LEDGER]
+    --out DIR --worktree W [--runs 2] [--build] [--timeout-ms 600000] [--gameplay-db-workers N] [--clauses LEDGER]
 ```
 
 `prove` runs the gameplay passes of chosen class-file entries deterministically (ADR 0121). Run it from
@@ -273,7 +273,8 @@ without that tooling it cannot run as documented. Run the generated scenarios tw
    least one is required; `DIR` must be new or empty and lie under the worktree or its main checkout, the two
    directories `coa-verify` mounts.
 2. For each run (at least 2), executes in the foreground `coa-verify --worktree W --ram --stages gameplay --scenario
-   <every scenario file>` (`build,gameplay` on run 1 only with `--build`), with the timeout; never `--jobs`. A timeout
+   <every scenario file>` (`build,gameplay` on run 1 only with `--build`, and `--gameplay-db-workers N` on every
+   run when given, for a set that shares the test MySQL), with the timeout; never `--jobs`. A timeout
    stops the process group (SIGTERM, then SIGKILL after 30 s) and the run fails. The run directory comes from the
    `VERIFY ALL: <status> <report.json>` line of `DIR/run<n>/verify.log`; `INCOMPLETE` is the normal status of
    exploratory scenario files. A failed build stage, scenario drift, results of several builds, or a run (pilot
@@ -358,6 +359,56 @@ reads the file beside the ledger: on the verdicts' build, a `consumed` row turns
 behaviour evidence; a `not_consumed` row keeps it data and lists it. K3 is the only consumption route: the K1
 static join needs the value dump, which is not adopted, and no K1+K2 rows are written.
 
+### Coverage audit and bucket file
+
+```sh
+python3 -B conformance.py audit --class 23 --clauses classes/necromancer_clauses.json --out COVERAGE.json \
+  [--results DIR ...] [--base-results DIR] [--manifest MANIFEST.json] [--hooked HOOKED.json] [--build B] \
+  [--consumption classes/<name>_consumption.json]
+python3 -B conformance.py buckets --class 23 --coverage COVERAGE.json --out BUCKETS.json \
+  [--manifest MANIFEST.json] [--class-map CLASS-MAP.json] [--settled SETTLED.json] \
+  [--standing-alerts STANDING.json] [--source-root W] [--dbc-dir DIR]
+python3 -B conformance.py aura354 --class-map CLASS-MAP.json --class 23 [--out AURA354.json]
+```
+
+`audit` merges the verdicts of `--base-results` and then of each `--results` directory in order (a later directory
+replaces the labels of the earlier ones) and runs `coverage.clause_coverage` on the ledger. With no directory it runs
+on no verdicts, as for a new class: every claim comes out unproven. `--manifest` stamps the observed metric of a
+generated manifest on a metric verdict that carries none (verdicts written before the metric was stamped);
+`--hooked` turns the listed labels into `not_measured`; `--build` stamps one audit build on every merged verdict,
+and without it the merged verdicts must come from one build (`coverage.require_build`). The output keeps the inputs,
+`results_replaced` and `results_added` (labels of `--results` over the base), `results_disagree` (labels whose status
+class, conformant or the status itself plus `data_only`, differs between `--results` directories), `figures`
+(`claims`, `behaviour`, `data`, `unproven`, `resolved`, `not_measured`, `tool_gaps_pending`), `no_claim_entries`,
+`statuses` (label to status) and one row per claim: `index` (the claim's position among the ledger's claims),
+`spell`, `clause`, `evidence`, `claim_evidence`, `labels`, `missing_labels`, `label_statuses`, `alert_labels` and
+`alert_explanations` (the first 300 characters).
+
+`buckets` writes the bucket file `sample` and `packets` read: `definition`, `inputs` (with the family, the source
+files and their family masks), `uncited_alert_verdicts`, `uncited_alert_quotes` and one row per audit row with
+`index, spell, spell_name, clause, bucket, evidence, alert_source, script_touch, script_touch_hits, token_kind,
+tokens, literals, token_readbacks, readable_token, token_readbacks_conformant, declared_claims, zero_agent_data,
+labels, missing_labels, label_statuses`. A row is `A` when a standing alert applies (an alert label, an alert verdict
+cited by no clause whose manifest rule or class-file `target_aura_gates` quote gives the clause text, or a
+`--standing-alerts` row), unless `--settled` lists it; otherwise `out_of_scope` when behaviour proven, `U` when
+unproven, `D` when data conformant. The class code is the class map's `own_files` for the class, or without
+`--class-map` the files `src/server/coa/**/Ascension<class name>*` under `--source-root`; the family is the class
+map's `family`, or the most common `SpellFamilyName` of the class spells. `script_touch_hits` matches the clause
+spell, its rank ids (value scenarios of `--manifest`) and the spells its tokens name, by id as a whole word or by a
+family mask the class code tests. `--settled` is a JSON list of `{spell, clause, why}` and `--standing-alerts` of
+`{spell, clause}`. Without `--manifest` there are no rank ids, token readbacks or uncited alert quotes, and the
+spell name comes from `Spell.dbc`.
+
+`aura354` lists the class spells of a class map whose `custom_mechanics` carry aura 354 with their risk, custom
+mechanics and first code hits, and flags a spell of risk `stock` or `data_row` as a candidate defect (guide 9.2).
+
+On the Templar, `buckets` fed the batch-1 audit (`coverage.json`), a manifest regenerated at 6cbd4ed4fe (1233
+scenarios), the class code of that commit, the two settled alerts and the ten standing prototype alerts reproduced
+the batch-1 bucket file on all 433 rows (`bucket`, `evidence`, `script_touch`, `token_kind` and every other row
+field) except two: `spell_name` on 20 rows, where the original had none and `buckets` reads `Spell.dbc`, and the
+wording of `alert_source` on the 9 standing-alert rows, which names the input file. The
+batch-1 audit itself cannot be rerun: its round 10 `verdicts.json` and batch-1 compare outputs no longer exist.
+
 ### Drawing a batch sample
 
 ```sh
@@ -400,6 +451,90 @@ server DBC set, the class file, the bucket file and an optional class map, which
   matched by spell id, else by a map spell of the same name whose hits name the id.
 
 The command prints its runtime. The same inputs write the same files.
+
+### Cycle runner
+
+```sh
+python3 -B conformance.py cycle --config CYCLE.json [--skip STEP ...] [--write-digests]
+```
+
+`cycle` runs the integrator's fixed steps of a merged pair, in this order (ADR 0655): `gate` (each class of
+`guard_classes`, which must not be empty: every generation of `snapshots.GENERATIONS` regenerated at the worktree and at a `git archive` of
+`base`, `diff -r`, then `snapshots.py check`; a difference stops the gate unless `gate_accepted` declares it for
+that class and every differing file is exactly the declared change, ADR 0659), `digests` (`snapshots.py check --class N`, or `write` with
+`--write-digests`), `generate` (into `scenarios_dir`, refused when it is not empty), `source` (`source_runner
+--stages source --base BASE`), `runs` (run 1 then run 2: each `disk_checks` command first, no run above
+`disk_limit_percent`; then `gameplay_runner --stages gameplay --gameplay-db-workers N --scenario <every generated
+file>`, the stamp read from its `VERIFY ALL` line; a run stops the cycle unless it ends `PASSED` with exit 0 or
+`INCOMPLETE` with exit 3, the normal status of exploratory scenario files, its `report.json` exists and its gameplay
+stage ran; as in `prove`, a run in which a scenario of the manifest has no result, or a scenario drifted, stops it
+too), `compare` (with `runs` skipped, `pair.results` is checked for missing results first) and `audit` per run,
+`tally`, `refactor` (only with `refactor.moved_kinds`), `archive` (only with `archive`, a new directory, and two
+stamps; besides the compare outputs, audits, reports, manifest and status files it holds `ledger/`: the clause ledger
+the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`; the
+step needs `head`, resolves it to its commit id, which every read and `BUILD.txt` use, and stops when that commit
+cannot be read in the worktree, never falling back to the worktree HEAD; the ledger must be named
+`<class>_clauses.json`, or the step stops before writing;
+`BUILD.txt` says whether the ledger used equals the one at `head`, which is kept as `ledger/committed-<ledger>` when
+it differs, and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
+out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
+`OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
+2. Relative paths in the cycle file are read from its directory. The fields:
+
+| Field | Meaning |
+|---|---|
+| `class_id`, `name` | the class and the pair's name (`final16`): `OUT/<name>-cmp-<stamp>/`, `OUT/coverage-<name>-<stamp>.json`, `OUT/<name>-status.json` and `.md` |
+| `worktree`, `head`, `base` | the class worktree whose `conformance.py` runs, the generation commit (required by `archive`; the checkpoint's head, `git rev-parse HEAD` when unset), the base of the gate and the source stage |
+| `clauses`, `out`, `build` | the clause ledger, the output directory, the build `compare --build` judges |
+| `scenarios_dir`, `manifest` | the generate target (needed by `generate` and `runs`); the manifest, `scenarios_dir/manifest.json` by default |
+| `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
+| `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
+| `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
+| `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth and differ from it as JSON (an added key, never a changed one; a formatting-only difference stops), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
+| `other_verdicts_accepted` | the "other" record verdicts the cycle may pass: `{"keys": [["label", "check", "scenario"]], "why": "..."}`, the exact keys found: a found key not listed and a listed key no longer found (stale) both stop, and both are named; without it the tally and the checkpoint stop |
+| `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |
+| `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped); the two entries of each field, and of `OUT/pair.json`, must name two different runs |
+| `decisions` | the candidates and rulings file, below |
+| `refactor` | `moved_kinds`, `record_commit` and `class_file` (the class file there and at the worktree, or at `class_file_rev`), `db_words` and `db_kinds` (the seed-suspect classes); a label/check row changes when one scenario's statuses over the two runs differ between the record and the pair, and lists those scenarios in `changed_scenarios` |
+| `archive`, `cost`, `previous_status` | the archive directory; a cost JSON copied into the checkpoint (`"not recorded"` without it); the status file the delta is measured against (the record by default) |
+
+The tally (`tally.py`) gives every ledger claim a status 1-5 or `not final`. A claim with a flip is not final: a flip
+within the pair is a label/check/scenario whose judged status class (conformant, or the status itself) differs between
+the runs or that is present in one run only (`insufficient_trials` is not judged); a flip against the record compares
+the pair with the record's two runs on every label/check/scenario of either side, so a scenario with no result in both
+runs of the pair flips against the record, except on a label whose judge changed (`judge_changed`: a changed
+expectation or a new value link). The record and the pair are matched by scenario key (the entry) and label/check,
+not by the scenario file's sha256 (ADR 0660): a re-hashed scenario, such as one that gained a fixture field, is
+compared; a pooled verdict (`part-1 + part-2 ...`) is compared when every part matches. A record scenario with a file
+whose key or labels the pair's manifest lacks is unmatched and not compared; the checkpoint (`record_scenarios` in
+`checkpoint.json`, a line in `checkpoint.md` and the checkpoint log) and the command output state the matched and
+unmatched counts, with a `WARNING` and the first unmatched keys when any is unmatched. They also count the record
+verdicts (label, check, scenario) of the ledger's labels that were not compared because they match no filed scenario
+of both manifests or their judge changed (`record_verdicts`): those whose every scenario part has no file in either
+manifest ("no scenario file": their status comes from the manifest and the judge code, not from a run) and the
+others, and any
+"other" verdict stops the tally and the checkpoint (nonzero exit, the keys listed) unless `other_verdicts_accepted`
+names them; the accepted reason is written into `checkpoint.md` and `checkpoint.json`. A ledger label without an ordinal reaches its
+`label #N` verdicts in the flips and the label checks, as in the audit (`coverage.resolved_labels`). A ruling is
+applied first and stands over a flip: its status (2 to 5) rests on the rule or ruling it names, not on the runs
+(class-conformance.md section 2). Status 1 needs a pair with no flip (class-conformance.md 3.2) and never comes from a
+ruling. Otherwise a record status 1 stays 1 on behaviour in both runs, a status 2 stays 2 on behaviour or on its
+recorded evidence kind, and a recorded status 3-5 claim with neither a ruling nor a candidate stops the tally. The
+decisions file holds, by claim key, `candidates`
+(`{key: why}`: status 1 on behaviour in both runs with every label conformant), `rulings` (`{key: {"status": "3",
+"why": "..."}}`, status 2 to 5), `counted` (ledger-only re-audit corrections, counted at once: status 1, basis
+`counted`, on behaviour in both runs; otherwise the record status rules apply) and `text_changed` (keys whose claim
+text changed on purpose; any other text change stops the tally). A decision key that names no claim of the ledger (a
+record key, or `new I.P` for a new claim) stops the tally and names the key. A record row that no ledger claim reaches
+is listed as `LOST <key> missing` and counts in the record figure and the delta. The checkpoint (`checkpoint.json` and
+`.md`) holds the count, the delta against `previous_status` (the record status file by default),
+the statuses, the flips, the lost and gained keys, the pair and record stamps, the build, the head, the refactor gate
+figures, the steps done and `cost`.
+
+On the Necromancer, the cycle replayed cycle 17 (20261114-071744 / -074148, 626 / 627, the 389.0 flip) and cycle 18
+(20261114-084514 / -090752, 627 / 627) from their archived compare outputs with `gate`/`digests` (cycle 18 only),
+`generate`, `source`, `runs` and `compare` skipped: both status files were byte-identical to the recorded
+`final15-status.json` and `final16-status.json`, and the cycle 17 refactor gate matched its recorded 84 rows.
 
 ### Verdicts
 

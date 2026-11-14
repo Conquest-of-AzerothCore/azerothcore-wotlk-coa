@@ -1196,6 +1196,17 @@ class SourceStageTests(WorkspaceTest):
                                  else ['tools/check_source.py', '--all'])
         self.assertIn('printed no JSON', summary['message'])
 
+    def test_the_conformance_rerun_listing_is_kept_in_the_source_summary(self):
+        workspace = self.workspace()
+        reruns = {'engine_files': ['src/server/game/Spells/Spell.cpp'], 'enforced': False, 'classes': []}
+        result = {'status': 'passed', 'selected_suites': [], 'conformance_reruns': reruns, 'results': [
+            {'command': ['python', '-B', 'tools/check_comments.py'], 'status': 'passed'}]}
+        with patch.object(verify_all, 'run_captured', return_value=verify_all.Outcome(0, json.dumps(result))):
+            context = workspace.context(base='origin/main')
+            status, summary = verify_all.stage_source(context, context.output / 'source.log')
+        self.assertEqual(status, 'passed')
+        self.assertEqual(summary['conformance_reruns'], reruns)
+
 
 class RegistrationTests(unittest.TestCase):
     def test_verify_all_changes_select_its_regressions(self):

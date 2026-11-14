@@ -1,0 +1,274 @@
+{
+  "schema": 1,
+  "name": "Rom'ogg Bonecrusher leaves his leash on Heroic: one reset emote, and he comes back visible 10 s later",
+  "contract": [
+    "Our tester pulled Rom'ogg Bonecrusher (39665) out of his leash in a Heroic Blackrock Caverns, saw the reset emote twice",
+    "in a row, and afterwards Rom'ogg stayed invisible except in GM mode. A reset announces itself once, and the boss",
+    "comes back visible about 10 s later at full health. Here he gets a 15-yard circle, summoned in the corridor east of his room, more than 60 yards from his own spawn."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2,
+      "melee_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "gm",
+      "map": 645,
+      "x": 345.4,
+      "y": 948.5,
+      "z": 190.97,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: gm is in a Heroic Blackrock Caverns",
+      "actor": "gm",
+      "metric": "map_difficulty",
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "gm",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".leash clear 39665"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".leash radius 15 39665"
+    },
+    {
+      "action": "summon",
+      "actor": "gm",
+      "as": "boss",
+      "entry": 39665,
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "actor": "gm",
+      "target": "boss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the boss is in combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "boss",
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the boss is hurt",
+      "actor": "boss",
+      "metric": "health_pct",
+      "max": 99
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the boss is visible before the reset",
+      "actor": "gm",
+      "metric": "nearby_creature_at_client",
+      "entry": 39665,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "gm",
+      "metric": "monster_chat_count",
+      "save_as": "chats"
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 10.0,
+      "dy": 0.2
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 10.0,
+      "dy": 0.2
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 10.3,
+      "dy": 0.1
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 11.0,
+      "dy": -1.7
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 11.3,
+      "dy": -1.7
+    },
+    {
+      "action": "assert",
+      "label": "The boss vanishes once he leaves the circle",
+      "actor": "gm",
+      "metric": "nearby_creature_at_client",
+      "entry": 39665,
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "His reset is announced to the gm",
+      "actor": "gm",
+      "metric": "monster_chat_count",
+      "relative_to": "chats",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The gm leaves combat with him",
+      "actor": "gm",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "He cannot be attacked while gone",
+      "actor": "gm",
+      "metric": "nearby_creature_can_attack",
+      "entry": 39665,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "He is still gone 7 s later",
+      "actor": "gm",
+      "metric": "nearby_creature_at_client",
+      "entry": 39665,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The reset is announced only once",
+      "actor": "gm",
+      "metric": "monster_chat_count",
+      "relative_to": "chats",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "He returns about 10 s after the reset",
+      "actor": "gm",
+      "metric": "nearby_creature_at_client",
+      "entry": 39665,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "He returns at full health",
+      "actor": "boss",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "He can be attacked again",
+      "actor": "gm",
+      "metric": "nearby_creature_can_attack",
+      "entry": 39665,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "He is not in combat",
+      "actor": "boss",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "He stays visible",
+      "actor": "gm",
+      "metric": "nearby_creature_at_client",
+      "entry": 39665,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".leash clear 39665"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 from sheets import render_text, scripted_hooks, sheet, talent_catalog_entry, talent_catalog_ranks, write_sheets
 from values import dataset
 
@@ -14,7 +14,7 @@ MISSING_SPELL = 99999999
 
 class SheetTests(unittest.TestCase):
     def setUp(self):
-        self.class_file = load_class_file(TEMPLAR_CLASS_ID)
+        self.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_rejects_unknown_spell(self):
