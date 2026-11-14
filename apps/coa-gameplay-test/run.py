@@ -234,7 +234,7 @@ PLAYER_STAT_METRICS = {
     'script_periodic_damage_taken', 'script_heal_received', 'spell_effect_value', 'spell_effect_radius',
     'spell_calc_amount_hooks',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
-    'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
+    'aoe_damage_taken', 'reputation', 'reputation_gain', 'melee_attack_count',
     'melee_attacks_taken',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_resist_chance', 'spell_uses_armor',

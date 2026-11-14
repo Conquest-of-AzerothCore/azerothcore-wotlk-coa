@@ -1406,6 +1406,7 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_TRADE_STATUS &&
         packet.GetOpcode() != SMSG_TOTEM_CREATED &&
         packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA && packet.GetOpcode() != SMSG_TRIGGER_MOVIE &&
+        packet.GetOpcode() != SMSG_ATTACKSTOP && packet.GetOpcode() != SMSG_GOSSIP_COMPLETE &&
         packet.GetOpcode() != SMSG_SPELLDAMAGESHIELD)
         return;
 
@@ -4087,6 +4088,17 @@ private:
                 return aura->GetEffect(effect)->GetCritChance();
             return aura->GetEffect(effect)->GetAmount();
         }
+        if (metric == "spell_immune" || metric == "spell_effect_immune")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            Require(info != nullptr, "Unknown immunity probe spell");
+            Unit* caster = GetUnit(step.get<std::string>("target"));
+            if (metric == "spell_immune")
+                return unit->IsImmunedToSpell(info, caster);
+            uint32 effect = step.get<uint32>("effect", EFFECT_0);
+            Require(effect < MAX_SPELL_EFFECTS && info->Effects[effect].IsEffect(), "Invalid immunity probe effect");
+            return unit->IsImmunedToSpellEffect(info, effect, caster);
+        }
         Player* player = unit->ToPlayer();
         Require(player != nullptr, "Metric requires a player: " + metric);
         if (metric == "spell_mod_mutants")
@@ -5149,17 +5161,6 @@ private:
             uint32 faction = step.get<uint32>("id");
             Require(sFactionStore.LookupEntry(faction) != nullptr, "Unknown reputation faction");
             return player->CalculateReputationGain(REPUTATION_SOURCE_SPELL, player->GetLevel(), 1000, int32(faction));
-        }
-        if (metric == "spell_immune" || metric == "spell_effect_immune")
-        {
-            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
-            Require(info != nullptr, "Unknown immunity probe spell");
-            Unit* caster = GetUnit(step.get<std::string>("target"));
-            if (metric == "spell_immune")
-                return player->IsImmunedToSpell(info, caster);
-            uint32 effect = step.get<uint32>("effect", EFFECT_0);
-            Require(effect < MAX_SPELL_EFFECTS && info->Effects[effect].IsEffect(), "Invalid immunity probe effect");
-            return player->IsImmunedToSpellEffect(info, effect, caster);
         }
         if (metric == "power_type")
             return player->getPowerType();
