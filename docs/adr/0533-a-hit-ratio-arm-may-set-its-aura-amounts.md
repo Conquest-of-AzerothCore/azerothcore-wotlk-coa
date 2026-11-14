@@ -23,4 +23,3 @@ harness `set_aura` step already sets an aura effect's amount.
   +22 (Necromancer ADR 0026).
 <!-- Draft note: the original ADR 0533 states no tool-only consequence (no Templar byte-identity line); add one only if
      measured. -->
-
