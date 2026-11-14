@@ -1,0 +1,3 @@
+{"type": "user", "timestamp": "2026-01-02T13:00:00Z", "message": {"role": "user", "content": "Do the work. It is read-only."}}
+{"type": "assistant", "timestamp": "2026-01-02T13:03:00Z", "message": {"id": "r2", "model": "model-x", "role": "assistant", "content": [], "usage": {"input_tokens": 7, "cache_read_input_tokens": 7, "cache_creation_input_tokens": 7, "output_tokens": 7}}}
+{"type": "assistant", "timestamp": "2026-01-02T13:03:30Z", "message": {"id": "syn", "model": "<synthetic>", "role": "assistant", "content": [], "usage": {"input_tokens": 9, "cache_read_input_tokens": 9, "cache_creation_input_tokens": 9, "output_tokens": 9}}}
