@@ -5,7 +5,7 @@
     "all": {
       "arguments": [],
       "files": {
-        "manifest.json": "f6951e0d8d8ca95b678984d0b4d8b27440982d799c86cea4f852b470ab7105ae",
+        "manifest.json": "4e43ec31fd6d589031004dbe4c5d24c965d931e7beb290997fd169d09ddf4f2b",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-root-ends.json": "6c803224683da36792633ec51e41c55ad290a925d66f625932a4127e9929672b",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-root-held.json": "ee9435dca9814257531bd94e4bade2e88950c4e552a7029677507b9a270b195d",
         "scenarios/conformance-necromancer-behaviour-300233-metric-delta-slow-ends.json": "a70202c19502b26502051516d4d97389fe2abe456548af96d7381c2aed163b8d",
@@ -738,7 +738,7 @@
         "scenarios/conformance-necromancer-behaviour-500331-radius-edge.json": "0bf857c58624105982025a23199844deaea157e05044f97fe773d779a0284de0",
         "scenarios/conformance-necromancer-behaviour-500331-script-hit-command-damage-sp.json": "49aa544def7e0348659506295cbd233a211858f4640159f2a06a54557bcb5631",
         "scenarios/conformance-necromancer-behaviour-500331-script-hit-command-damage.json": "bfb1a3aab4557d58edd255ddb4225dfbb607bb4cf1642fd131141a06283cfc79",
-        "scenarios/conformance-necromancer-behaviour-500335-metric-delta-cloud-per-strike.json": "c9afa434277878a6358f9b8e68276fe1c120462e94d8f2c42e1a7ad3a3a5643b",
+        "scenarios/conformance-necromancer-behaviour-500335-metric-delta-cloud-per-strike.json": "cbb0f6ecf07ede1c6295f132ae0b1dee86a62f2a39ba099f34778226eb72e756",
         "scenarios/conformance-necromancer-behaviour-500335-metric-delta-cloud-unattacked.json": "f5f5edc7083b21133a046cea6be08c6b44bd8f922f51cd47df0a6ab16cb5c151",
         "scenarios/conformance-necromancer-behaviour-500335-metric-delta-command.json": "fd361a93ccbb7e144a5b2a9af61c926dc8864d5aee1140d1d7a1dd384502fa06",
         "scenarios/conformance-necromancer-behaviour-500335-metric-delta-count.json": "ba5ccf70f82964737b19edc445d240973dcec80f6adb168fbf81085fd465023f",
