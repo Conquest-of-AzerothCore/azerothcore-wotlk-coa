@@ -452,6 +452,57 @@ server DBC set, the class file, the bucket file and an optional class map, which
 
 The command prints its runtime. The same inputs write the same files.
 
+### Cycle runner
+
+```sh
+python3 -B conformance.py cycle --config CYCLE.json [--skip STEP ...] [--write-digests]
+```
+
+`cycle` runs the integrator's fixed steps of a merged pair, in this order (ADR 0655): `gate` (each class of
+`guard_classes`: every generation of `snapshots.GENERATIONS` regenerated at the worktree and at a `git archive` of
+`base`, `diff -r`, then `snapshots.py check`), `digests` (`snapshots.py check --class N`, or `write` with
+`--write-digests`), `generate` (into `scenarios_dir`, refused when it is not empty), `source` (`source_runner
+--stages source --base BASE`), `runs` (run 1 then run 2: each `disk_checks` command first, no run above
+`disk_limit_percent`; then `gameplay_runner --stages gameplay --gameplay-db-workers N --scenario <every generated
+file>`, the stamp read from its `VERIFY ALL` line), `compare` and `audit` per run, `tally`, `refactor` (only with
+`refactor.moved_kinds`), `archive` (only with `archive`, a new directory) and `checkpoint`. `--skip` leaves a step
+out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
+`OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
+2. Relative paths in the cycle file are read from its directory. The fields:
+
+| Field | Meaning |
+|---|---|
+| `class_id`, `name` | the class and the pair's name (`final16`): `OUT/<name>-cmp-<stamp>/`, `OUT/coverage-<name>-<stamp>.json`, `OUT/<name>-status.json` and `.md` |
+| `worktree`, `head`, `base` | the class worktree whose `conformance.py` runs, the generation commit (the checkpoint's head; `git rev-parse HEAD` when unset), the base of the gate and the source stage |
+| `clauses`, `out`, `build` | the clause ledger, the output directory, the build `compare --build` judges |
+| `scenarios_dir`, `manifest` | the generate target (needed by `generate` and `runs`); the manifest, `scenarios_dir/manifest.json` by default |
+| `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
+| `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
+| `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
+| `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (its two compare outputs), `manifest` |
+| `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped) |
+| `decisions` | the candidates and rulings file, below |
+| `refactor` | `moved_kinds`, `record_commit` and `class_file` (the class file there and at the worktree, or at `class_file_rev`), `db_words` and `db_kinds` (the seed-suspect classes) |
+| `archive`, `cost`, `previous_status` | the archive directory; a cost JSON copied into the checkpoint (`"not recorded"` without it); the status file the delta is measured against (the record by default) |
+
+The tally (`tally.py`) gives every ledger claim a status 1-5 or `not final`. A claim with a flip is not final: a flip
+within the pair is a label/check/scenario whose judged status class (conformant, or the status itself) differs between
+the runs or that is present in one run only (`insufficient_trials` is not judged); a flip against the record compares
+the pair with the record's two runs, except on a scenario whose sha256 changed or a label whose judge changed
+(`judge_changed`: a changed expectation or a new value link). Otherwise a record status 1 stays 1 on behaviour in both
+runs, a status 2 stays 2 on behaviour or on its recorded evidence kind, and statuses 3-5 come only from a ruling. The
+decisions file holds, by claim key, `candidates` (`{key: why}`: status 1 on behaviour in both runs with every label
+conformant), `rulings` (`{key: {"status": "3", "why": "..."}}`), `counted` (ledger-only re-audit corrections,
+counted at once as record status 1) and `text_changed` (keys whose claim text changed on purpose; any other text change
+stops the tally). The checkpoint (`checkpoint.json` and `.md`) holds the count, the delta against `previous_status`,
+the statuses, the flips, the lost and gained keys, the pair and record stamps, the build, the head, the refactor gate
+figures, the steps done and `cost`.
+
+On the Necromancer, the cycle replayed cycle 17 (20261114-071744 / -074148, 626 / 627, the 389.0 flip) and cycle 18
+(20261114-084514 / -090752, 627 / 627) from their archived compare outputs with `gate`/`digests` (cycle 18 only),
+`generate`, `source`, `runs` and `compare` skipped: both status files were byte-identical to the recorded
+`final15-status.json` and `final16-status.json`, and the cycle 17 refactor gate matched its recorded 84 rows.
+
 ### Verdicts
 
 | Status | Given to |

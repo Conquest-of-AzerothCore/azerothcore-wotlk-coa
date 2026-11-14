@@ -81,8 +81,8 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   leaves for a human.
 - [Generate and compare](docs/generate-and-compare.md) — `generate`/`compare` CLI, a full class run, the impact
   report, coverage comparison, behaviour sheets, the `prove` runner, the coverage audit, bucket file and aura-354
-  check (`audit`, `buckets`, `aura354`), batch samples, per-spell packets, verdict
-  statuses, open conformance checks.
+  check (`audit`, `buckets`, `aura354`), batch samples, per-spell packets, the `cycle` runner of a merged pair
+  (ADR 0655), verdict statuses, open conformance checks.
 - [Server-fix brief](docs/fix-brief.md) — the method rule for server fixes and the brief template round workflows
   copy into each fix item.
 - [Clause ledger and clause coverage](docs/clause-ledger.md) — `classes/<name>_clauses.json` format,

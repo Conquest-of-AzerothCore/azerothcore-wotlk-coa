@@ -806,7 +806,13 @@ def main(argv=None) -> int:
     ledgering.add_argument('--text-basis', dest='text_basis', action='append',
                            help='<spell>=<basis> of a spell read from coa_client_spell_description: owner_ruling, '
                                 'live_source, text_correction or align_to_server; required for each such spell')
+    from cycle import add_cycle_arguments, cycle_command
+    add_cycle_arguments(commands.add_parser('cycle', help="run the integrator's fixed steps of a merged pair from a "
+                                                         'cycle file: gate, digests, generate, source stage, pair, '
+                                                         'compare, audit, tally, refactor gate, archive, checkpoint'))
     args = parser.parse_args(argv)
+    if args.command == 'cycle':
+        return cycle_command(args)
     if args.command in batch_handlers:
         return batch_handlers[args.command](args)
     handlers = {'scaffold': scaffold_command, 'generate': generate_command, 'sheets': sheets_command,
