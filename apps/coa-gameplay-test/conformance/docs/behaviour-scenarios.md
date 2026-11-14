@@ -1822,6 +1822,9 @@ state read promised by a clause that names a creation.
 
 A `metric_delta` `strike` may name `owned_entry` (ADR 0530): the striker casts its spell at the caster's owned creature
 of that entry (the harness creature cast's test-only `target_owner` / `target_owned_entry`), in the after phase only.
+A `strike` may set `reaction` (ADR 0654), the striker's react state: 0 passive, 1 defensive (the default), 2
+aggressive. A passive striker swings only through its scripted casts (Ghoul Mastery 503740: the Ghoul's Command: Ghouls
+801514 hits the striker, and a defensive striker could daze the Ghoul before the control reading).
 A `script_hit` entry may name `strike_owned_entry`: the striker casts `strike_spell` at that owned creature in the
 treatment arm only, after the arm's casts and one `settle_ms`, while the control arm waits the same time unstruck, so
 `control_casts` may repeat the casts (Raise: Abomination 500335: the cloud fires when the Abomination is attacked).

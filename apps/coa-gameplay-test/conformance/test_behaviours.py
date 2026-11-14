@@ -11133,6 +11133,25 @@ class OwnedCreatureStrikeTests(unittest.TestCase):
         self.assertEqual(judged(1.0), 'alert')
         self.assertEqual(judged(0.0), 'alert')
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_strike_reaction_sets_the_striker_react_state_and_defaults_to_defensive(self):
+        entry = cycle_one_entry(500335, 'cloud_per_strike')
+        default, _ = behaviour_scenario(load_fixture_class_file(23), entry)
+        passive, _ = behaviour_scenario(load_fixture_class_file(23),
+                                        {**entry, 'strike': {**entry['strike'], 'reaction': 0}})
+
+        def striker(scenario: dict) -> dict:
+            return next(creature for creature in scenario['creatures'] if creature['id'] == 'striker')
+        self.assertEqual(striker(default)['reaction'], 1)
+        self.assertEqual(striker(passive)['reaction'], 0)
+        self.assertEqual(default['steps'], passive['steps'])
+        self.assertNotIn('react state', default['contract'])
+
+    def test_a_strike_reaction_is_a_react_state(self):
+        for reaction in (3, -1, True, '0'):
+            with self.assertRaises(ValueError):
+                metric_delta_strike({'spell': 1715, 'health': 1, 'max_health': 1, 'reaction': reaction})
+
     def test_an_owned_strike_never_runs_in_the_before_phase(self):
         with self.assertRaises(ValueError):
             metric_delta_strike({'spell': 41394, 'health': 1, 'max_health': 1, 'owned_entry': 50068,

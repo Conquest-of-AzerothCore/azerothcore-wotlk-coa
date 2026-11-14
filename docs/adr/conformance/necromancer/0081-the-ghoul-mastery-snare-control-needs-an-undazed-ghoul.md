@@ -31,3 +31,11 @@ strike, before the Frenzied transform), so it can read the same Dazed 1604 at 0.
 `before_aura_absent` {1604, 50073} too. The after phase is unchanged: a Dazed after the transform is not read
 (whether 707014's snare immunity, Effect[2] aura 77 MiscValue 11, covers Dazed's mechanic is not read), and the
 after reading is the one the Hamstring strike produces.
+
+## Addendum (cycle 18)
+
+The striker is pulled by the Ghoul itself: the Command makes the Ghoul cast Command: Ghouls 801514 (enemies within
+10 yd of the Ghoul), which damages the striker; the defensive striker then melees the Ghoul and can daze it from behind.
+Diagnostic 20261114-080834 showed this in 240/240 mixed copies, with 1604 in 5/240. That is game behaviour, so no
+server change. Both 503740 entries now set the strike `reaction` 0 (ADR 0654): in 20261114-082317 the passive striker
+made no swing and no copy held 1604. `before_aura_absent` stays as the guard.

@@ -1381,6 +1381,7 @@ class MetricDeltaStrike:
     after_trigger_ms: int | None = None
     in_before: bool = False
     owned_entry: int | None = None
+    reaction: int | None = None
 
 
 def metric_delta_contrast(spec) -> str:
@@ -1405,14 +1406,18 @@ def metric_delta_strike(raw: dict | None) -> MetricDeltaStrike | None:
     if raw is None:
         return None
     unknown = set(raw) - {'spell', 'health', 'max_health', 'count', 'wait_ms', 'dx', 'after_trigger_ms', 'in_before',
-                          'owned_entry'}
+                          'owned_entry', 'reaction'}
     if unknown:
         raise ValueError(f'metric_delta strike fields {sorted(unknown)} are unknown')
     strike = MetricDeltaStrike(int(raw['spell']), int(raw['health']), int(raw['max_health']),
                                int(raw.get('count', 1)), int(raw.get('wait_ms', 200)), float(raw.get('dx', 0.0)),
                                None if raw.get('after_trigger_ms') is None else int(raw['after_trigger_ms']),
                                raw.get('in_before', False),
-                               None if raw.get('owned_entry') is None else int(raw['owned_entry']))
+                               None if raw.get('owned_entry') is None else int(raw['owned_entry']),
+                               raw.get('reaction'))
+    if strike.reaction is not None and (type(strike.reaction) is not int or strike.reaction not in (0, 1, 2)):
+        raise ValueError('metric_delta strike reaction is the striker\'s react state: 0 passive, 1 defensive, '
+                         '2 aggressive')
     if strike.owned_entry is not None and (strike.in_before or strike.owned_entry < 1):
         raise ValueError('metric_delta strike owned_entry names a positive creature entry, struck in the after phase '
                          'only')
@@ -1875,9 +1880,14 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         scenario['players'][0].update(dict(spec.player_ratings))
     option_fixtures(class_file, spec, scenario)
     if spec.strike is not None:
+        reaction = 1 if spec.strike.reaction is None else spec.strike.reaction
         scenario.setdefault('creatures', []).append(
             {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],
-             'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100})
+             'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': reaction, 'spell_hit_bonus': 100})
+        if spec.strike.reaction is not None:
+            scenario['contract'] += (f' The striker\'s react state is {reaction}, so it fights only through its '
+                                     f'scripted casts.' if reaction == 0 else
+                                     f' The striker\'s react state is {reaction}.')
     label = f'{spec.spell} behaviour_metric_delta' + (f' {spec.label_suffix}' if spec.label_suffix else '')
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
