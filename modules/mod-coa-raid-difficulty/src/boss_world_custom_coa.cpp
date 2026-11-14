@@ -623,10 +623,11 @@ namespace
     constexpr float RING_THROW_Z      = 4.0f;
     constexpr uint8 GRASP_RINGS       = 6;
     constexpr uint32 GO_STALACTITE    = 978099;
-    constexpr float STALACTITE_GRID   = 10.0f;
+    constexpr float STALACTITE_GRID   = 12.0f;
     constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_SINK   = 4.0f;
+    constexpr float CAVE_FLOOR_STEP   = 10.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
     constexpr float SNOWGRAVE_LEASH   = 120.0f;
 
@@ -695,7 +696,10 @@ namespace
                     float const x = home.GetPositionX() + dx + frand(-2.0f, 2.0f);
                     float const y = home.GetPositionY() + dy + frand(-2.0f, 2.0f);
                     float const ground = map->GetHeight(me->GetPhaseMask(), x, y, home.GetPositionZ() + 10.0f);
-                    if (ground <= INVALID_HEIGHT)
+                    if (ground <= INVALID_HEIGHT || std::fabs(ground - home.GetPositionZ()) > CAVE_FLOOR_STEP ||
+                        !map->isInLineOfSight(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ() + 5.0f,
+                            x, y, ground + 5.0f, me->GetPhaseMask(), LINEOFSIGHT_ALL_CHECKS,
+                            VMAP::ModelIgnoreFlags::Nothing))
                         continue;
                     float rx, ry, rz;
                     if (!tree.GetObjectHitPos(x, y, ground + 2.0f, x, y, ground + CEILING_SEARCH, rx, ry, rz, -0.5f) ||
