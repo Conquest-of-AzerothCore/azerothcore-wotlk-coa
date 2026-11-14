@@ -1070,6 +1070,9 @@ holds for `power` 0..6, scripts included (reads only, ADR 0529).
 Intellect, Spirit) and requires it to be present (a read only, ADR 0480).
 `owned_creature_aura_max_duration_ms` reads the maximum duration of the aura `spell` on the same creature (0 when
 absent; a read only, ADR 0484).
+`owned_creature_applied_aura_count` reads how many aura applications the same creature holds (any caster) and
+lists them in the step record as `auras`: `spell`, `caster` (GUID), `caster_entry`, `stacks` and `duration_ms` of
+each (a read only, ADR 0652).
 `owned_creature_spell_cast_count` counts the casts of `spell` by that owned creature in its map instance (the
 harness cast counter), and `game_time_ms` reads the server's game time in milliseconds (reads only, ADR 0485).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval

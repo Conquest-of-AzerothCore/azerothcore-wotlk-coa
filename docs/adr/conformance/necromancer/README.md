@@ -60,6 +60,7 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 | [0062](0062-rotting-flesh-and-fetid-mark-are-read-on-swing-arms.md) | - | Rotting Flesh and Fetid Mark are read on swing arms | new |
 | [0065](0065-parasites-leech-needs-only-the-players-debuff.md) | - | The Parasites leech needs only the player's debuff | new |
 | [0080](0080-vampiric-aura-trials-start-after-the-aura-reaches-the-minion.md) | - | Vampiric Aura trials start after the aura reaches the minion | new |
+| [0081](0081-the-ghoul-mastery-snare-control-needs-an-undazed-ghoul.md) | - | The Ghoul Mastery snare control needs an undazed Ghoul | new |
 
 ## Re-auditable verdict set
 

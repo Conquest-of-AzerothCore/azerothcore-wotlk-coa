@@ -1915,3 +1915,5 @@ Options with a module:
   cast only, the fourth named point `after_trigger_steps` (ADR 0606)
 - [`strike_landed`](metric_delta_options/strike_landed.md): the strike's damage logs read after the after reading, no
   landed strike is unmeasured, the fifth named point `verdict` (ADR 0625)
+- [`before_aura_absent`](metric_delta_options/before_aura_absent.md): an aura the owned creature must not hold at
+  the before reading, else unmeasured, through the named point `verdict` (ADR 0653)

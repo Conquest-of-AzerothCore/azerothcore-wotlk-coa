@@ -2584,6 +2584,23 @@ private:
         return state;
     }
 
+    static Tree DescribeAuras(Unit const* unit)
+    {
+        Tree auras;
+        for (auto const& [spellId, application] : unit->GetAppliedAuras())
+        {
+            Aura const* aura = application->GetBase();
+            Tree listed;
+            listed.put("spell", spellId);
+            listed.put("caster", aura->GetCasterGUID().ToString());
+            listed.put("caster_entry", aura->GetCasterGUID().GetEntry());
+            listed.put("stacks", uint32(aura->GetStackAmount()));
+            listed.put("duration_ms", aura->GetDuration());
+            auras.push_back({ "", listed });
+        }
+        return auras;
+    }
+
     static bool LeaveGroups(Player* player)
     {
         for (uint8 nesting = 0; nesting < 2; ++nesting)
@@ -5656,6 +5673,12 @@ private:
             Aura const* aura = creature->GetAura(spell);
             return aura ? aura->GetMaxDuration() : 0;
         }
+        if (metric == "owned_creature_applied_aura_count")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Aura listing needs a present owned creature");
+            return static_cast<double>(creature->GetAppliedAuras().size());
+        }
         if (metric == "owned_creature_stat")
         {
             uint32 stat = step.get<uint32>("stat");
@@ -6918,6 +6941,9 @@ private:
             record.put("actual", actual);
             record.put("actor", step.get<std::string>("actor"));
             record.put("metric", step.get<std::string>("metric"));
+            if (step.get<std::string>("metric") == "owned_creature_applied_aura_count")
+                record.add_child("auras", DescribeAuras(GetOwnedCreature(GetPlayer(step.get<std::string>("actor")),
+                    step.get<uint32>("entry"))));
             if (action == "snapshot")
                 _snapshots[step.get<std::string>("save_as")] = actual;
             else
