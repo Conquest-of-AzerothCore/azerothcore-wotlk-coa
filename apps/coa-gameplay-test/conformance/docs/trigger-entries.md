@@ -642,6 +642,9 @@ class code makes the minion attack too. An attempt is one `swing_ms`. `trial_met
 - `caster_health_pct` holds the caster at that health before every window, the first one set before the attack
   starts (ADR 0650): the runner takes one step per world tick, so a minion with a ready swing timer otherwise lands
   its first hit at the caster's natural health (Vampiric Aura 300241: 45%, and 55% in its gate-absence entry).
+- `aura_settle_ms` (with `aura_settle_source`) waits that long after the learn before the first attack, when the
+  passive reaches the minion only after a delay the DBC states (Vampiric Aura 300241: 1500 ms, past the 1000 ms first
+  tick of its Effect[1] that casts 560607 onto the summons; Necromancer ADR 0080).
 - `aura_on_minion` reads the passive on the minion when its only effects apply auras to summons (Pandemic 560798).
 - `aura_cast` casts the aura after its learn, for an active (Fetid Ward 680388); `caster_power` (`{"power", "value",
   "source"}`) sets a power before each cast, for a base-mana percentage cost.

@@ -2643,6 +2643,17 @@ class MinionHeldHealthTests(unittest.TestCase):
         entry = {'aura': 707001, 'trigger': {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000}}
         self.assertEqual(minion_attempt_steps(entry, 4000, '')[0]['action'], 'attack')
 
+    def test_an_aura_settle_waits_after_the_learn_and_needs_its_source(self):
+        from triggers import aura_steps, checked_minion_trigger
+        trigger = {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000, 'swing_source': 'dbc'}
+        entry = {'aura': 300241, 'trigger': trigger, 'aura_settle_ms': 1500, 'aura_settle_source': 'first tick'}
+        checked_minion_trigger(300241, trigger, entry)
+        self.assertEqual(aura_steps({}, entry), [{'action': 'learn', 'actor': 'caster', 'spell': 300241},
+                                                 {'action': 'wait', 'label': 'aura settle', 'ms': 1500}])
+        for bad in ({'aura_settle_ms': 1500}, {'aura_settle_ms': 0, 'aura_settle_source': 'first tick'}):
+            with self.assertRaises(ValueError):
+                checked_minion_trigger(300241, trigger, {'aura': 300241, 'trigger': trigger, **bad})
+
 
 class MagnitudeTwoPointBandTest(unittest.TestCase):
     setUp = MagnitudeTriggerCompareTest.setUp

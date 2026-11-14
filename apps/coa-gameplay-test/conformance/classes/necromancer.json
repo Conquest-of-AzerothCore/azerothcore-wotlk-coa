@@ -847,12 +847,14 @@
       "trial_metric": "owned_creature_damage_count",
       "observe_spell": 561095,
       "observe_source": "tooltip token $560607s2 of 300241",
-      "observe_note": "300241 Effect[1] refreshes 560607 on the caster every 1000 ms; 560607 Effect[1] (aura 354, rewritten to SPELL_AURA_DUMMY by AscensionNecromancerContracts.cpp:57-61) reaches the summons through effect 190, and AscensionNecromancerEvents.cpp:97-98 casts the heal 561095 on the owner for each damaging hit of a minion carrying the owner 560607 while the owner is below 50% health; the 45% health fixture is set before the attack starts, since a hit landing above 50% cannot heal (AscensionNecromancerEvents.cpp:97, HealthBelowPct(50)): in cycle 13 the first hit of every part without a baseline landed at full health, one tick before the first fixture, and was the one missing event of that part",
+      "observe_note": "300241 Effect[1] refreshes 560607 on the caster every 1000 ms; 560607 Effect[1] (aura 354, rewritten to SPELL_AURA_DUMMY by AscensionNecromancerContracts.cpp:57-61) reaches the summons through effect 190, and AscensionNecromancerEvents.cpp:97-98 casts the heal 561095 on the owner for each damaging hit of a minion carrying the owner 560607 while the owner is below 50% health; the 45% health fixture is set before the attack starts, so no counted hit lands at full health",
       "observe_metric": "spell_cast_count",
       "per_trigger": 1,
       "per_trigger_text": "heal you for $560607s2% of their damage dealt",
       "caster_health_pct": 45,
-      "minion_aura_refresh_ms": 4000
+      "minion_aura_refresh_ms": 4000,
+      "aura_settle_ms": 1500,
+      "aura_settle_source": "300241 Effect[1] (PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000) casts 560607 only at its first tick, 1000 ms after the learn, and 560607 reaches the summons then: a hit before it cannot heal (AscensionNecromancerEvents.cpp:97, actor->HasAura(560607)); cycle 13 and 14 pairs: exactly one heal short in each part that attacks right after the learn; diagnostic 20261114-025240: the minion has no 560607 at the attack and the first hit does not heal without the wait, 268 of 268 with it (Necromancer ADR 0080)"
     },
     {
       "aura": 300241,
@@ -877,7 +879,9 @@
       "per_trigger": 1,
       "per_trigger_text": "heal you for $560607s2% of their damage dealt",
       "caster_health_pct": 55,
-      "minion_aura_refresh_ms": 4000
+      "minion_aura_refresh_ms": 4000,
+      "aura_settle_ms": 1500,
+      "aura_settle_source": "300241 Effect[1] (PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000) casts 560607 only at its first tick, 1000 ms after the learn, and 560607 reaches the summons then: a hit before it cannot heal (AscensionNecromancerEvents.cpp:97, actor->HasAura(560607)); cycle 13 and 14 pairs: exactly one heal short in each part that attacks right after the learn; diagnostic 20261114-025240: the minion has no 560607 at the attack and the first hit does not heal without the wait, 268 of 268 with it (Necromancer ADR 0080)"
     },
     {
       "aura": 300241,
@@ -902,7 +906,9 @@
       "per_trigger_text": "heal you for $560607s2% of their damage dealt",
       "observe_source": "tooltip token $560607s2 of 300241 (560607 EffectBasePoints[1] 9 + 1 = 10); AscensionNecromancerEvents.cpp:97-98 heals for damage x Amount(560607, 1) / 100",
       "caster_health_pct": 45,
-      "minion_aura_refresh_ms": 4000
+      "minion_aura_refresh_ms": 4000,
+      "aura_settle_ms": 1500,
+      "aura_settle_source": "300241 Effect[1] (PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000) casts 560607 only at its first tick, 1000 ms after the learn, and 560607 reaches the summons then: a hit before it cannot heal (AscensionNecromancerEvents.cpp:97, actor->HasAura(560607)); cycle 13 and 14 pairs: exactly one heal short in each part that attacks right after the learn; diagnostic 20261114-025240: the minion has no 560607 at the attack and the first hit does not heal without the wait, 268 of 268 with it (Necromancer ADR 0080)"
     },
     {
       "aura": 560798,

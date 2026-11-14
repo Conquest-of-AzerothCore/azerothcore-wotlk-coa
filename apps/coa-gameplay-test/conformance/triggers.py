@@ -357,6 +357,9 @@ def checked_minion_trigger(aura: int, trigger: dict, entry: dict) -> None:
             raise ValueError(f'Trigger {aura} minion action needs a positive integer {field}')
     if not trigger.get('swing_source'):
         raise ValueError(f'Trigger {aura} minion action needs the source of its swing_ms')
+    if 'aura_settle_ms' in entry and (not isinstance(entry['aura_settle_ms'], int) or entry['aura_settle_ms'] <= 0
+                                      or not entry.get('aura_settle_source')):
+        raise ValueError(f'Trigger {aura} needs a positive integer aura_settle_ms with its aura_settle_source')
     if any(not isinstance(spell, int) for spell in trigger.get('learn', [])):
         raise ValueError(f'Trigger {aura} minion action has a non-integer learn spell')
     for aura_fixture in entry.get('minion_auras', []):
@@ -384,7 +387,15 @@ def aura_steps(class_file: dict, entry: dict) -> list[dict]:
     if entry.get('aura_cast'):
         steps += cast_steps(facts_of(records_of(class_file), aura), aura, None, cast_interval(class_file, aura), 1,
                             power_steps(entry))
+    if entry.get('aura_settle_ms'):
+        steps.append({'action': 'wait', 'label': 'aura settle', 'ms': entry['aura_settle_ms']})
     return steps
+
+
+def aura_settle_note(entry: dict) -> str:
+    if not entry.get('aura_settle_ms'):
+        return ''
+    return f'; the trials start {entry["aura_settle_ms"]} ms after the learn ({entry["aura_settle_source"]})'
 
 
 def aura_measurement(entry: dict, label: str) -> dict:
@@ -628,6 +639,7 @@ def trigger_rule(entry: dict) -> str:
                      f'cast ({entry["caster_power"]["source"]})')
     if entry['trigger']['action'] == MINION and entry.get('caster_health_pct') is not None:
         fixtures += f'; the caster held at {entry["caster_health_pct"]}% health'
+    fixtures += aura_settle_note(entry)
     if entry.get('force_crit'):
         fixtures += f'; every attempt forced to crit ({entry["force_crit"]})'
     fixtures += ''.join(f'; minion aura {aura["spell"]}' + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
@@ -808,6 +820,7 @@ def gate_absence_rule(entry: dict) -> str:
                  f'{entry["trigger"]["spell"]}')
         if entry.get('caster_health_pct') is not None:
             trial += f', the caster held at {entry["caster_health_pct"]}% health'
+        trial += aura_settle_note(entry)
     on_target = ' on the target' if entry.get('observe_actor') == 'target' else ''
     return (f'0 events required over at least {TRIGGER_TRIALS} trials with the passive known but '
             f'{entry["gate_text"]!r} withheld; trials: {trial}; events: {entry["observe_metric"]} of '
@@ -1243,7 +1256,7 @@ def magnitude_trigger_descriptor(entry: dict) -> str:
         return f'{entry["trigger_metric"]} of main-hand melee attacks'
     if trigger['action'] == MINION:
         held = (f', the caster held at {entry["caster_health_pct"]}% health'
-                if entry.get('caster_health_pct') is not None else '')
+                if entry.get('caster_health_pct') is not None else '') + aura_settle_note(entry)
         held += ''.join(f'; minion aura {aura["spell"]}' + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
                         + f' set every {entry["minion_aura_refresh_ms"]} ms by harness set_aura ({aura["source"]})'
                         for aura in entry.get('minion_auras', []))
