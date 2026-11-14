@@ -436,7 +436,8 @@ class CheckpointTest(CycleCase):
         manifest['scenarios'] = manifest['scenarios'][1:]
         path = self.root / 'manifest.json'
         path.write_text(json.dumps(manifest), encoding='utf-8')
-        run_cycle(self.replay(manifest=path), REPLAY, FakeRunner(self.root))
+        run_cycle(self.replay(manifest=path, other_verdicts_accepted=cycle.verdict_acceptance(
+            {'count': 1, 'why': 'the removed scenario'})), REPLAY, FakeRunner(self.root))
         markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
         self.assertIn('- **WARNING: 1 record scenarios UNMATCHED** (not compared with the record), 21 matched by '
                       'entry and label: conformance-necromancer-value-301303', markdown)
