@@ -1254,7 +1254,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(not ({'entry', 'pet', 'caster'} & step.keys()),
                         f'{where}: caster_entry replaces the entry, pet and caster filters')
                 number(step['caster_entry'], f'{where}.caster_entry', 1, 2**32 - 1, True)
-            if 'target_entry' in step:
+            if 'target_entry' in step and metric != 'nearby_creature_facing_offset':
                 require(metric in SPELL_DAMAGE_METRICS, f'{where}: target_entry only filters spell damage events')
                 require('target' not in step, f'{where}: target_entry replaces the target filter')
                 number(step['target_entry'], f'{where}.target_entry', 1, 2**32 - 1, True)
