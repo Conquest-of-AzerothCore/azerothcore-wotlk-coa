@@ -77,6 +77,7 @@ ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
+MINIMUM_BETWEEN_PARTS = 10
 ARMOR_PROBE_DAMAGE = 1000.0
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
@@ -977,6 +978,9 @@ def between_part_judgement(parts: list[tuple[float, float]], minimum: int, expec
     interval = between_part_interval(parts)
     if low is None or interval is None:
         return status, low, high, why
+    if len(parts) < MINIMUM_BETWEEN_PARTS:
+        return status, low, high, (f'{why} (Wilson: {len(parts)} parts, the between-part t interval needs '
+                                   f'{MINIMUM_BETWEEN_PARTS}; it would be [{interval[0]:.4f}, {interval[1]:.4f}])')
     low, high = interval
     status = 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert'
     return status, low, high, (f'rate {procs / trials:.4f}, between-part 99% interval [{low:.4f}, {high:.4f}] '
@@ -4149,7 +4153,7 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
     scale = 100.0 if model.get('rate') else 1.0
-    between_parts = len(runs) > 1 and bool(model.get('rate'))
+    between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))
     series = {}
     for arm in ('control', 'treatment'):
         totals, counts = [], []
@@ -4225,6 +4229,8 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
         beyond += f'; {len(runs)} parts pooled'
     if between_parts:
         beyond += ' (99% interval from the between-part variance of the per-part rates, t over the parts)'
+    elif len(runs) > 1 and model.get('rate'):
+        beyond += f' (per-cast interval: the between-part t interval needs {MINIMUM_BETWEEN_PARTS} parts)'
     if model.get('rate'):
         beyond += f'; the {model["rate"]} rate is in percent of the counted events'
     ratio = f', ratio {treatment.mean / control.mean:.5g}' if control.mean else ''

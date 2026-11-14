@@ -2041,6 +2041,21 @@ class BetweenPartIntervalTests(unittest.TestCase):
         self.assertIn('between-part', why)
         self.assertGreater(high - low, 0.02)
 
+    def test_seeded_nine_parts_keep_the_wilson_interval(self):
+        from compare import between_part_judgement
+        from procs import wilson_interval
+        parts = self.parts([0.10, 0.20], 5)[:9]
+        status, low, high, why = between_part_judgement(parts, 1, 0.15)
+        self.assertEqual((low, high), wilson_interval(sum(events for events, _ in parts), 9 * self.TRIALS))
+        self.assertIn('Wilson', why)
+
+    def test_seeded_ten_parts_take_the_between_part_t_interval(self):
+        from compare import between_part_interval, between_part_judgement
+        parts = self.parts([0.10, 0.20], 5)[:10]
+        status, low, high, why = between_part_judgement(parts, 1, 0.15)
+        self.assertEqual((low, high), between_part_interval(parts))
+        self.assertIn('t over 10 parts', why)
+
     def test_one_part_has_no_between_part_interval(self):
         from compare import between_part_interval
         self.assertIsNone(between_part_interval([(10.0, 100.0)]))
@@ -2067,10 +2082,20 @@ class BetweenPartHitRatioTests(unittest.TestCase):
         from compare import behaviour_hit_ratio_verdict
         model = self.model()
         base = Verdict('x', 'alert', None, None, None, None, '')
-        steady = [self.part(model, {'control': 0.05, 'treatment': 0.25}) for _ in range(8)]
+        steady = [self.part(model, {'control': 0.05, 'treatment': 0.25}) for _ in range(10)]
         spread = [self.part(model, {'control': 0.05, 'treatment': 0.25 + (0.04 if index % 2 else -0.04)})
-                  for index in range(8)]
+                  for index in range(10)]
         narrow = behaviour_hit_ratio_verdict(base, steady, model).detail['bonus']['half']
         wide = behaviour_hit_ratio_verdict(base, spread, model)
         self.assertIn('between-part variance', wide.explanation)
         self.assertGreater(wide.detail['bonus']['half'], 2 * narrow)
+
+    def test_nine_pooled_rate_parts_keep_the_per_cast_interval(self):
+        from compare import behaviour_hit_ratio_verdict
+        model = self.model()
+        base = Verdict('x', 'alert', None, None, None, None, '')
+        spread = [self.part(model, {'control': 0.05, 'treatment': 0.25 + (0.04 if index % 2 else -0.04)})
+                  for index in range(9)]
+        verdict = behaviour_hit_ratio_verdict(base, spread, model)
+        self.assertNotIn('between-part variance', verdict.explanation)
+        self.assertIn('per-cast interval', verdict.explanation)
