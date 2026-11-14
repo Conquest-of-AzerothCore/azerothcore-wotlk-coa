@@ -623,11 +623,11 @@ namespace
     constexpr float RING_THROW_Z      = 4.0f;
     constexpr uint8 GRASP_RINGS       = 6;
     constexpr uint32 GO_STALACTITE    = 978099;
-    constexpr float STALACTITE_GRID   = 8.0f;
-    constexpr float STALACTITE_REACH  = 50.0f;
+    constexpr float STALACTITE_GRID   = 10.0f;
+    constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
-    constexpr float SNOWGRAVE_LEASH   = 45.0f;
+    constexpr float SNOWGRAVE_LEASH   = 120.0f;
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
     {
@@ -701,8 +701,13 @@ namespace
                         rz >= ground + CEILING_SEARCH - 1.0f)
                         continue;
                     float const turn = frand(0.0f, 2 * float(M_PI));
-                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 1, 0, 0, 0, 0))
+                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 0, 0, 0, 0, 0))
+                    {
+                        hanging->SetWorldRotationAngles(turn, 0.0f, float(M_PI));
+                        hanging->DestroyForVisiblePlayers();
+                        hanging->UpdateObjectVisibility();
                         _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
+                    }
                 }
         }
 
