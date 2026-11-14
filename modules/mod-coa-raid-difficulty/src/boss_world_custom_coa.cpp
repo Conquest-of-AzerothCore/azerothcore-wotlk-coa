@@ -625,8 +625,7 @@ namespace
     constexpr uint32 GO_STALACTITE    = 978099;
     constexpr float STALACTITE_GRID   = 8.0f;
     constexpr float STALACTITE_REACH  = 50.0f;
-    constexpr float CEILING_SEARCH    = 40.0f;
-    constexpr float CEILING_FALLBACK  = 18.0f;
+    constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
     constexpr float SNOWGRAVE_LEASH   = 45.0f;
 
@@ -700,9 +699,9 @@ namespace
                     float rx, ry, rz;
                     if (!tree.GetObjectHitPos(x, y, ground + 2.0f, x, y, ground + CEILING_SEARCH, rx, ry, rz, -0.5f) ||
                         rz >= ground + CEILING_SEARCH - 1.0f)
-                        rz = ground + CEILING_FALLBACK;
+                        continue;
                     float const turn = frand(0.0f, 2 * float(M_PI));
-                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 0, 0, 0, 0, 0))
+                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 1, 0, 0, 0, 0))
                         _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
                 }
         }

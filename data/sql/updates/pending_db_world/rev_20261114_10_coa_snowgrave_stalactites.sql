@@ -3,4 +3,4 @@
 DELETE FROM `gameobject_template` WHERE `entry` = 978099;
 INSERT INTO `gameobject_template` (`entry`, `type`, `displayId`, `name`, `IconName`, `castBarCaption`, `unk1`,
     `size`, `AIName`, `ScriptName`, `VerifiedBuild`) VALUES
-(978099, 5, 5072, 'Hanging Icicle', '', '', '', 1, '', '', 12340);
+(978099, 5, 8324, 'Hanging Icicle', '', '', '', 0.5, '', '', 12340);
