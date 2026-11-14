@@ -546,6 +546,9 @@ class ArchiveLedgerTest(CycleCase):
         self.assertIn('ledger/x_clauses.json, DIFFERENT from', build)
         self.assertIn(f'No x_consumption.json at {head}.', build)
         self.assertEqual((archive / 'ledger' / 'x_clauses.json').read_text(encoding='utf-8'), '["edited"]')
+        committed = archive / 'ledger' / 'committed-x_clauses.json'
+        self.assertEqual(committed.read_text(encoding='utf-8'), '["committed"]')
+        self.assertIn(f'{cycle.sha256(committed)}  ledger/committed-x_clauses.json', build)
 
 
     def test_an_unreadable_generating_commit_stops_the_archive(self):

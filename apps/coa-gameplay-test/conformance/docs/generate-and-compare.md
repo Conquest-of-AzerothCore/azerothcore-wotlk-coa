@@ -473,7 +473,8 @@ too), `compare` (with `runs` skipped, `pair.results` is checked for missing resu
 stamps; besides the compare outputs, audits, reports, manifest and status files it holds `ledger/`: the clause ledger
 the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`; the
 step needs `head` and stops when that commit cannot be read in the worktree, never falling back to the worktree HEAD;
-`BUILD.txt` says whether the ledger used equals the one at `head` and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
+`BUILD.txt` says whether the ledger used equals the one at `head`, which is kept as `ledger/committed-<ledger>` when
+it differs, and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
 out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
 `OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
 2. Relative paths in the cycle file are read from its directory. The fields:

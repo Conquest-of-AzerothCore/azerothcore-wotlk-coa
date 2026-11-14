@@ -674,6 +674,10 @@ def archive_ledger(config: CycleConfig, rev: str) -> list:
         raise CycleError(f'archive: {classes}/{config.clauses.name} does not exist at {rev}')
     state = 'equal to' if committed == used else 'DIFFERENT from'
     lines = [f'Ledger used: ledger/{config.clauses.name}, {state} {rev}:{classes}/{config.clauses.name}.']
+    if committed != used:
+        (ledger / f'committed-{config.clauses.name}').write_bytes(committed)
+        lines.append(f'Committed ledger ledger/committed-{config.clauses.name} from '
+                     f'{rev}:{classes}/{config.clauses.name}.')
     for name, required in ((f'{stem}.json', True), (f'{stem}{CONSUMPTION_SUFFIX}.json', False)):
         content = file_at(config.worktree, rev, f'{classes}/{name}')
         if content is None:
