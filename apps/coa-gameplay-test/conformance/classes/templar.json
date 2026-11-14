@@ -5496,7 +5496,8 @@
       "variant": "argent_blade_crit_rate", "label_suffix": "argent_blade_crit_rate",
       "quote": "and critical strike chance of your next", "expected": 1.5, "observe_spell": 807268,
       "learn": [807268], "control": {"auras": [[561156, 1]]}, "treatment": {"auras": [[520608, 1], [561156, 1]]},
-      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 76,
+      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 115,
+      "observe_source": "115 parts of 166 casts: from the between-part SD measured in six runs (3.76 points pooled, binomial 3.88), P(99% half-width > 1.25) is 9e-8 at the measured SD and 8e-5 at its 99% upper bound.",
       "expected_source": "$s1 = 50 (520608 EffectBasePoints[0] 49, EffectDieSides[0] 1), as the crit_rate entry: 520608 modifies Warrior of Dawn 561156, whose Effect[2] aura 107 SPELLMOD_CRITICAL_CHANCE on Argent Blade 807268 is 0 on its own; Unit::SpellDoneCritChance applies it to the next Argent Blade, which consumes 561156. Both arms set 561156 before each Argent Blade, the treatment sets 520608 first; no crit rating fixture. Pooled proof of the chance-claim ruling (2026-11-12) with the rate mode of ADR 0195: 76 parts of 166 casts per arm, 12,616 per arm, sized for a 99% half-width of at most 1.25 points (half the band of +-2.5) near 5% / 55%; the critical share of all Argent Blade hits must differ by 50 points between the arms."
     },
     {
