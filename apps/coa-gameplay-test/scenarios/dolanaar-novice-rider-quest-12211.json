@@ -6,13 +6,14 @@
     "the Novice Rider quest, and a quest started from the Path to Ascension book cannot be turned in to her.",
     "Sylindra Starweave 449169 <Traveling Riding Trainer> teaches Novice Riding 33379 like Garion Hunter 97921 in",
     "Goldshire, who offers and ends the Alliance quests 4420430, 4420432, 4420433, 4420436 and 4420439.",
-    "Expected: Sylindra shows a Draenei the available quest marker (8) and lists Draenei quest 4420439; a rider",
+    "Expected: Sylindra shows a level 5 Draenei, the quests' MinLevel, the available quest marker (8) and lists",
+    "Draenei quest 4420439; a rider",
     "who knows Novice Riding gets its credit on accepting (also with CoA.MaxRidingFromStart, which grants riding",
     "at login), she then shows the turn-in marker (10), and the turn-in gives the Draenei starter mount 29744."
   ],
   "timeout_ms": 60000,
   "location": {"map": 1, "x": 9895.5, "y": 950.5, "z": 1311.9, "o": 0.9},
-  "players": [{"id": "draenei", "race": 11, "class": 1, "level": 10}],
+  "players": [{"id": "draenei", "race": 11, "class": 1, "level": 5}],
   "creatures": [{"id": "sylindra", "owner": "draenei", "entry": 449169, "faction": 35, "distance": 2}],
   "steps": [
     {"action": "wait", "label": "Let login settle", "ms": 3000},
