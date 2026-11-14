@@ -4,7 +4,7 @@
   "contract": [
     "GM tooling with no live reference: .coa trial objectives lists a player's active challenges with each tracked objective numbered as done or pending, .coa trial credit marks one objective done whatever the player's level, and .coa trial restore puts a failed challenge back as active with its progress and resurrects the character.",
     "Hardcore - Boss Blitz (60) has one life, caps levelling one below each kill gate and starts with Edwin VanCleef before 21, Mutanus the Devourer before 22 and Archmage Arugal before 26 among its 25 kill objectives.",
-    "Expected: the list flips exactly the credited objectives, a credit past the level 21 gate is accepted and says so, a death fails the run and leaves a failure lock, and the restore returns level 1 with the fatal death taken back, both credits kept and the character alive; a further credit proves the run is active again."
+    "Expected: the list flips exactly the credited objectives, a credit past the level 21 gate is accepted and says so, a death fails the run and leaves a failure lock, a restore is refused while the character is above the level it failed at, and at that level the restore returns level 1 with the fatal death taken back, both credits kept and the character alive; a further credit proves the run is active again."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -93,6 +93,18 @@
       "action": "assert", "label": "The death failed the one-life run",
       "actor": "gm", "metric": "system_message_contains", "text": "Failure locks: 60", "equals": 1, "within_ms": 5000
     },
+    { "action": "set_level", "actor": "runner", "value": 24 },
+    {
+      "action": "command", "label": "A restore after levelling past the failure is refused",
+      "actor": "gm", "command": ".coa trial restore 60 \"Blitzprobe Dunmere\"", "rejected": true
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the refusal names both levels",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Blitzprobe Dunmere was level 23 when challenge 60 failed and is now level 24. Restore refused",
+      "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_level", "actor": "runner", "value": 23 },
     {
       "action": "command", "label": "Restore the failed run",
       "actor": "gm", "command": ".coa trial restore 60 \"Blitzprobe Dunmere\""

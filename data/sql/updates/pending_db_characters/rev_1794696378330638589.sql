@@ -1,5 +1,6 @@
 --
-CREATE TABLE IF NOT EXISTS `coa_challenge_failure_snapshot` (
+DROP TABLE IF EXISTS `coa_challenge_failure_snapshot`;
+CREATE TABLE `coa_challenge_failure_snapshot` (
     `guid` INT UNSIGNED NOT NULL,
     `failedChallengeId` INT UNSIGNED NOT NULL,
     `challengeId` INT UNSIGNED NOT NULL,
@@ -11,5 +12,6 @@ CREATE TABLE IF NOT EXISTS `coa_challenge_failure_snapshot` (
     `startTime` INT UNSIGNED NOT NULL DEFAULT 0,
     `trialId` VARCHAR(64) NOT NULL DEFAULT '',
     `trialStartTime` INT UNSIGNED NOT NULL DEFAULT 0,
+    `characterLevel` INT UNSIGNED NOT NULL DEFAULT 0,
     PRIMARY KEY (`guid`, `failedChallengeId`, `challengeId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

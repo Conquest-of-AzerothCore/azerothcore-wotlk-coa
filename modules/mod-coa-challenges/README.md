@@ -108,6 +108,31 @@ Support commands for a player's run (administrator, also from the console; the p
   comes from `coa_challenge_failure_snapshot`, written at every failure; a failure from before that table
   restores with a restarted timer. High-Risk drops and shared-fate partners are not restored.
 
+`restore` is refused when the character is a higher level than it was when the run failed. Those levels were
+gained outside the challenge's rules (its lives, its bans on the auction house, mail, heirlooms and the dungeon
+finder, and its level cap), so the run is no longer the one that failed. It would not be playable either: an
+objective only counts below its gate level, so every objective whose gate was passed in the meantime could
+never be earned again. Use `.coa trial unlock` to give the player a fresh attempt instead.
+
+Example, Hardcore - Boss Blitz (60), whose first gates are Edwin VanCleef before 21, Mutanus the Devourer before
+22 and Archmage Arugal before 26:
+
+- A player dies at level 22 with VanCleef and Mutanus done and is restored at level 22. Both objectives are
+  still done and levelling is capped at 25 again, exactly as before the death.
+- A player dies at level 22, keeps playing without the trial and reaches level 59. `restore` answers
+  `<name> was level 22 when challenge 60 failed and is now level 59. Restore refused` and changes nothing.
+
+Worked example for a kill that did not register:
+
+```
+.coa trial objectives "Firstname Lastname"
+  2. [pending] Kill Mutanus the Devourer before level 22 (levelling capped at 21)
+.coa trial credit 60 2 "Firstname Lastname"
+```
+
+Crediting the last objective of a trial does not complete it early: a trial completes when every objective is
+done and the character reaches the realm's maximum level.
+
 ## Scope / limitations
 
 - GroupRewards (`ChallengeGroupRewards.dbc`) — semantics not confirmed.

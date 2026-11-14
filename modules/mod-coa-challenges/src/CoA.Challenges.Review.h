@@ -547,7 +547,7 @@ void FailSharedFate(Player* dead, uint32 challengeID);
 std::vector<Objective> TrackedObjectives(uint32 challengeID);
 std::string DescribeObjective(Objective const& o);
 bool CreditObjective(Player* player, uint32 challengeID, uint32 number, std::string& message);
-void SaveFailureSnapshot(uint32 guid, uint32 challengeID);
+void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel);
 void ForgetFailureSnapshot(uint32 guid, uint32 challengeID);
 bool RestoreFailedChallenge(Player* player, uint32 challengeID, std::string& message);
 void FailSharedFateHolders(Group* group, ObjectGuid extraGuid);

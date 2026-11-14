@@ -1790,7 +1790,7 @@ namespace CoAChallenges
         // so the failure announcement is attributed to the trial.
         std::string trialDisplayName, trialDisplayIcon;
         ActiveTrialDisplayFor(player, challengeID, trialDisplayName, trialDisplayIcon);
-        SaveFailureSnapshot(guid, challengeID);
+        SaveFailureSnapshot(guid, challengeID, player->GetLevel());
         // INSERT IGNORE + synchronous: the PK (guid, challengeId) makes a repeat
         // fail a no-op, and a sync write means HasFailure/HasPermaDeathFailure
         // (read in the same tick) and the client re-push see the row immediately.
@@ -1874,7 +1874,8 @@ namespace CoAChallenges
     void FailChallengeOffline(uint32 guid, uint32 challengeID, uint32 level, uint32 deaths,
         ObjectGuid const& killerSource)
     {
-        SaveFailureSnapshot(guid, challengeID);
+        SaveFailureSnapshot(guid, challengeID,
+            sCharacterCache->GetCharacterLevelByGuid(ObjectGuid::Create<HighGuid::Player>(guid)));
         CharacterDatabase.DirectExecute(
             "INSERT IGNORE INTO coa_challenge_failure (guid, challengeId, level, deaths, failTime) "
             "VALUES ({}, {}, {}, {}, UNIX_TIMESTAMP())",
@@ -2215,9 +2216,11 @@ namespace CoAChallenges
 
     // Called at the top of a failure, while the active rows still exist: keeps
     // what the failure is about to discard (run timer, hunger/thirst, fatigue,
-    // the custom trial and its other bundled challenges) for `.coa trial restore`.
+    // the custom trial and its other bundled challenges) for `.coa trial restore`,
+    // with the character's level so a restore can tell the character has since
+    // levelled outside the challenge's rules.
     // A repeat failure call finds no active row and leaves the snapshot alone.
-    void SaveFailureSnapshot(uint32 guid, uint32 challengeID)
+    void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel)
     {
         if (!CharacterDatabase.Query(
                 "SELECT 1 FROM coa_character_challenge WHERE guid = {} AND challengeId = {}", guid, challengeID))
@@ -2233,14 +2236,14 @@ namespace CoAChallenges
         CharacterDatabase.DirectExecute(
             "INSERT IGNORE INTO coa_challenge_failure_snapshot "
             "(guid, failedChallengeId, challengeId, level, deaths, hunger, thirst, fatigue, startTime, "
-            "trialId, trialStartTime) "
+            "trialId, trialStartTime, characterLevel) "
             "SELECT c.guid, {}, c.challengeId, c.level, c.deaths, c.hunger, c.thirst, COALESCE(f.fatigue, 0), "
-            "c.startTime, COALESCE(t.trialId, ''), COALESCE(t.startTime, 0) "
+            "c.startTime, COALESCE(t.trialId, ''), COALESCE(t.startTime, 0), {} "
             "FROM coa_character_challenge c "
             "LEFT JOIN coa_character_fatigue f ON f.guid = c.guid AND f.challengeId = c.challengeId "
             "LEFT JOIN coa_custom_trial_active t ON t.guid = c.guid AND {} = 1 "
             "WHERE c.guid = {} AND c.challengeId IN ({})",
-            challengeID, bundled.empty() ? 0 : 1, guid, ids);
+            challengeID, characterLevel, bundled.empty() ? 0 : 1, guid, ids);
     }
 
     void ForgetFailureSnapshot(uint32 guid, uint32 challengeID)
@@ -2283,8 +2286,9 @@ namespace CoAChallenges
         };
         std::vector<RestoreRow> rows;
         bool relinkTrial = false;
+        uint32 levelAtFailure = 0;
         if (QueryResult r = CharacterDatabase.Query(
-                "SELECT challengeId, level, deaths, hunger, thirst, fatigue, startTime, trialId "
+                "SELECT challengeId, level, deaths, hunger, thirst, fatigue, startTime, trialId, characterLevel "
                 "FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
                 guid, challengeID))
         {
@@ -2300,13 +2304,28 @@ namespace CoAChallenges
                 row.fatigue = f[5].Get<int32>();
                 row.startTime = f[6].Get<uint32>();
                 if (row.challengeId == challengeID)
+                {
                     relinkTrial = !f[7].Get<std::string>().empty();
+                    levelAtFailure = f[8].Get<uint32>();
+                }
                 if (row.challengeId == challengeID || !actives.count(row.challengeId))
                     rows.push_back(row);
             } while (r->NextRow());
         }
         bool const fromSnapshot = std::any_of(rows.begin(), rows.end(),
             [challengeID](RestoreRow const& row) { return row.challengeId == challengeID; });
+        // Levels gained after the failure were earned without the challenge's
+        // rules (lives, bans, level cap), and every objective whose gate was
+        // passed meanwhile can no longer be earned: the run is not the one that
+        // failed any more. `.coa trial unlock` gives a fresh attempt instead.
+        if (fromSnapshot && levelAtFailure && player->GetLevel() > levelAtFailure)
+        {
+            message = Acore::StringFormat(
+                "{} was level {} when challenge {} failed and is now level {}. Restore refused: the levels since "
+                "then were gained outside the challenge's rules. Use .coa trial unlock for a fresh attempt.",
+                player->GetName(), levelAtFailure, challengeID, player->GetLevel());
+            return false;
+        }
         if (!fromSnapshot)
         {
             rows.clear();
@@ -2401,8 +2420,8 @@ namespace CoAChallenges
         if (resurrected)
             message += " Resurrected.";
         if (!fromSnapshot)
-            message += " No snapshot existed for this failure: the run timer restarted and hunger, thirst and "
-                "fatigue were reset.";
+            message += " No snapshot existed for this failure: the run timer restarted, hunger, thirst and "
+                "fatigue were reset, and levels gained since the failure could not be checked.";
         return true;
     }
 } // namespace CoAChallenges
