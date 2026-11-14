@@ -665,8 +665,9 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   Deterministic stat readings (ADR 0135, owner ruling of 2026-11-11): for a metric of
   `compare.DETERMINISTIC_STAT_METRICS` (stats, armor, ratings, power, hit, crit, parry, dodge and block chances,
   expertise, attack time, weapon damage, resistances, mana regeneration, run speed) the margin is the metric's floor
-  alone, the rounding of the reading (1 point, or 0.01 for the percent-point metrics and `weapon_damage_min`), with
-  no 0.5% relative part and no `tolerated` tier: outside it the verdict is an alert. Blessed Padding 301311 armor
+  alone, the rounding of the reading (1 point, or 0.01 for the percent-point metrics and `weapon_damage_min`, or
+  that 0.01-point floor in rate units, 0.01 / 100 = 1e-4, for the rate metrics `RATE_METRICS`: `run_speed_rate`,
+  ADR 0661; Courage's +20% reads 1.2000000476837158 and is `ok`, +19% is an alert), with no 0.5% relative part and no `tolerated` tier: outside it the verdict is an alert. Blessed Padding 301311 armor
   +802 expected: +803 is `ok`, +805 and +834 are alerts. The same holds for the pre-truncation `stat_exact` reading
   (0.01) and for the readings of a `behaviour_group_stack_cap` on such a metric. Where the rounding cannot separate
   the stated value, `data_only` below keeps the clause data conformant.

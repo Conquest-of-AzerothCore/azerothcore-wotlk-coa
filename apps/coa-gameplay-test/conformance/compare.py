@@ -118,6 +118,8 @@ PERCENT_POINT_METRICS = frozenset({'melee_crit_chance', 'melee_crit_chance_refre
                                    'spell_done_crit_chance'})
 FRACTIONAL_METRICS = PERCENT_POINT_METRICS | {'weapon_damage_min'}
 FRACTIONAL_FLOOR = 0.01
+RATE_METRICS = frozenset({'run_speed_rate'})
+PERCENT_POINTS_PER_RATE = 100.0
 DETERMINISTIC_STAT_METRICS = frozenset({'stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance',
                                         'spell_hit_chance', 'expertise', 'spell_power', 'attack_power',
                                         'ranged_attack_power', 'max_health', 'max_power', 'power', 'run_speed_rate',
@@ -2236,6 +2238,8 @@ class DeltaReading:
 
 
 def delta_floor(metric: str) -> float:
+    if metric in RATE_METRICS:
+        return FRACTIONAL_FLOOR / PERCENT_POINTS_PER_RATE
     return FRACTIONAL_FLOOR if metric in FRACTIONAL_METRICS else ABSOLUTE_TOLERANCE
 
 
