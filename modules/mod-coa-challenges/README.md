@@ -108,22 +108,26 @@ Support commands for a player's run (administrator, also from the console; the p
   comes from `coa_challenge_failure_snapshot`, written at every failure; a failure from before that table
   restores with a restarted timer. High-Risk drops and shared-fate partners are not restored.
 
-`restore` is refused when the character is a higher level than it was when the run failed. Those levels were
-gained outside the challenge's rules (its lives, its bans on the auction house, mail, heirlooms and the dungeon
-finder, and its level cap), so the run is no longer the one that failed. It would not be playable either: an
-objective only counts below its gate level, so every objective whose gate was passed in the meantime could
-never be earned again. There is no way to bring such a run back. `.coa trial unlock` only removes the failure
-lock: a challenge that must be started at level 1 (the `LEVEL_UP` activation condition, which most trials have)
-still cannot be started by that character, so a fresh attempt means a level 1 character. Restore soon after
-the failure, before the player levels.
+`restore` is refused when the character has levelled past the gate of an objective that is still pending. An
+objective only counts below its gate level, so that objective could never be earned again, and the levels in
+between were gained outside the challenge's rules (its lives, its bans on the auction house, mail, heirlooms and
+the dungeon finder, and its level cap). There is no way to bring such a run back. `.coa trial unlock` only
+removes the failure lock: a challenge that must be started at level 1 (the `LEVEL_UP` activation condition,
+which most trials have) still cannot be started by that character, so a fresh attempt means a level 1 character.
+
+A character that gained levels after the failure without passing a pending gate, for example while waiting for
+a GM, is restored, and the answer states both levels.
 
 Example, Hardcore - Boss Blitz (60), whose first gates are Edwin VanCleef before 21, Mutanus the Devourer before
 22 and Archmage Arugal before 26:
 
 - A player dies at level 22 with VanCleef and Mutanus done and is restored at level 22. Both objectives are
   still done and levelling is capped at 25 again, exactly as before the death.
-- A player dies at level 22, keeps playing without the trial and reaches level 59. `restore` answers
-  `<name> was level 22 when challenge 60 failed and is now level 59. Restore refused` and changes nothing.
+- The same player reaches level 24 before a GM answers. The restore succeeds: Arugal's gate is 26, so nothing
+  was missed, and levelling is capped at 25.
+- The same player keeps playing without the trial and reaches level 59. `restore` answers
+  `Restore refused: <name> is level 59, past the level 26 gate of pending objective 3 (Kill Archmage Arugal
+  before level 26) on challenge 60` and changes nothing.
 
 Worked example for a kill that did not register:
 

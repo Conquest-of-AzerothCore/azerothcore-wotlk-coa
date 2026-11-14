@@ -3147,7 +3147,8 @@ namespace CoAChallenges
         // .coa <trial|challenge> restore <id> [player]
         // Puts a failed challenge back as active with the state it had at the
         // failure, and resurrects the character when still dead. Refused when
-        // the character has levelled since the failure (see the module README).
+        // the character has since levelled past a pending objective's gate (see
+        // the module README).
         static bool HandleCoARestoreCommand(ChatHandler* handler, uint32 challengeId, Optional<PlayerIdentifier> player)
         {
             if (!player)

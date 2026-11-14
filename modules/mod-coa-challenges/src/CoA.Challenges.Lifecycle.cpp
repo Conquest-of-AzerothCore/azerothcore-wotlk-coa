@@ -2217,8 +2217,8 @@ namespace CoAChallenges
     // Called at the top of a failure, while the active rows still exist: keeps
     // what the failure is about to discard (run timer, hunger/thirst, fatigue,
     // the custom trial and its other bundled challenges) for `.coa trial restore`,
-    // with the character's level so a restore can tell the character has since
-    // levelled outside the challenge's rules.
+    // with the character's level so a restore can tell which objective gates the
+    // character has passed since.
     // A repeat failure call finds no active row and leaves the snapshot alone.
     void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel)
     {
@@ -2314,18 +2314,6 @@ namespace CoAChallenges
         }
         bool const fromSnapshot = std::any_of(rows.begin(), rows.end(),
             [challengeID](RestoreRow const& row) { return row.challengeId == challengeID; });
-        // Levels gained after the failure were earned without the challenge's
-        // rules (lives, bans, level cap), and every objective whose gate was
-        // passed meanwhile can no longer be earned: the run is not the one that
-        // failed any more.
-        if (fromSnapshot && levelAtFailure && player->GetLevel() > levelAtFailure)
-        {
-            message = Acore::StringFormat(
-                "{} was level {} when challenge {} failed and is now level {}. Restore refused: the levels since "
-                "then were gained outside the challenge's rules.",
-                player->GetName(), levelAtFailure, challengeID, player->GetLevel());
-            return false;
-        }
         if (!fromSnapshot)
         {
             rows.clear();
@@ -2347,6 +2335,31 @@ namespace CoAChallenges
                 message = Acore::StringFormat(
                     "Cannot restore challenge {} for {}: it conflicts with active challenge {}.",
                     row.challengeId, player->GetName(), conflictId);
+                return false;
+            }
+        }
+
+        // A character that kept levelling after the failure may still be
+        // restored while every pending objective is within reach. An objective
+        // only counts below its gate level, so once the character has levelled
+        // past a pending gate the run can no longer be finished by playing and
+        // the levels in between were gained outside the challenge's rules.
+        // Without a snapshot the level at the failure is unknown (0), so any
+        // pending gate at or below the current level refuses.
+        uint32 const currentLevel = player->GetLevel();
+        for (RestoreRow const& row : rows)
+        {
+            std::vector<Objective> const tracked = TrackedObjectives(row.challengeId);
+            for (std::size_t i = 0; i < tracked.size(); ++i)
+            {
+                uint32 const gate = CoAParse::ObjectiveGateLevel(tracked[i]);
+                if (!gate || gate <= levelAtFailure || gate > currentLevel
+                    || IsObjectiveDone(guid, row.challengeId, tracked[i].key))
+                    continue;
+                message = Acore::StringFormat(
+                    "Restore refused: {} is level {}, past the level {} gate of pending objective {} ({}) on "
+                    "challenge {}. That objective can no longer be earned.",
+                    player->GetName(), currentLevel, gate, i + 1, DescribeObjective(tracked[i]), row.challengeId);
                 return false;
             }
         }
@@ -2419,9 +2432,12 @@ namespace CoAChallenges
             message += " Custom trial re-linked.";
         if (resurrected)
             message += " Resurrected.";
+        if (levelAtFailure && currentLevel > levelAtFailure)
+            message += Acore::StringFormat(" The character was level {} at the failure and is now level {}.",
+                levelAtFailure, currentLevel);
         if (!fromSnapshot)
-            message += " No snapshot existed for this failure: the run timer restarted, hunger, thirst and "
-                "fatigue were reset, and levels gained since the failure could not be checked.";
+            message += " No snapshot existed for this failure: the run timer restarted and hunger, thirst and "
+                "fatigue were reset.";
         return true;
     }
 } // namespace CoAChallenges
