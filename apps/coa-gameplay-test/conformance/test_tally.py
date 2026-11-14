@@ -315,6 +315,13 @@ class FlipRuleTest(unittest.TestCase):
                'scenarios': [{'key': 'a', 'expectations': [{'label': LABEL, 'low': 2}]}]}
         self.assertEqual(judge_changed(old, now), {LABEL, 'linked'})
 
+    def test_judge_changed_keeps_each_check_of_a_label(self):
+        def manifest(first: int) -> dict:
+            return {'class_file': {}, 'scenarios': [{'key': 'a', 'expectations': [
+                {'label': LABEL, 'check': 'one', 'low': first}, {'label': LABEL, 'check': 'two', 'low': 1}]}]}
+        self.assertEqual(judge_changed(manifest(1), manifest(2)), {LABEL})
+        self.assertEqual(judge_changed(manifest(1), manifest(1)), set())
+
     def test_a_status_2_claim_keeps_its_recorded_evidence_kind(self):
         rec = {'key': 'k', 'evidence': 'data', 'labels': [], 'flips_in_pair': [], 'flips_vs_record': [],
                'run1': 'data', 'run2': 'data'}

@@ -126,7 +126,8 @@ def record_verdicts(labels, new_runs, old_runs, matched, file_less) -> dict:
 
 
 def expectations(manifest: dict) -> dict:
-    return {(expectation['label'], scenario['key']): json.dumps(expectation, sort_keys=True)
+    return {(expectation['label'], expectation.get('check'), scenario['key']):
+            json.dumps(expectation, sort_keys=True)
             for scenario in manifest['scenarios'] for expectation in scenario['expectations']}
 
 
@@ -136,7 +137,7 @@ def value_link_labels(manifest: dict) -> set:
 
 def judge_changed(record_manifest: dict, manifest: dict) -> set:
     old, now = expectations(record_manifest), expectations(manifest)
-    changed = {label for (label, key), text in now.items() if (label, key) in old and old[(label, key)] != text}
+    changed = {place[0] for place, text in now.items() if place in old and old[place] != text}
     return changed | (value_link_labels(manifest) - value_link_labels(record_manifest))
 
 
