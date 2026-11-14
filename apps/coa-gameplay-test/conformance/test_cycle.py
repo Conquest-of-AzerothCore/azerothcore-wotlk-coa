@@ -548,6 +548,23 @@ class ArchiveLedgerTest(CycleCase):
         self.assertEqual((archive / 'ledger' / 'x_clauses.json').read_text(encoding='utf-8'), '["edited"]')
 
 
+    def test_an_unreadable_generating_commit_stops_the_archive(self):
+        repo, clauses, _ = self.repository(False)
+        archive = self.root / 'archive'
+        with self.assertRaisesRegex(CycleError, f'archive: the generating commit {"0" * 40} cannot be read in'):
+            run_cycle(self.replay(worktree=repo, clauses=clauses, head='0' * 40, archive=archive),
+                      (*REPLAY, 'tally', 'refactor', 'checkpoint'), FakeRunner(self.root))
+        self.assertFalse(archive.exists())
+
+    def test_an_archive_without_a_generating_commit_is_refused(self):
+        repo, clauses, _ = self.repository(False)
+        archive = self.root / 'archive'
+        with self.assertRaisesRegex(CycleError, 'the archive step needs "head", the generating commit'):
+            run_cycle(self.replay(worktree=repo, clauses=clauses, head=None, archive=archive),
+                      (*REPLAY, 'tally', 'refactor', 'checkpoint'), FakeRunner(self.root))
+        self.assertFalse(archive.exists())
+
+
 class CommandLineTest(CycleCase):
     def test_the_cycle_subcommand_reads_a_cycle_file_with_relative_paths(self):
         pair = FIXTURES / 'final16'

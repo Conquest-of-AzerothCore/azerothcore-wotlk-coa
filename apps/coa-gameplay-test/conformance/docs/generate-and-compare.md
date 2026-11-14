@@ -471,7 +471,8 @@ stage ran; as in `prove`, a run in which a scenario of the manifest has no resul
 too), `compare` (with `runs` skipped, `pair.results` is checked for missing results first) and `audit` per run,
 `tally`, `refactor` (only with `refactor.moved_kinds`), `archive` (only with `archive`, a new directory, and two
 stamps; besides the compare outputs, audits, reports, manifest and status files it holds `ledger/`: the clause ledger
-the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`;
+the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`; the
+step needs `head` and stops when that commit cannot be read in the worktree, never falling back to the worktree HEAD;
 `BUILD.txt` says whether the ledger used equals the one at `head` and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
 out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
 `OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
@@ -480,7 +481,7 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | Field | Meaning |
 |---|---|
 | `class_id`, `name` | the class and the pair's name (`final16`): `OUT/<name>-cmp-<stamp>/`, `OUT/coverage-<name>-<stamp>.json`, `OUT/<name>-status.json` and `.md` |
-| `worktree`, `head`, `base` | the class worktree whose `conformance.py` runs, the generation commit (the checkpoint's head; `git rev-parse HEAD` when unset), the base of the gate and the source stage |
+| `worktree`, `head`, `base` | the class worktree whose `conformance.py` runs, the generation commit (required by `archive`; the checkpoint's head, `git rev-parse HEAD` when unset), the base of the gate and the source stage |
 | `clauses`, `out`, `build` | the clause ledger, the output directory, the build `compare --build` judges |
 | `scenarios_dir`, `manifest` | the generate target (needed by `generate` and `runs`); the manifest, `scenarios_dir/manifest.json` by default |
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |

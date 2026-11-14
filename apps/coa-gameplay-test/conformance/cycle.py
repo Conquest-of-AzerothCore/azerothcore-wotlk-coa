@@ -197,6 +197,8 @@ def validate(config: CycleConfig, skip: frozenset) -> None:
         raise CycleError('the generate and runs steps need "scenarios_dir"')
     if {'source', 'gate'} - skip and not config.base:
         raise CycleError('the gate and source steps need "base"')
+    if config.archive is not None and 'archive' not in skip and not config.head:
+        raise CycleError('the archive step needs "head", the generating commit')
     pair_of(config.record.compare, 'record.compare', required=True)
     accepted = [change.class_id for change in config.gate_accepted]
     if len(accepted) != len(set(accepted)) or set(accepted) - set(config.guard_classes):
@@ -651,6 +653,14 @@ def file_at(worktree: Path, rev: str, path: str) -> bytes | None:
     return found.stdout if found.returncode == 0 else None
 
 
+def generating_commit(config: CycleConfig) -> str:
+    found = subprocess.run(['git', '-C', str(config.worktree), 'rev-parse', '--verify', '--quiet',
+                            f'{config.head}^{{commit}}'], capture_output=True, text=True)
+    if found.returncode != 0:
+        raise CycleError(f'archive: the generating commit {config.head} cannot be read in {config.worktree}')
+    return config.head
+
+
 def archive_ledger(config: CycleConfig, rev: str) -> list:
     from profile import CLAUSE_LEDGER_SUFFIX, CONSUMPTION_SUFFIX
     ledger = config.archive / 'ledger'
@@ -685,6 +695,7 @@ def step_archive(cycle: Cycle) -> None:
         raise CycleError(f'archive: {config.archive} exists; an archive is written once')
     if len(cycle.stamps) != 2:
         raise CycleError('archive: the pair has no two stamps; run the pair or set pair.stamps')
+    rev = generating_commit(config)
     config.archive.mkdir(parents=True)
     for stamp, directory, coverage in zip(cycle.stamps, compare_dirs(cycle), coverage_files(cycle)):
         shutil.copytree(directory, config.archive / f'{config.name}-cmp-{stamp}')
@@ -702,7 +713,6 @@ def step_archive(cycle: Cycle) -> None:
     for path in (json_path, markdown_path):
         if path.exists():
             shutil.copy2(path, config.archive / path.name)
-    rev = config.head or head_sha(config.worktree)
     ledger = archive_ledger(config, rev)
     build = [f'Class {config.class_id} re-auditable verdict set, {config.name} merged pair.',
              f'Runs: {" and ".join(cycle.stamps)}.',
