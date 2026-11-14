@@ -19,7 +19,7 @@
  *   while it dies; then the Gift of the Blood God and her bat form.
  *
  *   Bat form, when the avatar dies
- *     Bat-tering Charge  first 2s, every 20s   random player beyond 8 and within 25 yards,
+ *     Bat-tering Charge  first 2s, every 20s   random player beyond 9 and within 25 yards,
  *                                              knocks back everyone within 10 yards
  *     Terrifying Screech the moment the charge lands, in place, or in its place when no
  *                                              player is in reach (live: 12 of 12 landed charges, 0-9 ms):
@@ -47,7 +47,9 @@
  *   - the bat riders move from the troll phase to the bat phase with the swap.
  *   - Bat-tering Charge has 100 yards in the DBC; players at 30 yards and more are out of
  *     reach on live (tester, 2026-11-04), so it takes the 25 yards of stock Jeklik's Charge;
- *     testers saw it hit melee players (2026-11-13), so it also takes stock's 8 yard minimum;
+ *     testers saw it hit melee players (2026-11-13), so it takes a minimum as well: stock's 8
+ *     yards at first, 9 since the round-7 tester (2026-11-14) asked for room for Sixfold Shot
+ *     (5 yards); both ranges count the hitboxes, and her bat form's is only 0.389 yards;
  *   - the bat carries its rider on vehicle 108, an estimated stand-in: the live seat is unknown;
  *   - the bat dives at a uniform random 16-56s after the pair spawns (live: 15.9-56.7s);
  *   - the pair flies stock's rider loop at stock's speed, and cannot be attacked before the
@@ -147,7 +149,7 @@ namespace
     constexpr float MASS_FEAR_RANGE    = 20.0f;
     constexpr float SCREECH_RANGE      = 100.0f;
     constexpr float SCREECH_FEAR_RANGE = 20.0f;
-    constexpr float BATTERING_CHARGE_MIN_RANGE = 8.0f;
+    constexpr float BATTERING_CHARGE_MIN_RANGE = 9.0f;
     constexpr float BATTERING_CHARGE_MAX_RANGE = 25.0f;
     constexpr float LIQUID_FIRE_RANGE  = 100.0f;
     constexpr uint8 CRAZED_RIDERS_MIN_SPAWN_MODE = 2;

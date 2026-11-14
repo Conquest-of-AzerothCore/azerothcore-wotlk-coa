@@ -1,12 +1,13 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: High Priestess Mar'li's Hatch Eggs opens the eggs near the raid 10 seconds later, one spider each",
+  "name": "Zul'Gurub: Mar'li's Hatch Eggs makes the eggs near the raid cast Hatching, one spider each 10 s later",
   "contract": [
     "The tester confirmed on 2026-11-04 that on live each Hatch Eggs (2118115) picks the eggs near the players and",
-    "they hatch about 10 s later. Each egg (179985) hatches one Spawn of Mar'li (15041). Two heroes stand",
-    "back to back and each places one egg 3 yards in front of them; the world's eggs share phase 1 and the",
-    "lane has its own phase, so Mar'li sees only these two. When she casts Hatch Eggs 17 s into the fight no",
-    "spider appears at once or 7 s later, and two spiders appear by 13 s: one per egg, not ten on the nearest.",
+    "they hatch about 10 s later. The eggs are Spider Egg creatures (14915, the live client cache) that cast",
+    "Hatching (2118119, 10 s) and hatch one Spawn of Mar'li (15041) each. One egg stands 3 yards north of the two",
+    "heroes and one 3 yards south; the world's eggs share phase 1 and the lane has its own phase, so Mar'li sees",
+    "only these two. When she casts Hatch Eggs 17 s into the fight both eggs start Hatching, no spider appears at",
+    "once or 7 s later, and two spiders appear by 13 s: one per egg, not ten on the nearest. A hatched egg is gone.",
     "The tester of 2026-11-08: a Spawn of Mar'li had 36,342 health with 11 players on live; coa_boss_flex gives it",
     "3,304 per player, so with the raid count's floor of 10 a spider has 33,040 health on Normal."
   ],
@@ -88,27 +89,29 @@
       "ms": 1000
     },
     {
-      "action": "summon_gameobject",
-      "label": "The tank places an egg in front of them",
+      "action": "summon",
+      "label": "An egg stands 3 yards north of the heroes",
       "actor": "tank",
-      "entry": 179985,
+      "entry": 14915,
+      "as": "egg_north",
       "distance": 3,
-      "duration_s": 0
+      "unowned": true
     },
     {
-      "action": "summon_gameobject",
-      "label": "The other hero places an egg in front of them",
-      "actor": "other",
-      "entry": 179985,
-      "distance": 3,
-      "duration_s": 0
+      "action": "summon",
+      "label": "An egg stands 3 yards south of the heroes",
+      "actor": "tank",
+      "entry": 14915,
+      "as": "egg_south",
+      "distance": -3,
+      "unowned": true
     },
     {
       "action": "summon",
       "actor": "tank",
       "entry": 14510,
       "as": "marli",
-      "distance": 4
+      "distance": 8
     },
     {
       "action": "wait",
@@ -152,6 +155,22 @@
     },
     {
       "action": "assert",
+      "label": "DISCRIMINATING: the north egg casts Hatching",
+      "actor": "egg_north",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the south egg casts Hatching",
+      "actor": "egg_south",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
       "label": "DISCRIMINATING: no egg hatches as she casts",
       "actor": "tank",
       "metric": "nearby_creature_count",
@@ -190,6 +209,14 @@
       "metric": "nearby_creature_count",
       "entry": 15041,
       "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Both hatched eggs are gone",
+      "actor": "tank",
+      "metric": "nearby_creature_count",
+      "entry": 14915,
+      "equals": 0
     },
     {
       "action": "assert",

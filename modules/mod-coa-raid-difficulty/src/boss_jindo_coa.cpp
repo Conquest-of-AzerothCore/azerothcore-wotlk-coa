@@ -9,7 +9,7 @@
  *                                                 hunts them, Shadow damage every
  *                                                 5s that doubles every 10s,
  *                                                 +350% damage against undead
- *   Brain Wash Totems     first 16s, every 60s    three around him (five above
+ *   Brain Wash Totems     first 16s, every 60s    three over the pit (five above
  *                                                 Normal), each casts Brainwash
  *                                                 on a player: stunned and
  *                                                 pacified while it stands
@@ -21,6 +21,7 @@
  *                                                 fight; they Fierce Blow too
  *   Fierce Blow           first 8s, every 8s      on the tank
  *   Friends On the Other Side  +2% damage for every shade alive
+ *   Berserk               at 15 minutes           Ascended only (2100213)
  *
  *   Every hit takes one health from a totem: a Brain Wash Totem has 5, the
  *   ward 15 (25 above Normal). The pit is empty before the fight, and he casts
@@ -34,8 +35,12 @@
  *     that the brain wash totem casts Brainwash and the ward casts Healing
  *     Stream is read from the spells' names and targets. Both auras last
  *     seven days in the data, so they end when their totem dies or despawns;
- *   - the totems stand ten yards from him, spread evenly; Mythic and Ascended
- *     use the Heroic totem counts and health;
+ *   - the totems spread over the Bloodfire Pit (tester 2026-11-14, marked on a
+ *     screenshot): each stands on a free trash pack spot, at least 20 yards from
+ *     the others of its wave where the spots allow, and within its spell's range
+ *     of him. The spots and the spacing are estimated; the live video does not
+ *     show where the totems stand. Away from the pit they stand ten yards
+ *     around him. Mythic and Ascended use the Heroic totem counts and health;
  *   - the Shade of Jin'do neither swings nor casts Shadow Shock: in the CoA logs
  *     of 2026-08-02 and 2026-08-24 it only casts Seeking Shadow Bolts (2118556,
  *     4s, interruptible) over and over, while every 4s each player takes a
@@ -48,12 +53,14 @@
 #include "PassiveAI.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
 
+#include <algorithm>
 #include <array>
 #include <list>
 #include <map>
@@ -99,6 +106,7 @@ namespace
         EVENT_HEALING_STREAM,
         EVENT_FIERCE_BLOW,
         EVENT_DELUSIONS_GROW,
+        EVENT_BERSERK,
     };
 
     enum Npcs
@@ -111,6 +119,8 @@ namespace
     constexpr Milliseconds TROLL_CORPSE_DECAY = 5s;
     constexpr Milliseconds JINDO_FIERCE_BLOW  = 8s;
     constexpr float TOTEM_DISTANCE            = 10.0f;
+    constexpr float TOTEM_SPACING             = 20.0f;
+    constexpr float TOTEM_SPOT_TAKEN          = 3.0f;
     constexpr uint8 BRAIN_WASH_TOTEMS_NORMAL  = 3;
     constexpr uint8 BRAIN_WASH_TOTEMS_HEROIC  = 5;
     constexpr uint32 BRAIN_WASH_TOTEM_HEALTH  = 5;
@@ -132,6 +142,20 @@ namespace
         { -11582.3f, -1247.86f, 77.6299f, 4.36332f },
         { -11580.2f, -1250.6f, 77.6299f, 3.36848f },
         { -11580.6f, -1254.79f, 77.6299f, 2.28638f },
+    } };
+
+    std::array<Position, 10> const BloodfirePitTotemSpots =
+    { {
+        { -11550.1f, -1223.9f, 80.22f, 0.0f },
+        { -11601.1f, -1228.4f, 79.11f, 0.0f },
+        { -11549.8f, -1243.9f, 78.35f, 0.0f },
+        { -11569.4f, -1266.4f, 77.62f, 0.0f },
+        { -11588.6f, -1263.0f, 78.67f, 0.0f },
+        { -11532.0f, -1270.0f, 79.11f, 0.0f },
+        { -11537.6f, -1289.9f, 78.85f, 0.0f },
+        { -11573.3f, -1292.3f, 77.61f, 0.0f },
+        { -11571.1f, -1308.7f, 79.17f, 0.0f },
+        { -11613.4f, -1278.9f, 79.84f, 0.0f },
     } };
 
     bool AboveNormal(Unit const* unit)
@@ -164,6 +188,8 @@ namespace
             events.ScheduleEvent(EVENT_HEALING_STREAM, 21s);
             events.ScheduleEvent(EVENT_ANIMATE_BONES, 23s);
             events.ScheduleEvent(EVENT_DELUSIONS_GROW, 1s);
+            if (IsAscended(me))
+                events.ScheduleEvent(EVENT_BERSERK, ASCENDED_BERSERK_TIMER);
         }
 
         void JustSummoned(Creature* summon) override
@@ -172,7 +198,7 @@ namespace
             if (summon->GetEntry() == NPC_BRAIN_WASH_TOTEM)
             {
                 summon->SetReactState(REACT_PASSIVE);
-                if (Unit* target = BrainwashTarget())
+                if (Unit* target = BrainwashTarget(summon))
                     summon->CastSpell(target, SPELL_BRAINWASH, false);
             }
             else if (summon->GetEntry() == NPC_POWERFUL_HEALING_WARD)
@@ -181,23 +207,71 @@ namespace
                 DoZoneInCombat(summon);
         }
 
-        Unit* BrainwashTarget()
+        Unit* BrainwashTarget(Creature const* totem)
         {
             uint32 const skipTank = me->GetThreatMgr().GetThreatListSize() > 1 ? 1 : 0;
-            if (Unit* fresh = SelectTarget(SelectTargetMethod::Random, skipTank, 0.0f, true, true, -int32(SPELL_BRAINWASH)))
-                return fresh;
-            return SelectTarget(SelectTargetMethod::Random, skipTank, 0.0f, true);
+            float const range = sSpellMgr->AssertSpellInfo(SPELL_BRAINWASH)->GetMaxRange(false);
+            auto inReach = [totem, range](Unit const* target)
+            {
+                return totem->IsWithinDistInMap(target, range) && totem->IsWithinLOSInMap(target);
+            };
+            DefaultTargetSelector fresh(me, 0.0f, true, true, -int32(SPELL_BRAINWASH));
+            if (Unit* target = SelectTarget(SelectTargetMethod::Random, skipTank,
+                [&](Unit* unit) { return fresh(unit) && inReach(unit); }))
+                return target;
+            DefaultTargetSelector any(me, 0.0f, true, true, 0);
+            return SelectTarget(SelectTargetMethod::Random, skipTank,
+                [&](Unit* unit) { return any(unit) && inReach(unit); });
         }
 
-        void SummonAround(uint32 entry, uint8 count)
+        bool TotemStandsAt(Position const& spot) const
         {
+            for (ObjectGuid const& guid : summons)
+                if (Creature const* totem = ObjectAccessor::GetCreature(*me, guid))
+                    if (totem->IsAlive() && totem->GetExactDist2d(spot) < TOTEM_SPOT_TAKEN &&
+                        (totem->GetEntry() == NPC_BRAIN_WASH_TOTEM || totem->GetEntry() == NPC_POWERFUL_HEALING_WARD))
+                        return true;
+            return false;
+        }
+
+        std::vector<Position> SpreadTotemSpots(uint8 count, float reach) const
+        {
+            std::vector<Position> free;
+            std::vector<Position> taken;
+            for (Position const& spot : BloodfirePitTotemSpots)
+                if (me->GetExactDist2d(spot) <= reach)
+                    (TotemStandsAt(spot) ? taken : free).push_back(spot);
+            Acore::Containers::RandomShuffle(free);
+            Acore::Containers::RandomShuffle(taken);
+            free.insert(free.end(), taken.begin(), taken.end());
+
+            std::vector<Position> picked;
+            auto spaced = [&picked](Position const& spot)
+            {
+                return std::none_of(picked.begin(), picked.end(), [&spot](Position const& other)
+                {
+                    return other.GetExactDist2d(spot) < TOTEM_SPACING;
+                });
+            };
+            for (Position const& spot : free)
+                if (picked.size() < count && spaced(spot))
+                    picked.push_back(spot);
+            for (Position const& spot : free)
+                if (picked.size() < count && std::find(picked.begin(), picked.end(), spot) == picked.end())
+                    picked.push_back(spot);
+            return picked;
+        }
+
+        void SummonSpread(uint32 entry, uint8 count, uint32 reachSpell)
+        {
+            float const reach = sSpellMgr->AssertSpellInfo(reachSpell)->GetMaxRange(false);
+            std::vector<Position> spots = SpreadTotemSpots(count, reach);
             float const step = 2.0f * float(M_PI) / count;
             float const start = frand(0.0f, step);
-            for (uint8 i = 0; i < count; ++i)
-            {
-                Position pos = me->GetNearPosition(TOTEM_DISTANCE, start + step * i);
-                me->SummonCreature(entry, pos, TEMPSUMMON_TIMED_DESPAWN, TOTEM_LIFETIME.count());
-            }
+            for (uint8 i = uint8(spots.size()); i < count; ++i)
+                spots.push_back(me->GetNearPosition(TOTEM_DISTANCE, start + step * i));
+            for (Position const& spot : spots)
+                me->SummonCreature(entry, spot, TEMPSUMMON_TIMED_DESPAWN, TOTEM_LIFETIME.count());
         }
 
         void AnimateBones()
@@ -287,10 +361,11 @@ namespace
                     }
                     break;
                 case SPELL_SUMMON_BRAIN_WASH:
-                    SummonAround(NPC_BRAIN_WASH_TOTEM, AboveNormal(me) ? BRAIN_WASH_TOTEMS_HEROIC : BRAIN_WASH_TOTEMS_NORMAL);
+                    SummonSpread(NPC_BRAIN_WASH_TOTEM,
+                        AboveNormal(me) ? BRAIN_WASH_TOTEMS_HEROIC : BRAIN_WASH_TOTEMS_NORMAL, SPELL_BRAINWASH);
                     break;
                 case SPELL_SUMMON_HEALING_STREAM:
-                    SummonAround(NPC_POWERFUL_HEALING_WARD, 1);
+                    SummonSpread(NPC_POWERFUL_HEALING_WARD, 1, SPELL_HEALING_STREAM);
                     break;
                 case SPELL_ANIMATE_BONES:
                     AnimateBones();
@@ -389,6 +464,9 @@ namespace
                         UpdateFriends();
                         ReleaseTotemAuras(false);
                         events.ScheduleEvent(EVENT_DELUSIONS_GROW, 1s);
+                        break;
+                    case EVENT_BERSERK:
+                        DoCastSelf(SPELL_ASCENDED_BERSERK, true);
                         break;
                     default:
                         break;

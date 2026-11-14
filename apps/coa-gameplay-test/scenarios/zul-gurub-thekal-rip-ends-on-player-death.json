@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Thekal's Rip ends when the bleeding player dies",
+  "contract": [
+    "High Priest Thekal's Rip (2118240 and its difficulty versions 2118241-2118243, SpellDifficulty 2351) carries",
+    "SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD in the client DBC, so it stayed on a dead player and killed them again after",
+    "a battle resurrection (round-7 tester, 2026-11-14). A player's Rip now ends with that player's death, like",
+    "Arlokk's Razor Claws: the Normal and the Mythic version both leave with the hero's death."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login settle",
+      "ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "The hero carries the Normal Rip",
+      "actor": "hero",
+      "spell": 2118240,
+      "stacks": 3
+    },
+    {
+      "action": "set_aura",
+      "label": "The hero carries the Mythic Rip",
+      "actor": "hero",
+      "spell": 2118242,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero bleeds from the Normal Rip",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118240,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero bleeds from the Mythic Rip",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118242,
+      "equals": 1
+    },
+    {
+      "action": "die",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is dead",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Normal Rip ends with the hero's death",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118240,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Mythic Rip ends with the hero's death",
+      "actor": "hero",
+      "metric": "aura",
+      "spell": 2118242,
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

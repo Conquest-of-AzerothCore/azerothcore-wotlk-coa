@@ -139,6 +139,24 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(field=field), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_nearest_creature_distance_radius_is_positive_and_scoped(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearest_creature_distance', 'entry': 15112,
+                'min': 12}
+        for radius in (1, 150, 200):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**step, 'radius': radius})
+            with self.subTest(radius=radius):
+                self.assertIs(run.validate(scenario), scenario)
+        for radius in (0, -1, 201, float('nan'), True, '150'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({**step, 'radius': radius})
+            with self.subTest(radius=radius), self.assertRaises(ValueError):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'health', 'min': 1, 'radius': 5})
+        with self.assertRaisesRegex(ValueError, 'radius only applies'):
+            run.validate(scenario)
+
     def test_nearby_creature_health_pct_needs_a_player_and_entry(self):
         step = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_creature_health_pct', 'entry': 12118,
                 'equals': 100}
@@ -1246,6 +1264,18 @@ class RunnerTests(unittest.TestCase):
                 invalid['steps'][-1].update(change)
                 with self.assertRaises(ValueError):
                     run.validate(invalid)
+
+    def test_spell_damage_taken_stacks(self):
+        valid = {'action': 'snapshot', 'actor': 'caster', 'metric': 'spell_damage_taken', 'spell': 116,
+                 'target': 'target', 'base': 1000, 'stacks': 5, 'save_as': 'taken'}
+        self.scenario['steps'].append(valid)
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for change in ({'stacks': 0}, {'stacks': 256}, {'stacks': 2.5}, {'base': 2**31, 'stacks': 2},
+                       {'metric': 'melee_damage_taken'}):
+            invalid = copy.deepcopy(self.scenario)
+            invalid['steps'][-1].update(change)
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
 
     def test_movement_and_cast_observations(self):
         self.scenario['steps'].extend([
