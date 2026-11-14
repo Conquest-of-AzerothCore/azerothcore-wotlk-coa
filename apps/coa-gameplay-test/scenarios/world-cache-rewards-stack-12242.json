@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "name": "Cache rewards join the stack already in the bags (#12242)",
+  "contract": [
+    "A cache reward that stacks goes onto the stack of the same item already in the bags, even when an empty bag",
+    "slot comes before that stack, so opening caches does not leave several part stacks of one potion (#12242).",
+    "The green Adventurer's Cache (1397885) gives one green item and one supply at level 60 (adventurer-containers);",
+    "every supply it can give a level-60 Barbarian is already carried once, and each stacks to 20 (item_template).",
+    "Two empty slots come before every carried supply. The gear fills one, the supply joins its stack and the",
+    "consumed cache frees its own slot, so two slots stay free; a new stack for the supply would leave one.",
+    "None of the supplies goes to the mailbox (a mailed supply would also leave two slots free). Unstackable",
+    "Recruit's Shirts (38) fill the other slots, so no filler can expire and free a slot during the test."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 4500
+    },
+    {
+      "action": "equip",
+      "actor": "hero",
+      "item": 4500,
+      "slot": 19
+    },
+    {
+      "label": "SETUP: two placeholders take the first free slots, ahead of every supply",
+      "action": "add_item",
+      "actor": "hero",
+      "item": 6256
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 2901
+    },
+    {
+      "label": "SETUP: one of each supply the green cache can give a level-60 Barbarian",
+      "action": "add_item",
+      "actor": "hero",
+      "item": 3928
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 13443
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 13446
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1645
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 4599
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 8766
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 8952
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 4338
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 14047
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 4304
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 8170
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 3858
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 10620
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 8838
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 1397885
+    },
+    {
+      "action": "add_item",
+      "label": "SETUP: Recruit's Shirts fill every other slot",
+      "actor": "hero",
+      "item": 38,
+      "count": 200
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the bags are full",
+      "actor": "hero",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hero",
+      "item": 6256
+    },
+    {
+      "action": "destroy_item",
+      "actor": "hero",
+      "item": 2901
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two empty slots come before the supply stacks",
+      "actor": "hero",
+      "metric": "free_inventory_slots",
+      "equals": 2
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 1397885,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "the cache is consumed",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 1397885,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "supply 3928 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 3928,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 13443 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 13443,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 13446 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 13446,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 1645 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 1645,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 4599 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 4599,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 8766 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 8766,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 8952 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 8952,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 4338 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 4338,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 14047 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 14047,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 4304 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 4304,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 8170 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 8170,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 3858 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 3858,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 10620 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 10620,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "supply 8838 was not mailed",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 8838,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the supply joined its stack instead of taking the second empty slot",
+      "actor": "hero",
+      "metric": "free_inventory_slots",
+      "equals": 2
+    }
+  ]
+}

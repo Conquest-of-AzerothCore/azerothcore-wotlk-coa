@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Westfall: the Field Boots worldforged pickup stays at its realm-map spot on the ground (#12076)",
+  "contract": "Worldforged pickup 95778 (guid 6940470, loot 515678) was placed at (-9831.6, 920.1, 31.43) against the realm map marker in 2026_09_23_08_worldforged_westfall.sql. The LootCollector StarterDB v7.0 pin (-9835.1, 915.9; INFERRED, community data, folder dated 2026-08-20) is 5.5 yd away, within the looter-position noise of such pins, and the terrain height there is 31.42. This pins the spawn at its placed spot and on the ground.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9831.6,
+    "y": 920.1,
+    "z": 31.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The Field Boots stay at their realm-map spot",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6940470,
+      "spawn_type": "gameobject",
+      "x": -9831.6,
+      "y": 920.1,
+      "z": 31.43,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "The Field Boots rest on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6940470,
+      "spawn_type": "gameobject",
+      "min": -0.5,
+      "max": 0.5
+    }
+  ]
+}
