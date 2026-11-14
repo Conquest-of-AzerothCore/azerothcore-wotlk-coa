@@ -460,7 +460,8 @@ python3 -B conformance.py cycle --config CYCLE.json [--skip STEP ...] [--write-d
 
 `cycle` runs the integrator's fixed steps of a merged pair, in this order (ADR 0655): `gate` (each class of
 `guard_classes`, which must not be empty: every generation of `snapshots.GENERATIONS` regenerated at the worktree and at a `git archive` of
-`base`, `diff -r`, then `snapshots.py check`), `digests` (`snapshots.py check --class N`, or `write` with
+`base`, `diff -r`, then `snapshots.py check`; a difference stops the gate unless `gate_accepted` declares it for
+that class and every differing file is exactly the declared change, ADR 0659), `digests` (`snapshots.py check --class N`, or `write` with
 `--write-digests`), `generate` (into `scenarios_dir`, refused when it is not empty), `source` (`source_runner
 --stages source --base BASE`), `runs` (run 1 then run 2: each `disk_checks` command first, no run above
 `disk_limit_percent`; then `gameplay_runner --stages gameplay --gameplay-db-workers N --scenario <every generated
@@ -483,6 +484,7 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
 | `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
 | `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
+| `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth (an added key, never a changed one), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
 | `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |
 | `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped); the two entries of each field, and of `OUT/pair.json`, must name two different runs |
 | `decisions` | the candidates and rulings file, below |

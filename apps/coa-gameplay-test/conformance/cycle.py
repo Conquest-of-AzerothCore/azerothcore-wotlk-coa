@@ -55,6 +55,13 @@ class Refactor:
 
 
 @dataclass(frozen=True)
+class GateChange:
+    class_id: int
+    added_fields: tuple
+    why: str
+
+
+@dataclass(frozen=True)
 class CycleConfig:
     class_id: int
     name: str
@@ -75,6 +82,7 @@ class CycleConfig:
     disk_checks: tuple = DEFAULT_DISK_CHECKS
     guard_classes: tuple = ()
     gate_archive_paths: tuple = DEFAULT_GATE_PATHS
+    gate_accepted: tuple = ()
     stamps: tuple = ()
     results: tuple = ()
     compare: tuple = ()
@@ -123,6 +131,14 @@ def distinct_pair(values, name: str) -> None:
         raise CycleError(f'{name}: both entries name the same run {values[0]}; a merged pair is two runs')
 
 
+def gate_change(document: dict) -> GateChange:
+    fields = tuple(str(name) for name in document.get('added_fields', ()))
+    why = str(document.get('why', '')).strip()
+    if not fields or not why:
+        raise CycleError(f'gate_accepted: {document} needs "class_id", a non-empty "added_fields" and a "why"')
+    return GateChange(int(require(document, 'class_id', 'gate_accepted')), fields, why)
+
+
 def load_config(path: Path) -> CycleConfig:
     path = Path(path).resolve()
     document = json.loads(path.read_text(encoding='utf-8'))
@@ -154,6 +170,7 @@ def load_config(path: Path) -> CycleConfig:
         disk_checks=tuple(document.get('disk_checks', DEFAULT_DISK_CHECKS)),
         guard_classes=tuple(int(item) for item in document.get('guard_classes', ())),
         gate_archive_paths=tuple(document.get('gate_archive_paths', DEFAULT_GATE_PATHS)),
+        gate_accepted=tuple(gate_change(item) for item in document.get('gate_accepted', ())),
         stamps=pair_of(pair.get('stamps'), 'pair.stamps'),
         results=tuple(resolve(base, item) for item in pair_of(pair.get('results'), 'pair.results')),
         compare=tuple(resolve(base, item) for item in pair_of(pair.get('compare'), 'pair.compare')),
@@ -180,6 +197,10 @@ def validate(config: CycleConfig, skip: frozenset) -> None:
     if {'source', 'gate'} - skip and not config.base:
         raise CycleError('the gate and source steps need "base"')
     pair_of(config.record.compare, 'record.compare', required=True)
+    accepted = [change.class_id for change in config.gate_accepted]
+    if len(accepted) != len(set(accepted)) or set(accepted) - set(config.guard_classes):
+        raise CycleError(f'gate_accepted: classes {accepted} must be distinct guard classes '
+                         f'{list(config.guard_classes)}')
     for name, values in (('record.stamps', config.record.stamps), ('record.compare', config.record.compare),
                          ('pair.stamps', config.stamps), ('pair.results', config.results),
                          ('pair.compare', config.compare), ('pair.coverage', config.coverage)):
@@ -233,11 +254,79 @@ def manifest_path(config: CycleConfig) -> Path:
     return config.scenarios_dir / 'manifest.json'
 
 
+def without_fields(node, fields: tuple):
+    if isinstance(node, dict):
+        return {key: without_fields(value, fields) for key, value in node.items() if key not in fields}
+    if isinstance(node, list):
+        return [without_fields(value, fields) for value in node]
+    return node
+
+
+def files_under(root: Path) -> set:
+    return {path.relative_to(root).as_posix() for path in Path(root).rglob('*') if path.is_file()}
+
+
+def read_json(path: Path):
+    try:
+        return json.loads(Path(path).read_text(encoding='utf-8'))
+    except ValueError:
+        return None
+
+
+def manifest_problems(head: dict, base: dict, fields: tuple, changed: set) -> list:
+    def plain(manifest):
+        return {**manifest, 'scenarios': [{key: value for key, value in scenario.items() if key != 'sha256'}
+                                          for scenario in manifest.get('scenarios', [])]}
+    if plain(without_fields(head, fields)) != plain(base):
+        return ['manifest.json: differs beyond the accepted fields and the scenario sha256']
+    return [f"manifest.json: sha256 of {now.get('key')} changed but its file {now.get('file')} did not"
+            for now, before in zip(head['scenarios'], base['scenarios'])
+            if now.get('sha256') != before.get('sha256') and now.get('file') not in changed]
+
+
+def accepted_diff(head: Path, base: Path, fields: tuple) -> tuple:
+    head_files, base_files = files_under(head), files_under(base)
+    problems = [f'{name}: only in {"head" if name in head_files else "base"}'
+                for name in sorted(head_files ^ base_files)]
+    changed = set()
+    for name in sorted(head_files & base_files - {'manifest.json'}):
+        if (head / name).read_bytes() == (base / name).read_bytes():
+            continue
+        now, before = read_json(head / name), read_json(base / name)
+        if now is None or before is None or without_fields(now, fields) != before:
+            problems.append(f'{name}: differs beyond the accepted added fields {list(fields)}')
+        else:
+            changed.add(name)
+    if 'manifest.json' in head_files & base_files:
+        now, before = read_json(head / 'manifest.json'), read_json(base / 'manifest.json')
+        if now is None or before is None:
+            problems.append('manifest.json: not JSON')
+        elif now != before:
+            problems += manifest_problems(now, before, fields, changed)
+    return problems, changed
+
+
+def gate_generation(cycle: Cycle, head: Path, base: Path, change: GateChange | None, label: str) -> int:
+    if call(cycle, 'gate', ['diff', '-r', '-q', head, base]) == 0:
+        return 0
+    if change is None:
+        raise CycleError(f'gate: {label} differs between head and base; declare an intended change in '
+                         f'"gate_accepted" ({log_path(cycle, "gate")})')
+    problems, changed = accepted_diff(head, base, change.added_fields)
+    if problems:
+        raise CycleError(f'gate: {label} differs beyond the accepted change {list(change.added_fields)}: '
+                         f'{"; ".join(problems[:20])}{" ..." if len(problems) > 20 else ""}')
+    note(cycle, 'gate', f'{label}: {len(changed)} files differ only by the accepted added fields '
+                        f'{list(change.added_fields)} ({change.why})')
+    return len(changed)
+
+
 def step_gate(cycle: Cycle) -> None:
     from snapshots import GENERATIONS
     config = cycle.config
     if not config.guard_classes:
         raise CycleError('gate: "guard_classes" is empty; list the finished classes to guard or skip the gate')
+    accepted = {change.class_id: change for change in config.gate_accepted}
     gate = config.out / 'gate'
     tree = gate / 'base-tree'
     if tree.exists():
@@ -250,6 +339,7 @@ def step_gate(cycle: Cycle) -> None:
         for class_id in config.guard_classes:
             if class_id not in GENERATIONS:
                 raise CycleError(f'gate: class {class_id} is not a finished class of snapshots.py')
+            changed = 0
             for generation, arguments in GENERATIONS[class_id].items():
                 head, base = gate / f'{class_id}-{generation}' / 'head', gate / f'{class_id}-{generation}' / 'base'
                 for root, out in ((config.worktree, head), (tree, base)):
@@ -257,8 +347,11 @@ def step_gate(cycle: Cycle) -> None:
                         shutil.rmtree(out)
                     must(cycle, 'gate', [*tool(root), 'generate', '--class', class_id, '--out', out, *arguments],
                          root / CONFORMANCE)
-                must(cycle, 'gate', ['diff', '-r', '-q', head, base])
+                changed += gate_generation(cycle, head, base, accepted.get(class_id), f'class {class_id} {generation}')
                 shutil.rmtree(head.parent, ignore_errors=True)
+            if class_id in accepted and not changed:
+                raise CycleError(f'gate: class {class_id} declares the accepted change '
+                                 f'{list(accepted[class_id].added_fields)}, but no generated file changed')
             must(cycle, 'gate', [*tool(config.worktree, 'snapshots.py'), 'check', '--class', class_id],
                  config.worktree / CONFORMANCE)
     finally:

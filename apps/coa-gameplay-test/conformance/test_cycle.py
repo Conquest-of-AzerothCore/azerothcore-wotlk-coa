@@ -1,3 +1,5 @@
+import filecmp
+import hashlib
 import json
 from pathlib import Path
 import shutil
@@ -8,7 +10,7 @@ from unittest import mock
 from conformance import main
 import cycle
 from cycle import (CHECKPOINT_JSON, CHECKPOINT_MD, NOT_RECORDED, REFACTOR_FILE, STEPS, SUMMARY_FILE, CycleConfig,
-                   CycleError, Record, Refactor, disk_percent, load_config)
+                   CycleError, GateChange, Record, Refactor, accepted_diff, disk_percent, load_config)
 
 FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'cycle'
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -164,6 +166,93 @@ class StepOrderTest(CycleCase):
         self.assertEqual(runner.commands[4][-1], '--stack')
         self.assertEqual(runner.commands[-1][-2:], ['--class', '19'])
         self.assertFalse((self.root / 'out' / 'gate' / 'base-tree').exists())
+
+
+class GuardRunner(FakeRunner):
+    def __init__(self, root: Path, head_creature: dict, base_creature: dict | None = None):
+        super().__init__(root)
+        self.head_creature, self.base_creature = head_creature, base_creature or {'entry': 36}
+
+    def generate(self, out: Path):
+        creature = self.head_creature if out.name == 'head' else self.base_creature
+        (out / 'scenarios').mkdir(parents=True)
+        scenarios = []
+        for number in range(2):
+            text = json.dumps({'creatures': [creature if number == 0 else {'entry': 36}]})
+            (out / 'scenarios' / f'{number}.json').write_text(text, encoding='utf-8')
+            scenarios.append({'key': f'scenario-{number}', 'file': f'scenarios/{number}.json',
+                              'sha256': hashlib.sha256(text.encode()).hexdigest()})
+        (out / 'manifest.json').write_text(json.dumps({'scenarios': scenarios}), encoding='utf-8')
+
+    def __call__(self, command, cwd, log):
+        if command[0] == 'diff':
+            self.commands.append(list(command))
+            differ = filecmp.dircmp(command[3], command[4])
+            return 1 if differ.diff_files or differ.subdirs['scenarios'].diff_files else 0
+        return super().__call__(command, cwd, log)
+
+
+class GateChangeTest(CycleCase):
+    ARMOR = GateChange(19, ('min_level_armor',), 'ADR 0658 pins generated fixture armor')
+
+    def gate(self, runner, accepted=()):
+        return run_cycle(self.config(guard_classes=(19,), gate_accepted=accepted),
+                         [step for step in STEPS if step != 'gate'], runner)
+
+    def test_an_undeclared_change_of_a_guard_class_stops_the_gate(self):
+        with self.assertRaisesRegex(CycleError, 'class 19 all differs between head and base; declare'):
+            self.gate(GuardRunner(self.root, {'entry': 36, 'min_level_armor': True}))
+
+    def test_a_declared_added_field_passes_the_gate_and_is_logged(self):
+        runner = GuardRunner(self.root, {'entry': 36, 'min_level_armor': True})
+        self.assertEqual(self.gate(runner, (self.ARMOR,)).done, ['gate'])
+        log = (self.root / 'out' / 'logs' / '01-gate.log').read_text(encoding='utf-8')
+        self.assertIn("class 19 all: 1 files differ only by the accepted added fields ['min_level_armor'] (ADR 0658",
+                      log)
+        self.assertEqual(runner.kinds()[-1], 'snapshots.py check')
+
+    def test_a_change_beyond_the_declared_field_stops_the_gate(self):
+        runner = GuardRunner(self.root, {'entry': 37, 'min_level_armor': True})
+        with self.assertRaisesRegex(CycleError, r"scenarios/0.json: differs beyond the accepted added fields"):
+            self.gate(runner, (self.ARMOR,))
+
+    def test_a_changed_value_of_the_declared_field_is_not_an_addition(self):
+        runner = GuardRunner(self.root, {'entry': 36, 'min_level_armor': True},
+                             {'entry': 36, 'min_level_armor': False})
+        with self.assertRaisesRegex(CycleError, 'differs beyond the accepted'):
+            self.gate(runner, (self.ARMOR,))
+
+    def test_a_declared_change_that_did_not_happen_stops_the_gate(self):
+        with self.assertRaisesRegex(CycleError, 'declares the accepted change .* but no generated file changed'):
+            self.gate(GuardRunner(self.root, {'entry': 36}), (self.ARMOR,))
+
+    def test_a_manifest_sha_change_without_a_file_change_is_refused(self):
+        head, base = self.root / 'head', self.root / 'base'
+        for root, sha in ((head, 'a'), (base, 'b')):
+            (root / 'scenarios').mkdir(parents=True)
+            (root / 'scenarios' / '0.json').write_text('{}', encoding='utf-8')
+            (root / 'manifest.json').write_text(json.dumps({'scenarios': [{'key': 'k', 'file': 'scenarios/0.json',
+                                                                           'sha256': sha}]}), encoding='utf-8')
+        problems, changed = accepted_diff(head, base, ('min_level_armor',))
+        self.assertEqual((problems, changed), (['manifest.json: sha256 of k changed but its file scenarios/0.json '
+                                                'did not'], set()))
+
+    def test_the_cycle_file_declares_an_accepted_change_of_a_guard_class(self):
+        document = {
+            'class_id': 23, 'name': 'x', 'worktree': str(REPOSITORY), 'clauses': 'c.json', 'out': 'out',
+            'build': BUILD, 'guard_classes': [19],
+            'record': {'name': 'r', 'status': 's.json', 'compare': ['a', 'b'], 'manifest': 'm.json'},
+            'gate_accepted': [{'class_id': 19, 'added_fields': ['min_level_armor'], 'why': 'ADR 0658'}]}
+        path = self.root / 'cycle.json'
+        path.write_text(json.dumps(document), encoding='utf-8')
+        self.assertEqual(load_config(path).gate_accepted, (GateChange(19, ('min_level_armor',), 'ADR 0658'),))
+        document['gate_accepted'][0]['why'] = ''
+        path.write_text(json.dumps(document), encoding='utf-8')
+        with self.assertRaisesRegex(CycleError, 'gate_accepted'):
+            load_config(path)
+        with self.assertRaisesRegex(CycleError, 'must be distinct guard classes'):
+            run_cycle(self.config(guard_classes=(19,), gate_accepted=(GateChange(23, ('x',), 'y'),)), STEPS,
+                      FakeRunner(self.root))
 
 
 class SkipTest(CycleCase):
