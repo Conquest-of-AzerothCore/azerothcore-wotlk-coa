@@ -1,0 +1,63 @@
+{
+  "schema": 1,
+  "name": "Runestone Forest: no Radiant Fanatic uses the untextured gnome display 32697 (#11937)",
+  "contract": [
+    "Radiant Fanatic 161772 picks one of four creature_template_model displays per spawn. rev_20261015_10 set Idx 3 to 32697 (gnome female, extra 21675), whose baked texture Textures\\BakedNpcTextures\\CreatureDisplayExtra-21675.blp is in no MPQ of the installed client, so about one Fanatic in four renders as an untextured rig with only its hair.",
+    "Expected: Idx 3 uses 6982 (gnome female, space helmet, gold plate; extra 4711, baked texture in common.MPQ), one of the radiation-suit stand-ins the user approved on 2026-10-15 and already used by Radiant Guard 161773. Idx 0-2 keep 25525, 141780 and 27657, whose baked textures the client has.",
+    "Template data assertions on creature_template_model, read by index in Idx order: the harness cannot see whether the client finds a texture."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -5933.06,
+    "y": 686.82,
+    "z": 486.015,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 3,
+      "class": 1,
+      "level": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "assert",
+      "label": "Idx 0 keeps the dwarf male diving-suit display 25525",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161772,
+      "index": 0,
+      "equals": 25525
+    },
+    {
+      "action": "assert",
+      "label": "Idx 1 keeps the dwarf female space-suit display 141780",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161772,
+      "index": 1,
+      "equals": 141780
+    },
+    {
+      "action": "assert",
+      "label": "Idx 2 keeps the gnome male diving-suit display 27657",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161772,
+      "index": 2,
+      "equals": 27657
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Idx 3 uses the textured gnome female display 6982, not 32697",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 161772,
+      "index": 3,
+      "equals": 6982
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import struct
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 import compare
 from classes import PROGRESSION_HEADER as HEADER, ClassSpell, class_spells, table_rows
@@ -14,7 +15,7 @@ from passives import (ALIASED_REASON_MARKER, AURA_STATE_METRIC, FAMILIES, MAX_SP
                       active_class_ranks, classify, crit_plans, effect_override, family_of, literal_token,
                       named_targets, own_token, passive_effects, passive_scenario, reference_spell, stat_after_token)
 from procs import proc_scenario
-from profile import CASTER, load_class_file, spell_power_label, stat_label
+from profile import CASTER, load_fixture_class_file, spell_power_label, stat_label
 from tooltip import Displayed, Records
 from values import TARGET, dataset
 import schemas
@@ -451,7 +452,7 @@ class AliasedTokenFixtureTest(unittest.TestCase):
 class TemplarPassiveTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.class_file = load_class_file(TEMPLAR_CLASS_ID)
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
 
     def effects(self, spell_id: int):
         return passive_effects(self.class_file, templar_passive(spell_id))
@@ -868,7 +869,7 @@ def labelled(steps: list[dict], suffix: str) -> list[dict]:
 class PassiveScenarioTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.class_file = load_class_file(TEMPLAR_CLASS_ID)
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
 
     def scenario(self, spell_id: int):
         return passive_scenario(self.class_file, templar_passive(spell_id))
@@ -1157,8 +1158,8 @@ class GeneratePassiveTest(unittest.TestCase):
         shutil.rmtree(self.out)
 
     def test_passives_lose_the_hit_placeholder(self):
-        from conformance import generate
-        manifest = json.loads(generate(TEMPLAR_CLASS_ID, self.out, spells=[PIOUS]).read_text(encoding='utf-8'))
+        from test_compare import fixture_generate
+        manifest = json.loads(fixture_generate(TEMPLAR_CLASS_ID, self.out, spells=[PIOUS]).read_text(encoding='utf-8'))
         kinds = [entry['kind'] for entry in manifest['scenarios'] if entry['spell_id'] == PIOUS]
         self.assertNotIn('hit', kinds)
         self.assertEqual(kinds.count('passive'), 1)
@@ -1168,16 +1169,17 @@ class GeneratePassiveTest(unittest.TestCase):
 
     def test_passive_flag_generates_only_passive_scenarios(self):
         from conformance import main
-        self.assertEqual(main(['generate', '--class', str(TEMPLAR_CLASS_ID), '--out', str(self.out),
-                               '--passive', str(PIOUS), '--passive', str(LIBERTY)]), 0)
+        with mock.patch('conformance.load_class_file', load_fixture_class_file):
+            self.assertEqual(main(['generate', '--class', str(TEMPLAR_CLASS_ID), '--out', str(self.out),
+                                   '--passive', str(PIOUS), '--passive', str(LIBERTY)]), 0)
         manifest = json.loads((self.out / 'manifest.json').read_text(encoding='utf-8'))
         self.assertEqual(sorted((entry['kind'], entry['spell_id']) for entry in manifest['scenarios']),
                          [('passive', LIBERTY), ('passive', PIOUS)])
 
     def test_passive_flag_refuses_an_active_spell(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         with self.assertRaises(ValueError):
-            generate(TEMPLAR_CLASS_ID, self.out, passives=[RECKONING_AT_60])
+            fixture_generate(TEMPLAR_CLASS_ID, self.out, passives=[RECKONING_AT_60])
 
 
 if __name__ == '__main__':

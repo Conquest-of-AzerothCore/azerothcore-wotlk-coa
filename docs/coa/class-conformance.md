@@ -2,7 +2,10 @@
 
 This guide is for a developer who takes one CoA class through the conformance method that finished the Templar. It
 assumes you know the repository (`AGENTS.md`, `.agents/rules/`); no history of the Templar work is needed. The rulings
-it cites as G-n, and the Templar precedents, are in [class-conformance-rulings.md](class-conformance-rulings.md).
+it cites as G-n, and the Templar precedents, are in [class-conformance-rulings.md](class-conformance-rulings.md); a
+class's own rulings and ADRs are in its folder under `docs/adr/conformance/` (ADR 0583).
+Section 14 says which files your class's work owns, which belong to the owner, and the guards that protect the
+finished classes.
 Figures and examples come from the Templar work; where no ADR records them, their source is the Templar's working
 records, which are not in the repository.
 
@@ -44,7 +47,7 @@ values come from the effective client DBC set, never from server code (`CONF/REA
 parts:
 - the gameplay-test harness in `src/server/coa/CoAGameplayTest.cpp`, which runs the scenarios inside a worldserver;
 - `tools/verify_all.py`, which drives builds and runs;
-- the ADRs in `docs/adr/`.
+- the ADRs in `docs/adr/` (shared) and `docs/adr/conformance/<class>/` (one class's fixes and rulings, ADR 0583).
 
 ## 2. The five final statuses
 
@@ -95,7 +98,7 @@ Templar examples:
 
 ### 3.1 Behaviour against data
 
-The tool computes two proof statuses from closed tables, never by hand (ADR 0120; `LEDGER:161-234`).
+The tool computes two proof statuses from closed tables, never by hand (ADR 0120; `LEDGER:209-282`).
 - **Data conformant**: a readback of a computed value. Examples: a stored modifier, a calculation function called by the
   harness, a spell's computed effect value.
 - **Behaviour proven**: the value is shown to be consumed by the path that acts. Examples: the hit that landed, the
@@ -420,14 +423,14 @@ Aura 354 is `SPELL_AURA_ASCENSION_PROC_PERCENT_EVENT` (`SpellAuraDefines.h:398`)
   - Other classes hook it with `OnEffectProc += AuraEffectProcFn(..., AuraType(354))`, for example
     `AscensionPrimalistSecondary.cpp:134`.
 
-No repository command runs this check; one is future work. Steps:
+Steps:
 1. Build the class map (9.1).
-2. List the class's aura-354 spells with this read-only query. It is not a repository command:
+2. List the class's aura-354 spells:
 
-       python3 -c "import json; d=json.load(open('OUT/class-map.json'));
-       [print(s['spell'], s['name'], s['risk'], s['custom_mechanics'], s['code_hits'][:3]) for s in
-       d['classes']['<id>']['spells'] if any(m.endswith(': aura 354') for m in s['custom_mechanics'])]"
+       python3 -B conformance.py aura354 --class-map OUT/class-map.json --class <id> [--out AURA354.json]
 
+   It prints each spell with its risk, custom mechanics and first code hits, flags `stock` and `data_row` spells as
+   candidate defects, and ends with the counts.
 3. Read each result by its `risk`:
    - **`scripted`**: class code names the spell. Check that the code really handles the 354 effect, through an
      `AuraType(354)` hook or a contract rewrite. Then prove the claim with a `triggers` entry (`trigger_count`). For "X%
@@ -467,11 +470,13 @@ Measure the reference stats with a naked scenario (`CONF/docs/scaffolding.md:43-
 The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, labels, kind}` entries, with optional
 `claims`, `tool_gap`, `text_source`, `no_behaviour_route` and `effectiveness_of` (`LEDGER:7-47`).
 - `kind` is `claim` or `no_claim`. A `no_claim` row comes only from the initial generation or an owner ruling
-  (`LEDGER:88-92`).
+  (`LEDGER:136-140`).
 - Other workstreams never edit the ledger directly. They write a fragment, and the integrator merges it by `(spell,
-  clause)` (`LEDGER:73-92`).
+  clause)` (`LEDGER:121-140`).
 
-**No repository tool builds a class's first ledger.** This is future work.
+**`conformance.py ledger` builds a class's first ledger** from data, by the rules below (ADR 0310;
+`LEDGER`, "Writing a first ledger"). Review its output before the first batch: it declares no `claims`, adds no
+behaviour labels, and needs `--text-basis` for each streamed spell. The Templar ledger predates it:
 - The Templar ledger was added once, in commit e32d5308b5 (2026-11-09), from a round 10 clause audit of 450 rows that
   agents wrote. ADR 0052 calls it "generated once"; the conversion step was never committed. The commit adds the ledger
   and no generator.
@@ -495,8 +500,8 @@ The ledger is `classes/<name>_clauses.json`: a JSON array of `{spell, clause, la
   `dbc_clause` keeps the DBC words when the streamed text changed them (ADR 0192, ADR 0198);
 - `effectiveness_of`: the spell id of X in a clause "the effectiveness of X" (ADR 0268).
 
-**Splitting tooltips into claims.** No written rule set exists. The rules below are the ones the Templar ledger and
-`coverage.py` apply. Write a new class's ledger by them.
+**Splitting tooltips into claims.** The rules below are the ones the Templar ledger and `coverage.py` apply;
+`conformance.py ledger` applies a fixed form of them (`LEDGER`, "Writing a first ledger").
 - **Sentence to clauses.** A sentence is cut where a part carries its own effect or value. Each clause is one row with
   the exact tooltip words. The cut is not fully regular.
   - Absolution, "Taunt all enemies within 8 yds for $d and increase your movement speed by $520659s1% for $520659d.",
@@ -564,7 +569,7 @@ Use your class id in place of 19.
 - `generate` also takes `--behaviour`, `--target-gate` and `--learned-hit` to select class-file entries
   (`conformance.py:662-669`).
 
-Coverage against the ledger (`LEDGER:238-239`):
+Coverage against the ledger (`LEDGER:286-287`):
 
     python conformance.py coverage --before <dir> --after <dir> --clauses classes/templar_clauses.json
 
@@ -590,12 +595,26 @@ The command:
     python3 -B conformance.py packets --class 19 --sample SAMPLE.json --chunk 2 --buckets BUCKETS.json \
       --class-map CLASS-MAP.json --out PACKETS/
 
-**The bucket file is built by scripts that are not in the repository.** This is future work. The Templar used two
-uncommitted, Templar-only scripts with hard-coded paths and no arguments:
-- a coverage audit, which runs `coverage.clause_coverage` on the ledger with merged verdicts;
-- a bucket builder.
+Build the bucket file with two commands (`CONF/docs/generate-and-compare.md`, Coverage audit and bucket file):
 
-The bucket file is a JSON array of rows, one per ledger claim. Its readers on the branch read these fields:
+    python3 -B conformance.py audit --class 23 --clauses LEDGER --out COVERAGE.json [--results DIR ...] \
+      [--base-results DIR] [--manifest M] [--hooked FILE] [--build B]
+    python3 -B conformance.py buckets --class 23 --coverage COVERAGE.json --out BUCKETS.json [--manifest M] \
+      [--class-map CLASS-MAP.json] [--settled FILE] [--standing-alerts FILE]
+
+- `audit` runs `coverage.clause_coverage` on the ledger with the merged verdicts (a later `--results` replaces the
+  labels of an earlier one; disagreeing labels are listed). With no verdicts, as for a new class, every claim is
+  unproven.
+- `buckets` turns the audit into the bucket file. The class code is the class map's `own_files` (or
+  `src/server/coa/**/Ascension<class name>*` without a map), the family the class's `SpellFamilyName`. Settled alerts
+  and standing alerts from outside the audit are optional input files.
+
+The Templar used two uncommitted scripts with hard-coded paths for the same steps; fed the Templar's inputs,
+`buckets` reproduces the `bucket`, `evidence`, `script_touch` and `token_kind` of all 433 rows of its batch-1 bucket
+file.
+
+The bucket file is a JSON array of rows, one per ledger claim, or `{"clauses": [...]}` with a `definition` block
+(what `buckets` writes). Its readers on the branch read these fields:
 
 | Field | Type | Required by | Meaning |
 |---|---|---|---|
@@ -624,8 +643,8 @@ What the Templar's builder wrote into them:
 - **`script_touch`** and **`script_touch_hits`**: matches in the class code, by id or by family mask; the first is the
   flag, the second the hits in the shape above.
 
-The order of commands on the Templar was scaffold, generate and compare (9.3, 9.5), the ledger (9.4), the two scripts
-above, then `sample` and `packets` (this section).
+The order of commands is scaffold, generate and compare (9.3, 9.5), the ledger (9.4), `audit` and `buckets`, then
+`sample` and `packets` (this section).
 
 Batch sizes used on the Templar:
 - batch 1: about 40 clauses, with a first chunk of 10;
@@ -655,7 +674,23 @@ Rules for a batch:
 When two authors work in parallel:
 - data files are partitioned by spell;
 - tool, test, doc, ADR and harness files go through a lock file and cherry-picks;
-- ADR numbers are reserved in blocks per author.
+- class ADRs are numbered inside the class folder; shared ADRs carry provisional numbers and take the next free ones
+  just before merge (section 14.4). Number blocks per author are retired (ADR 0583).
+
+Cadence, the default for every class and every cycle (owner, through the mentor, 2026-11-13; no clock and no end
+time since the evening ruling of that day):
+1. Every cycle starts with a written plan: the claims taken and the target final count. There is no clock and no end
+   time: speed comes from ordering and grouping, not from deadlines.
+2. Order inside a cycle: (a) ledger-only and audit fixes, counted by a re-audit, with no runs; (b) claims that ride
+   existing kinds; (c) new kinds, grouped by tool, one author per tool group; (d) harness C++ only after a G-39 note.
+3. At every cycle's triage, status 3 or 4 only after two genuinely different designs failed (the second-agent rule)
+   or a proven impossibility. More than 90 agent-minutes on a claim only flags it for a design review with the
+   mentor; it never closes a claim by itself.
+4. The bench never idles: the next cycle's read-only work (grouping, designs, tables) runs while the merged pair runs.
+5. Two authors at most, fresh agents; Sonnet for mechanical work, Opus for design and review.
+6. A checkpoint after each merged pair: the count, the delta and the next cycle's plan, to the mentor in one message,
+   and a report written at that checkpoint.
+7. A cycle that gains less than half its target: the next plan says why and changes the split.
 
 Each batch sets a stop rule before it starts, in minutes per resolved clause.
 
@@ -672,12 +707,14 @@ When the tool cannot express a claim, extend it:
 - the smallest extension;
 - seeded tests;
 - a mutant that must alert (server mutants: `conformance.py mutate`, `k3`, ADR 0129);
-- every existing scenario regenerating byte-identical;
+- every existing scenario regenerating byte-identical: the snapshot check of every finished class passes, or each
+  difference is intended and its digest file rewritten in the same commit (section 14.5);
 - a one-off clock line.
 
 A tool extension needs no prior approval and is reported in the batch report. A harness C++ change beyond reading and
 recording needs a note first (G-39): to the mentor, or without one to the owner. A gap becomes status 5 only after two
-different designs have failed, or when one claim would cost more than 90 agent-minutes.
+genuinely different designs have failed or on a proven impossibility; more than 90 agent-minutes on one claim only
+flags it for a design review with the mentor (section 9.6, Cadence).
 
 A new check or metric needs a row in the closed evidence tables first (`coverage.EVIDENCE`, `METRIC_EVIDENCE`, ADR
 0120). Without the row the coverage run fails.
@@ -689,7 +726,8 @@ Integration steps, in order:
    removed.
 2. Merge: fast-forward the first branch, rebase the second, and resolve conflicts only by the ownership rules.
 3. **Regeneration identity check**: `conformance.py generate --class N` at the merged HEAD. Each side's counted
-   scenarios must come out byte-identical; re-run any that differ, twice.
+   scenarios must come out byte-identical; re-run any that differ, twice. For a finished class the source stage's
+   snapshot check does this (section 14.5).
 4. Run `python -B tools/verify_all.py --stages build`, then `--stages source --base origin/main`, once each. With the
    optional guide tooling, the Templar ran them as `coa-verify --worktree <wt> --ram --stages ...`.
 5. Recompute coverage on the merged ledger with the stored verdicts.
@@ -710,6 +748,16 @@ Write the class report. The Templar's sections were:
 - the tool gaps;
 - the cost by batch;
 - what could not be verified.
+
+When the class reaches its count of record:
+- archive a re-auditable verdict set: the `compare` outputs of both runs of the final merged pair (`verdicts.json`,
+  `report.md`, `alerts.tsv`, the manifests) with the build id passed to `compare --build`, and the two verify_all
+  stamps. Commit them under the class's ADR folder when their size allows, or keep them at a stable path; either way,
+  the class ADR folder's `README.md` names the location. A later change to an audit or coverage rule is re-audited on
+  that archive (`conformance.py audit --results ... --build ...`). The Templar has no such single-build set, so rule
+  changes cannot be re-audited on it until its next counted pair;
+- add the class to `FINISHED_CLASSES` and `GENERATIONS` in `CONF/snapshots.py` and commit its digest file
+  (`python -B snapshots.py write --class N`) in the commit that records the count (ADR 0590).
 
 Publication (push, PR) needs the owner's go.
 
@@ -838,7 +886,8 @@ source is the Templar's working records, which are not in the repository.
    - The integrator redid its cherry-picks twice because of count lines.
 
    Rule: ADR blocks reserved per author before launch; a lock file for shared tool files; each fix branch owns its own
-   C++ file; the entry-count line is checked at every commit.
+   C++ file; the entry-count line is checked at every commit. Since ADR 0583 a class's ADRs are numbered inside its
+   folder, and shared ADRs take the next free numbers just before merge.
 7. **Coin-flip tests.**
    - A High General damage test failed on a correct server: with 8 casts per arm and the dummy's partial resists
      uncontrolled, a correct server misses the band about 31% of the time (ADR 0154, Context).
@@ -926,17 +975,15 @@ Sources:
 
 ## 13. Known limits and open points
 
+- **The first-ledger generator** (`conformance.py ledger`, 9.4) cuts clauses by fixed rules. Run on the Templar it
+  gives 187 of the hand ledger's 452 `(spell, clause)` rows exactly, so its output is a start that batch authors
+  refine, not a finished ledger. It declares no `claims` and cannot label a spell whose value scenario is unmodelled.
 - **The tool has only run on the Templar.** The generation from data (spell set, tooltip reading, value, passive and hit
   scenarios) is written to be class-agnostic. The behaviour, trigger and proc entries are hand-written per spell.
   - Of the 64 behaviour kinds in `classes/templar.json`, 35 have a single entry.
   - The Python names one Templar spell id, `DEFAULT_CHAIN_AURA` (Oath Chain), which an entry can override.
   - The tests are Templar fixtures.
   - Expect to add check kinds; they cost the most per claim (section 10.4).
-- **Not included, future work:**
-  - a generator for a class's first ledger (9.4): the Templar ledger came from an agent audit, converted by an
-    uncommitted step;
-  - the bucket builder (9.6);
-  - a command for the aura 354 check (9.2). The query given there is not a repository command.
 - **The final statuses 2, 4 and 5** have no field in the ledger or in `coverage.py`. The Templar recorded them outside
   the repository.
 - **`prove` calls the `coa-verify` wrapper** from the optional guide tooling by default (`prove.py:57`), with no option
@@ -965,3 +1012,126 @@ Sources:
   - At runtime it is inert unless `CoAGameplayTest.Enable` is set; the default is false (`CoAGameplayTest::OnStartup`).
   - With the gate off, its script hooks stay registered and return early.
   - No chat command script is registered; opcode constants are used only to observe packets (no handler was traced).
+
+## 14. What a contributor owns and what the owner owns
+
+A contributor takes one class. What the class's work may change on its own, and what needs a proposal first, follows
+the files (ADR 0598).
+
+### 14.1 Contributor-owned
+
+- `CONF/classes/<class>.json` and its ledger `<class>_clauses.json` (and a `_consumption.json` when the class has one);
+- the class's C++, `src/server/coa/Ascension<Class>*`, within the four criteria of section 7;
+- the class's SQL, only under `data/sql/updates/pending_db_*/`;
+- `docs/adr/conformance/<class>/`: the class ADRs, their `README.md` index and the class rulings in `rulings.md`;
+- the class's snapshot digests, `CONF/snapshots/<class>.json`, rewritten with `snapshots.py write` when a change to
+  the class's own files is intended to change its scenarios;
+- new kind modules (`CONF/kinds/<kind>.py`, `test_<kind>.py`, `CONF/docs/kinds/<kind>.md`, ADR 0581) and new
+  `metric_delta` option modules (`CONF/metric_delta_options/`, ADR 0582). They are additive files; their ADR is
+  shared and numbered at merge.
+
+### 14.2 Owner-owned
+
+- the shared tool core: `behaviours.py`, `compare.py`, `triggers.py`, `procs.py`, `coverage.py`, `passives.py`,
+  `conformance.py`, `snapshots.py`, `class_map.py`, and the other modules of `CONF/` that are not a kind or option
+  module;
+- the harness: `src/server/coa/CoAGameplayTest.cpp` and the other `CoAGameplay*` files, `apps/coa-gameplay-test/run.py`
+  and the runner;
+- the engine: `src/server/game/` and `src/server/scripts/`;
+- `tools/check_source.py`, `tools/verify_all.py` and the source suites;
+- the fixtures, `CONF/fixtures/classes/` (ADR 0580), and the cross-class guard tests (14.5);
+- other classes' files, ADR folders and snapshot digests, and the finished-class list (`FINISHED_CLASSES`);
+- the shared ADRs in `docs/adr/`, their numbers, and the common rulings (G-n) in `class-conformance-rulings.md`.
+
+### 14.3 Proposing a change to an owner file
+
+Write a shared ADR draft with a provisional number, plus the fix note of section 7 (the four criteria, G-37) for a
+server change, or the tool note of 9.7 for a tool change (G-39 for harness C++ beyond reads and recording). Send it
+to the mentor or, without a mentor session, to the owner, before the change is built. The change lands with its ADR,
+in the same commit; the owner assigns the final number at merge.
+
+### 14.4 ADR numbers and citations
+
+- A class ADR lives in `docs/adr/conformance/<class>/NNNN-<slug>.md`, numbered from 0001 inside that folder, and is
+  cited in prose as "Necromancer ADR 0007" with a relative link, and in a JSON string as plain "Necromancer ADR 0007"
+  (ADR 0583).
+- A shared ADR written on a branch carries a provisional number. Just before merge, a PR's shared ADRs take the next
+  free numbers of `docs/adr/`, renumbered inside the PR. A renumbering repeats the citation rewrite and regenerates
+  the affected class output and snapshot digests in that commit.
+- An ADR that would hold both a class fix and a tool rule is split: the class half in the class folder, the tool half
+  in `docs/adr/`, each naming the other.
+
+### 14.5 Guards for finished classes
+
+- **Snapshot digests** (ADR 0590). `CONF/snapshots/<class>.json` holds the SHA-256 of every file that
+  `generate --class N` (and `--stack` for the Templar) writes. The `conformance` suite of the source stage regenerates
+  each finished class and names the changed, added and removed files, with the commands to regenerate at the base and
+  on your tree and `diff -r` the two. **GitHub CI does not run this check: it has no DBC set, so the check skips
+  there.** It runs only in your local source stage, which is mandatory before a PR (G-42: every contributor has the
+  DBC set). An intended difference is committed as a rewritten digest file with the change; the diff is the review
+  evidence.
+- **Shared engine files** (ADR 0591). Generation does not read the engine, so the digests cannot see a change to it.
+  When the diff touches a file of `ENGINE_FILES` in `tools/check_source.py` (`Unit.cpp`, `Unit.h`, `StatSystem.cpp`,
+  `Spell.cpp`, `Spell.h`, `SpellEffects.cpp`, `SpellInfo.cpp`, `SpellInfo.h`, `SpellInfoCorrections.cpp`,
+  `SpellMgr.cpp`, `SpellMgr.h`, `SpellScript.cpp`, `SpellAuraEffects.cpp`, `SpellAuras.cpp`), the source stage prints
+  the rerun every finished class needs and keeps it in `report.json` (source summary, `conformance_reruns`). It does
+  not fail the stage: the rule is yours to apply. Per finished class and generation: `conformance.py generate` into
+  a new directory, `verify_all.py --stages build,gameplay --scenario <dir>/scenarios/*.json`, `compare`, then
+  `diff` against the class's count of record; the PR states each diff's result. Another engine file (`Player.cpp`,
+  for example) prints nothing, and the same rerun applies when it can reach a finished class's measurements.
+- **Shared spells and fixtures** (ADR 0597). The class map flags, per spell, the other classes whose spell list holds
+  it (`shared_with`), and lists the spell ids more than one class file uses (`shared_class_file_spells`). At
+  019887b267: 81 Dodge, 107 Block, 6603 Auto Attack and 552011 Resilient Constitution in both Templar and Necromancer
+  lists; and 1715, 12096 Fear, 37122, 41394, 48101, 92559, 600002, 823764, 984954 and 1140480 in both class files.
+  Touching the code, data or fixture of a flagged spell requires the snapshot check and the gameplay rerun of every
+  finished class that uses it (`--spell ID` cannot select conformance scenarios, so the rerun goes by the class's
+  generation, as above). A case to track under this rule: drains against a Necromancer, through the shared drain
+  handlers (owner ruling Q-c3-1).
+- **Re-auditable verdict set** (9.9). Each finished class archives the compare outputs of its final merged pair with
+  the build id; rule changes are re-audited on it.
+- **Cross-class guard tests.** All tool tests read the frozen fixtures, except these, which read every live class file
+  on purpose and must keep passing for every class:
+  - `test_values.py`: `test_cross_class_guard_every_class_file_names_its_class`,
+    `test_cross_class_guard_class_file_paths_leaves_out_the_clause_ledger`,
+    `test_cross_class_guard_unknown_class_is_refused`;
+  - `test_coverage.py`: `test_cross_class_guard_consumption_files_are_not_class_files`,
+    `test_cross_class_guard_every_metric_of_the_class_checks_has_an_evidence_class` (against `metric_evidence()`,
+    kind-module rows included; seeded case `test_cross_class_guard_a_metric_without_its_evidence_row_is_found`),
+    `test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric`,
+    `test_cross_class_guard_every_declared_clause_of_the_class_ledgers_is_well_formed`,
+    `test_cross_class_guard_no_kind_module_overrides_a_base_row_unless_allowed` (`KindRowOverrideGuardTest`: a kind
+    module's `EVIDENCE`, `METRIC_EVIDENCE` or `STATE_PROMISES` row may not replace a built-in row unless
+    `coverage.KIND_ROW_OVERRIDES` names it; seeded case
+    `test_cross_class_guard_a_seeded_override_of_a_base_row_is_found`);
+  - `test_questions.py`: `test_cross_class_guard_templar_class_file_settles_from_logs_not_a_live_player`.
+
+### 14.6 Rules for agent sessions
+
+Every agent session on conformance work follows these rules, the controller included:
+- **Never resume an agent for a new task** (owner rule, first priority: token use is a primary constraint). A resume
+  is only for a follow-up on the same task (a fix to its own report, a missing check), and only when it is cheaper
+  than a fresh agent with a handoff file. One agent per task, ended when the task is done. The controller makes no
+  exploratory reads either: grep or head on reports, short messages.
+- Fresh agents only, no forks. A brief points to files; it does not paste them.
+- Big files (`behaviours.py`, `compare.py`, `CoAGameplayTest.cpp`, ledgers, generated scenarios, run logs, verdict
+  JSON) are read by grep or line ranges, never whole. Run output goes to files, read by grep.
+- The full report goes to a named file; the agent returns at most 15 lines (reviewers 10).
+- Verification goes through `tools/verify_all.py` selections only; never run judges, tests or scripts directly.
+- Never wait in the background, never sleep-poll. The dispatch is the agent's task: it ignores messages that do not
+  come from its controller session.
+- Read only what the task needs: the files the dispatch names, by grep. Do not read whole briefs of other batches.
+- A brief never says "read X in full" for the growing files (night and morning briefs, the mentor's decision logs,
+  the rulings): it quotes the two to five decision lines the task needs, or names the grep pattern.
+
+### 14.7 Residual risks
+
+- **Harness `Measure()`/`Act()` are not split** (ADR 0599, option B). Every class's new reads edit the same branch
+  lists in `CoAGameplayTest.cpp` and the same `run.py` tables. Put a class's reads in a per-class helper in a new file,
+  called from one branch line each; resolve conflicts by hand at merge. Option A (registration files) comes back when
+  parallel classes conflict there more than that absorbs.
+- **`MetricDeltaSpec` keeps 60 built-in fields** (ADR 0582). New options are modules; moving an existing field needs
+  its own hook point at the exact place its steps run, or the generated scenarios change.
+- **`cooldown_gate` has no trigger-kind registry.** It still has branches in `conformance.py`'s trigger table,
+  `triggers.checked_entry` and `trigger_plan`, the compare part-judge table and the coverage evidence table; a new
+  trigger kind edits those shared files until a follow-up gives it a registry like the behaviour kinds.
+- **The engine rerun is printed, not enforced** (ADR 0591), and the snapshot check runs only locally (ADR 0590).

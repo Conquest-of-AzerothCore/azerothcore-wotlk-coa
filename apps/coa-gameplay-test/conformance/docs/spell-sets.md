@@ -43,6 +43,23 @@ Titanstrike, Crusader's Presence, Righteous Custodian and Shoot (a ranged hit; i
 is `unmodelled`). Temple Guardian is logged at Rank 6 803796 (`Spell.dbc` `Rank[enUS]`, level 60), while the header
 chains 801165 to Rank 2 803792 only, so the run judges Rank 2.
 
+Necromancer (class 23): the candidates are the 50 class-map `base_candidate` spells of ClassId 23 that the generated
+ledger did not hold. Four of them (500338, 704355, 801760, 801945) are `CharacterAdvancement` spells already, whose
+ledger rows sit under a later rank. Searched on 2026-11-12 by every rank id of the progression header in the
+deduplicated archive (186 logs), keeping events by players who also cast a `CharacterAdvancement` active of class 23:
+29 are confirmed and listed in `classes/necromancer.json`. Two are logged under another name: Raise: Lesser Skeletal
+Warrior by its rank 504901 Raise: Greater Skeletal Warrior, and Runic Harvest 562210 as "Siphon Mana". The 17 others
+had no such event; no log event is not evidence that a spell is unobtainable (G-12). A second search of the reference
+snapshots (owner, 2026-11-12: a class kit listing counts as reachability evidence) found 11 of them in the
+ascensionsidekick `coaKits` Necromancer kit (data.js fetched 2026-09-18): Raise: Skeletal Rogue, Grave March, Command:
+Undead, Sense Undead, Scourge Apprentice Training, Ghoulify, Transfer Life, Call of The Scourge, Create Bone Reliquary,
+Necromancy and Sacrifice Undead. They are listed with a kit citation,
+`ascensionsidekick data.js coaKits Necromancer <spec> kit, fetched <date>`. Create Frozen Reliquary 803772 is a
+`CharacterAdvancement` spell whose rows sit under rank 803777. Resilient Constitution 552011 (in no kit, no log
+event, no live capture) is listed by owner ruling Q-n1 of 2026-11-13 (in scope, tested against a player attacker),
+with the citation `owner ruling <question>, <date>` (ADR 0540). Left out: the stock skills Dodge, Block, Wand and
+Auto Attack (no class tooltip claim).
+
 Righteous Tempest 805410 (`AscensionTemplarAbilities.cpp`'s `RighteousTempest()`, ranks 805410/570200-570205) is a
 23rd `extra_spells` entry, logged at Rank 7 570205 (level 60); it is not one of the 34 `ClassSpells` candidates above
 (round 3, 2026-11-08), so ADR 0016's citation mechanism applies to it independently of that candidate list. Its chain

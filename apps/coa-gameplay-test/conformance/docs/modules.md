@@ -14,7 +14,13 @@
 - `profile.py`: the reference character of a class file and `base_steps(class_file)`, the steps every scenario starts
   with; `spell_dbc_sha256(dbc_dir)` hashes a set's `Spell.dbc` and `server_dbc_dir(dbc_dir)` /
   `require_server_sha(sha, source)` raise `DbcSetMismatch` for a set other than the server's (`load_class_file`
-  applies it to a class file's `dbc_dir`). Its name shadows the standard library `profile`: run the package from its own directory.
+  applies it to a class file's `dbc_dir`); `load_fixture_class_file` reads the frozen copies of `fixtures/classes/`
+  that the tool tests use (ADR 0580). Its name shadows the standard library `profile`: run the package from its own directory.
+- `kinds/`: one module per behaviour kind that is not built into `behaviours.py`, found at run time
+  (`kinds.kind_modules()`); see [Behaviour kind modules](behaviour-scenarios.md#behaviour-kind-modules) (ADR 0581).
+- `metric_delta_options/`: one module per `metric_delta` option that is not a `MetricDeltaSpec` field
+  (`metric_delta_options.option_modules()`); see
+  [Metric-delta option modules](behaviour-scenarios.md#metric-delta-option-modules) (ADR 0582).
 - `values.py`: `value_scenario(class_file, spell, rank_id)` returns the no-combat scenario of one rank, its
   `Expectation` list, and the `periodic_totals` of any `OVER_TICKS` token deferred to a companion scenario (below).
 - `passives.py`: `passive_effects(class_file, spell)` classifies each effect of a passive into a family, its expected
@@ -67,9 +73,26 @@
 - `packets.py`: `write_packets(dbc_dir, class_file, sample, chunk, bucket_rows, out_dir, class_map)` writes one
   Markdown packet per spell of a sample chunk (`packet`, `render_packet`) (see
   [Per-spell packets](generate-and-compare.md#per-spell-packets)).
+- `audit.py`: `audit_document(class_id, ledger, results, base_results, manifest, hooked, build, consumption)` merges
+  compare outputs (a later one replaces earlier labels, `disagreements` lists labels whose status class differs) and
+  runs `coverage.clause_coverage` on the ledger; `buckets.py`: `bucket_document(coverage, manifest, class_file,
+  sources, source_name, family, records, settled, standing, inputs)` turns that audit into the bucket file of
+  `sample` and `packets`; `aura354.py`: `aura354_rows(class_map, class_id)` lists a class's aura-354 spells and flags
+  those without class code; `batch_commands.py` registers the three as `audit`, `buckets` and `aura354` (see
+  [Coverage audit and bucket file](generate-and-compare.md#coverage-audit-and-bucket-file)).
+- `ledger.py`: `ledger(class_file, dbc_dir, text_bases)` writes a class's first clause ledger from the tooltips of
+  its class spell set (`raw_clauses` cuts each tooltip, `clause_label_lists` maps its `$` tokens to the value
+  scenario's labels, `no_claim_reason` names the rows without a mechanic) and returns `Ledger(entries, unlabelled)`;
+  `write_ledger(entries, out)` never overwrites a file (see
+  [Writing a first ledger](clause-ledger.md#writing-a-first-ledger)).
 - `class_map.py`: the command line `--worktree W --out OUT [--dbc-dir DIR] [--log-events EVENTS.csv]` maps every
   spell of the 21 CoA classes to the code that touches it (`risk`, `gap`, `custom_mechanics`, log counts) and writes
-  `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)).
+  `class-map.json` and `class-map-table.md`, the input of `packets --class-map` (see [Class map](class-map.md)); it
+  flags spells and class-file spell ids shared between classes (`mark_shared_spells`, `shared_class_file_spells`,
+  ADR 0597).
+- `snapshots.py`: `check --class N` / `write --class N` for the finished classes (`FINISHED_CLASSES`): regenerates
+  each generation of `GENERATIONS` into a temporary directory and compares the SHA-256 of every file with
+  `snapshots/<class>.json`, naming the changed, added and removed files (ADR 0590).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)
