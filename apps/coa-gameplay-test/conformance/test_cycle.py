@@ -34,9 +34,11 @@ def argument(command, flag):
 
 class FakeRunner:
     def __init__(self, root: Path, percent: int = 87, verify_line: bool = True, verify: str = 'INCOMPLETE',
-                 gameplay_exit: int = 3, gameplay_stage: dict | None = None, failing: str | None = None):
+                 gameplay_exit: int = 3, gameplay_stage: dict | None = None, failing: str | None = None,
+                 stamps: tuple = STAMPS):
         self.root, self.percent, self.verify_line = root, percent, verify_line
         self.verify, self.gameplay_exit, self.failing = verify, gameplay_exit, failing
+        self.stamps = stamps
         self.gameplay_stage = gameplay_stage or {'status': 'unavailable', 'summary': {'returncode': 3}}
         self.commands = []
 
@@ -60,7 +62,7 @@ class FakeRunner:
             self.generate(Path(argument(command, '--out')))
         elif kind == 'gameplay':
             number = sum(1 for found in self.commands if '--stages' in found and 'gameplay' in found)
-            report = self.root / 'verify-all' / STAMPS[number - 1] / 'report.json'
+            report = self.root / 'verify-all' / self.stamps[number - 1] / 'report.json'
             report.parent.mkdir(parents=True, exist_ok=True)
             report.write_text(json.dumps({'stages': {'gameplay': self.gameplay_stage}}), encoding='utf-8')
             if self.verify_line:
@@ -353,6 +355,15 @@ class RefactorGateTest(CycleCase):
                           for row in rows], [('9 moved_a', True, ['a'], 'refactor regression')])
 
 
+    def test_a_missing_verdict_differs_from_a_second_ok(self):
+        key = ('9 moved_a', 'behaviour_metric_delta')
+        ok = {key: [{'scenario': 's', 'status': 'ok'}]}
+        self.assertEqual(cycle.by_scenario([ok, ok], key), {'s': ['ok', 'ok']})
+        self.assertEqual(cycle.by_scenario([ok, {}], key), {'s': ['missing', 'ok']})
+        self.assertEqual(cycle.changed_scenarios([ok, ok], [ok, {}], key), ['s'])
+        self.assertEqual(cycle.changed_scenarios([ok, {}], [{}, ok], key), [])
+
+
 class CommandLineTest(CycleCase):
     def test_the_cycle_subcommand_reads_a_cycle_file_with_relative_paths(self):
         pair = FIXTURES / 'final16'
@@ -418,6 +429,20 @@ class PairIdentityTest(CycleCase):
         (out / cycle.PAIR_FILE).write_text(json.dumps({'runs': [run, run]}), encoding='utf-8')
         with self.assertRaisesRegex(CycleError, 'stamps: both entries name the same run'):
             run_cycle(self.replay(stamps=(), compare=()), REPLAY, FakeRunner(self.root))
+
+    def test_an_unnormalised_path_naming_the_same_run_is_refused(self):
+        path = self.cycle_file()
+        document = json.loads(path.read_text(encoding='utf-8'))
+        document['pair'] = {'stamps': list(STAMPS), 'compare': ['/tmp/pair/cmp', '/tmp/pair/../pair/cmp']}
+        path.write_text(json.dumps(document), encoding='utf-8')
+        with self.assertRaisesRegex(CycleError, 'pair.compare: both entries name the same run'):
+            run_cycle(load_config(path), REPLAY, FakeRunner(self.root))
+
+    def test_a_produced_pair_naming_one_run_twice_is_refused(self):
+        runner = FakeRunner(self.root, stamps=(STAMPS[0], STAMPS[0]))
+        with self.assertRaisesRegex(CycleError, 'runs: produced stamps: both entries name the same run'):
+            run_cycle(self.config(), RUNS_ONLY, runner)
+        self.assertFalse((self.root / 'out' / cycle.PAIR_FILE).exists())
 
 
 if __name__ == '__main__':

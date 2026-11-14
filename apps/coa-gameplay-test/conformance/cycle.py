@@ -2,6 +2,7 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 import hashlib
 import json
+import os
 from pathlib import Path
 import shlex
 import shutil
@@ -102,7 +103,7 @@ def resolve(base: Path, value) -> Path | None:
     if value is None:
         return None
     path = Path(value).expanduser()
-    return path if path.is_absolute() else (base / path).resolve()
+    return Path(os.path.normpath(path)) if path.is_absolute() else (base / path).resolve()
 
 
 def require(document: dict, name: str, where: str = 'cycle file'):
@@ -366,8 +367,11 @@ def step_runs(cycle: Cycle) -> None:
         require_results(cycle, 'runs', manifest, report.parent)
         runs.append({'number': number, 'exit': code, 'verify': status, 'report': str(report),
                      'stamp': report.parent.name, 'results': str(report.parent)})
-    cycle.stamps = [run['stamp'] for run in runs]
-    cycle.results = [Path(run['results']) for run in runs]
+    stamps = [run['stamp'] for run in runs]
+    results = [Path(os.path.normpath(run['results'])) for run in runs]
+    distinct_pair(stamps, 'runs: produced stamps')
+    distinct_pair(results, 'runs: produced results')
+    cycle.stamps, cycle.results = stamps, results
     (config.out / PAIR_FILE).write_text(json.dumps({'runs': runs, 'scenarios': len(files)}, indent=1) + '\n',
                                         encoding='utf-8')
 
@@ -452,11 +456,13 @@ def label_verdicts(directory: Path) -> dict:
 
 
 def by_scenario(runs: list, key: tuple) -> dict:
-    statuses = defaultdict(set)
-    for run in runs:
-        for verdict in run.get(key, []):
-            statuses[verdict['scenario']].add(verdict['status'])
-    return {scenario: sorted(found) for scenario, found in statuses.items()}
+    scenarios = {verdict['scenario'] for run in runs for verdict in run.get(key, [])}
+    found = {}
+    for scenario in scenarios:
+        found[scenario] = sorted(
+            '+'.join(sorted({verdict['status'] for verdict in run.get(key, []) if verdict['scenario'] == scenario}))
+            or 'missing' for run in runs)
+    return found
 
 
 def changed_scenarios(old: list, new: list, key: tuple) -> list:
