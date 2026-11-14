@@ -2339,14 +2339,42 @@ namespace CoAChallenges
             }
         }
 
-        // A character that kept levelling after the failure may still be
-        // restored while every pending objective is within reach. An objective
+        // Levels gained after the failure were earned without the challenge's
+        // rules (lives, bans on the auction house, mail and trade, level cap). A
+        // few are tolerated for a player who kept playing while waiting for a
+        // GM; more than the allowance refuses. A challenge without objective
+        // gates has no other check, so its failure needs the recorded level.
+        uint32 const currentLevel = player->GetLevel();
+        uint32 const levelAllowance = sConfigMgr->GetOption<uint32>("CoAChallenges.Restore.MaxLevelsGained", 3);
+        if (levelAtFailure && currentLevel > levelAtFailure + levelAllowance)
+        {
+            message = Acore::StringFormat(
+                "Restore refused: {} was level {} when challenge {} failed and is now level {}, more than the {} "
+                "levels allowed since a failure (CoAChallenges.Restore.MaxLevelsGained).",
+                player->GetName(), levelAtFailure, challengeID, currentLevel, levelAllowance);
+            return false;
+        }
+        if (!levelAtFailure)
+        {
+            std::vector<Objective> const tracked = TrackedObjectives(challengeID);
+            if (std::none_of(tracked.begin(), tracked.end(),
+                    [](Objective const& o) { return CoAParse::ObjectiveGateLevel(o) != 0; }))
+            {
+                message = Acore::StringFormat(
+                    "Restore refused: challenge {} failed for {} before failures recorded the character's level, "
+                    "and it has no objective gates to check the levels gained since against.",
+                    challengeID, player->GetName());
+                return false;
+            }
+        }
+
+        // Within the allowance a character may still only be restored while
+        // every pending objective is within reach. An objective
         // only counts below its gate level, so once the character has levelled
         // past a pending gate the run can no longer be finished by playing and
         // the levels in between were gained outside the challenge's rules.
         // Without a snapshot the level at the failure is unknown (0), so any
         // pending gate at or below the current level refuses.
-        uint32 const currentLevel = player->GetLevel();
         for (RestoreRow const& row : rows)
         {
             std::vector<Objective> const tracked = TrackedObjectives(row.challengeId);

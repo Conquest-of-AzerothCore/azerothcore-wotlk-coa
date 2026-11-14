@@ -108,26 +108,34 @@ Support commands for a player's run (administrator, also from the console; the p
   comes from `coa_challenge_failure_snapshot`, written at every failure; a failure from before that table
   restores with a restarted timer. High-Risk drops and shared-fate partners are not restored.
 
-`restore` is refused when the character has levelled past the gate of an objective that is still pending. An
-objective only counts below its gate level, so that objective could never be earned again, and the levels in
-between were gained outside the challenge's rules (its lives, its bans on the auction house, mail, heirlooms and
-the dungeon finder, and its level cap). There is no way to bring such a run back. `.coa trial unlock` only
-removes the failure lock: a challenge that must be started at level 1 (the `LEVEL_UP` activation condition,
-which most trials have) still cannot be started by that character, so a fresh attempt means a level 1 character.
+`restore` is refused in two cases, both because of levels gained after the failure. Those levels were earned
+outside the challenge's rules: its lives, its bans on the auction house, mail, trade, heirlooms and the dungeon
+finder, and its level cap.
 
-A character that gained levels after the failure without passing a pending gate, for example while waiting for
-a GM, is restored, and the answer states both levels.
+- The character has gained more than `CoAChallenges.Restore.MaxLevelsGained` levels (default 3) since the run
+  failed. This is the only check for a trial with no objectives, such as Hardcore (54), which completes by
+  reaching the maximum level alive.
+- The character has levelled past the gate of an objective that is still pending. An objective only counts
+  below its gate level, so it could never be earned again.
 
-Example, Hardcore - Boss Blitz (60), whose first gates are Edwin VanCleef before 21, Mutanus the Devourer before
-22 and Archmage Arugal before 26:
+There is no way to bring such a run back. `.coa trial unlock` only removes the failure lock: a challenge that
+must be started at level 1 (the `LEVEL_UP` activation condition, which most trials have) still cannot be started
+by that character, so a fresh attempt means a level 1 character.
 
-- A player dies at level 22 with VanCleef and Mutanus done and is restored at level 22. Both objectives are
-  still done and levelling is capped at 25 again, exactly as before the death.
-- The same player reaches level 24 before a GM answers. The restore succeeds: Arugal's gate is 26, so nothing
-  was missed, and levelling is capped at 25.
-- The same player keeps playing without the trial and reaches level 59. `restore` answers
-  `Restore refused: <name> is level 59, past the level 26 gate of pending objective 3 (Kill Archmage Arugal
-  before level 26) on challenge 60` and changes nothing.
+A character within the allowance and below every pending gate, for example one who kept playing while waiting
+for a GM, is restored, and the answer states both levels. A failure from before the snapshot table has no
+recorded character level: it is checked against the objective gates only, and refused on a trial that has none.
+
+Examples:
+
+- Hardcore (54): a player dies at level 20 and asks for a restore at level 30. Refused: ten levels gained, three
+  allowed. At level 23 or below the restore succeeds.
+- Hardcore - Boss Blitz (60), whose first gates are Edwin VanCleef before 21, Mutanus the Devourer before 22 and
+  Archmage Arugal before 26: a player dies at level 22 with VanCleef and Mutanus done.
+  - Restored at level 22: both objectives are still done and levelling is capped at 25 again.
+  - Restored at level 24: allowed, Arugal's gate is 26 so nothing was missed.
+  - At level 26 or higher: refused, `past the level 26 gate of pending objective 3 (Kill Archmage Arugal
+    before level 26)`.
 
 Worked example for a kill that did not register:
 
