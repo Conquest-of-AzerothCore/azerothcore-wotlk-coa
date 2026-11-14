@@ -64,14 +64,15 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 
 ## Re-auditable verdict set
 
-The latest merged pair (guide 9.9, ADR 0590): runs 20261114-021607 and 20261114-023918 (cycle 14), 3731 scenarios each,
-`compare --build 0f8fa16910c132f0ea0f71c263b573a2e63f8dd6f19e6be70d3805adc3dcffe7`, server commit 8d31bd4fe4, scenarios
-generated at d970398b02. The set (both `compare` outputs, both audits, the two verify_all `report.json` files and the
-manifest, 39 MB in all) is too large for this folder. It is kept outside the repository on the class owner's
-workstation, in the conformance checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final13/`,
-with a `BUILD.txt` that names the build, the commit and the re-audit command. The previous sets (cycle 13, runs
-20261114-011350 / -013600, commit c717e741ef; cycle 12, runs 20261114-002259 / -004257, commit 9aca7ae282; cycle 11,
-runs 20261113-225755 / -232053, commit e40779722d; cycle 10, runs 20261113-212439 / -214713; cycle 8, runs
-20261113-192548 / -194835; cycle 6, runs 20261113-181701 / -184212) stay beside it in `archive/necromancer-final12/`,
-`archive/necromancer-final11/`, `archive/necromancer-final10/`, `archive/necromancer-final9/`,
-`archive/necromancer-final8/` and `archive/necromancer-final7/`.
+The latest merged pair (guide 9.9, ADR 0590): runs 20261114-033327 and 20261114-035622 (cycle 15), 3731 scenarios each,
+`compare --build 3efb74631ffd614aa3ea0e1cde2f6f71ed4f782252e8b933b32511f93a2adfbb`, server commit 34f8d4b186, scenarios
+generated at 34f8d4b186. The set (both `compare` outputs, both audits, the two verify_all `report.json` files and the
+manifest, 40 MB in all) is too large for this folder. It is kept outside the repository on the class owner's
+workstation, in the conformance checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final14/`,
+with a `BUILD.txt` that names the build, the commit and the re-audit command. The previous sets (cycle 14, runs
+20261114-021607 / -023918, commit 8d31bd4fe4; cycle 13, runs 20261114-011350 / -013600, commit c717e741ef; cycle 12,
+runs 20261114-002259 / -004257, commit 9aca7ae282; cycle 11, runs 20261113-225755 / -232053, commit e40779722d; cycle
+10, runs 20261113-212439 / -214713; cycle 8, runs 20261113-192548 / -194835; cycle 6, runs 20261113-181701 / -184212)
+stay beside it in `archive/necromancer-final13/`, `archive/necromancer-final12/`, `archive/necromancer-final11/`,
+`archive/necromancer-final10/`, `archive/necromancer-final9/`, `archive/necromancer-final8/` and
+`archive/necromancer-final7/`.
