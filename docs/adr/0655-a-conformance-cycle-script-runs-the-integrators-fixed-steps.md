@@ -29,8 +29,10 @@ ledger-only re-audit corrections and intended text changes are read by claim key
 keeps the rules of the per-cycle tally: statuses 1-5, the flip rule within the pair and against the record (with
 changed scenarios and judges excluded), re-audit corrections counted at once, candidates gaining status 1 only on
 behaviour in both runs with every label conformant. It adds loud refusals the per-cycle scripts lacked: a decision key
-that names no ledger claim, a ruling of status 1 (status 1 needs a pair with no flip, class-conformance.md 3.2) and a
-recorded status 3-5 claim without a ruling stop the tally; a record row no ledger claim reaches is a `LOST` line
+that names no ledger claim, a ruling of status 1 and a recorded status 3-5 claim without a ruling stop the tally (a
+ruling sets status 2-5 only, never 1: class-conformance.md section 2 gives status 2 "the rule or ruling named in the
+verdict" and status 1 "a counted pair on one build", and section 3.2 requires that pair to have no flip; a status-2
+ruling may stand on a flipping claim); a record row no ledger claim reaches is a `LOST` line
 counted in the delta; the against-record flip test covers scenarios the pair has no result for. The runs step stops on
 a run that does not end `PASSED` (exit 0) or `INCOMPLETE` (exit 3) with a gameplay run, on a missing `report.json`
 and, as `prove` does, on scenarios without a result. The checkpoint (`checkpoint.json` and `.md`) records the count,
