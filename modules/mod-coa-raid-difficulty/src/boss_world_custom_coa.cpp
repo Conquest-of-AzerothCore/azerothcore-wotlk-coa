@@ -626,6 +626,7 @@ namespace
     constexpr float STALACTITE_GRID   = 8.0f;
     constexpr float STALACTITE_REACH  = 50.0f;
     constexpr float CEILING_SEARCH    = 40.0f;
+    constexpr float CEILING_FALLBACK  = 18.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
     constexpr float SNOWGRAVE_LEASH   = 45.0f;
 
@@ -663,11 +664,16 @@ namespace
             DoCastSelf(SPELL_FROZEN_CLUB, true);
             _stomps = 0;
             ClearIcicles();
-            HangStalactites();
+            _hung = false;
         }
 
         void UpdateAI(uint32 diff) override
         {
+            if (!_hung && me->IsInWorld())
+            {
+                _hung = true;
+                HangStalactites();
+            }
             if (me->IsInCombat() && me->GetExactDist2d(&me->GetHomePosition()) > SNOWGRAVE_LEASH)
             {
                 EnterEvadeMode();
@@ -692,10 +698,9 @@ namespace
                     if (ground <= INVALID_HEIGHT)
                         continue;
                     float rx, ry, rz;
-                    if (!tree.GetObjectHitPos(x, y, ground + 2.0f, x, y, ground + CEILING_SEARCH, rx, ry, rz, -0.5f))
-                        continue;
-                    if (rz >= ground + CEILING_SEARCH - 1.0f)
-                        continue;
+                    if (!tree.GetObjectHitPos(x, y, ground + 2.0f, x, y, ground + CEILING_SEARCH, rx, ry, rz, -0.5f) ||
+                        rz >= ground + CEILING_SEARCH - 1.0f)
+                        rz = ground + CEILING_FALLBACK;
                     float const turn = frand(0.0f, 2 * float(M_PI));
                     if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 0, 0, 0, 0, 0))
                         _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
@@ -963,6 +968,7 @@ namespace
             ObjectGuid hanging;
         };
         std::vector<Stalactite> _stalactites;
+        bool _hung = false;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
     };
