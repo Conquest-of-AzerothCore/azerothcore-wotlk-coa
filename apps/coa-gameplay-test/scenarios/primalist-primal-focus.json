@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Primalist Focus and Primal Focus native stat bonuses",
-  "contract": "Both ranks of the same advancement entry grant 5/10% Intellect and Stamina, leave Strength unchanged, and restore baseline on removal.",
+  "contract": "Both ranks of the same advancement entry grant 5/10% Strength, Intellect and Stamina (rank 2 is a total, not an addition) and restore baseline on removal.",
   "players": [
     {
       "id": "primalist",
@@ -64,6 +64,14 @@
       "save_as": "base_3"
     },
     {
+      "action": "assert",
+      "label": "GUARD: Strength is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "primalist",
+      "metric": "stat",
+      "stat": 0,
+      "min": 50
+    },
+    {
       "action": "learn",
       "actor": "primalist",
       "spell": 680936
@@ -91,8 +99,9 @@
       "actor": "primalist",
       "metric": "stat",
       "stat": 0,
-      "relative_to": "base_0",
-      "equals": 0
+      "ratio_to": "base_0",
+      "min": 1.03,
+      "max": 1.06
     },
     {
       "action": "unlearn",
@@ -152,8 +161,9 @@
       "actor": "primalist",
       "metric": "stat",
       "stat": 0,
-      "relative_to": "base_0",
-      "equals": 0
+      "ratio_to": "base_0",
+      "min": 1.08,
+      "max": 1.11
     },
     {
       "action": "unlearn",
