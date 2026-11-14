@@ -28,5 +28,6 @@ failed claim. No server change: Dazed from behind is the engine's rule for a cre
 
 The `frenzied_snare_immune` entry of 503740 takes the same striker and the same untouched before phase (no talent, no
 strike, before the Frenzied transform), so it can read the same Dazed 1604 at 0.57143 and alert. It sets
-`before_aura_absent` {1604, 50073} too. The after phase is unchanged: 707014 carries Effect[2] aura 77 mechanic
-immunity to snare (MECHANIC 11), which covers Dazed's snare aura as it covers Hamstring's.
+`before_aura_absent` {1604, 50073} too. The after phase is unchanged: a Dazed after the transform is not read
+(whether 707014's snare immunity, Effect[2] aura 77 MiscValue 11, covers Dazed's mechanic is not read), and the
+after reading is the one the Hamstring strike produces.
