@@ -1,0 +1,182 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Jin'do's totems spread over the Bloodfire Pit instead of standing ten yards around him",
+  "contract": [
+    "The round-7 tester asked for Jin'do's (11380) totems to spread over the whole Bloodfire Pit. They stand on",
+    "trash pack spots of the arena, where they stood ten yards around him before. Jin'do is summoned two yards in",
+    "front of the tank beside his own spawn, because the lane's players do not see the phase-1 spawn. Every spot on",
+    "the old ring lies at most 12 yards from the tank and the nearest pit spot 15 yards, so the nearest Brain Wash",
+    "Totem (15112) and the Powerful Healing Ward (14987) stand at least 13 yards from the tank. The Brain Wash",
+    "Totems still put Brainwash (2118502) on the other hero, who stands inside the arena. Both heroes carry the",
+    "Delusions vision aura (2118511), which Delusions of Jin'do skips, so its phase aura (2118512, mask 3) cannot",
+    "move a hero out of the lane's phase and away from the totems."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the heroes so both enter the same instance",
+      "actor": "tank",
+      "target": "mate"
+    },
+    {
+      "action": "teleport",
+      "label": "Beside Jin'do's spawn",
+      "actor": "tank",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "label": "Into the arena",
+      "actor": "mate",
+      "map": 309,
+      "x": -11545.0,
+      "y": -1275.5,
+      "z": 79.0,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_aura",
+      "label": "Delusions passes over the tank",
+      "actor": "tank",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Delusions passes over the mate",
+      "actor": "mate",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "summon",
+      "label": "Jin'do two yards in front of the tank",
+      "actor": "tank",
+      "entry": 11380,
+      "as": "jindo",
+      "distance": 2
+    },
+    {
+      "action": "attack",
+      "label": "The tank pulls Jin'do",
+      "actor": "tank",
+      "target": "jindo"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do fights",
+      "actor": "jindo",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Brain Wash Totems come 16 s into the fight",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 0,
+      "within_ms": 25000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Brain Wash Totem stands on the old ring around Jin'do",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 15112,
+      "radius": 150,
+      "min": 13
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a Brain Wash Totem brainwashes the other hero",
+      "actor": "mate",
+      "metric": "aura",
+      "spell": 2118502,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ward comes at 21 s",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the ward stands away from Jin'do too",
+      "actor": "tank",
+      "metric": "nearest_creature_distance",
+      "entry": 14987,
+      "radius": 150,
+      "min": 13
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Jin'do is still fighting",
+      "actor": "jindo",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}
