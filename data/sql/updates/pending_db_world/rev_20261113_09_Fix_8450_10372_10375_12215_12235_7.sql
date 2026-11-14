@@ -3,15 +3,15 @@
 -- Schema: ec4dbf0c7e2ffbe21a91d275b19a344f8bffe1dc476fe49e1502e6e9a75afc22
 -- Generated: 2026-11-13
 
-DELETE FROM `creature` WHERE `guid` IN (86597, 86596, 89294, 93209, 12101022, 12101023, 12101024, 12101026);
+DELETE FROM `creature` WHERE `guid` IN (86597, 86596, 89294, 93209, 12101022, 12101024);
 DELETE FROM `gameobject` WHERE `guid` IN (12101024, 12101025, 12101026, 12101027, 12101028, 12101029, 12101030, 12101031, 12101032, 12101033, 12101034, 12101035, 12101036, 12101037, 12343, 99991, 12101038, 12101039, 12101040);
 
 INSERT INTO `creature`(`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`)
 VALUES
-(12101022, 1415,  0, 0, 0, 1, 1, 1, -8997.77, 858.99,  105.81,  0.8252511480258712, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
-(12101023, 1413,  0, 0, 0, 1, 1, 0, -8953.36, 862.729,  105.55394625503253, 6.28191, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
-(12101024, 1414,  0, 0, 0, 1, 1, 0, -8995.65, 861.07,  105.75,  3.9751775344342897, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
-(12101026, 14757, 0, 0, 0, 1, 1, 0, -531.0075726373829, -3872.7412350927298, 232.56292677815676, 5.508129681681255, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view');
+(89294, 1415,  0, 0, 0, 1, 1, 1, -8955.445392724252, 861.1223956945032,  105.18221912214845,  0.8252511480258712, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
+(86596, 1413,  0, 0, 0, 1, 1, 0, -8953.36, 862.729,  105.55394625503253, 6.28191, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
+(86597, 1414,  0, 0, 0, 1, 1, 0, -8956.234071773495, 863.7149594944616,  105.41394442919793,  0.060865020162770914, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view'),
+(93209, 14757, 0, 0, 0, 1, 1, 0, -531.0075726373829, -3872.7412350927298, 232.56292677815676, 5.508129681681255, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'ACQC 3D view');
 
 INSERT INTO `gameobject`(`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
 (12101029, 1326645, 1, 0, 0, 1, 1, -493.60519952771546, -4212.784812655135, 50.65479854452987,  5.056685205203493, 0, 0,  0.575528, -0.817782, 300, 100, 1, '', NULL, 'ACQC 3D view'),
