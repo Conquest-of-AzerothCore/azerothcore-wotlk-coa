@@ -1456,12 +1456,30 @@ public:
     }
 };
 
+constexpr std::array<uint32, 13> MYTHICAL_BOON_ITEMS = { 2104920, 2104921, 2104922, 2104923, 2104925, 2104926, 2104927,
+    2104928, 2104929, 2104930, 2104931, 2104932, 2104935 };
+
+void RemoveBoonsOutsideDungeon(Player* player)
+{
+    Map* map = player->FindMap();
+    if (!map || map->IsDungeon() || !player->IsAlive())
+        return;
+    for (uint32 item : MYTHICAL_BOON_ITEMS)
+        if (uint32 const count = player->GetItemCount(item, true))
+            player->DestroyItemCount(item, count, true);
+}
+
 // Death takes the player affixes; a resurrection inside a running key brings them back.
 class coa_mythic_plus_player : public PlayerScript
 {
 public:
     coa_mythic_plus_player() : PlayerScript("coa_mythic_plus_player",
-        { PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_UPDATE }) { }
+        { PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_MAP_CHANGED }) { }
+
+    void OnPlayerMapChanged(Player* player) override
+    {
+        RemoveBoonsOutsideDungeon(player);
+    }
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
@@ -1474,6 +1492,7 @@ public:
     // AscensionDifficultyRelease.
     void OnPlayerLogin(Player* player) override
     {
+        RemoveBoonsOutsideDungeon(player);
         for (auto const& [id, key, text] : CLIENT_STRINGS)
         {
             WorldPacket data(SMSG_PATCH_GLOBAL_STRINGS, 32 + std::strlen(key) + std::strlen(text));
@@ -1510,6 +1529,7 @@ public:
 
     void OnPlayerResurrect(Player* player, float /*restorePercent*/, bool& /*applySickness*/) override
     {
+        RemoveBoonsOutsideDungeon(player);
         Map* map = player->FindMap();
         if (!map || !map->IsDungeon())
             return;
@@ -2546,8 +2566,6 @@ public:
 
     bool OnGossipHello(Player* player, Creature* creature) override
     {
-        static constexpr std::array<uint32, 13> BOONS = { 2104920, 2104921, 2104922, 2104923, 2104925, 2104926, 2104927,
-            2104928, 2104929, 2104930, 2104931, 2104932, 2104935 };
         CloseGossipMenuFor(player);
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         if (!InRunningKey(creature->GetMap()))
@@ -2555,9 +2573,8 @@ public:
         player->CastSpell(player, SPELL_MYTHICAL_BLESSING, true);
         for (Player* target : BoonTargets(player))
         {
-            uint32 const boon = BOONS[urand(0, BOONS.size() - 1)];
-            if (!target->AddItem(boon, 1))
-                target->SendItemRetrievalMail(boon, 1);
+            uint32 const boon = MYTHICAL_BOON_ITEMS[urand(0, MYTHICAL_BOON_ITEMS.size() - 1)];
+            target->AddItem(boon, 1);
         }
         creature->DespawnOrUnsummon(0ms, 7 * 24h);
         return true;
