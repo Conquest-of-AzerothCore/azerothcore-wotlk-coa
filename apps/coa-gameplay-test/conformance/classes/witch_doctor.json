@@ -49,7 +49,7 @@
   "alternate_weapons": [
     {
       "item": 2000265,
-      "slot": 15,
+      "slot": 17,
       "subclass": 2,
       "min_damage": 3.5625,
       "max_damage": 5.9375,
