@@ -2108,8 +2108,8 @@
       "spell": 300513, "name": "Crusader's Brand (damage on the branded attacker)", "kind": "script_hit",
       "quote": "and when they deal direct damage they take ${$573020m1*$<scalingbp>+$sph*0.275+$AP*.185} Holy Damage.",
       "hit_spell": 573020, "casts": [[300513, "striker"]], "control_casts": [], "strike_spell": 41394,
-      "receiver": "striker", "caster_health_pct": 100, "trials": 40, "minimum_hits": 30,
-      "observe_source": "AscensionTemplarEvents.cpp:120-121 (case 300513): a direct damage hit dealt by the branded unit casts 573020 from the Templar at that unit (300513 Effect[0] aura 42, ProcChance 100). Each treatment trial brands the passive striker (creature 36, 3 yd away), which then casts Light of the Naaru 41394 (direct Holy) at the caster; the control trials make the same strike without the brand (ADR 0206), so no 573020 hit may land. 573020 Effect[0] SCHOOL_DAMAGE 242 + 1, Templar coefficients (AscensionTemplarData.h:60)."
+      "receiver": "striker", "caster_health_pct": 100, "trials": 70, "minimum_hits": 30,
+      "observe_source": "AscensionTemplarEvents.cpp:120-121 (case 300513): a direct damage hit dealt by the branded unit casts 573020 from the Templar at that unit (300513 Effect[0] aura 42, ProcChance 100). Each treatment trial brands the passive striker (creature 36, 3 yd away), which then casts Light of the Naaru 41394 (direct Holy) at the caster; the control trials make the same strike without the brand (ADR 0206), so no 573020 hit may land. 573020 Effect[0] SCHOOL_DAMAGE 242 + 1, Templar coefficients (AscensionTemplarData.h:60). Sample: 40 trials gave 29 and 38 usable hits (pair 20261114-135017 / -141026): 4 + 0 critical hits and 7 + 2 trials with no 573020 hit (the strike 41394 and the retaliation 573020 each roll MagicSpellHitResult; 300513, DmgClass 0 with aura effects only, cannot miss), 67 usable of 80. At 70 trials P(usable < 30) = 1.2e-15 at the pooled rate 0.8375 and 9.5e-8 at its 99% one-sided Clopper-Pearson lower bound 0.719 (binomial)."
     },
     {
       "spell": 300515, "name": "Fortified Body (does not stack, heals)", "kind": "hit_ratio", "variant": "no_stack",
