@@ -2628,6 +2628,22 @@ class MinionMagnitudeTests(unittest.TestCase):
             checked_magnitude_entry(entry)
 
 
+class MinionHeldHealthTests(unittest.TestCase):
+    def test_the_caster_health_is_set_before_the_first_minion_swing(self):
+        from triggers import minion_attempt_steps
+        entry = {'aura': 300241, 'caster_health_pct': 45, 'minion_aura_refresh_ms': 4000,
+                 'trigger': {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000}}
+        steps = minion_attempt_steps(entry, 8000, '')
+        attack = next(index for index, step in enumerate(steps) if step['action'] == 'attack')
+        self.assertEqual(steps[attack - 1], {'action': 'set_health', 'actor': 'caster', 'value': 4500,
+                                             'maximum': 10000})
+
+    def test_an_entry_without_a_held_health_starts_with_the_attack(self):
+        from triggers import minion_attempt_steps
+        entry = {'aura': 707001, 'trigger': {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000}}
+        self.assertEqual(minion_attempt_steps(entry, 4000, '')[0]['action'], 'attack')
+
+
 class MagnitudeTwoPointBandTest(unittest.TestCase):
     setUp = MagnitudeTriggerCompareTest.setUp
     tearDown = MagnitudeTriggerCompareTest.tearDown

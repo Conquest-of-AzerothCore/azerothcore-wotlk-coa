@@ -78,3 +78,17 @@ class MinionSwingArmsTests(unittest.TestCase):
     def test_an_ok_verdict_is_behaviour_evidence_through_its_event_metric(self):
         verdict = self.judged(1000.0, 1100.0)
         self.assertEqual(verdict_evidence(verdict, ENTRY['quote'], {}), BEHAVIOUR)
+
+    def test_pooled_parts_judge_every_window_of_every_part_and_name_a_failing_part(self):
+        from kinds.minion_swing_arms import POOLED_JUDGE
+        _, [expectation] = self.built()
+        good = FakeRun(self.values(expectation, 1000.0, 1100.0))
+        pooled = POOLED_JUDGE(base_verdict(expectation), [good, good], expectation.model)
+        self.assertEqual(pooled.status, 'ok')
+        self.assertEqual(pooled.detail['bonus']['trials'], 2 * len(expectation.model['windows']['control']))
+        self.assertIn('2 parts pooled', pooled.explanation)
+        unheld = FakeRun(self.values(expectation, 1000.0, 1100.0, held=3))
+        unheld.key = 'part-2'
+        failed = POOLED_JUDGE(base_verdict(expectation), [good, unheld], expectation.model)
+        self.assertEqual(failed.status, 'unmeasured')
+        self.assertTrue(failed.explanation.startswith('part-2: '))

@@ -159,23 +159,41 @@ def aura_mismatch(model: dict, values: dict) -> str | None:
     return None
 
 
-def minion_swing_arms_verdict(base, run, model: dict):
+def arms_failure(base, run, model: dict, prefix: str):
     from compare import missing_measurement
     labels = [label for arm in ARMS for window in model['windows'][arm] for label in window.values()]
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
-        return replace(base, explanation=missing_measurement(run, missing))
+        return replace(base, explanation=f'{prefix}{missing_measurement(run, missing)}')
     mismatch = aura_mismatch(model, run.values)
     if mismatch:
-        return replace(base, status='unmeasured', explanation=f'not judged: the arms did not hold: {mismatch}')
+        return replace(base, status='unmeasured',
+                       explanation=f'{prefix}not judged: the arms did not hold: {mismatch}')
+    return None
+
+
+def window_reads(run, model: dict, arm: str) -> tuple[list[float], list[float]]:
+    windows = model['windows'][arm]
+    totals = [run.values[window['end total']] - run.values[window['start total']] for window in windows]
+    counts = [run.values[window['end count']] - run.values[window['start count']] for window in windows]
+    return totals, counts
+
+
+def swing_arms_judgement(base, runs: list, model: dict, note: str = ''):
+    for run in runs:
+        unusable = arms_failure(base, run, model, f'{run.key}: ' if note else '')
+        if unusable is not None:
+            return unusable
     samples = {}
     for arm in ARMS:
-        windows = model['windows'][arm]
-        totals = [run.values[window['end total']] - run.values[window['start total']] for window in windows]
-        counts = [run.values[window['end count']] - run.values[window['start count']] for window in windows]
-        if sum(counts) < len(windows):
+        totals, counts = [], []
+        for run in runs:
+            run_totals, run_counts = window_reads(run, model, arm)
+            totals += run_totals
+            counts += run_counts
+        if sum(counts) < len(counts):
             return replace(base, status='unmeasured',
-                           explanation=f'{sum(counts):g} plain swings in the {len(windows)} {arm} windows; each arm '
+                           explanation=f'{sum(counts):g} plain swings in the {len(counts)} {arm} windows; each arm '
                                        f'needs at least one per window on average')
         samples[arm] = per_event_sample(totals, counts)
     bonus = bonus_of(samples['treatment'], samples['control'], float(model['expected']))
@@ -186,7 +204,17 @@ def minion_swing_arms_verdict(base, run, model: dict):
                    detail={'bonus': bonus_detail(bonus), 'trials_needed': needed},
                    explanation=f'per-swing mean {treatment.mean:.6g} over {treatment.events:g} treatment swings '
                                f'against {control.mean:.6g} over {control.events:g} control swings, ratio '
-                               f'{treatment.mean / control.mean:.5g}; {bonus_text(bonus)}; {reason}')
+                               f'{treatment.mean / control.mean:.5g}; {bonus_text(bonus)}; {reason}{note}')
+
+
+def minion_swing_arms_verdict(base, run, model: dict):
+    return swing_arms_judgement(base, [run], model)
+
+
+def minion_swing_arms_pooled_verdict(base, runs: list, model: dict):
+    windows = len(model['windows']['control'])
+    return swing_arms_judgement(base, runs, model, f'; {len(runs)} parts pooled, the {windows} windows per arm of '
+                                                   f'every part in one per-window sample')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
@@ -198,4 +226,5 @@ def label(entry: dict) -> list[str]:
 
 
 JUDGES = {BEHAVIOUR_METRIC_DELTA: minion_swing_arms_verdict}
+POOLED_JUDGE = minion_swing_arms_pooled_verdict
 METRIC_EVIDENCE = {MINION_SWING_ARMS_METRIC: 'event'}

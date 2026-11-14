@@ -639,8 +639,9 @@ class code makes the minion attack too. An attempt is one `swing_ms`. `trial_met
 
 - `minion_auras` (`{"spell", "amount", "source"}`, precondition fixtures) are removed and set again on the minion
   every `minion_aura_refresh_ms`; Chomp 707283 forces Abomination crits with Anointed 280912 at amount 100.
-- `caster_health_pct` holds the caster at that health before every window (Vampiric Aura 300241: 30%, and 100% in
-  its gate-absence entry).
+- `caster_health_pct` holds the caster at that health before every window, the first one set before the attack
+  starts (ADR 0650): the runner takes one step per world tick, so a minion with a ready swing timer otherwise lands
+  its first hit at the caster's natural health (Vampiric Aura 300241: 45%, and 55% in its gate-absence entry).
 - `aura_on_minion` reads the passive on the minion when its only effects apply auras to summons (Pandemic 560798).
 - `aura_cast` casts the aura after its learn, for an active (Fetid Ward 680388); `caster_power` (`{"power", "value",
   "source"}`) sets a power before each cast, for a base-mana percentage cost.

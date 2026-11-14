@@ -13,6 +13,8 @@ means of the two arms (the hit ratio judge's per-window sample and 99% interval)
 (`stacks` x the aura effect's BasePoints + DieSides, which `expected` must equal), in the G-19 band. An entry
 without a treatment aura is refused: the arms would not differ. `player_spell_power` gives the caster the harness
 spell-power fixture, so the minion's attack power dwarfs its weapon roll and the swing spread falls under 1%.
+`parts` (ADR 0651) runs the scenario that many times and pools the windows of every part into one per-window sample
+per arm; a part with a missing read or an unheld aura makes the label unmeasured and is named.
 
 The verdict stamps the metric `minion_swing_arm_damage`, an event read (this module's `METRIC_EVIDENCE` row).
 

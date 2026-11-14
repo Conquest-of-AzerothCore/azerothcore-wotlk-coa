@@ -431,10 +431,10 @@ def minion_attempt_steps(entry: dict, wait_ms: int, phase: str) -> list[dict]:
     recast = entry.get('aura_recast_ms')
     if recast:
         refresh = min(refresh, recast)
-    steps = [{'action': 'attack', 'actor': CASTER, 'target': TARGET}]
-    remaining = wait_ms
     health = [fixture_health_step(CASTER, entry['caster_health_pct'])] \
         if entry.get('caster_health_pct') is not None else []
+    steps = health + [{'action': 'attack', 'actor': CASTER, 'target': TARGET}]
+    remaining = wait_ms
     while remaining > 0:
         chunk = min(refresh, remaining)
         again = aura_recast_steps(entry) if recast and remaining < wait_ms else []
