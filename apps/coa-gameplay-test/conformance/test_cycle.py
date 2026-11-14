@@ -378,27 +378,58 @@ class CheckpointTest(CycleCase):
                          {'no_scenario_file': 0, 'other': 0, 'other_verdicts': []})
         self.assertIn('- Record verdicts not compared with the record: 0 with no scenario file, 0 other', markdown)
 
-    def test_other_unmatched_record_verdicts_are_loud_in_the_checkpoint(self):
+    OTHER_KEY = ('301303 effect_value e0 #0', 'effect_value', 'derived-301303')
+
+    def other_verdict_config(self, **fields) -> CycleConfig:
         record = []
         for index, source in enumerate((FIXTURES / 'record' / 'cmp-run1', FIXTURES / 'record' / 'cmp-run2')):
             document = json.loads((source / 'verdicts.json').read_text(encoding='utf-8'))
-            document['verdicts'].append({'label': '301303 effect_value e0 #0', 'check': 'effect_value',
-                                         'scenario': 'derived-301303', 'status': 'ok'})
+            document['verdicts'].append({'label': self.OTHER_KEY[0], 'check': self.OTHER_KEY[1],
+                                         'scenario': self.OTHER_KEY[2], 'status': 'ok'})
             out = self.root / f'record-{index}'
-            out.mkdir()
+            out.mkdir(exist_ok=True)
             (out / 'verdicts.json').write_text(json.dumps(document), encoding='utf-8')
             record.append(out)
         config = self.replay()
-        run_cycle(self.replay(record=Record(config.record.name, config.record.status, config.record.stamps,
-                                            tuple(record), config.record.manifest)), REPLAY, FakeRunner(self.root))
-        self.assertEqual(self.checkpoint()['record_verdicts'], {
-            'no_scenario_file': 0, 'other': 1, 'other_verdicts': [['301303 effect_value e0 #0', 'effect_value',
-                                                                   'derived-301303']]})
-        markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
-        self.assertIn('- **WARNING: record verdicts not compared with the record: 0 with no scenario file, 1 other**: '
-                      '301303 effect_value e0 #0 | effect_value | derived-301303', markdown)
-        log = (self.root / 'out' / 'logs' / '11-checkpoint.log').read_text(encoding='utf-8')
-        self.assertIn('WARNING record verdicts not compared with the record: no scenario file 0, OTHER 1', log)
+        return self.replay(record=Record(config.record.name, config.record.status, config.record.stamps,
+                                         tuple(record), config.record.manifest), **fields)
+
+    def test_other_unmatched_record_verdicts_stop_the_cycle(self):
+        with self.assertRaisesRegex(CycleError, 'other 1: 301303 effect_value e0 #0 \\| effect_value \\|'):
+            run_cycle(self.other_verdict_config(), REPLAY, FakeRunner(self.root))
+        self.assertFalse((self.root / 'out' / CHECKPOINT_JSON).exists())
+
+    def test_other_unmatched_record_verdicts_stop_the_tally_step(self):
+        steps = [step for step in REPLAY if step != 'tally']
+        with self.assertRaisesRegex(CycleError, 'tally: record verdicts not compared'):
+            run_cycle(self.other_verdict_config(), steps, FakeRunner(self.root))
+
+    def test_accepted_other_record_verdicts_pass_with_the_reason_in_the_checkpoint(self):
+        for acceptance in ({'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'}, {'count': 1, 'why': 'mentor M3'}):
+            with self.subTest(acceptance=acceptance):
+                config = self.other_verdict_config(other_verdicts_accepted=cycle.verdict_acceptance(acceptance))
+                run_cycle(config, REPLAY, FakeRunner(self.root))
+                document = self.checkpoint()
+                self.assertEqual(document['record_verdicts']['other'], 1)
+                self.assertEqual(document['record_verdicts_acceptance'],
+                                 {'why': 'mentor M3', 'count': 1, 'keys': [list(self.OTHER_KEY)]})
+                markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
+                self.assertIn('ACCEPTED in the cycle file: mentor M3 (301303 effect_value e0 #0 | effect_value | '
+                              'derived-301303)', markdown)
+
+    def test_an_acceptance_that_does_not_cover_the_keys_still_stops(self):
+        for acceptance in ({'keys': [['other', 'effect_value', 'derived-1']], 'why': 'mentor M3'},
+                           {'count': 2, 'why': 'mentor M3'}):
+            with self.subTest(acceptance=acceptance):
+                config = self.other_verdict_config(other_verdicts_accepted=cycle.verdict_acceptance(acceptance))
+                with self.assertRaisesRegex(CycleError, 'does not cover them'):
+                    run_cycle(config, REPLAY, FakeRunner(self.root))
+
+    def test_an_acceptance_needs_a_reason_and_keys_or_a_count(self):
+        for document in ({'count': 1}, {'why': 'x'}, {'why': 'x', 'count': 1, 'keys': [['a', 'b', 'c']]},
+                         {'why': 'x', 'keys': [['a', 'b']]}):
+            with self.subTest(document=document), self.assertRaisesRegex(CycleError, 'other_verdicts_accepted'):
+                cycle.verdict_acceptance(document)
 
     def test_unmatched_record_scenarios_are_loud_in_the_checkpoint_and_the_command_line(self):
         manifest = json.loads((FIXTURES / 'final16' / 'manifest.json').read_text(encoding='utf-8'))

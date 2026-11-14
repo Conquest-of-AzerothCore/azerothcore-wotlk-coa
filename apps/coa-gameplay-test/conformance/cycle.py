@@ -56,6 +56,13 @@ class Refactor:
 
 
 @dataclass(frozen=True)
+class VerdictAcceptance:
+    keys: tuple
+    count: int | None
+    why: str
+
+
+@dataclass(frozen=True)
 class GateChange:
     class_id: int
     added_fields: tuple
@@ -84,6 +91,7 @@ class CycleConfig:
     guard_classes: tuple = ()
     gate_archive_paths: tuple = DEFAULT_GATE_PATHS
     gate_accepted: tuple = ()
+    other_verdicts_accepted: VerdictAcceptance | None = None
     stamps: tuple = ()
     results: tuple = ()
     compare: tuple = ()
@@ -140,6 +148,18 @@ def gate_change(document: dict) -> GateChange:
     return GateChange(int(require(document, 'class_id', 'gate_accepted')), fields, why)
 
 
+def verdict_acceptance(document) -> VerdictAcceptance | None:
+    if document is None:
+        return None
+    why = str(document.get('why', '')).strip() if isinstance(document, dict) else ''
+    keys = tuple(tuple(str(part) for part in key) for key in document.get('keys', ())) if why else ()
+    count = document.get('count')
+    if not why or bool(keys) == (count is not None) or any(len(key) != 3 for key in keys):
+        raise CycleError(f'other_verdicts_accepted: {document} needs a "why" and either "keys" '
+                         f'([label, check, scenario] triples) or "count"')
+    return VerdictAcceptance(keys, None if count is None else int(count), why)
+
+
 def load_config(path: Path) -> CycleConfig:
     path = Path(path).resolve()
     document = json.loads(path.read_text(encoding='utf-8'))
@@ -172,6 +192,7 @@ def load_config(path: Path) -> CycleConfig:
         guard_classes=tuple(int(item) for item in document.get('guard_classes', ())),
         gate_archive_paths=tuple(document.get('gate_archive_paths', DEFAULT_GATE_PATHS)),
         gate_accepted=tuple(gate_change(item) for item in document.get('gate_accepted', ())),
+        other_verdicts_accepted=verdict_acceptance(document.get('other_verdicts_accepted')),
         stamps=pair_of(pair.get('stamps'), 'pair.stamps'),
         results=tuple(resolve(base, item) for item in pair_of(pair.get('results'), 'pair.results')),
         compare=tuple(resolve(base, item) for item in pair_of(pair.get('compare'), 'pair.compare')),
@@ -507,6 +528,21 @@ def status_paths(config: CycleConfig) -> tuple:
     return config.out / f'{config.name}-status.json', config.out / f'{config.name}-status.md'
 
 
+def verdict_acceptance_note(config: CycleConfig, verdicts: dict) -> dict | None:
+    if not verdicts['other']:
+        return None
+    found = [tuple(key) for key in verdicts['other_verdicts']]
+    accepted = config.other_verdicts_accepted
+    covered = accepted is not None and (accepted.count == len(found) if accepted.count is not None
+                                        else set(found) <= set(accepted.keys))
+    if not covered:
+        shown = ', '.join(' | '.join(key) for key in found)
+        declared = '' if accepted is None else ' (the declared acceptance does not cover them)'
+        raise CycleError(f'record verdicts not compared with the record, other {len(found)}: {shown}; accept them '
+                         f'with "other_verdicts_accepted" and a reason{declared}')
+    return {'why': accepted.why, 'count': len(found), 'keys': [list(key) for key in found]}
+
+
 def step_tally(cycle: Cycle) -> None:
     config = cycle.config
     directories, coverage = compare_dirs(cycle), coverage_files(cycle)
@@ -518,6 +554,10 @@ def step_tally(cycle: Cycle) -> None:
                              load_decisions(config.decisions))
         result = tally(inputs)
     except (TallyError, KeyError, IndexError, OSError) as error:
+        raise CycleError(f'tally: {error}') from None
+    try:
+        verdict_acceptance_note(config, result['record_verdicts'])
+    except CycleError as error:
         raise CycleError(f'tally: {error}') from None
     json_path, markdown_path = status_paths(config)
     write_status(result, json_path, markdown_path, f'{config.name} status (class {config.class_id})')
@@ -774,6 +814,7 @@ def record_verdicts(cycle: Cycle) -> dict:
 def checkpoint_document(cycle: Cycle) -> dict:
     config = cycle.config
     rows = tally_rows(cycle)
+    verdicts = record_verdicts(cycle)
     now = final_keys(rows)
     before = final_keys(json.loads((config.previous_status or config.record.status).read_text(encoding='utf-8')))
     keys = [row['key'] for row in rows]
@@ -797,7 +838,8 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'flips': {'in_pair': [row['key'] for row in rows if row['flips_in_pair']],
                   'against_record': [row['key'] for row in rows if row['flips_vs_record']]},
         'record_scenarios': record_scenarios(cycle),
-        'record_verdicts': record_verdicts(cycle),
+        'record_verdicts': verdicts,
+        'record_verdicts_acceptance': verdict_acceptance_note(config, verdicts),
         'lost': lost,
         'gained': [row['key'] for row in rows if row['key'] in now - before],
         'stamps': list(cycle.stamps),
@@ -818,10 +860,14 @@ def match_markdown(match: dict) -> str:
             f"{' ...' if match['unmatched'] > 10 else ''}")
 
 
-def verdict_markdown(verdicts: dict) -> str:
+def verdict_markdown(verdicts: dict, acceptance: dict | None = None) -> str:
     counts = f"{verdicts['no_scenario_file']} with no scenario file, {verdicts['other']} other"
     if not verdicts['other']:
         return f'Record verdicts not compared with the record: {counts}'
+    if acceptance:
+        shown = ', '.join(' | '.join(key) for key in acceptance['keys'][:10])
+        return (f"Record verdicts not compared with the record: {counts}, ACCEPTED in the cycle file: "
+                f"{acceptance['why']} ({shown}{' ...' if acceptance['count'] > 10 else ''})")
     shown = ', '.join(' | '.join(key) for key in verdicts['other_verdicts'][:10])
     return (f"**WARNING: record verdicts not compared with the record: {counts}**: {shown}"
             f"{' ...' if verdicts['other'] > 10 else ''}")
@@ -842,7 +888,7 @@ def checkpoint_markdown(document: dict) -> str:
              f"{len(document['flips']['against_record'])} against the record "
              f"({', '.join(document['flips']['against_record']) or 'none'})",
              f"- {match_markdown(document['record_scenarios'])}",
-             f"- {verdict_markdown(document['record_verdicts'])}",
+             f"- {verdict_markdown(document['record_verdicts'], document['record_verdicts_acceptance'])}",
              f"- Lost: {', '.join(document['lost']) or 'none'}; gained: {', '.join(document['gained']) or 'none'}",
              f"- Stamps: {' / '.join(document['stamps']) or NOT_RECORDED}; record {document['record']['name']} "
              f"({' / '.join(document['record']['stamps']) or NOT_RECORDED})",
