@@ -25,6 +25,17 @@ struct SpellInfo
     uint32 SpellLevel = 0;
 };
 
+struct SpellEntry
+{
+    uint32 BaseLevel = 0;
+    uint32 SpellLevel = 0;
+};
+
+struct SpellStore
+{
+    SpellEntry const* LookupEntry(uint32) const { return nullptr; }
+} sSpellStore;
+
 struct SpellMgr
 {
     std::set<uint32> known;
@@ -60,6 +71,7 @@ struct Player
             stored.resize(index + 1);
         stored[index].value = value;
     }
+    uint8 GetLevel() const { return 80; }
     bool HasSpell(uint32 spellId) const { return spells.contains(spellId); }
     void learnSpell(uint32 spellId)
     {

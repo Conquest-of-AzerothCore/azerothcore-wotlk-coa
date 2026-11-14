@@ -127,11 +127,24 @@ struct ObjectMgr
         auto item = Items.find(id);
         return item != Items.end() ? &item->second : nullptr;
     }
+    uint32 GetScriptId(char const*) const { return 0; }
     ItemLocale const* GetItemLocale(uint32) const { return nullptr; }
     static void GetLocaleString(std::vector<std::string> const&, int, std::string&) { }
 } objectMgr;
 
 auto sObjectMgr = &objectMgr;
+
+enum ServerConfigs
+{
+    CONFIG_MAX_PLAYER_LEVEL
+};
+
+struct World
+{
+    uint32 getIntConfig(ServerConfigs) const { return 80; }
+} world;
+
+auto sWorld = &world;
 
 using SpellCategorySet = std::set<std::pair<bool, uint32>>;
 using SpellCategoryStore = std::unordered_map<uint32, SpellCategorySet>;

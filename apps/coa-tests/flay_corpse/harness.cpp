@@ -9,6 +9,7 @@ using uint32 = std::uint32_t;
 using uint64 = std::uint64_t;
 constexpr float INTERACTION_DISTANCE = 5.5f;
 constexpr uint32 PLAYER_FLAGS_GHOST = 1;
+constexpr uint32 CORPSE_FIELD_DISPLAY_ID = 1;
 enum SpellCastResult { SPELL_CAST_OK, SPELL_FAILED_AFFECTING_COMBAT, SPELL_FAILED_BAD_TARGETS };
 enum class DeathState { Alive, Corpse, Dead };
 enum CorpseType { CORPSE_BONES, CORPSE_RESURRECTABLE_PVP };
@@ -40,6 +41,7 @@ struct Creature : WorldObject
 {
     DeathState state;
     CreatureType type;
+    uint32 displayId = 0;
     Creature(float position, CreatureType kind, DeathState death = DeathState::Corpse) : state(death), type(kind)
     {
         x = position;
@@ -47,6 +49,7 @@ struct Creature : WorldObject
     Creature* ToCreature() override { return this; }
     DeathState getDeathState() const { return state; }
     CreatureType GetCreatureType() const { return type; }
+    void SetDisplayId(uint32 display) { displayId = display; }
 };
 struct Player : WorldObject
 {
@@ -76,7 +79,9 @@ struct Corpse : WorldObject
 {
     CorpseType type = CORPSE_RESURRECTABLE_PVP;
     ObjectGuid owner;
+    uint32 displayId = 0;
     Corpse* ToCorpse() override { return this; }
+    void SetUInt32Value(uint32 field, uint32 value) { assert(field == CORPSE_FIELD_DISPLAY_ID); displayId = value; }
     CorpseType GetType() const { return type; }
     ObjectGuid GetOwnerGUID() const { return owner; }
 };

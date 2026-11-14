@@ -22,6 +22,8 @@ def main():
     harness = harness.replace('// ACTUAL_CONSTANTS', '\n'.join(
         re.search(r'^constexpr [\w:]+ ' + name + r' = [^;]+;$', source, re.M)[0]
         for name in constants))
+    player_script = (ROOT / 'src/server/game/Scripting/ScriptDefines/PlayerScript.h').read_text(encoding='utf-8')
+    harness = harness.replace('// ACTUAL_PROGRESS_EVENT', method(player_script, 'enum class CoAProgressEvent') + ';')
     transaction = (ROOT / 'src/server/database/Database/Transaction.h').read_text(encoding='utf-8')
     callback = method(transaction, 'class AC_DATABASE_API TransactionCallback').replace('AC_DATABASE_API ', '')
     harness = harness.replace('// ACTUAL_TRANSACTION_CALLBACK', callback + ';')
