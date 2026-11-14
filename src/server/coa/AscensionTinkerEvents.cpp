@@ -209,9 +209,13 @@ class aura_ascension_tinker_event : public AuraScript
                 Cast(player,target,681307);
                 break;
             case 706680:
+            {
+                bool cooling = player->HasSpellCooldown(500612);
                 Cast(player,target,500612);
-                player->SendClearCooldown(500612,player);
+                if (!cooling)
+                    player->RemoveSpellCooldown(500612,true);
                 break;
+            }
             case 704449: Cast(player,target,524904); break;
             case 504523: Cast(player,target,504521); break;
             case 705817:
