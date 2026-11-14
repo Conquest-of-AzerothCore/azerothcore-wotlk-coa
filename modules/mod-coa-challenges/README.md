@@ -112,7 +112,10 @@ Support commands for a player's run (administrator, also from the console; the p
 gained outside the challenge's rules (its lives, its bans on the auction house, mail, heirlooms and the dungeon
 finder, and its level cap), so the run is no longer the one that failed. It would not be playable either: an
 objective only counts below its gate level, so every objective whose gate was passed in the meantime could
-never be earned again. Use `.coa trial unlock` to give the player a fresh attempt instead.
+never be earned again. There is no way to bring such a run back. `.coa trial unlock` only removes the failure
+lock: a challenge that must be started at level 1 (the `LEVEL_UP` activation condition, which most trials have)
+still cannot be started by that character, so a fresh attempt means a level 1 character. Restore soon after
+the failure, before the player levels.
 
 Example, Hardcore - Boss Blitz (60), whose first gates are Edwin VanCleef before 21, Mutanus the Devourer before
 22 and Archmage Arugal before 26:

@@ -2317,12 +2317,12 @@ namespace CoAChallenges
         // Levels gained after the failure were earned without the challenge's
         // rules (lives, bans, level cap), and every objective whose gate was
         // passed meanwhile can no longer be earned: the run is not the one that
-        // failed any more. `.coa trial unlock` gives a fresh attempt instead.
+        // failed any more.
         if (fromSnapshot && levelAtFailure && player->GetLevel() > levelAtFailure)
         {
             message = Acore::StringFormat(
                 "{} was level {} when challenge {} failed and is now level {}. Restore refused: the levels since "
-                "then were gained outside the challenge's rules. Use .coa trial unlock for a fresh attempt.",
+                "then were gained outside the challenge's rules.",
                 player->GetName(), levelAtFailure, challengeID, player->GetLevel());
             return false;
         }
