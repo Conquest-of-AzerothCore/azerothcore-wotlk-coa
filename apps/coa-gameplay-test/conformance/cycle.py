@@ -10,7 +10,8 @@ import subprocess
 import sys
 from typing import Callable, Sequence
 
-from tally import FINAL, TallyError, TallyInputs, load_decisions, tally, tally_lines, write_status
+from tally import (FINAL, TallyError, TallyInputs, load_decisions, match_line, record_match, tally, tally_lines,
+                   tally_record_verdicts, verdict_line, write_status)
 
 STEPS = ('gate', 'digests', 'generate', 'source', 'runs', 'compare', 'audit', 'tally', 'refactor', 'archive',
          'checkpoint')
@@ -55,6 +56,19 @@ class Refactor:
 
 
 @dataclass(frozen=True)
+class VerdictAcceptance:
+    keys: tuple
+    why: str
+
+
+@dataclass(frozen=True)
+class GateChange:
+    class_id: int
+    added_fields: tuple
+    why: str
+
+
+@dataclass(frozen=True)
 class CycleConfig:
     class_id: int
     name: str
@@ -75,6 +89,8 @@ class CycleConfig:
     disk_checks: tuple = DEFAULT_DISK_CHECKS
     guard_classes: tuple = ()
     gate_archive_paths: tuple = DEFAULT_GATE_PATHS
+    gate_accepted: tuple = ()
+    other_verdicts_accepted: VerdictAcceptance | None = None
     stamps: tuple = ()
     results: tuple = ()
     compare: tuple = ()
@@ -123,6 +139,35 @@ def distinct_pair(values, name: str) -> None:
         raise CycleError(f'{name}: both entries name the same run {values[0]}; a merged pair is two runs')
 
 
+def gate_change(document: dict) -> GateChange:
+    fields = tuple(str(name) for name in document.get('added_fields', ()))
+    why = str(document.get('why', '')).strip()
+    if not fields or not why:
+        raise CycleError(f'gate_accepted: {document} needs "class_id", a non-empty "added_fields" and a "why"')
+    return GateChange(int(require(document, 'class_id', 'gate_accepted')), fields, why)
+
+
+def verdict_acceptance(document) -> VerdictAcceptance | None:
+    if document is None:
+        return None
+    usage = 'needs {"keys": [[label, check, scenario], ...], "why": "reason"}'
+    if not isinstance(document, dict):
+        raise CycleError(f'other_verdicts_accepted: {document!r} is not an object; it {usage}')
+    raw = document.get('keys')
+    why = document.get('why')
+    if not isinstance(raw, list) or not raw or not isinstance(why, str) or not why.strip() \
+            or set(document) - {'keys', 'why'}:
+        raise CycleError(f'other_verdicts_accepted: {document!r} {usage}')
+    keys = []
+    for key in raw:
+        if not isinstance(key, list) or len(key) != 3 or not all(isinstance(part, str) for part in key):
+            raise CycleError(f'other_verdicts_accepted: key {key!r} is not a [label, check, scenario] triple')
+        keys.append(tuple(key))
+    if len(set(keys)) != len(keys):
+        raise CycleError('other_verdicts_accepted: a key is listed twice')
+    return VerdictAcceptance(tuple(keys), why.strip())
+
+
 def load_config(path: Path) -> CycleConfig:
     path = Path(path).resolve()
     document = json.loads(path.read_text(encoding='utf-8'))
@@ -154,6 +199,8 @@ def load_config(path: Path) -> CycleConfig:
         disk_checks=tuple(document.get('disk_checks', DEFAULT_DISK_CHECKS)),
         guard_classes=tuple(int(item) for item in document.get('guard_classes', ())),
         gate_archive_paths=tuple(document.get('gate_archive_paths', DEFAULT_GATE_PATHS)),
+        gate_accepted=tuple(gate_change(item) for item in document.get('gate_accepted', ())),
+        other_verdicts_accepted=verdict_acceptance(document.get('other_verdicts_accepted')),
         stamps=pair_of(pair.get('stamps'), 'pair.stamps'),
         results=tuple(resolve(base, item) for item in pair_of(pair.get('results'), 'pair.results')),
         compare=tuple(resolve(base, item) for item in pair_of(pair.get('compare'), 'pair.compare')),
@@ -179,7 +226,13 @@ def validate(config: CycleConfig, skip: frozenset) -> None:
         raise CycleError('the generate and runs steps need "scenarios_dir"')
     if {'source', 'gate'} - skip and not config.base:
         raise CycleError('the gate and source steps need "base"')
+    if config.archive is not None and 'archive' not in skip and not config.head:
+        raise CycleError('the archive step needs "head", the generating commit')
     pair_of(config.record.compare, 'record.compare', required=True)
+    accepted = [change.class_id for change in config.gate_accepted]
+    if len(accepted) != len(set(accepted)) or set(accepted) - set(config.guard_classes):
+        raise CycleError(f'gate_accepted: classes {accepted} must be distinct guard classes '
+                         f'{list(config.guard_classes)}')
     for name, values in (('record.stamps', config.record.stamps), ('record.compare', config.record.compare),
                          ('pair.stamps', config.stamps), ('pair.results', config.results),
                          ('pair.compare', config.compare), ('pair.coverage', config.coverage)):
@@ -233,11 +286,81 @@ def manifest_path(config: CycleConfig) -> Path:
     return config.scenarios_dir / 'manifest.json'
 
 
+def without_fields(node, fields: tuple):
+    if isinstance(node, dict):
+        return {key: without_fields(value, fields) for key, value in node.items() if key not in fields}
+    if isinstance(node, list):
+        return [without_fields(value, fields) for value in node]
+    return node
+
+
+def files_under(root: Path) -> set:
+    return {path.relative_to(root).as_posix() for path in Path(root).rglob('*') if path.is_file()}
+
+
+def read_json(path: Path):
+    try:
+        return json.loads(Path(path).read_text(encoding='utf-8'))
+    except ValueError:
+        return None
+
+
+def manifest_problems(head: dict, base: dict, fields: tuple, changed: set) -> list:
+    def plain(manifest):
+        return {**manifest, 'scenarios': [{key: value for key, value in scenario.items() if key != 'sha256'}
+                                          for scenario in manifest.get('scenarios', [])]}
+    if plain(without_fields(head, fields)) != plain(base):
+        return ['manifest.json: differs beyond the accepted fields and the scenario sha256']
+    return [f"manifest.json: sha256 of {now.get('key')} changed but its file {now.get('file')} did not"
+            for now, before in zip(head['scenarios'], base['scenarios'])
+            if now.get('sha256') != before.get('sha256') and now.get('file') not in changed]
+
+
+def accepted_diff(head: Path, base: Path, fields: tuple) -> tuple:
+    head_files, base_files = files_under(head), files_under(base)
+    problems = [f'{name}: only in {"head" if name in head_files else "base"}'
+                for name in sorted(head_files ^ base_files)]
+    changed = set()
+    for name in sorted(head_files & base_files - {'manifest.json'}):
+        if (head / name).read_bytes() == (base / name).read_bytes():
+            continue
+        now, before = read_json(head / name), read_json(base / name)
+        if now is None or before is None or without_fields(now, fields) != before:
+            problems.append(f'{name}: differs beyond the accepted added fields {list(fields)}')
+        elif now == before:
+            problems.append(f'{name}: differs in formatting only, adding none of the accepted fields {list(fields)}')
+        else:
+            changed.add(name)
+    if 'manifest.json' in head_files & base_files:
+        now, before = read_json(head / 'manifest.json'), read_json(base / 'manifest.json')
+        if now is None or before is None:
+            problems.append('manifest.json: not JSON')
+        elif now != before:
+            problems += manifest_problems(now, before, fields, changed)
+    return problems, changed
+
+
+def gate_generation(cycle: Cycle, head: Path, base: Path, change: GateChange | None, label: str) -> int:
+    if call(cycle, 'gate', ['diff', '-r', '-q', head, base]) == 0:
+        return 0
+    if change is None:
+        raise CycleError(f'gate: {label} differs between head and base; declare an intended change in '
+                         f'"gate_accepted" ({log_path(cycle, "gate")})')
+    problems, changed = accepted_diff(head, base, change.added_fields)
+    if problems:
+        raise CycleError(f'gate: {label} differs beyond the accepted change {list(change.added_fields)}: '
+                         f'{"; ".join(problems[:20])}{" ..." if len(problems) > 20 else ""}')
+    note(cycle, 'gate', f'{label}: {len(changed)} files differ only by the accepted added fields '
+                        f'{list(change.added_fields)} ({change.why})')
+    return len(changed)
+
+
 def step_gate(cycle: Cycle) -> None:
     from snapshots import GENERATIONS
     config = cycle.config
     if not config.guard_classes:
         raise CycleError('gate: "guard_classes" is empty; list the finished classes to guard or skip the gate')
+    accepted = {change.class_id: change for change in config.gate_accepted}
     gate = config.out / 'gate'
     tree = gate / 'base-tree'
     if tree.exists():
@@ -250,6 +373,7 @@ def step_gate(cycle: Cycle) -> None:
         for class_id in config.guard_classes:
             if class_id not in GENERATIONS:
                 raise CycleError(f'gate: class {class_id} is not a finished class of snapshots.py')
+            changed = 0
             for generation, arguments in GENERATIONS[class_id].items():
                 head, base = gate / f'{class_id}-{generation}' / 'head', gate / f'{class_id}-{generation}' / 'base'
                 for root, out in ((config.worktree, head), (tree, base)):
@@ -257,8 +381,11 @@ def step_gate(cycle: Cycle) -> None:
                         shutil.rmtree(out)
                     must(cycle, 'gate', [*tool(root), 'generate', '--class', class_id, '--out', out, *arguments],
                          root / CONFORMANCE)
-                must(cycle, 'gate', ['diff', '-r', '-q', head, base])
+                changed += gate_generation(cycle, head, base, accepted.get(class_id), f'class {class_id} {generation}')
                 shutil.rmtree(head.parent, ignore_errors=True)
+            if class_id in accepted and not changed:
+                raise CycleError(f'gate: class {class_id} declares the accepted change '
+                                 f'{list(accepted[class_id].added_fields)}, but no generated file changed')
             must(cycle, 'gate', [*tool(config.worktree, 'snapshots.py'), 'check', '--class', class_id],
                  config.worktree / CONFORMANCE)
     finally:
@@ -411,6 +538,25 @@ def status_paths(config: CycleConfig) -> tuple:
     return config.out / f'{config.name}-status.json', config.out / f'{config.name}-status.md'
 
 
+def verdict_acceptance_note(config: CycleConfig, verdicts: dict) -> dict | None:
+    found = {tuple(key) for key in verdicts['other_verdicts']}
+    accepted = config.other_verdicts_accepted
+    declared = set(accepted.keys) if accepted is not None else set()
+    if not found and not declared:
+        return None
+    if found != declared:
+        raise CycleError(
+            f'record verdicts not compared with the record, other {len(found)}: {join_keys(found)}; '
+            f'"other_verdicts_accepted" must name exactly these keys and a reason. '
+            f'Not accepted: {join_keys(found - declared) or "none"}. '
+            f'Accepted but not found (stale): {join_keys(declared - found) or "none"}')
+    return {'why': accepted.why, 'count': len(found), 'keys': [list(key) for key in sorted(found)]}
+
+
+def join_keys(keys) -> str:
+    return ', '.join(' | '.join(key) for key in sorted(keys))
+
+
 def step_tally(cycle: Cycle) -> None:
     config = cycle.config
     directories, coverage = compare_dirs(cycle), coverage_files(cycle)
@@ -422,6 +568,10 @@ def step_tally(cycle: Cycle) -> None:
                              load_decisions(config.decisions))
         result = tally(inputs)
     except (TallyError, KeyError, IndexError, OSError) as error:
+        raise CycleError(f'tally: {error}') from None
+    try:
+        verdict_acceptance_note(config, result['record_verdicts'])
+    except CycleError as error:
         raise CycleError(f'tally: {error}') from None
     json_path, markdown_path = status_paths(config)
     write_status(result, json_path, markdown_path, f'{config.name} status (class {config.class_id})')
@@ -552,6 +702,56 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def file_at(worktree: Path, rev: str, path: str) -> bytes | None:
+    found = subprocess.run(['git', '-C', str(worktree), 'show', f'{rev}:{path}'], capture_output=True)
+    return found.stdout if found.returncode == 0 else None
+
+
+def generating_commit(config: CycleConfig) -> str:
+    found = subprocess.run(['git', '-C', str(config.worktree), 'rev-parse', '--verify', '--quiet',
+                            f'{config.head}^{{commit}}'], capture_output=True, text=True)
+    if found.returncode != 0:
+        raise CycleError(f'archive: the generating commit {config.head} cannot be read in {config.worktree}')
+    return found.stdout.strip()
+
+
+def class_stem(config: CycleConfig) -> str:
+    from profile import CLAUSE_LEDGER_SUFFIX
+    stem = config.clauses.stem
+    if not stem.endswith(CLAUSE_LEDGER_SUFFIX) or stem == CLAUSE_LEDGER_SUFFIX:
+        raise CycleError(f'archive: the ledger {config.clauses.name} does not end in {CLAUSE_LEDGER_SUFFIX}.json; '
+                         f'its class files cannot be named')
+    return stem.removesuffix(CLAUSE_LEDGER_SUFFIX)
+
+
+def archive_ledger(config: CycleConfig, rev: str, stem: str) -> list:
+    from profile import CONSUMPTION_SUFFIX
+    ledger = config.archive / 'ledger'
+    ledger.mkdir()
+    used = config.clauses.read_bytes()
+    (ledger / config.clauses.name).write_bytes(used)
+    classes = (CONFORMANCE / 'classes').as_posix()
+    committed = file_at(config.worktree, rev, f'{classes}/{config.clauses.name}')
+    if committed is None:
+        raise CycleError(f'archive: {classes}/{config.clauses.name} does not exist at {rev}')
+    state = 'equal to' if committed == used else 'DIFFERENT from'
+    lines = [f'Ledger used: ledger/{config.clauses.name}, {state} {rev}:{classes}/{config.clauses.name}.']
+    if committed != used:
+        (ledger / f'committed-{config.clauses.name}').write_bytes(committed)
+        lines.append(f'Committed ledger ledger/committed-{config.clauses.name} from '
+                     f'{rev}:{classes}/{config.clauses.name}.')
+    for name, required in ((f'{stem}.json', True), (f'{stem}{CONSUMPTION_SUFFIX}.json', False)):
+        content = file_at(config.worktree, rev, f'{classes}/{name}')
+        if content is None:
+            if required:
+                raise CycleError(f'archive: the class file {classes}/{name} does not exist at {rev}')
+            lines.append(f'No {name} at {rev}.')
+            continue
+        (ledger / name).write_bytes(content)
+        lines.append(f'Class file ledger/{name} from {rev}:{classes}/{name}.')
+    return lines + [f'{sha256(path)}  ledger/{path.name}' for path in sorted(ledger.iterdir())]
+
+
 def step_archive(cycle: Cycle) -> None:
     config = cycle.config
     if config.archive is None:
@@ -561,6 +761,7 @@ def step_archive(cycle: Cycle) -> None:
         raise CycleError(f'archive: {config.archive} exists; an archive is written once')
     if len(cycle.stamps) != 2:
         raise CycleError('archive: the pair has no two stamps; run the pair or set pair.stamps')
+    rev, stem = generating_commit(config), class_stem(config)
     config.archive.mkdir(parents=True)
     for stamp, directory, coverage in zip(cycle.stamps, compare_dirs(cycle), coverage_files(cycle)):
         shutil.copytree(directory, config.archive / f'{config.name}-cmp-{stamp}')
@@ -578,12 +779,14 @@ def step_archive(cycle: Cycle) -> None:
     for path in (json_path, markdown_path):
         if path.exists():
             shutil.copy2(path, config.archive / path.name)
+    ledger = archive_ledger(config, rev, stem)
     build = [f'Class {config.class_id} re-auditable verdict set, {config.name} merged pair.',
              f'Runs: {" and ".join(cycle.stamps)}.',
              f'compare --build {config.build}.',
-             f'Generation commit {config.head or NOT_RECORDED} (worktree {config.worktree.name}).',
-             f'Re-audit: conformance.py audit --class {config.class_id} --clauses {config.clauses.name} '
+             f'Generation commit {rev} (worktree {config.worktree.name}).',
+             f'Re-audit: conformance.py audit --class {config.class_id} --clauses ledger/{config.clauses.name} '
              f'--results <{config.name}-cmp-STAMP> --manifest manifest.json --out <file>',
+             *ledger,
              f'{sha256(manifest)}  manifest.json']
     (config.archive / 'BUILD.txt').write_text('\n'.join(build) + '\n', encoding='utf-8')
     note(cycle, 'archive', f'archived into {config.archive}')
@@ -613,9 +816,27 @@ def tally_rows(cycle: Cycle) -> list:
     return json.loads(json_path.read_text(encoding='utf-8'))
 
 
+def record_scenarios(cycle: Cycle) -> dict:
+    if cycle.tally_result is not None:
+        return cycle.tally_result['record_scenarios']
+    config = cycle.config
+    return record_match(json.loads(config.record.manifest.read_text(encoding='utf-8')),
+                        json.loads(manifest_path(config).read_text(encoding='utf-8')))
+
+
+def record_verdicts(cycle: Cycle) -> dict:
+    if cycle.tally_result is not None:
+        return cycle.tally_result['record_verdicts']
+    config = cycle.config
+    inputs = TallyInputs(config.clauses, config.record.status, config.record.compare, config.record.manifest,
+                         tuple(compare_dirs(cycle)), (), manifest_path(config), load_decisions(None))
+    return tally_record_verdicts(inputs)
+
+
 def checkpoint_document(cycle: Cycle) -> dict:
     config = cycle.config
     rows = tally_rows(cycle)
+    verdicts = record_verdicts(cycle)
     now = final_keys(rows)
     before = final_keys(json.loads((config.previous_status or config.record.status).read_text(encoding='utf-8')))
     keys = [row['key'] for row in rows]
@@ -638,6 +859,9 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'statuses': dict(sorted(statuses.items())),
         'flips': {'in_pair': [row['key'] for row in rows if row['flips_in_pair']],
                   'against_record': [row['key'] for row in rows if row['flips_vs_record']]},
+        'record_scenarios': record_scenarios(cycle),
+        'record_verdicts': verdicts,
+        'record_verdicts_acceptance': verdict_acceptance_note(config, verdicts),
         'lost': lost,
         'gained': [row['key'] for row in rows if row['key'] in now - before],
         'stamps': list(cycle.stamps),
@@ -648,6 +872,27 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'steps': [*cycle.done, 'checkpoint'],
         'cost': cost_of(config),
     }
+
+
+def match_markdown(match: dict) -> str:
+    if not match['unmatched']:
+        return f"Record scenarios: {match['matched']} matched by entry and label, 0 unmatched"
+    return (f"**WARNING: {match['unmatched']} record scenarios UNMATCHED** (not compared with the record), "
+            f"{match['matched']} matched by entry and label: {', '.join(match['unmatched_scenarios'][:10])}"
+            f"{' ...' if match['unmatched'] > 10 else ''}")
+
+
+def verdict_markdown(verdicts: dict, acceptance: dict | None = None) -> str:
+    counts = f"{verdicts['no_scenario_file']} with no scenario file, {verdicts['other']} other"
+    if not verdicts['other']:
+        return f'Record verdicts not compared with the record: {counts}'
+    if acceptance:
+        shown = ', '.join(' | '.join(key) for key in acceptance['keys'][:10])
+        return (f"Record verdicts not compared with the record: {counts}, ACCEPTED in the cycle file: "
+                f"{acceptance['why']} ({shown}{' ...' if acceptance['count'] > 10 else ''})")
+    shown = ', '.join(' | '.join(key) for key in verdicts['other_verdicts'][:10])
+    return (f"**WARNING: record verdicts not compared with the record: {counts}**: {shown}"
+            f"{' ...' if verdicts['other'] > 10 else ''}")
 
 
 def checkpoint_markdown(document: dict) -> str:
@@ -664,6 +909,8 @@ def checkpoint_markdown(document: dict) -> str:
              f"({', '.join(document['flips']['in_pair']) or 'none'}), "
              f"{len(document['flips']['against_record'])} against the record "
              f"({', '.join(document['flips']['against_record']) or 'none'})",
+             f"- {match_markdown(document['record_scenarios'])}",
+             f"- {verdict_markdown(document['record_verdicts'], document['record_verdicts_acceptance'])}",
              f"- Lost: {', '.join(document['lost']) or 'none'}; gained: {', '.join(document['gained']) or 'none'}",
              f"- Stamps: {' / '.join(document['stamps']) or NOT_RECORDED}; record {document['record']['name']} "
              f"({' / '.join(document['record']['stamps']) or NOT_RECORDED})",
@@ -680,6 +927,8 @@ def step_checkpoint(cycle: Cycle) -> None:
     (out / CHECKPOINT_JSON).write_text(json.dumps(document, indent=1) + '\n', encoding='utf-8')
     (out / CHECKPOINT_MD).write_text(checkpoint_markdown(document), encoding='utf-8')
     note(cycle, 'checkpoint', f"{document['count']} / {document['total']}, delta {document['delta']:+d}")
+    note(cycle, 'checkpoint', match_line(document['record_scenarios']))
+    note(cycle, 'checkpoint', verdict_line(document['record_verdicts']))
 
 
 HANDLERS = {'gate': step_gate, 'digests': step_digests, 'generate': step_generate, 'source': step_source,
@@ -750,6 +999,9 @@ def cycle_command(args) -> int:
         lines = tally_lines(cycle.tally_result)
         for line in [lines[1], *(line for line in lines if line.startswith('LOST '))]:
             print(line)
+    if {'tally', 'checkpoint'} & set(cycle.done):
+        print(match_line(record_scenarios(cycle)))
+        print(verdict_line(record_verdicts(cycle)))
     if (config.out / CHECKPOINT_MD).exists() and 'checkpoint' in cycle.done:
         print(config.out / CHECKPOINT_MD)
     return 0

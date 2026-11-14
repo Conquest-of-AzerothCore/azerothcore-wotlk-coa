@@ -460,7 +460,8 @@ python3 -B conformance.py cycle --config CYCLE.json [--skip STEP ...] [--write-d
 
 `cycle` runs the integrator's fixed steps of a merged pair, in this order (ADR 0655): `gate` (each class of
 `guard_classes`, which must not be empty: every generation of `snapshots.GENERATIONS` regenerated at the worktree and at a `git archive` of
-`base`, `diff -r`, then `snapshots.py check`), `digests` (`snapshots.py check --class N`, or `write` with
+`base`, `diff -r`, then `snapshots.py check`; a difference stops the gate unless `gate_accepted` declares it for
+that class and every differing file is exactly the declared change, ADR 0659), `digests` (`snapshots.py check --class N`, or `write` with
 `--write-digests`), `generate` (into `scenarios_dir`, refused when it is not empty), `source` (`source_runner
 --stages source --base BASE`), `runs` (run 1 then run 2: each `disk_checks` command first, no run above
 `disk_limit_percent`; then `gameplay_runner --stages gameplay --gameplay-db-workers N --scenario <every generated
@@ -469,7 +470,13 @@ file>`, the stamp read from its `VERIFY ALL` line; a run stops the cycle unless 
 stage ran; as in `prove`, a run in which a scenario of the manifest has no result, or a scenario drifted, stops it
 too), `compare` (with `runs` skipped, `pair.results` is checked for missing results first) and `audit` per run,
 `tally`, `refactor` (only with `refactor.moved_kinds`), `archive` (only with `archive`, a new directory, and two
-stamps) and `checkpoint`. `--skip` leaves a step
+stamps; besides the compare outputs, audits, reports, manifest and status files it holds `ledger/`: the clause ledger
+the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`; the
+step needs `head`, resolves it to its commit id, which every read and `BUILD.txt` use, and stops when that commit
+cannot be read in the worktree, never falling back to the worktree HEAD; the ledger must be named
+`<class>_clauses.json`, or the step stops before writing;
+`BUILD.txt` says whether the ledger used equals the one at `head`, which is kept as `ledger/committed-<ledger>` when
+it differs, and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
 out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
 `OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
 2. Relative paths in the cycle file are read from its directory. The fields:
@@ -477,12 +484,14 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | Field | Meaning |
 |---|---|
 | `class_id`, `name` | the class and the pair's name (`final16`): `OUT/<name>-cmp-<stamp>/`, `OUT/coverage-<name>-<stamp>.json`, `OUT/<name>-status.json` and `.md` |
-| `worktree`, `head`, `base` | the class worktree whose `conformance.py` runs, the generation commit (the checkpoint's head; `git rev-parse HEAD` when unset), the base of the gate and the source stage |
+| `worktree`, `head`, `base` | the class worktree whose `conformance.py` runs, the generation commit (required by `archive`; the checkpoint's head, `git rev-parse HEAD` when unset), the base of the gate and the source stage |
 | `clauses`, `out`, `build` | the clause ledger, the output directory, the build `compare --build` judges |
 | `scenarios_dir`, `manifest` | the generate target (needed by `generate` and `runs`); the manifest, `scenarios_dir/manifest.json` by default |
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
 | `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
 | `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
+| `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth and differ from it as JSON (an added key, never a changed one; a formatting-only difference stops), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
+| `other_verdicts_accepted` | the "other" record verdicts the cycle may pass: `{"keys": [["label", "check", "scenario"]], "why": "..."}`, the exact keys found: a found key not listed and a listed key no longer found (stale) both stop, and both are named; without it the tally and the checkpoint stop |
 | `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |
 | `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped); the two entries of each field, and of `OUT/pair.json`, must name two different runs |
 | `decisions` | the candidates and rulings file, below |
@@ -493,8 +502,19 @@ The tally (`tally.py`) gives every ledger claim a status 1-5 or `not final`. A c
 within the pair is a label/check/scenario whose judged status class (conformant, or the status itself) differs between
 the runs or that is present in one run only (`insufficient_trials` is not judged); a flip against the record compares
 the pair with the record's two runs on every label/check/scenario of either side, so a scenario with no result in both
-runs of the pair flips against the record, except on a scenario whose sha256 changed or a label whose judge changed
-(`judge_changed`: a changed expectation or a new value link). A ledger label without an ordinal reaches its
+runs of the pair flips against the record, except on a label whose judge changed (`judge_changed`: a changed
+expectation or a new value link). The record and the pair are matched by scenario key (the entry) and label/check,
+not by the scenario file's sha256 (ADR 0660): a re-hashed scenario, such as one that gained a fixture field, is
+compared; a pooled verdict (`part-1 + part-2 ...`) is compared when every part matches. A record scenario with a file
+whose key or labels the pair's manifest lacks is unmatched and not compared; the checkpoint (`record_scenarios` in
+`checkpoint.json`, a line in `checkpoint.md` and the checkpoint log) and the command output state the matched and
+unmatched counts, with a `WARNING` and the first unmatched keys when any is unmatched. They also count the record
+verdicts (label, check, scenario) of the ledger's labels that were not compared because they match no filed scenario
+of both manifests or their judge changed (`record_verdicts`): those whose every scenario part has no file in either
+manifest ("no scenario file": their status comes from the manifest and the judge code, not from a run) and the
+others, and any
+"other" verdict stops the tally and the checkpoint (nonzero exit, the keys listed) unless `other_verdicts_accepted`
+names them; the accepted reason is written into `checkpoint.md` and `checkpoint.json`. A ledger label without an ordinal reaches its
 `label #N` verdicts in the flips and the label checks, as in the audit (`coverage.resolved_labels`). A ruling is
 applied first and stands over a flip: its status (2 to 5) rests on the rule or ruling it names, not on the runs
 (class-conformance.md section 2). Status 1 needs a pair with no flip (class-conformance.md 3.2) and never comes from a
