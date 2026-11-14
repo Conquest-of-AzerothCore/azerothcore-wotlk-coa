@@ -391,6 +391,14 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_creature_actor_spell_immunity_metrics(self):
+        for step in ({'metric': 'spell_immune', 'spell': 853},
+                     {'metric': 'spell_effect_immune', 'spell': 61391, 'effect': 0}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'target', 'target': 'caster', 'equals': 1, **step})
+            with self.subTest(metric=step['metric']):
+                self.assertIs(run.validate(scenario), scenario)
+
     def test_creature_reaction_and_victim_target_validation(self):
         for reaction in (0, 1, 2):
             scenario = copy.deepcopy(self.scenario)

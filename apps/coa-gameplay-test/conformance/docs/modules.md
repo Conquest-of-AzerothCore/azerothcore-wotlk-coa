@@ -93,6 +93,20 @@
 - `snapshots.py`: `check --class N` / `write --class N` for the finished classes (`FINISHED_CLASSES`): regenerates
   each generation of `GENERATIONS` into a temporary directory and compares the SHA-256 of every file with
   `snapshots/<class>.json`, naming the changed, added and removed files (ADR 0590).
+- `cycle.py`: `run_cycle(config, skip, runner, write_digests)` runs the steps of `STEPS` from a `CycleConfig`
+  (`load_config(cycle.json)`), each logged under the output directory, and writes the checkpoint;
+  `add_cycle_arguments` and `cycle_command` register `cycle` in `conformance.py` (see
+  [Cycle runner](generate-and-compare.md#cycle-runner)).
+- `tally.py`: `tally(TallyInputs)` gives each ledger claim its status from the pair's compare outputs and audits,
+  the record and the decisions file (`load_decisions`); `flips` applies the flip rule within the pair and against
+  the record (see [Cycle runner](generate-and-compare.md#cycle-runner)).
+- `cost.py`: `conformance.py cost --transcripts DIR --since ISO [--until ISO] --out cost.json` (the directory is
+  required, there is no default) reads local agent transcripts (`*.jsonl`, subagents as `agent-*.jsonl` with an optional
+  `.meta.json` description) and writes aggregates only: per role (`author`, `integrator`, `read-only`, `fix`, and
+  `main` for the controller sessions) the agent count, input (uncached + cache read + cache write), cache read, output
+  and agent-minutes (an agent counts from its first message to its last one, or to `--until`). One usage is kept per
+  message id, synthetic messages are skipped, and the role comes from the first prompt and description by `role_of`. No
+  prompt, path, session id or user name is written (ADR 0656).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)

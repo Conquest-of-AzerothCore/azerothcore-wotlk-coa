@@ -1,0 +1,2 @@
+{"type": "user", "timestamp": "2026-01-01T09:00:00Z", "message": {"role": "user", "content": "Old work"}}
+{"type": "assistant", "timestamp": "2026-01-01T09:30:00Z", "message": {"id": "e1", "model": "model-x", "role": "assistant", "content": [], "usage": {"input_tokens": 100, "cache_read_input_tokens": 100, "cache_creation_input_tokens": 100, "output_tokens": 100}}}

@@ -9,6 +9,8 @@ finished classes.
 Figures and examples come from the Templar work; where no ADR records them, their source is the Templar's working
 records, which are not in the repository.
 
+To start a class from files alone, follow [conformance-start-a-class.md](conformance-start-a-class.md).
+
 Short names:
 - `CONF` = `apps/coa-gameplay-test/conformance/`;
 - `G&C` = `CONF/docs/generate-and-compare.md`;
@@ -379,6 +381,9 @@ remove`. `prove` defaults to `coa-verify` (`prove.py:57`; section 13).
   agent session is set up as mentor (section 12). If there is none, it tells the developer before any other work. It
   says that the work can go ahead without one but will be less efficient, and that every doubtful case will then go to
   the owner as a question.
+- **The dispatch rules are mandatory.** Every agent brief and the controller follow
+  [conformance-dispatch-rules.md](conformance-dispatch-rules.md): the rules 00 and 0-7, the model and effort table, the
+  cadence and the cost record (ADR 0657). A class's plan links that file; it does not copy a changed version.
 - **One class at a time.** Get the owner's go for the class. The Templar goal forbade starting another class.
 - **A worktree and branch of your own**, created from freshly fetched `origin/main`. Follow
   `.agents/rules/git-safety.md`. Each worktree needs its own build: about 22 GB each, with a first build of about
@@ -736,6 +741,24 @@ Integration steps, in order:
    tooling, `coa-worktree-cleanup <wt>` prints its plan first and acts only with `--yes`
    (`references/guide-tooling.md:128`).
 
+**The cycle script (ADR 0655).** After a merged pair is planned, write `cycle.json` in the class plan folder: class,
+pair name (`finalNN`), worktree, generation commit (`head`), `base`, ledger, `scenarios_dir` (empty), the worldserver
+sha256 (`build`), the record (`status`, `stamps`, `compare`, `manifest`), `decisions.json`, `gameplay_runner`
+(`["coa-verify", "--worktree", "{worktree}", "--ram"]`), `disk_checks` (`/` and `docker exec coa-test-mysql df -P
+/var/lib/mysql`), `guard_classes` (every finished class except this one), `archive`, `previous_status`, and
+`refactor.moved_kinds` when kinds moved. Then run `python3 -B conformance.py cycle --config cycle.json`. The script
+runs, in order: the guard-class gate, the digests, generate, the source stage, run 1 and run 2 (each after the disk
+check; above 97% it stops), compare and audit per run, the tally, the refactor gate, the archive and `checkpoint.md` /
+`.json`. It stops at the first failure and names the step and its log (`OUT/logs/NN-step.log`). `decisions.json` holds,
+by claim key, `candidates` (`{key: why}`), `rulings` (`{key: {status, why}}`, status 2 to 5, needed again in every
+cycle for each status 3-5 claim, or the tally stops; a key that names no claim of the ledger stops it too), `counted` (ledger-only re-audit corrections, counted at once, G-17) and `text_changed` (owner text
+items). A re-audit of an archived pair is the same command with `--skip gate --skip digests --skip generate --skip
+source --skip runs --skip compare` and `pair.stamps` / `pair.compare` set. Agents are used only where the script
+stops: a merge conflict, the cause of a flip, a candidate ruling. The controller records the cost with
+`conformance.py cost` before the cycle runs and names the file in the `cost` field, since the checkpoint step copies it
+(ADR 0656; without transcripts the checkpoint shows "not recorded"). At each checkpoint the controller compacts its
+context and sends the checkpoint, with the next cycle's plan, to the mentor.
+
 Before a PR, `python -B tools/verify_all.py --stages source --base origin/main` (`CONF/README.md:94`). Run the codestyle
 linters on changed C++ and SQL files. SQL goes only under `data/sql/updates/pending_db_*/`.
 
@@ -763,11 +786,11 @@ Publication (push, PR) needs the owner's go.
 
 ## 10. Measured costs
 
-All figures were measured on the Templar: section 10.1 from its cost totals, 10.2 from its batch clock and integration
-reports, and 10.3-10.4 from its cost profile and timing analyses, all computed from session transcripts and run reports.
-Those working records are not in the repository. Estimates are not quoted. A "resolved claim" is one the integrator's
-recount moved to a final state. The authors' own counts were higher (R2: 51 against 42; R3 side b: 24 against 8), so
-quote the recount and say so.
+All figures except 10.5 were measured on the Templar: section 10.1 from its cost totals, 10.2 from its batch clock
+and integration reports, 10.3-10.4 from its cost profile and timing analyses, all computed from session transcripts and
+run reports. Section 10.5 is the Necromancer, measured the same way. Those working records are not in the repository.
+Estimates are not quoted. A "resolved claim" is one the integrator's recount moved to a final state. The authors' own
+counts were higher (R2: 51 against 42; R3 side b: 24 against 8), so quote the recount and say so.
 
 ### 10.1 Whole Templar effort
 
@@ -836,6 +859,28 @@ As the reports state it:
    6.26.
 4. **Poll loops and background waits** in the early rounds: 16.0 h over rounds 1-4.
 5. **Shared bench limits.** In round 10 the in-RAM MySQL disk filled and blocked three steps for 63 agent-minutes.
+
+### 10.5 Necromancer cost, by role
+
+Measured from the controller and mentor session transcripts of the Necromancer run (window 2026-11-12 21:00Z to
+2026-11-14 10:03Z, the same method as 10.1: one usage per message id, synthetic messages skipped; input = uncached +
+cache read + cache write). The agents are 120 subagent transcripts, role from the first prompt and description.
+
+| Role | Agents | Agent-min | Input M | Cache read M | Output k |
+|---|---:|---:|---:|---:|---:|
+| Author | 35 | 2,713 | 4,129.2 | 4,101.1 | 6,937 |
+| Integrator | 23 | 867 | 286.8 | 280.0 | 1,137 |
+| Read-only | 50 | 582 | 466.1 | 457.9 | 2,194 |
+| Fix | 12 | 164 | 138.6 | 136.6 | 579 |
+| All agents | 120 | 4,326 | 5,020.7 | 4,975.6 | 10,847 |
+
+- The controller and mentor sessions took 762.4 M input over the same window (controller 585.8 M, mentor 176.3 M,
+  previous controller session 0.3 M); these are not attributed to a role.
+- By cycle, agents only: the night 2,083.8 M and cycle 1 1,421.5 M input (together about 3,505 M), against 12.4 to
+  46.9 M for each of the seven merged-pair cycles c11 to c18 (c16 had no pair of its own and is counted in c17).
+- Not recorded: the cost per claim (agents work on several claims), the gameplay seconds of the two night pairs, and
+  the role of a hands-on mentor session active in the window, which is not counted.
+- From the next class on, `conformance.py cost` records these figures per checkpoint (ADR 0656).
 
 ## 11. Lessons that cost time
 
@@ -916,6 +961,34 @@ source is the Templar's working records, which are not in the repository.
     qualification starts (`.agents/rules/verification.md`).
 12. **A server change made to satisfy our own check.** A Scourgebane strike chain was added so a check would pass. Live
     logs show about one chained strike where a chain would give about 64, and it was reverted (ADR 0128). Rule: G-2.
+
+### 11.1 Standing rulings, decided alone
+
+A controller or integrator applies these without asking the mentor or the owner. Each carries its source; the mentor
+rulings of the Necromancer conformance work (2026-11-13/14) are stated here in full because their log is not in the
+repository.
+
+- **Cause first.** A claim that reads consistently off its expectation (a steady 4-5% low offset was the case) gets
+  its cause established (ticks, haste, read timing, resist, expectation arithmetic) before a fix: the ruling was "read
+  the cause first, no band ruling", then correct the expectation or write a defect lead. The same ruling applies to a
+  verdict change after a resize and to a precondition failure (no retry before the cause is known). The 300241 miss that
+  fixed the wrong place first is in the Necromancer final report.
+  Source: mentor ruling, Necromancer conformance, 2026-11-13/14.
+- **The band decides, and a rate's 99% interval sits inside the band.** A deterministic value is judged by the band on
+  the value; a proc rate counts when its 99% interval lies inside the band, without holding the exact chance. ADR 0646
+  (amends ADR 0346); G-19 for the band.
+- **A label drop is judged by the claim text.** "Label drops are allowed only where the claim states no such value":
+  a label that measures something the claim does not state may be dropped from the proof; one that measures a stated
+  value is restored, linked to the measuring label that passes in the same run, or the claim is demoted with the count
+  corrected honestly. Source: mentor ruling, Necromancer conformance, 2026-11-13/14.
+- **A ledger-only re-audit counts at once.** "A ledger-only correction re-audited on the count-of-record pair counts at
+  once (same build and runs, G-17); a measurement change waits for the next pair."
+  Source: mentor ruling, Necromancer conformance, 2026-11-13/14.
+- **Contrast is required.** A contrast-gated read is behaviour evidence only with its contrast. ADR 0616; G-22 for a
+  stat gain.
+- **Status 3 only after two genuinely different designs.** Status 3 or 4 follows two different designs that failed (the
+  second-agent rule) or a proven impossibility; more than 90 agent-minutes only flags a design review (9.6, cadence
+  point 3; G-25 for gaps).
 
 ## 12. The mentor's brief
 
@@ -1107,21 +1180,8 @@ in the same commit; the owner assigns the final number at merge.
 
 ### 14.6 Rules for agent sessions
 
-Every agent session on conformance work follows these rules, the controller included:
-- **Never resume an agent for a new task** (owner rule, first priority: token use is a primary constraint). A resume
-  is only for a follow-up on the same task (a fix to its own report, a missing check), and only when it is cheaper
-  than a fresh agent with a handoff file. One agent per task, ended when the task is done. The controller makes no
-  exploratory reads either: grep or head on reports, short messages.
-- Fresh agents only, no forks. A brief points to files; it does not paste them.
-- Big files (`behaviours.py`, `compare.py`, `CoAGameplayTest.cpp`, ledgers, generated scenarios, run logs, verdict
-  JSON) are read by grep or line ranges, never whole. Run output goes to files, read by grep.
-- The full report goes to a named file; the agent returns at most 15 lines (reviewers 10).
-- Verification goes through `tools/verify_all.py` selections only; never run judges, tests or scripts directly.
-- Never wait in the background, never sleep-poll. The dispatch is the agent's task: it ignores messages that do not
-  come from its controller session.
-- Read only what the task needs: the files the dispatch names, by grep. Do not read whole briefs of other batches.
-- A brief never says "read X in full" for the growing files (night and morning briefs, the mentor's decision logs,
-  the rulings): it quotes the two to five decision lines the task needs, or names the grep pattern.
+Every agent session on conformance work follows [conformance-dispatch-rules.md](conformance-dispatch-rules.md), the
+controller included (ADR 0657). That file is the single source; do not copy it into a plan or brief.
 
 ### 14.7 Residual risks
 
