@@ -1941,7 +1941,7 @@
   },
   {
     "spell": 560800,
-    "clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+    "clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
     "kind": "claim",
     "reason": "Cycle 1 F2 (controller item 1, ADR 0536): the audit held the explosion-time claim unproven because the readback '560800 aura_amplitude_ms #0' in its labels is unmodelled in both runs of pair 20261113-084238 / -085831; it is no evidence either way and is removed from the claim's labels, not reclassified. The claim rests on explode_before / explode_after, judged in game time (ADR 0501). 'run towards the enemy' has no read of its own: the explosion that hits the dummy follows the Rotling reaching it. Explosion time: not final until a counted pair judges it in game time (integration of batch M; mentor rule: a side c duration claim counts only after a game-time rejudge): explode_before / explode_after now carry the game-time window 7750..8250 ms after the channel starts (ADR 0501). Working evidence (nominal waits): Claims summon and explosion time: Status 1 (the M side c counted pair 20261113-074018 / -074225 (build 5dd0c38e75e7, worldserver 229b8b4f, 2 runs, control arm in each entry, no flips)): a full Crypt Swarm 501886 channel (3000 ms) leaves one Rotling 50303 3600 ms after the cast starts with 560800, none without (control); the Rotling's Rotling Explosion 500585 has not hit the dummy 7800 ms after the cast starts and has at 8200 ms: 5 sec after the summon ($807640t2 = 807640 Effect[1] amplitude 5000), bracketed inside the G-19 band on both sides. Claim damage: route pending (M side c): the expected ${$500585m1+$500585ppl1+$SP*0.335} at level 60 depends on the per-level reading of m1 and ppl1 for a creature-cast triggered spell (the Glacial Impact per-level case, SpellInfo.cpp:482-497); not judged here. Not measured: \"run towards the enemy\" (no claim label) and an interrupted-channel arm. G-11 searched (2026-11-13, M side c): server DBC set (/srv/coa/server-data/dbc) and src/server/coa read; raw combat logs (~/Projects/coa-log-history/data/logs, rg by id and by name, positive control in the same query: 802353 by id 1551 lines, \"Disease Cloud\" by name 1955 lines): \"Wormfood\" 0 lines by name, 0 lines by id 560800; ~/CoaServer/reference: bindmysoul \"Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after 5 se\", sidekick coaKits names it (6 matches), exiles-db tables list it (acquisition, no value), WDB cachepacks list it; coa-obtainable: live capture True, advancement class 23 level 0; sources.md followed; MCP not queried (unavailable). Claim 'for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.': Status 2 by precedent Q-b1-1 (owner ruling 2026-11-13: per-level scaling intended, text to align; mentor 14:50): Rotling Explosion 500585 Effect[0] BasePoints 199, DieSides 1, RealPointsPerLevel 2.0, BaseLevel 0, SpellLevel 0; the Rotling takes the owner's level (Scale, AscensionNecromancerSummons.cpp:283), so at level 60 the base is 199 + 2 x 60 + 1 = 320 (the literal m1 + ppl1 = 202), plus 0.335 x the owner's Shadow spell power (AscensionNecromancerData.h:20); text item pending (mentor 14:50).",
     "claims": [
@@ -1959,12 +1959,23 @@
         ]
       },
       {
-        "claim": "for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+        "claim": "for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
         "labels": [
           "560800 effect_value 500585e0 #1"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261114_01_necromancer_owner_text_items_15_16.sql",
+      "commit": "a8f82f06d6",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text item 16 (125.2, precedent Q-b1-1), owner go 2026-11-14 (text-items.md)",
+      "spell": 560800,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 560848,
@@ -4436,7 +4447,7 @@
   },
   {
     "spell": 805649,
-    "clause": "Your Command spells now have a $h% chance to refund a portion of their Runic Power cost.",
+    "clause": "Your Command spells now have a $h% chance to refund 10 Runic Power.",
     "kind": "claim",
     "reason": "Claim 'Your Command spells now have a $h% chance': status 1 (M side b counted pair 20261113-075721 / -080045 (server a1bac36d90c3, worldserver 80400a75efe2); baseline without the talent): Command: Undead 504868 casts energize 359505 at 40.16% / 40.15% (9563 in 23815, 9561 in 23811; pilot19 39.76% / 39.75%), Wilson 99% inside the G-19 band 38%-42% of $h = 40 (ADR 0497: an energize count is a proc event). Claim 'to refund a portion of their Runic Power cost.': status 1 by owner ruling Q-c4-1 (a fixed 10 Runic Power, the 359505 text 'Gain 10 Runic Power'; Necromancer ADR 0031; before it the handler refunded the whole paid cost, 300 for Command: Undead 504868): c4 focused pair 20261113-140305 / -140428 (worldserver 9ab6323cc61e, server commit ba7e75a7c6, 98 parts each): every 359505 Runic Power energize after a 30 Runic Power Command restores 100 (942500 over 9425 and 950100 over 9501 energizes); control: the baseline arm without the talent, no 359505 energize in 20 attempts; the rate in the same pair 39.57% / 39.88%, Wilson 99% inside 38%-42%. The readback '805649 effect_value #0' (unmodelled: a chance token, not the refund) leaves the claim's labels. G-11 search (2026-11-13, M side b): server DBC set and src/server/coa read; raw combat logs by id and quoted name (positive control 802353 1551 lines in the same search): 805649 0 lines (a passive) and its energize 359505 0 lines, so the logs do not decide; MCP not queried (unavailable).",
     "claims": [
@@ -4447,12 +4458,23 @@
         ]
       },
       {
-        "claim": "to refund a portion of their Runic Power cost.",
+        "claim": "to refund 10 Runic Power.",
         "labels": [
           "805649 proc_energize_amount 6"
         ]
       }
-    ]
+    ],
+    "dbc_clause": "Your Command spells now have a $h% chance to refund a portion of their Runic Power cost.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261114_01_necromancer_owner_text_items_15_16.sql",
+      "commit": "a8f82f06d6",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "owner text item 15 (Q-c4-1), owner go 2026-11-14 (text-items.md)",
+      "spell": 805649,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 805674,
