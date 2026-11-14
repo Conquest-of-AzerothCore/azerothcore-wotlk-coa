@@ -324,7 +324,9 @@ namespace PathToAscension
     {
         auto const found = trackingQuests.find(questId);
         Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
-        if (found == trackingQuests.end() || !quest || player->GetQuestStatus(questId) != QUEST_STATUS_NONE)
+        QuestStatus const status = player->GetQuestStatus(questId);
+        if (found == trackingQuests.end() || !quest
+            || (status != QUEST_STATUS_NONE && status != QUEST_STATUS_REWARDED))
             return;
 
         if (!IsQuestAvailable(player, questId))
