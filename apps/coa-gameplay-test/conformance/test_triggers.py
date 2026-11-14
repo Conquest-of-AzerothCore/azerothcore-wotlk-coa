@@ -2414,10 +2414,10 @@ class TakenHitMutantTests(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateTriggerTest(unittest.TestCase):
     def test_generate_writes_every_part(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-triggers-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[STAFFGUARD, CHAKRA_OF_POWER])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[STAFFGUARD, CHAKRA_OF_POWER])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             self.assertEqual({entry['kind'] for entry in manifest['scenarios']}, {'trigger'})
             parts = len(trigger_plan(CLASS_FILE, templar_trigger(CHAKRA_OF_POWER)).part_attempts)
@@ -2433,10 +2433,10 @@ class GenerateTriggerTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_fervent_castigation_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-fervent-castigation-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[FERVENT_CASTIGATION])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[FERVENT_CASTIGATION])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -2446,10 +2446,10 @@ class GenerateTriggerTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_blessing_of_eonar_scenario_keys_do_not_collide(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-blessing-of-eonar-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[BLESSING_OF_EONAR])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[BLESSING_OF_EONAR])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -2459,10 +2459,10 @@ class GenerateTriggerTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_one_with_the_light_cooldown_scenario_keys_do_not_collide_across_three_shared_effect_entries(self):
-        from conformance import generate
+        from test_compare import fixture_generate
         out = Path(tempfile.mkdtemp(prefix='conformance-one-with-the-light-cooldown-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, triggers=[ONE_WITH_THE_LIGHT])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, triggers=[ONE_WITH_THE_LIGHT])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             keys = [entry['key'] for entry in manifest['scenarios']]
             self.assertEqual(len(keys), len(set(keys)))
@@ -2583,6 +2583,103 @@ class CooldownDeltaForceCritTest(unittest.TestCase):
         scenario, _ = cooldown_trigger_scenario(CLASS_FILE, one_with_the_light, 0)
         self.assertNotIn('melee_crit_rating', scenario['players'][0])
         self.assertNotIn('spell_crit_rating', scenario['players'][0])
+
+
+
+class MinionMagnitudeTests(unittest.TestCase):
+    TOMB_KING = 805044
+
+    def tomb_king_entry(self) -> dict:
+        from profile import load_fixture_class_file
+        return next(entry for entry in load_fixture_class_file(23)['triggers'] if entry['aura'] == self.TOMB_KING)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_melee_hits_and_the_minion_observation_are_read(self):
+        from profile import load_fixture_class_file
+        from triggers import magnitude_measurement_labels, magnitude_ratio_scenario
+        scenario, _ = magnitude_ratio_scenario(load_fixture_class_file(23), self.tomb_king_entry())
+        labels = magnitude_measurement_labels(self.TOMB_KING)
+        reads = {step['label']: step for step in scenario['steps'] if step.get('action') == 'assert'}
+        trigger_count = reads[labels['trigger_count']]
+        self.assertEqual((trigger_count['metric'], trigger_count['entry']), ('pet_melee_hits', 50073))
+        observed = [reads[labels['observe_total']], reads[labels['observe_count']]]
+        self.assertTrue(all(step['spell'] == 570050 and step['caster_entry'] == 50073 for step in observed))
+        self.assertEqual(reads[labels['aura']]['spell'], 800027)
+
+    @unittest.skipUnless(Path('/srv/coa/server-data/dbc').is_dir(), 'client DBC set not found')
+    def test_the_cast_aura_is_cast_again_with_its_power(self):
+        from profile import load_fixture_class_file
+        from triggers import magnitude_ratio_scenario
+        scenario, _ = magnitude_ratio_scenario(load_fixture_class_file(23), self.tomb_king_entry())
+        casts = [index for index, step in enumerate(scenario['steps'])
+                 if step.get('action') == 'cast' and step.get('spell') == self.TOMB_KING]
+        self.assertGreater(len(casts), 2)
+        for index in casts[1:]:
+            self.assertEqual(scenario['steps'][index - 2]['action'], 'set_power')
+
+    def test_a_recast_needs_a_cast_aura_of_a_minion_trigger(self):
+        from triggers import checked_magnitude_entry
+        entry = {**self.tomb_king_entry(), 'aura_cast': False}
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+        entry = {**self.tomb_king_entry(), 'observe_actor': 'minion',
+                 'trigger': {'action': 'attack', 'spell': 0}, 'trigger_metric': 'melee_damage_total'}
+        with self.assertRaises(ValueError):
+            checked_magnitude_entry(entry)
+
+
+class MinionHeldHealthTests(unittest.TestCase):
+    def test_the_caster_health_is_set_before_the_first_minion_swing(self):
+        from triggers import minion_attempt_steps
+        entry = {'aura': 300241, 'caster_health_pct': 45, 'minion_aura_refresh_ms': 4000,
+                 'trigger': {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000}}
+        steps = minion_attempt_steps(entry, 8000, '')
+        attack = next(index for index, step in enumerate(steps) if step['action'] == 'attack')
+        self.assertEqual(steps[attack - 1], {'action': 'set_health', 'actor': 'caster', 'value': 4500,
+                                             'maximum': 10000})
+
+    def test_an_entry_without_a_held_health_starts_with_the_attack(self):
+        from triggers import minion_attempt_steps
+        entry = {'aura': 707001, 'trigger': {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000}}
+        self.assertEqual(minion_attempt_steps(entry, 4000, '')[0]['action'], 'attack')
+
+    def test_an_aura_settle_waits_after_the_learn_and_needs_its_source(self):
+        from triggers import aura_steps, checked_minion_trigger
+        trigger = {'action': 'minion', 'spell': 500971, 'entry': 50073, 'swing_ms': 2000, 'swing_source': 'dbc'}
+        entry = {'aura': 300241, 'trigger': trigger, 'aura_settle_ms': 1500, 'aura_settle_source': 'first tick'}
+        checked_minion_trigger(300241, trigger, entry)
+        self.assertEqual(aura_steps({}, entry), [{'action': 'learn', 'actor': 'caster', 'spell': 300241},
+                                                 {'action': 'wait', 'label': 'aura settle', 'ms': 1500}])
+        for bad in ({'aura_settle_ms': 1500}, {'aura_settle_ms': 0, 'aura_settle_source': 'first tick'}):
+            with self.assertRaises(ValueError):
+                checked_minion_trigger(300241, trigger, {'aura': 300241, 'trigger': trigger, **bad})
+
+
+class MagnitudeTwoPointBandTest(unittest.TestCase):
+    setUp = MagnitudeTriggerCompareTest.setUp
+    tearDown = MagnitudeTriggerCompareTest.tearDown
+    verdict = MagnitudeTriggerCompareTest.verdict
+
+    def test_a_small_stated_fraction_passes_within_two_points(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(expected_ratio=0.1)],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=11700))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.low, 0.08)
+        self.assertAlmostEqual(verdict.high, 0.12)
+        self.assertIn('0.02', verdict.explanation)
+
+    def test_a_small_stated_fraction_beyond_two_points_alerts(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(expected_ratio=0.1)],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=12300))
+        self.assertEqual(self.verdict().status, 'alert')
+
+    def test_a_large_stated_fraction_keeps_five_percent_of_its_value(self):
+        self.workspace.scenario(MAGNITUDE_KEY, 'trigger', [magnitude_expectation(expected_ratio=0.8)],
+                                steps=magnitude_steps(trigger_total=100000, observe_total=83500))
+        verdict = self.verdict()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.high, 0.84)
 
 
 if __name__ == '__main__':

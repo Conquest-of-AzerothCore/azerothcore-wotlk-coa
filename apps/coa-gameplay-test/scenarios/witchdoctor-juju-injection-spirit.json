@@ -1,0 +1,376 @@
+{
+  "schema": 1,
+  "name": "Juju Injection raises Agility, Intellect and Spirit by the same percent",
+  "contract": "Juju Injection (CharacterAdvancement entry 7088, rank 1 spell 503608, rank 2 spell 503609) raised Agility and Intellect only, which leaves the Spirit specialization Brewing with nothing to multiply. AscensionWitchDoctorCompletion.cpp gives both ranks a third effect, aura 137 (SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) on Spirit with the same base points as the other two (5 percent, then 10 percent in total: rank 2 replaces rank 1 and does not add to it). A level 80 Witch Doctor picks Brewing (ChrSpecs 6) and learns each rank, and the three aura effect amounts are asserted exactly. Stamina is the unchanged control. Character sheet stats are whole numbers, so the stat ratios use bands and a guard first asserts that each raised stat is at least 50, which keeps the rounding inside them (rank 1 floor 1.05 - 1/50 stays above 1.03; rank 2 floor 1.10 - 1/50 stays above 1.08, and the two bands do not overlap); 15 percent in total would fail the rank 2 band. The client tooltip is not observed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose the specialization",
+      "actor": "doctor",
+      "id": 6
+    },
+    {
+      "action": "wait",
+      "label": "Let the specialization settle",
+      "ms": 1500
+    },
+    {
+      "action": "unlearn",
+      "label": "Start without the talent",
+      "actor": "doctor",
+      "spell": 503608,
+      "all_specs": true
+    },
+    {
+      "action": "unlearn",
+      "label": "Start without the talent",
+      "actor": "doctor",
+      "spell": 503609,
+      "all_specs": true
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "base_1"
+    },
+    {
+      "action": "snapshot",
+      "label": "Intellect before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "base_3"
+    },
+    {
+      "action": "snapshot",
+      "label": "Spirit before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "base_4"
+    },
+    {
+      "action": "snapshot",
+      "label": "Stamina before",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "base_2"
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Agility is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Intellect is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 3,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "GUARD: Spirit is at least 50, so whole-number rounding stays inside the bands",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "min": 50
+    },
+    {
+      "action": "learn",
+      "label": "Learn rank 1",
+      "actor": "doctor",
+      "spell": 503608
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 passive 503608 is active",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 503608,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 1 resolves to 5",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503608,
+      "effect": 0,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 2 resolves to 5",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503608,
+      "effect": 1,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 effect 3 resolves to 5",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503608,
+      "effect": 2,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility is up about 5 percent",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 1.03,
+      "max": 1.07,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is up about 5 percent",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 1.03,
+      "max": 1.07,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is up about 5 percent",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "base_4",
+      "min": 1.03,
+      "max": 1.07,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stamina did not change",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "base_2",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "unlearn",
+      "label": "Forget rank 1",
+      "actor": "doctor",
+      "spell": 503608,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 passive 503608 is gone",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 503608,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "base_4",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn rank 2",
+      "actor": "doctor",
+      "spell": 503609
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 passive 503609 is active",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 503609,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 1 resolves to 10",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503609,
+      "effect": 0,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 2 resolves to 10",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503609,
+      "effect": 1,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 effect 3 resolves to 10",
+      "actor": "doctor",
+      "metric": "aura_amount",
+      "spell": 503609,
+      "effect": 2,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility is up about 10 percent in total, not 15",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is up about 10 percent in total, not 15",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is up about 10 percent in total, not 15",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "base_4",
+      "min": 1.08,
+      "max": 1.12,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stamina did not change",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "base_2",
+      "min": 0.9999,
+      "max": 1.0001
+    },
+    {
+      "action": "unlearn",
+      "label": "Forget rank 2",
+      "actor": "doctor",
+      "spell": 503609,
+      "all_specs": true
+    },
+    {
+      "action": "assert",
+      "label": "Rank 2 passive 503609 is gone",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 503609,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Agility is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "base_1",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Intellect is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "base_3",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Spirit is back at its baseline",
+      "actor": "doctor",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "base_4",
+      "min": 0.9999,
+      "max": 1.0001,
+      "within_ms": 3000
+    }
+  ]
+}

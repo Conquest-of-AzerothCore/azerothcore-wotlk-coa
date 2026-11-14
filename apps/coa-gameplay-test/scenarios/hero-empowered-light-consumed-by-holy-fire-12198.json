@@ -1,0 +1,75 @@
+{
+  "schema": 1,
+  "name": "Holy Fire consumes Empowered Light",
+  "contract": "Empowered Light (275362) reduces the cast time of the next Holy Fire by 35% per stack, up to 3 stacks. Its Spell.dbc record has no proc charges and it had no spell_proc row, so nothing removed it: a player held 3 stacks and cast instant Holy Fire every cooldown. With 3 stacks, Holy Fire (14914, 2 s base cast, family 6 flag 0x100000) becomes instant; casting it must remove every stack, as the sibling Kindles for Holy Fire (270301) already is. The actor lacks the Empowered Light talent (275361), which only Crusader Strike, Judgement and similar strikes trigger, so Holy Fire cannot grant a fresh stack and the aura reading after the cast isolates consumption.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 5,
+      "level": 20,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "e",
+      "owner": "p",
+      "entry": 36,
+      "level": 20,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 14914
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 275362,
+      "stacks": 3
+    },
+    {
+      "action": "assert",
+      "label": "Empowered Light holds 3 stacks before the cast",
+      "actor": "p",
+      "metric": "aura_stacks",
+      "spell": 275362,
+      "equals": 3
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 14914,
+      "target": "e"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Holy Fire was cast instantly through 3 Empowered Light stacks",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 14914,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Casting Holy Fire used up Empowered Light",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 275362,
+      "equals": 0
+    }
+  ]
+}

@@ -48,6 +48,7 @@ struct Player
     unsigned removed = 0;
 };
 bool IsFreepickHero(Player* p) { return p->freepick; }
+bool HasFreepickBuild(Player* p) { return IsFreepickHero(p); }
 uint32 ActiveSpecialization(Player* p) { return p->active; }
 std::string SpecializationBuildSetting(uint32 n) { return "slot" + std::to_string(n); }
 std::vector<Entry> StoredEntries(Player* p) { return p->builds["current"]; }

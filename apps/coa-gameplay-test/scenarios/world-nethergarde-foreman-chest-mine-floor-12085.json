@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Blasted Lands: the Nethergarde Foreman Chest stands on the Nethergarde mine camp floor (#12085)",
+  "contract": "Worldforged pickup 96192 'Nethergarde Crate' (guid 6940802, loot 515283) was imported at (-10834.1, -3050.0) with the realm dump's own height 57.282. rev_20261006_65_worldforged_openworld_float_heights.sql lowered it to the terrain height 53.7997, but the spot lies on the floor of the Nethergarde goldmine WMO (Md_Goldmine_Variantd.wmo, tile 000_37_52), whose one surface at that X/Y is at z 57.28. The chest sat 3.48 yd under that floor where players could not see or reach it. It now stands back on the floor: the distance to the realm-dump position is the discriminating check (3.48 before), and open sky above the chest means it is no longer under the floor (about 3.2 yd of headroom before).",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -10834.1, "y": -3050.0, "z": 57.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the chest stands at the realm-dump height on the mine floor",
+      "actor": "p", "metric": "spawn_distance", "guid": 6940802, "spawn_type": "gameobject",
+      "x": -10834.1, "y": -3050.0, "z": 57.282, "max": 0.3
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: no mine floor hangs over the chest",
+      "actor": "p", "metric": "spawn_headroom", "guid": 6940802, "spawn_type": "gameobject", "min": 5
+    },
+    {
+      "action": "assert", "label": "The chest rests on its ground",
+      "actor": "p", "metric": "spawn_ground_gap", "guid": 6940802, "spawn_type": "gameobject", "min": -0.3, "max": 0.3
+    }
+  ]
+}

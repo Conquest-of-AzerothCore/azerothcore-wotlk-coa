@@ -1,0 +1,35 @@
+{
+  "schema": 1,
+  "name": "Sylindra Starweave in Dolanaar offers and takes back Path to Ascension: Novice Rider",
+  "contract": [
+    "Reports #12211 and #12282: a Draenei at Dolanaar's riding trainer can learn Novice Riding but is never offered",
+    "the Novice Rider quest, and a quest started from the Path to Ascension book cannot be turned in to her.",
+    "Sylindra Starweave 449169 <Traveling Riding Trainer> teaches Novice Riding 33379 like Garion Hunter 97921 in",
+    "Goldshire, who offers and ends the Alliance quests 4420430, 4420432, 4420433, 4420436 and 4420439.",
+    "Expected: Sylindra shows a level 5 Draenei, the quests' MinLevel, the available quest marker (8) and lists",
+    "Draenei quest 4420439; a rider",
+    "who knows Novice Riding gets its credit on accepting (also with CoA.MaxRidingFromStart, which grants riding",
+    "at login), she then shows the turn-in marker (10), and the turn-in gives the Draenei starter mount 29744."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": 9895.5, "y": 950.5, "z": 1311.9, "o": 0.9},
+  "players": [{"id": "draenei", "race": 11, "class": 1, "level": 5}],
+  "creatures": [{"id": "sylindra", "owner": "draenei", "entry": 449169, "faction": 35, "distance": 2}],
+  "steps": [
+    {"action": "wait", "label": "Let login settle", "ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: Sylindra offers the Draenei a quest", "actor": "draenei",
+     "metric": "dialog_status", "entry": 449169, "equals": 8, "within_ms": 5000},
+    {"action": "gossip_hello", "label": "Talk to Sylindra Starweave", "actor": "draenei", "target": "sylindra"},
+    {"action": "assert", "label": "Her quest menu lists the Draenei Novice Rider quest", "actor": "draenei",
+     "metric": "quest_menu_has", "quest": 4420439, "equals": 1, "within_ms": 3000},
+    {"action": "learn", "label": "Learn Novice Riding", "actor": "draenei", "spell": 33379},
+    {"action": "prepare_quest", "label": "Take the quest", "actor": "draenei", "quest": 4420439, "complete": false},
+    {"action": "assert", "label": "Knowing Novice Riding completes the objective", "actor": "draenei",
+     "metric": "quest_objective_count", "quest": 4420439, "index": 0, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: Sylindra takes the completed quest back", "actor": "draenei",
+     "metric": "dialog_status", "entry": 449169, "equals": 10, "within_ms": 3000},
+    {"action": "reward_quest", "label": "Turn the quest in", "actor": "draenei", "quest": 4420439},
+    {"action": "assert", "label": "The turn-in gives the Draenei starter mount", "actor": "draenei",
+     "metric": "item_count", "item": 29744, "equals": 1}
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Reputation quartermasters sell their Ascension reputation rewards",
+  "contract": [
+    "The Ascension reputation rewards the client and captured vendor lists carry (SUB npc_vendor, 2026-10-04) were",
+    "missing from Meilosh 11557, Lokhtos Darkbargainer 12944 and Quartermaster Miranda Breechlock 11536.",
+    "Meilosh sells Ancient Stick 355107 at its captured WDB price of 1000 gold; Lokhtos and Miranda shelve",
+    "their Ascension rewards (a vendor_price of -1 means the item is not on the shelves)."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "meilosh",
+      "owner": "p",
+      "entry": 11557,
+      "faction": 35,
+      "level": 60,
+      "distance": 2
+    },
+    {
+      "id": "lokhtos",
+      "owner": "p",
+      "entry": 12944,
+      "faction": 35,
+      "level": 60,
+      "distance": 3
+    },
+    {
+      "id": "miranda",
+      "owner": "p",
+      "entry": 11536,
+      "faction": 35,
+      "level": 60,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Meilosh for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "meilosh"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Ancient Stick for 1000 gold (WDB buy price)",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 355107,
+      "equals": 10000000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Lokhtos for his wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "lokhtos"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Black Visor of the Brotherhood 856006 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856006,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Brotherhoods Special Whetstone 1519804 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519804,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Thorium Threaded Boots 1519909 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519909,
+      "min": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask Miranda for her wares",
+      "actor": "p",
+      "opcode": 414,
+      "fields": [
+        {
+          "actor_guid": "miranda"
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: her shop opens",
+      "actor": "p",
+      "metric": "vendor_list_packets",
+      "equals": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Light's Hope 856003 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 856003,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Light's Hope Arbalest 1519800 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519800,
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "label": "Spaulders of Dusk 1519884 is on the shelves",
+      "actor": "p",
+      "metric": "vendor_price",
+      "item": 1519884,
+      "min": 0
+    }
+  ]
+}

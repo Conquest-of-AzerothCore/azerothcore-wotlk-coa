@@ -54,6 +54,10 @@ max health, strictly below the 35% gate and above any lower-threshold check that
 ms for `Unit::Update` to recompute the derived aura state flag. Without the wait the cast can still see the stale
 flag and fail `SPELL_FAILED_TARGET_AURASTATE` (111). An unmapped `TargetAuraState` is `unmodelled: target aura state
 <n> has no scenario fixture`, never silently skipped. Templar: Titanstrike 806521/806834/806835.
+`AURA_STATE_HEALTHLESS_20_PERCENT` (2) sets the target to 15% the same way. `AURA_STATE_FROZEN` (4) is not a health
+flag: `SpellInfo::GetAuraState` derives it from a Frost-school stun or root aura, so the fixture is a harness
+`set_aura` of Frost Nova 122 (Frost, root) on the target, a precondition fixture in the sense of rule 4 point 6.
+Necromancer: Glacial Impact 704355 (frozen), Death's Due 808016 (below 20%).
 
 A value that cannot be compared is never dropped; its `rule` starts with a stable prefix:
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
@@ -67,7 +71,8 @@ rather than left for the reader to keep re-investigating),
 `unmeasurable: <reason>` for a readable token with no no-combat metric (a periodic total or `mixed` token left to
 the hit scenario, a chance token, an aura of a passive or cast-time spell, a foreign amplitude or an amplitude of a
 passive effect, another spell's effect or radius that `Spell.dbc` does not define or that `disabled_foreign_effects`
-names, which `spell_effect_value`/`spell_effect_radius` refuse). Only `unmeasurable` expectations may lack a
+names, which `spell_effect_value`/`spell_effect_radius` refuse). A class file's `removed_own_effects` (ADR 0364) keeps an effect a class contract removes from being the
+rank's first effect for its unreadable tokens (Runic Harvest 562210-562213, effect 0). Only `unmeasurable` expectations may lack a
 measurement step. The rank's own radius (`$aN`), own period (`$tN`/`$TN` after an instant cast) and own stack count
 (`$u`) are measured, through `spell_effect_radius`, `aura_amplitude_ms` and `spell_max_stacks`; `$i`
 (`MaxAffectedTargets`) still has no no-combat metric.

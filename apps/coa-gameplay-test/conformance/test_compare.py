@@ -8,6 +8,7 @@ from statistics import fmean, pstdev
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, ENGINE_ROUNDING, NOT_MEASURED,
                      PER_LEVEL_ROUNDING, PER_LEVEL_UNMODELLED, per_level_loss, per_level_unmodelled,
@@ -16,10 +17,11 @@ from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, E
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
+                     apply_value_links,
                      write_outputs)
 from behaviours import BEHAVIOUR_METRIC_DELTA
 from hits import HitModel, Modifier
-from profile import CLASSES_DIR, DBC_DIR
+from profile import DBC_DIR, FIXTURE_CLASSES_DIR, load_fixture_class_file
 from classes import class_spells
 from tooltip import CasterStats, Displayed, Readout, Unreadable, read_tooltip
 from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RANGE_YD, Expectation,
@@ -29,7 +31,7 @@ from values import (GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, NOMINAL_MELEE_RAN
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import batch
 
-CLASS_FILE = json.loads((CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
+CLASS_FILE = json.loads((FIXTURE_CLASSES_DIR / 'templar.json').read_text(encoding='utf-8'))
 RANK = 1001
 FIXED_POINTS = (0, 1)
 ROLLS = range(100, 110)
@@ -1755,13 +1757,18 @@ class GeneratedTokenTest(unittest.TestCase):
         self.assertEqual(self.judged(KEEPING_THE_OATH, '$803237d', '9000').status, 'alert')
 
 
+def fixture_generate(class_id: int, out: Path, **options) -> Path:
+    from conformance import generate
+    with mock.patch('conformance.load_class_file', load_fixture_class_file):
+        return generate(class_id, out, **options)
+
+
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateTest(unittest.TestCase):
     def test_manifest_hashes_and_keys_match_what_the_runner_records(self):
-        from conformance import generate
         out = Path(tempfile.mkdtemp(prefix='conformance-generate-'))
         try:
-            manifest_path = generate(CLASS_FILE['class_id'], out, spells=[804929])
+            manifest_path = fixture_generate(CLASS_FILE['class_id'], out, spells=[804929])
             manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
             written = [entry for entry in manifest['scenarios'] if entry['file']]
             self.assertTrue(written)
@@ -1779,10 +1786,9 @@ class GenerateTest(unittest.TestCase):
             shutil.rmtree(out)
 
     def test_long_hit_is_written_in_parts_that_share_its_label(self):
-        from conformance import generate
         out = Path(tempfile.mkdtemp(prefix='conformance-generate-'))
         try:
-            manifest = json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
+            manifest = json.loads(fixture_generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
                 encoding='utf-8'))
             hits = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
             self.assertEqual([entry['key'] for entry in hits],
@@ -1833,6 +1839,58 @@ class ResolveLinkedStatusesTest(unittest.TestCase):
         plain = verdict('1 e0', 'ok')
         resolved = resolve_linked_statuses([plain])
         self.assertEqual(resolved[0], plain)
+
+
+VALUE_LINKS = {'value_links': [{'label': '1 effect_value #1', 'checked_by': ['1 behaviour_metric_delta rate'],
+                                 'arithmetic': '$h = ProcChance 5, the rate band 3%..7%'}]}
+
+
+def value_verdict(status: str = 'unmodelled') -> Verdict:
+    return Verdict('1 effect_value #1', status, None, None, None, None, 'unmeasurable: chance_pct token',
+                   check='effect_value')
+
+
+class ApplyValueLinksTest(unittest.TestCase):
+    def linked(self, measuring_status: str, value_status: str = 'unmodelled') -> Verdict:
+        verdicts = [value_verdict(value_status), verdict('1 behaviour_metric_delta rate', measuring_status)]
+        return resolve_linked_statuses(apply_value_links(verdicts, VALUE_LINKS))[0]
+
+    def test_a_passing_measuring_label_closes_the_linked_value_label(self):
+        resolved = self.linked('ok')
+        self.assertEqual(resolved.status, 'closed')
+        self.assertIn('"1 behaviour_metric_delta rate" (status ok)', resolved.explanation)
+        self.assertIn('ProcChance 5', resolved.explanation)
+
+    def test_a_failing_measuring_label_fails_the_linked_value_label_with_it(self):
+        resolved = self.linked('alert')
+        self.assertEqual(resolved.status, 'alert')
+        self.assertIn('(status alert)', resolved.explanation)
+
+    def test_a_not_measured_hooked_value_label_follows_its_link(self):
+        self.assertEqual(self.linked('ok', 'not_measured').status, 'closed')
+        self.assertEqual(self.linked('alert', 'not_measured').status, 'alert')
+
+    def test_an_ambiguous_sign_value_label_follows_its_link(self):
+        self.assertEqual(self.linked('ok', 'ambiguous_tooltip').status, 'closed')
+        self.assertEqual(self.linked('alert', 'ambiguous_tooltip').status, 'alert')
+
+    def test_an_unlinked_ambiguous_value_label_keeps_its_status(self):
+        verdicts = [replace(value_verdict('ambiguous_tooltip'), label='2 effect_value #1'),
+                    verdict('1 behaviour_metric_delta rate', 'ok')]
+        self.assertEqual(resolve_linked_statuses(apply_value_links(verdicts, VALUE_LINKS))[0].status,
+                         'ambiguous_tooltip')
+
+    def test_a_missing_measuring_label_leaves_the_value_label_unmodelled(self):
+        resolved = resolve_linked_statuses(apply_value_links([value_verdict()], VALUE_LINKS))[0]
+        self.assertEqual(resolved.status, 'unmodelled')
+
+    def test_an_already_judged_value_label_is_not_relinked(self):
+        verdicts = [value_verdict('ok'), verdict('1 behaviour_metric_delta rate', 'alert')]
+        self.assertEqual(resolve_linked_statuses(apply_value_links(verdicts, VALUE_LINKS))[0].status, 'ok')
+
+    def test_a_class_file_without_value_links_changes_nothing(self):
+        verdicts = [value_verdict(), verdict('1 behaviour_metric_delta rate', 'ok')]
+        self.assertEqual(apply_value_links(verdicts, {}), verdicts)
 
 
 class ObservationLinesTest(unittest.TestCase):
@@ -1895,3 +1953,149 @@ class ShareNeighbourTest(unittest.TestCase):
         scaled = share_neighbour_reason(self.verdict(16.0, 16.0), {'relation': 'scale'},
                                         SimpleNamespace(values={}), 'combat_rating')
         self.assertIsNone(scaled)
+
+
+class EngineAmountBandTests(unittest.TestCase):
+    STATED = {'bonus': 15, 'parts': [10], 'truncated': True, 'band': True}
+
+    def reading(self, ratio: float, half_ratio: float) -> str:
+        from bonus import Bonus
+        from compare import engine_amount_band_reading
+        found = Bonus((ratio - 1) * 100, half_ratio * 100, (1.11 / 1.10 - 1) * 100, 40)
+        return engine_amount_band_reading(found, self.STATED).status
+
+    def test_a_ratio_under_the_exact_step_is_inside_the_amount_band(self):
+        self.assertEqual(self.reading(1.0082, 0.0008), 'ok')
+        self.assertEqual(self.reading(1.0091, 0.0008), 'ok')
+
+    def test_no_talent_and_a_doubled_talent_alert(self):
+        self.assertEqual(self.reading(1.0, 0.0008), 'alert')
+        self.assertEqual(self.reading(1.12 / 1.10, 0.0008), 'alert')
+
+    def test_an_interval_across_a_band_edge_is_not_judged(self):
+        self.assertEqual(self.reading(1.0046, 0.0008), 'insufficient_trials')
+
+
+class BandedRateTests(unittest.TestCase):
+    EXPECTED = 0.15
+
+    def judged(self, procs: float, trials: float) -> str:
+        from compare import banded_rate, rate_judgement
+        status, low, high, why = rate_judgement(procs, trials, 1, self.EXPECTED)
+        return banded_rate(status, low, high, self.EXPECTED, why)[0]
+
+    def test_an_interval_inside_the_band_that_excludes_the_exact_chance_is_ok(self):
+        from procs import wilson_interval
+        low, high = wilson_interval(2213, 15573)
+        self.assertTrue(0.13 < low and high < 0.15)
+        self.assertEqual(self.judged(2213, 15573), 'ok')
+
+    def test_an_interval_across_a_band_edge_that_excludes_the_chance_alerts(self):
+        from procs import wilson_interval
+        low, high = wilson_interval(2000, 15573)
+        self.assertTrue(low < 0.13 < high < 0.15)
+        self.assertEqual(self.judged(2000, 15573), 'alert')
+
+    def test_an_interval_holding_the_chance_across_a_band_edge_stays_measured(self):
+        self.assertEqual(self.judged(300, 2000), 'measured')
+
+    def test_an_interval_wholly_outside_the_band_alerts(self):
+        self.assertEqual(self.judged(1500, 15573), 'alert')
+
+
+class BetweenPartIntervalTests(unittest.TestCase):
+    PARTS, TRIALS = 55, 300
+
+    def parts(self, chances: list[float], seed: int) -> list[tuple[float, float]]:
+        import random
+        draw = random.Random(seed)
+        return [(float(sum(draw.random() < chances[index % len(chances)] for _ in range(self.TRIALS))),
+                 float(self.TRIALS)) for index in range(self.PARTS)]
+
+    def widths(self, chances: list[float], seed: int) -> tuple[float, float]:
+        from compare import between_part_interval
+        from procs import wilson_interval
+        parts = self.parts(chances, seed)
+        low, high = between_part_interval(parts)
+        wilson = wilson_interval(sum(events for events, _ in parts), self.PARTS * self.TRIALS)
+        return high - low, wilson[1] - wilson[0]
+
+    def test_seeded_binomial_parts_give_about_the_wilson_width(self):
+        for seed in (1, 2, 3):
+            with self.subTest(seed=seed):
+                between, wilson = self.widths([0.15], seed)
+                self.assertLess(abs(between / wilson - 1), 0.25)
+
+    def test_seeded_overdispersed_parts_widen_the_interval(self):
+        for seed in (1, 2, 3):
+            with self.subTest(seed=seed):
+                between, wilson = self.widths([0.10, 0.20], seed)
+                self.assertGreater(between / wilson, 1.8)
+
+    def test_a_pooled_banded_rate_is_judged_on_the_between_part_interval(self):
+        from compare import between_part_judgement
+        binomial = self.parts([0.15], 4)
+        spread = self.parts([0.10, 0.20], 4)
+        self.assertEqual(between_part_judgement(binomial, 1, 0.15)[0], 'ok')
+        status, low, high, why = between_part_judgement(spread, 1, 0.15)
+        self.assertIn('between-part', why)
+        self.assertGreater(high - low, 0.02)
+
+    def test_seeded_nine_parts_keep_the_wilson_interval(self):
+        from compare import between_part_judgement
+        from procs import wilson_interval
+        parts = self.parts([0.10, 0.20], 5)[:9]
+        status, low, high, why = between_part_judgement(parts, 1, 0.15)
+        self.assertEqual((low, high), wilson_interval(sum(events for events, _ in parts), 9 * self.TRIALS))
+        self.assertIn('Wilson', why)
+
+    def test_seeded_ten_parts_take_the_between_part_t_interval(self):
+        from compare import between_part_interval, between_part_judgement
+        parts = self.parts([0.10, 0.20], 5)[:10]
+        status, low, high, why = between_part_judgement(parts, 1, 0.15)
+        self.assertEqual((low, high), between_part_interval(parts))
+        self.assertIn('t over 10 parts', why)
+
+    def test_one_part_has_no_between_part_interval(self):
+        from compare import between_part_interval
+        self.assertIsNone(between_part_interval([(10.0, 100.0)]))
+
+
+class BetweenPartHitRatioTests(unittest.TestCase):
+    CASTS = 20
+
+    def model(self) -> dict:
+        reads = {arm: [[f'{arm} {index} total', f'{arm} {index} count'] for index in range(self.CASTS + 1)]
+                 for arm in ('control', 'treatment')}
+        return {'kind': 'hit_ratio', 'reads': reads, 'minimum_hits': 1, 'trials': self.CASTS, 'expected': 1.0,
+                'expected_bonus': 0.0, 'expected_delta': 20.0, 'rate': 'critical', 'parts': 2}
+
+    def part(self, model: dict, shares: dict[str, float]):
+        values = {}
+        for arm, reads in model['reads'].items():
+            for index, (total, count) in enumerate(reads):
+                values[total] = index * 4 * shares[arm] + (index % 2) * 0.5
+                values[count] = index * 4.0
+        return type('Part', (), {'values': values, 'key': 'part', 'status': 'completed', 'message': ''})()
+
+    def test_overdispersed_parts_widen_a_pooled_rate_interval(self):
+        from compare import behaviour_hit_ratio_verdict
+        model = self.model()
+        base = Verdict('x', 'alert', None, None, None, None, '')
+        steady = [self.part(model, {'control': 0.05, 'treatment': 0.25}) for _ in range(10)]
+        spread = [self.part(model, {'control': 0.05, 'treatment': 0.25 + (0.04 if index % 2 else -0.04)})
+                  for index in range(10)]
+        narrow = behaviour_hit_ratio_verdict(base, steady, model).detail['bonus']['half']
+        wide = behaviour_hit_ratio_verdict(base, spread, model)
+        self.assertIn('between-part variance', wide.explanation)
+        self.assertGreater(wide.detail['bonus']['half'], 2 * narrow)
+
+    def test_nine_pooled_rate_parts_keep_the_per_cast_interval(self):
+        from compare import behaviour_hit_ratio_verdict
+        model = self.model()
+        base = Verdict('x', 'alert', None, None, None, None, '')
+        spread = [self.part(model, {'control': 0.05, 'treatment': 0.25 + (0.04 if index % 2 else -0.04)})
+                  for index in range(9)]
+        verdict = behaviour_hit_ratio_verdict(base, spread, model)
+        self.assertNotIn('between-part variance', verdict.explanation)
+        self.assertIn('per-cast interval', verdict.explanation)

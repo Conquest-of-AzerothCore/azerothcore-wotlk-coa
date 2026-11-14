@@ -148,6 +148,8 @@ void Cast(Creature* caster, Unit* target, uint32 id)
 
 // ACTUAL_TURRET
 
+bool Beacon(uint32) { return false; }
+
 struct TinkerState
 {
     ObjectGuid focus = 0, observedVictim = 0, observedAutoRepeatTarget = 0;
@@ -163,6 +165,7 @@ struct Device
 {
     Creature* me;
     uint32 focus = 0, owner = 0;
+    bool Explosive() const { return false; }
     // ACTUAL_INITIALIZATION
     // ACTUAL_TARGET
     // ACTUAL_UPDATE

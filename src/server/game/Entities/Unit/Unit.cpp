@@ -13898,10 +13898,19 @@ bool Unit::CanReceivePowerFromSpell(Powers power)
     // Witch Hunter restores both pools; Primalist has secondary Rage even
     // before specialization. Spell restoration does not enable the native
     // automatic Rage formulas, which retain their HasActivePowerType gate.
-    return HasActivePowerType(power) || (IsPlayer() &&
+    return HasActivePowerType(power) || HasNecromancerManaPool(power) || (IsPlayer() &&
         ((getClass() == CLASS_WITCH_HUNTER && (power == POWER_MANA || power == POWER_RAGE)) ||
-            (getClass() == CLASS_NECROMANCER && power == POWER_MANA) ||
             (getClass() == CLASS_WILDWALKER && power == POWER_RAGE)));
+}
+
+bool Unit::HasNecromancerManaPool(Powers power) const
+{
+    return IsPlayer() && getClass() == CLASS_NECROMANCER && power == POWER_MANA;
+}
+
+bool Unit::CanLosePowerToSpell(Powers power)
+{
+    return HasActivePowerType(power) || HasNecromancerManaPool(power);
 }
 
 uint32 Unit::GetCreatePowers(Powers power) const

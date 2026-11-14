@@ -38,6 +38,7 @@ struct SpellInfo
     void const* DurationEntry = this;
     int32 EquippedItemClass = 2;
     uint32 EquippedItemSubClassMask = 0;
+    uint32 EquippedItemInventoryTypeMask = 0;
     std::array<SpellEffectInfo, 3> Effects;
     bool HasAttribute(uint32) const { return false; }
 };
@@ -81,6 +82,7 @@ struct Item
 {
     ItemTemplate data;
     bool broken = false;
+    bool IsBroken() const { return broken; }
     ItemTemplate const* GetTemplate() { return &data; }
 };
 struct Player : Unit
@@ -93,7 +95,7 @@ struct Player : Unit
     uint32 getClass() const { return cls; }
     uint32 GetLevel() const { return level; }
     bool HasSpell(uint32 id) const { return id == 537218 && knows; }
-    Item* GetWeaponForAttack(uint32, bool) { return weapon && !weapon->broken ? weapon : nullptr; }
+    Item* GetWeaponForAttack(uint32, bool = false) { return weapon && !weapon->broken ? weapon : nullptr; }
     Pet* GetPet() { return pet; }
     void ApplySpellMod(uint32, uint32, uint32&) { }
 };

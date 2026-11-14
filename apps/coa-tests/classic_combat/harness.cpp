@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <functional>
 #include <map>
+#include <string_view>
 
 using int32 = std::int32_t;
 using uint8 = std::uint8_t;
@@ -37,7 +38,9 @@ enum AuraType
     SPELL_AURA_PERIODIC_DAMAGE,
     SPELL_AURA_PERIODIC_LEECH,
     SPELL_AURA_PERIODIC_DAMAGE_PERCENT,
-    SPELL_AURA_MOD_ROOT
+    SPELL_AURA_MOD_ROOT,
+    SPELL_AURA_ASCENSION_SUPPRESS_AVOIDANCE,
+    SPELL_AURA_ASCENSION_MOD_OFFHAND_HIT_CHANCE
 };
 enum SpellEffects
 {
@@ -142,9 +145,21 @@ struct SpellEffectInfo
     bool IsEffect() const { return Effect != SPELL_EFFECT_NONE; }
 };
 
+enum SpellFamilyNames : uint32
+{
+    SPELLFAMILY_SHAMAN = 11
+};
+
+enum LocaleConstant
+{
+    LOCALE_enUS = 0
+};
+
 struct SpellInfo
 {
     uint32 Id = 0;
+    uint32 SpellFamilyName = 0;
+    std::array<char const*, 16> SpellName{};
     bool binary = false;
     bool AscensionIgnoreAbsorbAndResistance = false;
     uint32 attributes = 0;
@@ -307,8 +322,9 @@ struct Unit
     }
     bool HasInArc(double, Unit const*) const { return front; }
     bool HasIgnoreHitDirectionAura() const { return false; }
-    bool IsNonMeleeSpellCast(bool, bool, bool) const { return false; }
-    bool CanDefendDuringChannel() const { return false; }
+    bool IsNonMeleeSpellCast(bool, bool, bool, bool, bool, bool) const { return false; }
+    bool CanDefendDuringChannel(Unit const*) const { return false; }
+    bool CanDefendDuringCast(Unit const*) const { return false; }
     bool HasUnitState(uint32) const { return false; }
     bool HasOffhandWeaponForAttack() const { return dualWield; }
     float GetExpertiseDodgeOrParryReduction(WeaponAttackType) const { return 0.0f; }

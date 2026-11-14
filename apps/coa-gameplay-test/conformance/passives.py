@@ -5,7 +5,8 @@ import re
 
 from classes import PROGRESSION_HEADER, ClassSpell, class_spells, progression_chains, table_rows
 from hits import creature_fixture
-from procs import proc_label, shares_aura, shares_proc_spell, trigger_key
+from kinds import kind_labels
+from procs import entry_proc_label
 from profile import CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, player_fixture, stat_label
 from stack import class_mask, family_flags
 from tooltip import COLOR_CODE, Displayed, Records, Unreadable, read_tooltip
@@ -655,9 +656,10 @@ def effect_unmodelled(class_file: dict, spell_ids: set[int], effect: int) -> str
 
 def behaviour_label(entry: dict) -> list[str]:
     kind = entry['kind']
-    if kind not in BEHAVIOUR_LABELS:
+    labels = {**BEHAVIOUR_LABELS, **kind_labels()}
+    if kind not in labels:
         raise ValueError(f'behaviour kind {kind!r} has no known label format for a P5 link')
-    return BEHAVIOUR_LABELS[kind](entry)
+    return labels[kind](entry)
 
 
 def trigger_link(class_file: dict, spell_ids: set[int], effect: int) -> list[tuple[str, dict]] | None:
@@ -687,9 +689,7 @@ def check_label(class_file: dict, kind: str, entry: dict) -> list[str]:
             return [duration_label(entry['aura'])]
         return [trigger_label(entry['aura'])]
     if kind == 'procs':
-        trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
-        return [proc_label(entry['aura'], entry['proc_spell'], trigger)
-               if shares_aura(class_file, entry) else proc_label(entry['aura'])]
+        return [entry_proc_label(class_file, entry)]
     return behaviour_label(entry)
 
 

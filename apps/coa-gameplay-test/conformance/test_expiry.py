@@ -12,14 +12,14 @@ from expiry import (BEHAVIOUR_EXPIRIES, BEHAVIOUR_EXPIRY, CLOCK_STEP_MS, LOCKOUT
                     act_margins_of, behaviour_expiry, expiry_arm, lands_within_its_cast_step, margins_of, pair_steps,
                     school_lockout_scenario, shift_of, trigger_expiry)
 from hits import MAX_ACCELERATED_SCENARIO_MS
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 from tooltip import Records
 from values import dataset
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import run
 
-CLASS_FILE = load_class_file(19)
+CLASS_FILE = load_fixture_class_file(19)
 TESTAMENT_OF_STRENGTH = 300514
 BLESSING_OF_AGGRAMAR = 300502
 FINESSE_RANK_2 = 707851
@@ -390,8 +390,8 @@ class GenerateExpiryTest(unittest.TestCase):
         shutil.rmtree(self.out)
 
     def test_generate_adds_one_expiry_scenario_beside_the_readback(self):
-        from conformance import generate
-        manifest = json.loads(generate(19, self.out, behaviours=[FINESSE_RANK_2],
+        from test_compare import fixture_generate
+        manifest = json.loads(fixture_generate(19, self.out, behaviours=[FINESSE_RANK_2],
                                        triggers=[HOLY_COMBATANT]).read_text(encoding='utf-8'))
         kinds = sorted(entry['kind'] for entry in manifest['scenarios'])
         self.assertEqual(kinds.count('expiry'), 2)
@@ -402,8 +402,8 @@ class GenerateExpiryTest(unittest.TestCase):
         self.assertEqual(labels, {f'{FINESSE_RANK_2} {BEHAVIOUR_EXPIRY}', f'{HOLY_COMBATANT} {BEHAVIOUR_EXPIRY}'})
 
     def test_compare_judges_the_expiry_expectation(self):
-        from conformance import generate
-        manifest_path = generate(19, self.out, behaviours=[TESTAMENT_OF_STRENGTH])
+        from test_compare import fixture_generate
+        manifest_path = fixture_generate(19, self.out, behaviours=[TESTAMENT_OF_STRENGTH])
         manifest = json.loads(manifest_path.read_text(encoding='utf-8'))
         entry = next(entry for entry in manifest['scenarios'] if entry['kind'] == 'expiry')
         scenario = json.loads((self.out / entry['file']).read_text(encoding='utf-8'))

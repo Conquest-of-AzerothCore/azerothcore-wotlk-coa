@@ -562,17 +562,9 @@ class Tooltip:
 
     def expansion(self, markup: re.Match) -> Readout:
         spell_id = int(markup.group('spell'))
-        try:
-            if int(markup.group('flags')) < 0:
-                raise Unreadable('negative flags select a shift or partial rendering')
-            if not self.records.has_spell(spell_id):
-                raise Unreadable(f'spell {spell_id} is not in Spell.dbc')
-            if spell_id in self.expanding:
-                raise Unreadable('expansion cycle ' + ' -> '.join(map(str, self.expanding + (spell_id,))))
-            if len(self.expanding) > MAX_EXPANSION_DEPTH:
-                raise Unreadable(f'nesting deeper than {MAX_EXPANSION_DEPTH} expansions')
-        except Unreadable as error:
-            return Readout([], [unreadable_entry(markup.group(0), error)])
+        refusal = expansion_refusal(self.records, markup, self.expanding)
+        if refusal is not None:
+            return Readout([], [unreadable_entry(markup.group(0), refusal)])
         nested = Tooltip(self.records, spell_id, self.caster, self.expanding)
         readout = nested.read(self.records.field('Spell', spell_id, 'Description[enUS]'))
         return Readout([referenced(value, spell_id) for value in readout.values], readout.unreadable)
@@ -752,6 +744,19 @@ class ExpressionParser:
                 self.spell_id = spell_id
             return value
         raise Unreadable
+
+
+def expansion_refusal(records: Records, markup: re.Match, expanding: tuple[int, ...]) -> Unreadable | None:
+    spell_id = int(markup.group('spell'))
+    if int(markup.group('flags')) < 0:
+        return Unreadable('negative flags select a shift or partial rendering')
+    if not records.has_spell(spell_id):
+        return Unreadable(f'spell {spell_id} is not in Spell.dbc')
+    if spell_id in expanding:
+        return Unreadable('expansion cycle ' + ' -> '.join(map(str, expanding + (spell_id,))))
+    if len(expanding) > MAX_EXPANSION_DEPTH:
+        return Unreadable(f'nesting deeper than {MAX_EXPANSION_DEPTH} expansions')
+    return None
 
 
 def referenced(value: Displayed, spell_id: int) -> Displayed:

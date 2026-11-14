@@ -70,7 +70,9 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
   entries.
 - [Behaviour scenarios](docs/behaviour-scenarios.md) — prose-only behaviours: target count, healing ratio, aura
   spread, shield break, metric delta, health-threshold ratio, leech ratio, duration, duration ratio, duration
-  refresh, amount delta, expiry pairs, Templar entries.
+  refresh, amount delta, expiry pairs, Templar entries; the kinds that live in their own `kinds/<kind>.py` module and
+  page (`docs/kinds/<kind>.md`, ADR 0581) and the `metric_delta` options in `metric_delta_options/<field>.py` (ADR
+  0582) are indexed at its end.
 - [Player observations and readings](docs/player-observations.md) — a class file's `player_observations` and
   `player_tooltip_readings` arrays.
 - [Talent stack (lever map)](docs/talent-stack.md) — cumulative talent configurations, DPS levers, the owner
@@ -78,13 +80,15 @@ Each topic lives in its own page under `docs/`, so an agent reads only the page 
 - [Scaffolding a class file](docs/scaffolding.md) — `conformance.py scaffold`, what it fills in and what it
   leaves for a human.
 - [Generate and compare](docs/generate-and-compare.md) — `generate`/`compare` CLI, a full class run, the impact
-  report, coverage comparison, behaviour sheets, the `prove` runner, batch samples, per-spell packets, verdict
-  statuses, open conformance checks.
+  report, coverage comparison, behaviour sheets, the `prove` runner, the coverage audit, bucket file and aura-354
+  check (`audit`, `buckets`, `aura354`), batch samples, per-spell packets, the `cycle` runner of a merged pair
+  (ADR 0655), verdict statuses, open conformance checks.
 - [Server-fix brief](docs/fix-brief.md) — the method rule for server fixes and the brief template round workflows
   copy into each fix item.
-- [Clause ledger and clause coverage](docs/clause-ledger.md) — `classes/<name>_clauses.json` format, how a
-  workstream contributes labels, `conformance.py coverage --clauses`, the behaviour-proven and data-conformant
-  statuses, tool gaps and the `Spell.dbc` sha256 of fragments.
+- [Clause ledger and clause coverage](docs/clause-ledger.md) — `classes/<name>_clauses.json` format,
+  `conformance.py ledger` (a class's first ledger), how a workstream contributes labels,
+  `conformance.py coverage --clauses`, the behaviour-proven and data-conformant statuses, tool gaps and the
+  `Spell.dbc` sha256 of fragments.
 
 ## Run
 
@@ -96,3 +100,16 @@ python -B tools/verify_all.py --stages source --base origin/main
 
 The tests that read the client DBC set are skipped when `/srv/coa/server-data/dbc` does not exist; the fixture tests
 always run.
+
+Tool tests read frozen class files from `fixtures/classes/` (`profile.load_fixture_class_file`,
+`test_compare.fixture_generate`), not the live files under `classes/`, so a class author's edit does not change a
+tool test (ADR 0580). Only the tests named `test_cross_class_guard_*` read every live class file on purpose. The
+Necromancer fixtures (`necromancer.json`, `necromancer_clauses.json`) were frozen after the ADR citation rewrite
+(ADR 0583).
+
+The finished classes (Templar, Necromancer) keep the SHA-256 of every generated file in `snapshots/<class>.json`
+(ADR 0590). The `conformance` suite runs `snapshots.py check --class N` for each: it regenerates the class and names
+the files that differ. It needs the DBC set, so GitHub CI skips it and the local source stage is the guard; run it
+before every PR. When a difference is intended, `python -B snapshots.py write --class N` and commit the digest file
+with the change. A change to a shared engine file (`Unit.cpp`, `Spell.cpp`, ...) does not change the digests; the
+source stage then prints the gameplay rerun of every finished class (ADR 0591).

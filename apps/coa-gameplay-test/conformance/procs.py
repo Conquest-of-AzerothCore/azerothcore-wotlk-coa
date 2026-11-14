@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Sequence
 
@@ -10,19 +10,32 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, EFFECTS, READ_STEP_M
                     armed_for, facts_of, is_hostile, targets_ally)
 
 PROC_CHECK = 'proc_rate'
+PROC_ENERGIZE_CHECK = 'proc_energize_amount'
 AMBIGUOUS_TOOLTIP = 'ambiguous_tooltip: '
 ENTRY_STATUSES = {'ambiguous_tooltip': AMBIGUOUS_TOOLTIP, 'unmodelled': UNMODELLED}
 RATE_HALF_WIDTH = 0.025
+BAND_RELATIVE = 0.05
+BAND_POINTS = 0.02
 CHANCE_KIND = 'chance_pct'
+ADD_FLAT_MODIFIER = 107
+SPELLMOD_CHANCE_OF_SUCCESS = 18
 PERCENT_KIND = 'percent'
 ATTACK = 'attack'
 CAST = 'cast'
+MINION = 'minion'
+MINION_PROC_TRIALS = frozenset({'pet_melee_crits', 'owned_creature_damage_count'})
+MINION_BASELINE_ATTEMPTS = 20
+BASELINE_MISS_RISK = 0.01
 CAST_COUNT = 'spell_cast_count'
 MELEE_EVENTS = 'melee_attack_count'
-EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS})
+MINION_PROC_COUNT = 'owned_creature_spell_proc_count'
+ENERGIZE_EVENTS = 'spell_energize_count'
+EVENT_METRICS = frozenset({CAST_COUNT, 'spell_damage_count', MELEE_EVENTS, MINION_PROC_COUNT, ENERGIZE_EVENTS})
+SUMMON_EVENTS = 'owned_creature_summon_count'
 CHARGES = 'spell_charges'
 TRIGGER_TARGETS = frozenset({TARGET, ALLY})
 PERIODIC_DAMAGE_AURA = 3
+PERIODIC_LEECH_AURA = 53
 TICKS_PER_ATTEMPT = 2
 TRIGGERING_HITS = 'triggering hits only'
 WILSON_RULE = f'Wilson {Z_99:g} (99%) interval of the proc rate holds the tooltip chance'
@@ -49,6 +62,14 @@ class ProcPlan:
     per_part: int
 
 
+def rate_band(p: float) -> float:
+    return max(BAND_RELATIVE * p, BAND_POINTS)
+
+
+def band_trials_needed(p: float) -> int:
+    return math.ceil(Z_99 ** 2 * p * (1 - p) / (rate_band(p) / 2) ** 2)
+
+
 def trials_needed(p: float) -> int:
     if not 0 < p < 1:
         raise ValueError(f'A proc chance of {p} has no rate to measure')
@@ -73,20 +94,114 @@ def proc_measurements(aura: int) -> dict[str, str]:
     return {part: f'{aura} proc {part}' for part in ('trials', 'events', 'attempts', 'aura')}
 
 
+def baseline_attempts(chance_pct: float) -> int:
+    return max(MINION_BASELINE_ATTEMPTS, math.ceil(math.log(BASELINE_MISS_RISK) / math.log(1 - chance_pct / 100)))
+
+
+def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    if entry['trigger']['action'] != CAST:
+        raise ValueError(f'Proc {entry["aura"]} has a baseline without a minion or cast trigger')
+    labels = baseline_labels(entry['aura'])
+    held = replace(plan, per_part=baseline_attempts(plan.chance_pct))
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': trigger_spell(entry)}] + cast_attempts(class_file, entry, held)
+            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, trials_step(entry, labels['trials']),
+               {**event_steps(entry)[0], 'label': labels['events']}])
+
+
+def excluded_trial_labels(entry: dict) -> list[str]:
+    return [f'{entry["aura"]} proc trials excluded {spell}' for spell in entry.get('trial_excluded_spells', [])]
+
+
+def excluded_trial_steps(entry: dict) -> list[dict]:
+    if entry.get('trial_excluded_spells') and minion_entry(entry) is None:
+        raise ValueError(f'Proc {entry["aura"]} excludes trial spells without a minion trigger')
+    return [measurement(label, CASTER, 'spell_damage_count', spell=spell, entry=minion_entry(entry))
+            for label, spell in zip(excluded_trial_labels(entry), entry.get('trial_excluded_spells', []))]
+
+
+def baseline_labels(aura: int) -> dict[str, str]:
+    return {'trials': f'{aura} proc baseline trials', 'events': f'{aura} proc baseline events'}
+
+
+def minion_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    from triggers import minion_attempt_steps
+    labels = baseline_labels(entry['aura'])
+    creature = entry['trigger']['entry']
+    events = event_steps(entry)[0]
+    return (minion_attempt_steps(entry, baseline_attempts(plan.chance_pct) * plan.attempt_ms, 'baseline ')
+            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS},
+               measurement(labels['trials'], CASTER, entry['trial_metric'], entry=creature),
+               {**events, 'label': labels['events']}])
+
+
+def cast_baseline_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dict]:
+    labels = baseline_labels(entry['aura'])
+    spell, target = trigger_spell(entry), trigger_target(entry)
+    facts = facts_of(records_of(class_file), spell)
+    events = event_steps(entry)[0]
+    casts = [aimed(step, target) for _ in range(baseline_attempts(plan.chance_pct))
+             for step in cast_steps(facts, spell, target, plan.attempt_ms, 1, attempt_fixtures(entry))]
+    return ([{'action': 'learn', 'actor': CASTER, 'spell': spell}] + casts
+            + [{'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, {**trials_step(entry, labels['trials'])},
+               {**events, 'label': labels['events']}])
+
+
+def same_roll(entry: dict, other: dict) -> bool:
+    return other['aura'] == entry['aura'] and chance_modifiers(other) == chance_modifiers(entry)
+
+
 def shares_aura(class_file: dict, entry: dict) -> bool:
-    return sum(1 for other in class_file.get('procs', []) if other['aura'] == entry['aura']) > 1
+    return sum(1 for other in class_file.get('procs', []) if same_roll(entry, other)) > 1
 
 
 def shares_proc_spell(class_file: dict, entry: dict) -> bool:
     if 'proc_spell' not in entry:
         return False
     return sum(1 for other in class_file.get('procs', [])
-              if other['aura'] == entry['aura'] and other.get('proc_spell') == entry['proc_spell']) > 1
+              if same_roll(entry, other) and other.get('proc_spell') == entry['proc_spell']) > 1
+
+
+def chance_modifiers(entry: dict) -> tuple[tuple[int, str], ...]:
+    raw = entry.get('chance_modifiers', ())
+    if not isinstance(raw, list | tuple) or not all(
+            isinstance(pair, list | tuple) and len(pair) == 2 and isinstance(pair[0], int)
+            and isinstance(pair[1], str) for pair in raw):
+        raise ValueError(f'Proc {entry["aura"]} chance_modifiers must list [spell, tooltip token] pairs')
+    return tuple((spell, token) for spell, token in raw)
+
+
+def modifier_key(entry: dict) -> tuple:
+    return tuple(part for spell, _ in chance_modifiers(entry) for part in ('with', spell))
+
+
+def entry_proc_label(class_file: dict, entry: dict) -> str:
+    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
+    label = (proc_label(entry['aura'], entry['proc_spell'], trigger) if shares_aura(class_file, entry)
+             else proc_label(entry['aura']))
+    return ' '.join((label, *map(str, modifier_key(entry))))
+
+
+def modifier_points(class_file: dict, entry: dict) -> float:
+    records = records_of(class_file)
+    points = 0.0
+    for spell, token in chance_modifiers(entry):
+        shown = next((value for value in read_tooltip(records.dbc, spell, reference_caster(class_file)).values
+                      if value.text == token and value.kind == PERCENT_KIND), None)
+        if shown is None or shown.effect_index is None:
+            raise ValueError(f'The tooltip of {spell} shows no percent token {token}')
+        effect = shown.effect_index
+        aura = records.field('Spell', spell, f'EffectApplyAuraName[{effect}]')
+        modifier = records.field('Spell', spell, f'EffectMiscValue[{effect}]')
+        if aura != ADD_FLAT_MODIFIER or modifier != SPELLMOD_CHANCE_OF_SUCCESS:
+            raise ValueError(f'{token} of {spell} is effect {effect}, aura {aura} on modifier {modifier}, not a flat '
+                             f'SPELLMOD_CHANCE_OF_SUCCESS modifier')
+        points += shown.value
+    return points
 
 
 def trigger_key(entry: dict) -> int | str:
     trigger = entry['trigger']
-    return trigger['spell'] if trigger['action'] == CAST else trigger['action']
+    return trigger['spell'] if trigger['action'] in (CAST, MINION) else trigger['action']
 
 
 def chance_of(values: Sequence, token: str, kind: str = CHANCE_KIND) -> float | None:
@@ -117,7 +232,7 @@ def proc_chance(class_file: dict, entry: dict) -> float:
     chance = chance_of(readout.values, entry['chance_token'], kind)
     if chance is None:
         raise ValueError(f'The tooltip of {shown} shows no chance token {entry["chance_token"]}')
-    return chance
+    return chance + modifier_points(class_file, entry) if chance_modifiers(entry) else chance
 
 
 def chance_model(entry: dict) -> dict:
@@ -128,13 +243,18 @@ def chance_model(entry: dict) -> dict:
 
 
 def aura_steps(entry: dict) -> list[dict]:
+    modifiers = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell, _ in chance_modifiers(entry)]
     if applied_by(entry) is None:
-        return [{'action': 'learn', 'actor': CASTER, 'spell': entry['aura']}]
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': entry['aura'], 'stacks': 1}]
+        return [{'action': 'learn', 'actor': CASTER, 'spell': entry['aura']}] + modifiers
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': entry['aura'], 'stacks': 1}] + modifiers
 
 
 def trigger_spell(entry: dict) -> int:
     return entry['trigger']['spell'] if entry['trigger']['action'] == CAST else 0
+
+
+def minion_entry(entry: dict) -> int | None:
+    return entry['trigger']['entry'] if entry['trigger']['action'] == MINION else None
 
 
 def trigger_target(entry: dict) -> str:
@@ -162,7 +282,7 @@ def charge_pool_label(aura: int) -> str:
 
 def tick_spacing(class_file: dict, facts: RankFacts, spell: int) -> int:
     ticks = [records_of(class_file).field('Spell', spell, f'EffectAmplitude[{effect}]') for effect in EFFECTS
-             if facts.aura_names[effect] == PERIODIC_DAMAGE_AURA]
+             if facts.aura_names[effect] in (PERIODIC_DAMAGE_AURA, PERIODIC_LEECH_AURA)]
     return TICKS_PER_ATTEMPT * max(ticks) + CAST_MARGIN_MS if ticks else 0
 
 
@@ -209,6 +329,13 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
         if per_trigger_limit(entry) is None:
             return swing
         return swing + (TRIGGER_ACTIONS + boundary_reads(entry)) * READ_STEP_MS
+    if trigger['action'] == MINION:
+        from triggers import checked_minion_trigger
+        checked_minion_trigger(entry['aura'], trigger, entry)
+        if entry.get('trial_metric') not in MINION_PROC_TRIALS:
+            raise ValueError(f'Proc {entry["aura"]} counts {entry.get("trial_metric")!r} minion trials, not one of '
+                             f'{sorted(MINION_PROC_TRIALS)}')
+        return trigger['swing_ms']
     if trigger['action'] != CAST:
         raise ValueError(f'Unknown trigger action {trigger["action"]!r} of proc {entry["aura"]}')
     facts = facts_of(records_of(class_file), trigger['spell'])
@@ -223,26 +350,51 @@ def attempt_interval(class_file: dict, entry: dict) -> int:
 def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> ProcPlan:
     if entry.get('status'):
         raise ValueError(f'Proc {entry["aura"]} is {entry["status"]}: {entry.get("reason", "")}')
-    if entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry):
+    minion_cast_events = entry.get('event_actor') == MINION and entry['event_metric'] == 'spell_go_count'
+    if counts_summons(entry):
+        checked_summon_entry(entry)
+    elif entry['event_metric'] not in EVENT_METRICS and not counts_charges(entry) and not minion_cast_events:
         raise ValueError(f'Unknown event metric {entry["event_metric"]!r} of proc {entry["aura"]}')
+    if entry['event_metric'] == MINION_PROC_COUNT and entry.get('event_actor') != MINION:
+        raise ValueError(f'Proc {entry["aura"]} counts minion procs without a minion event actor')
     if entry['event_metric'] == MELEE_EVENTS and entry['trigger']['action'] != CAST:
         raise ValueError(f'Proc {entry["aura"]} counts auto attacks as events, which needs a cast trigger')
     per_trigger_limit(entry)
     chance = proc_chance(class_file, entry)
-    needed = trials_needed(chance / 100)
-    scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN) if attempts is None else attempts
-    if scheduled < needed:
+    needed = band_trials_needed(chance / 100) if entry.get('band') else trials_needed(chance / 100)
+    per_attempt = entry.get('trials_per_attempt', 1)
+    if not isinstance(per_attempt, int) or per_attempt < 1:
+        raise ValueError(f'Proc {entry["aura"]} needs a positive integer trials_per_attempt')
+    scheduled = math.ceil(needed * EXCLUDED_OUTCOME_MARGIN / per_attempt) if attempts is None else attempts
+    if scheduled * per_attempt < needed:
         raise ValueError(f'{scheduled} attempts are fewer than the {needed} trials a {chance:g}% proc needs')
     interval = attempt_interval(class_file, entry)
-    capacity = PART_BUDGET_MS // interval
+    held = baseline_attempts(chance) * interval + DRAIN_MS \
+        if entry['trigger']['action'] in (MINION, CAST) and entry.get('baseline') else 0
+    capacity = (PART_BUDGET_MS - held) // interval
     if capacity < 1:
         raise Unmodelled(f'one attempt of {interval} ms exceeds the scenario budget of {PART_BUDGET_MS} ms')
     parts = math.ceil(scheduled / capacity)
+    per_part = math.ceil(scheduled / parts)
+    minimum_parts = entry.get('min_parts', 1)
+    if not isinstance(minimum_parts, int) or minimum_parts < 1:
+        raise ValueError(f'Proc {entry["aura"]} needs a positive integer min_parts')
+    if parts < minimum_parts:
+        parts, scheduled = minimum_parts, per_part * minimum_parts
     return ProcPlan(chance_pct=chance, needed=needed, scheduled=scheduled, attempt_ms=interval, parts=parts,
-                    per_part=math.ceil(scheduled / parts))
+                    per_part=per_part)
 
 
 def trial_rule(entry: dict) -> str:
+    trigger = entry['trigger']
+    if trigger['action'] == MINION:
+        fixtures = ''.join(f'; minion aura {aura["spell"]}'
+                           + (f' at amount {aura["amount"]}' if 'amount' in aura else '')
+                           + f' set every {entry["minion_aura_refresh_ms"]} ms by harness set_aura ({aura["source"]})'
+                           for aura in entry.get('minion_auras', []))
+        return (f'trials: {entry["trial_metric"]} of the creature {trigger["entry"]} raised by {trigger["spell"]}, '
+                f'attacking the dummy with the caster, {trigger["swing_ms"]} ms swings ({trigger["swing_source"]})'
+                f'{fixtures}')
     if entry['trigger']['action'] == ATTACK:
         return 'trials: main-hand melee hits dealing damage (melee_damage_count hand 0)'
     if trigger_target(entry) == ALLY:
@@ -252,7 +404,7 @@ def trial_rule(entry: dict) -> str:
 
 def trials_step(entry: dict, label: str) -> dict:
     spell = trigger_spell(entry)
-    if trigger_target(entry) == ALLY:
+    if trigger_target(entry) == ALLY or entry.get('trial_casts'):
         return measurement(label, CASTER, CAST_COUNT, spell=spell)
     return measurement(label, CASTER, 'spell_damage_count', spell=spell, target=TARGET)
 
@@ -262,9 +414,13 @@ def attempt_auras(entry: dict) -> list[dict]:
     if auras and entry['trigger']['action'] != CAST:
         raise ValueError(f'Proc {entry["aura"]} sets attempt_auras without a cast trigger')
     for aura in auras:
-        if set(aura) != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) or aura['stacks'] < 0:
+        if set(aura) - {'target'} != {'spell', 'stacks', 'source'} or not isinstance(aura['stacks'], int) \
+                or aura['stacks'] < 0:
             raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} must name its spell, stacks and source')
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks']}
+        if aura.get('target', TARGET) != TARGET:
+            raise ValueError(f'Proc {entry["aura"]} attempt aura {aura!r} sets an aura on the caster or the {TARGET}')
+    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura['spell'], 'stacks': aura['stacks'],
+             **({'target': TARGET} if 'target' in aura else {})}
             for aura in auras]
 
 
@@ -331,6 +487,13 @@ def per_trigger_steps(class_file: dict, entry: dict, plan: ProcPlan) -> list[dic
 def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[str, str]) -> list[dict]:
     if per_trigger_limit(entry) is not None:
         return per_trigger_steps(class_file, entry, plan)
+    if entry['trigger']['action'] == MINION:
+        from triggers import minion_attempt_steps
+        creature = entry['trigger']['entry']
+        return (minion_attempt_steps(entry, plan.per_part * plan.attempt_ms, '')
+                + [{'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS},
+                   measurement(labels['trials'], CASTER, entry['trial_metric'], entry=creature),
+                   measurement(labels['attempts'], CASTER, 'pet_melee_swings', entry=creature)])
     if entry['trigger']['action'] == ATTACK:
         return [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
                 {'action': 'wait', 'label': 'swings', 'ms': plan.per_part * plan.attempt_ms},
@@ -367,9 +530,32 @@ def event_terms(entry: dict) -> list[tuple[str, dict]]:
                                           for term in entry.get('extra_event_terms', [])]
 
 
+def counts_summons(entry: dict) -> bool:
+    return entry['event_metric'] == SUMMON_EVENTS
+
+
+def checked_summon_entry(entry: dict) -> None:
+    if entry['trigger']['action'] != CAST or entry.get('event_actor') or entry.get('extra_event_terms'):
+        raise ValueError(f'Proc {entry["aura"]} counts summons, which needs a cast trigger and no other event terms')
+    if not isinstance(entry.get('event_entry'), int) or entry['event_entry'] <= 0:
+        raise ValueError(f'Proc {entry["aura"]} counts summons of a positive creature event_entry')
+
+
 def event_steps(entry: dict) -> list[dict]:
     if counts_charges(entry):
         return []
+    if counts_summons(entry):
+        return [measurement(proc_measurements(entry['aura'])['events'], CASTER, SUMMON_EVENTS,
+                            entry=entry['event_entry'])]
+    if entry.get('event_actor') == MINION:
+        if entry['event_metric'] not in ('spell_damage_count', 'spell_go_count', MINION_PROC_COUNT) \
+                or minion_entry(entry) is None:
+            raise ValueError(f'Proc {entry["aura"]} reads minion events other than damage, casts or '
+                             f'{MINION_PROC_COUNT} of a minion')
+        on_target = {'target': TARGET} \
+            if entry['event_metric'] == 'spell_damage_count' and not entry.get('extra_dummies') else {}
+        return [measurement(label, CASTER, term['metric'], spell=term['spell'], entry=minion_entry(entry),
+                            **on_target) for label, term in event_terms(entry)]
     return [spell_count_step(label, term['metric'], term['spell']) for label, term in event_terms(entry)]
 
 
@@ -419,23 +605,39 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
         raise ValueError(f'Proc {entry["aura"]} has parts 0 to {plan.parts - 1}, not {part}')
     aura = entry['aura']
     labels = proc_measurements(aura)
-    steps = aura_steps(entry)
+    minion = entry['trigger']['action'] == MINION
+    cast_baseline = entry['trigger']['action'] == CAST and part == 0 and entry.get('baseline', False)
+    baseline = (minion and part == 0 and entry.get('baseline', False)) or cast_baseline
+    if minion:
+        from triggers import minion_setup_steps
+        steps = minion_setup_steps(class_file, entry['trigger'])
+        steps += minion_baseline_steps(class_file, entry, plan) if baseline else []
+        steps += aura_steps(entry)
+    else:
+        steps = (cast_baseline_steps(class_file, entry, plan) if cast_baseline else []) + aura_steps(entry)
     limit = per_trigger_limit(entry)
     steps += attempt_steps(class_file, entry, plan, labels)
     if limit is None:
-        steps += added_trial_steps(entry) + event_steps(entry)
-    steps += [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
+        steps += added_trial_steps(entry) + event_steps(entry) + energize_steps(entry) + excluded_trial_steps(entry)
+    if entry.get('aura_on_minion'):
+        if minion_entry(entry) is None:
+            raise ValueError(f'Proc {aura} reads its aura on a minion without a minion trigger')
+        steps += [measurement(labels['aura'], CASTER, 'owned_creature_count', entry=minion_entry(entry), spell=aura,
+                              caster=CASTER)]
+    else:
+        steps += [measurement(labels['aura'], CASTER, 'aura', spell=aura)]
     name = f'Conformance proc {class_file["name"]} {entry["name"]} {aura} part {part + 1} of {plan.parts}'
     contract = 'Proc rate of an aura over enough triggering hits, summed over its parts, against its tooltip chance.'
     scenario = scenario_shell(class_file, name, contract, steps)
     if trigger_target(entry) == ALLY:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     else:
-        scenario['creatures'] = [creature_fixture(class_file)]
+        scenario['creatures'] = [creature_fixture(class_file)] + extra_dummies(class_file, entry)
     model = {'part': part, 'parts': plan.parts, 'chance_pct': plan.chance_pct, 'minimum_trials': plan.needed,
              'scheduled_attempts': plan.scheduled, 'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms,
              'trigger': dict(entry['trigger']), 'proc_spell': entry['proc_spell'],
-             **chance_model(entry),
+             **chance_model(entry), **({'chance_modifiers': [list(pair) for pair in chance_modifiers(entry)]}
+                                        if chance_modifiers(entry) else {}),
              'event_metric': entry['event_metric'], 'events_per_proc': entry.get('events_per_proc', 1),
              'measurements': labels, 'event_labels': event_labels(entry, plan),
              'exclude_trigger_casts': excludes_trigger_casts(entry),
@@ -443,16 +645,79 @@ def proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
                           for reading in trial_readings(entry)]}
     if counts_charges(entry):
         model['charge_pool'] = charge_pool_label(aura)
+    if baseline:
+        model['baseline'] = {**baseline_labels(aura), 'attempts': baseline_attempts(plan.chance_pct)}
+    if entry.get('band'):
+        model['band'] = rate_band(plan.chance_pct / 100)
+    if entry.get('trial_excluded_spells'):
+        model['trial_exclusions'] = excluded_trial_labels(entry)
     rule = f'{WILSON_RULE}; {trial_rule(entry)}'
+    if entry.get('band'):
+        rule += (f'; the 99% interval inside the band of {rate_band(plan.chance_pct / 100) * 100:g} points around '
+                 f'the chance (G-19, ADR 0346)')
+    if entry.get('trial_excluded_spells'):
+        rule += (f'; the minion hits of {entry["trial_excluded_spells"]} are left out of the trials '
+                 f'({entry["trial_excluded_reason"]})')
+    if entry.get('extra_dummies'):
+        rule += (f'; {len(entry["extra_dummies"])} more dummies at {entry["extra_dummies"]} yd from the caster, the '
+                 f'events counted on every dummy')
+    if entry.get('baseline') and entry['trigger']['action'] in (MINION, CAST):
+        rule += (f'; no event in the {baseline_attempts(plan.chance_pct)} baseline attempts before the passive is '
+                 f'learned, which a {plan.chance_pct:g}% roll passes with under {BASELINE_MISS_RISK:g} probability')
     if limit is not None:
         model[PER_TRIGGER] = limit
         model['trigger_boundaries'] = trigger_boundaries(entry, plan.per_part)
         rule = f'{rule}; {PER_TRIGGER_RULE} ({limit})'
-    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
-    label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
+    label = entry_proc_label(class_file, entry)
     expectation = Expectation(label, PROC_CHECK, aura, aura, None, entry['chance_token'],
                               f'{rule}{handler_note(entry)}', model)
-    return timed(scenario, SETTLE_MS + plan.per_part * plan.attempt_ms + DRAIN_MS), [expectation]
+    baseline_ms = baseline_attempts(plan.chance_pct) * plan.attempt_ms + DRAIN_MS if baseline else 0
+    return (timed(scenario, SETTLE_MS + baseline_ms + plan.per_part * plan.attempt_ms + DRAIN_MS),
+            [expectation] + energize_expectations(entry, part, plan.parts))
+
+
+def energize_labels(aura: int, power: int) -> dict[str, str]:
+    return {part: f'{aura} proc energize {power} {part}' for part in ('total', 'count', 'max_power')}
+
+
+def energize_steps(entry: dict) -> list[dict]:
+    steps = []
+    for amount in entry.get('energize_amounts', []):
+        labels = energize_labels(entry['aura'], amount['power'])
+        steps += [measurement(labels['total'], CASTER, 'spell_energize_total', spell=entry['proc_spell'],
+                              power=amount['power']),
+                  measurement(labels['count'], CASTER, 'spell_energize_count', spell=entry['proc_spell'],
+                              power=amount['power'])]
+        if 'percent_of_max' in amount:
+            steps.append(measurement(labels['max_power'], CASTER, 'max_power', power=amount['power']))
+    return steps
+
+
+def energize_expectations(entry: dict, part: int, parts: int) -> list[Expectation]:
+    expectations = []
+    for amount in entry.get('energize_amounts', []):
+        if set(amount) - {'power', 'expected', 'percent_of_max', 'source'} or ('expected' in amount) == \
+                ('percent_of_max' in amount) or not amount.get('source'):
+            raise ValueError(f'Proc {entry["aura"]} energize amount is {{"power", "expected" or "percent_of_max", '
+                             f'"source"}}')
+        stated = (f'{amount["expected"]:g}' if 'expected' in amount
+                  else f'{amount["percent_of_max"]:g}% of the maximum')
+        rule = (f'every energize of power {amount["power"]} by {entry["proc_spell"]} restores {stated}, summed over '
+                f'the proc parts ({amount["source"]})')
+        model = {'part': part, 'parts': parts, 'power': amount['power'], 'expected': amount.get('expected'),
+                 'percent_of_max': amount.get('percent_of_max'),
+                 'measurements': energize_labels(entry['aura'], amount['power'])}
+        expectations.append(Expectation(f'{entry["aura"]} {PROC_ENERGIZE_CHECK} {amount["power"]}',
+                                        PROC_ENERGIZE_CHECK, entry['aura'], entry['aura'], None, stated, rule, model))
+    return expectations
+
+
+def extra_dummies(class_file: dict, entry: dict) -> list[dict]:
+    extras = entry.get('extra_dummies', [])
+    if extras and minion_entry(entry) is None:
+        raise ValueError(f'Proc {entry["aura"]} places extra dummies without a minion trigger')
+    return [{**creature_fixture(class_file), 'id': f'{TARGET}_{index + 2}', 'distance': distance}
+            for index, distance in enumerate(extras)]
 
 
 def handler_note(entry: dict) -> str:
@@ -526,8 +791,7 @@ def delta_proc_scenario(class_file: dict, entry: dict, part: int = 0, *,
             'part_attempts': plan.per_part, 'attempt_ms': plan.attempt_ms, 'trigger': dict(entry['trigger']),
             'proc_spell': entry['proc_spell'], 'event_metric': entry['event_metric'], 'measurements': labels,
             'baseline_co_learn': list(entry['baseline_co_learn'])}
-    trigger = trigger_key(entry) if shares_proc_spell(class_file, entry) else None
-    label = proc_label(aura, entry['proc_spell'], trigger) if shares_aura(class_file, entry) else proc_label(aura)
+    label = entry_proc_label(class_file, entry)
     expectation = Expectation(label, DELTA_CHECK, aura, aura, None, entry['chance_token'],
                               f'{DELTA_RULE}; {trial_rule(entry)}{handler_note(entry)}', model)
     return timed(scenario, SETTLE_MS + 2 * plan.per_part * plan.attempt_ms + 2 * DRAIN_MS), [expectation]

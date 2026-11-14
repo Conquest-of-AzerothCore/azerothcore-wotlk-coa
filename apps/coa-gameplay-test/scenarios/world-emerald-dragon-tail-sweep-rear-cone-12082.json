@@ -1,0 +1,169 @@
+{
+  "schema": 1,
+  "name": "Emeriss's Tail Sweep hits the cone behind her, not a player at her flank",
+  "contract": [
+    "Tail Sweep 2119705 says 'enemies in a cone behind the caster'. boss_emerald_dragons_coa swept the whole rear",
+    "half-plane (!isInFront(pi)), so a player 110 degrees off her facing, at her flank, was hit and thrown.",
+    "Emeriss (14889) faces the tank at -x. 'back' stands 8 yd straight behind her (180 degrees) and is swept;",
+    "'side' stands 8 yd away at 110 degrees, inside the old half-plane and outside the 90 degree rear cone the",
+    "sibling CoA tails (BWL drakes, Vaelastrasz, Nefarian) use, and must stay untouched for three sweeps. A sweep",
+    "knocks 'back' away, so 'back' returns to the same spot before each of the next two sweeps (every 4 s, held back while her breath is cast)."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "side",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "back",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 500000000,
+      "maximum": 500000000
+    },
+    {
+      "action": "set_health",
+      "actor": "side",
+      "value": 500000000,
+      "maximum": 500000000
+    },
+    {
+      "action": "set_health",
+      "actor": "back",
+      "value": 500000000,
+      "maximum": 500000000
+    },
+    {
+      "action": "summon",
+      "actor": "tank",
+      "entry": 14889,
+      "as": "emeriss",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "tank",
+      "entry": 14889
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "side",
+      "map": 0,
+      "x": -8910.67,
+      "y": -123.37,
+      "z": 82.37,
+      "o": 0.0,
+      "label": "side: 8 yd from Emeriss, 110 degrees off her facing"
+    },
+    {
+      "action": "teleport",
+      "actor": "back",
+      "map": 0,
+      "x": -8905.41,
+      "y": -115.853,
+      "z": 82.37,
+      "o": 0.0,
+      "label": "back: 8 yd straight behind Emeriss"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the sweep hits the player straight behind her",
+      "actor": "tank",
+      "metric": "spell_damage_count",
+      "spell": 2119705,
+      "caster": "emeriss",
+      "target": "back",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "actor": "back",
+      "map": 0,
+      "x": -8905.41,
+      "y": -115.853,
+      "z": 82.37,
+      "o": 0.0,
+      "label": "back: return behind her after sweep 1 threw her"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: sweep 2 hits the player behind her again",
+      "actor": "tank",
+      "metric": "spell_damage_count",
+      "spell": 2119705,
+      "caster": "emeriss",
+      "target": "back",
+      "min": 2,
+      "within_ms": 12000
+    },
+    {
+      "action": "teleport",
+      "actor": "back",
+      "map": 0,
+      "x": -8905.41,
+      "y": -115.853,
+      "z": 82.37,
+      "o": 0.0,
+      "label": "back: return behind her after sweep 2 threw her"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: sweep 3 hits the player behind her again",
+      "actor": "tank",
+      "metric": "spell_damage_count",
+      "spell": 2119705,
+      "caster": "emeriss",
+      "target": "back",
+      "min": 3,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player at her flank is never swept",
+      "actor": "tank",
+      "metric": "spell_damage_count",
+      "spell": 2119705,
+      "caster": "emeriss",
+      "target": "side",
+      "equals": 0
+    }
+  ]
+}
