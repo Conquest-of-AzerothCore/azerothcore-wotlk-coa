@@ -1,0 +1,68 @@
+{
+  "schema": 1,
+  "name": "Tinker: the Laser Beam talent's Sticky Bomb does not lock the client's Sticky Bomb button (#12207)",
+  "contract": [
+    "Talent 706680: Laser Beam (805372) damage casts Sticky Bomb 500612 on the target. The talent cast is triggered,",
+    "so the server stores no cooldown, but the client starts category 742's cooldown from SMSG_SPELL_GO and greys",
+    "out every Sticky Bomb button (the report). After the triggered cast the server must send SMSG_CLEAR_COOLDOWN",
+    "(478) for 500612, as Venomancer and Sun Cleric #11484 do. The spell_proc chance is 100, so the proc is certain."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 60,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 2000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 3000},
+    {"action": "add_item", "label": "Fixture: ranged gun", "actor": "tinker", "item": 450265},
+    {"action": "equip", "label": "Equip the gun", "actor": "tinker", "item": 450265, "slot": 17},
+    {"action": "assert", "actor": "tinker", "metric": "equipped_item", "slot": 17, "equals": 450265},
+    {"action": "learn", "actor": "tinker", "spell": 92141},
+    {"action": "learn", "actor": "tinker", "spell": 801384},
+    {"action": "learn", "actor": "tinker", "spell": 805372},
+    {"action": "learn", "label": "The Laser Beam Sticky Bomb talent", "actor": "tinker", "spell": 706680},
+    {"action": "assert", "label": "SETUP: the talent aura is on", "actor": "tinker", "metric": "aura", "spell": 706680, "min": 1, "within_ms": 2000},
+    {"action": "set_aura", "actor": "tinker", "spell": 801816, "stacks": 100},
+    {"action": "cast", "actor": "tinker", "spell": 801384},
+    {"action": "assert", "label": "Mechsuit is on", "actor": "tinker", "metric": "aura", "spell": 803451, "equals": 1, "within_ms": 2000},
+    {"action": "wait", "label": "Let the global cooldown clear", "ms": 1700},
+    {"action": "snapshot", "actor": "tinker", "metric": "server_packets", "opcode": 478, "row": 500612, "save_as": "clears_before"},
+    {"action": "cast", "actor": "tinker", "spell": 805372, "target": "target"},
+    {"action": "assert", "label": "Laser Beam hits its target", "actor": "tinker", "metric": "spell_damage_total", "spell": 805372, "target": "target", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The talent puts Sticky Bomb on the target", "actor": "target", "metric": "aura", "spell": 500612, "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "The triggered Sticky Bomb leaves no server cooldown", "actor": "tinker", "metric": "cooldown_ms", "spell": 500612, "equals": 0},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the server clears the client's Sticky Bomb cooldown with SMSG_CLEAR_COOLDOWN for 500612",
+      "actor": "tinker",
+      "metric": "server_packets",
+      "opcode": 478,
+      "row": 500612,
+      "relative_to": "clears_before",
+      "min": 1,
+      "within_ms": 2000
+    }
+  ]
+}

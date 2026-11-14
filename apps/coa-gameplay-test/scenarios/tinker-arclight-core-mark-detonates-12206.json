@@ -1,0 +1,67 @@
+{
+  "schema": 1,
+  "name": "Tinker: a pet ability consumes the Arclight Core mark and deals its Fire damage (#12206)",
+  "contract": [
+    "Arclight Core 704449: 'The next damaging ability used on this target by your pet consumes the mark to deal ...",
+    "Fire damage.' The mark is 524904 (applied by the Tinker); the damage is 524903, whose TargetAuraSpell is 524904,",
+    "so SpellInfo::CheckTarget refuses it on a target without the mark. DeviceEvent removed the mark before casting",
+    "524903, so the cast always failed: the mark vanished and no damage landed (the report). A permanent pet's spell",
+    "hit on a marked enemy must now deal 524903 to it and then remove the mark. The mark is set as a fixture with the",
+    "Tinker as caster; ZIGGI-6K's Gear Toss 520368 is the pet ability, with the original pet hit fixture 984948."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "golem",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 70,
+      "distance": 5,
+      "health": 1000000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "label": "Build: ZIGGI-6K passive", "actor": "tinker", "spell": 92140},
+    {"action": "learn", "label": "Build: ZIGGI-6K", "actor": "tinker", "spell": 524840},
+    {"action": "cast", "label": "Build: ZIGGI-6K", "actor": "tinker", "spell": 524840},
+    {"action": "assert", "label": "SETUP: ZIGGI-6K is built", "actor": "tinker", "metric": "pet_entry", "equals": 500481, "within_ms": 9000},
+    {"action": "set_aura", "label": "Supply the original pet hit and expertise fixture", "actor": "tinker", "spell": 984948, "pet": true, "stacks": 1},
+    {"action": "wait", "label": "ZIGGI-6K settles beside the Tinker", "ms": 2000},
+    {"action": "assert", "label": "SETUP: ZIGGI-6K knows Gear Toss", "actor": "tinker", "metric": "pet_knows_spell", "spell": 520368, "equals": 1, "within_ms": 5000},
+    {"action": "set_aura", "label": "The Tinker's Arclight Core mark is on the golem", "actor": "tinker", "target": "golem", "caster": "tinker", "spell": 524904, "stacks": 1},
+    {"action": "assert", "label": "SETUP: the mark is on the golem", "actor": "golem", "metric": "aura", "spell": 524904, "equals": 1},
+    {"action": "snapshot", "actor": "tinker", "metric": "spell_damage_count", "spell": 524903, "target": "golem", "pet": true, "save_as": "detonations_before"},
+    {"action": "cast_charm", "label": "ZIGGI-6K casts Gear Toss at the marked golem", "actor": "tinker", "spell": 520368, "target": "golem", "pet": true},
+    {"action": "assert", "label": "The pet cast is accepted", "actor": "tinker", "metric": "cast_failure", "spell": 520368, "equals": 0},
+    {"action": "assert", "label": "Gear Toss hits the golem", "actor": "tinker", "metric": "spell_damage_total", "spell": 520368, "target": "golem", "pet": true, "min": 1, "within_ms": 6000},
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pet's hit detonates the mark for Arclight Core Fire damage",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 524903,
+      "target": "golem",
+      "pet": true,
+      "relative_to": "detonations_before",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {"action": "assert", "label": "The mark is consumed", "actor": "golem", "metric": "aura", "spell": 524904, "equals": 0, "within_ms": 2000}
+  ]
+}
