@@ -626,21 +626,25 @@
       "name": "Blade Sermon",
       "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
       "chance_token": "$h",
-      "kind": "proc_rate_delta",
-      "trigger": {"action": "cast", "spell": 803880},
-      "trigger_text": "Zealotry",
+      "band": true,
+      "trigger": {"action": "cast", "spell": 573324},
+      "trigger_text": "trigger twice",
       "event_metric": "spell_cast_count",
       "proc_spell": 801450,
-      "proc_spell_source": "AscensionTemplar.cpp:212-220 Zealotry(): the repeat=true recursive call casts 801450 again, same spell as the first hit, so only a baseline (706325 alone) vs with-aura (706325 + 572554) delta tells the repeat apart from the first hit; the tooltip names only Zealotry, not a specific trigger, so the periodic-tick route (Blade of Faith 803880, Condemnation 706325) is this entry's own choice of a measurable Zealotry source, documented in reason",
-      "baseline_co_learn": [706325],
-      "delta_attempts": 12000,
-      "internal_cooldown_ms": 0,
-      "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
-      "reason": "owner ruling 2026-11-09: the double-hit chance applies to all three Zealotry sources (periodic tick 706325, off-hand swing 92108, Oath: Vindication 805332), reached through the single shared Zealotry() function; measured here on the periodic-tick source (706325 co-learned as the baseline), see 572548's entry for why 92108 and 805332 are not independently measurable by this harness and why 572548 itself could not reach ok at this trial count",
+      "proc_spell_source": "AscensionTemplar.cpp:218-226 Zealotry(): it casts 801450, then rolls 572554's ProcChance (checked before 572548) to call itself once more with repeat=true",
+      "events_per_proc": 1,
+      "events_exclude_trigger_casts": true,
+      "attempt_auras": [
+        {"spell": 704576, "stacks": 10, "source": "Oath Chain at its 10-stack cap: GrantOath (AscensionTemplar.cpp:168-171) grants no Oath: Vindication, whose 20% roll would call Zealotry again"},
+        {"spell": 805332, "stacks": 0, "source": "no Oath: Vindication 805332 from an earlier attempt"}
+      ],
+      "handler": "AscensionTemplarAbilities.cpp:347-352 (OnSpellHitResult): a landed Vindication 573324 hit (rank 7 of 801446) calls Zealotry once, which casts 801450 and rolls 572554's ProcChance 10 for a second 801450 (AscensionTemplar.cpp:218-226); the events are the 801450 casts less the Vindication casts, so each trial is one roll",
+      "reason": "owner ruling 2026-11-09: the double-hit chance applies to every Zealotry source through the single shared Zealotry() function; mentor ruling 2026-11-14 17:10: claim 135 is measured as a banded rate (ADR 0646). The direct Vindication route of 572548 replaces the proc_rate_delta over the periodic tick 706325, whose measured chance (with-rate / baseline-rate - 1) divides by a noisy 15% baseline: five runs of 24300 ticks per phase read +0.1303, +0.0808, +0.1682, +0.0495, +0.0836 (standard error about 0.023 each)",
       "dbc": {
         "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     },
     {
       "aura": 804571,
