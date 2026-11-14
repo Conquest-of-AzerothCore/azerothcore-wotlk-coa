@@ -10,9 +10,13 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <unordered_set>
 
 namespace CoaMythicPlus
 {
+    constexpr std::array<uint32, 6> CLIENT_AFFIX_FIELDS = { 7, 11, 3, 12, 13, 14 };
+
     namespace
     {
         // A plain WDBC file: header, fixed-size records, string block. The
@@ -175,33 +179,71 @@ namespace CoaMythicPlus
         RawDbc affixes;
         if (ReadDbc("MythicAffixes.dbc", 16, affixes))
         {
+            std::unordered_map<uint32, std::unordered_map<uint32, uint32>> weekAffixLevels;
+            for (uint32 i = 0; i < affixes.records; ++i)
+                for (uint32 f = 3; f <= 14; ++f)
+                    if (uint32 id = affixes.U32(i, f))
+                    {
+                        auto [itr, inserted] = weekAffixLevels[affixes.U32(i, 1)].emplace(id, affixes.U32(i, 2));
+                        if (!inserted)
+                            itr->second = std::min(itr->second, affixes.U32(i, 2));
+                    }
+            std::unordered_map<uint32, std::unordered_set<uint32>> tierAffixes;
+            for (auto const& [week, levels] : weekAffixLevels)
+                for (auto const& [id, level] : levels)
+                    tierAffixes[level].insert(id);
+
             for (uint32 i = 0; i < affixes.records; ++i)
             {
                 std::vector<uint32> ids;
                 for (uint32 f = 3; f <= 14; ++f)
                     if (uint32 id = affixes.U32(i, f))
                         ids.push_back(id);
-                // A disabled affix (MythicPlus.DisabledAffixes) takes the first of
-                // MythicPlus.AffixSubstitutes the row does not have yet. The
-                // swapped rows go to the client at login (SMSG_PATCH_MYTHIC_AFFIXES).
+                std::unordered_map<uint32, uint32> const& weekLevels = weekAffixLevels[affixes.U32(i, 1)];
+                std::unordered_map<uint32, uint32> tierOf;
+                for (uint32 id : ids)
+                    tierOf[id] = weekLevels.at(id);
                 for (uint32& id : ids)
-                    if (std::find(_disabledAffixes.begin(), _disabledAffixes.end(), id) != _disabledAffixes.end())
-                        for (uint32 substitute : _affixSubstitutes)
-                            if (std::find(ids.begin(), ids.end(), substitute) == ids.end())
-                            {
-                                id = substitute;
-                                break;
-                            }
+                {
+                    if (std::find(_disabledAffixes.begin(), _disabledAffixes.end(), id) == _disabledAffixes.end())
+                        continue;
+                    std::unordered_set<uint32> const& tier = tierAffixes[weekLevels.at(id)];
+                    auto const available = [&](uint32 substitute, bool sameTier)
+                    {
+                        return !weekLevels.count(substitute) && std::find(ids.begin(), ids.end(), substitute) == ids.end()
+                            && (!sameTier || tier.count(substitute));
+                    };
+                    auto substitute = std::find_if(_affixSubstitutes.begin(), _affixSubstitutes.end(),
+                        [&](uint32 candidate) { return available(candidate, true); });
+                    if (substitute == _affixSubstitutes.end())
+                        substitute = std::find_if(_affixSubstitutes.begin(), _affixSubstitutes.end(),
+                            [&](uint32 candidate) { return available(candidate, false); });
+                    if (substitute != _affixSubstitutes.end())
+                    {
+                        tierOf[*substitute] = tierOf[id];
+                        id = *substitute;
+                    }
+                }
+                std::sort(ids.begin(), ids.end(), [&tierOf](uint32 a, uint32 b)
+                {
+                    return std::tie(tierOf[a], a) < std::tie(tierOf[b], b);
+                });
                 std::array<uint32, 16> row;
                 for (uint32 f = 0; f < 16; ++f)
                     row[f] = affixes.U32(i, f);
-                bool swapped = false;
-                for (uint32 f = 3, next = 0; f <= 14; ++f)
+                std::vector<uint32> fields;
+                for (uint32 f : CLIENT_AFFIX_FIELDS)
                     if (row[f])
-                    {
-                        swapped |= row[f] != ids[next];
-                        row[f] = ids[next++];
-                    }
+                        fields.push_back(f);
+                for (uint32 f = 3; f <= 14; ++f)
+                    if (row[f] && std::find(fields.begin(), fields.end(), f) == fields.end())
+                        fields.push_back(f);
+                bool swapped = false;
+                for (std::size_t next = 0; next < fields.size(); ++next)
+                {
+                    swapped |= row[fields[next]] != ids[next];
+                    row[fields[next]] = ids[next];
+                }
                 if (swapped)
                     _swappedAffixRows.push_back(row);
                 _lastAffixRowId = std::max(_lastAffixRowId, row[0]);

@@ -1624,7 +1624,10 @@ public:
         Run* run = RunFor(map);
         // Mythical Boons (80215) exist only for a keystone.
         if (creature->GetEntry() == 80215)
+        {
             creature->SetVisible(run && run->Active());
+            creature->SetFloatValue(UNIT_FIELD_COMBATREACH, 10.0f);
+        }
         if (run && run->Active())
             ApplyCreatureAffixes(creature, *run);
         if (run && Finished(*run))

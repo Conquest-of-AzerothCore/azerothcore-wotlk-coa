@@ -1,0 +1,262 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Gri'lek's damage rises by 5% every 20 seconds",
+  "contract": [
+    "Live Trauma ticks (snapshotted when each Ground Slam applies them) rise about 1.41-1.46x by 200 s and",
+    "2.0-2.13x by 424 s, with no cap, one step every 20 s with Relentless Pursuit (2118801). Decided 2026-11-13:",
+    "Gri'lek (15082) gains one stack of a hidden +5% damage done aura (92432, custom 5 per stack) 1 s into the",
+    "fight and every 20 s after. Two grouped heroes fight the Mythic Gri'lek. At the first slam (24 s) he has two",
+    "stacks (x1.10), at the second (49 s) three (x1.15), so the second slam's eight Trauma ticks",
+    "(2118804, Mythic in 2118802's SpellDifficulty row) on the leader total 1.15 / 1.10 = 1.045x the first; the old",
+    "script gave exactly 1.00. Trauma's base is fixed (1000 per tick, no die roll), creatures cannot crit with",
+    "spells and bleeds ignore armor, so the ratio is exact."
+  ],
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "lead",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mate",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "lead",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mate",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "lead",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "group",
+      "label": "Both heroes share one Zul'Gurub instance",
+      "actor": "lead",
+      "target": "mate"
+    },
+    {
+      "action": "teleport",
+      "actor": "lead",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the leader's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "mate",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the mate's transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader is in Zul'Gurub on Mythic",
+      "actor": "lead",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the mate is in the same Mythic Zul'Gurub",
+      "actor": "mate",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "lead",
+      "entry": 15082,
+      "as": "grilek",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack",
+      "actor": "lead",
+      "target": "grilek"
+    },
+    {
+      "action": "attack",
+      "actor": "mate",
+      "target": "grilek"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek fights",
+      "actor": "grilek",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "lead"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mate"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first rising-damage stack comes 1 s into the fight",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 92432,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: one stack is +5% damage done, not the spell's own 10%",
+      "actor": "grilek",
+      "metric": "aura_amount",
+      "spell": 92432,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Gri'lek casts Ground Slam 24 s in",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 15082,
+      "spell": 2118806,
+      "min": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the first Trauma ticks eight times on the leader",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "lead",
+      "spell": 2118804,
+      "equals": 8,
+      "within_ms": 12000
+    },
+    {
+      "action": "snapshot",
+      "label": "The first slam's Trauma damage on the leader",
+      "actor": "lead",
+      "metric": "spell_damage_total",
+      "caster": "grilek",
+      "target": "lead",
+      "spell": 2118804,
+      "save_as": "first_trauma"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: two stacks (1 s and 21 s) about 33 s in",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 92432,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second slam 25 s later",
+      "actor": "lead",
+      "metric": "spell_go_count",
+      "entry": 15082,
+      "spell": 2118806,
+      "min": 2,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second Trauma ticks eight times on the leader",
+      "actor": "lead",
+      "metric": "spell_damage_count",
+      "caster": "grilek",
+      "target": "lead",
+      "spell": 2118804,
+      "equals": 16,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second slam's Trauma is 1.15 / 1.10 of the first (old script: 1.00)",
+      "actor": "lead",
+      "metric": "spell_damage_total",
+      "caster": "grilek",
+      "target": "lead",
+      "spell": 2118804,
+      "relative_to": "first_trauma",
+      "ratio_to": "first_trauma",
+      "min": 1.04,
+      "max": 1.05
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: at least three stacks after the 41 s step",
+      "actor": "grilek",
+      "metric": "aura_stacks",
+      "spell": 92432,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the aura's amount grows with its stacks (at least 15%)",
+      "actor": "grilek",
+      "metric": "aura_amount",
+      "spell": 92432,
+      "min": 15
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader survived",
+      "actor": "lead",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}

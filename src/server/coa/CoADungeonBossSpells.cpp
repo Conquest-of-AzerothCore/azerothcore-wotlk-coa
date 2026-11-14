@@ -16,10 +16,13 @@
 #include "SpellScript.h"
 #include "Log.h"
 #include "SpellAuras.h"
+#include "DBCStores.h"
+#include "DatabaseEnv.h"
 #include "SpellMgr.h"
 #include "Player.h"
 #include "UnitScript.h"
 #include <memory>
+#include <unordered_map>
 
 namespace
 {
@@ -416,6 +419,52 @@ namespace
     };
 }
 
+class CoADungeonBossSpellReach final : public GlobalScript
+{
+public:
+    CoADungeonBossSpellReach() : GlobalScript("CoADungeonBossSpellReach", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (!info)
+            return;
+        if (!_loaded)
+            Load();
+        auto const itr = _reach.find(info->Id);
+        if (itr == _reach.end())
+            return;
+        if (itr->second.rangeIndex)
+            if (SpellRangeEntry const* range = sSpellRangeStore.LookupEntry(itr->second.rangeIndex))
+                info->RangeEntry = range;
+        if (itr->second.lineOfSight)
+            info->AttributesEx2 &= ~SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    }
+
+private:
+    struct Reach
+    {
+        uint32 rangeIndex = 0;
+        bool lineOfSight = false;
+    };
+
+    void Load()
+    {
+        _loaded = true;
+        if (PreparedQueryResult result = WorldDatabase.Query(WorldDatabase.GetPreparedStatement(WORLD_SEL_COA_DUNGEON_SPELL_REACH)))
+        {
+            do
+            {
+                Field* fields = result->Fetch();
+                _reach[fields[0].Get<uint32>()] = { fields[1].Get<uint32>(), fields[2].Get<uint8>() != 0 };
+            } while (result->NextRow());
+        }
+        LOG_INFO("server.loading", ">> Loaded {} CoA dungeon spell reach corrections", _reach.size());
+    }
+
+    bool _loaded = false;
+    std::unordered_map<uint32, Reach> _reach;
+};
+
 class spell_coa_summon_hearty_heart : public SpellScript
 {
     PrepareSpellScript(spell_coa_summon_hearty_heart);
@@ -501,4 +550,5 @@ void AddSC_CoADungeonBossSpells()
     new CoATargorrBerserkerLeapMarker();
     RegisterSpellScript(spell_coa_mothers_milk_spray);
     RegisterSpellScript(spell_coa_mothers_milk_debuff);
+    new CoADungeonBossSpellReach();
 }

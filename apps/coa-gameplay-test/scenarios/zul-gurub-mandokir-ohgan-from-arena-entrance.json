@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "name": "Zul'Gurub: Ohgan runs in from the arena entrance at double size when Mandokir is pulled",
+  "name": "Zul'Gurub: Mandokir waits unmounted and Ohgan runs in from the arena entrance at double size when he is pulled",
   "contract": [
     "The tester of 2026-11-04 (live): when Bloodlord Mandokir (11382) comes down, Ohgan (14988) comes running in",
     "from the arena entrance instead of appearing at his side, and he is twice the size of the stock raptor. The",
@@ -8,7 +8,11 @@
     "The tank stands about 30 yards inside the arena from there, so the old spawn 3 yards beside Mandokir never",
     "leaves its home by 15 yards, while Ohgan from the entrance must run to the fight. Double size is display",
     "215271, the same model and textures as 15271 at a client scale of 2, kept at a model scale of 1 on every",
-    "tier."
+    "tier.",
+    "Before the pull Mandokir stands unmounted (tester and user decision, 2026-11-13): he rode Ohgan's display",
+    "215271 from his template addon and his Reset, and carried Mounted 2118412; now neither mount nor aura.",
+    "In all four live logs Ohgan casts Dash (2106617) early in the fight and about every 20 seconds; the stock",
+    "npc_ohgan casts it on engage and repeats it every 20 seconds."
   ],
   "timeout_ms": 120000,
   "location": {
@@ -79,6 +83,21 @@
       "ms": 300
     },
     {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mandokir does not ride Ohgan before the pull",
+      "actor": "mandokir",
+      "metric": "mount_display_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and carries no Mounted aura",
+      "actor": "mandokir",
+      "metric": "aura",
+      "spell": 2118412,
+      "equals": 0
+    },
+    {
       "action": "attack",
       "label": "Engage Mandokir",
       "actor": "tank",
@@ -113,6 +132,26 @@
       "metric": "nearby_creature_display",
       "entry": 14988,
       "equals": 215271
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ohgan casts Dash in the fight",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "spell": 2106617,
+      "entry": 14988,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and casts it again about 20 seconds later",
+      "actor": "tank",
+      "metric": "spell_go_count",
+      "spell": 2106617,
+      "entry": 14988,
+      "min": 2,
+      "within_ms": 25000
     },
     {
       "action": "assert",
