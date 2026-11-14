@@ -90,6 +90,24 @@ keys are appended automatically on deploy.
 
 A player with a two-word name is given in quotes, in any letter case: `.coa reset "Firstname Lastname"`.
 
+Support commands for a player's run (administrator, also from the console; the player defaults to the target):
+
+```
+.coa trial objectives [player]
+.coa trial credit <challengeId> <objective number> [player]
+.coa trial restore <challengeId> [player]
+```
+
+- `objectives` lists every active challenge with its level, deaths and tracked objectives, numbered and marked
+  done or pending, and the challenge ids the player is locked out of. It also works for an offline character.
+- `credit` marks one objective done by its number from that list, whatever the player's level, and runs the
+  normal completion check. The player must be online.
+- `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives,
+  run timer, hunger, thirst and fatigue it had when it failed, re-links a custom trial with its other bundled
+  challenges, takes the fatal death back when the run was out of lives, and resurrects the character. The state
+  comes from `coa_challenge_failure_snapshot`, written at every failure; a failure from before that table
+  restores with a restarted timer. High-Risk drops and shared-fate partners are not restored.
+
 ## Scope / limitations
 
 - GroupRewards (`ChallengeGroupRewards.dbc`) — semantics not confirmed.
