@@ -23,3 +23,10 @@ failed claim. No server change: Dazed from behind is the engine's rule for a cre
 
 - The `snare_control` scenario gains one read before the before reading; the Necromancer digests are refreshed.
 - A dazed control still leaves 389.0 unproven in that run; it is no longer an alert.
+
+## Addendum (cycle 16)
+
+The `frenzied_snare_immune` entry of 503740 takes the same striker and the same untouched before phase (no talent, no
+strike, before the Frenzied transform), so it can read the same Dazed 1604 at 0.57143 and alert. It sets
+`before_aura_absent` {1604, 50073} too. The after phase is unchanged: 707014 carries Effect[2] aura 77 mechanic
+immunity to snare (MECHANIC 11), which covers Dazed's snare aura as it covers Hamstring's.
