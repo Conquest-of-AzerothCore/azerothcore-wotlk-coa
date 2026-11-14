@@ -87,6 +87,7 @@ void AddSC_CoAGuardLevel();
 void AddSC_CoATestZoneBonus();
 void AddSC_AscensionBazaarTokenCap();
 void AddSC_AscensionBazaarTokenCapQuestRewards();
+void AddSC_AscensionStoneBuyer();
 void AddSC_CoAPtrCharacterCopy();
 void AddSC_CoADungeonBossSpells();
 void AddSC_AscensionProfessionSpellAffect();
@@ -899,6 +900,7 @@ void AddCoAScripts()
     AddSC_CoATestZoneBonus();
     AddSC_AscensionBazaarTokenCap();
     AddSC_AscensionBazaarTokenCapQuestRewards();
+    AddSC_AscensionStoneBuyer();
     AddSC_CoAPtrCharacterCopy();
     AddSC_CoADungeonBossSpells();
     AddSC_AscensionProfessionSpellAffect();
