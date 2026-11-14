@@ -83,7 +83,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'placement_audit_event_spawns',
     'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
-    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item', 'level_scaling_choice',
+    'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp', 'sent_visible_item',
+    'level_scaling_choice',
     'spell_mod_mutants',
     'sent_average_item_level', 'sent_average_item_level_count',
     'creature_query_rank', 'creature_query_quest_item', 'quest_level', 'quest_xp',
@@ -1093,7 +1094,8 @@ def validate(scenario, clock=REAL_CLOCK):
                         and bool(step['name']), f'{where}: name metric needs a player and name')
             elif 'name' in step:
                 require(False, f'{where}: name only applies to name metrics')
-            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_visible_item'}:
+            if metric in {'view_level', 'sent_level', 'sent_max_health', 'sent_faction', 'sent_free_for_all_pvp',
+                          'sent_visible_item'}:
                 require(step['actor'] in player_ids and 'target' in step,
                         f'{where}: view metric needs a player and target')
             if metric == 'sent_visible_item':
