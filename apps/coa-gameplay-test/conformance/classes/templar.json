@@ -6892,6 +6892,13 @@
       "observe_source": "$s2 = 10 (707754 EffectBasePoints[0] 9 + EffectDieSides[0] 1): Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The Templar's run speed rate is read before Courage is learned (the control, 1.0) and after (1.1), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 10% alerts (the passive scenario's run_speed_rate verdict uses a 1-point floor and stays data). A learned contrast of the run speed the clause promises (ADR 0190)."
     },
     {
+      "spell": 712466, "name": "Courage (Rank 2, movement speed)", "kind": "metric_delta", "variant": "speed",
+      "label_suffix": "speed", "quote": "Increases your movement speed", "expected": 1.2, "trigger_spell": 578276,
+      "target": "caster", "metric": "run_speed_rate", "fields": {}, "before_expected": 1.0, "wait_ms": 1000,
+      "expire_ms": 6500,
+      "observe_source": "712466 EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20%: Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The passive's own before/after reading as a learned contrast (ADR 0616): the Templar's run speed rate is read before Courage Rank 2 is learned (the control, 1.0) and after (1.2), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 20% alerts."
+    },
+    {
       "spell": 800424,
       "name": "Absolution",
       "kind": "aggro_redirect",
