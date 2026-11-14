@@ -365,6 +365,11 @@ An omitted bonus uses the creature's normal stats. Require the observed hit as w
 Optional `stationary: true` disables native movement for that fixture using `UNIT_FLAG_DISABLE_MOVE` and stops
 its current motion. Other creatures retain their original movement. Use it for a fixed damage target when
 wandering or fleeing would invalidate ordinary cast range or facing; it does not change spell hit or proc chance.
+Optional `min_level_armor: true` sets that fixture's base armor, after its `level` is applied, to the armor of its
+template's lowest level (`creature_classlevelstats` at `minlevel` times the template's armor modifier), read at run
+time. A template with a level range otherwise rolls its level at spawn, and its armor with it. Melee damage, mana
+and the other level-derived stats still follow the rolled level; health comes from the `health` field. The
+conformance generator sets it on every creature fixture ([ADR 0658](../../docs/adr/0658-pin-generated-fixture-armor-to-the-template-minimum.md)).
 
 Start from [scenarios/frostbolt.json](scenarios/frostbolt.json). Schema version 1 accepts up to eight players,
 twelve creatures and 10,000 sequential steps (twelve since ADR 0221; eight before). Schema version 2 raises the
