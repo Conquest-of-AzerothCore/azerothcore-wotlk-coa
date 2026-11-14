@@ -104,8 +104,9 @@
   required, there is no default) reads local agent transcripts (`*.jsonl`, subagents as `agent-*.jsonl` with an optional
   `.meta.json` description) and writes aggregates only: per role (`author`, `integrator`, `read-only`, `fix`, and
   `main` for the controller sessions) the agent count, input (uncached + cache read + cache write), cache read, output
-  and agent-minutes. One usage is kept per message id, synthetic messages are skipped, and the role comes from the first
-  prompt and description by `role_of`. No prompt, path, session id or user name is written (ADR 0656).
+  and agent-minutes (an agent counts from its first message to its last one, or to `--until`). One usage is kept per
+  message id, synthetic messages are skipped, and the role comes from the first prompt and description by `role_of`. No
+  prompt, path, session id or user name is written (ADR 0656).
 - `bonus.py`: the owner's band on a percent bonus (`bonus_band`, the larger of 5% of it and 2 points), the bonus of
   two arms with its 99% Welch half-width (`per_event_sample`, `bonus_of`), the status with power and negative arm
   (`bonus_status`), the trials a band needs (`sized_trials`) and the interval a verdict excludes (`excluded_text`)

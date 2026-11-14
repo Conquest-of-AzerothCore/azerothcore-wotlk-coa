@@ -35,11 +35,11 @@ that layout; without such transcripts the checkpoint reads "not recorded".
    or `coa-verify` selections only (guide 9.5).
 9. Work in batches and cycles (guide 9.6): write each cycle's plan (claims taken, target count) first; fresh agents
    only; no clock.
-10. After each merged pair, write `cycle.json` and run `python3 -B conformance.py cycle --config cycle.json` (guide
-    9.8, ADR 0655). Agents are needed only where it stops.
-11. At each checkpoint record the cost: `python3 -B conformance.py cost --transcripts DIR --since ISO --out cost.json`
-    (ADR 0656; without transcripts the checkpoint reads "not recorded"). Compact the controller's context and send the
-    checkpoint to the mentor.
+10. After each merged pair, record the cost first: `python3 -B conformance.py cost --transcripts DIR --since ISO --out
+    cost.json` (ADR 0656), and name that file in the `cost` field of `cycle.json`; the cycle copies it into the
+    checkpoint it writes (without transcripts, leave `cost` out: the checkpoint reads "not recorded").
+11. Then run `python3 -B conformance.py cycle --config cycle.json` (guide 9.8, ADR 0655). Agents are needed only where
+    it stops. Compact the controller's context and send the checkpoint to the mentor.
 12. Before a PR: `python -B tools/verify_all.py --stages source --base origin/main`, the codestyle linters on changed
     C++ and SQL, class ADRs under `docs/adr/conformance/<class>/` (guide 14.4).
 

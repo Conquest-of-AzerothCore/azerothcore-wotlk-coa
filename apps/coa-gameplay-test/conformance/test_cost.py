@@ -68,6 +68,12 @@ class TotalsTest(unittest.TestCase):
         self.assertEqual(bounded['agents_total']['agents'], 2)
         self.assertEqual(bounded['roles']['read-only']['agents'], 0)
 
+    def test_until_clips_an_agent_running_past_it(self):
+        until = datetime(2026, 1, 2, 11, 15, tzinfo=timezone.utc)
+        bounded = cost_totals(FIXTURE, SINCE, until)
+        self.assertEqual(bounded['roles']['author']['agent_minutes'], 15.0)
+        self.assertEqual(bounded['roles']['author']['output'], 20)
+
     def test_a_missing_directory_is_an_error(self):
         with self.assertRaises(CostError):
             cost_totals(FIXTURE / 'absent', SINCE)

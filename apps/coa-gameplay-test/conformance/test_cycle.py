@@ -324,6 +324,34 @@ class RefactorGateTest(CycleCase):
         self.assertEqual(rows[0]['record'], [['ok'], ['ok']])
         self.assertEqual(rows[0]['pair'], [['alert'], ['ok']])
 
+    def scenario_verdicts(self, name: str, statuses: dict) -> Path:
+        directory = self.root / name
+        directory.mkdir()
+        verdicts = [{'label': '9 moved_a', 'check': 'behaviour_metric_delta', 'scenario': scenario, 'status': status}
+                    for scenario, status in statuses.items()]
+        (directory / 'verdicts.json').write_text(json.dumps({'verdicts': verdicts}), encoding='utf-8')
+        return directory
+
+    def test_a_change_in_one_scenario_of_a_shared_label_is_reported(self):
+        entries = [{'kind': 'moved_a', 'spell': 9, 'name': 'Strike'}]
+        manifest = self.root / 'manifest.json'
+        manifest.write_text(json.dumps({'scenarios': [{'key': key, 'expectations': [
+            {'label': '9 moved_a', 'spell_id': 9, 'model': {'kind': 'moved_a'}}]} for key in ('a', 'b')]}),
+            encoding='utf-8')
+        recorded = {'a': 'ok', 'b': 'alert'}
+        record = Record('final14', FIXTURES / 'record-status.json', (),
+                        (self.scenario_verdicts('r1', recorded), self.scenario_verdicts('r2', recorded)), manifest)
+        refactor = Refactor(('moved_a',), 'abc', 'classes/x.json', 'def', (), ())
+        config = self.replay(record=record, manifest=manifest, refactor=refactor,
+                             compare=(self.scenario_verdicts('p1', {'a': 'alert', 'b': 'alert'}),
+                                      self.scenario_verdicts('p2', recorded)))
+        files = {'abc': {'behaviours': entries}, 'def': {'behaviours': entries}}
+        with mock.patch('cycle.class_file_at', lambda worktree, rev, path: files[rev]):
+            run_cycle(config, (*REPLAY, 'tally', 'archive', 'checkpoint'), FakeRunner(self.root))
+        rows = json.loads((self.root / 'out' / REFACTOR_FILE).read_text(encoding='utf-8'))
+        self.assertEqual([(row['label'], row['changed'], row.get('changed_scenarios'), row.get('class'))
+                          for row in rows], [('9 moved_a', True, ['a'], 'refactor regression')])
+
 
 class CommandLineTest(CycleCase):
     def test_the_cycle_subcommand_reads_a_cycle_file_with_relative_paths(self):
@@ -349,6 +377,47 @@ class CommandLineTest(CycleCase):
         path.write_text(json.dumps(document), encoding='utf-8')
         with self.assertRaisesRegex(CycleError, 'pair.stamps'):
             load_config(path)
+
+
+class PairIdentityTest(CycleCase):
+    def cycle_file(self, **record) -> Path:
+        pair = FIXTURES / 'final16'
+        document = {'class_id': 23, 'name': 'final16', 'worktree': str(REPOSITORY), 'clauses': 'c.json', 'out': 'out',
+                    'build': BUILD,
+                    'record': {'name': 'final14', 'status': 's.json', 'manifest': 'm.json',
+                               'compare': [str(FIXTURES / 'record' / 'cmp-run1'),
+                                           str(FIXTURES / 'record' / 'cmp-run2')], **record},
+                    'pair': {'stamps': [STAMPS[0], STAMPS[0]], 'compare': [str(pair / 'cmp-run1')] * 2}}
+        path = self.root / 'cycle.json'
+        path.write_text(json.dumps(document), encoding='utf-8')
+        return path
+
+    def test_an_empty_record_compare_is_refused(self):
+        with self.assertRaisesRegex(CycleError, r'record.compare: a merged pair has 2 entries, found 0'):
+            load_config(self.cycle_file(compare=[]))
+        config = self.replay(record=Record('final14', FIXTURES / 'record-status.json', (), (),
+                                           FIXTURES / 'record' / 'manifest.json'))
+        with self.assertRaisesRegex(CycleError, 'record.compare: a merged pair has 2 entries, found 0'):
+            run_cycle(config, REPLAY, FakeRunner(self.root))
+
+    def test_a_pair_naming_one_run_twice_is_refused(self):
+        config = load_config(self.cycle_file())
+        with self.assertRaisesRegex(CycleError, 'pair.stamps: both entries name the same run'):
+            run_cycle(config, REPLAY, FakeRunner(self.root))
+        pair = FIXTURES / 'final16'
+        for field, value in (('compare', (pair / 'cmp-run1',) * 2),
+                             ('coverage', (pair / 'coverage-run1.json',) * 2)):
+            with self.subTest(field=field):
+                with self.assertRaisesRegex(CycleError, f'pair.{field}: both entries name the same run'):
+                    run_cycle(self.replay(**{field: value}), REPLAY, FakeRunner(self.root))
+
+    def test_a_restored_pair_naming_one_run_twice_is_refused(self):
+        out = self.root / 'out'
+        out.mkdir()
+        run = {'stamp': STAMPS[0], 'results': str(self.root / STAMPS[0])}
+        (out / cycle.PAIR_FILE).write_text(json.dumps({'runs': [run, run]}), encoding='utf-8')
+        with self.assertRaisesRegex(CycleError, 'stamps: both entries name the same run'):
+            run_cycle(self.replay(stamps=(), compare=()), REPLAY, FakeRunner(self.root))
 
 
 if __name__ == '__main__':

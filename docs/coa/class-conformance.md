@@ -754,9 +754,10 @@ by claim key, `candidates` (`{key: why}`), `rulings` (`{key: {status, why}}`, st
 cycle for each status 3-5 claim, or the tally stops; a key that names no claim of the ledger stops it too), `counted` (ledger-only re-audit corrections, counted at once, G-17) and `text_changed` (owner text
 items). A re-audit of an archived pair is the same command with `--skip gate --skip digests --skip generate --skip
 source --skip runs --skip compare` and `pair.stamps` / `pair.compare` set. Agents are used only where the script
-stops: a merge conflict, the cause of a flip, a candidate ruling. At each checkpoint the controller compacts its
-context, records the cost with `conformance.py cost` (ADR 0656; without transcripts the checkpoint shows "not
-recorded") and sends the checkpoint, with the next cycle's plan, to the mentor.
+stops: a merge conflict, the cause of a flip, a candidate ruling. The controller records the cost with
+`conformance.py cost` before the cycle runs and names the file in the `cost` field, since the checkpoint step copies it
+(ADR 0656; without transcripts the checkpoint shows "not recorded"). At each checkpoint the controller compacts its
+context and sends the checkpoint, with the next cycle's plan, to the mentor.
 
 Before a PR, `python -B tools/verify_all.py --stages source --base origin/main` (`CONF/README.md:94`). Run the codestyle
 linters on changed C++ and SQL files. SQL goes only under `data/sql/updates/pending_db_*/`.

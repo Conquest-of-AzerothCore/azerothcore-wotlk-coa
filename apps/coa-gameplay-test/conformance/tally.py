@@ -3,6 +3,7 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 
+from coverage import resolved_labels
 from prove import CONFORMANT, NOT_JUDGED, status_class
 
 FINAL = ('1', '2', '3', '4', '5')
@@ -91,9 +92,14 @@ def judged_classes(statuses) -> set:
     return {status_class(status) for status in statuses if status is not None and status != NOT_JUDGED}
 
 
+def run_labels(label: str, runs) -> list:
+    present = dict.fromkeys(name for run in runs for name in run)
+    return resolved_labels(label, present) or [label]
+
+
 def flips(labels, new_runs, old_runs, old_sha, now_sha, changed) -> tuple:
     inside, against = [], []
-    for label in labels:
+    for label in (match for ledger_label in labels for match in run_labels(ledger_label, [*new_runs, *old_runs])):
         keys = set().union(*(run.get(label, {}).keys() for run in new_runs))
         recorded = set().union(*(run.get(label, {}).keys() for run in old_runs))
         for key in sorted(keys | recorded):
@@ -111,7 +117,8 @@ def flips(labels, new_runs, old_runs, old_sha, now_sha, changed) -> tuple:
 
 
 def label_statuses(runs, labels) -> dict:
-    return {label: [sorted({status for status in run.get(label, {}).values()}) for run in runs] for label in labels}
+    return {label: [sorted({status for match in run_labels(label, runs) for status in run.get(match, {}).values()})
+                    for run in runs] for label in labels}
 
 
 def labels_pass(runs, labels) -> tuple:

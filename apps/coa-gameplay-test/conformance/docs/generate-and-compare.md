@@ -483,10 +483,10 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
 | `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
 | `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
-| `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (its two compare outputs), `manifest` |
-| `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped) |
+| `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |
+| `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped); the two entries of each field, and of `OUT/pair.json`, must name two different runs |
 | `decisions` | the candidates and rulings file, below |
-| `refactor` | `moved_kinds`, `record_commit` and `class_file` (the class file there and at the worktree, or at `class_file_rev`), `db_words` and `db_kinds` (the seed-suspect classes) |
+| `refactor` | `moved_kinds`, `record_commit` and `class_file` (the class file there and at the worktree, or at `class_file_rev`), `db_words` and `db_kinds` (the seed-suspect classes); a label/check row changes when one scenario's statuses over the two runs differ between the record and the pair, and lists those scenarios in `changed_scenarios` |
 | `archive`, `cost`, `previous_status` | the archive directory; a cost JSON copied into the checkpoint (`"not recorded"` without it); the status file the delta is measured against (the record by default) |
 
 The tally (`tally.py`) gives every ledger claim a status 1-5 or `not final`. A claim with a flip is not final: a flip
@@ -494,11 +494,13 @@ within the pair is a label/check/scenario whose judged status class (conformant,
 the runs or that is present in one run only (`insufficient_trials` is not judged); a flip against the record compares
 the pair with the record's two runs on every label/check/scenario of either side, so a scenario with no result in both
 runs of the pair flips against the record, except on a scenario whose sha256 changed or a label whose judge changed
-(`judge_changed`: a changed expectation or a new value link). A ruling is applied first and stands over a flip: its
-status (2 to 5) rests on the rule or ruling it names, not on the runs (class-conformance.md section 2). Status 1 needs a
-pair with no flip (class-conformance.md 3.2) and never comes from a ruling. Otherwise a record status 1 stays 1 on
-behaviour in both runs, a status 2 stays 2 on behaviour or on its recorded evidence kind, and a recorded status 3-5
-claim with neither a ruling nor a candidate stops the tally. The decisions file holds, by claim key, `candidates`
+(`judge_changed`: a changed expectation or a new value link). A ledger label without an ordinal reaches its
+`label #N` verdicts in the flips and the label checks, as in the audit (`coverage.resolved_labels`). A ruling is
+applied first and stands over a flip: its status (2 to 5) rests on the rule or ruling it names, not on the runs
+(class-conformance.md section 2). Status 1 needs a pair with no flip (class-conformance.md 3.2) and never comes from a
+ruling. Otherwise a record status 1 stays 1 on behaviour in both runs, a status 2 stays 2 on behaviour or on its
+recorded evidence kind, and a recorded status 3-5 claim with neither a ruling nor a candidate stops the tally. The
+decisions file holds, by claim key, `candidates`
 (`{key: why}`: status 1 on behaviour in both runs with every label conformant), `rulings` (`{key: {"status": "3",
 "why": "..."}}`, status 2 to 5), `counted` (ledger-only re-audit corrections, counted at once: status 1, basis
 `counted`, on behaviour in both runs; otherwise the record status rules apply) and `text_changed` (keys whose claim

@@ -4,7 +4,8 @@ import tempfile
 import unittest
 
 from tally import (NOT_FINAL, Decisions, TallyError, TallyInputs, check_decisions, classify, flips, judge_changed,
-                   ledger_keys, load_decisions, record_rows, status_markdown, tally, tally_lines, write_status)
+                   label_statuses, labels_pass, ledger_keys, load_decisions, record_rows, status_markdown, tally,
+                   tally_lines, write_status)
 
 FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'cycle'
 RULING = 'mentor ruling on X 18:39, confirmed (c8 brief): status 3'
@@ -189,6 +190,16 @@ class FlipRuleTest(unittest.TestCase):
     def test_a_changed_scenario_or_judge_is_not_compared_with_the_record(self):
         self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], now_sha={'scenario-a': 'y'}), ([], []))
         self.assertEqual(self.check(['alert', 'alert'], ['ok', 'ok'], changed={LABEL}), ([], []))
+
+    def test_an_ordinal_free_label_reaches_its_ordinal_run_labels(self):
+        runs = [{f'{LABEL} #0': {KEY: 'ok'}, f'{LABEL} #1': {KEY: 'tolerated'}, f'{LABEL} #1x': {KEY: 'alert'}}] * 2
+        self.assertEqual(label_statuses(runs, [LABEL]), {LABEL: [['ok', 'tolerated'], ['ok', 'tolerated']]})
+        self.assertEqual(labels_pass(runs, [LABEL]), (True, {}))
+        self.assertEqual(label_statuses(runs, [f'{LABEL} #2']), {f'{LABEL} #2': [[], []]})
+        flipping = [{f'{LABEL} #1': {KEY: 'ok'}}, {f'{LABEL} #1': {KEY: 'unmeasured'}}]
+        inside, _ = flips([LABEL], flipping, [{}, {}], {}, {}, frozenset())
+        self.assertEqual(inside, [{'label': f'{LABEL} #1', 'check': KEY[0], 'scenario': KEY[1],
+                                   'statuses': ['ok', 'unmeasured']}])
 
     def test_judge_changed_names_changed_expectations_and_new_value_links(self):
         old = {'class_file': {}, 'scenarios': [{'key': 'a', 'expectations': [{'label': LABEL, 'low': 1}]}]}

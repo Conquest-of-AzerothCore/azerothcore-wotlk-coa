@@ -2,7 +2,7 @@
 
 The single source of the rules for every agent dispatched on class conformance work, the controller included
 ([ADR 0657](../adr/0657-dispatch-rules-and-model-effort-are-mandatory-for-class-work.md)). A class's plan links this
-file or copies it; it does not rewrite the rules. The guide is [class-conformance.md](class-conformance.md).
+file; it does not copy or rewrite the rules. The guide is [class-conformance.md](class-conformance.md).
 
 Measured reason (Necromancer retrospective, agents only, input = uncached + cache read + cache write): the night and
 cycle 1 took 3,505 M input tokens (2,083.8 M and 1,421.5 M), against 12.4 to 46.9 M for each of

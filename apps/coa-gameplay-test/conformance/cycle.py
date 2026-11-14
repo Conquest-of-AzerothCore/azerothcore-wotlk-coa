@@ -111,10 +111,15 @@ def require(document: dict, name: str, where: str = 'cycle file'):
     return document[name]
 
 
-def pair_of(values, name: str) -> tuple:
-    if values and len(values) != 2:
-        raise CycleError(f'{name}: a merged pair has 2 entries, found {len(values)}')
+def pair_of(values, name: str, required: bool = False) -> tuple:
+    if (values or required) and len(values or ()) != 2:
+        raise CycleError(f'{name}: a merged pair has 2 entries, found {len(values or ())}')
     return tuple(values or ())
+
+
+def distinct_pair(values, name: str) -> None:
+    if len(values) == 2 and values[0] == values[1]:
+        raise CycleError(f'{name}: both entries name the same run {values[0]}; a merged pair is two runs')
 
 
 def load_config(path: Path) -> CycleConfig:
@@ -136,7 +141,7 @@ def load_config(path: Path) -> CycleConfig:
         record=Record(str(require(record, 'name', 'record')), resolve(base, require(record, 'status', 'record')),
                       pair_of(record.get('stamps'), 'record.stamps'),
                       tuple(resolve(base, item) for item in pair_of(require(record, 'compare', 'record'),
-                                                                     'record.compare')),
+                                                                     'record.compare', required=True)),
                       resolve(base, require(record, 'manifest', 'record'))),
         decisions=resolve(base, document.get('decisions')),
         scenarios_dir=resolve(base, document.get('scenarios_dir')),
@@ -173,6 +178,11 @@ def validate(config: CycleConfig, skip: frozenset) -> None:
         raise CycleError('the generate and runs steps need "scenarios_dir"')
     if {'source', 'gate'} - skip and not config.base:
         raise CycleError('the gate and source steps need "base"')
+    pair_of(config.record.compare, 'record.compare', required=True)
+    for name, values in (('record.stamps', config.record.stamps), ('record.compare', config.record.compare),
+                         ('pair.stamps', config.stamps), ('pair.results', config.results),
+                         ('pair.compare', config.compare), ('pair.coverage', config.coverage)):
+        distinct_pair(values, name)
 
 
 def run_logged(command: Sequence[str], cwd: Path, log: Path) -> int:
@@ -441,6 +451,19 @@ def label_verdicts(directory: Path) -> dict:
     return out
 
 
+def by_scenario(runs: list, key: tuple) -> dict:
+    statuses = defaultdict(set)
+    for run in runs:
+        for verdict in run.get(key, []):
+            statuses[verdict['scenario']].add(verdict['status'])
+    return {scenario: sorted(found) for scenario, found in statuses.items()}
+
+
+def changed_scenarios(old: list, new: list, key: tuple) -> list:
+    before, after = by_scenario(old, key), by_scenario(new, key)
+    return sorted(scenario for scenario in set(before) | set(after) if before.get(scenario) != after.get(scenario))
+
+
 def refactor_class(info: dict, refactor: Refactor, record: Record) -> str:
     if info['entry_changed_since_record']:
         return f'explained: entry changed since {record.name} ({refactor.record_commit})'
@@ -486,10 +509,12 @@ def refactor_rows(config: CycleConfig, directories: list) -> list:
                    'record_measured': [[verdict.get('measured') for verdict in run.get((label, check), [])]
                                        for run in old],
                    'pair_measured': [[verdict.get('measured') for verdict in run.get((label, check), [])]
-                                     for run in new],
-                   'changed': sorted(set(sum(before, []))) != sorted(set(sum(after, [])))}
-            if row['changed']:
+                                     for run in new]}
+            moved = changed_scenarios(old, new, (label, check))
+            row['changed'] = bool(moved)
+            if moved:
                 row['class'] = refactor_class(info, refactor, config.record)
+                row['changed_scenarios'] = moved
             rows.append(row)
     return rows
 
@@ -666,6 +691,9 @@ def known_pair(cycle: Cycle) -> None:
         runs = json.loads(pair_file.read_text(encoding='utf-8'))['runs']
         cycle.stamps = [run['stamp'] for run in runs]
         cycle.results = [Path(run['results']) for run in runs]
+        pair_of(cycle.stamps, str(pair_file))
+        distinct_pair(cycle.stamps, f'{pair_file} stamps')
+        distinct_pair(cycle.results, f'{pair_file} results')
 
 
 def run_cycle(config: CycleConfig, skip: Sequence[str] = (), runner: Runner = run_logged,

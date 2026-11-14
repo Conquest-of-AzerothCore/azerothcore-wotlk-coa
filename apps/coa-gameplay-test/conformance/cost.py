@@ -134,7 +134,8 @@ def cost_totals(root: Path, since: datetime, until: Optional[datetime] = None) -
             continue
         totals = by_role[role_of(description_of(path), prompt)]
         totals['agents'] += 1
-        totals['seconds'] += (parse_time(last) - parse_time(first)).total_seconds()
+        end = parse_time(last) if until is None else min(parse_time(last), until)
+        totals['seconds'] += (end - parse_time(first)).total_seconds()
         collect(totals, usage)
     for path, first, last, usage, prompt in mains:
         collect(by_role[MAIN], usage)
