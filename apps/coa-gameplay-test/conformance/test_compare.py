@@ -1287,6 +1287,26 @@ class PassiveDeltaTest(unittest.TestCase):
         self.assertEqual(missing.status, 'alert')
         self.assertNotIn(DATA_ONLY, missing.detail)
 
+    def test_a_run_speed_rate_delta_takes_the_hundredth_point_floor_in_rate_units(self):
+        entry = passive_expectation(712466, 0, 'run_speed_rate', 'scale', '$s1', 20.0)
+        token = [Displayed('$s1', 20.0, 0, 'percent')]
+        stated = self.single(entry, '1', '1.2000000476837158', token)
+        self.assertEqual(stated.status, 'ok')
+        self.assertAlmostEqual(stated.high - stated.expected, 1e-4)
+        self.assertNotIn(DATA_ONLY, stated.detail)
+        self.assertEqual(self.single(entry, '1', '1.1900000572204590', token).status, 'alert')
+        self.assertEqual(self.single(entry, '1', '1', token).status, 'alert')
+
+    def test_run_speed_rate_readings_of_ten_and_twenty_percent_are_judged_alike(self):
+        token = {10.0: [Displayed('$s1', 10.0, 0, 'percent')], 20.0: [Displayed('$s1', 20.0, 0, 'percent')]}
+        readings = {10.0: '1.1000000238418579', 20.0: '1.2000000476837158'}
+        for percent, reading in readings.items():
+            with self.subTest(percent=percent):
+                entry = passive_expectation(707754, 0, 'run_speed_rate', 'scale', '$s1', percent)
+                verdict = self.single(entry, '1', reading, token[percent])
+                self.assertEqual(verdict.status, 'ok')
+                self.assertNotIn(DATA_ONLY, verdict.detail)
+
     def test_exact_stat_reading_judges_a_sub_point_delta(self):
         entry = passive_expectation(BELLS_OF_LIGHT, 2, 'stat', 'scale', '$s1', 3.0, fields={'stat': 3}, exact=True)
         token = [Displayed('$s1', 3.0, 0, 'percent')]
@@ -1604,6 +1624,8 @@ class QuestionDetailTest(unittest.TestCase):
         self.assertEqual(delta_margin('spell_modifier', -30000.0), 150.0)
         self.assertEqual(delta_margin('armor', 1631.0), 1.0)
         self.assertEqual(delta_margin('spell_crit_chance', 600.0), 0.01)
+        self.assertAlmostEqual(delta_margin('run_speed_rate', 0.2), 1e-4)
+        self.assertAlmostEqual(delta_margin('run_speed_rate', 2.4), 1e-4)
         self.assertEqual(PERCENT_POINT_METRICS, frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed',
                                                            'spell_crit_chance', 'melee_hit_chance', 'spell_hit_chance',
                                                            'parry_chance', 'dodge_chance', 'spell_done_crit_chance'}))

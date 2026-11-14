@@ -626,21 +626,25 @@
       "name": "Blade Sermon",
       "tooltip": "Increases the Weapon Damage dealt by |cFFFFFFFFZealotry|r by $s1% and gives it a $h% chance to trigger twice.",
       "chance_token": "$h",
-      "kind": "proc_rate_delta",
-      "trigger": {"action": "cast", "spell": 803880},
-      "trigger_text": "Zealotry",
+      "band": true,
+      "trigger": {"action": "cast", "spell": 573324},
+      "trigger_text": "trigger twice",
       "event_metric": "spell_cast_count",
       "proc_spell": 801450,
-      "proc_spell_source": "AscensionTemplar.cpp:212-220 Zealotry(): the repeat=true recursive call casts 801450 again, same spell as the first hit, so only a baseline (706325 alone) vs with-aura (706325 + 572554) delta tells the repeat apart from the first hit; the tooltip names only Zealotry, not a specific trigger, so the periodic-tick route (Blade of Faith 803880, Condemnation 706325) is this entry's own choice of a measurable Zealotry source, documented in reason",
-      "baseline_co_learn": [706325],
-      "delta_attempts": 12000,
-      "internal_cooldown_ms": 0,
-      "handler": "AscensionTemplar.cpp:214-223 (Zealotry) rolls its ProcChance to cast the strike 801450 again",
-      "reason": "owner ruling 2026-11-09: the double-hit chance applies to all three Zealotry sources (periodic tick 706325, off-hand swing 92108, Oath: Vindication 805332), reached through the single shared Zealotry() function; measured here on the periodic-tick source (706325 co-learned as the baseline), see 572548's entry for why 92108 and 805332 are not independently measurable by this harness and why 572548 itself could not reach ok at this trial count",
+      "proc_spell_source": "AscensionTemplar.cpp:218-226 Zealotry(): it casts 801450, then rolls 572554's ProcChance (checked before 572548) to call itself once more with repeat=true",
+      "events_per_proc": 1,
+      "events_exclude_trigger_casts": true,
+      "attempt_auras": [
+        {"spell": 704576, "stacks": 10, "source": "Oath Chain at its 10-stack cap: GrantOath (AscensionTemplar.cpp:168-171) grants no Oath: Vindication, whose 20% roll would call Zealotry again"},
+        {"spell": 805332, "stacks": 0, "source": "no Oath: Vindication 805332 from an earlier attempt"}
+      ],
+      "handler": "AscensionTemplarAbilities.cpp:347-352 (OnSpellHitResult): a landed Vindication 573324 hit (rank 7 of 801446) calls Zealotry once, which casts 801450 and rolls 572554's ProcChance 10 for a second 801450 (AscensionTemplar.cpp:218-226); the events are the 801450 casts less the Vindication casts, so each trial is one roll",
+      "reason": "owner ruling 2026-11-09: the double-hit chance applies to every Zealotry source through the single shared Zealotry() function; mentor ruling 2026-11-14 17:10: claim 135 is measured as a banded rate (ADR 0646). The direct Vindication route of 572548 replaces the proc_rate_delta over the periodic tick 706325, whose measured chance (with-rate / baseline-rate - 1) divides by a noisy 15% baseline: five runs of 24300 ticks per phase read +0.1303, +0.0808, +0.1682, +0.0495, +0.0836 (standard error about 0.023 each)",
       "dbc": {
         "572554": {"ProcChance": 10, "ProcFlags": 0, "ProcCharges": 0}
       },
-      "spell_proc": {}
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     },
     {
       "aura": 804571,
@@ -2001,7 +2005,8 @@
       "spell": 524767, "name": "Judgement of the Gods (Titanstrike crit rate, pooled)", "kind": "hit_ratio",
       "variant": "crit_rate", "label_suffix": "crit_rate", "quote": "Increases the critical strike chance of", "expected": 1.0,
       "observe_spell": 806835, "control": {"auras": [[823764, 1]]}, "treatment": {"auras": [[823764, 1], [524767, 1]]},
-      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 75, "target_health_pct": 30,
+      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 146, "target_health_pct": 30,
+      "observe_source": "146 parts of 166 casts: from the between-part SD measured in four runs (4.08 and 3.97 points, binomial 3.88), P(99% half-width > 1.25) is 6e-12 at the measured SD and 7e-5 at its 99% upper bound.",
       "expected_source": "$s1 = 50 (524767 EffectBasePoints[0] 49 + 1), aura 107 SPELLMOD on EffectMiscValue[0] 7 (SPELLMOD_CRITICAL_CHANCE), mask-matched to Titanstrike 806835 (spell_modifier ok). Titanstrike 806835 (TargetAuraState 13, the dummy held at 30%) cast at the dummy in both arms with beeg spellpen 823764; the treatment sets 524767. The critical share of Titanstrike hits must differ by 50 points."
     },
     {
@@ -2108,8 +2113,8 @@
       "spell": 300513, "name": "Crusader's Brand (damage on the branded attacker)", "kind": "script_hit",
       "quote": "and when they deal direct damage they take ${$573020m1*$<scalingbp>+$sph*0.275+$AP*.185} Holy Damage.",
       "hit_spell": 573020, "casts": [[300513, "striker"]], "control_casts": [], "strike_spell": 41394,
-      "receiver": "striker", "caster_health_pct": 100, "trials": 40, "minimum_hits": 30,
-      "observe_source": "AscensionTemplarEvents.cpp:120-121 (case 300513): a direct damage hit dealt by the branded unit casts 573020 from the Templar at that unit (300513 Effect[0] aura 42, ProcChance 100). Each treatment trial brands the passive striker (creature 36, 3 yd away), which then casts Light of the Naaru 41394 (direct Holy) at the caster; the control trials make the same strike without the brand (ADR 0206), so no 573020 hit may land. 573020 Effect[0] SCHOOL_DAMAGE 242 + 1, Templar coefficients (AscensionTemplarData.h:60)."
+      "receiver": "striker", "caster_health_pct": 100, "trials": 70, "minimum_hits": 30,
+      "observe_source": "AscensionTemplarEvents.cpp:120-121 (case 300513): a direct damage hit dealt by the branded unit casts 573020 from the Templar at that unit (300513 Effect[0] aura 42, ProcChance 100). Each treatment trial brands the passive striker (creature 36, 3 yd away), which then casts Light of the Naaru 41394 (direct Holy) at the caster; the control trials make the same strike without the brand (ADR 0206), so no 573020 hit may land. 573020 Effect[0] SCHOOL_DAMAGE 242 + 1, Templar coefficients (AscensionTemplarData.h:60). Sample: 40 trials gave 29 and 38 usable hits (pair 20261114-135017 / -141026): 4 + 0 critical hits and 7 + 2 trials with no 573020 hit (the strike 41394 and the retaliation 573020 each roll MagicSpellHitResult; 300513, DmgClass 0 with aura effects only, cannot miss), 67 usable of 80. At 70 trials P(usable < 30) = 1.2e-15 at the pooled rate 0.8375 and 9.5e-8 at its 99% one-sided Clopper-Pearson lower bound 0.719 (binomial)."
     },
     {
       "spell": 300515, "name": "Fortified Body (does not stack, heals)", "kind": "hit_ratio", "variant": "no_stack",
@@ -5491,7 +5496,8 @@
       "variant": "argent_blade_crit_rate", "label_suffix": "argent_blade_crit_rate",
       "quote": "and critical strike chance of your next", "expected": 1.5, "observe_spell": 807268,
       "learn": [807268], "control": {"auras": [[561156, 1]]}, "treatment": {"auras": [[520608, 1], [561156, 1]]},
-      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 76,
+      "rate": "critical", "expected_points": 50, "trials": 166, "parts": 115,
+      "observe_source": "115 parts of 166 casts: from the between-part SD measured in six runs (3.76 points pooled, binomial 3.88), P(99% half-width > 1.25) is 9e-8 at the measured SD and 8e-5 at its 99% upper bound.",
       "expected_source": "$s1 = 50 (520608 EffectBasePoints[0] 49, EffectDieSides[0] 1), as the crit_rate entry: 520608 modifies Warrior of Dawn 561156, whose Effect[2] aura 107 SPELLMOD_CRITICAL_CHANCE on Argent Blade 807268 is 0 on its own; Unit::SpellDoneCritChance applies it to the next Argent Blade, which consumes 561156. Both arms set 561156 before each Argent Blade, the treatment sets 520608 first; no crit rating fixture. Pooled proof of the chance-claim ruling (2026-11-12) with the rate mode of ADR 0195: 76 parts of 166 casts per arm, 12,616 per arm, sized for a 99% half-width of at most 1.25 points (half the band of +-2.5) near 5% / 55%; the critical share of all Argent Blade hits must differ by 50 points between the arms."
     },
     {
@@ -6889,7 +6895,14 @@
       "label_suffix": "speed", "quote": "Increases your movement speed", "expected": 1.1, "trigger_spell": 578276,
       "target": "caster", "metric": "run_speed_rate", "fields": {}, "before_expected": 1.0, "wait_ms": 1000,
       "expire_ms": 6500,
-      "observe_source": "$s2 = 10 (707754 EffectBasePoints[0] 9 + EffectDieSides[0] 1): Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The Templar's run speed rate is read before Courage is learned (the control, 1.0) and after (1.1), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 10% alerts (the passive scenario's run_speed_rate verdict uses a 1-point floor and stays data). A learned contrast of the run speed the clause promises (ADR 0190)."
+      "observe_source": "$s2 = 10 (707754 EffectBasePoints[0] 9 + EffectDieSides[0] 1): Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The Templar's run speed rate is read before Courage is learned (the control, 1.0) and after (1.1), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 10% alerts (the passive scenario's run_speed_rate verdict takes the 1e-4 rate floor of ADR 0661, so it is no longer data_only). A learned contrast of the run speed the clause promises (ADR 0190)."
+    },
+    {
+      "spell": 712466, "name": "Courage (Rank 2, movement speed)", "kind": "metric_delta", "variant": "speed",
+      "label_suffix": "speed", "quote": "Increases your movement speed", "expected": 1.2, "trigger_spell": 578276,
+      "target": "caster", "metric": "run_speed_rate", "fields": {}, "before_expected": 1.0, "wait_ms": 1000,
+      "expire_ms": 6500,
+      "observe_source": "712466 EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20%: Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED. The passive's own before/after reading as a learned contrast (ADR 0258, amending ADR 0120): the Templar's run speed rate is read before Courage Rank 2 is learned (the control, 1.0) and after (1.2), each after a Benediction 578276 on itself, which does not touch speed; judged to 1e-5, so a bonus other than 20% alerts."
     },
     {
       "spell": 800424,

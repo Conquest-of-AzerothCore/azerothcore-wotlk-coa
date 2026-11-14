@@ -320,14 +320,13 @@ the 99% threshold with margin (empirically, 2031 attempts/phase gave z between 1
 runs of Blade Sermon 572554's 10% rank against its ~15% Condemnation baseline; 12000 attempts/phase gave z 5.00
 and 5.90 across two repeated runs, reliably `ok`).
 
-Blade Sermon 572554 (10%) carries this check (`baseline_co_learn: [706325]`, `delta_attempts: 12000`,
-300 parts), measured `ok` (stamp `20261109-163213`: baseline 3662 in 24300, with-aura 4139 in 24300, z 5.90,
-measured chance +0.1303 against tooltip 0.1). Blade Sermon 572548 (5%) could not reach `ok` within this round's
-budget: its smaller nested chance needs a baseline many times larger before the same two-proportion z reliably
-clears 2.576 (at 2031 attempts/phase, stamp `20261109-162302`: baseline 590 in 4131, with-aura 645 in 4131, z
-1.70, measured chance +0.0932 against tooltip 0.05 - directionally consistent, underpowered); it stays
-`unmodelled` with this measurement recorded in its `reason`, since 572554's identical code path (same function,
-same lines, only a different `ProcChance` operand) is the runtime evidence for both ranks sharing one mechanism.
+Blade Sermon 572554 (10%) carried this check (`baseline_co_learn: [706325]`, `delta_attempts: 12000`, 300 parts)
+until claim 135 (2026-11-14): five runs of 24300 ticks per phase read +0.1303, +0.0808, +0.1682, +0.0495 and
++0.0836, each with a standard error of about 0.023 because the measured chance divides by a noisy 15% baseline, so
+the z flipped around 2.576. Both ranks are now plain proc entries on the Vindication route (trigger 573324, the
+801450 casts less the Vindication casts, one roll per trial), and 572554 is a `band: true` entry (ADR 0646) that
+needs `band_trials_needed(0.10)` = 5973 trials, scheduled as 8960 attempts in 30 parts. The kind stays available
+for a nested chance with no direct trial.
 The off-hand-swing (92108) and Oath: Vindication (805332) sources named by the same ruling are not independently
 measurable by this harness for reasons already on their own entries (92108: no `CanDualWield` path for Templar;
 805332/504107: no fixture to co-learn the Oath aura before a roll that depends on it) - not a gap this round

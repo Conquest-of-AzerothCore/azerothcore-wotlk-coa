@@ -236,7 +236,7 @@
       "300513 script_hit 573020"
     ],
     "kind": "claim",
-    "reason": "script_hit with control casts (ADR 0206): the branded striker's Light of the Naaru takes 573020 hits of 211.9 / 208.3 against the model 209.0; the same strike without the brand: 0 hits; counted 20261112-021809 / -021850"
+    "reason": "script_hit with control casts (ADR 0206): the branded striker's Light of the Naaru takes 573020 hits of 212.36 / 211.16 against the model 209.0; the same strike without the brand: 0 hits; 70 trials (P(usable < 30) <= 9.5e-8), counted 20261114-143311 / -143339"
   },
   {
     "spell": 300513,
@@ -1066,7 +1066,7 @@
       "520608 behaviour_hit_ratio argent_blade_crit_rate"
     ],
     "kind": "claim",
-    "reason": "Argent Blade 807268 with Warrior of Dawn 561156 set before each cast, 520608 set first in the treatment, no crit fixture: pooled rate proof (chance-claim ruling 2026-11-12, ADR 0195 rate mode), 76 parts of 166 casts per arm, 12,616 per arm. Critical share +50.26 points (99% interval +49.11 to +51.41) and +50.40 (+49.26 to +51.55) against +50 inside +-2.5, control 0 critical hits in both runs of one counted pair (20261112-012244, -012512). The 300-cast crit_rate step (ADR 0173) stays as the first reading"
+    "reason": "Argent Blade 807268 with Warrior of Dawn 561156 set before each cast, 520608 set first in the treatment, no crit fixture: pooled rate proof (chance-claim ruling 2026-11-12, ADR 0195 rate mode), 115 parts of 166 casts per arm. Earlier 76-part pair: critical share +50.26 points (99% interval +49.11 to +51.41) and +50.40 (+49.26 to +51.55) against +50 inside +-2.5, control 0 critical hits in both runs (20261112-012244, -012512). Resized after the count-of-record pair 20261114-163739 / -165640, where 520608 was ok in both runs (50.79 and 51.24) but its 99% half-width read 1.2452 and 1.0736 against the 1.25 limit: from the between-part SD measured in six runs (3.76 points pooled, binomial 3.88), 115 parts bring P(half-width > 1.25) to 9e-8 at the measured SD and 8e-5 at its 99% upper bound (76 parts: 1.1e-1 and 4.2e-1). Focused pair on 115 parts, 20261114-171716 / -171904: critical share 49.60 and 49.72 points against 50 inside [47.5, 52.5], half-widths 0.9563 and 0.9510, no flip. The 300-cast crit_rate step (ADR 0173) stays as the first reading; counts only at the counted pair"
   },
   {
     "spell": 520812,
@@ -1234,7 +1234,8 @@
       "524767 e0 spell_done_crit_chance 806835",
       "524767 behaviour_hit_ratio crit_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "pooled hit_ratio crit rate (ADR 0647) of Titanstrike 806835 with and without the talent, band 50 [47.5, 52.5]: 146 parts of 166 casts, sized from the between-part SD measured in four runs (4.08 and 3.97 points, binomial 3.88), P(99% half-width > 1.25) 6e-12 at the measured SD and 7e-5 at its 99% upper bound (75 parts sat on the limit, expected half 1.245); counts only at the counted pair"
   },
   {
     "spell": 524822,
@@ -1658,7 +1659,8 @@
     "labels": [
       "572554 proc_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "banded direct rate (ADR 0646) on the Vindication route of Rank 1 572548: trigger 573324, events 801450 casts less the 573324 casts, one roll per Zealotry() call (DBC ProcChance 10, no spell_proc row, no internal cooldown), the Oath Chain held and Oath: Vindication 805332 removed; band [0.08, 0.12], band_trials_needed(0.10) 5973 trials, 30 parts x 299 = 8970; the former proc_rate_delta flipped because its ratio divides by a noisy 15% Condemnation baseline (standard error about 0.023 per run; five delta runs pooled +0.1016), not a server defect; focused pair 20261114-161949 / -162032: 0.0982 [0.0904, 0.1061] and 0.1017 [0.0938, 0.1095]; counts only at the counted pair"
   },
   {
     "spell": 572555,
@@ -3317,9 +3319,11 @@
     "spell": 712466,
     "clause": "Increases your movement speed",
     "labels": [
-      "712466 e0 run_speed_rate"
+      "712466 e0 run_speed_rate",
+      "712466 behaviour_metric_delta speed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "the passive's own before/after-learn reading as a learned contrast (ADR 0258, amending ADR 0120): run speed 1.0 before Courage Rank 2 is learned and 1.2000000476837158 after, judged to 1e-5; the passive's e0 run_speed_rate is judged to 1e-4 (ADR 0661); focused pair 20261114-151448 / -151515"
   },
   {
     "spell": 712466,

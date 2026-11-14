@@ -380,6 +380,17 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(bonus=bonus), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_creature_min_level_armor_validation(self):
+        for value in (True, False):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0]['min_level_armor'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value in (1, 0, 'true', None):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0]['min_level_armor'] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_creature_actor_spell_immunity_metrics(self):
         for step in ({'metric': 'spell_immune', 'spell': 853},
                      {'metric': 'spell_effect_immune', 'spell': 61391, 'effect': 0}):
