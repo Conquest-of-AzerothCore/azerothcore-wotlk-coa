@@ -15,7 +15,8 @@ BUILD = 'b' * 64
 STAMPS = ('20261114-084514', '20261114-090752')
 RUNS_ONLY = ('gate', 'refactor', 'archive')
 REPLAY = ('gate', 'digests', 'generate', 'source', 'runs', 'compare', 'audit')
-DECISIONS = {'rulings': {'81.0': {'status': '3', 'why': 'mentor ruling'}}, 'text_changed': ['125.2']}
+DECISIONS = {'rulings': {'81.0': {'status': '3', 'why': 'mentor ruling on X 18:39, confirmed (c8 brief): status 3'}},
+             'text_changed': ['125.2']}
 
 
 def argument(command, flag):
