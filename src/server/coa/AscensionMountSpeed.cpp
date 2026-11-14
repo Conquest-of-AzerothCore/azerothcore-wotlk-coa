@@ -22,6 +22,7 @@ namespace
 constexpr uint32 ColdWeatherFlying = 54197;
 constexpr uint32 AshadarItemMount = 287665;
 constexpr uint32 AshadarMount = 917000;
+constexpr int32 BattlegroundGroundMountSpeed = 100;
 
 std::atomic<bool> legacyFlight{ false };
 
@@ -141,8 +142,12 @@ public:
             return;
 
         uint16 const riding = player->GetBaseSkillValue(SKILL_RIDING);
-        amount = type == SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED ? GetRidingGroundMountSpeed(riding) :
-            GetRidingFlightMountSpeed(riding);
+        if (type == SPELL_AURA_MOD_INCREASE_MOUNTED_FLIGHT_SPEED)
+            amount = GetRidingFlightMountSpeed(riding);
+        else if (player->InBattleground() && !player->InArena())
+            amount = BattlegroundGroundMountSpeed;
+        else
+            amount = GetRidingGroundMountSpeed(riding);
     }
 };
 }
