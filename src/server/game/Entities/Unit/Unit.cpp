@@ -8476,6 +8476,11 @@ void Unit::ModifyAuraState(AuraStateType flag, bool apply)
         if (!HasFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1)))
         {
             SetFlag(UNIT_FIELD_AURASTATE, 1 << (flag - 1));
+
+            // enrage auras are never unapplied when the state drops (see below), so reapplying them stacks their effects
+            if (flag == AURA_STATE_ENRAGE)
+                return;
+
             Unit::AuraMap& tAuras = GetOwnedAuras();
             for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end(); ++itr)
             {
