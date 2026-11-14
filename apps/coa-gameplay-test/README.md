@@ -678,8 +678,9 @@ reports whether the player carries it (for example `8` customize, `64` faction c
 with a fixed base of 1000. The spell metric also requires `spell` and accepts `effect` (default 0); the melee metric uses a main-hand white hit.
 `spell_damage_taken` and `melee_damage_taken` query the corresponding incoming bonus calculations for any
 unit; `target` identifies the attacker, and `melee_damage_taken` optionally accepts a weapon-strike `spell`.
-These queries do not execute attacks or include hit rolls, critical hits, armor/resistance mitigation, or proc
-effects.
+`spell_damage_taken` also accepts `base` (default 1000, per stack), `periodic` for a DoT tick and `stacks`
+(default 1), which multiplies the base and is passed as the aura's stack count. These queries do not execute
+attacks or include hit rolls, critical hits, armor/resistance mitigation, or proc effects.
 `spell_power_cost` requires `spell` and queries its current native resource cost; it does not submit a cast.
 `skill_line_for_spell` requires `spell` and returns the server's loaded `SkillLineAbility` entry's `SkillLine`
 for it (the client spellbook tab the spell's own row places it under), or `-1` when no row carries a nonzero

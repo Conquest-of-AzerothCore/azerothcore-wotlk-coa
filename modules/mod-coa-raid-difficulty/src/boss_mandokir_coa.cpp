@@ -28,10 +28,14 @@
  *                                            missed; SpellFix.cpp)
  *   Threatening Gaze  first 15s, every 20s   he stares at a player for 4s,
  *                                            then Menacing Gaze for 4s: an
- *                                            active hostile action (a spell
- *                                            with a power cost on the global
- *                                            cooldown) Sentences them to Die
- *                                            and he Decapitates them
+ *                                            active action, any cast of a
+ *                                            spell that requires a power
+ *                                            source and is on the global
+ *                                            cooldown (heals and buffs too,
+ *                                            and free procs like Clearcasting;
+ *                                            the 2118423 tooltip), Sentences
+ *                                            them to Die and he Decapitates
+ *                                            them
  *   Execute           the tank below 20%, every 7-14s
  *   Fierce Blow       first 30.7-31.6s, every 22.5-44s   the tank; later and
  *                                            rarer than on the other bosses
@@ -512,10 +516,16 @@ namespace
     public:
         mandokir_coa_menacing_gaze() : PlayerScript("mandokir_coa_menacing_gaze", { PLAYERHOOK_ON_SPELL_CAST }) { }
 
+        static bool IsActiveAction(SpellInfo const* info)
+        {
+            bool requiresPower = info->ManaCost || info->ManaCostPercentage || info->ManaCostPerlevel ||
+                info->ManaPerSecond || info->RuneCostID;
+            return requiresPower && info->StartRecoveryTime;
+        }
+
         void OnPlayerSpellCast(Player* player, Spell* spell, bool /*skipCheck*/) override
         {
-            SpellInfo const* info = spell->GetSpellInfo();
-            if (spell->IsTriggered() || info->IsPositive() || !spell->GetPowerCost() || !info->StartRecoveryTime)
+            if (spell->IsTriggered() || !IsActiveAction(spell->GetSpellInfo()))
                 return;
             Aura* gaze = player->GetAura(SPELL_MENACING_GAZE);
             if (!gaze)

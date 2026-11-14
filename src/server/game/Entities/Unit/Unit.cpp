@@ -10099,9 +10099,9 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellInfo const* spellProto, ui
         if (coeff <= 0.0f)
         {
             if (caster)
-                coeff = caster->CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
+                coeff = caster->CalculateDefaultCoefficient(spellProto, damagetype);
             else
-                coeff = CalculateDefaultCoefficient(spellProto, damagetype) * int32(stack);
+                coeff = CalculateDefaultCoefficient(spellProto, damagetype);
         }
 
         float factorMod = CalculateLevelPenalty(spellProto) * stack;

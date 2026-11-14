@@ -6,11 +6,11 @@
     "spider form: the Ascended log of 2025-12-21 shows a Festering Spawn of Mar'li that carries Putrid Cloud",
     "(2118170, 10 yd every 1 s; 2118171 becomes 2118174 on Ascended) and leaves a Festering Cloud (2118176,",
     "2118179 on Ascended) where it dies. Mar'li (14510) Infests 15 s into her spider form, hatching the nearest",
-    "free egg (179985) as a Spawn of Mar'li (15041, an estimated stand-in). A Mythic and an Ascended hero each",
-    "fight one Mar'li alone; the world's eggs share phase 1 and the fixture lives in the lane's own phase, so",
-    "each hero places one untimed egg once the first Hatch Eggs (2118115, 17 s, then every 30 s) has passed and",
-    "her spider form has begun. Infest then has the egg before the second Hatch Eggs at 47 s; on Mythic the",
-    "egg stays free until that Hatch Eggs hatches it."
+    "free Spider Egg (14915) at once as a Spawn of Mar'li (15041, an estimated stand-in). A Mythic and an",
+    "Ascended hero each fight one Mar'li alone; the world's eggs share phase 1 and the fixture lives in the",
+    "lane's own phase, so each hero places one egg once the first Hatch Eggs (2118115, 17 s, then every 30 s)",
+    "has passed and her spider form has begun. Infest then has the egg before the second Hatch Eggs at 47 s; on",
+    "Mythic the egg stays free until that Hatch Eggs makes it cast Hatching (2118119, 10 s) and hatch."
   ],
   "timeout_ms": 150000,
   "location": {
@@ -212,16 +212,22 @@
       "within_ms": 15000
     },
     {
-      "action": "command",
+      "action": "summon",
       "label": "The Mythic hero places one Spider Egg",
       "actor": "mythic",
-      "command": ".gobject add temp 179985 0"
+      "entry": 14915,
+      "as": "egg_mythic",
+      "distance": 3,
+      "unowned": true
     },
     {
-      "action": "command",
+      "action": "summon",
       "label": "The Ascended hero places one Spider Egg",
       "actor": "ascended",
-      "command": ".gobject add temp 179985 0"
+      "entry": 14915,
+      "as": "egg_ascended",
+      "distance": 3,
+      "unowned": true
     },
     {
       "action": "assert",

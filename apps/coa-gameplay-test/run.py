@@ -250,7 +250,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat', 'below_armor_class', 'unwearable', 'spells',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries',
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'victim_state', 'school_mask',
-                  'rolls'} | TIMELINE_FIELDS | EVENT_TIME_FIELDS
+                  'rolls', 'stacks'} | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag', 'unit_state'}),
@@ -1028,8 +1028,11 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
             if metric in {'pet_autocast_enabled', 'owned_creature_spell_proc_count'}:
                 number(step.get('spell'), f'{where}.spell', 1, 2**31 - 1, True)
-            if metric == 'spell_damage_done' and 'base' in step:
+            if metric in {'spell_damage_done', 'spell_damage_taken'} and 'base' in step:
                 number(step['base'], f'{where}.base', 0, 2**32 - 1, True)
+            if 'stacks' in step:
+                require(metric == 'spell_damage_taken' and step['stacks'] >= 1,
+                        f'{where}: stacks applies to spell_damage_taken and needs at least one')
             if metric in {'combo_points', 'game_mode_mask', 'pet_autocast_enabled'}:
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
             if metric == 'victim':
@@ -1046,7 +1049,8 @@ def validate(scenario, clock=REAL_CLOCK):
             elif 'spells' in step:
                 require(False, f'{where}: spells only applies to carried_aura_count')
             if 'periodic' in step:
-                require(metric in {'spell_damage_done', 'spell_healing_done', 'spell_healing_taken'}
+                require(metric in {'spell_damage_done', 'spell_damage_taken', 'spell_healing_done',
+                                   'spell_healing_taken'}
                         and type(step['periodic']) is bool,
                         f'{where}: periodic requires a damage/healing calculation and a boolean')
             require(metric in METRICS, f'{where}: unknown metric')

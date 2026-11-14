@@ -47,13 +47,18 @@
  */
 
 #include "CreatureScript.h"
+#include "GlobalScript.h"
 #include "InstanceScript.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
+#include "SpellInfo.h"
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+
+#include <algorithm>
+#include <array>
 
 using namespace coa_zg;
 
@@ -111,6 +116,10 @@ namespace
 
     constexpr uint8 STORM_SHIELD_CHARGES = 20;
 
+    // Rip by difficulty (SpellDifficulty 2351). The DBC lets it stay on a dead
+    // player, so a battle-resurrected player bled to death again (round-7 tester).
+    constexpr std::array<uint32, 4> RIP_BLEEDS = { 2118240, 2118241, 2118242, 2118243 };
+
     struct boss_thekal_coa : public BossAI
     {
         boss_thekal_coa(Creature* creature) : BossAI(creature, DATA_THEKAL) { }
@@ -143,6 +152,11 @@ namespace
                 zealot->Kill(zealot, zealot);
             if (Creature* zealot = instance->GetCreature(DATA_ZATH))
                 zealot->Kill(zealot, zealot);
+            me->GetMap()->DoForAllPlayers([](Player* p)
+            {
+                for (uint32 bleed : RIP_BLEEDS)
+                    p->RemoveAurasDueToSpell(bleed);
+            });
         }
 
         void JustEngagedWith(Unit* /*who*/) override
@@ -409,6 +423,19 @@ namespace
                 SPELL_AURA_DUMMY);
         }
     };
+
+    class ThekalRipEndsOnDeath final : public GlobalScript
+    {
+    public:
+        ThekalRipEndsOnDeath()
+            : GlobalScript("ThekalRipEndsOnDeath", { GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR }) { }
+
+        void OnLoadSpellCustomAttr(SpellInfo* info) override
+        {
+            if (std::find(RIP_BLEEDS.begin(), RIP_BLEEDS.end(), info->Id) != RIP_BLEEDS.end())
+                info->AttributesEx3 &= ~SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD;
+        }
+    };
 }
 
 void AddCoaThekalScripts()
@@ -417,4 +444,5 @@ void AddCoaThekalScripts()
     RegisterSpellScript(spell_thekal_coa_zath_strike);
     RegisterSpellScript(spell_thekal_coa_storm_shield);
     RegisterSpellScript(spell_thekal_coa_storm_shield_charge);
+    new ThekalRipEndsOnDeath();
 }

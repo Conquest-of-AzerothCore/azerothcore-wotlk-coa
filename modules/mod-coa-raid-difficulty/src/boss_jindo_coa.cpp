@@ -21,6 +21,7 @@
  *                                                 fight; they Fierce Blow too
  *   Fierce Blow           first 8s, every 8s      on the tank
  *   Friends On the Other Side  +2% damage for every shade alive
+ *   Berserk               at 15 minutes           Ascended only (2100213)
  *
  *   Every hit takes one health from a totem: a Brain Wash Totem has 5, the
  *   ward 15 (25 above Normal). The pit is empty before the fight, and he casts
@@ -99,6 +100,7 @@ namespace
         EVENT_HEALING_STREAM,
         EVENT_FIERCE_BLOW,
         EVENT_DELUSIONS_GROW,
+        EVENT_BERSERK,
     };
 
     enum Npcs
@@ -164,6 +166,8 @@ namespace
             events.ScheduleEvent(EVENT_HEALING_STREAM, 21s);
             events.ScheduleEvent(EVENT_ANIMATE_BONES, 23s);
             events.ScheduleEvent(EVENT_DELUSIONS_GROW, 1s);
+            if (IsAscended(me))
+                events.ScheduleEvent(EVENT_BERSERK, ASCENDED_BERSERK_TIMER);
         }
 
         void JustSummoned(Creature* summon) override
@@ -389,6 +393,9 @@ namespace
                         UpdateFriends();
                         ReleaseTotemAuras(false);
                         events.ScheduleEvent(EVENT_DELUSIONS_GROW, 1s);
+                        break;
+                    case EVENT_BERSERK:
+                        DoCastSelf(SPELL_ASCENDED_BERSERK, true);
                         break;
                     default:
                         break;

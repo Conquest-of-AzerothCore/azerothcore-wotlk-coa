@@ -3923,7 +3923,9 @@ private:
                 return unit->MeleeDamageBonusTaken(attacker, 1000, BASE_ATTACK, info,
                     info ? info->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL);
             Require(info != nullptr, "Incoming spell damage needs a spell");
-            return unit->SpellDamageBonusTaken(attacker, info, 1000, SPELL_DIRECT_DAMAGE);
+            uint32 const stacks = step.get<uint32>("stacks", 1);
+            return unit->SpellDamageBonusTaken(attacker, info, step.get<uint32>("base", 1000) * stacks,
+                step.get<bool>("periodic", false) ? DOT : SPELL_DIRECT_DAMAGE, stacks);
         }
         if (metric == "applied_aura_count")
             return static_cast<double>(unit->GetAppliedAuras().size());
