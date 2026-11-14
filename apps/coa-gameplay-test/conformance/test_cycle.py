@@ -453,6 +453,54 @@ class RefactorGateTest(CycleCase):
         self.assertEqual(cycle.changed_scenarios([ok, {}], [{}, ok], key), [])
 
 
+class ArchiveLedgerTest(CycleCase):
+    def repository(self, consumption: bool) -> tuple:
+        repo = self.root / 'repo'
+        classes = repo / cycle.CONFORMANCE / 'classes'
+        classes.mkdir(parents=True)
+        (classes / 'x_clauses.json').write_text('["committed"]', encoding='utf-8')
+        (classes / 'x.json').write_text('{"class_id": 23}', encoding='utf-8')
+        if consumption:
+            (classes / 'x_consumption.json').write_text('{}', encoding='utf-8')
+        git = ['git', '-C', str(repo), '-c', 'user.name=t', '-c', 'user.email=t@t']
+        for command in (['init', '-q'], ['add', '.'], ['commit', '-q', '-m', 'ledger']):
+            cycle.subprocess.run([*git, *command], check=True)
+        head = cycle.subprocess.run([*git, 'rev-parse', 'HEAD'], capture_output=True, text=True).stdout.strip()
+        (classes / 'x.json').write_text('{"class_id": 99}', encoding='utf-8')
+        return repo, classes / 'x_clauses.json', head
+
+    def archive(self, consumption: bool = True) -> tuple:
+        repo, clauses, head = self.repository(consumption)
+        archive = self.root / 'archive'
+        run_cycle(self.replay(worktree=repo, clauses=clauses, head=head, archive=archive),
+                  (*REPLAY, 'tally', 'refactor', 'checkpoint'), FakeRunner(self.root))
+        return archive, head
+
+    def test_the_archive_holds_the_ledger_used_and_the_class_files_at_the_generating_commit(self):
+        archive, head = self.archive()
+        ledger = archive / 'ledger'
+        self.assertEqual(sorted(path.name for path in ledger.iterdir()),
+                         ['x.json', 'x_clauses.json', 'x_consumption.json'])
+        self.assertEqual((ledger / 'x.json').read_text(encoding='utf-8'), '{"class_id": 23}')
+        self.assertEqual((ledger / 'x_clauses.json').read_text(encoding='utf-8'), '["committed"]')
+        build = (archive / 'BUILD.txt').read_text(encoding='utf-8')
+        self.assertIn(f'Ledger used: ledger/x_clauses.json, equal to {head}:{cycle.CONFORMANCE.as_posix()}'
+                      f'/classes/x_clauses.json.', build)
+        self.assertIn('--clauses ledger/x_clauses.json', build)
+        self.assertIn(f'{cycle.sha256(ledger / "x.json")}  ledger/x.json', build)
+
+    def test_a_ledger_that_differs_from_the_generating_commit_is_stated(self):
+        repo, clauses, head = self.repository(False)
+        clauses.write_text('["edited"]', encoding='utf-8')
+        archive = self.root / 'archive'
+        run_cycle(self.replay(worktree=repo, clauses=clauses, head=head, archive=archive),
+                  (*REPLAY, 'tally', 'refactor', 'checkpoint'), FakeRunner(self.root))
+        build = (archive / 'BUILD.txt').read_text(encoding='utf-8')
+        self.assertIn('ledger/x_clauses.json, DIFFERENT from', build)
+        self.assertIn(f'No x_consumption.json at {head}.', build)
+        self.assertEqual((archive / 'ledger' / 'x_clauses.json').read_text(encoding='utf-8'), '["edited"]')
+
+
 class CommandLineTest(CycleCase):
     def test_the_cycle_subcommand_reads_a_cycle_file_with_relative_paths(self):
         pair = FIXTURES / 'final16'

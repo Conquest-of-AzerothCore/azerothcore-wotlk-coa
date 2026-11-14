@@ -470,7 +470,9 @@ file>`, the stamp read from its `VERIFY ALL` line; a run stops the cycle unless 
 stage ran; as in `prove`, a run in which a scenario of the manifest has no result, or a scenario drifted, stops it
 too), `compare` (with `runs` skipped, `pair.results` is checked for missing results first) and `audit` per run,
 `tally`, `refactor` (only with `refactor.moved_kinds`), `archive` (only with `archive`, a new directory, and two
-stamps) and `checkpoint`. `--skip` leaves a step
+stamps; besides the compare outputs, audits, reports, manifest and status files it holds `ledger/`: the clause ledger
+the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`;
+`BUILD.txt` says whether the ledger used equals the one at `head` and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
 out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
 `OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
 2. Relative paths in the cycle file are read from its directory. The fields:

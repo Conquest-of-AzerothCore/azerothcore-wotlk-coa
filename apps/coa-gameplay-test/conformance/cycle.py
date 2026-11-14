@@ -645,6 +645,36 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def file_at(worktree: Path, rev: str, path: str) -> bytes | None:
+    found = subprocess.run(['git', '-C', str(worktree), 'show', f'{rev}:{path}'], capture_output=True)
+    return found.stdout if found.returncode == 0 else None
+
+
+def archive_ledger(config: CycleConfig, rev: str) -> list:
+    from profile import CLAUSE_LEDGER_SUFFIX, CONSUMPTION_SUFFIX
+    ledger = config.archive / 'ledger'
+    ledger.mkdir()
+    used = config.clauses.read_bytes()
+    (ledger / config.clauses.name).write_bytes(used)
+    stem = config.clauses.stem.removesuffix(CLAUSE_LEDGER_SUFFIX)
+    classes = (CONFORMANCE / 'classes').as_posix()
+    committed = file_at(config.worktree, rev, f'{classes}/{config.clauses.name}')
+    if committed is None:
+        raise CycleError(f'archive: {classes}/{config.clauses.name} does not exist at {rev}')
+    state = 'equal to' if committed == used else 'DIFFERENT from'
+    lines = [f'Ledger used: ledger/{config.clauses.name}, {state} {rev}:{classes}/{config.clauses.name}.']
+    for name, required in ((f'{stem}.json', True), (f'{stem}{CONSUMPTION_SUFFIX}.json', False)):
+        content = file_at(config.worktree, rev, f'{classes}/{name}')
+        if content is None:
+            if required:
+                raise CycleError(f'archive: the class file {classes}/{name} does not exist at {rev}')
+            lines.append(f'No {name} at {rev}.')
+            continue
+        (ledger / name).write_bytes(content)
+        lines.append(f'Class file ledger/{name} from {rev}:{classes}/{name}.')
+    return lines + [f'{sha256(path)}  ledger/{path.name}' for path in sorted(ledger.iterdir())]
+
+
 def step_archive(cycle: Cycle) -> None:
     config = cycle.config
     if config.archive is None:
@@ -671,12 +701,15 @@ def step_archive(cycle: Cycle) -> None:
     for path in (json_path, markdown_path):
         if path.exists():
             shutil.copy2(path, config.archive / path.name)
+    rev = config.head or head_sha(config.worktree)
+    ledger = archive_ledger(config, rev)
     build = [f'Class {config.class_id} re-auditable verdict set, {config.name} merged pair.',
              f'Runs: {" and ".join(cycle.stamps)}.',
              f'compare --build {config.build}.',
-             f'Generation commit {config.head or NOT_RECORDED} (worktree {config.worktree.name}).',
-             f'Re-audit: conformance.py audit --class {config.class_id} --clauses {config.clauses.name} '
+             f'Generation commit {rev} (worktree {config.worktree.name}).',
+             f'Re-audit: conformance.py audit --class {config.class_id} --clauses ledger/{config.clauses.name} '
              f'--results <{config.name}-cmp-STAMP> --manifest manifest.json --out <file>',
+             *ledger,
              f'{sha256(manifest)}  manifest.json']
     (config.archive / 'BUILD.txt').write_text('\n'.join(build) + '\n', encoding='utf-8')
     note(cycle, 'archive', f'archived into {config.archive}')
