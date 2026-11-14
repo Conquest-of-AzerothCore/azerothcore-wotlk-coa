@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Ragefire Chasm: on Mythic, Taragaman the Hungerer's Fire Nova deals 6.667 times, his Massive Fire Nova twice its damage (#11768)",
+  "contract": [
+    "Taragaman the Hungerer 11520 casts the SpellDifficulty variant of each nova: on Mythic Fire Nova 381390 and",
+    "Massive Fire Nova 2102518. Our tester measured about 300 and 3k there and asked for about 2k and 6k.",
+    "coa_dungeon_creature_damage rows for Taragaman and these spells raise them x6.667 and x2. Other casters keep their damage.",
+    "The scenario compares Taragaman with Jergosh the Invoker 11518 casting the same spells, on Mythic."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 1811.0,
+    "y": -4410.0,
+    "z": -18.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 389,
+      "x": -243.0,
+      "y": 150.0,
+      "z": -18.6
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "label": "CONTROL: the hero is in a Mythic Ragefire Chasm",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 11520,
+      "as": "taragaman",
+      "distance": 5
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 11518,
+      "as": "jergosh",
+      "distance": 5
+    },
+    {
+      "label": "CONTROL: on Mythic Taragaman's Fire Nova is cast as 381390",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_id_for_difficulty",
+      "target": "taragaman",
+      "spell": 11970,
+      "equals": 381390
+    },
+    {
+      "label": "CONTROL: and his Massive Fire Nova as 2102518",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "spell_id_for_difficulty",
+      "target": "taragaman",
+      "spell": 2102516,
+      "equals": 2102518
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 381390,
+      "save_as": "plain_nova"
+    },
+    {
+      "label": "DISCRIMINATING: Taragaman's Mythic Fire Nova goes through the damage hooks 6.667 times as high as Jergosh's",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "taragaman",
+      "spell": 381390,
+      "ratio_to": "plain_nova",
+      "min": 6.6,
+      "max": 6.73
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 2102518,
+      "save_as": "plain_massive"
+    },
+    {
+      "label": "DISCRIMINATING: his Mythic Massive Fire Nova comes out twice as high as Jergosh's",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "taragaman",
+      "spell": 2102518,
+      "ratio_to": "plain_massive",
+      "min": 1.98,
+      "max": 2.02
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 154039,
+      "save_as": "plain_heroic_nova"
+    },
+    {
+      "label": "DISCRIMINATING: his Heroic Fire Nova comes out 1.3 times softer than the Mythic one, 5.128 times Jergosh's",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "taragaman",
+      "spell": 154039,
+      "ratio_to": "plain_heroic_nova",
+      "min": 5.08,
+      "max": 5.18
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "jergosh",
+      "spell": 2102517,
+      "save_as": "plain_heroic_massive"
+    },
+    {
+      "label": "DISCRIMINATING: his Heroic Massive Fire Nova comes out 1.538 times Jergosh's",
+      "action": "assert",
+      "actor": "hero",
+      "metric": "script_spell_damage_taken",
+      "target": "taragaman",
+      "spell": 2102517,
+      "ratio_to": "plain_heroic_massive",
+      "min": 1.52,
+      "max": 1.56
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+{
+ "clauses": [
+  {
+   "index": 0,
+   "claim_evidence": [
+    "behaviour"
+   ]
+  },
+  {
+   "index": 1,
+   "claim_evidence": [
+    "behaviour",
+    "unproven"
+   ]
+  },
+  {
+   "index": 2,
+   "claim_evidence": [
+    "behaviour",
+    "behaviour",
+    "behaviour"
+   ]
+  },
+  {
+   "index": 3,
+   "claim_evidence": [
+    "data"
+   ]
+  },
+  {
+   "index": 4,
+   "claim_evidence": [
+    "unproven",
+    "behaviour",
+    "behaviour"
+   ]
+  },
+  {
+   "index": 5,
+   "claim_evidence": [
+    "behaviour",
+    "behaviour",
+    "data"
+   ]
+  },
+  {
+   "index": 6,
+   "claim_evidence": [
+    "unproven"
+   ]
+  }
+ ]
+}

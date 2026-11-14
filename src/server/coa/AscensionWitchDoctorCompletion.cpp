@@ -217,6 +217,28 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[index].Amplitude = amplitude;
         info->Effects[index].TriggerSpell = 0;
     };
+    auto addStatPercent = [info](uint8 index, Stats stat)
+    {
+        SpellEffectInfo const& source = info->Effects[EFFECT_0];
+        SpellEffectInfo& added = info->Effects[index];
+        added.Effect = SPELL_EFFECT_APPLY_AURA;
+        added.ApplyAuraName = SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE;
+        added.BasePoints = source.BasePoints;
+        added.DieSides = source.DieSides;
+        added.MiscValue = stat;
+        added.TargetA = source.TargetA;
+        added.TargetB = SpellImplicitTargetInfo();
+    };
+    if ((id == JujuInjection || id == JujuInjectionTwo) && !info->Effects[EFFECT_2].Effect &&
+        info->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) &&
+        info->Effects[EFFECT_0].MiscValue == STAT_AGILITY &&
+        info->Effects[EFFECT_1].IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) &&
+        info->Effects[EFFECT_1].MiscValue == STAT_INTELLECT)
+        addStatPercent(EFFECT_2, STAT_SPIRIT);
+    if (id == SpiritWardenBuff && !info->Effects[EFFECT_1].Effect &&
+        info->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) &&
+        info->Effects[EFFECT_0].MiscValue == STAT_SPIRIT)
+        addStatPercent(EFFECT_1, STAT_AGILITY);
     if (id == Shadowhunter)
         dummy(EFFECT_1);
     if (id == PuppeteersGrasp)

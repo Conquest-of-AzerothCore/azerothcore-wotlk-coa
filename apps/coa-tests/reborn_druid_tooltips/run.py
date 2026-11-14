@@ -54,7 +54,8 @@ def check_client(directory):
     spells = read_dbc(directory / "Spell.dbc")
     problems = []
     druid = source("src/server/coa/AscensionWarcraftRebornDruid.cpp")
-    pairs = re.findall(r"\{ (\d+), (\d+) \}", druid)
+    ticks = druid[druid.index("TRANQUILITY_TICKS"):]
+    pairs = re.findall(r"\{ (\d+), (\d+) \}", ticks[:ticks.index(";")])
     if len(pairs) != len(TRANQUILITY) or [int(p) for p, _ in pairs] != list(TRANQUILITY):
         problems.append("the Tranquility parent/tick table does not list the seven Reborn ranks")
     for parent, tick in ((int(p), int(t)) for p, t in pairs):

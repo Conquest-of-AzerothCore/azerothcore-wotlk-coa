@@ -24,10 +24,19 @@
     },
     {
       "action": "assert",
-      "label": "The Mythic difficulty string (SMSG_PATCH_GLOBAL_STRINGS)",
+      "label": "The Mythic difficulty string (SMSG_PATCH_GLOBAL_STRINGS; PvE Power and Fel Commutation send theirs too)",
       "actor": "hero",
       "metric": "server_packets",
       "opcode": 1654,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "and it carries the Mythic difficulty name",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 1654,
+      "text": "5 Player (Mythic)",
       "equals": 1
     },
     {
@@ -79,11 +88,11 @@
     },
     {
       "action": "assert",
-      "label": "Week 40 swaps nothing: only the empty +1 rows of weeks 40 and 41 (SMSG_PATCH_MYTHIC_AFFIXES)",
+      "label": "Week 40 swaps no affix but reorders them by tier: 248 rows each for weeks 40 and 41 plus their empty +1 rows (SMSG_PATCH_MYTHIC_AFFIXES)",
       "actor": "hero",
       "metric": "server_packets",
       "opcode": 1388,
-      "equals": 2,
+      "equals": 498,
       "relative_to": "affix_rows"
     },
     {

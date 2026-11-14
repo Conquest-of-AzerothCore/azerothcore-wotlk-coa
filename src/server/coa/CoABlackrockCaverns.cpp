@@ -202,7 +202,8 @@ Position const RazLedgePos = { 406.1927f, 906.0121f, 163.4926f, 4.310963f };
 Position const RazObsidiusPos = { 308.9653f, 635.8195f, 64.79769f, 4.555309f };
 Position const RazBridgePos = { 400.9f, 821.1f, 106.5f };
 Position const ObsidiusPos = { 331.7f, 554.5f, 66.1f };
-Position const RazObsidiusStandPos = { 330.5491f, 559.3794f, 66.00645f, 4.945502f };
+Position const RazObsidiusCallPos = { 240.127f, 567.9303f, 73.23914f };
+Position const RazObsidiusStandPos = { 320.2156f, 574.0704f, 66.00645f, 5.195028f };
 
 std::array<Position, 12> const RazPathRomogg =
 { {
@@ -268,6 +269,7 @@ constexpr float FireZoneSpread = 3.0f;
 constexpr uint32 FireZoneMs = 2500;
 constexpr uint32 FireZoneCallers = 2;
 constexpr float RazDamageBonus = 1.3f;
+constexpr float RazSpeedBonus = 1.1f;
 constexpr float SkullcrackerRadius = 3.0f;
 constexpr float SkullcrackerShare = 0.75f;
 
@@ -390,7 +392,7 @@ public:
                 return;
             }
             if (stage <= RAZ_CORLA && GetBossState(DATA_KARSH) == DONE &&
-                (PlayerNear(RazObsidiusPos, 60.0f) || PlayerNear(ObsidiusPos, 70.0f)))
+                (PlayerNear(RazObsidiusPos, 60.0f) || PlayerNear(ObsidiusPos, 70.0f) || PlayerNear(RazObsidiusCallPos, 15.0f)))
             {
                 StorePersistentData(PERSISTENT_RAZ_STAGE, RAZ_OBSIDIUS);
                 instance->SummonCreature(NPC_RAZ, RazObsidiusPos);
@@ -682,7 +684,7 @@ struct npc_coa_brc_raz : public ScriptedAI
         me->SetHover(false);
         me->SetImmuneToAll(false);
         me->SetReactState(REACT_AGGRESSIVE);
-        me->GetMotionMaster()->MoveJump(RazPathRomogg[0], 20.0f, 10.0f);
+        Leap(RazPathRomogg[0], 20.0f, 10.0f);
         _point = 1;
         _events.ScheduleEvent(EVENT_SMASH, 3s);
         _events.ScheduleEvent(EVENT_ACTIVATE, 4s);
@@ -706,6 +708,8 @@ struct npc_coa_brc_raz : public ScriptedAI
 
     void MovementInform(uint32 type, uint32 id) override
     {
+        if (type == EFFECT_MOTION_TYPE)
+            me->HandleEmoteCommand(id == POINT_RAZ_OBSIDIUS_JUMP ? EMOTE_ONESHOT_JUMPEND : EMOTE_ONESHOT_JUMPLANDRUN);
         if (type == EFFECT_MOTION_TYPE && id == POINT_RAZ_LEDGE_JUMP)
         {
             DoCastSelf(SPELL_QUAKE, true);
@@ -758,7 +762,7 @@ struct npc_coa_brc_raz : public ScriptedAI
                     {
                         _path = { RazObsidiusStandPos };
                         _atObsidius = true;
-                        me->GetMotionMaster()->MoveJump(RazObsidiusStandPos, 18.0f, 30.0f, POINT_RAZ_OBSIDIUS_JUMP);
+                        Leap(RazObsidiusStandPos, 18.0f, 30.0f, POINT_RAZ_OBSIDIUS_JUMP);
                     }
                     else
                         _events.ScheduleEvent(EVENT_DIE, 4s);
@@ -769,7 +773,7 @@ struct npc_coa_brc_raz : public ScriptedAI
                     break;
                 case EVENT_LEAP_LEDGE:
                     Talk(SAY_RAZ_SMASH);
-                    me->GetMotionMaster()->MoveJump(RazCorlaPos, 35.0f, 12.0f, POINT_RAZ_LEDGE_JUMP);
+                    Leap(RazCorlaPos, 35.0f, 12.0f, POINT_RAZ_LEDGE_JUMP);
                     break;
                 case EVENT_DIE:
                     Talk(SAY_RAZ_TIRED);
@@ -801,6 +805,12 @@ struct npc_coa_brc_raz : public ScriptedAI
     }
 
 private:
+    void Leap(Position const& pos, float speedXY, float speedZ, uint32 id = 0)
+    {
+        me->HandleEmoteCommand(EMOTE_ONESHOT_JUMPSTART);
+        me->GetMotionMaster()->MoveJump(pos, speedXY * RazSpeedBonus, speedZ, id);
+    }
+
     void Drive()
     {
         if (!_active || !me->IsAlive())
@@ -827,7 +837,7 @@ private:
             return;
         _walking = true;
         if (_jumps.count(_point))
-            me->GetMotionMaster()->MoveJump(_path[_point], 30.0f, 15.0f, _point + 1);
+            Leap(_path[_point], 30.0f, 15.0f, _point + 1);
         else
             me->GetMotionMaster()->MovePoint(_point + 1, _path[_point]);
     }
@@ -853,6 +863,7 @@ private:
         _initialized = true;
         _events.ScheduleEvent(EVENT_DRIVE, 500ms);
         me->SetWalk(false);
+        me->SetSpeedRate(MOVE_RUN, me->GetCreatureTemplate()->speed_run * RazSpeedBonus);
         me->SetReactState(REACT_AGGRESSIVE);
         uint32 const stage = _instance ? _instance->GetPersistentData(PERSISTENT_RAZ_STAGE) : RAZ_CAGED;
         if (stage == RAZ_CAGED || stage == RAZ_FREED)
@@ -1676,6 +1687,21 @@ struct boss_coa_brc_obsidius : public BossAI
         for (ObjectGuid const& guid : summons)
             if (Creature* shadow = ObjectAccessor::GetCreature(*me, guid))
                 SetBound(shadow, false);
+        StopRazHeart(3s);
+    }
+
+    void StopRazHeart(Milliseconds delay)
+    {
+        me->m_Events.AddEventAtOffset([this]()
+        {
+            Creature* raz = instance->GetCreature(DATA_RAZ);
+            if (!raz || !raz->IsAlive())
+                return;
+            if (raz->IsInCombat())
+                StopRazHeart(1s);
+            else
+                DoCast(raz, SPELL_STOP_HEART, true);
+        }, delay);
     }
 
     void JustEngagedWith(Unit* who) override

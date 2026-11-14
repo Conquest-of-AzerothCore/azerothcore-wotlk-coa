@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk's Razor Claws bleed keeps the DBC Mythic amount per stack",
+  "contract": [
+    "The round-6 tester (Mythic): Arlokk's bleed ticks for about 9k. A full Ravage (2118331, 4 hits/s for 10 s)",
+    "stacks her Razor Claws bleed to about 40; the Mythic variant 2118328 has 213 per stack (DBC; Normal 2118326",
+    "125, Heroic 2118327 169, Ascended 2118329 250) and Aspect of Bethekk (2118323) adds 25 %, so a stack bleeds 266.",
+    "The user decided on 2026-11-13 that each difficulty keeps its DBC amount: 213 on Mythic, as its tooltip shows,",
+    "and not the Normal 125. Here a warrior hero pulls Arlokk at the Zul'Gurub entrance on Mythic and wounds her below",
+    "half health; she vanishes, Ravages him and his bleed stacks past 25. After the Ravage the bleed amount divided",
+    "by its stacks must be 213 x 1.25 = 266 (250-280 allows one stack landing between the two reads), not 156."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Mythic",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk before she walks back to her temple",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Arlokk below half health",
+      "actor": "hero",
+      "entry": 14515,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she takes panther form",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she vanishes with the change",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she steps out and Ravages the hero 11 s after the change",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118331,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Ravage stacks the Mythic bleed high",
+      "actor": "hero",
+      "metric": "aura_stacks",
+      "spell": 2118328,
+      "min": 25,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "label": "Let the 10 s Ravage finish so only her slower swings still add stacks",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "hero",
+      "metric": "aura_stacks",
+      "spell": 2118328,
+      "save_as": "bleed_stacks"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: each stack bleeds the Mythic 213 x 1.25, not the Normal 125 x 1.25",
+      "actor": "hero",
+      "metric": "aura_amount",
+      "spell": 2118328,
+      "effect": 0,
+      "ratio_to": "bleed_stacks",
+      "min": 250,
+      "max": 280
+    }
+  ]
+}

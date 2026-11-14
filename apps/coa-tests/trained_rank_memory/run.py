@@ -13,6 +13,7 @@ method = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
 def main():
     wildcard = (ROOT / 'src/server/coa/AscensionWildcard.cpp').read_text(encoding='utf-8')
     actual = '\n\n'.join([
+        method(wildcard, 'uint32 RankLevel(SpellInfo const* info)'),
         method(wildcard, 'void RememberTrainedRank(Player* player, uint32 spellId)'),
         method(wildcard, 'void RestoreTrainedRanks(Player* player, uint32 firstSpellId)'),
         method(wildcard, 'std::vector<Trainer::Spell> RankTrainerRows(Player const* player)'),

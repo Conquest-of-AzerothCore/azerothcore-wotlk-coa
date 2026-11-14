@@ -55,6 +55,7 @@ class ProveSpec:
     build: bool = False
     timeout_ms: int = DEFAULT_TIMEOUT_MS
     verify: tuple[str, ...] = ('coa-verify',)
+    db_workers: int | None = None
 
 
 @dataclass(frozen=True)
@@ -113,7 +114,8 @@ def is_under(path: Path, roots: Sequence[Path]) -> bool:
 
 def verify_command(spec: ProveSpec, number: int, files: Sequence[Path]) -> list[str]:
     stages = f'{BUILD_STAGE},{GAMEPLAY_STAGE}' if spec.build and number == 1 else GAMEPLAY_STAGE
-    return [*spec.verify, '--worktree', str(spec.worktree), '--ram', '--stages', stages,
+    workers = ['--gameplay-db-workers', str(spec.db_workers)] if spec.db_workers else []
+    return [*spec.verify, '--worktree', str(spec.worktree), '--ram', '--stages', stages, *workers,
             '--scenario', *map(str, files)]
 
 
@@ -252,7 +254,8 @@ def run_pilot(spec: ProveSpec, pilot: Pilot, runner: Runner, compare: Compare
     files = scenario_files(directory, manifest)
     if not files:
         raise ProveFailure(f'{manifest_path} lists no pilot scenario to run')
-    pilot_spec = ProveSpec(directory, spec.worktree, spec.runs, spec.build, spec.timeout_ms, spec.verify)
+    pilot_spec = ProveSpec(directory, spec.worktree, spec.runs, spec.build, spec.timeout_ms, spec.verify,
+                           spec.db_workers)
     outcome = execute_run(pilot_spec, 1, Path(manifest_path), files, runner, compare)
     trials, sized = pilot.size(outcome.verdicts)
     return outcome, trials, {'manifest': str(manifest_path), 'run': outcome.record, 'trials': dict(trials),
@@ -301,7 +304,8 @@ def prove(spec: ProveSpec, generate: Generate, rows: Rows | None = None, enrich:
     if out.exists() and (not out.is_dir() or any(out.iterdir())):
         raise ValueError(f'{out} is not empty; prove into a new directory')
     out.mkdir(parents=True, exist_ok=True)
-    spec = ProveSpec(out.resolve(), Path(spec.worktree), spec.runs, spec.build, spec.timeout_ms, spec.verify)
+    spec = ProveSpec(out.resolve(), Path(spec.worktree), spec.runs, spec.build, spec.timeout_ms, spec.verify,
+                     spec.db_workers)
     summary = {'schema': SUMMARY_SCHEMA, 'class_id': None, 'manifest': None, 'spell_dbc_sha256': None,
                'scenarios': 0, 'worktree': str(spec.worktree), 'sizing': None, 'runs': [], 'flips': [],
                'not_judged': [], 'flip_reports': [], 'fragment': None, 'missing_results': [], 'failed_run': None,
@@ -312,7 +316,8 @@ def prove(spec: ProveSpec, generate: Generate, rows: Rows | None = None, enrich:
         if pilot is not None:
             piloted, trials, summary['sizing'] = run_pilot(spec, pilot, runner, compare)
         if piloted is not None:
-            spec = ProveSpec(spec.out, spec.worktree, spec.runs, False, spec.timeout_ms, spec.verify)
+            spec = ProveSpec(spec.out, spec.worktree, spec.runs, False, spec.timeout_ms, spec.verify,
+                             spec.db_workers)
             manifest_path = Path(pilot.sized(spec.out, trials))
         else:
             manifest_path = Path(generate(spec.out))

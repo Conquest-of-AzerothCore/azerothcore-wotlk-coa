@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Venoxis's Parasitic Serpents run as fast as his Razzashi Cobras",
+  "contract": [
+    "The testers of 2026-11-13 report that the Parasitic Serpents (14884) of High Priest Venoxis \"still move too",
+    "slowly\". Their template ran at 0.571429 (4 yards per second), the Razzashi Cobra (11373) at 1.14286",
+    "(8 yards per second). The user approved the cobra's speed on 2026-11-13 as an estimate for all four",
+    "difficulty templates (14884, 114884, 214884, 314884); no live source gives the serpent's own speed. A",
+    "serpent summoned in a Mythic Zul'Gurub takes the Mythic template, and its native run speed rate must be the",
+    "cobra's."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Mythic",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14884,
+      "as": "serpent",
+      "distance": 6
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the serpent takes the Mythic template",
+      "actor": "hero",
+      "metric": "nearby_creature_template",
+      "entry": 14884,
+      "equals": 214884
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the serpent runs at the cobra's 1.14286 (8 yards per second)",
+      "actor": "serpent",
+      "metric": "run_speed_rate",
+      "min": 1.14,
+      "max": 1.15
+    }
+  ]
+}

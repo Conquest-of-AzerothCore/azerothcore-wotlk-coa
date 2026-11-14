@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Frozen Bodies at 10 stacks guarantees a crit and 50% extra Glacial Impact damage (#10025)",
-  "contract": "Frozen Bodies712434 reads 'Increases the damage of your next Glacial Impact by $s1% for $d, stacking $u times. Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.' Spell.dbc only carries the linear per-stack %; there was no code anywhere checking GetStackAmount()==StackAmount(10), so the discrete bonus never fired. The fix forces a 100% crit chance and multiplies Glacial Impact707592's base damage by 1.5 when Frozen Bodies is at its DBC-defined StackAmount cap of 10. The control cast is forced to crit the same way via spell_crit_rating, isolating the 1.5x multiplier from the crit roll itself.",
+  "name": "Frozen Bodies at 10 stacks guarantees a crit without a second 1.5x on Glacial Impact damage (#10025)",
+  "contract": "Frozen Bodies712434 reads 'Increases the damage of your next Glacial Impact by $s1% for $d, stacking $u times. Reaching 10 stacks causes your next Glacial Impact to critically strike for 50% increased damage.' The crit is the 50% increased damage (spell crit multiplier), not a second multiplier: live Glacial Impact707592 hits at 10 stacks are about 1.031 times the 9-stack crit (14 pairs), all crit. The server forces a 100% crit chance at the DBC-defined StackAmount cap of 10 and leaves base damage alone (Necromancer ADR 0032, reversing the x1.5 of #10025/#10573). The control cast is forced to crit the same way via spell_crit_rating, so the 10-stack cast must deal the control crit times the stack spellmod only (about 1.03), far from 1.5.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -37,6 +37,7 @@
     { "action": "wait", "ms": 3000 },
     { "action": "learn", "actor": "n", "spell": 704355 },
     { "action": "set_aura", "actor": "n", "spell": 801747, "stacks": 1, "label": "Permafrost makes the unfrozen dummy a valid target" },
+    { "action": "set_aura", "actor": "n", "spell": 823764, "stacks": 1, "label": "Precondition: no partial resists, so both crits are comparable" },
     { "action": "set_power", "actor": "n", "power": 0, "value": 2000 },
     { "action": "set_aura", "actor": "n", "spell": 712434, "stacks": 9, "label": "CONTROL: 9 stacks, below the 10-stack threshold" },
     { "action": "cast", "label": "Control cast at 9 stacks", "actor": "n", "spell": 704355, "target": "d" },
@@ -47,6 +48,6 @@
     { "action": "set_aura", "actor": "n", "spell": 712434, "stacks": 10, "label": "DISCRIMINATING: reaching the 10-stack cap" },
     { "action": "cast", "label": "10-stack cast", "actor": "n", "spell": 704355, "target": "d" },
     { "action": "assert", "label": "CONTRACT: the 10-stack cast crits too", "actor": "n", "metric": "spell_damage_count", "spell": 707592, "target": "d", "critical": true, "min": 2, "within_ms": 4000 },
-    { "action": "assert", "label": "CONTRACT: the 10-stack cast deals 1.5x the control crit's damage", "actor": "n", "metric": "spell_damage_total", "spell": 707592, "target": "d", "critical": true, "relative_to": "control_damage", "ratio_to": "control_damage", "min": 1.4, "max": 1.6 }
+    { "action": "assert", "label": "CONTRACT: the 10-stack crit deals the 9-stack crit plus the stack spellmod only (no extra 1.5x)", "actor": "n", "metric": "spell_damage_total", "spell": 707592, "target": "d", "critical": true, "relative_to": "control_damage", "ratio_to": "control_damage", "min": 1.0, "max": 1.06 }
   ]
 }

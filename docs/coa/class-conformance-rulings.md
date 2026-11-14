@@ -4,6 +4,8 @@ This page records the decisions that govern class conformance work.
 - Part 1 holds the rules that bind every class.
 - Part 2 keeps the Templar-specific rulings as examples and precedent. A later class may cite them, but they decide
   nothing outside the Templar unless their own wording says so.
+- A class's own rulings are in its ADR folder, binding for that class only, in the same way: the Necromancer's
+  are in [docs/adr/conformance/necromancer/rulings.md](../adr/conformance/necromancer/rulings.md).
 
 **Who decided.** Each entry names its author:
 - **Owner**: the project owner's own decision;
@@ -45,7 +47,7 @@ appendix).
 **G-5. Sentences pulled in from another spell.** 2026-11-10, owner.
 - A sentence that a tooltip pulls in from another spell through an `@s:` reference counts only if that spell is not
   evaluated on its own. It then joins the parent tooltip's clauses.
-- ADR 0116 names the `@s:` sentence lister. No ADR found stating the rule.
+- ADR 0116 names the `@s:` sentence lister. ADR 0304 applies the rule to the first-ledger generator.
 
 **G-6. A tooltip percentage on direct damage is that exact increase.** 2026-11-10, owner.
 - Case: High General, "to deal $s1% increased direct damage", with $s1 = 100.
@@ -108,6 +110,15 @@ Otherwise the conclusion reads "not found in the places searched", naming them. 
 - Its Spell.dbc layer was built from a client whose Spell.dbc equals ours (same record count; 28 Templar spells compared
   identical).
 - Its spell values therefore confirm nothing on their own.
+- No ADR found.
+
+**G-43. Conformance does not balance.** 2026-11-13, owner, through the mentor, on the Ghoul healing question.
+- Provisional number: a common ruling added on the Necromancer branch; the owner numbers it at merge (ADR 0583).
+- Conformance verifies and fixes spells against their tooltips and live behaviour. A balance change is out of scope:
+  it is recorded as an observation for a later balance pass and never built inside a conformance batch.
+- The owner's words: "si c'est pour un niveau 60 pourquoi pas, on garde le -30%. l'équilibrage viendra dans un second
+  temps, ici on cherche a vérifier et fix les sorts plutot" ("for level 60, why not, we keep the -30%. Balancing comes
+  later; here we verify and fix the spells").
 - No ADR found.
 
 ### 1.2 What counts as proof
@@ -440,9 +451,9 @@ Each is binding for the Templar only. "Applies as precedent" marks wording that 
 ## Appendix. Decisions recorded only on this page
 
 No ADR states these decisions; this page is their record:
-- **General rules:** G-3 (the rule; ADR 0118 has only the finding), G-4, G-5 (the rule), G-9, G-10, G-11, G-12, G-13
+- **General rules:** G-3 (the rule; ADR 0118 has only the finding), G-4, G-9, G-10, G-11, G-12, G-13
   (the rule), G-21 (rule 4 and its amendment, applied in ADRs 0258, 0263 and 0287), G-23, G-25, G-30, G-31, G-32 (as a
-  whole), G-33, G-37, G-38, G-39, G-40, G-41 and G-42.
+  whole), G-33, G-37, G-38, G-39, G-40, G-41, G-42 and G-43.
 - **Templar rulings:** the live Zealot dual wield (owner, checked on a video), Legacy of the Silver Hand, Argent Blade,
   Untainted, Staffguard, Force of Golganneth, Zealotry and Oath Flow, the batch protocol, the three-set limit and "quote
   the tooltip in full".

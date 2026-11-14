@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Venomancer: prestige forgets Wasp Form so the Book sells Venomwing Form again (#10453, #11853)",
+  "contract": "Wasp Form 805141 is the Book of Ascension's level-60 upgrade row of Venomwing Form 520307 (SpellbookTrainerData, trainer_spell ReqAbility1 520307). Prestige drops the character to level 1, where the level pass removes Venomwing (ClassSpells level 16); prestige must forget the Wasp upgrade with it, or the Book shows the Venomwing row as held and refuses to sell it. After prestige and back at level 16, Venomwing is an available row and can be bought. Prestige requires the realm level cap (80).",
+  "timeout_ms": 150000,
+  "location": {
+    "map": 0,
+    "x": -9483.25,
+    "y": -17.99,
+    "z": 56.96,
+    "o": 3.8
+  },
+  "players": [
+    {
+      "id": "vm",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "chromie",
+      "owner": "vm",
+      "entry": 178081,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "specialization", "actor": "vm", "id": 53, "label": "fixture: prestige needs a chosen specialization" },
+    { "action": "learn", "actor": "vm", "spell": 520307, "label": "fixture: Venomwing Form bought" },
+    { "action": "learn", "actor": "vm", "spell": 805141, "label": "fixture: Wasp Form bought on top of it" },
+    { "action": "assert", "actor": "vm", "metric": "knows_spell", "spell": 520307, "equals": 1, "within_ms": 3000, "label": "SETUP Venomwing Form known" },
+    { "action": "assert", "actor": "vm", "metric": "knows_spell", "spell": 805141, "equals": 1, "within_ms": 3000, "label": "SETUP Wasp Form known" },
+
+    { "action": "gossip_hello", "actor": "vm", "target": "chromie" },
+    { "action": "gossip_select", "actor": "vm", "option": 0 },
+    { "action": "assert", "actor": "vm", "metric": "level", "equals": 1, "within_ms": 5000, "label": "back to level 1" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "actor": "vm", "metric": "knows_spell", "spell": 520307, "equals": 0, "label": "Venomwing Form is gone below level 16" },
+    { "action": "assert", "actor": "vm", "metric": "knows_spell", "spell": 805141, "equals": 0, "label": "Wasp Form is forgotten with it" },
+
+    { "action": "set_level", "actor": "vm", "value": 16 },
+    { "action": "money", "actor": "vm", "copper": 200000, "label": "fixture: a purse for the purchase" },
+    { "action": "learn", "actor": "vm", "spell": 97930, "label": "learn the book companion spell" },
+    { "action": "cast", "actor": "vm", "spell": 97930, "label": "summon the Book of Ascension" },
+    { "action": "assert", "actor": "vm", "metric": "owned_creature_count", "entry": 75115, "equals": 1, "within_ms": 5000, "label": "the book is out" },
+    { "action": "gossip_hello", "actor": "vm", "label": "open the book" },
+    { "action": "assert", "actor": "vm", "metric": "trainer_window_state", "spell": 520307, "equals": 0, "label": "Venomwing Form is an available row, not a held one" },
+    { "action": "trainer_buy", "actor": "vm", "spell": 520307, "label": "buy Venomwing Form" },
+    { "action": "assert", "actor": "vm", "metric": "spellbook_buy_succeeded", "spell": 520307, "equals": 1, "label": "the purchase was granted" },
+    { "action": "assert", "actor": "vm", "metric": "knows_spell", "spell": 520307, "equals": 1, "label": "Venomwing Form is learned again" }
+  ]
+}

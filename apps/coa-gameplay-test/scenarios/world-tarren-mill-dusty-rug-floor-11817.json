@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Tarren Mill's Dusty Rug and its captured farmers stand on the inn floor (#11817)",
+  "contract": [
+    "Issue #11817. Elixir of Agony (quest 524) ends at the Dusty Rug (gameobject 1728, guid 20800) in the Tarren Mill inn, beside the three Captured Farmers (creature 2284, guids 15891-15893).",
+    "This client's rebuilt inn has its room floor at z 63.3. The rug kept the stock height 61.94 and lay 1.36 yd under that floor, and the farmers sank under it too, so the turn-in could not be reached.",
+    "Expected: the rug and each farmer rest on the inn floor within 0.3 yd. Before the repair the rug's gap reads about -1.36."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": 0.49, "y": -943.4, "z": 63.3, "o": 0 },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Dusty Rug rests on the inn floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 20800, "spawn_type": "gameobject", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "CONTRACT: Captured Farmer 15891 stands on the inn floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 15891, "spawn_type": "creature", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "CONTRACT: Captured Farmer 15892 stands on the inn floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 15892, "spawn_type": "creature", "min": -0.3, "max": 0.3 },
+    { "action": "assert", "label": "CONTRACT: Captured Farmer 15893 stands on the inn floor", "actor": "p", "metric": "spawn_ground_gap", "guid": 15893, "spawn_type": "creature", "min": -0.3, "max": 0.3 }
+  ]
+}

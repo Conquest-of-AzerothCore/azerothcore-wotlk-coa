@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: Corrupted Blood leaves the players when Hakkar dies",
+  "contract": [
+    "Tester feedback round 6 (2026-11-13): Corrupted Blood stayed on the raid after Hakkar (14834) died and kept",
+    "ticking for its 300 s. At all six live kills in the logs nothing of it remains on the players at his death. The",
+    "core removes only the dead unit's own auras, so his script must take the players' Corrupted Blood",
+    "(2118601-2118604, one per difficulty) off at his death. In a fresh Normal instance every High Priest is set DONE,",
+    "so Hakkar drains no avatar and takes damage at once; the hero waits for his first Corrupted Blood (25 s after",
+    "the pull) and then kills him."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The raid has killed Jeklik",
+      "actor": "hero",
+      "command": ".instance setbossstate 0 3"
+    },
+    {
+      "action": "command",
+      "label": "Venoxis",
+      "actor": "hero",
+      "command": ".instance setbossstate 1 3"
+    },
+    {
+      "action": "command",
+      "label": "Mar'li",
+      "actor": "hero",
+      "command": ".instance setbossstate 2 3"
+    },
+    {
+      "action": "command",
+      "label": "Arlokk",
+      "actor": "hero",
+      "command": ".instance setbossstate 3 3"
+    },
+    {
+      "action": "command",
+      "label": "and Thekal",
+      "actor": "hero",
+      "command": ".instance setbossstate 4 3"
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with every High Priest dead Hakkar has no Hakkar's Power",
+      "actor": "hakkar",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Pull Hakkar",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: his first Corrupted Blood reaches the hero",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118601,
+        2118602,
+        2118603,
+        2118604
+      ],
+      "min": 1,
+      "within_ms": 40000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The hero kills Hakkar",
+      "actor": "hero",
+      "entry": 14834,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Hakkar dies",
+      "actor": "hakkar",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Corrupted Blood leaves the hero with him",
+      "actor": "hero",
+      "metric": "carried_aura_count",
+      "spells": [
+        2118601,
+        2118602,
+        2118603,
+        2118604
+      ],
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

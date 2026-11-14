@@ -96,7 +96,7 @@ class aura_ascension_necromancer_event : public AuraScript
                 LeechArmy(player, damage, ward->GetAmount());
             if (minion && player->HealthBelowPct(50) && actor->HasAura(560607, player->GetGUID()))
                 Copy(player, player, 561095, uint64(damage) * std::max(0, Amount(560607, 1)) / 100);
-            if (actor->HasAura(800027, player->GetGUID()))
+            if (minion && actor->GetEntry() != 50320 && actor->HasAura(800027, player->GetGUID()))
                 Copy(actor, target, 570050, uint64(damage) * std::max(0, Amount(800027)) / 100);
             if (minion && melee && actor->HasAura(805290, player->GetGUID()))
                 Cast(actor, player, 707000);
@@ -115,14 +115,15 @@ class aura_ascension_necromancer_event : public AuraScript
                     if (Aura* stacks = player->GetAura(707133))
                         stacks->ModStackAmount(-1);
             }
+            bool const periodicParasites = periodic && Chance(player, 561319);
+            if (periodicParasites || Chance(player, 560730))
+                Cast(player, target, 560729);
             if (periodic)
             {
                 if (Chance(player, 300235))
                     BuffArmy(player, 301334, true);
                 if (player->HasAura(573223))
                     Copy(player, target, 573242, uint64(damage) * 20 / 100);
-                if (Chance(player, 561319) || Chance(player, 560730))
-                    Cast(player, target, 560729);
                 if (Chance(player, 806086))
                     Summon(player, 806087, target, target->GetPosition());
                 if (Chance(player, 807700))
@@ -172,6 +173,8 @@ class aura_ascension_necromancer_event : public AuraScript
                 Reduce(player, 801938, std::abs(Amount(806322)));
             if (actor->GetEntry() == 50073 && Chance(player, 503740))
                 Cast(player, actor, 707014);
+            if (actor->GetEntry() == 50385 && (!info || info->Id != 504022))
+                Cast(actor, actor, 504022);
             if (melee && actor->GetEntry() == 50078 && roll_chance_i(sSpellMgr->GetSpellInfo(805023)->ProcChance))
                 Cast(actor, target, 805024);
             if (melee && actor->GetEntry() == 503200 && actor->HasAura(531133))
@@ -180,28 +183,19 @@ class aura_ascension_necromancer_event : public AuraScript
                 Cast(player, player, 712434);
             if (critical && Chance(player, 537208, 1, 1000))
                 Reduce(player, 805029, std::abs(Amount(680553)));
-            if (critical && melee && Chance(player, 638403))
+            if (critical && melee && MinionChance(player, actor, 638403))
                 Copy(actor, target, 801241, uint64(damage) * std::max(0, Amount(638403, 1)) / 100);
             if (critical && (actor->GetEntry() == 50068 || actor->GetEntry() == 50115) && player->HasAura(707283))
                 Cast(actor, target, 707284);
             if (Chance(player, player->HasAura(707882) ? 707882 : 707001))
+                Cast(actor, target, 707002);
+            if (MinionChance(player, actor, 802986))
             {
-                uint32 count = 0;
-                uint32 cap = std::max(1, Amount(player->HasAura(707882) ? 707882 : 707001));
-                for (Unit* nearby : Nearby(target, 8.0f))
-                    if (player->IsValidAttackTarget(nearby))
-                    {
-                        Cast(actor, nearby, 707002);
-                        if (++count >= cap)
-                            break;
-                    }
-            }
-            if (Chance(player, 802986))
-            {
-                Cast(player, actor, 807653);
+                Cast(actor, actor, 807653);
+                Cast(actor, actor, 807765);
                 Cast(actor, actor, 504022);
             }
-            if (target->HasAura(560729, player->GetGUID()) && player->HasAura(561319))
+            if (target->HasAura(560729, player->GetGUID()))
                 Copy(actor, target, 561318, uint64(damage) * std::max(0, Amount(561319)) / 100);
             if (player->HasAura(704721) &&
                 (!info || (info->SchoolMask & (SPELL_SCHOOL_MASK_NORMAL | SPELL_SCHOOL_MASK_FROST))) &&

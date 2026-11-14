@@ -417,7 +417,8 @@ trigger spell for `cast`, `melee_damage_count` of the main hand for `attack`), a
 `judge_trigger_magnitude` sums each of the four numbers across every part, then judges
 `ratio = (observe_total / observe_count) / (trigger_total / trigger_count)` — the triggered spell's own mean
 amount per occurrence, over the trigger side's own mean amount per attempt — against `expected_ratio` within
-`max(0.01, 5% of expected)` (the owner's own "within 5% on numbers" standard), everything outside is `alert`.
+`max(0.01, 0.02, 5% of expected)` (the owner's own "within 5% on numbers" standard and the G-19 band, the larger
+of 5% of the stated value and 2 points, ADR 0481), everything outside is `alert`.
 The explanation and `detail.excluded` state the ratio range the check excludes (`compare.magnitude_excluded`): the
 band widened by the 99% half-width of the mean of the per-part ratios when two parts or more were usable, otherwise
 the band alone with the statement that one part gives no sampling interval.
@@ -626,3 +627,46 @@ stack grows across repeated casts — the tooltip's own separate "Oath" clause, 
 fixture (`{"spell": 805332, "stacks": 0, ...}`, the existing `set_aura` action with `stacks: 0`, which already
 removes the aura regardless of caster) clears the Oath before every attempt. Two independent runs after that
 fix each measured 273/273, `self_trigger_count` `ok`; the Oath's own chance clause remains separately unproven.
+
+### Minion trigger entries (ADR 0340, ADR 0342, ADR 0343)
+
+`trigger: {"action": "minion", "spell": <summon>, "entry": <creature>, "swing_ms": <ms>, "swing_source": <citation>,
+"learn": [<spell>, ...]}` drives a trigger from a raised minion's hits. The scenario learns `learn` and the summon
+spell, casts it, asserts one owned creature of `entry` within 8000 ms, and the caster attacks the dummy, which the
+class code makes the minion attack too. An attempt is one `swing_ms`. `trial_metric` is `pet_melee_crits`,
+`pet_melee_swings` or `owned_creature_damage_count` of the minion; `observe_actor: "minion"` reads
+`spell_damage_count` of `observe_spell` cast by the minion at the dummy.
+
+- `minion_auras` (`{"spell", "amount", "source"}`, precondition fixtures) are removed and set again on the minion
+  every `minion_aura_refresh_ms`; Chomp 707283 forces Abomination crits with Anointed 280912 at amount 100.
+- `caster_health_pct` holds the caster at that health before every window, the first one set before the attack
+  starts (ADR 0650): the runner takes one step per world tick, so a minion with a ready swing timer otherwise lands
+  its first hit at the caster's natural health (Vampiric Aura 300241: 45%, and 55% in its gate-absence entry).
+- `aura_settle_ms` (with `aura_settle_source`) waits that long after the learn before the first attack, when the
+  passive reaches the minion only after a delay the DBC states (Vampiric Aura 300241: 1500 ms, past the 1000 ms first
+  tick of its Effect[1] that casts 560607 onto the summons; Necromancer ADR 0080).
+- `aura_on_minion` reads the passive on the minion when its only effects apply auras to summons (Pandemic 560798).
+- `aura_cast` casts the aura after its learn, for an active (Fetid Ward 680388); `caster_power` (`{"power", "value",
+  "source"}`) sets a power before each cast, for a base-mana percentage cost.
+- `magnitude_ratio` takes the minion action (`trigger_metric` `owned_creature_damage_total`), and so does
+  `gate_absence`.
+- A `magnitude_ratio` cast entry may name `trial_spell`, the hit spell it measures (Harrowing Winds 705745: Glacial
+  Impact 704355 deals 707592), and `target_state_fixture` sets the cast's target aura state (ADR 0303); `trigger_count`
+  cast entries take `target_state_fixture` too. `label_suffix` names a second magnitude entry of one aura.
+
+A `cooldown_delta` entry with the minion action reads, per window, the observed spell's cooldown and the minion's
+counted events before and after `window_ms`; the judge sums the drop less the elapsed time per counted event against
+`expected_delta_ms` within 5%, and 0 per event over the baseline windows. `observe_target`, `observe_target_auras`
+and `observe_cleared_auras` set the observed cast's target and its precondition auras (Pandemic: Crypt Plague 570131
+on the dummy, Infestation 803782 cleared). `observe_settle_ms` waits that long after each observed cast before the
+window's first read, for what the cast itself raises to expire (Study of Death 704721: the 5 Greater Zombies of each
+Unholy Frenzy last 15 s and share the 1 s gate, so the window opens 17000 ms after the cast; ADR 0349). A
+`kind: "cooldown_gate"` entry (`effect` and `label_suffix` to keep it
+apart) primes the observed spell, lets the minion attack for `gate_wait_ms` and casts it again: refused
+(`SPELL_FAILED_NOT_READY`) without the passive, cast with it (check `trigger_cooldown_gate`, behaviour).
+
+A minion `magnitude_ratio` may measure `pet_melee_damage` over the minion's melee hits (`pet_melee_hits`, the
+default) or, with `trigger_count_metric: "pet_melee_crits"`, over its melee crits, for a proc of forced crits
+(Depravity 638403; ADR 0347), and read the copy on the minion (`observe_actor: "minion"`, by `caster_entry`);
+`aura_on_minion` applies to it too, and `presence_aura` takes precedence over it for the aura read. `expected_note` adds the derivation of `expected_ratio` to the rule (Fetid Ward's leech, 0.30 x the healing
+received factor its own entry proves). `target_state_fixture` may be `{"spell", "source"}`, which the rule then names.

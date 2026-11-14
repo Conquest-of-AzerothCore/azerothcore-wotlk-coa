@@ -267,7 +267,7 @@ class aura_ascension_necromancer_lifecycle : public AuraScript
     {
         if (Player* player = Owner(GetCaster()))
             if (Named(GetSpellInfo(), 801945))
-                Cast(player, GetTarget(), 680928);
+                Cast(player, GetUnitOwner(), 680928);
     }
     void Register() override
     {

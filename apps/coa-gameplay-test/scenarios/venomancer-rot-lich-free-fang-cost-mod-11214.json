@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Rot Lich's free Serpent's Fang reaches the client as a cost modifier (#11214)",
+  "contract": [
+    "#11214: after a Rot Lich proc the Serpent's Fang button stayed grey at low mana. 706032 'Your next Serpent's Fang",
+    "within $d is free of cost' was made free only inside the server's CalcPowerCost, so no cost spell modifier was",
+    "sent and the client kept checking Serpent's Fang's own 20% base mana cost before submitting the cast.",
+    "706032 now carries a -100% SPELLMOD_COST (14) aura effect on its own Serpent's Fang mask, the same modifier the",
+    "authored Rot Lich record 707321 holds (BasePoints -101 + 1); in family 35 that mask matches only the 16 Serpent's",
+    "Fang ranks. A native spell modifier is what the client receives (SMSG_SET_PCT_SPELL_MODIFIER), so spell_modifier",
+    "op 14 on base 1000 must read 0 with the buff and 1000 without it."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "v", "race": 1, "class": 29, "level": 60 }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "v", "spell": 800946 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "CONTROL: no cost modifier on Serpent's Fang without the buff", "actor": "v",
+      "metric": "spell_modifier", "spell": 800946, "op": 14, "base": 1000, "equals": 1000 },
+    { "action": "set_aura", "actor": "v", "spell": 706032, "stacks": 1, "label": "Rot Lich proc buff" },
+    { "action": "assert", "label": "SETUP: the free Serpent's Fang buff is active", "actor": "v", "metric": "aura",
+      "spell": 706032, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the buff sends a -100% cost modifier for Serpent's Fang",
+      "actor": "v", "metric": "spell_modifier", "spell": 800946, "op": 14, "base": 1000, "equals": 0 },
+    { "action": "assert", "label": "Serpent's Fang costs no mana with the buff", "actor": "v",
+      "metric": "spell_power_cost", "spell": 800946, "equals": 0 }
+  ]
+}

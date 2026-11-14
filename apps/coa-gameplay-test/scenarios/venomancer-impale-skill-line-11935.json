@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Impale is in the Fortitude tab, not Stalking (#11935)",
+  "contract": [
+    "Issue #11935. Impale (560248) is the Fortitude talent CharacterAdvancement 7169 in Tab 78, but SkillLineAbility",
+    "row 22251 filed it under SkillLine 104 (Stalking), so the Fortitude spellbook tab did not list it. Every other",
+    "active Fortitude talent, such as Molt (805102, row 89239), is in SkillLine 105. Row 22251 now carries SkillLine",
+    "105 on the server and in the client patch streamed after the spell is learned."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "v", "race": 1, "class": 29, "level": 60}
+  ],
+  "steps": [
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 805102, "equals": 105,
+     "label": "CONTROL: Molt is in the Fortitude line"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_for_spell", "spell": 560248, "equals": 105,
+     "label": "Impale carries the Fortitude line"},
+    {"action": "learn", "actor": "v", "spell": 560248, "label": "learn Impale"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_after_learned", "spell": 560248, "equals": 1,
+     "within_ms": 5000, "label": "the row follows the learn announcement"},
+    {"action": "assert", "actor": "v", "metric": "skill_line_ability", "spell": 560248, "equals": 105,
+     "within_ms": 5000, "label": "the client patch carries SkillLine 105 for Impale"}
+  ]
+}

@@ -19,10 +19,10 @@
  *   while it dies; then the Gift of the Blood God and her bat form.
  *
  *   Bat form, when the avatar dies
- *     Bat-tering Charge  first 2s, every 20s   random player out of melee and within 25
- *                                              yards, knocks back everyone within 10 yards
- *     Terrifying Screech the moment the charge stuns, or in its place when no player
- *                                              is in reach (live: 12 of 12 landed charges, 0-9 ms):
+ *     Bat-tering Charge  first 2s, every 20s   random player beyond 8 and within 25 yards,
+ *                                              knocks back everyone within 10 yards
+ *     Terrifying Screech the moment the charge lands, in place, or in its place when no
+ *                                              player is in reach (live: 12 of 12 landed charges, 0-9 ms):
  *                                              everyone in the room, and fears everyone
  *                                              within 20 yards
  *     Vampirism          passive, her hits drain life
@@ -46,7 +46,8 @@
  *     the live logs fear part of the raid, but give no positions;
  *   - the bat riders move from the troll phase to the bat phase with the swap.
  *   - Bat-tering Charge has 100 yards in the DBC; players at 30 yards and more are out of
- *     reach on live (tester, 2026-11-04), so it takes the 25 yards of stock Jeklik's Charge.
+ *     reach on live (tester, 2026-11-04), so it takes the 25 yards of stock Jeklik's Charge;
+ *     testers saw it hit melee players (2026-11-13), so it also takes stock's 8 yard minimum;
  *   - the bat carries its rider on vehicle 108, an estimated stand-in: the live seat is unknown;
  *   - the bat dives at a uniform random 16-56s after the pair spawns (live: 15.9-56.7s);
  *   - the pair flies stock's rider loop at stock's speed, and cannot be attacked before the
@@ -146,6 +147,7 @@ namespace
     constexpr float MASS_FEAR_RANGE    = 20.0f;
     constexpr float SCREECH_RANGE      = 100.0f;
     constexpr float SCREECH_FEAR_RANGE = 20.0f;
+    constexpr float BATTERING_CHARGE_MIN_RANGE = 8.0f;
     constexpr float BATTERING_CHARGE_MAX_RANGE = 25.0f;
     constexpr float LIQUID_FIRE_RANGE  = 100.0f;
     constexpr uint8 CRAZED_RIDERS_MIN_SPAWN_MODE = 2;
@@ -193,6 +195,7 @@ namespace
             _avatar.Restore(me);
             _bat = false;
             _riders = 0;
+            _screechOnLanding = false;
             DoCastSelf(SPELL_GREEN_CHANNELING, true);
         }
 
@@ -201,6 +204,7 @@ namespace
             BossAI::JustEngagedWith(who);
             Talk(SAY_AGGRO);
             DoZoneInCombat();
+            me->InterruptSpell(CURRENT_CHANNELED_SPELL);
             me->RemoveAurasDueToSpell(SPELL_GREEN_CHANNELING);
             StartTrollPhase();
         }
@@ -252,6 +256,7 @@ namespace
             DoCastSelf(SPELL_ASPECT_OF_HIREEK, true);
             DoCastSelf(SPELL_VAMPIRISM, true);
             DoResetThreatList();
+            _screechOnLanding = false;
 
             events.SetPhase(PHASE_BAT);
             events.ScheduleEvent(EVENT_BATTERING_CHARGE, 2s, 0, PHASE_BAT);
@@ -315,7 +320,21 @@ namespace
                 return;
 
             me->CastSpell(target, SPELL_BATTERING_IMPACT, true);
-            events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
+            if (_screechOnLanding && !me->HasUnitState(UNIT_STATE_CHARGING))
+            {
+                _screechOnLanding = false;
+                events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
+            }
+        }
+
+        void MovementInform(uint32 type, uint32 id) override
+        {
+            if (type != POINT_MOTION_TYPE || (id != ::EVENT_CHARGE && id != EVENT_CHARGE_PREPATH) || !_screechOnLanding)
+                return;
+
+            _screechOnLanding = false;
+            me->StopMoving();
+            DoCastSelf(SPELL_SCREECH);
         }
 
         void CallOfHireek()
@@ -403,9 +422,10 @@ namespace
                     case EVENT_BATTERING_CHARGE:
                         if (Unit* target = SelectTarget(SelectTargetMethod::Random, 0, [this](Unit* u)
                             {
-                                return u->IsPlayer() && !me->IsWithinMeleeRange(u) && me->IsWithinDist(u, BATTERING_CHARGE_MAX_RANGE);
+                                return u->IsPlayer() && !me->IsWithinDist(u, BATTERING_CHARGE_MIN_RANGE)
+                                    && me->IsWithinDist(u, BATTERING_CHARGE_MAX_RANGE);
                             }))
-                            DoCast(target, SPELL_BATTERING_CHARGE);
+                            _screechOnLanding = DoCast(target, SPELL_BATTERING_CHARGE) == SPELL_CAST_OK;
                         else
                             events.ScheduleEvent(EVENT_SCREECH, 0ms, 0, PHASE_BAT);
                         events.ScheduleEvent(EVENT_BATTERING_CHARGE, 20s, 0, PHASE_BAT);
@@ -435,6 +455,7 @@ namespace
     private:
         bool _bat = false;
         uint8 _riders = 0;
+        bool _screechOnLanding = false;
         LoaAvatar _avatar{ NPC_AVATAR_OF_HIREEK, SPELL_DRAIN_POWER };
         ObjectGuid _target;
     };

@@ -138,6 +138,7 @@ namespace
     constexpr float BREATH_RANGE = 30.0f;
     constexpr float CONE_ARC     = float(M_PI) / 2;
     constexpr float TAIL_RANGE   = 20.0f;
+    constexpr float TAIL_SAFE_ARC = float(M_PI) * 1.5f;
     constexpr float FOG_RADIUS   = 5.0f;
     constexpr uint8 BREATH_PULSES = 6;
 
@@ -256,7 +257,8 @@ namespace
 
         void Tail()
         {
-            for (Player* p : Players(me, [&](Player* x) { return me->IsWithinDist(x, TAIL_RANGE) && !me->isInFront(x, float(M_PI)); }))
+            for (Player* p : Players(me, [&](Player* x)
+                { return me->IsWithinDist(x, TAIL_RANGE) && !me->isInFront(x, TAIL_SAFE_ARC); }))
             {
                 me->CastSpell(p, S(OFF_TAIL_HIT), true);
                 p->KnockbackFrom(me->GetPositionX(), me->GetPositionY(), 15.0f, 8.0f);

@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: High Priestess Arlokk stays vanished through area damage on Mythic",
+  "contract": [
+    "The round-6 tester (Mythic): Arlokk's Vanish ends almost at once. On live (Bronzebeard Mythic, 2025-12-22) her",
+    "Vanish (2118312) lasted its full 9.95 s while about 40 Earthquake, Volley, Fire Storm, Thunder Clap and other",
+    "area hits landed on her. A hostile spell hit removed every stealth aura of its target, so the first area hit",
+    "ended her Vanish. Here a warrior hero pulls Arlokk at the Zul'Gurub entrance on Mythic, wounds her below half",
+    "health so she takes panther form and vanishes, then hits her with Thunder Clap (6343). Vanish must still be",
+    "on her and she must stay hidden from the hero's client; after 10 s she steps out, visible again, and Ravages."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 6343
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -12326.5,
+      "y": -1577.11,
+      "z": 133.588,
+      "o": 4.817,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the instance is Mythic",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14515,
+      "as": "arlokk",
+      "distance": 4
+    },
+    {
+      "action": "attack",
+      "label": "Pull Arlokk before she walks back to her temple",
+      "actor": "hero",
+      "target": "arlokk"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Arlokk fights",
+      "actor": "arlokk",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "hero"
+    },
+    {
+      "action": "set_health_pct",
+      "label": "Wound Arlokk below half health",
+      "actor": "hero",
+      "entry": 14515,
+      "pct": 45
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she takes panther form",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118323,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she vanishes with the change",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's client loses sight of her",
+      "actor": "hero",
+      "metric": "nearby_creature_at_client",
+      "entry": 14515,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "hero",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Thunder Clap around the hero, where Arlokk stands vanished",
+      "actor": "hero",
+      "spell": 6343
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thunder Clap is cast",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 6343,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thunder Clap hits the vanished Arlokk",
+      "actor": "hero",
+      "metric": "spell_damage_count",
+      "spell": 6343,
+      "target": "arlokk",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Vanish survives the area hit",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she stays hidden from the hero's client",
+      "actor": "hero",
+      "metric": "nearby_creature_at_client",
+      "entry": 14515,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Well inside the 10 seconds out of sight",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: she is still vanished",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: she steps out and Ravages the hero 11 s after the change",
+      "actor": "arlokk",
+      "metric": "spell_cast_count",
+      "spell": 2118331,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Vanish is gone",
+      "actor": "arlokk",
+      "metric": "aura",
+      "spell": 2118312,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's client sees her again",
+      "actor": "hero",
+      "metric": "nearby_creature_at_client",
+      "entry": 14515,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

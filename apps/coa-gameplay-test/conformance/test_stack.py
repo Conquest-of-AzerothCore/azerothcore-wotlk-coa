@@ -12,7 +12,7 @@ from compare import STATUSES, Verdict, alert_rows, change_decision, compare, wri
 from profile import DBC_DIR
 from stack import (MEASURED, STACK_DPS, STACK_SOURCE, TALENT_DELTA, Lever, levers, mean_interval, ratio_interval,
                    stack_scenarios, student_t_quantile)
-from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader
+from test_compare import CLASS_FILE, Workspace, assert_step, constant_reader, fixture_generate
 from tooltip import Displayed, Records
 from values import Expectation, dataset
 
@@ -514,10 +514,9 @@ class StackScenarioTest(unittest.TestCase):
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class GenerateStackTest(unittest.TestCase):
     def test_generate_writes_every_pass_of_every_configuration(self):
-        from conformance import generate
         out = Path(tempfile.mkdtemp(prefix='conformance-stack-'))
         try:
-            manifest = json.loads(generate(CLASS_FILE['class_id'], out, stack=True, passes=2)
+            manifest = json.loads(fixture_generate(CLASS_FILE['class_id'], out, stack=True, passes=2)
                                   .read_text(encoding='utf-8'))
             entries = manifest['scenarios']
             self.assertEqual(len(entries), 2 * len(CONFIGS))

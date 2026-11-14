@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: killing Hakkar while all five High Priests live earns Straight to the Heart",
+  "contract": [
+    "Tester feedback round 6 (2026-11-13): no achievement for the kill. Straight to the Heart (Normal 20016) says",
+    "\"Defeat Hakkar ... while all of his High Priests are still alive\"; its criterion 12004 is being the target of",
+    "2107157, and AzerothCore counts that only with an achievement_criteria_data row, which was missing, so nobody",
+    "could earn it (user decision 2026-11-13: all five priests alive). Two ungrouped heroes each kill a Hakkar",
+    "(14834) in their own fresh Normal instance. In the first all five priests live, and the hero must earn 20016;",
+    "in the second Arlokk is set DONE, and the control hero must not."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "control",
+      "map": 309,
+      "x": -11787.4,
+      "y": -1649.34,
+      "z": 54.1017,
+      "o": 4.76475,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let both transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Zul'Gurub on Normal",
+      "actor": "hero",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the control hero is in Zul'Gurub on Normal",
+      "actor": "control",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The control raid has killed Arlokk",
+      "actor": "control",
+      "command": ".instance setbossstate 3 3"
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 14834,
+      "as": "hakkar",
+      "distance": 4
+    },
+    {
+      "action": "summon",
+      "actor": "control",
+      "entry": 14834,
+      "as": "hakkar_control",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's Hakkar carries five stacks of Hakkar's Power, one per living priest",
+      "actor": "hakkar",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the control Hakkar carries four, so the instances are separate",
+      "actor": "hakkar_control",
+      "metric": "aura_stacks",
+      "spell": 24692,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero has not earned Straight to the Heart yet",
+      "actor": "hero",
+      "metric": "has_achievement",
+      "achievement": 20016,
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "label": "Pull the hero's Hakkar",
+      "actor": "hero",
+      "target": "hakkar"
+    },
+    {
+      "action": "attack",
+      "label": "Pull the control Hakkar",
+      "actor": "control",
+      "target": "hakkar_control"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's Hakkar fights",
+      "actor": "hakkar",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the control Hakkar fights",
+      "actor": "hakkar_control",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The hero kills Hakkar",
+      "actor": "hero",
+      "entry": 14834,
+      "kill": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The control hero kills Hakkar",
+      "actor": "control",
+      "entry": 14834,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero's Hakkar dies",
+      "actor": "hakkar",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the control Hakkar dies",
+      "actor": "hakkar_control",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with all five priests alive the hero earns Straight to the Heart",
+      "actor": "hero",
+      "metric": "has_achievement",
+      "achievement": 20016,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with Arlokk dead the control hero does not",
+      "actor": "control",
+      "metric": "has_achievement",
+      "achievement": 20016,
+      "equals": 0
+    }
+  ]
+}

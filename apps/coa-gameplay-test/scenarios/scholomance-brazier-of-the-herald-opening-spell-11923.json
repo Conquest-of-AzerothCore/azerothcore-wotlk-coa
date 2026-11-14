@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Scholomance: the keyless Brazier of the Herald accepts the opening spell and summons Kirtonos (#11923)",
+  "contract": "Issue #11923: using Blood of Innocents (13523) on the Brazier of the Herald (gameobject 175564, type BUTTON) said Invalid target and Kirtonos the Herald (10506) never came. #11458 removed the brazier's lock 1179 (Data1 0), but a client that cached the lock still uses the item, which casts Opening 3366 (SPELL_EFFECT_OPEN_LOCK) at the brazier. A lockless gameobject other than a door refused that spell with SPELL_FAILED_BAD_TARGETS (the door case was #6816). Expected: Opening on the lockless brazier is not refused, activates it, and its SmartAI sets instance data 0, which summons Kirtonos.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 289,
+      "x": 322.6,
+      "y": 93.6,
+      "z": 101.64,
+      "o": 0.0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in Scholomance",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 289,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Brazier of the Herald is ready",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 175564,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Kirtonos the Herald is not out yet",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10506,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 3366
+    },
+    {
+      "action": "cast",
+      "label": "Opening, the spell Blood of Innocents casts",
+      "actor": "hero",
+      "spell": 3366,
+      "target_gameobject": 175564
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Opening is not refused (Invalid target)",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 3366,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Kirtonos the Herald is summoned",
+      "actor": "hero",
+      "metric": "nearby_creature_count",
+      "entry": 10506,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

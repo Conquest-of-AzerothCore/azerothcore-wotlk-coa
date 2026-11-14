@@ -1,0 +1,145 @@
+[
+ {
+  "spell": 92121,
+  "clause": "Level 10 Passive",
+  "labels": [],
+  "kind": "no_claim"
+ },
+ {
+  "spell": 92121,
+  "clause": "Damage dealt by Crypt Swarm now applies 1 stack of Crypt Plague",
+  "labels": [
+   "92121 behaviour_metric_delta crypt_swarm"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 300748,
+  "clause": "Increases your maximum health and the maximum health of your summons by $s1%.",
+  "claims": [
+   {
+    "claim": "Increases your maximum health ... by $s1%",
+    "labels": [
+     "300748 behaviour_metric_delta own_health"
+    ]
+   },
+   {
+    "claim": "and the maximum health of your summons by $s1%",
+    "labels": [
+     "300748 behaviour_metric_delta summon_health"
+    ]
+   }
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301207,
+  "clause": "Each Abomination or Decaying Colossus active now increases your total Armor and magic resistance by $805017s2%",
+  "claims": [
+   {
+    "claim": "Abomination or Decaying Colossus active now increases your total Armor",
+    "labels": [
+     "301207 behaviour_metric_delta armor",
+     "301207 behaviour_metric_delta armor_colossus",
+     "301207 behaviour_metric_delta armor_none"
+    ]
+   },
+   {
+    "claim": "Each",
+    "labels": [
+     "301207 behaviour_metric_delta armor_each",
+     "301207 behaviour_metric_delta capacity_fixture"
+    ]
+   },
+   {
+    "claim": "and magic resistance by $805017s2%",
+    "labels": [
+     "301207 behaviour_metric_delta resistance"
+    ]
+   }
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 301303,
+  "clause": "Increases your critical damage with Frost spells by $s1%.",
+  "labels": [
+   "301303 effect_value e0 #0"
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 504316,
+  "clause": "Command your Abominations to hook an enemy to their location, slowing their movement speed to a halt for $800043d.",
+  "claims": [
+   {
+    "claim": "Command your Abominations to hook an enemy to their location",
+    "labels": [
+     "504316 spell_duration 800043 #0",
+     "504316 behaviour_metric_delta hook_pull",
+     "504316 behaviour_metric_delta hook_to_abomination"
+    ]
+   },
+   {
+    "claim": "slowing their movement speed to a halt",
+    "labels": [
+     "504316 behaviour_metric_delta halt",
+     "504316 behaviour_metric_delta chase_halt"
+    ]
+   },
+   {
+    "claim": "for $800043d",
+    "labels": [
+     "504316 behaviour_metric_delta duration"
+    ]
+   }
+  ],
+  "kind": "claim"
+ },
+ {
+  "spell": 560800,
+  "clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
+  "kind": "claim",
+  "claims": [
+   {
+    "claim": "Upon fully channeling Crypt Swarm, you summon a Rotling",
+    "labels": [
+     "560800 behaviour_metric_delta rotling"
+    ]
+   },
+   {
+    "claim": "that will run towards the enemy and explode after $807640t2 sec",
+    "labels": [
+     "560800 behaviour_metric_delta explode_before",
+     "560800 behaviour_metric_delta explode_after"
+    ]
+   },
+   {
+    "claim": "for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage, increased with your level.",
+    "labels": [
+     "560800 effect_value 500585e0 #1"
+    ]
+   }
+  ],
+  "dbc_clause": "Upon fully channeling Crypt Swarm, you summon a Rotling that will run towards the enemy and explode after $807640t2 sec for ${$500585m1+$500585ppl1+$SP*0.335} Plague damage.",
+  "text_source": {
+   "table": "coa_client_spell_description",
+   "file": "rev_20261114_01_necromancer_owner_text_items_15_16.sql",
+   "commit": "a8f82f06d6",
+   "pr": null,
+   "basis": "owner_ruling",
+   "ruling": "owner text item 16 (125.2, precedent Q-b1-1), owner go 2026-11-14 (text-items.md)",
+   "spell": 560800,
+   "dbc_differs": "Description differs from Spell.dbc"
+  }
+ },
+ {
+  "spell": 503740,
+  "clause": "Immune to movement slowing effects.",
+  "labels": [
+   "503740 behaviour_metric_delta frenzied_snare_immune",
+   "503740 behaviour_metric_delta snare_control"
+  ],
+  "kind": "claim"
+ }
+]
