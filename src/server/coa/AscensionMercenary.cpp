@@ -124,13 +124,6 @@ void SetMercenaryFreeForAll(Player* player)
             controlled->SetByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_FFA_PVP);
 }
 
-void TakeUpMercenaryState(Player* player)
-{
-    SetMercenaryFaction(player, MERCENARY_FACTION_TEMPLATE);
-    SetMercenaryFreeForAll(player);
-    RefreshRulesetPlayersFor(player);
-}
-
 void ReleaseMercenaryFaction(Player* player)
 {
     if (player->GetFaction() != MERCENARY_FACTION_TEMPLATE)
@@ -142,6 +135,21 @@ void ReleaseMercenaryFaction(Player* player)
                 sChrRacesStore.LookupEntry(player->GetTeamId() == TEAM_ALLIANCE ? RACE_HUMAN : RACE_ORC))
             player->SetFaction(race->FactionID);
     SetMercenaryFaction(player, player->GetFaction());
+}
+
+void SyncMercenaryFaction(Player* player)
+{
+    if (player->pvpInfo.IsInNoPvPArea)
+        ReleaseMercenaryFaction(player);
+    else if (player->GetFaction() != MERCENARY_FACTION_TEMPLATE)
+        SetMercenaryFaction(player, MERCENARY_FACTION_TEMPLATE);
+}
+
+void TakeUpMercenaryState(Player* player)
+{
+    SyncMercenaryFaction(player);
+    SetMercenaryFreeForAll(player);
+    RefreshRulesetPlayersFor(player);
 }
 
 void StandDownForTeamBattle(Player* player)
@@ -188,7 +196,10 @@ void RestoreFreeForAllOnceAreaSettles(Player* player)
     {
         Player* player = ObjectAccessor::FindPlayer(guid);
         if (player && player->IsInWorld() && ActiveMercenary(player))
+        {
+            SyncMercenaryFaction(player);
             SetMercenaryFreeForAll(player);
+        }
     }, 0ms);
 }
 
@@ -275,6 +286,12 @@ public:
         bool const secondMercenary = ActiveMercenary(second);
         if (!firstMercenary && !secondMercenary)
             return true;
+
+        if (first->pvpInfo.IsInNoPvPArea || second->pvpInfo.IsInNoPvPArea)
+        {
+            reaction = firstMercenary ? RaceReactionTo(first, target) : RaceReactionTo(second, unit);
+            return false;
+        }
 
         if ((firstMercenary && InMercenaryWar(second)) || (secondMercenary && InMercenaryWar(first)))
             reaction = REP_HOSTILE;
