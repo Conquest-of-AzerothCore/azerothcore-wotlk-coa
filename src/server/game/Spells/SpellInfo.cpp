@@ -2763,6 +2763,10 @@ void SpellInfo::_LoadImmunityInfo()
                     case 54508: // Demonic Empowerment
                         mechanicImmunityMask |= (1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_ROOT) | (1ULL << MECHANIC_STUN);
                         break;
+                    case 804652: // Vial of Moonwell Water
+                        mechanicImmunityMask |= IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK &
+                            ~((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_DAZE));
+                        break;
                     default:
                         if (miscVal < 1)
                             break;
