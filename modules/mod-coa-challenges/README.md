@@ -102,11 +102,13 @@ Support commands for a player's run (administrator, also from the console; the p
   done or pending, and the challenge ids the player is locked out of. It also works for an offline character.
 - `credit` marks one objective done by its number from that list, whatever the player's level, and runs the
   normal completion check. The player must be online.
-- `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives,
-  run timer, hunger, thirst and fatigue it had when it failed, re-links a custom trial with its other bundled
-  challenges, takes the fatal death back when the run was out of lives, and resurrects the character. The state
-  comes from `coa_challenge_failure_snapshot`, written at every failure; a failure from before that table
-  restores with a restarted timer. High-Risk drops and shared-fate partners are not restored.
+- `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives
+  and run timer it had when it failed, re-links a custom trial with its other bundled challenges, takes the
+  fatal death back when the run was out of lives, and resurrects the character. Hunger and thirst restart at
+  zero and the fatigue bar restarts full, as on a new activation, so a run that failed by starving or falling
+  asleep (Survival, Narcolepsy) does not die again at once. The state comes from
+  `coa_challenge_failure_snapshot`, written at every failure; a failure from before that table restores with a
+  restarted timer. High-Risk drops and shared-fate partners are not restored.
 
 `restore` is refused in two cases, both because of levels gained after the failure. Those levels were earned
 outside the challenge's rules: its lives, its bans on the auction house, mail, trade, heirlooms and the dungeon
