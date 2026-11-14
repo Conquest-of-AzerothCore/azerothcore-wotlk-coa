@@ -1,0 +1,116 @@
+{
+  "schema": 1,
+  "name": "Deadmines: an unselectable lockless lever refuses the opening spell",
+  "contract": "Opening spells (SPELL_EFFECT_OPEN_LOCK) accept lockless doors (#6816) and buttons (#11923), but the click path GameObject::Use ignores a gameobject flagged GO_FLAG_NOT_SELECTABLE. The Deadmines Door Lever 101833 (type BUTTON, no lock; flags 48 at the client: GO_FLAG_NOT_SELECTABLE 16 plus GO_FLAG_NODESPAWN 32) is moved only by the instance. Expected: Opening 3366 cast at it fails with SPELL_FAILED_BAD_TARGETS (12) and the lever stays ready, so the spell cannot reach what a click cannot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 36,
+      "x": -94.9,
+      "y": -670.6,
+      "z": 7.4,
+      "o": 3.14
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the hero is in the Deadmines",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 36,
+      "within_ms": 10000
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 2000000,
+      "maximum": 2000000
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Door Lever is ready",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 101833,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Door Lever is not selectable",
+      "actor": "hero",
+      "metric": "nearby_gameobject_flags",
+      "entry": 101833,
+      "equals": 48
+    },
+    {
+      "action": "set_aura",
+      "actor": "hero",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "hero",
+      "spell": 3366
+    },
+    {
+      "action": "cast",
+      "label": "Opening at the unselectable lever",
+      "actor": "hero",
+      "spell": 3366,
+      "target_gameobject": 101833
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Opening is refused with SPELL_FAILED_BAD_TARGETS",
+      "actor": "hero",
+      "metric": "cast_failure",
+      "spell": 3366,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "label": "The Door Lever was not used",
+      "actor": "hero",
+      "metric": "nearby_gameobject_state",
+      "entry": 101833,
+      "equals": 1
+    }
+  ]
+}
