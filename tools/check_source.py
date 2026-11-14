@@ -100,6 +100,7 @@ SUITES = {
                      [CONFORMANCE + 'test_packets.py'], [CONFORMANCE + 'test_class_map.py'],
                      [CONFORMANCE + 'test_audit.py'], [CONFORMANCE + 'test_buckets.py'],
                      [CONFORMANCE + 'test_aura354.py'], [CONFORMANCE + 'test_ledger.py'],
+                     [CONFORMANCE + 'test_cost.py'],
                      [CONFORMANCE + 'test_minions.py'], [CONFORMANCE + 'test_snapshots.py'],
                      [CONFORMANCE + 'test_tally.py'], [CONFORMANCE + 'test_cycle.py']],
     },

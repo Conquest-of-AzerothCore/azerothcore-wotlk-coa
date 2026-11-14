@@ -667,6 +667,8 @@ def main(argv=None) -> int:
     commands = parser.add_subparsers(dest='command', required=True)
     from batch_commands import add_batch_commands
     batch_handlers = add_batch_commands(commands)
+    from cost import add_cost_command
+    batch_handlers.update(add_cost_command(commands))
     scaffolding = commands.add_parser('scaffold', help='write a minimal classes/<name>.json for a CoA class')
     scaffolding.add_argument('--class', dest='class_id', type=int, required=True)
     scaffolding.add_argument('--out', type=Path, required=True)
