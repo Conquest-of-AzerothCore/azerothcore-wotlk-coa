@@ -379,6 +379,9 @@ remove`. `prove` defaults to `coa-verify` (`prove.py:57`; section 13).
   agent session is set up as mentor (section 12). If there is none, it tells the developer before any other work. It
   says that the work can go ahead without one but will be less efficient, and that every doubtful case will then go to
   the owner as a question.
+- **The dispatch rules are mandatory.** Every agent brief and the controller follow
+  [conformance-dispatch-rules.md](conformance-dispatch-rules.md): the rules 00 and 0-7, the model and effort table, the
+  cadence and the cost record (ADR 0657). A class's plan links that file; it does not copy a changed version.
 - **One class at a time.** Get the owner's go for the class. The Templar goal forbade starting another class.
 - **A worktree and branch of your own**, created from freshly fetched `origin/main`. Follow
   `.agents/rules/git-safety.md`. Each worktree needs its own build: about 22 GB each, with a first build of about
@@ -736,6 +739,11 @@ Integration steps, in order:
    tooling, `coa-worktree-cleanup <wt>` prints its plan first and acts only with `--yes`
    (`references/guide-tooling.md:128`).
 
+The integrator's fixed steps run through `conformance.py cycle` (ADR 0655), which this guide does not restate. Agents
+are used only where the script stops: merge conflicts, flip causes and candidate rulings. At each checkpoint the
+controller compacts its context and records the cost with `conformance.py cost` (ADR 0656); without transcripts the
+checkpoint shows "not recorded".
+
 Before a PR, `python -B tools/verify_all.py --stages source --base origin/main` (`CONF/README.md:94`). Run the codestyle
 linters on changed C++ and SQL files. SQL goes only under `data/sql/updates/pending_db_*/`.
 
@@ -763,11 +771,11 @@ Publication (push, PR) needs the owner's go.
 
 ## 10. Measured costs
 
-All figures were measured on the Templar: section 10.1 from its cost totals, 10.2 from its batch clock and integration
-reports, and 10.3-10.4 from its cost profile and timing analyses, all computed from session transcripts and run reports.
-Those working records are not in the repository. Estimates are not quoted. A "resolved claim" is one the integrator's
-recount moved to a final state. The authors' own counts were higher (R2: 51 against 42; R3 side b: 24 against 8), so
-quote the recount and say so.
+All figures except 10.5 were measured on the Templar: section 10.1 from its cost totals, 10.2 from its batch clock
+and integration reports, 10.3-10.4 from its cost profile and timing analyses, all computed from session transcripts and
+run reports. Section 10.5 is the Necromancer, measured the same way. Those working records are not in the repository.
+Estimates are not quoted. A "resolved claim" is one the integrator's recount moved to a final state. The authors' own
+counts were higher (R2: 51 against 42; R3 side b: 24 against 8), so quote the recount and say so.
 
 ### 10.1 Whole Templar effort
 
@@ -836,6 +844,28 @@ As the reports state it:
    6.26.
 4. **Poll loops and background waits** in the early rounds: 16.0 h over rounds 1-4.
 5. **Shared bench limits.** In round 10 the in-RAM MySQL disk filled and blocked three steps for 63 agent-minutes.
+
+### 10.5 Necromancer cost, by role
+
+Measured from the controller and mentor session transcripts of the Necromancer run (window 2026-11-12 21:00Z to
+2026-11-14 10:03Z, the same method as 10.1: one usage per message id, synthetic messages skipped; input = uncached +
+cache read + cache write). The agents are 120 subagent transcripts, role from the first prompt and description.
+
+| Role | Agents | Agent-min | Input M | Cache read M | Output k |
+|---|---:|---:|---:|---:|---:|
+| Author | 35 | 2,713 | 4,129.2 | 4,101.1 | 6,937 |
+| Integrator | 23 | 867 | 286.8 | 280.0 | 1,137 |
+| Read-only | 50 | 582 | 466.1 | 457.9 | 2,194 |
+| Fix | 12 | 164 | 138.6 | 136.6 | 579 |
+| All agents | 120 | 4,326 | 5,020.7 | 4,975.6 | 10,847 |
+
+- The controller and mentor sessions took 762.4 M input over the same window (controller 585.8 M, mentor 176.3 M,
+  previous controller session 0.3 M); these are not attributed to a role.
+- By cycle, agents only: the night 2,083.8 M and cycle 1 1,421.5 M input (together about 3,505 M), against 12.4 to
+  46.9 M for each of the cycles c11 to c18.
+- Not recorded: the cost per claim (agents work on several claims), the gameplay seconds of the two night pairs, and
+  the role of a hands-on mentor session active in the window, which is not counted.
+- From the next class on, `conformance.py cost` records these figures per checkpoint (ADR 0656).
 
 ## 11. Lessons that cost time
 
@@ -916,6 +946,30 @@ source is the Templar's working records, which are not in the repository.
     qualification starts (`.agents/rules/verification.md`).
 12. **A server change made to satisfy our own check.** A Scourgebane strike chain was added so a check would pass. Live
     logs show about one chained strike where a chain would give about 64, and it was reverted (ADR 0128). Rule: G-2.
+
+### 11.1 Standing rulings, decided alone
+
+A controller or integrator applies these without asking the mentor or the owner. Each carries its source; "Necromancer
+mentor decisions" are the class's working log (`mentor-decisions.md`, `mentor-decisions-local.md`), which is not in the
+repository.
+
+- **Cause first.** A claim that reads off its expectation gets its cause established (ticks, haste, read timing, resist,
+  expectation arithmetic) before a fix or a corrected expectation. Necromancer mentor decisions, 2026-11-13 (c11:
+  "399.0 cause first", "308.0 ... cause first"); the 300241 miss that fixed the wrong place first is in the Necromancer
+  final report.
+- **The band decides, and a rate's 99% interval sits inside the band.** A deterministic value is judged by the band on
+  the value; a proc rate counts when its 99% interval lies inside the band, without holding the exact chance. ADR 0646
+  (amends ADR 0346); G-19 for the band.
+- **A label drop is judged by the claim text.** A label is dropped only where the claim states no such value.
+  Necromancer mentor decisions, 2026-11-13 18:26.
+- **A ledger-only re-audit counts at once.** A ledger-only correction re-audited on the count-of-record pair counts
+  immediately (same build and runs, G-17); a measurement change waits for the next pair. Necromancer mentor decisions,
+  2026-11-13 14:31.
+- **Contrast is required.** A contrast-gated read is behaviour evidence only with its contrast. ADR 0616; G-22 for a
+  stat gain.
+- **Status 3 only after two genuinely different designs.** Status 3 or 4 follows two different designs that failed (the
+  second-agent rule) or a proven impossibility; more than 90 agent-minutes only flags a design review (9.6, cadence
+  point 3; G-25 for gaps).
 
 ## 12. The mentor's brief
 
