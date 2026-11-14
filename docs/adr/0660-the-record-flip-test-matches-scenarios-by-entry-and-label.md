@@ -23,8 +23,8 @@ labels the pair's manifest lacks is unmatched. The tally result carries `record_
 the unmatched keys); the checkpoint JSON, the checkpoint markdown, the checkpoint log and the command output state the
 counts, with a `WARNING` naming the first unmatched keys when the count is above 0. Because a verdict is skipped
 per verdict and not per scenario, the same outputs also carry `record_verdicts`: the record verdict keys of the
-ledger's labels that were not compared, split into "no scenario file" (every part is a scenario with no file in
-either manifest) and "other".
+ledger's labels that were not compared, a changed judge included, split into "no scenario file" (every part is a
+scenario with no file in either manifest) and "other".
 
 An "other" count above 0 is a stop, not a warning: the tally and the checkpoint end with a nonzero exit and list the
 keys, because a verdict that no flip test reached can hide a flip, and a warning in a markdown file is read late or
@@ -41,4 +41,5 @@ Option 1 leaves a fixture change that re-hashes every scenario with no compariso
 
 - A change of a scenario's set-up that keeps its key and labels is compared with the record; a flip then means the
   set-up change moved the verdict, which the cycle must explain.
-- A judge change still excludes its label, as before.
+- A judge change still excludes its label from the flip test; its record verdicts count as "other", so a judge
+  change stops the cycle until its keys are accepted with a reason.

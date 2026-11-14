@@ -13,6 +13,9 @@ DECISIONS = Decisions({}, {'81.0': ('3', RULING)}, frozenset(), frozenset({'125.
 LABEL = '900001 behaviour_metric_delta probe'
 VALUE_LABEL = '301303 effect_value e0 #0'
 NO_SKIPPED_VERDICT = {'no_scenario_file': 0, 'other': 0, 'other_verdicts': []}
+JUDGE_CHANGED_KEY = ['503740 behaviour_metric_delta frenzied_snare_immune', 'behaviour_metric_delta',
+                     'conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune']
+JUDGE_CHANGED_VERDICT = {'no_scenario_file': 0, 'other': 1, 'other_verdicts': [JUDGE_CHANGED_KEY]}
 KEY = ('behaviour_metric_delta', 'scenario-a')
 
 
@@ -178,7 +181,7 @@ class RecordMatchTest(unittest.TestCase):
         result = tally(self.inputs('final15', self.rewritten('final15', rehash)))
         self.assertEqual(result['flips_vs_record'], ['389.0'])
         self.assertEqual(result['record_scenarios'], {'matched': 22, 'unmatched': 0, 'unmatched_scenarios': []})
-        self.assertEqual(result['record_verdicts'], NO_SKIPPED_VERDICT)
+        self.assertEqual(result['record_verdicts'], JUDGE_CHANGED_VERDICT)
 
     def test_a_record_scenario_missing_from_the_pair_is_counted_as_unmatched(self):
         def drop(manifest):
@@ -236,31 +239,40 @@ class RecordVerdictTest(unittest.TestCase):
     def test_a_file_less_closed_record_verdict_is_counted_as_not_compared(self):
         result = tally(self.inputs('conformance-necromancer-unmodelled-301303', 'closed', 'alert', file_less=True))
         self.assertEqual(result['flips_vs_record'], [])
-        self.assertEqual(result['record_verdicts'], {'no_scenario_file': 1, 'other': 0, 'other_verdicts': []})
-        self.assertEqual(verdict_line(result['record_verdicts']),
-                         'record verdicts not compared with the record: no scenario file 1, other 0')
+        self.assertEqual(result['record_verdicts'], {'no_scenario_file': 1, 'other': 1,
+                                                     'other_verdicts': [JUDGE_CHANGED_KEY]})
 
     def test_a_record_verdict_naming_no_manifest_scenario_is_other_and_warned(self):
         result = tally(self.inputs('derived-301303', 'ok', 'alert', file_less=False))
         self.assertEqual(result['record_scenarios']['unmatched'], 0)
-        self.assertEqual(result['record_verdicts'], {'no_scenario_file': 0, 'other': 1, 'other_verdicts': [
-            [VALUE_LABEL, 'effect_value', 'derived-301303']]})
+        self.assertEqual(result['record_verdicts'], {'no_scenario_file': 0, 'other': 2, 'other_verdicts': [
+            [VALUE_LABEL, 'effect_value', 'derived-301303'], JUDGE_CHANGED_KEY]})
         self.assertEqual(verdict_line(result['record_verdicts']),
-                         'WARNING record verdicts not compared with the record: no scenario file 0, OTHER 1 '
-                         f'({VALUE_LABEL} | effect_value | derived-301303)')
+                         'WARNING record verdicts not compared with the record: no scenario file 0, OTHER 2 '
+                         f'({VALUE_LABEL} | effect_value | derived-301303, {" | ".join(JUDGE_CHANGED_KEY)})')
+
+    def test_the_fixture_judge_change_is_an_other_verdict(self):
+        self.assertEqual(tally(pair_inputs('final16'))['record_verdicts'], JUDGE_CHANGED_VERDICT)
+        self.assertEqual(verdict_line(NO_SKIPPED_VERDICT),
+                         'record verdicts not compared with the record: no scenario file 0, other 0')
 
     def test_a_verdict_check_without_its_expectation_is_other(self):
         matched = {(LABEL, 'other_check', 'scenario-a')}
         old_runs = [{LABEL: {KEY: 'ok'}}] * 2
-        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, matched, set())['other'], 1)
-        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, {(LABEL, *KEY)}, set()),
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, matched, set(), set())['other'], 1)
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, {(LABEL, *KEY)}, set(), set()),
                          NO_SKIPPED_VERDICT)
+
+    def test_a_matched_verdict_whose_judge_changed_is_other(self):
+        old_runs = [{LABEL: {KEY: 'ok'}}] * 2
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], old_runs, {(LABEL, *KEY)}, set(), {LABEL}),
+                         {'no_scenario_file': 0, 'other': 1, 'other_verdicts': [[LABEL, *KEY]]})
 
     def test_a_pooled_record_verdict_is_file_less_only_when_every_part_is(self):
         pooled = {LABEL: {(KEY[0], 'part-1 + part-2'): 'closed'}}
-        self.assertEqual(record_verdicts([LABEL], [{}, {}], [pooled] * 2, set(), {'part-1', 'part-2'})
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], [pooled] * 2, set(), {'part-1', 'part-2'}, set())
                          ['no_scenario_file'], 1)
-        self.assertEqual(record_verdicts([LABEL], [{}, {}], [pooled] * 2, set(), {'part-1'})['other'], 1)
+        self.assertEqual(record_verdicts([LABEL], [{}, {}], [pooled] * 2, set(), {'part-1'}, set())['other'], 1)
 
 
 class FlipRuleTest(unittest.TestCase):

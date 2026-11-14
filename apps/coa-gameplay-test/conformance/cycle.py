@@ -327,6 +327,8 @@ def accepted_diff(head: Path, base: Path, fields: tuple) -> tuple:
         now, before = read_json(head / name), read_json(base / name)
         if now is None or before is None or without_fields(now, fields) != before:
             problems.append(f'{name}: differs beyond the accepted added fields {list(fields)}')
+        elif now == before:
+            problems.append(f'{name}: differs in formatting only, adding none of the accepted fields {list(fields)}')
         else:
             changed.add(name)
     if 'manifest.json' in head_files & base_files:
@@ -710,16 +712,24 @@ def generating_commit(config: CycleConfig) -> str:
                             f'{config.head}^{{commit}}'], capture_output=True, text=True)
     if found.returncode != 0:
         raise CycleError(f'archive: the generating commit {config.head} cannot be read in {config.worktree}')
-    return config.head
+    return found.stdout.strip()
 
 
-def archive_ledger(config: CycleConfig, rev: str) -> list:
-    from profile import CLAUSE_LEDGER_SUFFIX, CONSUMPTION_SUFFIX
+def class_stem(config: CycleConfig) -> str:
+    from profile import CLAUSE_LEDGER_SUFFIX
+    stem = config.clauses.stem
+    if not stem.endswith(CLAUSE_LEDGER_SUFFIX) or stem == CLAUSE_LEDGER_SUFFIX:
+        raise CycleError(f'archive: the ledger {config.clauses.name} does not end in {CLAUSE_LEDGER_SUFFIX}.json; '
+                         f'its class files cannot be named')
+    return stem.removesuffix(CLAUSE_LEDGER_SUFFIX)
+
+
+def archive_ledger(config: CycleConfig, rev: str, stem: str) -> list:
+    from profile import CONSUMPTION_SUFFIX
     ledger = config.archive / 'ledger'
     ledger.mkdir()
     used = config.clauses.read_bytes()
     (ledger / config.clauses.name).write_bytes(used)
-    stem = config.clauses.stem.removesuffix(CLAUSE_LEDGER_SUFFIX)
     classes = (CONFORMANCE / 'classes').as_posix()
     committed = file_at(config.worktree, rev, f'{classes}/{config.clauses.name}')
     if committed is None:
@@ -751,7 +761,7 @@ def step_archive(cycle: Cycle) -> None:
         raise CycleError(f'archive: {config.archive} exists; an archive is written once')
     if len(cycle.stamps) != 2:
         raise CycleError('archive: the pair has no two stamps; run the pair or set pair.stamps')
-    rev = generating_commit(config)
+    rev, stem = generating_commit(config), class_stem(config)
     config.archive.mkdir(parents=True)
     for stamp, directory, coverage in zip(cycle.stamps, compare_dirs(cycle), coverage_files(cycle)):
         shutil.copytree(directory, config.archive / f'{config.name}-cmp-{stamp}')
@@ -769,7 +779,7 @@ def step_archive(cycle: Cycle) -> None:
     for path in (json_path, markdown_path):
         if path.exists():
             shutil.copy2(path, config.archive / path.name)
-    ledger = archive_ledger(config, rev)
+    ledger = archive_ledger(config, rev, stem)
     build = [f'Class {config.class_id} re-auditable verdict set, {config.name} merged pair.',
              f'Runs: {" and ".join(cycle.stamps)}.',
              f'compare --build {config.build}.',

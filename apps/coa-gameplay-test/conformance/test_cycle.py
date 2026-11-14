@@ -20,6 +20,9 @@ BUILD = 'b' * 64
 STAMPS = ('20261114-084514', '20261114-090752')
 RUNS_ONLY = ('gate', 'refactor', 'archive')
 REPLAY = ('gate', 'digests', 'generate', 'source', 'runs', 'compare', 'audit')
+JUDGE_CHANGED_KEY = ('503740 behaviour_metric_delta frenzied_snare_immune', 'behaviour_metric_delta',
+                     'conformance-necromancer-behaviour-503740-metric-delta-frenzied-snare-immune')
+JUDGE_CHANGE_WHY = 'the c16 guard changed the frenzied_snare_immune judge'
 DECISIONS = {'rulings': {'81.0': {'status': '3', 'why': 'mentor ruling on X 18:39, confirmed (c8 brief): status 3'}},
              'text_changed': ['125.2']}
 
@@ -30,6 +33,10 @@ def no_missing_result(manifest, results):
 
 def run_cycle(config, skip, runner, results_check=no_missing_result, **options):
     return cycle.run_cycle(config, skip, runner, results_check=results_check, **options)
+
+
+def accepting(*keys, why=JUDGE_CHANGE_WHY):
+    return cycle.verdict_acceptance({'keys': [list(JUDGE_CHANGED_KEY), *map(list, keys)], 'why': why})
 
 
 def argument(command, flag):
@@ -108,7 +115,8 @@ class CycleCase(unittest.TestCase):
                         FIXTURES / 'record' / 'manifest.json')
         values = dict(class_id=23, name='final16', worktree=REPOSITORY, head='055a888543', base='origin/main',
                       clauses=FIXTURES / 'clauses.json', out=self.root / 'out', build=BUILD, record=record,
-                      decisions=self.decisions, scenarios_dir=self.root / 'scenarios')
+                      decisions=self.decisions, scenarios_dir=self.root / 'scenarios',
+                      other_verdicts_accepted=accepting())
         values.update(fields)
         return CycleConfig(**values)
 
@@ -238,6 +246,15 @@ class GateChangeTest(CycleCase):
         problems, changed = accepted_diff(head, base, ('min_level_armor',))
         self.assertEqual((problems, changed), (['manifest.json: sha256 of k changed but its file scenarios/0.json '
                                                 'did not'], set()))
+
+    def test_a_formatting_only_change_is_not_an_addition(self):
+        head, base = self.root / 'head', self.root / 'base'
+        for root, text in ((head, '{"entry": 36}'), (base, '{ "entry": 36 }')):
+            root.mkdir()
+            (root / '0.json').write_text(text, encoding='utf-8')
+        self.assertEqual(accepted_diff(head, base, ('min_level_armor',)),
+                         (["0.json: differs in formatting only, adding none of the accepted fields "
+                           "['min_level_armor']"], set()))
 
     def test_the_cycle_file_declares_an_accepted_change_of_a_guard_class(self):
         document = {
@@ -375,8 +392,13 @@ class CheckpointTest(CycleCase):
         markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
         self.assertIn('- Record scenarios: 22 matched by entry and label, 0 unmatched', markdown)
         self.assertEqual(self.checkpoint()['record_verdicts'],
-                         {'no_scenario_file': 0, 'other': 0, 'other_verdicts': []})
-        self.assertIn('- Record verdicts not compared with the record: 0 with no scenario file, 0 other', markdown)
+                         {'no_scenario_file': 0, 'other': 1, 'other_verdicts': [list(JUDGE_CHANGED_KEY)]})
+        self.assertIn('- Record verdicts not compared with the record: 0 with no scenario file, 1 other, ACCEPTED in '
+                      f'the cycle file: {JUDGE_CHANGE_WHY}', markdown)
+
+    def test_the_fixture_judge_change_stops_the_cycle_unless_accepted(self):
+        with self.assertRaisesRegex(CycleError, 'other 1: 503740 behaviour_metric_delta frenzied_snare_immune'):
+            run_cycle(self.replay(other_verdicts_accepted=None), REPLAY, FakeRunner(self.root))
 
     OTHER_KEY = ('301303 effect_value e0 #0', 'effect_value', 'derived-301303')
 
@@ -395,7 +417,7 @@ class CheckpointTest(CycleCase):
                                          tuple(record), config.record.manifest), **fields)
 
     def test_other_unmatched_record_verdicts_stop_the_cycle(self):
-        with self.assertRaisesRegex(CycleError, 'other 1: 301303 effect_value e0 #0 \\| effect_value \\|'):
+        with self.assertRaisesRegex(CycleError, 'other 2: 301303 effect_value e0 #0 \\| effect_value \\|'):
             run_cycle(self.other_verdict_config(), REPLAY, FakeRunner(self.root))
         self.assertFalse((self.root / 'out' / CHECKPOINT_JSON).exists())
 
@@ -405,40 +427,38 @@ class CheckpointTest(CycleCase):
             run_cycle(self.other_verdict_config(), steps, FakeRunner(self.root))
 
     def test_accepted_other_record_verdicts_pass_with_the_reason_in_the_checkpoint(self):
-        for acceptance in ({'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'},):
-            with self.subTest(acceptance=acceptance):
-                config = self.other_verdict_config(other_verdicts_accepted=cycle.verdict_acceptance(acceptance))
-                run_cycle(config, REPLAY, FakeRunner(self.root))
-                document = self.checkpoint()
-                self.assertEqual(document['record_verdicts']['other'], 1)
-                self.assertEqual(document['record_verdicts_acceptance'],
-                                 {'why': 'mentor M3', 'count': 1, 'keys': [list(self.OTHER_KEY)]})
-                markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
-                self.assertIn('ACCEPTED in the cycle file: mentor M3 (301303 effect_value e0 #0 | effect_value | '
-                              'derived-301303)', markdown)
+        config = self.other_verdict_config(other_verdicts_accepted=accepting(self.OTHER_KEY, why='mentor M3'))
+        run_cycle(config, REPLAY, FakeRunner(self.root))
+        document = self.checkpoint()
+        self.assertEqual(document['record_verdicts']['other'], 2)
+        self.assertEqual(document['record_verdicts_acceptance'],
+                         {'why': 'mentor M3', 'count': 2, 'keys': [list(self.OTHER_KEY), list(JUDGE_CHANGED_KEY)]})
+        markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
+        self.assertIn('ACCEPTED in the cycle file: mentor M3 (301303 effect_value e0 #0 | effect_value | '
+                      'derived-301303, 503740', markdown)
 
     def test_an_acceptance_that_is_not_the_exact_key_set_still_stops(self):
-        stale = [list(self.OTHER_KEY), ['other', 'effect_value', 'derived-1']]
+        stale = ('other', 'effect_value', 'derived-1')
         for acceptance, expected in (
-                ({'keys': [['other', 'effect_value', 'derived-1']], 'why': 'mentor M3'},
+                (accepting(stale),
                  'Not accepted: 301303 effect_value e0 #0 \\| effect_value \\| derived-301303. '
                  'Accepted but not found \\(stale\\): other \\| effect_value \\| derived-1'),
-                ({'keys': stale, 'why': 'mentor M3'},
+                (accepting(self.OTHER_KEY, stale),
                  'Not accepted: none. Accepted but not found \\(stale\\): other \\| effect_value \\| derived-1')):
             with self.subTest(acceptance=acceptance):
-                config = self.other_verdict_config(other_verdicts_accepted=cycle.verdict_acceptance(acceptance))
+                config = self.other_verdict_config(other_verdicts_accepted=acceptance)
                 with self.assertRaisesRegex(CycleError, expected):
                     run_cycle(config, REPLAY, FakeRunner(self.root))
 
     def test_an_acceptance_with_nothing_found_is_stale(self):
-        config = self.replay(other_verdicts_accepted=cycle.verdict_acceptance(
-            {'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'}))
         with self.assertRaisesRegex(CycleError, 'other 0: ; .*Accepted but not found \\(stale\\)'):
-            run_cycle(config, REPLAY, FakeRunner(self.root))
+            cycle.verdict_acceptance_note(self.replay(), {'other_verdicts': []})
+        with self.assertRaisesRegex(CycleError, 'other 1: .*Accepted but not found \\(stale\\): 301303'):
+            run_cycle(self.replay(other_verdicts_accepted=accepting(self.OTHER_KEY)), REPLAY, FakeRunner(self.root))
 
     def test_the_checkpoint_step_stops_on_its_own_when_the_tally_is_skipped(self):
-        accepted = cycle.verdict_acceptance({'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'})
-        run_cycle(self.other_verdict_config(other_verdicts_accepted=accepted), REPLAY, FakeRunner(self.root))
+        run_cycle(self.other_verdict_config(other_verdicts_accepted=accepting(self.OTHER_KEY)), REPLAY,
+                  FakeRunner(self.root))
         (self.root / 'out' / CHECKPOINT_JSON).unlink()
         with self.assertRaisesRegex(CycleError, '^record verdicts not compared'):
             run_cycle(self.other_verdict_config(), [*REPLAY, 'tally'], FakeRunner(self.root))
@@ -464,9 +484,9 @@ class CheckpointTest(CycleCase):
         manifest['scenarios'] = manifest['scenarios'][1:]
         path = self.root / 'manifest.json'
         path.write_text(json.dumps(manifest), encoding='utf-8')
-        run_cycle(self.replay(manifest=path, other_verdicts_accepted=cycle.verdict_acceptance(
-            {'keys': [[self.OTHER_KEY[0], self.OTHER_KEY[1], 'conformance-necromancer-value-301303']],
-         'why': 'the removed scenario'})), REPLAY, FakeRunner(self.root))
+        removed = (self.OTHER_KEY[0], self.OTHER_KEY[1], 'conformance-necromancer-value-301303')
+        run_cycle(self.replay(manifest=path, other_verdicts_accepted=accepting(removed, why='the removed scenario')),
+                  REPLAY, FakeRunner(self.root))
         markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
         self.assertIn('- **WARNING: 1 record scenarios UNMATCHED** (not compared with the record), 21 matched by '
                       'entry and label: conformance-necromancer-value-301303', markdown)
@@ -612,6 +632,24 @@ class ArchiveLedgerTest(CycleCase):
         self.assertIn(f'{cycle.sha256(committed)}  ledger/committed-x_clauses.json', build)
 
 
+    def test_the_archive_names_the_resolved_generating_commit(self):
+        repo, clauses, head = self.repository(False)
+        archive = self.root / 'archive'
+        run_cycle(self.replay(worktree=repo, clauses=clauses, head='HEAD', archive=archive),
+                  (*REPLAY, 'tally', 'refactor', 'checkpoint'), FakeRunner(self.root))
+        build = (archive / 'BUILD.txt').read_text(encoding='utf-8')
+        self.assertIn(f'Generation commit {head} (worktree', build)
+        self.assertIn(f'equal to {head}:', build)
+        self.assertNotIn('HEAD', build)
+
+    def test_a_ledger_without_the_clauses_suffix_stops_the_archive(self):
+        repo, clauses, _ = self.repository(False)
+        archive = self.root / 'archive'
+        with self.assertRaisesRegex(CycleError, r'archive: the ledger x.json does not end in _clauses.json'):
+            run_cycle(self.replay(worktree=repo, clauses=clauses.with_name('x.json'), head='HEAD', archive=archive),
+                      (*REPLAY, 'tally', 'refactor', 'checkpoint'), FakeRunner(self.root))
+        self.assertFalse(archive.exists())
+
     def test_an_unreadable_generating_commit_stops_the_archive(self):
         repo, clauses, _ = self.repository(False)
         archive = self.root / 'archive'
@@ -639,6 +677,7 @@ class CommandLineTest(CycleCase):
                                'compare': [str(FIXTURES / 'record' / 'cmp-run1'),
                                            str(FIXTURES / 'record' / 'cmp-run2')],
                                'manifest': str(FIXTURES / 'record' / 'manifest.json')},
+                    'other_verdicts_accepted': {'keys': [list(JUDGE_CHANGED_KEY)], 'why': JUDGE_CHANGE_WHY},
                     'pair': {'stamps': list(STAMPS), 'compare': [str(pair / 'cmp-run1'), str(pair / 'cmp-run2')],
                              'coverage': [str(pair / 'coverage-run1.json'), str(pair / 'coverage-run2.json')]}}
         path = self.root / 'cycle.json'
@@ -652,8 +691,8 @@ class CommandLineTest(CycleCase):
             self.assertEqual(main(['cycle', '--config', str(path), *skips]), 0)
         self.assertEqual(self.checkpoint()['count'], 14)
         self.assertIn('record scenarios matched by entry and label: 22, unmatched: 0\n', output.getvalue())
-        self.assertIn('record verdicts not compared with the record: no scenario file 0, other 0\n',
-                      output.getvalue())
+        self.assertIn('WARNING record verdicts not compared with the record: no scenario file 0, OTHER 1 '
+                      f'({" | ".join(JUDGE_CHANGED_KEY)})\n', output.getvalue())
         document['pair']['stamps'] = list(STAMPS[:1])
         path.write_text(json.dumps(document), encoding='utf-8')
         with self.assertRaisesRegex(CycleError, 'pair.stamps'):

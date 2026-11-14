@@ -472,7 +472,9 @@ too), `compare` (with `runs` skipped, `pair.results` is checked for missing resu
 `tally`, `refactor` (only with `refactor.moved_kinds`), `archive` (only with `archive`, a new directory, and two
 stamps; besides the compare outputs, audits, reports, manifest and status files it holds `ledger/`: the clause ledger
 the tally used, and the class file and consumption file at the generating commit `head`, read with `git show`; the
-step needs `head` and stops when that commit cannot be read in the worktree, never falling back to the worktree HEAD;
+step needs `head`, resolves it to its commit id, which every read and `BUILD.txt` use, and stops when that commit
+cannot be read in the worktree, never falling back to the worktree HEAD; the ledger must be named
+`<class>_clauses.json`, or the step stops before writing;
 `BUILD.txt` says whether the ledger used equals the one at `head`, which is kept as `ledger/committed-<ledger>` when
 it differs, and gives the sha256 of each file) and `checkpoint`. `--skip` leaves a step
 out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
@@ -488,7 +490,7 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
 | `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
 | `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
-| `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth (an added key, never a changed one), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
+| `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth and differ from it as JSON (an added key, never a changed one; a formatting-only difference stops), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
 | `other_verdicts_accepted` | the "other" record verdicts the cycle may pass: `{"keys": [["label", "check", "scenario"]], "why": "..."}`, the exact keys found: a found key not listed and a listed key no longer found (stale) both stop, and both are named; without it the tally and the checkpoint stop |
 | `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |
 | `pair` | `stamps` and `results` of a pair already run; `compare` and `coverage` of outputs already written (their steps must then be skipped); the two entries of each field, and of `OUT/pair.json`, must name two different runs |
@@ -508,8 +510,9 @@ whose key or labels the pair's manifest lacks is unmatched and not compared; the
 `checkpoint.json`, a line in `checkpoint.md` and the checkpoint log) and the command output state the matched and
 unmatched counts, with a `WARNING` and the first unmatched keys when any is unmatched. They also count the record
 verdicts (label, check, scenario) of the ledger's labels that were not compared because they match no filed scenario
-of both manifests (`record_verdicts`): those whose every scenario part has no file in either manifest ("no scenario
-file": their status comes from the manifest and the judge code, not from a run) and the others, and any
+of both manifests or their judge changed (`record_verdicts`): those whose every scenario part has no file in either
+manifest ("no scenario file": their status comes from the manifest and the judge code, not from a run) and the
+others, and any
 "other" verdict stops the tally and the checkpoint (nonzero exit, the keys listed) unless `other_verdicts_accepted`
 names them; the accepted reason is written into `checkpoint.md` and `checkpoint.json`. A ledger label without an ordinal reaches its
 `label #N` verdicts in the flips and the label checks, as in the audit (`coverage.resolved_labels`). A ruling is

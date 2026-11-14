@@ -114,13 +114,15 @@ def ledger_labels(rows: list) -> list:
     return list(dict.fromkeys(label for row in rows for _, labels in parts(row) for label in labels))
 
 
-def record_verdicts(labels, new_runs, old_runs, matched, file_less) -> dict:
+def record_verdicts(labels, new_runs, old_runs, matched, file_less, changed) -> dict:
     no_file, other = set(), set()
     reached = dict.fromkeys(match for ledger_label in labels
                             for match in run_labels(ledger_label, [*new_runs, *old_runs]))
     for label in reached:
         for key in set().union(*(run.get(label, {}).keys() for run in old_runs)):
-            if all(run.get(label, {}).get(key) is None for run in old_runs) or is_matched(label, key, matched):
+            if all(run.get(label, {}).get(key) is None for run in old_runs):
+                continue
+            if is_matched(label, key, matched) and label not in changed:
                 continue
             file_less_parts = all(part in file_less for part in key[1].split(PART_SEPARATOR))
             (no_file if file_less_parts else other).add((label, *key))
@@ -287,7 +289,7 @@ def tally(inputs: TallyInputs) -> dict:
     result = summary(out, changed, decisions, missing_rows(keys, record), record)
     result['record_scenarios'] = record_match(record_manifest, manifest)
     result['record_verdicts'] = record_verdicts(ledger_labels(rows), new_runs, old_runs, matched,
-                                                file_less_keys(record_manifest, manifest))
+                                                file_less_keys(record_manifest, manifest), changed)
     return result
 
 
@@ -296,7 +298,8 @@ def tally_record_verdicts(inputs: TallyInputs) -> dict:
     record_manifest, manifest = load(inputs.record_manifest), load(inputs.manifest)
     return record_verdicts(ledger_labels(rows), [verdict_index(path) for path in inputs.compare],
                            [verdict_index(path) for path in inputs.record_compare],
-                           matched_expectations(record_manifest, manifest), file_less_keys(record_manifest, manifest))
+                           matched_expectations(record_manifest, manifest), file_less_keys(record_manifest, manifest),
+                           judge_changed(record_manifest, manifest))
 
 
 def summary(out: list, changed: set, decisions: Decisions, missing: list, record: dict) -> dict:

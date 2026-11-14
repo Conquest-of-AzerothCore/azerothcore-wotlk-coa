@@ -21,9 +21,10 @@ manifest different, all by that field alone. The only way on was `--skip gate`, 
 
 Option 3. A cycle file field `gate_accepted` names, per guard class, the keys the branch adds to the generated
 files (`added_fields`) and why. When `diff -r` finds a difference for that class, the gate compares the files: each
-differing scenario file must equal the base file once the named keys are removed from the head file at any depth;
-the manifest may differ only by those keys and by the sha256 of the files that changed that way. A key present in the
-base file is therefore never accepted as changed. Any other difference, a file in one tree only, or a declared change
+differing scenario file must equal the base file once the named keys are removed from the head file at any depth,
+and differ from it as parsed JSON, so a formatting-only difference adds no key and stops the gate; the manifest may
+differ only by those keys and by the sha256 of the files that changed that way. A key present in the base file is
+therefore never accepted as changed. Any other difference, a file in one tree only, or a declared change
 that no generated file shows stops the gate. `snapshots.py check` still runs for the class.
 
 Option 1 loses the guard and the snapshot check on every intended change. Option 2 needs the branch to refresh the
