@@ -29,9 +29,11 @@ either manifest) and "other".
 An "other" count above 0 is a stop, not a warning: the tally and the checkpoint end with a nonzero exit and list the
 keys, because a verdict that no flip test reached can hide a flip, and a warning in a markdown file is read late or
 never. This is the mentor's decision (M3). It passes only through `other_verdicts_accepted` in the cycle file, in the
-pattern of `gate_accepted` (ADR 0659): the accepted keys (every found key listed) or the accepted count (equal to the
-found count), and a reason. The reason is written into `checkpoint.md` and `checkpoint.json`. An acceptance that does
-not cover the found keys still stops.
+pattern of `gate_accepted` (ADR 0659): the accepted keys and a reason. The accepted keys must equal the found keys: a
+found key that is not accepted and an accepted key that is no longer found (stale) both stop, and both kinds are listed.
+There is no count form, because a count passes whichever key is found and hides a key that changed.
+The reason is written into `checkpoint.md` and `checkpoint.json`. A malformed acceptance is a `CycleError` when the
+cycle file loads.
 
 Option 1 leaves a fixture change that re-hashes every scenario with no comparison against the record.
 

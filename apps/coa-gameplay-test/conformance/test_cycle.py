@@ -405,7 +405,7 @@ class CheckpointTest(CycleCase):
             run_cycle(self.other_verdict_config(), steps, FakeRunner(self.root))
 
     def test_accepted_other_record_verdicts_pass_with_the_reason_in_the_checkpoint(self):
-        for acceptance in ({'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'}, {'count': 1, 'why': 'mentor M3'}):
+        for acceptance in ({'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'},):
             with self.subTest(acceptance=acceptance):
                 config = self.other_verdict_config(other_verdicts_accepted=cycle.verdict_acceptance(acceptance))
                 run_cycle(config, REPLAY, FakeRunner(self.root))
@@ -417,18 +417,46 @@ class CheckpointTest(CycleCase):
                 self.assertIn('ACCEPTED in the cycle file: mentor M3 (301303 effect_value e0 #0 | effect_value | '
                               'derived-301303)', markdown)
 
-    def test_an_acceptance_that_does_not_cover_the_keys_still_stops(self):
-        for acceptance in ({'keys': [['other', 'effect_value', 'derived-1']], 'why': 'mentor M3'},
-                           {'count': 2, 'why': 'mentor M3'}):
+    def test_an_acceptance_that_is_not_the_exact_key_set_still_stops(self):
+        stale = [list(self.OTHER_KEY), ['other', 'effect_value', 'derived-1']]
+        for acceptance, expected in (
+                ({'keys': [['other', 'effect_value', 'derived-1']], 'why': 'mentor M3'},
+                 'Not accepted: 301303 effect_value e0 #0 \\| effect_value \\| derived-301303. '
+                 'Accepted but not found \\(stale\\): other \\| effect_value \\| derived-1'),
+                ({'keys': stale, 'why': 'mentor M3'},
+                 'Not accepted: none. Accepted but not found \\(stale\\): other \\| effect_value \\| derived-1')):
             with self.subTest(acceptance=acceptance):
                 config = self.other_verdict_config(other_verdicts_accepted=cycle.verdict_acceptance(acceptance))
-                with self.assertRaisesRegex(CycleError, 'does not cover them'):
+                with self.assertRaisesRegex(CycleError, expected):
                     run_cycle(config, REPLAY, FakeRunner(self.root))
 
-    def test_an_acceptance_needs_a_reason_and_keys_or_a_count(self):
-        for document in ({'count': 1}, {'why': 'x'}, {'why': 'x', 'count': 1, 'keys': [['a', 'b', 'c']]},
-                         {'why': 'x', 'keys': [['a', 'b']]}):
+    def test_an_acceptance_with_nothing_found_is_stale(self):
+        config = self.replay(other_verdicts_accepted=cycle.verdict_acceptance(
+            {'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'}))
+        with self.assertRaisesRegex(CycleError, 'other 0: ; .*Accepted but not found \\(stale\\)'):
+            run_cycle(config, REPLAY, FakeRunner(self.root))
+
+    def test_the_checkpoint_step_stops_on_its_own_when_the_tally_is_skipped(self):
+        accepted = cycle.verdict_acceptance({'keys': [list(self.OTHER_KEY)], 'why': 'mentor M3'})
+        run_cycle(self.other_verdict_config(other_verdicts_accepted=accepted), REPLAY, FakeRunner(self.root))
+        (self.root / 'out' / CHECKPOINT_JSON).unlink()
+        with self.assertRaisesRegex(CycleError, '^record verdicts not compared'):
+            run_cycle(self.other_verdict_config(), [*REPLAY, 'tally'], FakeRunner(self.root))
+        self.assertFalse((self.root / 'out' / CHECKPOINT_JSON).exists())
+
+    def test_an_acceptance_needs_a_reason_and_keys(self):
+        for document in ({'count': 1, 'why': 'x'}, {'why': 'x'}, {'keys': [['a', 'b', 'c']]},
+                         {'why': ' ', 'keys': [['a', 'b', 'c']]}, {'why': 'x', 'keys': []},
+                         {'why': 'x', 'count': 1, 'keys': [['a', 'b', 'c']]}, {'why': 'x', 'keys': [['a', 'b']]},
+                         {'why': 'x', 'keys': ['abc']}, {'why': 'x', 'keys': 'abc'},
+                         {'why': 'x', 'keys': [['a', 'b', 1]]}, {'why': 'x', 'keys': [['a', 'b', 'c']] * 2},
+                         {'why': 3, 'keys': [['a', 'b', 'c']]}):
             with self.subTest(document=document), self.assertRaisesRegex(CycleError, 'other_verdicts_accepted'):
+                cycle.verdict_acceptance(document)
+
+    def test_a_malformed_acceptance_in_the_cycle_file_is_a_cycle_error(self):
+        for document in ([], 'x', 3, [['a', 'b', 'c']]):
+            with self.subTest(document=document), self.assertRaisesRegex(CycleError, 'not an object'):
                 cycle.verdict_acceptance(document)
 
     def test_unmatched_record_scenarios_are_loud_in_the_checkpoint_and_the_command_line(self):
@@ -437,7 +465,8 @@ class CheckpointTest(CycleCase):
         path = self.root / 'manifest.json'
         path.write_text(json.dumps(manifest), encoding='utf-8')
         run_cycle(self.replay(manifest=path, other_verdicts_accepted=cycle.verdict_acceptance(
-            {'count': 1, 'why': 'the removed scenario'})), REPLAY, FakeRunner(self.root))
+            {'keys': [[self.OTHER_KEY[0], self.OTHER_KEY[1], 'conformance-necromancer-value-301303']],
+         'why': 'the removed scenario'})), REPLAY, FakeRunner(self.root))
         markdown = (self.root / 'out' / CHECKPOINT_MD).read_text(encoding='utf-8')
         self.assertIn('- **WARNING: 1 record scenarios UNMATCHED** (not compared with the record), 21 matched by '
                       'entry and label: conformance-necromancer-value-301303', markdown)

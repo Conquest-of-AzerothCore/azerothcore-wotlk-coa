@@ -58,7 +58,6 @@ class Refactor:
 @dataclass(frozen=True)
 class VerdictAcceptance:
     keys: tuple
-    count: int | None
     why: str
 
 
@@ -151,13 +150,22 @@ def gate_change(document: dict) -> GateChange:
 def verdict_acceptance(document) -> VerdictAcceptance | None:
     if document is None:
         return None
-    why = str(document.get('why', '')).strip() if isinstance(document, dict) else ''
-    keys = tuple(tuple(str(part) for part in key) for key in document.get('keys', ())) if why else ()
-    count = document.get('count')
-    if not why or bool(keys) == (count is not None) or any(len(key) != 3 for key in keys):
-        raise CycleError(f'other_verdicts_accepted: {document} needs a "why" and either "keys" '
-                         f'([label, check, scenario] triples) or "count"')
-    return VerdictAcceptance(keys, None if count is None else int(count), why)
+    usage = 'needs {"keys": [[label, check, scenario], ...], "why": "reason"}'
+    if not isinstance(document, dict):
+        raise CycleError(f'other_verdicts_accepted: {document!r} is not an object; it {usage}')
+    raw = document.get('keys')
+    why = document.get('why')
+    if not isinstance(raw, list) or not raw or not isinstance(why, str) or not why.strip() \
+            or set(document) - {'keys', 'why'}:
+        raise CycleError(f'other_verdicts_accepted: {document!r} {usage}')
+    keys = []
+    for key in raw:
+        if not isinstance(key, list) or len(key) != 3 or not all(isinstance(part, str) for part in key):
+            raise CycleError(f'other_verdicts_accepted: key {key!r} is not a [label, check, scenario] triple')
+        keys.append(tuple(key))
+    if len(set(keys)) != len(keys):
+        raise CycleError('other_verdicts_accepted: a key is listed twice')
+    return VerdictAcceptance(tuple(keys), why.strip())
 
 
 def load_config(path: Path) -> CycleConfig:
@@ -529,18 +537,22 @@ def status_paths(config: CycleConfig) -> tuple:
 
 
 def verdict_acceptance_note(config: CycleConfig, verdicts: dict) -> dict | None:
-    if not verdicts['other']:
-        return None
-    found = [tuple(key) for key in verdicts['other_verdicts']]
+    found = {tuple(key) for key in verdicts['other_verdicts']}
     accepted = config.other_verdicts_accepted
-    covered = accepted is not None and (accepted.count == len(found) if accepted.count is not None
-                                        else set(found) <= set(accepted.keys))
-    if not covered:
-        shown = ', '.join(' | '.join(key) for key in found)
-        declared = '' if accepted is None else ' (the declared acceptance does not cover them)'
-        raise CycleError(f'record verdicts not compared with the record, other {len(found)}: {shown}; accept them '
-                         f'with "other_verdicts_accepted" and a reason{declared}')
-    return {'why': accepted.why, 'count': len(found), 'keys': [list(key) for key in found]}
+    declared = set(accepted.keys) if accepted is not None else set()
+    if not found and not declared:
+        return None
+    if found != declared:
+        raise CycleError(
+            f'record verdicts not compared with the record, other {len(found)}: {join_keys(found)}; '
+            f'"other_verdicts_accepted" must name exactly these keys and a reason. '
+            f'Not accepted: {join_keys(found - declared) or "none"}. '
+            f'Accepted but not found (stale): {join_keys(declared - found) or "none"}')
+    return {'why': accepted.why, 'count': len(found), 'keys': [list(key) for key in sorted(found)]}
+
+
+def join_keys(keys) -> str:
+    return ', '.join(' | '.join(key) for key in sorted(keys))
 
 
 def step_tally(cycle: Cycle) -> None:
