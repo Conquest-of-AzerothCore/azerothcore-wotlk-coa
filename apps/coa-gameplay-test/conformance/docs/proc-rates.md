@@ -365,6 +365,8 @@ creator. It needs a cast trigger; `events_per_proc` is the creatures per proc (2
 trigger casts the trigger `max(20, ceil(log 0.01 / log(1 - p)))` times before the passive is learned (part 1 only):
 any summon there is an alert. `trials_per_attempt` divides the scheduled casts when each cast yields several trials
 (Harvest Plague's leech ticks: two per attempt, since aura 53 now counts in the tick spacing like aura 3).
+`min_parts` splits a proc into at least that many parts of the same attempts per part, adding attempts (the
+between-part t interval needs 10 parts, ADR 0647).
 
 ### Chance modifiers learned with the aura (ADR 0586)
 

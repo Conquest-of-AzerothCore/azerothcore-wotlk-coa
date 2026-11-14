@@ -540,6 +540,17 @@ class WholeProcsPerTriggerCompareTest(unittest.TestCase):
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ProcScenarioTest(unittest.TestCase):
+    def test_min_parts_adds_parts_of_the_same_size(self):
+        entry = templar_proc(SCOURGEBANE)
+        base = proc_plan(CLASS_FILE, entry)
+        wider = proc_plan(CLASS_FILE, {**entry, 'min_parts': base.parts + 5})
+        self.assertEqual((wider.parts, wider.per_part), (base.parts + 5, base.per_part))
+        self.assertEqual(wider.scheduled, base.per_part * (base.parts + 5))
+        self.assertEqual(wider.needed, base.needed)
+        self.assertEqual(proc_plan(CLASS_FILE, {**entry, 'min_parts': 1}), base)
+        with self.assertRaises(ValueError):
+            proc_plan(CLASS_FILE, {**entry, 'min_parts': 0})
+
     def test_scourgebane_reads_every_swing_in_parts_that_fit_the_timeout(self):
         entry = templar_proc(SCOURGEBANE)
         plan = proc_plan(CLASS_FILE, entry)

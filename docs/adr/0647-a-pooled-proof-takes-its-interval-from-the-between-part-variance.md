@@ -38,6 +38,9 @@ without `band` keeps the Wilson verdict and states the between-part interval in 
 - Few parts give a wide t quantile: three 5-part `band` proc labels of cycle 11 run 2 (560730 x2, 705750) would move
   from `ok` to `measured`; under the 10-part minimum they keep their Wilson verdicts. Pooled entries under 10 parts
   are resized to at least 10 when next touched.
+  The Necromancer pooled entries under 10 parts were resized in cycle 13 with the existing knobs (`parts` of a
+  behaviour, `hit_casts`, `trial_attempts_factor` of a trigger) and a new optional proc field `min_parts`, which adds
+  parts of the same attempts per part.
 - A pooled rate hit ratio's `trials` and sizing figures count parts, not casts.
 - Templar: seven pooled `rate` hit ratios (705253, 707852, 520032, 524767, 560650, 561346, 520608) are judged by this
   interval on their next comparison; generated scenarios do not change.

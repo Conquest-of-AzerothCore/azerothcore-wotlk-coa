@@ -375,8 +375,14 @@ def proc_plan(class_file: dict, entry: dict, attempts: int | None = None) -> Pro
     if capacity < 1:
         raise Unmodelled(f'one attempt of {interval} ms exceeds the scenario budget of {PART_BUDGET_MS} ms')
     parts = math.ceil(scheduled / capacity)
+    per_part = math.ceil(scheduled / parts)
+    minimum_parts = entry.get('min_parts', 1)
+    if not isinstance(minimum_parts, int) or minimum_parts < 1:
+        raise ValueError(f'Proc {entry["aura"]} needs a positive integer min_parts')
+    if parts < minimum_parts:
+        parts, scheduled = minimum_parts, per_part * minimum_parts
     return ProcPlan(chance_pct=chance, needed=needed, scheduled=scheduled, attempt_ms=interval, parts=parts,
-                    per_part=math.ceil(scheduled / parts))
+                    per_part=per_part)
 
 
 def trial_rule(entry: dict) -> str:
