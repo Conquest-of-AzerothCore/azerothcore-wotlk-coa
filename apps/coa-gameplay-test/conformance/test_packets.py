@@ -2,11 +2,12 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest import mock
 
 from conformance import main
 from packets import (PacketError, annotated_tooltip, chunk_spells, class_map_match, label_kinds, packet,
                      render_packet, write_packets)
-from profile import DBC_DIR, load_class_file
+from profile import DBC_DIR, load_fixture_class_file
 from tooltip import Displayed, Readout
 from values import dataset
 
@@ -43,7 +44,7 @@ class PacketTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.dbc = dataset(DBC_DIR)
-        cls.class_file = load_class_file(TEMPLAR_CLASS_ID)
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
         cls.data = packet(cls.dbc, cls.class_file, PARRY_DANCE, BUCKET_ROWS, {376}, CLASS_MAP)
 
     def test_tooltip_tokens_are_resolved_in_place(self):
@@ -119,9 +120,10 @@ class PacketTests(unittest.TestCase):
             (root / 'sample.json').write_text(json.dumps(SAMPLE), encoding='utf-8')
             (root / 'buckets.json').write_text(json.dumps({'clauses': BUCKET_ROWS}), encoding='utf-8')
             (root / 'map.json').write_text(json.dumps(CLASS_MAP), encoding='utf-8')
-            code = main(['packets', '--class', str(TEMPLAR_CLASS_ID), '--sample', str(root / 'sample.json'),
-                         '--chunk', '1', '--buckets', str(root / 'buckets.json'), '--class-map',
-                         str(root / 'map.json'), '--out', str(root / 'out')])
+            with mock.patch('conformance.load_class_file', load_fixture_class_file):
+                code = main(['packets', '--class', str(TEMPLAR_CLASS_ID), '--sample', str(root / 'sample.json'),
+                             '--chunk', '1', '--buckets', str(root / 'buckets.json'), '--class-map',
+                             str(root / 'map.json'), '--out', str(root / 'out')])
             self.assertEqual(code, 0)
             self.assertTrue((root / 'out' / f'{ZEALOTRY}.md').is_file())
 

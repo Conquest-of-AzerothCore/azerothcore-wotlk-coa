@@ -1120,6 +1120,36 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'metric needs spell'):
             run.validate(self.scenario)
 
+    def test_owned_creature_school_spell_crit_needs_entry_and_probe_spell(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster',
+                                       'metric': 'owned_creature_school_spell_crit_chance', 'entry': 50073,
+                                       'spell': 501978, 'school_mask': 16, 'min': 0, 'max': 100})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for field, message in (('spell', 'metric needs a magic probe spell'), ('entry', 'metric needs creature entry')):
+            scenario = copy.deepcopy(self.scenario)
+            del scenario['steps'][-1][field]
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, message):
+                run.validate(scenario)
+
+    def test_owned_creature_health_modifier_needs_entry_and_part(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'owned_creature_health_modifier',
+                                       'entry': 50073, 'part': 0, 'min': 0, 'max': 100000})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        self.scenario['steps'][-1]['part'] = 4
+        with self.assertRaises(ValueError):
+            run.validate(self.scenario)
+        del self.scenario['steps'][-1]['part']
+        with self.assertRaisesRegex(ValueError, 'metric needs the health modifier part'):
+            run.validate(self.scenario)
+
+    def test_active_power_needs_a_power(self):
+        self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'active_power', 'power': 0,
+                                       'min': 0, 'max': 1})
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        del self.scenario['steps'][-1]['power']
+        with self.assertRaisesRegex(ValueError, 'metric needs the power type'):
+            run.validate(self.scenario)
+
     def test_pet_aura_amount_needs_spell(self):
         self.scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'pet_aura_amount',
                                        'spell': 500939, 'effect': 1, 'equals': 5})
@@ -1273,6 +1303,42 @@ class RunnerTests(unittest.TestCase):
                                      key: False, 'min': 0})
             with self.subTest(key=key), self.assertRaises(ValueError):
                 run.validate(invalid)
+
+    def test_caster_entry_filters_spell_damage_and_healing(self):
+        for metric in ('spell_damage_count', 'spell_damage_total', 'spell_heal_count', 'spell_heal_total'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                      'caster_entry': 50073, 'min': 0})
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            for change in ({'caster_entry': 0}, {'caster_entry': '50073'}, {'entry': 50073}, {'pet': True}):
+                invalid = copy.deepcopy(scenario)
+                invalid['steps'][-1].update(change)
+                with self.subTest(metric=metric, change=change), self.assertRaises(ValueError):
+                    run.validate(invalid)
+        invalid = copy.deepcopy(self.scenario)
+        invalid['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'aura', 'spell': 116,
+                                 'caster_entry': 50073, 'min': 0})
+        with self.assertRaises(ValueError):
+            run.validate(invalid)
+
+    def test_target_entry_filters_spell_damage_by_the_struck_creature(self):
+        for metric in ('spell_damage_count', 'spell_damage_total'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'spell': 116,
+                                      'target_entry': 500483, 'min': 0})
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            for change in ({'target_entry': 0}, {'target_entry': '500483'}, {'target': 'caster'}):
+                invalid = copy.deepcopy(scenario)
+                invalid['steps'][-1].update(change)
+                with self.subTest(metric=metric, change=change), self.assertRaises(ValueError):
+                    run.validate(invalid)
+        invalid = copy.deepcopy(self.scenario)
+        invalid['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'spell_heal_count', 'spell': 116,
+                                 'target_entry': 500483, 'min': 0})
+        with self.assertRaises(ValueError):
+            run.validate(invalid)
 
     def test_spell_damage_blocked_filter(self):
         for metric in ('spell_damage_count', 'spell_damage_total'):

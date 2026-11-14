@@ -342,6 +342,12 @@ class ProveHelperTests(unittest.TestCase):
                                    '--scenario', '/o/a.json', '/o/b.json'])
         self.assertEqual(verify_command(spec, 2, [Path('/o/a.json')])[5], 'gameplay')
 
+    def test_verify_command_forwards_the_gameplay_db_workers(self):
+        spec = ProveSpec(Path('/o'), Path('/w'), 2, False, db_workers=4)
+        self.assertEqual(verify_command(spec, 1, [Path('/o/a.json')]),
+                         ['coa-verify', '--worktree', '/w', '--ram', '--stages', 'gameplay',
+                          '--gameplay-db-workers', '4', '--scenario', '/o/a.json'])
+
     def test_verify_report_reads_the_last_line(self):
         directory = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, directory, True)

@@ -28,31 +28,34 @@ from behaviours import (BEHAVIOUR_ABSORB_PIERCE_RATIO, BEHAVIOUR_AGGRO_REDIRECT,
                         BEHAVIOUR_PROC_RESET, BEHAVIOUR_TAKEN_HIT, BEHAVIOUR_THREAT_REDIRECT,
                         BEHAVIOUR_DISPEL_COUNT, BEHAVIOUR_TAKEN_OUTCOME, BEHAVIOUR_CRIT_RATE, BEHAVIOUR_AMOUNT_MATCH,
                         BEHAVIOUR_FALL_DAMAGE, BEHAVIOUR_SOURCE_STACK, CONDITION_CONTRAST, DISPEL_TYPE_NAMES,
-                        HIT_RATIO_ARMS, LEARNED_CONTRAST, STAT_GAIN_ATTRIBUTION, STAT_GAIN_RETURN,
-                        TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
+                        HIT_RATIO_ARMS, LEARNED_CONTRAST, SPELL_FAILED_NOT_READY, STAT_GAIN_ATTRIBUTION,
+                        STAT_GAIN_RETURN, TAKEN_HIT_CONTROL_ARM, TAKEN_HIT_RETURNED_KEYS, engine_amount, stated_ratio,
                         strongest_percent)
-from bonus import (Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
+from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_band, bonus_detail, bonus_of,
                    bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings
 from hits import (CLOSED, HEAL, MEAN_HALF_WIDTH, SCHOOL_DAMAGE, UNMODELLED, WEAPON_FLAT_EFFECTS,
                   WEAPON_PERCENT_DAMAGE, Z_99, HitModel, Modifier, Unmodelled, magic_schools, measured_hit_model)
+from kinds import kind_judge, kind_pooled_judge
+from metric_delta_options import option_verdict
 from mitigation import TargetProfile, expected_mitigation
 from observations import player_observations
 from tooltip_readings import player_tooltip_readings, reading_band, reading_for
 from passives import PASSIVE_DELTA, VERSUS_AURA_STATE, cleaned_tooltip, literal_token
-from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PROC_CHECK,
-                   chance_of, wilson_interval)
+from procs import (AMBIGUOUS_TOOLTIP, CAST, CHANCE_KIND, DELTA_CHECK, DELTA_SANITY_FACTOR, PER_TRIGGER, PERCENT_KIND,
+                   PROC_CHECK, PROC_ENERGIZE_CHECK, chance_of, rate_band, wilson_interval)
 from profile import (DBC_DIR, EQUIP_FIELDS, armed, caster_stats_from, known_aura_label, probe_aura_label,
                      require_server_sha)
 from questions import (DATA_ISSUE, READINGS_QUESTION, SERVER_BEHAVIOUR, TEXT_QUESTION, TOOLTIP_VALUE, asked, cleaned,
                        questions, spell_name, write_questions)
 from stack import (ADDS, MEASURED, MELEE_SOURCE, MINIMUM_PASSES, MULTIPLIES, STACK_CHECKS, STACK_DPS, STACK_SOURCE,
-                   TALENT_DELTA, levers, mean_interval, ratio_interval)
+                   TALENT_DELTA, TWO_SIDED_99, levers, mean_interval, ratio_interval, student_t_quantile)
 from tooltip import (CasterStats, Displayed, ForcedPoints, Readout, Records, Tooltip, UnscaledForcedPoints,
                      Unreadable)
-from triggers import (COOLDOWN_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK, MAGNITUDE_CHECK,
-                      PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK, cooldown_trial_label, duration_trial_label)
+from triggers import (COOLDOWN_CHECK, COOLDOWN_GATE_CHECK, DURATION_CHECK, EVENT_TOLERANCE, GATE_ABSENCE_CHECK,
+                      MAGNITUDE_CHECK, MINION, MINION_COOLDOWN_BAND, PERIODIC, SELF_TRIGGER_CHECK, TRIGGER_CHECK,
+                      cooldown_trial_label, duration_trial_label, minion_cooldown_event_label)
 from values import (CAST_MARGIN_MS, CAST_WAIT_LABEL, EFFECT_MODIFIER_BASE, EFFECTS, FIXED_DIE_SIDES,
                     GAP_CLOSER_DISTANCE, GAP_CLOSER_MARGIN_YD, GENERIC, UNMEASURABLE, UNREADABLE, Expectation,
                     calc_amount_hooks_label, dataset, effect_modifier_label, mean_samples, roll_range, sample_labels)
@@ -74,8 +77,12 @@ ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
+MINIMUM_BETWEEN_PARTS = 10
+ARMOR_PROBE_DAMAGE = 1000.0
 MAGNITUDE_RATIO_TOLERANCE = 0.05
 MAGNITUDE_RATIO_FLOOR = 0.01
+MAGNITUDE_RATIO_POINTS = 0.02
+FORCED_CHANCE = 'forced_chance'
 METRIC_DELTA_FLOAT_TOLERANCE = 1e-5
 TOKEN_CHECKS = frozenset({'effect_value', 'aura_amount', 'aura_duration_ms', 'max_stacks', 'spell_duration',
                           'effect_radius', 'aura_amplitude_ms'})
@@ -127,6 +134,7 @@ CRITICAL_DAMAGE_BASE = 1000
 DIRECT_CRIT_DAMAGE_AURA = 163
 DURATION_KIND = 'duration_ms'
 PASSIVE_METRIC = 'metric'
+STACKED_SAME = 'stacked_same'
 DATA_ONLY = 'data_only'
 EXCLUDED = 'excluded'
 EXCLUDING_STATUSES = frozenset({'ok', 'tolerated', 'alert'})
@@ -140,6 +148,7 @@ ADDITIVE_RELATIONS = frozenset({'add', 'share'})
 TRUNCATED_METRICS = frozenset({'stat'})
 CLASS_ENTRIES = {PROC_CHECK: ('procs', 'aura'), TRIGGER_CHECK: ('triggers', 'aura'),
                  COOLDOWN_CHECK: ('triggers', 'aura'), DURATION_CHECK: ('triggers', 'aura'),
+                 COOLDOWN_GATE_CHECK: ('triggers', 'aura'), PROC_ENERGIZE_CHECK: ('procs', 'aura'),
                  SELF_TRIGGER_CHECK: ('triggers', 'aura'), GATE_ABSENCE_CHECK: ('triggers', 'aura'),
                  TALENT_DELTA: ('talent_modifiers', 'talent')}
 PER_LEVEL_TOKEN = re.compile(r'\$\d*ppl\d')
@@ -941,6 +950,43 @@ def judge_hit(base: Verdict, class_file: dict, parts: list[ProcPart], hit_model:
 RateJudgement = tuple[str, float | None, float | None, str]
 
 
+def banded_rate(status: str, low: float, high: float, expected: float, why: str) -> RateJudgement:
+    band = rate_band(expected)
+    if status not in ('ok', 'alert'):
+        return status, low, high, why
+    if expected - band - FLOAT_EPSILON <= low and high <= expected + band + FLOAT_EPSILON:
+        return 'ok', low, high, f'{why} inside the band [{expected - band:.4f}, {expected + band:.4f}]'
+    if status == 'alert':
+        return status, low, high, why
+    return 'measured', low, high, (f'{why} holds the chance but not inside the band [{expected - band:.4f}, '
+                                   f'{expected + band:.4f}]: effect present, interval stated, not final (G-20)')
+
+
+def between_part_interval(parts: list[tuple[float, float]]) -> tuple[float, float] | None:
+    procs, trials = sum(events for events, _ in parts), sum(count for _, count in parts)
+    if len(parts) < 2 or trials <= 0:
+        return None
+    rate = procs / trials
+    spread = sum((events - rate * count) ** 2 for events, count in parts) * len(parts) / (len(parts) - 1)
+    half = student_t_quantile(TWO_SIDED_99, len(parts) - 1) * math.sqrt(spread) / trials
+    return max(0.0, rate - half), min(1.0, rate + half)
+
+
+def between_part_judgement(parts: list[tuple[float, float]], minimum: int, expected: float) -> RateJudgement:
+    procs, trials = sum(events for events, _ in parts), sum(count for _, count in parts)
+    status, low, high, why = rate_judgement(procs, trials, minimum, expected)
+    interval = between_part_interval(parts)
+    if low is None or interval is None:
+        return status, low, high, why
+    if len(parts) < MINIMUM_BETWEEN_PARTS:
+        return status, low, high, (f'{why} (Wilson: {len(parts)} parts, the between-part t interval needs '
+                                   f'{MINIMUM_BETWEEN_PARTS}; it would be [{interval[0]:.4f}, {interval[1]:.4f}])')
+    low, high = interval
+    status = 'ok' if low - FLOAT_EPSILON <= expected <= high + FLOAT_EPSILON else 'alert'
+    return status, low, high, (f'rate {procs / trials:.4f}, between-part 99% interval [{low:.4f}, {high:.4f}] '
+                               f'(t over {len(parts)} parts, {len(parts) - 1} df, trial-weighted)')
+
+
 def rate_judgement(procs: float, trials: float, minimum: int, expected: float) -> RateJudgement:
     if procs < 0:
         return 'alert', None, None, 'fewer events than the trigger casts they exclude'
@@ -1001,6 +1047,12 @@ def stated_chance(manifest: dict, run: Run, expectation: Expectation, tooltips: 
     if chance is None:
         return replace(base, measured=measured, explanation=f'the tooltip of {shown} no longer shows '
                                                             f'the chance token {expectation.displayed}')
+    for spell, token in expectation.model.get('chance_modifiers', ()):
+        points = chance_of(tooltips.read(spell, caster).values, token, PERCENT_KIND)
+        if points is None:
+            return replace(base, measured=measured, explanation=f'the tooltip of {spell} no longer shows the '
+                                                                f'chance modifier token {token}')
+        chance += points
     if abs(chance - expectation.model['chance_pct']) > FLOAT_EPSILON:
         return replace(base, measured=measured, expected=chance / 100,
                        explanation=f'{expectation.displayed} shows {chance:g}%, generated as '
@@ -1056,6 +1108,17 @@ def judge_proc_per_trigger(manifest: dict, parts: list[ProcPart], tooltips: Tool
                                f'{expectation.displayed} shows {chance:g}%; {expectation.rule}')
 
 
+def proc_part_counts(per_part: list[tuple[dict[str, float], float]], model: dict, event_labels: list[str],
+                     reading: dict) -> list[tuple[float, float]]:
+    counts = []
+    for part_totals, offset in per_part:
+        events = offset + sum(part_totals[label] for label in event_labels)
+        excluded = events if reading.get('minus_events') else 0.0
+        counts.append((events / model['events_per_proc'],
+                       sum(part_totals[label] for label in reading['labels']) - excluded))
+    return counts
+
+
 def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -> Verdict:
     first_entry, first_run, expectation = parts[0]
     model = expectation.model
@@ -1074,20 +1137,36 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     totals = dict.fromkeys(wanted[1:], 0.0)
     events = 0.0
     counted, without_aura, unmeasured, reasons = [], [], [], []
-    for _, run, _ in parts:
+    per_part: list[tuple[dict[str, float], float]] = []
+    baseline_trials = baseline_events = None
+    for _, run, part in parts:
         if trigger:
             reasons += failure_reasons(run, trigger)
         values = [run.values.get(label) for label in wanted]
-        if None in values:
+        part_baseline = part.model.get('baseline')
+        held = [run.values.get(part_baseline[name]) for name in ('trials', 'events')] if part_baseline else [0.0, 0.0]
+        excluded = [run.values.get(label) for label in part.model.get('trial_exclusions', [])]
+        if None in values or None in held or None in excluded:
             unmeasured.append(f'{run.key} ({run.status}: {run.message})')
         elif values[0] <= 0:
             without_aura.append(run.key)
         else:
             counted.append(run.key)
-            for label, value in zip(wanted[1:], values[1:]):
+            part_totals = dict(zip(wanted[1:], values[1:]))
+            part_totals[labels['trials']] -= sum(excluded)
+            if part_baseline:
+                baseline_trials, baseline_events = held
+                part_totals[labels['trials']] -= baseline_trials
+                part_totals[event_labels[0]] -= baseline_events
+            for label, value in part_totals.items():
                 totals[label] += value
-            events -= player_casts(model, run, trigger)
-            events += refund_offset(model, run)
+            offset = refund_offset(model, run) - player_casts(model, run, trigger)
+            events += offset
+            per_part.append((part_totals, offset))
+    if baseline_events:
+        return replace(base, measured=baseline_events, expected=0.0, low=0.0, high=0.0,
+                       explanation=f'{baseline_events:g} events in {baseline_trials:g} baseline trials without the '
+                                   f'passive')
     events += sum(totals[label] for label in event_labels)
     procs = events / model['events_per_proc']
     trials = totals[labels['trials']]
@@ -1111,7 +1190,16 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
     for reading in readings:
         excluded = events if reading.get('minus_events') else 0.0
         reading_trials = sum(totals[label] for label in reading['labels']) - excluded
-        status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
+        part_rates = proc_part_counts(per_part, model, event_labels, reading)
+        if model.get('band') and len(part_rates) > 1:
+            status, low, high, why = between_part_judgement(part_rates, model['minimum_trials'], expected)
+        else:
+            status, low, high, why = rate_judgement(procs, reading_trials, model['minimum_trials'], expected)
+            spread = between_part_interval(part_rates) if low is not None else None
+            if spread:
+                why += f'; between-part 99% interval [{spread[0]:.4f}, {spread[1]:.4f}] over {len(part_rates)} parts'
+        if model.get('band') and low is not None:
+            status, low, high, why = banded_rate(status, low, high, expected, why)
         judged.append((status, procs / reading_trials if reading_trials > 0 else None, low, high,
                        f'{reading["name"]}: {procs:g} procs in {reading_trials:g} trials, {why}: {status}',
                        reading_trials))
@@ -1123,6 +1211,8 @@ def judge_proc(manifest: dict, parts: list[ProcPart], tooltips: TooltipSource) -
         detail = {'question': proc_question(manifest, first_entry, expectation, readings, judged, procs, chance,
                                             tooltips)}
     readings_text = '; '.join(text for *_, text, _ in judged)
+    if baseline_trials is not None:
+        readings_text += f'; no event in {baseline_trials:g} baseline trials without the passive'
     lead = 'the readings of the trials disagree; ' if len(statuses) > 1 else ''
     return replace(base, status=status, measured=rate, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'{lead}{readings_text} ({notes}); {expectation.displayed} shows {chance:g}%; '
@@ -1445,9 +1535,142 @@ def cooldown_trial_windows(run: Run, aura: int, labels: dict, phase: str,
     return found
 
 
+def minion_cooldown_windows(run: Run, aura: int, phase: str, count: int,
+                            wait_ms: float) -> list[tuple[float, float, float]] | None:
+    found = []
+    for index in range(count):
+        labels = [cooldown_trial_label(aura, phase, index, moment) for moment in ('before', 'after')]
+        events = [minion_cooldown_event_label(aura, phase, index, moment) for moment in ('before', 'after')]
+        values = [run.values.get(label) for label in labels + events]
+        upper = elapsed_between(run, labels[0], labels[1])
+        if None in values or upper is None:
+            return None
+        before, after, events_before, events_after = values
+        found.append((before - after - max(upper, wait_ms), before - after - wait_ms, events_after - events_before))
+    return found
+
+
+def judge_minion_cooldown(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    aura = expectation.spell_id
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    expected = model['expected_delta_ms']
+    band = MINION_COOLDOWN_BAND * expected
+    windows = {'baseline': [], 'measured': []}
+    without_aura, unmeasured = [], []
+    for _, run, part in parts:
+        aura_value = run.values.get(part.model['measurements']['aura'])
+        found = {phase: minion_cooldown_windows(run, aura, phase, count, model['window_ms'])
+                 for phase, count in (('baseline', part.model['baseline_attempts']),
+                                      ('measured', part.model['part_attempts']))}
+        if aura_value is None or None in found.values():
+            unmeasured.append(unusable_run(run))
+            continue
+        if aura_value <= 0:
+            without_aura.append(run.key)
+            continue
+        for phase, rows in found.items():
+            windows[phase] += rows
+    notes = f'{len(windows["measured"])} measured windows across {model["parts"]} parts'
+    if without_aura:
+        notes += f'; aura {aura} absent in {", ".join(without_aura)}'
+    if unmeasured:
+        notes += f'; no cooldown measurements in {", ".join(unmeasured)}'
+
+    def per_event(rows: list[tuple[float, float, float]]) -> tuple[float, float, float] | None:
+        events = sum(row[2] for row in rows)
+        if events <= 0:
+            return None
+        return sum(row[0] for row in rows) / events, sum(row[1] for row in rows) / events, events
+
+    baseline = per_event(windows['baseline'])
+    if baseline is None:
+        return replace(base, status='unmeasured', explanation=f'no minion event in the baseline windows ({notes})')
+    if baseline[0] > band or baseline[1] < -band:
+        return replace(base, measured=baseline[1], expected=0.0, low=-band, high=band,
+                       explanation=f'{baseline[0]:g} to {baseline[1]:g} ms of cooldown per minion event over '
+                                   f'{baseline[2]:g} events without the passive ({notes})')
+    measured = per_event(windows['measured'])
+    if measured is None:
+        status = 'alert' if unmeasured and not without_aura else 'unmeasured'
+        return replace(base, status=status, explanation=f'no minion event with the passive learned ({notes})')
+    low, high = expected - band, expected + band
+    judged = replace(base, measured=measured[1], expected=expected, low=low, high=high)
+    counts = (f'{measured[0]:g} to {measured[1]:g} ms of cooldown per {model["trial_metric"]} event over '
+              f'{measured[2]:g} events (the window bounded by the wait and the elapsed steps), '
+              f'{baseline[0]:g} to {baseline[1]:g} ms per event over {baseline[2]:g} events without the passive')
+    if len(windows['measured']) < model['minimum_trials']:
+        return replace(judged, status='insufficient_trials',
+                       explanation=f'{counts}; {len(windows["measured"])} windows, fewer than the '
+                                   f'{model["minimum_trials"]} the check needs ({notes})')
+    status = 'ok' if measured[0] <= high + FLOAT_EPSILON and measured[1] >= low - FLOAT_EPSILON else 'alert'
+    return replace(judged, status=status, explanation=f'{counts}; {expectation.rule} ({notes})')
+
+
+def judge_proc_energize(parts: list[ProcPart]) -> Verdict:
+    first_entry, _, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    labels = model['measurements']
+    total = count = 0.0
+    expected_totals = 0.0
+    unmeasured = []
+    for _, run, _ in parts:
+        values = {name: run.values.get(label) for name, label in labels.items()
+                  if name != 'max_power' or model.get('percent_of_max') is not None}
+        if None in values.values():
+            unmeasured.append(unusable_run(run))
+            continue
+        each = model['expected'] if model.get('expected') is not None \
+            else math.floor(values['max_power'] * model['percent_of_max'] / 100)
+        total += values['total']
+        count += values['count']
+        expected_totals += values['count'] * each
+    notes = f'{len(parts) - len(unmeasured)} of {model["parts"]} parts'
+    if unmeasured:
+        notes += f'; no energize measurements in {", ".join(unmeasured)}'
+    if count <= 0:
+        return replace(base, status='unmeasured', explanation=f'no energize of power {model["power"]} ({notes})')
+    mean, expected = total / count, expected_totals / count
+    status = 'ok' if abs(total - expected_totals) <= FLOAT_EPSILON else 'alert'
+    return replace(base, status=status, measured=mean, expected=expected, low=expected, high=expected,
+                   explanation=f'{total:g} restored over {count:g} energizes, {mean:g} each, against {expected:g} '
+                               f'each; {expectation.rule} ({notes})')
+
+
+def judge_cooldown_gate(parts: list[ProcPart]) -> Verdict:
+    first_entry, run, expectation = parts[0]
+    model = expectation.model
+    base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
+                   expectation.rank_id, expectation.check)
+    names = ('arms', 'events', 'primed')
+    values = {name: {arm: run.values.get(label) for arm, label in model[name].items()} for name in names}
+    aura = run.values.get(model['measurements']['aura'])
+    if aura is None or any(value is None for name in names for value in values[name].values()):
+        return replace(base, explanation=f'no cooldown gate measurement in {unusable_run(run)}')
+    if aura <= 0:
+        return replace(base, status='unmeasured', explanation=f'aura {expectation.spell_id} absent in {run.key}')
+    without, with_ = values['arms']['without'], values['arms']['with']
+    primed = values['primed']
+    readings = (f'without the passive: cast result {without:g} after {values["events"]["without"]:g} minion events '
+                f'(cooldown {primed["without"]:g} ms when primed); with it: cast result {with_:g} after '
+                f'{values["events"]["with"]:g} events (primed {primed["with"]:g} ms)')
+    if min(primed.values()) <= model['gate_wait_ms']:
+        return replace(base, status='unmeasured', explanation=f'{readings}: the priming cast left no cooldown longer '
+                                                             f'than the {model["gate_wait_ms"]:g} ms wait')
+    status = 'ok' if without == SPELL_FAILED_NOT_READY and with_ == 0 else 'alert'
+    return replace(base, status=status, measured=with_, expected=0.0, low=0.0, high=0.0,
+                   explanation=f'{readings}; {expectation.rule}')
+
+
 def judge_trigger_cooldown(parts: list[ProcPart]) -> Verdict:
     first_entry, _, expectation = parts[0]
     model = expectation.model
+    if model['trigger']['action'] == MINION:
+        return judge_minion_cooldown(parts)
     aura = expectation.spell_id
     base = Verdict(expectation.label, 'alert', None, None, None, None, '', first_entry['key'], expectation.spell_id,
                    expectation.rank_id, expectation.check)
@@ -1682,12 +1905,12 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
     kept = kept_count / observe_count
     tooltip_ratio = expected
     expected = tooltip_ratio * kept
-    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_TOLERANCE * expected)
+    margin = max(MAGNITUDE_RATIO_FLOOR, MAGNITUDE_RATIO_POINTS, MAGNITUDE_RATIO_TOLERANCE * expected)
     low, high = expected - margin, expected + margin
     judged = replace(base, measured=ratio, expected=expected, low=low, high=high)
     status = 'ok' if low - FLOAT_EPSILON <= ratio <= high + FLOAT_EPSILON else 'alert'
     trigger_source = 'main-hand melee attacks' if model['trigger']['action'] == 'attack' \
-        else str(model['trigger']['spell'])
+        else str(model.get('trial_spell') or model['trigger']['spell'])
     resisted = (f' (tooltip {tooltip_ratio:g} x {kept:.4f} kept after the target\'s average partial resist of school '
                 f'mask {model["resisted_school_mask"]})') if model.get('resisted_school_mask') else ''
     excluded, excluded_note = magnitude_excluded(low, high, part_ratios)
@@ -1696,7 +1919,8 @@ def judge_trigger_magnitude(parts: list[ProcPart]) -> Verdict:
                                f'{observe_count:g} of its own events, against mean {mean_trigger:g} '
                                f'{model["trigger_metric"]} of {trigger_source} over {trigger_count:g} of its own '
                                f'events, = {ratio:.4f}, within max({MAGNITUDE_RATIO_FLOOR:g}, '
-                               f'{MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of {expected:g}{resisted}; '
+                               f'{MAGNITUDE_RATIO_POINTS:g}, {MAGNITUDE_RATIO_TOLERANCE:.0%} of expected) of '
+                               f'{expected:g}{resisted}; '
                                f'{expectation.rule} ({notes}); {excluded_note}')
 
 
@@ -2667,6 +2891,8 @@ def behaviour_party_stat_ratio_verdict(base: Verdict, run: Run, model: dict) -> 
     if near_before is None or near_after is None:
         return replace(base, explanation=missing_measurement(
             run, model['near_before_label'] if near_before is None else model['near_after_label']))
+    if model.get('relation') == ADDITIVE_RELATION:
+        return party_stat_gain_verdict(base, run, model, near_before, near_after)
     if near_before <= 0:
         return replace(base, status='unmeasured', measured=near_after,
                        explanation=f'{model["near_before_label"]} measured {near_before:g}; a party stat ratio '
@@ -2695,6 +2921,31 @@ def behaviour_party_stat_ratio_verdict(base: Verdict, run: Run, model: dict) -> 
                    low=expected - PARTY_STAT_RATIO_TOLERANCE, high=expected + PARTY_STAT_RATIO_TOLERANCE,
                    explanation=f'{model["metric"]} on the grouped, non-caster ally measured {near_before:g} before '
                                f'the caster learned the passive and {near_after:g} after, ratio {near_ratio:g} '
+                               f'against expected {expected:g}{far_detail}')
+
+
+ADDITIVE_RELATION = 'additive'
+
+
+def party_stat_gain_verdict(base: Verdict, run: Run, model: dict, near_before: float, near_after: float) -> Verdict:
+    expected = float(model['expected'])
+    gain = near_after - near_before
+    near_ok = abs(gain - expected) <= PARTY_STAT_RATIO_TOLERANCE
+    far_detail = ''
+    far_ok = True
+    far_before_label, far_after_label = model.get('far_before_label'), model.get('far_after_label')
+    if far_before_label is not None:
+        far_before = run.values.get(far_before_label)
+        far_after = run.values.get(far_after_label)
+        if far_before is None or far_after is None:
+            return replace(base, explanation=missing_measurement(
+                run, far_before_label if far_before is None else far_after_label))
+        far_ok = abs(far_after - far_before) <= PARTY_STAT_RATIO_TOLERANCE
+        far_detail = f'; out-of-radius ally gain {far_after - far_before:g} (must stay at 0)'
+    return replace(base, status='ok' if near_ok and far_ok else 'alert', measured=gain, expected=expected,
+                   low=expected - PARTY_STAT_RATIO_TOLERANCE, high=expected + PARTY_STAT_RATIO_TOLERANCE,
+                   explanation=f'{model["metric"]} on the grouped, non-caster ally measured {near_before:g} before '
+                               f'the caster learned the passive and {near_after:g} after, a gain of {gain:g} points '
                                f'against expected {expected:g}{far_detail}')
 
 
@@ -2814,6 +3065,68 @@ def behaviour_trigger_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
 
 
 def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    verdict = option_verdict(forced_or_plain_metric_delta_verdict(base, run, model), run, model)
+    stamps = model.get('game_time')
+    if stamps is None or verdict.status == 'unmeasured':
+        return verdict
+    cast = run.values.get(stamps['cast_label'])
+    windows = [(stamps['after_label'], stamps['after_window'], 'after')]
+    if 'expired_label' in stamps:
+        windows.append((stamps['expired_label'], stamps['expired_window'], 'expired'))
+    if cast is None or any(run.values.get(label) is None for label, _, _ in windows):
+        return replace(verdict, status='unmeasured', explanation=f'{verdict.explanation}; a game-time stamp is '
+                                                                 f'missing, so the reading\'s time is not known')
+    texts, inside = [], True
+    for label, (low, high), moment in windows:
+        elapsed = run.values[label] - cast
+        inside = inside and low <= elapsed <= high
+        texts.append(f'the {moment} reading at {elapsed:g} ms of game time after the trigger cast (window '
+                     f'{low:g}..{high:g} ms)')
+    explanation = f'{verdict.explanation}; {", ".join(texts)}'
+    if not inside:
+        return replace(verdict, status='alert', explanation=f'{explanation}: a reading falls outside its game-time '
+                                                            f'window, so the bracket is not proven')
+    return replace(verdict, explanation=explanation)
+
+
+def forced_or_plain_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    forced = model.get('forced_chance')
+    if model.get('forced_roll') is not None:
+        return forced_roll_metric_delta_verdict(base, run, model)
+    if forced is None:
+        return judged_metric_delta(base, run, model)
+    absent = run.values.get(forced['absent_label'])
+    present = run.values.get(forced['present_label'])
+    count = run.values.get(forced['count_label'])
+    released = run.values.get(forced['released_label'])
+    fixture = (f'forcing fixture: a {forced["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant, '
+               f'{forced["aura"]} read on creature {forced["entry"]} before both readings')
+    if present is None or count is None or present < 1 or present != count:
+        return replace(base, status='unmeasured', explanation=f'{fixture}: the forced aura is on {present} of {count} '
+                                                              f'creatures, so the effect is not read')
+    verdict = judged_metric_delta(base, run, model)
+    if absent is None or absent != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the aura is on the '
+                                                            f'creature without the passive ({absent})')
+    if released is None or released != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the modifier is '
+                                                            f'still active at the end ({released})')
+    return replace(verdict, explanation=f'{verdict.explanation}; {fixture}: absent without the passive, present '
+                                                    f'({present:g}) with it, released at the end')
+
+
+def forced_roll_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
+    roll = model['forced_roll']
+    verdict = judged_metric_delta(base, run, model)
+    released = run.values.get(roll['released_label'])
+    fixture = f'forcing fixture: a {roll["talent"]} SPELLMOD_CHANCE_OF_SUCCESS +1000% spell modifier mutant'
+    if released is None or released != 0:
+        return replace(verdict, status='alert', explanation=f'{verdict.explanation}; {fixture}: the modifier is '
+                                                            f'still active at the end ({released})')
+    return replace(verdict, explanation=f'{verdict.explanation}; {fixture}, released at the end')
+
+
+def judged_metric_delta(base: Verdict, run: Run, model: dict) -> Verdict:
     before = run.values.get(model['before_label'])
     after = run.values.get(model['after_label'])
     if before is None or after is None:
@@ -2822,9 +3135,18 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
     before_expected = float(model['before_expected'])
     expected = float(model['expected'])
     tolerance = float(model.get('tolerance', METRIC_DELTA_FLOAT_TOLERANCE))
+    if 'expected_gain' in model:
+        return metric_gain_verdict(base, model, before, after, before_expected, float(model['expected_gain']),
+                                   tolerance)
+    if 'expected_ratio' in model:
+        return metric_ratio_verdict(base, model, before, after, before_expected, float(model['expected_ratio']),
+                                    tolerance)
     before_ok = abs(before - before_expected) <= tolerance
     at_least = model.get('after_at_least')
+    at_most = model.get('after_at_most')
     after_ok = after >= float(at_least) if at_least is not None else abs(after - expected) <= tolerance
+    if at_most is not None:
+        after_ok = after_ok and after <= float(at_most)
     expired_label = model.get('expired_label')
     expired, expired_ok, expired_explanation = None, True, ''
     if expired_label is not None:
@@ -2837,6 +3159,8 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                                f'{after_expiry_expected:g}), ruling out the effect outliving its own aura')
     status = 'ok' if before_ok and after_ok and expired_ok else 'alert'
     after_text = f'at least {float(at_least):g}' if at_least is not None else f'{expected:g}'
+    if at_most is not None:
+        after_text += f' and at most {float(at_most):g}'
     explanation = (f'{model["metric"]} measured {before:g} before the learn (expected '
                    f'{before_expected:g}) and {after:g} after (expected {after_text}); match within '
                    f'{tolerance:g} required' + expired_explanation)
@@ -2846,8 +3170,31 @@ def behaviour_metric_delta_verdict(base: Verdict, run: Run, model: dict) -> Verd
                     ', an explicit per-entry tolerance wide enough to absorb this metric\'s own simulated-clock '
                     'tick jitter but far below the magnitude of any real defect this check would need to catch')
     low, high = (float(at_least), None) if at_least is not None else (expected - tolerance, expected + tolerance)
+    if at_most is not None:
+        high = float(at_most)
     return replace(base, status=status, measured=after, expected=expected, low=low, high=high,
                    explanation=explanation)
+
+
+def metric_gain_verdict(base: Verdict, model: dict, before: float, after: float, least_before: float, gain: float,
+                        tolerance: float) -> Verdict:
+    measured = after - before
+    status = 'ok' if before >= least_before - tolerance and abs(measured - gain) <= tolerance else 'alert'
+    explanation = (f'{model["metric"]} measured {before:g} before and {after:g} after, a gain of {measured:g} '
+                   f'(expected {gain:g}, within {tolerance:g}); the before reading must reach {least_before:g} so '
+                   f'that no floor of the metric can hide the stated gain')
+    return replace(base, status=status, measured=measured, expected=gain, low=gain - tolerance,
+                   high=gain + tolerance, explanation=explanation)
+
+
+def metric_ratio_verdict(base: Verdict, model: dict, before: float, after: float, least_before: float, ratio: float,
+                         tolerance: float) -> Verdict:
+    measured = after / before if before else float('nan')
+    status = 'ok' if before >= least_before and abs(measured - ratio) <= tolerance else 'alert'
+    explanation = (f'{model["metric"]} measured {before:g} before and {after:g} after, a ratio of {measured:.6g} '
+                   f'(expected {ratio:g}, within {tolerance:g}); the before reading must reach {least_before:g}')
+    return replace(base, status=status, measured=measured, expected=ratio, low=ratio - tolerance,
+                   high=ratio + tolerance, explanation=explanation)
 
 
 def stat_gain_arm_labels(arm: dict) -> list[str]:
@@ -3352,8 +3699,12 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     own_factor = (1 + own_pct / 100) * (1 + personal_pct / 100)
     combined_factor = (1 + cap_pct / 100) * (1 + personal_pct / 100)
     inverse = model.get('relation') == INVERSE_RELATION
+    additive = model.get('relation') == ADDITIVE_RELATION
     own_expected = baseline / own_factor if inverse else baseline * own_factor
     combined_expected = baseline / combined_factor if inverse else baseline * combined_factor
+    if additive:
+        own_expected = baseline + own_pct + personal_pct
+        combined_expected = baseline + cap_pct + personal_pct
     tolerance = model.get('tolerance')
     own_margin = tolerance if tolerance is not None else delta_margin(model.get('metric', ''), own_expected)
     combined_margin = tolerance if tolerance is not None else delta_margin(model.get('metric', ''),
@@ -3363,6 +3714,7 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
     status = 'ok' if own_ok and combined_ok else 'alert'
     return replace(base, status=status, measured=combined, expected=combined_expected,
                    low=combined_expected - combined_margin, high=combined_expected + combined_margin,
+                   detail={**(base.detail or {}), STACKED_SAME: abs(combined - own) <= combined_margin},
                    explanation=f'baseline {baseline:g}; after learning the own passive alone, measured {own:g} '
                                f'against expected {own_expected:g} ({own_pct:+g}%, +/-{own_margin:g}); after also '
                                f'learning the partner ({partner_pct:g}%, {mechanism_phrase}), measured {combined:g} '
@@ -3370,7 +3722,9 @@ def behaviour_group_stack_cap_verdict(base: Verdict, run: Run, model: dict) -> V
                                f'+/-{combined_margin:g}); a combined reading that reflects the sum of both '
                                f'percentages instead of their cap is always an alert'
                                + (f'; the metric is a time between events, so each percent divides it'
-                                  if inverse else ''))
+                                  if inverse else '')
+                               + ('; the metric is a percent chance, so each percent adds its points' if additive
+                                  else ''))
 
 
 def behaviour_crit_magnitude_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
@@ -3667,8 +4021,18 @@ def behaviour_cast_applies_aura_verdict(base: Verdict, run: Run, model: dict) ->
 
 def observed(expectation: Expectation) -> dict:
     model = expectation.model or {}
-    found = {PASSIVE_METRIC: model.get('metric', model.get('observe_metric')), CONTRAST: model.get(CONTRAST)}
+    found = {PASSIVE_METRIC: model.get('evidence_metric', model.get('metric', model.get('observe_metric'))),
+             CONTRAST: model.get(CONTRAST),
+             FORCED_CHANCE: (model.get(FORCED_CHANCE) or {}).get('talent')}
     return {key: value for key, value in found.items() if value is not None}
+
+
+def health_loss_series(run: Run, labels: list[str], health_set: float,
+                       counts: list[float]) -> tuple[list[float], list[float]] | str:
+    readings = [run.values.get(label) for label in labels]
+    if any(reading is None for reading in readings):
+        return missing_measurement(run, labels[readings.index(None)])
+    return [health_set - reading if count else 0.0 for reading, count in zip(readings, counts)], counts
 
 
 def hit_ratio_series(run: Run, reads: list[list[str]]) -> tuple[list[float], list[float]] | str:
@@ -3762,10 +4126,34 @@ def engine_step_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
                                              'stated bonus gives', passes, text)
 
 
+def engine_amount_band_reading(bonus: Bonus, stated: dict) -> EngineStepReading:
+    part = float(stated['parts'][0])
+    expected = float(engine_amount(part * (1 + float(stated['bonus']) / 100)))
+    amount = lambda points: ((1 + points / 100) * (1 + part / 100) - 1) * 100
+    band = RELATIVE_BAND * expected
+    passes = (expected - band, expected + band)
+    if not math.isfinite(bonus.half):
+        return EngineStepReading(Bonus(amount(bonus.measured), math.inf, expected, bonus.trials, band),
+                                 'insufficient_trials', 'not judged: one trial per arm gives no interval', passes,
+                                 'no interval')
+    low, high = amount(bonus.low), amount(bonus.high)
+    found = Bonus(amount(bonus.measured), (high - low) / 2, expected, bonus.trials, band)
+    text = (f'the ratio read as the aura amount on the part {part:g}: {found.measured:.4g} (99% interval {low:.4g} '
+            f'to {high:.4g}) against the int32 amount {expected:g} the stated {float(stated["bonus"]):g}% gives, '
+            f'band {passes[0]:.4g} to {passes[1]:.4g} (G-19, 5% of the amount)')
+    if passes[0] - FLOAT_EPSILON <= low and high <= passes[1] + FLOAT_EPSILON:
+        return EngineStepReading(found, 'ok', 'the whole interval lies inside the band', passes, text)
+    if high < passes[0] or low > passes[1]:
+        return EngineStepReading(found, 'alert', 'the whole interval lies outside the band', passes, text)
+    return EngineStepReading(found, 'insufficient_trials', 'not judged: the interval crosses a band edge', passes,
+                             text)
+
+
 def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict) -> Verdict:
     runs = run if isinstance(run, list) else [run]
     run = runs[0]
     scale = 100.0 if model.get('rate') else 1.0
+    between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))
     series = {}
     for arm in ('control', 'treatment'):
         totals, counts = [], []
@@ -3773,8 +4161,23 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
             found = hit_ratio_series(part, model['reads'][arm])
             if isinstance(found, str):
                 return replace(base, explanation=found)
-            totals += [total * scale for total in found[0]]
-            counts += found[1]
+            if 'health_reads' in model:
+                found = health_loss_series(part, model['health_reads'][arm], float(model['health_set']), found[1])
+                if isinstance(found, str):
+                    return replace(base, explanation=found)
+            flat = float(model.get('treatment_flat', 0.0)) if arm == 'treatment' else 0.0
+            if flat and model.get('treatment_flat_armor'):
+                reduced = part.values.get(model['treatment_flat_armor'])
+                if reduced is None:
+                    return replace(base, explanation=missing_measurement(part, model['treatment_flat_armor']))
+                flat *= reduced / ARMOR_PROBE_DAMAGE
+            part_totals = [(total - flat * count) * scale for total, count in zip(*found)]
+            if between_parts:
+                totals.append(sum(part_totals))
+                counts.append(sum(found[1]))
+            else:
+                totals += part_totals
+                counts += found[1]
         series[arm] = (totals, counts)
     minimum = int(model['minimum_hits']) * len(runs)
     hits = {arm: sum(counts) for arm, (_, counts) in series.items()}
@@ -3805,13 +4208,16 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
     except ValueError as error:
         return replace(base, status='unmeasured', explanation=f'not judged: {error}')
     stated = model.get('stated')
-    stepped = stated and flat is None and stated.get('truncated') and engine_step_reading(bonus, stated)
+    stepped = stated and flat is None and stated.get('truncated') and (
+        engine_amount_band_reading(bonus, stated) if stated.get('band') else engine_step_reading(bonus, stated))
     if stepped:
         bonus = stepped.bonus
         status, reason, needed = stepped.status, stepped.reason, None
     else:
         if stated and flat is None:
             bonus = stated_bonus(bonus, stated)
+        if model.get('ratio_band'):
+            bonus = replace(bonus, fixed_band=RELATIVE_BAND * float(model['expected']) * 100)
         status, reason, needed = bonus_status(bonus)
     sized = None if stepped else sized_trials(bonus)
     detail = {'bonus': bonus_detail(bonus), 'trials_needed': needed, 'sized_trials': sized,
@@ -3821,6 +4227,10 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
               else '')
     if len(runs) > 1:
         beyond += f'; {len(runs)} parts pooled'
+    if between_parts:
+        beyond += ' (99% interval from the between-part variance of the per-part rates, t over the parts)'
+    elif len(runs) > 1 and model.get('rate'):
+        beyond += f' (per-cast interval: the between-part t interval needs {MINIMUM_BETWEEN_PARTS} parts)'
     if model.get('rate'):
         beyond += f'; the {model["rate"]} rate is in percent of the counted events'
     ratio = f', ratio {treatment.mean / control.mean:.5g}' if control.mean else ''
@@ -3892,6 +4302,9 @@ def judged_behaviour(base: Verdict, run: Run | None, expectation: Expectation) -
     if run is None:
         return replace(base, explanation=f'{base.scenario} has no scenario to measure {expectation.check}')
     model = expectation.model
+    judge = kind_judge(expectation.check, (model or {}).get('kind'))
+    if judge:
+        return judge(base, run, model)
     if expectation.check == BEHAVIOUR_AMOUNT_MATCH:
         return behaviour_amount_match_verdict(base, run, model)
     if expectation.check == BEHAVIOUR_CAST_GATE:
@@ -4688,6 +5101,24 @@ def calc_amount_verdict(verdict: Verdict, run: Run, expectation: Expectation) ->
 
 
 LINKED_VERDICT_REFERENCE = re.compile(r'"([^"]+)" \(status \w+\)')
+VALUE_LINK = 'value_link'
+VALUE_LINK_STATUSES = frozenset({'unmodelled', NOT_MEASURED, 'ambiguous_tooltip'})
+
+
+def apply_value_links(verdicts: list[Verdict], class_file: dict | None) -> list[Verdict]:
+    links = {link['label']: link for link in (class_file or {}).get('value_links', [])}
+    linked = []
+    for verdict in verdicts:
+        link = links.get(verdict.label)
+        if link is None or verdict.status not in VALUE_LINK_STATUSES:
+            linked.append(verdict)
+            continue
+        pointers = ', '.join(f'"{label}" (status unmodelled)' for label in link['checked_by'])
+        explanation = (f'checked by value link (verdict {pointers}): {link["arithmetic"]}; '
+                       f'the read alone: {verdict.explanation}')
+        linked.append(replace(verdict, explanation=explanation,
+                              detail={**(verdict.detail or {}), VALUE_LINK: list(link['checked_by'])}))
+    return linked
 
 
 def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
@@ -4699,18 +5130,27 @@ def resolve_linked_statuses(verdicts: list[Verdict]) -> list[Verdict]:
 
     resolved = []
     for verdict in verdicts:
+        value_link = VALUE_LINK in (verdict.detail or {})
         referenced = (LINKED_VERDICT_REFERENCE.findall(verdict.explanation)
-                     if verdict.check == 'unmodelled' and 'checked by' in verdict.explanation else [])
+                     if (verdict.check == 'unmodelled' or value_link) and 'checked by' in verdict.explanation
+                     else [])
         if not referenced:
             resolved.append(verdict)
             continue
         explanation = LINKED_VERDICT_REFERENCE.sub(live_text, verdict.explanation)
         status = 'closed' if all(by_label.get(label) in CONFORMANT for label in referenced) else verdict.status
+        if value_link and any(by_label.get(label) == 'alert' for label in referenced):
+            status = 'alert'
         resolved.append(replace(verdict, status=status, explanation=explanation))
     return resolved
 
 
 POOLED_CHECKS = frozenset({BEHAVIOUR_HIT_RATIO, BEHAVIOUR_TAKEN_HIT})
+
+
+def pooled_parts(check: str, model: dict | None) -> bool:
+    model = model or {}
+    return model.get('parts', 1) > 1 and (check in POOLED_CHECKS or kind_pooled_judge(model.get('kind')) is not None)
 
 
 def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource | None = None,
@@ -4736,7 +5176,7 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
         run = runs.get(entry['key'])
         if entry.get('file') and run is None:
             for data in entry['expectations']:
-                if (data.get('model') or {}).get('parts', 1) > 1 and data['check'] in POOLED_CHECKS:
+                if pooled_parts(data['check'], data.get('model')):
                     pooled.setdefault(data['label'], []).append((entry, None, Expectation(**data)))
             continue
         tokens = read_tokens(manifest['class_file'], entry, run, tooltips) if run and entry['kind'] == 'value' else None
@@ -4751,9 +5191,10 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
             elif expectation.check in STACK_CHECKS and run is not None:
                 stack_parts.setdefault(expectation.label, []).append((entry, run, expectation))
             elif expectation.check in (TRIGGER_CHECK, COOLDOWN_CHECK, DURATION_CHECK, MAGNITUDE_CHECK,
-                                       SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK) and run is not None:
+                                       SELF_TRIGGER_CHECK, GATE_ABSENCE_CHECK, COOLDOWN_GATE_CHECK,
+                                       PROC_ENERGIZE_CHECK) and run is not None:
                 trigger_parts.setdefault(expectation.label, []).append((entry, run, expectation))
-            elif expectation.check in POOLED_CHECKS and (expectation.model or {}).get('parts', 1) > 1:
+            elif pooled_parts(expectation.check, expectation.model):
                 if expectation.label not in hit_slots:
                     hit_slots[expectation.label] = len(verdicts)
                     verdicts.append(None)
@@ -4775,7 +5216,9 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                        ' + '.join(entry['key'] for entry, _, _ in parts), expectation.spell_id, expectation.rank_id,
                        expectation.check)
         present = [run for _, run, _ in parts if run is not None]
+        kind_pooled = kind_pooled_judge((expectation.model or {}).get('kind'))
         pooled_judge = (behaviour_hit_ratio_verdict if expectation.check == BEHAVIOUR_HIT_RATIO
+                        else kind_pooled if kind_pooled
                         else behaviour_taken_rate_verdict)
         verdict = (pooled_judge(base, present, expectation.model)
                    if len(present) == expectation.model['parts']
@@ -4795,12 +5238,13 @@ def evaluate(manifest_path: Path, results_dir: Path, *, tooltips: TooltipSource 
                  for parts in delta_parts.values()]
     trigger_judges = {TRIGGER_CHECK: judge_trigger, COOLDOWN_CHECK: judge_trigger_cooldown,
                       DURATION_CHECK: judge_trigger_duration, MAGNITUDE_CHECK: judge_trigger_magnitude,
-                      SELF_TRIGGER_CHECK: judge_self_trigger, GATE_ABSENCE_CHECK: judge_gate_absence}
+                      SELF_TRIGGER_CHECK: judge_self_trigger, GATE_ABSENCE_CHECK: judge_gate_absence,
+                      COOLDOWN_GATE_CHECK: judge_cooldown_gate, PROC_ENERGIZE_CHECK: judge_proc_energize}
     verdicts += [server_question(manifest, parts[0][2], trigger_judges[parts[0][2].check](parts), tooltips)
                  for parts in trigger_parts.values()]
     verdicts += judge_stack(manifest, stack_parts, tooltips, hit_model)
     stamped = [with_provenance(verdict, judged, label_runs.get(verdict.label) or scenario_runs(runs, verdict))
-               for verdict in resolve_linked_statuses(verdicts)]
+               for verdict in resolve_linked_statuses(apply_value_links(verdicts, manifest['class_file']))]
     return Comparison(manifest, runs, missing, stamped, judged, other_build)
 
 

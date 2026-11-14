@@ -474,6 +474,8 @@ def stage_source(context, log):
     failed = [command_text(result.get('command', [])[2:]) for result in results if result.get('status') != 'passed']
     summary = {'counts': {'passed': len(results) - len(failed), 'failed': len(failed)},
                'selected_suites': data.get('selected_suites', []), 'failed_commands': failed}
+    if data.get('conformance_reruns'):
+        summary['conformance_reruns'] = data['conformance_reruns']
     passed = outcome.returncode == 0 and data.get('status') == 'passed' and not failed
     return ('passed' if passed else 'failed'), summary
 
