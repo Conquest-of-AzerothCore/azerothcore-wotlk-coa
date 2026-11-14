@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Holy Light consumes Divine Favor",
+  "contract": "Divine Favor (20216) gives the next Holy spell +100% critical chance and +50% healing. The realm's Spell.dbc record has no proc charges (the stock 3.3.5 record has one) and it had no spell_proc row, so nothing removed it: every Holy Light crit for the buff's full 10 s. Holy Light (635, family 10 flag 0x80000000, inside the buff's 0xC0200000 mask) is the reported spell. Casting it on the caster must remove the buff. The actor has no other source of Divine Favor, so the aura reading after the cast isolates consumption.",
+  "timeout_ms": 30000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 2,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 635
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 20216,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Divine Favor is up before the cast",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 20216,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 635,
+      "target": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "label": "Holy Light was cast",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 635,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Casting Holy Light used up Divine Favor",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 20216,
+      "equals": 0
+    }
+  ]
+}
