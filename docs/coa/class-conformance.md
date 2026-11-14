@@ -750,8 +750,8 @@ sha256 (`build`), the record (`status`, `stamps`, `compare`, `manifest`), `decis
 runs, in order: the guard-class gate, the digests, generate, the source stage, run 1 and run 2 (each after the disk
 check; above 97% it stops), compare and audit per run, the tally, the refactor gate, the archive and `checkpoint.md` /
 `.json`. It stops at the first failure and names the step and its log (`OUT/logs/NN-step.log`). `decisions.json` holds,
-by claim key, `candidates` (`{key: why}`), `rulings` (`{key: {status, why}}`, needed again in every cycle for each
-status 3-5 claim), `counted` (ledger-only re-audit corrections, counted at once, G-17) and `text_changed` (owner text
+by claim key, `candidates` (`{key: why}`), `rulings` (`{key: {status, why}}`, status 2 to 5, needed again in every
+cycle for each status 3-5 claim, or the tally stops; a key that names no claim of the ledger stops it too), `counted` (ledger-only re-audit corrections, counted at once, G-17) and `text_changed` (owner text
 items). A re-audit of an archived pair is the same command with `--skip gate --skip digests --skip generate --skip
 source --skip runs --skip compare` and `pair.stamps` / `pair.compare` set. Agents are used only where the script
 stops: a merge conflict, the cause of a flip, a candidate ruling. At each checkpoint the controller compacts its
@@ -876,7 +876,7 @@ cache read + cache write). The agents are 120 subagent transcripts, role from th
 - The controller and mentor sessions took 762.4 M input over the same window (controller 585.8 M, mentor 176.3 M,
   previous controller session 0.3 M); these are not attributed to a role.
 - By cycle, agents only: the night 2,083.8 M and cycle 1 1,421.5 M input (together about 3,505 M), against 12.4 to
-  46.9 M for each of the cycles c11 to c18.
+  46.9 M for each of the seven merged-pair cycles c11 to c18 (c16 had no pair of its own and is counted in c17).
 - Not recorded: the cost per claim (agents work on several claims), the gameplay seconds of the two night pairs, and
   the role of a hands-on mentor session active in the window, which is not counted.
 - From the next class on, `conformance.py cost` records these figures per checkpoint (ADR 0656).

@@ -5,8 +5,8 @@ The single source of the rules for every agent dispatched on class conformance w
 file or copies it; it does not rewrite the rules. The guide is [class-conformance.md](class-conformance.md).
 
 Measured reason (Necromancer retrospective, agents only, input = uncached + cache read + cache write): the night and
-cycle 1 took 3,505 M input tokens (2,083.8 M and 1,421.5 M), against 12.4 to 46.9 M for each of the seven late cycles
-c11 to c18.
+cycle 1 took 3,505 M input tokens (2,083.8 M and 1,421.5 M), against 12.4 to 46.9 M for each of
+the seven merged-pair cycles c11 to c18 (c16 had no pair of its own and is counted in c17).
 
 ## Rules
 

@@ -33,8 +33,9 @@ A checkpoint records the final count, the delta and the cost per role. The cost 
   file path, session id or user name is written, here or in a checkpoint.
 
 The step is optional for a contributor without transcripts: the checkpoint shows "not recorded" and no figure is
-estimated. On the Necromancer transcripts the tool reproduces the retrospective's per-role agent counts, agent-minutes
-and tokens.
+estimated. Measured locally on the Necromancer transcripts, which are private and not in the repository, the tool
+reproduced the retrospective's per-role agent counts, agent-minutes and tokens; the repository cannot reproduce that
+check, and its tests use synthetic fixtures.
 
 ## Consequences
 

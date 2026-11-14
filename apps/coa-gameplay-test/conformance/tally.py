@@ -3,9 +3,11 @@ from dataclasses import dataclass
 import json
 from pathlib import Path
 
-CONFORMANT = frozenset({'ok', 'tolerated', 'closed'})
-NOT_JUDGED = 'insufficient_trials'
+from prove import CONFORMANT, NOT_JUDGED, status_class
+
 FINAL = ('1', '2', '3', '4', '5')
+RULED = ('2', '3', '4', '5')
+RULING_REQUIRED = ('3', '4', '5')
 NOT_FINAL = 'not final'
 VERDICTS_FILE = 'verdicts.json'
 
@@ -45,8 +47,9 @@ def load_decisions(path: Path | None) -> Decisions:
         raise TallyError(f'{path}: unknown decision fields {sorted(unknown)}')
     rulings = {}
     for key, ruling in document.get('rulings', {}).items():
-        if str(ruling.get('status')) not in FINAL:
-            raise TallyError(f'{path}: ruling {key} has status {ruling.get("status")!r}, not one of {FINAL}')
+        if str(ruling.get('status')) not in RULED:
+            raise TallyError(f'{path}: ruling {key} has status {ruling.get("status")!r}, not one of {RULED}; '
+                             f'status 1 comes only from a counted pair, through a candidate or the record')
         rulings[key] = (str(ruling['status']), ruling.get('why', ''))
     return Decisions(dict(document.get('candidates', {})), rulings, frozenset(document.get('counted', [])),
                      frozenset(document.get('text_changed', [])))
@@ -63,10 +66,6 @@ def verdict_index(directory: Path) -> dict:
     for verdict in load(Path(directory) / VERDICTS_FILE)['verdicts']:
         by_label[verdict['label']][(verdict['check'], verdict['scenario'])] = verdict['status']
     return by_label
-
-
-def status_class(status: str) -> str:
-    return 'conformant' if status in CONFORMANT else status
 
 
 def scenario_shas(manifest: dict) -> dict:
@@ -96,9 +95,10 @@ def flips(labels, new_runs, old_runs, old_sha, now_sha, changed) -> tuple:
     inside, against = [], []
     for label in labels:
         keys = set().union(*(run.get(label, {}).keys() for run in new_runs))
-        for key in sorted(keys):
+        recorded = set().union(*(run.get(label, {}).keys() for run in old_runs))
+        for key in sorted(keys | recorded):
             seen = [run.get(label, {}).get(key) for run in new_runs]
-            if None in seen or len(judged_classes(seen)) > 1:
+            if key in keys and (None in seen or len(judged_classes(seen)) > 1):
                 inside.append({'label': label, 'check': key[0], 'scenario': key[1], 'statuses': seen})
             old = [run.get(label, {}).get(key) for run in old_runs]
             if all(status is None for status in old):
@@ -139,6 +139,8 @@ def classify(rec: dict, prior: dict, new_runs, decisions: Decisions) -> tuple:
                                       + '; behaviour both runs, every label conformant, no flip')
         return NOT_FINAL, 'candidate', (decisions.candidates[key] + f"; this pair {rec['run1']}/{rec['run2']}; "
                                         f'labels not passing {failing}')
+    if key in decisions.counted and behaviour:
+        return '1', 'counted', 'ledger-only re-audit correction on the count-of-record pair, behaviour both runs'
     status = prior['status']
     if status == '1':
         if behaviour:
@@ -152,13 +154,8 @@ def classify(rec: dict, prior: dict, new_runs, decisions: Decisions) -> tuple:
     return NOT_FINAL, 'carried', prior.get('detail') or ''
 
 
-def record_rows(path: Path, counted: frozenset) -> dict:
-    record = {}
-    for row in load(path):
-        if row['key'] in counted:
-            row = {**row, 'status': '1', 'detail': ''}
-        record[(row['index'], row['part'])] = row
-    return record
+def record_rows(path: Path) -> dict:
+    return {(row['index'], row['part']): row for row in load(path)}
 
 
 def new_prior(index: int, part: int, row: dict, text: str) -> dict:
@@ -166,12 +163,35 @@ def new_prior(index: int, part: int, row: dict, text: str) -> dict:
             'spell': row['spell'], 'detail': 'new claim'}
 
 
+def ledger_keys(rows: list, record: dict) -> dict:
+    return {(index, part): record[(index, part)]['key'] if (index, part) in record else f'new {index}.{part}'
+            for index, row in enumerate(rows) for part in range(len(parts(row)))}
+
+
+def check_decisions(keys: dict, record: dict, decisions: Decisions) -> None:
+    unknown = (set(decisions.candidates) | set(decisions.rulings) | decisions.counted
+               | decisions.text_changed) - set(keys.values())
+    if unknown:
+        raise TallyError(f'decision keys that name no claim of this ledger: {sorted(unknown)}')
+    unruled = [record[place]['key'] for place in keys if place in record
+               and record[place]['status'] in RULING_REQUIRED and record[place]['key'] not in decisions.rulings
+               and record[place]['key'] not in decisions.candidates]
+    if unruled:
+        raise TallyError(f'recorded status 3-5 claims without a ruling in the decisions file: {unruled}')
+
+
+def missing_rows(keys: dict, record: dict) -> list:
+    return [{'key': row['key'], 'index': row['index'], 'part': row['part'], 'record_status': row['status'],
+             'basis': 'missing', 'detail': f"record row {row['index']}.{row['part']} reached by no ledger claim"}
+            for place, row in sorted(record.items()) if place not in keys]
+
+
 def tally(inputs: TallyInputs) -> dict:
     decisions = inputs.decisions
     rows = [row for row in load(inputs.ledger) if row['kind'] == 'claim']
-    record = record_rows(inputs.record_status, decisions.counted)
-    unknown = (set(decisions.candidates) | set(decisions.rulings) | decisions.counted
-               | decisions.text_changed) - {row['key'] for row in record.values()}
+    record = record_rows(inputs.record_status)
+    keys = ledger_keys(rows, record)
+    check_decisions(keys, record, decisions)
     audits = [load(path) for path in inputs.coverage]
     new_runs = [verdict_index(path) for path in inputs.compare]
     old_runs = [verdict_index(path) for path in inputs.record_compare]
@@ -201,20 +221,21 @@ def tally(inputs: TallyInputs) -> dict:
             status, basis, detail = classify(rec, prior, new_runs, decisions)
             rec.update({'status': status, 'basis': basis, 'detail': detail})
             out.append(rec)
-    return summary(out, changed, decisions, unknown)
+    return summary(out, changed, decisions, missing_rows(keys, record), record)
 
 
-def summary(out: list, changed: set, decisions: Decisions, unknown: set) -> dict:
+def summary(out: list, changed: set, decisions: Decisions, missing: list, record: dict) -> dict:
     counts = Counter(row['status'] for row in out)
     return {
         'rows': out,
         'judge_changed': sorted(changed),
-        'unknown_decision_keys': sorted(unknown),
+        'missing': missing,
         'total': len(out),
         'counts': {status: counts[status] for status in (*FINAL, NOT_FINAL) if counts[status]},
-        'record_final': sum(1 for row in out if row['record_status'] in FINAL),
+        'record_final': sum(1 for row in record.values() if row['status'] in FINAL),
         'final': sum(counts[status] for status in FINAL),
-        'lost': [row for row in out if row['record_status'] in FINAL and row['status'] not in FINAL],
+        'lost': [row for row in out if row['record_status'] in FINAL and row['status'] not in FINAL]
+        + [row for row in missing if row['record_status'] in FINAL],
         'gained': [row for row in out if row['record_status'] not in FINAL and row['status'] in FINAL],
         'candidates_not_final': [row for row in out if row['key'] in decisions.candidates
                                  and row['status'] not in FINAL],
@@ -226,8 +247,6 @@ def summary(out: list, changed: set, decisions: Decisions, unknown: set) -> dict
 def tally_lines(result: dict) -> list:
     lines = [f"judge changed since the record (no like-for-like record comparison): {result['judge_changed']}",
              f"{result['total']} {result['counts']} record {result['record_final']} final {result['final']}"]
-    if result['unknown_decision_keys']:
-        lines.append(f"decision keys not in the record: {result['unknown_decision_keys']}")
     lines += [f"LOST {row['key']} {row['basis']} {str(row['detail'])[:200]}" for row in result['lost']]
     lines += [f"GAIN {row['key']} {row['status']} {row['basis']} {str(row['detail'])[:120]}"
               for row in result['gained']]

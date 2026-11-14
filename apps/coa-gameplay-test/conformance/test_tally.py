@@ -3,19 +3,20 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tally import (NOT_FINAL, Decisions, TallyError, TallyInputs, classify, flips, judge_changed, load_decisions,
-                   status_markdown, tally, tally_lines, write_status)
+from tally import (NOT_FINAL, Decisions, TallyError, TallyInputs, check_decisions, classify, flips, judge_changed,
+                   ledger_keys, load_decisions, record_rows, status_markdown, tally, tally_lines, write_status)
 
 FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'cycle'
 RULING = 'mentor ruling on X 18:39, confirmed (c8 brief): status 3'
-DECISIONS = Decisions({}, {'81.0': ('3', RULING)}, frozenset(), frozenset({'125.2', '273.1'}))
+DECISIONS = Decisions({}, {'81.0': ('3', RULING)}, frozenset(), frozenset({'125.2'}))
 LABEL = '900001 behaviour_metric_delta probe'
 KEY = ('behaviour_metric_delta', 'scenario-a')
 
 
-def pair_inputs(name: str, decisions: Decisions = DECISIONS, record_status: Path | None = None) -> TallyInputs:
+def pair_inputs(name: str, decisions: Decisions = DECISIONS, record_status: Path | None = None,
+                ledger: Path | None = None) -> TallyInputs:
     pair = FIXTURES / name
-    return TallyInputs(FIXTURES / 'clauses.json', record_status or FIXTURES / 'record-status.json',
+    return TallyInputs(ledger or FIXTURES / 'clauses.json', record_status or FIXTURES / 'record-status.json',
                        (FIXTURES / 'record' / 'cmp-run1', FIXTURES / 'record' / 'cmp-run2'),
                        FIXTURES / 'record' / 'manifest.json', (pair / 'cmp-run1', pair / 'cmp-run2'),
                        (pair / 'coverage-run1.json', pair / 'coverage-run2.json'), pair / 'manifest.json', decisions)
@@ -86,9 +87,55 @@ class RecordDecisionTest(unittest.TestCase):
         decisions = Decisions({}, DECISIONS.rulings, frozenset({'0.0'}), DECISIONS.text_changed)
         result = tally(pair_inputs('final16', decisions, self.record))
         row = by_key(result)['0.0']
-        self.assertEqual((row['record_status'], row['status'], row['basis']), ('1', '1', 'kept'))
-        self.assertEqual(result['record_final'], 13)
-        self.assertEqual([row['key'] for row in result['gained']], [])
+        self.assertEqual((row['record_status'], row['status'], row['basis']), (NOT_FINAL, '1', 'counted'))
+        self.assertEqual(result['record_final'], 12)
+        self.assertEqual([row['key'] for row in result['gained']], ['0.0'])
+
+    def test_a_recorded_status_3_to_5_claim_without_a_ruling_stops_the_tally(self):
+        rows = recorded('record')
+        next(row for row in rows if row['key'] == '29.0')['status'] = '4'
+        self.record.write_text(json.dumps(rows), encoding='utf-8')
+        with self.assertRaisesRegex(TallyError, r"without a ruling.*'29.0'"):
+            tally(pair_inputs('final16', record_status=self.record))
+
+    def test_an_unknown_decision_key_stops_the_tally_and_names_the_key(self):
+        cases = {'999.0': Decisions({'999.0': 'typo'}, DECISIONS.rulings, frozenset(), DECISIONS.text_changed),
+                 '81.9': Decisions({}, {**DECISIONS.rulings, '81.9': ('3', 'typo')}, frozenset(),
+                                   DECISIONS.text_changed),
+                 '0.9': Decisions({}, DECISIONS.rulings, frozenset({'0.9'}), DECISIONS.text_changed)}
+        for key, decisions in cases.items():
+            with self.assertRaisesRegex(TallyError, f"no claim of this ledger: \\['{key}'\\]"):
+                tally(pair_inputs('final16', decisions))
+
+    def test_a_ruling_of_status_2_stands_over_a_flip_and_the_flip_stays_listed(self):
+        decisions = Decisions({}, {**DECISIONS.rulings, '389.0': ('2', 'owner ruling')}, frozenset(),
+                              DECISIONS.text_changed)
+        result = tally(pair_inputs('final15', decisions))
+        row = by_key(result)['389.0']
+        self.assertEqual((row['status'], row['basis']), ('2', 'ruled'))
+        self.assertEqual((result['flips_in_pair'], result['flips_vs_record']), (['389.0'], ['389.0']))
+
+    def test_the_key_of_a_new_claim_is_a_known_decision_key(self):
+        record = record_rows(FIXTURES / 'record-status.json')
+        rows = [row for row in json.loads((FIXTURES / 'clauses.json').read_text(encoding='utf-8'))
+                if row['kind'] == 'claim']
+        keys = ledger_keys([*rows, {'clause': 'a new claim', 'spell': 1}], record)
+        self.assertEqual(keys[(7, 0)], 'new 7.0')
+        check_decisions(keys, record, Decisions({'new 7.0': 'cycle 19 entry'}, DECISIONS.rulings, frozenset(),
+                                                DECISIONS.text_changed))
+
+    def test_a_record_row_no_ledger_claim_reaches_is_lost_and_counted(self):
+        ledger = json.loads((FIXTURES / 'clauses.json').read_text(encoding='utf-8'))
+        row = [row for row in ledger if row['kind'] == 'claim'][2]
+        row['claims'] = row['claims'][:2]
+        path = Path(self.directory.name) / 'clauses.json'
+        path.write_text(json.dumps(ledger), encoding='utf-8')
+        result = tally(pair_inputs('final16', ledger=path))
+        self.assertEqual((result['total'], result['final'], result['record_final']), (13, 13, 14))
+        self.assertEqual([(row['key'], row['basis']) for row in result['lost']], [('26.2', 'missing')])
+        lines = tally_lines(result)
+        self.assertIn('13 {\'1\': 9, \'2\': 3, \'3\': 1} record 14 final 13', lines)
+        self.assertIn('LOST 26.2 missing record row 2.2 reached by no ledger claim', lines)
 
     def test_a_candidate_with_behaviour_and_conformant_labels_gains_status_1(self):
         decisions = Decisions({'0.0': 'cycle 19 entry'}, DECISIONS.rulings, frozenset(),
@@ -129,6 +176,11 @@ class FlipRuleTest(unittest.TestCase):
     def test_an_unjudged_run_is_not_a_flip(self):
         self.assertEqual(self.check(['ok', 'insufficient_trials']), ([], []))
 
+    def test_a_scenario_missing_from_both_runs_flips_against_the_record(self):
+        self.assertEqual(self.check([None, None], ['ok', 'ok']),
+                         ([], [{'label': LABEL, 'check': KEY[0], 'scenario': KEY[1], 'record': ['ok', 'ok'],
+                                'pair': [None, None]}]))
+
     def test_the_pair_flips_against_the_record(self):
         _, against = self.check(['alert', 'alert'], ['ok', 'ok'])
         self.assertEqual(against, [{'label': LABEL, 'check': KEY[0], 'scenario': KEY[1], 'record': ['ok', 'ok'],
@@ -161,9 +213,10 @@ class DecisionFileTest(unittest.TestCase):
                                         'counted': ['3.0'], 'text_changed': ['4.0']}), encoding='utf-8')
             self.assertEqual(load_decisions(path), Decisions({'1.0': 'why'}, {'2.0': ('5', 'q')},
                                                              frozenset({'3.0'}), frozenset({'4.0'})))
-            path.write_text(json.dumps({'rulings': {'2.0': {'status': 6}}}), encoding='utf-8')
-            with self.assertRaisesRegex(TallyError, 'status'):
-                load_decisions(path)
+            for status in (6, 1, '1'):
+                path.write_text(json.dumps({'rulings': {'2.0': {'status': status}}}), encoding='utf-8')
+                with self.assertRaisesRegex(TallyError, 'status'):
+                    load_decisions(path)
             path.write_text(json.dumps({'candidate': {}}), encoding='utf-8')
             with self.assertRaisesRegex(TallyError, 'unknown'):
                 load_decisions(path)

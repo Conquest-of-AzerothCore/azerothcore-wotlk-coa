@@ -109,7 +109,7 @@ def in_window(stamp: Optional[str], since: datetime, until: Optional[datetime]) 
 
 def cost_totals(root: Path, since: datetime, until: Optional[datetime] = None) -> dict:
     if not root.is_dir():
-        raise CostError(f'--transcripts is not a directory: {root}')
+        raise CostError('--transcripts is not a directory')
     agents = []
     mains = []
     for path in transcripts(root):

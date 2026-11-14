@@ -459,13 +459,17 @@ python3 -B conformance.py cycle --config CYCLE.json [--skip STEP ...] [--write-d
 ```
 
 `cycle` runs the integrator's fixed steps of a merged pair, in this order (ADR 0655): `gate` (each class of
-`guard_classes`: every generation of `snapshots.GENERATIONS` regenerated at the worktree and at a `git archive` of
+`guard_classes`, which must not be empty: every generation of `snapshots.GENERATIONS` regenerated at the worktree and at a `git archive` of
 `base`, `diff -r`, then `snapshots.py check`), `digests` (`snapshots.py check --class N`, or `write` with
 `--write-digests`), `generate` (into `scenarios_dir`, refused when it is not empty), `source` (`source_runner
 --stages source --base BASE`), `runs` (run 1 then run 2: each `disk_checks` command first, no run above
 `disk_limit_percent`; then `gameplay_runner --stages gameplay --gameplay-db-workers N --scenario <every generated
-file>`, the stamp read from its `VERIFY ALL` line), `compare` and `audit` per run, `tally`, `refactor` (only with
-`refactor.moved_kinds`), `archive` (only with `archive`, a new directory) and `checkpoint`. `--skip` leaves a step
+file>`, the stamp read from its `VERIFY ALL` line; a run stops the cycle unless it ends `PASSED` with exit 0 or
+`INCOMPLETE` with exit 3, the normal status of exploratory scenario files, its `report.json` exists and its gameplay
+stage ran; as in `prove`, a run in which a scenario of the manifest has no result, or a scenario drifted, stops it
+too), `compare` (with `runs` skipped, `pair.results` is checked for missing results first) and `audit` per run,
+`tally`, `refactor` (only with `refactor.moved_kinds`), `archive` (only with `archive`, a new directory, and two
+stamps) and `checkpoint`. `--skip` leaves a step
 out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, their output and exit codes);
 `OUT/cycle-summary.json` lists each step as done, skipped or failed, and the first failure stops the cycle with exit
 2. Relative paths in the cycle file are read from its directory. The fields:
@@ -488,13 +492,20 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 The tally (`tally.py`) gives every ledger claim a status 1-5 or `not final`. A claim with a flip is not final: a flip
 within the pair is a label/check/scenario whose judged status class (conformant, or the status itself) differs between
 the runs or that is present in one run only (`insufficient_trials` is not judged); a flip against the record compares
-the pair with the record's two runs, except on a scenario whose sha256 changed or a label whose judge changed
-(`judge_changed`: a changed expectation or a new value link). Otherwise a record status 1 stays 1 on behaviour in both
-runs, a status 2 stays 2 on behaviour or on its recorded evidence kind, and statuses 3-5 come only from a ruling. The
-decisions file holds, by claim key, `candidates` (`{key: why}`: status 1 on behaviour in both runs with every label
-conformant), `rulings` (`{key: {"status": "3", "why": "..."}}`), `counted` (ledger-only re-audit corrections,
-counted at once as record status 1) and `text_changed` (keys whose claim text changed on purpose; any other text change
-stops the tally). The checkpoint (`checkpoint.json` and `.md`) holds the count, the delta against `previous_status`,
+the pair with the record's two runs on every label/check/scenario of either side, so a scenario with no result in both
+runs of the pair flips against the record, except on a scenario whose sha256 changed or a label whose judge changed
+(`judge_changed`: a changed expectation or a new value link). A ruling is applied first and stands over a flip: its
+status (2 to 5) rests on the rule or ruling it names, not on the runs (class-conformance.md section 2). Status 1 needs a
+pair with no flip (class-conformance.md 3.2) and never comes from a ruling. Otherwise a record status 1 stays 1 on
+behaviour in both runs, a status 2 stays 2 on behaviour or on its recorded evidence kind, and a recorded status 3-5
+claim with neither a ruling nor a candidate stops the tally. The decisions file holds, by claim key, `candidates`
+(`{key: why}`: status 1 on behaviour in both runs with every label conformant), `rulings` (`{key: {"status": "3",
+"why": "..."}}`, status 2 to 5), `counted` (ledger-only re-audit corrections, counted at once: status 1, basis
+`counted`, on behaviour in both runs; otherwise the record status rules apply) and `text_changed` (keys whose claim
+text changed on purpose; any other text change stops the tally). A decision key that names no claim of the ledger (a
+record key, or `new I.P` for a new claim) stops the tally and names the key. A record row that no ledger claim reaches
+is listed as `LOST <key> missing` and counts in the record figure and the delta. The checkpoint (`checkpoint.json` and
+`.md`) holds the count, the delta against `previous_status` (the record status file by default),
 the statuses, the flips, the lost and gained keys, the pair and record stamps, the build, the head, the refactor gate
 figures, the steps done and `cost`.
 

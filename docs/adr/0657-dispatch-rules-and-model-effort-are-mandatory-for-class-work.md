@@ -8,8 +8,9 @@
 The Necromancer rules (never resume an agent for a new task, fresh agents with file-pointing briefs, ranged reads, reports
 to files, verification through `verify_all.py` only) lived in the class's plan folder and were copied by hand. They are
 class-neutral. The retrospective measured the effect: the night and cycle 1 took about 3,505 M agent input tokens
-(2,083.8 M and 1,421.5 M), against 12.4 to 46.9 M for each of the cycles c11 to c18 that followed the rules. The model and
-effort of an agent were not part of the rules: Opus ran 101 of the 120 agents.
+(2,083.8 M and 1,421.5 M), against 12.4 to 46.9 M for each of the seven merged-pair cycles c11 to c18 (c16 had no
+pair of its own and is counted in c17), which followed the rules. The model and effort of an agent were not part of
+the rules: Opus ran 101 of the 120 agents.
 
 ## Options
 
@@ -28,7 +29,6 @@ recorded with `conformance.py cost` (ADR 0656), or the checkpoint shows "not rec
 
 ## Consequences
 
-- Section 14.6 of the guide keeps its own list; the dispatch-rules file is the source if they differ, and 14.6 is to be
-  reduced to a link when next edited.
+- Section 14.6 of the guide links the dispatch-rules file and keeps no list of its own.
 - A class that wants a different rule writes an ADR superseding this one.
 - No code change.

@@ -28,7 +28,12 @@ the runners, workers, disk limit and checks, guarded classes, moved kinds and se
 ledger-only re-audit corrections and intended text changes are read by claim key from a decisions file. `tally.py`
 keeps the rules of the per-cycle tally: statuses 1-5, the flip rule within the pair and against the record (with
 changed scenarios and judges excluded), re-audit corrections counted at once, candidates gaining status 1 only on
-behaviour in both runs with every label conformant. The checkpoint (`checkpoint.json` and `.md`) records the count,
+behaviour in both runs with every label conformant. It adds loud refusals the per-cycle scripts lacked: a decision key
+that names no ledger claim, a ruling of status 1 (status 1 needs a pair with no flip, class-conformance.md 3.2) and a
+recorded status 3-5 claim without a ruling stop the tally; a record row no ledger claim reaches is a `LOST` line
+counted in the delta; the against-record flip test covers scenarios the pair has no result for. The runs step stops on
+a run that does not end `PASSED` (exit 0) or `INCOMPLETE` (exit 3) with a gameplay run, on a missing `report.json`
+and, as `prove` does, on scenarios without a result. The checkpoint (`checkpoint.json` and `.md`) records the count,
 the delta, the flips, the lost and gained claims, the stamps, the build and a `cost` field ("not recorded" without a
 cost file).
 

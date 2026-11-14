@@ -24,8 +24,10 @@ PAIR_FILE = 'pair.json'
 SUMMARY_FILE = 'cycle-summary.json'
 REFACTOR_FILE = 'refactor-gate.json'
 FAILED = 2
+ACCEPTED_RUNS = {'PASSED': 0, 'INCOMPLETE': 3}
 
 Runner = Callable[[Sequence[str], Path, Path], int]
+ResultsCheck = Callable[[dict, Path], list]
 
 
 class CycleError(RuntimeError):
@@ -88,6 +90,7 @@ class Cycle:
     runner: Runner
     skip: frozenset
     write_digests: bool = False
+    results_check: ResultsCheck | None = None
     stamps: list = field(default_factory=list)
     results: list = field(default_factory=list)
     tally_result: dict | None = None
@@ -222,6 +225,8 @@ def manifest_path(config: CycleConfig) -> Path:
 def step_gate(cycle: Cycle) -> None:
     from snapshots import GENERATIONS
     config = cycle.config
+    if not config.guard_classes:
+        raise CycleError('gate: "guard_classes" is empty; list the finished classes to guard or skip the gate')
     gate = config.out / 'gate'
     tree = gate / 'base-tree'
     if tree.exists():
@@ -303,6 +308,33 @@ def verify_report(log: Path) -> tuple:
     return status, Path(report.strip())
 
 
+def missing_results(manifest: dict, results: Path) -> list:
+    from compare import ScenarioDrift, load_runs
+    try:
+        return load_runs(manifest, Path(results))[1]
+    except ScenarioDrift as drift:
+        raise CycleError(f'scenario drift in {results}, no verdict:\n{drift}') from None
+
+
+def require_results(cycle: Cycle, step: str, manifest: dict, results: Path) -> None:
+    missing = sorted((cycle.results_check or missing_results)(manifest, results))
+    if missing:
+        raise CycleError(f'{step}: {len(missing)} scenarios of the manifest have no result in {results}: '
+                         f'{", ".join(missing[:20])}{" ..." if len(missing) > 20 else ""}')
+
+
+def require_run(number: int, code: int, status: str, report: Path, log: Path) -> None:
+    if ACCEPTED_RUNS.get(status) != code:
+        raise CycleError(f'run {number}: VERIFY ALL: {status} with exit {code}; a counted run ends PASSED (exit 0) or '
+                         f'INCOMPLETE (exit 3) ({log})')
+    if not report.is_file():
+        raise CycleError(f'run {number}: {report} does not exist ({log})')
+    gameplay = json.loads(report.read_text(encoding='utf-8')).get('stages', {}).get('gameplay', {})
+    if gameplay.get('status') != 'passed' and 'returncode' not in gameplay.get('summary', {}):
+        raise CycleError(f"run {number}: the gameplay stage is {gameplay.get('status')} without a gameplay run "
+                         f"({gameplay.get('summary', {}).get('reason')}) ({log})")
+
+
 def step_runs(cycle: Cycle) -> None:
     config = cycle.config
     manifest = json.loads(manifest_path(config).read_text(encoding='utf-8'))
@@ -320,6 +352,8 @@ def step_runs(cycle: Cycle) -> None:
         code = cycle.runner(command, config.worktree, log)
         status, report = verify_report(log)
         note(cycle, 'runs', f'run {number}: exit {code}, VERIFY ALL: {status} {report}')
+        require_run(number, code, status, report, log)
+        require_results(cycle, 'runs', manifest, report.parent)
         runs.append({'number': number, 'exit': code, 'verify': status, 'report': str(report),
                      'stamp': report.parent.name, 'results': str(report.parent)})
     cycle.stamps = [run['stamp'] for run in runs]
@@ -342,6 +376,10 @@ def step_compare(cycle: Cycle) -> None:
     config = cycle.config
     if len(cycle.results) != 2:
         raise CycleError('compare: no results of the pair; run the pair or set pair.results')
+    if 'runs' in cycle.skip:
+        manifest = json.loads(manifest_path(config).read_text(encoding='utf-8'))
+        for results in cycle.results:
+            require_results(cycle, 'compare', manifest, results)
     for results, out in zip(cycle.results, compare_dirs(cycle)):
         must(cycle, 'compare', [*tool(config.worktree), 'compare', '--manifest', manifest_path(config), '--results',
                                 results, '--out', out, '--build', config.build], config.worktree / CONFORMANCE)
@@ -490,6 +528,8 @@ def step_archive(cycle: Cycle) -> None:
         return
     if config.archive.exists():
         raise CycleError(f'archive: {config.archive} exists; an archive is written once')
+    if len(cycle.stamps) != 2:
+        raise CycleError('archive: the pair has no two stamps; run the pair or set pair.stamps')
     config.archive.mkdir(parents=True)
     for stamp, directory, coverage in zip(cycle.stamps, compare_dirs(cycle), coverage_files(cycle)):
         shutil.copytree(directory, config.archive / f'{config.name}-cmp-{stamp}')
@@ -546,10 +586,9 @@ def checkpoint_document(cycle: Cycle) -> dict:
     config = cycle.config
     rows = tally_rows(cycle)
     now = final_keys(rows)
-    if config.previous_status:
-        before = final_keys(json.loads(config.previous_status.read_text(encoding='utf-8')))
-    else:
-        before = {row['key'] for row in rows if row['record_status'] in FINAL}
+    before = final_keys(json.loads((config.previous_status or config.record.status).read_text(encoding='utf-8')))
+    keys = [row['key'] for row in rows]
+    lost = [key for key in keys if key in before - now] + sorted(before - now - set(keys))
     statuses = defaultdict(int)
     for row in rows:
         statuses[row['status']] += 1
@@ -568,7 +607,7 @@ def checkpoint_document(cycle: Cycle) -> dict:
         'statuses': dict(sorted(statuses.items())),
         'flips': {'in_pair': [row['key'] for row in rows if row['flips_in_pair']],
                   'against_record': [row['key'] for row in rows if row['flips_vs_record']]},
-        'lost': [row['key'] for row in rows if row['key'] in before - now],
+        'lost': lost,
         'gained': [row['key'] for row in rows if row['key'] in now - before],
         'stamps': list(cycle.stamps),
         'record': {'name': config.record.name, 'stamps': list(config.record.stamps)},
@@ -630,11 +669,11 @@ def known_pair(cycle: Cycle) -> None:
 
 
 def run_cycle(config: CycleConfig, skip: Sequence[str] = (), runner: Runner = run_logged,
-              write_digests: bool = False) -> Cycle:
+              write_digests: bool = False, results_check: ResultsCheck | None = None) -> Cycle:
     skipped = frozenset(skip)
     validate(config, skipped)
     config.out.mkdir(parents=True, exist_ok=True)
-    cycle = Cycle(config, runner, skipped, write_digests)
+    cycle = Cycle(config, runner, skipped, write_digests, results_check)
     known_pair(cycle)
     summary = {'steps': []}
     try:
@@ -647,9 +686,10 @@ def run_cycle(config: CycleConfig, skip: Sequence[str] = (), runner: Runner = ru
             HANDLERS[step](cycle)
             cycle.done.append(step)
             summary['steps'].append({'step': step, 'state': 'done'})
-    except CycleError as error:
-        summary['steps'].append({'step': step, 'state': 'failed', 'reason': str(error)})
-        note(cycle, step, f'failed: {error}')
+    except Exception as error:
+        reason = str(error) if isinstance(error, CycleError) else f'{type(error).__name__}: {error}'
+        summary['steps'].append({'step': step, 'state': 'failed', 'reason': reason})
+        note(cycle, step, f'failed: {reason}')
         raise
     finally:
         (config.out / SUMMARY_FILE).write_text(json.dumps(summary, indent=1) + '\n', encoding='utf-8')
@@ -673,7 +713,8 @@ def cycle_command(args) -> int:
     config = cycle.config
     print(f"{config.out / SUMMARY_FILE}: done {', '.join(cycle.done) or 'nothing'}")
     if cycle.tally_result:
-        for line in tally_lines(cycle.tally_result)[1:2]:
+        lines = tally_lines(cycle.tally_result)
+        for line in [lines[1], *(line for line in lines if line.startswith('LOST '))]:
             print(line)
     if (config.out / CHECKPOINT_MD).exists() and 'checkpoint' in cycle.done:
         print(config.out / CHECKPOINT_MD)

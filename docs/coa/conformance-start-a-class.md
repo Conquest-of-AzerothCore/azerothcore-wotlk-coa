@@ -4,9 +4,23 @@ The ordered checklist for a fresh session that takes the next class through conf
 [class-conformance.md](class-conformance.md); section numbers below are its own. `CONF` is
 `apps/coa-gameplay-test/conformance/`; `conformance.py --help` lists every command.
 
+## Environment
+
+`tools/verify_all.py` alone is enough: it runs the source stage, the build and the gameplay runs this checklist needs
+(`docs/coa/verification.md`), and `git worktree remove` cleans up. `coa-verify`, its in-RAM MySQL route, `coa-slot`
+and `coa-worktree-cleanup` are optional local helpers from the separate coa-server-guide project, outside this
+repository (guide 9). Where a step names `coa-verify`, the matching `verify_all.py` selection does the same work; a
+cycle file then keeps the default `gameplay_runner` and drops the in-RAM MySQL disk check. `conformance.py cost` reads
+Claude Code transcripts (session `.jsonl` files and their subagent `agent-*.jsonl` files) and sorts agents into roles
+by keywords of their description and first prompt, the rules of the Necromancer retrospective (ADR 0656). It expects
+that layout; without such transcripts the checkpoint reads "not recorded".
+
+## Steps
+
 1. Get the owner's go for the class and for a worktree and branch of your own, created from freshly fetched
    `origin/main` (guide 9.0, `.agents/rules/git-safety.md`). Ask the developer whether a mentor session exists (guide
-   12).
+   12). The mentor is optional: the guide's rules and the standing rulings (guide 11.1) decide alone, and without a
+   mentor a case they do not decide goes to the owner as a question (guide 9.0).
 2. Read the guide: sections 1 to 3 (what counts as proof), 7 (what you may fix), 8 (owner questions), 9 (the workflow),
    11.1 (standing rulings) and 14 (ownership, ADR numbers, guards).
 3. Read [conformance-dispatch-rules.md](conformance-dispatch-rules.md): every agent brief and the controller follow it

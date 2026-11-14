@@ -6,8 +6,9 @@ import unittest
 from unittest import mock
 
 from conformance import main
+import cycle
 from cycle import (CHECKPOINT_JSON, CHECKPOINT_MD, NOT_RECORDED, REFACTOR_FILE, STEPS, SUMMARY_FILE, CycleConfig,
-                   CycleError, Record, Refactor, disk_percent, load_config, run_cycle)
+                   CycleError, Record, Refactor, disk_percent, load_config)
 
 FIXTURES = Path(__file__).resolve().parent / 'fixtures' / 'cycle'
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -19,13 +20,24 @@ DECISIONS = {'rulings': {'81.0': {'status': '3', 'why': 'mentor ruling on X 18:3
              'text_changed': ['125.2']}
 
 
+def no_missing_result(manifest, results):
+    return []
+
+
+def run_cycle(config, skip, runner, results_check=no_missing_result, **options):
+    return cycle.run_cycle(config, skip, runner, results_check=results_check, **options)
+
+
 def argument(command, flag):
     return command[command.index(flag) + 1]
 
 
 class FakeRunner:
-    def __init__(self, root: Path, percent: int = 87, verify_line: bool = True):
+    def __init__(self, root: Path, percent: int = 87, verify_line: bool = True, verify: str = 'INCOMPLETE',
+                 gameplay_exit: int = 3, gameplay_stage: dict | None = None, failing: str | None = None):
         self.root, self.percent, self.verify_line = root, percent, verify_line
+        self.verify, self.gameplay_exit, self.failing = verify, gameplay_exit, failing
+        self.gameplay_stage = gameplay_stage or {'status': 'unavailable', 'summary': {'returncode': 3}}
         self.commands = []
 
     def kind(self, command):
@@ -50,16 +62,17 @@ class FakeRunner:
             number = sum(1 for found in self.commands if '--stages' in found and 'gameplay' in found)
             report = self.root / 'verify-all' / STAMPS[number - 1] / 'report.json'
             report.parent.mkdir(parents=True, exist_ok=True)
-            report.write_text('{}', encoding='utf-8')
+            report.write_text(json.dumps({'stages': {'gameplay': self.gameplay_stage}}), encoding='utf-8')
             if self.verify_line:
-                log.write_text(f'VERIFY ALL: INCOMPLETE {report}\n', encoding='utf-8')
+                log.write_text(f'VERIFY ALL: {self.verify} {report}\n', encoding='utf-8')
+            return self.gameplay_exit
         elif kind == 'conformance.py compare':
             run = STAMPS.index(Path(argument(command, '--results')).name) + 1
             shutil.copytree(FIXTURES / 'final16' / f'cmp-run{run}', argument(command, '--out'))
         elif kind == 'conformance.py audit':
             run = 1 if argument(command, '--results').endswith(STAMPS[0]) else 2
             shutil.copy(FIXTURES / 'final16' / f'coverage-run{run}.json', argument(command, '--out'))
-        return 0
+        return 1 if kind == self.failing else 0
 
     def generate(self, out: Path):
         manifest = json.loads((FIXTURES / 'final16' / 'manifest.json').read_text(encoding='utf-8'))
@@ -196,6 +209,45 @@ class RefusalTest(CycleCase):
     def test_a_run_without_a_verify_line_stops_the_cycle(self):
         with self.assertRaisesRegex(CycleError, 'VERIFY ALL'):
             run_cycle(self.config(), RUNS_ONLY, FakeRunner(self.root, verify_line=False))
+
+    def test_a_failed_or_mismatched_run_stops_before_the_compare(self):
+        for runner, reason in ((FakeRunner(self.root, verify='FAILED', gameplay_exit=1), 'FAILED with exit 1'),
+                               (FakeRunner(self.root, gameplay_exit=2), 'INCOMPLETE with exit 2'),
+                               (FakeRunner(self.root, gameplay_stage={'status': 'unavailable',
+                                                                      'summary': {'reason': 'no MySQL'}}),
+                                'without a gameplay run \\(no MySQL\\)')):
+            shutil.rmtree(self.root / 'out', ignore_errors=True)
+            shutil.rmtree(self.root / 'scenarios', ignore_errors=True)
+            with self.assertRaisesRegex(CycleError, f'run 1: .*{reason}'):
+                run_cycle(self.config(), RUNS_ONLY, runner)
+            self.assertEqual(runner.kinds().count('gameplay'), 1)
+            self.assertNotIn('conformance.py compare', runner.kinds())
+            self.assertEqual((self.summary()[-1]['step'], self.summary()[-1]['state']), ('runs', 'failed'))
+
+    def test_a_run_missing_scenario_results_stops_the_cycle(self):
+        runner = FakeRunner(self.root)
+        with self.assertRaisesRegex(CycleError, 'runs: 1 scenarios of the manifest have no result in .*: s-1'):
+            run_cycle(self.config(), RUNS_ONLY, runner, results_check=lambda manifest, results: ['s-1'])
+        self.assertEqual(runner.kinds().count('gameplay'), 1)
+
+    def test_recorded_results_missing_scenarios_stop_the_compare(self):
+        config = self.replay(compare=(), coverage=(), results=(self.root / 'r1', self.root / 'r2'))
+        runner = FakeRunner(self.root)
+        with self.assertRaisesRegex(CycleError, 'compare: 2 scenarios'):
+            run_cycle(config, ('gate', 'digests', 'generate', 'source', 'runs'), runner,
+                      results_check=lambda manifest, results: ['b', 'a'])
+        self.assertEqual(runner.commands, [])
+
+    def test_a_failing_command_stops_the_cycle_at_its_step(self):
+        runner = FakeRunner(self.root, failing='source')
+        with self.assertRaisesRegex(CycleError, 'source: .* exited 1'):
+            run_cycle(self.config(), RUNS_ONLY, runner)
+        self.assertNotIn('gameplay', runner.kinds())
+        self.assertEqual([entry['state'] for entry in self.summary()][-1], 'failed')
+
+    def test_the_gate_refuses_an_empty_guard_class_list(self):
+        with self.assertRaisesRegex(CycleError, 'guard_classes'):
+            run_cycle(self.replay(), [step for step in STEPS if step != 'gate'], FakeRunner(self.root))
 
     def test_the_disk_percentage_is_read_from_the_last_line(self):
         self.assertEqual(disk_percent('Filesystem Capacity\n/dev/a 10 5 5 63% /var/lib/mysql\n'), 63.0)
