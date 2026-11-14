@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionMountSpeed.h"
+#include "AllBattlegroundScript.h"
 #include "AllSpellScript.h"
 #include "AreaDefines.h"
 #include "Battlefield.h"
@@ -150,6 +151,33 @@ public:
             amount = GetRidingGroundMountSpeed(riding);
     }
 };
+
+class BattlegroundMountSpeed : public AllBattlegroundScript
+{
+public:
+    BattlegroundMountSpeed() : AllBattlegroundScript("AscensionBattlegroundMountSpeed",
+        { ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_ADD_PLAYER,
+          ALLBATTLEGROUNDHOOK_ON_BATTLEGROUND_REMOVE_PLAYER_AT_LEAVE }) { }
+
+    void OnBattlegroundAddPlayer(Battleground*, Player* player) override
+    {
+        RecalculateGroundMountSpeed(player);
+    }
+
+    void OnBattlegroundRemovePlayerAtLeave(Battleground*, Player* player) override
+    {
+        RecalculateGroundMountSpeed(player);
+    }
+
+private:
+    static void RecalculateGroundMountSpeed(Player* player)
+    {
+        auto const& mounted = player->GetAuraEffectsByType(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+        std::vector<AuraEffect*> const speeds(mounted.begin(), mounted.end());
+        for (AuraEffect* speed : speeds)
+            speed->RecalculateAmount();
+    }
+};
 }
 
 namespace AscensionMountSpeed
@@ -179,4 +207,5 @@ void AddSC_AscensionMountSpeed()
     new MountFlight();
     new MountFlightArea();
     new LearnedMountSpeed();
+    new BattlegroundMountSpeed();
 }

@@ -6,8 +6,10 @@
     "are slower. On CoA every mounted player in a battleground moves at 100% regardless of training, and outside",
     "battlegrounds the speed keeps following Riding skill (contributor's live CoA experience, 2026-11-14).",
     "AscensionMountSpeed gives a learned mount 40% with Novice, 60% with Apprentice and 100% from Journeyman Riding.",
-    "Expected: with Apprentice Riding (75) the Brown Horse 458 runs at 60% (run speed rate 1.6) near Northshire, and",
-    "at 100% (rate 2.0) outdoors in Warsong Gulch."
+    "Speed is set when the mount is summoned, and a rider keeps the mount through the battleground's teleports, so",
+    "joining and leaving recalculate it. Expected with Apprentice Riding (75): the Brown Horse 458 runs at 60% (run",
+    "speed rate 1.6) near Northshire, at 100% (rate 2.0) once ridden into Warsong Gulch and when summoned there, and",
+    "at 60% again after riding out."
   ],
   "timeout_ms": 180000,
   "location": {"map": 0, "x": -8914, "y": -133, "z": 80.6},
@@ -41,12 +43,25 @@
     {"action": "teleport", "label": "Step outdoors", "actor": "alliance", "map": 489, "x": 1304.63, "y": 1455.89,
      "z": 317.694, "o": 0},
     {"action": "wait", "label": "Let the teleport settle", "ms": 3000},
-    {"action": "assert", "label": "SETUP: entering the battleground dismounted the rider", "actor": "alliance",
-     "metric": "mount_display_id", "equals": 0},
+    {"action": "assert", "label": "SETUP: the rider rode into Warsong Gulch still mounted", "actor": "alliance",
+     "metric": "mount_display_id", "min": 1},
+    {"action": "assert", "label": "DISCRIMINATING: the mount ridden in runs at 100% in the battleground",
+     "actor": "alliance", "metric": "run_speed_rate", "min": 1.999, "max": 2.001, "within_ms": 3000},
+    {"action": "cancel_aura", "label": "Dismount", "actor": "alliance", "spell": 458},
+    {"action": "assert", "label": "SETUP: the rider is on foot", "actor": "alliance", "metric": "mount_display_id",
+     "equals": 0, "within_ms": 3000},
     {"action": "cast", "label": "Mount up in Warsong Gulch", "actor": "alliance", "spell": 458},
     {"action": "assert", "label": "The Brown Horse mounts the rider in Warsong Gulch", "actor": "alliance",
      "metric": "mount_display_id", "min": 1, "within_ms": 5000},
-    {"action": "assert", "label": "DISCRIMINATING: in a battleground Apprentice Riding still gives 100%",
-     "actor": "alliance", "metric": "run_speed_rate", "min": 1.999, "max": 2.001}
+    {"action": "assert", "label": "DISCRIMINATING: a mount summoned in the battleground runs at 100%",
+     "actor": "alliance", "metric": "run_speed_rate", "min": 1.999, "max": 2.001},
+    {"action": "client_packet", "label": "The rider leaves the battleground", "actor": "alliance", "opcode": 737,
+     "consumed": false, "fields": [{"u8": 0}, {"u8": 0}, {"u32": 2}, {"u8": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "SETUP: the rider is back outside", "actor": "alliance", "metric": "map_id",
+     "equals": 0, "within_ms": 30000},
+    {"action": "assert", "label": "SETUP: the rider rode out still mounted", "actor": "alliance",
+     "metric": "mount_display_id", "min": 1, "within_ms": 3000},
+    {"action": "assert", "label": "DISCRIMINATING: outside the battleground the mount is back to 60%",
+     "actor": "alliance", "metric": "run_speed_rate", "min": 1.599, "max": 1.601, "within_ms": 3000}
   ]
 }
