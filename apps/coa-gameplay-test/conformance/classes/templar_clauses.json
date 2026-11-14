@@ -3321,7 +3321,7 @@
       "712466 behaviour_metric_delta speed"
     ],
     "kind": "claim",
-    "reason": "the passive's own before/after-learn reading as a learned contrast (ADR 0616): run speed 1.0 before Courage Rank 2 is learned and 1.2000000476837158 after, judged to 1e-5; the passive's e0 run_speed_rate is judged to 1e-4 (ADR 0661); focused pair 20261114-151448 / -151515"
+    "reason": "the passive's own before/after-learn reading as a learned contrast (ADR 0258, amending ADR 0120): run speed 1.0 before Courage Rank 2 is learned and 1.2000000476837158 after, judged to 1e-5; the passive's e0 run_speed_rate is judged to 1e-4 (ADR 0661); focused pair 20261114-151448 / -151515"
   },
   {
     "spell": 712466,
