@@ -236,7 +236,7 @@
       "300513 script_hit 573020"
     ],
     "kind": "claim",
-    "reason": "script_hit with control casts (ADR 0206): the branded striker's Light of the Naaru takes 573020 hits of 211.9 / 208.3 against the model 209.0; the same strike without the brand: 0 hits; counted 20261112-021809 / -021850"
+    "reason": "script_hit with control casts (ADR 0206): the branded striker's Light of the Naaru takes 573020 hits of 212.36 / 211.16 against the model 209.0; the same strike without the brand: 0 hits; 70 trials (P(usable < 30) <= 9.5e-8), counted 20261114-143311 / -143339"
   },
   {
     "spell": 300513,
