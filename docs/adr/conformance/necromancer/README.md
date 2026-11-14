@@ -63,13 +63,14 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 
 ## Re-auditable verdict set
 
-The latest merged pair (guide 9.9, ADR 0590): runs 20261114-011350 and 20261114-013600 (cycle 13), 3630 scenarios
-each, `compare --build c446928b5981cbfb580bcd16f9179d24a053e55579034290a67e5e6c769c89e2`, server commit c717e741ef.
-The set (both `compare` outputs, both audits, the two verify_all `report.json` files and the manifest, 38 MB in all)
-is too large for this folder. It is kept outside the repository on the class owner's workstation, in the conformance
-checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final12/`, with a `BUILD.txt` that names
-the build, the commit and the re-audit command. The previous sets (cycle 12, runs 20261114-002259 / -004257, commit
-9aca7ae282; cycle 11, runs 20261113-225755 / -232053, commit e40779722d; cycle 10, runs 20261113-212439 /
--214713; cycle 8, runs 20261113-192548 / -194835; cycle 6, runs 20261113-181701 / -184212) stay beside it in
+The latest merged pair (guide 9.9, ADR 0590): runs 20261114-021607 and 20261114-023918 (cycle 14), 3731 scenarios each,
+`compare --build 0f8fa16910c132f0ea0f71c263b573a2e63f8dd6f19e6be70d3805adc3dcffe7`, server commit 8d31bd4fe4, scenarios
+generated at d970398b02. The set (both `compare` outputs, both audits, the two verify_all `report.json` files and the
+manifest, 39 MB in all) is too large for this folder. It is kept outside the repository on the class owner's
+workstation, in the conformance checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final13/`,
+with a `BUILD.txt` that names the build, the commit and the re-audit command. The previous sets (cycle 13, runs
+20261114-011350 / -013600, commit c717e741ef; cycle 12, runs 20261114-002259 / -004257, commit 9aca7ae282; cycle 11,
+runs 20261113-225755 / -232053, commit e40779722d; cycle 10, runs 20261113-212439 / -214713; cycle 8, runs
+20261113-192548 / -194835; cycle 6, runs 20261113-181701 / -184212) stay beside it in `archive/necromancer-final12/`,
 `archive/necromancer-final11/`, `archive/necromancer-final10/`, `archive/necromancer-final9/`,
 `archive/necromancer-final8/` and `archive/necromancer-final7/`.
