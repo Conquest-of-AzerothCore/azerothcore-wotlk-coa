@@ -62,11 +62,12 @@ class half is here, its tool half keeps the old number in `docs/adr/`.
 
 ## Re-auditable verdict set
 
-The latest merged pair (guide 9.9, ADR 0590): runs 20261113-225755 and 20261113-232053 (cycle 11), 3342 scenarios
-each, `compare --build 63241579861b7ee867d81ccf913a3e1f13a8f9f253ebf45d1d1444b5fcde720d`, server commit e40779722d.
+The latest merged pair (guide 9.9, ADR 0590): runs 20261114-002259 and 20261114-004257 (cycle 12), 3388 scenarios
+each, `compare --build 63241579861b7ee867d81ccf913a3e1f13a8f9f253ebf45d1d1444b5fcde720d`, server commit 9aca7ae282.
 The set (both `compare` outputs, both audits, the two verify_all `report.json` files and the manifest, 36 MB in all)
 is too large for this folder. It is kept outside the repository on the class owner's workstation, in the conformance
-checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final10/`, with a `BUILD.txt` that names
-the build, the commit and the re-audit command. The previous sets (cycle 10, runs 20261113-212439 / -214713, build
-f0dca933ac7f, commit 548acbb5b3; cycle 8, runs 20261113-192548 / -194835; cycle 6, runs 20261113-181701 / -184212)
-stay beside it in `archive/necromancer-final9/`, `archive/necromancer-final8/` and `archive/necromancer-final7/`.
+checkout's `.agents/plans/class-conformance-necromancer/archive/necromancer-final11/`, with a `BUILD.txt` that names
+the build, the commit and the re-audit command. The previous sets (cycle 11, runs 20261113-225755 / -232053, commit
+e40779722d; cycle 10, runs 20261113-212439 / -214713; cycle 8, runs 20261113-192548 / -194835; cycle 6, runs
+20261113-181701 / -184212) stay beside it in `archive/necromancer-final10/`, `archive/necromancer-final9/`,
+`archive/necromancer-final8/` and `archive/necromancer-final7/`.
