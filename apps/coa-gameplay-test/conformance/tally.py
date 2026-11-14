@@ -73,6 +73,9 @@ PART_SEPARATOR = ' + '
 
 
 def generated_expectations(manifest: dict) -> set:
+    joined = sorted(scenario['key'] for scenario in manifest['scenarios'] if PART_SEPARATOR in scenario['key'])
+    if joined:
+        raise TallyError(f'scenario keys containing the pooled key separator {PART_SEPARATOR!r}: {joined}')
     return {(expectation['label'], expectation['check'], scenario['key']) for scenario in manifest['scenarios']
             if scenario.get('sha256') for expectation in scenario['expectations']}
 

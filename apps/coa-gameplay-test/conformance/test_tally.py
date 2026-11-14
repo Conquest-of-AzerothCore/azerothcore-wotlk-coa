@@ -197,6 +197,12 @@ class RecordMatchTest(unittest.TestCase):
         self.assertEqual(record_match(record, now)['unmatched_scenarios'], ['conformance-necromancer-value-301303'])
 
 
+    def test_a_scenario_key_holding_the_pooled_separator_stops_the_match(self):
+        manifest = {'scenarios': [{'key': 'a + b', 'sha256': 'x', 'expectations': []}]}
+        with self.assertRaisesRegex(TallyError, "pooled key separator ' \\+ ': \\['a \\+ b'\\]"):
+            record_match(manifest, manifest)
+
+
 class RecordVerdictTest(unittest.TestCase):
     def setUp(self):
         directory = tempfile.TemporaryDirectory()
