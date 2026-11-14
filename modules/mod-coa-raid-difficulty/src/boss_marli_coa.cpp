@@ -152,6 +152,7 @@ namespace
     {
         DATA_HATCH_FOR_MARLI = 1,
         DATA_EGG_HATCHED,
+        DATA_EGG_DIED,
     };
 
     enum Events
@@ -468,6 +469,8 @@ namespace
 
         void SetGUID(ObjectGuid const& guid, int32 id) override
         {
+            if (id == DATA_EGG_DIED && guid == _evolvedEgg)
+                _evolvedEgg.Clear();
             if (id != DATA_EGG_HATCHED || !me->IsAlive())
                 return;
             if (Creature* egg = ObjectAccessor::GetCreature(*me, guid))
@@ -711,6 +714,10 @@ namespace
 
         void JustDied(Unit* /*killer*/) override
         {
+            if (_instance)
+                if (Creature* marli = _instance->GetCreature(DATA_MARLI))
+                    if (marli->AI())
+                        marli->AI()->SetGUID(me->GetGUID(), DATA_EGG_DIED);
             me->DespawnOrUnsummon(0ms, EGG_REFILL);
         }
 

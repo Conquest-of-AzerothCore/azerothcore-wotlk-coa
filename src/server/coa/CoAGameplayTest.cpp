@@ -4036,7 +4036,10 @@ private:
                     info ? info->GetSchoolMask() : SPELL_SCHOOL_MASK_NORMAL);
             Require(info != nullptr, "Incoming spell damage needs a spell");
             uint32 const stacks = step.get<uint32>("stacks", 1);
-            return unit->SpellDamageBonusTaken(attacker, info, step.get<uint32>("base", 1000) * stacks,
+            uint64 const total = uint64(step.get<uint32>("base", 1000)) * stacks;
+            Require(total <= std::numeric_limits<uint32>::max(),
+                "spell_damage_taken base times stacks exceeds 32 bits");
+            return unit->SpellDamageBonusTaken(attacker, info, uint32(total),
                 step.get<bool>("periodic", false) ? DOT : SPELL_DIRECT_DAMAGE, stacks);
         }
         if (metric == "applied_aura_count")

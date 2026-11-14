@@ -1065,8 +1065,10 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric in {'spell_damage_done', 'spell_damage_taken'} and 'base' in step:
                 number(step['base'], f'{where}.base', 0, 2**32 - 1, True)
             if 'stacks' in step:
-                require(metric == 'spell_damage_taken' and step['stacks'] >= 1,
-                        f'{where}: stacks applies to spell_damage_taken and needs at least one')
+                require(metric == 'spell_damage_taken', f'{where}: stacks applies to spell_damage_taken')
+                number(step['stacks'], f'{where}.stacks', 1, 255, True)
+                require(step.get('base', 1000) * step['stacks'] <= 2**32 - 1,
+                        f'{where}: base times stacks must fit in 32 bits')
             if metric in {'combo_points', 'game_mode_mask', 'pet_autocast_enabled'}:
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
             if metric == 'victim':

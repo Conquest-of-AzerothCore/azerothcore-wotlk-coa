@@ -1254,6 +1254,18 @@ class RunnerTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     run.validate(invalid)
 
+    def test_spell_damage_taken_stacks(self):
+        valid = {'action': 'snapshot', 'actor': 'caster', 'metric': 'spell_damage_taken', 'spell': 116,
+                 'target': 'target', 'base': 1000, 'stacks': 5, 'save_as': 'taken'}
+        self.scenario['steps'].append(valid)
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for change in ({'stacks': 0}, {'stacks': 256}, {'stacks': 2.5}, {'base': 2**31, 'stacks': 2},
+                       {'metric': 'melee_damage_taken'}):
+            invalid = copy.deepcopy(self.scenario)
+            invalid['steps'][-1].update(change)
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                run.validate(invalid)
+
     def test_movement_and_cast_observations(self):
         self.scenario['steps'].extend([
             {'action': 'set_moving', 'actor': 'caster', 'enabled': True},
