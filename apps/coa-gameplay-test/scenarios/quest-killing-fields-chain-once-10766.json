@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "Westfall: The Killing Fields is a five-step chain, each step taken once (#10766)",
+  "contract": [
+    "#10766 reported 'The Killing Fields' being offered again after completion. Five distinct quests carry that title, as the captured WDB quest cache also shows: 26993 (Farmer Furlbrow, Rusty Harvest Golem x10) -> 26994 (talk to Farmer Saldean) -> 26995 (Harvest Golem x10) -> 26996 (Harvest Watcher x10) -> 26997 (Harvest Reaper x10), chained by PrevQuestID. The older 9 and 17014 lost their starters in #7630.",
+    "Expected: each step opens only after its predecessor is rewarded and cannot be taken again once rewarded, so the same title appearing up to five times is the chain, not a repeat."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10128.7,
+    "y": 1055.21,
+    "z": 36.4333,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 15
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the chain opens at 26993",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26993,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 26994 waits for its predecessor",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26994,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 26995 waits for its predecessor",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 26996 waits for its predecessor",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26996,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 26997 waits for its predecessor",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26997,
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "label": "The Killing Fields step 1 (26993) is complete",
+      "actor": "p",
+      "quest": 26993
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 26993",
+      "actor": "p",
+      "quest": 26993
+    },
+    {
+      "action": "assert",
+      "label": "26993 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 26993,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 26993 cannot be taken again",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26993,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next step 26994 opens",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26994,
+      "equals": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "The Killing Fields step 2 (26994) is complete",
+      "actor": "p",
+      "quest": 26994
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 26994",
+      "actor": "p",
+      "quest": 26994
+    },
+    {
+      "action": "assert",
+      "label": "26994 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 26994,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 26994 cannot be taken again",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26994,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next step 26995 opens",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26995,
+      "equals": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "The Killing Fields step 3 (26995) is complete",
+      "actor": "p",
+      "quest": 26995
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 26995",
+      "actor": "p",
+      "quest": 26995
+    },
+    {
+      "action": "assert",
+      "label": "26995 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 26995,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 26995 cannot be taken again",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next step 26996 opens",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26996,
+      "equals": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "The Killing Fields step 4 (26996) is complete",
+      "actor": "p",
+      "quest": 26996
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 26996",
+      "actor": "p",
+      "quest": 26996
+    },
+    {
+      "action": "assert",
+      "label": "26996 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 26996,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 26996 cannot be taken again",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26996,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next step 26997 opens",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26997,
+      "equals": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "The Killing Fields step 5 (26997) is complete",
+      "actor": "p",
+      "quest": 26997
+    },
+    {
+      "action": "reward_quest",
+      "label": "Turn in 26997",
+      "actor": "p",
+      "quest": 26997
+    },
+    {
+      "action": "assert",
+      "label": "26997 is rewarded",
+      "actor": "p",
+      "metric": "quest_rewarded",
+      "quest": 26997,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 26997 cannot be taken again",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26997,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "After the chain 26993 stays closed",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26993,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "After the chain 26994 stays closed",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26994,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "After the chain 26995 stays closed",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26995,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "After the chain 26996 stays closed",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26996,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "After the chain 26997 stays closed",
+      "actor": "p",
+      "metric": "quest_takeable",
+      "quest": 26997,
+      "equals": 0
+    }
+  ]
+}

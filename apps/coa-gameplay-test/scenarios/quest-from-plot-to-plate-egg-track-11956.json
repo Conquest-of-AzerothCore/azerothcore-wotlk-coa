@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "From Plot to Plate: the Dunshire Egg objective tracks the egg nests, not the innkeeper (#11956)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 (the default).",
+    "Quest 175030 From Plot to Plate requires 559863 Windswept Sheep Milk x3, 559864 Windswept Cow Milk x5 and 559865 Dunshire Egg x7. The eggs loot from the 8 Dunshire Eggs gameobjects 2300642 (guids 9920415-9920422) around (-7816, 545, 136.36). The client's QuestSuperTrack.dbc row 32929 has only objective 0 node 9177 at Innkeeper Miralda (-7772.03, 601.39, 138.28) and turn-in node 9114 at Hestwin Honeycrust, so the egg objective falls back to the innkeeper, about 71 yd from the nests.",
+    "Expected: row 32929 is streamed whole with the client's nodes 9177 (objective 0) and 9114 (turn-in), plus objective 2 node 21064 on Dunshire Eggs guid 9920422 (-7815.85, 545.566, 136.357) with the row's own 4 yd radius; nodes 9177 and 9114 stay unpatched.",
+    "These are data assertions on the bytes the server sends; the harness cannot see how the client draws the diamond."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -7795.69,
+    "y": 535.23,
+    "z": 137.68,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 3,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the character carries 175030 From Plot to Plate",
+      "actor": "c",
+      "quest": 175030
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends QuestSuperTrack row 32929 once",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1727,
+      "row": 32929,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 32929 belongs to quest 175030",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 32929,
+      "index": 1,
+      "equals": 175030,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Objective 0 keeps the client's Innkeeper Miralda node 9177",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 32929,
+      "index": 2,
+      "equals": 9177,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: objective 2, the Dunshire Egg, points at node 21064 where the client row has none",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 32929,
+      "index": 42,
+      "equals": 21064,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The turn-in keeps the client's Hestwin Honeycrust node 9114",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 32929,
+      "index": 82,
+      "equals": 9114,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Row 32929 carries all 102 fields",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1727,
+      "row": 32929,
+      "index": 101,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The login stream sends SuperTrack node 21064 once",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 21064,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21064 is on the Eastern Kingdoms, MapID 0",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21064,
+      "index": 1,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21064 x is Dunshire Eggs guid 9920422 -7815.85",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21064,
+      "index": 2,
+      "equals": 3321118413,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21064 y is Dunshire Eggs guid 9920422 545.566, 71 yd from the innkeeper's 601.39",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21064,
+      "index": 3,
+      "equals": 1141400633,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21064 z is Dunshire Eggs guid 9920422 136.357",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21064,
+      "index": 4,
+      "equals": 1124621156,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Node 21064 uses the 4 yd radius of the row's other nodes",
+      "actor": "c",
+      "metric": "server_packet_u32",
+      "opcode": 1726,
+      "row": 21064,
+      "index": 5,
+      "equals": 1082130432,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Innkeeper node 9177 is not patched",
+      "actor": "c",
+      "metric": "server_packets",
+      "opcode": 1726,
+      "row": 9177,
+      "equals": 0,
+      "within_ms": 8000
+    }
+  ]
+}

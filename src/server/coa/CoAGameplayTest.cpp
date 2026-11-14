@@ -6086,7 +6086,9 @@ private:
             uint32 entry = step.get<uint32>("entry");
             CreatureTemplate const* proto = sObjectMgr->GetCreatureTemplate(entry);
             Require(proto != nullptr, "Unknown creature template in metric");
-            CreatureModel const* model = ObjectMgr::ChooseDisplayId(proto);
+            auto const index = step.get_optional<uint32>("index");
+            Require(!index || *index < proto->Models.size(), "Creature template has no model at that index");
+            CreatureModel const* model = index ? &proto->Models[*index] : ObjectMgr::ChooseDisplayId(proto);
             Require(model != nullptr, "Creature template has no model");
             return metric == "creature_model_scale" ? double(model->DisplayScale)
                                                      : double(model->CreatureDisplayID);

@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "The Dignity of the Dead: a cleared Weed or Snow Pile credits once and disappears (#11792)",
+  "contract": [
+    "The Dignity of the Dead (quest 175170) asks for 6 Weeds (gameobject 2300710, objective index 0) and 6 Snow Piles (gameobject 2300711, objective index 1) cleared in Snowveil Cemetery. Each pile is authored as a consumable goober (Data5 1).",
+    "With an auto-close time of 0 the goober was never marked in use, so a cleared pile gave progress and stayed, as reported. Each pile here is the actor's own summoned copy of the template, used twice in a row with no wait.",
+    "Expected: the first use of each pile credits 1; the second use of the same pile is rejected, so its counter stays 1; the used pile then disappears. Before the repair the pile stays."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -6337.83, "y": -462.45, "z": 649.77, "o": 0 },
+  "players": [
+    { "id": "keeper", "race": 1, "class": 12, "level": 30 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "prepare_quest", "actor": "keeper", "quest": 175170, "complete": false },
+    { "action": "assert", "label": "SETUP: no Weed cleared yet", "actor": "keeper", "metric": "quest_objective_count", "quest": 175170, "index": 0, "equals": 0 },
+    { "action": "assert", "label": "SETUP: no Snow Pile cleared yet", "actor": "keeper", "metric": "quest_objective_count", "quest": 175170, "index": 1, "equals": 0 },
+    { "action": "summon_gameobject", "actor": "keeper", "entry": 2300710, "distance": 2 },
+    { "action": "assert", "label": "SETUP: one Weed grows by the keeper", "actor": "keeper", "metric": "owned_gameobject_count", "entry": 2300710, "equals": 1 },
+    { "action": "use_gameobject", "label": "Pull the Weed", "actor": "keeper", "entry": 2300710 },
+    { "action": "use_gameobject", "label": "Click the same Weed again at once", "actor": "keeper", "entry": 2300710 },
+    { "action": "assert", "label": "SETUP: the first pull credits the quest", "actor": "keeper", "metric": "quest_objective_count", "quest": 175170, "index": 0, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the same Weed credits only once", "actor": "keeper", "metric": "quest_objective_count", "quest": 175170, "index": 0, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the pulled Weed disappears", "actor": "keeper", "metric": "owned_gameobject_count", "entry": 2300710, "equals": 0, "within_ms": 5000 },
+    { "action": "summon_gameobject", "actor": "keeper", "entry": 2300711, "distance": 2 },
+    { "action": "assert", "label": "SETUP: one Snow Pile lies by the keeper", "actor": "keeper", "metric": "owned_gameobject_count", "entry": 2300711, "equals": 1 },
+    { "action": "use_gameobject", "label": "Clear the Snow Pile", "actor": "keeper", "entry": 2300711 },
+    { "action": "use_gameobject", "label": "Click the same Snow Pile again at once", "actor": "keeper", "entry": 2300711 },
+    { "action": "assert", "label": "SETUP: the first clearing credits the quest", "actor": "keeper", "metric": "quest_objective_count", "quest": 175170, "index": 1, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: the same Snow Pile credits only once", "actor": "keeper", "metric": "quest_objective_count", "quest": 175170, "index": 1, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the cleared Snow Pile disappears", "actor": "keeper", "metric": "owned_gameobject_count", "entry": 2300711, "equals": 0, "within_ms": 5000 }
+  ]
+}
