@@ -1066,7 +1066,7 @@
       "520608 behaviour_hit_ratio argent_blade_crit_rate"
     ],
     "kind": "claim",
-    "reason": "Argent Blade 807268 with Warrior of Dawn 561156 set before each cast, 520608 set first in the treatment, no crit fixture: pooled rate proof (chance-claim ruling 2026-11-12, ADR 0195 rate mode), 76 parts of 166 casts per arm, 12,616 per arm. Critical share +50.26 points (99% interval +49.11 to +51.41) and +50.40 (+49.26 to +51.55) against +50 inside +-2.5, control 0 critical hits in both runs of one counted pair (20261112-012244, -012512). The 300-cast crit_rate step (ADR 0173) stays as the first reading"
+    "reason": "Argent Blade 807268 with Warrior of Dawn 561156 set before each cast, 520608 set first in the treatment, no crit fixture: pooled rate proof (chance-claim ruling 2026-11-12, ADR 0195 rate mode), 115 parts of 166 casts per arm. Earlier 76-part pair: critical share +50.26 points (99% interval +49.11 to +51.41) and +50.40 (+49.26 to +51.55) against +50 inside +-2.5, control 0 critical hits in both runs (20261112-012244, -012512). Resized after the count-of-record pair 20261114-163739 / -165640, where 520608 was ok in both runs (50.79 and 51.24) but its 99% half-width read 1.2452 and 1.0736 against the 1.25 limit: from the between-part SD measured in six runs (3.76 points pooled, binomial 3.88), 115 parts bring P(half-width > 1.25) to 9e-8 at the measured SD and 8e-5 at its 99% upper bound (76 parts: 1.1e-1 and 4.2e-1). Focused pair on 115 parts, 20261114-171716 / -171904: critical share 49.60 and 49.72 points against 50 inside [47.5, 52.5], half-widths 0.9563 and 0.9510, no flip. The 300-cast crit_rate step (ADR 0173) stays as the first reading; counts only at the counted pair"
   },
   {
     "spell": 520812,
