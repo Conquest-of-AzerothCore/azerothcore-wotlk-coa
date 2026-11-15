@@ -171,7 +171,7 @@
       "action": "set_power",
       "actor": "chronomancer",
       "power": 0,
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "set_aura",

@@ -79,7 +79,7 @@
     {
       "action": "set_power",
       "actor": "mage",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -110,7 +110,7 @@
     {
       "action": "set_power",
       "actor": "starcaller",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -155,7 +155,7 @@
     {
       "action": "set_power",
       "actor": "mage",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -188,7 +188,7 @@
     {
       "action": "set_power",
       "actor": "chrono",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -233,7 +233,7 @@
     {
       "action": "set_power",
       "actor": "chrono",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -278,7 +278,7 @@
     {
       "action": "set_power",
       "actor": "chrono",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
@@ -308,7 +308,7 @@
     {
       "action": "set_power",
       "actor": "mage",
-      "value": 5000
+      "value": 1000
     },
     {
       "action": "cast",
