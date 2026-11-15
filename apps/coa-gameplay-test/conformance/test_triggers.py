@@ -303,7 +303,7 @@ class TrialsTest(unittest.TestCase):
         step = count_step('label', 'melee_damage_count', 0)
         self.assertEqual(step, {'action': 'assert', 'label': 'label', 'actor': 'caster',
                                 'metric': 'melee_damage_count', 'hand': MAIN_HAND,
-                                'min': -1000000000, 'max': 1000000000})
+                                'min': -10**15, 'max': 10**15})
 
     def test_count_step_merges_trial_metric_fields_without_dropping_hand(self):
         step = count_step('label', 'melee_damage_count', 0, trial_metric_fields={'critical': True})
