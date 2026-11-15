@@ -33,7 +33,7 @@ bool Stationary(uint32 entry)
 }
 bool Ranged(uint32 entry)
 {
-    return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177 || entry == 50067;
+    return entry == 50076 || entry == 50075 || entry == 50323 || entry == 50177;
 }
 bool InReach(Creature const* minion, Unit const* target)
 {
@@ -43,6 +43,14 @@ bool InReach(Creature const* minion, Unit const* target)
 bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
+}
+bool EmitsZombiePlague(uint32 entry)
+{
+    return entry == 503030 || entry == 503031 || entry == 503032;
+}
+Milliseconds ZombiePlaguePeriod()
+{
+    return Milliseconds(sSpellMgr->GetSpellInfo(504023)->Effects[EFFECT_0].Amplitude);
 }
 bool Travelling(Player const* player)
 {
@@ -112,7 +120,7 @@ uint32 AttackSpell(uint32 entry)
     case 500650:
         return 572211;
     case 50075:
-        return 801513;
+        return 805955;
     case 50076:
         return 800609;
     case 50323:
@@ -550,6 +558,10 @@ class npc_ascension_necromancer : public ScriptedAI
             _events.ScheduleEvent(3, Milliseconds(sSpellMgr->GetSpellInfo(807640)->Effects[1].Amplitude));
         if (me->GetEntry() == 542064)
             _events.ScheduleEvent(4, 2s);
+        if (EmitsZombiePlague(me->GetEntry()))
+            _events.ScheduleEvent(11, ZombiePlaguePeriod());
+        if (me->GetEntry() == 50309)
+            _events.ScheduleEvent(12, 1s);
         if (me->GetEntry() == 50177)
         {
             me->SetFloatValue(UNIT_FIELD_HOVERHEIGHT, 3.0f);
@@ -688,6 +700,9 @@ class npc_ascension_necromancer : public ScriptedAI
             break;
         case 50073:
             Cast(me, target, 801514);
+            break;
+        case 50075:
+            Cast(me, target, 801513);
             break;
         case 50068:
             Copy(me, me, 504022, std::max(1, Amount(504022, 0, player) + Amount(505223, 1, player)));
@@ -884,6 +899,19 @@ class npc_ascension_necromancer : public ScriptedAI
                     if (Unit* victim = me->GetVictim(); victim && player->IsValidAttackTarget(victim))
                         Cast(me, victim, 704706);
                 _events.ScheduleEvent(10, 1s);
+            }
+            if (event == 11)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED) && me->GetVictim())
+                    Cast(me, me, 504022);
+                _events.ScheduleEvent(11, ZombiePlaguePeriod());
+            }
+            if (event == 12)
+            {
+                if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED) && me->GetVictim() &&
+                    !me->HasAura(801412))
+                    Cast(me, me, 801412);
+                _events.ScheduleEvent(12, 1s);
             }
         }
         if (me->GetEntry() == 523032 && !_exploded)

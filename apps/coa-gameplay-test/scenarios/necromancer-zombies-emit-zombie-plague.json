@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Animated Zombies emit Zombie Plague while they fight",
+  "contract": "Animate: Zombie 525379 summons creature 503031 and reads 'These minions cause periodic Nature Damage to nearby enemies while active.' Spell.dbc gives the Zombies' passive Zombie Plague 504023 a periodic trigger of Zombie Plague 504022 every 3000 ms ('Deals ${$504022m1+$504022ppl1+$SP*.1} Plague Damage'). Nothing applied or emulated it, so a fighting Zombie only meleed and never cast 504022. A fighting Zombie now casts 504022 on the passive's period, and an idle one does not.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_power": 1000, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 5000000, "distance": 6 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 525379 },
+    { "action": "cast", "label": "Animate: Zombie", "actor": "n", "spell": 525379 },
+    {
+      "action": "assert", "label": "SETUP: Zombie animated", "actor": "n",
+      "metric": "owned_creature_count", "entry": 503031, "equals": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Idle for more than one plague period", "ms": 4000 },
+    {
+      "action": "assert", "label": "CONTROL: an idle Zombie emits no Zombie Plague", "actor": "n",
+      "metric": "spell_go_count", "spell": 504022, "entry": 503031, "equals": 0
+    },
+    { "action": "attack", "actor": "n", "target": "golem" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the fighting Zombie emits Zombie Plague", "actor": "n",
+      "metric": "spell_go_count", "spell": 504022, "entry": 503031, "min": 2, "within_ms": 9000
+    }
+  ]
+}

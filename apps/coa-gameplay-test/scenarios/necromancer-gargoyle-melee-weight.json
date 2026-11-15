@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Necromancer: a Raised Gargoyle closes to melee and fights with its 3 Life Force weight",
+  "contract": "Raise: Gargoyle 500329 summons creature 50067 and occupies 3 Life Force; Necromancy scales a minion's Attack Power and Spell Power by its Life Force. Its tooltip names no ranged basic attack, and no live record names one. Kept at range (#6737), its only damage was Putrid Claw 805976 (Plague, no spell power coefficient): about 250 damage in 30 s against a golem, while a 1 Life Force Ghoul dealt about 3,000 and a 3 Life Force Abomination about 10,000. Owner ruling (2026-11-15): the Gargoyle fights in melee like the Abomination. It now walks to a golem 15 yards away and its swings carry its weight, while Command: Gargoyle stays an order.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_power": 1000, "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "golem", "owner": "n", "entry": 36, "level": 60, "health": 5000000, "distance": 15 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
+    { "action": "learn", "actor": "n", "spell": 500329 },
+    { "action": "cast", "label": "Raise: Gargoyle", "actor": "n", "spell": 500329 },
+    {
+      "action": "assert", "label": "SETUP: Gargoyle raised", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50067, "equals": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let it take formation", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: the Gargoyle starts in formation beside the Necromancer", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50067, "min_distance": 10, "equals": 0
+    },
+    { "action": "attack", "label": "Target the golem 15 yards away", "actor": "n", "target": "golem" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Gargoyle closes to melee", "actor": "n",
+      "metric": "owned_creature_distance_2d", "entry": 50067, "target": "golem", "max": 5, "within_ms": 8000
+    },
+    { "action": "snapshot", "actor": "n", "metric": "owned_creature_damage_total", "entry": 50067, "save_as": "d0" },
+    { "action": "wait", "label": "Five 2 s swings", "ms": 10000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: its weighted swings deal more than Putrid Claw alone could",
+      "actor": "n", "metric": "owned_creature_damage_total", "entry": 50067, "relative_to": "d0", "min": 1000
+    },
+    {
+      "action": "assert", "label": "No Command: Gargoyle without an order", "actor": "golem",
+      "metric": "aura", "spell": 704706, "equals": 0
+    }
+  ]
+}
