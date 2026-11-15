@@ -6108,12 +6108,12 @@ private:
             Require(slot < MAX_ITEM_PROTO_SPELLS, "Item spell slot out of range");
             return proto->Spells[slot].SpellPPMRate;
         }
-        if (metric == "item_sell_price")
+        if (metric == "item_sell_price" || metric == "item_quality")
         {
             uint32 item = step.get<uint32>("item");
             ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
             Require(proto != nullptr, "Unknown item in metric");
-            return proto->SellPrice;
+            return metric == "item_quality" ? proto->Quality : proto->SellPrice;
         }
         if (metric == "creature_model_scale" || metric == "creature_model_display")
         {
