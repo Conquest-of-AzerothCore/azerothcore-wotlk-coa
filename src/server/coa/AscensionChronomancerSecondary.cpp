@@ -45,7 +45,9 @@ enum ChronomancerSecondarySpells : uint32
     SPELL_GRAVITY_BOMB_EXPLOSION = 801282,
     SPELL_TEMPORAL_ANOMALY = 806315,
     SPELL_TEMPORAL_ANOMALY_HEAL = 807799,
-    SPELL_INFINITE_SHIELD_HEAL = 520458
+    SPELL_INFINITE_SHIELD_HEAL = 520458,
+    SPELL_AEON_REND = 583248,
+    SPELL_TIME_LOOP_SHARD = 807989
 };
 
 constexpr uint32 ChronomancerSpellFamily = 28;
@@ -91,6 +93,15 @@ bool IsChromaticShardRank(uint32 id)
 {
     return id == SPELL_CHROMATIC_SHARD || (id >= 501836 && id <= 501840) || id == 574346 ||
         id == 567543 || id == 567544;
+}
+
+uint32 OwnedChromaticShardRank(Player const* player)
+{
+    uint32 owned = SPELL_CHROMATIC_SHARD;
+    for (uint32 rank = SPELL_CHROMATIC_SHARD; rank; rank = sSpellMgr->GetNextSpellInChain(rank))
+        if (player->HasSpell(rank))
+            owned = rank;
+    return owned;
 }
 
 void ResetChromaticShard(Player* player)
@@ -420,6 +431,59 @@ class aura_ascension_temporal_anomaly : public AuraScript
     }
 };
 
+class aura_ascension_aeon_rend : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_aeon_rend);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_CHROMATIC_SHARD}); }
+
+    void Restrike(AuraEffect const* effect, ProcEventInfo& event)
+    {
+        PreventDefaultAction();
+        Unit* target = event.GetActionTarget();
+        SpellInfo const* shard = event.GetSpellInfo();
+        if (target && shard)
+            GetTarget()->CastSpell(target, IsChromaticShardRank(shard->Id) ? shard->Id : uint32(SPELL_CHROMATIC_SHARD),
+                true, nullptr, effect);
+    }
+
+    void Register() override
+    {
+        OnEffectProc += AuraEffectProcFn(aura_ascension_aeon_rend::Restrike, EFFECT_0, SPELL_AURA_PROC_TRIGGER_SPELL);
+    }
+};
+
+class spell_ascension_time_loop_shard : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_time_loop_shard);
+
+    bool Validate(SpellInfo const*) override { return ValidateSpellInfo({SPELL_CHROMATIC_SHARD}); }
+
+    void Fire(SpellEffIndex effIndex)
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!player)
+            return;
+        PreventHitDefaultEffect(effIndex);
+        if (Unit* target = GetExplTargetUnit())
+            player->CastSpell(target, OwnedChromaticShardRank(player),
+                TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET));
+    }
+
+    void Suppress(SpellEffIndex effIndex)
+    {
+        if (GetCaster()->IsPlayer())
+            PreventHitDefaultEffect(effIndex);
+    }
+
+    void Register() override
+    {
+        OnEffectLaunch += SpellEffectFn(spell_ascension_time_loop_shard::Fire, EFFECT_0, SPELL_EFFECT_TRIGGER_SPELL);
+        OnEffectLaunchTarget += SpellEffectFn(spell_ascension_time_loop_shard::Suppress, EFFECT_0,
+            SPELL_EFFECT_TRIGGER_SPELL);
+    }
+};
+
 class chronomancer_secondary_casts : public AllSpellScript
 {
 public:
@@ -572,4 +636,6 @@ void AddSC_AscensionChronomancerSecondary()
     RegisterSpellScript(aura_ascension_ripple_release);
     RegisterSpellScript(aura_ascension_echo_duration);
     RegisterSpellScript(aura_ascension_temporal_anomaly);
+    RegisterSpellScript(aura_ascension_aeon_rend);
+    RegisterSpellScript(spell_ascension_time_loop_shard);
 }

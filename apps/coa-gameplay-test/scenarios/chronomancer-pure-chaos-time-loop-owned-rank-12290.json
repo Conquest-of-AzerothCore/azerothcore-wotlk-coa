@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "chronomancer-pure-chaos-time-loop-owned-rank-12290",
+  "contract": [
+    "Pure Chaos 807569 locks the Chronomancer in Time Loop 807571: \"you cast Chromatic Shard free of cost,",
+    "repeating every 1 sec\". Its periodic trigger 807989 names rank one 801292, so a level 60 Chronomancer's loop",
+    "fired rank one shards instead of the owned rank nine 567544.",
+    "The character owns only rank nine. Time Loop is fixtured from the Chronomancer onto the stationary Dig Rat, as",
+    "the native proc applies it, so its own periodic tick and trigger run unchanged. Within its 3000 ms duration",
+    "every fired Shard must be rank nine and hit; no 801292 cast may occur. No chance is involved."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 567544,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 801292,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop's periodic Chromatic Shard aura from the Chronomancer on the target"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 567544,
+      "min": 1,
+      "label": "Time Loop fires the owned rank nine Shard"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "equals": 0,
+      "label": "Time Loop never fires the rank one record"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 567544,
+      "target": "dummy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "alive",
+      "equals": 1
+    }
+  ]
+}
