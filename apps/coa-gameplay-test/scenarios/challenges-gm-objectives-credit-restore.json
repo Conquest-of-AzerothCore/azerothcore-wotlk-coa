@@ -42,6 +42,16 @@
       "text": "Credit an objective: .coa trial credit <Challenge ID> <Objective ID> [player]", "equals": 1
     },
     {
+      "action": "command", "label": "Ask the in-game help for the credit command",
+      "actor": "gm", "command": ".help coa trial credit"
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the help row explains the command",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Marks one objective of the player's active challenge as done, whatever the player's level.",
+      "equals": 1, "within_ms": 5000
+    },
+    {
       "action": "command", "label": "A bare credit command is refused with its syntax",
       "actor": "gm", "command": ".coa trial credit", "rejected": true
     },
