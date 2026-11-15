@@ -3110,8 +3110,7 @@ namespace CoAChallenges
             // from the failure snapshot and is absent for older failures.
             QueryResult failed = CharacterDatabase.Query(
                 "SELECT f.challengeId, f.level, f.failTime, s.characterLevel FROM coa_challenge_failure f "
-                "LEFT JOIN coa_challenge_failure_snapshot s ON s.guid = f.guid "
-                "AND s.failedChallengeId = f.challengeId AND s.challengeId = f.challengeId "
+                "LEFT JOIN coa_challenge_failure_snapshot s ON s.guid = f.guid AND s.challengeId = f.challengeId "
                 "WHERE f.guid = {} ORDER BY f.failTime DESC, f.challengeId", guid);
             if (failed)
             {

@@ -2194,70 +2194,33 @@ namespace CoAChallenges
         return true;
     }
 
-    // The active custom trial's bundled challenges when `challengeID` is one of
-    // them (same membership test as EndActiveCustomTrialFor), else empty.
-    static std::vector<uint32> ActiveTrialBundleWith(uint32 guid, uint32 challengeID)
-    {
-        std::string trialID = GetActiveCustomTrial(guid);
-        if (trialID.empty())
-            return {};
-        uint32 const ownerGuid = TrialOwnerGuid(trialID);
-        if (!ownerGuid)
-            return {};
-        CharacterDatabase.EscapeString(trialID);
-        std::vector<uint32> bundled;
-        if (QueryResult r = CharacterDatabase.Query(
-                "SELECT challengeId FROM coa_custom_trial_entry WHERE guid = {} AND trialId = '{}'",
-                ownerGuid, trialID))
-            do { bundled.push_back(r->Fetch()[0].Get<uint32>()); } while (r->NextRow());
-        if (std::find(bundled.begin(), bundled.end(), challengeID) == bundled.end())
-            return {};
-        return bundled;
-    }
-
-    // Called at the top of a failure, while the active rows still exist: keeps
-    // what the failure is about to discard (run timer, the custom trial and its
-    // other bundled challenges) for `.coa trial restore`,
-    // with the character's level so a restore can tell which objective gates the
-    // character has passed since.
+    // Called at the top of a failure, while the active row still exists: keeps
+    // what the failure is about to discard (the run timer) for
+    // `.coa trial restore`, with the character's level so a restore can tell
+    // which objective gates the character has passed since.
     // A repeat failure call finds no active row and leaves the snapshot alone.
     void SaveFailureSnapshot(uint32 guid, uint32 challengeID, uint32 characterLevel)
     {
         if (!CharacterDatabase.Query(
                 "SELECT 1 FROM coa_character_challenge WHERE guid = {} AND challengeId = {}", guid, challengeID))
             return;
-        std::vector<uint32> const bundled = ActiveTrialBundleWith(guid, challengeID);
-        std::string ids = std::to_string(challengeID);
-        for (uint32 cid : bundled)
-            if (cid != challengeID)
-                ids += "," + std::to_string(cid);
-        CharacterDatabaseTransaction snapshot = CharacterDatabase.BeginTransaction();
-        snapshot->Append(
-            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
-            guid, challengeID);
-        snapshot->Append(
-            "INSERT IGNORE INTO coa_challenge_failure_snapshot "
-            "(guid, failedChallengeId, challengeId, level, deaths, startTime, trialId, trialStartTime, "
-            "characterLevel) "
-            "SELECT c.guid, {}, c.challengeId, c.level, c.deaths, c.startTime, COALESCE(t.trialId, ''), "
-            "COALESCE(t.startTime, 0), {} "
-            "FROM coa_character_challenge c "
-            "LEFT JOIN coa_custom_trial_active t ON t.guid = c.guid AND {} = 1 "
-            "WHERE c.guid = {} AND c.challengeId IN ({})",
-            challengeID, characterLevel, bundled.empty() ? 0 : 1, guid, ids);
-        CharacterDatabase.DirectCommitTransaction(snapshot);
+        CharacterDatabase.DirectExecute(
+            "REPLACE INTO coa_challenge_failure_snapshot (guid, challengeId, level, deaths, startTime, "
+            "characterLevel) SELECT guid, challengeId, level, deaths, startTime, {} FROM coa_character_challenge "
+            "WHERE guid = {} AND challengeId = {}",
+            characterLevel, guid, challengeID);
     }
 
     void ForgetFailureSnapshot(uint32 guid, uint32 challengeID)
     {
         CharacterDatabase.Execute(
-            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
-            guid, challengeID);
+            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND challengeId = {}", guid, challengeID);
     }
 
     // GM restore of a failed run: drops the failure lock and puts the challenge
     // back as active from the snapshot taken at the failure (or, for a failure
-    // older than the snapshot table, from the failure record alone).
+    // older than the snapshot table, from the failure record alone). A custom
+    // trial the challenge belonged to is not restored.
     bool RestoreFailedChallenge(Player* player, uint32 challengeID, std::string& message)
     {
         uint32 const guid = player->GetGUID().GetCounter();
@@ -2269,70 +2232,36 @@ namespace CoAChallenges
             message = Acore::StringFormat("{} has no failure lock on challenge {}.", player->GetName(), challengeID);
             return false;
         }
-        std::set<uint32> const actives = ActiveChallenges(guid);
-        if (actives.count(challengeID))
+        if (ActiveChallenges(guid).count(challengeID))
         {
             message = Acore::StringFormat("Challenge {} is already active for {}.", challengeID, player->GetName());
             return false;
         }
 
-        struct RestoreRow
-        {
-            uint32 challengeId = 0;
-            uint32 level = 1;
-            uint32 deaths = 0;
-            uint32 startTime = 0;
-        };
-        std::vector<RestoreRow> rows;
-        bool relinkTrial = false;
+        uint32 level = failure->Fetch()[0].Get<uint32>();
+        uint32 deaths = failure->Fetch()[1].Get<uint32>();
+        uint32 startTime = uint32(::time(nullptr));
         uint32 levelAtFailure = 0;
-        if (QueryResult r = CharacterDatabase.Query(
-                "SELECT challengeId, level, deaths, startTime, trialId, characterLevel "
-                "FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
-                guid, challengeID))
+        QueryResult snapshot = CharacterDatabase.Query(
+            "SELECT level, deaths, startTime, characterLevel FROM coa_challenge_failure_snapshot "
+            "WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        bool const fromSnapshot = snapshot != nullptr;
+        if (fromSnapshot)
         {
-            do
-            {
-                Field* f = r->Fetch();
-                RestoreRow row;
-                row.challengeId = f[0].Get<uint32>();
-                row.level = f[1].Get<uint32>();
-                row.deaths = f[2].Get<uint32>();
-                row.startTime = f[3].Get<uint32>();
-                if (row.challengeId == challengeID)
-                {
-                    relinkTrial = !f[4].Get<std::string>().empty();
-                    levelAtFailure = f[5].Get<uint32>();
-                }
-                if (row.challengeId == challengeID || !actives.count(row.challengeId))
-                    rows.push_back(row);
-            } while (r->NextRow());
-        }
-        bool const fromSnapshot = std::any_of(rows.begin(), rows.end(),
-            [challengeID](RestoreRow const& row) { return row.challengeId == challengeID; });
-        if (!fromSnapshot)
-        {
-            rows.clear();
-            relinkTrial = false;
-            Field* f = failure->Fetch();
-            RestoreRow row;
-            row.challengeId = challengeID;
-            row.level = f[0].Get<uint32>();
-            row.deaths = f[1].Get<uint32>();
-            row.startTime = uint32(::time(nullptr));
-            rows.push_back(row);
+            Field* f = snapshot->Fetch();
+            level = f[0].Get<uint32>();
+            deaths = f[1].Get<uint32>();
+            startTime = f[2].Get<uint32>();
+            levelAtFailure = f[3].Get<uint32>();
         }
 
-        for (RestoreRow const& row : rows)
+        uint32 conflictId = 0;
+        if (ConflictingExclusiveChallenge(guid, challengeID, conflictId))
         {
-            uint32 conflictId = 0;
-            if (ConflictingExclusiveChallenge(guid, row.challengeId, conflictId))
-            {
-                message = Acore::StringFormat(
-                    "Cannot restore challenge {} for {}: it conflicts with active challenge {}.",
-                    row.challengeId, player->GetName(), conflictId);
-                return false;
-            }
+            message = Acore::StringFormat(
+                "Cannot restore challenge {} for {}: it conflicts with active challenge {}.",
+                challengeID, player->GetName(), conflictId);
+            return false;
         }
 
         // Levels gained after the failure were earned without the challenge's
@@ -2340,6 +2269,7 @@ namespace CoAChallenges
         // few are tolerated for a player who kept playing while waiting for a
         // GM; more than the allowance refuses. A challenge without objective
         // gates has no other check, so its failure needs the recorded level.
+        std::vector<Objective> const tracked = TrackedObjectives(challengeID);
         uint32 const currentLevel = player->GetLevel();
         uint32 const levelAllowance = sConfigMgr->GetOption<uint32>("CoAChallenges.Restore.MaxLevelsGained", 3);
         if (levelAtFailure && currentLevel > levelAtFailure + levelAllowance)
@@ -2350,87 +2280,58 @@ namespace CoAChallenges
                 player->GetName(), levelAtFailure, challengeID, currentLevel, levelAllowance);
             return false;
         }
-        if (!levelAtFailure)
+        if (!levelAtFailure && std::none_of(tracked.begin(), tracked.end(),
+                [](Objective const& o) { return CoAParse::ObjectiveGateLevel(o) != 0; }))
         {
-            std::vector<Objective> const tracked = TrackedObjectives(challengeID);
-            if (std::none_of(tracked.begin(), tracked.end(),
-                    [](Objective const& o) { return CoAParse::ObjectiveGateLevel(o) != 0; }))
-            {
-                message = Acore::StringFormat(
-                    "Restore refused: challenge {} failed for {} before failures recorded the character's level, "
-                    "and it has no objective gates to check the levels gained since against.",
-                    challengeID, player->GetName());
-                return false;
-            }
+            message = Acore::StringFormat(
+                "Restore refused: challenge {} failed for {} before failures recorded the character's level, "
+                "and it has no objective gates to check the levels gained since against.",
+                challengeID, player->GetName());
+            return false;
         }
 
         // Within the allowance a character may still only be restored while
-        // every pending objective is within reach. An objective
-        // only counts below its gate level, so once the character has levelled
-        // past a pending gate the run can no longer be finished by playing and
-        // the levels in between were gained outside the challenge's rules.
-        // Without a snapshot the level at the failure is unknown (0), so any
-        // pending gate at or below the current level refuses.
-        for (RestoreRow const& row : rows)
+        // every pending objective is within reach. An objective only counts
+        // below its gate level, so once the character has levelled past a
+        // pending gate the run can no longer be finished by playing. Without a
+        // snapshot the level at the failure is unknown (0), so any pending gate
+        // at or below the current level refuses.
+        for (std::size_t i = 0; i < tracked.size(); ++i)
         {
-            std::vector<Objective> const tracked = TrackedObjectives(row.challengeId);
-            for (std::size_t i = 0; i < tracked.size(); ++i)
-            {
-                uint32 const gate = CoAParse::ObjectiveGateLevel(tracked[i]);
-                if (!gate || gate <= levelAtFailure || gate > currentLevel
-                    || IsObjectiveDone(guid, row.challengeId, tracked[i].key))
-                    continue;
-                message = Acore::StringFormat(
-                    "Restore refused: {} is level {}, past the level {} gate of pending objective {} ({}) on "
-                    "challenge {}. That objective can no longer be earned.",
-                    player->GetName(), currentLevel, gate, i + 1, DescribeObjective(tracked[i]), row.challengeId);
-                return false;
-            }
+            uint32 const gate = CoAParse::ObjectiveGateLevel(tracked[i]);
+            if (!gate || gate <= levelAtFailure || gate > currentLevel
+                || IsObjectiveDone(guid, challengeID, tracked[i].key))
+                continue;
+            message = Acore::StringFormat(
+                "Restore refused: {} is level {}, past the level {} gate of pending objective {} ({}) on "
+                "challenge {}. That objective can no longer be earned.",
+                player->GetName(), currentLevel, gate, i + 1, DescribeObjective(tracked[i]), challengeID);
+            return false;
         }
 
-        uint32 restoredLevel = 1;
-        uint32 restoredDeaths = 0;
-        bool hungerReset = false;
-        bool fatigueReset = false;
-        // One transaction: the lock, the active rows, the meters, the trial
-        // link and the snapshot change together or not at all.
+        // The fatal death is taken back so the run is not left at zero lives.
+        uint32 const lives = LivesTotal(challengeID);
+        if (lives && deaths >= lives)
+            deaths = lives - 1;
+
+        // One transaction: the lock, the active row, the meters and the
+        // snapshot change together or not at all.
         CharacterDatabaseTransaction restore = CharacterDatabase.BeginTransaction();
-        for (RestoreRow& row : rows)
-        {
-            if (row.challengeId == challengeID)
-            {
-                // The fatal death is taken back so the run is not left at zero lives.
-                uint32 const lives = LivesTotal(challengeID);
-                if (lives && row.deaths >= lives)
-                    row.deaths = lives - 1;
-                restoredLevel = row.level;
-                restoredDeaths = row.deaths;
-            }
-            restore->Append(
-                "DELETE FROM coa_challenge_failure WHERE guid = {} AND challengeId = {}", guid, row.challengeId);
-            restore->Append(
-                "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
-                "VALUES ({}, {}, {}, {}, 0, 0, {})",
-                guid, row.challengeId, row.level, row.deaths, row.startTime);
-            // The meters restart fresh, as on activation: a run that failed on
-            // a full hunger or thirst meter or an empty fatigue bar would
-            // otherwise die again at once. No fatigue row means a full bar.
-            restore->Append(
-                "DELETE FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}", guid, row.challengeId);
-            if (IsHungerChallenge(row.challengeId))
-                restore->Append("UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = {}", guid);
-            hungerReset = hungerReset || IsHungerChallenge(row.challengeId);
-            fatigueReset = fatigueReset || IsFatigueChallenge(row.challengeId);
-        }
-        if (relinkTrial)
-            restore->Append(
-                "REPLACE INTO coa_custom_trial_active (guid, trialId, startTime) "
-                "SELECT guid, trialId, trialStartTime FROM coa_challenge_failure_snapshot "
-                "WHERE guid = {} AND failedChallengeId = {} AND challengeId = {} AND trialId <> ''",
-                guid, challengeID, challengeID);
+        restore->Append("DELETE FROM coa_challenge_failure WHERE guid = {} AND challengeId = {}", guid, challengeID);
         restore->Append(
-            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
-            guid, challengeID);
+            "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
+            "VALUES ({}, {}, {}, {}, 0, 0, {})",
+            guid, challengeID, level, deaths, startTime);
+        // The meters restart fresh, as on activation: a run that failed on a
+        // full hunger or thirst meter or an empty fatigue bar would otherwise
+        // die again at once. No fatigue row means a full bar.
+        restore->Append("DELETE FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}", guid, challengeID);
+        bool const hungerReset = IsHungerChallenge(challengeID);
+        bool const fatigueReset = IsFatigueChallenge(challengeID);
+        if (hungerReset)
+            restore->Append("UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = {}", guid);
+        restore->Append(
+            "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND challengeId = {}", guid, challengeID);
         CharacterDatabase.DirectCommitTransaction(restore);
         ClearCharChallengeCache(guid);
 
@@ -2442,29 +2343,20 @@ namespace CoAChallenges
         }
 
         // The login push rebuilds every tracker, aura and client list from the
-        // rows just written; it is idempotent for an in-world character.
+        // row just written; it is idempotent for an in-world character.
         PreloadLoginChallengeRows(guid);
         PushLoginState(player);
-        if (relinkTrial)
-            if (std::string const trialID = GetActiveCustomTrial(guid); !trialID.empty())
-                SendActiveTrial(player, trialID);
 
         uint32 done = 0;
-        std::vector<Objective> const tracked = TrackedObjectives(challengeID);
         for (Objective const& o : tracked)
             if (IsObjectiveDone(guid, challengeID, o.key))
                 ++done;
         LOG_INFO("module.coa_challenges", "Challenge {} ({}) restored for {} by a GM (level {}, deaths {}, {})",
-            challengeID, ChallengeName(challengeID), player->GetName(), restoredLevel, restoredDeaths,
+            challengeID, ChallengeName(challengeID), player->GetName(), level, deaths,
             fromSnapshot ? "from snapshot" : "no snapshot");
         message = Acore::StringFormat(
             "Restored challenge {} ({}) for {}: level {}, deaths {}, {} of {} objectives done.",
-            challengeID, ChallengeName(challengeID), player->GetName(), restoredLevel, restoredDeaths,
-            done, tracked.size());
-        if (rows.size() > 1)
-            message += Acore::StringFormat(" Restored {} bundled challenges.", rows.size() - 1);
-        if (relinkTrial)
-            message += " Custom trial re-linked.";
+            challengeID, ChallengeName(challengeID), player->GetName(), level, deaths, done, tracked.size());
         if (resurrected)
             message += " Resurrected.";
         if (levelAtFailure && currentLevel > levelAtFailure)

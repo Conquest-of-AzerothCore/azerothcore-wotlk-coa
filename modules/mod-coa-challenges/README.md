@@ -107,12 +107,12 @@ Support commands for a player's run (administrator, also from the console; the p
   typed without their IDs print their syntax and point to `objectives`. `.help coa trial objectives`,
   `.help coa trial credit` and `.help coa trial restore` print the syntax and a short explanation in game.
 - `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives
-  and run timer it had when it failed, re-links a custom trial with its other bundled challenges, takes the
-  fatal death back when the run was out of lives, and resurrects the character. The meters restart as on a
-  new activation, so a run that failed on one does not die again at once: hunger and thirst at zero on the
-  Survival trials, the fatigue bar full on the Narcolepsy trials. The answer names the meters it restarted.
-  The state comes from `coa_challenge_failure_snapshot`, written at every failure; a failure from before that
-  table restores with a restarted timer. High-Risk drops and shared-fate partners are not restored.
+  and run timer it had when it failed, takes the fatal death back when the run was out of lives, and resurrects
+  the character. The meters restart as on a new activation, so a run that failed on one does not die again at
+  once: hunger and thirst at zero on the Survival trials, the fatigue bar full on the Narcolepsy trials. The
+  answer names the meters it restarted. The state comes from `coa_challenge_failure_snapshot`, written at every
+  failure; a failure from before that table restores with a restarted timer. A custom trial the challenge
+  belonged to, High-Risk drops and shared-fate partners are not restored.
 
 `restore` is refused in two cases, both because of levels gained after the failure. Those levels were earned
 outside the challenge's rules: its lives, its bans on the auction house, mail, trade, heirlooms and the dungeon
