@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Vanity collection: Deliver Item withholds Beastmaster's Whistles whose beast cannot be summoned (#10984)",
+  "contract": "Issue #10984. SummonCosmeticPet refuses a Tamed Beast whistle with APPLY_APPEARANCES_BAD_CREATURE_ENTRY when creature_template has no row for its beast and with APPLY_APPEARANCES_BAD_CREATURE_TEMPLATE when the beast has family 0 or is not tameable, so the Vanity tab must not deliver such a whistle. Since the cosmetic pet creatures of #11000 the beasts of Sandy Wilderling 194340 (creature 4754) and Arcane Bound Core Hound 234628 (creature 50517) exist and are tameable, as is the Aether Ray 80662 (creature 22181). Stone Cold Snappy 123160 (creature 590019, family 21) and Fel-infused Mana Ray 333413 (creature 225600, family 34) have a pet family but no tameable type flag. CoA.UnlockAllVanity is on in the test realm, so the character is entitled to every static entry. The Wooly Wendigo Set Cache 918854 shares a category 33 Appearances.dbc row whose creature 918854 does not exist, but it is a real cache, not a whistle. Expected: the Deliver Item button hands over the three summonable whistles and the cache, and neither untameable whistle.",
+  "timeout_ms": 30000,
+  "players": [
+    { "id": "collector", "race": 1, "class": 1, "level": 10 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "label": "No Sandy Wilderling before the requests", "actor": "collector", "metric": "item_count", "item": 194340, "equals": 0 },
+    { "action": "assert", "label": "No Arcane Bound Core Hound before the requests", "actor": "collector", "metric": "item_count", "item": 234628, "equals": 0 },
+    { "action": "assert", "label": "No Aether Ray before the requests", "actor": "collector", "metric": "item_count", "item": 80662, "equals": 0 },
+    { "action": "assert", "label": "No Wooly Wendigo Set Cache before the requests", "actor": "collector", "metric": "item_count", "item": 918854, "equals": 0 },
+    { "action": "assert", "label": "No Stone Cold Snappy before the requests", "actor": "collector", "metric": "item_count", "item": 123160, "equals": 0 },
+    { "action": "assert", "label": "No Fel-infused Mana Ray before the requests", "actor": "collector", "metric": "item_count", "item": 333413, "equals": 0 },
+    { "action": "client_packet", "label": "Deliver Sandy Wilderling (beast now has a template)", "actor": "collector", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 194340 }] },
+    { "action": "client_packet", "label": "Deliver Arcane Bound Core Hound (beast now has a family)", "actor": "collector", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 234628 }] },
+    { "action": "client_packet", "label": "Deliver Aether Ray", "actor": "collector", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 80662 }] },
+    { "action": "client_packet", "label": "Deliver Wooly Wendigo Set Cache", "actor": "collector", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 918854 }] },
+    { "action": "client_packet", "label": "Deliver Stone Cold Snappy (beast is not tameable)", "actor": "collector", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 123160 }] },
+    { "action": "client_packet", "label": "Deliver Fel-infused Mana Ray (beast is not tameable)", "actor": "collector", "opcode": 1315, "fields": [{ "u8": 2 }, { "u32": 333413 }] },
+    { "action": "assert", "label": "Sandy Wilderling was delivered", "actor": "collector", "metric": "item_count", "item": 194340, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Arcane Bound Core Hound was delivered", "actor": "collector", "metric": "item_count", "item": 234628, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Aether Ray was delivered", "actor": "collector", "metric": "item_count", "item": 80662, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Wooly Wendigo Set Cache was delivered", "actor": "collector", "metric": "item_count", "item": 918854, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "Stone Cold Snappy was withheld", "actor": "collector", "metric": "item_count", "item": 123160, "equals": 0 },
+    { "action": "assert", "label": "Fel-infused Mana Ray was withheld", "actor": "collector", "metric": "item_count", "item": 333413, "equals": 0 }
+  ]
+}
