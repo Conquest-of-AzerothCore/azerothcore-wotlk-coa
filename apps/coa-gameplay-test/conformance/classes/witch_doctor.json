@@ -296,6 +296,321 @@
       "wait_ms": 2500,
       "expire_ms": 500,
       "observe_source": "AscensionWitchDoctorAbilities.cpp:328-329 (OnSpellCast): if (Family(info, 1, 131072) && player->HasAura(SplashOnEm)) Reduce(player, Beam, 2000); Loa's Brew 801670 has SpellFamilyFlags[1] 131072; Reduce is ModifySpellCooldown(-2000) on each known rank of Mojo Beam 500950 (RecoveryTime 14000). Each phase casts Mojo Beam at the caster (starts its 14000 ms cooldown), then Loa's Brew, and reads the Beam cooldown 1000 ms later; 802219 learned between phases. Control: the before phase (no talent) reads the cooldown the Beam still has; the judge takes after minus before and requires -2000 within 100 (before_expected 6000 is the least before reading so no floor hides the cut, expected = 6000 - 2000). Same waits in both phases, so clock overhead cancels."
+    },
+    {
+      "spell": 802219,
+      "name": "Splash On Em (Mojo Beam recast after Loa's Brew)",
+      "kind": "cost_gate",
+      "variant": "brew_cut",
+      "label_suffix": "brew",
+      "quote": "reduces the cooldown of Mojo Beam by 2 sec.",
+      "gated_spell": 500950,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "target": "caster",
+      "after_casts": [
+        [
+          801670,
+          "caster"
+        ]
+      ],
+      "after_wait_ms": 2500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:328-329 (OnSpellCast): Family(info, 1, 131072) (Loa's Brew 801670) with 802219 known calls Reduce(player, Beam, 2000), ModifySpellCooldown(-2000) on every known rank of Mojo Beam 500950 (AscensionWitchDoctorCompletion.cpp:161-174); the hook runs when the 2000 ms Brew cast completes (cycle 1 read 10491 ms when it read too early). Mojo Beam RecoveryTime and CategoryRecoveryTime 14000 ms, a channel, cast at the caster (TARGET_UNIT_TARGET_ALLY). Each arm casts Mojo Beam, then Loa's Brew 2500 ms later (past the 1500 ms global cooldown; the Brew is cast in every arm and only 802219 differs), then attempts Mojo Beam at the stated cooldown plus or minus 500 ms counted from the Beam cast: without 802219 at 12500 ms it is refused (SPELL_FAILED_NOT_READY 67, 1500 ms left, the control), with it learned it goes through (0), and at 11500 ms with it it is refused again, so the cut is no larger than 2 sec. The Brew completes at 4500 ms, long before every attempt. This consumes the cooldown: the recast is accepted, which a cooldown_ms read does not show. The percent costs (Beam 15%, Brew 33% of about 1490 base mana) and the cost-gate player's disabled regeneration make cast_power 1000 set the mana before the Beam casts of each arm, so the Brew in between always has the 33% it needs (a Brew refused for mana would read as a missing cut).",
+      "cast_power": 1000
+    },
+    {
+      "spell": 501136,
+      "name": "Mirage (copy left behind)",
+      "kind": "metric_delta",
+      "variant": "copy",
+      "label_suffix": "copy",
+      "quote": "leaving a copy of yourself behind",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 501136,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 840000
+      },
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "Mirage 501136 Effect[2] SPELL_EFFECT_SUMMON (EffectMiscValue 840000, TARGET_DEST_CASTER, DurationIndex 18 = 20000 ms) is not zeroed by the contract (Completion.cpp:406-407 zeroes Effect[1] only). The summon spell script (AscensionWitchDoctorSummons.cpp:570-596) calls Summon(player, 501136, ...), which takes entry 840000 from the SUMMON effect (Summons.cpp:177-183), count 1, owner = the caster; the creature runs away from the caster (Summons.cpp:286-289, RunAwayFrom). Control: the uncast before phase reads 0 owned creatures of entry 840000; after one real Mirage cast, 2000 ms later, exactly 1."
+    },
+    {
+      "spell": 501136,
+      "name": "Mirage (ended by direct damage)",
+      "kind": "metric_delta",
+      "variant": "damage_ends",
+      "label_suffix": "damage_ends",
+      "quote": "Direct damage or healing done will end this effect.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 806289,
+      "target": "dummy",
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 501136
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:277-278 (OnSpellHitResult): (damage || healing) && id != Spirit && !Family(info, 0, 8) && !spell->IsTriggered() removes Mirage 501136 from the caster. Mirage is a real setup cast (M-9; instant, CastingTimeIndex 1, 29% mana, cooldown 180000 reset by the scenario) made at the caster in both phases, followed by a 1600 ms wait past the 1500 ms global cooldown (StartRecoveryTime 1500, category 133, shared with the Glaive), so the Glaive that follows is accepted. cast_power 1000 sets the mana before the setup cast (Mirage 29% plus Glaive 10% of about 1490 base mana). Control (before phase, cast_in_before false): Mirage cast, no damage, the aura still reads 1 stack 1600 ms later. After: the same Mirage, then one real Spirit Glaive 806289 at the dummy (Shadow direct damage, 2000 ms cast, cooldown 20000 reset by the scenario, spell hit rating 10000), read 3000 ms after the Glaive cast starts, about 1000 ms after the hit lands: 0."
+    },
+    {
+      "spell": 501136,
+      "name": "Mirage (ended by direct healing)",
+      "kind": "metric_delta",
+      "variant": "heal_ends",
+      "label_suffix": "heal_ends",
+      "quote": "Direct damage or healing done will end this effect.",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 801670,
+      "target": "caster",
+      "caster_health_pct": 50,
+      "setup_casts": [
+        501136
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 1000,
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 501136
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Same hook as damage_ends (Abilities.cpp:277-278, the healing argument). Mirage is a real setup cast at the caster in both phases (M-9) with a 1600 ms wait past the 1500 ms global cooldown. cast_power 1000 sets the mana before it (Mirage 29% plus Loa's Brew 33% of about 1490 base mana is 924). Loa's Brew 801670 (2000 ms cast, CastingTimeIndex 5, SPELL_EFFECT_HEAL, TARGET_UNIT_TARGET_ALLY) is cast at the caster, held at 50% health so the heal is effective; read 3000 ms after the cast starts, 1000 ms after the heal lands. Control: the before phase makes the Mirage cast and no heal, and reads Mirage still on (1); after: 0. Calibrate on the first run: if the hook's healing argument is the effective heal only and the health fixture does not take, the read stays 1."
+    },
+    {
+      "spell": 501136,
+      "name": "Mirage (the invisible caster sees only invisible targets)",
+      "kind": "metric_delta",
+      "variant": "sight",
+      "label_suffix": "sight",
+      "quote": "you can only see other invisible targets",
+      "expected": 0,
+      "before_expected": 1,
+      "trigger_spell": 501136,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "The tooltip governs (G-1): an invisible caster sees only invisible targets and those who can see invisible. The reference dummy (creature 36) is visible and detects nothing invisible. Unit::CanSeeOrDetect(dummy) of the caster is read: before the cast (control) 1, after one real Mirage cast 0. No Witch Doctor code restricts the caster's sight: grep of AscensionWitchDoctor*.cpp finds Mirage only at Abilities.cpp:277-278, 345-352 and Auras.cpp:170, 335, 404 (stat, threat, speed, summon), and Mirage's only aura is Effect[0] 18 SPELL_AURA_MOD_INVISIBILITY, which in stock rules does not hide the world from its holder. A read of 1 after the cast is therefore a candidate defect for the lead, not a test fault. Readback entry (M-11): it reports data conformant, not behaviour."
+    },
+    {
+      "spell": 704497,
+      "name": "Soul Marionette (clones apply a stack)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "applying a stack of Soul Marionette",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 704497,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 807057
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:307-308 starts each of the 5 clones (entry 300661) with a 2000 ms timer; at the tick Summons.cpp:559-562 (++_marionetteTicks <= 4, player has Marionette) casts the stack aura 807057 on the caster, one stack per clone per tick, max 20 stacks (StackAmount 20). The first tick of all 5 clones falls at about 2000 ms, the second at about 4000 ms, so 3000 ms after the cast the caster holds exactly 5 stacks. Control: the uncast before phase reads 0 stacks of 807057."
+    },
+    {
+      "spell": 807038,
+      "name": "Soul Marionette stack (haste per stack)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Increases your haste by 1% per stack.",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 704497,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_amount",
+      "fields": {
+        "spell": 807057,
+        "effect": 0
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Completion.cpp:423-428 turns Effect[0] of 807057 into SPELL_AURA_HASTE_SPELLS with BasePoints 0 and DieSides 1 (1% per stack); SpellAuraEffects.cpp:659 multiplies the amount by the stack amount, so the 5 stacks of the stacks entry read an amount of 5 (5% haste). Control: the uncast before phase reads 0 (no aura). The amount is the aura effect's own value, the haste actually applied to the caster follows from it. Readback entry (M-11): it reports data conformant, not behaviour."
+    },
+    {
+      "spell": 802100,
+      "name": "Veil of Darkness (veil on the target for 15 sec)",
+      "kind": "metric_delta",
+      "variant": "lasts",
+      "label_suffix": "lasts",
+      "quote": "increasing the damage you deal to them by $s1% for $d.",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 802100,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "wait_ms": 14700,
+      "expiry_wait_ms": 600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "metric": "aura",
+      "fields": {
+        "spell": 802100,
+        "caster": "caster"
+      },
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          14250,
+          15750
+        ],
+        "expired": [
+          14250,
+          15750
+        ]
+      },
+      "observe_source": "Cause of the cycle 1 flake (baseline 20261114-235616 aura present, 20261115-011935 absent, same build and scenario, both cast_failure 0 and cooldown 89982): Veil 802100 is a Shadow aura-only spell. SpellMgr.cpp:3929 sets SPELL_ATTR0_CU_BINARY_SPELL on it (Effect[0] aura 271 with a non-zero value), and the override at SpellMgr.cpp:4063-4099 that clears the flag for spells whose periodic trigger spell is not binary does not fire, because the contract has already turned Effect[1] into a periodic dummy with TriggerSpell 0 (Completion.cpp:284-285, run in LoadSpellInfoCorrections, World.cpp:415, before LoadSpellInfoCustomAttributes, World.cpp:429). A binary spell adds Unit::GetEffectiveResistChance to the full-resist roll (Unit.cpp:4092-4098): the level 60 dummy's linear monster resistance, 60 x CoA.MonsterResistance.PerLevel 1.0 / PerPercent 5.0 = 12%, a SPELL_MISS_RESIST that leaves cast_failure 0 and starts the cooldown. The spell hit roll cannot be the cause: Unit.cpp:4055-4062 caps the hit chance at 100% and the class file's spell_hit_rating 10000 reaches it. The resist is derived by reading the code, not observed: the value scenarios keep no combat log. Fixture: caster aura 823764 (beeg spellpen, SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on all magic schools, the fixture of the hit and Crypt Plague entries) sets the dummy's effective resistance to 0 (Unit.cpp:2615-2622, 2625-2626), so the resist chance is 0. 823764 is a phase aura of both phases, not the cause. Control: the uncast before phase reads the aura absent. After one real cast: held at 14700 ms, gone at 15300 ms, inside the G-19 band 14250 to 15750 ms around $d = 15000 ms (SpellDuration 8) in game time."
+    },
+    {
+      "spell": 504774,
+      "name": "Sen'jin's Wisdom (Mirage lasts twice as long)",
+      "kind": "metric_delta",
+      "variant": "double",
+      "label_suffix": "double",
+      "quote": "Doubles the duration of",
+      "expected": 39000,
+      "before_expected": 19500,
+      "expected_ratio": 2.0,
+      "tolerance": 0.02,
+      "trigger_spell": 501136,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 501136
+      },
+      "wait_ms": 100,
+      "expire_ms": 2000,
+      "observe_source": "Native effect, no script: 504774 Effect[0] SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 1 (SPELLMOD_DURATION), +20000 ms (BasePoints 19999 + DieSides 1), class mask [2] 1073741824 = Mirage's SpellFamilyFlags[2] 1073741824; Mirage DurationIndex 18 = 20000 ms, so a doubling. Each phase casts Mirage at the caster and reads the aura's remaining duration 100 ms later; 504774 is learned between the phases (control: the before phase, about 19900 ms). Judged as the after reading over the before reading, 2 within 0.02 (about 39900 over 19900 = 2.005), so the clock overhead cancels. expire_ms 2000 puts the second Mirage cast past the 1500 ms global cooldown of the first (the Mirage cooldown itself is reset by the scenario); the first Mirage aura is still running and the recast refreshes it. Readback entry (M-11): it reports data conformant, not behaviour."
+    },
+    {
+      "spell": 706543,
+      "name": "Residual Energy (Lesser Shadow Avatar when Shadow Avatar ends)",
+      "kind": "metric_delta",
+      "variant": "lesser",
+      "label_suffix": "lesser",
+      "quote": "you become a",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 705943,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 706544
+      },
+      "wait_ms": 15600,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAuras.cpp:417-418 (aura remove): Avatar 705943 removed by AURA_REMOVE_BY_EXPIRE with Residual 706543 known casts Lesser Shadow Avatar 706544 on the caster (DurationIndex 31 = 8000 ms). Shadow Avatar DurationIndex 8 = 15000 ms, so 15600 ms after the cast it has ended and the Lesser Avatar has been on for 600 ms. Each phase casts Shadow Avatar at the caster; 706543 is learned between the phases. Control (before phase): the Avatar ends and 706544 reads absent (0); after: present (1)."
+    },
+    {
+      "spell": 707504,
+      "name": "Spirit Hunting (extra Spirit per Malefic Arrow, 15% per Spirit)",
+      "kind": "stack_chance_rate",
+      "variant": "spirit_chance",
+      "label_suffix": "spirit_chance",
+      "quote": "Each active Spirit gives you a 15% chance when you cast Malefic Arrow to generate an additional Spirit.",
+      "talent": 707504,
+      "stack_aura": 561136,
+      "trigger_spell": 801674,
+      "learn": [
+        801674,
+        707854
+      ],
+      "event_spell": 561136,
+      "chance_pct": 15,
+      "arms": [
+        {
+          "stacks": 5,
+          "trials": 590
+        },
+        {
+          "stacks": 4,
+          "trials": 1180
+        }
+      ],
+      "control_trials": 10,
+      "unlearned_trials": 10,
+      "cast_wait_ms": 1600,
+      "cast_power": 1000,
+      "parts": 6,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:313-314 (OnSpellCast, non-triggered cast): if (IsArrow(info) && player->HasAura(SpiritHunting) && roll_chance_i(count * 15)) GainSpirit(player); count is the 561136 stack count snapshotted in OnSpellBeforeEffects (Abilities.cpp:101), which Spell.cpp:4044 calls before OnSpellCast (Spell.cpp:4191). GainSpirit (Completion.cpp:137-150) casts 561136 once, also at the 5-stack cap, so spell_cast_count of 561136 counts every extra Spirit; set_aura uses AddAura and casts nothing. Malefic Arrow 801674: IsArrow (SpellFamilyFlags[1] 0x80008000, Completion.h:372-375), not Family(1,4), so it grants no Spirit of its own; castable with ArrowTalent 707854 known (Abilities.cpp:83), needs the bow (EquippedItemSubClassMask 262156), instant (CastTime -1000000), GCD 1500, 8000 ms cooldown reset each cast, 5% base mana. cast_power 1000 is unverified for the bow: the 2567 maximum mana read in compare-c1 was taken with the reference weapon 72038, not the bow, and a set_power above the maximum errors the scenario rather than misjudging it. 707504 is passive with ProcFlags 0, so its native aura 42 (trigger 561136) never fires. Tooltip literal 15% per Spirit. Judged on each arm total (mentor M-1, ADR 0662 provisional): 5 Spirits 75% (band 3.75 points) needs 3540 casts, 4 Spirits 60% (band 3 points) needs 7079, the two cheapest stack counts; 6 parts of 590 and 1180, about 48 game minutes each (Witch Doctor ADR 0001)."
+    },
+    {
+      "spell": 705843,
+      "name": "Loa Spirits (Reclamation casts an additional time, 5% per Spirit)",
+      "kind": "stack_chance_rate",
+      "variant": "spirit_chance",
+      "label_suffix": "spirit_chance",
+      "quote": "For each active Spirit on you, you have a $561361s1% chance for your Reclamation to cast an additional time.",
+      "talent": 705843,
+      "stack_aura": 561136,
+      "trigger_spell": 806288,
+      "learn": [
+        806288
+      ],
+      "trial_spell": 561136,
+      "event_spell": 806288,
+      "event_offset": 1,
+      "chance_pct": 5,
+      "arms": [
+        {
+          "stacks": 1,
+          "trials": 451
+        },
+        {
+          "stacks": 2,
+          "trials": 854
+        }
+      ],
+      "control_trials": 90,
+      "unlearned_trials": 8,
+      "cast_wait_ms": 2500,
+      "cast_power": 1000,
+      "parts": 7,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:305-309 (OnSpellCast, non-triggered cast): Family(info,1,4) (Reclamation 806288, SpellFamilyFlags[1] 268435460) -> GainSpirit(player), then if (player->HasAura(LoaEcho) && target && roll_chance_i(count * 5)) Cast(player, target, id); the recast is triggered, so OnSpellCast returns before a second GainSpirit and no recast rolls again. spell_cast_count counts every cast of 806288, triggered or not, so events are the 806288 casts less one per trial, and trials are the 561136 casts (one per player Reclamation). Tooltip $561361s1: 561361 EffectBasePoints[0] 4 + DieSides 1 = 5% per Spirit. 705843 is passive with ProcFlags 0, so its native aura 42 (trigger 707422, which re-triggers 806288, ProcChance 1) does not fire; if it came alive, the 0-stack control would catch it with probability 1 - 0.99^n, 99.8% for the 630 control casts of one run. Reclamation: cast 1800 ms + 500 ranged, GCD 1500, no cooldown, 8% base mana, bow; cast_power 1000 is unverified for the bow (the 2567 maximum mana of compare-c1 was read with the reference weapon 72038, not the bow). Judged on each arm total (mentor M-1, ADR 0662 provisional): 1 Spirit 5% needs 3152 casts and 2 Spirits 10% need 5973 (band 2 points each), the two cheapest stack counts; 7 parts of 451 and 854, about 59 game minutes each (Witch Doctor ADR 0001). Both arms also alert on a roll that counts the Spirit this Reclamation grants (10% and 15%)."
     }
   ],
   "player_observations": [],
@@ -307,7 +622,15 @@
   "dual_target_effects": [],
   "target_aura_gates": [],
   "learned_hits": [],
-  "cast_auras": [],
+  "cast_auras": [
+    {
+      "spell": 802100,
+      "auras": [
+        823764
+      ],
+      "reason": "Veil of Darkness is a Shadow aura-only spell flagged SPELL_ATTR0_CU_BINARY_SPELL (the contract turns its periodic trigger into a periodic dummy before SpellMgr.cpp:4063-4099 can clear the flag), so Unit.cpp:4092-4098 would give the level 60 dummy a 12% full resist, derived from the code and not observed; beeg spellpen 823764 (SPELL_AURA_MOD_TARGET_RESISTANCE -9999 on all magic schools) is set before the cast so the value scenario's aura reads are deterministic whatever the cause (baseline 20261114-235616 present, 20261115-011935 absent)"
+    }
+  ],
   "hit_casts": [],
   "removed_own_effects": [
     {

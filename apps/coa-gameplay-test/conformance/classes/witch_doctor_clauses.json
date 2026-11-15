@@ -453,7 +453,9 @@
       },
       {
         "claim": "leaving a copy of yourself behind",
-        "labels": []
+        "labels": [
+          "501136 behaviour_metric_delta copy"
+        ]
       },
       {
         "claim": "reducing threat each second",
@@ -464,13 +466,18 @@
   {
     "spell": 501136,
     "clause": "Direct damage or healing done will end this effect.",
-    "labels": [],
+    "labels": [
+      "501136 behaviour_metric_delta damage_ends",
+      "501136 behaviour_metric_delta heal_ends"
+    ],
     "kind": "claim"
   },
   {
     "spell": 501136,
     "clause": "While invisible, you can only see other invisible targets and those who can see invisible.",
-    "labels": [],
+    "labels": [
+      "501136 behaviour_metric_delta sight"
+    ],
     "kind": "claim"
   },
   {
@@ -781,7 +788,9 @@
   {
     "spell": 504774,
     "clause": "Doubles the duration of Mirage.",
-    "labels": [],
+    "labels": [
+      "504774 behaviour_metric_delta double"
+    ],
     "kind": "claim"
   },
   {
@@ -1212,14 +1221,18 @@
       },
       {
         "claim": "that channel on you, applying a stack of Soul Marionette",
-        "labels": []
+        "labels": [
+          "704497 behaviour_metric_delta stacks"
+        ]
       }
     ]
   },
   {
     "spell": 704497,
     "clause": "Increases your haste by 1% per stack.",
-    "labels": [],
+    "labels": [
+      "807038 behaviour_metric_delta haste"
+    ],
     "kind": "claim"
   },
   {
@@ -1417,7 +1430,8 @@
     "spell": 705843,
     "clause": "For each active Spirit on you, you have a $561361s1% chance for your Reclamation to cast an additional time.",
     "labels": [
-      "705843 effect_value 561361e0 #0"
+      "705843 effect_value 561361e0 #0",
+      "705843 behaviour_metric_delta spirit_chance"
     ],
     "kind": "claim"
   },
@@ -2063,7 +2077,9 @@
   {
     "spell": 706543,
     "clause": "At the end of Shadow Avatar's duration you become a Lesser Shadow Avatar.",
-    "labels": [],
+    "labels": [
+      "706543 behaviour_metric_delta lesser"
+    ],
     "kind": "claim"
   },
   {
@@ -2293,7 +2309,9 @@
   {
     "spell": 707504,
     "clause": "Each active Spirit gives you a 15% chance when you cast Malefic Arrow to generate an additional Spirit.",
-    "labels": [],
+    "labels": [
+      "707504 behaviour_metric_delta spirit_chance"
+    ],
     "kind": "claim"
   },
   {
@@ -2675,7 +2693,8 @@
     "labels": [
       "802100 effect_value e0 #0",
       "802100 aura_amount e0 #0",
-      "802100 aura_duration_ms #1"
+      "802100 aura_duration_ms #1",
+      "802100 behaviour_metric_delta lasts"
     ],
     "kind": "claim"
   },
@@ -2699,7 +2718,10 @@
     "spell": 802219,
     "clause": "Casting Loa's Brew now reduces the cooldown of Mojo Beam by 2 sec.",
     "labels": [
-      "802219 behaviour_metric_delta brew_beam"
+      "802219 behaviour_metric_delta brew_beam",
+      "802219 cost_gate 500950 brew without",
+      "802219 cost_gate 500950 brew with",
+      "802219 cost_gate 500950 brew beyond"
     ],
     "kind": "claim"
   },
