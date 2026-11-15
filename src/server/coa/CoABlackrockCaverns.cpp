@@ -25,6 +25,7 @@
 #include "SpellScript.h"
 #include "SpellScriptLoader.h"
 #include "TemporarySummon.h"
+#include <optional>
 #include <algorithm>
 #include <array>
 #include <set>
@@ -269,6 +270,8 @@ constexpr uint32 FireZoneMs = 2500;
 constexpr uint32 FireZoneCallers = 2;
 constexpr float RazDamageBonus = 1.3f;
 constexpr float RazSpeedBonus = 1.1f;
+constexpr float SkullcrackerRadius = 3.0f;
+constexpr float SkullcrackerShare = 0.75f;
 
 constexpr float HeatWavePerStack = 57.6f;
 constexpr float HeatWaveBaseStacks = 2.33f;
@@ -304,6 +307,18 @@ void DealDamage(
         return;
     SpellNonMeleeDamage damage(caster, target, info, school != SPELL_SCHOOL_MASK_NONE ? school : info->GetSchoolMask());
     caster->CalculateSpellDamageTaken(&damage, int32(value), info);
+    Unit::DealDamageMods(target, damage.damage, &damage.absorb);
+    caster->DealSpellDamage(&damage, true);
+    caster->SendSpellNonMeleeDamageLog(&damage);
+}
+
+void DealUnmitigatedDamage(Unit* caster, Unit* target, uint32 spellId, uint32 value)
+{
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
+    if (!info || !value)
+        return;
+    SpellNonMeleeDamage damage(caster, target, info, SPELL_SCHOOL_MASK_NORMAL);
+    damage.damage = value;
     Unit::DealDamageMods(target, damage.damage, &damage.absorb);
     caster->DealSpellDamage(&damage, true);
     caster->SendSpellNonMeleeDamageLog(&damage);
@@ -444,6 +459,7 @@ struct boss_coa_brc_romogg : public BossAI
         _Reset();
         me->SetReactState(REACT_AGGRESSIVE);
         _chains.Clear();
+        _chainsSpot.reset();
     }
 
     void JustEngagedWith(Unit* who) override
@@ -475,7 +491,13 @@ struct boss_coa_brc_romogg : public BossAI
     {
         BossAI::JustSummoned(summon);
         if (summon->GetEntry() == NPC_CHAINS_OF_WOE)
+        {
+            if (Creature* old = ObjectAccessor::GetCreature(*me, _chains))
+                if (old != summon)
+                    old->DespawnOrUnsummon();
             _chains = summon->GetGUID();
+            _chainsSpot = summon->GetPosition();
+        }
         else if (summon->GetEntry() == NPC_ANGERED_EARTH)
         {
             summon->SetCorpseDelay(5);
@@ -499,8 +521,19 @@ struct boss_coa_brc_romogg : public BossAI
             case SPELL_SKULLCRACKER_MYTHIC:
             {
                 for (Player* player : PlayersNear(me, 200.0f))
+                {
                     if (player->HasAura(SPELL_CHAINS_OF_WOE_ROOT))
-                        DealDamage(me, player, spell->Id, player->GetMaxHealth() * 10, SPELL_SCHOOL_MASK_NORMAL);
+                        DealUnmitigatedDamage(me, player, spell->Id, player->GetMaxHealth() * 10);
+                    else if (_chainsSpot && player->GetExactDist2d(*_chainsSpot) <= SkullcrackerRadius)
+                        DealUnmitigatedDamage(me, player, spell->Id, uint32(player->GetMaxHealth() * SkullcrackerShare));
+                }
+                if (Creature* chains = ObjectAccessor::GetCreature(*me, _chains))
+                {
+                    std::vector<Player*> players = PlayersNear(me, 200.0f);
+                    if (std::none_of(players.begin(), players.end(), [](Player* player)
+                            { return player->IsAlive() && player->HasAura(SPELL_CHAINS_OF_WOE_ROOT); }))
+                        chains->DespawnOrUnsummon();
+                }
                 me->SetReactState(REACT_AGGRESSIVE);
                 break;
             }
@@ -547,8 +580,7 @@ struct boss_coa_brc_romogg : public BossAI
                     break;
                 case EVENT_CHAINS_CHECK:
                     if (!ObjectAccessor::GetCreature(*me, _chains))
-                        me->SummonCreature(NPC_CHAINS_OF_WOE, me->GetNearPosition(4.0f, 0.0f),
-                            TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 20000);
+                        me->SummonCreature(NPC_CHAINS_OF_WOE, me->GetNearPosition(4.0f, 0.0f), TEMPSUMMON_MANUAL_DESPAWN);
                     break;
                 case EVENT_SKULLCRACKER:
                     Talk(EMOTE_ROMOGG_SKULLCRACKER);
@@ -574,6 +606,7 @@ struct boss_coa_brc_romogg : public BossAI
 
 private:
     ObjectGuid _chains;
+    std::optional<Position> _chainsSpot;
 };
 
 struct npc_coa_brc_chains_of_woe : public ScriptedAI
@@ -590,6 +623,11 @@ struct npc_coa_brc_chains_of_woe : public ScriptedAI
             me->SetFullHealth();
         }
         DoCastSelf(SPELL_CHAINS_OF_WOE_VISUAL, true);
+        if (Aura* visual = me->GetAura(SPELL_CHAINS_OF_WOE_VISUAL))
+        {
+            visual->SetMaxDuration(-1);
+            visual->SetDuration(-1);
+        }
         WorldObject* center = summoner ? summoner : me;
         for (Player* player : PlayersNear(center, 60.0f))
         {
@@ -601,7 +639,17 @@ struct npc_coa_brc_chains_of_woe : public ScriptedAI
     }
 
     void AttackStart(Unit* ) override { }
-    void UpdateAI(uint32 ) override { }
+    void UpdateAI(uint32 ) override
+    {
+        if (_held)
+            return;
+        _held = true;
+        if (TempSummon* chains = me->ToTempSummon())
+            chains->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
+    }
+
+private:
+    bool _held = false;
 };
 
 struct npc_coa_brc_raz : public ScriptedAI
