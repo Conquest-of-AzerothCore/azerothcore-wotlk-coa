@@ -308,3 +308,7 @@ to it in the log.
       time and the Hatch Eggs recast; Jeklik and Venoxis (the videos show no defect).
     - Unexplained: why 2118408's stock trigger of 2118409 dealt no damage; target selection of the triggered
       spell from a self aura is the likely cause.
+    - Jin'do's totems no longer stand on the ten fixed spots of round 7 (user: random, in the same area). Each
+      takes a random point inside the area the outer six spots enclose (about 4,900 square yards), on the floor
+      those spots stand on (76.6-81.2), out of the water, in Jin'do's sight and within the spell's 100 yd range,
+      keeping the 20 yd spacing where the floor allows. Estimated: the area's edges and the floor band.

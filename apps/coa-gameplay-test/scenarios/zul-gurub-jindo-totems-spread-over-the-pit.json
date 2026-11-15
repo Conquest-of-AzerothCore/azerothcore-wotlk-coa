@@ -2,10 +2,10 @@
   "schema": 1,
   "name": "Zul'Gurub: Jin'do's totems spread over the Bloodfire Pit instead of standing ten yards around him",
   "contract": [
-    "The round-7 tester asked for Jin'do's (11380) totems to spread over the whole Bloodfire Pit. They stand on",
-    "trash pack spots of the arena, where they stood ten yards around him before. Jin'do is summoned two yards in",
+    "The round-7 tester asked for Jin'do's (11380) totems to spread over the whole Bloodfire Pit. They stand at",
+    "random points of the arena, where they stood ten yards around him before. Jin'do is summoned two yards in",
     "front of the tank beside his own spawn, because the lane's players do not see the phase-1 spawn. Every spot on",
-    "the old ring lies at most 12 yards from the tank and the nearest pit spot 15 yards, so the nearest Brain Wash",
+    "the old ring lies at most 12 yards from the tank and the pit's nearest corner 15 yards, so the nearest Brain Wash",
     "Totem (15112) and the Powerful Healing Ward (14987) stand at least 13 yards from the tank. The Brain Wash",
     "Totems still put Brainwash (2118502) on the other hero, who stands inside the arena. Both heroes carry the",
     "Delusions vision aura (2118511), which Delusions of Jin'do skips, so its phase aura (2118512, mask 3) cannot",
