@@ -623,11 +623,15 @@ namespace
     constexpr float RING_THROW_Z      = 4.0f;
     constexpr uint8 GRASP_RINGS       = 6;
     constexpr uint32 GO_STALACTITE    = 978099;
-    constexpr float STALACTITE_GRID   = 8.0f;
-    constexpr float STALACTITE_REACH  = 50.0f;
+    constexpr float STALACTITE_GRID   = 12.0f;
+    constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
+    constexpr float STALACTITE_SINK   = 4.0f;
+    constexpr Milliseconds ICICLE_IMPACT = 4000ms;
+    constexpr uint32 NPC_FALLING_ICICLE = 978100;
+    constexpr float CAVE_FLOOR_STEP   = 10.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
-    constexpr float SNOWGRAVE_LEASH   = 45.0f;
+    constexpr float SNOWGRAVE_LEASH   = 120.0f;
 
     struct boss_snowgrave_coa : public custom_world_boss_coa
     {
@@ -694,15 +698,22 @@ namespace
                     float const x = home.GetPositionX() + dx + frand(-2.0f, 2.0f);
                     float const y = home.GetPositionY() + dy + frand(-2.0f, 2.0f);
                     float const ground = map->GetHeight(me->GetPhaseMask(), x, y, home.GetPositionZ() + 10.0f);
-                    if (ground <= INVALID_HEIGHT)
+                    if (ground <= INVALID_HEIGHT || std::fabs(ground - home.GetPositionZ()) > CAVE_FLOOR_STEP ||
+                        !map->isInLineOfSight(home.GetPositionX(), home.GetPositionY(), home.GetPositionZ() + 5.0f,
+                            x, y, ground + 5.0f, me->GetPhaseMask(), LINEOFSIGHT_ALL_CHECKS,
+                            VMAP::ModelIgnoreFlags::Nothing))
                         continue;
                     float rx, ry, rz;
                     if (!tree.GetObjectHitPos(x, y, ground + 2.0f, x, y, ground + CEILING_SEARCH, rx, ry, rz, -0.5f) ||
                         rz >= ground + CEILING_SEARCH - 1.0f)
                         continue;
                     float const turn = frand(0.0f, 2 * float(M_PI));
-                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz, turn, 1, 0, 0, 0, 0))
-                        _stalactites.push_back({ Position(x, y, ground), hanging->GetGUID() });
+                    if (GameObject* hanging = me->SummonGameObject(GO_STALACTITE, x, y, rz - STALACTITE_SINK, turn,
+                            0, 0, 0, 0, 0))
+                    {
+                        hanging->SetTransportPathRotation(1.0f, 0.0f, 0.0f, 0.0f);
+                        _stalactites.push_back({ Position(x, y, ground), rz - STALACTITE_SINK, hanging->GetGUID() });
+                    }
                 }
         }
 
@@ -726,6 +737,32 @@ namespace
                 if (GameObject* hanging = me->GetMap()->GetGameObject(stalactite.hanging))
                     hanging->DespawnOrUnsummon();
             _stalactites.clear();
+            DespawnFalling();
+        }
+
+        static Milliseconds FallTime(float height)
+        {
+            return Milliseconds(uint32(std::sqrt(2.0f * std::max(height, 0.0f) / Movement::gravity) * 1000));
+        }
+
+        void Drop(Position const& ground, float ceiling)
+        {
+            if (!me->IsInCombat())
+                return;
+            if (Creature* falling = me->SummonCreature(NPC_FALLING_ICICLE, ground.GetPositionX(), ground.GetPositionY(),
+                    ceiling, frand(0.0f, 2 * float(M_PI)), TEMPSUMMON_TIMED_DESPAWN, 6000))
+            {
+                falling->GetMotionMaster()->MoveFall();
+                _falling.push_back(falling->GetGUID());
+            }
+        }
+
+        void DespawnFalling()
+        {
+            for (ObjectGuid const& guid : _falling)
+                if (Creature* falling = ObjectAccessor::GetCreature(*me, guid))
+                    falling->DespawnOrUnsummon();
+            _falling.clear();
         }
 
         void Schedule() override
@@ -835,16 +872,23 @@ namespace
                                 nearest = it;
                         if (nearest == _stalactites.end())
                             continue;
+                        Milliseconds const dropAt = std::max(ICICLE_IMPACT - FallTime(nearest->ceiling -
+                            nearest->ground.GetPositionZ()), 0ms);
                         if (GameObject* hanging = me->GetMap()->GetGameObject(nearest->hanging))
-                            hanging->DespawnOrUnsummon(4s);
+                            hanging->DespawnOrUnsummon(dropAt);
                         nearest->hanging.Clear();
                         _icicles.push_back(nearest->ground);
                         CastAt(nearest->ground, SPELL_CAVE_IN_WARNING);
+                        Position const ground = nearest->ground;
+                        float const ceiling = nearest->ceiling;
+                        me->m_Events.AddEventAtOffset([this, ground, ceiling]() { Drop(ground, ceiling); }, dropAt);
                     }
-                    _clock.ScheduleEvent(TW_ICICLE, 4s);
+                    _clock.ScheduleEvent(TW_ICICLE, ICICLE_IMPACT);
                     break;
                 }
                 case TW_ICICLE:
+                    DespawnFalling();
+                    me->RemoveDynObject(SPELL_WATER_SPIKE);
                     for (Position const& pos : _icicles)
                     {
                         CastAt(pos, SPELL_WATER_SPIKE);
@@ -964,9 +1008,11 @@ namespace
         struct Stalactite
         {
             Position ground;
+            float ceiling;
             ObjectGuid hanging;
         };
         std::vector<Stalactite> _stalactites;
+        std::vector<ObjectGuid> _falling;
         bool _hung = false;
         std::vector<ObjectGuid> _fallen;
         std::vector<Position> _ringSpikes[2];
