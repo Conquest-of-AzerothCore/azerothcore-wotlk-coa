@@ -21,12 +21,12 @@ ENTRY = {'spell': 707504, 'name': 'Spirit Hunting (extra Spirit per Malefic Arro
          'label_suffix': 'spirit_chance', 'quote': HUNTING_QUOTE, 'talent': 707504, 'stack_aura': SPIRIT,
          'trigger_spell': ARROW, 'learn': [ARROW, 707854], 'event_spell': SPIRIT, 'chance_pct': 15,
          'arms': [{'stacks': 5, 'trials': 590}, {'stacks': 4, 'trials': 1180}], 'control_trials': 10,
-         'unlearned_trials': 10, 'cast_wait_ms': 1600, 'cast_power': 1000, 'parts': 6}
+         'unlearned_trials': 10, 'cast_wait_ms': 1600, 'cast_power': 1000, 'parts': 6, 'dummy_distance': 15}
 ECHO = {'spell': 705843, 'name': 'Loa Spirits (Reclamation recast)', 'kind': 'stack_chance_rate',
         'label_suffix': 'spirit_chance', 'quote': ECHO_QUOTE, 'stack_aura': SPIRIT, 'trigger_spell': RECLAMATION,
         'trial_spell': SPIRIT, 'event_spell': RECLAMATION, 'event_offset': 1, 'chance_pct': 5,
         'arms': [{'stacks': 1, 'trials': 451}, {'stacks': 2, 'trials': 854}], 'control_trials': 10,
-        'unlearned_trials': 8, 'cast_wait_ms': 2500, 'cast_power': 1000, 'parts': 7}
+        'unlearned_trials': 8, 'cast_wait_ms': 2500, 'cast_power': 1000, 'parts': 7, 'dummy_distance': 15}
 FAIR = {'unlearned': (10, 0), 'control': (10, 0), 'stacks 5': (590, 442), 'stacks 4': (1180, 708)}
 ECHO_FAIR = {'unlearned': (8, 0), 'control': (10, 0), 'stacks 1': (451, 22), 'stacks 2': (854, 85)}
 TEN_PARTS = {'parts': 10, 'arms': [{'stacks': 5, 'trials': 570}, {'stacks': 4, 'trials': 1150}]}
@@ -145,6 +145,14 @@ class StackChanceRateTests(unittest.TestCase):
                         {'parts': 10, 'arms': [{'stacks': 5, 'trials': 354}, {'stacks': 4, 'trials': 708}]},
                         {'arms': [{'stacks': 6, 'trials': 600}]},
                         {'chance_pct': 25, 'arms': [{'stacks': 4, 'trials': 600}]}, {'cast_wait_ms': 1000},
-                        {'cast_power': None}, {'learn': [ARROW, 707854, 707504]}, {'control_trials': 8}):
+                        {'cast_power': None}, {'learn': [ARROW, 707854, 707504]}, {'control_trials': 8},
+                        {'dummy_distance': None}, {'dummy_distance': 0}, {'dummy_distance': 101}):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.built(**changes)
+
+    def test_a_ranged_trigger_casts_at_the_stated_distance(self):
+        for entry in (ENTRY, ECHO):
+            with self.subTest(spell=entry['spell']):
+                scenario, _ = self.built(entry)
+                self.assertEqual(scenario['creatures'][0]['distance'], 15)
+                self.assertIn('The dummy stands 15 yd from the caster.', scenario['contract'])

@@ -43,7 +43,9 @@ states the game time, the acceleration it assumes and the wall time.
 Two arms of different stacks separate a per-stack chance from a flat one: a flat 75% at 4 Spirits reads 75% against
 60% plus or minus 3 points. `cast_power` sets the trigger's power before each cast (required for a costed trigger);
 its cooldown is reset before each cast when it has one; `cast_wait_ms` must cover the global cooldown and the cast
-time.
+time. `dummy_distance` (yd, at most 100) places the dummy; a trigger that uses the ranged slot must name it, because
+at the default distance the core refuses every cast as too close (`SPELL_FAILED_TOO_CLOSE`, Spell.cpp:7355-7359), and
+a run without it would count no trial at all.
 
 Witch Doctor (Witch Doctor ADR 0001): Spirit Hunting 707504 (Malefic Arrow 801674, one extra Spirit 561136 at 15% per
 Spirit, arms of 5 and 4 Spirits) and Loa Spirits 705843 (Reclamation 806288 cast an additional time at 5% per Spirit,

@@ -2,7 +2,8 @@ from dataclasses import dataclass, replace
 import math
 from pathlib import Path
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, LEARNED_CONTRAST, behaviour_entry, prose_rule, waited_ms
+from behaviours import (BEHAVIOUR_METRIC_DELTA, LEARNED_CONTRAST, METRIC_DELTA_MAX_DUMMY_DISTANCE, behaviour_entry,
+                        prose_rule, waited_ms)
 from compare import (CONTRAST, MINIMUM_BETWEEN_PARTS, Run, Verdict, banded_rate, between_part_judgement,
                      missing_measurement)
 from hits import MAX_ACCELERATED_SCENARIO_MS, creature_fixture, timed
@@ -54,6 +55,7 @@ class StackChanceSpec:
     parts: int
     pilot: bool
     label_suffix: str
+    dummy_distance: float | None = None
 
 
 def arm_total_chance(chance: float, stacks: int) -> float:
@@ -90,7 +92,11 @@ def stack_chance_spec(entry: dict) -> StackChanceSpec:
         int(entry['control_trials']), int(entry['unlearned_trials']), int(entry['cast_wait_ms']),
         int(entry['cast_power']) if entry.get('cast_power') is not None else None,
         learn if trigger in learn else (trigger, *learn), int(entry.get('parts', 1)), bool(entry.get('pilot', False)),
-        entry.get('label_suffix', 'stack_chance'))
+        entry.get('label_suffix', 'stack_chance'),
+        float(entry['dummy_distance']) if entry.get('dummy_distance') is not None else None)
+    if spec.dummy_distance is not None and not 0 < spec.dummy_distance <= METRIC_DELTA_MAX_DUMMY_DISTANCE:
+        raise ValueError(f'{spec.spell} {KIND} places the dummy {spec.dummy_distance:g} yd away, outside (0, '
+                         f'{METRIC_DELTA_MAX_DUMMY_DISTANCE}] yd')
     chance = spec.chance_pct / 100
     stacks = [arm.stacks for arm in spec.arms]
     if not 0 < chance < 1 or not stacks or len(set(stacks)) != len(stacks) or spec.event_offset < 0:
@@ -129,6 +135,9 @@ def stack_chance_scenario(class_file: dict, spec: StackChanceSpec) -> tuple[dict
     costed = facts.mana_cost > 0 or facts.mana_cost_percentage > 0 or facts.mana_cost_per_level > 0
     if costed and spec.cast_power is None:
         raise ValueError(f'{spec.spell} {KIND} casts {spec.trigger_spell}, which costs power: name cast_power')
+    if records.field('Spell', spec.trigger_spell, 'Attributes') & USES_RANGED_SLOT and spec.dummy_distance is None:
+        raise ValueError(f'{spec.spell} {KIND} casts {spec.trigger_spell}, a ranged-slot spell refused as too close '
+                         f'at the default dummy distance: name dummy_distance')
     stack_limit = max(1, int(records.field('Spell', spec.stack_aura, 'StackAmount')))
     if max(arm.stacks for arm in spec.arms) > stack_limit:
         raise ValueError(f'{spec.spell} {KIND} sets more than the {stack_limit} stacks of {spec.stack_aura}')
@@ -167,6 +176,11 @@ def stack_chance_scenario(class_file: dict, spec: StackChanceSpec) -> tuple[dict
     if len(steps) > MAX_SCENARIO_STEPS:
         raise ValueError(f'{spec.spell} {KIND} needs {len(steps)} steps, more than {MAX_SCENARIO_STEPS}: '
                          f'split the trials over more parts')
+    dummy = creature_fixture(armed)
+    placement = ''
+    if spec.dummy_distance is not None:
+        dummy['distance'] = spec.dummy_distance
+        placement = f' The dummy stands {spec.dummy_distance:g} yd from the caster.'
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour stack chance rate',
@@ -176,9 +190,9 @@ def stack_chance_scenario(class_file: dict, spec: StackChanceSpec) -> tuple[dict
                      f'then ' + ', '.join(f'{arm.trials} at {arm.stacks}' for arm in spec.arms)
                      + f'; an event is a cast of {spec.event_spell} beyond {spec.event_offset} per counted cast of '
                        f'{spec.trial_spell}, and each arm\'s total chance, its stacks times {spec.chance_pct:g}%, '
-                       f'must hold in a {interval_name(spec.parts)} inside the G-19 band of that total'),
+                       f'must hold in a {interval_name(spec.parts)} inside the G-19 band of that total' + placement),
         'players': [player_fixture(armed)],
-        'creatures': [creature_fixture(armed)],
+        'creatures': [dummy],
         'steps': steps}
     model = {'kind': KIND, 'metric': METRIC, 'quote': entry.quote, 'chance_pct': spec.chance_pct,
              'stack_aura': spec.stack_aura, 'trial_spell': spec.trial_spell, 'event_spell': spec.event_spell,
