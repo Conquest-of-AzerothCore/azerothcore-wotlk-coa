@@ -1,0 +1,227 @@
+{
+  "schema": 1,
+  "name": "Unmake ticks scale with the tooltip spell power coefficient (#12124)",
+  "contract": [
+    "Every Unmake rank's description prices one tick at $m1+0+$SP*coefficient: 0.1 on rank 1 804418 and 0.12 on ranks 2-11 (503784-503790, 504574, 574344, 574345).",
+    "Spell.dbc EffectBonusMultiplier is 0 on rank 1 and 0.0624 on ranks 2-11, a stock column CoA does not author; spell_bonus_data dot_bonus now carries the tooltip value for each rank.",
+    "spell_damage_done with periodic: true queries the native DoT path on a fixed base of 1000, so its gain after the +2000 all-school spell damage aura 44505, divided by the measured spell power gain, is the coefficient times the native level penalty.",
+    "Rank 11 574345 has SpellLevel 60 and MaxLevel 78, so a level-60 caster has no penalty and the ratio is 0.12 (0.0624 before the fix).",
+    "Rank 1 804418 has SpellLevel 1 and MaxLevel 5; the native penalty for spells below level 20 is (20 - 1) * 3.75% = 71.25%, so a level-1 caster gets 0.1 * 0.2875 = 0.02875 (0 before the fix). Its own row is needed because the lookup falls back to the first rank, whose coefficient differs from rank 11's.",
+    "A real rank 11 cast at level 60 then ticks for base 79-85 (EffectBasePoints 78 + DieSides 7, no per-level growth at BaseLevel 60) plus 0.12 * 2000 = 240, so a non-critical tick averages 319-325; the stock 0.0624 would give 204-210."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "novice",
+      "race": 1,
+      "class": 22,
+      "level": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5
+    },
+    {
+      "id": "novice_dummy",
+      "owner": "novice",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 6000
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 574345
+    },
+    {
+      "action": "learn",
+      "actor": "novice",
+      "spell": 804418
+    },
+    {
+      "action": "assert",
+      "label": "The level-60 caster begins without spell power",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 574345,
+      "effect": 0,
+      "periodic": true,
+      "target": "dummy",
+      "save_as": "rank11_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "sp_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "novice",
+      "metric": "spell_damage_done",
+      "spell": 804418,
+      "effect": 0,
+      "periodic": true,
+      "target": "novice_dummy",
+      "save_as": "rank1_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "novice",
+      "metric": "spell_power",
+      "school": 5,
+      "save_as": "novice_sp_before"
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture +2000 spell damage",
+      "actor": "chronomancer",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture +2000 spell damage",
+      "actor": "novice",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the fixture grants 2000 spell damage",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "equals": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "sp_before",
+      "save_as": "sp_gain"
+    },
+    {
+      "action": "snapshot",
+      "actor": "novice",
+      "metric": "spell_power",
+      "school": 5,
+      "relative_to": "novice_sp_before",
+      "save_as": "novice_sp_gain"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 11's periodic coefficient is the tooltip's 0.12, not the stock 0.0624",
+      "actor": "chronomancer",
+      "metric": "spell_damage_done",
+      "spell": 574345,
+      "effect": 0,
+      "periodic": true,
+      "target": "dummy",
+      "relative_to": "rank11_before",
+      "ratio_to": "sp_gain",
+      "min": 0.119,
+      "max": 0.121
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: rank 1's periodic coefficient is the tooltip's 0.1 after the native 71.25% low-level penalty",
+      "actor": "novice",
+      "metric": "spell_damage_done",
+      "spell": 804418,
+      "effect": 0,
+      "periodic": true,
+      "target": "novice_dummy",
+      "relative_to": "rank1_before",
+      "ratio_to": "novice_sp_gain",
+      "min": 0.0275,
+      "max": 0.0295
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Refresh the 10 s fixture before the cast",
+      "actor": "chronomancer",
+      "spell": 44505,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 574345,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Unmake ticks on the dummy",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 574345,
+      "target": "dummy",
+      "critical": false,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Let the 1.5 s DoT finish",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 574345,
+      "target": "dummy",
+      "critical": false,
+      "save_as": "ticks"
+    },
+    {
+      "action": "assert",
+      "label": "A non-critical tick averages base 79-85 plus 0.12 x 2000 spell power",
+      "actor": "chronomancer",
+      "metric": "spell_damage_total",
+      "spell": 574345,
+      "target": "dummy",
+      "critical": false,
+      "ratio_to": "ticks",
+      "min": 315,
+      "max": 330
+    }
+  ]
+}

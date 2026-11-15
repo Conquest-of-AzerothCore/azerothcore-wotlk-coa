@@ -166,8 +166,9 @@ without inventing the missing intent, and several need a decision before anythin
 the decisive field.
 
 - **#894 Infinite Horizon 560528** — effect 1 is `SPELLMOD_BONUS_MULTIPLIER` +20% masked to Timerend and
-  Unmake, but `Unit::SpellDamageBonusDone` applies that op only when the effect's `EffectBonusMultiplier` is
-  nonzero. Unmake 503784 carries 0.0624; every Timerend rank carries 0.0, and the one that carried 0.1
+  Unmake, but `Unit::SpellDamageBonusDone` applies that op only when the spell has a nonzero coefficient.
+  Unmake ranks carry their tooltip coefficients in `spell_bonus_data` (#12124); every Timerend rank carries 0.0,
+  and the one that carried 0.1
   (801291) is zeroed by `AscensionStockCoefficients.cpp`, and the Timerend descriptions state no spell power
   term. The Timerend half is dead. The raid aura and the Unmake bonus work
   (`chronomancer-infinite-horizon-raid-and-unmake-scaling`), and since 2026-09-22 raid damage group 2000184
