@@ -4,6 +4,14 @@ DELETE FROM `creature_addon` WHERE `guid` = 9962259;
 INSERT INTO `creature_addon` (`guid`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
 (9962259, 0, 0, 1, 1, 0, 0, '');
 
+-- His look from Redthedeer's dialogue view (RIEMlZSgbQw 7:43:05-7:50:10): bald, white braided beard, navy vest
+-- with arm bands, dark trousers. Closest client items; his light-blue cape has no match yet.
+DELETE FROM `creature_display_preset` WHERE `entry` = 164379;
+INSERT INTO `creature_display_preset` (`entry`, `display_id`, `race`, `gender`, `class`, `skin`, `face`, `hair`,
+    `haircolor`, `facialhair`, `guild_id`, `item_head`, `item_shoulders`, `item_body`, `item_chest`, `item_waist`,
+    `item_legs`, `item_feet`, `item_wrists`, `item_hands`, `item_back`, `item_tabard`) VALUES
+(164379, 53, 3, 0, 1, 3, 7, 13, 14, 2, 0, 0, 0, 40287, 0, 1238, 40297, 18943, 0, 0, 0, 0);
+
 -- Tholgrim Copperweigh, Nivelarn's last open merchant (npc_text 1200361 "take a look"), trades in front of his
 -- cart instead of inside the hovel. The realm stock is unknown; he sells common trade goods.
 UPDATE `creature` SET `position_x` = -6417.77, `position_y` = 77.4868, `position_z` = 519.039, `orientation` = 2.3878,
