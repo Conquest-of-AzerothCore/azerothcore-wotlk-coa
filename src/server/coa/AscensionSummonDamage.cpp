@@ -1,20 +1,13 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "AscensionLevelDamageSummons.h"
 #include "ObjectMgr.h"
 #include "Pet.h"
 #include "Player.h"
 #include "ScriptMgr.h"
-#include <algorithm>
-#include <array>
 
 namespace
 {
-constexpr std::array<uint32, 3> LevelDamageSummons = {
-    51265,
-    100481,
-    250305,
-};
-
 class ascension_summon_level_damage : public PlayerScript
 {
 public:
@@ -23,9 +16,7 @@ public:
 
     void OnPlayerAfterGuardianInitStatsForLevel(Player* player, Guardian* guardian) override
     {
-        if (!player || !guardian ||
-            std::find(LevelDamageSummons.begin(), LevelDamageSummons.end(), guardian->GetEntry()) ==
-                LevelDamageSummons.end())
+        if (!player || !guardian || !IsAscensionLevelDamageSummon(guardian->GetEntry()))
             return;
 
         CreatureTemplate const* info = guardian->GetCreatureTemplate();
