@@ -4,13 +4,24 @@
   "contract": [
     "Issue #12029: Thermaplugg's kit Walking Bombs (9780710) appeared under the boss. The kit summoned each one at",
     "SMART_TARGET_RANDOM_POINT range 20, whose radius is uniform from 0 to 20 yards. The kit's in-game check places",
-    "them about 20 yards from him, so each Jackhammer (2102788, first cast 9.1-11.1 s into combat) now summons three",
-    "bombs on a 20-yard ring around him. Frostbite 12494 roots Thermaplugg so Knock Away cannot pull him off his spot.",
-    "The observer stands 3 yards from him and stays out of the fight; the nearest ring bomb is then at least 17 yards",
-    "from the observer. With the old uniform radius, the nearest of three bombs lands within 15 yards of the observer",
-    "in about 98% of casts."
+    "them about 20 yards from him, so each Jackhammer (2102788, first cast 9.1-11.1 s into combat) now summons",
+    "three bombs on a 20-yard ring around him. The fight runs at his own spawn point in Gnomeregan, so the ring",
+    "lands on his room's floor. The tank re-enters grouped with the observer, so both share his instance. Self Root",
+    "Forever 42716 holds him there: it has no mechanic, so his root immunity (-229) does not block it. He is",
+    "defensive and a tank bot holds him, so only the tank is on his threat list and Jackhammer's and Knock Away's",
+    "knockbacks cannot move the observer, who stands 3 yards from him and never attacks. The nearest ring bomb is",
+    "then 17-23 yards from the observer. With the old uniform radius, the nearest of three bombs lands within 15",
+    "yards of the observer in about 98% of casts."
   ],
   "timeout_ms": 90000,
+  "location": {
+    "map": 90,
+    "x": -534.324,
+    "y": 670.159,
+    "z": -325.185,
+    "o": 0.0,
+    "ignore_access": true
+  },
   "players": [
     {
       "id": "observer",
@@ -22,7 +33,10 @@
       "id": "tank",
       "race": 1,
       "class": 1,
-      "level": 60
+      "level": 60,
+      "role": "tank",
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
     }
   ],
   "creatures": [
@@ -32,6 +46,7 @@
       "entry": 7800,
       "level": 30,
       "health": 1000000,
+      "reaction": 1,
       "distance": 3
     }
   ],
@@ -39,7 +54,8 @@
     {
       "action": "set_health",
       "actor": "tank",
-      "value": 10000000
+      "value": 10000000,
+      "maximum": 10000000
     },
     {
       "action": "wait",
@@ -47,10 +63,62 @@
       "ms": 3000
     },
     {
+      "action": "teleport",
+      "label": "The tank leaves its own Gnomeregan instance",
+      "actor": "tank",
+      "map": 0,
+      "x": -5163.0,
+      "y": 925.0,
+      "z": 257.2,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank is outside",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "group",
+      "label": "The tank joins the observer's group",
+      "actor": "observer",
+      "target": "tank"
+    },
+    {
+      "action": "teleport",
+      "label": "The tank enters the observer's Gnomeregan instance",
+      "actor": "tank",
+      "map": 90,
+      "x": -534.324,
+      "y": 672.159,
+      "z": -325.185,
+      "o": 0,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the fight is in Gnomeregan",
+      "actor": "observer",
+      "metric": "map_id",
+      "equals": 90
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the tank shares Thermaplugg's instance",
+      "actor": "tank",
+      "metric": "distance",
+      "target": "thermaplugg",
+      "max": 10,
+      "within_ms": 10000
+    },
+    {
       "action": "set_aura",
       "actor": "observer",
       "target": "thermaplugg",
-      "spell": 12494,
+      "caster": "thermaplugg",
+      "spell": 42716,
       "stacks": 1
     },
     {
@@ -70,15 +138,17 @@
       "equals": 0
     },
     {
-      "action": "attack",
+      "action": "encounter_start",
       "actor": "tank",
-      "target": "thermaplugg"
+      "boss_entry": 7800,
+      "radius": 30
     },
     {
       "action": "assert",
       "label": "CONTROL: Thermaplugg fights the tank",
       "actor": "thermaplugg",
-      "metric": "combat",
+      "metric": "victim",
+      "target": "tank",
       "equals": 1,
       "within_ms": 10000
     },
@@ -99,6 +169,22 @@
       "entry": 9780710,
       "min": 15,
       "max": 24
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Thermaplugg is still rooted",
+      "actor": "thermaplugg",
+      "metric": "rooted",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the observer still stands 3 yards from Thermaplugg",
+      "actor": "observer",
+      "metric": "distance",
+      "target": "thermaplugg",
+      "min": 2,
+      "max": 4
     }
   ]
 }
