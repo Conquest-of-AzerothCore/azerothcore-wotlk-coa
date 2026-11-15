@@ -627,8 +627,8 @@ namespace
     constexpr float STALACTITE_REACH  = 115.0f;
     constexpr float CEILING_SEARCH    = 90.0f;
     constexpr float STALACTITE_SINK   = 4.0f;
-    constexpr Milliseconds ICICLE_DROP = 3300ms;
-    constexpr uint32 NPC_ICICLE_DROPPER = 67538;
+    constexpr Milliseconds ICICLE_DROP = 2400ms;
+    constexpr uint32 NPC_FALLING_ICICLE = 978100;
     constexpr float CAVE_FLOOR_STEP   = 10.0f;
     constexpr float STALACTITE_PICK   = 10.0f;
     constexpr float SNOWGRAVE_LEASH   = 120.0f;
@@ -859,13 +859,10 @@ namespace
                 }
                 case TW_ICICLE_DROP:
                     for (Stalactite const& drop : _drops)
-                        if (Creature* from = me->SummonCreature(NPC_ICICLE_DROPPER, drop.ground.GetPositionX(),
-                                drop.ground.GetPositionY(), drop.ceiling, 0, TEMPSUMMON_TIMED_DESPAWN, 3000))
-                        {
-                            from->SetDisableGravity(true);
-                            from->CastSpell(drop.ground.GetPositionX(), drop.ground.GetPositionY(),
-                                drop.ground.GetPositionZ(), SPELL_HAIL_MISSILE_LEFT, true);
-                        }
+                        if (Creature* falling = me->SummonCreature(NPC_FALLING_ICICLE, drop.ground.GetPositionX(),
+                                drop.ground.GetPositionY(), drop.ceiling, frand(0.0f, 2 * float(M_PI)),
+                                TEMPSUMMON_TIMED_DESPAWN, 1600))
+                            falling->GetMotionMaster()->MoveFall();
                     _drops.clear();
                     break;
                 case TW_ICICLE:
