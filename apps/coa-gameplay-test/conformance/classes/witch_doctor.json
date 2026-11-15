@@ -293,7 +293,7 @@
       "fields": {
         "spell": 500950
       },
-      "wait_ms": 1000,
+      "wait_ms": 2500,
       "expire_ms": 500,
       "observe_source": "AscensionWitchDoctorAbilities.cpp:328-329 (OnSpellCast): if (Family(info, 1, 131072) && player->HasAura(SplashOnEm)) Reduce(player, Beam, 2000); Loa's Brew 801670 has SpellFamilyFlags[1] 131072; Reduce is ModifySpellCooldown(-2000) on each known rank of Mojo Beam 500950 (RecoveryTime 14000). Each phase casts Mojo Beam at the caster (starts its 14000 ms cooldown), then Loa's Brew, and reads the Beam cooldown 1000 ms later; 802219 learned between phases. Control: the before phase (no talent) reads the cooldown the Beam still has; the judge takes after minus before and requires -2000 within 100 (before_expected 6000 is the least before reading so no floor hides the cut, expected = 6000 - 2000). Same waits in both phases, so clock overhead cancels."
     }

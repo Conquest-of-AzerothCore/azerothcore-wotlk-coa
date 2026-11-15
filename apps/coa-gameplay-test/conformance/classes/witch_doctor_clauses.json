@@ -139,7 +139,9 @@
   {
     "spell": 301175,
     "clause": "Casting Spirit in a Bottle now grants Spirit.",
-    "labels": [],
+    "labels": [
+      "301175 behaviour_metric_delta spirit"
+    ],
     "kind": "claim"
   },
   {
@@ -441,7 +443,23 @@
     "spell": 501136,
     "clause": "gaining 5 Spirits, leaving a copy of yourself behind, and reducing threat each second.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "gaining 5 Spirits",
+        "labels": [
+          "501136 behaviour_metric_delta spirits"
+        ]
+      },
+      {
+        "claim": "leaving a copy of yourself behind",
+        "labels": []
+      },
+      {
+        "claim": "reducing threat each second",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 501136,
@@ -1184,7 +1202,19 @@
     "spell": 704497,
     "clause": "and create 5 clones of yourself that channel on you, applying a stack of Soul Marionette.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "create 5 clones of yourself",
+        "labels": [
+          "704497 behaviour_metric_delta clones"
+        ]
+      },
+      {
+        "claim": "that channel on you, applying a stack of Soul Marionette",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 704497,
@@ -1900,7 +1930,9 @@
   {
     "spell": 705948,
     "clause": "Casting Spirit Eclipse with 5 Spirits now resets the cooldown of Spirit Glaive",
-    "labels": [],
+    "labels": [
+      "705948 behaviour_metric_delta reset"
+    ],
     "kind": "claim"
   },
   {
@@ -1983,7 +2015,9 @@
   {
     "spell": 706488,
     "clause": "Your Mimic Ward now summons 1 additional Mimic Ward",
-    "labels": [],
+    "labels": [
+      "706488 behaviour_metric_delta mimic"
+    ],
     "kind": "claim"
   },
   {
@@ -2664,7 +2698,9 @@
   {
     "spell": 802219,
     "clause": "Casting Loa's Brew now reduces the cooldown of Mojo Beam by 2 sec.",
-    "labels": [],
+    "labels": [
+      "802219 behaviour_metric_delta brew_beam"
+    ],
     "kind": "claim"
   },
   {
