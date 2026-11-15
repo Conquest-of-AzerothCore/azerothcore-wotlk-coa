@@ -1182,6 +1182,7 @@ namespace
         SPELL_SOUL_LINK         = 2119847,
         SPELL_VESSEL_CHANNEL    = 33827,
         SPELL_VESSEL_SOULS      = 84848,
+        SPELL_VESSEL_SHADOWMOURNE = 72523,
         SPELL_VESSEL_HORROR     = 69105,
 
         NPC_ATALZUL             = 67532,
@@ -1327,18 +1328,17 @@ namespace
             else
                 me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             _assaulted = false;
-            for (uint32 visual : { SPELL_VESSEL_SOULS, SPELL_VESSEL_HORROR })
-            {
-                if (state == VESSEL_IDLE || state == VESSEL_LINKED)
-                {
-                    if (!me->HasAura(visual))
-                        me->AddAura(visual, me);
-                }
-                else
-                    me->RemoveAurasDueToSpell(visual);
-            }
             Keep(_barrier, state == VESSEL_SHIELDED, NPC_VESSEL_BARRIER, BARRIER_RISE);
-            Keep(_anchor, state == VESSEL_LINKED || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
+            bool const dormant = state == VESSEL_IDLE || state == VESSEL_LINKED;
+            Keep(_anchor, dormant || state == VESSEL_OPEN, NPC_VESSEL_ANCHOR, ANCHOR_RISE);
+            if (Creature* anchor = ObjectAccessor::GetCreature(*me, _anchor))
+                for (uint32 visual : { SPELL_VESSEL_SHADOWMOURNE, SPELL_VESSEL_SOULS, SPELL_VESSEL_HORROR })
+                {
+                    if (dormant && !anchor->HasAura(visual))
+                        anchor->AddAura(visual, anchor);
+                    else if (!dormant)
+                        anchor->RemoveAurasDueToSpell(visual);
+                }
         }
 
         void Keep(ObjectGuid& guid, bool wanted, uint32 entry, float rise)
@@ -1410,6 +1410,8 @@ namespace
         {
             if (_state == VESSEL_IDLE || _state == VESSEL_LINKED)
             {
+                if (!ObjectAccessor::GetCreature(*me, _anchor))
+                    SetState(_state);
                 bool const held = Channeler() != nullptr;
                 if (held && _state == VESSEL_IDLE)
                 {
