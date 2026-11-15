@@ -99,7 +99,9 @@ Support commands for a player's run (administrator, also from the console; the p
 ```
 
 - `objectives` lists every active challenge with its level, deaths and tracked objectives, numbered and marked
-  done or pending, and the challenge ids the player is locked out of. It also works for an offline character.
+  done or pending, and the challenges the player has failed, newest first, each with its Challenge ID, level,
+  when it failed and the character's level at that moment, which is what `restore` needs. It also works for an
+  offline character.
 - `credit` marks one objective done by the Challenge ID and Objective ID shown in that list, whatever the
   player's level, and runs the normal completion check. The player must be online. `credit` and `restore`
   typed without their IDs print their syntax and point to `objectives`. `.help coa trial objectives`,

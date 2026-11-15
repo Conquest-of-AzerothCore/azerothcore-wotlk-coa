@@ -120,7 +120,7 @@
     },
     {
       "action": "assert", "label": "The death failed the one-life run",
-      "actor": "gm", "metric": "system_message_contains", "text": "Failure locks (Challenge IDs): 60", "equals": 1, "within_ms": 5000
+      "actor": "gm", "metric": "system_message_contains", "text": "Hardcore - Boss Blitz, Challenge ID 60, level 1, failed less than a minute ago at character level 23", "equals": 1, "within_ms": 5000
     },
     { "action": "set_level", "actor": "runner", "value": 27 },
     {

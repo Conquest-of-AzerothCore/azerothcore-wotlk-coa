@@ -3105,24 +3105,48 @@ namespace CoAChallenges
                     handler->PSendSysMessage("  All objectives done; completes at level {}.", maxLevel);
             }
 
-            std::string failed;
-            if (QueryResult r = CharacterDatabase.Query(
-                    "SELECT challengeId FROM coa_challenge_failure WHERE guid = {} ORDER BY challengeId", guid))
+            // The failed challenges, newest first, with what a GM needs to pick
+            // the Challenge ID for `.coa trial restore`. The character level comes
+            // from the failure snapshot and is absent for older failures.
+            QueryResult failed = CharacterDatabase.Query(
+                "SELECT f.challengeId, f.level, f.failTime, s.characterLevel FROM coa_challenge_failure f "
+                "LEFT JOIN coa_challenge_failure_snapshot s ON s.guid = f.guid "
+                "AND s.failedChallengeId = f.challengeId AND s.challengeId = f.challengeId "
+                "WHERE f.guid = {} ORDER BY f.failTime DESC, f.challengeId", guid);
+            if (failed)
             {
+                handler->PSendSysMessage("Failed challenges:");
+                uint32 const now = uint32(::time(nullptr));
                 do
                 {
-                    if (!failed.empty())
-                        failed += ", ";
-                    failed += std::to_string(r->Fetch()[0].Get<uint32>());
-                } while (r->NextRow());
+                    Field* f = failed->Fetch();
+                    uint32 const challengeId = f[0].Get<uint32>();
+                    uint32 const failTime = f[2].Get<uint32>();
+                    handler->PSendSysMessage("  {}, Challenge ID {}, level {}, failed {}{}",
+                        ChallengeName(challengeId), challengeId, f[1].Get<uint32>(),
+                        TimeAgo(failTime, now), f[3].IsNull() ? std::string()
+                            : Acore::StringFormat(" at character level {}", f[3].Get<uint32>()));
+                } while (failed->NextRow());
             }
-            if (!failed.empty())
-                handler->PSendSysMessage("Failure locks (Challenge IDs): {}", failed);
             if (!actives.empty())
                 handler->PSendSysMessage("Credit an objective: {}", CreditSyntax);
-            if (!failed.empty())
+            if (failed)
                 handler->PSendSysMessage("Restore a failed challenge: {}", RestoreSyntax);
             return true;
+        }
+
+        static std::string TimeAgo(uint32 then, uint32 now)
+        {
+            if (!then || then > now)
+                return "at an unknown time";
+            uint32 const seconds = now - then;
+            if (seconds < MINUTE)
+                return "less than a minute ago";
+            if (seconds < HOUR)
+                return Acore::StringFormat("{} minute(s) ago", seconds / MINUTE);
+            if (seconds < DAY)
+                return Acore::StringFormat("{} hour(s) ago", seconds / HOUR);
+            return Acore::StringFormat("{} day(s) ago", seconds / DAY);
         }
 
         static constexpr char const* CreditSyntax = ".coa trial credit <Challenge ID> <Objective ID> [player]";
