@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionClassMechanics12To17.h"
+#include "Creature.h"
 #include "Player.h"
 #include "Spell.h"
 #include <array>
@@ -90,6 +91,12 @@ bool IsSuccessfulHostileHit(Player const* player, Unit const* target,
         !player->IsFriendlyTo(target);
 }
 
+bool IsTrainingDummy(Unit const* unit)
+{
+    Creature const* creature = unit ? unit->ToCreature() : nullptr;
+    return creature && creature->GetScriptName() == "npc_training_dummy";
+}
+
 void RestoreAllEnergy(Player* player)
 {
     player->SetPower(POWER_ENERGY, player->GetMaxPower(POWER_ENERGY));
@@ -115,18 +122,22 @@ void HandleAscensionClassMechanics12To17CalculatedTarget(Spell* spell,
 void HandleAscensionClassMechanics12To17Hit(Spell* spell, Player* player,
     Unit* target, std::uint8_t missInfo, std::uint32_t damage, bool critical)
 {
-    if (!spell || !player || spell->IsTriggered() ||
-        !IsSuccessfulHostileHit(player, target, missInfo, damage))
+    if (!spell || !player || spell->IsTriggered())
         return;
 
     std::uint32_t spellId = spell->GetSpellInfo()->Id;
+    if (player->getClass() == CLASS_BARBARIAN && player->HasAura(SPELL_BARBARIAN_THIRST_FOR_BATTLE) &&
+        IsSpellInRanges(spellId, BARBARIAN_SMASH) &&
+        IsSuccessfulHostileHit(player, target, missInfo, damage ? damage : IsTrainingDummy(target)))
+        player->CastSpell(player, SPELL_BARBARIAN_THIRST_ENERGIZE, true);
+
+    if (!IsSuccessfulHostileHit(player, target, missInfo, damage))
+        return;
+
     switch (player->getClass())
     {
         case CLASS_BARBARIAN:
         {
-            if (player->HasAura(SPELL_BARBARIAN_THIRST_FOR_BATTLE) && IsSpellInRanges(spellId, BARBARIAN_SMASH))
-                player->CastSpell(player, SPELL_BARBARIAN_THIRST_ENERGIZE, true);
-
             if (IsSpellInRanges(spellId, BARBARIAN_HEADHUNTERS_SPEAR))
             {
                 player->CastSpell(player,

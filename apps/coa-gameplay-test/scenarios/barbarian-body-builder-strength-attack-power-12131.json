@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Body Builder adds 75% of Strength as melee attack power whether Strength or Agility is higher (#12131, #11966)",
+  "contract": "Body Builder (706481) is the visible talent; its tooltip reads 'Increases your size by $706508s2% and your melee attack power by $s1% of your Strength.' with effect 0 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT (268), amount 75, MiscValue 0 = Strength, and no condition. A level 60 human Barbarian starts with Strength 86 and Agility 133 (player_class_stats class 12 level 60, race 1 adds 0). Low side: learning Body Builder raises melee attack power by 0.75 x 86 = 64.5. High side: Juju Power (16323, SPELL_AURA_MOD_STAT Strength) with its amount set to 200 lifts Strength to 286, above Agility; learning Body Builder must still raise attack power by 0.75 x 286 = 214.5. The removed server rule subtracted the bonus whenever Strength was not lower than Agility, which made the high-side gain 0. Bands are the exact values widened for integer stat and attack power rounding; both sides first pin the Strength and Agility they rely on.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+
+    { "action": "assert", "label": "Setup: Strength is the level 60 base 86", "actor": "b", "metric": "stat", "stat": 0, "min": 80, "max": 92 },
+    { "action": "assert", "label": "Setup: Agility is the level 60 base 133", "actor": "b", "metric": "stat", "stat": 1, "min": 127, "max": 139 },
+    { "action": "snapshot", "label": "Attack power without Body Builder, Strength below Agility", "actor": "b", "metric": "attack_power", "save_as": "ap_low" },
+    { "action": "learn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Body Builder (706481) is active", "actor": "b", "metric": "aura", "spell": 706481, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Strength below Agility: attack power rises by 75% of Strength (64.5)", "actor": "b", "metric": "attack_power", "relative_to": "ap_low", "min": 60, "max": 70, "within_ms": 3000 },
+    { "action": "unlearn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Unlearning removes the bonus", "actor": "b", "metric": "attack_power", "relative_to": "ap_low", "equals": 0, "within_ms": 3000 },
+
+    { "action": "set_aura", "actor": "b", "spell": 16323, "stacks": 1, "amount": 200 },
+    { "action": "assert", "label": "Setup: Strength rises to 286, above Agility", "actor": "b", "metric": "stat", "stat": 0, "min": 280, "max": 292, "within_ms": 3000 },
+    { "action": "assert", "label": "Setup: Agility is unchanged at 133", "actor": "b", "metric": "stat", "stat": 1, "min": 127, "max": 139 },
+    { "action": "snapshot", "label": "Attack power without Body Builder, Strength above Agility", "actor": "b", "metric": "attack_power", "save_as": "ap_high" },
+    { "action": "learn", "actor": "b", "spell": 706481 },
+    { "action": "assert", "label": "Body Builder (706481) is active again", "actor": "b", "metric": "aura", "spell": 706481, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Strength above Agility: attack power still rises by 75% of Strength (214.5)", "actor": "b", "metric": "attack_power", "relative_to": "ap_high", "min": 209, "max": 220, "within_ms": 3000 }
+  ]
+}
