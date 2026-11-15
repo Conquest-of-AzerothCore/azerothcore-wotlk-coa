@@ -32,6 +32,8 @@ enum ChronomancerSecondarySpells : uint32
     SPELL_ECHO_DURATION = 807711,
     SPELL_UNMAKE = 804418,
     SPELL_ANOMALY_SPIKE = 503826,
+    SPELL_FATEBREAKER = 503835,
+    SPELL_FATEBREAKER_DAMAGE = 504725,
     SPELL_CHROMATIC_SHARD = 801292,
     SPELL_CHROMATIC_SHARD_CAST_TIME = 503829,
     SPELL_DECOMPOSITION = 800856,
@@ -108,6 +110,17 @@ void EruptInfiniteKeeper(Player* player, Unit* target)
     AuraEffect const* keeper = player->GetAuraEffect(SPELL_INFINITE_KEEPER, EFFECT_0);
     if (keeper && player->IsValidAttackTarget(target) && HasOwnTimerend(target, player->GetGUID()))
         player->CastSpell(target, SPELL_INFINITE_KEEPER_TRIGGER, true, nullptr, keeper);
+}
+
+void BreakFate(Player* player, Unit* target, uint32 damage)
+{
+    AuraEffect const* fatebreaker = player->GetAuraEffect(SPELL_FATEBREAKER, EFFECT_0);
+    if (!fatebreaker || fatebreaker->GetAmount() <= 0)
+        return;
+    uint64 amount = uint64(damage) * uint64(fatebreaker->GetAmount()) / 100;
+    if (amount)
+        player->CastCustomSpell(SPELL_FATEBREAKER_DAMAGE, SPELLVALUE_BASE_POINT0,
+            int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())), target, true, nullptr, fatebreaker);
 }
 
 void ReplicateShiftingChaos(Player* player, Unit* target, uint32 damage)
@@ -466,6 +479,8 @@ public:
             return;
         if (damage && info->Id == SPELL_ANOMALY_SPIKE && player->HasSpell(SPELL_CHROMATIC_SHARD))
             player->CastSpell(player, SPELL_CHROMATIC_SHARD_CAST_TIME, true);
+        if (damage && info->Id == SPELL_ANOMALY_SPIKE)
+            BreakFate(player, target, damage);
         if (sSpellMgr->GetFirstSpellInChain(info->Id) == SPELL_UNMAKE)
             EruptInfiniteKeeper(player, target);
         else if (damage && IsChromaticShardOrAnomalySpike(info))
@@ -515,7 +530,8 @@ public:
             info->AscensionInheritsResolvedAmount = true;
             info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
         }
-        if (info->Id == SPELL_SHIFTING_CHAOS_BLAST && info->SpellFamilyName == ChronomancerSpellFamily)
+        if ((info->Id == SPELL_SHIFTING_CHAOS_BLAST || info->Id == SPELL_FATEBREAKER_DAMAGE) &&
+            info->SpellFamilyName == ChronomancerSpellFamily)
         {
             info->AttributesEx2 |= SPELL_ATTR2_CANT_CRIT;
             info->AttributesEx3 |= SPELL_ATTR3_IGNORE_CASTER_MODIFIERS;
@@ -523,12 +539,16 @@ public:
             info->AscensionInheritsResolvedAmount = true;
             info->Effects[EFFECT_0].BonusMultiplier = 0.0f;
         }
-        if ((info->Id == SPELL_INFINITE_KEEPER || info->Id == SPELL_SHIFTING_CHAOS) &&
-            info->SpellFamilyName == ChronomancerSpellFamily)
+        if ((info->Id == SPELL_INFINITE_KEEPER || info->Id == SPELL_SHIFTING_CHAOS ||
+            info->Id == SPELL_FATEBREAKER) && info->SpellFamilyName == ChronomancerSpellFamily)
         {
             info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
             info->Effects[EFFECT_0].TriggerSpell = 0;
         }
+        if (info->Id == SPELL_ANOMALY_SPIKE && info->SpellFamilyName == ChronomancerSpellFamily &&
+            info->Effects[EFFECT_1].Effect == SPELL_EFFECT_TRIGGER_SPELL &&
+            info->Effects[EFFECT_1].TriggerSpell == SPELL_FATEBREAKER_DAMAGE)
+            info->Effects[EFFECT_1].Effect = 0;
         if (info->Id == SPELL_ECHO_DURATION || info->Id == SPELL_AHEAD_COUNTER || info->Id == SPELL_RIPPLE_CHARGE)
         {
             info->AttributesCu &= ~SPELL_ATTR0_CU_FORCE_AURA_SAVING;
