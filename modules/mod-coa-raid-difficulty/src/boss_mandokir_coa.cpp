@@ -555,8 +555,8 @@ namespace
         }
     };
 
-    // Whirlwind's periodic aura names no spell to trigger; its tooltip and the live logs show the 5-yard hit
-    // 2118409 once a second, 1 to 6 s into the spin.
+    // Whirlwind's periodic aura names 2118409, yet the stock trigger dealt no damage. Mandokir casts it on
+    // himself instead, so each tick hits everyone within 5 yards, once a second, 1 to 6 s into the spin.
     class spell_mandokir_coa_whirlwind : public AuraScript
     {
         PrepareAuraScript(spell_mandokir_coa_whirlwind);

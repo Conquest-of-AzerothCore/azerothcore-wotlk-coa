@@ -281,9 +281,11 @@ to it in the log.
       casts that require a power source and are on the global cooldown: the script punishes hostile casts that
       meet the definition, whatever they cost at the moment, and not heals or buffs (the tester, clarified).
       The damaging casts on Mandokir that went unpunished fit the old exclusion of casts whose paid cost was 0.
-    - Mandokir's Whirlwind dealt no damage: 2118408's periodic effect names no spell, so the 2118409 hit the
-      live logs show once a second within 5 yards (about one melee hit, 3,786 on the tank on Normal, about
-      9,563 on Mythic) never happened. A spell script now casts it on each tick.
+    - Mandokir's Whirlwind dealt no damage. 2118408's periodic effect (aura 23, every 1,000 ms) names 2118409
+      as its trigger spell, yet the hit the live logs show once a second within 5 yards (about one melee hit,
+      3,786 on the tank on Normal, about 9,563 on Mythic) never happened; why the stock trigger missed is
+      unexplained, with its target selection from a self aura the likely cause. A spell script now prevents
+      the default tick and has Mandokir cast 2118409 on himself, so every tick hits all within 5 yards.
     - The two videos of 2026-11-13 were recorded on the CoA PTR.
     - Jin'do's totems spread over the Bloodfire Pit instead of a 10 yd ring around him (the tester marked the
       whole open area on a screenshot). Estimated: the ten spots, which are trash pack spawns of the arena, and the
