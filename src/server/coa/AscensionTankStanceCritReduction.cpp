@@ -25,8 +25,8 @@ namespace
 
     bool HoldsCritReductionStance(Player const* player)
     {
-        for (uint32 spellId = Ascension::FIRST_TANK_STANCE_AURA; spellId <= Ascension::LAST_TANK_STANCE_AURA; ++spellId)
-            if (spellId != SPELL_VENOMANCER_BEETLE_FORM_TANK_AURA && player->HasAura(spellId))
+        for (auto const& [spellId, application] : player->GetAppliedAuras())
+            if (spellId != SPELL_VENOMANCER_BEETLE_FORM_TANK_AURA && Ascension::IsTankStanceAura(spellId))
                 return true;
         return HasFortitudeBeetleForm(player);
     }

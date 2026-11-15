@@ -15,6 +15,9 @@
     { "action": "assert", "label": "Beetle Form outside Fortitude gives no crit reduction", "actor": "v", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 3000 },
     { "action": "specialization", "label": "Switch to Fortitude", "actor": "v", "id": 52, "entries": [31202] },
     { "action": "assert", "label": "SETUP: Fortitude grants Exposed Flesh", "actor": "v", "metric": "knows_spell", "spell": 92144, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Beetle Form's tank aura survives the switch to Fortitude", "actor": "v", "metric": "aura", "spell": 807726, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Switching to Fortitude in Beetle Form grants the crit reduction", "actor": "v", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 3000 },
+    { "action": "set_aura", "actor": "v", "spell": 803183, "stacks": 0 },
     { "action": "set_aura", "actor": "v", "spell": 803183, "stacks": 1 },
     { "action": "assert", "label": "SETUP: Beetle Form applies its tank aura in Fortitude", "actor": "v", "metric": "aura", "spell": 807726, "equals": 1, "within_ms": 3000 },
     { "action": "assert", "label": "Beetle Form in Fortitude grants the crit reduction", "actor": "v", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 3000 },
@@ -29,6 +32,7 @@
     { "action": "assert", "label": "Spider Lord keeps the crit reduction", "actor": "v", "metric": "aura", "spell": 991293, "equals": 1, "within_ms": 3000 },
     { "action": "specialization", "label": "Switch back to Stalking", "actor": "v", "id": 53, "entries": [12201] },
     { "action": "assert", "label": "SETUP: leaving Fortitude removes Exposed Flesh", "actor": "v", "metric": "knows_spell", "spell": 92144, "equals": 0, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: Beetle Form's tank aura survives the switch to Stalking", "actor": "v", "metric": "aura", "spell": 807726, "equals": 1, "within_ms": 3000 },
     { "action": "assert", "label": "Leaving Fortitude removes the crit reduction", "actor": "v", "metric": "aura", "spell": 991293, "equals": 0, "within_ms": 3000 }
   ]
 }
