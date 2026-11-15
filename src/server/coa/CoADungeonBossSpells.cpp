@@ -172,7 +172,7 @@ namespace
             PreventHitDefaultEffect(effIndex);
             Unit* caster = GetCaster();
             Unit* target = GetHitUnit();
-            if (!caster || !target || target->GetTypeId() != TYPEID_PLAYER || target->HasUnitState(UNIT_STATE_ROOT)
+            if (!caster || !target || !target->IsPlayer() || target->HasUnitState(UNIT_STATE_ROOT)
                 || Shielded(target->GetGUID()))
                 return;
             if (target->IsNonMeleeSpellCast(true))
