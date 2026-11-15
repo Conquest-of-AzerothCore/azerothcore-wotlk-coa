@@ -134,7 +134,7 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPackets::NPC::TrainerBuySpel
         return;
 
     trainer->TeachSpell(npc, _player, packet.SpellID);
-    if (trainer->RepublishesAfterPurchase())
+    if (trainer->RepublishesAfterPurchase(_player))
         SendTrainerList(npc);
 }
 
