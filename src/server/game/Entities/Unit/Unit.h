@@ -1169,6 +1169,7 @@ public:
 
     [[nodiscard]] float GetUnitMissChance(WeaponAttackType attType) const;
     float GetUnitCriticalChance(WeaponAttackType attackType, Unit const* victim) const;
+    [[nodiscard]] float GetMeleeDazeChance(Unit const* victim) const;
     bool HasAscensionConditionalCombatState(int32 state) const;
     int32 GetAscensionConditionalCombatModifier(Unit const* victim, SpellInfo const* spellInfo,
         AscensionConditionalCombatModifier modifier) const;

@@ -180,6 +180,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_duration_ms',
     'aura_crit_chance', 'aura_script_value', 'melee_hit_chance', 'spell_hit_chance', 'spell_power',
     'spell_done_crit_chance', 'spell_taken_crit_chance', 'spell_done_crit_chance_scripted', 'ranged_taken_crit_chance',
+    'melee_crit_taken_chance', 'daze_taken_chance',
     'melee_spell_damage_done', 'melee_spell_damage_done_scripted', 'script_melee_damage_taken',
     'script_melee_hit_taken', 'script_melee_damage_dealt',
     'script_spell_damage_taken', 'spell_id_for_difficulty', 'script_periodic_damage_taken', 'script_heal_received', 'spell_effect_value',
