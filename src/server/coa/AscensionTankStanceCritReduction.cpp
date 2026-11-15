@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
+#include <algorithm>
+#include <array>
 
 namespace
 {
@@ -11,10 +13,34 @@ namespace
     constexpr uint32 SPELL_VENOMANCER_EXPOSED_FLESH = 92144;
     constexpr uint32 SPELL_VENOMANCER_EXPOSED_FLESH_HELPER = 805098;
 
+    struct StockTankStance
+    {
+        uint8 classId;
+        uint32 spellId;
+    };
+
+    constexpr std::array<StockTankStance, 6> STOCK_TANK_STANCES = {{
+        {CLASS_WARRIOR, 71}, {CLASS_WARRIOR, 1100071},
+        {CLASS_DRUID, 5487}, {CLASS_DRUID, 1105487}, {CLASS_DRUID, 9634}, {CLASS_DRUID, 1109634},
+    }};
+
+    bool IsStockTankStanceAura(uint32 spellId)
+    {
+        return std::ranges::any_of(STOCK_TANK_STANCES,
+            [spellId](StockTankStance const& stance) { return stance.spellId == spellId; });
+    }
+
+    bool HoldsStockTankStance(Player const* player)
+    {
+        uint8 const classId = player->getClass();
+        return std::ranges::any_of(STOCK_TANK_STANCES, [player, classId](StockTankStance const& stance)
+            { return stance.classId == classId && player->HasAura(stance.spellId); });
+    }
+
     bool IsResyncTrigger(uint32 spellId)
     {
-        return Ascension::IsTankStanceAura(spellId) || spellId == SPELL_VENOMANCER_EXPOSED_FLESH ||
-            spellId == SPELL_VENOMANCER_EXPOSED_FLESH_HELPER;
+        return Ascension::IsTankStanceAura(spellId) || IsStockTankStanceAura(spellId) ||
+            spellId == SPELL_VENOMANCER_EXPOSED_FLESH || spellId == SPELL_VENOMANCER_EXPOSED_FLESH_HELPER;
     }
 
     bool HasFortitudeBeetleForm(Player const* player)
@@ -28,7 +54,7 @@ namespace
         for (auto const& [spellId, application] : player->GetAppliedAuras())
             if (spellId != SPELL_VENOMANCER_BEETLE_FORM_TANK_AURA && Ascension::IsTankStanceAura(spellId))
                 return true;
-        return HasFortitudeBeetleForm(player);
+        return HasFortitudeBeetleForm(player) || HoldsStockTankStance(player);
     }
 
     void SyncCritReduction(Player* player)
