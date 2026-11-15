@@ -11,7 +11,7 @@
  * the spirits and the speaker keep their stock scripts, with the spells of the
  * log. Up on the ledge he can be neither attacked nor selected until the
  * Speaker dies (live: he engaged 4.1-5.5s after the Speaker's death in 6 of 6
- * pulls).
+ * pulls); he engages the moment his ride down ends (tester video, 2026-11-15).
  *
  *   Berserker Charge  first 10s, every 25s   a random player out of his melee
  *                                            range he can see, knocked down;
@@ -42,6 +42,11 @@
  *                                            rarer than on the other bosses
  *   Level Up!         +4% damage for every player who dies near him
  *   Frenzy            when Ohgan dies
+ *   Mounted           when Ohgan comes within 10 yards: Mandokir rides
+ *                     Ohgan's display 215271 with Mounted 2118412 (+20%
+ *                     damage done, -20% taken) for 30s, while Ohgan keeps
+ *                     fighting beside him with Mounted 2118411 on his
+ *                     rider's target; again 30s after he dismounts
  *   Bloodlord's Presence  at the pull, on enemies within 30 yards: no
  *                     durability loss; taken off when the fight ends
  *
@@ -51,9 +56,11 @@
  *     tooltip. These auras and Bloodlord's Presence are never logged (their
  *     spells are flagged so), which is why the log does not show them;
  *   - Bloodlord's Presence once at the pull; its aura lasts until removed;
- *   - he stands unmounted before the pull and Mounted (2118412) is never cast
- *     (tester and user, 2026-11-13); the log has Ohgan fighting on his own
- *     from the first second;
+ *   - he stands unmounted before the pull (tester and user, 2026-11-13);
+ *   - he mounts Ohgan in the fight, and both stay selectable and attackable
+ *     (tester video and user, 2026-11-15); neither Mounted aura is in any
+ *     live log, so the 10 yard reach and the 30s before he mounts again are
+ *     estimated, and the 30s ride is the tester's measure from the video;
  *   - Ohgan runs in from the arena entrance at the pull (tester, live,
  *     2026-11-04); the spot, the gap in the chained spirits' ring on the
  *     north-west side, is estimated;
@@ -107,6 +114,8 @@ namespace
         SPELL_WHIRLWIND         = 2118408,
         SPELL_WHIRLWIND_HIT     = 2118409,
         SPELL_DECAPITATE        = 2118410,
+        SPELL_MOUNTED_MOUNT     = 2118411,
+        SPELL_MOUNTED_RIDER     = 2118412,
         SPELL_LEAP              = 2118413,
         SPELL_BLOODLORDS_PRESENCE = 2118415,
         SPELL_LEVEL_UP          = 2118416,
@@ -136,6 +145,9 @@ namespace
         EVENT_EXECUTE,
         EVENT_CHECK_OHGAN,
         EVENT_FIERCE_BLOW,
+        EVENT_MOUNT,
+        EVENT_DISMOUNT,
+        EVENT_COMMAND_OHGAN,
     };
 
     enum Misc
@@ -143,6 +155,7 @@ namespace
         ACTION_REVIVE        = 2,
         GUID_SENTENCED       = 1,
         POINT_MANDOKIR_END   = 25,
+        POINT_MANDOKIR_FLOOR = 26,
         CHAINED_SPIRIT_COUNT = 20
     };
 
@@ -153,6 +166,11 @@ namespace
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_FIRST_MAX = 31600ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MIN = 22500ms;
     constexpr Milliseconds MANDOKIR_FIERCE_BLOW_MAX = 44s;
+    constexpr Milliseconds MANDOKIR_RIDE_DOWN_FALLBACK = 10s;
+    constexpr Milliseconds MANDOKIR_MOUNT_DURATION = 30s;
+    constexpr Milliseconds MANDOKIR_MOUNT_COOLDOWN = 30s;
+    constexpr float MANDOKIR_MOUNT_REACH = 10.0f;
+    constexpr uint32 OHGAN_DISPLAY = 215271;
 
     Position const PosSummonChainedSpirits[CHAINED_SPIRIT_COUNT] =
     {
@@ -220,6 +238,8 @@ namespace
             _whirlwindOnLanding = false;
             _gazed.Clear();
             _reviveGUID.Clear();
+            Dismount();
+            _ohganGUID.Clear();
             RemovePresence();
 
             bool const waitingForSpeaker = me->GetPositionZ() > 140.0f;
@@ -248,6 +268,53 @@ namespace
                 me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
 
+        void Engage()
+        {
+            events.CancelEvent(EVENT_STARTED);
+            SetUntouchable(false);
+            me->SetInCombatWithZone();
+        }
+
+        Creature* GetOhgan() const
+        {
+            Creature* ohgan = ObjectAccessor::GetCreature(*me, _ohganGUID);
+            return ohgan && ohgan->IsAlive() ? ohgan : nullptr;
+        }
+
+        void CommandOhgan(Creature* ohgan)
+        {
+            Unit* victim = me->GetVictim();
+            if (!victim || !ohgan->IsValidAttackTarget(victim))
+                return;
+            ohgan->GetThreatMgr().AddThreat(victim, 0.0f);
+            ohgan->GetThreatMgr().FixateTarget(victim);
+            if (ohgan->GetVictim() != victim && ohgan->IsAIEnabled)
+                ohgan->AI()->AttackStart(victim);
+        }
+
+        void MountOhgan(Creature* ohgan)
+        {
+            me->Mount(OHGAN_DISPLAY);
+            DoCastSelf(SPELL_MOUNTED_RIDER, true);
+            ohgan->CastSpell(ohgan, SPELL_MOUNTED_MOUNT, true);
+            CommandOhgan(ohgan);
+            events.ScheduleEvent(EVENT_DISMOUNT, MANDOKIR_MOUNT_DURATION);
+            events.ScheduleEvent(EVENT_COMMAND_OHGAN, 1s);
+        }
+
+        void Dismount()
+        {
+            me->Dismount();
+            me->RemoveAurasDueToSpell(SPELL_MOUNTED_RIDER);
+            events.CancelEvent(EVENT_DISMOUNT);
+            events.CancelEvent(EVENT_COMMAND_OHGAN);
+            if (Creature* ohgan = ObjectAccessor::GetCreature(*me, _ohganGUID))
+            {
+                ohgan->RemoveAurasDueToSpell(SPELL_MOUNTED_MOUNT);
+                ohgan->GetThreatMgr().ClearFixate();
+            }
+        }
+
         void RemovePresence()
         {
             me->GetMap()->DoForAllPlayers([](Player* player)
@@ -273,6 +340,7 @@ namespace
             GetCreatureListWithEntryInGrid(spirits, me, NPC_CHAINED_SPIRIT, 200.0f);
             for (Creature* spirit : spirits)
                 spirit->DespawnOrUnsummon();
+            Dismount();
             RemovePresence();
             instance->SetBossState(DATA_MANDOKIR, DONE);
             instance->SaveToDB();
@@ -286,13 +354,15 @@ namespace
             events.ScheduleEvent(EVENT_GAZE, 15s);
             events.ScheduleEvent(EVENT_CHECK_OHGAN, 1s);
             events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_FIRST_MIN, MANDOKIR_FIERCE_BLOW_FIRST_MAX);
+            events.ScheduleEvent(EVENT_MOUNT, 1s);
 
             me->SetHomePosition(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
             Talk(SAY_AGGRO);
             DoCastSelf(SPELL_BLOODLORDS_PRESENCE, true);
             Position entrance = PosArenaEntrance;
             me->UpdateGroundPositionZ(entrance.GetPositionX(), entrance.GetPositionY(), entrance.m_positionZ);
-            me->SummonCreature(NPC_OHGAN, entrance, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 35000);
+            if (Creature* ohgan = me->SummonCreature(NPC_OHGAN, entrance, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 35000))
+                _ohganGUID = ohgan->GetGUID();
             for (Position const& pos : PosSummonChainedSpirits)
                 me->SummonCreature(NPC_CHAINED_SPIRIT, pos, TEMPSUMMON_CORPSE_DESPAWN);
             DoZoneInCombat();
@@ -346,6 +416,12 @@ namespace
                 _whirlwindOnLanding = false;
                 events.CancelEvent(EVENT_WHIRLWIND);
                 DoCastSelf(SPELL_WHIRLWIND);
+                return;
+            }
+
+            if (type == POINT_MOTION_TYPE && id == POINT_MANDOKIR_FLOOR)
+            {
+                Engage();
                 return;
             }
 
@@ -418,17 +494,15 @@ namespace
                         {
                             if (instance->GetBossState(DATA_MANDOKIR) == SPECIAL)
                             {
-                                me->GetMotionMaster()->MovePoint(0, PosMandokir[1].m_positionX, PosMandokir[1].m_positionY, PosMandokir[1].m_positionZ);
-                                events.ScheduleEvent(EVENT_STARTED, 6s);
+                                me->GetMotionMaster()->MovePoint(POINT_MANDOKIR_FLOOR, PosMandokir[1].m_positionX,
+                                    PosMandokir[1].m_positionY, PosMandokir[1].m_positionZ);
+                                events.ScheduleEvent(EVENT_STARTED, MANDOKIR_RIDE_DOWN_FALLBACK);
                             }
                             else
                                 events.ScheduleEvent(EVENT_CHECK_START, 1s);
                         }
                         else if (eventId == EVENT_STARTED)
-                        {
-                            SetUntouchable(false);
-                            me->SetInCombatWithZone();
-                        }
+                            Engage();
                     }
                 }
                 return;
@@ -491,6 +565,8 @@ namespace
                     case EVENT_CHECK_OHGAN:
                         if (instance->GetBossState(DATA_OHGAN) == DONE)
                         {
+                            Dismount();
+                            events.CancelEvent(EVENT_MOUNT);
                             DoCastSelf(SPELL_FRENZY, true);
                             Talk(SAY_OHGAN_DEAD);
                         }
@@ -500,6 +576,28 @@ namespace
                     case EVENT_FIERCE_BLOW:
                         DoCastVictim(SPELL_FIERCE_BLOW);
                         events.ScheduleEvent(EVENT_FIERCE_BLOW, MANDOKIR_FIERCE_BLOW_MIN, MANDOKIR_FIERCE_BLOW_MAX);
+                        break;
+                    case EVENT_MOUNT:
+                        if (Creature* ohgan = GetOhgan(); ohgan && me->IsWithinDist(ohgan, MANDOKIR_MOUNT_REACH))
+                            MountOhgan(ohgan);
+                        else
+                            events.ScheduleEvent(EVENT_MOUNT, 1s);
+                        break;
+                    case EVENT_DISMOUNT:
+                        Dismount();
+                        events.ScheduleEvent(EVENT_MOUNT, MANDOKIR_MOUNT_COOLDOWN);
+                        break;
+                    case EVENT_COMMAND_OHGAN:
+                        if (Creature* ohgan = GetOhgan())
+                        {
+                            CommandOhgan(ohgan);
+                            events.ScheduleEvent(EVENT_COMMAND_OHGAN, 1s);
+                        }
+                        else
+                        {
+                            Dismount();
+                            events.ScheduleEvent(EVENT_MOUNT, 1s);
+                        }
                         break;
                     default:
                         break;
@@ -520,6 +618,7 @@ namespace
         bool _whirlwindOnLanding = false;
         ObjectGuid _gazed;
         ObjectGuid _reviveGUID;
+        ObjectGuid _ohganGUID;
     };
 
     class mandokir_coa_menacing_gaze : public PlayerScript
