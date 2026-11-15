@@ -2155,8 +2155,9 @@ namespace CoAChallenges
         std::vector<Objective> const tracked = TrackedObjectives(challengeID);
         if (!number || number > tracked.size())
         {
-            message = Acore::StringFormat("Challenge {} has {} objectives; see .coa trial objectives.",
-                challengeID, tracked.size());
+            message = Acore::StringFormat(
+                "Challenge {} has no Objective ID {} (it has {}); see .coa trial objectives.",
+                challengeID, number, tracked.size());
             return false;
         }
         Objective const& o = tracked[number - 1];

@@ -3079,8 +3079,8 @@ namespace CoAChallenges
                         guid, challengeId))
                     deaths = r->Fetch()[0].Get<uint32>();
                 uint32 const lives = LivesTotal(challengeId);
-                handler->PSendSysMessage("Challenge {} ({}), level {}, deaths {}{}",
-                    challengeId, ChallengeName(challengeId), ActiveChallengeLevel(guid, challengeId), deaths,
+                handler->PSendSysMessage("{}, Challenge ID {}, level {}, deaths {}{}",
+                    ChallengeName(challengeId), challengeId, ActiveChallengeLevel(guid, challengeId), deaths,
                     lives ? Acore::StringFormat(" of {} lives", lives) : std::string());
 
                 std::vector<Objective> const tracked = TrackedObjectives(challengeId);
@@ -3096,8 +3096,8 @@ namespace CoAChallenges
                     bool const done = IsObjectiveDone(guid, challengeId, o.key);
                     allDone = allDone && done;
                     uint32 const gate = CoAParse::ObjectiveGateLevel(o);
-                    handler->PSendSysMessage("  {}. [{}] {}{}", i + 1, done ? "done" : "pending", DescribeObjective(o),
-                        (!done && gate && gate == cappedGate)
+                    handler->PSendSysMessage("  {}. [{}] {}, Objective ID {}{}", i + 1, done ? "done" : "pending",
+                        DescribeObjective(o), i + 1, (!done && gate && gate == cappedGate)
                             ? Acore::StringFormat(" (levelling capped at {})", gate - 1) : std::string());
                 }
                 if (allDone && IsTrialChallenge(challengeId) && (!online || online->GetLevel() < maxLevel))
@@ -3116,15 +3116,30 @@ namespace CoAChallenges
                 } while (r->NextRow());
             }
             if (!failed.empty())
-                handler->PSendSysMessage("Failure locks: {}", failed);
+                handler->PSendSysMessage("Failure locks (Challenge IDs): {}", failed);
+            if (!actives.empty())
+                handler->PSendSysMessage("Credit an objective: {}", CreditSyntax);
+            if (!failed.empty())
+                handler->PSendSysMessage("Restore a failed challenge: {}", RestoreSyntax);
             return true;
         }
 
+        static constexpr char const* CreditSyntax = ".coa trial credit <Challenge ID> <Objective ID> [player]";
+        static constexpr char const* RestoreSyntax = ".coa trial restore <Challenge ID> [player]";
+        static constexpr char const* ObjectivesHint =
+            "Use .coa trial objectives \"Player Name\" to find the IDs. The player defaults to your target.";
+
         // .coa <trial|challenge> credit <id> <objective number> [player]
         // Marks one tracked objective done, whatever the player's level.
-        static bool HandleCoACreditCommand(ChatHandler* handler, uint32 challengeId, uint32 objectiveNumber,
-            Optional<PlayerIdentifier> player)
+        static bool HandleCoACreditCommand(ChatHandler* handler, Optional<uint32> challengeId,
+            Optional<uint32> objectiveNumber, Optional<PlayerIdentifier> player)
         {
+            if (!challengeId || !objectiveNumber)
+            {
+                handler->PSendSysMessage("Syntax: {}", CreditSyntax);
+                handler->SendErrorMessage("{}", ObjectivesHint);
+                return false;
+            }
             if (!player)
                 player = PlayerIdentifier::FromTargetOrSelf(handler);
             Player* p = player ? player->GetConnectedPlayer() : nullptr;
@@ -3135,7 +3150,7 @@ namespace CoAChallenges
             }
 
             std::string message;
-            if (!CreditObjective(p, challengeId, objectiveNumber, message))
+            if (!CreditObjective(p, *challengeId, *objectiveNumber, message))
             {
                 handler->SendErrorMessage("{}", message);
                 return false;
@@ -3149,8 +3164,15 @@ namespace CoAChallenges
         // failure, and resurrects the character when still dead. Refused when
         // the character has since levelled past a pending objective's gate (see
         // the module README).
-        static bool HandleCoARestoreCommand(ChatHandler* handler, uint32 challengeId, Optional<PlayerIdentifier> player)
+        static bool HandleCoARestoreCommand(ChatHandler* handler, Optional<uint32> challengeId,
+            Optional<PlayerIdentifier> player)
         {
+            if (!challengeId)
+            {
+                handler->PSendSysMessage("Syntax: {}", RestoreSyntax);
+                handler->SendErrorMessage("{}", ObjectivesHint);
+                return false;
+            }
             if (!player)
                 player = PlayerIdentifier::FromTargetOrSelf(handler);
             Player* p = player ? player->GetConnectedPlayer() : nullptr;
@@ -3161,7 +3183,7 @@ namespace CoAChallenges
             }
 
             std::string message;
-            if (!RestoreFailedChallenge(p, challengeId, message))
+            if (!RestoreFailedChallenge(p, *challengeId, message))
             {
                 handler->SendErrorMessage("{}", message);
                 return false;

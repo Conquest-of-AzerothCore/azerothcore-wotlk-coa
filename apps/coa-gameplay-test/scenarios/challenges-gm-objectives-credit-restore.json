@@ -25,16 +25,35 @@
     {
       "action": "assert", "label": "The run is listed with its level, deaths and lives",
       "actor": "gm", "metric": "system_message_contains",
-      "text": "Challenge 60 (Hardcore - Boss Blitz), level 1, deaths 0 of 1 lives", "equals": 1, "within_ms": 5000
+      "text": "Hardcore - Boss Blitz, Challenge ID 60, level 1, deaths 0 of 1 lives", "equals": 1, "within_ms": 5000
     },
     {
       "action": "assert", "label": "The first gate is pending and caps levelling",
       "actor": "gm", "metric": "system_message_contains",
-      "text": "1. [pending] Kill Edwin VanCleef before level 21 (levelling capped at 20)", "equals": 1
+      "text": "1. [pending] Kill Edwin VanCleef before level 21, Objective ID 1 (levelling capped at 20)", "equals": 1
     },
     {
       "action": "assert", "label": "Nothing is done before any credit",
       "actor": "gm", "metric": "system_message_contains", "text": "[done]", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The list ends with the credit syntax",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Credit an objective: .coa trial credit <Challenge ID> <Objective ID> [player]", "equals": 1
+    },
+    {
+      "action": "command", "label": "A bare credit command is refused with its syntax",
+      "actor": "gm", "command": ".coa trial credit", "rejected": true
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the bare command shows the syntax",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Syntax: .coa trial credit <Challenge ID> <Objective ID> [player]", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: and points to the objectives command for the IDs",
+      "actor": "gm", "metric": "system_message_contains",
+      "text": "Use .coa trial objectives \"Player Name\" to find the IDs.", "equals": 1
     },
     {
       "action": "command", "label": "Credit Mutanus below its gate",
@@ -72,12 +91,12 @@
     {
       "action": "assert", "label": "DISCRIMINATING: the list shows the credited objective done",
       "actor": "gm", "metric": "system_message_contains",
-      "text": "2. [done] Kill Mutanus the Devourer before level 22", "equals": 1, "within_ms": 5000
+      "text": "2. [done] Kill Mutanus the Devourer before level 22, Objective ID 2", "equals": 1, "within_ms": 5000
     },
     {
       "action": "assert", "label": "The cap moved to the next pending gate",
       "actor": "gm", "metric": "system_message_contains",
-      "text": "3. [pending] Kill Archmage Arugal before level 26 (levelling capped at 25)", "equals": 1
+      "text": "3. [pending] Kill Archmage Arugal before level 26, Objective ID 3 (levelling capped at 25)", "equals": 1
     },
     { "action": "die", "actor": "runner" },
     { "action": "wait", "ms": 2000 },

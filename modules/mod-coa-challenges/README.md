@@ -94,14 +94,15 @@ Support commands for a player's run (administrator, also from the console; the p
 
 ```
 .coa trial objectives [player]
-.coa trial credit <challengeId> <objective number> [player]
-.coa trial restore <challengeId> [player]
+.coa trial credit <Challenge ID> <Objective ID> [player]
+.coa trial restore <Challenge ID> [player]
 ```
 
 - `objectives` lists every active challenge with its level, deaths and tracked objectives, numbered and marked
   done or pending, and the challenge ids the player is locked out of. It also works for an offline character.
-- `credit` marks one objective done by its number from that list, whatever the player's level, and runs the
-  normal completion check. The player must be online.
+- `credit` marks one objective done by the Challenge ID and Objective ID shown in that list, whatever the
+  player's level, and runs the normal completion check. The player must be online. `credit` and `restore`
+  typed without their IDs print their syntax and point to `objectives`.
 - `restore` removes the failure lock of a failed challenge and makes it active again with the level, objectives
   and run timer it had when it failed, re-links a custom trial with its other bundled challenges, takes the
   fatal death back when the run was out of lives, and resurrects the character. Hunger and thirst restart at
@@ -143,7 +144,8 @@ Worked example for a kill that did not register:
 
 ```
 .coa trial objectives "Firstname Lastname"
-  2. [pending] Kill Mutanus the Devourer before level 22 (levelling capped at 21)
+Hardcore - Boss Blitz, Challenge ID 60, level 1, deaths 0 of 1 lives
+  2. [pending] Kill Mutanus the Devourer before level 22, Objective ID 2 (levelling capped at 21)
 .coa trial credit 60 2 "Firstname Lastname"
 ```
 
