@@ -54,6 +54,7 @@
 #include "CreatureScript.h"
 #include "GameTime.h"
 #include "PassiveAI.h"
+#include "PathGenerator.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "SpellMgr.h"
@@ -65,6 +66,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <list>
 #include <map>
 #include <optional>
@@ -133,6 +135,11 @@ namespace
     constexpr uint8 ANIMATED_TROLLS           = 8;
     constexpr Milliseconds SEEKING_SHADOW_BOLTS = 4s;
     constexpr float SEEKING_SHADOW_BOLTS_RANGE  = 200.0f;
+    constexpr float SHADE_SPAWN_MIN             = 15.0f;
+    constexpr float SHADE_SPAWN_MAX             = 30.0f;
+    constexpr float SHADE_SPOT_CLIMB            = 10.0f;
+    constexpr float SHADE_SPOT_ON_GROUND        = 1.5f;
+    constexpr uint8 SHADE_SPOT_ATTEMPTS         = 32;
 
     std::array<Position, 10> const BloodPitTrolls =
     { {
@@ -359,13 +366,50 @@ namespace
             me->CastCustomSpell(me, SPELL_FRIENDS_ON_THE_OTHER_SIDE, nullptr, &bonus, nullptr, true);
         }
 
-        void TrackShades(Unit* summoner)
+        bool WalkableFromJindo(float x, float y, float z) const
         {
-            std::list<Creature*> shades;
-            summoner->GetCreatureListWithEntryInGrid(shades, NPC_SHADE_OF_JINDO, 5.0f);
-            for (Creature* shade : shades)
-                if (shade->IsSummon() && shade->ToTempSummon()->GetSummonerGUID() == summoner->GetGUID())
-                    _shadeGuids.insert(shade->GetGUID());
+            dtNavMeshQuery const* navMesh = me->GetMap()->GetMapCollisionData().GetMMapData().GetNavMeshQuery();
+            if (!navMesh)
+                return true;
+
+            float const spot[VERTEX_SIZE] = { y, z, x };
+            float const extents[VERTEX_SIZE] = { SHADE_SPOT_ON_GROUND, SHADE_SPOT_ON_GROUND, SHADE_SPOT_ON_GROUND };
+            dtQueryFilter const filter;
+            dtPolyRef ground = INVALID_POLYREF;
+            if (dtStatusFailed(navMesh->findNearestPoly(spot, extents, &filter, &ground, nullptr)) ||
+                ground == INVALID_POLYREF)
+                return false;
+
+            PathGenerator path(me);
+            path.CalculatePath(x, y, z);
+            return path.GetPathType() == PATHFIND_NORMAL;
+        }
+
+        Position RandomShadeSpot()
+        {
+            for (uint8 attempt = 0; attempt < SHADE_SPOT_ATTEMPTS; ++attempt)
+            {
+                float const angle = frand(0.0f, 2.0f * float(M_PI));
+                float const distance =
+                    std::sqrt(frand(SHADE_SPAWN_MIN * SHADE_SPAWN_MIN, SHADE_SPAWN_MAX * SHADE_SPAWN_MAX));
+                float const x = me->GetPositionX() + distance * std::cos(angle);
+                float const y = me->GetPositionY() + distance * std::sin(angle);
+                float const z =
+                    me->GetMap()->GetHeight(me->GetPhaseMask(), x, y, me->GetPositionZ() + SHADE_SPOT_CLIMB);
+                if (std::fabs(z - me->GetPositionZ()) <= SHADE_SPOT_CLIMB && me->IsWithinLOS(x, y, z) &&
+                    !me->GetMap()->IsInWater(me->GetPhaseMask(), x, y, z, DEFAULT_COLLISION_HEIGHT) &&
+                    WalkableFromJindo(x, y, z))
+                    return Position(x, y, z, Position::NormalizeOrientation(angle + float(M_PI)));
+            }
+            return me->GetFirstCollisionPosition(SHADE_SPAWN_MIN, frand(0.0f, 2.0f * float(M_PI)));
+        }
+
+        void SummonShade(Unit* cursed)
+        {
+            uint32 const lifetime = uint32(sSpellMgr->AssertSpellInfo(SPELL_SUMMON_SHADE_OF_JINDO)->GetDuration());
+            if (TempSummon* shade = cursed->SummonCreature(NPC_SHADE_OF_JINDO, RandomShadeSpot(),
+                TEMPSUMMON_TIMED_DESPAWN, lifetime))
+                _shadeGuids.insert(shade->GetGUID());
         }
 
         void OnSpellCast(SpellInfo const* spell) override
@@ -384,8 +428,7 @@ namespace
                         // effect, so reuse only that effect here.
                         me->AddAura(sSpellMgr->GetSpellInfo(SPELL_DELUSIONS_OF_JINDO), 1 << EFFECT_2, target);
                         me->CastSpell(target, SPELL_DELUSIONS_DOT, true);
-                        target->CastSpell(target, SPELL_SUMMON_SHADE_OF_JINDO, true);
-                        TrackShades(target);
+                        SummonShade(target);
                         _delusions[target->GetGUID()] = GameTime::GetGameTimeMS();
                     }
                     break;
