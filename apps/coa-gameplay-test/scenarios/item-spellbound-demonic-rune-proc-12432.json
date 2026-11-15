@@ -1,0 +1,56 @@
+{
+  "schema": 1,
+  "name": "Spellbound Demonic Rune procs from damaging spells once per minute (#12432)",
+  "contract": [
+    "#12432: Spellbound Demonic Rune (item 1414516) equips 23992, whose tooltip reads 'Your damaging spells have",
+    "a chance to increase your spell damage by $24025s1 for $24025d. Can only occur once per min.' 23992's single",
+    "proc effect is aura 42 triggering 24025 (aura 345, +80 spell power, duration index 1), but Spell.dbc gives",
+    "23992 ProcFlags 0 and no spell_proc row existed, so SpellMgr::LoadSpellProcs skipped it and the buff never",
+    "appeared. The fix adds the row: done negative magic spell hits, damage type, Spell.dbc ProcChance 100 and a",
+    "60 s cooldown. Frostbolt rank 1 (116) hits once with no periodic damage. With a 100% chance one Frostbolt",
+    "hit must apply 24025; after it expires a second hit inside the minute must not apply it again."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "mage",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 10,
+      "faction": 7
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "actor": "mage", "item": 1414516 },
+    { "action": "equip", "actor": "mage", "item": 1414516, "slot": 12 },
+    { "action": "learn", "actor": "mage", "spell": 116 },
+    { "action": "assert", "label": "SETUP: the trinket's passive is active", "actor": "mage", "metric": "aura",
+      "spell": 23992, "equals": 1, "within_ms": 3000 },
+    { "action": "set_power", "actor": "mage", "power": 0, "value": 5000 },
+    { "action": "cast", "actor": "mage", "spell": 116, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the first Frostbolt hit", "actor": "mage", "metric": "spell_damage_count",
+      "spell": 116, "target": "dummy", "min": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "DISCRIMINATING: a damaging spell hit applies the spell power buff",
+      "actor": "mage", "metric": "aura", "spell": 24025, "equals": 1, "within_ms": 6000 },
+    { "action": "assert", "label": "SETUP: the buff ends after its duration", "actor": "mage", "metric": "aura",
+      "spell": 24025, "equals": 0, "within_ms": 15000 },
+    { "action": "set_power", "actor": "mage", "power": 0, "value": 5000 },
+    { "action": "cast", "actor": "mage", "spell": 116, "target": "dummy" },
+    { "action": "assert", "label": "SETUP: the second Frostbolt hit inside the one minute cooldown", "actor": "mage",
+      "metric": "spell_damage_count", "spell": 116, "target": "dummy", "min": 2, "within_ms": 6000 },
+    { "action": "wait", "label": "Give a proc from the second hit time to apply", "ms": 1000 },
+    { "action": "assert", "label": "DISCRIMINATING: the proc does not repeat within a minute", "actor": "mage",
+      "metric": "aura", "spell": 24025, "equals": 0 }
+  ]
+}
