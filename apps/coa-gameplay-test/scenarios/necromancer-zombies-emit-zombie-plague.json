@@ -27,6 +27,10 @@
     {
       "action": "assert", "label": "DISCRIMINATING: the fighting Zombie emits Zombie Plague", "actor": "n",
       "metric": "spell_go_count", "spell": 504022, "entry": 503031, "min": 2, "within_ms": 9000
+    },
+    {
+      "action": "assert", "label": "Zombie Plague damages the golem", "actor": "n",
+      "metric": "spell_damage_count", "spell": 504022, "caster_entry": 503031, "target": "golem", "min": 1
     }
   ]
 }

@@ -39,7 +39,7 @@
     },
     {
       "action": "assert", "label": "Bonestorm strikes the golem", "actor": "n",
-      "metric": "owned_creature_damage_count", "entry": 50309, "min": 5
+      "metric": "spell_damage_count", "spell": 801411, "caster_entry": 50309, "target": "golem", "min": 5
     }
   ]
 }
