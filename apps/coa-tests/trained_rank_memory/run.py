@@ -19,11 +19,13 @@ def main():
         method(wildcard, 'std::vector<Trainer::Spell> RankTrainerRows(Player const* player)'),
     ])
     trainer = (ROOT / 'src/server/game/Entities/Creature/Trainer.cpp').read_text(encoding='utf-8')
-    assert 'return _trainerId == WILDCARD_RANK_TRAINER_ID;' in method(trainer, 'bool Trainer::RepublishesAfterPurchase() const')
+    republish = method(trainer, 'bool Trainer::RepublishesAfterPurchase(Player const* player) const')
+    assert 'if (_trainerId == WILDCARD_RANK_TRAINER_ID)' + chr(10) + '            return true;' in republish
+    assert 'player->GetTemporarySpellReplacement(trainerSpell.SpellId) != trainerSpell.SpellId' in republish
     handler = (ROOT / 'src/server/game/Handlers/NPCHandler.cpp').read_text(encoding='utf-8')
     buy = method(handler, 'void WorldSession::HandleTrainerBuySpellOpcode(')
     assert buy.index('trainer->TeachSpell(npc, _player, packet.SpellID);') < buy.index(
-        'if (trainer->RepublishesAfterPurchase())' + chr(10) + '        SendTrainerList(npc);')
+        'if (trainer->RepublishesAfterPurchase(_player))' + chr(10) + '        SendTrainerList(npc);')
     learn = method(wildcard, 'void OnPlayerLearnSpell(Player* player, uint32 spellId) override')
     assert 'Loaded.RankLadders.contains(spellId))\n            RestoreTrainedRanks(player, spellId);' in learn
     forgot = method(wildcard, 'void OnPlayerForgotSpell(Player* player, uint32 spellId) override')

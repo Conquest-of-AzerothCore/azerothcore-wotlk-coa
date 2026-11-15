@@ -1,0 +1,3643 @@
+{
+  "schema": 1,
+  "name": "chronomancer-aeon-rend-owned-rank-12287",
+  "contract": [
+    "Aeon Rend 583248: \"Your Chromatic Shard now has a 25% chance to strike again and incur no cooldown.\" The",
+    "re-strike is the Chromatic Shard that hit. Its aura42 effect names rank one 801292, so a Chronomancer who owns",
+    "rank nine 567544 (level 60) re-struck with the rank one base damage.",
+    "The character owns only rank nine and Aeon Rend. Eighty ordinary rank nine casts hit the stationary Dig Rat;",
+    "a native spell modifier removes the 3500 ms cast time and Incarnation of Chaos 504723 removes the cooldown, so",
+    "only the cast cadence changes. The original 25 percent chance stays: (0.75)^80 is below 1.1e-10.",
+    "Every re-strike must be rank nine: no 801292 cast at all, and more rank nine casts and hits than ordinary casts."
+  ],
+  "timeout_ms": 400000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 583248
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 567544,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 801292,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 583248,
+      "equals": 1
+    },
+    {
+      "action": "spell_mod_mutant",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "op": 10,
+      "percent": -100
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 1 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 2 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 3 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 4 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 5 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 6 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 7 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 8 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 9 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 10 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 11 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 12 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 13 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 14 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 15 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 16 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 17 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 18 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 19 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 20 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 21 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 22 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 23 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 24 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 25 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 26 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 27 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 28 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 29 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 30 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 31 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 32 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 33 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 34 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 35 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 36 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 37 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 38 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 39 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 40 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 41 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 42 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 43 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 44 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 45 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 46 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 47 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 48 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 49 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 50 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 51 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 52 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 53 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 54 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 55 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 56 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 57 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 58 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 59 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 60 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 61 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 62 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 63 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 64 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 65 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 66 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 67 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 68 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 69 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 70 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 71 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 72 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 73 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 74 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 75 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 76 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 77 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 78 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 79 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "spell": 504723,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "chronomancer",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Ordinary rank nine Chromatic Shard 80 of 80"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cast_failure",
+      "spell": 567544,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 583248,
+      "min": 1,
+      "label": "Aeon Rend fired at least once across the eighty eligible hits"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "equals": 0,
+      "label": "No re-strike falls back to the rank one record"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 567544,
+      "min": 81,
+      "label": "At least one re-strike is the rank nine Shard that hit"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_damage_count",
+      "spell": 567544,
+      "target": "dummy",
+      "min": 81
+    }
+  ]
+}

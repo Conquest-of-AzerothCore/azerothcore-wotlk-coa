@@ -90,10 +90,11 @@ std::list<Unit*> Nearby(Player* player, Unit* center, uint32 helper, bool friend
     Acore::AnyUnitInObjectRangeCheck check(center, radius);
     Acore::UnitListSearcher<Acore::AnyUnitInObjectRangeCheck> search(center, targets, check);
     Cell::VisitObjects(center, search, radius);
-    targets.remove_if([player, center, friendly](Unit* target)
+    bool playersOnly = info->HasAttribute(SPELL_ATTR3_ONLY_ON_PLAYER);
+    targets.remove_if([player, center, friendly, playersOnly](Unit* target)
     {
-        return target == center || !target->IsAlive() || !target->InSamePhase(player) ||
-            !center->IsWithinLOSInMap(target) || !player->IsWithinLOSInMap(target) ||
+        return target == center || (playersOnly && !target->IsPlayer()) || !target->IsAlive() ||
+            !target->InSamePhase(player) || !center->IsWithinLOSInMap(target) || !player->IsWithinLOSInMap(target) ||
             !(friendly ? player->IsValidAssistTarget(target) : player->IsValidAttackTarget(target));
     });
     targets.sort([center](Unit* first, Unit* second)
