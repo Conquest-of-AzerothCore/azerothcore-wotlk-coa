@@ -2231,10 +2231,11 @@ namespace CoAChallenges
         for (uint32 cid : bundled)
             if (cid != challengeID)
                 ids += "," + std::to_string(cid);
-        CharacterDatabase.DirectExecute(
+        CharacterDatabaseTransaction snapshot = CharacterDatabase.BeginTransaction();
+        snapshot->Append(
             "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
             guid, challengeID);
-        CharacterDatabase.DirectExecute(
+        snapshot->Append(
             "INSERT IGNORE INTO coa_challenge_failure_snapshot "
             "(guid, failedChallengeId, challengeId, level, deaths, startTime, trialId, trialStartTime, "
             "characterLevel) "
@@ -2244,6 +2245,7 @@ namespace CoAChallenges
             "LEFT JOIN coa_custom_trial_active t ON t.guid = c.guid AND {} = 1 "
             "WHERE c.guid = {} AND c.challengeId IN ({})",
             challengeID, characterLevel, bundled.empty() ? 0 : 1, guid, ids);
+        CharacterDatabase.DirectCommitTransaction(snapshot);
     }
 
     void ForgetFailureSnapshot(uint32 guid, uint32 challengeID)
@@ -2389,6 +2391,9 @@ namespace CoAChallenges
         uint32 restoredLevel = 1;
         uint32 restoredDeaths = 0;
         bool metersReset = false;
+        // One transaction: the lock, the active rows, the meters, the trial
+        // link and the snapshot change together or not at all.
+        CharacterDatabaseTransaction restore = CharacterDatabase.BeginTransaction();
         for (RestoreRow& row : rows)
         {
             if (row.challengeId == challengeID)
@@ -2400,31 +2405,31 @@ namespace CoAChallenges
                 restoredLevel = row.level;
                 restoredDeaths = row.deaths;
             }
-            CharacterDatabase.DirectExecute(
+            restore->Append(
                 "DELETE FROM coa_challenge_failure WHERE guid = {} AND challengeId = {}", guid, row.challengeId);
-            CharacterDatabase.DirectExecute(
+            restore->Append(
                 "REPLACE INTO coa_character_challenge (guid, challengeId, level, deaths, hunger, thirst, startTime) "
                 "VALUES ({}, {}, {}, {}, 0, 0, {})",
                 guid, row.challengeId, row.level, row.deaths, row.startTime);
             // The meters restart fresh, as on activation: a run that failed on
             // a full hunger or thirst meter or an empty fatigue bar would
             // otherwise die again at once. No fatigue row means a full bar.
-            CharacterDatabase.DirectExecute(
+            restore->Append(
                 "DELETE FROM coa_character_fatigue WHERE guid = {} AND challengeId = {}", guid, row.challengeId);
             if (IsHungerChallenge(row.challengeId))
-                CharacterDatabase.DirectExecute(
-                    "UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = {}", guid);
+                restore->Append("UPDATE coa_character_survival SET hunger = 0, thirst = 0 WHERE guid = {}", guid);
             metersReset = metersReset || IsHungerChallenge(row.challengeId) || IsFatigueChallenge(row.challengeId);
         }
         if (relinkTrial)
-            CharacterDatabase.DirectExecute(
+            restore->Append(
                 "REPLACE INTO coa_custom_trial_active (guid, trialId, startTime) "
                 "SELECT guid, trialId, trialStartTime FROM coa_challenge_failure_snapshot "
                 "WHERE guid = {} AND failedChallengeId = {} AND challengeId = {} AND trialId <> ''",
                 guid, challengeID, challengeID);
-        CharacterDatabase.DirectExecute(
+        restore->Append(
             "DELETE FROM coa_challenge_failure_snapshot WHERE guid = {} AND failedChallengeId = {}",
             guid, challengeID);
+        CharacterDatabase.DirectCommitTransaction(restore);
         ClearCharChallengeCache(guid);
 
         bool const resurrected = !player->IsAlive();

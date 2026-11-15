@@ -1,6 +1,5 @@
 --
-DROP TABLE IF EXISTS `coa_challenge_failure_snapshot`;
-CREATE TABLE `coa_challenge_failure_snapshot` (
+CREATE TABLE IF NOT EXISTS `coa_challenge_failure_snapshot` (
     `guid` INT UNSIGNED NOT NULL,
     `failedChallengeId` INT UNSIGNED NOT NULL,
     `challengeId` INT UNSIGNED NOT NULL,
