@@ -65,18 +65,239 @@
   "extra_spells": [],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
-  "effect_overrides": [],
+  "effect_overrides": [
+    {
+      "spell": 807296,
+      "effect": 0,
+      "misc_value": 7,
+      "citation": "AscensionWitchDoctorCompletion.cpp:271-275 rewrites EffectMiscValue 23 to SPELLMOD_CRITICAL_CHANCE (7) and the class mask to Bad Juju's flag96(0, 1024, 2)"
+    }
+  ],
   "item_armor_subclass_effects": [],
-  "unmodelled_effects": [],
+  "unmodelled_effects": [
+    {
+      "spell": 504462,
+      "effect": 0,
+      "reason": "AscensionWitchDoctorCompletion.cpp:276-278 dummies every effect of Voodoo Mind at load; the per-Spirit Shadow Puppets tick speed is scripted at AscensionWitchDoctorAuras.cpp:175-178 (amplitude * 100 / (100 + 10 * Spirits)), so no static spell modifier exists to read"
+    },
+    {
+      "spell": 504462,
+      "effect": 1,
+      "reason": "AscensionWitchDoctorCompletion.cpp:276-278 dummies every effect of Voodoo Mind at load; the per-Spirit Shadow Puppets duration is scripted at AscensionWitchDoctorAbilities.cpp:152-153 (duration * (100 + Spirits * Amount(VoodooMind, EFFECT_1)) / 100), and its probe target 501087 effect 1 is zeroed at AscensionWitchDoctorCompletion.cpp:307-311"
+    },
+    {
+      "spell": 705894,
+      "effect": 1,
+      "reason": "AscensionWitchDoctorCompletion.cpp:276-278 dummies every effect of Soul Feeder at load; the Malefic Arrow and Spirit Eclipse bonus is delivered by Spirit stats 561299 effect 1 (mask rewritten at AscensionWitchDoctorCompletion.cpp:269, amount set at AscensionWitchDoctorAuras.cpp:149-150), and its probe target Spirit Eclipse 811117 effect 1 is zeroed at AscensionWitchDoctorCompletion.cpp:312-317"
+    },
+    {
+      "spell": 707650,
+      "effect": 0,
+      "reason": "AscensionWitchDoctorCompletion.cpp:279-280 rewrites Bwonsamdi's Gift effect 0 to SPELL_AURA_MOD_RANGED_HASTE after the dummy at AscensionWitchDoctorCompletion.cpp:276-278; the amount is set only while a Mimic is summoned (AscensionWitchDoctorAuras.cpp:127-128, AscensionWitchDoctorAuras.cpp:464-465), so it is not a static modifier on Spirit Volley, and the Volley probe target 504582 effects 1 and 2 are zeroed at AscensionWitchDoctorCompletion.cpp:442-446"
+    },
+    {
+      "spell": 707650,
+      "effect": 2,
+      "reason": "AscensionWitchDoctorCompletion.cpp:276-278 dummies every effect of Bwonsamdi's Gift at load; the per-Spirit Spirit Volley damage is scripted (AscensionWitchDoctorAbilities.cpp:173), and the Volley probe target 504582 effect 2 is zeroed at AscensionWitchDoctorCompletion.cpp:442-446"
+    },
+    {
+      "spell": 804620,
+      "effect": 1,
+      "reason": "AscensionWitchDoctorCompletion.cpp:294-295 dummies effect 1 of Loa Spirits; the per-Spirit Spirit bonus is set on Spirit stats 561299 effect 2 at AscensionWitchDoctorAuras.cpp:151-152, and the Spirit pickup buff probe target 561067 effect 2 is zeroed at AscensionWitchDoctorCompletion.cpp:286-291"
+    },
+    {
+      "spell": 807904,
+      "effect": 1,
+      "reason": "AscensionWitchDoctorCompletion.cpp:294-295 dummies effect 1 of Loa Spirits; the per-Spirit Spirit bonus is set on Spirit stats 561299 effect 2 at AscensionWitchDoctorAuras.cpp:151-152, and the Spirit pickup buff probe target 561067 effect 2 is zeroed at AscensionWitchDoctorCompletion.cpp:286-291"
+    },
+    {
+      "spell": 705840,
+      "effect": 0,
+      "reason": "AscensionWitchDoctorCompletion.cpp:276-278 dummies every effect of Ritual Hexing rank 1, so no spell modifier is registered; the percent on Bad Juju, Malefic Wrath and Hexfire against targets with the caster's Hex of Malice is a per-hit factor at AscensionWitchDoctorAbilities.cpp:156-171, judged by a gated hit"
+    },
+    {
+      "spell": 705841,
+      "effect": 0,
+      "reason": "AscensionWitchDoctorCompletion.cpp:276-278 dummies every effect of Ritual Hexing rank 2, so no spell modifier is registered; the percent on Bad Juju, Malefic Wrath and Hexfire against targets with the caster's Hex of Malice is a per-hit factor at AscensionWitchDoctorAbilities.cpp:156-171, judged by a gated hit"
+    }
+  ],
   "literal_tokens": [],
   "effect_notes": [],
-  "passive_targets": [],
+  "passive_targets": [
+    {
+      "spell": 705916,
+      "effect": 0,
+      "targets": [
+        801716
+      ],
+      "tooltip_words": "Voice of Bwonsamdi"
+    },
+    {
+      "spell": 807296,
+      "effect": 0,
+      "targets": [
+        501181
+      ],
+      "tooltip_words": "Bad Juju"
+    },
+    {
+      "spell": 504459,
+      "effect": 0,
+      "targets": [
+        504465,
+        804226
+      ],
+      "tooltip_words": "Swift Idol"
+    },
+    {
+      "spell": 504636,
+      "effect": 0,
+      "targets": [
+        504465,
+        804226
+      ],
+      "tooltip_words": "Swift Idol"
+    }
+  ],
   "procs": [],
   "triggers": [],
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 301175,
+      "name": "Spirit Out Of The Bottle (Spirit gained)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "now grants",
+      "expected": 1,
+      "before_expected": 0,
+      "trigger_spell": 801696,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 561136
+      },
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:320-321 (OnSpellCast, non-triggered cast): if (IsBottle(info) && player->HasAura(OutOfBottle)) GainSpirit(player). Spirit in a Bottle 801696 has SpellFamilyFlags[2] bit 1 (IsBottle, Completion.h:380). GainSpirit (Completion.cpp:137-150) casts Spirit 561136 once on the caster. Control (before phase): 801696 cast without 301175 known reads 0 stacks of 561136 (no other path grants Spirit to a Bottle cast); after: exactly 1, so a doubled grant also alerts. 301175's own Effect[0] is aura 42 triggering 561136; reading exactly 1 also proves that native path does not add a second Spirit."
+    },
+    {
+      "spell": 501136,
+      "name": "Mirage (5 Spirits)",
+      "kind": "metric_delta",
+      "variant": "spirits",
+      "label_suffix": "spirits",
+      "quote": "gaining 5",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 501136,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 561136
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:345-346 (OnSpellCast): if (id == Mirage) GainSpirit(player, 5). Mirage's native Effect[1] (SPELL_EFFECT_TRIGGER_SPELL 561136) is zeroed at load (Completion.cpp:406-407), so the script is the only Spirit source. Control: the before phase casts nothing and reads 0 stacks of 561136; after: one Mirage cast reads 5 (the aura's stack cap, so the entry cannot see an extra grant; it does catch a missing or short one)."
+    },
+    {
+      "spell": 704497,
+      "name": "Soul Marionette (5 clones)",
+      "kind": "metric_delta",
+      "variant": "clones",
+      "label_suffix": "clones",
+      "quote": "create 5 clones",
+      "expected": 5,
+      "before_expected": 0,
+      "trigger_spell": 704497,
+      "target": "caster",
+      "cast_in_before": false,
+      "measure_actor": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 300661
+      },
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:184-188 (Summon): spell == Marionette selects NpcMarionette 300661 and count = 5, one SummonCreature per clone owned by the player; called from AscensionWitchDoctorAuras.cpp:239-240 when the Marionette aura 704497 applies. Marionette's native Effect[1] summon (MiscValue 300661) and Effect[2] are zeroed (Completion.cpp:418-422), so the script is the only source. Clones last 8500 ms (Summons.cpp:193-194), read at 3000 ms. Control: before phase casts nothing and reads 0 owned creatures of entry 300661; after: 5."
+    },
+    {
+      "spell": 706488,
+      "name": "Mojo High (additional Mimic Ward)",
+      "kind": "metric_delta",
+      "variant": "mimic",
+      "label_suffix": "mimic",
+      "quote": "summons 1 additional",
+      "expected": 2,
+      "before_expected": 1,
+      "trigger_spell": 707162,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 300659
+      },
+      "wait_ms": 3000,
+      "expire_ms": 1500,
+      "observe_source": "AscensionWitchDoctorSummons.cpp:189-190 (Summon): if (spell == Mimic) count = max(1, Effects[EFFECT_2].CalcValue(player)); Mimic Ward 707162 Effect[2] (SUMMON, MiscValue 300659) has DieSides 0 and Completion.cpp:250-251 pins its BasePoints to 1, so CalcValue is 1 ward. Mojo High 706488 Effect[0] aura 107 (SPELLMOD_EFFECT3, MiscValue 23, class mask 512 which Mimic Ward's SpellFamilyFlags[0] 8704 carries) has DieSides 1, so its modifier is +1 and Unit::ApplyEffectModifiers makes CalcValue 2. Both phases cast Mimic Ward at the caster, 706488 learned between them (control = before phase, 1 ward); a new cast despawns the earlier ward of the same slot (Summons.cpp:216-220), so the first phase's ward cannot inflate the count. Needs a first run to confirm the SPELLMOD reaches CalcValue(player); if the read is 1 the entry alerts and points at that path."
+    },
+    {
+      "spell": 705948,
+      "name": "A Price To Pay (Spirit Glaive cooldown reset)",
+      "kind": "metric_delta",
+      "variant": "reset",
+      "label_suffix": "reset",
+      "quote": "now resets the cooldown of",
+      "expected": 0,
+      "before_expected": 14000,
+      "tolerance": 4500,
+      "trigger_spell": 801607,
+      "setup_casts": [
+        806289,
+        501136
+      ],
+      "setup_wait_ms": 2000,
+      "target": "dummy",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 806289
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:333-338 (OnSpellCast): else-if Family(info,0,536870912) (Spirit Eclipse 801607) { if (count == 5 && player->HasAura(PriceToPay)) { Reduce(player, Glaive, INT32_MAX); Cast(player, player, PriceReady); } }; Reduce (Completion.cpp:161-174) calls RemoveSpellCooldown on every known rank of Spirit Glaive 806289 (CategoryRecoveryTime 20000). count is the Spirit stacks at cast start: Mirage 501136 is the setup cast that makes 5 Spirits without set_aura. Each phase casts Glaive 806289, then Mirage, then Eclipse; 705948 learned between phases. Control: before phase leaves Glaive at about 20000 minus the setup waits (about 14000, tolerance 4500 covers cast times and the simulated clock; a reset reads 0, so the two arms never overlap); calibrate before_expected on the first run."
+    },
+    {
+      "spell": 802219,
+      "name": "Splash On Em (Loa's Brew reduces Mojo Beam cooldown)",
+      "kind": "metric_delta",
+      "variant": "brew_beam",
+      "label_suffix": "brew_beam",
+      "quote": "by 2 sec.",
+      "expected": 4000,
+      "before_expected": 6000,
+      "expected_gain": -2000,
+      "tolerance": 100,
+      "trigger_spell": 801670,
+      "setup_casts": [
+        500950
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2500,
+      "target": "caster",
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 500950
+      },
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "AscensionWitchDoctorAbilities.cpp:328-329 (OnSpellCast): if (Family(info, 1, 131072) && player->HasAura(SplashOnEm)) Reduce(player, Beam, 2000); Loa's Brew 801670 has SpellFamilyFlags[1] 131072; Reduce is ModifySpellCooldown(-2000) on each known rank of Mojo Beam 500950 (RecoveryTime 14000). Each phase casts Mojo Beam at the caster (starts its 14000 ms cooldown), then Loa's Brew, and reads the Beam cooldown 1000 ms later; 802219 learned between phases. Control: the before phase (no talent) reads the cooldown the Beam still has; the judge takes after minus before and requires -2000 within 100 (before_expected 6000 is the least before reading so no floor hides the cut, expected = 6000 - 2000). Same waits in both phases, so clock overhead cancels."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],
@@ -87,5 +308,17 @@
   "target_aura_gates": [],
   "learned_hits": [],
   "cast_auras": [],
-  "hit_casts": []
+  "hit_casts": [],
+  "removed_own_effects": [
+    {
+      "spell": 705851,
+      "effect": 0,
+      "reason": "AscensionWitchDoctorCompletion.cpp:372-375 sets Effect = 0 on every non-aura effect of Mojo: Frog Shrooms (effects 0 and 2); the unreadable client notes were read as effect 0 and stopped the value scenario (Spell effect does not exist)"
+    },
+    {
+      "spell": 705851,
+      "effect": 2,
+      "reason": "AscensionWitchDoctorCompletion.cpp:372-375 sets Effect = 0 on every non-aura effect of Mojo: Frog Shrooms (effects 0 and 2)"
+    }
+  ]
 }
