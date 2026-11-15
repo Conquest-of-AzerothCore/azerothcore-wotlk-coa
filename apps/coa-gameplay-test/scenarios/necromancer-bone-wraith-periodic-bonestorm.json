@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Necromancer: an Animated Bone Wraith unleashes Bonestorm on its own while it fights",
-  "contract": "Animate: Bone Wraith 805032 summons creature 50309 for 15 s and reads 'While active, it will periodically unleash a Bonestorm, striking up to $801411i nearby enemies ... every $801412t1 sec for $801412d.' Spell.dbc makes 801412 a 5 s self aura triggering Bonestorm 801411 every 0.5 s, proc-triggered by the Bone Wraith passive 800037, which carries no proc flags, no spell_proc row and no interval. Nothing cast 801412 except an explicit Command, so a fighting Bone Wraith only meleed. Owner ruling (2026-11-15): while it has a target, it starts a new Bonestorm whenever the previous one ends. An idle Bone Wraith does not spin; a fighting one spins at least twice within its life.",
+  "contract": "Animate: Bone Wraith 805032 summons creature 50309 for 15 s and reads 'While active, it will periodically unleash a Bonestorm, striking up to $801411i nearby enemies ... every $801412t1 sec for $801412d.' Spell.dbc makes 801412 a 5 s self aura triggering Bonestorm 801411 every 0.5 s, proc-triggered by the Bone Wraith passive 800037, which carries no proc flags, no spell_proc row and no interval. Nothing cast 801412 except an explicit Command, so a fighting Bone Wraith only meleed. Owner ruling (2026-11-15): while it has a target, it spins, rests for one Bonestorm duration (5 s), then spins again, so it unleashes two Bonestorms in its 15 s life. An idle Bone Wraith does not spin; a fighting one does not spin during the rest and spins again after it.",
   "timeout_ms": 60000,
   "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
   "players": [
@@ -28,9 +28,14 @@
       "action": "assert", "label": "DISCRIMINATING: the fighting Bone Wraith unleashes Bonestorm", "actor": "n",
       "metric": "spell_go_count", "spell": 801412, "entry": 50309, "min": 1, "within_ms": 4000
     },
+    { "action": "wait", "label": "The 5 s spin ends and its 5 s rest begins", "ms": 6000 },
     {
-      "action": "assert", "label": "It spins again once the first 5 s Bonestorm ends", "actor": "n",
-      "metric": "spell_go_count", "spell": 801412, "entry": 50309, "min": 2, "within_ms": 8000
+      "action": "assert", "label": "DISCRIMINATING: no new Bonestorm during the rest after a spin", "actor": "n",
+      "metric": "spell_go_count", "spell": 801412, "entry": 50309, "equals": 1
+    },
+    {
+      "action": "assert", "label": "It spins again once the rest ends", "actor": "n",
+      "metric": "spell_go_count", "spell": 801412, "entry": 50309, "min": 2, "within_ms": 6000
     },
     {
       "action": "assert", "label": "Bonestorm strikes the golem", "actor": "n",

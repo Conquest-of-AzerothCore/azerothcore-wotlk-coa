@@ -52,6 +52,10 @@ Milliseconds ZombiePlaguePeriod()
 {
     return Milliseconds(sSpellMgr->GetSpellInfo(504023)->Effects[EFFECT_0].Amplitude);
 }
+Milliseconds BonestormSpinAndRest()
+{
+    return Milliseconds(2 * sSpellMgr->GetSpellInfo(801412)->GetDuration());
+}
 bool Travelling(Player const* player)
 {
     return player->IsMounted() || player->IsInFlight();
@@ -910,8 +914,12 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED) && me->GetVictim() &&
                     !me->HasAura(801412))
+                {
                     Cast(me, me, 801412);
-                _events.ScheduleEvent(12, 1s);
+                    _events.ScheduleEvent(12, BonestormSpinAndRest());
+                }
+                else
+                    _events.ScheduleEvent(12, 1s);
             }
         }
         if (me->GetEntry() == 523032 && !_exploded)
