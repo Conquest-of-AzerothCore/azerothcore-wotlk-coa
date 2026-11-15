@@ -1646,7 +1646,7 @@ namespace
             if (action == ACTION_VESSEL_LINKED)
             {
                 bool all = true;
-                ForVessels([&](npc_soul_vessel_coa* ai) { all = all && ai->State() == VESSEL_LINKED; });
+                ForVessels([&](npc_soul_vessel_coa* ai) { all = all && ai->State() == VESSEL_LINKED && ai->Channeler(); });
                 if (all && _dormant)
                     Awaken();
             }
